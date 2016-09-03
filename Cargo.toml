@@ -1,0 +1,11 @@
+[package]
+name = "item"
+version = "0.1.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "Nom parser for Rust items"
+repository = "https://github.com/dtolnay/item"
+include = ["Cargo.toml", "src/**/*.rs"]
+
+[dependencies]
+nom = "1.2.4"
