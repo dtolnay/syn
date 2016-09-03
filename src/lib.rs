@@ -320,23 +320,88 @@ pub enum FunctionRetTy {
     Ty(Ty),
 }
 
+pub fn escaped_string(input: &str) -> IResult<&str, String> {
+    let mut s = String::new();
+    let mut chars = input.char_indices().peekable();
+    while let Some((byte_offset, ch)) = chars.next() {
+        match ch {
+            '"' => {
+                return IResult::Done(&input[byte_offset..], s);
+            }
+            '\\' => {
+                match chars.next() {
+                    Some((_, 'x')) => unimplemented!(),
+                    Some((_, 'u')) => unimplemented!(),
+                    Some((_, 'n')) => s.push('\n'),
+                    Some((_, 'r')) => s.push('\r'),
+                    Some((_, 't')) => s.push('\t'),
+                    Some((_, '0')) => s.push('\0'),
+                    Some((_, '\\')) => s.push('\\'),
+                    Some((_, '\n')) => {
+                        while let Some(&(_, ch)) = chars.peek() {
+                            if ch.is_whitespace() {
+                                chars.next();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    _ => break,
+                }
+            }
+            ch => {
+                s.push(ch);
+            }
+        }
+    }
+    IResult::Error(nom::Err::Position(nom::ErrorKind::Escaped, input))
+}
+
+named!(quoted<&str, String>, delimited!(
+    tag_s!("\""),
+    escaped_string,
+    tag_s!("\"")
+));
+
+named!(meta_item<&str, MetaItem>, chain!(
+    space? ~
+    meta_item: alt!(
+        chain!(
+            ident: word ~
+            space? ~
+            tag_s!("(") ~
+            inner: separated_list!(tag_s!(","), meta_item) ~
+            space? ~
+            tag_s!(")"),
+            move || MetaItem::List(ident, inner)
+        )
+        |
+        chain!(
+            ident: word ~
+            space? ~
+            tag_s!("=") ~
+            space? ~
+            string: quoted,
+            move || MetaItem::NameValue(ident, string)
+        )
+        |
+        map!(word, MetaItem::Word)
+    ),
+    move || meta_item
+));
+
 named!(attribute<&str, Attribute>, chain!(
     space? ~
-    tag_s!("#[") ~
+    tag_s!("#") ~
     space? ~
-    first: word ~
+    tag_s!("[") ~
+    meta_item: meta_item ~
     space? ~
-    tag_s!("(") ~
-    inner: separated_list!(tag_s!(", "), word) ~
-    tag_s!(")") ~
-    space? ~
-    tag_s!("]") ,
-    || { return  Attribute {
-            value: MetaItem::List(first.to_string(), inner.into_iter().map(|w|
-                MetaItem::Word(w.to_string())
-            ).collect()),
-            is_sugared_doc: false,
-        } }
+    tag_s!("]"),
+    move || Attribute {
+        value: meta_item,
+        is_sugared_doc: false,
+    }
 ));
 
 named!(visibility<&str, Visibility>,
@@ -359,33 +424,29 @@ named!(path_segment<&str, PathSegment>, alt!(
         tag_s!("<") ~
         types: many0!(ty) ~
         space? ~
-        tag_s!(">") ,
-        || {
-            PathSegment {
-                ident: ident,
-                parameters: PathParameters::AngleBracketed(
-                    AngleBracketedParameterData {
-                        lifetimes: Vec::new(),
-                        types: types,
-                        bindings: Vec::new(),
-                    }
-                ),
-            }
+        tag_s!(">"),
+        move || PathSegment {
+            ident: ident,
+            parameters: PathParameters::AngleBracketed(
+                AngleBracketedParameterData {
+                    lifetimes: Vec::new(),
+                    types: types,
+                    bindings: Vec::new(),
+                }
+            ),
         }
     )
     |
-    map!(word, |n| PathSegment::ident(n))
+    map!(word, PathSegment::ident)
 ));
 
 named!(ty<&str, Ty>, chain!(
     global: tag_s!("::")? ~
-    segments: separated_nonempty_list!(tag_s!("::"), path_segment) ,
-    || {
-        Ty::Path(None, Path {
-            global: global.is_some(),
-            segments: segments,
-        })
-    }
+    segments: separated_nonempty_list!(tag_s!("::"), path_segment),
+    move || Ty::Path(None, Path {
+        global: global.is_some(),
+        segments: segments,
+    })
 ));
 
 /*
@@ -421,89 +482,207 @@ named!(ty<&str, Ty>, chain!(
     Infer,
 */
 
-named!(field<&str, Field>, chain!(
+named!(struct_field<&str, Field>, chain!(
+    attrs: many0!(attribute) ~
     space? ~
     vis: visibility ~
     ident: word ~
     space? ~
     tag_s!(":") ~
     space? ~
-    ty: ty ,
-    || {
-        Field {
-            ident: Some(ident),
-            vis: vis,
-            attrs: Vec::new(),
-            ty: ty,
-        }
+    ty: ty,
+    move || Field {
+        ident: Some(ident),
+        vis: vis,
+        attrs: attrs,
+        ty: ty,
     }
 ));
 
-named!(struct_body<&str, Body>, alt!(
+named!(tuple_field<&str, Field>, chain!(
+    attrs: many0!(attribute) ~
+    space? ~
+    vis: visibility ~
+    ty: ty,
+    move || Field {
+        ident: None,
+        vis: vis,
+        attrs: attrs,
+        ty: ty,
+    }
+));
+
+named!(struct_body<&str, (Style, Vec<Field>)>, alt!(
     chain!(
         tag_s!("{") ~
-        fields: separated_list!(tag_s!(","), field) ~
+        fields: separated_list!(tag_s!(","), struct_field) ~
         space? ~
         tag_s!(",")? ~
         space? ~
-        tag_s!("}") ,
-        || { Body::Struct(Style::Struct, fields) }
+        tag_s!("}"),
+        move || (Style::Struct, fields)
     )
     |
     chain!(
         tag_s!("(") ~
-        separated_list!(tag_s!(","), chain!(
-            space? ~
-            vis: visibility ~
-            ty: ty ,
-            || {}
-        )) ~
+        fields: separated_list!(tag_s!(","), tuple_field) ~
         space? ~
         tag_s!(",")? ~
         space? ~
-        tag_s!(")") ,
-        || { Body::Struct(Style::Tuple, Vec::new()) }
+        tag_s!(")"),
+        move || (Style::Tuple, fields)
     )
     |
-    map!(tag_s!(";"), |_| Body::Struct(Style::Unit, Vec::new()))
+    map!(tag_s!(";"), |_| (Style::Unit, Vec::new()))
+));
+
+named!(variant<&str, Variant>, chain!(
+    attrs: many0!(attribute) ~
+    space? ~
+    ident: word ~
+    space? ~
+    body: struct_body,
+    move || Variant {
+        ident: ident,
+        attrs: attrs,
+        style: body.0,
+        fields: body.1,
+    }
+));
+
+named!(enum_body<&str, Body>, chain!(
+    tag_s!("{") ~
+    variants: separated_list!(tag_s!(","), variant) ~
+    space? ~
+    tag_s!(",")? ~
+    space? ~
+    tag_s!("}"),
+    move || Body::Enum(variants)
+));
+
+named!(lifetime<&str, Lifetime>, preceded!(
+    tag_s!("'"),
+    map!(word, |n| Lifetime { ident: n })
+));
+
+named!(where_predicate<&str, WherePredicate>, preceded!(
+    opt!(space),
+    alt!(
+        map!(lifetime, |_| unimplemented!())
+        |
+        map!(word, |_| unimplemented!())
+    )
+));
+
+named!(lifetime_def<&str, LifetimeDef>, chain!(
+    lifetime: lifetime,
+    move || LifetimeDef {
+        lifetime: lifetime,
+        bounds: Vec::new(),
+    }
+));
+
+named!(ty_param<&str, TyParam>, chain!(
+    space? ~
+    ident: word,
+    move || TyParam {
+        ident: ident,
+        bounds: Vec::new(),
+        default: None,
+    }
+));
+
+named!(generics<&str, Generics>, chain!(
+    bracketed: map!(
+        opt!(chain!(
+            space? ~
+            tag_s!("<") ~
+            lifetimes: separated_list!(tag_s!(","), lifetime_def) ~
+            ty_params: opt!(chain!(
+                space? ~
+                cond!(!lifetimes.is_empty(), tag_s!(",")) ~
+                ty_params: separated_nonempty_list!(tag_s!(","), ty_param),
+                move || ty_params
+            )) ~
+            space? ~
+            tag_s!(">"),
+            move || (lifetimes, ty_params.unwrap_or_else(Vec::new))
+        )),
+        |opt: Option<_>| opt.unwrap_or_else(|| (Vec::new(), Vec::new()))
+    ) ~
+    where_clause: opt!(chain!(
+        tag_s!("where") ~
+        space ~
+        predicates: separated_nonempty_list!(tag_s!(","), where_predicate) ~
+        space? ~
+        tag_s!(",")?,
+        move || predicates
+    )),
+    move || Generics {
+        lifetimes: bracketed.0,
+        ty_params: bracketed.1,
+        where_clause: where_clause.unwrap_or_else(Vec::new),
+    }
 ));
 
 named!(item<&str, Item>, chain!(
     attrs: many0!(attribute) ~
     space? ~
     vis: visibility ~
-    tag_s!("struct") ~
+    which: alt!(tag_s!("struct") | tag_s!("enum")) ~
     space ~
     ident: word ~
     space? ~
-    body: struct_body ~
-    space? ,
-    || { return Item {
+    generics: generics ~
+    space? ~
+    item: switch!(value!(which),
+        "struct" => map!(struct_body, move |(style, fields)| Item {
             ident: ident,
             vis: vis,
             attrs: attrs,
-            generics: Generics::default(),
+            generics: generics,
+            body: Body::Struct(style, fields),
+        })
+        |
+        "enum" => map!(enum_body, move |body| Item {
+            ident: ident,
+            vis: vis,
+            attrs: attrs,
+            generics: generics,
             body: body,
-        } }
+        })
+    ) ~
+    space?,
+    move || item
 ));
 
-pub fn parse(input: &str) -> Result<Item, String> {
+pub fn parse(input: &str) -> Item {
     match item(input) {
         IResult::Done(rest, ast) => {
             if rest.is_empty() {
-                Ok(ast)
+                ast
             } else {
-                Err(format!("more than a single input item: {:?}", rest))
+                panic!("more than a single input item: {:?}", rest)
             }
         }
-        IResult::Error(nom::Err::Code(kind)) |
-        IResult::Error(nom::Err::Node(kind, _)) => {
-            Err(format!("failed to parse {:?}", kind))
+        IResult::Error(err) => raise(err),
+        IResult::Incomplete(_) => panic!("incomplete input item"),
+    }
+}
+
+fn raise(mut err: nom::Err<&str>) -> ! {
+    loop {
+        match err {
+            nom::Err::Code(kind) => {
+                panic!("failed to parse {:?}", kind)
+            }
+            nom::Err::Position(kind, pos) => {
+                panic!("failed to parse {:?}: {:?}", kind, pos)
+            }
+            nom::Err::Node(_, next) |
+            nom::Err::NodePosition(_, _, next) => {
+                err = *next;
+            }
         }
-        IResult::Error(nom::Err::Position(kind, pos)) |
-        IResult::Error(nom::Err::NodePosition(kind, pos, _)) => {
-            Err(format!("failed to parse {:?}: {:?}", kind, pos))
-        }
-        IResult::Incomplete(_) => Err("incomplete input item".to_string()),
     }
 }

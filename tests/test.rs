@@ -7,6 +7,7 @@ fn simple_ty(ident: &str) -> Ty {
         segments: vec![PathSegment::ident(ident.to_string())],
     })
 }
+
 #[test]
 fn test_struct() {
     let raw = "
@@ -60,5 +61,73 @@ fn test_struct() {
         ]),
     };
 
-    assert_eq!(expected, parse(raw).unwrap());
+    assert_eq!(expected, parse(raw));
+}
+
+#[test]
+fn test_enum() {
+    let raw = "
+        pub enum Result<T, E> {
+            Ok(T),
+            #[unlikely]
+            Err(E),
+        }
+    ";
+
+    let expected = Item {
+        ident: "Result".to_string(),
+        vis: Visibility::Public,
+        attrs: Vec::new(),
+        generics: Generics {
+            lifetimes: Vec::new(),
+            ty_params: vec![
+                TyParam {
+                    ident: "T".to_string(),
+                    bounds: Vec::new(),
+                    default: None,
+                },
+                TyParam {
+                    ident: "E".to_string(),
+                    bounds: Vec::new(),
+                    default: None,
+                },
+            ],
+            where_clause: Vec::new(),
+        },
+        body: Body::Enum(vec![
+            Variant {
+                ident: "Ok".to_string(),
+                attrs: Vec::new(),
+                style: Style::Tuple,
+                fields: vec![
+                    Field {
+                        ident: None,
+                        vis: Visibility::Inherited,
+                        attrs: Vec::new(),
+                        ty: simple_ty("T"),
+                    },
+                ],
+            },
+            Variant {
+                ident: "Err".to_string(),
+                attrs: vec![
+                    Attribute {
+                        value: MetaItem::Word("unlikely".to_string()),
+                        is_sugared_doc: false,
+                    },
+                ],
+                style: Style::Tuple,
+                fields: vec![
+                    Field {
+                        ident: None,
+                        vis: Visibility::Inherited,
+                        attrs: Vec::new(),
+                        ty: simple_ty("E"),
+                    },
+                ],
+            },
+        ]),
+    };
+
+    assert_eq!(expected, parse(raw));
 }
