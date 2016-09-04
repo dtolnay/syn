@@ -181,6 +181,26 @@ mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
 
+    impl ToTokens for Generics {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            let has_lifetimes = !self.lifetimes.is_empty();
+            let has_ty_params = !self.ty_params.is_empty();
+            if has_lifetimes || has_ty_params {
+                tokens.append("<");
+                tokens.append_separated(&self.lifetimes, ",");
+                if has_lifetimes && has_ty_params {
+                    tokens.append(",");
+                }
+                tokens.append_separated(&self.ty_params, ",");
+                tokens.append(">");
+            }
+            if !self.where_clause.is_empty() {
+                tokens.append("where");
+                tokens.append_separated(&self.where_clause, ",");
+            }
+        }
+    }
+
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
@@ -197,12 +217,65 @@ mod printing {
         }
     }
 
+    impl ToTokens for TyParam {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.ident.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                tokens.append(":");
+                tokens.append_separated(&self.bounds, ",");
+            }
+            if let Some(ref default) = self.default {
+                tokens.append("=");
+                default.to_tokens(tokens);
+            }
+        }
+    }
+
     impl ToTokens for TyParamBound {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 TyParamBound::MaybeSized => tokens.append("?Sized"),
                 TyParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
                 TyParamBound::Trait(ref trait_ref) => trait_ref.to_tokens(tokens),
+            }
+        }
+    }
+
+    impl ToTokens for WherePredicate {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                WherePredicate::BoundPredicate(ref predicate) => {
+                    predicate.to_tokens(tokens);
+                }
+                WherePredicate::RegionPredicate(ref predicate) => {
+                    predicate.to_tokens(tokens);
+                }
+            }
+        }
+    }
+
+    impl ToTokens for WhereBoundPredicate {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if !self.bound_lifetimes.is_empty() {
+                tokens.append("for");
+                tokens.append("<");
+                tokens.append_separated(&self.bound_lifetimes, ",");
+                tokens.append(">");
+            }
+            self.bounded_ty.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                tokens.append(":");
+                tokens.append_separated(&self.bounds, "+");
+            }
+        }
+    }
+
+    impl ToTokens for WhereRegionPredicate {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.lifetime.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                tokens.append(":");
+                tokens.append_separated(&self.bounds, "+");
             }
         }
     }
