@@ -1,5 +1,4 @@
 use std::fmt::{self, Display};
-use std::ops::Deref;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Ident(String);
@@ -22,10 +21,8 @@ impl From<String> for Ident {
     }
 }
 
-impl Deref for Ident {
-    type Target = str;
-
-    fn deref(&self) -> &str {
+impl AsRef<str> for Ident {
+    fn as_ref(&self) -> &str {
         &self.0
     }
 }
@@ -63,4 +60,16 @@ pub mod parsing {
             epsilon!() => { |_| Visibility::Inherited }
         )
     ));
+}
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Ident {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append(self.as_ref())
+        }
+    }
 }

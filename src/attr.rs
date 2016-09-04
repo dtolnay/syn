@@ -100,15 +100,17 @@ mod printing {
     impl ToTokens for MetaItem {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                MetaItem::Word(ref ident) => tokens.append(&ident),
+                MetaItem::Word(ref ident) => {
+                    ident.to_tokens(tokens);
+                }
                 MetaItem::List(ref ident, ref inner) => {
-                    tokens.append(&ident);
+                    ident.to_tokens(tokens);
                     tokens.append("(");
                     tokens.append_separated(inner, ",");
                     tokens.append(")");
                 }
                 MetaItem::NameValue(ref name, ref value) => {
-                    tokens.append(&name);
+                    name.to_tokens(tokens);
                     tokens.append("=");
                     value.to_tokens(tokens);
                 }
