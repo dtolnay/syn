@@ -410,3 +410,238 @@ pub mod parsing {
         })
     ));
 }
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Ty {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Ty::Vec(ref inner) => {
+                    tokens.append("[");
+                    inner.to_tokens(tokens);
+                    tokens.append("]");
+                }
+                Ty::FixedLengthVec(ref inner, len) => {
+                    tokens.append("[");
+                    inner.to_tokens(tokens);
+                    tokens.append(";");
+                    len.to_tokens(tokens);
+                    tokens.append("]");
+                }
+                Ty::Ptr(ref target) => {
+                    tokens.append("*");
+                    match target.mutability {
+                        Mutability::Mutable => tokens.append("mut"),
+                        Mutability::Immutable => tokens.append("const"),
+                    }
+                    target.ty.to_tokens(tokens);
+                }
+                Ty::Rptr(ref lifetime, ref target) => {
+                    tokens.append("&");
+                    lifetime.to_tokens(tokens);
+                    if let Mutability::Mutable = target.mutability {
+                        tokens.append("mut");
+                    }
+                    target.ty.to_tokens(tokens);
+                }
+                Ty::BareFn(ref func) => {
+                    func.to_tokens(tokens);
+                }
+                Ty::Never => {
+                    tokens.append("!");
+                }
+                Ty::Tup(ref elems) => {
+                    tokens.append("(");
+                    for (i, elem) in elems.iter().enumerate() {
+                        if i > 0 {
+                            tokens.append(",");
+                        }
+                        elem.to_tokens(tokens);
+                    }
+                    if elems.len() == 1 {
+                        tokens.append(",");
+                    }
+                    tokens.append(")");
+                }
+                Ty::Path(ref qself, ref path) => {
+                    match *qself {
+                        Some(ref qself) => {
+                            tokens.append("<");
+                            qself.ty.to_tokens(tokens);
+                            if qself.position > 0 {
+                                tokens.append("as");
+                                for (i, segment) in path.segments.iter()
+                                                        .take(qself.position)
+                                                        .enumerate()
+                                {
+                                    if i > 0 || path.global {
+                                        tokens.append("::");
+                                    }
+                                    segment.to_tokens(tokens);
+                                }
+                                for segment in path.segments.iter()
+                                                   .skip(qself.position)
+                                {
+                                    tokens.append("::");
+                                    segment.to_tokens(tokens);
+                                }
+                            }
+                            tokens.append(">");
+                        }
+                        None => path.to_tokens(tokens),
+                    }
+                }
+                Ty::ObjectSum(_, _) => unimplemented!(),
+                Ty::PolyTraitRef(_) => unimplemented!(),
+                Ty::ImplTrait(ref bounds) => {
+                    tokens.append("impl");
+                    for (i, bound) in bounds.iter().enumerate() {
+                        if i > 0 {
+                            tokens.append("+");
+                        }
+                        bound.to_tokens(tokens);
+                    }
+                }
+                Ty::Paren(ref inner) => {
+                    tokens.append("(");
+                    inner.to_tokens(tokens);
+                    tokens.append(")");
+                }
+                Ty::Infer => {
+                    tokens.append("_");
+                }
+            }
+        }
+    }
+
+    impl ToTokens for Path {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            for (i, segment) in self.segments.iter().enumerate() {
+                if i > 0 || self.global {
+                    tokens.append("::");
+                }
+                segment.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for PathSegment {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.ident.to_tokens(tokens);
+            self.parameters.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for PathParameters {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                PathParameters::AngleBracketed(ref parameters) => {
+                    parameters.to_tokens(tokens);
+                }
+                PathParameters::Parenthesized(ref parameters) => {
+                    parameters.to_tokens(tokens);
+                }
+            }
+        }
+    }
+
+    impl ToTokens for AngleBracketedParameterData {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            let has_lifetimes = !self.lifetimes.is_empty();
+            let has_types = !self.types.is_empty();
+            let has_bindings = !self.bindings.is_empty();
+            if !has_lifetimes && !has_types && !has_bindings {
+                return;
+            }
+
+            tokens.append("<");
+
+            let mut first = true;
+            for lifetime in &self.lifetimes {
+                if !first {
+                    tokens.append(",");
+                }
+                lifetime.to_tokens(tokens);
+                first = false;
+            }
+            for ty in &self.types {
+                if !first {
+                    tokens.append(",");
+                }
+                ty.to_tokens(tokens);
+                first = false;
+            }
+            for binding in &self.bindings {
+                if !first {
+                    tokens.append(",");
+                }
+                binding.to_tokens(tokens);
+                first = false;
+            }
+
+            tokens.append(">");
+        }
+    }
+
+    impl ToTokens for TypeBinding {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.ident.to_tokens(tokens);
+            tokens.append("=");
+            self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ParenthesizedParameterData {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("(");
+            for (i, input) in self.inputs.iter().enumerate() {
+                if i > 0 {
+                    tokens.append(",");
+                }
+                input.to_tokens(tokens);
+            }
+            tokens.append(")");
+            if let Some(ref output) = self.output {
+                tokens.append("->");
+                output.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for PolyTraitRef {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if !self.bound_lifetimes.is_empty() {
+                tokens.append("<");
+                for (i, lifetime) in self.bound_lifetimes.iter().enumerate() {
+                    if i > 0 {
+                        tokens.append(",");
+                    }
+                    lifetime.to_tokens(tokens);
+                }
+                tokens.append(">");
+            }
+            self.trait_ref.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for BareFnTy {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("fn");
+            if !self.lifetimes.is_empty() {
+                tokens.append("<");
+                for (i, lifetime) in self.lifetimes.iter().enumerate() {
+                    if i > 0 {
+                        tokens.append(",");
+                    }
+                    lifetime.to_tokens(tokens);
+                }
+                tokens.append(">");
+            }
+            tokens.append("(");
+            tokens.append(")");
+        }
+    }
+}

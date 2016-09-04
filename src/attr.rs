@@ -83,3 +83,41 @@ pub mod parsing {
         map!(word, MetaItem::Word)
     ));
 }
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Attribute {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("#[");
+            self.value.to_tokens(tokens);
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for MetaItem {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                MetaItem::Word(ref ident) => tokens.append(&ident),
+                MetaItem::List(ref ident, ref inner) => {
+                    tokens.append(&ident);
+                    tokens.append("(");
+                    for (i, meta_item) in inner.iter().enumerate() {
+                        if i > 0 {
+                            tokens.append(",");
+                        }
+                        meta_item.to_tokens(tokens);
+                    }
+                    tokens.append(")");
+                }
+                MetaItem::NameValue(ref name, ref value) => {
+                    tokens.append(&name);
+                    tokens.append("=");
+                    value.to_tokens(tokens);
+                }
+            }
+        }
+    }
+}

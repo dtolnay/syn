@@ -101,7 +101,9 @@ pub mod parsing {
 
     named!(pub lifetime<&str, Lifetime>, preceded!(
         punct!("'"),
-        map!(word, |ident| Lifetime { ident: ident })
+        map!(word, |ident| Lifetime {
+            ident: format!("'{}", ident),
+        })
     ));
 
     named!(pub lifetime_def<&str, LifetimeDef>, do_parse!(
@@ -172,4 +174,41 @@ pub mod parsing {
             }))
         )
     ));
+}
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Lifetime {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.ident.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for LifetimeDef {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.lifetime.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                tokens.append(":");
+                for (i, bound) in self.bounds.iter().enumerate() {
+                    if i > 0 {
+                        tokens.append("+");
+                    }
+                    bound.to_tokens(tokens);
+                }
+            }
+        }
+    }
+
+    impl ToTokens for TyParamBound {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                TyParamBound::MaybeSized => tokens.append("?Sized"),
+                TyParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
+                TyParamBound::Trait(ref trait_ref) => trait_ref.to_tokens(tokens),
+            }
+        }
+    }
 }

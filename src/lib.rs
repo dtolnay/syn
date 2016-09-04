@@ -2,6 +2,9 @@
 #[macro_use]
 extern crate nom;
 
+#[cfg(feature = "printing")]
+extern crate quote;
+
 #[macro_use]
 mod do_parse;
 
