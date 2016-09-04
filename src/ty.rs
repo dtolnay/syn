@@ -461,32 +461,28 @@ mod printing {
                     }
                     tokens.append(")");
                 }
-                Ty::Path(ref qself, ref path) => {
-                    match *qself {
-                        Some(ref qself) => {
-                            tokens.append("<");
-                            qself.ty.to_tokens(tokens);
-                            if qself.position > 0 {
-                                tokens.append("as");
-                                for (i, segment) in path.segments.iter()
-                                                        .take(qself.position)
-                                                        .enumerate()
-                                {
-                                    if i > 0 || path.global {
-                                        tokens.append("::");
-                                    }
-                                    segment.to_tokens(tokens);
-                                }
-                                for segment in path.segments.iter()
-                                                   .skip(qself.position)
-                                {
-                                    tokens.append("::");
-                                    segment.to_tokens(tokens);
-                                }
+                Ty::Path(None, ref path) => {
+                    path.to_tokens(tokens);
+                }
+                Ty::Path(Some(ref qself), ref path) => {
+                    tokens.append("<");
+                    qself.ty.to_tokens(tokens);
+                    if qself.position > 0 {
+                        tokens.append("as");
+                        for (i, segment) in path.segments.iter()
+                                                .take(qself.position)
+                                                .enumerate()
+                        {
+                            if i > 0 || path.global {
+                                tokens.append("::");
                             }
-                            tokens.append(">");
+                            segment.to_tokens(tokens);
                         }
-                        None => path.to_tokens(tokens),
+                    }
+                    tokens.append(">");
+                    for segment in path.segments.iter().skip(qself.position) {
+                        tokens.append("::");
+                        segment.to_tokens(tokens);
                     }
                 }
                 Ty::ObjectSum(_, _) => unimplemented!(),
