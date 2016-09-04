@@ -809,6 +809,7 @@ named!(item<&str, Item>, chain!(
     attrs: many0!(attribute) ~
     vis: visibility ~
     which: alt!(tag_s!("struct") | tag_s!("enum")) ~
+    space ~
     ident: word ~
     generics: generics ~
     item: switch!(value!(which),
