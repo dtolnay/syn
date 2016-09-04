@@ -20,7 +20,7 @@ let raw = "
     }
 ";
 
-let ast = item::parse(raw).unwrap();
+let ast = item::parse(raw);
 ```
 
 ## License
