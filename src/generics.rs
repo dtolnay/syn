@@ -192,12 +192,7 @@ mod printing {
             self.lifetime.to_tokens(tokens);
             if !self.bounds.is_empty() {
                 tokens.append(":");
-                for (i, bound) in self.bounds.iter().enumerate() {
-                    if i > 0 {
-                        tokens.append("+");
-                    }
-                    bound.to_tokens(tokens);
-                }
+                tokens.append_separated(&self.bounds, "+");
             }
         }
     }

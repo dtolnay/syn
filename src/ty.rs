@@ -455,12 +455,7 @@ mod printing {
                 }
                 Ty::Tup(ref elems) => {
                     tokens.append("(");
-                    for (i, elem) in elems.iter().enumerate() {
-                        if i > 0 {
-                            tokens.append(",");
-                        }
-                        elem.to_tokens(tokens);
-                    }
+                    tokens.append_separated(elems, ",");
                     if elems.len() == 1 {
                         tokens.append(",");
                     }
@@ -498,12 +493,7 @@ mod printing {
                 Ty::PolyTraitRef(_) => unimplemented!(),
                 Ty::ImplTrait(ref bounds) => {
                     tokens.append("impl");
-                    for (i, bound) in bounds.iter().enumerate() {
-                        if i > 0 {
-                            tokens.append("+");
-                        }
-                        bound.to_tokens(tokens);
-                    }
+                    tokens.append_separated(bounds, "+");
                 }
                 Ty::Paren(ref inner) => {
                     tokens.append("(");
@@ -597,12 +587,7 @@ mod printing {
     impl ToTokens for ParenthesizedParameterData {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append("(");
-            for (i, input) in self.inputs.iter().enumerate() {
-                if i > 0 {
-                    tokens.append(",");
-                }
-                input.to_tokens(tokens);
-            }
+            tokens.append_separated(&self.inputs, ",");
             tokens.append(")");
             if let Some(ref output) = self.output {
                 tokens.append("->");
@@ -615,12 +600,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if !self.bound_lifetimes.is_empty() {
                 tokens.append("<");
-                for (i, lifetime) in self.bound_lifetimes.iter().enumerate() {
-                    if i > 0 {
-                        tokens.append(",");
-                    }
-                    lifetime.to_tokens(tokens);
-                }
+                tokens.append_separated(&self.bound_lifetimes, ",");
                 tokens.append(">");
             }
             self.trait_ref.to_tokens(tokens);

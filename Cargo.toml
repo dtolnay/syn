@@ -14,4 +14,4 @@ printing = ["quote"]
 
 [dependencies]
 nom = { version = "1.2.4", optional = true }
-quote = { version = "0.1", optional = true }
+quote = { version = "0.1.1", optional = true }

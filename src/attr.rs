@@ -104,12 +104,7 @@ mod printing {
                 MetaItem::List(ref ident, ref inner) => {
                     tokens.append(&ident);
                     tokens.append("(");
-                    for (i, meta_item) in inner.iter().enumerate() {
-                        if i > 0 {
-                            tokens.append(",");
-                        }
-                        meta_item.to_tokens(tokens);
-                    }
+                    tokens.append_separated(inner, ",");
                     tokens.append(")");
                 }
                 MetaItem::NameValue(ref name, ref value) => {
