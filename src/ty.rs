@@ -187,120 +187,147 @@ pub enum FunctionRetTy {
 }
 
 named!(pub ty<&str, Ty>, alt!(
-    delimited!(
-        punct!("["),
-        ty,
-        punct!("]")
-    ) => { |elem| Ty::Vec(Box::new(elem)) }
+    ty_vec
     |
-    do_parse!(
-        punct!("[") >>
-        elem: ty >>
-        punct!(";") >>
-        opt!(multispace) >>
-        size: map_res!(digit, str::parse) >>
-        (Ty::FixedLengthVec(Box::new(elem), size))
-    )
+    ty_fixed_length_vec
     |
-    do_parse!(
-        punct!("*") >>
-        mutability: alt!(
-            punct!("const") => { |_| Mutability::Immutable }
-            |
-            punct!("mut") => { |_| Mutability::Mutable }
-        ) >>
-        target: ty >>
-        (Ty::Ptr(Box::new(MutTy {
-            ty: target,
-            mutability: mutability,
-        })))
-    )
+    ty_ptr
     |
-    do_parse!(
-        punct!("&") >>
-        life: opt!(lifetime) >>
-        mutability: mutability >>
-        target: ty >>
-        (Ty::Rptr(life, Box::new(MutTy {
-            ty: target,
-            mutability: mutability,
-        })))
-    )
+    ty_rptr
     |
-    do_parse!(
-        punct!("fn") >>
-        multispace >>
-        lifetimes: opt_vec!(delimited!(
-            punct!("<"),
-            separated_list!(punct!(","), lifetime_def),
-            punct!(">")
-        )) >>
-        punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        punct!(")") >>
-        output: opt!(preceded!(
-            punct!("->"),
-            ty
-        )) >>
-        (Ty::BareFn(Box::new(BareFnTy {
-            lifetimes: lifetimes,
-            decl: FnDecl {
-                inputs: inputs,
-                output: match output {
-                    Some(ty) => FunctionRetTy::Ty(ty),
-                    None => FunctionRetTy::Default,
-                },
+    ty_bare_fn
+    |
+    ty_never
+    |
+    ty_tup
+    |
+    ty_path
+    |
+    ty_qpath
+    |
+    ty_impl_trait
+    |
+    ty_paren
+));
+
+named!(ty_vec<&str, Ty>, do_parse!(
+    punct!("[") >>
+    elem: ty >>
+    punct!("]") >>
+    (Ty::Vec(Box::new(elem)))
+));
+
+named!(ty_fixed_length_vec<&str, Ty>, do_parse!(
+    punct!("[") >>
+    elem: ty >>
+    punct!(";") >>
+    opt!(multispace) >>
+    size: map_res!(digit, str::parse) >>
+    (Ty::FixedLengthVec(Box::new(elem), size))
+));
+
+named!(ty_ptr<&str, Ty>, do_parse!(
+    punct!("*") >>
+    mutability: alt!(
+        punct!("const") => { |_| Mutability::Immutable }
+        |
+        punct!("mut") => { |_| Mutability::Mutable }
+    ) >>
+    target: ty >>
+    (Ty::Ptr(Box::new(MutTy {
+        ty: target,
+        mutability: mutability,
+    })))
+));
+
+named!(ty_rptr<&str, Ty>, do_parse!(
+    punct!("&") >>
+    life: opt!(lifetime) >>
+    mutability: mutability >>
+    target: ty >>
+    (Ty::Rptr(life, Box::new(MutTy {
+        ty: target,
+        mutability: mutability,
+    })))
+));
+
+named!(ty_bare_fn<&str, Ty>, do_parse!(
+    punct!("fn") >>
+    multispace >>
+    lifetimes: opt_vec!(delimited!(
+        punct!("<"),
+        separated_list!(punct!(","), lifetime_def),
+        punct!(">")
+    )) >>
+    punct!("(") >>
+    inputs: separated_list!(punct!(","), fn_arg) >>
+    punct!(")") >>
+    output: opt!(preceded!(
+        punct!("->"),
+        ty
+    )) >>
+    (Ty::BareFn(Box::new(BareFnTy {
+        lifetimes: lifetimes,
+        decl: FnDecl {
+            inputs: inputs,
+            output: match output {
+                Some(ty) => FunctionRetTy::Ty(ty),
+                None => FunctionRetTy::Default,
             },
-        })))
-    )
-    |
-    punct!("!") => { |_| Ty::Never }
-    |
-    delimited!(
-        punct!("("),
-        separated_list!(punct!(","), ty),
-        punct!(")")
-    ) => { Ty::Tup }
-    |
-    path => { |p| Ty::Path(None, p) }
-    |
-    do_parse!(
-        punct!("<") >>
-        this: map!(ty, Box::new) >>
-        path: opt!(preceded!(
-            tuple!(punct!("as"), multispace),
-            path
-        )) >>
-        punct!(">") >>
-        punct!("::") >>
-        rest: separated_nonempty_list!(punct!("::"), path_segment) >>
-        ({
-            match path {
-                Some(mut path) => {
-                    let pos = path.segments.len();
-                    path.segments.extend(rest);
-                    Ty::Path(Some(QSelf { ty: this, position: pos }), path)
-                }
-                None => {
-                    Ty::Path(Some(QSelf { ty: this, position: 0 }), Path {
-                        global: false,
-                        segments: rest,
-                    })
-                }
+        },
+    })))
+));
+
+named!(ty_never<&str, Ty>, map!(punct!("!"), |_| Ty::Never));
+
+named!(ty_tup<&str, Ty>, do_parse!(
+    punct!("(") >>
+    elems: separated_list!(punct!(","), ty) >>
+    punct!(")") >>
+    (Ty::Tup(elems))
+));
+
+named!(ty_path<&str, Ty>, map!(path, |p| Ty::Path(None, p)));
+
+named!(ty_qpath<&str, Ty>, do_parse!(
+    punct!("<") >>
+    this: map!(ty, Box::new) >>
+    path: opt!(preceded!(
+        tuple!(punct!("as"), multispace),
+        path
+    )) >>
+    punct!(">") >>
+    punct!("::") >>
+    rest: separated_nonempty_list!(punct!("::"), path_segment) >>
+    ({
+        match path {
+            Some(mut path) => {
+                let pos = path.segments.len();
+                path.segments.extend(rest);
+                Ty::Path(Some(QSelf { ty: this, position: pos }), path)
             }
-        })
-    )
-    |
-    preceded!(
-        tuple!(punct!("impl"), multispace),
-        separated_nonempty_list!(punct!("+"), ty_param_bound)
-    ) => { Ty::ImplTrait }
-    |
-    delimited!(
-        punct!("("),
-        ty,
-        punct!(")")
-    ) => { |inner| Ty::Paren(Box::new(inner)) }
+            None => {
+                Ty::Path(Some(QSelf { ty: this, position: 0 }), Path {
+                    global: false,
+                    segments: rest,
+                })
+            }
+        }
+    })
+));
+
+named!(ty_impl_trait<&str, Ty>, do_parse!(
+    punct!("impl") >>
+    multispace >>
+    elem: separated_nonempty_list!(punct!("+"), ty_param_bound) >>
+    (Ty::ImplTrait(elem))
+));
+
+named!(ty_paren<&str, Ty>, do_parse!(
+    punct!("(") >>
+    elem: ty >>
+    punct!(")") >>
+    (Ty::Paren(Box::new(elem)))
 ));
 
 named!(mutability<&str, Mutability>, preceded!(
