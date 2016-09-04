@@ -2,7 +2,6 @@
 #[macro_use]
 extern crate nom;
 
-#[cfg(feature = "parsing")]
 #[macro_use]
 mod do_parse;
 
@@ -63,7 +62,7 @@ pub use ty::{
 
 #[cfg(feature = "parsing")]
 pub fn parse(input: &str) -> Item {
-    match item::item(input) {
+    match item::parsing::item(input) {
         nom::IResult::Done(rest, ast) => {
             if rest.is_empty() {
                 ast

@@ -1,12 +1,5 @@
 use super::*;
 
-#[cfg(feature = "parsing")]
-use common::word;
-#[cfg(feature = "parsing")]
-use helper::escaped_string;
-#[cfg(feature = "parsing")]
-use nom::multispace;
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Attribute {
     pub value: MetaItem,
@@ -33,55 +26,60 @@ pub enum MetaItem {
 }
 
 #[cfg(feature = "parsing")]
-named!(pub attribute<&str, Attribute>, alt!(
-    do_parse!(
-        punct!("#") >>
-        punct!("[") >>
-        meta_item: meta_item >>
-        punct!("]") >>
-        (Attribute {
-            value: meta_item,
-            is_sugared_doc: false,
-        })
-    )
-    |
-    do_parse!(
-        punct!("///") >>
-        space: multispace >>
-        content: take_until_s!("\n") >>
-        (Attribute {
-            value: MetaItem::NameValue(
-                "doc".to_string(),
-                format!("///{}{}", space, content),
-            ),
-            is_sugared_doc: true,
-        })
-    )
-));
+pub mod parsing {
+    use super::*;
+    use common::parsing::word;
+    use helper::escaped_string;
+    use nom::multispace;
 
-#[cfg(feature = "parsing")]
-named!(quoted<&str, String>, delimited!(
-    punct!("\""),
-    escaped_string,
-    tag_s!("\"")
-));
+    named!(pub attribute<&str, Attribute>, alt!(
+        do_parse!(
+            punct!("#") >>
+            punct!("[") >>
+            meta_item: meta_item >>
+            punct!("]") >>
+            (Attribute {
+                value: meta_item,
+                is_sugared_doc: false,
+            })
+        )
+        |
+        do_parse!(
+            punct!("///") >>
+            space: multispace >>
+            content: take_until_s!("\n") >>
+            (Attribute {
+                value: MetaItem::NameValue(
+                    "doc".to_string(),
+                    format!("///{}{}", space, content),
+                ),
+                is_sugared_doc: true,
+            })
+        )
+    ));
 
-#[cfg(feature = "parsing")]
-named!(meta_item<&str, MetaItem>, alt!(
-    do_parse!(
-        ident: word >>
-        punct!("(") >>
-        inner: separated_list!(punct!(","), meta_item) >>
-        punct!(")") >>
-        (MetaItem::List(ident, inner))
-    )
-    |
-    do_parse!(
-        ident: word >>
-        punct!("=") >>
-        string: quoted >>
-        (MetaItem::NameValue(ident, string))
-    )
-    |
-    map!(word, MetaItem::Word)
-));
+    named!(quoted<&str, String>, delimited!(
+        punct!("\""),
+        escaped_string,
+        tag_s!("\"")
+    ));
+
+    named!(meta_item<&str, MetaItem>, alt!(
+        do_parse!(
+            ident: word >>
+            punct!("(") >>
+            inner: separated_list!(punct!(","), meta_item) >>
+            punct!(")") >>
+            (MetaItem::List(ident, inner))
+        )
+        |
+        do_parse!(
+            ident: word >>
+            punct!("=") >>
+            string: quoted >>
+            (MetaItem::NameValue(ident, string))
+        )
+        |
+        map!(word, MetaItem::Word)
+    ));
+}

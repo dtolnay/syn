@@ -1,16 +1,5 @@
 use super::*;
 
-#[cfg(feature = "parsing")]
-use attr::attribute;
-#[cfg(feature = "parsing")]
-use common::{word, visibility};
-#[cfg(feature = "parsing")]
-use generics::generics;
-#[cfg(feature = "parsing")]
-use ty::ty;
-#[cfg(feature = "parsing")]
-use nom::multispace;
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Item {
     pub ident: Ident,
@@ -50,113 +39,115 @@ pub struct Field {
 }
 
 #[cfg(feature = "parsing")]
-named!(pub item<&str, Item>, do_parse!(
-    attrs: many0!(attribute) >>
-    vis: visibility >>
-    which: alt!(tag_s!("struct") | tag_s!("enum")) >>
-    multispace >>
-    ident: word >>
-    generics: generics >>
-    item: switch!(value!(which),
-        "struct" => map!(struct_body, move |(style, fields)| Item {
-            ident: ident,
-            vis: vis,
-            attrs: attrs,
-            generics: generics,
-            body: Body::Struct(style, fields),
-        })
-        |
-        "enum" => map!(enum_body, move |body| Item {
-            ident: ident,
-            vis: vis,
-            attrs: attrs,
-            generics: generics,
-            body: body,
-        })
-    ) >>
-    opt!(multispace) >>
-    (item)
-));
+pub mod parsing {
+    use super::*;
+    use attr::parsing::attribute;
+    use common::parsing::{word, visibility};
+    use generics::parsing::generics;
+    use ty::parsing::ty;
+    use nom::multispace;
 
-#[cfg(feature = "parsing")]
-named!(struct_body<&str, (Style, Vec<Field>)>, alt!(
-    struct_like_body => { |fields| (Style::Struct, fields) }
-    |
-    terminated!(tuple_like_body, punct!(";")) => { |fields| (Style::Tuple, fields) }
-    |
-    punct!(";") => { |_| (Style::Unit, Vec::new()) }
-));
+    named!(pub item<&str, Item>, do_parse!(
+        attrs: many0!(attribute) >>
+        vis: visibility >>
+        which: alt!(tag_s!("struct") | tag_s!("enum")) >>
+        multispace >>
+        ident: word >>
+        generics: generics >>
+        item: switch!(value!(which),
+            "struct" => map!(struct_body, move |(style, fields)| Item {
+                ident: ident,
+                vis: vis,
+                attrs: attrs,
+                generics: generics,
+                body: Body::Struct(style, fields),
+            })
+            |
+            "enum" => map!(enum_body, move |body| Item {
+                ident: ident,
+                vis: vis,
+                attrs: attrs,
+                generics: generics,
+                body: body,
+            })
+        ) >>
+        opt!(multispace) >>
+        (item)
+    ));
 
-#[cfg(feature = "parsing")]
-named!(enum_body<&str, Body>, do_parse!(
-    punct!("{") >>
-    variants: separated_list!(punct!(","), variant) >>
-    opt!(punct!(",")) >>
-    punct!("}") >>
-    (Body::Enum(variants))
-));
-
-#[cfg(feature = "parsing")]
-named!(variant<&str, Variant>, do_parse!(
-    attrs: many0!(attribute) >>
-    ident: word >>
-    body: alt!(
+    named!(struct_body<&str, (Style, Vec<Field>)>, alt!(
         struct_like_body => { |fields| (Style::Struct, fields) }
         |
-        tuple_like_body => { |fields| (Style::Tuple, fields) }
+        terminated!(tuple_like_body, punct!(";")) => { |fields| (Style::Tuple, fields) }
         |
-        epsilon!() => { |_| (Style::Unit, Vec::new()) }
-    ) >>
-    (Variant {
-        ident: ident,
-        attrs: attrs,
-        style: body.0,
-        fields: body.1,
-    })
-));
+        punct!(";") => { |_| (Style::Unit, Vec::new()) }
+    ));
 
-#[cfg(feature = "parsing")]
-named!(struct_like_body<&str, Vec<Field> >, do_parse!(
-    punct!("{") >>
-    fields: separated_list!(punct!(","), struct_field) >>
-    opt!(punct!(",")) >>
-    punct!("}") >>
-    (fields)
-));
+    named!(enum_body<&str, Body>, do_parse!(
+        punct!("{") >>
+        variants: separated_list!(punct!(","), variant) >>
+        opt!(punct!(",")) >>
+        punct!("}") >>
+        (Body::Enum(variants))
+    ));
 
-#[cfg(feature = "parsing")]
-named!(tuple_like_body<&str, Vec<Field> >, do_parse!(
-    punct!("(") >>
-    fields: separated_list!(punct!(","), tuple_field) >>
-    opt!(punct!(",")) >>
-    punct!(")") >>
-    (fields)
-));
+    named!(variant<&str, Variant>, do_parse!(
+        attrs: many0!(attribute) >>
+        ident: word >>
+        body: alt!(
+            struct_like_body => { |fields| (Style::Struct, fields) }
+            |
+            tuple_like_body => { |fields| (Style::Tuple, fields) }
+            |
+            epsilon!() => { |_| (Style::Unit, Vec::new()) }
+        ) >>
+        (Variant {
+            ident: ident,
+            attrs: attrs,
+            style: body.0,
+            fields: body.1,
+        })
+    ));
 
-#[cfg(feature = "parsing")]
-named!(struct_field<&str, Field>, do_parse!(
-    attrs: many0!(attribute) >>
-    vis: visibility >>
-    ident: word >>
-    punct!(":") >>
-    ty: ty >>
-    (Field {
-        ident: Some(ident),
-        vis: vis,
-        attrs: attrs,
-        ty: ty,
-    })
-));
+    named!(struct_like_body<&str, Vec<Field> >, do_parse!(
+        punct!("{") >>
+        fields: separated_list!(punct!(","), struct_field) >>
+        opt!(punct!(",")) >>
+        punct!("}") >>
+        (fields)
+    ));
 
-#[cfg(feature = "parsing")]
-named!(tuple_field<&str, Field>, do_parse!(
-    attrs: many0!(attribute) >>
-    vis: visibility >>
-    ty: ty >>
-    (Field {
-        ident: None,
-        vis: vis,
-        attrs: attrs,
-        ty: ty,
-    })
-));
+    named!(tuple_like_body<&str, Vec<Field> >, do_parse!(
+        punct!("(") >>
+        fields: separated_list!(punct!(","), tuple_field) >>
+        opt!(punct!(",")) >>
+        punct!(")") >>
+        (fields)
+    ));
+
+    named!(struct_field<&str, Field>, do_parse!(
+        attrs: many0!(attribute) >>
+        vis: visibility >>
+        ident: word >>
+        punct!(":") >>
+        ty: ty >>
+        (Field {
+            ident: Some(ident),
+            vis: vis,
+            attrs: attrs,
+            ty: ty,
+        })
+    ));
+
+    named!(tuple_field<&str, Field>, do_parse!(
+        attrs: many0!(attribute) >>
+        vis: visibility >>
+        ty: ty >>
+        (Field {
+            ident: None,
+            vis: vis,
+            attrs: attrs,
+            ty: ty,
+        })
+    ));
+}

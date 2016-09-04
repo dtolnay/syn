@@ -2,6 +2,8 @@
 // https://github.com/Geal/nom/blob/a38188f333c29d00c32a3082bec5491d2eefa33f/src/sequence.rs#L591-L687
 // Will be released in nom 2.0.
 
+#![cfg(feature = "parsing")]
+
 #[macro_export]
 macro_rules! do_parse (
   ($i:expr, $($rest:tt)*) => (
