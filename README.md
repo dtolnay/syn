@@ -13,10 +13,13 @@ item = "0.2"
 extern crate item;
 
 let raw = "
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Eq, PartialEq)]
     pub struct Item {
         pub ident: Ident,
+        pub vis: Visibility,
         pub attrs: Vec<Attribute>,
+        pub generics: Generics,
+        pub body: Body,
     }
 ";
 
