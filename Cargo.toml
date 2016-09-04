@@ -1,6 +1,6 @@
 [package]
 name = "item"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Nom parser for Rust items"
