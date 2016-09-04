@@ -193,56 +193,56 @@ named!(pub ty<&str, Ty>, alt!(
         punct!("]")
     ) => { |elem| Ty::Vec(Box::new(elem)) }
     |
-    chain!(
-        punct!("[") ~
-        elem: ty ~
-        punct!(";") ~
-        multispace? ~
-        size: map_res!(digit, str::parse),
-        move || Ty::FixedLengthVec(Box::new(elem), size)
+    do_parse!(
+        punct!("[") >>
+        elem: ty >>
+        punct!(";") >>
+        opt!(multispace) >>
+        size: map_res!(digit, str::parse) >>
+        (Ty::FixedLengthVec(Box::new(elem), size))
     )
     |
-    chain!(
-        punct!("*") ~
+    do_parse!(
+        punct!("*") >>
         mutability: alt!(
             punct!("const") => { |_| Mutability::Immutable }
             |
             punct!("mut") => { |_| Mutability::Mutable }
-        ) ~
-        target: ty,
-        move || Ty::Ptr(Box::new(MutTy {
+        ) >>
+        target: ty >>
+        (Ty::Ptr(Box::new(MutTy {
             ty: target,
             mutability: mutability,
-        }))
+        })))
     )
     |
-    chain!(
-        punct!("&") ~
-        life: lifetime? ~
-        mutability: mutability ~
-        target: ty,
-        move || Ty::Rptr(life, Box::new(MutTy {
+    do_parse!(
+        punct!("&") >>
+        life: opt!(lifetime) >>
+        mutability: mutability >>
+        target: ty >>
+        (Ty::Rptr(life, Box::new(MutTy {
             ty: target,
             mutability: mutability,
-        }))
+        })))
     )
     |
-    chain!(
-        punct!("fn") ~
-        multispace ~
+    do_parse!(
+        punct!("fn") >>
+        multispace >>
         lifetimes: opt_vec!(delimited!(
             punct!("<"),
             separated_list!(punct!(","), lifetime_def),
             punct!(">")
-        )) ~
-        punct!("(") ~
-        inputs: separated_list!(punct!(","), fn_arg) ~
-        punct!(")") ~
+        )) >>
+        punct!("(") >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        punct!(")") >>
         output: opt!(preceded!(
             punct!("->"),
             ty
-        )),
-        move || Ty::BareFn(Box::new(BareFnTy {
+        )) >>
+        (Ty::BareFn(Box::new(BareFnTy {
             lifetimes: lifetimes,
             decl: FnDecl {
                 inputs: inputs,
@@ -251,7 +251,7 @@ named!(pub ty<&str, Ty>, alt!(
                     None => FunctionRetTy::Default,
                 },
             },
-        }))
+        })))
     )
     |
     punct!("!") => { |_| Ty::Never }
@@ -264,17 +264,17 @@ named!(pub ty<&str, Ty>, alt!(
     |
     path => { |p| Ty::Path(None, p) }
     |
-    chain!(
-        punct!("<") ~
-        this: map!(ty, Box::new) ~
+    do_parse!(
+        punct!("<") >>
+        this: map!(ty, Box::new) >>
         path: opt!(preceded!(
             tuple!(punct!("as"), multispace),
             path
-        )) ~
-        punct!(">") ~
-        punct!("::") ~
-        rest: separated_nonempty_list!(punct!("::"), path_segment),
-        move || {
+        )) >>
+        punct!(">") >>
+        punct!("::") >>
+        rest: separated_nonempty_list!(punct!("::"), path_segment) >>
+        ({
             match path {
                 Some(mut path) => {
                     let pos = path.segments.len();
@@ -288,7 +288,7 @@ named!(pub ty<&str, Ty>, alt!(
                     })
                 }
             }
-        }
+        })
     )
     |
     preceded!(
@@ -312,33 +312,33 @@ named!(mutability<&str, Mutability>, preceded!(
     )
 ));
 
-named!(path<&str, Path>, chain!(
-    global: punct!("::")? ~
-    segments: separated_nonempty_list!(punct!("::"), path_segment),
-    move || Path {
+named!(path<&str, Path>, do_parse!(
+    global: opt!(punct!("::")) >>
+    segments: separated_nonempty_list!(punct!("::"), path_segment) >>
+    (Path {
         global: global.is_some(),
         segments: segments,
-    }
+    })
 ));
 
 named!(path_segment<&str, PathSegment>, alt!(
-    chain!(
-        ident: word ~
-        punct!("<") ~
-        lifetimes: separated_list!(punct!(","), lifetime) ~
+    do_parse!(
+        ident: word >>
+        punct!("<") >>
+        lifetimes: separated_list!(punct!(","), lifetime) >>
         types: opt_vec!(preceded!(
             cond!(!lifetimes.is_empty(), punct!(",")),
             separated_nonempty_list!(
                 punct!(","),
                 terminated!(ty, not!(peek!(punct!("="))))
             )
-        )) ~
+        )) >>
         bindings: opt_vec!(preceded!(
             cond!(!lifetimes.is_empty() || !types.is_empty(), punct!(",")),
             separated_nonempty_list!(punct!(","), type_binding)
-        )) ~
-        punct!(">"),
-        move || PathSegment {
+        )) >>
+        punct!(">") >>
+        (PathSegment {
             ident: ident,
             parameters: PathParameters::AngleBracketed(
                 AngleBracketedParameterData {
@@ -347,36 +347,36 @@ named!(path_segment<&str, PathSegment>, alt!(
                     bindings: bindings,
                 }
             ),
-        }
+        })
     )
     |
     map!(word, PathSegment::ident)
 ));
 
-named!(type_binding<&str, TypeBinding>, chain!(
-    ident: word ~
-    punct!("=") ~
-    ty: ty,
-    move || TypeBinding {
+named!(type_binding<&str, TypeBinding>, do_parse!(
+    ident: word >>
+    punct!("=") >>
+    ty: ty >>
+    (TypeBinding {
         ident: ident,
         ty: ty,
-    }
+    })
 ));
 
-named!(pub poly_trait_ref<&str, PolyTraitRef>, chain!(
-    bound_lifetimes: bound_lifetimes ~
-    trait_ref: path,
-    move || PolyTraitRef {
+named!(pub poly_trait_ref<&str, PolyTraitRef>, do_parse!(
+    bound_lifetimes: bound_lifetimes >>
+    trait_ref: path >>
+    (PolyTraitRef {
         bound_lifetimes: bound_lifetimes,
         trait_ref: trait_ref,
-    }
+    })
 ));
 
-named!(fn_arg<&str, Arg>, chain!(
-    pat: opt!(terminated!(word, punct!(":"))) ~
-    ty: ty,
-    move || Arg {
+named!(fn_arg<&str, Arg>, do_parse!(
+    pat: opt!(terminated!(word, punct!(":"))) >>
+    ty: ty >>
+    (Arg {
         pat: pat,
         ty: ty,
-    }
+    })
 ));

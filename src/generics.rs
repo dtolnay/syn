@@ -67,33 +67,33 @@ pub struct WhereRegionPredicate {
     pub bounds: Vec<Lifetime>,
 }
 
-named!(pub generics<&str, Generics>, chain!(
+named!(pub generics<&str, Generics>, do_parse!(
     bracketed: alt!(
-        chain!(
-            punct!("<") ~
-            lifetimes: separated_list!(punct!(","), lifetime_def) ~
+        do_parse!(
+            punct!("<") >>
+            lifetimes: separated_list!(punct!(","), lifetime_def) >>
             ty_params: opt_vec!(preceded!(
                 cond!(!lifetimes.is_empty(), punct!(",")),
                 separated_nonempty_list!(punct!(","), ty_param)
-            )) ~
-            punct!(">"),
-            move || (lifetimes, ty_params)
+            )) >>
+            punct!(">") >>
+            (lifetimes, ty_params)
         )
         |
         epsilon!() => { |_| (Vec::new(), Vec::new()) }
-    ) ~
-    where_clause: opt_vec!(chain!(
-        punct!("where") ~
-        multispace ~
-        predicates: separated_nonempty_list!(punct!(","), where_predicate) ~
-        punct!(",")? ~
-        move || predicates
-    )),
-    move || Generics {
+    ) >>
+    where_clause: opt_vec!(do_parse!(
+        punct!("where") >>
+        multispace >>
+        predicates: separated_nonempty_list!(punct!(","), where_predicate) >>
+        opt!(punct!(",")) >>
+        (predicates)
+    )) >>
+    (Generics {
         lifetimes: bracketed.0,
         ty_params: bracketed.1,
         where_clause: where_clause,
-    }
+    })
 ));
 
 named!(pub lifetime<&str, Lifetime>, preceded!(
@@ -101,41 +101,41 @@ named!(pub lifetime<&str, Lifetime>, preceded!(
     map!(word, |ident| Lifetime { ident: ident })
 ));
 
-named!(pub lifetime_def<&str, LifetimeDef>, chain!(
-    life: lifetime ~
+named!(pub lifetime_def<&str, LifetimeDef>, do_parse!(
+    life: lifetime >>
     bounds: opt_vec!(preceded!(
         punct!(":"),
         separated_nonempty_list!(punct!(","), lifetime)
-    )),
-    move || LifetimeDef {
+    )) >>
+    (LifetimeDef {
         lifetime: life,
         bounds: bounds,
-    }
+    })
 ));
 
-named!(pub bound_lifetimes<&str, Vec<LifetimeDef> >, opt_vec!(chain!(
-    punct!("for") ~
-    punct!("<") ~
-    lifetimes: separated_list!(punct!(","), lifetime_def) ~
-    punct!(">"),
-    move || lifetimes
+named!(pub bound_lifetimes<&str, Vec<LifetimeDef> >, opt_vec!(do_parse!(
+    punct!("for") >>
+    punct!("<") >>
+    lifetimes: separated_list!(punct!(","), lifetime_def) >>
+    punct!(">") >>
+    (lifetimes)
 )));
 
-named!(ty_param<&str, TyParam>, chain!(
-    ident: word ~
+named!(ty_param<&str, TyParam>, do_parse!(
+    ident: word >>
     bounds: opt_vec!(preceded!(
         punct!(":"),
         separated_nonempty_list!(punct!("+"), ty_param_bound)
-    )) ~
+    )) >>
     default: opt!(preceded!(
         punct!("="),
         ty
-    )) ~
-    move || TyParam {
+    )) >>
+    (TyParam {
         ident: ident,
         bounds: bounds,
         default: default,
-    }
+    })
 ));
 
 named!(pub ty_param_bound<&str, TyParamBound>, alt!(
@@ -147,25 +147,25 @@ named!(pub ty_param_bound<&str, TyParamBound>, alt!(
 ));
 
 named!(where_predicate<&str, WherePredicate>, alt!(
-    chain!(
-        ident: lifetime ~
-        punct!(":") ~
-        bounds: separated_nonempty_list!(punct!("+"), lifetime),
-        move || WherePredicate::RegionPredicate(WhereRegionPredicate {
+    do_parse!(
+        ident: lifetime >>
+        punct!(":") >>
+        bounds: separated_nonempty_list!(punct!("+"), lifetime) >>
+        (WherePredicate::RegionPredicate(WhereRegionPredicate {
             lifetime: ident,
             bounds: bounds,
-        })
+        }))
     )
     |
-    chain!(
-        bound_lifetimes: bound_lifetimes ~
-        bounded_ty: ty ~
-        punct!(":") ~
-        bounds: separated_nonempty_list!(punct!("+"), ty_param_bound),
-        move || WherePredicate::BoundPredicate(WhereBoundPredicate {
+    do_parse!(
+        bound_lifetimes: bound_lifetimes >>
+        bounded_ty: ty >>
+        punct!(":") >>
+        bounds: separated_nonempty_list!(punct!("+"), ty_param_bound) >>
+        (WherePredicate::BoundPredicate(WhereBoundPredicate {
             bound_lifetimes: bound_lifetimes,
             bounded_ty: bounded_ty,
             bounds: bounds,
-        })
+        }))
     )
 ));

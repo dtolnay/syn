@@ -30,28 +30,28 @@ pub enum MetaItem {
 }
 
 named!(pub attribute<&str, Attribute>, alt!(
-    chain!(
-        punct!("#") ~
-        punct!("[") ~
-        meta_item: meta_item ~
-        punct!("]"),
-        move || Attribute {
+    do_parse!(
+        punct!("#") >>
+        punct!("[") >>
+        meta_item: meta_item >>
+        punct!("]") >>
+        (Attribute {
             value: meta_item,
             is_sugared_doc: false,
-        }
+        })
     )
     |
-    chain!(
-        punct!("///") ~
-        space: multispace ~
-        content: take_until_s!("\n"),
-        move || Attribute {
+    do_parse!(
+        punct!("///") >>
+        space: multispace >>
+        content: take_until_s!("\n") >>
+        (Attribute {
             value: MetaItem::NameValue(
                 "doc".to_string(),
                 format!("///{}{}", space, content),
             ),
             is_sugared_doc: true,
-        }
+        })
     )
 ));
 
@@ -62,19 +62,19 @@ named!(quoted<&str, String>, delimited!(
 ));
 
 named!(meta_item<&str, MetaItem>, alt!(
-    chain!(
-        ident: word ~
-        punct!("(") ~
-        inner: separated_list!(punct!(","), meta_item) ~
-        punct!(")"),
-        move || MetaItem::List(ident, inner)
+    do_parse!(
+        ident: word >>
+        punct!("(") >>
+        inner: separated_list!(punct!(","), meta_item) >>
+        punct!(")") >>
+        (MetaItem::List(ident, inner))
     )
     |
-    chain!(
-        ident: word ~
-        punct!("=") ~
-        string: quoted,
-        move || MetaItem::NameValue(ident, string)
+    do_parse!(
+        ident: word >>
+        punct!("=") >>
+        string: quoted >>
+        (MetaItem::NameValue(ident, string))
     )
     |
     map!(word, MetaItem::Word)

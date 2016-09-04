@@ -2,6 +2,9 @@
 extern crate nom;
 
 #[macro_use]
+mod do_parse;
+
+#[macro_use]
 mod helper;
 
 mod attr;
