@@ -222,7 +222,7 @@ mod printing {
             self.ident.to_tokens(tokens);
             if !self.bounds.is_empty() {
                 tokens.append(":");
-                tokens.append_separated(&self.bounds, ",");
+                tokens.append_separated(&self.bounds, "+");
             }
             if let Some(ref default) = self.default {
                 tokens.append("=");
