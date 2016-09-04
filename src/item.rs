@@ -183,6 +183,7 @@ mod printing {
                     tokens.append("{");
                     for variant in variants {
                         variant.to_tokens(tokens);
+                        tokens.append(",");
                     }
                     tokens.append("}");
                 }
