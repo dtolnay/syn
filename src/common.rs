@@ -33,7 +33,7 @@ impl Display for Ident {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Visibility {
     Public,
     Inherited,

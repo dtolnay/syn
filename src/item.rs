@@ -23,7 +23,7 @@ pub struct Variant {
     pub fields: Vec<Field>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Style {
     Struct,
     Tuple,
@@ -150,4 +150,94 @@ pub mod parsing {
             ty: ty,
         })
     ));
+}
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use common::Visibility;
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Item {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            for attr in &self.attrs {
+                attr.to_tokens(tokens);
+            }
+            if let Visibility::Public = self.vis {
+                tokens.append("pub");
+            }
+            match self.body {
+                Body::Enum(_) => tokens.append("enum"),
+                Body::Struct(_, _) => tokens.append("struct"),
+            }
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.body.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for Body {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Body::Enum(ref variants) => {
+                    tokens.append("{");
+                    for variant in variants {
+                        variant.to_tokens(tokens);
+                    }
+                    tokens.append("}");
+                }
+                Body::Struct(style, ref fields) => {
+                    fields_to_tokens(style, fields, tokens);
+                    match style {
+                        Style::Struct => { /* no semicolon */ }
+                        Style::Tuple | Style::Unit => tokens.append(";"),
+                    }
+                }
+            }
+        }
+    }
+
+    impl ToTokens for Variant {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            for attr in &self.attrs {
+                attr.to_tokens(tokens);
+            }
+            self.ident.to_tokens(tokens);
+            fields_to_tokens(self.style, &self.fields, tokens);
+        }
+    }
+
+    impl ToTokens for Field {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            for attr in &self.attrs {
+                attr.to_tokens(tokens);
+            }
+            if let Visibility::Public = self.vis {
+                tokens.append("pub");
+            }
+            if let Some(ref ident) = self.ident {
+                ident.to_tokens(tokens);
+                tokens.append(":");
+            }
+            self.ty.to_tokens(tokens);
+        }
+    }
+
+    fn fields_to_tokens(style: Style, fields: &[Field], tokens: &mut Tokens) {
+        match style {
+            Style::Struct => {
+                tokens.append("{");
+                tokens.append_separated(fields, ",");
+                tokens.append("}");
+            }
+            Style::Tuple => {
+                tokens.append("(");
+                tokens.append_separated(fields, ",");
+                tokens.append(")");
+            }
+            Style::Unit => {
+                assert!(fields.is_empty(), "unit variant cannot have fields");
+            }
+        }
+    }
 }
