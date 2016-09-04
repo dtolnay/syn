@@ -67,9 +67,10 @@ fn test_struct() {
 #[test]
 fn test_enum() {
     let raw = "
+        /// See the std::result module documentation for details.
+        #[must_use]
         pub enum Result<T, E> {
             Ok(T),
-            #[unlikely]
             Err(E),
         }
     ";
@@ -77,7 +78,19 @@ fn test_enum() {
     let expected = Item {
         ident: "Result".to_string(),
         vis: Visibility::Public,
-        attrs: Vec::new(),
+        attrs: vec![
+            Attribute {
+                value: MetaItem::NameValue(
+                    "doc".to_string(),
+                    "/// See the std::result module documentation for details.".to_string(),
+                ),
+                is_sugared_doc: true,
+            },
+            Attribute {
+                value: MetaItem::Word("must_use".to_string()),
+                is_sugared_doc: false,
+            },
+        ],
         generics: Generics {
             lifetimes: Vec::new(),
             ty_params: vec![
@@ -110,12 +123,7 @@ fn test_enum() {
             },
             Variant {
                 ident: "Err".to_string(),
-                attrs: vec![
-                    Attribute {
-                        value: MetaItem::Word("unlikely".to_string()),
-                        is_sugared_doc: false,
-                    },
-                ],
+                attrs: Vec::new(),
                 style: Style::Tuple,
                 fields: vec![
                     Field {

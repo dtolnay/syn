@@ -2,6 +2,7 @@ use super::*;
 
 use common::word;
 use helper::escaped_string;
+use nom::multispace;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Attribute {
@@ -28,15 +29,30 @@ pub enum MetaItem {
     NameValue(Ident, String),
 }
 
-named!(pub attribute<&str, Attribute>, chain!(
-    punct!("#") ~
-    punct!("[") ~
-    meta_item: meta_item ~
-    punct!("]"),
-    move || Attribute {
-        value: meta_item,
-        is_sugared_doc: false,
-    }
+named!(pub attribute<&str, Attribute>, alt!(
+    chain!(
+        punct!("#") ~
+        punct!("[") ~
+        meta_item: meta_item ~
+        punct!("]"),
+        move || Attribute {
+            value: meta_item,
+            is_sugared_doc: false,
+        }
+    )
+    |
+    chain!(
+        punct!("///") ~
+        space: multispace ~
+        content: take_until_s!("\n"),
+        move || Attribute {
+            value: MetaItem::NameValue(
+                "doc".to_string(),
+                format!("///{}{}", space, content),
+            ),
+            is_sugared_doc: true,
+        }
+    )
 ));
 
 named!(quoted<&str, String>, delimited!(
