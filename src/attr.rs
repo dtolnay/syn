@@ -91,7 +91,8 @@ mod printing {
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append("#[");
+            tokens.append("#");
+            tokens.append("[");
             self.value.to_tokens(tokens);
             tokens.append("]");
         }
