@@ -9,6 +9,21 @@ fn simple_ty(ident: &str) -> Ty {
 }
 
 #[test]
+fn test_unit() {
+    let raw = "struct Unit;";
+
+    let expected = Item {
+        ident: "Unit".into(),
+        vis: Visibility::Inherited,
+        attrs: Vec::new(),
+        generics: Generics::default(),
+        body: Body::Struct(Style::Unit, Vec::new()),
+    };
+
+    assert_eq!(expected, parse(raw));
+}
+
+#[test]
 fn test_struct() {
     let raw = "
         #[derive(Debug, Clone)]

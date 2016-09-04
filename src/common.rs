@@ -42,23 +42,25 @@ pub enum Visibility {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use nom::multispace;
 
     fn ident_ch(ch: char) -> bool {
         ch.is_alphanumeric() || ch == '_'
     }
 
     named!(pub word<&str, Ident>, preceded!(
-        opt!(call!(::nom::multispace)),
+        option!(multispace),
         map!(take_while1_s!(ident_ch), Into::into)
     ));
 
-    named!(pub visibility<&str, Visibility>, preceded!(
-        opt!(call!(::nom::multispace)),
-        alt!(
-            terminated!(tag_s!("pub"), call!(::nom::multispace)) => { |_| Visibility::Public }
-            |
-            epsilon!() => { |_| Visibility::Inherited }
+    named!(pub visibility<&str, Visibility>, alt_complete!(
+        do_parse!(
+            punct!("pub") >>
+            multispace >>
+            (Visibility::Public)
         )
+        |
+        epsilon!() => { |_| Visibility::Inherited }
     ));
 }
 

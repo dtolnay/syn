@@ -4,16 +4,29 @@ use nom::{self, IResult};
 
 macro_rules! punct {
     ($i:expr, $punct:expr) => {
-        tuple!($i, opt!(call!(::nom::multispace)), tag_s!($punct))
+        complete!($i, preceded!(opt!(call!(::nom::multispace)), tag_s!($punct)))
     };
 }
+
+macro_rules! option (
+    ($i:expr, $submac:ident!( $($args:tt)* )) => ({
+        match $submac!($i, $($args)*) {
+            ::nom::IResult::Done(i, o) => ::nom::IResult::Done(i, Some(o)),
+            ::nom::IResult::Error(_) => ::nom::IResult::Done($i, None),
+            ::nom::IResult::Incomplete(_) => ::nom::IResult::Done($i, None),
+        }
+    });
+    ($i:expr, $f:expr) => (
+        option!($i, call!($f));
+    );
+);
 
 macro_rules! opt_vec (
     ($i:expr, $submac:ident!( $($args:tt)* )) => ({
         match $submac!($i, $($args)*) {
             ::nom::IResult::Done(i, o) => ::nom::IResult::Done(i, o),
             ::nom::IResult::Error(_) => ::nom::IResult::Done($i, Vec::new()),
-            ::nom::IResult::Incomplete(i) => ::nom::IResult::Incomplete(i)
+            ::nom::IResult::Incomplete(_) => ::nom::IResult::Done($i, Vec::new()),
         }
     });
 );

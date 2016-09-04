@@ -71,7 +71,7 @@ pub mod parsing {
     use nom::multispace;
 
     named!(pub generics<&str, Generics>, do_parse!(
-        bracketed: alt!(
+        bracketed: alt_complete!(
             do_parse!(
                 punct!("<") >>
                 lifetimes: separated_list!(punct!(","), lifetime_def) >>
@@ -89,7 +89,7 @@ pub mod parsing {
             punct!("where") >>
             multispace >>
             predicates: separated_nonempty_list!(punct!(","), where_predicate) >>
-            opt!(punct!(",")) >>
+            option!(punct!(",")) >>
             (predicates)
         )) >>
         (Generics {
@@ -132,7 +132,7 @@ pub mod parsing {
             punct!(":"),
             separated_nonempty_list!(punct!("+"), ty_param_bound)
         )) >>
-        default: opt!(preceded!(
+        default: option!(preceded!(
             punct!("="),
             ty
         )) >>
@@ -143,7 +143,7 @@ pub mod parsing {
         })
     ));
 
-    named!(pub ty_param_bound<&str, TyParamBound>, alt!(
+    named!(pub ty_param_bound<&str, TyParamBound>, alt_complete!(
         tuple!(punct!("?"), punct!("Sized")) => { |_| TyParamBound::MaybeSized }
         |
         lifetime => { TyParamBound::Region }
@@ -151,7 +151,7 @@ pub mod parsing {
         poly_trait_ref => { TyParamBound::Trait }
     ));
 
-    named!(where_predicate<&str, WherePredicate>, alt!(
+    named!(where_predicate<&str, WherePredicate>, alt_complete!(
         do_parse!(
             ident: lifetime >>
             punct!(":") >>

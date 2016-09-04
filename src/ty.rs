@@ -188,7 +188,7 @@ pub mod parsing {
     use nom::{digit, multispace};
     use std::str;
 
-    named!(pub ty<&str, Ty>, alt!(
+    named!(pub ty<&str, Ty>, alt_complete!(
         ty_vec
         |
         ty_fixed_length_vec
@@ -223,14 +223,14 @@ pub mod parsing {
         punct!("[") >>
         elem: ty >>
         punct!(";") >>
-        opt!(multispace) >>
+        option!(multispace) >>
         size: map_res!(digit, str::parse) >>
         (Ty::FixedLengthVec(Box::new(elem), size))
     ));
 
     named!(ty_ptr<&str, Ty>, do_parse!(
         punct!("*") >>
-        mutability: alt!(
+        mutability: alt_complete!(
             punct!("const") => { |_| Mutability::Immutable }
             |
             punct!("mut") => { |_| Mutability::Mutable }
@@ -244,7 +244,7 @@ pub mod parsing {
 
     named!(ty_rptr<&str, Ty>, do_parse!(
         punct!("&") >>
-        life: opt!(lifetime) >>
+        life: option!(lifetime) >>
         mutability: mutability >>
         target: ty >>
         (Ty::Rptr(life, Box::new(MutTy {
@@ -264,7 +264,7 @@ pub mod parsing {
         punct!("(") >>
         inputs: separated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
-        output: opt!(preceded!(
+        output: option!(preceded!(
             punct!("->"),
             ty
         )) >>
@@ -294,7 +294,7 @@ pub mod parsing {
     named!(ty_qpath<&str, Ty>, do_parse!(
         punct!("<") >>
         this: map!(ty, Box::new) >>
-        path: opt!(preceded!(
+        path: option!(preceded!(
             tuple!(punct!("as"), multispace),
             path
         )) >>
@@ -332,17 +332,18 @@ pub mod parsing {
         (Ty::Paren(Box::new(elem)))
     ));
 
-    named!(mutability<&str, Mutability>, preceded!(
-        opt!(multispace),
-        alt!(
-            terminated!(tag_s!("mut"), multispace) => { |_| Mutability::Mutable }
-            |
-            epsilon!() => { |_| Mutability::Immutable }
+    named!(mutability<&str, Mutability>, alt_complete!(
+        do_parse!(
+            punct!("mut") >>
+            multispace >>
+            (Mutability::Mutable)
         )
+        |
+        epsilon!() => { |_| Mutability::Immutable }
     ));
 
     named!(path<&str, Path>, do_parse!(
-        global: opt!(punct!("::")) >>
+        global: option!(punct!("::")) >>
         segments: separated_nonempty_list!(punct!("::"), path_segment) >>
         (Path {
             global: global.is_some(),
@@ -350,7 +351,7 @@ pub mod parsing {
         })
     ));
 
-    named!(path_segment<&str, PathSegment>, alt!(
+    named!(path_segment<&str, PathSegment>, alt_complete!(
         do_parse!(
             ident: word >>
             punct!("<") >>
@@ -402,7 +403,7 @@ pub mod parsing {
     ));
 
     named!(fn_arg<&str, Arg>, do_parse!(
-        pat: opt!(terminated!(word, punct!(":"))) >>
+        pat: option!(terminated!(word, punct!(":"))) >>
         ty: ty >>
         (Arg {
             pat: pat,

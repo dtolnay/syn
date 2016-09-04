@@ -32,7 +32,7 @@ pub mod parsing {
     use helper::escaped_string;
     use nom::multispace;
 
-    named!(pub attribute<&str, Attribute>, alt!(
+    named!(pub attribute<&str, Attribute>, alt_complete!(
         do_parse!(
             punct!("#") >>
             punct!("[") >>
@@ -64,7 +64,7 @@ pub mod parsing {
         tag_s!("\"")
     ));
 
-    named!(meta_item<&str, MetaItem>, alt!(
+    named!(meta_item<&str, MetaItem>, alt_complete!(
         do_parse!(
             ident: word >>
             punct!("(") >>

@@ -50,7 +50,7 @@ pub mod parsing {
     named!(pub item<&str, Item>, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
-        which: alt!(tag_s!("struct") | tag_s!("enum")) >>
+        which: alt_complete!(punct!("struct") | punct!("enum")) >>
         multispace >>
         ident: word >>
         generics: generics >>
@@ -71,11 +71,11 @@ pub mod parsing {
                 body: body,
             })
         ) >>
-        opt!(multispace) >>
+        option!(multispace) >>
         (item)
     ));
 
-    named!(struct_body<&str, (Style, Vec<Field>)>, alt!(
+    named!(struct_body<&str, (Style, Vec<Field>)>, alt_complete!(
         struct_like_body => { |fields| (Style::Struct, fields) }
         |
         terminated!(tuple_like_body, punct!(";")) => { |fields| (Style::Tuple, fields) }
@@ -86,7 +86,7 @@ pub mod parsing {
     named!(enum_body<&str, Body>, do_parse!(
         punct!("{") >>
         variants: separated_list!(punct!(","), variant) >>
-        opt!(punct!(",")) >>
+        option!(punct!(",")) >>
         punct!("}") >>
         (Body::Enum(variants))
     ));
@@ -94,7 +94,7 @@ pub mod parsing {
     named!(variant<&str, Variant>, do_parse!(
         attrs: many0!(attribute) >>
         ident: word >>
-        body: alt!(
+        body: alt_complete!(
             struct_like_body => { |fields| (Style::Struct, fields) }
             |
             tuple_like_body => { |fields| (Style::Tuple, fields) }
@@ -112,7 +112,7 @@ pub mod parsing {
     named!(struct_like_body<&str, Vec<Field> >, do_parse!(
         punct!("{") >>
         fields: separated_list!(punct!(","), struct_field) >>
-        opt!(punct!(",")) >>
+        option!(punct!(",")) >>
         punct!("}") >>
         (fields)
     ));
@@ -120,7 +120,7 @@ pub mod parsing {
     named!(tuple_like_body<&str, Vec<Field> >, do_parse!(
         punct!("(") >>
         fields: separated_list!(punct!(","), tuple_field) >>
-        opt!(punct!(",")) >>
+        option!(punct!(",")) >>
         punct!(")") >>
         (fields)
     ));
