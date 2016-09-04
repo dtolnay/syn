@@ -1,4 +1,40 @@
-pub type Ident = String;
+use std::fmt::{self, Display};
+use std::ops::Deref;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Ident(String);
+
+impl Ident {
+    pub fn new<T: Into<Ident>>(t: T) -> Self {
+        t.into()
+    }
+}
+
+impl<'a> From<&'a str> for Ident {
+    fn from(s: &str) -> Self {
+        Ident(s.to_owned())
+    }
+}
+
+impl From<String> for Ident {
+    fn from(s: String) -> Self {
+        Ident(s)
+    }
+}
+
+impl Deref for Ident {
+    type Target = str;
+
+    fn deref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Display for Ident {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        self.0.fmt(formatter)
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Visibility {
@@ -16,7 +52,7 @@ pub mod parsing {
 
     named!(pub word<&str, Ident>, preceded!(
         opt!(call!(::nom::multispace)),
-        map!(take_while1_s!(ident_ch), String::from)
+        map!(take_while1_s!(ident_ch), Into::into)
     ));
 
     named!(pub visibility<&str, Visibility>, preceded!(

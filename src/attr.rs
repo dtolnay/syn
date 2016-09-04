@@ -50,7 +50,7 @@ pub mod parsing {
             content: take_until_s!("\n") >>
             (Attribute {
                 value: MetaItem::NameValue(
-                    "doc".to_string(),
+                    "doc".into(),
                     format!("///{}{}", space, content),
                 ),
                 is_sugared_doc: true,

@@ -102,7 +102,7 @@ pub mod parsing {
     named!(pub lifetime<&str, Lifetime>, preceded!(
         punct!("'"),
         map!(word, |ident| Lifetime {
-            ident: format!("'{}", ident),
+            ident: format!("'{}", ident).into(),
         })
     ));
 

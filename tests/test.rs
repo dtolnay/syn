@@ -4,7 +4,7 @@ use item::*;
 fn simple_ty(ident: &str) -> Ty {
     Ty::Path(None, Path {
         global: false,
-        segments: vec![PathSegment::ident(ident.to_string())],
+        segments: vec![PathSegment::ident(ident.into())],
     })
 }
 
@@ -19,13 +19,13 @@ fn test_struct() {
     ";
 
     let expected = Item {
-        ident: "Item".to_string(),
+        ident: "Item".into(),
         vis: Visibility::Public,
         attrs: vec![
             Attribute {
-                value: MetaItem::List("derive".to_string(), vec![
-                    MetaItem::Word("Debug".to_string()),
-                    MetaItem::Word("Clone".to_string()),
+                value: MetaItem::List("derive".into(), vec![
+                    MetaItem::Word("Debug".into()),
+                    MetaItem::Word("Clone".into()),
                 ]),
                 is_sugared_doc: false,
             },
@@ -33,20 +33,20 @@ fn test_struct() {
         generics: Generics::default(),
         body: Body::Struct(Style::Struct, vec![
             Field {
-                ident: Some("ident".to_string()),
+                ident: Some("ident".into()),
                 vis: Visibility::Public,
                 attrs: Vec::new(),
                 ty: simple_ty("Ident"),
             },
             Field {
-                ident: Some("attrs".to_string()),
+                ident: Some("attrs".into()),
                 vis: Visibility::Public,
                 attrs: Vec::new(),
                 ty: Ty::Path(None, Path {
                     global: false,
                     segments: vec![
                         PathSegment {
-                            ident: "Vec".to_string(),
+                            ident: "Vec".into(),
                             parameters: PathParameters::AngleBracketed(
                                 AngleBracketedParameterData {
                                     lifetimes: Vec::new(),
@@ -76,18 +76,18 @@ fn test_enum() {
     ";
 
     let expected = Item {
-        ident: "Result".to_string(),
+        ident: "Result".into(),
         vis: Visibility::Public,
         attrs: vec![
             Attribute {
                 value: MetaItem::NameValue(
-                    "doc".to_string(),
-                    "/// See the std::result module documentation for details.".to_string(),
+                    "doc".into(),
+                    "/// See the std::result module documentation for details.".into(),
                 ),
                 is_sugared_doc: true,
             },
             Attribute {
-                value: MetaItem::Word("must_use".to_string()),
+                value: MetaItem::Word("must_use".into()),
                 is_sugared_doc: false,
             },
         ],
@@ -95,12 +95,12 @@ fn test_enum() {
             lifetimes: Vec::new(),
             ty_params: vec![
                 TyParam {
-                    ident: "T".to_string(),
+                    ident: "T".into(),
                     bounds: Vec::new(),
                     default: None,
                 },
                 TyParam {
-                    ident: "E".to_string(),
+                    ident: "E".into(),
                     bounds: Vec::new(),
                     default: None,
                 },
@@ -109,7 +109,7 @@ fn test_enum() {
         },
         body: Body::Enum(vec![
             Variant {
-                ident: "Ok".to_string(),
+                ident: "Ok".into(),
                 attrs: Vec::new(),
                 style: Style::Tuple,
                 fields: vec![
@@ -122,7 +122,7 @@ fn test_enum() {
                 ],
             },
             Variant {
-                ident: "Err".to_string(),
+                ident: "Err".into(),
                 attrs: Vec::new(),
                 style: Style::Tuple,
                 fields: vec![
