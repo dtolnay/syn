@@ -595,6 +595,7 @@ mod printing {
     impl ToTokens for PolyTraitRef {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if !self.bound_lifetimes.is_empty() {
+                tokens.append("for");
                 tokens.append("<");
                 tokens.append_separated(&self.bound_lifetimes, ",");
                 tokens.append(">");
