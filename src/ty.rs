@@ -2,7 +2,7 @@ use super::*;
 
 use common::word;
 use generics::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
-use nom::{digit, multispace as space};
+use nom::{digit, multispace};
 
 use std::str;
 
@@ -197,7 +197,7 @@ named!(pub ty<&str, Ty>, alt!(
         punct!("[") ~
         elem: ty ~
         punct!(";") ~
-        space? ~
+        multispace? ~
         size: map_res!(digit, str::parse),
         move || Ty::FixedLengthVec(Box::new(elem), size)
     )
@@ -229,7 +229,7 @@ named!(pub ty<&str, Ty>, alt!(
     |
     chain!(
         punct!("fn") ~
-        space ~
+        multispace ~
         lifetimes: opt_vec!(delimited!(
             punct!("<"),
             separated_list!(punct!(","), lifetime_def),
@@ -268,7 +268,7 @@ named!(pub ty<&str, Ty>, alt!(
         punct!("<") ~
         this: map!(ty, Box::new) ~
         path: opt!(preceded!(
-            tuple!(punct!("as"), space),
+            tuple!(punct!("as"), multispace),
             path
         )) ~
         punct!(">") ~
@@ -292,7 +292,7 @@ named!(pub ty<&str, Ty>, alt!(
     )
     |
     preceded!(
-        tuple!(punct!("impl"), space),
+        tuple!(punct!("impl"), multispace),
         separated_nonempty_list!(punct!("+"), ty_param_bound)
     ) => { Ty::ImplTrait }
     |
@@ -304,9 +304,9 @@ named!(pub ty<&str, Ty>, alt!(
 ));
 
 named!(mutability<&str, Mutability>, preceded!(
-    opt!(space),
+    opt!(multispace),
     alt!(
-        terminated!(tag_s!("mut"), space) => { |_| Mutability::Mutable }
+        terminated!(tag_s!("mut"), multispace) => { |_| Mutability::Mutable }
         |
         epsilon!() => { |_| Mutability::Immutable }
     )

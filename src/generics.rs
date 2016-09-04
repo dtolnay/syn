@@ -2,7 +2,7 @@ use super::*;
 
 use common::word;
 use ty::{ty, poly_trait_ref};
-use nom::multispace as space;
+use nom::multispace;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct Generics {
@@ -84,7 +84,7 @@ named!(pub generics<&str, Generics>, chain!(
     ) ~
     where_clause: opt_vec!(chain!(
         punct!("where") ~
-        space ~
+        multispace ~
         predicates: separated_nonempty_list!(punct!(","), where_predicate) ~
         punct!(",")? ~
         move || predicates

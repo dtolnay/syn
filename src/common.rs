@@ -16,7 +16,7 @@ named!(pub word<&str, Ident>, preceded!(
 ));
 
 named!(pub visibility<&str, Visibility>, preceded!(
-    opt!(call!(::nom::space)),
+    opt!(call!(::nom::multispace)),
     alt!(
         terminated!(tag_s!("pub"), call!(::nom::multispace)) => { |_| Visibility::Public }
         |

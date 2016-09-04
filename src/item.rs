@@ -4,7 +4,7 @@ use attr::attribute;
 use common::{word, visibility};
 use generics::generics;
 use ty::ty;
-use nom::multispace as space;
+use nom::multispace;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Item {
@@ -48,7 +48,7 @@ named!(pub item<&str, Item>, chain!(
     attrs: many0!(attribute) ~
     vis: visibility ~
     which: alt!(tag_s!("struct") | tag_s!("enum")) ~
-    space ~
+    multispace ~
     ident: word ~
     generics: generics ~
     item: switch!(value!(which),
@@ -68,7 +68,7 @@ named!(pub item<&str, Item>, chain!(
             body: body,
         })
     ) ~
-    space?,
+    multispace?,
     move || item
 ));
 
