@@ -1,7 +1,10 @@
 use super::*;
 
+#[cfg(feature = "parsing")]
 use common::word;
+#[cfg(feature = "parsing")]
 use ty::{ty, poly_trait_ref};
+#[cfg(feature = "parsing")]
 use nom::multispace;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
@@ -67,6 +70,7 @@ pub struct WhereRegionPredicate {
     pub bounds: Vec<Lifetime>,
 }
 
+#[cfg(feature = "parsing")]
 named!(pub generics<&str, Generics>, do_parse!(
     bracketed: alt!(
         do_parse!(
@@ -96,11 +100,13 @@ named!(pub generics<&str, Generics>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(pub lifetime<&str, Lifetime>, preceded!(
     punct!("'"),
     map!(word, |ident| Lifetime { ident: ident })
 ));
 
+#[cfg(feature = "parsing")]
 named!(pub lifetime_def<&str, LifetimeDef>, do_parse!(
     life: lifetime >>
     bounds: opt_vec!(preceded!(
@@ -113,6 +119,7 @@ named!(pub lifetime_def<&str, LifetimeDef>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(pub bound_lifetimes<&str, Vec<LifetimeDef> >, opt_vec!(do_parse!(
     punct!("for") >>
     punct!("<") >>
@@ -121,6 +128,7 @@ named!(pub bound_lifetimes<&str, Vec<LifetimeDef> >, opt_vec!(do_parse!(
     (lifetimes)
 )));
 
+#[cfg(feature = "parsing")]
 named!(ty_param<&str, TyParam>, do_parse!(
     ident: word >>
     bounds: opt_vec!(preceded!(
@@ -138,6 +146,7 @@ named!(ty_param<&str, TyParam>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(pub ty_param_bound<&str, TyParamBound>, alt!(
     tuple!(punct!("?"), punct!("Sized")) => { |_| TyParamBound::MaybeSized }
     |
@@ -146,6 +155,7 @@ named!(pub ty_param_bound<&str, TyParamBound>, alt!(
     poly_trait_ref => { TyParamBound::Trait }
 ));
 
+#[cfg(feature = "parsing")]
 named!(where_predicate<&str, WherePredicate>, alt!(
     do_parse!(
         ident: lifetime >>

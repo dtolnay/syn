@@ -1,6 +1,8 @@
+#[cfg(feature = "parsing")]
 #[macro_use]
 extern crate nom;
 
+#[cfg(feature = "parsing")]
 #[macro_use]
 mod do_parse;
 
@@ -59,6 +61,7 @@ pub use ty::{
     TypeBinding,
 };
 
+#[cfg(feature = "parsing")]
 pub fn parse(input: &str) -> Item {
     match item::item(input) {
         nom::IResult::Done(rest, ast) => {
@@ -73,6 +76,7 @@ pub fn parse(input: &str) -> Item {
     }
 }
 
+#[cfg(feature = "parsing")]
 fn raise(mut err: nom::Err<&str>) -> ! {
     loop {
         match err {

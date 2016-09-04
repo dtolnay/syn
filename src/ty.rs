@@ -1,9 +1,13 @@
 use super::*;
 
+#[cfg(feature = "parsing")]
 use common::word;
+#[cfg(feature = "parsing")]
 use generics::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
+#[cfg(feature = "parsing")]
 use nom::{digit, multispace};
 
+#[cfg(feature = "parsing")]
 use std::str;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -186,6 +190,7 @@ pub enum FunctionRetTy {
     Ty(Ty),
 }
 
+#[cfg(feature = "parsing")]
 named!(pub ty<&str, Ty>, alt!(
     ty_vec
     |
@@ -210,6 +215,7 @@ named!(pub ty<&str, Ty>, alt!(
     ty_paren
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_vec<&str, Ty>, do_parse!(
     punct!("[") >>
     elem: ty >>
@@ -217,6 +223,7 @@ named!(ty_vec<&str, Ty>, do_parse!(
     (Ty::Vec(Box::new(elem)))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_fixed_length_vec<&str, Ty>, do_parse!(
     punct!("[") >>
     elem: ty >>
@@ -226,6 +233,7 @@ named!(ty_fixed_length_vec<&str, Ty>, do_parse!(
     (Ty::FixedLengthVec(Box::new(elem), size))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_ptr<&str, Ty>, do_parse!(
     punct!("*") >>
     mutability: alt!(
@@ -240,6 +248,7 @@ named!(ty_ptr<&str, Ty>, do_parse!(
     })))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_rptr<&str, Ty>, do_parse!(
     punct!("&") >>
     life: opt!(lifetime) >>
@@ -251,6 +260,7 @@ named!(ty_rptr<&str, Ty>, do_parse!(
     })))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_bare_fn<&str, Ty>, do_parse!(
     punct!("fn") >>
     multispace >>
@@ -278,8 +288,10 @@ named!(ty_bare_fn<&str, Ty>, do_parse!(
     })))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_never<&str, Ty>, map!(punct!("!"), |_| Ty::Never));
 
+#[cfg(feature = "parsing")]
 named!(ty_tup<&str, Ty>, do_parse!(
     punct!("(") >>
     elems: separated_list!(punct!(","), ty) >>
@@ -287,8 +299,10 @@ named!(ty_tup<&str, Ty>, do_parse!(
     (Ty::Tup(elems))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_path<&str, Ty>, map!(path, |p| Ty::Path(None, p)));
 
+#[cfg(feature = "parsing")]
 named!(ty_qpath<&str, Ty>, do_parse!(
     punct!("<") >>
     this: map!(ty, Box::new) >>
@@ -316,6 +330,7 @@ named!(ty_qpath<&str, Ty>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_impl_trait<&str, Ty>, do_parse!(
     punct!("impl") >>
     multispace >>
@@ -323,6 +338,7 @@ named!(ty_impl_trait<&str, Ty>, do_parse!(
     (Ty::ImplTrait(elem))
 ));
 
+#[cfg(feature = "parsing")]
 named!(ty_paren<&str, Ty>, do_parse!(
     punct!("(") >>
     elem: ty >>
@@ -330,6 +346,7 @@ named!(ty_paren<&str, Ty>, do_parse!(
     (Ty::Paren(Box::new(elem)))
 ));
 
+#[cfg(feature = "parsing")]
 named!(mutability<&str, Mutability>, preceded!(
     opt!(multispace),
     alt!(
@@ -339,6 +356,7 @@ named!(mutability<&str, Mutability>, preceded!(
     )
 ));
 
+#[cfg(feature = "parsing")]
 named!(path<&str, Path>, do_parse!(
     global: opt!(punct!("::")) >>
     segments: separated_nonempty_list!(punct!("::"), path_segment) >>
@@ -348,6 +366,7 @@ named!(path<&str, Path>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(path_segment<&str, PathSegment>, alt!(
     do_parse!(
         ident: word >>
@@ -380,6 +399,7 @@ named!(path_segment<&str, PathSegment>, alt!(
     map!(word, PathSegment::ident)
 ));
 
+#[cfg(feature = "parsing")]
 named!(type_binding<&str, TypeBinding>, do_parse!(
     ident: word >>
     punct!("=") >>
@@ -390,6 +410,7 @@ named!(type_binding<&str, TypeBinding>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(pub poly_trait_ref<&str, PolyTraitRef>, do_parse!(
     bound_lifetimes: bound_lifetimes >>
     trait_ref: path >>
@@ -399,6 +420,7 @@ named!(pub poly_trait_ref<&str, PolyTraitRef>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(fn_arg<&str, Arg>, do_parse!(
     pat: opt!(terminated!(word, punct!(":"))) >>
     ty: ty >>

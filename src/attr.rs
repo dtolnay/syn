@@ -1,7 +1,10 @@
 use super::*;
 
+#[cfg(feature = "parsing")]
 use common::word;
+#[cfg(feature = "parsing")]
 use helper::escaped_string;
+#[cfg(feature = "parsing")]
 use nom::multispace;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -29,6 +32,7 @@ pub enum MetaItem {
     NameValue(Ident, String),
 }
 
+#[cfg(feature = "parsing")]
 named!(pub attribute<&str, Attribute>, alt!(
     do_parse!(
         punct!("#") >>
@@ -55,12 +59,14 @@ named!(pub attribute<&str, Attribute>, alt!(
     )
 ));
 
+#[cfg(feature = "parsing")]
 named!(quoted<&str, String>, delimited!(
     punct!("\""),
     escaped_string,
     tag_s!("\"")
 ));
 
+#[cfg(feature = "parsing")]
 named!(meta_item<&str, MetaItem>, alt!(
     do_parse!(
         ident: word >>

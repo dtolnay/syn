@@ -1,3 +1,5 @@
+#![cfg(feature = "parsing")]
+
 use nom::{self, IResult};
 
 macro_rules! punct {

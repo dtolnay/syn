@@ -7,5 +7,9 @@ description = "Nom parser for Rust items"
 repository = "https://github.com/dtolnay/item"
 include = ["Cargo.toml", "src/**/*.rs"]
 
+[features]
+default = ["parsing"]
+parsing = ["nom"]
+
 [dependencies]
-nom = "1.2.4"
+nom = { version = "1.2.4", optional = true }

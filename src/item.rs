@@ -1,9 +1,14 @@
 use super::*;
 
+#[cfg(feature = "parsing")]
 use attr::attribute;
+#[cfg(feature = "parsing")]
 use common::{word, visibility};
+#[cfg(feature = "parsing")]
 use generics::generics;
+#[cfg(feature = "parsing")]
 use ty::ty;
+#[cfg(feature = "parsing")]
 use nom::multispace;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -44,6 +49,7 @@ pub struct Field {
     pub ty: Ty,
 }
 
+#[cfg(feature = "parsing")]
 named!(pub item<&str, Item>, do_parse!(
     attrs: many0!(attribute) >>
     vis: visibility >>
@@ -72,6 +78,7 @@ named!(pub item<&str, Item>, do_parse!(
     (item)
 ));
 
+#[cfg(feature = "parsing")]
 named!(struct_body<&str, (Style, Vec<Field>)>, alt!(
     struct_like_body => { |fields| (Style::Struct, fields) }
     |
@@ -80,6 +87,7 @@ named!(struct_body<&str, (Style, Vec<Field>)>, alt!(
     punct!(";") => { |_| (Style::Unit, Vec::new()) }
 ));
 
+#[cfg(feature = "parsing")]
 named!(enum_body<&str, Body>, do_parse!(
     punct!("{") >>
     variants: separated_list!(punct!(","), variant) >>
@@ -88,6 +96,7 @@ named!(enum_body<&str, Body>, do_parse!(
     (Body::Enum(variants))
 ));
 
+#[cfg(feature = "parsing")]
 named!(variant<&str, Variant>, do_parse!(
     attrs: many0!(attribute) >>
     ident: word >>
@@ -106,6 +115,7 @@ named!(variant<&str, Variant>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(struct_like_body<&str, Vec<Field> >, do_parse!(
     punct!("{") >>
     fields: separated_list!(punct!(","), struct_field) >>
@@ -114,6 +124,7 @@ named!(struct_like_body<&str, Vec<Field> >, do_parse!(
     (fields)
 ));
 
+#[cfg(feature = "parsing")]
 named!(tuple_like_body<&str, Vec<Field> >, do_parse!(
     punct!("(") >>
     fields: separated_list!(punct!(","), tuple_field) >>
@@ -122,6 +133,7 @@ named!(tuple_like_body<&str, Vec<Field> >, do_parse!(
     (fields)
 ));
 
+#[cfg(feature = "parsing")]
 named!(struct_field<&str, Field>, do_parse!(
     attrs: many0!(attribute) >>
     vis: visibility >>
@@ -136,6 +148,7 @@ named!(struct_field<&str, Field>, do_parse!(
     })
 ));
 
+#[cfg(feature = "parsing")]
 named!(tuple_field<&str, Field>, do_parse!(
     attrs: many0!(attribute) >>
     vis: visibility >>
