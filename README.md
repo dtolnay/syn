@@ -6,7 +6,7 @@ Parse Rust structs and enums without a Syntex dependency, intended for use with
 
 ```toml
 [dependencies]
-item = "0.2"
+item = "0.3"
 ```
 
 ```rust
