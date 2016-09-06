@@ -55,12 +55,12 @@ pub mod parsing {
         ident: word >>
         generics: generics >>
         item: switch!(value!(which),
-            "struct" => map!(struct_body, move |(style, fields)| Item {
+            "struct" => map!(struct_body, move |body| Item {
                 ident: ident,
                 vis: vis,
                 attrs: attrs,
                 generics: generics,
-                body: Body::Struct(style, fields),
+                body: body,
             })
             |
             "enum" => map!(enum_body, move |body| Item {
@@ -75,12 +75,12 @@ pub mod parsing {
         (item)
     ));
 
-    named!(struct_body<&str, (Style, Vec<Field>)>, alt_complete!(
-        struct_like_body => { |fields| (Style::Struct, fields) }
+    named!(struct_body<&str, Body>, alt_complete!(
+        struct_like_body => { |fields| Body::Struct(Style::Struct, fields) }
         |
-        terminated!(tuple_like_body, punct!(";")) => { |fields| (Style::Tuple, fields) }
+        terminated!(tuple_like_body, punct!(";")) => { |fields| Body::Struct(Style::Tuple, fields) }
         |
-        punct!(";") => { |_| (Style::Unit, Vec::new()) }
+        punct!(";") => { |_| Body::Struct(Style::Unit, Vec::new()) }
     ));
 
     named!(enum_body<&str, Body>, do_parse!(

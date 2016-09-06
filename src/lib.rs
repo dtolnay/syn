@@ -65,7 +65,7 @@ pub use ty::{
 
 #[cfg(feature = "parsing")]
 pub fn parse(input: &str) -> Item {
-    match item::parsing::item(input) {
+    return match item::parsing::item(input) {
         nom::IResult::Done(rest, ast) => {
             if rest.is_empty() {
                 ast
@@ -75,22 +75,21 @@ pub fn parse(input: &str) -> Item {
         }
         nom::IResult::Error(err) => raise(err),
         nom::IResult::Incomplete(_) => panic!("incomplete input item"),
-    }
-}
+    };
 
-#[cfg(feature = "parsing")]
-fn raise(mut err: nom::Err<&str>) -> ! {
-    loop {
-        match err {
-            nom::Err::Code(kind) => {
-                panic!("failed to parse {:?}", kind)
-            }
-            nom::Err::Position(kind, pos) => {
-                panic!("failed to parse {:?}: {:?}", kind, pos)
-            }
-            nom::Err::Node(_, next) |
-            nom::Err::NodePosition(_, _, next) => {
-                err = *next;
+    fn raise(mut err: nom::Err<&str>) -> ! {
+        loop {
+            match err {
+                nom::Err::Code(kind) => {
+                    panic!("failed to parse {:?}", kind)
+                }
+                nom::Err::Position(kind, pos) => {
+                    panic!("failed to parse {:?}: {:?}", kind, pos)
+                }
+                nom::Err::Node(_, next) |
+                nom::Err::NodePosition(_, _, next) => {
+                    err = *next;
+                }
             }
         }
     }

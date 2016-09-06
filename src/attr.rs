@@ -58,12 +58,6 @@ pub mod parsing {
         )
     ));
 
-    named!(quoted<&str, String>, delimited!(
-        punct!("\""),
-        escaped_string,
-        tag_s!("\"")
-    ));
-
     named!(meta_item<&str, MetaItem>, alt_complete!(
         do_parse!(
             ident: word >>
@@ -81,6 +75,12 @@ pub mod parsing {
         )
         |
         map!(word, MetaItem::Word)
+    ));
+
+    named!(quoted<&str, String>, delimited!(
+        punct!("\""),
+        escaped_string,
+        tag_s!("\"")
     ));
 }
 

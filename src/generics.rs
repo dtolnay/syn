@@ -110,7 +110,7 @@ pub mod parsing {
         life: lifetime >>
         bounds: opt_vec!(preceded!(
             punct!(":"),
-            separated_nonempty_list!(punct!(","), lifetime)
+            separated_nonempty_list!(punct!("+"), lifetime)
         )) >>
         (LifetimeDef {
             lifetime: life,

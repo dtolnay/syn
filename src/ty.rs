@@ -224,8 +224,9 @@ pub mod parsing {
         elem: ty >>
         punct!(";") >>
         option!(multispace) >>
-        size: map_res!(digit, str::parse) >>
-        (Ty::FixedLengthVec(Box::new(elem), size))
+        len: map_res!(digit, str::parse) >>
+        punct!("]") >>
+        (Ty::FixedLengthVec(Box::new(elem), len))
     ));
 
     named!(ty_ptr<&str, Ty>, do_parse!(
