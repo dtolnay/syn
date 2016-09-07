@@ -10,7 +10,7 @@ syn = "0.4"
 ```
 
 ```rust
-extern crate item;
+extern crate syn;
 
 let raw = "
     #[derive(Debug, Clone, Eq, PartialEq)]
