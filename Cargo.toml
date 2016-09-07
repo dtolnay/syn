@@ -1,6 +1,6 @@
 [package]
 name = "syn"
-version = "0.4.0"
+version = "0.4.0" # don't forget to update version in readme
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Nom parser for Rust items"
