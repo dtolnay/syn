@@ -5,6 +5,7 @@
 #![cfg(feature = "parsing")]
 
 #[macro_export]
+#[doc(hidden)]
 macro_rules! do_parse (
   ($i:expr, $($rest:tt)*) => (
     {
