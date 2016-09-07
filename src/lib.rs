@@ -64,7 +64,7 @@ pub use ty::{
 };
 
 #[cfg(feature = "parsing")]
-pub fn parse(input: &str) -> Item {
+pub fn parse_item(input: &str) -> Item {
     return match item::parsing::item(input) {
         nom::IResult::Done(rest, ast) => {
             if rest.is_empty() {

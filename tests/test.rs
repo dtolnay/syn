@@ -1,5 +1,5 @@
-extern crate item;
-use item::*;
+extern crate syn;
+use syn::*;
 
 fn simple_ty(ident: &str) -> Ty {
     Ty::Path(None, Path {
@@ -20,7 +20,7 @@ fn test_unit() {
         body: Body::Struct(Style::Unit, Vec::new()),
     };
 
-    assert_eq!(expected, parse(raw));
+    assert_eq!(expected, parse_item(raw));
 }
 
 #[test]
@@ -76,7 +76,7 @@ fn test_struct() {
         ]),
     };
 
-    assert_eq!(expected, parse(raw));
+    assert_eq!(expected, parse_item(raw));
 }
 
 #[test]
@@ -152,5 +152,5 @@ fn test_enum() {
         ]),
     };
 
-    assert_eq!(expected, parse(raw));
+    assert_eq!(expected, parse_item(raw));
 }

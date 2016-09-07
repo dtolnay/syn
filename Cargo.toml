@@ -1,5 +1,5 @@
 [package]
-name = "item"
+name = "syn"
 version = "0.3.2"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"

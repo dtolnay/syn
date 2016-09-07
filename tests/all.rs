@@ -1,4 +1,4 @@
-extern crate item;
+extern crate syn;
 
 #[macro_use]
 extern crate quote;
@@ -8,9 +8,9 @@ extern crate quote;
 #[test]
 fn test_all() {
     for s in ITEMS {
-        let ast = item::parse(s);
+        let ast = syn::parse_item(s);
         let tokens = quote!(#ast).to_string();
-        assert_eq!(ast, item::parse(&tokens));
+        assert_eq!(ast, syn::parse_item(&tokens));
     }
 
     static ITEMS: &'static [&'static str] = &[
