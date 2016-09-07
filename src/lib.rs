@@ -47,8 +47,8 @@ pub use item::{
 mod ty;
 pub use ty::{
     AngleBracketedParameterData,
-    Arg,
     BareFnTy,
+    FnArg,
     FnDecl,
     FunctionRetTy,
     MutTy,

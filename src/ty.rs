@@ -155,7 +155,7 @@ pub struct BareFnTy {
 /// E.g. `fn foo(bar: baz)`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FnDecl {
-    pub inputs: Vec<Arg>,
+    pub inputs: Vec<FnArg>,
     pub output: FunctionRetTy,
 }
 
@@ -163,7 +163,7 @@ pub struct FnDecl {
 ///
 /// E.g. `bar: usize` as in `fn foo(bar: usize)`
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Arg {
+pub struct FnArg {
     pub pat: Option<Ident>,
     pub ty: Ty,
 }
@@ -403,10 +403,10 @@ pub mod parsing {
         })
     ));
 
-    named!(fn_arg<&str, Arg>, do_parse!(
+    named!(fn_arg<&str, FnArg>, do_parse!(
         pat: option!(terminated!(word, punct!(":"))) >>
         ty: ty >>
-        (Arg {
+        (FnArg {
             pat: pat,
             ty: ty,
         })
