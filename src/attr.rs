@@ -28,8 +28,8 @@ pub enum MetaItem {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use common::parsing::word;
     use helper::escaped_string;
+    use ident::parsing::ident;
     use nom::multispace;
 
     named!(pub attribute<&str, Attribute>, alt_complete!(
@@ -60,21 +60,21 @@ pub mod parsing {
 
     named!(meta_item<&str, MetaItem>, alt_complete!(
         do_parse!(
-            ident: word >>
+            id: ident >>
             punct!("(") >>
             inner: separated_list!(punct!(","), meta_item) >>
             punct!(")") >>
-            (MetaItem::List(ident, inner))
+            (MetaItem::List(id, inner))
         )
         |
         do_parse!(
-            ident: word >>
+            id: ident >>
             punct!("=") >>
             string: quoted >>
-            (MetaItem::NameValue(ident, string))
+            (MetaItem::NameValue(id, string))
         )
         |
-        map!(word, MetaItem::Word)
+        map!(ident, MetaItem::Word)
     ));
 
     named!(quoted<&str, String>, delimited!(
