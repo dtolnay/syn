@@ -84,6 +84,10 @@ mod parsing {
         unwrap("item", item::parsing::item(input))
     }
 
+    pub fn parse_type(input: &str) -> Result<Ty, String> {
+        unwrap("type", ty::parsing::ty(input))
+    }
+
     pub fn parse_path(input: &str) -> Result<Path, String> {
         unwrap("path", ty::parsing::path(input))
     }
