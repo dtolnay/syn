@@ -1,6 +1,6 @@
 [package]
 name = "syn"
-version = "0.4.0" # don't forget to update version in readme
+version = "0.5.0" # don't forget to update version in readme
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Nom parser for Rust items"
@@ -17,4 +17,4 @@ visit = []
 
 [dependencies]
 nom = { version = "1.2.4", optional = true }
-quote = { version = "0.1.1", optional = true }
+quote = { version = "0.1.2", optional = true }

@@ -10,7 +10,7 @@ Parse Rust structs and enums without a Syntex dependency, intended for use with
 
 ```toml
 [dependencies]
-syn = "0.4"
+syn = "0.5"
 ```
 
 ```rust
