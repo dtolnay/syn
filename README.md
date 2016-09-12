@@ -8,6 +8,11 @@ Nom parser for Rust items
 Parse Rust structs and enums without a Syntex dependency, intended for use with
 [Macros 1.1](https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md).
 
+Designed for fast compile time.
+
+- Compile time for `syn` (from scratch including all dependencies): **6 seconds**
+- Compile time for the `syntex`/`quasi`/`aster` stack: **60+ seconds**
+
 ```toml
 [dependencies]
 syn = "0.5"
