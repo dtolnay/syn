@@ -4,7 +4,7 @@ use super::*;
 pub struct Generics {
     pub lifetimes: Vec<LifetimeDef>,
     pub ty_params: Vec<TyParam>,
-    pub where_clause: Vec<WherePredicate>,
+    pub where_clause: WhereClause,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -27,9 +27,19 @@ pub struct TyParam {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TyParamBound {
-    MaybeSized,
+    Trait(PolyTraitRef, TraitBoundModifier),
     Region(Lifetime),
-    Trait(PolyTraitRef),
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum TraitBoundModifier {
+    None,
+    Maybe,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
+pub struct WhereClause {
+    pub predicates: Vec<WherePredicate>,
 }
 
 /// A single predicate in a `where` clause
@@ -66,7 +76,7 @@ pub struct WhereRegionPredicate {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use common::parsing::word;
+    use ident::parsing::ident;
     use ty::parsing::{ty, poly_trait_ref};
     use nom::multispace;
 
@@ -85,13 +95,7 @@ pub mod parsing {
             |
             epsilon!() => { |_| (Vec::new(), Vec::new()) }
         ) >>
-        where_clause: opt_vec!(do_parse!(
-            punct!("where") >>
-            multispace >>
-            predicates: separated_nonempty_list!(punct!(","), where_predicate) >>
-            option!(punct!(",")) >>
-            (predicates)
-        )) >>
+        where_clause: where_clause >>
         (Generics {
             lifetimes: bracketed.0,
             ty_params: bracketed.1,
@@ -101,8 +105,8 @@ pub mod parsing {
 
     named!(pub lifetime<&str, Lifetime>, preceded!(
         punct!("'"),
-        map!(word, |ident| Lifetime {
-            ident: format!("'{}", ident).into(),
+        map!(ident, |id| Lifetime {
+            ident: format!("'{}", id).into(),
         })
     ));
 
@@ -127,7 +131,7 @@ pub mod parsing {
     )));
 
     named!(ty_param<&str, TyParam>, do_parse!(
-        ident: word >>
+        id: ident >>
         bounds: opt_vec!(preceded!(
             punct!(":"),
             separated_nonempty_list!(punct!("+"), ty_param_bound)
@@ -137,18 +141,34 @@ pub mod parsing {
             ty
         )) >>
         (TyParam {
-            ident: ident,
+            ident: id,
             bounds: bounds,
             default: default,
         })
     ));
 
     named!(pub ty_param_bound<&str, TyParamBound>, alt_complete!(
-        tuple!(punct!("?"), punct!("Sized")) => { |_| TyParamBound::MaybeSized }
+        preceded!(punct!("?"), poly_trait_ref) => {
+            |poly| TyParamBound::Trait(poly, TraitBoundModifier::Maybe)
+        }
         |
         lifetime => { TyParamBound::Region }
         |
-        poly_trait_ref => { TyParamBound::Trait }
+        poly_trait_ref => {
+            |poly| TyParamBound::Trait(poly, TraitBoundModifier::None)
+        }
+    ));
+
+    named!(pub where_clause<&str, WhereClause>, alt_complete!(
+        do_parse!(
+            punct!("where") >>
+            multispace >>
+            predicates: separated_nonempty_list!(punct!(","), where_predicate) >>
+            option!(punct!(",")) >>
+            (WhereClause { predicates: predicates })
+        )
+        |
+        epsilon!() => { |_| Default::default() }
     ));
 
     named!(where_predicate<&str, WherePredicate>, alt_complete!(
@@ -194,10 +214,6 @@ mod printing {
                 tokens.append_separated(&self.ty_params, ",");
                 tokens.append(">");
             }
-            if !self.where_clause.is_empty() {
-                tokens.append("where");
-                tokens.append_separated(&self.where_clause, ",");
-            }
         }
     }
 
@@ -234,9 +250,23 @@ mod printing {
     impl ToTokens for TyParamBound {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                TyParamBound::MaybeSized => tokens.append("?Sized"),
                 TyParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
-                TyParamBound::Trait(ref trait_ref) => trait_ref.to_tokens(tokens),
+                TyParamBound::Trait(ref trait_ref, modifier) => {
+                    match modifier {
+                        TraitBoundModifier::None => {}
+                        TraitBoundModifier::Maybe => tokens.append("?"),
+                    }
+                    trait_ref.to_tokens(tokens);
+                }
+            }
+        }
+    }
+
+    impl ToTokens for WhereClause {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if !self.predicates.is_empty() {
+                tokens.append("where");
+                tokens.append_separated(&self.predicates, ",");
             }
         }
     }

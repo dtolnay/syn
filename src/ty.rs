@@ -183,8 +183,8 @@ pub enum FunctionRetTy {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use common::parsing::word;
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
+    use ident::parsing::ident;
     use nom::{digit, multispace};
     use std::str;
 
@@ -343,7 +343,7 @@ pub mod parsing {
         epsilon!() => { |_| Mutability::Immutable }
     ));
 
-    named!(path<&str, Path>, do_parse!(
+    named!(pub path<&str, Path>, do_parse!(
         global: option!(punct!("::")) >>
         segments: separated_nonempty_list!(punct!("::"), path_segment) >>
         (Path {
@@ -354,7 +354,7 @@ pub mod parsing {
 
     named!(path_segment<&str, PathSegment>, alt_complete!(
         do_parse!(
-            ident: word >>
+            id: ident >>
             punct!("<") >>
             lifetimes: separated_list!(punct!(","), lifetime) >>
             types: opt_vec!(preceded!(
@@ -370,7 +370,7 @@ pub mod parsing {
             )) >>
             punct!(">") >>
             (PathSegment {
-                ident: ident,
+                ident: id,
                 parameters: PathParameters::AngleBracketed(
                     AngleBracketedParameterData {
                         lifetimes: lifetimes,
@@ -381,15 +381,15 @@ pub mod parsing {
             })
         )
         |
-        map!(word, PathSegment::ident)
+        map!(ident, PathSegment::ident)
     ));
 
     named!(type_binding<&str, TypeBinding>, do_parse!(
-        ident: word >>
+        id: ident >>
         punct!("=") >>
         ty: ty >>
         (TypeBinding {
-            ident: ident,
+            ident: id,
             ty: ty,
         })
     ));
@@ -404,7 +404,7 @@ pub mod parsing {
     ));
 
     named!(fn_arg<&str, FnArg>, do_parse!(
-        pat: option!(terminated!(word, punct!(":"))) >>
+        pat: option!(terminated!(ident, punct!(":"))) >>
         ty: ty >>
         (FnArg {
             pat: pat,

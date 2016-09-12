@@ -17,10 +17,10 @@ fn test_unit() {
         vis: Visibility::Inherited,
         attrs: Vec::new(),
         generics: Generics::default(),
-        body: Body::Struct(Style::Unit, Vec::new()),
+        body: Body::Struct(VariantData::Unit),
     };
 
-    assert_eq!(expected, parse_item(raw));
+    assert_eq!(expected, parse_item(raw).unwrap());
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn test_struct() {
             },
         ],
         generics: Generics::default(),
-        body: Body::Struct(Style::Struct, vec![
+        body: Body::Struct(VariantData::Struct(vec![
             Field {
                 ident: Some("ident".into()),
                 vis: Visibility::Public,
@@ -73,10 +73,10 @@ fn test_struct() {
                     ],
                 }),
             },
-        ]),
+        ])),
     };
 
-    assert_eq!(expected, parse_item(raw));
+    assert_eq!(expected, parse_item(raw).unwrap());
 }
 
 #[test]
@@ -120,37 +120,37 @@ fn test_enum() {
                     default: None,
                 },
             ],
-            where_clause: Vec::new(),
+            where_clause: WhereClause {
+                predicates: Vec::new(),
+            },
         },
         body: Body::Enum(vec![
             Variant {
                 ident: "Ok".into(),
                 attrs: Vec::new(),
-                style: Style::Tuple,
-                fields: vec![
+                data: VariantData::Tuple(vec![
                     Field {
                         ident: None,
                         vis: Visibility::Inherited,
                         attrs: Vec::new(),
                         ty: simple_ty("T"),
                     },
-                ],
+                ]),
             },
             Variant {
                 ident: "Err".into(),
                 attrs: Vec::new(),
-                style: Style::Tuple,
-                fields: vec![
+                data: VariantData::Tuple(vec![
                     Field {
                         ident: None,
                         vis: Visibility::Inherited,
                         attrs: Vec::new(),
                         ty: simple_ty("E"),
                     },
-                ],
+                ]),
             },
         ]),
     };
 
-    assert_eq!(expected, parse_item(raw));
+    assert_eq!(expected, parse_item(raw).unwrap());
 }

@@ -12,22 +12,31 @@ pub struct Item {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Body {
     Enum(Vec<Variant>),
-    Struct(Style, Vec<Field>),
+    Struct(VariantData),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Variant {
     pub ident: Ident,
     pub attrs: Vec<Attribute>,
-    pub style: Style,
-    pub fields: Vec<Field>,
+    pub data: VariantData,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Style {
-    Struct,
-    Tuple,
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum VariantData {
+    Struct(Vec<Field>),
+    Tuple(Vec<Field>),
     Unit,
+}
+
+impl VariantData {
+    pub fn fields(&self) -> &[Field] {
+        match *self {
+            VariantData::Struct(ref fields) |
+            VariantData::Tuple(ref fields) => fields,
+            VariantData::Unit => &[],
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -38,12 +47,18 @@ pub struct Field {
     pub ty: Ty,
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Visibility {
+    Public,
+    Inherited,
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
     use attr::parsing::attribute;
-    use common::parsing::{word, visibility};
     use generics::parsing::generics;
+    use ident::parsing::ident;
     use ty::parsing::ty;
     use nom::multispace;
 
@@ -52,60 +67,59 @@ pub mod parsing {
         vis: visibility >>
         which: alt_complete!(punct!("struct") | punct!("enum")) >>
         multispace >>
-        ident: word >>
+        id: ident >>
         generics: generics >>
         item: switch!(value!(which),
             "struct" => map!(struct_body, move |body| Item {
-                ident: ident,
+                ident: id,
                 vis: vis,
                 attrs: attrs,
                 generics: generics,
-                body: body,
+                body: Body::Struct(body),
             })
             |
             "enum" => map!(enum_body, move |body| Item {
-                ident: ident,
+                ident: id,
                 vis: vis,
                 attrs: attrs,
                 generics: generics,
-                body: body,
+                body: Body::Enum(body),
             })
         ) >>
         option!(multispace) >>
         (item)
     ));
 
-    named!(struct_body<&str, Body>, alt_complete!(
-        struct_like_body => { |fields| Body::Struct(Style::Struct, fields) }
+    named!(struct_body<&str, VariantData>, alt_complete!(
+        struct_like_body => { VariantData::Struct }
         |
-        terminated!(tuple_like_body, punct!(";")) => { |fields| Body::Struct(Style::Tuple, fields) }
+        terminated!(tuple_like_body, punct!(";")) => { VariantData::Tuple }
         |
-        punct!(";") => { |_| Body::Struct(Style::Unit, Vec::new()) }
+        punct!(";") => { |_| VariantData::Unit }
     ));
 
-    named!(enum_body<&str, Body>, do_parse!(
+    named!(enum_body<&str, Vec<Variant> >, do_parse!(
         punct!("{") >>
         variants: separated_list!(punct!(","), variant) >>
         option!(punct!(",")) >>
         punct!("}") >>
-        (Body::Enum(variants))
+        (variants)
     ));
 
     named!(variant<&str, Variant>, do_parse!(
         attrs: many0!(attribute) >>
-        ident: word >>
-        body: alt_complete!(
-            struct_like_body => { |fields| (Style::Struct, fields) }
+        id: ident >>
+        data: alt_complete!(
+            struct_like_body => { VariantData::Struct }
             |
-            tuple_like_body => { |fields| (Style::Tuple, fields) }
+            tuple_like_body => { VariantData::Tuple }
             |
-            epsilon!() => { |_| (Style::Unit, Vec::new()) }
+            epsilon!() => { |_| VariantData::Unit }
         ) >>
         (Variant {
-            ident: ident,
+            ident: id,
             attrs: attrs,
-            style: body.0,
-            fields: body.1,
+            data: data,
         })
     ));
 
@@ -128,11 +142,11 @@ pub mod parsing {
     named!(struct_field<&str, Field>, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
-        ident: word >>
+        id: ident >>
         punct!(":") >>
         ty: ty >>
         (Field {
-            ident: Some(ident),
+            ident: Some(id),
             vis: vis,
             attrs: attrs,
             ty: ty,
@@ -150,12 +164,21 @@ pub mod parsing {
             ty: ty,
         })
     ));
+
+    named!(pub visibility<&str, Visibility>, alt_complete!(
+        do_parse!(
+            punct!("pub") >>
+            multispace >>
+            (Visibility::Public)
+        )
+        |
+        epsilon!() => { |_| Visibility::Inherited }
+    ));
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use common::Visibility;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Item {
@@ -168,10 +191,11 @@ mod printing {
             }
             match self.body {
                 Body::Enum(_) => tokens.append("enum"),
-                Body::Struct(_, _) => tokens.append("struct"),
+                Body::Struct(_) => tokens.append("struct"),
             }
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.body.to_tokens(tokens);
         }
     }
@@ -187,11 +211,12 @@ mod printing {
                     }
                     tokens.append("}");
                 }
-                Body::Struct(style, ref fields) => {
-                    fields_to_tokens(style, fields, tokens);
-                    match style {
-                        Style::Struct => { /* no semicolon */ }
-                        Style::Tuple | Style::Unit => tokens.append(";"),
+                Body::Struct(ref variant_data) => {
+                    variant_data_to_tokens(variant_data, tokens);
+                    match *variant_data {
+                        VariantData::Struct(_) => { /* no semicolon */ }
+                        VariantData::Tuple(_) |
+                        VariantData::Unit => tokens.append(";"),
                     }
                 }
             }
@@ -204,7 +229,7 @@ mod printing {
                 attr.to_tokens(tokens);
             }
             self.ident.to_tokens(tokens);
-            fields_to_tokens(self.style, &self.fields, tokens);
+            variant_data_to_tokens(&self.data, tokens);
         }
     }
 
@@ -224,21 +249,19 @@ mod printing {
         }
     }
 
-    fn fields_to_tokens(style: Style, fields: &[Field], tokens: &mut Tokens) {
-        match style {
-            Style::Struct => {
+    fn variant_data_to_tokens(data: &VariantData, tokens: &mut Tokens) {
+        match *data {
+            VariantData::Struct(ref fields) => {
                 tokens.append("{");
                 tokens.append_separated(fields, ",");
                 tokens.append("}");
             }
-            Style::Tuple => {
+            VariantData::Tuple(ref fields) => {
                 tokens.append("(");
                 tokens.append_separated(fields, ",");
                 tokens.append(")");
             }
-            Style::Unit => {
-                assert!(fields.is_empty(), "unit variant cannot have fields");
-            }
+            VariantData::Unit => {}
         }
     }
 }

@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash)]
 pub struct Ident(String);
 
 impl Ident {
@@ -33,10 +33,10 @@ impl Display for Ident {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Visibility {
-    Public,
-    Inherited,
+impl<T: ?Sized> PartialEq<T> for Ident where T: AsRef<str> {
+    fn eq(&self, other: &T) -> bool {
+        self.0 == other.as_ref()
+    }
 }
 
 #[cfg(feature = "parsing")]
@@ -48,19 +48,9 @@ pub mod parsing {
         ch.is_alphanumeric() || ch == '_'
     }
 
-    named!(pub word<&str, Ident>, preceded!(
+    named!(pub ident<&str, Ident>, preceded!(
         option!(multispace),
         map!(take_while1_s!(ident_ch), Into::into)
-    ));
-
-    named!(pub visibility<&str, Visibility>, alt_complete!(
-        do_parse!(
-            punct!("pub") >>
-            multispace >>
-            (Visibility::Public)
-        )
-        |
-        epsilon!() => { |_| Visibility::Inherited }
     ));
 }
 
