@@ -27,7 +27,7 @@ let raw = "
     }
 ";
 
-let ast = syn::parse_item(raw);
+let ast = syn::parse_item(raw).unwrap();
 ```
 
 ## License
