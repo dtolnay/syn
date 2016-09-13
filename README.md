@@ -35,6 +35,42 @@ let raw = "
 let ast = syn::parse_item(raw).unwrap();
 ```
 
+## Usage with [Macros 1.1](https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md)
+```rust
+// lib.rs
+#![crate_type = "rustc-macro"]
+#![feature(rustc_macro)]
+#![feature(rustc_macro_lib)]
+
+extern crate rustc_macro;
+#[macro_use]
+extern crate quote;
+extern crate syn;
+
+use rustc_macro::TokenStream;
+
+#[rustc_macro_derive(SpecialItem)]
+pub fn special_item(input: TokenStream) -> TokenStream {
+    let source = input.to_string();
+
+    // Parse a string of items to an AST
+    let ast = syn::parse_item(&source).unwrap();
+
+    // Parse this back to a token stream and return it
+    quote!(#ast).to_string().parse().unwrap()
+}
+```
+```toml
+# Cargo.toml
+# ...
+[dependencies]
+syn = "0.5"
+quote = "0.1"
+
+[lib]
+rustc-macro = true
+```
+
 ## License
 
 Licensed under either of
