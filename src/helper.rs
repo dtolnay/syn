@@ -68,12 +68,14 @@ pub fn escaped_string(input: &str) -> IResult<&str, String> {
             '\\' => {
                 match chars.next() {
                     Some((_, 'x')) => unimplemented!(),
-                    Some((_, 'u')) => unimplemented!(),
                     Some((_, 'n')) => s.push('\n'),
                     Some((_, 'r')) => s.push('\r'),
                     Some((_, 't')) => s.push('\t'),
-                    Some((_, '0')) => s.push('\0'),
                     Some((_, '\\')) => s.push('\\'),
+                    Some((_, '0')) => s.push('\0'),
+                    Some((_, 'u')) => unimplemented!(),
+                    Some((_, '\'')) => s.push('\''),
+                    Some((_, '"')) => s.push('"'),
                     Some((_, '\n')) => {
                         while let Some(&(_, ch)) = chars.peek() {
                             if ch.is_whitespace() {
