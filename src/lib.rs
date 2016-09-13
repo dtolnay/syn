@@ -11,6 +11,8 @@ mod do_parse;
 #[macro_use]
 mod helper;
 
+mod escape;
+
 mod attr;
 pub use attr::{
     Attribute,

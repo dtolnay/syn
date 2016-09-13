@@ -28,7 +28,7 @@ pub enum MetaItem {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use helper::escaped_string;
+    use escape::escaped_string;
     use ident::parsing::ident;
     use nom::multispace;
 
