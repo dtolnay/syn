@@ -47,11 +47,6 @@ macro_rules! opt_vec {
 
 macro_rules! epsilon {
     ($i:expr,) => {
-        call!($i, {
-            fn epsilon<T>(input: T) -> ::nom::IResult<T, ()> {
-                ::nom::IResult::Done(input, ())
-            }
-            epsilon
-        })
+        value!($i, ())
     };
 }
