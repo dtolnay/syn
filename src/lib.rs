@@ -1,12 +1,9 @@
-#[cfg(feature = "parsing")]
-#[macro_use]
-extern crate nom;
-
 #[cfg(feature = "printing")]
 extern crate quote;
 
+#[cfg(feature = "parsing")]
 #[macro_use]
-mod do_parse;
+mod nom;
 
 #[macro_use]
 mod helper;
@@ -83,23 +80,23 @@ mod parsing {
     use nom;
 
     pub fn parse_item(input: &str) -> Result<Item, String> {
-        unwrap("item", item::parsing::item(input))
+        unwrap("item", item::parsing::item, input)
     }
 
     pub fn parse_type(input: &str) -> Result<Ty, String> {
-        unwrap("type", ty::parsing::ty(input))
+        unwrap("type", ty::parsing::ty, input)
     }
 
     pub fn parse_path(input: &str) -> Result<Path, String> {
-        unwrap("path", ty::parsing::path(input))
+        unwrap("path", ty::parsing::path, input)
     }
 
     pub fn parse_where_clause(input: &str) -> Result<WhereClause, String> {
-        unwrap("where clause", generics::parsing::where_clause(input))
+        unwrap("where clause", generics::parsing::where_clause, input)
     }
 
-    fn unwrap<T>(name: &'static str, ires: nom::IResult<&str, T>) -> Result<T, String> {
-        return match ires {
+    fn unwrap<T>(name: &'static str, f: fn(&str) -> nom::IResult<&str, T>, input: &str) -> Result<T, String> {
+        match f(input) {
             nom::IResult::Done(rest, t) => {
                 if rest.is_empty() {
                     Ok(t)
@@ -107,25 +104,7 @@ mod parsing {
                     Err(format!("remaining tokens after {}: {:?}", name, rest))
                 }
             }
-            nom::IResult::Error(err) => Err(root_cause(err)),
-            nom::IResult::Incomplete(_) => Err(format!("incomplete {}", name)),
-        };
-
-        fn root_cause(mut err: nom::Err<&str>) -> String {
-            loop {
-                match err {
-                    nom::Err::Code(kind) => {
-                        return format!("failed to parse {:?}", kind);
-                    }
-                    nom::Err::Position(kind, pos) => {
-                        return format!("failed to parse {:?}: {:?}", kind, pos);
-                    }
-                    nom::Err::Node(_, next) |
-                    nom::Err::NodePosition(_, _, next) => {
-                        err = *next;
-                    }
-                }
-            }
+            nom::IResult::Error => Err(format!("failed to parse {}: {:?}", name, input)),
         }
     }
 }

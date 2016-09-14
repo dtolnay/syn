@@ -80,8 +80,8 @@ pub mod parsing {
     use ty::parsing::{ty, poly_trait_ref};
     use nom::multispace;
 
-    named!(pub generics<&str, Generics>, do_parse!(
-        bracketed: alt_complete!(
+    named!(pub generics -> Generics, do_parse!(
+        bracketed: alt!(
             do_parse!(
                 punct!("<") >>
                 lifetimes: separated_list!(punct!(","), lifetime_def) >>
@@ -103,14 +103,14 @@ pub mod parsing {
         })
     ));
 
-    named!(pub lifetime<&str, Lifetime>, preceded!(
+    named!(pub lifetime -> Lifetime, preceded!(
         punct!("'"),
         map!(ident, |id| Lifetime {
             ident: format!("'{}", id).into(),
         })
     ));
 
-    named!(pub lifetime_def<&str, LifetimeDef>, do_parse!(
+    named!(pub lifetime_def -> LifetimeDef, do_parse!(
         life: lifetime >>
         bounds: opt_vec!(preceded!(
             punct!(":"),
@@ -122,7 +122,7 @@ pub mod parsing {
         })
     ));
 
-    named!(pub bound_lifetimes<&str, Vec<LifetimeDef> >, opt_vec!(do_parse!(
+    named!(pub bound_lifetimes -> Vec<LifetimeDef>, opt_vec!(do_parse!(
         punct!("for") >>
         punct!("<") >>
         lifetimes: separated_list!(punct!(","), lifetime_def) >>
@@ -130,7 +130,7 @@ pub mod parsing {
         (lifetimes)
     )));
 
-    named!(ty_param<&str, TyParam>, do_parse!(
+    named!(ty_param -> TyParam, do_parse!(
         id: ident >>
         bounds: opt_vec!(preceded!(
             punct!(":"),
@@ -147,7 +147,7 @@ pub mod parsing {
         })
     ));
 
-    named!(pub ty_param_bound<&str, TyParamBound>, alt_complete!(
+    named!(pub ty_param_bound -> TyParamBound, alt!(
         preceded!(punct!("?"), poly_trait_ref) => {
             |poly| TyParamBound::Trait(poly, TraitBoundModifier::Maybe)
         }
@@ -159,7 +159,7 @@ pub mod parsing {
         }
     ));
 
-    named!(pub where_clause<&str, WhereClause>, alt_complete!(
+    named!(pub where_clause -> WhereClause, alt!(
         do_parse!(
             punct!("where") >>
             multispace >>
@@ -171,7 +171,7 @@ pub mod parsing {
         epsilon!() => { |_| Default::default() }
     ));
 
-    named!(where_predicate<&str, WherePredicate>, alt_complete!(
+    named!(where_predicate -> WherePredicate, alt!(
         do_parse!(
             ident: lifetime >>
             punct!(":") >>

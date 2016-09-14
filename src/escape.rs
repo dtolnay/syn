@@ -1,7 +1,7 @@
 #![cfg(feature = "parsing")]
 
 use std::{char, str};
-use nom::{self, IResult};
+use nom::IResult;
 
 pub fn escaped_string(input: &str) -> IResult<&str, String> {
     let mut s = String::new();
@@ -45,7 +45,7 @@ pub fn escaped_string(input: &str) -> IResult<&str, String> {
             }
         }
     }
-    IResult::Error(nom::Err::Position(nom::ErrorKind::Escaped, input))
+    IResult::Error
 }
 
 macro_rules! next_char {

@@ -1,6 +1,6 @@
 #![cfg(feature = "parsing")]
 
-use nom::{self, IResult};
+use nom::IResult;
 
 macro_rules! punct {
     ($i:expr, $punct:expr) => {
@@ -16,35 +16,34 @@ pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a st
                 let end = i + token.len();
                 IResult::Done(&input[end..], &input[i..end])
             } else {
-                IResult::Error(nom::Err::Position(nom::ErrorKind::TagStr, input))
+                IResult::Error
             };
         }
     }
-    IResult::Error(nom::Err::Position(nom::ErrorKind::TagStr, input))
+    IResult::Error
 }
 
-macro_rules! option (
-    ($i:expr, $submac:ident!( $($args:tt)* )) => ({
+macro_rules! option {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
             ::nom::IResult::Done(i, o) => ::nom::IResult::Done(i, Some(o)),
-            ::nom::IResult::Error(_) => ::nom::IResult::Done($i, None),
-            ::nom::IResult::Incomplete(_) => ::nom::IResult::Done($i, None),
+            ::nom::IResult::Error => ::nom::IResult::Done($i, None),
         }
-    });
-    ($i:expr, $f:expr) => (
-        option!($i, call!($f));
-    );
-);
+    };
 
-macro_rules! opt_vec (
-    ($i:expr, $submac:ident!( $($args:tt)* )) => ({
+    ($i:expr, $f:expr) => {
+        option!($i, call!($f));
+    };
+}
+
+macro_rules! opt_vec {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
             ::nom::IResult::Done(i, o) => ::nom::IResult::Done(i, o),
-            ::nom::IResult::Error(_) => ::nom::IResult::Done($i, Vec::new()),
-            ::nom::IResult::Incomplete(_) => ::nom::IResult::Done($i, Vec::new()),
+            ::nom::IResult::Error => ::nom::IResult::Done($i, Vec::new()),
         }
-    });
-);
+    };
+}
 
 macro_rules! epsilon {
     ($i:expr,) => {

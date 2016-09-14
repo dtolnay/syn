@@ -188,7 +188,7 @@ pub mod parsing {
     use nom::{digit, multispace};
     use std::str;
 
-    named!(pub ty<&str, Ty>, alt_complete!(
+    named!(pub ty -> Ty, alt!(
         ty_vec
         |
         ty_fixed_length_vec
@@ -212,14 +212,14 @@ pub mod parsing {
         ty_paren
     ));
 
-    named!(ty_vec<&str, Ty>, do_parse!(
+    named!(ty_vec -> Ty, do_parse!(
         punct!("[") >>
         elem: ty >>
         punct!("]") >>
         (Ty::Vec(Box::new(elem)))
     ));
 
-    named!(ty_fixed_length_vec<&str, Ty>, do_parse!(
+    named!(ty_fixed_length_vec -> Ty, do_parse!(
         punct!("[") >>
         elem: ty >>
         punct!(";") >>
@@ -229,9 +229,9 @@ pub mod parsing {
         (Ty::FixedLengthVec(Box::new(elem), len))
     ));
 
-    named!(ty_ptr<&str, Ty>, do_parse!(
+    named!(ty_ptr -> Ty, do_parse!(
         punct!("*") >>
-        mutability: alt_complete!(
+        mutability: alt!(
             punct!("const") => { |_| Mutability::Immutable }
             |
             punct!("mut") => { |_| Mutability::Mutable }
@@ -243,7 +243,7 @@ pub mod parsing {
         })))
     ));
 
-    named!(ty_rptr<&str, Ty>, do_parse!(
+    named!(ty_rptr -> Ty, do_parse!(
         punct!("&") >>
         life: option!(lifetime) >>
         mutability: mutability >>
@@ -254,7 +254,7 @@ pub mod parsing {
         })))
     ));
 
-    named!(ty_bare_fn<&str, Ty>, do_parse!(
+    named!(ty_bare_fn -> Ty, do_parse!(
         punct!("fn") >>
         multispace >>
         lifetimes: opt_vec!(delimited!(
@@ -281,18 +281,18 @@ pub mod parsing {
         })))
     ));
 
-    named!(ty_never<&str, Ty>, map!(punct!("!"), |_| Ty::Never));
+    named!(ty_never -> Ty, map!(punct!("!"), |_| Ty::Never));
 
-    named!(ty_tup<&str, Ty>, do_parse!(
+    named!(ty_tup -> Ty, do_parse!(
         punct!("(") >>
         elems: separated_list!(punct!(","), ty) >>
         punct!(")") >>
         (Ty::Tup(elems))
     ));
 
-    named!(ty_path<&str, Ty>, map!(path, |p| Ty::Path(None, p)));
+    named!(ty_path -> Ty, map!(path, |p| Ty::Path(None, p)));
 
-    named!(ty_qpath<&str, Ty>, do_parse!(
+    named!(ty_qpath -> Ty, do_parse!(
         punct!("<") >>
         this: map!(ty, Box::new) >>
         path: option!(preceded!(
@@ -319,21 +319,21 @@ pub mod parsing {
         })
     ));
 
-    named!(ty_impl_trait<&str, Ty>, do_parse!(
+    named!(ty_impl_trait -> Ty, do_parse!(
         punct!("impl") >>
         multispace >>
         elem: separated_nonempty_list!(punct!("+"), ty_param_bound) >>
         (Ty::ImplTrait(elem))
     ));
 
-    named!(ty_paren<&str, Ty>, do_parse!(
+    named!(ty_paren -> Ty, do_parse!(
         punct!("(") >>
         elem: ty >>
         punct!(")") >>
         (Ty::Paren(Box::new(elem)))
     ));
 
-    named!(mutability<&str, Mutability>, alt_complete!(
+    named!(mutability -> Mutability, alt!(
         do_parse!(
             punct!("mut") >>
             multispace >>
@@ -343,7 +343,7 @@ pub mod parsing {
         epsilon!() => { |_| Mutability::Immutable }
     ));
 
-    named!(pub path<&str, Path>, do_parse!(
+    named!(pub path -> Path, do_parse!(
         global: option!(punct!("::")) >>
         segments: separated_nonempty_list!(punct!("::"), path_segment) >>
         (Path {
@@ -352,7 +352,7 @@ pub mod parsing {
         })
     ));
 
-    named!(path_segment<&str, PathSegment>, alt_complete!(
+    named!(path_segment -> PathSegment, alt!(
         do_parse!(
             id: ident >>
             punct!("<") >>
@@ -384,7 +384,7 @@ pub mod parsing {
         map!(ident, PathSegment::ident)
     ));
 
-    named!(type_binding<&str, TypeBinding>, do_parse!(
+    named!(type_binding -> TypeBinding, do_parse!(
         id: ident >>
         punct!("=") >>
         ty: ty >>
@@ -394,7 +394,7 @@ pub mod parsing {
         })
     ));
 
-    named!(pub poly_trait_ref<&str, PolyTraitRef>, do_parse!(
+    named!(pub poly_trait_ref -> PolyTraitRef, do_parse!(
         bound_lifetimes: bound_lifetimes >>
         trait_ref: path >>
         (PolyTraitRef {
@@ -403,7 +403,7 @@ pub mod parsing {
         })
     ));
 
-    named!(fn_arg<&str, FnArg>, do_parse!(
+    named!(fn_arg -> FnArg, do_parse!(
         pat: option!(terminated!(ident, punct!(":"))) >>
         ty: ty >>
         (FnArg {

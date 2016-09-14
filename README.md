@@ -10,7 +10,7 @@ Parse Rust structs and enums without a Syntex dependency, intended for use with
 
 Designed for fast compile time.
 
-- Compile time for `syn` (from scratch including all dependencies): **6 seconds**
+- Compile time for `syn` (from scratch including all dependencies): **4 seconds**
 - Compile time for the `syntex`/`quasi`/`aster` stack: **60+ seconds**
 
 ```toml

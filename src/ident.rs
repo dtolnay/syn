@@ -48,9 +48,9 @@ pub mod parsing {
         ch.is_alphanumeric() || ch == '_'
     }
 
-    named!(pub ident<&str, Ident>, preceded!(
+    named!(pub ident -> Ident, preceded!(
         option!(multispace),
-        map!(take_while1_s!(ident_ch), Into::into)
+        map!(take_while1!(ident_ch), Into::into)
     ));
 }
 

@@ -62,10 +62,10 @@ pub mod parsing {
     use ty::parsing::ty;
     use nom::multispace;
 
-    named!(pub item<&str, Item>, do_parse!(
+    named!(pub item -> Item, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
-        which: alt_complete!(punct!("struct") | punct!("enum")) >>
+        which: alt!(punct!("struct") | punct!("enum")) >>
         multispace >>
         id: ident >>
         generics: generics >>
@@ -90,7 +90,7 @@ pub mod parsing {
         (item)
     ));
 
-    named!(struct_body<&str, VariantData>, alt_complete!(
+    named!(struct_body -> VariantData, alt!(
         struct_like_body => { VariantData::Struct }
         |
         terminated!(tuple_like_body, punct!(";")) => { VariantData::Tuple }
@@ -98,7 +98,7 @@ pub mod parsing {
         punct!(";") => { |_| VariantData::Unit }
     ));
 
-    named!(enum_body<&str, Vec<Variant> >, do_parse!(
+    named!(enum_body -> Vec<Variant>, do_parse!(
         punct!("{") >>
         variants: separated_list!(punct!(","), variant) >>
         option!(punct!(",")) >>
@@ -106,10 +106,10 @@ pub mod parsing {
         (variants)
     ));
 
-    named!(variant<&str, Variant>, do_parse!(
+    named!(variant -> Variant, do_parse!(
         attrs: many0!(attribute) >>
         id: ident >>
-        data: alt_complete!(
+        data: alt!(
             struct_like_body => { VariantData::Struct }
             |
             tuple_like_body => { VariantData::Tuple }
@@ -123,7 +123,7 @@ pub mod parsing {
         })
     ));
 
-    named!(struct_like_body<&str, Vec<Field> >, do_parse!(
+    named!(struct_like_body -> Vec<Field>, do_parse!(
         punct!("{") >>
         fields: separated_list!(punct!(","), struct_field) >>
         option!(punct!(",")) >>
@@ -131,7 +131,7 @@ pub mod parsing {
         (fields)
     ));
 
-    named!(tuple_like_body<&str, Vec<Field> >, do_parse!(
+    named!(tuple_like_body -> Vec<Field>, do_parse!(
         punct!("(") >>
         fields: separated_list!(punct!(","), tuple_field) >>
         option!(punct!(",")) >>
@@ -139,7 +139,7 @@ pub mod parsing {
         (fields)
     ));
 
-    named!(struct_field<&str, Field>, do_parse!(
+    named!(struct_field -> Field, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
         id: ident >>
@@ -153,7 +153,7 @@ pub mod parsing {
         })
     ));
 
-    named!(tuple_field<&str, Field>, do_parse!(
+    named!(tuple_field -> Field, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
         ty: ty >>
@@ -165,7 +165,7 @@ pub mod parsing {
         })
     ));
 
-    named!(pub visibility<&str, Visibility>, alt_complete!(
+    named!(pub visibility -> Visibility, alt!(
         do_parse!(
             punct!("pub") >>
             multispace >>

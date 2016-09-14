@@ -32,7 +32,7 @@ pub mod parsing {
     use ident::parsing::ident;
     use nom::multispace;
 
-    named!(pub attribute<&str, Attribute>, alt_complete!(
+    named!(pub attribute -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
             punct!("[") >>
@@ -47,7 +47,7 @@ pub mod parsing {
         do_parse!(
             punct!("///") >>
             space: multispace >>
-            content: take_until_s!("\n") >>
+            content: take_until!("\n") >>
             (Attribute {
                 value: MetaItem::NameValue(
                     "doc".into(),
@@ -58,7 +58,7 @@ pub mod parsing {
         )
     ));
 
-    named!(meta_item<&str, MetaItem>, alt_complete!(
+    named!(meta_item -> MetaItem, alt!(
         do_parse!(
             id: ident >>
             punct!("(") >>
@@ -77,10 +77,10 @@ pub mod parsing {
         map!(ident, MetaItem::Word)
     ));
 
-    named!(quoted<&str, String>, delimited!(
+    named!(quoted -> String, delimited!(
         punct!("\""),
         escaped_string,
-        tag_s!("\"")
+        tag!("\"")
     ));
 }
 
