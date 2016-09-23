@@ -16,6 +16,26 @@ pub use attr::{
     MetaItem,
 };
 
+#[cfg(feature = "full")]
+mod expr;
+#[cfg(feature = "full")]
+pub use expr::{
+    Arm,
+    BinOp,
+    BindingMode,
+    Block,
+    BlockCheckMode,
+    CaptureBy,
+    Expr,
+    FieldPat,
+    Local,
+    MacStmtStyle,
+    Pat,
+    RangeLimits,
+    Stmt,
+    UnOp,
+};
+
 mod generics;
 pub use generics::{
     Generics,
@@ -38,11 +58,33 @@ pub use ident::{
 mod item;
 pub use item::{
     Body,
+    Discriminant,
     Field,
     Item,
     Variant,
     VariantData,
     Visibility,
+};
+
+mod lit;
+pub use lit::{
+    FloatTy,
+    IntTy,
+    Lit,
+    StrStyle,
+};
+
+#[cfg(feature = "full")]
+mod mac;
+#[cfg(feature = "full")]
+pub use mac::{
+    BinOpToken,
+    DelimToken,
+    Delimited,
+    Mac,
+    SequenceRepetition,
+    Token,
+    TokenTree,
 };
 
 mod ty;
