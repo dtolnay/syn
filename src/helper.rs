@@ -9,8 +9,7 @@ macro_rules! punct {
 }
 
 pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
-    let mut chars = input.char_indices();
-    while let Some((i, ch)) = chars.next() {
+    for (i, ch) in input.char_indices() {
         if !ch.is_whitespace() {
             return if input[i..].starts_with(token) {
                 let end = i + token.len();

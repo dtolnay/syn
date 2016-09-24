@@ -4,7 +4,7 @@ use super::*;
 /// is being invoked, and the vector of token-trees contains the source
 /// of the macro invocation.
 ///
-/// NB: the additional ident for a macro_rules-style macro is actually
+/// NB: the additional ident for a `macro_rules`-style macro is actually
 /// stored in the enclosing item. Oog.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Mac {
@@ -20,7 +20,7 @@ pub struct Mac {
 /// If the syntax extension is an MBE macro, it will attempt to match its
 /// LHS token tree against the provided token tree, and if it finds a
 /// match, will transcribe the RHS token tree, splicing in any captured
-/// macro_parser::matched_nonterminals into the `SubstNt`s it finds.
+/// `macro_parser::matched_nonterminals` into the `SubstNt`s it finds.
 ///
 /// The RHS of an MBE macro is the only place `SubstNt`s are substituted.
 /// Nothing special happens to misnamed or misplaced `SubstNt`s.

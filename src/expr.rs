@@ -318,7 +318,7 @@ pub enum RangeLimits {
 ///
 /// Patterns like the fields of Foo `{ x, ref y, ref mut z }`
 /// are treated the same as` x: x, y: ref y, z: ref mut z`,
-/// except is_shorthand is true
+/// except `is_shorthand` is true
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FieldPat {
     /// The identifier for the field

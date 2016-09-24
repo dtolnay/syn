@@ -66,6 +66,7 @@ fn backslash_x<I>(chars: &mut I) -> Option<char> where I: Iterator<Item = (usize
     char_from_hex_bytes(&[a as u8, b as u8])
 }
 
+#[cfg_attr(feature = "clippy", allow(many_single_char_names))]
 fn backslash_u<I>(chars: &mut I) -> Option<char> where I: Iterator<Item = (usize, char)> {
     next_char!(chars @ '{');
     let a = next_char!(chars @ '0'...'9' | 'a'...'f' | 'A'...'F');

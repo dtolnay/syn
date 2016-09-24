@@ -17,4 +17,5 @@ printing = ["quote"]
 visit = []
 
 [dependencies]
+clippy = { version = "0.*", optional = true }
 quote = { version = "0.1.2", optional = true }

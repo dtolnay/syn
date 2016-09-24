@@ -87,13 +87,13 @@ pub enum ViewPath {
     /// or just
     ///
     /// `foo::bar::baz` (with `as baz` implicitly on the right)
-    ViewPathSimple(Ident, Path),
+    Simple(Ident, Path),
 
     /// `foo::bar::*`
-    ViewPathGlob(Path),
+    Glob(Path),
 
-    /// `foo::bar::{a,b,c}`
-    ViewPathList(Path, Vec<PathListItem>)
+    /// `foo::bar::{a, b, c}`
+    List(Path, Vec<PathListItem>)
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
