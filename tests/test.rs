@@ -12,7 +12,7 @@ fn simple_ty(ident: &str) -> Ty {
 fn test_unit() {
     let raw = "struct Unit;";
 
-    let expected = Item {
+    let expected = MacroInput {
         ident: "Unit".into(),
         vis: Visibility::Inherited,
         attrs: Vec::new(),
@@ -20,7 +20,7 @@ fn test_unit() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    assert_eq!(expected, parse_item(raw).unwrap());
+    assert_eq!(expected, parse_macro_input(raw).unwrap());
 }
 
 #[test]
@@ -33,7 +33,7 @@ fn test_struct() {
         }
     ";
 
-    let expected = Item {
+    let expected = MacroInput {
         ident: "Item".into(),
         vis: Visibility::Public,
         attrs: vec![
@@ -76,7 +76,7 @@ fn test_struct() {
         ])),
     };
 
-    assert_eq!(expected, parse_item(raw).unwrap());
+    assert_eq!(expected, parse_macro_input(raw).unwrap());
 }
 
 #[test]
@@ -91,7 +91,7 @@ fn test_enum() {
         }
     ";
 
-    let expected = Item {
+    let expected = MacroInput {
         ident: "Result".into(),
         vis: Visibility::Public,
         attrs: vec![
@@ -167,5 +167,5 @@ fn test_enum() {
         ]),
     };
 
-    assert_eq!(expected, parse_item(raw).unwrap());
+    assert_eq!(expected, parse_macro_input(raw).unwrap());
 }

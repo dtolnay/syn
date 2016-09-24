@@ -16,6 +16,15 @@ pub use attr::{
     MetaItem,
 };
 
+mod data;
+pub use data::{
+    Discriminant,
+    Field,
+    Variant,
+    VariantData,
+    Visibility,
+};
+
 #[cfg(feature = "full")]
 mod expr;
 #[cfg(feature = "full")]
@@ -55,15 +64,27 @@ pub use ident::{
     Ident,
 };
 
+#[cfg(feature = "full")]
 mod item;
+#[cfg(feature = "full")]
 pub use item::{
-    Body,
-    Discriminant,
-    Field,
+    Abi,
+    Constness,
+    Defaultness,
+    ForeignItemKind,
+    ForeignItem,
+    ForeignMod,
+    ImplItem,
+    ImplItemKind,
+    ImplPolarity,
     Item,
-    Variant,
-    VariantData,
-    Visibility,
+    ItemKind,
+    MethodSig,
+    PathListItem,
+    TraitItem,
+    TraitItemKind,
+    Unsafety,
+    ViewPath,
 };
 
 mod lit;
@@ -85,6 +106,12 @@ pub use mac::{
     SequenceRepetition,
     Token,
     TokenTree,
+};
+
+mod macro_input;
+pub use macro_input::{
+    Body,
+    MacroInput,
 };
 
 mod ty;
@@ -118,11 +145,11 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {generics, item, ty};
+    use {generics, macro_input, ty};
     use nom;
 
-    pub fn parse_item(input: &str) -> Result<Item, String> {
-        unwrap("item", item::parsing::item, input)
+    pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
+        unwrap("macro input", macro_input::parsing::macro_input, input)
     }
 
     pub fn parse_type(input: &str) -> Result<Ty, String> {

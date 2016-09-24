@@ -32,7 +32,7 @@ let raw = "
     }
 ";
 
-let ast = syn::parse_item(raw).unwrap();
+let ast = syn::parse_macro_input(raw).unwrap();
 ```
 
 ## Usage with [Macros 1.1](https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md)
@@ -55,7 +55,7 @@ pub fn special_item(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse a string of items to an AST
-    let ast = syn::parse_item(&source).unwrap();
+    let ast = syn::parse_macro_input(&source).unwrap();
 
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
