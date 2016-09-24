@@ -324,17 +324,6 @@ pub enum BindingMode {
     ByValue(Mutability),
 }
 
-#[cfg(feature = "parsing")]
-pub mod parsing {
-    use super::*;
-    use lit::parsing::lit;
-
-    named!(expr -> Expr, alt!(
-        // TODO other expressions
-        lit => { Expr::Lit }
-    ));
-}
-
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
