@@ -355,8 +355,26 @@ pub mod parsing {
             expr_lit
             |
             expr_if
+            // TODO: IfLet
+            // TODO: While
+            // TODO: WhileLet
+            // TODO: ForLoop
+            // TODO: Loop
+            // TODO: ForLoop
+            // TODO: Loop
+            // TODO: Match
+            // TODO: Closure
             |
             expr_block
+            // TODO: Path
+            // TODO: AddrOf
+            // TODO: Break
+            // TODO: Continue
+            // TODO: Ret
+            // TODO: Mac
+            // TODO: Struct
+            // TODO: Repeat
+            // TODO: Pparen
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
@@ -381,6 +399,13 @@ pub mod parsing {
             tap!(ty: and_ascription => {
                 e = Expr::Type(Box::new(e), Box::new(ty));
             })
+            // TODO: Assign
+            // TODO: AssignOp
+            // TODO: Field
+            // TODO: TupField
+            // TODO: Index
+            // TODO: Range
+            // TODO: Try
         )) >>
         (e)
     ));
@@ -556,7 +581,11 @@ pub mod parsing {
     ));
 
     named!(standalone_stmt -> Stmt, alt!(
+        // TODO: local
+        // TODO: item
+        // TODO: expr
         stmt_semi
+        // TODO: mac
     ));
 
     named!(stmt_semi -> Stmt, do_parse!(

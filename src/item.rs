@@ -217,12 +217,24 @@ pub mod parsing {
     use nom::multispace;
 
     named!(pub item -> Item, alt!(
-        extern_crate
+        item_extern_crate
+        // TODO: Use
+        // TODO: Static
+        // TODO: Const
+        // TODO: Fn
+        // TODO: Mod
+        // TODO: ForeignMod
+        // TODO: Ty
         |
-        struct_or_enum
+        item_struct_or_enum
+        // TODO: Union
+        // TODO: Trait
+        // TODO: DefaultImpl
+        // TODO: Impl
+        // TODO: Mac
     ));
 
-    named!(extern_crate -> Item, do_parse!(
+    named!(item_extern_crate -> Item, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
         punct!("extern") >>
@@ -249,7 +261,7 @@ pub mod parsing {
         })
     ));
 
-    named!(struct_or_enum -> Item, map!(
+    named!(item_struct_or_enum -> Item, map!(
         macro_input,
         |def: MacroInput| Item {
             ident: def.ident,
