@@ -47,19 +47,18 @@ rustc-macro = true
 ```
 
 ```rust
-#![crate_type = "rustc-macro"]
 #![feature(rustc_macro, rustc_macro_lib)]
 
 extern crate rustc_macro;
+use rustc_macro::TokenStream;
+
+extern crate syn;
 
 #[macro_use]
 extern crate quote;
-extern crate syn;
 
-use rustc_macro::TokenStream;
-
-#[rustc_macro_derive(SpecialItem)]
-pub fn special_item(input: TokenStream) -> TokenStream {
+#[rustc_macro_derive(MyMacro)]
+pub fn my_macro(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse a string of items to an AST
