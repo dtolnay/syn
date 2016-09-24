@@ -53,6 +53,7 @@ pub mod parsing {
     ));
 }
 
+#[cfg(feature = "printing")]
 mod printing {
     use super::*;
     use data::{Visibility, VariantData};
