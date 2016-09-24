@@ -239,7 +239,7 @@ pub enum Pat {
     /// Represents a wildcard pattern (`_`)
     Wild,
 
-    /// A `PatKind::Ident` may either be a new bound variable (`ref mut binding @ OPT_SUBPATTERN`),
+    /// A `Pat::Ident` may either be a new bound variable (`ref mut binding @ OPT_SUBPATTERN`),
     /// or a unit struct/variant pattern, or a const pattern (in the last two cases the third
     /// field must be `None`). Disambiguation cannot be done with parser alone, so it happens
     /// during name resolution.
@@ -273,7 +273,7 @@ pub enum Pat {
     /// A range pattern, e.g. `1...2`
     Range(Box<Expr>, Box<Expr>),
     /// `[a, b, ..i, y, z]` is represented as:
-    ///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`
+    ///     `Pat::Vec(box [a, b], Some(i), box [y, z])`
     Vec(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
     /// A macro pattern; pre-expansion
     Mac(Mac),
