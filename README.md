@@ -15,7 +15,7 @@ Designed for fast compile time.
 
 ```toml
 [dependencies]
-syn = "0.5"
+syn = "0.6"
 ```
 
 ```rust
