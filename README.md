@@ -21,7 +21,7 @@ syn = "0.6"
 ```rust
 extern crate syn;
 
-let raw = "
+let source = "
     #[derive(Debug, Clone, Eq, PartialEq)]
     pub struct Item {
         pub ident: Ident,
@@ -32,7 +32,7 @@ let raw = "
     }
 ";
 
-let ast = syn::parse_macro_input(raw).unwrap();
+let ast = syn::parse_macro_input(source).unwrap();
 ```
 
 ## Usage with [Macros 1.1](https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md)
