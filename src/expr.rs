@@ -316,7 +316,7 @@ pub enum RangeLimits {
 /// A single field in a struct pattern
 ///
 /// Patterns like the fields of Foo `{ x, ref y, ref mut z }`
-/// are treated the same as` x: x, y: ref y, z: ref mut z`,
+/// are treated the same as `x: x, y: ref y, z: ref mut z`,
 /// except `is_shorthand` is true
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FieldPat {
@@ -544,12 +544,11 @@ pub mod parsing {
     ));
 
     named!(within_block -> Vec<Stmt>, do_parse!(
-        most: many0!(standalone_stmt) >>
+        mut most: many0!(standalone_stmt) >>
         last: option!(expr) >>
         (match last {
             None => most,
             Some(last) => {
-                let mut most = most;
                 most.push(Stmt::Expr(Box::new(last)));
                 most
             }
