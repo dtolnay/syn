@@ -118,16 +118,14 @@ pub mod parsing {
                     bytes.next();
                     len += 1;
                 }
-                _ => {
-                    return if len > 0 {
-                        IResult::Done(&input[len..], value)
-                    } else {
-                        IResult::Error
-                    };
-                },
+                _ => break,
             }
         }
-        IResult::Error
+        if len > 0 {
+            IResult::Done(&input[len..], value)
+        } else {
+            IResult::Error
+        }
     }
 }
 

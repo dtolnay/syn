@@ -549,6 +549,20 @@ macro_rules! do_parse {
         }
     };
 
+    ($i:expr, mut $field:ident : $e:ident >> $($rest:tt)*) => {
+        do_parse!($i, $field: call!($e) >> $($rest)*);
+    };
+
+    ($i:expr, mut $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
+        match $submac!($i, $($args)*) {
+            $crate::nom::IResult::Error => $crate::nom::IResult::Error,
+            $crate::nom::IResult::Done(i,o) => {
+                let mut $field = o;
+                do_parse!(i, $($rest)*)
+            },
+        }
+    };
+
     // ending the chain
     ($i:expr, $e:ident >> ( $($rest:tt)* )) => {
         do_parse!($i, call!($e) >> ( $($rest)* ));
