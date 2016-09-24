@@ -149,7 +149,7 @@ mod parsing {
     use nom;
 
     #[cfg(feature = "full")]
-    use item;
+    use {expr, item};
 
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
         unwrap("macro input", macro_input::parsing::macro_input, input)
@@ -158,6 +158,11 @@ mod parsing {
     #[cfg(feature = "full")]
     pub fn parse_item(input: &str) -> Result<Item, String> {
         unwrap("item", item::parsing::item, input)
+    }
+
+    #[cfg(feature = "full")]
+    pub fn parse_expr(input: &str) -> Result<Expr, String> {
+        unwrap("expression", expr::parsing::expr, input)
     }
 
     pub fn parse_type(input: &str) -> Result<Ty, String> {

@@ -334,6 +334,23 @@ pub enum BindingMode {
     ByValue(Mutability),
 }
 
+#[cfg(feature = "parsing")]
+pub mod parsing {
+    use super::*;
+    use nom::multispace;
+
+    named!(pub expr -> Expr, alt!(
+        box_expr
+    ));
+
+    named!(box_expr -> Expr, do_parse!(
+        punct!("box") >>
+        multispace >>
+        inner: expr >>
+        (Expr::Box(Box::new(inner)))
+    ));
+}
+
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
