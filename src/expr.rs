@@ -280,6 +280,16 @@ pub enum Pat {
     Mac(Mac),
 }
 
+/// An arm of a 'match'.
+///
+/// E.g. `0...10 => { println!("match!") }` as in
+///
+/// ```rust,ignore
+/// match n {
+///     0...10 => { println!("match!") },
+///     // ..
+/// }
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Arm {
     pub attrs: Vec<Attribute>,

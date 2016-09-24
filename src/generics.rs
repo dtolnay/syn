@@ -1,5 +1,7 @@
 use super::*;
 
+/// Represents lifetimes and type parameters attached to a declaration
+/// of a function, enum, trait, etc.
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct Generics {
     pub lifetimes: Vec<LifetimeDef>,
@@ -12,6 +14,7 @@ pub struct Lifetime {
     pub ident: Ident,
 }
 
+/// A lifetime definition, e.g. `'a: 'b+'c+'d`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LifetimeDef {
     pub lifetime: Lifetime,
@@ -25,18 +28,25 @@ pub struct TyParam {
     pub default: Option<Ty>,
 }
 
+/// The AST represents all type param bounds as types.
+/// typeck::collect::compute_bounds matches these against
+/// the "special" built-in traits (see middle::lang_items) and
+/// detects Copy, Send and Sync.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TyParamBound {
     Trait(PolyTraitRef, TraitBoundModifier),
     Region(Lifetime),
 }
 
+/// A modifier on a bound, currently this is only used for `?Sized`, where the
+/// modifier is `Maybe`. Negative bounds should also be handled here.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TraitBoundModifier {
     None,
     Maybe,
 }
 
+/// A `where` clause in a definition
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct WhereClause {
     pub predicates: Vec<WherePredicate>,

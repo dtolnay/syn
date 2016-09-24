@@ -1,5 +1,8 @@
 use super::*;
 
+/// An item
+///
+/// The name might be a dummy name in case of anonymous items
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Item {
     pub ident: Ident,
@@ -138,6 +141,7 @@ pub struct ForeignItem {
     pub vis: Visibility,
 }
 
+/// An item within an `extern` block
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ForeignItemKind {
     /// A foreign function

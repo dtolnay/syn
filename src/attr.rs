@@ -1,5 +1,6 @@
 use super::*;
 
+/// Doc-comments are promoted to attributes that have is_sugared_doc = true
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Attribute {
     pub value: MetaItem,

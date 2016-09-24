@@ -1,5 +1,6 @@
 use super::*;
 
+/// The different kinds of types recognized by the compiler
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Ty {
     /// A variable-length array (`[T]`)
@@ -46,6 +47,12 @@ pub enum Mutability {
     Immutable,
 }
 
+/// A "Path" is essentially Rust's notion of a name.
+///
+/// It's represented as a sequence of identifiers,
+/// along with a bunch of supporting information.
+///
+/// E.g. `std::cmp::PartialEq`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Path {
     pub global: bool,
