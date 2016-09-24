@@ -58,10 +58,14 @@ pub mod parsing {
     use nom::{IResult, multispace};
 
     named!(pub lit -> Lit, alt!(
-        // TODO other literals
         quoted => { |q| Lit::Str(q, StrStyle::Cooked) }
+        // TODO: ByteStr
+        // TODO: Byte
+        // TODO: Char
         |
         int => { |(value, ty)| Lit::Int(value, ty) }
+        // TODO: Float
+        // TODO: Bool
     ));
 
     named!(quoted -> String, delimited!(
