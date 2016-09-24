@@ -15,7 +15,7 @@ Designed for fast compile time.
 
 ```toml
 [dependencies]
-syn = "0.6"
+syn = "0.7"
 ```
 
 ```rust
@@ -39,7 +39,7 @@ let ast = syn::parse_macro_input(source).unwrap();
 
 ```toml
 [dependencies]
-syn = "0.6"
+syn = "0.7"
 quote = "0.1"
 
 [lib]

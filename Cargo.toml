@@ -1,6 +1,6 @@
 [package]
 name = "syn"
-version = "0.6.0" # don't forget to update version in readme
+version = "0.7.0" # don't forget to update version in readme
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Nom parser for Rust items"
@@ -18,4 +18,4 @@ visit = []
 
 [dependencies]
 clippy = { version = "0.*", optional = true }
-quote = { version = "0.1.2", optional = true }
+quote = { version = "0.1.4", optional = true }
