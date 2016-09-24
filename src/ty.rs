@@ -40,7 +40,7 @@ pub struct MutTy {
     pub mutability: Mutability,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Mutability {
     Mutable,
     Immutable,

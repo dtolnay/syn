@@ -20,6 +20,8 @@ pub struct Variant {
     pub ident: Ident,
     pub attrs: Vec<Attribute>,
     pub data: VariantData,
+    /// Explicit discriminant, e.g. `Foo = 1`
+    pub discriminant: Option<Discriminant>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -53,12 +55,19 @@ pub enum Visibility {
     Inherited,
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct Discriminant {
+    pub value: u64,
+    pub ty: IntTy,
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
     use attr::parsing::attribute;
     use generics::parsing::generics;
     use ident::parsing::ident;
+    use lit::parsing::int;
     use ty::parsing::ty;
     use nom::multispace;
 
@@ -116,10 +125,12 @@ pub mod parsing {
             |
             epsilon!() => { |_| VariantData::Unit }
         ) >>
+        disr: option!(preceded!(punct!("="), discriminant)) >>
         (Variant {
             ident: id,
             attrs: attrs,
             data: data,
+            discriminant: disr,
         })
     ));
 
@@ -174,11 +185,20 @@ pub mod parsing {
         |
         epsilon!() => { |_| Visibility::Inherited }
     ));
+
+    named!(discriminant -> Discriminant, map!(
+        int,
+        |(value, ty)| Discriminant {
+            value: value,
+            ty: ty,
+        }
+    ));
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
+    use lit::Lit;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Item {
@@ -230,6 +250,10 @@ mod printing {
             }
             self.ident.to_tokens(tokens);
             variant_data_to_tokens(&self.data, tokens);
+            if let Some(ref disr) = self.discriminant {
+                tokens.append("=");
+                disr.to_tokens(tokens);
+            }
         }
     }
 
@@ -246,6 +270,12 @@ mod printing {
                 tokens.append(":");
             }
             self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for Discriminant {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            Lit::Int(self.value, self.ty).to_tokens(tokens);
         }
     }
 

@@ -87,6 +87,7 @@ fn test_enum() {
         pub enum Result<T, E> {
             Ok(T),
             Err(E),
+            Surprise = 0isize,
         }
     ";
 
@@ -97,7 +98,10 @@ fn test_enum() {
             Attribute {
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    "/// See the std::result module documentation for details.".into(),
+                    Lit::Str(
+                        "/// See the std::result module documentation for details.".into(),
+                        StrStyle::Cooked,
+                    ),
                 ),
                 is_sugared_doc: true,
             },
@@ -136,6 +140,7 @@ fn test_enum() {
                         ty: simple_ty("T"),
                     },
                 ]),
+                discriminant: None,
             },
             Variant {
                 ident: "Err".into(),
@@ -148,6 +153,16 @@ fn test_enum() {
                         ty: simple_ty("E"),
                     },
                 ]),
+                discriminant: None,
+            },
+            Variant {
+                ident: "Surprise".into(),
+                attrs: Vec::new(),
+                data: VariantData::Unit,
+                discriminant: Some(Discriminant {
+                    value: 0,
+                    ty: IntTy::Isize,
+                }),
             },
         ]),
     };

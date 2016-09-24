@@ -22,14 +22,15 @@ pub enum MetaItem {
     /// Name value meta item.
     ///
     /// E.g. `feature = "foo"` as in `#[feature = "foo"]`
-    NameValue(Ident, String),
+    NameValue(Ident, Lit),
 }
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use escape::escaped_string;
     use ident::parsing::ident;
+    use lit::{Lit, StrStyle};
+    use lit::parsing::lit;
     use nom::multispace;
 
     named!(pub attribute -> Attribute, alt!(
@@ -51,7 +52,10 @@ pub mod parsing {
             (Attribute {
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    format!("///{}{}", space, content),
+                    Lit::Str(
+                        format!("///{}{}", space, content),
+                        StrStyle::Cooked,
+                    ),
                 ),
                 is_sugared_doc: true,
             })
@@ -68,19 +72,13 @@ pub mod parsing {
         )
         |
         do_parse!(
-            id: ident >>
+            name: ident >>
             punct!("=") >>
-            string: quoted >>
-            (MetaItem::NameValue(id, string))
+            value: lit >>
+            (MetaItem::NameValue(name, value))
         )
         |
         map!(ident, MetaItem::Word)
-    ));
-
-    named!(quoted -> String, delimited!(
-        punct!("\""),
-        escaped_string,
-        tag!("\"")
     ));
 }
 
