@@ -34,6 +34,7 @@ pub enum Expr {
     Lit(Lit),
     /// A cast (`foo as f64`)
     Cast(Box<Expr>, Box<Ty>),
+    /// Type ascription (`foo: f64`)
     Type(Box<Expr>, Box<Ty>),
     /// An `if` block, with an optional else block
     ///
@@ -343,57 +344,69 @@ pub mod parsing {
 
     named!(pub expr -> Expr, do_parse!(
         mut e: alt!(
-            boxed
+            expr_box
             |
-            vec
+            expr_vec
             |
-            tup
+            expr_tup
             |
-            unary
+            expr_unary
             |
-            map!(lit, Expr::Lit)
+            expr_lit
+            |
+            expr_if
+            |
+            expr_block
         ) >>
         many0!(alt!(
-            tap!(c: call => {
-                e = Expr::Call(Box::new(e), c);
+            tap!(args: and_call => {
+                e = Expr::Call(Box::new(e), args);
             })
             |
-            tap!(c: method_call => {
-                let (method, ascript, mut args) = c;
+            tap!(more: and_method_call => {
+                let (method, ascript, mut args) = more;
                 args.insert(0, e);
                 e = Expr::MethodCall(method, ascript, args);
             })
             |
-            tap!(b: binary => {
-                let (op, other) = b;
+            tap!(more: and_binary => {
+                let (op, other) = more;
                 e = Expr::Binary(op, Box::new(e), Box::new(other));
+            })
+            |
+            tap!(ty: and_cast => {
+                e = Expr::Cast(Box::new(e), Box::new(ty));
+            })
+            |
+            tap!(ty: and_ascription => {
+                e = Expr::Type(Box::new(e), Box::new(ty));
             })
         )) >>
         (e)
     ));
 
-    named!(boxed -> Expr, do_parse!(
+    named!(expr_box -> Expr, do_parse!(
         punct!("box") >>
         multispace >>
         inner: expr >>
         (Expr::Box(Box::new(inner)))
     ));
 
-    named!(vec -> Expr, do_parse!(
+    named!(expr_vec -> Expr, do_parse!(
         punct!("[") >>
         elems: separated_list!(punct!(","), expr) >>
         punct!("]") >>
         (Expr::Vec(elems))
     ));
 
-    named!(call -> Vec<Expr>, do_parse!(
+    named!(and_call -> Vec<Expr>, do_parse!(
         punct!("(") >>
         args: separated_list!(punct!(","), expr) >>
         punct!(")") >>
         (args)
     ));
 
-    named!(method_call -> (Ident, Vec<Ty>, Vec<Expr>), do_parse!(
+    named!(and_method_call -> (Ident, Vec<Ty>, Vec<Expr>), do_parse!(
         punct!(".") >>
         method: ident >>
         ascript: opt_vec!(delimited!(
@@ -407,14 +420,14 @@ pub mod parsing {
         (method, ascript, args)
     ));
 
-    named!(tup -> Expr, do_parse!(
+    named!(expr_tup -> Expr, do_parse!(
         punct!("(") >>
         elems: separated_list!(punct!(","), expr) >>
         punct!(")") >>
         (Expr::Tup(elems))
     ));
 
-    named!(binary -> (BinOp, Expr), tuple!(
+    named!(and_binary -> (BinOp, Expr), tuple!(
         alt!(
             punct!("&&") => { |_| BinOp::And }
             |
@@ -455,7 +468,7 @@ pub mod parsing {
         expr
     ));
 
-    named!(unary -> Expr, do_parse!(
+    named!(expr_unary -> Expr, do_parse!(
         operator: alt!(
             punct!("*") => { |_| UnOp::Deref }
             |
@@ -465,6 +478,92 @@ pub mod parsing {
         ) >>
         operand: expr >>
         (Expr::Unary(operator, Box::new(operand)))
+    ));
+
+    named!(expr_lit -> Expr, map!(lit, Expr::Lit));
+
+    named!(and_cast -> Ty, do_parse!(
+        punct!("as") >>
+        multispace >>
+        ty: ty >>
+        (ty)
+    ));
+
+    named!(and_ascription -> Ty, preceded!(punct!(":"), ty));
+
+    named!(expr_if -> Expr, do_parse!(
+        punct!("if") >>
+        multispace >>
+        cond: expr >>
+        punct!("{") >>
+        then_block: within_block >>
+        punct!("}") >>
+        else_block: option!(preceded!(
+            punct!("else"),
+            alt!(
+                expr_if
+                |
+                do_parse!(
+                    punct!("{") >>
+                    else_block: within_block >>
+                    punct!("}") >>
+                    (Expr::Block(Box::new(Block {
+                        stmts: else_block,
+                        rules: BlockCheckMode::Default,
+                    })))
+                )
+            )
+        )) >>
+        (Expr::If(
+            Box::new(cond),
+            Box::new(Block {
+                stmts: then_block,
+                rules: BlockCheckMode::Default,
+            }),
+            else_block.map(Box::new),
+        ))
+    ));
+
+    named!(expr_block -> Expr, map!(block, |b| Expr::Block(Box::new(b))));
+
+    named!(block -> Block, do_parse!(
+        rules: block_check_mode >>
+        punct!("{") >>
+        stmts: within_block >>
+        punct!("}") >>
+        (Block {
+            stmts: stmts,
+            rules: rules,
+        })
+    ));
+
+    named!(block_check_mode -> BlockCheckMode, alt!(
+        punct!("unsafe") => { |_| BlockCheckMode::Unsafe }
+        |
+        epsilon!() => { |_| BlockCheckMode::Default }
+    ));
+
+    named!(within_block -> Vec<Stmt>, do_parse!(
+        most: many0!(standalone_stmt) >>
+        last: option!(expr) >>
+        (match last {
+            None => most,
+            Some(last) => {
+                let mut most = most;
+                most.push(Stmt::Expr(Box::new(last)));
+                most
+            }
+        })
+    ));
+
+    named!(standalone_stmt -> Stmt, alt!(
+        stmt_semi
+    ));
+
+    named!(stmt_semi -> Stmt, do_parse!(
+        e: expr >>
+        punct!(";") >>
+        (Stmt::Semi(Box::new(e)))
     ));
 }
 
