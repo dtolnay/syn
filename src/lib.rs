@@ -148,8 +148,16 @@ mod parsing {
     use {generics, macro_input, ty};
     use nom;
 
+    #[cfg(feature = "full")]
+    use item;
+
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
         unwrap("macro input", macro_input::parsing::macro_input, input)
+    }
+
+    #[cfg(feature = "full")]
+    pub fn parse_item(input: &str) -> Result<Item, String> {
+        unwrap("item", item::parsing::item, input)
     }
 
     pub fn parse_type(input: &str) -> Result<Ty, String> {

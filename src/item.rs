@@ -205,3 +205,64 @@ pub struct MethodSig {
     pub decl: FnDecl,
     pub generics: Generics,
 }
+
+#[cfg(feature = "parsing")]
+pub mod parsing {
+    use super::*;
+    use attr::parsing::attribute;
+    use data::parsing::visibility;
+    use ident::parsing::ident;
+    use macro_input::{Body, MacroInput};
+    use macro_input::parsing::macro_input;
+    use nom::multispace;
+
+    named!(pub item -> Item, alt!(
+        extern_crate
+        |
+        struct_or_enum
+    ));
+
+    named!(extern_crate -> Item, do_parse!(
+        attrs: many0!(attribute) >>
+        vis: visibility >>
+        punct!("extern") >>
+        multispace >>
+        punct!("crate") >>
+        multispace >>
+        id: ident >>
+        rename: option!(preceded!(
+            tuple!(punct!("as"), multispace),
+            ident
+        )) >>
+        punct!(";") >>
+        ({
+            let (name, original_name) = match rename {
+                Some(rename) => (rename, Some(id)),
+                None => (id, None),
+            };
+            Item {
+                ident: name,
+                vis: vis,
+                attrs: attrs,
+                node: ItemKind::ExternCrate(original_name),
+            }
+        })
+    ));
+
+    named!(struct_or_enum -> Item, map!(
+        macro_input,
+        |def: MacroInput| Item {
+            ident: def.ident,
+            vis: def.vis,
+            attrs: def.attrs,
+            node: match def.body {
+                Body::Enum(variants) => {
+                    ItemKind::Enum(variants, def.generics)
+                }
+                Body::Struct(variant_data) => {
+                    ItemKind::Struct(variant_data, def.generics)
+                }
+            }
+        }
+    ));
+}
