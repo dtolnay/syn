@@ -37,8 +37,16 @@ let ast = syn::parse_macro_input(raw).unwrap();
 
 ## Usage with [Macros 1.1](https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md)
 
+```toml
+[dependencies]
+syn = "0.6"
+quote = "0.1"
+
+[lib]
+rustc-macro = true
+```
+
 ```rust
-// lib.rs
 #![crate_type = "rustc-macro"]
 #![feature(rustc_macro, rustc_macro_lib)]
 
@@ -65,17 +73,6 @@ pub fn special_item(input: TokenStream) -> TokenStream {
     // Parse this back to a token stream and return it
     expanded.to_string().parse().unwrap()
 }
-```
-
-```toml
-# Cargo.toml
-# ...
-[dependencies]
-syn = "0.5"
-quote = "0.1"
-
-[lib]
-rustc-macro = true
 ```
 
 ## License
