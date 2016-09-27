@@ -21,6 +21,12 @@ impl From<String> for Ident {
     }
 }
 
+impl From<usize> for Ident {
+    fn from(u: usize) -> Self {
+        Ident(u.to_string())
+    }
+}
+
 impl AsRef<str> for Ident {
     fn as_ref(&self) -> &str {
         &self.0
