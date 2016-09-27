@@ -361,7 +361,8 @@ pub mod parsing {
             // TODO: ForLoop
             // TODO: Loop
             // TODO: ForLoop
-            // TODO: Loop
+            |
+            expr_loop
             // TODO: Match
             // TODO: Closure
             |
@@ -546,6 +547,21 @@ pub mod parsing {
                 rules: BlockCheckMode::Default,
             }),
             else_block.map(Box::new),
+        ))
+    ));
+
+    named!(expr_loop -> Expr, do_parse!(
+        id: option!(
+            terminated!(
+                preceded!(
+                    punct!("'"),
+                    ident),
+                punct!(":"))) >>
+            punct!("loop") >>
+        loop_block: block >>
+        (Expr::Loop(
+            Box::new(loop_block),
+            id,
         ))
     ));
 
