@@ -26,6 +26,16 @@ pub enum MetaItem {
     NameValue(Ident, Lit),
 }
 
+impl MetaItem {
+    pub fn name(&self) -> &str {
+        match *self {
+            MetaItem::Word(ref name) => name.as_ref(),
+            MetaItem::List(ref name, _) => name.as_ref(),
+            MetaItem::NameValue(ref name, _) => name.as_ref(),
+        }
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
