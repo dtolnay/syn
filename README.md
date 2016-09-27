@@ -13,29 +13,7 @@ Designed for fast compile time.
 - Compile time for `syn` (from scratch including all dependencies): **4 seconds**
 - Compile time for the `syntex`/`quasi`/`aster` stack: **60+ seconds**
 
-```toml
-[dependencies]
-syn = "0.7"
-```
-
-```rust
-extern crate syn;
-
-let source = "
-    #[derive(Debug, Clone, Eq, PartialEq)]
-    pub struct Item {
-        pub ident: Ident,
-        pub vis: Visibility,
-        pub attrs: Vec<Attribute>,
-        pub generics: Generics,
-        pub body: Body,
-    }
-";
-
-let ast = syn::parse_macro_input(source).unwrap();
-```
-
-## Usage with [Macros 1.1](https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md)
+## Usage with Macros 1.1
 
 ```toml
 [dependencies]
