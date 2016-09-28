@@ -337,6 +337,7 @@ pub enum BindingMode {
 pub mod parsing {
     use super::*;
     use {Ident, Ty};
+    use generics::parsing::lifetime;
     use ident::parsing::ident;
     use lit::parsing::lit;
     use nom::multispace;
@@ -551,17 +552,12 @@ pub mod parsing {
     ));
 
     named!(expr_loop -> Expr, do_parse!(
-        id: option!(
-            terminated!(
-                preceded!(
-                    punct!("'"),
-                    ident),
-                punct!(":"))) >>
-            punct!("loop") >>
+        lt: option!(terminated!(lifetime, punct!(":"))) >>
+        punct!("loop") >>
         loop_block: block >>
         (Expr::Loop(
             Box::new(loop_block),
-            id,
+            lt.map(|lt| lt.ident),
         ))
     ));
 

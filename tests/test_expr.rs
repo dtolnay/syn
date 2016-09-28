@@ -37,7 +37,7 @@ fn test_named_loop() {
 
     let raw = "' test : loop{(1, 5, 9, 11)}";
 
-    let expected = Expr::Loop(block, Some("test".into()));
+    let expected = Expr::Loop(block, Some("'test".into()));
 
     assert_eq!(expected, parse_expr(raw).unwrap());
 }
