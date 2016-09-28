@@ -357,7 +357,8 @@ pub mod parsing {
             |
             expr_if
             // TODO: IfLet
-            // TODO: While
+            |
+            expr_while
             // TODO: WhileLet
             // TODO: ForLoop
             // TODO: Loop
@@ -557,6 +558,18 @@ pub mod parsing {
         loop_block: block >>
         (Expr::Loop(
             Box::new(loop_block),
+            lt.map(|lt| lt.ident),
+        ))
+    ));
+
+    named!(expr_while -> Expr, do_parse!(
+        lt: option!(terminated!(lifetime, punct!(":"))) >>
+        punct!("while") >>
+        cond: expr >>
+        while_block: block >>
+        (Expr::While(
+            Box::new(cond),
+            Box::new(while_block),
             lt.map(|lt| lt.ident),
         ))
     ));

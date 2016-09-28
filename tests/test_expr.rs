@@ -41,3 +41,35 @@ fn test_named_loop() {
 
     assert_eq!(expected, parse_expr(raw).unwrap());
 }
+
+#[test]
+// Ignore test until bool parsing is available
+#[ignore]
+fn test_unnamed_while() {
+    let block = match parse_expr("{ ( 1, 3, 8 ) }").unwrap() {
+        Expr::Block(b) => b,
+        _ => panic!("Could not run test_unnamed_while: error in block parse."),
+    };
+
+    let raw = "while true {(1, 3, 8 )}";
+
+    let expected = Expr::While(Box::new(Expr::Lit(Lit::Bool(true))), block, None);
+
+    assert_eq!(expected, parse_expr(raw).unwrap());
+}
+
+#[test]
+// Ignore test until bool parsing is available
+#[ignore]
+fn test_named_while() {
+    let block = match parse_expr("{ ( 1, 5, 9, 11) }").unwrap() {
+        Expr::Block(b) => b,
+        _ => panic!("Could not run named_while: error in block parse."),
+    };
+
+    let raw = "' test :  while true {(1, 5, 9, 11)}";
+
+    let expected = Expr::While(Box::new(Expr::Lit(Lit::Bool(true))), block, Some("'test".into()));
+
+    assert_eq!(expected, parse_expr(raw).unwrap());
+}
