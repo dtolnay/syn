@@ -88,7 +88,6 @@ pub mod parsing {
     use super::*;
     use ident::parsing::ident;
     use ty::parsing::{ty, poly_trait_ref};
-    use nom::multispace;
 
     named!(pub generics -> Generics, do_parse!(
         bracketed: alt!(
@@ -133,7 +132,7 @@ pub mod parsing {
     ));
 
     named!(pub bound_lifetimes -> Vec<LifetimeDef>, opt_vec!(do_parse!(
-        punct!("for") >>
+        keyword!("for") >>
         punct!("<") >>
         lifetimes: separated_list!(punct!(","), lifetime_def) >>
         punct!(">") >>
@@ -171,8 +170,7 @@ pub mod parsing {
 
     named!(pub where_clause -> WhereClause, alt!(
         do_parse!(
-            punct!("where") >>
-            multispace >>
+            keyword!("where") >>
             predicates: separated_nonempty_list!(punct!(","), where_predicate) >>
             option!(punct!(",")) >>
             (WhereClause { predicates: predicates })

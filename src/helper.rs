@@ -1,6 +1,7 @@
 #![cfg(feature = "parsing")]
 
 use nom::IResult;
+use unicode_xid::UnicodeXID;
 
 macro_rules! punct {
     ($i:expr, $punct:expr) => {
@@ -12,14 +13,42 @@ pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a st
     for (i, ch) in input.char_indices() {
         if !ch.is_whitespace() {
             return if input[i..].starts_with(token) {
-                let end = i + token.len();
-                IResult::Done(&input[end..], &input[i..end])
+                IResult::Done(&input[i + token.len()..], token)
             } else {
                 IResult::Error
             };
         }
     }
     IResult::Error
+}
+
+macro_rules! keyword {
+    ($i:expr, $keyword:expr) => {
+        $crate::helper::keyword($i, $keyword)
+    };
+}
+
+pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
+    match punct(input, token) {
+        IResult::Done(rest, _) => {
+            match word_break(rest) {
+                IResult::Done(_, _) => IResult::Done(rest, token),
+                IResult::Error => IResult::Error,
+            }
+        }
+        IResult::Error => IResult::Error,
+    }
+}
+
+pub fn word_break<'a>(input: &'a str) -> IResult<&'a str, ()> {
+    match input.chars().next() {
+        Some(ch) if UnicodeXID::is_xid_continue(ch) => {
+            IResult::Error
+        }
+        Some(_) | None => {
+            IResult::Done(input, ())
+        }
+    }
 }
 
 macro_rules! option {

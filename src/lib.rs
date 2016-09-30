@@ -5,6 +5,9 @@
 extern crate quote;
 
 #[cfg(feature = "parsing")]
+extern crate unicode_xid;
+
+#[cfg(feature = "parsing")]
 #[macro_use]
 mod nom;
 

@@ -27,8 +27,7 @@ pub mod parsing {
     named!(pub macro_input -> MacroInput, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
-        which: alt!(punct!("struct") | punct!("enum")) >>
-        multispace >>
+        which: alt!(keyword!("struct") | keyword!("enum")) >>
         id: ident >>
         generics: generics >>
         item: switch!(value!(which),

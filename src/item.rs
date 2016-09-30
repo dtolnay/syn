@@ -214,7 +214,6 @@ pub mod parsing {
     use ident::parsing::ident;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
-    use nom::multispace;
 
     named!(pub item -> Item, alt!(
         item_extern_crate
@@ -237,13 +236,11 @@ pub mod parsing {
     named!(item_extern_crate -> Item, do_parse!(
         attrs: many0!(attribute) >>
         vis: visibility >>
-        punct!("extern") >>
-        multispace >>
-        punct!("crate") >>
-        multispace >>
+        keyword!("extern") >>
+        keyword!("crate") >>
         id: ident >>
         rename: option!(preceded!(
-            tuple!(punct!("as"), multispace),
+            keyword!("as"),
             ident
         )) >>
         punct!(";") >>
