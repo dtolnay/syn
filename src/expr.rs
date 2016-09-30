@@ -560,7 +560,7 @@ pub mod parsing {
 
     named!(expr_while -> Expr, do_parse!(
         lt: option!(terminated!(lifetime, punct!(":"))) >>
-        punct!("while") >>
+        keyword!("while") >>
         cond: expr >>
         while_block: block >>
         (Expr::While(
