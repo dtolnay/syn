@@ -55,7 +55,8 @@ pub enum FloatTy {
 pub mod parsing {
     use super::*;
     use escape::escaped_string;
-    use nom::{IResult, multispace};
+    use helper::eat_spaces;
+    use nom::IResult;
 
     named!(pub lit -> Lit, alt!(
         quoted => { |q| Lit::Str(q, StrStyle::Cooked) }
@@ -74,37 +75,35 @@ pub mod parsing {
         tag!("\"")
     ));
 
-    named!(pub int -> (u64, IntTy), preceded!(
-        option!(multispace),
-        tuple!(
-            digits,
-            alt!(
-                tag!("isize") => { |_| IntTy::Isize }
-                |
-                tag!("i8") => { |_| IntTy::I8 }
-                |
-                tag!("i16") => { |_| IntTy::I16 }
-                |
-                tag!("i32") => { |_| IntTy::I32 }
-                |
-                tag!("i64") => { |_| IntTy::I64 }
-                |
-                tag!("usize") => { |_| IntTy::Usize }
-                |
-                tag!("u8") => { |_| IntTy::U8 }
-                |
-                tag!("u16") => { |_| IntTy::U16 }
-                |
-                tag!("u32") => { |_| IntTy::U32 }
-                |
-                tag!("u64") => { |_| IntTy::U64 }
-                |
-                epsilon!() => { |_| IntTy::Unsuffixed }
-            )
+    named!(pub int -> (u64, IntTy), tuple!(
+        digits,
+        alt!(
+            tag!("isize") => { |_| IntTy::Isize }
+            |
+            tag!("i8") => { |_| IntTy::I8 }
+            |
+            tag!("i16") => { |_| IntTy::I16 }
+            |
+            tag!("i32") => { |_| IntTy::I32 }
+            |
+            tag!("i64") => { |_| IntTy::I64 }
+            |
+            tag!("usize") => { |_| IntTy::Usize }
+            |
+            tag!("u8") => { |_| IntTy::U8 }
+            |
+            tag!("u16") => { |_| IntTy::U16 }
+            |
+            tag!("u32") => { |_| IntTy::U32 }
+            |
+            tag!("u64") => { |_| IntTy::U64 }
+            |
+            epsilon!() => { |_| IntTy::Unsuffixed }
         )
     ));
 
-    fn digits(input: &str) -> IResult<&str, u64> {
+    pub fn digits(input: &str) -> IResult<&str, u64> {
+        let input = eat_spaces(input);
         let mut value = 0u64;
         let mut len = 0;
         let mut bytes = input.bytes().peekable();

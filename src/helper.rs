@@ -1,6 +1,6 @@
 #![cfg(feature = "parsing")]
 
-use nom::IResult;
+use nom::{IResult, multispace};
 use unicode_xid::UnicodeXID;
 
 macro_rules! punct {
@@ -94,4 +94,11 @@ macro_rules! tap {
     ($i:expr, $name:ident : $f:expr => $e:expr) => {
         tap!($i, $name: call!($f) => $e);
     };
+}
+
+pub fn eat_spaces(input: &str) -> &str {
+    match multispace(input) {
+        IResult::Done(rest, _) => rest,
+        IResult::Error => input,
+    }
 }

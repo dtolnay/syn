@@ -192,7 +192,7 @@ pub mod parsing {
     use super::*;
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
     use ident::parsing::ident;
-    use nom::{digit, multispace};
+    use lit::parsing::int;
     use std::str;
 
     named!(pub ty -> Ty, alt!(
@@ -230,10 +230,9 @@ pub mod parsing {
         punct!("[") >>
         elem: ty >>
         punct!(";") >>
-        option!(multispace) >>
-        len: map_res!(digit, str::parse) >>
+        len: int >>
         punct!("]") >>
-        (Ty::FixedLengthVec(Box::new(elem), len))
+        (Ty::FixedLengthVec(Box::new(elem), len.0 as usize))
     ));
 
     named!(ty_ptr -> Ty, do_parse!(
@@ -434,7 +433,7 @@ mod printing {
                     tokens.append("[");
                     inner.to_tokens(tokens);
                     tokens.append(";");
-                    len.to_tokens(tokens);
+                    tokens.append(&len.to_string());
                     tokens.append("]");
                 }
                 Ty::Ptr(ref target) => {
