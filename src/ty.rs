@@ -239,9 +239,9 @@ pub mod parsing {
     named!(ty_ptr -> Ty, do_parse!(
         punct!("*") >>
         mutability: alt!(
-            punct!("const") => { |_| Mutability::Immutable }
+            keyword!("const") => { |_| Mutability::Immutable }
             |
-            punct!("mut") => { |_| Mutability::Mutable }
+            keyword!("mut") => { |_| Mutability::Mutable }
         ) >>
         target: ty >>
         (Ty::Ptr(Box::new(MutTy {
@@ -262,8 +262,7 @@ pub mod parsing {
     ));
 
     named!(ty_bare_fn -> Ty, do_parse!(
-        punct!("fn") >>
-        multispace >>
+        keyword!("fn") >>
         lifetimes: opt_vec!(delimited!(
             punct!("<"),
             separated_list!(punct!(","), lifetime_def),
@@ -303,7 +302,7 @@ pub mod parsing {
         punct!("<") >>
         this: map!(ty, Box::new) >>
         path: option!(preceded!(
-            tuple!(punct!("as"), multispace),
+            keyword!("as"),
             path
         )) >>
         punct!(">") >>
@@ -327,8 +326,7 @@ pub mod parsing {
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
-        punct!("impl") >>
-        multispace >>
+        keyword!("impl") >>
         elem: separated_nonempty_list!(punct!("+"), ty_param_bound) >>
         (Ty::ImplTrait(elem))
     ));
@@ -342,8 +340,7 @@ pub mod parsing {
 
     named!(mutability -> Mutability, alt!(
         do_parse!(
-            punct!("mut") >>
-            multispace >>
+            keyword!("mut") >>
             (Mutability::Mutable)
         )
         |

@@ -12,10 +12,11 @@ include = ["Cargo.toml", "src/**/*.rs"]
 default = ["parsing", "printing"]
 aster = []
 full = []
-parsing = []
+parsing = ["unicode-xid"]
 printing = ["quote"]
 visit = []
 
 [dependencies]
 clippy = { version = "0.*", optional = true }
 quote = { version = "0.2", optional = true }
+unicode-xid = { version = "0.0.3", optional = true }

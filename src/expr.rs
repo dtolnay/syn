@@ -340,7 +340,6 @@ pub mod parsing {
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use lit::parsing::lit;
-    use nom::multispace;
     use ty::parsing::ty;
 
     named!(pub expr -> Expr, do_parse!(
@@ -414,8 +413,7 @@ pub mod parsing {
     ));
 
     named!(expr_box -> Expr, do_parse!(
-        punct!("box") >>
-        multispace >>
+        keyword!("box") >>
         inner: expr >>
         (Expr::Box(Box::new(inner)))
     ));
@@ -511,8 +509,7 @@ pub mod parsing {
     named!(expr_lit -> Expr, map!(lit, Expr::Lit));
 
     named!(and_cast -> Ty, do_parse!(
-        punct!("as") >>
-        multispace >>
+        keyword!("as") >>
         ty: ty >>
         (ty)
     ));
@@ -520,14 +517,13 @@ pub mod parsing {
     named!(and_ascription -> Ty, preceded!(punct!(":"), ty));
 
     named!(expr_if -> Expr, do_parse!(
-        punct!("if") >>
-        multispace >>
+        keyword!("if") >>
         cond: expr >>
         punct!("{") >>
         then_block: within_block >>
         punct!("}") >>
         else_block: option!(preceded!(
-            punct!("else"),
+            keyword!("else"),
             alt!(
                 expr_if
                 |
@@ -554,7 +550,7 @@ pub mod parsing {
 
     named!(expr_loop -> Expr, do_parse!(
         lt: option!(terminated!(lifetime, punct!(":"))) >>
-        punct!("loop") >>
+        keyword!("loop") >>
         loop_block: block >>
         (Expr::Loop(
             Box::new(loop_block),
@@ -588,7 +584,7 @@ pub mod parsing {
     ));
 
     named!(block_check_mode -> BlockCheckMode, alt!(
-        punct!("unsafe") => { |_| BlockCheckMode::Unsafe }
+        keyword!("unsafe") => { |_| BlockCheckMode::Unsafe }
         |
         epsilon!() => { |_| BlockCheckMode::Default }
     ));

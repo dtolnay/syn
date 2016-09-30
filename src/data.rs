@@ -53,7 +53,6 @@ pub mod parsing {
     use ident::parsing::ident;
     use lit::parsing::int;
     use ty::parsing::ty;
-    use nom::multispace;
 
     named!(pub struct_body -> VariantData, alt!(
         struct_like_body => { VariantData::Struct }
@@ -134,8 +133,7 @@ pub mod parsing {
 
     named!(pub visibility -> Visibility, alt!(
         do_parse!(
-            punct!("pub") >>
-            multispace >>
+            keyword!("pub") >>
             (Visibility::Public)
         )
         |
