@@ -336,7 +336,7 @@ pub enum BindingMode {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {Ident, Ty};
+    use {Ident, Lifetime, Ty};
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use lit::parsing::lit;
@@ -549,24 +549,24 @@ pub mod parsing {
     ));
 
     named!(expr_loop -> Expr, do_parse!(
-        lt: option!(terminated!(lifetime, punct!(":"))) >>
+        lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("loop") >>
         loop_block: block >>
         (Expr::Loop(
             Box::new(loop_block),
-            lt.map(|lt| lt.ident),
+            lbl,
         ))
     ));
 
     named!(expr_while -> Expr, do_parse!(
-        lt: option!(terminated!(lifetime, punct!(":"))) >>
+        lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("while") >>
         cond: expr >>
         while_block: block >>
         (Expr::While(
             Box::new(cond),
             Box::new(while_block),
-            lt.map(|lt| lt.ident),
+            lbl,
         ))
     ));
 
@@ -614,6 +614,8 @@ pub mod parsing {
         punct!(";") >>
         (Stmt::Semi(Box::new(e)))
     ));
+
+    named!(label -> Ident, map!(lifetime, |lt: Lifetime| lt.ident));
 }
 
 #[cfg(feature = "printing")]
