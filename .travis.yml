@@ -18,12 +18,13 @@ before_script:
   - export PATH=$HOME/.local/bin:$PATH
 
 script:
-  - travis-cargo build -- --release
-  - travis-cargo test
+  - travis-cargo --only nightly build
+  - travis-cargo --only 1.12.0 build -- --release
+  - travis-cargo test -- --features full
   - travis-cargo doc -- --features full
 
 after_success:
-  - travis-cargo doc-upload
+  - travis-cargo --only nightly doc-upload
 
 env:
   global:
