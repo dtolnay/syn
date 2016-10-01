@@ -149,6 +149,19 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 Lit::Str(ref s, StrStyle::Cooked) => s.to_tokens(tokens),
+                Lit::Str(ref s, StrStyle::Raw(n)) => {
+                    let mut tok = "r".to_string();
+                    for _ in 0..n {
+                        tok.push('#');
+                    }
+                    tok.push('"');
+                    tok.push_str(s);
+                    tok.push('"');
+                    for _ in 0..n {
+                        tok.push('#');
+                    }
+                    tokens.append(&tok);
+                }
                 Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
                 _ => unimplemented!(),
             }

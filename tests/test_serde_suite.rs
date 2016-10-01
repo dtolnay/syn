@@ -593,5 +593,14 @@ fn test_all() {
         #[derive(Deserialize)]
         struct NamedUnit;
         "#,
+        r#"
+        #[derive(Deserialize)]
+        #[doc = r" A custom basic event not covered by the Matrix specification."]
+        #[derive(Debug, Serialize)]
+        pub struct CustomEvent {
+            /// The event's content.
+            content: String,
+        }
+        "#,
     ];
 }
