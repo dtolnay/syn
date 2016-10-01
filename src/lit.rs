@@ -67,7 +67,10 @@ pub mod parsing {
         |
         int => { |(value, ty)| Lit::Int(value, ty) }
         // TODO: Float
-        // TODO: Bool
+        |
+        keyword!("true") => { |_| Lit::Bool(true) }
+        |
+        keyword!("false") => { |_| Lit::Bool(false) }
     ));
 
     named!(string -> Lit, alt!(
@@ -180,6 +183,8 @@ mod printing {
                     tokens.append(&escaped);
                 }
                 Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
+                Lit::Bool(true) => tokens.append("true"),
+                Lit::Bool(false) => tokens.append("false"),
                 _ => unimplemented!(),
             }
         }
