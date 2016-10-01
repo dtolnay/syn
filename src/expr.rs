@@ -575,25 +575,25 @@ pub mod parsing {
 
     named!(expr_continue -> Expr, do_parse!(
         keyword!("continue") >>
-            lbl: option!(label) >>
-            (Expr::Continue(
-                lbl,
+        lbl: option!(label) >>
+        (Expr::Continue(
+            lbl,
          ))
     ));
 
     named!(expr_break -> Expr, do_parse!(
         keyword!("break") >>
-            lbl: option!(label) >>
-            (Expr::Break(
-                lbl,
+        lbl: option!(label) >>
+        (Expr::Break(
+            lbl,
          ))
     ));
 
     named!(expr_ret -> Expr, do_parse!(
         keyword!("return") >>
-            ret_value: option!(expr) >>
-            (Expr::Ret(
-                ret_value.map(Box::new),
+        ret_value: option!(expr) >>
+        (Expr::Ret(
+            ret_value.map(Box::new),
          ))
     ));
 
