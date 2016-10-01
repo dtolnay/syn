@@ -231,9 +231,7 @@ macro_rules! take_until {
 
 macro_rules! tag {
     ($i:expr, $tag: expr) => {
-        if $tag.len() > $i.len() {
-            $crate::nom::IResult::Error
-        } else if $i.starts_with($tag) {
+        if $i.starts_with($tag) {
             $crate::nom::IResult::Done(&$i[$tag.len()..], &$i[0..$tag.len()])
         } else {
             $crate::nom::IResult::Error
