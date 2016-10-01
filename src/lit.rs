@@ -60,7 +60,8 @@ pub mod parsing {
 
     named!(pub lit -> Lit, alt!(
         string
-        // TODO: ByteStr
+        |
+        byte_string
         // TODO: Byte
         // TODO: Char
         |
@@ -80,6 +81,19 @@ pub mod parsing {
             punct!("r"),
             raw_string
         ) => { |(s, n)| Lit::Str(s, StrStyle::Raw(n)) }
+    ));
+
+    named!(byte_string -> Lit, alt!(
+        delimited!(
+            punct!("b\""),
+            cooked_string,
+            tag!("\"")
+        ) => { |s: String| Lit::ByteStr(s.into_bytes()) }
+        |
+        preceded!(
+            punct!("br"),
+            raw_string
+        ) => { |(s, _): (String, _)| Lit::ByteStr(s.into_bytes()) }
     ));
 
     named!(pub int -> (u64, IntTy), tuple!(
@@ -145,6 +159,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
+    use std::{ascii, iter};
     use std::fmt::{self, Display};
 
     impl ToTokens for Lit {
@@ -152,17 +167,17 @@ mod printing {
             match *self {
                 Lit::Str(ref s, StrStyle::Cooked) => s.to_tokens(tokens),
                 Lit::Str(ref s, StrStyle::Raw(n)) => {
-                    let mut tok = "r".to_string();
-                    for _ in 0..n {
-                        tok.push('#');
+                    tokens.append(&format!("r{delim}\"{string}\"{delim}",
+                        delim = iter::repeat("#").take(n).collect::<String>(),
+                        string = s));
+                }
+                Lit::ByteStr(ref v) => {
+                    let mut escaped = "b\"".to_string();
+                    for &ch in v.iter() {
+                        escaped.extend(ascii::escape_default(ch).map(|c| c as char));
                     }
-                    tok.push('"');
-                    tok.push_str(s);
-                    tok.push('"');
-                    for _ in 0..n {
-                        tok.push('#');
-                    }
-                    tokens.append(&tok);
+                    escaped.push('"');
+                    tokens.append(&escaped);
                 }
                 Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
                 _ => unimplemented!(),
