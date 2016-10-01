@@ -52,25 +52,6 @@ macro_rules! map_impl {
     };
 }
 
-macro_rules! map_res {
-    ($i:expr, $f:expr, $g:expr) => {
-        map_res_impl!($i, call!($f), call!($g));
-    };
-}
-
-/// Internal parser, do not use directly
-macro_rules! map_res_impl {
-    ($i:expr, $submac:ident!( $($args:tt)* ), $submac2:ident!( $($args2:tt)* )) => {
-        match $submac!($i, $($args)*) {
-            $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i, o) => match $submac2!(o, $($args2)*) {
-                Ok(output) => $crate::nom::IResult::Done(i, output),
-                Err(_) => $crate::nom::IResult::Error,
-            }
-        }
-    };
-}
-
 macro_rules! not {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
