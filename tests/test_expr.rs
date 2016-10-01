@@ -15,6 +15,32 @@ fn test_box() {
 }
 
 #[test]
+fn test_cooked_string() {
+    let raw = r#""a\nb""#;
+
+    let expected = Expr::Lit(Lit::Str("a\nb".into(), StrStyle::Cooked));
+
+    assert_eq!(expected, parse_expr(raw).unwrap());
+}
+
+#[test]
+fn test_raw_string() {
+    let raw = r#"r"a\nb""#;
+
+    let expected = Expr::Lit(Lit::Str(r"a\nb".into(), StrStyle::Raw(0)));
+
+    assert_eq!(expected, parse_expr(raw).unwrap());
+}
+#[test]
+fn test_raw_string_2() {
+    let raw = r###"r##"a\n"#b"##"###;
+
+    let expected = Expr::Lit(Lit::Str(r##"a\n"#b"##.into(), StrStyle::Raw(2)));
+
+    assert_eq!(expected, parse_expr(raw).unwrap());
+}
+
+#[test]
 fn test_unnamed_loop() {
     let block = match parse_expr("{ ( 1, 3, 8 ) }").unwrap() {
         Expr::Block(b) => b,

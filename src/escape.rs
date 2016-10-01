@@ -3,7 +3,7 @@
 use std::{char, str};
 use nom::IResult;
 
-pub fn escaped_string(input: &str) -> IResult<&str, String> {
+pub fn cooked_string(input: &str) -> IResult<&str, String> {
     let mut s = String::new();
     let mut chars = input.char_indices().peekable();
     while let Some((byte_offset, ch)) = chars.next() {
@@ -43,6 +43,29 @@ pub fn escaped_string(input: &str) -> IResult<&str, String> {
             ch => {
                 s.push(ch);
             }
+        }
+    }
+    IResult::Error
+}
+
+pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
+    let mut chars = input.char_indices();
+    let mut n = 0;
+    while let Some((byte_offset, ch)) = chars.next() {
+        match ch {
+            '"' => {
+                n = byte_offset;
+                break;
+            }
+            '#' => {},
+            _ => return IResult::Error,
+        }
+    }
+    while let Some((byte_offset, ch)) = chars.next() {
+        if ch == '"' && input[byte_offset + 1..].starts_with(&input[..n]) {
+            let rest = &input[byte_offset + 1 + n..];
+            let value = &input[n + 1 .. byte_offset];
+            return IResult::Done(rest, (value.to_owned(), n));
         }
     }
     IResult::Error
@@ -101,8 +124,8 @@ fn char_from_hex_bytes(hex_bytes: &[u8]) -> Option<char> {
 }
 
 #[test]
-fn test_escaped_string() {
+fn test_cooked_string() {
     let input = r#"\x62 \u{7} \u{64} \u{bf5} \u{12ba} \u{1F395} \u{102345}""#;
     let expected = "\x62 \u{7} \u{64} \u{bf5} \u{12ba} \u{1F395} \u{102345}";
-    assert_eq!(escaped_string(input), IResult::Done("\"", expected.to_string()));
+    assert_eq!(cooked_string(input), IResult::Done("\"", expected.to_string()));
 }

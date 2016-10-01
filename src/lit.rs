@@ -54,12 +54,12 @@ pub enum FloatTy {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use escape::escaped_string;
+    use escape::{cooked_string, raw_string};
     use helper::eat_spaces;
     use nom::IResult;
 
     named!(pub lit -> Lit, alt!(
-        quoted => { |q| Lit::Str(q, StrStyle::Cooked) }
+        string
         // TODO: ByteStr
         // TODO: Byte
         // TODO: Char
@@ -69,10 +69,17 @@ pub mod parsing {
         // TODO: Bool
     ));
 
-    named!(quoted -> String, delimited!(
-        punct!("\""),
-        escaped_string,
-        tag!("\"")
+    named!(string -> Lit, alt!(
+        delimited!(
+            punct!("\""),
+            cooked_string,
+            tag!("\"")
+        ) => { |s| Lit::Str(s, StrStyle::Cooked) }
+        |
+        preceded!(
+            punct!("r"),
+            raw_string
+        ) => { |(s, n)| Lit::Str(s, StrStyle::Raw(n)) }
     ));
 
     named!(pub int -> (u64, IntTy), tuple!(
