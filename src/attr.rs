@@ -80,6 +80,7 @@ pub mod parsing {
     use lit::{Lit, StrStyle};
     use lit::parsing::lit;
 
+    #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, do_parse!(
         punct!("#") >>
         punct!("!") >>
