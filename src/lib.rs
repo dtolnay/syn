@@ -126,6 +126,8 @@ pub use macro_input::{
     MacroInput,
 };
 
+mod space;
+
 mod ty;
 pub use ty::{
     AngleBracketedParameterData,
@@ -158,7 +160,7 @@ pub use parsing::*;
 mod parsing {
     use super::*;
     use {generics, macro_input, ty};
-    use nom;
+    use nom::IResult;
 
     #[cfg(feature = "full")]
     use {expr, item, krate};
@@ -194,16 +196,16 @@ mod parsing {
         unwrap("where clause", generics::parsing::where_clause, input)
     }
 
-    fn unwrap<T>(name: &'static str, f: fn(&str) -> nom::IResult<&str, T>, input: &str) -> Result<T, String> {
+    fn unwrap<T>(name: &'static str, f: fn(&str) -> IResult<&str, T>, input: &str) -> Result<T, String> {
         match f(input) {
-            nom::IResult::Done(rest, t) => {
+            IResult::Done(rest, t) => {
                 if rest.is_empty() {
                     Ok(t)
                 } else {
                     Err(format!("remaining tokens after {}: {:?}", name, rest))
                 }
             }
-            nom::IResult::Error => Err(format!("failed to parse {}: {:?}", name, input)),
+            IResult::Error => Err(format!("failed to parse {}: {:?}", name, input)),
         }
     }
 }

@@ -10,25 +10,6 @@ pub enum IResult<I, O> {
     Error,
 }
 
-/// Recognizes spaces, tabs, carriage returns and line feeds
-pub fn multispace(input: &str) -> IResult<&str, &str> {
-    if input.is_empty() {
-        return IResult::Error;
-    }
-
-    for (idx, item) in input.char_indices() {
-        let chr = item;
-        if !(chr == ' ' || chr == '\t' || chr == '\r' || chr == '\n') {
-            if idx == 0 {
-                return IResult::Error;
-            } else {
-                return IResult::Done(&input[idx..], &input[0..idx]);
-            }
-        }
-    }
-    IResult::Done("", input)
-}
-
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
         fn $name(i: &str) -> $crate::nom::IResult<&str, $o> {

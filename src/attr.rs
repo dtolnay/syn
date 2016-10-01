@@ -79,19 +79,52 @@ pub mod parsing {
     use ident::parsing::ident;
     use lit::{Lit, StrStyle};
     use lit::parsing::lit;
+    use space::{block_comment, whitespace};
 
     #[cfg(feature = "full")]
-    named!(pub inner_attr -> Attribute, do_parse!(
-        punct!("#") >>
-        punct!("!") >>
-        punct!("[") >>
-        meta_item: meta_item >>
-        punct!("]") >>
-        (Attribute {
-            style: AttrStyle::Inner,
-            value: meta_item,
-            is_sugared_doc: false,
-        })
+    named!(pub inner_attr -> Attribute, alt!(
+        do_parse!(
+            punct!("#") >>
+            punct!("!") >>
+            punct!("[") >>
+            meta_item: meta_item >>
+            punct!("]") >>
+            (Attribute {
+                style: AttrStyle::Inner,
+                value: meta_item,
+                is_sugared_doc: false,
+            })
+        )
+        |
+        do_parse!(
+            punct!("//!") >>
+            content: take_until!("\n") >>
+            (Attribute {
+                style: AttrStyle::Inner,
+                value: MetaItem::NameValue(
+                    "doc".into(),
+                    Lit::Str(
+                        format!("//!{}", content),
+                        StrStyle::Cooked,
+                    ),
+                ),
+                is_sugared_doc: true,
+            })
+        )
+        |
+        do_parse!(
+            option!(whitespace) >>
+            peek!(tag!("/*!")) >>
+            com: block_comment >>
+            (Attribute {
+                style: AttrStyle::Inner,
+                value: MetaItem::NameValue(
+                    "doc".into(),
+                    Lit::Str(com.to_owned(), StrStyle::Cooked),
+                ),
+                is_sugared_doc: true,
+            })
+        )
     ));
 
     named!(pub outer_attr -> Attribute, alt!(
@@ -119,6 +152,20 @@ pub mod parsing {
                         format!("///{}", content),
                         StrStyle::Cooked,
                     ),
+                ),
+                is_sugared_doc: true,
+            })
+        )
+        |
+        do_parse!(
+            option!(whitespace) >>
+            peek!(tag!("/**")) >>
+            com: block_comment >>
+            (Attribute {
+                style: AttrStyle::Outer,
+                value: MetaItem::NameValue(
+                    "doc".into(),
+                    Lit::Str(com.to_owned(), StrStyle::Cooked),
                 ),
                 is_sugared_doc: true,
             })
@@ -153,27 +200,44 @@ mod printing {
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Attribute {
-                    style: AttrStyle::Outer,
-                    value: MetaItem::NameValue(
-                        ref name,
-                        Lit::Str(ref value, StrStyle::Cooked),
-                    ),
-                    is_sugared_doc: true,
-                } if name == "doc" && value.starts_with("///") => {
-                    tokens.append(&format!("{}\n", value));
-                }
-                _ => {
-                    tokens.append("#");
-                    if let AttrStyle::Inner = self.style {
-                        tokens.append("!");
+            if let Attribute {
+                style,
+                value: MetaItem::NameValue(
+                    ref name,
+                    Lit::Str(ref value, StrStyle::Cooked),
+                ),
+                is_sugared_doc: true,
+            } = *self {
+                if name == "doc" {
+                    match style {
+                        AttrStyle::Inner if value.starts_with("//!") => {
+                            tokens.append(&format!("{}\n", value));
+                            return;
+                        }
+                        AttrStyle::Inner if value.starts_with("/*!") => {
+                            tokens.append(value);
+                            return;
+                        }
+                        AttrStyle::Outer if value.starts_with("///") => {
+                            tokens.append(&format!("{}\n", value));
+                            return;
+                        }
+                        AttrStyle::Outer if value.starts_with("/**") => {
+                            tokens.append(value);
+                            return;
+                        }
+                        _ => {}
                     }
-                    tokens.append("[");
-                    self.value.to_tokens(tokens);
-                    tokens.append("]");
                 }
             }
+
+            tokens.append("#");
+            if let AttrStyle::Inner = self.style {
+                tokens.append("!");
+            }
+            tokens.append("[");
+            self.value.to_tokens(tokens);
+            tokens.append("]");
         }
     }
 

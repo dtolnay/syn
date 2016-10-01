@@ -10,13 +10,13 @@ pub struct Crate {
 pub mod parsing {
     use super::*;
     use attr::parsing::inner_attr;
+    use space::whitespace;
     use item::parsing::item;
-    use nom::multispace;
 
     named!(pub krate -> Crate, do_parse!(
         attrs: many0!(inner_attr) >>
         items: many0!(item) >>
-        option!(multispace) >>
+        option!(whitespace) >>
         (Crate {
             attrs: attrs,
             items: items,

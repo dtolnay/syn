@@ -48,14 +48,14 @@ impl<T: ?Sized> PartialEq<T> for Ident where T: AsRef<str> {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use nom::multispace;
+    use space::whitespace;
 
     fn ident_ch(ch: char) -> bool {
         ch.is_alphanumeric() || ch == '_'
     }
 
     named!(pub ident -> Ident, preceded!(
-        option!(multispace),
+        option!(whitespace),
         map!(take_while1!(ident_ch), Into::into)
     ));
 }

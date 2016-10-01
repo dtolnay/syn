@@ -55,7 +55,7 @@ pub enum FloatTy {
 pub mod parsing {
     use super::*;
     use escape::{cooked_string, raw_string};
-    use helper::eat_spaces;
+    use space::whitespace;
     use nom::IResult;
 
     named!(pub lit -> Lit, alt!(
@@ -83,7 +83,10 @@ pub mod parsing {
     ));
 
     named!(pub int -> (u64, IntTy), tuple!(
-        digits,
+        preceded!(
+            option!(whitespace),
+            digits
+        ),
         alt!(
             tag!("isize") => { |_| IntTy::Isize }
             |
@@ -110,7 +113,6 @@ pub mod parsing {
     ));
 
     pub fn digits(input: &str) -> IResult<&str, u64> {
-        let input = eat_spaces(input);
         let mut value = 0u64;
         let mut len = 0;
         let mut bytes = input.bytes().peekable();

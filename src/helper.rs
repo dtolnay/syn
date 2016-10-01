@@ -1,7 +1,7 @@
 #![cfg(feature = "parsing")]
 
-use nom::{IResult, multispace};
-use unicode_xid::UnicodeXID;
+use nom::IResult;
+use space::{whitespace, word_break};
 
 macro_rules! punct {
     ($i:expr, $punct:expr) => {
@@ -10,16 +10,15 @@ macro_rules! punct {
 }
 
 pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
-    for (i, ch) in input.char_indices() {
-        if !ch.is_whitespace() {
-            return if input[i..].starts_with(token) {
-                IResult::Done(&input[i + token.len()..], token)
-            } else {
-                IResult::Error
-            };
-        }
+    let input = match whitespace(input) {
+        IResult::Done(rest, _) => rest,
+        IResult::Error => input,
+    };
+    if input.starts_with(token) {
+        IResult::Done(&input[token.len()..], token)
+    } else {
+        IResult::Error
     }
-    IResult::Error
 }
 
 macro_rules! keyword {
@@ -37,17 +36,6 @@ pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a 
             }
         }
         IResult::Error => IResult::Error,
-    }
-}
-
-pub fn word_break(input: &str) -> IResult<&str, ()> {
-    match input.chars().next() {
-        Some(ch) if UnicodeXID::is_xid_continue(ch) => {
-            IResult::Error
-        }
-        Some(_) | None => {
-            IResult::Done(input, ())
-        }
     }
 }
 
@@ -94,11 +82,4 @@ macro_rules! tap {
     ($i:expr, $name:ident : $f:expr => $e:expr) => {
         tap!($i, $name: call!($f) => $e);
     };
-}
-
-pub fn eat_spaces(input: &str) -> &str {
-    match multispace(input) {
-        IResult::Done(rest, _) => rest,
-        IResult::Error => input,
-    }
 }
