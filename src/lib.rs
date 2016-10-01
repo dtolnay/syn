@@ -19,6 +19,7 @@ mod escape;
 mod attr;
 pub use attr::{
     Attribute,
+    AttrStyle,
     MetaItem,
 };
 
@@ -64,6 +65,11 @@ pub use generics::{
     WherePredicate,
     WhereRegionPredicate,
 };
+
+#[cfg(feature = "full")]
+mod krate;
+#[cfg(feature = "full")]
+pub use krate::Crate;
 
 mod ident;
 pub use ident::{
@@ -155,10 +161,15 @@ mod parsing {
     use nom;
 
     #[cfg(feature = "full")]
-    use {expr, item};
+    use {expr, item, krate};
 
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
         unwrap("macro input", macro_input::parsing::macro_input, input)
+    }
+
+    #[cfg(feature = "full")]
+    pub fn parse_crate(input: &str) -> Result<Crate, String> {
+        unwrap("crate", krate::parsing::krate, input)
     }
 
     #[cfg(feature = "full")]

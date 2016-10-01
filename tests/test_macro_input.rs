@@ -38,6 +38,7 @@ fn test_struct() {
         vis: Visibility::Public,
         attrs: vec![
             Attribute {
+                style: AttrStyle::Outer,
                 value: MetaItem::List("derive".into(), vec![
                     MetaItem::Word("Debug".into()),
                     MetaItem::Word("Clone".into()),
@@ -96,6 +97,7 @@ fn test_enum() {
         vis: Visibility::Public,
         attrs: vec![
             Attribute {
+                style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
                     Lit::Str(
@@ -106,6 +108,7 @@ fn test_enum() {
                 is_sugared_doc: true,
             },
             Attribute {
+                style: AttrStyle::Outer,
                 value: MetaItem::Word("must_use".into()),
                 is_sugared_doc: false,
             },

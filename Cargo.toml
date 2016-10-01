@@ -20,3 +20,8 @@ visit = []
 clippy = { version = "0.*", optional = true }
 quote = { version = "0.2", optional = true }
 unicode-xid = { version = "0.0.3", optional = true }
+
+[dev-dependencies]
+syntex_pos = "0.44.0"
+syntex_syntax = "0.44.0"
+walkdir = "0.1.8"

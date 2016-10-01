@@ -1,10 +1,22 @@
 use super::*;
 
+use std::iter;
+
 /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Attribute {
+    pub style: AttrStyle,
     pub value: MetaItem,
     pub is_sugared_doc: bool,
+}
+
+/// Distinguishes between Attributes that decorate items and Attributes that
+/// are contained as statements within items. These two cases need to be
+/// distinguished for pretty-printing.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum AttrStyle {
+    Outer,
+    Inner,
 }
 
 /// A compile-time attribute item.
@@ -36,6 +48,31 @@ impl MetaItem {
     }
 }
 
+pub trait FilterAttrs<'a> {
+    type Ret: Iterator<Item = &'a Attribute>;
+
+    fn outer(self) -> Self::Ret;
+    fn inner(self) -> Self::Ret;
+}
+
+impl<'a, T> FilterAttrs<'a> for T where T: IntoIterator<Item = &'a Attribute> {
+    type Ret = iter::Filter<T::IntoIter, fn(&&Attribute) -> bool>;
+
+    fn outer(self) -> Self::Ret {
+        fn is_outer(attr: &&Attribute) -> bool {
+            attr.style == AttrStyle::Outer
+        }
+        self.into_iter().filter(is_outer)
+    }
+
+    fn inner(self) -> Self::Ret {
+        fn is_inner(attr: &&Attribute) -> bool {
+            attr.style == AttrStyle::Inner
+        }
+        self.into_iter().filter(is_inner)
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
@@ -43,13 +80,27 @@ pub mod parsing {
     use lit::{Lit, StrStyle};
     use lit::parsing::lit;
 
-    named!(pub attribute -> Attribute, alt!(
+    named!(pub inner_attr -> Attribute, do_parse!(
+        punct!("#") >>
+        punct!("!") >>
+        punct!("[") >>
+        meta_item: meta_item >>
+        punct!("]") >>
+        (Attribute {
+            style: AttrStyle::Inner,
+            value: meta_item,
+            is_sugared_doc: false,
+        })
+    ));
+
+    named!(pub outer_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
             punct!("[") >>
             meta_item: meta_item >>
             punct!("]") >>
             (Attribute {
+                style: AttrStyle::Outer,
                 value: meta_item,
                 is_sugared_doc: false,
             })
@@ -60,6 +111,7 @@ pub mod parsing {
             not!(peek!(tag!("/"))) >>
             content: take_until!("\n") >>
             (Attribute {
+                style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
                     Lit::Str(
@@ -102,6 +154,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 Attribute {
+                    style: AttrStyle::Outer,
                     value: MetaItem::NameValue(
                         ref name,
                         Lit::Str(ref value, StrStyle::Cooked),
@@ -112,6 +165,9 @@ mod printing {
                 }
                 _ => {
                     tokens.append("#");
+                    if let AttrStyle::Inner = self.style {
+                        tokens.append("!");
+                    }
                     tokens.append("[");
                     self.value.to_tokens(tokens);
                     tokens.append("]");

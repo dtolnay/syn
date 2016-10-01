@@ -209,7 +209,7 @@ pub struct MethodSig {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use attr::parsing::attribute;
+    use attr::parsing::outer_attr;
     use data::parsing::visibility;
     use ident::parsing::ident;
     use macro_input::{Body, MacroInput};
@@ -234,7 +234,7 @@ pub mod parsing {
     ));
 
     named!(item_extern_crate -> Item, do_parse!(
-        attrs: many0!(attribute) >>
+        attrs: many0!(outer_attr) >>
         vis: visibility >>
         keyword!("extern") >>
         keyword!("crate") >>
@@ -274,4 +274,74 @@ pub mod parsing {
             }
         }
     ));
+}
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use attr::FilterAttrs;
+    use data::{VariantData, Visibility};
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Item {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            for attr in self.attrs.outer() {
+                attr.to_tokens(tokens);
+            }
+            match self.node {
+                ItemKind::ExternCrate(ref original) => {
+                    tokens.append("extern");
+                    tokens.append("crate");
+                    if let Some(ref original) = *original {
+                        original.to_tokens(tokens);
+                        tokens.append("as");
+                    }
+                    self.ident.to_tokens(tokens);
+                    tokens.append(";");
+                }
+                ItemKind::Use(ref _view_path) => unimplemented!(),
+                ItemKind::Static(ref _ty, ref _mutability, ref _expr) => unimplemented!(),
+                ItemKind::Const(ref _ty, ref _expr) => unimplemented!(),
+                ItemKind::Fn(ref _decl, _unsafety, _constness, ref _abi, ref _generics, ref _block) => unimplemented!(),
+                ItemKind::Mod(ref _items) => unimplemented!(),
+                ItemKind::ForeignMod(ref _foreign_mod) => unimplemented!(),
+                ItemKind::Ty(ref _ty, ref _generics) => unimplemented!(),
+                ItemKind::Enum(ref variants, ref generics) => {
+                    if let Visibility::Public = self.vis {
+                        tokens.append("pub");
+                    }
+                    tokens.append("enum");
+                    self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
+                    tokens.append("{");
+                    for variant in variants {
+                        variant.to_tokens(tokens);
+                        tokens.append(",");
+                    }
+                    tokens.append("}");
+                }
+                ItemKind::Struct(ref variant_data, ref generics) => {
+                    if let Visibility::Public = self.vis {
+                        tokens.append("pub");
+                    }
+                    tokens.append("struct");
+                    self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
+                    variant_data.to_tokens(tokens);
+                    match *variant_data {
+                        VariantData::Struct(_) => { /* no semicolon */ }
+                        VariantData::Tuple(_) |
+                        VariantData::Unit => tokens.append(";"),
+                    }
+                }
+                ItemKind::Union(ref _variant_data, ref _generics) => unimplemented!(),
+                ItemKind::Trait(_unsafety, ref _generics, ref _bound, ref _item) => unimplemented!(),
+                ItemKind::DefaultImpl(_unsafety, ref _path) => unimplemented!(),
+                ItemKind::Impl(_unsafety, _polarity, ref _generics, ref _path, ref _ty, ref _item) => unimplemented!(),
+                ItemKind::Mac(ref _mac) => unimplemented!(),
+            }
+        }
+    }
 }

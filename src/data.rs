@@ -49,7 +49,7 @@ pub struct Discriminant {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use attr::parsing::attribute;
+    use attr::parsing::outer_attr;
     use ident::parsing::ident;
     use lit::parsing::int;
     use ty::parsing::ty;
@@ -71,7 +71,7 @@ pub mod parsing {
     ));
 
     named!(variant -> Variant, do_parse!(
-        attrs: many0!(attribute) >>
+        attrs: many0!(outer_attr) >>
         id: ident >>
         data: alt!(
             struct_like_body => { VariantData::Struct }
@@ -106,7 +106,7 @@ pub mod parsing {
     ));
 
     named!(struct_field -> Field, do_parse!(
-        attrs: many0!(attribute) >>
+        attrs: many0!(outer_attr) >>
         vis: visibility >>
         id: ident >>
         punct!(":") >>
@@ -120,7 +120,7 @@ pub mod parsing {
     ));
 
     named!(tuple_field -> Field, do_parse!(
-        attrs: many0!(attribute) >>
+        attrs: many0!(outer_attr) >>
         vis: visibility >>
         ty: ty >>
         (Field {

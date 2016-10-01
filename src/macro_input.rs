@@ -18,14 +18,14 @@ pub enum Body {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use attr::parsing::attribute;
+    use attr::parsing::outer_attr;
     use data::parsing::{visibility, struct_body, enum_body};
     use generics::parsing::generics;
     use ident::parsing::ident;
     use nom::multispace;
 
     named!(pub macro_input -> MacroInput, do_parse!(
-        attrs: many0!(attribute) >>
+        attrs: many0!(outer_attr) >>
         vis: visibility >>
         which: alt!(keyword!("struct") | keyword!("enum")) >>
         id: ident >>
@@ -55,12 +55,13 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
+    use attr::FilterAttrs;
     use data::{Visibility, VariantData};
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for MacroInput {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            for attr in &self.attrs {
+            for attr in self.attrs.outer() {
                 attr.to_tokens(tokens);
             }
             if let Visibility::Public = self.vis {
