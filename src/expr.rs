@@ -653,8 +653,48 @@ mod printing {
     impl ToTokens for Expr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
+                Expr::Box(ref _inner) => unimplemented!(),
+                Expr::Vec(ref _inner) => unimplemented!(),
+                Expr::Call(ref _func, ref _args) => unimplemented!(),
+                Expr::MethodCall(ref _ident, ref _ascript, ref _args) => unimplemented!(),
+                Expr::Tup(ref fields) => {
+                    tokens.append("(");
+                    tokens.append_separated(fields, ",");
+                    if fields.len() == 1 {
+                        tokens.append(",");
+                    }
+                    tokens.append(")");
+                }
+                Expr::Binary(_op, ref _left, ref _right) => unimplemented!(),
+                Expr::Unary(_op, ref _expr) => unimplemented!(),
                 Expr::Lit(ref lit) => lit.to_tokens(tokens),
-                _ => unimplemented!(),
+                Expr::Cast(ref _expr, ref _ty) => unimplemented!(),
+                Expr::Type(ref _expr, ref _ty) => unimplemented!(),
+                Expr::If(ref _cond, ref _then_block, ref _else_block) => unimplemented!(),
+                Expr::IfLet(ref _pat, ref _expr, ref _then_block, ref _else_block) => unimplemented!(),
+                Expr::While(ref _cond, ref _body, ref _label) => unimplemented!(),
+                Expr::WhileLet(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
+                Expr::ForLoop(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
+                Expr::Loop(ref _body, ref _label) => unimplemented!(),
+                Expr::Match(ref _expr, ref _arms) => unimplemented!(),
+                Expr::Closure(_capture, ref _decl, ref _body) => unimplemented!(),
+                Expr::Block(ref _block) => unimplemented!(),
+                Expr::Assign(ref _var, ref _expr) => unimplemented!(),
+                Expr::AssignOp(_op, ref _var, ref _expr) => unimplemented!(),
+                Expr::Field(ref _expr, ref _field) => unimplemented!(),
+                Expr::TupField(ref _expr, _field) => unimplemented!(),
+                Expr::Index(ref _expr, ref _index) => unimplemented!(),
+                Expr::Range(ref _from, ref _to, _limits) => unimplemented!(),
+                Expr::Path(ref _qself, ref _path) => unimplemented!(),
+                Expr::AddrOf(_mutability, ref _expr) => unimplemented!(),
+                Expr::Break(ref _label) => unimplemented!(),
+                Expr::Continue(ref _label) => unimplemented!(),
+                Expr::Ret(ref _expr) => unimplemented!(),
+                Expr::Mac(ref _mac) => unimplemented!(),
+                Expr::Struct(ref _path, ref _fields, ref _base) => unimplemented!(),
+                Expr::Repeat(ref _expr, ref _times) => unimplemented!(),
+                Expr::Paren(ref _inner) => unimplemented!(),
+                Expr::Try(ref _expr) => unimplemented!(),
             }
         }
     }

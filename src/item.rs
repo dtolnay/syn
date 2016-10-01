@@ -211,15 +211,19 @@ pub mod parsing {
     use super::*;
     use attr::parsing::outer_attr;
     use data::parsing::visibility;
+    use expr::parsing::expr;
     use ident::parsing::ident;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
+    use ty::parsing::{mutability, ty};
 
     named!(pub item -> Item, alt!(
         item_extern_crate
         // TODO: Use
-        // TODO: Static
-        // TODO: Const
+        |
+        item_static
+        |
+        item_const
         // TODO: Fn
         // TODO: Mod
         // TODO: ForeignMod
@@ -258,6 +262,43 @@ pub mod parsing {
         })
     ));
 
+    named!(item_static -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("static") >>
+        mutability: mutability >>
+        id: ident >>
+        punct!(":") >>
+        ty: ty >>
+        punct!("=") >>
+        value: expr >>
+        punct!(";") >>
+        (Item {
+            ident: id,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Static(Box::new(ty), mutability, Box::new(value)),
+        })
+    ));
+
+    named!(item_const -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("const") >>
+        id: ident >>
+        punct!(":") >>
+        ty: ty >>
+        punct!("=") >>
+        value: expr >>
+        punct!(";") >>
+        (Item {
+            ident: id,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Const(Box::new(ty), Box::new(value)),
+        })
+    ));
+
     named!(item_struct_or_enum -> Item, map!(
         macro_input,
         |def: MacroInput| Item {
@@ -280,7 +321,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use data::{VariantData, Visibility};
+    use data::VariantData;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Item {
@@ -300,16 +341,33 @@ mod printing {
                     tokens.append(";");
                 }
                 ItemKind::Use(ref _view_path) => unimplemented!(),
-                ItemKind::Static(ref _ty, ref _mutability, ref _expr) => unimplemented!(),
-                ItemKind::Const(ref _ty, ref _expr) => unimplemented!(),
+                ItemKind::Static(ref ty, ref mutability, ref expr) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("static");
+                    mutability.to_tokens(tokens);
+                    self.ident.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                    tokens.append("=");
+                    expr.to_tokens(tokens);
+                    tokens.append(";");
+                }
+                ItemKind::Const(ref ty, ref expr) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("const");
+                    self.ident.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                    tokens.append("=");
+                    expr.to_tokens(tokens);
+                    tokens.append(";");
+                }
                 ItemKind::Fn(ref _decl, _unsafety, _constness, ref _abi, ref _generics, ref _block) => unimplemented!(),
                 ItemKind::Mod(ref _items) => unimplemented!(),
                 ItemKind::ForeignMod(ref _foreign_mod) => unimplemented!(),
                 ItemKind::Ty(ref _ty, ref _generics) => unimplemented!(),
                 ItemKind::Enum(ref variants, ref generics) => {
-                    if let Visibility::Public = self.vis {
-                        tokens.append("pub");
-                    }
+                    self.vis.to_tokens(tokens);
                     tokens.append("enum");
                     self.ident.to_tokens(tokens);
                     generics.to_tokens(tokens);
@@ -322,9 +380,7 @@ mod printing {
                     tokens.append("}");
                 }
                 ItemKind::Struct(ref variant_data, ref generics) => {
-                    if let Visibility::Public = self.vis {
-                        tokens.append("pub");
-                    }
+                    self.vis.to_tokens(tokens);
                     tokens.append("struct");
                     self.ident.to_tokens(tokens);
                     generics.to_tokens(tokens);

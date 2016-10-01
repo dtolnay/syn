@@ -56,7 +56,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use data::{Visibility, VariantData};
+    use data::VariantData;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for MacroInput {
@@ -64,9 +64,7 @@ mod printing {
             for attr in self.attrs.outer() {
                 attr.to_tokens(tokens);
             }
-            if let Visibility::Public = self.vis {
-                tokens.append("pub");
-            }
+            self.vis.to_tokens(tokens);
             match self.body {
                 Body::Enum(_) => tokens.append("enum"),
                 Body::Struct(_) => tokens.append("struct"),

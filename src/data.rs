@@ -192,14 +192,20 @@ mod printing {
             for attr in &self.attrs {
                 attr.to_tokens(tokens);
             }
-            if let Visibility::Public = self.vis {
-                tokens.append("pub");
-            }
+            self.vis.to_tokens(tokens);
             if let Some(ref ident) = self.ident {
                 ident.to_tokens(tokens);
                 tokens.append(":");
             }
             self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for Visibility {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Visibility::Public = *self {
+                tokens.append("pub");
+            }
         }
     }
 

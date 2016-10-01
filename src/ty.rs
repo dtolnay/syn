@@ -337,7 +337,7 @@ pub mod parsing {
         (Ty::Paren(Box::new(elem)))
     ));
 
-    named!(mutability -> Mutability, alt!(
+    named!(pub mutability -> Mutability, alt!(
         do_parse!(
             keyword!("mut") >>
             (Mutability::Mutable)
@@ -447,9 +447,7 @@ mod printing {
                 Ty::Rptr(ref lifetime, ref target) => {
                     tokens.append("&");
                     lifetime.to_tokens(tokens);
-                    if let Mutability::Mutable = target.mutability {
-                        tokens.append("mut");
-                    }
+                    target.mutability.to_tokens(tokens);
                     target.ty.to_tokens(tokens);
                 }
                 Ty::BareFn(ref func) => {
@@ -504,6 +502,14 @@ mod printing {
                 Ty::Infer => {
                     tokens.append("_");
                 }
+            }
+        }
+    }
+
+    impl ToTokens for Mutability {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Mutability::Mutable = *self {
+                tokens.append("mut");
             }
         }
     }
