@@ -42,7 +42,6 @@ pub mod parsing {
     use ident::parsing::ident;
     use lit::{Lit, StrStyle};
     use lit::parsing::lit;
-    use nom::multispace;
 
     named!(pub attribute -> Attribute, alt!(
         do_parse!(
@@ -58,13 +57,13 @@ pub mod parsing {
         |
         do_parse!(
             punct!("///") >>
-            space: multispace >>
+            not!(peek!(tag!("/"))) >>
             content: take_until!("\n") >>
             (Attribute {
                 value: MetaItem::NameValue(
                     "doc".into(),
                     Lit::Str(
-                        format!("///{}{}", space, content),
+                        format!("///{}", content),
                         StrStyle::Cooked,
                     ),
                 ),
@@ -96,14 +95,28 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
+    use lit::{Lit, StrStyle};
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append("#");
-            tokens.append("[");
-            self.value.to_tokens(tokens);
-            tokens.append("]");
+            match *self {
+                Attribute {
+                    value: MetaItem::NameValue(
+                        ref name,
+                        Lit::Str(ref value, StrStyle::Cooked),
+                    ),
+                    is_sugared_doc: true,
+                } if name == "doc" && value.starts_with("///") => {
+                    tokens.append(&format!("{}\n", value));
+                }
+                _ => {
+                    tokens.append("#");
+                    tokens.append("[");
+                    self.value.to_tokens(tokens);
+                    tokens.append("]");
+                }
+            }
         }
     }
 
