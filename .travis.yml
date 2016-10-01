@@ -20,7 +20,7 @@ before_script:
 script:
   - travis-cargo build -- --release
   - travis-cargo test
-  - travis-cargo doc
+  - travis-cargo doc -- --features full
 
 after_success:
   - travis-cargo doc-upload
