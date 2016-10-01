@@ -40,7 +40,7 @@ pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a 
     }
 }
 
-pub fn word_break<'a>(input: &'a str) -> IResult<&'a str, ()> {
+pub fn word_break(input: &str) -> IResult<&str, ()> {
     match input.chars().next() {
         Some(ch) if UnicodeXID::is_xid_continue(ch) => {
             IResult::Error

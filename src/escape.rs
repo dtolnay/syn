@@ -61,7 +61,7 @@ pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
             _ => return IResult::Error,
         }
     }
-    while let Some((byte_offset, ch)) = chars.next() {
+    for (byte_offset, ch) in chars {
         if ch == '"' && input[byte_offset + 1..].starts_with(&input[..n]) {
             let rest = &input[byte_offset + 1 + n..];
             let value = &input[n + 1 .. byte_offset];
@@ -83,13 +83,14 @@ macro_rules! next_char {
     };
 }
 
+#[cfg_attr(feature = "clippy", allow(diverging_sub_expression))]
 fn backslash_x<I>(chars: &mut I) -> Option<char> where I: Iterator<Item = (usize, char)> {
     let a = next_char!(chars @ '0'...'7');
     let b = next_char!(chars @ '0'...'9' | 'a'...'f' | 'A'...'F');
     char_from_hex_bytes(&[a as u8, b as u8])
 }
 
-#[cfg_attr(feature = "clippy", allow(many_single_char_names))]
+#[cfg_attr(feature = "clippy", allow(diverging_sub_expression, many_single_char_names))]
 fn backslash_u<I>(chars: &mut I) -> Option<char> where I: Iterator<Item = (usize, char)> {
     next_char!(chars @ '{');
     let a = next_char!(chars @ '0'...'9' | 'a'...'f' | 'A'...'F');

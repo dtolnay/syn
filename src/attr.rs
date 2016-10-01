@@ -29,8 +29,8 @@ pub enum MetaItem {
 impl MetaItem {
     pub fn name(&self) -> &str {
         match *self {
-            MetaItem::Word(ref name) => name.as_ref(),
-            MetaItem::List(ref name, _) => name.as_ref(),
+            MetaItem::Word(ref name) |
+            MetaItem::List(ref name, _) |
             MetaItem::NameValue(ref name, _) => name.as_ref(),
         }
     }
