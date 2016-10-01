@@ -370,9 +370,12 @@ pub mod parsing {
             expr_block
             // TODO: Path
             // TODO: AddrOf
-            // TODO: Break
-            // TODO: Continue
-            // TODO: Ret
+            |
+            expr_break
+            |
+            expr_continue
+            |
+            expr_ret
             // TODO: Mac
             // TODO: Struct
             // TODO: Repeat
@@ -568,6 +571,30 @@ pub mod parsing {
             Box::new(while_block),
             lbl,
         ))
+    ));
+
+    named!(expr_continue -> Expr, do_parse!(
+        keyword!("continue") >>
+            lbl: option!(label) >>
+            (Expr::Continue(
+                lbl,
+         ))
+    ));
+
+    named!(expr_break -> Expr, do_parse!(
+        keyword!("break") >>
+            lbl: option!(label) >>
+            (Expr::Break(
+                lbl,
+         ))
+    ));
+
+    named!(expr_ret -> Expr, do_parse!(
+        keyword!("return") >>
+            ret_value: option!(expr) >>
+            (Expr::Ret(
+                ret_value.map(Box::new),
+         ))
     ));
 
     named!(expr_block -> Expr, map!(block, |b| Expr::Block(Box::new(b))));
