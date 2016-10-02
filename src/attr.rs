@@ -7,6 +7,12 @@ pub struct Attribute {
     pub is_sugared_doc: bool,
 }
 
+impl Attribute {
+    pub fn name(&self) -> &str {
+        self.value.name()
+    }
+}
+
 /// A compile-time attribute item.
 ///
 /// E.g. `#[test]`, `#[derive(..)]` or `#[feature = "foo"]`
