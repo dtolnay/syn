@@ -10,6 +10,12 @@ pub struct Attribute {
     pub is_sugared_doc: bool,
 }
 
+impl Attribute {
+    pub fn name(&self) -> &str {
+        self.value.name()
+    }
+}
+
 /// Distinguishes between Attributes that decorate items and Attributes that
 /// are contained as statements within items. These two cases need to be
 /// distinguished for pretty-printing.

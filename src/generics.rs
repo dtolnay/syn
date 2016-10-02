@@ -29,6 +29,15 @@ pub struct LifetimeDef {
     pub bounds: Vec<Lifetime>,
 }
 
+impl LifetimeDef {
+    pub fn new<T: Into<Ident>>(t: T) -> Self {
+        LifetimeDef {
+            lifetime: Lifetime::new(t),
+            bounds: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TyParam {
     pub ident: Ident,
