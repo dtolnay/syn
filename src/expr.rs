@@ -39,39 +39,39 @@ pub enum Expr {
     /// An `if` block, with an optional else block
     ///
     /// `if expr { block } else { expr }`
-    If(Box<Expr>, Box<Block>, Option<Box<Expr>>),
+    If(Box<Expr>, Block, Option<Box<Expr>>),
     /// An `if let` expression with an optional else block
     ///
     /// `if let pat = expr { block } else { expr }`
     ///
     /// This is desugared to a `match` expression.
-    IfLet(Box<Pat>, Box<Expr>, Box<Block>, Option<Box<Expr>>),
+    IfLet(Box<Pat>, Box<Expr>, Block, Option<Box<Expr>>),
     /// A while loop, with an optional label
     ///
     /// `'label: while expr { block }`
-    While(Box<Expr>, Box<Block>, Option<Ident>),
+    While(Box<Expr>, Block, Option<Ident>),
     /// A while-let loop, with an optional label
     ///
     /// `'label: while let pat = expr { block }`
     ///
     /// This is desugared to a combination of `loop` and `match` expressions.
-    WhileLet(Box<Pat>, Box<Expr>, Box<Block>, Option<Ident>),
+    WhileLet(Box<Pat>, Box<Expr>, Block, Option<Ident>),
     /// A for loop, with an optional label
     ///
     /// `'label: for pat in expr { block }`
     ///
     /// This is desugared to a combination of `loop` and `match` expressions.
-    ForLoop(Box<Pat>, Box<Expr>, Box<Block>, Option<Ident>),
+    ForLoop(Box<Pat>, Box<Expr>, Block, Option<Ident>),
     /// Conditionless loop (can be exited with break, continue, or return)
     ///
     /// `'label: loop { block }`
-    Loop(Box<Block>, Option<Ident>),
+    Loop(Block, Option<Ident>),
     /// A `match` block.
     Match(Box<Expr>, Vec<Arm>),
     /// A closure (for example, `move |a, b, c| {a + b + c}`)
-    Closure(CaptureBy, Box<FnDecl>, Box<Block>),
-    /// A block (`{ ... }`)
-    Block(Box<Block>),
+    Closure(CaptureBy, Box<FnDecl>, Block),
+    /// A block (`{ ... }` or `unsafe { ... }`)
+    Block(BlockCheckMode, Block),
 
     /// An assignment (`a = foo()`)
     Assign(Box<Expr>, Box<Expr>),
@@ -135,8 +135,6 @@ pub enum Expr {
 pub struct Block {
     /// Statements in a block
     pub stmts: Vec<Stmt>,
-    /// Distinguishes between `unsafe { ... }` and `{ ... }`
-    pub rules: BlockCheckMode,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -336,15 +334,17 @@ pub enum BindingMode {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {Ident, Lifetime, Ty};
+    use {FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Path, QSelf, Ty};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use lit::parsing::lit;
-    use ty::parsing::{mutability, ty};
+    use ty::parsing::{mutability, path, path_segment, ty};
 
     named!(pub expr -> Expr, do_parse!(
         mut e: alt!(
+            expr_paren
+            |
             expr_box
             |
             expr_vec
@@ -367,10 +367,14 @@ pub mod parsing {
             expr_loop
             |
             expr_match
-            // TODO: Closure
+            |
+            expr_closure
             |
             expr_block
-            // TODO: Path
+            |
+            expr_path
+            |
+            expr_qpath
             // TODO: AddrOf
             |
             expr_break
@@ -381,7 +385,6 @@ pub mod parsing {
             // TODO: Mac
             // TODO: Struct
             // TODO: Repeat
-            // TODO: Pparen
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
@@ -415,6 +418,13 @@ pub mod parsing {
             // TODO: Try
         )) >>
         (e)
+    ));
+
+    named!(expr_paren -> Expr, do_parse!(
+        punct!("(") >>
+        e: expr >>
+        punct!(")") >>
+        (Expr::Paren(Box::new(e)))
     ));
 
     named!(expr_box -> Expr, do_parse!(
@@ -454,6 +464,7 @@ pub mod parsing {
     named!(expr_tup -> Expr, do_parse!(
         punct!("(") >>
         elems: separated_list!(punct!(","), expr) >>
+        option!(punct!(",")) >>
         punct!(")") >>
         (Expr::Tup(elems))
     ));
@@ -536,19 +547,17 @@ pub mod parsing {
                     punct!("{") >>
                     else_block: within_block >>
                     punct!("}") >>
-                    (Expr::Block(Box::new(Block {
+                    (Expr::Block(BlockCheckMode::Default, Block {
                         stmts: else_block,
-                        rules: BlockCheckMode::Default,
-                    })))
+                    }))
                 )
             )
         )) >>
         (Expr::If(
             Box::new(cond),
-            Box::new(Block {
+            Block {
                 stmts: then_block,
-                rules: BlockCheckMode::Default,
-            }),
+            },
             else_block.map(Box::new),
         ))
     ));
@@ -557,10 +566,7 @@ pub mod parsing {
         lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("loop") >>
         loop_block: block >>
-        (Expr::Loop(
-            Box::new(loop_block),
-            lbl,
-        ))
+        (Expr::Loop(loop_block, lbl))
     ));
 
     named!(expr_match -> Expr, do_parse!(
@@ -575,7 +581,7 @@ pub mod parsing {
             body: alt!(
                 terminated!(expr, punct!(","))
                 |
-                map!(block, |blk| Expr::Block(Box::new(blk)))
+                map!(block, |blk| Expr::Block(BlockCheckMode::Default, blk))
             ) >>
             (Arm {
                 attrs: attrs,
@@ -588,6 +594,45 @@ pub mod parsing {
         (Expr::Match(Box::new(obj), arms))
     ));
 
+    named!(expr_closure -> Expr, do_parse!(
+        capture: capture_by >>
+        punct!("|") >>
+        inputs: separated_list!(punct!(","), closure_arg) >>
+        punct!("|") >>
+        ret_and_body: alt!(
+            do_parse!(
+                punct!("->") >>
+                ty: ty >>
+                body: block >>
+                ((FunctionRetTy::Ty(ty), body))
+            )
+            |
+            map!(expr, |e| (
+                FunctionRetTy::Default,
+                Block {
+                    stmts: vec![Stmt::Expr(Box::new(e))],
+                },
+            ))
+        ) >>
+        (Expr::Closure(
+            capture,
+            Box::new(FnDecl {
+                inputs: inputs,
+                output: ret_and_body.0,
+            }),
+            ret_and_body.1,
+        ))
+    ));
+
+    named!(closure_arg -> FnArg, do_parse!(
+        pat: pat >>
+        ty: option!(preceded!(punct!(":"), ty)) >>
+        (FnArg {
+            pat: pat,
+            ty: ty.unwrap_or(Ty::Infer),
+        })
+    ));
+
     named!(expr_while -> Expr, do_parse!(
         lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("while") >>
@@ -595,7 +640,7 @@ pub mod parsing {
         while_block: block >>
         (Expr::While(
             Box::new(cond),
-            Box::new(while_block),
+            while_block,
             lbl,
         ))
     ));
@@ -627,10 +672,38 @@ pub mod parsing {
     named!(expr_block -> Expr, do_parse!(
         rules: block_check_mode >>
         b: block >>
-        (Expr::Block(Box::new(Block {
+        (Expr::Block(rules, Block {
             stmts: b.stmts,
-            rules: rules,
-        })))
+        }))
+    ));
+
+    named!(expr_path -> Expr, map!(path, |p| Expr::Path(None, p)));
+
+    named!(expr_qpath -> Expr, do_parse!(
+        punct!("<") >>
+        this: map!(ty, Box::new) >>
+        path: option!(preceded!(
+            keyword!("as"),
+            path
+        )) >>
+        punct!(">") >>
+        punct!("::") >>
+        rest: separated_nonempty_list!(punct!("::"), path_segment) >>
+        ({
+            match path {
+                Some(mut path) => {
+                    let pos = path.segments.len();
+                    path.segments.extend(rest);
+                    Expr::Path(Some(QSelf { ty: this, position: pos }), path)
+                }
+                None => {
+                    Expr::Path(Some(QSelf { ty: this, position: 0 }), Path {
+                        global: false,
+                        segments: rest,
+                    })
+                }
+            }
+        })
     ));
 
     named!(pub block -> Block, do_parse!(
@@ -639,7 +712,6 @@ pub mod parsing {
         punct!("}") >>
         (Block {
             stmts: stmts,
-            rules: BlockCheckMode::Default,
         })
     ));
 
@@ -709,13 +781,19 @@ pub mod parsing {
         ))
     ));
 
+    named!(capture_by -> CaptureBy, alt!(
+        keyword!("move") => { |_| CaptureBy::Value }
+        |
+        epsilon!() => { |_| CaptureBy::Ref }
+    ));
+
     named!(label -> Ident, map!(lifetime, |lt: Lifetime| lt.ident));
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use Mutability;
+    use {FunctionRetTy, Mutability, Ty};
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Expr {
@@ -733,7 +811,11 @@ mod printing {
                     }
                     tokens.append(")");
                 }
-                Expr::Binary(_op, ref _left, ref _right) => unimplemented!(),
+                Expr::Binary(op, ref left, ref right) => {
+                    left.to_tokens(tokens);
+                    op.to_tokens(tokens);
+                    right.to_tokens(tokens);
+                }
                 Expr::Unary(_op, ref _expr) => unimplemented!(),
                 Expr::Lit(ref lit) => lit.to_tokens(tokens),
                 Expr::Cast(ref _expr, ref _ty) => unimplemented!(),
@@ -751,15 +833,76 @@ mod printing {
                     tokens.append_separated(arms, ",");
                     tokens.append("}");
                 }
-                Expr::Closure(_capture, ref _decl, ref _body) => unimplemented!(),
-                Expr::Block(ref _block) => unimplemented!(),
+                Expr::Closure(capture, ref decl, ref body) => {
+                    capture.to_tokens(tokens);
+                    tokens.append("|");
+                    for (i, input) in decl.inputs.iter().enumerate() {
+                        if i > 0 {
+                            tokens.append(",");
+                        }
+                        input.pat.to_tokens(tokens);
+                        match input.ty {
+                            Ty::Infer => { /* nothing */ }
+                            _ => {
+                                tokens.append(":");
+                                input.ty.to_tokens(tokens);
+                            }
+                        }
+                    }
+                    tokens.append("|");
+                    match decl.output {
+                        FunctionRetTy::Default => {
+                            if body.stmts.len() == 1 {
+                                if let Stmt::Expr(ref expr) = body.stmts[0] {
+                                    expr.to_tokens(tokens);
+                                } else {
+                                    body.to_tokens(tokens);
+                                }
+                            } else {
+                                body.to_tokens(tokens);
+                            }
+                        }
+                        FunctionRetTy::Ty(ref ty) => {
+                            tokens.append("->");
+                            ty.to_tokens(tokens);
+                            body.to_tokens(tokens);
+                        }
+                    }
+                }
+                Expr::Block(rules, ref block) => {
+                    rules.to_tokens(tokens);
+                    block.to_tokens(tokens);
+                }
                 Expr::Assign(ref _var, ref _expr) => unimplemented!(),
                 Expr::AssignOp(_op, ref _var, ref _expr) => unimplemented!(),
                 Expr::Field(ref _expr, ref _field) => unimplemented!(),
                 Expr::TupField(ref _expr, _field) => unimplemented!(),
                 Expr::Index(ref _expr, ref _index) => unimplemented!(),
                 Expr::Range(ref _from, ref _to, _limits) => unimplemented!(),
-                Expr::Path(ref _qself, ref _path) => unimplemented!(),
+                Expr::Path(None, ref path) => {
+                    path.to_tokens(tokens);
+                }
+                Expr::Path(Some(ref qself), ref path) => {
+                    tokens.append("<");
+                    qself.ty.to_tokens(tokens);
+                    if qself.position > 0 {
+                        tokens.append("as");
+                        for (i, segment) in path.segments.iter()
+                                                .take(qself.position)
+                                                .enumerate()
+                        {
+                            if i > 0 || path.global {
+                                tokens.append("::");
+                            }
+                            segment.to_tokens(tokens);
+                        }
+                    }
+                    tokens.append(">");
+                    for segment in path.segments.iter().skip(qself.position) {
+                        tokens.append("::");
+                        segment.to_tokens(tokens);
+                    }
+                }
                 Expr::AddrOf(_mutability, ref _expr) => unimplemented!(),
                 Expr::Break(ref _label) => unimplemented!(),
                 Expr::Continue(ref _label) => unimplemented!(),
@@ -770,8 +913,37 @@ mod printing {
                 Expr::Mac(ref _mac) => unimplemented!(),
                 Expr::Struct(ref _path, ref _fields, ref _base) => unimplemented!(),
                 Expr::Repeat(ref _expr, ref _times) => unimplemented!(),
-                Expr::Paren(ref _inner) => unimplemented!(),
+                Expr::Paren(ref expr) => {
+                    tokens.append("(");
+                    expr.to_tokens(tokens);
+                    tokens.append(")");
+                }
                 Expr::Try(ref _expr) => unimplemented!(),
+            }
+        }
+    }
+
+    impl ToTokens for BinOp {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                BinOp::Add => tokens.append("+"),
+                BinOp::Sub => tokens.append("-"),
+                BinOp::Mul => tokens.append("*"),
+                BinOp::Div => tokens.append("/"),
+                BinOp::Rem => tokens.append("%"),
+                BinOp::And => tokens.append("&&"),
+                BinOp::Or => tokens.append("||"),
+                BinOp::BitXor => tokens.append("^"),
+                BinOp::BitAnd => tokens.append("&"),
+                BinOp::BitOr => tokens.append("|"),
+                BinOp::Shl => tokens.append("<<"),
+                BinOp::Shr => tokens.append(">>"),
+                BinOp::Eq => tokens.append("=="),
+                BinOp::Lt => tokens.append("<"),
+                BinOp::Le => tokens.append("<="),
+                BinOp::Ne => tokens.append("!="),
+                BinOp::Ge => tokens.append(">="),
+                BinOp::Gt => tokens.append(">"),
             }
         }
     }
@@ -789,7 +961,7 @@ mod printing {
             tokens.append("=>");
             self.body.to_tokens(tokens);
             match *self.body {
-                Expr::Block(_) => { /* no comma */ }
+                Expr::Block(_, _) => { /* no comma */ }
                 _ => tokens.append(","),
             }
         }
@@ -839,9 +1011,17 @@ mod printing {
         }
     }
 
+    impl ToTokens for CaptureBy {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                CaptureBy::Value => tokens.append("move"),
+                CaptureBy::Ref => { /* nothing */ }
+            }
+        }
+    }
+
     impl ToTokens for Block {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.rules.to_tokens(tokens);
             tokens.append("{");
             for stmt in &self.stmts {
                 stmt.to_tokens(tokens);
@@ -853,7 +1033,7 @@ mod printing {
     impl ToTokens for BlockCheckMode {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                BlockCheckMode::Default => { /* nothing */ },
+                BlockCheckMode::Default => { /* nothing */ }
                 BlockCheckMode::Unsafe => tokens.append("unsafe"),
             }
         }

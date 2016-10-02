@@ -22,7 +22,7 @@ macro_rules! errorf {
 
 #[test]
 fn test_round_trip() {
-    let mut success = true;
+    let mut failed = 0;
 
     for entry in walkdir::WalkDir::new("tests/cases").into_iter() {
         let entry = entry.unwrap();
@@ -41,7 +41,7 @@ fn test_round_trip() {
             Ok(krate) => krate,
             Err(msg) => {
                 errorf!("syn failed to parse\n{}\n", msg);
-                success = false;
+                failed += 1;
                 continue;
             }
         };
@@ -54,7 +54,7 @@ fn test_round_trip() {
             Err(mut diagnostic) => {
                 errorf!("syntex failed to parse");
                 diagnostic.emit();
-                success = false;
+                failed += 1;
                 continue;
             }
         };
@@ -63,11 +63,13 @@ fn test_round_trip() {
             errorf!("pass\n");
         } else {
             errorf!("FAIL\nbefore: {:?}\nafter: {:?}\n", before, after);
-            success = false;
+            failed += 1;
         }
     }
 
-    assert!(success);
+    if failed > 0 {
+        panic!("{} failures", failed);
+    }
 }
 
 fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Crate> {
@@ -115,7 +117,12 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 let folded = fold::noop_fold_expr(e, self);
                 Expr {
                     node: match folded.node {
-                        ExprKind::Lit(l) => ExprKind::Lit(l.map(|l| self.fold_spanned(l))),
+                        ExprKind::Lit(l) => {
+                            ExprKind::Lit(l.map(|l| self.fold_spanned(l)))
+                        }
+                        ExprKind::Binary(op, lhs, rhs) => {
+                            ExprKind::Binary(self.fold_spanned(op), self.fold_expr(lhs), self.fold_expr(rhs))
+                        }
                         other => other,
                     },
                     .. folded

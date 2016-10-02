@@ -342,7 +342,7 @@ pub mod parsing {
         })
     ));
 
-    named!(path_segment -> PathSegment, alt!(
+    named!(pub path_segment -> PathSegment, alt!(
         do_parse!(
             id: ident >>
             punct!("<") >>
