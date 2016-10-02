@@ -337,10 +337,11 @@ pub enum BindingMode {
 pub mod parsing {
     use super::*;
     use {Ident, Lifetime, Ty};
+    use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use lit::parsing::lit;
-    use ty::parsing::ty;
+    use ty::parsing::{mutability, ty};
 
     named!(pub expr -> Expr, do_parse!(
         mut e: alt!(
@@ -364,7 +365,8 @@ pub mod parsing {
             // TODO: ForLoop
             |
             expr_loop
-            // TODO: Match
+            |
+            expr_match
             // TODO: Closure
             |
             expr_block
@@ -561,6 +563,31 @@ pub mod parsing {
         ))
     ));
 
+    named!(expr_match -> Expr, do_parse!(
+        keyword!("match") >>
+        obj: expr >>
+        punct!("{") >>
+        arms: many0!(do_parse!(
+            attrs: many0!(outer_attr) >>
+            pats: separated_nonempty_list!(punct!("|"), pat) >>
+            guard: option!(preceded!(keyword!("if"), expr)) >>
+            punct!("=>") >>
+            body: alt!(
+                terminated!(expr, punct!(","))
+                |
+                map!(block, |blk| Expr::Block(Box::new(blk)))
+            ) >>
+            (Arm {
+                attrs: attrs,
+                pats: pats,
+                guard: guard.map(Box::new),
+                body: Box::new(body),
+            })
+        )) >>
+        punct!("}") >>
+        (Expr::Match(Box::new(obj), arms))
+    ));
+
     named!(expr_while -> Expr, do_parse!(
         lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("while") >>
@@ -642,12 +669,47 @@ pub mod parsing {
         (Stmt::Semi(Box::new(e)))
     ));
 
+    named!(pat -> Pat, alt!(
+        pat_wild
+        |
+        pat_ident
+        // TODO: Struct
+        // TODO: TupleStruct
+        // TODO: Path
+        // TODO: Tuple
+        // TODO: Box
+        // TODO: Ref
+        // TODO: Lit
+        // TODO: Range
+        // TODO: Vec
+        // TODO: Mac
+    ));
+
+    named!(pat_wild -> Pat, map!(keyword!("_"), |_| Pat::Wild));
+
+    named!(pat_ident -> Pat, do_parse!(
+        mode: option!(keyword!("ref")) >>
+        mutability: mutability >>
+        name: ident >>
+        subpat: option!(preceded!(punct!("@"), pat)) >>
+        (Pat::Ident(
+            if mode.is_some() {
+                BindingMode::ByRef(mutability)
+            } else {
+                BindingMode::ByValue(mutability)
+            },
+            name,
+            subpat.map(Box::new),
+        ))
+    ));
+
     named!(label -> Ident, map!(lifetime, |lt: Lifetime| lt.ident));
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
+    use Mutability;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Expr {
@@ -676,7 +738,13 @@ mod printing {
                 Expr::WhileLet(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
                 Expr::ForLoop(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
                 Expr::Loop(ref _body, ref _label) => unimplemented!(),
-                Expr::Match(ref _expr, ref _arms) => unimplemented!(),
+                Expr::Match(ref expr, ref arms) => {
+                    tokens.append("match");
+                    expr.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_separated(arms, ",");
+                    tokens.append("}");
+                }
                 Expr::Closure(_capture, ref _decl, ref _body) => unimplemented!(),
                 Expr::Block(ref _block) => unimplemented!(),
                 Expr::Assign(ref _var, ref _expr) => unimplemented!(),
@@ -695,6 +763,69 @@ mod printing {
                 Expr::Repeat(ref _expr, ref _times) => unimplemented!(),
                 Expr::Paren(ref _inner) => unimplemented!(),
                 Expr::Try(ref _expr) => unimplemented!(),
+            }
+        }
+    }
+
+    impl ToTokens for Arm {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            for attr in &self.attrs {
+                attr.to_tokens(tokens);
+            }
+            tokens.append_separated(&self.pats, "|");
+            if let Some(ref guard) = self.guard {
+                tokens.append("if");
+                guard.to_tokens(tokens);
+            }
+            tokens.append("=>");
+            self.body.to_tokens(tokens);
+            match *self.body {
+                Expr::Block(_) => { /* no comma */ }
+                _ => tokens.append(","),
+            }
+        }
+    }
+
+    impl ToTokens for Pat {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Pat::Wild => tokens.append("_"),
+                Pat::Ident(mode, ref ident, ref subpat) => {
+                    mode.to_tokens(tokens);
+                    ident.to_tokens(tokens);
+                    if let Some(ref subpat) = *subpat {
+                        tokens.append("@");
+                        subpat.to_tokens(tokens);
+                    }
+                }
+                Pat::Struct(ref _path, ref _fields, _dots) => unimplemented!(),
+                Pat::TupleStruct(ref _path, ref _pats, _dotpos) => unimplemented!(),
+                Pat::Path(ref _qself, ref _path) => unimplemented!(),
+                Pat::Tuple(ref _pats, _dotpos) => unimplemented!(),
+                Pat::Box(ref _inner) => unimplemented!(),
+                Pat::Ref(ref _target, _mutability) => unimplemented!(),
+                Pat::Lit(ref _expr) => unimplemented!(),
+                Pat::Range(ref _lower, ref _upper) => unimplemented!(),
+                Pat::Vec(ref _before, ref _dots, ref _after) => unimplemented!(),
+                Pat::Mac(ref _mac) => unimplemented!(),
+            }
+        }
+    }
+
+    impl ToTokens for BindingMode {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                BindingMode::ByRef(Mutability::Immutable) => {
+                    tokens.append("ref");
+                }
+                BindingMode::ByRef(Mutability::Mutable) => {
+                    tokens.append("ref");
+                    tokens.append("mut");
+                }
+                BindingMode::ByValue(Mutability::Immutable) => {}
+                BindingMode::ByValue(Mutability::Mutable) => {
+                    tokens.append("mut");
+                }
             }
         }
     }
