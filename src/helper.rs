@@ -1,5 +1,3 @@
-#![cfg(feature = "parsing")]
-
 use nom::IResult;
 use space::{whitespace, word_break};
 

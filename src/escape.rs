@@ -1,5 +1,3 @@
-#![cfg(feature = "parsing")]
-
 use std::{char, str};
 use nom::IResult;
 

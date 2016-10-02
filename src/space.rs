@@ -1,5 +1,3 @@
-#![cfg(feature = "parsing")]
-
 use nom::IResult;
 use unicode_xid::UnicodeXID;
 

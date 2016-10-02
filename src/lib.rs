@@ -11,9 +11,11 @@ extern crate unicode_xid;
 #[macro_use]
 mod nom;
 
+#[cfg(feature = "parsing")]
 #[macro_use]
 mod helper;
 
+#[cfg(feature = "parsing")]
 mod escape;
 
 mod attr;
@@ -128,6 +130,7 @@ pub use macro_input::{
     MacroInput,
 };
 
+#[cfg(feature = "parsing")]
 mod space;
 
 mod ty;
