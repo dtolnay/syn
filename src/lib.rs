@@ -83,6 +83,8 @@ pub use item::{
     Abi,
     Constness,
     Defaultness,
+    FnArg,
+    FnDecl,
     ForeignItemKind,
     ForeignItem,
     ForeignMod,
@@ -131,9 +133,8 @@ mod space;
 mod ty;
 pub use ty::{
     AngleBracketedParameterData,
+    BareFnArg,
     BareFnTy,
-    FnArg,
-    FnDecl,
     FunctionRetTy,
     MutTy,
     Mutability,

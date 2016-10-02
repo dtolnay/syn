@@ -154,24 +154,16 @@ pub struct QSelf {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BareFnTy {
     pub lifetimes: Vec<LifetimeDef>,
-    pub decl: FnDecl,
-}
-
-/// Header (not the body) of a function declaration.
-///
-/// E.g. `fn foo(bar: baz)`
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct FnDecl {
-    pub inputs: Vec<FnArg>,
+    pub inputs: Vec<BareFnArg>,
     pub output: FunctionRetTy,
 }
 
-/// An argument in a function header.
+/// An argument in a function type.
 ///
 /// E.g. `bar: usize` as in `fn foo(bar: usize)`
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct FnArg {
-    pub pat: Option<Ident>,
+pub struct BareFnArg {
+    pub name: Option<Ident>,
     pub ty: Ty,
 }
 
@@ -276,12 +268,10 @@ pub mod parsing {
         )) >>
         (Ty::BareFn(Box::new(BareFnTy {
             lifetimes: lifetimes,
-            decl: FnDecl {
-                inputs: inputs,
-                output: match output {
-                    Some(ty) => FunctionRetTy::Ty(ty),
-                    None => FunctionRetTy::Default,
-                },
+            inputs: inputs,
+            output: match output {
+                Some(ty) => FunctionRetTy::Ty(ty),
+                None => FunctionRetTy::Default,
             },
         })))
     ));
@@ -406,11 +396,11 @@ pub mod parsing {
         })
     ));
 
-    named!(pub fn_arg -> FnArg, do_parse!(
-        pat: option!(terminated!(ident, punct!(":"))) >>
+    named!(pub fn_arg -> BareFnArg, do_parse!(
+        name: option!(terminated!(ident, punct!(":"))) >>
         ty: ty >>
-        (FnArg {
-            pat: pat,
+        (BareFnArg {
+            name: name,
             ty: ty,
         })
     ));
@@ -623,12 +613,6 @@ mod printing {
                 tokens.append_separated(&self.lifetimes, ",");
                 tokens.append(">");
             }
-            self.decl.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for FnDecl {
-        fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append("(");
             tokens.append_separated(&self.inputs, ",");
             tokens.append(")");
@@ -639,10 +623,10 @@ mod printing {
         }
     }
 
-    impl ToTokens for FnArg {
+    impl ToTokens for BareFnArg {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Some(ref pat) = self.pat {
-                pat.to_tokens(tokens);
+            if let Some(ref name) = self.name {
+                name.to_tokens(tokens);
                 tokens.append(":");
             }
             self.ty.to_tokens(tokens);

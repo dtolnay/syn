@@ -206,19 +206,37 @@ pub struct MethodSig {
     pub generics: Generics,
 }
 
+/// Header (not the body) of a function declaration.
+///
+/// E.g. `fn foo(bar: baz)`
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FnDecl {
+    pub inputs: Vec<FnArg>,
+    pub output: FunctionRetTy,
+}
+
+/// An argument in a function header.
+///
+/// E.g. `bar: usize` as in `fn foo(bar: usize)`
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FnArg {
+    pub pat: Pat,
+    pub ty: Ty,
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {FnDecl, FunctionRetTy, Generics};
+    use {FunctionRetTy, Generics};
     use attr::parsing::outer_attr;
     use data::parsing::visibility;
-    use expr::parsing::{block, expr};
+    use expr::parsing::{block, expr, pat};
     use generics::parsing::{generics, where_clause};
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
-    use ty::parsing::{fn_arg, mutability, ty};
+    use ty::parsing::{mutability, ty};
 
     named!(pub item -> Item, alt!(
         item_extern_crate
@@ -340,6 +358,16 @@ pub mod parsing {
         })
     ));
 
+    named!(fn_arg -> FnArg, do_parse!(
+        pat: pat >>
+        punct!(":") >>
+        ty: ty >>
+        (FnArg {
+            pat: pat,
+            ty: ty,
+        })
+    ));
+
     named!(item_ty -> Item, do_parse!(
         attrs: many0!(outer_attr) >>
         vis: visibility >>
@@ -396,6 +424,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
+    use FunctionRetTy;
     use attr::FilterAttrs;
     use data::VariantData;
     use quote::{Tokens, ToTokens};
@@ -446,7 +475,13 @@ mod printing {
                     tokens.append("fn");
                     self.ident.to_tokens(tokens);
                     generics.to_tokens(tokens);
-                    decl.to_tokens(tokens);
+                    tokens.append("(");
+                    tokens.append_separated(&decl.inputs, ",");
+                    tokens.append(")");
+                    if let FunctionRetTy::Ty(ref ty) = decl.output {
+                        tokens.append("->");
+                        ty.to_tokens(tokens);
+                    }
                     generics.where_clause.to_tokens(tokens);
                     block.to_tokens(tokens);
                 }
@@ -493,6 +528,14 @@ mod printing {
                 ItemKind::Impl(_unsafety, _polarity, ref _generics, ref _path, ref _ty, ref _item) => unimplemented!(),
                 ItemKind::Mac(ref _mac) => unimplemented!(),
             }
+        }
+    }
+
+    impl ToTokens for FnArg {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.pat.to_tokens(tokens);
+            tokens.append(":");
+            self.ty.to_tokens(tokens);
         }
     }
 
