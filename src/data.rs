@@ -132,10 +132,7 @@ pub mod parsing {
     ));
 
     named!(pub visibility -> Visibility, alt!(
-        do_parse!(
-            keyword!("pub") >>
-            (Visibility::Public)
-        )
+        keyword!("pub") => { |_| Visibility::Public }
         |
         epsilon!() => { |_| Visibility::Inherited }
     ));

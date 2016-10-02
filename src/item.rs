@@ -403,19 +403,13 @@ pub mod parsing {
     ));
 
     named!(constness -> Constness, alt!(
-        do_parse!(
-            keyword!("const") >>
-            (Constness::Const)
-        )
+        keyword!("const") => { |_| Constness::Const }
         |
         epsilon!() => { |_| Constness::NotConst }
     ));
 
     named!(unsafety -> Unsafety, alt!(
-        do_parse!(
-            keyword!("unsafe") >>
-            (Unsafety::Unsafe)
-        )
+        keyword!("unsafe") => { |_| Unsafety::Unsafe }
         |
         epsilon!() => { |_| Unsafety::Normal }
     ));

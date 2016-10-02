@@ -328,10 +328,7 @@ pub mod parsing {
     ));
 
     named!(pub mutability -> Mutability, alt!(
-        do_parse!(
-            keyword!("mut") >>
-            (Mutability::Mutable)
-        )
+        keyword!("mut") => { |_| Mutability::Mutable }
         |
         epsilon!() => { |_| Mutability::Immutable }
     ));
