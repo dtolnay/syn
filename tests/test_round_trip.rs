@@ -8,8 +8,7 @@ extern crate syntex_syntax;
 extern crate walkdir;
 
 use syntex_pos::Span;
-use syntex_syntax::ast::{self, Attribute, TyParam};
-use syntex_syntax::fold::{self, Folder};
+use syntex_syntax::ast;
 use syntex_syntax::parse::{self, ParseSess, PResult};
 
 use std::fs::File;
@@ -78,11 +77,50 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 }
 
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
+    use syntex_syntax::ast::{Attribute, Expr, ExprKind, FnDecl, FunctionRetTy, ItemKind, Mac, TyParam};
+    use syntex_syntax::codemap::{self, Spanned};
+    use syntex_syntax::fold::{self, Folder};
+    use syntex_syntax::ptr::P;
+    use syntex_syntax::util::move_map::MoveMap;
+
     struct Respanner;
+
+    impl Respanner {
+        fn fold_spanned<T>(&mut self, spanned: Spanned<T>) -> Spanned<T> {
+            codemap::respan(self.new_span(spanned.span), spanned.node)
+        }
+    }
 
     impl Folder for Respanner {
         fn new_span(&mut self, _: Span) -> Span {
             syntex_pos::DUMMY_SP
+        }
+
+        fn fold_item_kind(&mut self, i: ItemKind) -> ItemKind {
+            match i {
+                ItemKind::Fn(decl, unsafety, constness, abi, generics, body) => {
+                    let generics = self.fold_generics(generics);
+                    let decl = self.fold_fn_decl(decl);
+                    let body = self.fold_block(body);
+                    // default fold_item_kind does not fold this span
+                    let constness = self.fold_spanned(constness);
+                    ItemKind::Fn(decl, unsafety, constness, abi, generics, body)
+                }
+                _ => fold::noop_fold_item_kind(i, self),
+            }
+        }
+
+        fn fold_expr(&mut self, e: P<Expr>) -> P<Expr> {
+            e.map(|e| {
+                let folded = fold::noop_fold_expr(e, self);
+                Expr {
+                    node: match folded.node {
+                        ExprKind::Lit(l) => ExprKind::Lit(l.map(|l| self.fold_spanned(l))),
+                        other => other,
+                    },
+                    .. folded
+                }
+            })
         }
 
         fn fold_ty_param(&mut self, tp: TyParam) -> TyParam {
@@ -93,12 +131,24 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
             }
         }
 
+        fn fold_fn_decl(&mut self, decl: P<FnDecl>) -> P<FnDecl> {
+            decl.map(|FnDecl {inputs, output, variadic}| FnDecl {
+                inputs: inputs.move_map(|x| self.fold_arg(x)),
+                output: match output {
+                    FunctionRetTy::Ty(ty) => FunctionRetTy::Ty(self.fold_ty(ty)),
+                    // default fold_fn_decl does not fold this span
+                    FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
+                },
+                variadic: variadic
+            })
+        }
+
         fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
             at.node.id.0 = 0;
             fold::noop_fold_attribute(at, self)
         }
 
-        fn fold_mac(&mut self, mac: ast::Mac) -> ast::Mac {
+        fn fold_mac(&mut self, mac: Mac) -> Mac {
             fold::noop_fold_mac(mac, self)
         }
     }

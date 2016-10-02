@@ -154,7 +154,7 @@ pub struct QSelf {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BareFnTy {
     pub lifetimes: Vec<LifetimeDef>,
-    pub decl: FnDecl
+    pub decl: FnDecl,
 }
 
 /// Header (not the body) of a function declaration.
@@ -406,7 +406,7 @@ pub mod parsing {
         })
     ));
 
-    named!(fn_arg -> FnArg, do_parse!(
+    named!(pub fn_arg -> FnArg, do_parse!(
         pat: option!(terminated!(ident, punct!(":"))) >>
         ty: ty >>
         (FnArg {
@@ -620,16 +620,32 @@ mod printing {
             tokens.append("fn");
             if !self.lifetimes.is_empty() {
                 tokens.append("<");
-                for (i, lifetime) in self.lifetimes.iter().enumerate() {
-                    if i > 0 {
-                        tokens.append(",");
-                    }
-                    lifetime.to_tokens(tokens);
-                }
+                tokens.append_separated(&self.lifetimes, ",");
                 tokens.append(">");
             }
+            self.decl.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for FnDecl {
+        fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append("(");
+            tokens.append_separated(&self.inputs, ",");
             tokens.append(")");
+            if let FunctionRetTy::Ty(ref ty) = self.output {
+                tokens.append("->");
+                ty.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for FnArg {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Some(ref pat) = self.pat {
+                pat.to_tokens(tokens);
+                tokens.append(":");
+            }
+            self.ty.to_tokens(tokens);
         }
     }
 }

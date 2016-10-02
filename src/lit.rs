@@ -74,16 +74,18 @@ pub mod parsing {
     ));
 
     named!(string -> Lit, alt!(
-        delimited!(
-            punct!("\""),
-            cooked_string,
-            tag!("\"")
-        ) => { |s| Lit::Str(s, StrStyle::Cooked) }
+        quoted_string => { |s| Lit::Str(s, StrStyle::Cooked) }
         |
         preceded!(
             punct!("r"),
             raw_string
         ) => { |(s, n)| Lit::Str(s, StrStyle::Raw(n)) }
+    ));
+
+    named!(pub quoted_string -> String, delimited!(
+        punct!("\""),
+        cooked_string,
+        tag!("\"")
     ));
 
     named!(byte_string -> Lit, alt!(

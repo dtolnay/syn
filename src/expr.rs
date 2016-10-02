@@ -624,16 +624,22 @@ pub mod parsing {
          ))
     ));
 
-    named!(expr_block -> Expr, map!(block, |b| Expr::Block(Box::new(b))));
-
-    named!(block -> Block, do_parse!(
+    named!(expr_block -> Expr, do_parse!(
         rules: block_check_mode >>
+        b: block >>
+        (Expr::Block(Box::new(Block {
+            stmts: b.stmts,
+            rules: rules,
+        })))
+    ));
+
+    named!(pub block -> Block, do_parse!(
         punct!("{") >>
         stmts: within_block >>
         punct!("}") >>
         (Block {
             stmts: stmts,
-            rules: rules,
+            rules: BlockCheckMode::Default,
         })
     ));
 
@@ -669,7 +675,7 @@ pub mod parsing {
         (Stmt::Semi(Box::new(e)))
     ));
 
-    named!(pat -> Pat, alt!(
+    named!(pub pat -> Pat, alt!(
         pat_wild
         |
         pat_ident
@@ -757,7 +763,10 @@ mod printing {
                 Expr::AddrOf(_mutability, ref _expr) => unimplemented!(),
                 Expr::Break(ref _label) => unimplemented!(),
                 Expr::Continue(ref _label) => unimplemented!(),
-                Expr::Ret(ref _expr) => unimplemented!(),
+                Expr::Ret(ref opt_expr) => {
+                    tokens.append("return");
+                    opt_expr.to_tokens(tokens);
+                }
                 Expr::Mac(ref _mac) => unimplemented!(),
                 Expr::Struct(ref _path, ref _fields, ref _base) => unimplemented!(),
                 Expr::Repeat(ref _expr, ref _times) => unimplemented!(),
@@ -826,6 +835,41 @@ mod printing {
                 BindingMode::ByValue(Mutability::Mutable) => {
                     tokens.append("mut");
                 }
+            }
+        }
+    }
+
+    impl ToTokens for Block {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.rules.to_tokens(tokens);
+            tokens.append("{");
+            for stmt in &self.stmts {
+                stmt.to_tokens(tokens);
+            }
+            tokens.append("}");
+        }
+    }
+
+    impl ToTokens for BlockCheckMode {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                BlockCheckMode::Default => { /* nothing */ },
+                BlockCheckMode::Unsafe => tokens.append("unsafe"),
+            }
+        }
+    }
+
+    impl ToTokens for Stmt {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Stmt::Local(ref _local) => unimplemented!(),
+                Stmt::Item(ref item) => item.to_tokens(tokens),
+                Stmt::Expr(ref expr) => expr.to_tokens(tokens),
+                Stmt::Semi(ref expr) => {
+                    expr.to_tokens(tokens);
+                    tokens.append(";");
+                }
+                Stmt::Mac(ref _mac) => unimplemented!(),
             }
         }
     }

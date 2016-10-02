@@ -32,7 +32,7 @@ pub enum ItemKind {
     /// A function declaration (`fn` or `pub fn`).
     ///
     /// E.g. `fn foo(bar: usize) -> usize { .. }`
-    Fn(Box<FnDecl>, Unsafety, Constness, Abi, Generics, Box<Block>),
+    Fn(Box<FnDecl>, Unsafety, Constness, Option<Abi>, Generics, Box<Block>),
     /// A module declaration (`mod` or `pub mod`).
     ///
     /// E.g. `mod foo;` or `mod foo { .. }`
@@ -209,14 +209,16 @@ pub struct MethodSig {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use {FnDecl, FunctionRetTy, Generics};
     use attr::parsing::outer_attr;
     use data::parsing::visibility;
-    use expr::parsing::expr;
-    use generics::parsing::generics;
+    use expr::parsing::{block, expr};
+    use generics::parsing::{generics, where_clause};
     use ident::parsing::ident;
+    use lit::parsing::quoted_string;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
-    use ty::parsing::{mutability, ty};
+    use ty::parsing::{fn_arg, mutability, ty};
 
     named!(pub item -> Item, alt!(
         item_extern_crate
@@ -225,7 +227,8 @@ pub mod parsing {
         item_static
         |
         item_const
-        // TODO: Fn
+        |
+        item_fn
         // TODO: Mod
         // TODO: ForeignMod
         |
@@ -301,6 +304,42 @@ pub mod parsing {
         })
     ));
 
+    named!(item_fn -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        constness: constness >>
+        unsafety: unsafety >>
+        abi: option!(preceded!(keyword!("extern"), quoted_string)) >>
+        keyword!("fn") >>
+        name: ident >>
+        generics: generics >>
+        punct!("(") >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        punct!(")") >>
+        ret: option!(preceded!(punct!("->"), ty)) >>
+        where_clause: where_clause >>
+        body: block >>
+        (Item {
+            ident: name,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Fn(
+                Box::new(FnDecl {
+                    inputs: inputs,
+                    output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                }),
+                unsafety,
+                constness,
+                abi.map(Abi),
+                Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
+                Box::new(body),
+            ),
+        })
+    ));
+
     named!(item_ty -> Item, do_parse!(
         attrs: many0!(outer_attr) >>
         vis: visibility >>
@@ -333,6 +372,24 @@ pub mod parsing {
                 }
             }
         }
+    ));
+
+    named!(constness -> Constness, alt!(
+        do_parse!(
+            keyword!("const") >>
+            (Constness::Const)
+        )
+        |
+        epsilon!() => { |_| Constness::NotConst }
+    ));
+
+    named!(unsafety -> Unsafety, alt!(
+        do_parse!(
+            keyword!("unsafe") >>
+            (Unsafety::Unsafe)
+        )
+        |
+        epsilon!() => { |_| Unsafety::Normal }
     ));
 }
 
@@ -381,7 +438,18 @@ mod printing {
                     expr.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Fn(ref _decl, _unsafety, _constness, ref _abi, ref _generics, ref _block) => unimplemented!(),
+                ItemKind::Fn(ref decl, unsafety, constness, ref abi, ref generics, ref block) => {
+                    self.vis.to_tokens(tokens);
+                    constness.to_tokens(tokens);
+                    unsafety.to_tokens(tokens);
+                    abi.to_tokens(tokens);
+                    tokens.append("fn");
+                    self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
+                    decl.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
+                    block.to_tokens(tokens);
+                }
                 ItemKind::Mod(ref _items) => unimplemented!(),
                 ItemKind::ForeignMod(ref _foreign_mod) => unimplemented!(),
                 ItemKind::Ty(ref ty, ref generics) => {
@@ -425,6 +493,31 @@ mod printing {
                 ItemKind::Impl(_unsafety, _polarity, ref _generics, ref _path, ref _ty, ref _item) => unimplemented!(),
                 ItemKind::Mac(ref _mac) => unimplemented!(),
             }
+        }
+    }
+
+    impl ToTokens for Unsafety {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Unsafety::Unsafe => tokens.append("unsafe"),
+                Unsafety::Normal => { /* nothing */ },
+            }
+        }
+    }
+
+    impl ToTokens for Constness {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Constness::Const => tokens.append("const"),
+                Constness::NotConst => { /* nothing */ },
+            }
+        }
+    }
+
+    impl ToTokens for Abi {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("extern");
+            self.0.to_tokens(tokens);
         }
     }
 }
