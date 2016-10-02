@@ -14,6 +14,14 @@ pub struct Lifetime {
     pub ident: Ident,
 }
 
+impl Lifetime {
+    pub fn new<T: Into<Ident>>(t: T) -> Self {
+        Lifetime {
+            ident: Ident::new(t),
+        }
+    }
+}
+
 /// A lifetime definition, e.g. `'a: 'b+'c+'d`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LifetimeDef {
