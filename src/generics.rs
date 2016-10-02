@@ -89,8 +89,8 @@ pub mod parsing {
     use ident::parsing::ident;
     use ty::parsing::{ty, poly_trait_ref};
 
-    named!(pub generics -> Generics, do_parse!(
-        bracketed: alt!(
+    named!(pub generics -> Generics, map!(
+        alt!(
             do_parse!(
                 punct!("<") >>
                 lifetimes: separated_list!(punct!(","), lifetime_def) >>
@@ -103,13 +103,12 @@ pub mod parsing {
             )
             |
             epsilon!() => { |_| (Vec::new(), Vec::new()) }
-        ) >>
-        where_clause: where_clause >>
-        (Generics {
-            lifetimes: bracketed.0,
-            ty_params: bracketed.1,
-            where_clause: where_clause,
-        })
+        ),
+        |(lifetimes, ty_params)| Generics {
+            lifetimes: lifetimes,
+            ty_params: ty_params,
+            where_clause: Default::default(),
+        }
     ));
 
     named!(pub lifetime -> Lifetime, preceded!(

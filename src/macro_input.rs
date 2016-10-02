@@ -18,9 +18,10 @@ pub enum Body {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use Generics;
     use attr::parsing::outer_attr;
     use data::parsing::{visibility, struct_body, enum_body};
-    use generics::parsing::generics;
+    use generics::parsing::{generics, where_clause};
     use space::whitespace;
     use ident::parsing::ident;
 
@@ -30,12 +31,16 @@ pub mod parsing {
         which: alt!(keyword!("struct") | keyword!("enum")) >>
         id: ident >>
         generics: generics >>
+        where_clause: where_clause >>
         item: switch!(value!(which),
             "struct" => map!(struct_body, move |body| MacroInput {
                 ident: id,
                 vis: vis,
                 attrs: attrs,
-                generics: generics,
+                generics: Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
                 body: Body::Struct(body),
             })
             |
@@ -43,7 +48,10 @@ pub mod parsing {
                 ident: id,
                 vis: vis,
                 attrs: attrs,
-                generics: generics,
+                generics: Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
                 body: Body::Enum(body),
             })
         ) >>

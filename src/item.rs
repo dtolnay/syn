@@ -212,6 +212,7 @@ pub mod parsing {
     use attr::parsing::outer_attr;
     use data::parsing::visibility;
     use expr::parsing::expr;
+    use generics::parsing::generics;
     use ident::parsing::ident;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
@@ -227,7 +228,8 @@ pub mod parsing {
         // TODO: Fn
         // TODO: Mod
         // TODO: ForeignMod
-        // TODO: Ty
+        |
+        item_ty
         |
         item_struct_or_enum
         // TODO: Union
@@ -299,6 +301,23 @@ pub mod parsing {
         })
     ));
 
+    named!(item_ty -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("type") >>
+        id: ident >>
+        generics: generics >>
+        punct!("=") >>
+        ty: ty >>
+        punct!(";") >>
+        (Item {
+            ident: id,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Ty(Box::new(ty), generics),
+        })
+    ));
+
     named!(item_struct_or_enum -> Item, map!(
         macro_input,
         |def: MacroInput| Item {
@@ -365,7 +384,15 @@ mod printing {
                 ItemKind::Fn(ref _decl, _unsafety, _constness, ref _abi, ref _generics, ref _block) => unimplemented!(),
                 ItemKind::Mod(ref _items) => unimplemented!(),
                 ItemKind::ForeignMod(ref _foreign_mod) => unimplemented!(),
-                ItemKind::Ty(ref _ty, ref _generics) => unimplemented!(),
+                ItemKind::Ty(ref ty, ref generics) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("type");
+                    self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
+                    tokens.append("=");
+                    ty.to_tokens(tokens);
+                    tokens.append(";");
+                }
                 ItemKind::Enum(ref variants, ref generics) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("enum");
