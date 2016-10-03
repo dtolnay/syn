@@ -873,14 +873,17 @@ pub mod parsing {
     ));
 
     named!(pub pat -> Pat, alt!(
-        pat_wild
+        pat_wild // must be before pat_ident
+        |
+        pat_box // must be before pat_ident
         |
         pat_ident
         // TODO: Struct
         // TODO: TupleStruct
         |
         pat_path
-        // TODO: Tuple
+        |
+        pat_tuple
         // TODO: Box
         // TODO: Ref
         // TODO: Lit
@@ -893,6 +896,12 @@ pub mod parsing {
     named!(pat_mac -> Pat, map!(mac, Pat::Mac));
 
     named!(pat_wild -> Pat, map!(keyword!("_"), |_| Pat::Wild));
+
+    named!(pat_box -> Pat, do_parse!(
+        keyword!("box") >>
+        pat: pat >>
+        (Pat::Box(Box::new(pat)))
+    ));
 
     named!(pat_ident -> Pat, do_parse!(
         mode: option!(keyword!("ref")) >>
@@ -911,6 +920,28 @@ pub mod parsing {
     ));
 
     named!(pat_path -> Pat, map!(qpath, |(qself, path)| Pat::Path(qself, path)));
+
+    named!(pat_tuple -> Pat, do_parse!(
+        punct!("(") >>
+        mut elems: separated_list!(punct!(","), pat) >>
+        dotdot: option!(do_parse!(
+            cond!(!elems.is_empty(), punct!(",")) >>
+            punct!("..") >>
+            rest: many0!(preceded!(punct!(","), pat)) >>
+            cond!(!rest.is_empty(), option!(punct!(","))) >>
+            (rest)
+        )) >>
+        cond!(!elems.is_empty() && dotdot.is_none(), option!(punct!(","))) >>
+        punct!(")") >>
+        (match dotdot {
+            Some(rest) => {
+                let pos = elems.len();
+                elems.extend(rest);
+                Pat::Tuple(elems, Some(pos))
+            }
+            None => Pat::Tuple(elems, None),
+        })
+    ));
 
     named!(capture_by -> CaptureBy, alt!(
         keyword!("move") => { |_| CaptureBy::Value }
@@ -1310,8 +1341,28 @@ mod printing {
                 Pat::Struct(ref _path, ref _fields, _dots) => unimplemented!(),
                 Pat::TupleStruct(ref _path, ref _pats, _dotpos) => unimplemented!(),
                 Pat::Path(ref _qself, ref _path) => unimplemented!(),
-                Pat::Tuple(ref _pats, _dotpos) => unimplemented!(),
-                Pat::Box(ref _inner) => unimplemented!(),
+                Pat::Tuple(ref pats, dotpos) => {
+                    tokens.append("(");
+                    match dotpos {
+                        Some(pos) => {
+                            if pos > 0 {
+                                tokens.append_separated(&pats[..pos], ",");
+                                tokens.append(",");
+                            }
+                            tokens.append("..");
+                            if pos < pats.len() {
+                                tokens.append(",");
+                                tokens.append_separated(&pats[pos..], ",");
+                            }
+                        }
+                        None => tokens.append_separated(pats, ","),
+                    }
+                    tokens.append(")");
+                }
+                Pat::Box(ref inner) => {
+                    tokens.append("box");
+                    inner.to_tokens(tokens);
+                }
                 Pat::Ref(ref _target, _mutability) => unimplemented!(),
                 Pat::Lit(ref _expr) => unimplemented!(),
                 Pat::Range(ref _lower, ref _upper) => unimplemented!(),
