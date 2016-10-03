@@ -365,7 +365,6 @@ pub mod parsing {
             expr_unary
             |
             expr_if
-            // TODO: IfLet
             |
             expr_while
             // TODO: WhileLet
@@ -543,9 +542,24 @@ pub mod parsing {
 
     named!(and_ascription -> Ty, preceded!(punct!(":"), ty));
 
+    enum IfCond {
+        Let(Pat, Expr),
+        Expr(Expr),
+    }
+
     named!(expr_if -> Expr, do_parse!(
         keyword!("if") >>
-        cond: expr >>
+        cond: alt!(
+            do_parse!(
+                keyword!("let") >>
+                pat: pat >>
+                punct!("=") >>
+                value: expr >>
+                (IfCond::Let(pat, value))
+            )
+            |
+            map!(expr, IfCond::Expr)
+        ) >>
         punct!("{") >>
         then_block: within_block >>
         punct!("}") >>
@@ -564,13 +578,23 @@ pub mod parsing {
                 )
             )
         )) >>
-        (Expr::If(
-            Box::new(cond),
-            Block {
-                stmts: then_block,
-            },
-            else_block.map(Box::new),
-        ))
+        (match cond {
+            IfCond::Let(pat, expr) => Expr::IfLet(
+                Box::new(pat),
+                Box::new(expr),
+                Block {
+                    stmts: then_block,
+                },
+                else_block.map(Box::new),
+            ),
+            IfCond::Expr(cond) => Expr::If(
+                Box::new(cond),
+                Block {
+                    stmts: then_block,
+                },
+                else_block.map(Box::new),
+            ),
+        })
     ));
 
     named!(expr_loop -> Expr, do_parse!(
@@ -897,7 +921,18 @@ mod printing {
                         else_block.to_tokens(tokens);
                     }
                 }
-                Expr::IfLet(ref _pat, ref _expr, ref _then_block, ref _else_block) => unimplemented!(),
+                Expr::IfLet(ref pat, ref expr, ref then_block, ref else_block) => {
+                    tokens.append("if");
+                    tokens.append("let");
+                    pat.to_tokens(tokens);
+                    tokens.append("=");
+                    expr.to_tokens(tokens);
+                    then_block.to_tokens(tokens);
+                    if let Some(ref else_block) = *else_block {
+                        tokens.append("else");
+                        else_block.to_tokens(tokens);
+                    }
+                }
                 Expr::While(ref _cond, ref _body, ref _label) => unimplemented!(),
                 Expr::WhileLet(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
                 Expr::ForLoop(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),

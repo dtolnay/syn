@@ -25,7 +25,15 @@ fn conditional() {
         1
     } else {
         -1
-    }
+    };
+
+    if let a = b {
+        0
+    } else if c {
+        1
+    } else if let d = e {
+        -1
+    };
 }
 
 fn item() {
