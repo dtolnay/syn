@@ -69,11 +69,11 @@ pub enum ItemKind {
     ///
     /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
     Impl(Unsafety,
-             ImplPolarity,
-             Generics,
-             Option<Path>, // (optional) trait this impl implements
-             Box<Ty>, // self
-             Vec<ImplItem>),
+         ImplPolarity,
+         Generics,
+         Option<Path>, // (optional) trait this impl implements
+         Box<Ty>, // self
+         Vec<ImplItem>),
     /// A macro invocation (which includes macro definition).
     ///
     /// E.g. `macro_rules! foo { .. }` or `foo!(..)`
@@ -93,7 +93,7 @@ pub enum ViewPath {
     Glob(Path),
 
     /// `foo::bar::{a, b, c}`
-    List(Path, Vec<PathListItem>)
+    List(Path, Vec<PathListItem>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -241,23 +241,23 @@ pub mod parsing {
 
     named!(pub item -> Item, alt!(
         item_extern_crate
-        // TODO: Use
+    // TODO: Use
         |
         item_static
         |
         item_const
         |
         item_fn
-        // TODO: Mod
-        // TODO: ForeignMod
+    // TODO: Mod
+    // TODO: ForeignMod
         |
         item_ty
         |
         item_struct_or_enum
-        // TODO: Union
-        // TODO: Trait
-        // TODO: DefaultImpl
-        // TODO: Impl
+    // TODO: Union
+    // TODO: Trait
+    // TODO: DefaultImpl
+    // TODO: Impl
         |
         item_mac
     ));
@@ -530,7 +530,9 @@ mod printing {
                     generics.where_clause.to_tokens(tokens);
                     variant_data.to_tokens(tokens);
                     match *variant_data {
-                        VariantData::Struct(_) => { /* no semicolon */ }
+                        VariantData::Struct(_) => {
+                            // no semicolon
+                        }
                         VariantData::Tuple(_) |
                         VariantData::Unit => tokens.append(";"),
                     }
@@ -538,7 +540,12 @@ mod printing {
                 ItemKind::Union(ref _variant_data, ref _generics) => unimplemented!(),
                 ItemKind::Trait(_unsafety, ref _generics, ref _bound, ref _item) => unimplemented!(),
                 ItemKind::DefaultImpl(_unsafety, ref _path) => unimplemented!(),
-                ItemKind::Impl(_unsafety, _polarity, ref _generics, ref _path, ref _ty, ref _item) => unimplemented!(),
+                ItemKind::Impl(_unsafety,
+                               _polarity,
+                               ref _generics,
+                               ref _path,
+                               ref _ty,
+                               ref _item) => unimplemented!(),
                 ItemKind::Mac(ref mac) => {
                     mac.path.to_tokens(tokens);
                     tokens.append("!");
@@ -547,9 +554,9 @@ mod printing {
                         tt.to_tokens(tokens);
                     }
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(
-                            Delimited { delim: DelimToken::Brace, .. }
-                        )) => { /* no semicolon */ }
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                            // no semicolon
+                        }
                         _ => tokens.append(";"),
                     }
                 }
@@ -569,7 +576,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 Unsafety::Unsafe => tokens.append("unsafe"),
-                Unsafety::Normal => { /* nothing */ },
+                Unsafety::Normal => {
+                    // nothing
+                }
             }
         }
     }
@@ -578,7 +587,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 Constness::Const => tokens.append("const"),
-                Constness::NotConst => { /* nothing */ },
+                Constness::NotConst => {
+                    // nothing
+                }
             }
         }
     }

@@ -417,12 +417,12 @@ pub mod parsing {
             tap!(ty: and_ascription => {
                 e = Expr::Type(Box::new(e), Box::new(ty));
             })
-            // TODO: Assign
-            // TODO: AssignOp
-            // TODO: Field
-            // TODO: TupField
-            // TODO: Index
-            // TODO: Range
+    // TODO: Assign
+    // TODO: AssignOp
+    // TODO: Field
+    // TODO: TupField
+    // TODO: Index
+    // TODO: Range
             |
             tap!(_try: punct!("?") => {
                 e = Expr::Try(Box::new(e));
@@ -882,16 +882,16 @@ pub mod parsing {
         pat_ident // must be before pat_path
         |
         pat_path
-        // TODO: Struct
-        // TODO: TupleStruct
+    // TODO: Struct
+    // TODO: TupleStruct
         |
         pat_tuple
-        // TODO: Box
+    // TODO: Box
         |
         pat_ref
         |
         pat_lit
-        // TODO: Vec
+    // TODO: Vec
         |
         pat_mac
     ));
@@ -1117,7 +1117,9 @@ mod printing {
                         }
                         input.pat.to_tokens(tokens);
                         match input.ty {
-                            Ty::Infer => { /* nothing */ }
+                            Ty::Infer => {
+                                // nothing
+                            }
                             _ => {
                                 tokens.append(":");
                                 input.ty.to_tokens(tokens);
@@ -1188,10 +1190,10 @@ mod printing {
                     qself.ty.to_tokens(tokens);
                     if qself.position > 0 {
                         tokens.append("as");
-                        for (i, segment) in path.segments.iter()
-                                                .take(qself.position)
-                                                .enumerate()
-                        {
+                        for (i, segment) in path.segments
+                            .iter()
+                            .take(qself.position)
+                            .enumerate() {
                             if i > 0 || path.global {
                                 tokens.append("::");
                             }
@@ -1339,7 +1341,9 @@ mod printing {
             tokens.append("=>");
             self.body.to_tokens(tokens);
             match *self.body {
-                Expr::Block(_, _) => { /* no comma */ }
+                Expr::Block(_, _) => {
+                    // no comma
+                }
                 _ => tokens.append(","),
             }
         }
@@ -1365,10 +1369,10 @@ mod printing {
                     qself.ty.to_tokens(tokens);
                     if qself.position > 0 {
                         tokens.append("as");
-                        for (i, segment) in path.segments.iter()
-                                                .take(qself.position)
-                                                .enumerate()
-                        {
+                        for (i, segment) in path.segments
+                            .iter()
+                            .take(qself.position)
+                            .enumerate() {
                             if i > 0 || path.global {
                                 tokens.append("::");
                             }
@@ -1442,7 +1446,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 CaptureBy::Value => tokens.append("move"),
-                CaptureBy::Ref => { /* nothing */ }
+                CaptureBy::Ref => {
+                    // nothing
+                }
             }
         }
     }
@@ -1460,7 +1466,9 @@ mod printing {
     impl ToTokens for BlockCheckMode {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                BlockCheckMode::Default => { /* nothing */ }
+                BlockCheckMode::Default => {
+                    // nothing
+                }
                 BlockCheckMode::Unsafe => tokens.append("unsafe"),
             }
         }
@@ -1484,7 +1492,9 @@ mod printing {
                     mac.to_tokens(tokens);
                     match style {
                         MacStmtStyle::Semicolon => tokens.append(";"),
-                        MacStmtStyle::Braces | MacStmtStyle::NoBraces => { /* no semicolon */ }
+                        MacStmtStyle::Braces | MacStmtStyle::NoBraces => {
+                            // no semicolon
+                        }
                     }
                 }
             }

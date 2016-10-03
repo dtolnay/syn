@@ -39,7 +39,9 @@ impl Display for Ident {
     }
 }
 
-impl<T: ?Sized> PartialEq<T> for Ident where T: AsRef<str> {
+impl<T: ?Sized> PartialEq<T> for Ident
+    where T: AsRef<str>
+{
     fn eq(&self, other: &T) -> bool {
         self.0 == other.as_ref()
     }

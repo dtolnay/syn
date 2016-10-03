@@ -1,17 +1,12 @@
-use {
-    Path,
-    PathSegment,
-    QSelf,
-    Ty,
-};
+use {Path, PathSegment, QSelf, Ty};
 use aster::ident::ToIdent;
 use aster::invoke::{Invoke, Identity};
 use aster::path::{PathBuilder, PathSegmentBuilder};
 use aster::ty::TyBuilder;
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
-pub struct QPathBuilder<F=Identity> {
+pub struct QPathBuilder<F = Identity> {
     callback: F,
 }
 
@@ -22,14 +17,12 @@ impl QPathBuilder {
 }
 
 impl<F> QPathBuilder<F>
-    where F: Invoke<(QSelf, Path)>,
+    where F: Invoke<(QSelf, Path)>
 {
     /// Construct a `QPathBuilder` that will call the `callback` with a constructed `QSelf`
     /// and `Path`.
     pub fn with_callback(callback: F) -> Self {
-        QPathBuilder {
-            callback: callback,
-        }
+        QPathBuilder { callback: callback }
     }
 
     /// Build a qualified path first by starting with a type builder.
@@ -52,7 +45,7 @@ impl<F> QPathBuilder<F>
 }
 
 impl<F> Invoke<Ty> for QPathBuilder<F>
-    where F: Invoke<(QSelf, Path)>,
+    where F: Invoke<(QSelf, Path)>
 {
     type Result = QPathTyBuilder<F>;
 
@@ -61,7 +54,7 @@ impl<F> Invoke<Ty> for QPathBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct QPathTyBuilder<F> {
     builder: QPathBuilder<F>,
@@ -69,7 +62,7 @@ pub struct QPathTyBuilder<F> {
 }
 
 impl<F> QPathTyBuilder<F>
-    where F: Invoke<(QSelf, Path)>,
+    where F: Invoke<(QSelf, Path)>
 {
     /// Build a qualified path with a path builder.
     pub fn as_(self) -> PathBuilder<Self> {
@@ -77,7 +70,7 @@ impl<F> QPathTyBuilder<F>
     }
 
     pub fn id<T>(self, id: T) -> F::Result
-        where T: ToIdent,
+        where T: ToIdent
     {
         let path = Path {
             global: false,
@@ -87,7 +80,7 @@ impl<F> QPathTyBuilder<F>
     }
 
     pub fn segment<T>(self, id: T) -> PathSegmentBuilder<QPathQSelfBuilder<F>>
-        where T: ToIdent,
+        where T: ToIdent
     {
         let path = Path {
             global: false,
@@ -98,7 +91,7 @@ impl<F> QPathTyBuilder<F>
 }
 
 impl<F> Invoke<Path> for QPathTyBuilder<F>
-    where F: Invoke<(QSelf, Path)>,
+    where F: Invoke<(QSelf, Path)>
 {
     type Result = QPathQSelfBuilder<F>;
 
@@ -114,7 +107,7 @@ impl<F> Invoke<Path> for QPathTyBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct QPathQSelfBuilder<F> {
     builder: QPathBuilder<F>,
@@ -123,23 +116,23 @@ pub struct QPathQSelfBuilder<F> {
 }
 
 impl<F> QPathQSelfBuilder<F>
-    where F: Invoke<(QSelf, Path)>,
+    where F: Invoke<(QSelf, Path)>
 {
     pub fn id<T>(self, id: T) -> F::Result
-        where T: ToIdent,
+        where T: ToIdent
     {
         self.segment(id).build()
     }
 
     pub fn segment<T>(self, id: T) -> PathSegmentBuilder<QPathQSelfBuilder<F>>
-        where T: ToIdent,
+        where T: ToIdent
     {
         PathSegmentBuilder::with_callback(id, self)
     }
 }
 
 impl<F> Invoke<PathSegment> for QPathQSelfBuilder<F>
-    where F: Invoke<(QSelf, Path)>,
+    where F: Invoke<(QSelf, Path)>
 {
     type Result = F::Result;
 

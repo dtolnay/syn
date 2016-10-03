@@ -11,18 +11,15 @@ pub fn whitespace(input: &str) -> IResult<&str, ()> {
     while let Some((i, ch)) = chars.next() {
         let s = &input[start + i..];
         if ch == '/' {
-            if s.starts_with("//")
-                    && (!s.starts_with("///") || s.starts_with("////"))
-                    && !s.starts_with("//!") {
+            if s.starts_with("//") && (!s.starts_with("///") || s.starts_with("////")) &&
+               !s.starts_with("//!") {
                 if let Some(len) = s.find('\n') {
                     start += i + len + 1;
                     chars = input[start..].char_indices();
                     continue;
                 }
                 break;
-            } else if s.starts_with("/*")
-                    && !s.starts_with("/**")
-                    && !s.starts_with("/*!") {
+            } else if s.starts_with("/*") && !s.starts_with("/**") && !s.starts_with("/*!") {
                 match block_comment(s) {
                     IResult::Done(_, com) => {
                         start += i + com.len();
@@ -71,11 +68,7 @@ pub fn block_comment(input: &str) -> IResult<&str, &str> {
 
 pub fn word_break(input: &str) -> IResult<&str, ()> {
     match input.chars().next() {
-        Some(ch) if UnicodeXID::is_xid_continue(ch) => {
-            IResult::Error
-        }
-        Some(_) | None => {
-            IResult::Done(input, ())
-        }
+        Some(ch) if UnicodeXID::is_xid_continue(ch) => IResult::Error,
+        Some(_) | None => IResult::Done(input, ()),
     }
 }

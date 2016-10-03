@@ -100,7 +100,7 @@ pub fn walk_lifetime_def<V: Visitor>(visitor: &mut V, lifetime_def: &LifetimeDef
 }
 
 pub fn walk_poly_trait_ref<V>(visitor: &mut V, trait_ref: &PolyTraitRef, _: &TraitBoundModifier)
-    where V: Visitor,
+    where V: Visitor
 {
     walk_list!(visitor, visit_lifetime_def, &trait_ref.bound_lifetimes);
     visitor.visit_path(&trait_ref.trait_ref);
@@ -114,15 +114,14 @@ pub fn walk_macro_input<V: Visitor>(visitor: &mut V, macro_input: &MacroInput) {
             walk_list!(visitor, visit_variant, variants, &macro_input.generics);
         }
         Body::Struct(ref variant_data) => {
-            visitor.visit_variant_data(variant_data, &macro_input.ident,
-                                     &macro_input.generics);
+            visitor.visit_variant_data(variant_data, &macro_input.ident, &macro_input.generics);
         }
     }
     walk_list!(visitor, visit_attribute, &macro_input.attrs);
 }
 
 pub fn walk_variant<V>(visitor: &mut V, variant: &Variant, generics: &Generics)
-    where V: Visitor,
+    where V: Visitor
 {
     visitor.visit_ident(&variant.ident);
     visitor.visit_variant_data(&variant.data, &variant.ident, generics);
@@ -131,17 +130,14 @@ pub fn walk_variant<V>(visitor: &mut V, variant: &Variant, generics: &Generics)
 
 pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
     match *ty {
-        Ty::Vec(ref inner) | Ty::Paren(ref inner) => {
-            visitor.visit_ty(inner)
-        }
-        Ty::Ptr(ref mutable_type) => {
-            visitor.visit_ty(&mutable_type.ty)
-        }
+        Ty::Vec(ref inner) |
+        Ty::Paren(ref inner) => visitor.visit_ty(inner),
+        Ty::Ptr(ref mutable_type) => visitor.visit_ty(&mutable_type.ty),
         Ty::Rptr(ref opt_lifetime, ref mutable_type) => {
             walk_list!(visitor, visit_lifetime, opt_lifetime);
             visitor.visit_ty(&mutable_type.ty)
         }
-        Ty::Never => {},
+        Ty::Never => {}
         Ty::Tup(ref tuple_element_types) => {
             walk_list!(visitor, visit_ty, tuple_element_types);
         }
@@ -184,7 +180,7 @@ pub fn walk_path_segment<V: Visitor>(visitor: &mut V, segment: &PathSegment) {
 }
 
 pub fn walk_path_parameters<V>(visitor: &mut V, path_parameters: &PathParameters)
-    where V: Visitor,
+    where V: Visitor
 {
     match *path_parameters {
         PathParameters::AngleBracketed(ref data) => {
@@ -224,17 +220,17 @@ pub fn walk_generics<V: Visitor>(visitor: &mut V, generics: &Generics) {
     walk_list!(visitor, visit_lifetime_def, &generics.lifetimes);
     for predicate in &generics.where_clause.predicates {
         match *predicate {
-            WherePredicate::BoundPredicate(WhereBoundPredicate{ref bounded_ty,
-                                                               ref bounds,
-                                                               ref bound_lifetimes,
-                                                               ..}) => {
+            WherePredicate::BoundPredicate(WhereBoundPredicate { ref bounded_ty,
+                                                                 ref bounds,
+                                                                 ref bound_lifetimes,
+                                                                 .. }) => {
                 visitor.visit_ty(bounded_ty);
                 walk_list!(visitor, visit_ty_param_bound, bounds);
                 walk_list!(visitor, visit_lifetime_def, bound_lifetimes);
             }
-            WherePredicate::RegionPredicate(WhereRegionPredicate{ref lifetime,
-                                                                 ref bounds,
-                                                                 ..}) => {
+            WherePredicate::RegionPredicate(WhereRegionPredicate { ref lifetime,
+                                                                   ref bounds,
+                                                                   .. }) => {
                 visitor.visit_lifetime(lifetime);
                 walk_list!(visitor, visit_lifetime, bounds);
             }

@@ -61,7 +61,9 @@ pub trait FilterAttrs<'a> {
     fn inner(self) -> Self::Ret;
 }
 
-impl<'a, T> FilterAttrs<'a> for T where T: IntoIterator<Item = &'a Attribute> {
+impl<'a, T> FilterAttrs<'a> for T
+    where T: IntoIterator<Item = &'a Attribute>
+{
     type Ret = iter::Filter<T::IntoIter, fn(&&Attribute) -> bool>;
 
     fn outer(self) -> Self::Ret {
@@ -206,14 +208,10 @@ mod printing {
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Attribute {
-                style,
-                value: MetaItem::NameValue(
-                    ref name,
-                    Lit::Str(ref value, StrStyle::Cooked),
-                ),
-                is_sugared_doc: true,
-            } = *self {
+            if let Attribute { style,
+                               value: MetaItem::NameValue(ref name,
+                                                   Lit::Str(ref value, StrStyle::Cooked)),
+                               is_sugared_doc: true } = *self {
                 if name == "doc" {
                     match style {
                         AttrStyle::Inner if value.starts_with("//!") => {

@@ -26,7 +26,7 @@ pub enum StrStyle {
     /// A raw string, like `r##"foo"##`
     ///
     /// The uint is the number of `#` symbols used
-    Raw(usize)
+    Raw(usize),
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -41,7 +41,7 @@ pub enum IntTy {
     U16,
     U32,
     U64,
-    Unsuffixed
+    Unsuffixed,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -62,11 +62,11 @@ pub mod parsing {
         string
         |
         byte_string
-        // TODO: Byte
-        // TODO: Char
+    // TODO: Byte
+    // TODO: Char
         |
         int => { |(value, ty)| Lit::Int(value, ty) }
-        // TODO: Float
+    // TODO: Float
         |
         keyword!("true") => { |_| Lit::Bool(true) }
         |
@@ -137,7 +137,7 @@ pub mod parsing {
         let mut bytes = input.bytes().peekable();
         while let Some(&b) = bytes.peek() {
             match b {
-                b'0' ... b'9' => {
+                b'0'...b'9' => {
                     value = match value.checked_mul(10) {
                         Some(value) => value,
                         None => return IResult::Error,

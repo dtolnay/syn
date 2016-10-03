@@ -281,7 +281,7 @@ macro_rules! separated_list {
         let mut res = ::std::vec::Vec::new();
         let mut input = $i;
 
-        // get the first element
+// get the first element
         match $submac!(input, $($args2)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Done(input, ::std::vec::Vec::new()),
             $crate::nom::IResult::Done(i,o) => {
@@ -291,13 +291,13 @@ macro_rules! separated_list {
                     res.push(o);
                     input = i;
 
-                    // get the separator first
+// get the separator first
                     while let $crate::nom::IResult::Done(i2, _) = $sep!(input, $($args)*) {
                         if i2.len() == input.len() {
                             break;
                         }
 
-                        // get the element next
+// get the element next
                         if let $crate::nom::IResult::Done(i3,o3) = $submac!(i2, $($args2)*) {
                             if i3.len() == i2.len() {
                                 break;

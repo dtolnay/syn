@@ -59,7 +59,9 @@ pub struct Path {
     pub segments: Vec<PathSegment>,
 }
 
-impl<T> From<T> for Path where T: Into<PathSegment> {
+impl<T> From<T> for Path
+    where T: Into<PathSegment>
+{
     fn from(segment: T) -> Self {
         Path {
             global: false,
@@ -77,7 +79,9 @@ pub struct PathSegment {
     pub parameters: PathParameters,
 }
 
-impl<T> From<T> for PathSegment where T: Into<Ident> {
+impl<T> From<T> for PathSegment
+    where T: Into<Ident>
+{
     fn from(ident: T) -> Self {
         PathSegment {
             ident: ident.into(),
@@ -157,7 +161,7 @@ pub struct PolyTraitRef {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct QSelf {
     pub ty: Box<Ty>,
-    pub position: usize
+    pub position: usize,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -470,10 +474,10 @@ mod printing {
                     qself.ty.to_tokens(tokens);
                     if qself.position > 0 {
                         tokens.append("as");
-                        for (i, segment) in path.segments.iter()
-                                                .take(qself.position)
-                                                .enumerate()
-                        {
+                        for (i, segment) in path.segments
+                            .iter()
+                            .take(qself.position)
+                            .enumerate() {
                             if i > 0 || path.global {
                                 tokens.append("::");
                             }

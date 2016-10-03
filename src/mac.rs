@@ -42,7 +42,7 @@ pub struct Delimited {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Token {
-    /* Expression-operator symbols. */
+    // Expression-operator symbols.
     Eq,
     Lt,
     Le,
@@ -57,7 +57,7 @@ pub enum Token {
     BinOp(BinOpToken),
     BinOpEq(BinOpToken),
 
-    /* Structural symbols */
+    // Structural symbols
     At,
     Dot,
     DotDot,
@@ -73,10 +73,10 @@ pub enum Token {
     Dollar,
     Question,
 
-    /* Literals */
+    // Literals
     Literal(Lit),
 
-    /* Name components */
+    // Name components
     Ident(Ident),
     Underscore,
     Lifetime(Ident),

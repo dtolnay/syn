@@ -1,13 +1,4 @@
-use {
-    Generics,
-    Lifetime,
-    MutTy,
-    Mutability,
-    Path,
-    QSelf,
-    Ty,
-    TyParamBound,
-};
+use {Generics, Lifetime, MutTy, Mutability, Path, QSelf, Ty, TyParamBound};
 use aster::ident::ToIdent;
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::IntoLifetime;
@@ -15,9 +6,9 @@ use aster::path::PathBuilder;
 use aster::qpath::QPathBuilder;
 use aster::ty_param::TyParamBoundBuilder;
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
-pub struct TyBuilder<F=Identity> {
+pub struct TyBuilder<F = Identity> {
     callback: F,
 }
 
@@ -28,12 +19,10 @@ impl TyBuilder {
 }
 
 impl<F> TyBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     pub fn with_callback(callback: F) -> Self {
-        TyBuilder {
-            callback: callback,
-        }
+        TyBuilder { callback: callback }
     }
 
     pub fn build(self, ty: Ty) -> F::Result {
@@ -41,7 +30,7 @@ impl<F> TyBuilder<F>
     }
 
     pub fn id<I>(self, id: I) -> F::Result
-        where I: ToIdent,
+        where I: ToIdent
     {
         self.path().id(id).build()
     }
@@ -170,22 +159,23 @@ impl<F> TyBuilder<F>
     }
 
     pub fn object_sum(self) -> TyBuilder<TyObjectSumBuilder<F>> {
-        TyBuilder::with_callback(TyObjectSumBuilder {
-            builder: self,
-        })
+        TyBuilder::with_callback(TyObjectSumBuilder { builder: self })
     }
 
     pub fn impl_trait(self) -> TyImplTraitTyBuilder<F> {
-        TyImplTraitTyBuilder { builder: self, bounds: Vec::new() }
+        TyImplTraitTyBuilder {
+            builder: self,
+            bounds: Vec::new(),
+        }
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyPathBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Path> for TyPathBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -194,12 +184,12 @@ impl<F> Invoke<Path> for TyPathBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyQPathBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<(QSelf, Path)> for TyQPathBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -208,12 +198,12 @@ impl<F> Invoke<(QSelf, Path)> for TyQPathBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TySliceBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Ty> for TySliceBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -222,7 +212,7 @@ impl<F> Invoke<Ty> for TySliceBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyRefBuilder<F> {
     builder: TyBuilder<F>,
@@ -231,7 +221,7 @@ pub struct TyRefBuilder<F> {
 }
 
 impl<F> TyRefBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     pub fn mut_(mut self) -> Self {
         self.mutability = Mutability::Mutable;
@@ -239,11 +229,9 @@ impl<F> TyRefBuilder<F>
     }
 
     pub fn lifetime<N>(mut self, name: N) -> Self
-        where N: ToIdent,
+        where N: ToIdent
     {
-        self.lifetime = Some(Lifetime {
-            ident: name.to_ident(),
-        });
+        self.lifetime = Some(Lifetime { ident: name.to_ident() });
         self
     }
 
@@ -261,7 +249,7 @@ impl<F> TyRefBuilder<F>
 }
 
 impl<F> Invoke<Ty> for TyRefBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -270,12 +258,12 @@ impl<F> Invoke<Ty> for TyRefBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyOptionBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Ty> for TyOptionBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -285,20 +273,20 @@ impl<F> Invoke<Ty> for TyOptionBuilder<F>
             .id("std")
             .id("option")
             .segment("Option")
-                .with_ty(ty)
-                .build()
+            .with_ty(ty)
+            .build()
             .build();
 
         self.0.build_path(path)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyResultOkBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Ty> for TyResultOkBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = TyBuilder<TyResultErrBuilder<F>>;
 
@@ -310,7 +298,7 @@ impl<F> Invoke<Ty> for TyResultOkBuilder<F>
 pub struct TyResultErrBuilder<F>(TyBuilder<F>, Ty);
 
 impl<F> Invoke<Ty> for TyResultErrBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -320,21 +308,21 @@ impl<F> Invoke<Ty> for TyResultErrBuilder<F>
             .id("std")
             .id("result")
             .segment("Result")
-                .with_ty(self.1)
-                .with_ty(ty)
-                .build()
+            .with_ty(self.1)
+            .with_ty(ty)
+            .build()
             .build();
 
         self.0.build_path(path)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyPhantomDataBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Ty> for TyPhantomDataBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -344,20 +332,20 @@ impl<F> Invoke<Ty> for TyPhantomDataBuilder<F>
             .id("std")
             .id("marker")
             .segment("PhantomData")
-                .with_ty(ty)
-                .build()
+            .with_ty(ty)
+            .build()
             .build();
 
         self.0.build_path(path)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyBoxBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Ty> for TyBoxBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -367,20 +355,20 @@ impl<F> Invoke<Ty> for TyBoxBuilder<F>
             .id("std")
             .id("boxed")
             .segment("Box")
-                .with_ty(ty)
-                .build()
+            .with_ty(ty)
+            .build()
             .build();
 
         self.0.build_path(path)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyIteratorBuilder<F>(TyBuilder<F>);
 
 impl<F> Invoke<Ty> for TyIteratorBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = F::Result;
 
@@ -390,22 +378,23 @@ impl<F> Invoke<Ty> for TyIteratorBuilder<F>
             .id("std")
             .id("iter")
             .segment("Iterator")
-                .binding("Item").build(ty.clone())
-                .build()
+            .binding("Item")
+            .build(ty.clone())
+            .build()
             .build();
 
         self.0.build_path(path)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyObjectSumBuilder<F> {
     builder: TyBuilder<F>,
 }
 
 impl<F> Invoke<Ty> for TyObjectSumBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = TyObjectSumTyBuilder<F>;
 
@@ -425,10 +414,10 @@ pub struct TyObjectSumTyBuilder<F> {
 }
 
 impl<F> TyObjectSumTyBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     pub fn with_bounds<I>(mut self, iter: I) -> Self
-        where I: Iterator<Item=TyParamBound>,
+        where I: Iterator<Item = TyParamBound>
     {
         self.bounds.extend(iter);
         self
@@ -444,15 +433,14 @@ impl<F> TyObjectSumTyBuilder<F>
     }
 
     pub fn with_generics(self, generics: Generics) -> Self {
-        self.with_lifetimes(
-            generics.lifetimes.into_iter()
-                .map(|def| def.lifetime)
-        )
+        self.with_lifetimes(generics.lifetimes
+            .into_iter()
+            .map(|def| def.lifetime))
     }
 
     pub fn with_lifetimes<I, L>(mut self, lifetimes: I) -> Self
-        where I: Iterator<Item=L>,
-              L: IntoLifetime,
+        where I: Iterator<Item = L>,
+              L: IntoLifetime
     {
         for lifetime in lifetimes {
             self = self.lifetime(lifetime);
@@ -462,7 +450,7 @@ impl<F> TyObjectSumTyBuilder<F>
     }
 
     pub fn lifetime<L>(self, lifetime: L) -> Self
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         self.bound().lifetime(lifetime)
     }
@@ -474,7 +462,7 @@ impl<F> TyObjectSumTyBuilder<F>
 }
 
 impl<F> Invoke<TyParamBound> for TyObjectSumTyBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = Self;
 
@@ -483,7 +471,7 @@ impl<F> Invoke<TyParamBound> for TyObjectSumTyBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyImplTraitTyBuilder<F> {
     builder: TyBuilder<F>,
@@ -491,10 +479,10 @@ pub struct TyImplTraitTyBuilder<F> {
 }
 
 impl<F> TyImplTraitTyBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     pub fn with_bounds<I>(mut self, iter: I) -> Self
-        where I: Iterator<Item=TyParamBound>,
+        where I: Iterator<Item = TyParamBound>
     {
         self.bounds.extend(iter);
         self
@@ -510,15 +498,14 @@ impl<F> TyImplTraitTyBuilder<F>
     }
 
     pub fn with_generics(self, generics: Generics) -> Self {
-        self.with_lifetimes(
-            generics.lifetimes.into_iter()
-                .map(|def| def.lifetime)
-        )
+        self.with_lifetimes(generics.lifetimes
+            .into_iter()
+            .map(|def| def.lifetime))
     }
 
     pub fn with_lifetimes<I, L>(mut self, lifetimes: I) -> Self
-        where I: Iterator<Item=L>,
-              L: IntoLifetime,
+        where I: Iterator<Item = L>,
+              L: IntoLifetime
     {
         for lifetime in lifetimes {
             self = self.lifetime(lifetime);
@@ -528,7 +515,7 @@ impl<F> TyImplTraitTyBuilder<F>
     }
 
     pub fn lifetime<L>(self, lifetime: L) -> Self
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         self.bound().lifetime(lifetime)
     }
@@ -540,7 +527,7 @@ impl<F> TyImplTraitTyBuilder<F>
 }
 
 impl<F> Invoke<TyParamBound> for TyImplTraitTyBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = Self;
 
@@ -549,7 +536,7 @@ impl<F> Invoke<TyParamBound> for TyImplTraitTyBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TyTupleBuilder<F> {
     builder: TyBuilder<F>,
@@ -557,10 +544,10 @@ pub struct TyTupleBuilder<F> {
 }
 
 impl<F> TyTupleBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     pub fn with_tys<I>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=Ty>,
+        where I: IntoIterator<Item = Ty>
     {
         self.tys.extend(iter);
         self
@@ -581,7 +568,7 @@ impl<F> TyTupleBuilder<F>
 }
 
 impl<F> Invoke<Ty> for TyTupleBuilder<F>
-    where F: Invoke<Ty>,
+    where F: Invoke<Ty>
 {
     type Result = Self;
 

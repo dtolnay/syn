@@ -16,9 +16,7 @@ pub struct Lifetime {
 
 impl Lifetime {
     pub fn new<T: Into<Ident>>(t: T) -> Self {
-        Lifetime {
-            ident: Ident::new(t),
-        }
+        Lifetime { ident: Ident::new(t) }
     }
 }
 

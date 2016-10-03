@@ -11,19 +11,23 @@ pub fn cooked_string(input: &str) -> IResult<&str, String> {
             }
             '\\' => {
                 match chars.next() {
-                    Some((_, 'x')) => match backslash_x(&mut chars) {
-                        Some(ch) => s.push(ch),
-                        None => break,
-                    },
+                    Some((_, 'x')) => {
+                        match backslash_x(&mut chars) {
+                            Some(ch) => s.push(ch),
+                            None => break,
+                        }
+                    }
                     Some((_, 'n')) => s.push('\n'),
                     Some((_, 'r')) => s.push('\r'),
                     Some((_, 't')) => s.push('\t'),
                     Some((_, '\\')) => s.push('\\'),
                     Some((_, '0')) => s.push('\0'),
-                    Some((_, 'u')) => match backslash_u(&mut chars) {
-                        Some(ch) => s.push(ch),
-                        None => break,
-                    },
+                    Some((_, 'u')) => {
+                        match backslash_u(&mut chars) {
+                            Some(ch) => s.push(ch),
+                            None => break,
+                        }
+                    }
                     Some((_, '\'')) => s.push('\''),
                     Some((_, '"')) => s.push('"'),
                     Some((_, '\n')) => {
@@ -55,14 +59,14 @@ pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
                 n = byte_offset;
                 break;
             }
-            '#' => {},
+            '#' => {}
             _ => return IResult::Error,
         }
     }
     for (byte_offset, ch) in chars {
         if ch == '"' && input[byte_offset + 1..].starts_with(&input[..n]) {
             let rest = &input[byte_offset + 1 + n..];
-            let value = &input[n + 1 .. byte_offset];
+            let value = &input[n + 1..byte_offset];
             return IResult::Done(rest, (value.to_owned(), n));
         }
     }
@@ -82,14 +86,18 @@ macro_rules! next_char {
 }
 
 #[cfg_attr(feature = "clippy", allow(diverging_sub_expression))]
-fn backslash_x<I>(chars: &mut I) -> Option<char> where I: Iterator<Item = (usize, char)> {
+fn backslash_x<I>(chars: &mut I) -> Option<char>
+    where I: Iterator<Item = (usize, char)>
+{
     let a = next_char!(chars @ '0'...'7');
     let b = next_char!(chars @ '0'...'9' | 'a'...'f' | 'A'...'F');
     char_from_hex_bytes(&[a as u8, b as u8])
 }
 
 #[cfg_attr(feature = "clippy", allow(diverging_sub_expression, many_single_char_names))]
-fn backslash_u<I>(chars: &mut I) -> Option<char> where I: Iterator<Item = (usize, char)> {
+fn backslash_u<I>(chars: &mut I) -> Option<char>
+    where I: Iterator<Item = (usize, char)>
+{
     next_char!(chars @ '{');
     let a = next_char!(chars @ '0'...'9' | 'a'...'f' | 'A'...'F');
     let b = next_char!(chars @ '0'...'9' | 'a'...'f' | 'A'...'F' | '}');

@@ -98,7 +98,9 @@ mod printing {
                 Body::Struct(ref variant_data) => {
                     variant_data.to_tokens(tokens);
                     match *variant_data {
-                        VariantData::Struct(_) => { /* no semicolon */ }
+                        VariantData::Struct(_) => {
+                            // no semicolon
+                        }
                         VariantData::Tuple(_) |
                         VariantData::Unit => tokens.append(";"),
                     }

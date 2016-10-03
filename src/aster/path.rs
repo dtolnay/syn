@@ -1,21 +1,11 @@
-use {
-    AngleBracketedParameterData,
-    Generics,
-    Ident,
-    Lifetime,
-    ParenthesizedParameterData,
-    Path,
-    PathParameters,
-    PathSegment,
-    Ty,
-    TypeBinding,
-};
+use {AngleBracketedParameterData, Generics, Ident, Lifetime, ParenthesizedParameterData, Path,
+     PathParameters, PathSegment, Ty, TypeBinding};
 use aster::ident::ToIdent;
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::IntoLifetime;
 use aster::ty::TyBuilder;
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub trait IntoPath {
     fn into_path(self) -> Path;
@@ -45,15 +35,17 @@ impl IntoPath for String {
     }
 }
 
-impl<'a, T> IntoPath for &'a [T] where T: ToIdent {
+impl<'a, T> IntoPath for &'a [T]
+    where T: ToIdent
+{
     fn into_path(self) -> Path {
         PathBuilder::new().ids(self).build()
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
-pub struct PathBuilder<F=Identity> {
+pub struct PathBuilder<F = Identity> {
     callback: F,
     global: bool,
 }
@@ -65,7 +57,7 @@ impl PathBuilder {
 }
 
 impl<F> PathBuilder<F>
-    where F: Invoke<Path>,
+    where F: Invoke<Path>
 {
     pub fn with_callback(callback: F) -> Self {
         PathBuilder {
@@ -84,8 +76,8 @@ impl<F> PathBuilder<F>
     }
 
     pub fn ids<I, T>(self, ids: I) -> PathSegmentsBuilder<F>
-        where I: IntoIterator<Item=T>,
-              T: ToIdent,
+        where I: IntoIterator<Item = T>,
+              T: ToIdent
     {
         let mut ids = ids.into_iter();
         let id = ids.next().expect("passed path with no id");
@@ -94,37 +86,37 @@ impl<F> PathBuilder<F>
     }
 
     pub fn id<I>(self, id: I) -> PathSegmentsBuilder<F>
-        where I: ToIdent,
+        where I: ToIdent
     {
         self.segment(id).build()
     }
 
-    pub fn segment<I>(self, id: I)
-        -> PathSegmentBuilder<PathSegmentsBuilder<F>>
-        where I: ToIdent,
+    pub fn segment<I>(self, id: I) -> PathSegmentBuilder<PathSegmentsBuilder<F>>
+        where I: ToIdent
     {
-        PathSegmentBuilder::with_callback(id, PathSegmentsBuilder {
-            callback: self.callback,
-            global: self.global,
-            segments: Vec::new(),
-        })
+        PathSegmentBuilder::with_callback(id,
+                                          PathSegmentsBuilder {
+                                              callback: self.callback,
+                                              global: self.global,
+                                              segments: Vec::new(),
+                                          })
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
-pub struct PathSegmentsBuilder<F=Identity> {
+pub struct PathSegmentsBuilder<F = Identity> {
     callback: F,
     global: bool,
     segments: Vec<PathSegment>,
 }
 
 impl<F> PathSegmentsBuilder<F>
-    where F: Invoke<Path>,
+    where F: Invoke<Path>
 {
     pub fn ids<I, T>(mut self, ids: I) -> PathSegmentsBuilder<F>
-        where I: IntoIterator<Item=T>,
-              T: ToIdent,
+        where I: IntoIterator<Item = T>,
+              T: ToIdent
     {
         for id in ids {
             self = self.id(id);
@@ -134,13 +126,13 @@ impl<F> PathSegmentsBuilder<F>
     }
 
     pub fn id<T>(self, id: T) -> PathSegmentsBuilder<F>
-        where T: ToIdent,
+        where T: ToIdent
     {
         self.segment(id).build()
     }
 
     pub fn segment<T>(self, id: T) -> PathSegmentBuilder<Self>
-        where T: ToIdent,
+        where T: ToIdent
     {
         PathSegmentBuilder::with_callback(id, self)
     }
@@ -162,9 +154,9 @@ impl<F> Invoke<PathSegment> for PathSegmentsBuilder<F> {
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
-pub struct PathSegmentBuilder<F=Identity> {
+pub struct PathSegmentBuilder<F = Identity> {
     callback: F,
     id: Ident,
     lifetimes: Vec<Lifetime>,
@@ -173,10 +165,10 @@ pub struct PathSegmentBuilder<F=Identity> {
 }
 
 impl<F> PathSegmentBuilder<F>
-    where F: Invoke<PathSegment>,
+    where F: Invoke<PathSegment>
 {
     pub fn with_callback<I>(id: I, callback: F) -> Self
-        where I: ToIdent,
+        where I: ToIdent
     {
         PathSegmentBuilder {
             callback: callback,
@@ -189,10 +181,12 @@ impl<F> PathSegmentBuilder<F>
 
     pub fn with_generics(self, generics: Generics) -> Self {
         // Strip off the bounds.
-        let lifetimes = generics.lifetimes.iter()
+        let lifetimes = generics.lifetimes
+            .iter()
             .map(|lifetime_def| lifetime_def.lifetime.clone());
 
-        let tys = generics.ty_params.iter()
+        let tys = generics.ty_params
+            .iter()
             .map(|ty_param| TyBuilder::new().id(ty_param.ident.clone()));
 
         self.with_lifetimes(lifetimes)
@@ -200,8 +194,8 @@ impl<F> PathSegmentBuilder<F>
     }
 
     pub fn with_lifetimes<I, L>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=L>,
-              L: IntoLifetime,
+        where I: IntoIterator<Item = L>,
+              L: IntoLifetime
     {
         let iter = iter.into_iter().map(|lifetime| lifetime.into_lifetime());
         self.lifetimes.extend(iter);
@@ -209,23 +203,21 @@ impl<F> PathSegmentBuilder<F>
     }
 
     pub fn with_lifetime<L>(mut self, lifetime: L) -> Self
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         self.lifetimes.push(lifetime.into_lifetime());
         self
     }
 
     pub fn lifetime<N>(self, name: N) -> Self
-        where N: ToIdent,
+        where N: ToIdent
     {
-        let lifetime = Lifetime {
-            ident: name.to_ident(),
-        };
+        let lifetime = Lifetime { ident: name.to_ident() };
         self.with_lifetime(lifetime)
     }
 
     pub fn with_tys<I>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=Ty>,
+        where I: IntoIterator<Item = Ty>
     {
         self.tys.extend(iter);
         self
@@ -246,7 +238,7 @@ impl<F> PathSegmentBuilder<F>
     }
 
     pub fn binding<T>(self, id: T) -> TyBuilder<TypeBindingBuilder<F>>
-        where T: ToIdent,
+        where T: ToIdent
     {
         TyBuilder::with_callback(TypeBindingBuilder {
             id: id.to_ident(),
@@ -302,7 +294,7 @@ impl<F> Invoke<Ty> for PathSegmentBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct TypeBindingBuilder<F> {
     id: Ident,
@@ -324,7 +316,7 @@ impl<F> Invoke<Ty> for TypeBindingBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct PathSegmentReturnBuilder<F>(PathSegmentBuilder<F>);
 

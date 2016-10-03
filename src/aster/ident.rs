@@ -22,13 +22,17 @@ impl ToIdent for String {
     }
 }
 
-impl<'a, T> ToIdent for &'a T where T: ToIdent {
+impl<'a, T> ToIdent for &'a T
+    where T: ToIdent
+{
     fn to_ident(&self) -> Ident {
         (**self).to_ident()
     }
 }
 
-impl<'a, T> ToIdent for &'a mut T where T: ToIdent {
+impl<'a, T> ToIdent for &'a mut T
+    where T: ToIdent
+{
     fn to_ident(&self) -> Ident {
         (**self).to_ident()
     }

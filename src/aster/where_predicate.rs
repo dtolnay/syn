@@ -1,22 +1,14 @@
-use {
-    Ident,
-    Lifetime,
-    LifetimeDef,
-    Ty,
-    TyParamBound,
-    WhereBoundPredicate,
-    WherePredicate,
-    WhereRegionPredicate,
-};
+use {Ident, Lifetime, LifetimeDef, Ty, TyParamBound, WhereBoundPredicate, WherePredicate,
+     WhereRegionPredicate};
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::{IntoLifetime, IntoLifetimeDef, LifetimeDefBuilder};
 use aster::path::IntoPath;
 use aster::ty::TyBuilder;
 use aster::ty_param::{TyParamBoundBuilder, PolyTraitRefBuilder, TraitTyParamBoundBuilder};
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
-pub struct WherePredicateBuilder<F=Identity> {
+pub struct WherePredicateBuilder<F = Identity> {
     callback: F,
 }
 
@@ -27,12 +19,10 @@ impl WherePredicateBuilder {
 }
 
 impl<F> WherePredicateBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     pub fn with_callback(callback: F) -> Self {
-        WherePredicateBuilder {
-            callback: callback,
-        }
+        WherePredicateBuilder { callback: callback }
     }
 
     pub fn bound(self) -> TyBuilder<Self> {
@@ -40,7 +30,7 @@ impl<F> WherePredicateBuilder<F>
     }
 
     pub fn lifetime<L>(self, lifetime: L) -> WhereRegionPredicateBuilder<F>
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         WhereRegionPredicateBuilder {
             callback: self.callback,
@@ -51,7 +41,7 @@ impl<F> WherePredicateBuilder<F>
 }
 
 impl<F> Invoke<Ty> for WherePredicateBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     type Result = WhereBoundPredicateTyBuilder<F>;
 
@@ -64,14 +54,14 @@ impl<F> Invoke<Ty> for WherePredicateBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct WhereBoundPredicateBuilder<F> {
     callback: F,
 }
 
 impl<F> Invoke<Ty> for WhereBoundPredicateBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     type Result = WhereBoundPredicateTyBuilder<F>;
 
@@ -84,7 +74,7 @@ impl<F> Invoke<Ty> for WhereBoundPredicateBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct WhereBoundPredicateTyBuilder<F> {
     callback: F,
@@ -93,17 +83,17 @@ pub struct WhereBoundPredicateTyBuilder<F> {
 }
 
 impl<F> WhereBoundPredicateTyBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     pub fn with_for_lifetime<L>(mut self, lifetime: L) -> Self
-        where L: IntoLifetimeDef,
+        where L: IntoLifetimeDef
     {
         self.bound_lifetimes.push(lifetime.into_lifetime_def());
         self
     }
 
     pub fn for_lifetime<N>(self, name: N) -> LifetimeDefBuilder<Self>
-        where N: Into<Ident>,
+        where N: Into<Ident>
     {
         LifetimeDefBuilder::with_callback(name, self)
     }
@@ -127,26 +117,24 @@ impl<F> WhereBoundPredicateTyBuilder<F>
         TyParamBoundBuilder::with_callback(builder)
     }
 
-    pub fn trait_<P>(self, path: P)
-        -> PolyTraitRefBuilder<
-            TraitTyParamBoundBuilder<
-                WhereBoundPredicateTyBoundsBuilder<F>
-            >
-        >
-        where P: IntoPath,
+    pub fn trait_<P>
+        (self,
+         path: P)
+         -> PolyTraitRefBuilder<TraitTyParamBoundBuilder<WhereBoundPredicateTyBoundsBuilder<F>>>
+        where P: IntoPath
     {
         self.bound().trait_(path)
     }
 
     pub fn lifetime<L>(self, lifetime: L) -> WhereBoundPredicateTyBoundsBuilder<F>
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         self.bound().lifetime(lifetime)
     }
 }
 
 impl<F> Invoke<LifetimeDef> for WhereBoundPredicateTyBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     type Result = Self;
 
@@ -156,7 +144,7 @@ impl<F> Invoke<LifetimeDef> for WhereBoundPredicateTyBuilder<F>
 }
 
 impl<F> Invoke<TyParamBound> for WhereBoundPredicateTyBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     type Result = WhereBoundPredicateTyBoundsBuilder<F>;
 
@@ -165,7 +153,7 @@ impl<F> Invoke<TyParamBound> for WhereBoundPredicateTyBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct WhereBoundPredicateTyBoundsBuilder<F> {
     callback: F,
@@ -175,17 +163,17 @@ pub struct WhereBoundPredicateTyBoundsBuilder<F> {
 }
 
 impl<F> WhereBoundPredicateTyBoundsBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     pub fn with_for_lifetime<L>(mut self, lifetime: L) -> Self
-        where L: IntoLifetimeDef,
+        where L: IntoLifetimeDef
     {
         self.bound_lifetimes.push(lifetime.into_lifetime_def());
         self
     }
 
     pub fn for_lifetime<N>(self, name: N) -> LifetimeDefBuilder<Self>
-        where N: Into<Ident>,
+        where N: Into<Ident>
     {
         LifetimeDefBuilder::with_callback(name, self)
     }
@@ -199,15 +187,14 @@ impl<F> WhereBoundPredicateTyBoundsBuilder<F>
         TyParamBoundBuilder::with_callback(self)
     }
 
-    pub fn trait_<P>(self, path: P)
-        -> PolyTraitRefBuilder<TraitTyParamBoundBuilder<Self>>
-        where P: IntoPath,
+    pub fn trait_<P>(self, path: P) -> PolyTraitRefBuilder<TraitTyParamBoundBuilder<Self>>
+        where P: IntoPath
     {
         self.bound().trait_(path)
     }
 
     pub fn lifetime<L>(self, lifetime: L) -> Self
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         self.bound().lifetime(lifetime)
     }
@@ -224,7 +211,7 @@ impl<F> WhereBoundPredicateTyBoundsBuilder<F>
 }
 
 impl<F> Invoke<LifetimeDef> for WhereBoundPredicateTyBoundsBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     type Result = Self;
 
@@ -234,7 +221,7 @@ impl<F> Invoke<LifetimeDef> for WhereBoundPredicateTyBoundsBuilder<F>
 }
 
 impl<F> Invoke<TyParamBound> for WhereBoundPredicateTyBoundsBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     type Result = Self;
 
@@ -243,7 +230,7 @@ impl<F> Invoke<TyParamBound> for WhereBoundPredicateTyBoundsBuilder<F>
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 pub struct WhereRegionPredicateBuilder<F> {
     callback: F,
@@ -252,10 +239,10 @@ pub struct WhereRegionPredicateBuilder<F> {
 }
 
 impl<F> WhereRegionPredicateBuilder<F>
-    where F: Invoke<WherePredicate>,
+    where F: Invoke<WherePredicate>
 {
     pub fn bound<L>(mut self, lifetime: L) -> Self
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         self.bounds.push(lifetime.into_lifetime());
         self

@@ -1,18 +1,11 @@
-use {
-    Generics,
-    Ident,
-    LifetimeDef,
-    TyParam,
-    WhereClause,
-    WherePredicate,
-};
+use {Generics, Ident, LifetimeDef, TyParam, WhereClause, WherePredicate};
 use aster::invoke::{Identity, Invoke};
 use aster::lifetime::{IntoLifetime, LifetimeDefBuilder, IntoLifetimeDef};
 use aster::path::IntoPath;
 use aster::ty_param::TyParamBuilder;
 use aster::where_predicate::WherePredicateBuilder;
 
-pub struct GenericsBuilder<F=Identity> {
+pub struct GenericsBuilder<F = Identity> {
     callback: F,
     lifetimes: Vec<LifetimeDef>,
     ty_params: Vec<TyParam>,
@@ -30,7 +23,7 @@ impl GenericsBuilder {
 }
 
 impl<F> GenericsBuilder<F>
-    where F: Invoke<Generics>,
+    where F: Invoke<Generics>
 {
     pub fn with_callback(callback: F) -> Self {
         GenericsBuilder {
@@ -57,8 +50,8 @@ impl<F> GenericsBuilder<F>
     }
 
     pub fn with_lifetimes<I, L>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=L>,
-              L: IntoLifetimeDef,
+        where I: IntoIterator<Item = L>,
+              L: IntoLifetimeDef
     {
         let iter = iter.into_iter().map(|lifetime_def| lifetime_def.into_lifetime_def());
         self.lifetimes.extend(iter);
@@ -66,8 +59,8 @@ impl<F> GenericsBuilder<F>
     }
 
     pub fn with_lifetime_names<I, N>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=N>,
-              N: Into<Ident>,
+        where I: IntoIterator<Item = N>,
+              N: Into<Ident>
     {
         for name in iter {
             self = self.lifetime_name(name);
@@ -81,27 +74,27 @@ impl<F> GenericsBuilder<F>
     }
 
     pub fn lifetime_name<N>(self, name: N) -> Self
-        where N: Into<Ident>,
+        where N: Into<Ident>
     {
         self.lifetime(name).build()
     }
 
     pub fn lifetime<N>(self, name: N) -> LifetimeDefBuilder<Self>
-        where N: Into<Ident>,
+        where N: Into<Ident>
     {
         LifetimeDefBuilder::with_callback(name, self)
     }
 
     pub fn with_ty_params<I>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=TyParam>,
+        where I: IntoIterator<Item = TyParam>
     {
         self.ty_params.extend(iter);
         self
     }
 
     pub fn with_ty_param_ids<I, T>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=T>,
-              T: Into<Ident>,
+        where I: IntoIterator<Item = T>,
+              T: Into<Ident>
     {
         for id in iter {
             self = self.ty_param_id(id);
@@ -115,19 +108,19 @@ impl<F> GenericsBuilder<F>
     }
 
     pub fn ty_param_id<I>(self, id: I) -> Self
-        where I: Into<Ident>,
+        where I: Into<Ident>
     {
         self.ty_param(id).build()
     }
 
     pub fn ty_param<I>(self, id: I) -> TyParamBuilder<Self>
-        where I: Into<Ident>,
+        where I: Into<Ident>
     {
         TyParamBuilder::with_callback(id, self)
     }
 
     pub fn with_predicates<I>(mut self, iter: I) -> Self
-        where I: IntoIterator<Item=WherePredicate>,
+        where I: IntoIterator<Item = WherePredicate>
     {
         self.predicates.extend(iter);
         self
@@ -143,7 +136,7 @@ impl<F> GenericsBuilder<F>
     }
 
     pub fn add_lifetime_bound<L>(mut self, lifetime: L) -> Self
-        where L: IntoLifetime,
+        where L: IntoLifetime
     {
         let lifetime = lifetime.into_lifetime();
 
@@ -161,13 +154,14 @@ impl<F> GenericsBuilder<F>
     }
 
     pub fn add_ty_param_bound<P>(mut self, path: P) -> Self
-        where P: IntoPath,
+        where P: IntoPath
     {
         let path = path.into_path();
 
         for ty_param in &mut self.ty_params {
             *ty_param = TyParamBuilder::from_ty_param(ty_param.clone())
-                .trait_bound(path.clone()).build()
+                .trait_bound(path.clone())
+                .build()
                 .build();
         }
 
@@ -203,15 +197,13 @@ impl<F> GenericsBuilder<F>
         self.callback.invoke(Generics {
             lifetimes: self.lifetimes,
             ty_params: self.ty_params,
-            where_clause: WhereClause {
-                predicates: self.predicates,
-            },
+            where_clause: WhereClause { predicates: self.predicates },
         })
     }
 }
 
 impl<F> Invoke<LifetimeDef> for GenericsBuilder<F>
-    where F: Invoke<Generics>,
+    where F: Invoke<Generics>
 {
     type Result = Self;
 
@@ -221,7 +213,7 @@ impl<F> Invoke<LifetimeDef> for GenericsBuilder<F>
 }
 
 impl<F> Invoke<TyParam> for GenericsBuilder<F>
-    where F: Invoke<Generics>,
+    where F: Invoke<Generics>
 {
     type Result = Self;
 
@@ -231,7 +223,7 @@ impl<F> Invoke<TyParam> for GenericsBuilder<F>
 }
 
 impl<F> Invoke<WherePredicate> for GenericsBuilder<F>
-    where F: Invoke<Generics>,
+    where F: Invoke<Generics>
 {
     type Result = Self;
 
