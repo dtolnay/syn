@@ -273,9 +273,9 @@ pub enum Pat {
     /// A reference pattern, e.g. `&mut (a, b)`
     Ref(Box<Pat>, Mutability),
     /// A literal
-    Lit(Box<Expr>),
+    Lit(Box<Lit>),
     /// A range pattern, e.g. `1...2`
-    Range(Box<Expr>, Box<Expr>),
+    Range(Box<Lit>, Box<Lit>),
     /// `[a, b, ..i, y, z]` is represented as:
     ///     `Pat::Vec(box [a, b], Some(i), box [y, z])`
     Vec(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
@@ -877,17 +877,19 @@ pub mod parsing {
         |
         pat_box // must be before pat_ident
         |
-        pat_ident
-        // TODO: Struct
-        // TODO: TupleStruct
+        pat_range // must be before pat_lit
+        |
+        pat_ident // must be before pat_path
         |
         pat_path
+        // TODO: Struct
+        // TODO: TupleStruct
         |
         pat_tuple
         // TODO: Box
         // TODO: Ref
-        // TODO: Lit
-        // TODO: Range
+        |
+        pat_lit
         // TODO: Vec
         |
         pat_mac
@@ -907,6 +909,8 @@ pub mod parsing {
         mode: option!(keyword!("ref")) >>
         mutability: mutability >>
         name: ident >>
+        not!(peek!(punct!("<"))) >>
+        not!(peek!(punct!("::"))) >>
         subpat: option!(preceded!(punct!("@"), pat)) >>
         (Pat::Ident(
             if mode.is_some() {
@@ -941,6 +945,15 @@ pub mod parsing {
             }
             None => Pat::Tuple(elems, None),
         })
+    ));
+
+    named!(pat_lit -> Pat, map!(lit, |lit| Pat::Lit(Box::new(lit))));
+
+    named!(pat_range -> Pat, do_parse!(
+        lo: lit >>
+        punct!("...") >>
+        hi: lit >>
+        (Pat::Range(Box::new(lo), Box::new(hi)))
     ));
 
     named!(capture_by -> CaptureBy, alt!(
@@ -1161,9 +1174,7 @@ mod printing {
                     }
                     to.to_tokens(tokens);
                 }
-                Expr::Path(None, ref path) => {
-                    path.to_tokens(tokens);
-                }
+                Expr::Path(None, ref path) => path.to_tokens(tokens),
                 Expr::Path(Some(ref qself), ref path) => {
                     tokens.append("<");
                     qself.ty.to_tokens(tokens);
@@ -1340,7 +1351,28 @@ mod printing {
                 }
                 Pat::Struct(ref _path, ref _fields, _dots) => unimplemented!(),
                 Pat::TupleStruct(ref _path, ref _pats, _dotpos) => unimplemented!(),
-                Pat::Path(ref _qself, ref _path) => unimplemented!(),
+                Pat::Path(None, ref path) => path.to_tokens(tokens),
+                Pat::Path(Some(ref qself), ref path) => {
+                    tokens.append("<");
+                    qself.ty.to_tokens(tokens);
+                    if qself.position > 0 {
+                        tokens.append("as");
+                        for (i, segment) in path.segments.iter()
+                                                .take(qself.position)
+                                                .enumerate()
+                        {
+                            if i > 0 || path.global {
+                                tokens.append("::");
+                            }
+                            segment.to_tokens(tokens);
+                        }
+                    }
+                    tokens.append(">");
+                    for segment in path.segments.iter().skip(qself.position) {
+                        tokens.append("::");
+                        segment.to_tokens(tokens);
+                    }
+                }
                 Pat::Tuple(ref pats, dotpos) => {
                     tokens.append("(");
                     match dotpos {
@@ -1364,8 +1396,12 @@ mod printing {
                     inner.to_tokens(tokens);
                 }
                 Pat::Ref(ref _target, _mutability) => unimplemented!(),
-                Pat::Lit(ref _expr) => unimplemented!(),
-                Pat::Range(ref _lower, ref _upper) => unimplemented!(),
+                Pat::Lit(ref lit) => lit.to_tokens(tokens),
+                Pat::Range(ref lo, ref hi) => {
+                    lo.to_tokens(tokens);
+                    tokens.append("...");
+                    hi.to_tokens(tokens);
+                }
                 Pat::Vec(ref _before, ref _dots, ref _after) => unimplemented!(),
                 Pat::Mac(ref mac) => mac.to_tokens(tokens),
             }

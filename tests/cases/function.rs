@@ -76,3 +76,10 @@ fn expr() {
     A::B { .. c };
     A::B { a: (), b: (), .. c };
 }
+
+fn pattern() {
+    match x {
+        0...31 => {}
+        A::B => {}
+    }
+}
