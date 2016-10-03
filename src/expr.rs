@@ -373,7 +373,8 @@ pub mod parsing {
             expr_block
             |
             expr_path
-            // TODO: AddrOf
+            |
+            expr_addr_of
             |
             expr_break
             |
@@ -677,6 +678,13 @@ pub mod parsing {
 
     named!(expr_path -> Expr, map!(qpath, |(qself, path)| Expr::Path(qself, path)));
 
+    named!(expr_addr_of -> Expr, do_parse!(
+        punct!("&") >>
+        mutability: mutability >>
+        expr: expr >>
+        (Expr::AddrOf(mutability, Box::new(expr)))
+    ));
+
     named!(pub block -> Block, do_parse!(
         punct!("{") >>
         stmts: within_block >>
@@ -808,11 +816,30 @@ mod printing {
                     op.to_tokens(tokens);
                     right.to_tokens(tokens);
                 }
-                Expr::Unary(_op, ref _expr) => unimplemented!(),
+                Expr::Unary(op, ref expr) => {
+                    op.to_tokens(tokens);
+                    expr.to_tokens(tokens);
+                }
                 Expr::Lit(ref lit) => lit.to_tokens(tokens),
-                Expr::Cast(ref _expr, ref _ty) => unimplemented!(),
-                Expr::Type(ref _expr, ref _ty) => unimplemented!(),
-                Expr::If(ref _cond, ref _then_block, ref _else_block) => unimplemented!(),
+                Expr::Cast(ref expr, ref ty) => {
+                    expr.to_tokens(tokens);
+                    tokens.append("as");
+                    ty.to_tokens(tokens);
+                }
+                Expr::Type(ref expr, ref ty) => {
+                    expr.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                }
+                Expr::If(ref cond, ref then_block, ref else_block) => {
+                    tokens.append("if");
+                    cond.to_tokens(tokens);
+                    then_block.to_tokens(tokens);
+                    if let Some(ref else_block) = *else_block {
+                        tokens.append("else");
+                        else_block.to_tokens(tokens);
+                    }
+                }
                 Expr::IfLet(ref _pat, ref _expr, ref _then_block, ref _else_block) => unimplemented!(),
                 Expr::While(ref _cond, ref _body, ref _label) => unimplemented!(),
                 Expr::WhileLet(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
@@ -895,9 +922,19 @@ mod printing {
                         segment.to_tokens(tokens);
                     }
                 }
-                Expr::AddrOf(_mutability, ref _expr) => unimplemented!(),
-                Expr::Break(ref _label) => unimplemented!(),
-                Expr::Continue(ref _label) => unimplemented!(),
+                Expr::AddrOf(mutability, ref expr) => {
+                    tokens.append("&");
+                    mutability.to_tokens(tokens);
+                    expr.to_tokens(tokens);
+                }
+                Expr::Break(ref opt_label) => {
+                    tokens.append("break");
+                    opt_label.to_tokens(tokens);
+                }
+                Expr::Continue(ref opt_label) => {
+                    tokens.append("continue");
+                    opt_label.to_tokens(tokens);
+                }
                 Expr::Ret(ref opt_expr) => {
                     tokens.append("return");
                     opt_expr.to_tokens(tokens);
@@ -910,7 +947,10 @@ mod printing {
                     expr.to_tokens(tokens);
                     tokens.append(")");
                 }
-                Expr::Try(ref _expr) => unimplemented!(),
+                Expr::Try(ref expr) => {
+                    expr.to_tokens(tokens);
+                    tokens.append("?");
+                }
             }
         }
     }
@@ -936,6 +976,16 @@ mod printing {
                 BinOp::Ne => tokens.append("!="),
                 BinOp::Ge => tokens.append(">="),
                 BinOp::Gt => tokens.append(">"),
+            }
+        }
+    }
+
+    impl ToTokens for UnOp {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                UnOp::Deref => tokens.append("*"),
+                UnOp::Not => tokens.append("!"),
+                UnOp::Neg => tokens.append("-"),
             }
         }
     }

@@ -17,3 +17,13 @@ fn ascript() {
         <G<u8> as m::Trait<u8>>::Assoc::f::<S>(),
     )
 }
+
+fn conditional() {
+    if a == b {
+        0
+    } else if a > b {
+        1
+    } else {
+        -1
+    }
+}
