@@ -27,3 +27,11 @@ fn conditional() {
         -1
     }
 }
+
+fn item() {
+    struct S;
+
+    let a = 1;
+    let a: u8 = 1;
+    let mut a = 1;
+}

@@ -338,6 +338,7 @@ pub mod parsing {
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
+    use item::parsing::item;
     use lit::parsing::lit;
     use ty::parsing::{mutability, qpath, ty};
 
@@ -713,12 +714,30 @@ pub mod parsing {
     ));
 
     named!(standalone_stmt -> Stmt, alt!(
-        // TODO: local
-        // TODO: item
-        // TODO: expr
+        stmt_local
+        |
+        stmt_item
+        |
         stmt_semi
         // TODO: mac
     ));
+
+    named!(stmt_local -> Stmt, do_parse!(
+        attrs: many0!(outer_attr) >>
+        keyword!("let") >>
+        pat: pat >>
+        ty: option!(preceded!(punct!(":"), ty)) >>
+        init: option!(preceded!(punct!("="), expr)) >>
+        punct!(";") >>
+        (Stmt::Local(Box::new(Local {
+            pat: Box::new(pat),
+            ty: ty.map(Box::new),
+            init: init.map(Box::new),
+            attrs: attrs,
+        })))
+    ));
+
+    named!(stmt_item -> Stmt, map!(item, |i| Stmt::Item(Box::new(i))));
 
     named!(stmt_semi -> Stmt, do_parse!(
         e: expr >>
@@ -1084,7 +1103,7 @@ mod printing {
     impl ToTokens for Stmt {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                Stmt::Local(ref _local) => unimplemented!(),
+                Stmt::Local(ref local) => local.to_tokens(tokens),
                 Stmt::Item(ref item) => item.to_tokens(tokens),
                 Stmt::Expr(ref expr) => expr.to_tokens(tokens),
                 Stmt::Semi(ref expr) => {
@@ -1093,6 +1112,22 @@ mod printing {
                 }
                 Stmt::Mac(ref _mac) => unimplemented!(),
             }
+        }
+    }
+
+    impl ToTokens for Local {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("let");
+            self.pat.to_tokens(tokens);
+            if let Some(ref ty) = self.ty {
+                tokens.append(":");
+                ty.to_tokens(tokens);
+            }
+            if let Some(ref init) = self.init {
+                tokens.append("=");
+                init.to_tokens(tokens);
+            }
+            tokens.append(";");
         }
     }
 }
