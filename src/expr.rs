@@ -367,10 +367,8 @@ pub mod parsing {
             expr_if
             |
             expr_while
-            // TODO: WhileLet
-            // TODO: ForLoop
-            // TODO: Loop
-            // TODO: ForLoop
+            |
+            expr_for_loop
             |
             expr_loop
             |
@@ -542,24 +540,26 @@ pub mod parsing {
 
     named!(and_ascription -> Ty, preceded!(punct!(":"), ty));
 
-    enum IfCond {
+    enum Cond {
         Let(Pat, Expr),
         Expr(Expr),
     }
 
+    named!(cond -> Cond, alt!(
+        do_parse!(
+            keyword!("let") >>
+            pat: pat >>
+            punct!("=") >>
+            value: expr >>
+            (Cond::Let(pat, value))
+        )
+        |
+        map!(expr, Cond::Expr)
+    ));
+
     named!(expr_if -> Expr, do_parse!(
         keyword!("if") >>
-        cond: alt!(
-            do_parse!(
-                keyword!("let") >>
-                pat: pat >>
-                punct!("=") >>
-                value: expr >>
-                (IfCond::Let(pat, value))
-            )
-            |
-            map!(expr, IfCond::Expr)
-        ) >>
+        cond: cond >>
         punct!("{") >>
         then_block: within_block >>
         punct!("}") >>
@@ -579,7 +579,7 @@ pub mod parsing {
             )
         )) >>
         (match cond {
-            IfCond::Let(pat, expr) => Expr::IfLet(
+            Cond::Let(pat, expr) => Expr::IfLet(
                 Box::new(pat),
                 Box::new(expr),
                 Block {
@@ -587,7 +587,7 @@ pub mod parsing {
                 },
                 else_block.map(Box::new),
             ),
-            IfCond::Expr(cond) => Expr::If(
+            Cond::Expr(cond) => Expr::If(
                 Box::new(cond),
                 Block {
                     stmts: then_block,
@@ -595,6 +595,16 @@ pub mod parsing {
                 else_block.map(Box::new),
             ),
         })
+    ));
+
+    named!(expr_for_loop -> Expr, do_parse!(
+        lbl: option!(terminated!(label, punct!(":"))) >>
+        keyword!("for") >>
+        pat: pat >>
+        keyword!("in") >>
+        expr: expr >>
+        loop_block: block >>
+        (Expr::ForLoop(Box::new(pat), Box::new(expr), loop_block, lbl))
     ));
 
     named!(expr_loop -> Expr, do_parse!(
@@ -671,13 +681,21 @@ pub mod parsing {
     named!(expr_while -> Expr, do_parse!(
         lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("while") >>
-        cond: expr >>
+        cond: cond >>
         while_block: block >>
-        (Expr::While(
-            Box::new(cond),
-            while_block,
-            lbl,
-        ))
+        (match cond {
+            Cond::Let(pat, expr) => Expr::WhileLet(
+                Box::new(pat),
+                Box::new(expr),
+                while_block,
+                lbl,
+            ),
+            Cond::Expr(cond) => Expr::While(
+                Box::new(cond),
+                while_block,
+                lbl,
+            ),
+        })
     ));
 
     named!(expr_continue -> Expr, do_parse!(
@@ -862,8 +880,15 @@ mod printing {
     impl ToTokens for Expr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                Expr::Box(ref _inner) => unimplemented!(),
-                Expr::Vec(ref _inner) => unimplemented!(),
+                Expr::Box(ref inner) => {
+                    tokens.append("box");
+                    inner.to_tokens(tokens);
+                }
+                Expr::Vec(ref tys) => {
+                    tokens.append("[");
+                    tokens.append_separated(tys, ",");
+                    tokens.append("]");
+                }
                 Expr::Call(ref func, ref args) => {
                     func.to_tokens(tokens);
                     tokens.append("(");
@@ -933,10 +958,46 @@ mod printing {
                         else_block.to_tokens(tokens);
                     }
                 }
-                Expr::While(ref _cond, ref _body, ref _label) => unimplemented!(),
-                Expr::WhileLet(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
-                Expr::ForLoop(ref _pat, ref _expr, ref _body, ref _label) => unimplemented!(),
-                Expr::Loop(ref _body, ref _label) => unimplemented!(),
+                Expr::While(ref cond, ref body, ref label) => {
+                    if let Some(ref label) = *label {
+                        label.to_tokens(tokens);
+                        tokens.append(":");
+                    }
+                    tokens.append("while");
+                    cond.to_tokens(tokens);
+                    body.to_tokens(tokens);
+                }
+                Expr::WhileLet(ref pat, ref expr, ref body, ref label) => {
+                    if let Some(ref label) = *label {
+                        label.to_tokens(tokens);
+                        tokens.append(":");
+                    }
+                    tokens.append("while");
+                    tokens.append("let");
+                    pat.to_tokens(tokens);
+                    tokens.append("=");
+                    expr.to_tokens(tokens);
+                    body.to_tokens(tokens);
+                }
+                Expr::ForLoop(ref pat, ref expr, ref body, ref label) => {
+                    if let Some(ref label) = *label {
+                        label.to_tokens(tokens);
+                        tokens.append(":");
+                    }
+                    tokens.append("for");
+                    pat.to_tokens(tokens);
+                    tokens.append("in");
+                    expr.to_tokens(tokens);
+                    body.to_tokens(tokens);
+                }
+                Expr::Loop(ref body, ref label) => {
+                    if let Some(ref label) = *label {
+                        label.to_tokens(tokens);
+                        tokens.append(":");
+                    }
+                    tokens.append("loop");
+                    body.to_tokens(tokens);
+                }
                 Expr::Match(ref expr, ref arms) => {
                     tokens.append("match");
                     expr.to_tokens(tokens);
@@ -984,12 +1045,40 @@ mod printing {
                     rules.to_tokens(tokens);
                     block.to_tokens(tokens);
                 }
-                Expr::Assign(ref _var, ref _expr) => unimplemented!(),
-                Expr::AssignOp(_op, ref _var, ref _expr) => unimplemented!(),
-                Expr::Field(ref _expr, ref _field) => unimplemented!(),
-                Expr::TupField(ref _expr, _field) => unimplemented!(),
-                Expr::Index(ref _expr, ref _index) => unimplemented!(),
-                Expr::Range(ref _from, ref _to, _limits) => unimplemented!(),
+                Expr::Assign(ref var, ref expr) => {
+                    var.to_tokens(tokens);
+                    tokens.append("=");
+                    expr.to_tokens(tokens);
+                }
+                Expr::AssignOp(op, ref var, ref expr) => {
+                    var.to_tokens(tokens);
+                    tokens.append(op.assign_op());
+                    expr.to_tokens(tokens);
+                }
+                Expr::Field(ref expr, ref field) => {
+                    expr.to_tokens(tokens);
+                    tokens.append(".");
+                    field.to_tokens(tokens);
+                }
+                Expr::TupField(ref expr, field) => {
+                    expr.to_tokens(tokens);
+                    tokens.append(".");
+                    tokens.append(&field.to_string());
+                }
+                Expr::Index(ref expr, ref index) => {
+                    expr.to_tokens(tokens);
+                    tokens.append("[");
+                    index.to_tokens(tokens);
+                    tokens.append("]");
+                }
+                Expr::Range(ref from, ref to, limits) => {
+                    from.to_tokens(tokens);
+                    match limits {
+                        RangeLimits::HalfOpen => tokens.append(".."),
+                        RangeLimits::Closed => tokens.append("..."),
+                    }
+                    to.to_tokens(tokens);
+                }
                 Expr::Path(None, ref path) => {
                     path.to_tokens(tokens);
                 }
@@ -1065,38 +1154,66 @@ mod printing {
         }
     }
 
+    impl BinOp {
+        fn op(&self) -> &'static str {
+            match *self {
+                BinOp::Add => "+",
+                BinOp::Sub => "-",
+                BinOp::Mul => "*",
+                BinOp::Div => "/",
+                BinOp::Rem => "%",
+                BinOp::And => "&&",
+                BinOp::Or => "||",
+                BinOp::BitXor => "^",
+                BinOp::BitAnd => "&",
+                BinOp::BitOr => "|",
+                BinOp::Shl => "<<",
+                BinOp::Shr => ">>",
+                BinOp::Eq => "==",
+                BinOp::Lt => "<",
+                BinOp::Le => "<=",
+                BinOp::Ne => "!=",
+                BinOp::Ge => ">=",
+                BinOp::Gt => ">",
+            }
+        }
+
+        fn assign_op(&self) -> &'static str {
+            match *self {
+                BinOp::Add => "+=",
+                BinOp::Sub => "-=",
+                BinOp::Mul => "*=",
+                BinOp::Div => "/=",
+                BinOp::Rem => "%=",
+                BinOp::BitXor => "^=",
+                BinOp::BitAnd => "&=",
+                BinOp::BitOr => "|=",
+                BinOp::Shl => "<<=",
+                BinOp::Shr => ">>=",
+                _ => panic!("bad assignment operator"),
+            }
+        }
+    }
+
     impl ToTokens for BinOp {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append(self.op());
+        }
+    }
+
+    impl UnOp {
+        fn op(&self) -> &'static str {
             match *self {
-                BinOp::Add => tokens.append("+"),
-                BinOp::Sub => tokens.append("-"),
-                BinOp::Mul => tokens.append("*"),
-                BinOp::Div => tokens.append("/"),
-                BinOp::Rem => tokens.append("%"),
-                BinOp::And => tokens.append("&&"),
-                BinOp::Or => tokens.append("||"),
-                BinOp::BitXor => tokens.append("^"),
-                BinOp::BitAnd => tokens.append("&"),
-                BinOp::BitOr => tokens.append("|"),
-                BinOp::Shl => tokens.append("<<"),
-                BinOp::Shr => tokens.append(">>"),
-                BinOp::Eq => tokens.append("=="),
-                BinOp::Lt => tokens.append("<"),
-                BinOp::Le => tokens.append("<="),
-                BinOp::Ne => tokens.append("!="),
-                BinOp::Ge => tokens.append(">="),
-                BinOp::Gt => tokens.append(">"),
+                UnOp::Deref => "*",
+                UnOp::Not => "!",
+                UnOp::Neg => "-",
             }
         }
     }
 
     impl ToTokens for UnOp {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                UnOp::Deref => tokens.append("*"),
-                UnOp::Not => tokens.append("!"),
-                UnOp::Neg => tokens.append("-"),
-            }
+            tokens.append(self.op());
         }
     }
 
