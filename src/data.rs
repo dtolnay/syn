@@ -24,6 +24,14 @@ impl VariantData {
             VariantData::Unit => &[],
         }
     }
+
+    pub fn fields_mut(&mut self) -> &mut [Field] {
+        match *self {
+            VariantData::Struct(ref mut fields) |
+            VariantData::Tuple(ref mut fields) => fields,
+            VariantData::Unit => &mut [],
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
