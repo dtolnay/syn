@@ -800,11 +800,32 @@ pub mod parsing {
     ));
 
     named!(standalone_stmt -> Stmt, alt!(
+        stmt_mac
+        |
         stmt_local
         |
         stmt_item
         |
         stmt_expr
+    ));
+
+    named!(stmt_mac -> Stmt, do_parse!(
+        attrs: many0!(outer_attr) >>
+        mac: mac >>
+        semi: option!(punct!(";")) >>
+        ({
+            let style = if semi.is_some() {
+                MacStmtStyle::Semicolon
+            } else if let Some(&TokenTree::Delimited(Delimited { delim, .. })) = mac.tts.last() {
+                match delim {
+                    DelimToken::Paren | DelimToken::Bracket => MacStmtStyle::NoBraces,
+                    DelimToken::Brace => MacStmtStyle::Braces,
+                }
+            } else {
+                MacStmtStyle::NoBraces
+            };
+            Stmt::Mac(Box::new((mac, style, attrs)))
+        })
     ));
 
     named!(stmt_local -> Stmt, do_parse!(
@@ -826,13 +847,6 @@ pub mod parsing {
 
     fn requires_semi(e: &Expr) -> bool {
         match *e {
-            Expr::Mac(ref mac) => match mac.tts.last() {
-                Some(&TokenTree::Delimited(
-                    Delimited { delim: DelimToken::Brace, .. }
-                )) => false,
-                _ => true,
-            },
-
             Expr::If(_, _, _) |
             Expr::IfLet(_, _, _, _) |
             Expr::While(_, _, _) |
@@ -911,6 +925,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use {FunctionRetTy, Mutability, Ty};
+    use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Expr {
@@ -1362,7 +1377,17 @@ mod printing {
                     expr.to_tokens(tokens);
                     tokens.append(";");
                 }
-                Stmt::Mac(ref _mac) => unimplemented!(),
+                Stmt::Mac(ref mac) => {
+                    let (ref mac, style, ref attrs) = **mac;
+                    for attr in attrs.outer() {
+                        attr.to_tokens(tokens);
+                    }
+                    mac.to_tokens(tokens);
+                    match style {
+                        MacStmtStyle::Semicolon => tokens.append(";"),
+                        MacStmtStyle::Braces | MacStmtStyle::NoBraces => { /* no semicolon */ }
+                    }
+                }
             }
         }
     }
