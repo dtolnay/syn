@@ -437,7 +437,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use FunctionRetTy;
+    use {Delimited, DelimToken, FunctionRetTy, TokenTree};
     use attr::FilterAttrs;
     use data::VariantData;
     use quote::{Tokens, ToTokens};
@@ -539,7 +539,20 @@ mod printing {
                 ItemKind::Trait(_unsafety, ref _generics, ref _bound, ref _item) => unimplemented!(),
                 ItemKind::DefaultImpl(_unsafety, ref _path) => unimplemented!(),
                 ItemKind::Impl(_unsafety, _polarity, ref _generics, ref _path, ref _ty, ref _item) => unimplemented!(),
-                ItemKind::Mac(ref _mac) => unimplemented!(),
+                ItemKind::Mac(ref mac) => {
+                    mac.path.to_tokens(tokens);
+                    tokens.append("!");
+                    self.ident.to_tokens(tokens);
+                    for tt in &mac.tts {
+                        tt.to_tokens(tokens);
+                    }
+                    match mac.tts.last() {
+                        Some(&TokenTree::Delimited(
+                            Delimited { delim: DelimToken::Brace, .. }
+                        )) => { /* no semicolon */ }
+                        _ => tokens.append(";"),
+                    }
+                }
             }
         }
     }

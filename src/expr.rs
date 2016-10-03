@@ -827,19 +827,12 @@ pub mod parsing {
 
     fn requires_semi(e: &Expr) -> bool {
         match *e {
-            Expr::Mac(ref mac) => {
-                let len = mac.tts.len();
-                if let TokenTree::Delimited(
-                    Delimited {
-                        delim: DelimToken::Brace,
-                        ..
-                    }
-                ) = mac.tts[len - 1] {
-                    false
-                } else {
-                    true
-                }
-            }
+            Expr::Mac(ref mac) => match mac.tts.last() {
+                Some(&TokenTree::Delimited(
+                    Delimited { delim: DelimToken::Brace, .. }
+                )) => false,
+                _ => true,
+            },
 
             Expr::If(_, _, _) |
             Expr::IfLet(_, _, _, _) |
@@ -1164,7 +1157,7 @@ mod printing {
                     tokens.append("return");
                     opt_expr.to_tokens(tokens);
                 }
-                Expr::Mac(ref _mac) => unimplemented!(),
+                Expr::Mac(ref mac) => mac.to_tokens(tokens),
                 Expr::Struct(ref path, ref fields, ref base) => {
                     path.to_tokens(tokens);
                     tokens.append("{");
@@ -1309,7 +1302,7 @@ mod printing {
                 Pat::Lit(ref _expr) => unimplemented!(),
                 Pat::Range(ref _lower, ref _upper) => unimplemented!(),
                 Pat::Vec(ref _before, ref _dots, ref _after) => unimplemented!(),
-                Pat::Mac(ref _mac) => unimplemented!(),
+                Pat::Mac(ref mac) => mac.to_tokens(tokens),
             }
         }
     }
