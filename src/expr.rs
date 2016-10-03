@@ -334,12 +334,12 @@ pub enum BindingMode {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Path, QSelf, Ty};
+    use {FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Ty};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use lit::parsing::lit;
-    use ty::parsing::{mutability, path, path_segment, ty};
+    use ty::parsing::{mutability, qpath, ty};
 
     named!(pub expr -> Expr, do_parse!(
         mut e: alt!(
@@ -373,8 +373,6 @@ pub mod parsing {
             expr_block
             |
             expr_path
-            |
-            expr_qpath
             // TODO: AddrOf
             |
             expr_break
@@ -677,34 +675,7 @@ pub mod parsing {
         }))
     ));
 
-    named!(expr_path -> Expr, map!(path, |p| Expr::Path(None, p)));
-
-    named!(expr_qpath -> Expr, do_parse!(
-        punct!("<") >>
-        this: map!(ty, Box::new) >>
-        path: option!(preceded!(
-            keyword!("as"),
-            path
-        )) >>
-        punct!(">") >>
-        punct!("::") >>
-        rest: separated_nonempty_list!(punct!("::"), path_segment) >>
-        ({
-            match path {
-                Some(mut path) => {
-                    let pos = path.segments.len();
-                    path.segments.extend(rest);
-                    Expr::Path(Some(QSelf { ty: this, position: pos }), path)
-                }
-                None => {
-                    Expr::Path(Some(QSelf { ty: this, position: 0 }), Path {
-                        global: false,
-                        segments: rest,
-                    })
-                }
-            }
-        })
-    ));
+    named!(expr_path -> Expr, map!(qpath, |(qself, path)| Expr::Path(qself, path)));
 
     named!(pub block -> Block, do_parse!(
         punct!("{") >>
@@ -753,7 +724,8 @@ pub mod parsing {
         pat_ident
         // TODO: Struct
         // TODO: TupleStruct
-        // TODO: Path
+        |
+        pat_path
         // TODO: Tuple
         // TODO: Box
         // TODO: Ref
@@ -781,6 +753,8 @@ pub mod parsing {
         ))
     ));
 
+    named!(pat_path -> Pat, map!(qpath, |(qself, path)| Pat::Path(qself, path)));
+
     named!(capture_by -> CaptureBy, alt!(
         keyword!("move") => { |_| CaptureBy::Value }
         |
@@ -801,8 +775,26 @@ mod printing {
             match *self {
                 Expr::Box(ref _inner) => unimplemented!(),
                 Expr::Vec(ref _inner) => unimplemented!(),
-                Expr::Call(ref _func, ref _args) => unimplemented!(),
-                Expr::MethodCall(ref _ident, ref _ascript, ref _args) => unimplemented!(),
+                Expr::Call(ref func, ref args) => {
+                    func.to_tokens(tokens);
+                    tokens.append("(");
+                    tokens.append_separated(args, ",");
+                    tokens.append(")");
+                }
+                Expr::MethodCall(ref ident, ref ascript, ref args) => {
+                    args[0].to_tokens(tokens);
+                    tokens.append(".");
+                    ident.to_tokens(tokens);
+                    if ascript.len() > 0 {
+                        tokens.append("::");
+                        tokens.append("<");
+                        tokens.append_separated(ascript, ",");
+                        tokens.append(">");
+                    }
+                    tokens.append("(");
+                    tokens.append_separated(&args[1..], ",");
+                    tokens.append(")");
+                }
                 Expr::Tup(ref fields) => {
                     tokens.append("(");
                     tokens.append_separated(fields, ",");

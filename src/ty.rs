@@ -204,8 +204,6 @@ pub mod parsing {
         |
         ty_path
         |
-        ty_qpath
-        |
         ty_impl_trait
         |
         ty_paren
@@ -285,33 +283,37 @@ pub mod parsing {
         (Ty::Tup(elems))
     ));
 
-    named!(ty_path -> Ty, map!(path, |p| Ty::Path(None, p)));
+    named!(ty_path -> Ty, map!(qpath, |(qself, p)| Ty::Path(qself, p)));
 
-    named!(ty_qpath -> Ty, do_parse!(
-        punct!("<") >>
-        this: map!(ty, Box::new) >>
-        path: option!(preceded!(
-            keyword!("as"),
-            path
-        )) >>
-        punct!(">") >>
-        punct!("::") >>
-        rest: separated_nonempty_list!(punct!("::"), path_segment) >>
-        ({
-            match path {
-                Some(mut path) => {
-                    let pos = path.segments.len();
-                    path.segments.extend(rest);
-                    Ty::Path(Some(QSelf { ty: this, position: pos }), path)
+    named!(pub qpath -> (Option<QSelf>, Path), alt!(
+        map!(path, |p| (None, p))
+        |
+        do_parse!(
+            punct!("<") >>
+            this: map!(ty, Box::new) >>
+            path: option!(preceded!(
+                keyword!("as"),
+                path
+            )) >>
+            punct!(">") >>
+            punct!("::") >>
+            rest: separated_nonempty_list!(punct!("::"), path_segment) >>
+            ({
+                match path {
+                    Some(mut path) => {
+                        let pos = path.segments.len();
+                        path.segments.extend(rest);
+                        (Some(QSelf { ty: this, position: pos }), path)
+                    }
+                    None => {
+                        (Some(QSelf { ty: this, position: 0 }), Path {
+                            global: false,
+                            segments: rest,
+                        })
+                    }
                 }
-                None => {
-                    Ty::Path(Some(QSelf { ty: this, position: 0 }), Path {
-                        global: false,
-                        segments: rest,
-                    })
-                }
-            }
-        })
+            })
+        )
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
@@ -342,9 +344,9 @@ pub mod parsing {
         })
     ));
 
-    named!(pub path_segment -> PathSegment, alt!(
+    named!(path_segment -> PathSegment, alt!(
         do_parse!(
-            id: ident >>
+            id: option!(ident) >>
             punct!("<") >>
             lifetimes: separated_list!(punct!(","), lifetime) >>
             types: opt_vec!(preceded!(
@@ -360,7 +362,7 @@ pub mod parsing {
             )) >>
             punct!(">") >>
             (PathSegment {
-                ident: id,
+                ident: id.unwrap_or_else(|| "".into()),
                 parameters: PathParameters::AngleBracketed(
                     AngleBracketedParameterData {
                         lifetimes: lifetimes,

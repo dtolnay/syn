@@ -10,3 +10,10 @@ fn f() {
         move |a, b| a + b,
     )
 }
+
+fn ascript() {
+    (
+        G::<u8>::f::<S>(),
+        <G<u8> as m::Trait<u8>>::Assoc::f::<S>(),
+    )
+}
