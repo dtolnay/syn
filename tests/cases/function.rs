@@ -39,19 +39,19 @@ fn conditional() {
 fn looping() {
     loop {
         print(a);
-    };
+    }
 
     while true {
         print(a);
-    };
+    }
 
     while let a = true {
         print(a);
-    };
+    }
 
     for a in b {
         print(a);
-    };
+    }
 }
 
 fn item() {

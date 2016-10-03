@@ -71,7 +71,11 @@ macro_rules! cond {
         } else {
             $crate::nom::IResult::Done($i, ::std::option::Option::None)
         }
-    }
+    };
+
+    ($i:expr, $cond:expr, $f:expr) => {
+        cond!($i, $cond, call!($f));
+    };
 }
 
 macro_rules! preceded {

@@ -340,12 +340,13 @@ pub enum BindingMode {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Ty};
+    use {Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, TokenTree, Ty};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use item::parsing::item;
     use lit::parsing::lit;
+    use nom::IResult::Error;
     use ty::parsing::{mutability, path, qpath, ty};
 
     named!(pub expr -> Expr, do_parse!(
@@ -782,13 +783,14 @@ pub mod parsing {
     ));
 
     named!(within_block -> Vec<Stmt>, do_parse!(
-        mut most: many0!(standalone_stmt) >>
+        many0!(punct!(";")) >>
+        mut standalone: many0!(terminated!(standalone_stmt, many0!(punct!(";")))) >>
         last: option!(expr) >>
         (match last {
-            None => most,
+            None => standalone,
             Some(last) => {
-                most.push(Stmt::Expr(Box::new(last)));
-                most
+                standalone.push(Stmt::Expr(Box::new(last)));
+                standalone
             }
         })
     ));
@@ -798,7 +800,7 @@ pub mod parsing {
         |
         stmt_item
         |
-        stmt_semi
+        stmt_expr
         // TODO: mac
     ));
 
@@ -819,10 +821,45 @@ pub mod parsing {
 
     named!(stmt_item -> Stmt, map!(item, |i| Stmt::Item(Box::new(i))));
 
-    named!(stmt_semi -> Stmt, do_parse!(
+    fn requires_semi(e: &Expr) -> bool {
+        match *e {
+            Expr::Mac(ref mac) => {
+                let len = mac.tts.len();
+                if let TokenTree::Delimited(
+                    Delimited {
+                        delim: DelimToken::Brace,
+                        ..
+                    }
+                ) = mac.tts[len - 1] {
+                    false
+                } else {
+                    true
+                }
+            }
+
+            Expr::If(_, _, _) |
+            Expr::IfLet(_, _, _, _) |
+            Expr::While(_, _, _) |
+            Expr::WhileLet(_, _, _, _) |
+            Expr::ForLoop(_, _, _, _) |
+            Expr::Loop(_, _) |
+            Expr::Match(_, _) |
+            Expr::Block(_, _) => false,
+
+            _ => true,
+        }
+    }
+
+    named!(stmt_expr -> Stmt, do_parse!(
         e: expr >>
-        punct!(";") >>
-        (Stmt::Semi(Box::new(e)))
+        semi: option!(punct!(";")) >>
+        (if semi.is_some() {
+            Stmt::Semi(Box::new(e))
+        } else if requires_semi(&e) {
+            return Error;
+        } else {
+            Stmt::Expr(Box::new(e))
+        })
     ));
 
     named!(pub pat -> Pat, alt!(
