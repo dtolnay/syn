@@ -206,7 +206,7 @@ mod parsing {
                 if rest.is_empty() {
                     Ok(t)
                 } else {
-                    Err(format!("remaining tokens after {}: {:?}", name, rest))
+                    Err(format!("failed to parse tokens after {}: {:?}", name, rest))
                 }
             }
             IResult::Error => Err(format!("failed to parse {}: {:?}", name, input)),

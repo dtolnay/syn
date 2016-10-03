@@ -79,7 +79,7 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 }
 
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
-    use syntex_syntax::ast::{Attribute, Expr, ExprKind, FnDecl, FunctionRetTy, ItemKind, Mac, TyParam};
+    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ItemKind, Mac, TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::ptr::P;
@@ -118,9 +118,11 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 Expr {
                     node: match folded.node {
                         ExprKind::Lit(l) => {
+                            // default fold_expr does not fold this span
                             ExprKind::Lit(l.map(|l| self.fold_spanned(l)))
                         }
                         ExprKind::Binary(op, lhs, rhs) => {
+                            // default fold_expr does not fold the op span
                             ExprKind::Binary(self.fold_spanned(op), self.fold_expr(lhs), self.fold_expr(rhs))
                         }
                         other => other,
@@ -148,6 +150,18 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 },
                 variadic: variadic
             })
+        }
+
+        fn fold_field(&mut self, field: Field) -> Field {
+            Field {
+                ident: codemap::respan(
+                    // default fold_field does not fold this span
+                    self.new_span(field.ident.span),
+                    self.fold_ident(field.ident.node),
+                ),
+                expr: self.fold_expr(field.expr),
+                span: self.new_span(field.span)
+            }
         }
 
         fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {

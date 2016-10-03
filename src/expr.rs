@@ -113,7 +113,7 @@ pub enum Expr {
     ///
     /// For example, `Foo {x: 1, y: 2}`, or
     /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
-    Struct(Path, Vec<Field>, Option<Box<Expr>>),
+    Struct(Path, Vec<FieldValue>, Option<Box<Expr>>),
 
     /// An array literal constructed from one repeated element.
     ///
@@ -126,6 +126,12 @@ pub enum Expr {
 
     /// `expr?`
     Try(Box<Expr>),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FieldValue {
+    pub ident: Ident,
+    pub expr: Expr,
 }
 
 /// A Block (`{ .. }`).
@@ -340,11 +346,15 @@ pub mod parsing {
     use ident::parsing::ident;
     use item::parsing::item;
     use lit::parsing::lit;
-    use ty::parsing::{mutability, qpath, ty};
+    use ty::parsing::{mutability, path, qpath, ty};
 
     named!(pub expr -> Expr, do_parse!(
         mut e: alt!(
-            expr_paren
+            expr_lit // needs to be before expr_struct
+            |
+            expr_struct // needs to be before expr_path
+            |
+            expr_paren // needs to be before expr_tup
             |
             expr_box
             |
@@ -353,8 +363,6 @@ pub mod parsing {
             expr_tup
             |
             expr_unary
-            |
-            expr_lit
             |
             expr_if
             // TODO: IfLet
@@ -383,8 +391,8 @@ pub mod parsing {
             |
             expr_ret
             // TODO: Mac
-            // TODO: Struct
-            // TODO: Repeat
+            |
+            expr_repeat
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
@@ -415,7 +423,10 @@ pub mod parsing {
             // TODO: TupField
             // TODO: Index
             // TODO: Range
-            // TODO: Try
+            |
+            tap!(_try: punct!("?") => {
+                e = Expr::Try(Box::new(e));
+            })
         )) >>
         (e)
     ));
@@ -648,25 +659,52 @@ pub mod parsing {
     named!(expr_continue -> Expr, do_parse!(
         keyword!("continue") >>
         lbl: option!(label) >>
-        (Expr::Continue(
-            lbl,
-         ))
+        (Expr::Continue(lbl))
     ));
 
     named!(expr_break -> Expr, do_parse!(
         keyword!("break") >>
         lbl: option!(label) >>
-        (Expr::Break(
-            lbl,
-         ))
+        (Expr::Break(lbl))
     ));
 
     named!(expr_ret -> Expr, do_parse!(
         keyword!("return") >>
         ret_value: option!(expr) >>
-        (Expr::Ret(
-            ret_value.map(Box::new),
-         ))
+        (Expr::Ret(ret_value.map(Box::new)))
+    ));
+
+    named!(expr_struct -> Expr, do_parse!(
+        path: path >>
+        punct!("{") >>
+        fields: separated_list!(punct!(","), field_value) >>
+        base: option!(do_parse!(
+            cond!(!fields.is_empty(), punct!(",")) >>
+            punct!("..") >>
+            base: expr >>
+            (base)
+        )) >>
+        punct!("}") >>
+        (Expr::Struct(path, fields, base.map(Box::new)))
+    ));
+
+    named!(field_value -> FieldValue, do_parse!(
+        name: ident >>
+        punct!(":") >>
+        value: expr >>
+        (FieldValue {
+            ident: name,
+            expr: value,
+        })
+    ));
+
+    named!(expr_repeat -> Expr, do_parse!(
+        punct!("[") >>
+        value: expr >>
+        punct!(";") >>
+        times: expr >>
+        punct!("]") >>
+        (Expr::Repeat(Box::new(value), Box::new(times)))
     ));
 
     named!(expr_block -> Expr, do_parse!(
@@ -959,8 +997,26 @@ mod printing {
                     opt_expr.to_tokens(tokens);
                 }
                 Expr::Mac(ref _mac) => unimplemented!(),
-                Expr::Struct(ref _path, ref _fields, ref _base) => unimplemented!(),
-                Expr::Repeat(ref _expr, ref _times) => unimplemented!(),
+                Expr::Struct(ref path, ref fields, ref base) => {
+                    path.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_separated(fields, ",");
+                    if let Some(ref base) = *base {
+                        if !fields.is_empty() {
+                            tokens.append(",");
+                        }
+                        tokens.append("..");
+                        base.to_tokens(tokens);
+                    }
+                    tokens.append("}");
+                }
+                Expr::Repeat(ref expr, ref times) => {
+                    tokens.append("[");
+                    expr.to_tokens(tokens);
+                    tokens.append(";");
+                    times.to_tokens(tokens);
+                    tokens.append("]");
+                }
                 Expr::Paren(ref expr) => {
                     tokens.append("(");
                     expr.to_tokens(tokens);
@@ -1006,6 +1062,14 @@ mod printing {
                 UnOp::Not => tokens.append("!"),
                 UnOp::Neg => tokens.append("-"),
             }
+        }
+    }
+
+    impl ToTokens for FieldValue {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.ident.to_tokens(tokens);
+            tokens.append(":");
+            self.expr.to_tokens(tokens);
         }
     }
 

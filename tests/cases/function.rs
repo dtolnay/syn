@@ -1,4 +1,4 @@
-fn f() {
+fn closure() {
     (
         || (),
         |_| (),
@@ -34,4 +34,15 @@ fn item() {
     let a = 1;
     let a: u8 = 1;
     let mut a = 1;
+}
+
+fn expr() {
+    fallible()?;
+
+    [repeat; 1 + 1];
+
+    A::B {};
+    A::B { a: () };
+    A::B { .. c };
+    A::B { a: (), b: (), .. c };
 }
