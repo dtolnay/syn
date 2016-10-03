@@ -227,13 +227,14 @@ pub struct FnArg {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {FunctionRetTy, Generics};
+    use {FunctionRetTy, Generics, Ident, Mac, TokenTree, Visibility};
     use attr::parsing::outer_attr;
     use data::parsing::visibility;
     use expr::parsing::{block, expr, pat};
     use generics::parsing::{generics, where_clause};
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
+    use mac::parsing::delimited;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
     use ty::parsing::{mutability, ty};
@@ -257,7 +258,25 @@ pub mod parsing {
         // TODO: Trait
         // TODO: DefaultImpl
         // TODO: Impl
-        // TODO: Mac
+        |
+        item_mac
+    ));
+
+    named!(item_mac -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        path: ident >>
+        punct!("!") >>
+        name: option!(ident) >>
+        body: delimited >>
+        (Item {
+            ident: name.unwrap_or_else(|| Ident::new("")),
+            vis: Visibility::Inherited,
+            attrs: attrs,
+            node: ItemKind::Mac(Mac {
+                path: path.into(),
+                tts: vec![TokenTree::Delimited(body)],
+            }),
+        })
     ));
 
     named!(item_extern_crate -> Item, do_parse!(

@@ -1,13 +1,6 @@
 extern crate syn;
 use syn::*;
 
-fn simple_ty(ident: &str) -> Ty {
-    Ty::Path(None, Path {
-        global: false,
-        segments: vec![PathSegment::ident(ident.into())],
-    })
-}
-
 #[test]
 fn test_unit() {
     let raw = "struct Unit;";
@@ -52,7 +45,7 @@ fn test_struct() {
                 ident: Some("ident".into()),
                 vis: Visibility::Public,
                 attrs: Vec::new(),
-                ty: simple_ty("Ident"),
+                ty: Ty::Path(None, "Ident".into()),
             },
             Field {
                 ident: Some("attrs".into()),
@@ -66,7 +59,7 @@ fn test_struct() {
                             parameters: PathParameters::AngleBracketed(
                                 AngleBracketedParameterData {
                                     lifetimes: Vec::new(),
-                                    types: vec![simple_ty("Attribute")],
+                                    types: vec![Ty::Path(None, "Attribute".into())],
                                     bindings: Vec::new(),
                                 },
                             ),
@@ -140,7 +133,7 @@ fn test_enum() {
                         ident: None,
                         vis: Visibility::Inherited,
                         attrs: Vec::new(),
-                        ty: simple_ty("T"),
+                        ty: Ty::Path(None, "T".into()),
                     },
                 ]),
                 discriminant: None,
@@ -153,7 +146,7 @@ fn test_enum() {
                         ident: None,
                         vis: Visibility::Inherited,
                         attrs: Vec::new(),
-                        ty: simple_ty("E"),
+                        ty: Ty::Path(None, "E".into()),
                     },
                 ]),
                 discriminant: None,

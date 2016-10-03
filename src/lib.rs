@@ -119,7 +119,6 @@ pub use mac::{
     DelimToken,
     Delimited,
     Mac,
-    SequenceRepetition,
     Token,
     TokenTree,
 };

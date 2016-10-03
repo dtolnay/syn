@@ -30,10 +30,6 @@ pub enum TokenTree {
     Token(Token),
     /// A delimited sequence of token trees
     Delimited(Delimited),
-
-    // This only makes sense in MBE macros.
-    /// A kleene-style repetition sequence with a span
-    Sequence(SequenceRepetition),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -42,26 +38,6 @@ pub struct Delimited {
     pub delim: DelimToken,
     /// The delimited sequence of token trees
     pub tts: Vec<TokenTree>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct SequenceRepetition {
-    /// The sequence of token trees
-    pub tts: Vec<TokenTree>,
-    /// The optional separator
-    pub separator: Option<Token>,
-    /// Whether the sequence can be repeated zero (*), or one or more times (+)
-    pub op: KleeneOp,
-    /// The number of `MatchNt`s that appear in the sequence (and subsequences)
-    pub num_captures: usize,
-}
-
-/// A Kleene-style [repetition operator](http://en.wikipedia.org/wiki/Kleene_star)
-/// for token sequences.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum KleeneOp {
-    ZeroOrMore,
-    OneOrMore,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -96,28 +72,16 @@ pub enum Token {
     Pound,
     Dollar,
     Question,
-    /// An opening delimiter, eg. `{`
-    OpenDelim(DelimToken),
-    /// A closing delimiter, eg. `}`
-    CloseDelim(DelimToken),
 
     /* Literals */
-    Literal(Lit, Option<String>),
+    Literal(Lit),
 
     /* Name components */
     Ident(Ident),
     Underscore,
     Lifetime(Ident),
 
-    // Can be expanded into several tokens.
-    /// Doc comment
     DocComment(String),
-    // In left-hand-sides of MBE macros:
-    /// Parse a nonterminal (name to bind, name of NT)
-    MatchNt(Ident, Ident),
-    // In right-hand-sides of MBE macros:
-    /// A syntactic variable that will be filled in by macro expansion.
-    SubstNt(Ident),
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -143,6 +107,189 @@ pub enum DelimToken {
     Bracket,
     /// A curly brace: `{` or `}`
     Brace,
-    /// An empty delimiter
-    NoDelim,
+}
+
+#[cfg(feature = "parsing")]
+pub mod parsing {
+    use super::*;
+    use Lifetime;
+    use generics::parsing::lifetime;
+    use ident::parsing::ident;
+    use lit::parsing::lit;
+    use space::{block_comment, whitespace};
+
+    named!(pub mac -> Mac, do_parse!(
+        name: ident >>
+        punct!("!") >>
+        body: delimited >>
+        (Mac {
+            path: name.into(),
+            tts: vec![TokenTree::Delimited(body)],
+        })
+    ));
+
+    named!(pub delimited -> Delimited, alt!(
+        delimited!(
+            punct!("("),
+            many0!(token_tree),
+            punct!(")")
+        ) => { |tts| Delimited { delim: DelimToken::Paren, tts: tts } }
+        |
+        delimited!(
+            punct!("["),
+            many0!(token_tree),
+            punct!("]")
+        ) => { |tts| Delimited { delim: DelimToken::Bracket, tts: tts } }
+        |
+        delimited!(
+            punct!("{"),
+            many0!(token_tree),
+            punct!("}")
+        ) => { |tts| Delimited { delim: DelimToken::Brace, tts: tts } }
+    ));
+
+    named!(token_tree -> TokenTree, alt!(
+        map!(token, TokenTree::Token)
+        |
+        map!(delimited, TokenTree::Delimited)
+    ));
+
+    named!(token -> Token, alt!(
+        map!(bin_op_eq, Token::BinOpEq)
+        |
+        map!(bin_op, Token::BinOp)
+        |
+        punct!("=") => { |_| Token::Eq }
+        |
+        punct!("<") => { |_| Token::Lt }
+        |
+        punct!("<=") => { |_| Token::Le }
+        |
+        punct!("==") => { |_| Token::EqEq }
+        |
+        punct!("!=") => { |_| Token::Ne }
+        |
+        punct!(">=") => { |_| Token::Ge }
+        |
+        punct!(">") => { |_| Token::Gt }
+        |
+        punct!("&&") => { |_| Token::AndAnd }
+        |
+        punct!("||") => { |_| Token::OrOr }
+        |
+        punct!("!") => { |_| Token::Not }
+        |
+        punct!("~") => { |_| Token::Tilde }
+        |
+        punct!("@") => { |_| Token::At }
+        |
+        punct!(".") => { |_| Token::Dot }
+        |
+        punct!("..") => { |_| Token::DotDot }
+        |
+        punct!("...") => { |_| Token::DotDotDot }
+        |
+        punct!(",") => { |_| Token::Comma }
+        |
+        punct!(";") => { |_| Token::Semi }
+        |
+        punct!(":") => { |_| Token::Colon }
+        |
+        punct!("::") => { |_| Token::ModSep }
+        |
+        punct!("->") => { |_| Token::RArrow }
+        |
+        punct!("<-") => { |_| Token::LArrow }
+        |
+        punct!("=>") => { |_| Token::FatArrow }
+        |
+        punct!("#") => { |_| Token::Pound }
+        |
+        punct!("$") => { |_| Token::Dollar }
+        |
+        punct!("?") => { |_| Token::Question }
+        |
+        punct!("_") => { |_| Token::Underscore }
+        |
+        map!(lit, Token::Literal)
+        |
+        map!(ident, Token::Ident)
+        |
+        map!(lifetime, |lt: Lifetime| Token::Lifetime(lt.ident))
+        |
+        map!(doc_comment, Token::DocComment)
+    ));
+
+    named!(bin_op -> BinOpToken, alt!(
+        punct!("+") => { |_| BinOpToken::Plus }
+        |
+        punct!("-") => { |_| BinOpToken::Minus }
+        |
+        punct!("*") => { |_| BinOpToken::Star }
+        |
+        punct!("/") => { |_| BinOpToken::Slash }
+        |
+        punct!("%") => { |_| BinOpToken::Percent }
+        |
+        punct!("^") => { |_| BinOpToken::Caret }
+        |
+        punct!("&") => { |_| BinOpToken::And }
+        |
+        punct!("|") => { |_| BinOpToken::Or }
+        |
+        punct!("<<") => { |_| BinOpToken::Shl }
+        |
+        punct!(">>") => { |_| BinOpToken::Shr }
+    ));
+
+    named!(bin_op_eq -> BinOpToken, alt!(
+        punct!("+=") => { |_| BinOpToken::Plus }
+        |
+        punct!("-=") => { |_| BinOpToken::Minus }
+        |
+        punct!("*=") => { |_| BinOpToken::Star }
+        |
+        punct!("/=") => { |_| BinOpToken::Slash }
+        |
+        punct!("%=") => { |_| BinOpToken::Percent }
+        |
+        punct!("^=") => { |_| BinOpToken::Caret }
+        |
+        punct!("&=") => { |_| BinOpToken::And }
+        |
+        punct!("|=") => { |_| BinOpToken::Or }
+        |
+        punct!("<<=") => { |_| BinOpToken::Shl }
+        |
+        punct!(">>=") => { |_| BinOpToken::Shr }
+    ));
+
+    named!(doc_comment -> String, alt!(
+        do_parse!(
+            punct!("//!") >>
+            content: take_until!("\n") >>
+            (format!("//!{}", content))
+        )
+        |
+        do_parse!(
+            option!(whitespace) >>
+            peek!(tag!("/*!")) >>
+            com: block_comment >>
+            (com.to_owned())
+        )
+        |
+        do_parse!(
+            punct!("///") >>
+            not!(peek!(tag!("/"))) >>
+            content: take_until!("\n") >>
+            (format!("///{}", content))
+        )
+        |
+        do_parse!(
+            option!(whitespace) >>
+            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
+            com: block_comment >>
+            (com.to_owned())
+        )
+    ));
 }

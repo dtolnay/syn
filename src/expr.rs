@@ -346,6 +346,7 @@ pub mod parsing {
     use ident::parsing::ident;
     use item::parsing::item;
     use lit::parsing::lit;
+    use mac::parsing::mac;
     use nom::IResult::Error;
     use ty::parsing::{mutability, path, qpath, ty};
 
@@ -388,7 +389,8 @@ pub mod parsing {
             expr_continue
             |
             expr_ret
-            // TODO: Mac
+            |
+            expr_mac
             |
             expr_repeat
         ) >>
@@ -428,6 +430,8 @@ pub mod parsing {
         )) >>
         (e)
     ));
+
+    named!(expr_mac -> Expr, map!(mac, Expr::Mac));
 
     named!(expr_paren -> Expr, do_parse!(
         punct!("(") >>
@@ -876,8 +880,11 @@ pub mod parsing {
         // TODO: Lit
         // TODO: Range
         // TODO: Vec
-        // TODO: Mac
+        |
+        pat_mac
     ));
+
+    named!(pat_mac -> Pat, map!(mac, Pat::Mac));
 
     named!(pat_wild -> Pat, map!(keyword!("_"), |_| Pat::Wild));
 

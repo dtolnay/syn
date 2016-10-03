@@ -59,6 +59,15 @@ pub struct Path {
     pub segments: Vec<PathSegment>,
 }
 
+impl<T> From<T> for Path where T: Into<PathSegment> {
+    fn from(segment: T) -> Self {
+        Path {
+            global: false,
+            segments: vec![segment.into()],
+        }
+    }
+}
+
 /// A segment of a path: an identifier, an optional lifetime, and a set of types.
 ///
 /// E.g. `std`, `String` or `Box<T>`
@@ -68,10 +77,10 @@ pub struct PathSegment {
     pub parameters: PathParameters,
 }
 
-impl PathSegment {
-    pub fn ident(ident: Ident) -> Self {
+impl<T> From<T> for PathSegment where T: Into<Ident> {
+    fn from(ident: T) -> Self {
         PathSegment {
-            ident: ident,
+            ident: ident.into(),
             parameters: PathParameters::none(),
         }
     }
@@ -373,7 +382,7 @@ pub mod parsing {
             })
         )
         |
-        map!(ident, PathSegment::ident)
+        map!(ident, Into::into)
     ));
 
     named!(type_binding -> TypeBinding, do_parse!(

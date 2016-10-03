@@ -165,7 +165,7 @@ pub mod parsing {
         |
         do_parse!(
             option!(whitespace) >>
-            peek!(tag!("/**")) >>
+            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
             com: block_comment >>
             (Attribute {
                 style: AttrStyle::Outer,
