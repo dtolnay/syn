@@ -81,5 +81,6 @@ fn pattern() {
     match x {
         0...31 => {}
         A::B => {}
+        &inner => {}
     }
 }

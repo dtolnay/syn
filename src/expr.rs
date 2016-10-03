@@ -887,7 +887,8 @@ pub mod parsing {
         |
         pat_tuple
         // TODO: Box
-        // TODO: Ref
+        |
+        pat_ref
         |
         pat_lit
         // TODO: Vec
@@ -945,6 +946,13 @@ pub mod parsing {
             }
             None => Pat::Tuple(elems, None),
         })
+    ));
+
+    named!(pat_ref -> Pat, do_parse!(
+        punct!("&") >>
+        mutability: mutability >>
+        pat: pat >>
+        (Pat::Ref(Box::new(pat), mutability))
     ));
 
     named!(pat_lit -> Pat, map!(lit, |lit| Pat::Lit(Box::new(lit))));
@@ -1395,7 +1403,11 @@ mod printing {
                     tokens.append("box");
                     inner.to_tokens(tokens);
                 }
-                Pat::Ref(ref _target, _mutability) => unimplemented!(),
+                Pat::Ref(ref target, mutability) => {
+                    tokens.append("&");
+                    mutability.to_tokens(tokens);
+                    target.to_tokens(tokens);
+                }
                 Pat::Lit(ref lit) => lit.to_tokens(tokens),
                 Pat::Range(ref lo, ref hi) => {
                     lo.to_tokens(tokens);
