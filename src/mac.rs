@@ -293,3 +293,135 @@ pub mod parsing {
         )
     ));
 }
+
+#[cfg(feature = "printing")]
+mod printing {
+    use super::*;
+    use quote::{Tokens, ToTokens};
+
+    impl ToTokens for Mac {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.path.to_tokens(tokens);
+            tokens.append("!");
+            for tt in &self.tts {
+                tt.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for TokenTree {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                TokenTree::Token(ref token) => token.to_tokens(tokens),
+                TokenTree::Delimited(ref delimited) => delimited.to_tokens(tokens),
+            }
+        }
+    }
+
+    impl DelimToken {
+        fn open(&self) -> &'static str {
+            match *self {
+                DelimToken::Paren => "(",
+                DelimToken::Bracket => "[",
+                DelimToken::Brace => "{",
+            }
+        }
+
+        fn close(&self) -> &'static str {
+            match *self {
+                DelimToken::Paren => ")",
+                DelimToken::Bracket => "]",
+                DelimToken::Brace => "}",
+            }
+        }
+    }
+
+    impl ToTokens for Delimited {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append(self.delim.open());
+            for tt in &self.tts {
+                tt.to_tokens(tokens);
+            }
+            tokens.append(self.delim.close());
+        }
+    }
+
+    impl ToTokens for Token {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Token::Eq => tokens.append("="),
+                Token::Lt => tokens.append("<"),
+                Token::Le => tokens.append("<="),
+                Token::EqEq => tokens.append("=="),
+                Token::Ne => tokens.append("!="),
+                Token::Ge => tokens.append(">="),
+                Token::Gt => tokens.append(">"),
+                Token::AndAnd => tokens.append("&&"),
+                Token::OrOr => tokens.append("||"),
+                Token::Not => tokens.append("!"),
+                Token::Tilde => tokens.append("~"),
+                Token::BinOp(binop) => tokens.append(binop.op()),
+                Token::BinOpEq(binop) => tokens.append(binop.assign_op()),
+                Token::At => tokens.append("@"),
+                Token::Dot => tokens.append("."),
+                Token::DotDot => tokens.append(".."),
+                Token::DotDotDot => tokens.append("..."),
+                Token::Comma => tokens.append(","),
+                Token::Semi => tokens.append(";"),
+                Token::Colon => tokens.append(":"),
+                Token::ModSep => tokens.append("::"),
+                Token::RArrow => tokens.append("->"),
+                Token::LArrow => tokens.append("<-"),
+                Token::FatArrow => tokens.append("=>"),
+                Token::Pound => tokens.append("#"),
+                Token::Dollar => tokens.append("$"),
+                Token::Question => tokens.append("?"),
+                Token::Literal(ref lit) => lit.to_tokens(tokens),
+                Token::Ident(ref ident) => ident.to_tokens(tokens),
+                Token::Underscore => tokens.append("_"),
+                Token::Lifetime(ref ident) => ident.to_tokens(tokens),
+                Token::DocComment(ref com) => {
+                    tokens.append(&format!("{}\n", com));
+                }
+            }
+        }
+    }
+
+    impl BinOpToken {
+        fn op(&self) -> &'static str {
+            match *self {
+                BinOpToken::Plus => "+",
+                BinOpToken::Minus => "-",
+                BinOpToken::Star => "*",
+                BinOpToken::Slash => "/",
+                BinOpToken::Percent => "%",
+                BinOpToken::Caret => "^",
+                BinOpToken::And => "&",
+                BinOpToken::Or => "|",
+                BinOpToken::Shl => "<<",
+                BinOpToken::Shr => ">>",
+            }
+        }
+
+        fn assign_op(&self) -> &'static str {
+            match *self {
+                BinOpToken::Plus => "+=",
+                BinOpToken::Minus => "-=",
+                BinOpToken::Star => "*=",
+                BinOpToken::Slash => "/=",
+                BinOpToken::Percent => "%=",
+                BinOpToken::Caret => "^=",
+                BinOpToken::And => "&=",
+                BinOpToken::Or => "|=",
+                BinOpToken::Shl => "<<=",
+                BinOpToken::Shr => ">>=",
+            }
+        }
+    }
+
+    impl ToTokens for BinOpToken {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append(self.op());
+        }
+    }
+}
