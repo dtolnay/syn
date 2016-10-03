@@ -155,13 +155,19 @@ pub mod parsing {
     ));
 
     named!(token -> Token, alt!(
+        punct!("_") => { |_| Token::Underscore }
+        |
         map!(bin_op_eq, Token::BinOpEq)
         |
         map!(bin_op, Token::BinOp)
         |
-        punct!("=") => { |_| Token::Eq }
+        map!(lit, Token::Literal)
         |
-        punct!("<") => { |_| Token::Lt }
+        map!(ident, Token::Ident)
+        |
+        map!(lifetime, |lt: Lifetime| Token::Lifetime(lt.ident))
+        |
+        map!(doc_comment, Token::DocComment)
         |
         punct!("<=") => { |_| Token::Le }
         |
@@ -171,29 +177,9 @@ pub mod parsing {
         |
         punct!(">=") => { |_| Token::Ge }
         |
-        punct!(">") => { |_| Token::Gt }
-        |
         punct!("&&") => { |_| Token::AndAnd }
         |
         punct!("||") => { |_| Token::OrOr }
-        |
-        punct!("!") => { |_| Token::Not }
-        |
-        punct!("~") => { |_| Token::Tilde }
-        |
-        punct!("@") => { |_| Token::At }
-        |
-        punct!(".") => { |_| Token::Dot }
-        |
-        punct!("..") => { |_| Token::DotDot }
-        |
-        punct!("...") => { |_| Token::DotDotDot }
-        |
-        punct!(",") => { |_| Token::Comma }
-        |
-        punct!(";") => { |_| Token::Semi }
-        |
-        punct!(":") => { |_| Token::Colon }
         |
         punct!("::") => { |_| Token::ModSep }
         |
@@ -203,21 +189,35 @@ pub mod parsing {
         |
         punct!("=>") => { |_| Token::FatArrow }
         |
+        punct!("...") => { |_| Token::DotDotDot }
+        |
+        punct!("..") => { |_| Token::DotDot }
+        |
+        punct!(".") => { |_| Token::Dot }
+        |
+        punct!("=") => { |_| Token::Eq }
+        |
+        punct!("<") => { |_| Token::Lt }
+        |
+        punct!(">") => { |_| Token::Gt }
+        |
+        punct!("!") => { |_| Token::Not }
+        |
+        punct!("~") => { |_| Token::Tilde }
+        |
+        punct!("@") => { |_| Token::At }
+        |
+        punct!(",") => { |_| Token::Comma }
+        |
+        punct!(";") => { |_| Token::Semi }
+        |
+        punct!(":") => { |_| Token::Colon }
+        |
         punct!("#") => { |_| Token::Pound }
         |
         punct!("$") => { |_| Token::Dollar }
         |
         punct!("?") => { |_| Token::Question }
-        |
-        punct!("_") => { |_| Token::Underscore }
-        |
-        map!(lit, Token::Literal)
-        |
-        map!(ident, Token::Ident)
-        |
-        map!(lifetime, |lt: Lifetime| Token::Lifetime(lt.ident))
-        |
-        map!(doc_comment, Token::DocComment)
     ));
 
     named!(bin_op -> BinOpToken, alt!(
