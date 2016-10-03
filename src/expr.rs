@@ -805,7 +805,6 @@ pub mod parsing {
         stmt_item
         |
         stmt_expr
-        // TODO: mac
     ));
 
     named!(stmt_local -> Stmt, do_parse!(

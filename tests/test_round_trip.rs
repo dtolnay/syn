@@ -79,10 +79,13 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 }
 
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
-    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ItemKind, Mac, TyParam};
+    use std::rc::Rc;
+    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl,
+        FunctionRetTy, ItemKind, Mac, TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::ptr::P;
+    use syntex_syntax::tokenstream::{Delimited, SequenceRepetition, TokenTree};
     use syntex_syntax::util::move_map::MoveMap;
 
     struct Respanner;
@@ -171,6 +174,32 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {
             fold::noop_fold_mac(mac, self)
+        }
+
+        fn fold_tt(&mut self, tt: &TokenTree) -> TokenTree {
+            match *tt {
+                TokenTree::Token(span, ref tok) => TokenTree::Token(
+                    self.new_span(span),
+                    self.fold_token(tok.clone()),
+                ),
+                TokenTree::Delimited(span, ref delimed) => TokenTree::Delimited(
+                    self.new_span(span),
+                    Rc::new(Delimited {
+                        delim: delimed.delim,
+                        open_span: self.new_span(delimed.open_span),
+                        tts: self.fold_tts(&delimed.tts),
+                        close_span: self.new_span(delimed.close_span),
+                    }),
+                ),
+                TokenTree::Sequence(span, ref seq) => TokenTree::Sequence(
+                    self.new_span(span),
+                    Rc::new(SequenceRepetition {
+                        tts: self.fold_tts(&seq.tts),
+                        separator: seq.separator.clone().map(|tok| self.fold_token(tok)),
+                        ..**seq
+                    }),
+                ),
+            }
         }
     }
 
