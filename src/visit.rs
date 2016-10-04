@@ -141,9 +141,13 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
         Ty::Tup(ref tuple_element_types) => {
             walk_list!(visitor, visit_ty, tuple_element_types);
         }
-        Ty::BareFn(ref function_declaration) => {
-            walk_fn_decl(visitor, &function_declaration.decl);
-            walk_list!(visitor, visit_lifetime_def, &function_declaration.lifetimes);
+        Ty::BareFn(ref bare_fn) => {
+            walk_list!(visitor, visit_lifetime_def, &bare_fn.lifetimes);
+            for argument in &bare_fn.inputs {
+                walk_opt_ident(visitor, &argument.name);
+                visitor.visit_ty(&argument.ty)
+            }
+            visitor.visit_fn_ret_ty(&bare_fn.output)
         }
         Ty::Path(ref maybe_qself, ref path) => {
             if let Some(ref qself) = *maybe_qself {
@@ -242,14 +246,6 @@ pub fn walk_fn_ret_ty<V: Visitor>(visitor: &mut V, ret_ty: &FunctionRetTy) {
     if let FunctionRetTy::Ty(ref output_ty) = *ret_ty {
         visitor.visit_ty(output_ty)
     }
-}
-
-pub fn walk_fn_decl<V: Visitor>(visitor: &mut V, function_declaration: &FnDecl) {
-    for argument in &function_declaration.inputs {
-        walk_opt_ident(visitor, &argument.pat);
-        visitor.visit_ty(&argument.ty)
-    }
-    visitor.visit_fn_ret_ty(&function_declaration.output)
 }
 
 pub fn walk_variant_data<V: Visitor>(visitor: &mut V, data: &VariantData) {

@@ -20,7 +20,7 @@ before_script:
 script:
   - travis-cargo --only nightly build
   - travis-cargo --only 1.12.0 build -- --release
-  - travis-cargo test -- --features full
+  - travis-cargo test -- --features 'full aster visit'
   - travis-cargo doc -- --features full
 
 after_success:
