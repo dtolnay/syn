@@ -61,7 +61,7 @@ pub enum ItemKind {
     ///
     /// E.g. `trait Foo { .. }` or `trait Foo<T> { .. }`
     Trait(Unsafety, Generics, Vec<TyParamBound>, Vec<TraitItem>),
-    // Default trait implementation.
+    /// Default trait implementation.
     ///
     /// E.g. `impl Trait for .. {}` or `impl<T> Trait<T> for .. {}`
     DefaultImpl(Unsafety, Path),
@@ -201,7 +201,7 @@ pub enum ImplItemKind {
 pub struct MethodSig {
     pub unsafety: Unsafety,
     pub constness: Constness,
-    pub abi: Abi,
+    pub abi: Option<Abi>,
     pub decl: FnDecl,
     pub generics: Generics,
 }
@@ -231,7 +231,7 @@ pub mod parsing {
     use attr::parsing::outer_attr;
     use data::parsing::{struct_like_body, visibility};
     use expr::parsing::{block, expr, pat};
-    use generics::parsing::{generics, where_clause};
+    use generics::parsing::{generics, ty_param_bound, where_clause};
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
     use mac::parsing::delimited;
@@ -256,7 +256,8 @@ pub mod parsing {
         item_struct_or_enum
         |
         item_union
-    // TODO: Trait
+        |
+        item_trait
     // TODO: DefaultImpl
     // TODO: Impl
         |
@@ -441,6 +442,130 @@ pub mod parsing {
                     .. generics
                 },
             ),
+        })
+    ));
+
+    named!(item_trait -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        unsafety: unsafety >>
+        keyword!("trait") >>
+        id: ident >>
+        generics: generics >>
+        bounds: opt_vec!(preceded!(
+            punct!(":"),
+            separated_nonempty_list!(punct!("+"), ty_param_bound)
+        )) >>
+        where_clause: where_clause >>
+        punct!("{") >>
+        body: many0!(trait_item) >>
+        punct!("}") >>
+        (Item {
+            ident: id,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Trait(
+                unsafety,
+                Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
+                bounds,
+                body,
+            ),
+        })
+    ));
+
+    named!(trait_item -> TraitItem, alt!(
+        trait_item_const
+        |
+        trait_item_method
+        |
+        trait_item_type
+        |
+        trait_item_mac
+    ));
+
+    named!(trait_item_const -> TraitItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        keyword!("const") >>
+        id: ident >>
+        punct!(":") >>
+        ty: ty >>
+        value: option!(preceded!(punct!("="), expr)) >>
+        punct!(";") >>
+        (TraitItem {
+            ident: id,
+            attrs: attrs,
+            node: TraitItemKind::Const(ty, value),
+        })
+    ));
+
+    named!(trait_item_method -> TraitItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        constness: constness >>
+        unsafety: unsafety >>
+        abi: option!(preceded!(keyword!("extern"), quoted_string)) >>
+        keyword!("fn") >>
+        name: ident >>
+        generics: generics >>
+        punct!("(") >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        punct!(")") >>
+        ret: option!(preceded!(punct!("->"), ty)) >>
+        where_clause: where_clause >>
+        body: option!(block) >>
+        cond!(body.is_none(), punct!(";")) >>
+        (TraitItem {
+            ident: name,
+            attrs: attrs,
+            node: TraitItemKind::Method(
+                MethodSig {
+                    unsafety: unsafety,
+                    constness: constness,
+                    abi: abi.map(Abi),
+                    decl: FnDecl {
+                        inputs: inputs,
+                        output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                    },
+                    generics: Generics {
+                        where_clause: where_clause,
+                        .. generics
+                    },
+                },
+                body,
+            ),
+        })
+    ));
+
+    named!(trait_item_type -> TraitItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        keyword!("type") >>
+        id: ident >>
+        bounds: opt_vec!(preceded!(
+            punct!(":"),
+            separated_nonempty_list!(punct!("+"), ty_param_bound)
+        )) >>
+        default: option!(preceded!(punct!("="), ty)) >>
+        (TraitItem {
+            ident: id,
+            attrs: attrs,
+            node: TraitItemKind::Type(bounds, default),
+        })
+    ));
+
+    named!(trait_item_mac -> TraitItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        id: ident >>
+        punct!("!") >>
+        body: delimited >>
+        (TraitItem {
+            ident: id.clone(),
+            attrs: attrs,
+            node: TraitItemKind::Macro(Mac {
+                path: id.into(),
+                tts: vec![TokenTree::Delimited(body)],
+            }),
         })
     ));
 
