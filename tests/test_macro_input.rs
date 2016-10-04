@@ -120,9 +120,7 @@ fn test_enum() {
                     default: None,
                 },
             ],
-            where_clause: WhereClause {
-                predicates: Vec::new(),
-            },
+            where_clause: WhereClause { predicates: Vec::new() },
         },
         body: Body::Enum(vec![
             Variant {

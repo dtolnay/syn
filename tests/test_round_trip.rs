@@ -80,8 +80,8 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use std::rc::Rc;
-    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl,
-        FunctionRetTy, ItemKind, Mac, TyParam};
+    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ItemKind,
+                             Mac, TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::ptr::P;
@@ -126,11 +126,13 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                         }
                         ExprKind::Binary(op, lhs, rhs) => {
                             // default fold_expr does not fold the op span
-                            ExprKind::Binary(self.fold_spanned(op), self.fold_expr(lhs), self.fold_expr(rhs))
+                            ExprKind::Binary(self.fold_spanned(op),
+                                             self.fold_expr(lhs),
+                                             self.fold_expr(rhs))
                         }
                         other => other,
                     },
-                    .. folded
+                    ..folded
                 }
             })
         }
@@ -139,31 +141,31 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
             TyParam {
                 // default fold_ty_param does not fold the span
                 span: self.new_span(tp.span),
-                .. fold::noop_fold_ty_param(tp, self)
+                ..fold::noop_fold_ty_param(tp, self)
             }
         }
 
         fn fold_fn_decl(&mut self, decl: P<FnDecl>) -> P<FnDecl> {
-            decl.map(|FnDecl {inputs, output, variadic}| FnDecl {
-                inputs: inputs.move_map(|x| self.fold_arg(x)),
-                output: match output {
-                    FunctionRetTy::Ty(ty) => FunctionRetTy::Ty(self.fold_ty(ty)),
-                    // default fold_fn_decl does not fold this span
-                    FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
-                },
-                variadic: variadic
+            decl.map(|FnDecl { inputs, output, variadic }| {
+                FnDecl {
+                    inputs: inputs.move_map(|x| self.fold_arg(x)),
+                    output: match output {
+                        FunctionRetTy::Ty(ty) => FunctionRetTy::Ty(self.fold_ty(ty)),
+                        // default fold_fn_decl does not fold this span
+                        FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
+                    },
+                    variadic: variadic,
+                }
             })
         }
 
         fn fold_field(&mut self, field: Field) -> Field {
             Field {
-                ident: codemap::respan(
-                    // default fold_field does not fold this span
-                    self.new_span(field.ident.span),
-                    self.fold_ident(field.ident.node),
-                ),
+                ident: codemap::respan(// default fold_field does not fold this span
+                                       self.new_span(field.ident.span),
+                                       self.fold_ident(field.ident.node)),
                 expr: self.fold_expr(field.expr),
-                span: self.new_span(field.span)
+                span: self.new_span(field.span),
             }
         }
 
@@ -178,27 +180,28 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
 
         fn fold_tt(&mut self, tt: &TokenTree) -> TokenTree {
             match *tt {
-                TokenTree::Token(span, ref tok) => TokenTree::Token(
-                    self.new_span(span),
-                    self.fold_token(tok.clone()),
-                ),
-                TokenTree::Delimited(span, ref delimed) => TokenTree::Delimited(
-                    self.new_span(span),
-                    Rc::new(Delimited {
-                        delim: delimed.delim,
-                        open_span: self.new_span(delimed.open_span),
-                        tts: self.fold_tts(&delimed.tts),
-                        close_span: self.new_span(delimed.close_span),
-                    }),
-                ),
-                TokenTree::Sequence(span, ref seq) => TokenTree::Sequence(
-                    self.new_span(span),
-                    Rc::new(SequenceRepetition {
-                        tts: self.fold_tts(&seq.tts),
-                        separator: seq.separator.clone().map(|tok| self.fold_token(tok)),
-                        ..**seq
-                    }),
-                ),
+                TokenTree::Token(span, ref tok) => {
+                    TokenTree::Token(self.new_span(span), self.fold_token(tok.clone()))
+                }
+                TokenTree::Delimited(span, ref delimed) => {
+                    TokenTree::Delimited(self.new_span(span),
+                                         Rc::new(Delimited {
+                                             delim: delimed.delim,
+                                             open_span: self.new_span(delimed.open_span),
+                                             tts: self.fold_tts(&delimed.tts),
+                                             close_span: self.new_span(delimed.close_span),
+                                         }))
+                }
+                TokenTree::Sequence(span, ref seq) => {
+                    TokenTree::Sequence(self.new_span(span),
+                                        Rc::new(SequenceRepetition {
+                                            tts: self.fold_tts(&seq.tts),
+                                            separator: seq.separator
+                                                .clone()
+                                                .map(|tok| self.fold_token(tok)),
+                                            ..**seq
+                                        }))
+                }
             }
         }
     }

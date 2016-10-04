@@ -5,7 +5,10 @@ extern crate serde_derive;
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
-struct DefaultStruct<A, B, C, D, E> where C: MyDefault, E: MyDefault {
+struct DefaultStruct<A, B, C, D, E>
+    where C: MyDefault,
+          E: MyDefault
+{
     a1: A,
     #[serde(default)]
     a2: B,
@@ -19,7 +22,10 @@ struct DefaultStruct<A, B, C, D, E> where C: MyDefault, E: MyDefault {
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
-enum DefaultEnum<A, B, C, D, E> where C: MyDefault, E: MyDefault {
+enum DefaultEnum<A, B, C, D, E>
+    where C: MyDefault,
+          E: MyDefault
+{
     Struct {
         a1: A,
         #[serde(default)]
@@ -83,28 +89,26 @@ struct RenameStructSerializeDeserialize {
 #[serde(rename = "Superhero")]
 #[derive(Deserialize)]
 enum RenameEnum {
-
     #[serde(rename = "bruce_wayne")]
-    Batman ,
+    Batman,
 
     #[serde(rename = "clark_kent")]
-    Superman ( i8 ) ,
+    Superman(i8),
 
     #[serde(rename = "diana_prince")]
-    WonderWoman ( i8 , i8 ) ,
+    WonderWoman(i8, i8),
 
     #[serde(rename = "barry_allan")]
     Flash {
         #[serde(rename = "b")]
-        a : i32,
-    } ,
+        a: i32,
+    },
 }
 
 #[derive(Deserialize)]
 #[serde ( rename ( serialize = "SuperheroSer" , deserialize = "SuperheroDe" ) ) ]
 #[derive(Serialize)]
 enum RenameEnumSerializeDeserialize<A> {
-
     #[serde(rename(serialize = "dick_grayson", deserialize = "jason_todd"))]
     Robin {
         a: i8,
@@ -115,8 +119,10 @@ enum RenameEnumSerializeDeserialize<A> {
 }
 
 #[derive(Serialize)]
-struct SkipSerializingStruct< 'a , B, C> where C : ShouldSkip {
-    a: & 'a i8,
+struct SkipSerializingStruct<'a, B, C>
+    where C: ShouldSkip
+{
+    a: &'a i8,
     #[serde(skip_serializing)]
     b: B,
     #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
@@ -124,7 +130,9 @@ struct SkipSerializingStruct< 'a , B, C> where C : ShouldSkip {
 }
 
 #[derive(Serialize)]
-enum SkipSerializingEnum<'a, B, C> where C: ShouldSkip {
+enum SkipSerializingEnum<'a, B, C>
+    where C: ShouldSkip
+{
     Struct {
         a: &'a i8,
         #[serde(skip_serializing)]
@@ -135,7 +143,10 @@ enum SkipSerializingEnum<'a, B, C> where C: ShouldSkip {
 }
 
 #[derive(Serialize)]
-struct ContainsNotSerialize<'a, B, C, D> where B: 'a , D: SerializeWith {
+struct ContainsNotSerialize<'a, B, C, D>
+    where B: 'a,
+          D: SerializeWith
+{
     a: &'a Option<i8>,
     #[serde(skip_serializing)]
     b: &'a B,
@@ -146,14 +157,18 @@ struct ContainsNotSerialize<'a, B, C, D> where B: 'a , D: SerializeWith {
 }
 
 #[derive(Serialize)]
-struct SerializeWithStruct<'a, B> where B: SerializeWith {
+struct SerializeWithStruct<'a, B>
+    where B: SerializeWith
+{
     a: &'a i8,
     #[serde(serialize_with = "SerializeWith::serialize_with")]
     b: B,
 }
 
 #[derive(Serialize)]
-enum SerializeWithEnum<'a, B> where B: SerializeWith {
+enum SerializeWithEnum<'a, B>
+    where B: SerializeWith
+{
     Struct {
         a: &'a i8,
         #[serde(serialize_with = "SerializeWith::serialize_with")]
@@ -162,14 +177,18 @@ enum SerializeWithEnum<'a, B> where B: SerializeWith {
 }
 
 #[derive(Deserialize)]
-struct DeserializeWithStruct<B> where B: DeserializeWith {
+struct DeserializeWithStruct<B>
+    where B: DeserializeWith
+{
     a: i8,
     #[serde(deserialize_with = "DeserializeWith::deserialize_with")]
     b: B,
 }
 
 #[derive(Deserialize)]
-enum DeserializeWithEnum<B> where B: DeserializeWith {
+enum DeserializeWithEnum<B>
+    where B: DeserializeWith
+{
     Struct {
         a: i8,
         #[serde(deserialize_with = "DeserializeWith::deserialize_with")]
@@ -180,9 +199,10 @@ enum DeserializeWithEnum<B> where B: DeserializeWith {
 #[derive(Deserialize)]
 enum InvalidLengthEnum {
     A(i32, i32, i32),
-    B(
-    #[serde(skip_deserializing)]
-    i32, i32, i32),
+    B(#[serde(skip_deserializing)]
+      i32,
+      i32,
+      i32),
 }
 
 #[derive(Deserialize)]
@@ -255,12 +275,11 @@ struct NoBounds<T> {
 #[derive(Deserialize)]
 enum EnumWith<T> {
     Unit,
-    Newtype(
-            #[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
+    Newtype(#[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
             X),
     Tuple(T,
-        #[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
-        X),
+          #[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
+          X),
     Struct {
         t: T,
         #[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
@@ -269,16 +288,19 @@ enum EnumWith<T> {
 }
 
 #[derive(Serialize)]
-struct MultipleRef<'a, 'b, 'c, T> where T: 'c, 'c: 'b, 'b: 'a {
+struct MultipleRef<'a, 'b, 'c, T>
+    where T: 'c,
+          'c: 'b,
+          'b: 'a
+{
     t: T,
     rrrt: &'a &'b &'c T,
 }
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
-struct Newtype(
-            #[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
-            X);
+struct Newtype(#[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
+               X);
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
@@ -313,7 +335,9 @@ struct RecursiveA {
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
-enum RecursiveB { A(RecursiveA), }
+enum RecursiveB {
+    A(RecursiveA),
+}
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
@@ -324,7 +348,10 @@ struct RecursiveGenericA<T> {
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
-enum RecursiveGenericB<T> { T(T), A(RecursiveGenericA<T>), }
+enum RecursiveGenericB<T> {
+    T(T),
+    A(RecursiveGenericA<T>),
+}
 
 #[derive(Serialize)]
 struct OptionStatic<'a> {
@@ -367,7 +394,7 @@ struct CowStr<'a>(Cow<'a, str>);
 #[derive(Serialize)]
 #[serde(bound(deserialize = "T::Owned: Deserialize"))]
 #[derive(Deserialize)]
-struct CowT < 'a , T : ? Sized + 'a + ToOwned > ( Cow < 'a , T > ) ;
+struct CowT<'a, T: ?Sized + 'a + ToOwned>(Cow<'a, T>);
 
 #[derive(Serialize)]
 struct SerNamedTuple<'a, 'b, A: 'a, B: 'b, C>(&'a A, &'b mut B, C);
@@ -385,12 +412,14 @@ struct SerNamedMap<'a, 'b, A: 'a, B: 'b, C> {
 #[derive(Deserialize)]
 struct DeNamedMap<A, B, C> {
     a: A,
-    b: < Vec < T > as a :: b :: Trait > :: AssociatedItem,
-    c: < Vec < T > > :: AssociatedItem,
+    b: <Vec<T> as a::b::Trait>::AssociatedItem,
+    c: <Vec<T>>::AssociatedItem,
 }
 
 #[derive(Serialize)]
-enum SerEnum<'a, B: 'a, C: 'a, D> where for < 'a > D: 'a {
+enum SerEnum<'a, B: 'a, C: 'a, D>
+    where for<'a> D: 'a
+{
     Unit,
     Seq(i8, B, &'a C, &'a mut D),
     Map {
@@ -458,7 +487,7 @@ pub struct GenericTupleStruct<T, U>(T, U);
 
 #[derive(Serialize)]
 #[derive(Deserialize)]
-pub enum GenericEnum<T, U: for < 'a > F<'a>> {
+pub enum GenericEnum<T, U: for<'a> F<'a>> {
     Unit,
     NewType(T),
     Seq(T, U),
@@ -471,7 +500,7 @@ pub enum GenericEnum<T, U: for < 'a > F<'a>> {
 #[derive(Serialize)]
 #[derive(Deserialize)]
 struct DefaultTyParam<T: AssociatedType<X = i32> = i32> {
-    phantom: std :: marker :: PhantomData<T>,
+    phantom: std::marker::PhantomData<T>,
 }
 
 #[derive(Serialize)]
