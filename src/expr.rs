@@ -879,21 +879,21 @@ pub mod parsing {
         |
         pat_range // must be before pat_lit
         |
+        pat_tuple_struct // must be before pat_ident
+        |
+        pat_mac // must be before pat_ident
+        |
         pat_ident // must be before pat_path
         |
         pat_path
     // TODO: Struct
-    // TODO: TupleStruct
         |
         pat_tuple
-    // TODO: Box
         |
         pat_ref
         |
         pat_lit
     // TODO: Vec
-        |
-        pat_mac
     ));
 
     named!(pat_mac -> Pat, map!(mac, Pat::Mac));
@@ -924,9 +924,20 @@ pub mod parsing {
         ))
     ));
 
+    named!(pat_tuple_struct -> Pat, do_parse!(
+        path: path >>
+        tuple: pat_tuple_helper >>
+        (Pat::TupleStruct(path, tuple.0, tuple.1))
+    ));
+
     named!(pat_path -> Pat, map!(qpath, |(qself, path)| Pat::Path(qself, path)));
 
-    named!(pat_tuple -> Pat, do_parse!(
+    named!(pat_tuple -> Pat, map!(
+        pat_tuple_helper,
+        |(pats, dotdot)| Pat::Tuple(pats, dotdot)
+    ));
+
+    named!(pat_tuple_helper -> (Vec<Pat>, Option<usize>), do_parse!(
         punct!("(") >>
         mut elems: separated_list!(punct!(","), pat) >>
         dotdot: option!(do_parse!(
@@ -942,9 +953,9 @@ pub mod parsing {
             Some(rest) => {
                 let pos = elems.len();
                 elems.extend(rest);
-                Pat::Tuple(elems, Some(pos))
+                (elems, Some(pos))
             }
-            None => Pat::Tuple(elems, None),
+            None => (elems, None),
         })
     ));
 
@@ -1362,7 +1373,25 @@ mod printing {
                     }
                 }
                 Pat::Struct(ref _path, ref _fields, _dots) => unimplemented!(),
-                Pat::TupleStruct(ref _path, ref _pats, _dotpos) => unimplemented!(),
+                Pat::TupleStruct(ref path, ref pats, dotpos) => {
+                    path.to_tokens(tokens);
+                    tokens.append("(");
+                    match dotpos {
+                        Some(pos) => {
+                            if pos > 0 {
+                                tokens.append_separated(&pats[..pos], ",");
+                                tokens.append(",");
+                            }
+                            tokens.append("..");
+                            if pos < pats.len() {
+                                tokens.append(",");
+                                tokens.append_separated(&pats[pos..], ",");
+                            }
+                        }
+                        None => tokens.append_separated(pats, ","),
+                    }
+                    tokens.append(")");
+                }
                 Pat::Path(None, ref path) => path.to_tokens(tokens),
                 Pat::Path(Some(ref qself), ref path) => {
                     tokens.append("<");

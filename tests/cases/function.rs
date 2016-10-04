@@ -79,8 +79,18 @@ fn expr() {
 
 fn pattern() {
     match x {
+        _ => {}
+        box a => {}
         0...31 => {}
+        A::B(a, .., b) => {}
+        a => {}
+        ref a => {}
+        mut a => {}
+        ref mut a => {}
         A::B => {}
+        (a, .., b) => {}
         &inner => {}
+        "a" => {}
+        mac!() => {}
     }
 }
