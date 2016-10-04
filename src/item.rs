@@ -227,9 +227,9 @@ pub struct FnArg {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {FunctionRetTy, Generics, Ident, Mac, TokenTree, Visibility};
+    use {FunctionRetTy, Generics, Ident, Mac, TokenTree, VariantData, Visibility};
     use attr::parsing::outer_attr;
-    use data::parsing::visibility;
+    use data::parsing::{struct_like_body, visibility};
     use expr::parsing::{block, expr, pat};
     use generics::parsing::{generics, where_clause};
     use ident::parsing::ident;
@@ -254,7 +254,8 @@ pub mod parsing {
         item_ty
         |
         item_struct_or_enum
-    // TODO: Union
+        |
+        item_union
     // TODO: Trait
     // TODO: DefaultImpl
     // TODO: Impl
@@ -421,6 +422,28 @@ pub mod parsing {
         }
     ));
 
+    named!(item_union -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("union") >>
+        id: ident >>
+        generics: generics >>
+        where_clause: where_clause >>
+        fields: struct_like_body >>
+        (Item {
+            ident: id,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Union(
+                VariantData::Struct(fields),
+                Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
+            ),
+        })
+    ));
+
     named!(constness -> Constness, alt!(
         keyword!("const") => { |_| Constness::Const }
         |
@@ -537,7 +560,14 @@ mod printing {
                         VariantData::Unit => tokens.append(";"),
                     }
                 }
-                ItemKind::Union(ref _variant_data, ref _generics) => unimplemented!(),
+                ItemKind::Union(ref variant_data, ref generics) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("union");
+                    self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
+                    variant_data.to_tokens(tokens);
+                }
                 ItemKind::Trait(_unsafety, ref _generics, ref _bound, ref _item) => unimplemented!(),
                 ItemKind::DefaultImpl(_unsafety, ref _path) => unimplemented!(),
                 ItemKind::Impl(_unsafety,

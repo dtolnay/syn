@@ -97,7 +97,7 @@ pub mod parsing {
         })
     ));
 
-    named!(struct_like_body -> Vec<Field>, do_parse!(
+    named!(pub struct_like_body -> Vec<Field>, do_parse!(
         punct!("{") >>
         fields: separated_list!(punct!(","), struct_field) >>
         option!(punct!(",")) >>
