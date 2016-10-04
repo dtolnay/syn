@@ -32,3 +32,5 @@ trait T {
     mac!();
     mac!{}
 }
+
+impl T::U for .. {}

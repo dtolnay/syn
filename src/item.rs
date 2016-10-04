@@ -239,7 +239,7 @@ pub mod parsing {
     use mac::parsing::delimited;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
-    use ty::parsing::{mutability, ty};
+    use ty::parsing::{mutability, path, ty};
 
     named!(pub item -> Item, alt!(
         item_extern_crate
@@ -260,7 +260,8 @@ pub mod parsing {
         item_union
         |
         item_trait
-    // TODO: DefaultImpl
+        |
+        item_default_impl
     // TODO: Impl
         |
         item_mac
@@ -490,6 +491,23 @@ pub mod parsing {
                 bounds,
                 body,
             ),
+        })
+    ));
+
+    named!(item_default_impl -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        unsafety: unsafety >>
+        keyword!("impl") >>
+        path: path >>
+        keyword!("for") >>
+        punct!("..") >>
+        punct!("{") >>
+        punct!("}") >>
+        (Item {
+            ident: "".into(),
+            vis: Visibility::Inherited,
+            attrs: attrs,
+            node: ItemKind::DefaultImpl(unsafety, path),
         })
     ));
 
@@ -728,7 +746,15 @@ mod printing {
                     tokens.append_all(items);
                     tokens.append("}");
                 }
-                ItemKind::DefaultImpl(_unsafety, ref _path) => unimplemented!(),
+                ItemKind::DefaultImpl(unsafety, ref path) => {
+                    unsafety.to_tokens(tokens);
+                    tokens.append("impl");
+                    path.to_tokens(tokens);
+                    tokens.append("for");
+                    tokens.append("..");
+                    tokens.append("{");
+                    tokens.append("}");
+                }
                 ItemKind::Impl(_unsafety,
                                _polarity,
                                ref _generics,
