@@ -881,12 +881,13 @@ pub mod parsing {
         |
         pat_tuple_struct // must be before pat_ident
         |
+        pat_struct // must be before pat_ident
+        |
         pat_mac // must be before pat_ident
         |
         pat_ident // must be before pat_path
         |
         pat_path
-    // TODO: Struct
         |
         pat_tuple
         |
@@ -928,6 +929,50 @@ pub mod parsing {
         path: path >>
         tuple: pat_tuple_helper >>
         (Pat::TupleStruct(path, tuple.0, tuple.1))
+    ));
+
+    named!(pat_struct -> Pat, do_parse!(
+        path: path >>
+        punct!("{") >>
+        fields: separated_list!(punct!(","), field_pat) >>
+        more: option!(preceded!(
+            cond!(!fields.is_empty(), punct!(",")),
+            punct!("..")
+        )) >>
+        punct!("}") >>
+        (Pat::Struct(path, fields, more.is_some()))
+    ));
+
+    named!(field_pat -> FieldPat, alt!(
+        do_parse!(
+            ident: ident >>
+            punct!(":") >>
+            pat: pat >>
+            (FieldPat {
+                ident: ident,
+                pat: Box::new(pat),
+                is_shorthand: false,
+            })
+        )
+        |
+        do_parse!(
+            mode: option!(keyword!("ref")) >>
+            mutability: mutability >>
+            ident: ident >>
+            (FieldPat {
+                ident: ident.clone(),
+                pat: Box::new(Pat::Ident(
+                    if mode.is_some() {
+                        BindingMode::ByRef(mutability)
+                    } else {
+                        BindingMode::ByValue(mutability)
+                    },
+                    ident,
+                    None,
+                )),
+                is_shorthand: true,
+            })
+        )
     ));
 
     named!(pat_path -> Pat, map!(qpath, |(qself, path)| Pat::Path(qself, path)));
@@ -1372,7 +1417,18 @@ mod printing {
                         subpat.to_tokens(tokens);
                     }
                 }
-                Pat::Struct(ref _path, ref _fields, _dots) => unimplemented!(),
+                Pat::Struct(ref path, ref fields, dots) => {
+                    path.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_separated(fields, ",");
+                    if dots {
+                        if !fields.is_empty() {
+                            tokens.append(",");
+                        }
+                        tokens.append("..");
+                    }
+                    tokens.append("}");
+                }
                 Pat::TupleStruct(ref path, ref pats, dotpos) => {
                     path.to_tokens(tokens);
                     tokens.append("(");
@@ -1450,6 +1506,16 @@ mod printing {
                 Pat::Vec(ref _before, ref _dots, ref _after) => unimplemented!(),
                 Pat::Mac(ref mac) => mac.to_tokens(tokens),
             }
+        }
+    }
+
+    impl ToTokens for FieldPat {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if !self.is_shorthand {
+                self.ident.to_tokens(tokens);
+                tokens.append(":");
+            }
+            self.pat.to_tokens(tokens);
         }
     }
 

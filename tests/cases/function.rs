@@ -83,6 +83,7 @@ fn pattern() {
         box a => {}
         0...31 => {}
         A::B(a, .., b) => {}
+        A::B { ref a, b: &c } => {}
         a => {}
         ref a => {}
         mut a => {}
