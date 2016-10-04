@@ -229,7 +229,7 @@ pub enum FnArg {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {FunctionRetTy, Generics, Ident, Mac, TokenTree, VariantData, Visibility};
+    use {DelimToken, FunctionRetTy, Generics, Ident, Mac, TokenTree, VariantData, Visibility};
     use attr::parsing::outer_attr;
     use data::parsing::{struct_like_body, visibility};
     use expr::parsing::{block, expr, pat};
@@ -577,6 +577,10 @@ pub mod parsing {
         id: ident >>
         punct!("!") >>
         body: delimited >>
+        cond!(match body.delim {
+            DelimToken::Paren | DelimToken::Bracket => true,
+            DelimToken::Brace => false,
+        }, punct!(";")) >>
         (TraitItem {
             ident: id.clone(),
             attrs: attrs,
@@ -798,6 +802,12 @@ mod printing {
                 }
                 TraitItemKind::Macro(ref mac) => {
                     mac.to_tokens(tokens);
+                    match mac.tts.last() {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                            // no semicolon
+                        }
+                        _ => tokens.append(";"),
+                    }
                 }
             }
         }

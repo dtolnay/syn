@@ -25,3 +25,10 @@ trait T {
     type X = ();
     type X: 'a + B = ();
 }
+
+trait T {
+    mac!();
+    mac!{}
+    mac!();
+    mac!{}
+}
