@@ -81,12 +81,13 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use std::rc::Rc;
     use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ItemKind,
-                             Mac, TyParam};
+                             Mac, MethodSig, TraitItem, TraitItemKind, TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::ptr::P;
     use syntex_syntax::tokenstream::{Delimited, SequenceRepetition, TokenTree};
     use syntex_syntax::util::move_map::MoveMap;
+    use syntex_syntax::util::small_vector::SmallVector;
 
     struct Respanner;
 
@@ -167,6 +168,23 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 expr: self.fold_expr(field.expr),
                 span: self.new_span(field.span),
             }
+        }
+
+        fn fold_trait_item(&mut self, i: TraitItem) -> SmallVector<TraitItem> {
+            let noop = fold::noop_fold_trait_item(i, self).expect_one("");
+            SmallVector::one(TraitItem {
+                node: match noop.node {
+                    TraitItemKind::Method(sig, body) => {
+                        TraitItemKind::Method(MethodSig {
+                                constness: self.fold_spanned(sig.constness),
+                                .. sig
+                            },
+                            body)
+                    }
+                    node => node,
+                },
+                .. noop
+            })
         }
 
         fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {

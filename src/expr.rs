@@ -677,10 +677,7 @@ pub mod parsing {
     named!(closure_arg -> FnArg, do_parse!(
         pat: pat >>
         ty: option!(preceded!(punct!(":"), ty)) >>
-        (FnArg {
-            pat: pat,
-            ty: ty.unwrap_or(Ty::Infer),
-        })
+        (FnArg::Captured(pat, ty.unwrap_or(Ty::Infer)))
     ));
 
     named!(expr_while -> Expr, do_parse!(
@@ -1032,7 +1029,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use {FunctionRetTy, Mutability, Ty};
+    use {FnArg, FunctionRetTy, Mutability, Ty};
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
@@ -1171,15 +1168,11 @@ mod printing {
                         if i > 0 {
                             tokens.append(",");
                         }
-                        input.pat.to_tokens(tokens);
-                        match input.ty {
-                            Ty::Infer => {
-                                // nothing
+                        match *input {
+                            FnArg::Captured(ref pat, Ty::Infer) => {
+                                pat.to_tokens(tokens);
                             }
-                            _ => {
-                                tokens.append(":");
-                                input.ty.to_tokens(tokens);
-                            }
+                            _ => input.to_tokens(tokens),
                         }
                     }
                     tokens.append("|");

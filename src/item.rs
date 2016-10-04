@@ -219,9 +219,11 @@ pub struct FnDecl {
 ///
 /// E.g. `bar: usize` as in `fn foo(bar: usize)`
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct FnArg {
-    pub pat: Pat,
-    pub ty: Ty,
+pub enum FnArg {
+    SelfRef(Option<Lifetime>, Mutability),
+    SelfValue(Mutability),
+    Captured(Pat, Ty),
+    Ignored(Ty),
 }
 
 #[cfg(feature = "parsing")]
@@ -231,7 +233,7 @@ pub mod parsing {
     use attr::parsing::outer_attr;
     use data::parsing::{struct_like_body, visibility};
     use expr::parsing::{block, expr, pat};
-    use generics::parsing::{generics, ty_param_bound, where_clause};
+    use generics::parsing::{generics, lifetime, ty_param_bound, where_clause};
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
     use mac::parsing::delimited;
@@ -379,14 +381,29 @@ pub mod parsing {
         })
     ));
 
-    named!(fn_arg -> FnArg, do_parse!(
-        pat: pat >>
-        punct!(":") >>
-        ty: ty >>
-        (FnArg {
-            pat: pat,
-            ty: ty,
-        })
+    named!(fn_arg -> FnArg, alt!(
+        do_parse!(
+            punct!("&") >>
+            lt: option!(lifetime) >>
+            mutability: mutability >>
+            keyword!("self") >>
+            (FnArg::SelfRef(lt, mutability))
+        )
+        |
+        do_parse!(
+            mutability: mutability >>
+            keyword!("self") >>
+            (FnArg::SelfValue(mutability))
+        )
+        |
+        do_parse!(
+            pat: pat >>
+            punct!(":") >>
+            ty: ty >>
+            (FnArg::Captured(pat, ty))
+        )
+        |
+        ty => { FnArg::Ignored }
     ));
 
     named!(item_ty -> Item, do_parse!(
@@ -547,6 +564,7 @@ pub mod parsing {
             separated_nonempty_list!(punct!("+"), ty_param_bound)
         )) >>
         default: option!(preceded!(punct!("="), ty)) >>
+        punct!(";") >>
         (TraitItem {
             ident: id,
             attrs: attrs,
@@ -592,9 +610,7 @@ mod printing {
 
     impl ToTokens for Item {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            for attr in self.attrs.outer() {
-                attr.to_tokens(tokens);
-            }
+            tokens.append_all(self.attrs.outer());
             match self.node {
                 ItemKind::ExternCrate(ref original) => {
                     tokens.append("extern");
@@ -693,7 +709,21 @@ mod printing {
                     generics.where_clause.to_tokens(tokens);
                     variant_data.to_tokens(tokens);
                 }
-                ItemKind::Trait(_unsafety, ref _generics, ref _bound, ref _item) => unimplemented!(),
+                ItemKind::Trait(unsafety, ref generics, ref bound, ref items) => {
+                    self.vis.to_tokens(tokens);
+                    unsafety.to_tokens(tokens);
+                    tokens.append("trait");
+                    self.ident.to_tokens(tokens);
+                    if !bound.is_empty() {
+                        tokens.append(":");
+                        tokens.append_separated(bound, "+");
+                    }
+                    generics.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_all(items);
+                    tokens.append("}");
+                }
                 ItemKind::DefaultImpl(_unsafety, ref _path) => unimplemented!(),
                 ItemKind::Impl(_unsafety,
                                _polarity,
@@ -719,11 +749,82 @@ mod printing {
         }
     }
 
+    impl ToTokens for TraitItem {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            match self.node {
+                TraitItemKind::Const(ref ty, ref expr) => {
+                    tokens.append("const");
+                    self.ident.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                    if let Some(ref expr) = *expr {
+                        tokens.append("=");
+                        expr.to_tokens(tokens);
+                    }
+                    tokens.append(";");
+                }
+                TraitItemKind::Method(ref sig, ref block) => {
+                    sig.unsafety.to_tokens(tokens);
+                    sig.abi.to_tokens(tokens);
+                    tokens.append("fn");
+                    self.ident.to_tokens(tokens);
+                    sig.generics.to_tokens(tokens);
+                    tokens.append("(");
+                    tokens.append_separated(&sig.decl.inputs, ",");
+                    tokens.append(")");
+                    if let FunctionRetTy::Ty(ref ty) = sig.decl.output {
+                        tokens.append("->");
+                        ty.to_tokens(tokens);
+                    }
+                    sig.generics.where_clause.to_tokens(tokens);
+                    match *block {
+                        Some(ref block) => block.to_tokens(tokens),
+                        None => tokens.append(";"),
+                    }
+                }
+                TraitItemKind::Type(ref bound, ref default) => {
+                    tokens.append("type");
+                    self.ident.to_tokens(tokens);
+                    if !bound.is_empty() {
+                        tokens.append(":");
+                        tokens.append_separated(bound, "+");
+                    }
+                    if let Some(ref default) = *default {
+                        tokens.append("=");
+                        default.to_tokens(tokens);
+                    }
+                    tokens.append(";");
+                }
+                TraitItemKind::Macro(ref mac) => {
+                    mac.to_tokens(tokens);
+                }
+            }
+        }
+    }
+
     impl ToTokens for FnArg {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.pat.to_tokens(tokens);
-            tokens.append(":");
-            self.ty.to_tokens(tokens);
+            match *self {
+                FnArg::SelfRef(ref lifetime, mutability) => {
+                    tokens.append("&");
+                    lifetime.to_tokens(tokens);
+                    mutability.to_tokens(tokens);
+                    tokens.append("self");
+                }
+                FnArg::SelfValue(mutability) => {
+                    mutability.to_tokens(tokens);
+                    tokens.append("self");
+                }
+                FnArg::Captured(ref pat, ref ty) => {
+                    pat.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                }
+                FnArg::Ignored(ref ty) => {
+                    ty.to_tokens(tokens);
+                }
+            }
         }
     }
 
