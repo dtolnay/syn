@@ -9,6 +9,61 @@ pub struct Generics {
     pub where_clause: WhereClause,
 }
 
+impl Generics {
+    /// Split a type's generics into the pieces required for impl'ing a trait
+    /// for that type.
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// # #[macro_use]
+    /// # extern crate quote;
+    /// # fn main() {
+    /// # let generics: syn::Generics = Default::default();
+    /// # let name = syn::Ident::new("MyType");
+    /// let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    /// quote! {
+    ///     impl #impl_generics MyTrait for #name #ty_generics #where_clause {
+    ///         // ...
+    ///     }
+    /// }
+    /// # ;
+    /// # }
+    /// ```
+    pub fn split_for_impl(&self) -> (Generics, Generics, WhereClause) {
+        // Remove where clause and type parameter defaults.
+        let impl_generics = Generics {
+            lifetimes: self.lifetimes.clone(),
+            ty_params: self.ty_params.iter().map(|ty_param| {
+                TyParam {
+                    ident: ty_param.ident.clone(),
+                    bounds: ty_param.bounds.clone(),
+                    default: None,
+                }}).collect(),
+            where_clause: WhereClause::none(),
+        };
+
+        // Remove where clause, type parameter defaults, and bounds.
+        let ty_generics = Generics {
+            lifetimes: self.lifetimes.iter().map(|lifetime_def| {
+                LifetimeDef {
+                    lifetime: lifetime_def.lifetime.clone(),
+                    bounds: Vec::new(),
+                }}).collect(),
+            ty_params: self.ty_params.iter().map(|ty_param| {
+                TyParam {
+                    ident: ty_param.ident.clone(),
+                    bounds: Vec::new(),
+                    default: None,
+                }}).collect(),
+            where_clause: WhereClause::none(),
+        };
+
+        let where_clause = self.where_clause.clone();
+
+        (impl_generics, ty_generics, where_clause)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Lifetime {
     pub ident: Ident,
@@ -67,6 +122,14 @@ pub enum TraitBoundModifier {
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct WhereClause {
     pub predicates: Vec<WherePredicate>,
+}
+
+impl WhereClause {
+    pub fn none() -> Self {
+        WhereClause {
+            predicates: Vec::new(),
+        }
+    }
 }
 
 /// A single predicate in a `where` clause
