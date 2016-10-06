@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Crate {
+    shebang: Option<String>,
     attrs: Vec<Attribute>,
     items: Vec<Item>,
 }
@@ -18,6 +19,7 @@ pub mod parsing {
         items: many0!(item) >>
         option!(whitespace) >>
         (Crate {
+            shebang: None,
             attrs: attrs,
             items: items,
         })
