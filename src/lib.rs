@@ -125,7 +125,8 @@ mod parsing {
             IResult::Done(rest, t) => {
                 if rest.is_empty() {
                     Ok(t)
-                } else if rest.len() == input.len() { // parsed nothing
+                } else if rest.len() == input.len() {
+                    // parsed nothing
                     Err(format!("failed to parse {}: {:?}", name, rest))
                 } else {
                     Err(format!("failed to parse tokens after {}: {:?}", name, rest))

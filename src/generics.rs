@@ -33,28 +33,40 @@ impl Generics {
         // Remove where clause and type parameter defaults.
         let impl_generics = Generics {
             lifetimes: self.lifetimes.clone(),
-            ty_params: self.ty_params.iter().map(|ty_param| {
-                TyParam {
-                    ident: ty_param.ident.clone(),
-                    bounds: ty_param.bounds.clone(),
-                    default: None,
-                }}).collect(),
+            ty_params: self.ty_params
+                .iter()
+                .map(|ty_param| {
+                    TyParam {
+                        ident: ty_param.ident.clone(),
+                        bounds: ty_param.bounds.clone(),
+                        default: None,
+                    }
+                })
+                .collect(),
             where_clause: WhereClause::none(),
         };
 
         // Remove where clause, type parameter defaults, and bounds.
         let ty_generics = Generics {
-            lifetimes: self.lifetimes.iter().map(|lifetime_def| {
-                LifetimeDef {
-                    lifetime: lifetime_def.lifetime.clone(),
-                    bounds: Vec::new(),
-                }}).collect(),
-            ty_params: self.ty_params.iter().map(|ty_param| {
-                TyParam {
-                    ident: ty_param.ident.clone(),
-                    bounds: Vec::new(),
-                    default: None,
-                }}).collect(),
+            lifetimes: self.lifetimes
+                .iter()
+                .map(|lifetime_def| {
+                    LifetimeDef {
+                        lifetime: lifetime_def.lifetime.clone(),
+                        bounds: Vec::new(),
+                    }
+                })
+                .collect(),
+            ty_params: self.ty_params
+                .iter()
+                .map(|ty_param| {
+                    TyParam {
+                        ident: ty_param.ident.clone(),
+                        bounds: Vec::new(),
+                        default: None,
+                    }
+                })
+                .collect(),
             where_clause: WhereClause::none(),
         };
 
@@ -124,9 +136,7 @@ pub struct WhereClause {
 
 impl WhereClause {
     pub fn none() -> Self {
-        WhereClause {
-            predicates: Vec::new(),
-        }
+        WhereClause { predicates: Vec::new() }
     }
 }
 
