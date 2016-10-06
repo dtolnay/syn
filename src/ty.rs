@@ -4,9 +4,9 @@ use super::*;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Ty {
     /// A variable-length array (`[T]`)
-    Vec(Box<Ty>),
+    Slice(Box<Ty>),
     /// A fixed length array (`[T; n]`)
-    FixedLengthVec(Box<Ty>, usize),
+    Array(Box<Ty>, usize),
     /// A raw pointer (`*const T` or `*mut T`)
     Ptr(Box<MutTy>),
     /// A reference (`&'a T` or `&'a mut T`)
@@ -226,7 +226,7 @@ pub mod parsing {
         punct!("[") >>
         elem: ty >>
         punct!("]") >>
-        (Ty::Vec(Box::new(elem)))
+        (Ty::Slice(Box::new(elem)))
     ));
 
     named!(ty_fixed_length_vec -> Ty, do_parse!(
@@ -235,7 +235,7 @@ pub mod parsing {
         punct!(";") >>
         len: int >>
         punct!("]") >>
-        (Ty::FixedLengthVec(Box::new(elem), len.0 as usize))
+        (Ty::Array(Box::new(elem), len.0 as usize))
     ));
 
     named!(ty_ptr -> Ty, do_parse!(
@@ -426,12 +426,12 @@ mod printing {
     impl ToTokens for Ty {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                Ty::Vec(ref inner) => {
+                Ty::Slice(ref inner) => {
                     tokens.append("[");
                     inner.to_tokens(tokens);
                     tokens.append("]");
                 }
-                Ty::FixedLengthVec(ref inner, len) => {
+                Ty::Array(ref inner, len) => {
                     tokens.append("[");
                     inner.to_tokens(tokens);
                     tokens.append(";");

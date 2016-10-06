@@ -277,8 +277,8 @@ pub enum Pat {
     /// A range pattern, e.g. `1...2`
     Range(Box<Lit>, Box<Lit>),
     /// `[a, b, ..i, y, z]` is represented as:
-    ///     `Pat::Vec(box [a, b], Some(i), box [y, z])`
-    Vec(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
+    ///     `Pat::Slice(box [a, b], Some(i), box [y, z])`
+    Slice(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
     /// A macro pattern; pre-expansion
     Mac(Mac),
 }
@@ -1496,7 +1496,7 @@ mod printing {
                     tokens.append("...");
                     hi.to_tokens(tokens);
                 }
-                Pat::Vec(ref _before, ref _dots, ref _after) => unimplemented!(),
+                Pat::Slice(ref _before, ref _dots, ref _after) => unimplemented!(),
                 Pat::Mac(ref mac) => mac.to_tokens(tokens),
             }
         }
