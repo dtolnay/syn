@@ -115,7 +115,7 @@ impl<F> TyBuilder<F>
     }
 
     pub fn build_slice(self, ty: Ty) -> F::Result {
-        self.build(Ty::Vec(Box::new(ty)))
+        self.build(Ty::Slice(Box::new(ty)))
     }
 
     pub fn slice(self) -> TyBuilder<TySliceBuilder<F>> {

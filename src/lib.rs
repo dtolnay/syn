@@ -64,9 +64,9 @@ pub use macro_input::{Body, MacroInput};
 mod space;
 
 mod ty;
-pub use ty::{AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy, Mutability,
-             ParenthesizedParameterData, Path, PathParameters, PathSegment, PolyTraitRef, QSelf,
-             Ty, TypeBinding};
+pub use ty::{AngleBracketedParameterData, ArrayLen, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
+             Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
+             PolyTraitRef, QSelf, Ty, TypeBinding};
 
 #[cfg(feature = "aster")]
 pub mod aster;

@@ -72,6 +72,9 @@ pub trait Visitor: Sized {
     fn visit_fn_ret_ty(&mut self, ret_ty: &FunctionRetTy) {
         walk_fn_ret_ty(self, ret_ty)
     }
+    fn visit_array_len(&mut self, len: &ArrayLen) {
+        walk_array_len(self, len)
+    }
 }
 
 #[macro_export]
@@ -130,7 +133,7 @@ pub fn walk_variant<V>(visitor: &mut V, variant: &Variant, generics: &Generics)
 
 pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
     match *ty {
-        Ty::Vec(ref inner) |
+        Ty::Slice(ref inner) |
         Ty::Paren(ref inner) => visitor.visit_ty(inner),
         Ty::Ptr(ref mutable_type) => visitor.visit_ty(&mutable_type.ty),
         Ty::Rptr(ref opt_lifetime, ref mutable_type) => {
@@ -159,8 +162,9 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
             visitor.visit_ty(inner);
             walk_list!(visitor, visit_ty_param_bound, bounds);
         }
-        Ty::FixedLengthVec(ref inner, _len) => {
+        Ty::Array(ref inner, ref len) => {
             visitor.visit_ty(inner);
+            visitor.visit_array_len(len);
         }
         Ty::PolyTraitRef(ref bounds) => {
             walk_list!(visitor, visit_ty_param_bound, bounds);
@@ -256,4 +260,13 @@ pub fn walk_field<V: Visitor>(visitor: &mut V, field: &Field) {
     walk_opt_ident(visitor, &field.ident);
     visitor.visit_ty(&field.ty);
     walk_list!(visitor, visit_attribute, &field.attrs);
+}
+
+pub fn walk_array_len<V: Visitor>(visitor: &mut V, len: &ArrayLen) {
+    match *len {
+        ArrayLen::Usize(_usize) => {}
+        ArrayLen::Path(ref path, _as_usize) => {
+            visitor.visit_path(path);
+        }
+    }
 }
