@@ -360,6 +360,12 @@ pub mod parsing {
             |
             expr_mac // must be before expr_path
             |
+            expr_break // must be before expr_path
+            |
+            expr_continue // must be before expr_path
+            |
+            expr_ret // must be before expr_path
+            |
             expr_box
             |
             expr_vec
@@ -385,12 +391,6 @@ pub mod parsing {
             expr_path
             |
             expr_addr_of
-            |
-            expr_break
-            |
-            expr_continue
-            |
-            expr_ret
             |
             expr_repeat
         ) >>

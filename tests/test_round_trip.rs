@@ -80,8 +80,9 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use std::rc::Rc;
-    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ItemKind,
-                             Mac, MethodSig, TraitItem, TraitItemKind, TyParam};
+    use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
+                             ImplItemKind, ItemKind, Mac, MethodSig, TraitItem, TraitItemKind,
+                             TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::ptr::P;
@@ -176,6 +177,23 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 node: match noop.node {
                     TraitItemKind::Method(sig, body) => {
                         TraitItemKind::Method(MethodSig {
+                                constness: self.fold_spanned(sig.constness),
+                                .. sig
+                            },
+                            body)
+                    }
+                    node => node,
+                },
+                .. noop
+            })
+        }
+
+        fn fold_impl_item(&mut self, i: ImplItem) -> SmallVector<ImplItem> {
+            let noop = fold::noop_fold_impl_item(i, self).expect_one("");
+            SmallVector::one(ImplItem {
+                node: match noop.node {
+                    ImplItemKind::Method(sig, body) => {
+                        ImplItemKind::Method(MethodSig {
                                 constness: self.fold_spanned(sig.constness),
                                 .. sig
                             },

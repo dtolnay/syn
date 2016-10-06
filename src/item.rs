@@ -262,7 +262,8 @@ pub mod parsing {
         item_trait
         |
         item_default_impl
-    // TODO: Impl
+        |
+        item_impl
         |
         item_mac
     ));
@@ -609,6 +610,159 @@ pub mod parsing {
         })
     ));
 
+    named!(item_impl -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        unsafety: unsafety >>
+        keyword!("impl") >>
+        generics: generics >>
+        polarity_path: alt!(
+            do_parse!(
+                polarity: impl_polarity >>
+                path: path >>
+                keyword!("for") >>
+                ((polarity, Some(path)))
+            )
+            |
+            epsilon!() => { |_| (ImplPolarity::Positive, None) }
+        ) >>
+        self_ty: ty >>
+        where_clause: where_clause >>
+        punct!("{") >>
+        body: many0!(impl_item) >>
+        punct!("}") >>
+        (Item {
+            ident: "".into(),
+            vis: Visibility::Inherited,
+            attrs: attrs,
+            node: ItemKind::Impl(
+                unsafety,
+                polarity_path.0,
+                Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
+                polarity_path.1,
+                Box::new(self_ty),
+                body,
+            ),
+        })
+    ));
+
+    named!(impl_item -> ImplItem, alt!(
+        impl_item_const
+        |
+        impl_item_method
+        |
+        impl_item_type
+        |
+        impl_item_macro
+    ));
+
+    named!(impl_item_const -> ImplItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        defaultness: defaultness >>
+        keyword!("const") >>
+        id: ident >>
+        punct!(":") >>
+        ty: ty >>
+        punct!("=") >>
+        value: expr >>
+        punct!(";") >>
+        (ImplItem {
+            ident: id,
+            vis: vis,
+            defaultness: defaultness,
+            attrs: attrs,
+            node: ImplItemKind::Const(ty, value),
+        })
+    ));
+
+    named!(impl_item_method -> ImplItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        defaultness: defaultness >>
+        constness: constness >>
+        unsafety: unsafety >>
+        abi: option!(preceded!(keyword!("extern"), quoted_string)) >>
+        keyword!("fn") >>
+        name: ident >>
+        generics: generics >>
+        punct!("(") >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        punct!(")") >>
+        ret: option!(preceded!(punct!("->"), ty)) >>
+        where_clause: where_clause >>
+        body: block >>
+        (ImplItem {
+            ident: name,
+            vis: vis,
+            defaultness: defaultness,
+            attrs: attrs,
+            node: ImplItemKind::Method(
+                MethodSig {
+                    unsafety: unsafety,
+                    constness: constness,
+                    abi: abi.map(Abi),
+                    decl: FnDecl {
+                        inputs: inputs,
+                        output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                    },
+                    generics: Generics {
+                        where_clause: where_clause,
+                        .. generics
+                    },
+                },
+                body,
+            ),
+        })
+    ));
+
+    named!(impl_item_type -> ImplItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        defaultness: defaultness >>
+        keyword!("type") >>
+        id: ident >>
+        punct!("=") >>
+        ty: ty >>
+        punct!(";") >>
+        (ImplItem {
+            ident: id,
+            vis: vis,
+            defaultness: defaultness,
+            attrs: attrs,
+            node: ImplItemKind::Type(ty),
+        })
+    ));
+
+    named!(impl_item_macro -> ImplItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        id: ident >>
+        punct!("!") >>
+        body: delimited >>
+        cond!(match body.delim {
+            DelimToken::Paren | DelimToken::Bracket => true,
+            DelimToken::Brace => false,
+        }, punct!(";")) >>
+        (ImplItem {
+            ident: id.clone(),
+            vis: Visibility::Inherited,
+            defaultness: Defaultness::Final,
+            attrs: attrs,
+            node: ImplItemKind::Macro(Mac {
+                path: id.into(),
+                tts: vec![TokenTree::Delimited(body)],
+            }),
+        })
+    ));
+
+    named!(impl_polarity -> ImplPolarity, alt!(
+        punct!("!") => { |_| ImplPolarity::Negative }
+        |
+        epsilon!() => { |_| ImplPolarity::Positive }
+    ));
+
     named!(constness -> Constness, alt!(
         keyword!("const") => { |_| Constness::Const }
         |
@@ -619,6 +773,12 @@ pub mod parsing {
         keyword!("unsafe") => { |_| Unsafety::Unsafe }
         |
         epsilon!() => { |_| Unsafety::Normal }
+    ));
+
+    named!(defaultness -> Defaultness, alt!(
+        keyword!("default") => { |_| Defaultness::Default }
+        |
+        epsilon!() => { |_| Defaultness::Final }
     ));
 }
 
@@ -755,12 +915,26 @@ mod printing {
                     tokens.append("{");
                     tokens.append("}");
                 }
-                ItemKind::Impl(_unsafety,
-                               _polarity,
-                               ref _generics,
-                               ref _path,
-                               ref _ty,
-                               ref _item) => unimplemented!(),
+                ItemKind::Impl(unsafety,
+                               polarity,
+                               ref generics,
+                               ref path,
+                               ref ty,
+                               ref items) => {
+                    unsafety.to_tokens(tokens);
+                    tokens.append("impl");
+                    generics.to_tokens(tokens);
+                    if let Some(ref path) = *path {
+                        polarity.to_tokens(tokens);
+                        path.to_tokens(tokens);
+                        tokens.append("for");
+                    }
+                    ty.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_all(items);
+                    tokens.append("}");
+                }
                 ItemKind::Mac(ref mac) => {
                     mac.path.to_tokens(tokens);
                     tokens.append("!");
@@ -839,6 +1013,61 @@ mod printing {
         }
     }
 
+    impl ToTokens for ImplItem {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            match self.node {
+                ImplItemKind::Const(ref ty, ref expr) => {
+                    self.vis.to_tokens(tokens);
+                    self.defaultness.to_tokens(tokens);
+                    tokens.append("const");
+                    self.ident.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                    tokens.append("=");
+                    expr.to_tokens(tokens);
+                    tokens.append(";");
+                }
+                ImplItemKind::Method(ref sig, ref block) => {
+                    self.vis.to_tokens(tokens);
+                    self.defaultness.to_tokens(tokens);
+                    sig.unsafety.to_tokens(tokens);
+                    sig.abi.to_tokens(tokens);
+                    tokens.append("fn");
+                    self.ident.to_tokens(tokens);
+                    sig.generics.to_tokens(tokens);
+                    tokens.append("(");
+                    tokens.append_separated(&sig.decl.inputs, ",");
+                    tokens.append(")");
+                    if let FunctionRetTy::Ty(ref ty) = sig.decl.output {
+                        tokens.append("->");
+                        ty.to_tokens(tokens);
+                    }
+                    sig.generics.where_clause.to_tokens(tokens);
+                    block.to_tokens(tokens);
+                }
+                ImplItemKind::Type(ref ty) => {
+                    self.vis.to_tokens(tokens);
+                    self.defaultness.to_tokens(tokens);
+                    tokens.append("type");
+                    self.ident.to_tokens(tokens);
+                    tokens.append("=");
+                    ty.to_tokens(tokens);
+                    tokens.append(";");
+                }
+                ImplItemKind::Macro(ref mac) => {
+                    mac.to_tokens(tokens);
+                    match mac.tts.last() {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                            // no semicolon
+                        }
+                        _ => tokens.append(";"),
+                    }
+                }
+            }
+        }
+    }
+
     impl ToTokens for FnArg {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
@@ -880,6 +1109,28 @@ mod printing {
             match *self {
                 Constness::Const => tokens.append("const"),
                 Constness::NotConst => {
+                    // nothing
+                }
+            }
+        }
+    }
+
+    impl ToTokens for Defaultness {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Defaultness::Default => tokens.append("default"),
+                Defaultness::Final => {
+                    // nothing
+                }
+            }
+        }
+    }
+
+    impl ToTokens for ImplPolarity {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                ImplPolarity::Negative => tokens.append("!"),
+                ImplPolarity::Positive => {
                     // nothing
                 }
             }
