@@ -6,7 +6,7 @@ pub enum Ty {
     /// A variable-length array (`[T]`)
     Slice(Box<Ty>),
     /// A fixed length array (`[T; n]`)
-    Array(Box<Ty>, usize),
+    Array(Box<Ty>, ArrayLen),
     /// A raw pointer (`*const T` or `*mut T`)
     Ptr(Box<MutTy>),
     /// A reference (`&'a T` or `&'a mut T`)
@@ -33,6 +33,15 @@ pub enum Ty {
     /// TyKind::Infer means the type should be inferred instead of it having been
     /// specified. This can appear anywhere in a type.
     Infer,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum ArrayLen {
+    /// As in `[T; 0]`.
+    Usize(usize),
+    /// As in `[T; LEN]` or `[T; helper::LEN as usize]`. The boolean indicates
+    /// whether the path is followed by `as usize`.
+    Path(Path, bool),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -203,7 +212,7 @@ pub mod parsing {
     named!(pub ty -> Ty, alt!(
         ty_vec
         |
-        ty_fixed_length_vec
+        ty_array
         |
         ty_ptr
         |
@@ -229,13 +238,23 @@ pub mod parsing {
         (Ty::Slice(Box::new(elem)))
     ));
 
-    named!(ty_fixed_length_vec -> Ty, do_parse!(
+    named!(ty_array -> Ty, do_parse!(
         punct!("[") >>
         elem: ty >>
         punct!(";") >>
-        len: int >>
+        len: array_len >>
         punct!("]") >>
-        (Ty::Array(Box::new(elem), len.0 as usize))
+        (Ty::Array(Box::new(elem), len))
+    ));
+
+    named!(array_len -> ArrayLen, alt!(
+        map!(int, |(i, _)| ArrayLen::Usize(i as usize))
+        |
+        do_parse!(
+            path: path >>
+            as_usize: option!(tuple!(keyword!("as"), keyword!("usize"))) >>
+            (ArrayLen::Path(path, as_usize.is_some()))
+        )
     ));
 
     named!(ty_ptr -> Ty, do_parse!(
@@ -431,11 +450,11 @@ mod printing {
                     inner.to_tokens(tokens);
                     tokens.append("]");
                 }
-                Ty::Array(ref inner, len) => {
+                Ty::Array(ref inner, ref len) => {
                     tokens.append("[");
                     inner.to_tokens(tokens);
                     tokens.append(";");
-                    tokens.append(&len.to_string());
+                    len.to_tokens(tokens);
                     tokens.append("]");
                 }
                 Ty::Ptr(ref target) => {
@@ -503,6 +522,21 @@ mod printing {
                 }
                 Ty::Infer => {
                     tokens.append("_");
+                }
+            }
+        }
+    }
+
+    impl ToTokens for ArrayLen {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                ArrayLen::Usize(len) => tokens.append(&len.to_string()),
+                ArrayLen::Path(ref path, as_usize) => {
+                    path.to_tokens(tokens);
+                    if as_usize {
+                        tokens.append("as");
+                        tokens.append("usize");
+                    }
                 }
             }
         }

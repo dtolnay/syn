@@ -352,11 +352,13 @@ pub mod parsing {
 
     named!(pub expr -> Expr, do_parse!(
         mut e: alt!(
-            expr_lit // needs to be before expr_struct
+            expr_lit // must be before expr_struct
             |
-            expr_struct // needs to be before expr_path
+            expr_struct // must be before expr_path
             |
-            expr_paren // needs to be before expr_tup
+            expr_paren // must be before expr_tup
+            |
+            expr_mac // must be before expr_path
             |
             expr_box
             |
@@ -389,8 +391,6 @@ pub mod parsing {
             expr_continue
             |
             expr_ret
-            |
-            expr_mac
             |
             expr_repeat
         ) >>
