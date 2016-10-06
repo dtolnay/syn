@@ -126,10 +126,10 @@ pub struct Abi(pub String);
 
 /// Foreign module declaration.
 ///
-/// E.g. `extern { .. }` or `extern C { .. }`
+/// E.g. `extern { .. }` or `extern "C" { .. }`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ForeignMod {
-    pub abi: Abi,
+    pub abi: Option<Abi>,
     pub items: Vec<ForeignItem>,
 }
 
@@ -146,9 +146,8 @@ pub struct ForeignItem {
 pub enum ForeignItemKind {
     /// A foreign function
     Fn(Box<FnDecl>, Generics),
-    /// A foreign static item (`static ext: u8`), with optional mutability
-    /// (the boolean is true when mutable)
-    Static(Box<Ty>, bool),
+    /// A foreign static item (`static ext: u8`)
+    Static(Box<Ty>, Mutability),
 }
 
 /// Represents an item declaration within a trait declaration,
@@ -250,8 +249,10 @@ pub mod parsing {
         item_const
         |
         item_fn
-    // TODO: Mod
-    // TODO: ForeignMod
+        |
+        item_mod
+        |
+        item_foreign_mod
         |
         item_ty
         |
@@ -406,6 +407,92 @@ pub mod parsing {
         )
         |
         ty => { FnArg::Ignored }
+    ));
+
+    named!(item_mod -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("mod") >>
+        id: ident >>
+        punct!("{") >>
+        items: many0!(item) >>
+        punct!("}") >>
+        (Item {
+            ident: id,
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Mod(items),
+        })
+    ));
+
+    named!(item_foreign_mod -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        keyword!("extern") >>
+        abi: option!(quoted_string) >>
+        punct!("{") >>
+        items: many0!(foreign_item) >>
+        punct!("}") >>
+        (Item {
+            ident: "".into(),
+            vis: Visibility::Inherited,
+            attrs: attrs,
+            node: ItemKind::ForeignMod(ForeignMod {
+                abi: abi.map(Abi),
+                items: items,
+            }),
+        })
+    ));
+
+    named!(foreign_item -> ForeignItem, alt!(
+        foreign_fn
+        |
+        foreign_static
+    ));
+
+    named!(foreign_fn -> ForeignItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("fn") >>
+        name: ident >>
+        generics: generics >>
+        punct!("(") >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        punct!(")") >>
+        ret: option!(preceded!(punct!("->"), ty)) >>
+        where_clause: where_clause >>
+        punct!(";") >>
+        (ForeignItem {
+            ident: name,
+            attrs: attrs,
+            node: ForeignItemKind::Fn(
+                Box::new(FnDecl {
+                    inputs: inputs,
+                    output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                }),
+                Generics {
+                    where_clause: where_clause,
+                    .. generics
+                },
+            ),
+            vis: vis,
+        })
+    ));
+
+    named!(foreign_static -> ForeignItem, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("static") >>
+        mutability: mutability >>
+        id: ident >>
+        punct!(":") >>
+        ty: ty >>
+        punct!(";") >>
+        (ForeignItem {
+            ident: id,
+            attrs: attrs,
+            node: ForeignItemKind::Static(Box::new(ty), mutability),
+            vis: vis,
+        })
     ));
 
     named!(item_ty -> Item, do_parse!(
@@ -844,8 +931,24 @@ mod printing {
                     generics.where_clause.to_tokens(tokens);
                     block.to_tokens(tokens);
                 }
-                ItemKind::Mod(ref _items) => unimplemented!(),
-                ItemKind::ForeignMod(ref _foreign_mod) => unimplemented!(),
+                ItemKind::Mod(ref items) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("mod");
+                    self.ident.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_all(items);
+                    tokens.append("}");
+                }
+                ItemKind::ForeignMod(ref foreign_mod) => {
+                    self.vis.to_tokens(tokens);
+                    match foreign_mod.abi {
+                        Some(ref abi) => abi.to_tokens(tokens),
+                        None => tokens.append("extern"),
+                    }
+                    tokens.append("{");
+                    tokens.append_all(&foreign_mod.items);
+                    tokens.append("}");
+                }
                 ItemKind::Ty(ref ty, ref generics) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("type");
@@ -1063,6 +1166,38 @@ mod printing {
                         }
                         _ => tokens.append(";"),
                     }
+                }
+            }
+        }
+    }
+
+    impl ToTokens for ForeignItem {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            match self.node {
+                ForeignItemKind::Fn(ref decl, ref generics) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("fn");
+                    self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
+                    tokens.append("(");
+                    tokens.append_separated(&decl.inputs, ",");
+                    tokens.append(")");
+                    if let FunctionRetTy::Ty(ref ty) = decl.output {
+                        tokens.append("->");
+                        ty.to_tokens(tokens);
+                    }
+                    generics.where_clause.to_tokens(tokens);
+                    tokens.append(";");
+                }
+                ForeignItemKind::Static(ref ty, mutability) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("static");
+                    mutability.to_tokens(tokens);
+                    self.ident.to_tokens(tokens);
+                    tokens.append(":");
+                    ty.to_tokens(tokens);
+                    tokens.append(";");
                 }
             }
         }
