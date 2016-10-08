@@ -72,9 +72,10 @@ pub trait Visitor: Sized {
     fn visit_fn_ret_ty(&mut self, ret_ty: &FunctionRetTy) {
         walk_fn_ret_ty(self, ret_ty)
     }
-    fn visit_array_len(&mut self, len: &ArrayLen) {
-        walk_array_len(self, len)
+    fn visit_const_expr(&mut self, expr: &ConstExpr) {
+        walk_const_expr(self, expr)
     }
+    fn visit_lit(&mut self, _lit: &Lit) {}
 }
 
 #[macro_export]
@@ -164,7 +165,7 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
         }
         Ty::Array(ref inner, ref len) => {
             visitor.visit_ty(inner);
-            visitor.visit_array_len(len);
+            visitor.visit_const_expr(len);
         }
         Ty::PolyTraitRef(ref bounds) => {
             walk_list!(visitor, visit_ty_param_bound, bounds);
@@ -262,10 +263,27 @@ pub fn walk_field<V: Visitor>(visitor: &mut V, field: &Field) {
     walk_list!(visitor, visit_attribute, &field.attrs);
 }
 
-pub fn walk_array_len<V: Visitor>(visitor: &mut V, len: &ArrayLen) {
+pub fn walk_const_expr<V: Visitor>(visitor: &mut V, len: &ConstExpr) {
     match *len {
-        ArrayLen::Usize(_usize) => {}
-        ArrayLen::Path(ref path, _as_usize) => {
+        ConstExpr::Call(ref function, ref args) => {
+            visitor.visit_const_expr(&function);
+            walk_list!(visitor, visit_const_expr, args);
+        }
+        ConstExpr::Binary(_op, ref left, ref right) => {
+            visitor.visit_const_expr(left);
+            visitor.visit_const_expr(right);
+        }
+        ConstExpr::Unary(_op, ref v) => {
+            visitor.visit_const_expr(v);
+        }
+        ConstExpr::Lit(ref lit) => {
+            visitor.visit_lit(lit);
+        }
+        ConstExpr::Cast(ref expr, ref ty) => {
+            visitor.visit_const_expr(expr);
+            visitor.visit_ty(ty);
+        }
+        ConstExpr::Path(ref path) => {
             visitor.visit_path(path);
         }
     }
