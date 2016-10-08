@@ -24,4 +24,5 @@ unicode-xid = { version = "0.0.3", optional = true }
 [dev-dependencies]
 syntex_pos = "0.44.0"
 syntex_syntax = "0.44.0"
+time = "0.1.35"
 walkdir = "0.1.8"

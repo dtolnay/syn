@@ -49,19 +49,21 @@ pub fn block_comment(input: &str) -> IResult<&str, &str> {
     }
 
     let mut depth = 0;
-    let mut chars = input.char_indices();
-    while let Some((i, _)) = chars.next() {
-        let s = &input[i..];
-        if s.starts_with("/*") {
+    let bytes = input.as_bytes();
+    let mut i = 0;
+    let upper = bytes.len() - 1;
+    while i < upper {
+        if bytes[i] == b'/' && bytes[i + 1] == b'*' {
             depth += 1;
-            chars.next(); // eat '*'
-        } else if s.starts_with("*/") {
+            i += 1; // eat '*'
+        } else if bytes[i] == b'*' && bytes[i + 1] == b'/' {
             depth -= 1;
             if depth == 0 {
                 return IResult::Done(&input[i + 2..], &input[..i + 2]);
             }
-            chars.next(); // eat '/'
+            i += 1; // eat '/'
         }
+        i += 1;
     }
     IResult::Error
 }
