@@ -301,57 +301,6 @@ macro_rules! delimited {
     };
 }
 
-macro_rules! separated_list {
-    ($i:expr, $sep:ident!( $($args:tt)* ), $submac:ident!( $($args2:tt)* )) => {{
-        let mut res = ::std::vec::Vec::new();
-        let mut input = $i;
-
-// get the first element
-        match $submac!(input, $($args2)*) {
-            $crate::nom::IResult::Error => $crate::nom::IResult::Done(input, ::std::vec::Vec::new()),
-            $crate::nom::IResult::Done(i, o) => {
-                if i.len() == input.len() {
-                    $crate::nom::IResult::Error
-                } else {
-                    res.push(o);
-                    input = i;
-
-// get the separator first
-                    while let $crate::nom::IResult::Done(i2, _) = $sep!(input, $($args)*) {
-                        if i2.len() == input.len() {
-                            break;
-                        }
-
-// get the element next
-                        if let $crate::nom::IResult::Done(i3, o3) = $submac!(i2, $($args2)*) {
-                            if i3.len() == i2.len() {
-                                break;
-                            }
-                            res.push(o3);
-                            input = i3;
-                        } else {
-                            break;
-                        }
-                    }
-                    $crate::nom::IResult::Done(input, res)
-                }
-            }
-        }
-    }};
-
-    ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
-        separated_list!($i, $submac!($($args)*), call!($g));
-    };
-
-    ($i:expr, $f:expr, $submac:ident!( $($args:tt)* )) => {
-        separated_list!($i, call!($f), $submac!($($args)*));
-    };
-
-    ($i:expr, $f:expr, $g:expr) => {
-        separated_list!($i, call!($f), call!($g));
-    };
-}
-
 macro_rules! separated_nonempty_list {
     ($i:expr, $sep:ident!( $($args:tt)* ), $submac:ident!( $($args2:tt)* )) => {{
         let mut res   = ::std::vec::Vec::new();

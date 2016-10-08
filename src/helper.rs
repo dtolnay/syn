@@ -81,3 +81,45 @@ macro_rules! tap {
         tap!($i, $name: call!($f) => $e);
     };
 }
+
+macro_rules! separated_list {
+    ($i:expr, punct!($sep:expr), $f:expr) => {
+        $crate::helper::separated_list($i, $sep, $f)
+    };
+}
+
+pub fn separated_list<'a, T>(mut input: &'a str, sep: &'static str, f: fn(&'a str) -> IResult<&'a str, T>) -> IResult<&'a str, Vec<T>> {
+    let mut res = Vec::new();
+
+    // get the first element
+    match f(input) {
+        IResult::Error => IResult::Done(input, Vec::new()),
+        IResult::Done(i, o) => {
+            if i.len() == input.len() {
+                IResult::Error
+            } else {
+                res.push(o);
+                input = i;
+
+                // get the separator first
+                while let IResult::Done(i2, _) = punct(input, sep) {
+                    if i2.len() == input.len() {
+                        break;
+                    }
+
+                    // get the element next
+                    if let IResult::Done(i3, o3) = f(i2) {
+                        if i3.len() == i2.len() {
+                            break;
+                        }
+                        res.push(o3);
+                        input = i3;
+                    } else {
+                        break;
+                    }
+                }
+                IResult::Done(input, res)
+            }
+        }
+    }
+}
