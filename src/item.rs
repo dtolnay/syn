@@ -87,7 +87,7 @@ pub enum ViewPath {
     /// or just
     ///
     /// `foo::bar::baz` (with `as baz` implicitly on the right)
-    Simple(Ident, Path),
+    Simple(Path, Option<Ident>),
 
     /// `foo::bar::*`
     Glob(Path),
@@ -228,7 +228,7 @@ pub enum FnArg {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {DelimToken, FunctionRetTy, Generics, Ident, Mac, TokenTree, VariantData, Visibility};
+    use {DelimToken, FunctionRetTy, Generics, Ident, Mac, Path, TokenTree, VariantData, Visibility};
     use attr::parsing::outer_attr;
     use data::parsing::{struct_like_body, visibility};
     use expr::parsing::{block, expr, pat};
@@ -242,7 +242,8 @@ pub mod parsing {
 
     named!(pub item -> Item, alt!(
         item_extern_crate
-    // TODO: Use
+        |
+        item_use
         |
         item_static
         |
@@ -308,6 +309,73 @@ pub mod parsing {
                 attrs: attrs,
                 node: ItemKind::ExternCrate(original_name),
             }
+        })
+    ));
+
+    named!(item_use -> Item, do_parse!(
+        attrs: many0!(outer_attr) >>
+        vis: visibility >>
+        keyword!("use") >>
+        what: view_path >>
+        punct!(";") >>
+        (Item {
+            ident: "".into(),
+            vis: vis,
+            attrs: attrs,
+            node: ItemKind::Use(Box::new(what)),
+        })
+    ));
+
+    named!(view_path -> ViewPath, alt!(
+        view_path_glob
+        |
+        view_path_list
+        |
+        view_path_list_root
+        |
+        view_path_simple // must be last
+    ));
+
+
+    named!(view_path_simple -> ViewPath, do_parse!(
+        path: path >>
+        rename: option!(preceded!(keyword!("as"), ident)) >>
+        (ViewPath::Simple(path, rename))
+    ));
+
+    named!(view_path_glob -> ViewPath, do_parse!(
+        path: path >>
+        punct!("::") >>
+        punct!("*") >>
+        (ViewPath::Glob(path))
+    ));
+
+    named!(view_path_list -> ViewPath, do_parse!(
+        path: path >>
+        punct!("::") >>
+        punct!("{") >>
+        items: separated_nonempty_list!(punct!(","), path_list_item) >>
+        punct!("}") >>
+        (ViewPath::List(path, items))
+    ));
+
+    named!(view_path_list_root -> ViewPath, do_parse!(
+        global: option!(punct!("::")) >>
+        punct!("{") >>
+        items: separated_nonempty_list!(punct!(","), path_list_item) >>
+        punct!("}") >>
+        (ViewPath::List(Path {
+            global: global.is_some(),
+            segments: Vec::new(),
+        }, items))
+    ));
+
+    named!(path_list_item -> PathListItem, do_parse!(
+        name: ident >>
+        rename: option!(preceded!(keyword!("as"), ident)) >>
+        (PathListItem {
+            name: name,
+            rename: rename,
         })
     ));
 
@@ -891,7 +959,12 @@ mod printing {
                     self.ident.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Use(ref _view_path) => unimplemented!(),
+                ItemKind::Use(ref view_path) => {
+                    self.vis.to_tokens(tokens);
+                    tokens.append("use");
+                    view_path.to_tokens(tokens);
+                    tokens.append(";");
+                }
                 ItemKind::Static(ref ty, ref mutability, ref expr) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("static");
@@ -1052,6 +1125,42 @@ mod printing {
                         _ => tokens.append(";"),
                     }
                 }
+            }
+        }
+    }
+
+    impl ToTokens for ViewPath {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                ViewPath::Simple(ref path, ref rename) => {
+                    path.to_tokens(tokens);
+                    if let Some(ref rename) = *rename {
+                        tokens.append("as");
+                        rename.to_tokens(tokens);
+                    }
+                }
+                ViewPath::Glob(ref path) => {
+                    path.to_tokens(tokens);
+                    tokens.append("::");
+                    tokens.append("*");
+                }
+                ViewPath::List(ref path, ref items) => {
+                    path.to_tokens(tokens);
+                    tokens.append("::");
+                    tokens.append("{");
+                    tokens.append_separated(items, ",");
+                    tokens.append("}");
+                }
+            }
+        }
+    }
+
+    impl ToTokens for PathListItem {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.name.to_tokens(tokens);
+            if let Some(ref rename) = self.rename {
+                tokens.append("as");
+                rename.to_tokens(tokens);
             }
         }
     }
