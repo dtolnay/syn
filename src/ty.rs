@@ -195,12 +195,15 @@ pub enum FunctionRetTy {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use {TraitBoundModifier, TyParamBound};
     use constant::parsing::const_expr;
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
     use ident::parsing::ident;
     use std::str;
 
     named!(pub ty -> Ty, alt!(
+        ty_poly_trait_ref // must be before ty_path
+        |
         ty_vec
         |
         ty_array
@@ -296,7 +299,18 @@ pub mod parsing {
         (Ty::Tup(elems))
     ));
 
-    named!(ty_path -> Ty, map!(qpath, |(qself, p)| Ty::Path(qself, p)));
+    named!(ty_path -> Ty, do_parse!(
+        qpath: qpath >>
+        bounds: many0!(preceded!(punct!("+"), ty_param_bound)) >>
+        ({
+            let path = Ty::Path(qpath.0, qpath.1);
+            if bounds.is_empty() {
+                path
+            } else {
+                Ty::ObjectSum(Box::new(path), bounds)
+            }
+        })
+    ));
 
     named!(pub qpath -> (Option<QSelf>, Path), alt!(
         map!(path, |p| (None, p))
@@ -327,6 +341,23 @@ pub mod parsing {
                 }
             })
         )
+    ));
+
+    named!(ty_poly_trait_ref -> Ty, do_parse!(
+        keyword!("for") >>
+        punct!("<") >>
+        lifetimes: separated_list!(punct!(","), lifetime_def) >>
+        punct!(">") >>
+        trait_ref: path >>
+        (Ty::PolyTraitRef(vec![
+            TyParamBound::Trait(
+                PolyTraitRef {
+                    bound_lifetimes: lifetimes,
+                    trait_ref: trait_ref,
+                },
+                TraitBoundModifier::None,
+            ),
+        ]))
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
@@ -490,8 +521,16 @@ mod printing {
                         segment.to_tokens(tokens);
                     }
                 }
-                Ty::ObjectSum(_, _) => unimplemented!(),
-                Ty::PolyTraitRef(_) => unimplemented!(),
+                Ty::ObjectSum(ref ty, ref bounds) => {
+                    ty.to_tokens(tokens);
+                    for bound in bounds {
+                        tokens.append("+");
+                        bound.to_tokens(tokens);
+                    }
+                }
+                Ty::PolyTraitRef(ref bounds) => {
+                    tokens.append_separated(bounds, "+");
+                }
                 Ty::ImplTrait(ref bounds) => {
                     tokens.append("impl");
                     tokens.append_separated(bounds, "+");
