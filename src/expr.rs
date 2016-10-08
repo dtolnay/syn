@@ -290,7 +290,8 @@ pub enum BindingMode {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, TokenTree, Ty};
+    use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, TokenTree,
+         Ty};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;

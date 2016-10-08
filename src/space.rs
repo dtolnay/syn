@@ -35,7 +35,7 @@ pub fn whitespace(input: &str) -> IResult<&str, ()> {
                 i += 1;
                 continue;
             }
-            b if b <= 0x7f => {},
+            b if b <= 0x7f => {}
             _ => {
                 let ch = s.chars().next().unwrap();
                 if ch.is_whitespace() {

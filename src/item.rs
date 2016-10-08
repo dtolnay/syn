@@ -1095,12 +1095,7 @@ mod printing {
                     tokens.append("{");
                     tokens.append("}");
                 }
-                ItemKind::Impl(unsafety,
-                               polarity,
-                               ref generics,
-                               ref path,
-                               ref ty,
-                               ref items) => {
+                ItemKind::Impl(unsafety, polarity, ref generics, ref path, ref ty, ref items) => {
                     unsafety.to_tokens(tokens);
                     tokens.append("impl");
                     generics.to_tokens(tokens);
