@@ -65,7 +65,7 @@ macro_rules! cond {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
         if $cond {
             match $submac!($i, $($args)*) {
-                $crate::nom::IResult::Done(i,o) => $crate::nom::IResult::Done(i, ::std::option::Option::Some(o)),
+                $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, ::std::option::Option::Some(o)),
                 $crate::nom::IResult::Error => $crate::nom::IResult::Done($i, ::std::option::Option::None),
             }
         } else {
@@ -284,7 +284,7 @@ macro_rules! separated_list {
 // get the first element
         match $submac!(input, $($args2)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Done(input, ::std::vec::Vec::new()),
-            $crate::nom::IResult::Done(i,o) => {
+            $crate::nom::IResult::Done(i, o) => {
                 if i.len() == input.len() {
                     $crate::nom::IResult::Error
                 } else {
@@ -298,7 +298,7 @@ macro_rules! separated_list {
                         }
 
 // get the element next
-                        if let $crate::nom::IResult::Done(i3,o3) = $submac!(i2, $($args2)*) {
+                        if let $crate::nom::IResult::Done(i3, o3) = $submac!(i2, $($args2)*) {
                             if i3.len() == i2.len() {
                                 break;
                             }
@@ -335,7 +335,7 @@ macro_rules! separated_nonempty_list {
         // get the first element
         match $submac!(input, $($args2)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i,o) => {
+            $crate::nom::IResult::Done(i, o) => {
                 if i.len() == input.len() {
                     $crate::nom::IResult::Error
                 } else {
@@ -347,7 +347,7 @@ macro_rules! separated_nonempty_list {
                             break;
                         }
 
-                        if let $crate::nom::IResult::Done(i3,o3) = $submac!(i2, $($args2)*) {
+                        if let $crate::nom::IResult::Done(i3, o3) = $submac!(i2, $($args2)*) {
                             if i3.len() == i2.len() {
                                 break;
                             }
@@ -391,7 +391,7 @@ macro_rules! tuple_parser {
     ($i:expr, (), $submac:ident!( $($args:tt)* ), $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i,o) =>
+            $crate::nom::IResult::Done(i, o) =>
                 tuple_parser!(i, (o), $($rest)*),
         }
     };
@@ -399,7 +399,7 @@ macro_rules! tuple_parser {
     ($i:expr, ($($parsed:tt)*), $submac:ident!( $($args:tt)* ), $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i,o) =>
+            $crate::nom::IResult::Done(i, o) =>
                 tuple_parser!(i, ($($parsed)* , o), $($rest)*),
         }
     };
@@ -464,7 +464,7 @@ macro_rules! alt {
 
     ($i:expr, $subrule:ident!( $($args:tt)*)) => {
         match $subrule!( $i, $($args)* ) {
-            $crate::nom::IResult::Done(i,o) => $crate::nom::IResult::Done(i,o),
+            $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, o),
             $crate::nom::IResult::Error => alt!($i),
         }
     };
@@ -498,7 +498,7 @@ macro_rules! do_parse {
     ($i:expr, $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i,o) => {
+            $crate::nom::IResult::Done(i, o) => {
                 let $field = o;
                 do_parse!(i, $($rest)*)
             },
@@ -512,35 +512,9 @@ macro_rules! do_parse {
     ($i:expr, mut $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
             $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i,o) => {
+            $crate::nom::IResult::Done(i, o) => {
                 let mut $field = o;
                 do_parse!(i, $($rest)*)
-            },
-        }
-    };
-
-    // ending the chain
-    ($i:expr, $e:ident >> ( $($rest:tt)* )) => {
-        do_parse!($i, call!($e) >> ( $($rest)* ));
-    };
-
-    ($i:expr, $submac:ident!( $($args:tt)* ) >> ( $($rest:tt)* )) => {
-        match $submac!($i, $($args)*) {
-            $crate::nom::IResult::Done(i, _) => $crate::nom::IResult::Done(i, ($($rest)*)),
-            $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-        }
-    };
-
-    ($i:expr, $field:ident : $e:ident >> ( $($rest:tt)* )) => {
-        do_parse!($i, $field: call!($e) >> ( $($rest)* ) );
-    };
-
-    ($i:expr, $field:ident : $submac:ident!( $($args:tt)* ) >> ( $($rest:tt)* )) => {
-        match $submac!($i, $($args)*) {
-            $crate::nom::IResult::Error => $crate::nom::IResult::Error,
-            $crate::nom::IResult::Done(i,o) => {
-                let $field = o;
-                $crate::nom::IResult::Done(i, ($($rest)*))
             },
         }
     };
