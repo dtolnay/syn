@@ -139,7 +139,7 @@ macro_rules! many0 {
                 }
                 $crate::nom::IResult::Done(i, o) => {
                     // loop trip must always consume (otherwise infinite loops)
-                    if i == input {
+                    if i.len() == input.len() {
                         ret = $crate::nom::IResult::Error;
                         break;
                     }
@@ -154,8 +154,33 @@ macro_rules! many0 {
     }};
 
     ($i:expr, $f:expr) => {
-        many0!($i, call!($f));
+        $crate::nom::many0($i, $f)
     };
+}
+
+pub fn many0<'a, T>(mut input: &'a str, f: fn(&'a str) -> IResult<&'a str, T>) -> IResult<&'a str, Vec<T>> {
+    let mut res = Vec::new();
+
+    loop {
+        if input.is_empty() {
+            return IResult::Done(input, res);
+        }
+
+        match f(input) {
+            IResult::Error => {
+                return IResult::Done(input, res);
+            }
+            IResult::Done(i, o) => {
+                // loop trip must always consume (otherwise infinite loops)
+                if i.len() == input.len() {
+                    return IResult::Error;
+                }
+
+                res.push(o);
+                input = i;
+            }
+        }
+    }
 }
 
 macro_rules! peek {
