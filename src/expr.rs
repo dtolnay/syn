@@ -422,6 +422,7 @@ pub mod parsing {
     named!(expr_vec -> Expr, do_parse!(
         punct!("[") >>
         elems: separated_list!(punct!(","), expr) >>
+        cond!(!elems.is_empty(), option!(punct!(","))) >>
         punct!("]") >>
         (Expr::Vec(elems))
     ));
@@ -429,6 +430,7 @@ pub mod parsing {
     named!(and_call -> Vec<Expr>, do_parse!(
         punct!("(") >>
         args: separated_list!(punct!(","), expr) >>
+        cond!(!args.is_empty(), option!(punct!(","))) >>
         punct!(")") >>
         (args)
     ));
@@ -436,13 +438,17 @@ pub mod parsing {
     named!(and_method_call -> (Ident, Vec<Ty>, Vec<Expr>), do_parse!(
         punct!(".") >>
         method: ident >>
-        ascript: opt_vec!(delimited!(
-            punct!("<"),
-            separated_list!(punct!(","), ty),
-            punct!(">")
+        ascript: opt_vec!(preceded!(
+            punct!("::"),
+            delimited!(
+                punct!("<"),
+                separated_list!(punct!(","), ty),
+                punct!(">")
+            )
         )) >>
         punct!("(") >>
         args: separated_list!(punct!(","), expr) >>
+        cond!(!args.is_empty(), option!(punct!(","))) >>
         punct!(")") >>
         (method, ascript, args)
     ));
@@ -450,7 +456,7 @@ pub mod parsing {
     named!(expr_tup -> Expr, do_parse!(
         punct!("(") >>
         elems: separated_list!(punct!(","), expr) >>
-        option!(punct!(",")) >>
+        cond!(!elems.is_empty(), option!(punct!(","))) >>
         punct!(")") >>
         (Expr::Tup(elems))
     ));
@@ -557,10 +563,11 @@ pub mod parsing {
             guard: option!(preceded!(keyword!("if"), expr)) >>
             punct!("=>") >>
             body: alt!(
-                terminated!(expr, punct!(","))
-                |
                 map!(block, |blk| Expr::Block(BlockCheckMode::Default, blk))
+                |
+                expr
             ) >>
+            option!(punct!(",")) >>
             (Arm {
                 attrs: attrs,
                 pats: pats,
@@ -576,6 +583,7 @@ pub mod parsing {
         capture: capture_by >>
         punct!("|") >>
         inputs: separated_list!(punct!(","), closure_arg) >>
+        cond!(!inputs.is_empty(), option!(punct!(","))) >>
         punct!("|") >>
         ret_and_body: alt!(
             do_parse!(
@@ -656,6 +664,7 @@ pub mod parsing {
             base: expr >>
             (base)
         )) >>
+        cond!(!fields.is_empty() && base.is_none(), option!(punct!(","))) >>
         punct!("}") >>
         (Expr::Struct(path, fields, base.map(Box::new)))
     ));

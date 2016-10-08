@@ -301,15 +301,40 @@ pub mod parsing {
 
     named!(ty_path -> Ty, do_parse!(
         qpath: qpath >>
+        parenthesized: cond!(
+            qpath.1.segments.last().unwrap().parameters == PathParameters::none(),
+            option!(parenthesized_parameter_data)
+        ) >>
         bounds: many0!(preceded!(punct!("+"), ty_param_bound)) >>
         ({
-            let path = Ty::Path(qpath.0, qpath.1);
+            let (qself, mut path) = qpath;
+            if let Some(Some(parenthesized)) = parenthesized {
+                path.segments.last_mut().unwrap().parameters = parenthesized;
+            }
+            let path = Ty::Path(qself, path);
             if bounds.is_empty() {
                 path
             } else {
                 Ty::ObjectSum(Box::new(path), bounds)
             }
         })
+    ));
+
+    named!(parenthesized_parameter_data -> PathParameters, do_parse!(
+        punct!("(") >>
+        inputs: separated_list!(punct!(","), ty) >>
+        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        punct!(")") >>
+        output: option!(preceded!(
+            punct!("->"),
+            ty
+        )) >>
+        (PathParameters::Parenthesized(
+            ParenthesizedParameterData {
+                inputs: inputs,
+                output: output,
+            },
+        ))
     ));
 
     named!(pub qpath -> (Option<QSelf>, Path), alt!(
@@ -433,9 +458,19 @@ pub mod parsing {
     named!(pub poly_trait_ref -> PolyTraitRef, do_parse!(
         bound_lifetimes: bound_lifetimes >>
         trait_ref: path >>
-        (PolyTraitRef {
-            bound_lifetimes: bound_lifetimes,
-            trait_ref: trait_ref,
+        parenthesized: cond!(
+            trait_ref.segments.last().unwrap().parameters == PathParameters::none(),
+            option!(parenthesized_parameter_data)
+        ) >>
+        ({
+            let mut trait_ref = trait_ref;
+            if let Some(Some(parenthesized)) = parenthesized {
+                trait_ref.segments.last_mut().unwrap().parameters = parenthesized;
+            }
+            PolyTraitRef {
+                bound_lifetimes: bound_lifetimes,
+                trait_ref: trait_ref,
+            }
         })
     ));
 
