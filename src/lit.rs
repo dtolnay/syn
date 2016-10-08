@@ -184,10 +184,12 @@ mod printing {
                     escaped.push('"');
                     tokens.append(&escaped);
                 }
+                Lit::Byte(b) => tokens.append(&format!("b{:?}", b)),
+                Lit::Char(ch) => ch.to_tokens(tokens),
                 Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
+                Lit::Float(ref value, ty) => tokens.append(&format!("{}{}", value, ty)),
                 Lit::Bool(true) => tokens.append("true"),
                 Lit::Bool(false) => tokens.append("false"),
-                _ => unimplemented!(),
             }
         }
     }
@@ -206,6 +208,16 @@ mod printing {
                 IntTy::U32 => formatter.write_str("u32"),
                 IntTy::U64 => formatter.write_str("u64"),
                 IntTy::Unsuffixed => Ok(()),
+            }
+        }
+    }
+
+    impl Display for FloatTy {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+            match *self {
+                FloatTy::F32 => formatter.write_str("f32"),
+                FloatTy::F64 => formatter.write_str("f64"),
+                FloatTy::Unsuffixed => Ok(()),
             }
         }
     }
