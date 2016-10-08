@@ -90,6 +90,29 @@ pub mod parsing {
         punct!(">") => { |_| BinOp::Gt }
     ));
 
+    #[cfg(feature = "full")]
+    named!(pub assign_op -> BinOp, alt!(
+        punct!("+=") => { |_| BinOp::Add }
+        |
+        punct!("-=") => { |_| BinOp::Sub }
+        |
+        punct!("*=") => { |_| BinOp::Mul }
+        |
+        punct!("/=") => { |_| BinOp::Div }
+        |
+        punct!("%=") => { |_| BinOp::Rem }
+        |
+        punct!("^=") => { |_| BinOp::BitXor }
+        |
+        punct!("&=") => { |_| BinOp::BitAnd }
+        |
+        punct!("|=") => { |_| BinOp::BitOr }
+        |
+        punct!("<<=") => { |_| BinOp::Shl }
+        |
+        punct!(">>=") => { |_| BinOp::Shr }
+    ));
+
     named!(pub unop -> UnOp, alt!(
         punct!("*") => { |_| UnOp::Deref }
         |

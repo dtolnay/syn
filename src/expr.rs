@@ -295,10 +295,10 @@ pub mod parsing {
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use item::parsing::item;
-    use lit::parsing::lit;
+    use lit::parsing::{digits, lit};
     use mac::parsing::mac;
     use nom::IResult::Error;
-    use op::parsing::{binop, unop};
+    use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty};
 
     named!(pub expr -> Expr, do_parse!(
@@ -339,6 +339,8 @@ pub mod parsing {
             |
             expr_block
             |
+            expr_range
+            |
             expr_path
             |
             expr_addr_of
@@ -368,12 +370,32 @@ pub mod parsing {
             tap!(ty: and_ascription => {
                 e = Expr::Type(Box::new(e), Box::new(ty));
             })
-    // TODO: Assign
-    // TODO: AssignOp
-    // TODO: Field
-    // TODO: TupField
-    // TODO: Index
-    // TODO: Range
+            |
+            tap!(v: and_assign => {
+                e = Expr::Assign(Box::new(e), Box::new(v));
+            })
+            |
+            tap!(more: and_assign_op => {
+                let (op, v) = more;
+                e = Expr::AssignOp(op, Box::new(e), Box::new(v));
+            })
+            |
+            tap!(field: and_field => {
+                e = Expr::Field(Box::new(e), field);
+            })
+            |
+            tap!(field: and_tup_field => {
+                e = Expr::TupField(Box::new(e), field as usize);
+            })
+            |
+            tap!(i: and_index => {
+                e = Expr::Index(Box::new(e), Box::new(i));
+            })
+            |
+            tap!(more: and_range => {
+                let (limits, hi) = more;
+                e = Expr::Range(Some(Box::new(e)), hi.map(Box::new), limits);
+            })
             |
             tap!(_try: punct!("?") => {
                 e = Expr::Try(Box::new(e));
@@ -665,6 +687,18 @@ pub mod parsing {
         }))
     ));
 
+    named!(expr_range -> Expr, do_parse!(
+        limits: range_limits >>
+        hi: option!(expr) >>
+        (Expr::Range(None, hi.map(Box::new), limits))
+    ));
+
+    named!(range_limits -> RangeLimits, alt!(
+        punct!("...") => { |_| RangeLimits::Closed }
+        |
+        punct!("..") => { |_| RangeLimits::HalfOpen }
+    ));
+
     named!(expr_path -> Expr, map!(qpath, |(qself, path)| Expr::Path(qself, path)));
 
     named!(expr_addr_of -> Expr, do_parse!(
@@ -673,6 +707,18 @@ pub mod parsing {
         expr: expr >>
         (Expr::AddrOf(mutability, Box::new(expr)))
     ));
+
+    named!(and_assign -> Expr, preceded!(punct!("="), expr));
+
+    named!(and_assign_op -> (BinOp, Expr), tuple!(assign_op, expr));
+
+    named!(and_field -> Ident, preceded!(punct!("."), ident));
+
+    named!(and_tup_field -> u64, preceded!(punct!("."), digits));
+
+    named!(and_index -> Expr, delimited!(punct!("["), expr, punct!("]")));
+
+    named!(and_range -> (RangeLimits, Option<Expr>), tuple!(range_limits, option!(expr)));
 
     named!(pub block -> Block, do_parse!(
         punct!("{") >>
