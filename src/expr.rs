@@ -422,16 +422,14 @@ pub mod parsing {
 
     named!(expr_vec -> Expr, do_parse!(
         punct!("[") >>
-        elems: separated_list!(punct!(","), expr) >>
-        cond!(!elems.is_empty(), option!(punct!(","))) >>
+        elems: terminated_list!(punct!(","), expr) >>
         punct!("]") >>
         (Expr::Vec(elems))
     ));
 
     named!(and_call -> Vec<Expr>, do_parse!(
         punct!("(") >>
-        args: separated_list!(punct!(","), expr) >>
-        cond!(!args.is_empty(), option!(punct!(","))) >>
+        args: terminated_list!(punct!(","), expr) >>
         punct!(")") >>
         (args)
     ));
@@ -443,21 +441,19 @@ pub mod parsing {
             punct!("::"),
             delimited!(
                 punct!("<"),
-                separated_list!(punct!(","), ty),
+                terminated_list!(punct!(","), ty),
                 punct!(">")
             )
         )) >>
         punct!("(") >>
-        args: separated_list!(punct!(","), expr) >>
-        cond!(!args.is_empty(), option!(punct!(","))) >>
+        args: terminated_list!(punct!(","), expr) >>
         punct!(")") >>
         (method, ascript, args)
     ));
 
     named!(expr_tup -> Expr, do_parse!(
         punct!("(") >>
-        elems: separated_list!(punct!(","), expr) >>
-        cond!(!elems.is_empty(), option!(punct!(","))) >>
+        elems: terminated_list!(punct!(","), expr) >>
         punct!(")") >>
         (Expr::Tup(elems))
     ));
@@ -583,8 +579,7 @@ pub mod parsing {
     named!(expr_closure -> Expr, do_parse!(
         capture: capture_by >>
         punct!("|") >>
-        inputs: separated_list!(punct!(","), closure_arg) >>
-        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        inputs: terminated_list!(punct!(","), closure_arg) >>
         punct!("|") >>
         ret_and_body: alt!(
             do_parse!(
@@ -898,6 +893,7 @@ pub mod parsing {
             cond!(!fields.is_empty(), punct!(",")),
             punct!("..")
         )) >>
+        cond!(!fields.is_empty() && more.is_none(), option!(punct!(","))) >>
         punct!("}") >>
         (Pat::Struct(path, fields, more.is_some()))
     ));

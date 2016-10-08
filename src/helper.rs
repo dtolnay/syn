@@ -84,11 +84,22 @@ macro_rules! tap {
 
 macro_rules! separated_list {
     ($i:expr, punct!($sep:expr), $f:expr) => {
-        $crate::helper::separated_list($i, $sep, $f)
+        $crate::helper::separated_list($i, $sep, $f, false)
     };
 }
 
-pub fn separated_list<'a, T>(mut input: &'a str, sep: &'static str, f: fn(&'a str) -> IResult<&'a str, T>) -> IResult<&'a str, Vec<T>> {
+macro_rules! terminated_list {
+    ($i:expr, punct!($sep:expr), $f:expr) => {
+        $crate::helper::separated_list($i, $sep, $f, true)
+    };
+}
+
+pub fn separated_list<'a, T>(
+    mut input: &'a str,
+    sep: &'static str,
+    f: fn(&'a str) -> IResult<&'a str, T>,
+    terminated: bool,
+) -> IResult<&'a str, Vec<T>> {
     let mut res = Vec::new();
 
     // get the first element
@@ -116,6 +127,11 @@ pub fn separated_list<'a, T>(mut input: &'a str, sep: &'static str, f: fn(&'a st
                         input = i3;
                     } else {
                         break;
+                    }
+                }
+                if terminated {
+                    if let IResult::Done(after, _) = punct(input, sep) {
+                        input = after;
                     }
                 }
                 IResult::Done(input, res)

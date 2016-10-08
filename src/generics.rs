@@ -227,7 +227,7 @@ pub mod parsing {
     named!(pub bound_lifetimes -> Vec<LifetimeDef>, opt_vec!(do_parse!(
         keyword!("for") >>
         punct!("<") >>
-        lifetimes: separated_list!(punct!(","), lifetime_def) >>
+        lifetimes: terminated_list!(punct!(","), lifetime_def) >>
         punct!(">") >>
         (lifetimes)
     )));

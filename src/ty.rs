@@ -270,11 +270,11 @@ pub mod parsing {
         keyword!("fn") >>
         lifetimes: opt_vec!(delimited!(
             punct!("<"),
-            separated_list!(punct!(","), lifetime_def),
+            terminated_list!(punct!(","), lifetime_def),
             punct!(">")
         )) >>
         punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
+        inputs: terminated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
         output: option!(preceded!(
             punct!("->"),
@@ -294,7 +294,7 @@ pub mod parsing {
 
     named!(ty_tup -> Ty, do_parse!(
         punct!("(") >>
-        elems: separated_list!(punct!(","), ty) >>
+        elems: terminated_list!(punct!(","), ty) >>
         punct!(")") >>
         (Ty::Tup(elems))
     ));
@@ -322,8 +322,7 @@ pub mod parsing {
 
     named!(parenthesized_parameter_data -> PathParameters, do_parse!(
         punct!("(") >>
-        inputs: separated_list!(punct!(","), ty) >>
-        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        inputs: terminated_list!(punct!(","), ty) >>
         punct!(")") >>
         output: option!(preceded!(
             punct!("->"),
@@ -371,7 +370,7 @@ pub mod parsing {
     named!(ty_poly_trait_ref -> Ty, do_parse!(
         keyword!("for") >>
         punct!("<") >>
-        lifetimes: separated_list!(punct!(","), lifetime_def) >>
+        lifetimes: terminated_list!(punct!(","), lifetime_def) >>
         punct!(">") >>
         trait_ref: path >>
         (Ty::PolyTraitRef(vec![

@@ -66,8 +66,7 @@ pub mod parsing {
 
     named!(pub enum_body -> Vec<Variant>, do_parse!(
         punct!("{") >>
-        variants: separated_list!(punct!(","), variant) >>
-        option!(punct!(",")) >>
+        variants: terminated_list!(punct!(","), variant) >>
         punct!("}") >>
         (variants)
     ));
@@ -93,16 +92,14 @@ pub mod parsing {
 
     named!(pub struct_like_body -> Vec<Field>, do_parse!(
         punct!("{") >>
-        fields: separated_list!(punct!(","), struct_field) >>
-        option!(punct!(",")) >>
+        fields: terminated_list!(punct!(","), struct_field) >>
         punct!("}") >>
         (fields)
     ));
 
     named!(tuple_like_body -> Vec<Field>, do_parse!(
         punct!("(") >>
-        fields: separated_list!(punct!(","), tuple_field) >>
-        option!(punct!(",")) >>
+        fields: terminated_list!(punct!(","), tuple_field) >>
         punct!(")") >>
         (fields)
     ));

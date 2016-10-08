@@ -184,7 +184,7 @@ pub mod parsing {
         do_parse!(
             id: ident >>
             punct!("(") >>
-            inner: separated_list!(punct!(","), meta_item) >>
+            inner: terminated_list!(punct!(","), meta_item) >>
             punct!(")") >>
             (MetaItem::List(id, inner))
         )

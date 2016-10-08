@@ -426,8 +426,7 @@ pub mod parsing {
         name: ident >>
         generics: generics >>
         punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        inputs: terminated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
@@ -525,8 +524,7 @@ pub mod parsing {
         name: ident >>
         generics: generics >>
         punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        inputs: terminated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
@@ -703,8 +701,7 @@ pub mod parsing {
         name: ident >>
         generics: generics >>
         punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        inputs: terminated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
@@ -847,8 +844,7 @@ pub mod parsing {
         name: ident >>
         generics: generics >>
         punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        cond!(!inputs.is_empty(), option!(punct!(","))) >>
+        inputs: terminated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>

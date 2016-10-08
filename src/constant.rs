@@ -55,7 +55,7 @@ pub mod parsing {
 
     named!(and_call -> Vec<ConstExpr>, do_parse!(
         punct!("(") >>
-        args: separated_list!(punct!(","), const_expr) >>
+        args: terminated_list!(punct!(","), const_expr) >>
         punct!(")") >>
         (args)
     ));
