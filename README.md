@@ -17,8 +17,8 @@ Designed for fast compile time.
 
 ```toml
 [dependencies]
-syn = "0.8"
-quote = "0.2"
+syn = "0.9"
+quote = "0.3"
 
 [lib]
 rustc-macro = true
