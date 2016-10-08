@@ -6,24 +6,22 @@ pub fn whitespace(input: &str) -> IResult<&str, ()> {
         return IResult::Error;
     }
 
-    let mut start = 0;
-    let mut chars = input.char_indices();
-    while let Some((i, ch)) = chars.next() {
-        let s = &input[start + i..];
-        if ch == '/' {
+    let bytes = input.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        let s = &input[i..];
+        if bytes[i] == b'/' {
             if s.starts_with("//") && (!s.starts_with("///") || s.starts_with("////")) &&
                !s.starts_with("//!") {
                 if let Some(len) = s.find('\n') {
-                    start += i + len + 1;
-                    chars = input[start..].char_indices();
+                    i += len + 1;
                     continue;
                 }
                 break;
             } else if s.starts_with("/*") && !s.starts_with("/**") && !s.starts_with("/*!") {
                 match block_comment(s) {
                     IResult::Done(_, com) => {
-                        start += i + com.len();
-                        chars = input[start..].char_indices();
+                        i += com.len();
                         continue;
                     }
                     IResult::Error => {
@@ -32,13 +30,25 @@ pub fn whitespace(input: &str) -> IResult<&str, ()> {
                 }
             }
         }
-        if !ch.is_whitespace() {
-            return if start + i > 0 {
-                IResult::Done(s, ())
-            } else {
-                IResult::Error
-            };
+        match bytes[i] {
+            b' ' | 0x09...0x0d => {
+                i += 1;
+                continue;
+            }
+            b if b <= 0x7f => {},
+            _ => {
+                let ch = s.chars().next().unwrap();
+                if ch.is_whitespace() {
+                    i += ch.len_utf8();
+                    continue;
+                }
+            }
         }
+        return if i > 0 {
+            IResult::Done(s, ())
+        } else {
+            IResult::Error
+        };
     }
     IResult::Done("", ())
 }
