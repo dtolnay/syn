@@ -1119,7 +1119,7 @@ mod printing {
                     tokens.append("match");
                     expr.to_tokens(tokens);
                     tokens.append("{");
-                    tokens.append_separated(arms, ",");
+                    tokens.append_all(arms);
                     tokens.append("}");
                 }
                 Expr::Closure(capture, ref decl, ref body) => {

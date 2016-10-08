@@ -136,6 +136,12 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                                              self.fold_expr(lhs),
                                              self.fold_expr(rhs))
                         }
+                        ExprKind::AssignOp(op, lhs, rhs) => {
+                            // default fold_expr does not fold the op span
+                            ExprKind::AssignOp(self.fold_spanned(op),
+                                             self.fold_expr(lhs),
+                                             self.fold_expr(rhs))
+                        }
                         other => other,
                     },
                     ..folded

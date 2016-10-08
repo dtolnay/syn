@@ -157,6 +157,10 @@ pub mod parsing {
     named!(token -> Token, alt!(
         punct!("_") => { |_| Token::Underscore }
         |
+        punct!("&&") => { |_| Token::AndAnd } // must be before bin_op
+        |
+        punct!("||") => { |_| Token::OrOr } // must be before bin_op
+        |
         map!(bin_op_eq, Token::BinOpEq)
         |
         map!(bin_op, Token::BinOp)
@@ -176,10 +180,6 @@ pub mod parsing {
         punct!("!=") => { |_| Token::Ne }
         |
         punct!(">=") => { |_| Token::Ge }
-        |
-        punct!("&&") => { |_| Token::AndAnd }
-        |
-        punct!("||") => { |_| Token::OrOr }
         |
         punct!("::") => { |_| Token::ModSep }
         |
