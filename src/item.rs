@@ -1146,7 +1146,9 @@ mod printing {
                 }
                 ViewPath::List(ref path, ref items) => {
                     path.to_tokens(tokens);
-                    tokens.append("::");
+                    if path.global || !path.segments.is_empty() {
+                        tokens.append("::");
+                    }
                     tokens.append("{");
                     tokens.append_separated(items, ",");
                     tokens.append("}");
