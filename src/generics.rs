@@ -83,7 +83,12 @@ pub struct Lifetime {
 
 impl Lifetime {
     pub fn new<T: Into<Ident>>(t: T) -> Self {
-        Lifetime { ident: Ident::new(t) }
+        let id = Ident::new(t);
+        if !id.as_ref().starts_with('\'') {
+            panic!("lifetime name must start with apostrophe as in \"'a\", \
+                   got {:?}", id.as_ref());
+        }
+        Lifetime { ident: id }
     }
 }
 
