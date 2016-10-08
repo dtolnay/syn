@@ -6,7 +6,7 @@ pub struct Variant {
     pub attrs: Vec<Attribute>,
     pub data: VariantData,
     /// Explicit discriminant, e.g. `Foo = 1`
-    pub discriminant: Option<Discriminant>,
+    pub discriminant: Option<ConstExpr>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -48,18 +48,12 @@ pub enum Visibility {
     Inherited,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Discriminant {
-    pub value: u64,
-    pub ty: IntTy,
-}
-
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
     use attr::parsing::outer_attr;
+    use constant::parsing::const_expr;
     use ident::parsing::ident;
-    use lit::parsing::int;
     use ty::parsing::ty;
 
     named!(pub struct_body -> VariantData, alt!(
@@ -88,7 +82,7 @@ pub mod parsing {
             |
             epsilon!() => { |_| VariantData::Unit }
         ) >>
-        disr: option!(preceded!(punct!("="), discriminant)) >>
+        disr: option!(preceded!(punct!("="), const_expr)) >>
         (Variant {
             ident: id,
             attrs: attrs,
@@ -144,20 +138,11 @@ pub mod parsing {
         |
         epsilon!() => { |_| Visibility::Inherited }
     ));
-
-    named!(discriminant -> Discriminant, map!(
-        int,
-        |(value, ty)| Discriminant {
-            value: value,
-            ty: ty,
-        }
-    ));
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use lit::Lit;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Variant {
@@ -211,12 +196,6 @@ mod printing {
             if let Visibility::Public = *self {
                 tokens.append("pub");
             }
-        }
-    }
-
-    impl ToTokens for Discriminant {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            Lit::Int(self.value, self.ty).to_tokens(tokens);
         }
     }
 }

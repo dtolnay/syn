@@ -21,14 +21,17 @@ mod escape;
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem};
 
+mod constant;
+pub use constant::ConstExpr;
+
 mod data;
-pub use data::{Discriminant, Field, Variant, VariantData, Visibility};
+pub use data::{Field, Variant, VariantData, Visibility};
 
 #[cfg(feature = "full")]
 mod expr;
 #[cfg(feature = "full")]
-pub use expr::{Arm, BinOp, BindingMode, Block, BlockCheckMode, CaptureBy, Expr, FieldPat, Local,
-               MacStmtStyle, Pat, RangeLimits, Stmt, UnOp};
+pub use expr::{Arm, BindingMode, Block, BlockCheckMode, CaptureBy, Expr, FieldPat, Local,
+               MacStmtStyle, Pat, RangeLimits, Stmt};
 
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
@@ -60,11 +63,14 @@ pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
 mod macro_input;
 pub use macro_input::{Body, MacroInput};
 
+mod op;
+pub use op::{BinOp, UnOp};
+
 #[cfg(feature = "parsing")]
 mod space;
 
 mod ty;
-pub use ty::{AngleBracketedParameterData, ArrayLen, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
+pub use ty::{AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
              Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
              PolyTraitRef, QSelf, Ty, TypeBinding};
 
