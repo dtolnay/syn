@@ -153,10 +153,7 @@ fn test_enum() {
                 ident: "Surprise".into(),
                 attrs: Vec::new(),
                 data: VariantData::Unit,
-                discriminant: Some(Discriminant {
-                    value: 0,
-                    ty: IntTy::Isize,
-                }),
+                discriminant: Some(ConstExpr::Lit(Lit::Int(0, IntTy::Isize))),
             },
         ]),
     };
