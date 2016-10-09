@@ -21,21 +21,21 @@ syn = "0.9"
 quote = "0.3"
 
 [lib]
-rustc-macro = true
+proc-macro = true
 ```
 
 ```rust
-#![feature(rustc_macro, rustc_macro_lib)]
+#![feature(proc_macro, proc_macro_lib)]
 
-extern crate rustc_macro;
-use rustc_macro::TokenStream;
+extern crate proc_macro;
+use proc_macro::TokenStream;
 
 extern crate syn;
 
 #[macro_use]
 extern crate quote;
 
-#[rustc_macro_derive(MyMacro)]
+#[proc_macro_derive(MyMacro)]
 pub fn my_macro(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
@@ -67,17 +67,17 @@ A complete Macros 1.1 implementation of `#[derive(NumFields)]` based on `syn`
 and [`quote`](https://github.com/dtolnay/quote) looks like this:
 
 ```rust
-#![feature(rustc_macro, rustc_macro_lib)]
+#![feature(proc_macro, proc_macro_lib)]
 
-extern crate rustc_macro;
-use rustc_macro::TokenStream;
+extern crate proc_macro;
+use proc_macro::TokenStream;
 
 extern crate syn;
 
 #[macro_use]
 extern crate quote;
 
-#[rustc_macro_derive(NumFields)]
+#[proc_macro_derive(NumFields)]
 pub fn num_fields(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
