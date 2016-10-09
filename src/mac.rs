@@ -157,9 +157,21 @@ pub mod parsing {
     named!(token -> Token, alt!(
         keyword!("_") => { |_| Token::Underscore }
         |
-        punct!("&&") => { |_| Token::AndAnd } // must be before bin_op
+        punct!("&&") => { |_| Token::AndAnd } // must be before BinOp
         |
-        punct!("||") => { |_| Token::OrOr } // must be before bin_op
+        punct!("||") => { |_| Token::OrOr } // must be before BinOp
+        |
+        punct!("->") => { |_| Token::RArrow } // must be before BinOp
+        |
+        punct!("<-") => { |_| Token::LArrow } // must be before Lt
+        |
+        punct!("=>") => { |_| Token::FatArrow } // must be before Eq
+        |
+        punct!("...") => { |_| Token::DotDotDot } // must be before DotDot
+        |
+        punct!("..") => { |_| Token::DotDot } // must be before Dot
+        |
+        punct!(".") => { |_| Token::Dot }
         |
         map!(bin_op_eq, Token::BinOpEq)
         |
@@ -182,18 +194,6 @@ pub mod parsing {
         punct!(">=") => { |_| Token::Ge }
         |
         punct!("::") => { |_| Token::ModSep }
-        |
-        punct!("->") => { |_| Token::RArrow }
-        |
-        punct!("<-") => { |_| Token::LArrow }
-        |
-        punct!("=>") => { |_| Token::FatArrow }
-        |
-        punct!("...") => { |_| Token::DotDotDot }
-        |
-        punct!("..") => { |_| Token::DotDot }
-        |
-        punct!(".") => { |_| Token::Dot }
         |
         punct!("=") => { |_| Token::Eq }
         |
