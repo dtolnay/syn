@@ -155,7 +155,7 @@ pub mod parsing {
     ));
 
     named!(token -> Token, alt!(
-        punct!("_") => { |_| Token::Underscore }
+        keyword!("_") => { |_| Token::Underscore }
         |
         punct!("&&") => { |_| Token::AndAnd } // must be before bin_op
         |
