@@ -54,7 +54,7 @@ pub enum FloatTy {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use escape::{cooked_string, raw_string};
+    use escape::{cooked_char, cooked_string, raw_string};
     use space::whitespace;
     use nom::IResult;
 
@@ -62,8 +62,10 @@ pub mod parsing {
         string
         |
         byte_string
-    // TODO: Byte
-    // TODO: Char
+        |
+        byte
+        |
+        character
         |
         int => { |(value, ty)| Lit::Int(value, ty) }
     // TODO: Float
@@ -99,6 +101,21 @@ pub mod parsing {
             punct!("br"),
             raw_string
         ) => { |(s, _): (String, _)| Lit::ByteStr(s.into_bytes()) }
+    ));
+
+    named!(byte -> Lit, do_parse!(
+        punct!("b") >>
+        tag!("'") >>
+        ch: cooked_char >>
+        tag!("'") >>
+        (Lit::Byte(ch as u8))
+    ));
+
+    named!(character -> Lit, do_parse!(
+        punct!("'") >>
+        ch: cooked_char >>
+        tag!("'") >>
+        (Lit::Char(ch))
     ));
 
     named!(pub int -> (u64, IntTy), tuple!(
@@ -184,7 +201,7 @@ mod printing {
                     escaped.push('"');
                     tokens.append(&escaped);
                 }
-                Lit::Byte(b) => tokens.append(&format!("b{:?}", b)),
+                Lit::Byte(b) => tokens.append(&format!("b{:?}", b as char)),
                 Lit::Char(ch) => ch.to_tokens(tokens),
                 Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
                 Lit::Float(ref value, ty) => tokens.append(&format!("{}{}", value, ty)),

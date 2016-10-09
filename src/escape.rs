@@ -50,6 +50,31 @@ pub fn cooked_string(input: &str) -> IResult<&str, String> {
     IResult::Error
 }
 
+pub fn cooked_char(input: &str) -> IResult<&str, char> {
+    let mut chars = input.char_indices();
+    let ch = match chars.next().map(|(_, ch)| ch) {
+        Some('\\') => {
+            match chars.next().map(|(_, ch)| ch) {
+                Some('x') => backslash_x(&mut chars),
+                Some('n') => Some('\n'),
+                Some('r') => Some('\r'),
+                Some('t') => Some('\t'),
+                Some('\\') => Some('\\'),
+                Some('0') => Some('\0'),
+                Some('u') => backslash_u(&mut chars),
+                Some('\'') => Some('\''),
+                Some('"') => Some('"'),
+                _ => None,
+            }
+        }
+        ch => ch,
+    };
+    match ch {
+        Some(ch) => IResult::Done(chars.as_str(), ch),
+        None => IResult::Error,
+    }
+}
+
 pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
     let mut chars = input.char_indices();
     let mut n = 0;
