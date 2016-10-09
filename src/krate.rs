@@ -2,9 +2,9 @@ use super::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Crate {
-    shebang: Option<String>,
-    attrs: Vec<Attribute>,
-    items: Vec<Item>,
+    pub shebang: Option<String>,
+    pub attrs: Vec<Attribute>,
+    pub items: Vec<Item>,
 }
 
 #[cfg(feature = "parsing")]
