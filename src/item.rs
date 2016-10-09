@@ -276,6 +276,10 @@ pub mod parsing {
         punct!("!") >>
         name: option!(ident) >>
         body: delimited >>
+        cond!(match body.delim {
+            DelimToken::Paren | DelimToken::Bracket => true,
+            DelimToken::Brace => false,
+        }, punct!(";")) >>
         (Item {
             ident: name.unwrap_or_else(|| Ident::new("")),
             vis: Visibility::Inherited,
