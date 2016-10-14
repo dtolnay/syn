@@ -36,6 +36,8 @@ pub use expr::{Arm, BindingMode, Block, BlockCheckMode, CaptureBy, Expr, FieldPa
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
                    WhereBoundPredicate, WhereClause, WherePredicate, WhereRegionPredicate};
+#[cfg(feature = "printing")]
+pub use generics::{ImplGenerics, TyGenerics};
 
 #[cfg(feature = "full")]
 mod krate;

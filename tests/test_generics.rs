@@ -1,28 +1,21 @@
 extern crate syn;
 use syn::*;
 
-fn simple_path(name: &'static str) -> Path {
-    Path {
-        global: false,
-        segments: vec![
-            PathSegment {
-                ident: Ident::new(name),
-                parameters: PathParameters::none(),
-            },
-        ],
-    }
-}
+#[macro_use]
+extern crate quote;
 
 #[test]
 fn test_split_for_impl() {
-    // <'a, 'b: 'a, T: 'a = ()> where T: Debug
+    // <'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug
     let generics = Generics {
         lifetimes: vec![
             LifetimeDef {
+                attrs: Vec::new(),
                 lifetime: Lifetime::new("'a"),
                 bounds: Vec::new(),
             },
             LifetimeDef {
+                attrs: Vec::new(),
                 lifetime: Lifetime::new("'b"),
                 bounds: vec![
                     Lifetime::new("'a"),
@@ -31,6 +24,13 @@ fn test_split_for_impl() {
         ],
         ty_params: vec![
             TyParam {
+                attrs: vec![
+                    Attribute {
+                        style: AttrStyle::Outer,
+                        value: MetaItem::Word("may_dangle".into()),
+                        is_sugared_doc: false,
+                    },
+                ],
                 ident: Ident::new("T"),
                 bounds: vec![
                     TyParamBound::Region(Lifetime::new("'a")),
@@ -42,12 +42,12 @@ fn test_split_for_impl() {
             predicates: vec![
                 WherePredicate::BoundPredicate(WhereBoundPredicate {
                     bound_lifetimes: Vec::new(),
-                    bounded_ty: Ty::Path(None, simple_path("T")),
+                    bounded_ty: Ty::Path(None, "T".into()),
                     bounds: vec![
                         TyParamBound::Trait(
                             PolyTraitRef {
                                 bound_lifetimes: Vec::new(),
-                                trait_ref: simple_path("Debug"),
+                                trait_ref: "Debug".into(),
                             },
                             TraitBoundModifier::None,
                         ),
@@ -59,55 +59,15 @@ fn test_split_for_impl() {
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
-    // <'a, 'b: 'a, T: 'a>
-    let expected_impl_generics = Generics {
-        lifetimes: vec![
-            LifetimeDef {
-                lifetime: Lifetime::new("'a"),
-                bounds: Vec::new(),
-            },
-            LifetimeDef {
-                lifetime: Lifetime::new("'b"),
-                bounds: vec![
-                    Lifetime::new("'a"),
-                ],
-            },
-        ],
-        ty_params: vec![
-            TyParam {
-                ident: Ident::new("T"),
-                bounds: vec![
-                    TyParamBound::Region(Lifetime::new("'a")),
-                ],
-                default: None,
-            },
-        ],
-        where_clause: WhereClause::none(),
+    let tokens = quote! {
+        impl #impl_generics MyTrait for Test #ty_generics #where_clause {}
     };
 
-    // <'a, 'b, T>
-    let expected_ty_generics = Generics {
-        lifetimes: vec![
-            LifetimeDef {
-                lifetime: Lifetime::new("'a"),
-                bounds: Vec::new(),
-            },
-            LifetimeDef {
-                lifetime: Lifetime::new("'b"),
-                bounds: Vec::new(),
-            },
-        ],
-        ty_params: vec![
-            TyParam {
-                ident: Ident::new("T"),
-                bounds: Vec::new(),
-                default: None,
-            },
-        ],
-        where_clause: WhereClause::none(),
-    };
+    let expected = concat!(
+        "impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
+        "MyTrait for Test < 'a , 'b , T > ",
+        "where T : Debug { }"
+    );
 
-    assert_eq!(impl_generics, expected_impl_generics);
-    assert_eq!(ty_generics, expected_ty_generics);
-    assert_eq!(where_clause, generics.where_clause);
+    assert_eq!(expected, tokens.to_string());
 }

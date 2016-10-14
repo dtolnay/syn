@@ -110,11 +110,13 @@ fn test_enum() {
             lifetimes: Vec::new(),
             ty_params: vec![
                 TyParam {
+                    attrs: Vec::new(),
                     ident: "T".into(),
                     bounds: Vec::new(),
                     default: None,
                 },
                 TyParam {
+                    attrs: Vec::new(),
                     ident: "E".into(),
                     bounds: Vec::new(),
                     default: None,
