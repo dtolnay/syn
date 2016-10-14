@@ -36,7 +36,7 @@ pub enum ItemKind {
     /// A module declaration (`mod` or `pub mod`).
     ///
     /// E.g. `mod foo;` or `mod foo { .. }`
-    Mod(Vec<Item>),
+    Mod(Option<Vec<Item>>),
     /// An external module (`extern` or `pub extern`).
     ///
     /// E.g. `extern {}` or `extern "C" {}`
@@ -486,9 +486,11 @@ pub mod parsing {
         vis: visibility >>
         keyword!("mod") >>
         id: ident >>
-        punct!("{") >>
-        items: many0!(item) >>
-        punct!("}") >>
+        items: alt!(
+            punct!(";") => { |_| None }
+            |
+            delimited!(punct!("{"), many0!(item), punct!("}")) => { Some }
+        ) >>
         (Item {
             ident: id,
             vis: vis,
@@ -1012,9 +1014,14 @@ mod printing {
                     self.vis.to_tokens(tokens);
                     tokens.append("mod");
                     self.ident.to_tokens(tokens);
-                    tokens.append("{");
-                    tokens.append_all(items);
-                    tokens.append("}");
+                    match *items {
+                        Some(ref items) => {
+                            tokens.append("{");
+                            tokens.append_all(items);
+                            tokens.append("}");
+                        }
+                        None => tokens.append(";"),
+                    }
                 }
                 ItemKind::ForeignMod(ref foreign_mod) => {
                     self.vis.to_tokens(tokens);
