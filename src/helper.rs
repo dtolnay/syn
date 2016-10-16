@@ -94,12 +94,11 @@ macro_rules! terminated_list {
     };
 }
 
-pub fn separated_list<'a, T>(
-    mut input: &'a str,
-    sep: &'static str,
-    f: fn(&'a str) -> IResult<&'a str, T>,
-    terminated: bool,
-) -> IResult<&'a str, Vec<T>> {
+pub fn separated_list<'a, T>(mut input: &'a str,
+                             sep: &'static str,
+                             f: fn(&'a str) -> IResult<&'a str, T>,
+                             terminated: bool)
+                             -> IResult<&'a str, Vec<T>> {
     let mut res = Vec::new();
 
     // get the first element

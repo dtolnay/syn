@@ -158,7 +158,9 @@ macro_rules! many0 {
     };
 }
 
-pub fn many0<'a, T>(mut input: &'a str, f: fn(&'a str) -> IResult<&'a str, T>) -> IResult<&'a str, Vec<T>> {
+pub fn many0<'a, T>(mut input: &'a str,
+                    f: fn(&'a str) -> IResult<&'a str, T>)
+                    -> IResult<&'a str, Vec<T>> {
     let mut res = Vec::new();
 
     loop {
