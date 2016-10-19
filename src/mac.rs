@@ -377,9 +377,9 @@ mod printing {
                 Token::Dollar => tokens.append("$"),
                 Token::Question => tokens.append("?"),
                 Token::Literal(ref lit) => lit.to_tokens(tokens),
-                Token::Ident(ref ident) => ident.to_tokens(tokens),
-                Token::Underscore => tokens.append("_"),
+                Token::Ident(ref ident) |
                 Token::Lifetime(ref ident) => ident.to_tokens(tokens),
+                Token::Underscore => tokens.append("_"),
                 Token::DocComment(ref com) => {
                     tokens.append(&format!("{}\n", com));
                 }

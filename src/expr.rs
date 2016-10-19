@@ -189,6 +189,9 @@ pub struct Local {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+// Clippy false positive
+// https://github.com/Manishearth/rust-clippy/issues/1241
+#[cfg_attr(feature = "clippy", allow(enum_variant_names))]
 pub enum Pat {
     /// Represents a wildcard pattern (`_`)
     Wild,
@@ -1013,7 +1016,7 @@ mod printing {
                     args[0].to_tokens(tokens);
                     tokens.append(".");
                     ident.to_tokens(tokens);
-                    if ascript.len() > 0 {
+                    if !ascript.is_empty() {
                         tokens.append("::");
                         tokens.append("<");
                         tokens.append_separated(ascript, ",");
