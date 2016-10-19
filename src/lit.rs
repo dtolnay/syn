@@ -29,6 +29,42 @@ pub enum StrStyle {
     Raw(usize),
 }
 
+impl From<String> for Lit {
+    fn from(input: String) -> Lit {
+        Lit::Str(input, StrStyle::Cooked)
+    }
+}
+
+impl<'a> From<&'a str> for Lit {
+    fn from(input: &str) -> Lit {
+        Lit::Str(input.into(), StrStyle::Cooked)
+    }
+}
+
+impl From<Vec<u8>> for Lit {
+    fn from(input: Vec<u8>) -> Lit {
+        Lit::ByteStr(input)
+    }
+}
+
+impl<'a> From<&'a [u8]> for Lit {
+    fn from(input: &[u8]) -> Lit {
+        Lit::ByteStr(input.into())
+    }
+}
+
+impl From<char> for Lit {
+    fn from(input: char) -> Lit {
+        Lit::Char(input)
+    }
+}
+
+impl From<bool> for Lit {
+    fn from(input: bool) -> Lit {
+        Lit::Bool(input)
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum IntTy {
     Isize,
@@ -50,6 +86,45 @@ pub enum FloatTy {
     F64,
     Unsuffixed,
 }
+
+macro_rules! impl_from_for_lit {
+    (Int, [$($rust_type:ty => $syn_type:expr),+]) => {
+        $(
+            impl From<$rust_type> for Lit {
+                fn from(input: $rust_type) -> Lit {
+                    Lit::Int(input as u64, $syn_type)
+                }
+            }
+        )+
+    };
+    (Float, [$($rust_type:ty => $syn_type:expr),+]) => {
+        $(
+            impl From<$rust_type> for Lit {
+                fn from(input: $rust_type) -> Lit {
+                    Lit::Float(format!("{}", input), $syn_type)
+                }
+            }
+        )+
+    };
+}
+
+impl_from_for_lit! {Int, [
+    isize => IntTy::Isize,
+    i8 => IntTy::I8,
+    i16 => IntTy::I16,
+    i32 => IntTy::I32,
+    i64 => IntTy::I64,
+    usize => IntTy::Usize,
+    u8 => IntTy::U8,
+    u16 => IntTy::U16,
+    u32 => IntTy::U32,
+    u64 => IntTy::U64
+]}
+
+impl_from_for_lit! {Float, [
+    f32 => FloatTy::F32,
+    f64 => FloatTy::F64
+]}
 
 #[cfg(feature = "parsing")]
 pub mod parsing {

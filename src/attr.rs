@@ -85,7 +85,6 @@ impl<'a, T> FilterAttrs<'a> for T
 pub mod parsing {
     use super::*;
     use ident::parsing::ident;
-    use lit::{Lit, StrStyle};
     use lit::parsing::lit;
     use space::{block_comment, whitespace};
 
@@ -111,10 +110,7 @@ pub mod parsing {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit::Str(
-                        format!("//!{}", content),
-                        StrStyle::Cooked,
-                    ),
+                    format!("//!{}", content).into(),
                 ),
                 is_sugared_doc: true,
             })
@@ -128,7 +124,7 @@ pub mod parsing {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit::Str(com.to_owned(), StrStyle::Cooked),
+                    com.into(),
                 ),
                 is_sugared_doc: true,
             })
@@ -156,10 +152,7 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit::Str(
-                        format!("///{}", content),
-                        StrStyle::Cooked,
-                    ),
+                    format!("///{}", content).into(),
                 ),
                 is_sugared_doc: true,
             })
@@ -173,7 +166,7 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit::Str(com.to_owned(), StrStyle::Cooked),
+                    com.into(),
                 ),
                 is_sugared_doc: true,
             })
