@@ -90,7 +90,7 @@ mod parsing {
     use nom::IResult;
 
     #[cfg(feature = "full")]
-    use {expr, item, krate};
+    use {expr, item, krate, mac};
 
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
         unwrap("macro input", macro_input::parsing::macro_input, input)
@@ -121,6 +121,11 @@ mod parsing {
 
     pub fn parse_where_clause(input: &str) -> Result<WhereClause, String> {
         unwrap("where clause", generics::parsing::where_clause, input)
+    }
+
+    #[cfg(feature = "full")]
+    pub fn parse_token_trees(input: &str) -> Result<Vec<TokenTree>, String> {
+        unwrap("token trees", mac::parsing::token_trees, input)
     }
 
     fn unwrap<T>(name: &'static str,

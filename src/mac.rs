@@ -128,6 +128,12 @@ pub mod parsing {
         })
     ));
 
+    named!(pub token_trees -> Vec<TokenTree>, do_parse!(
+        tts: many0!(token_tree) >>
+        option!(whitespace) >>
+        (tts)
+    ));
+
     named!(pub delimited -> Delimited, alt!(
         delimited!(
             punct!("("),
