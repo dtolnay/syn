@@ -2,31 +2,46 @@ sudo: false
 
 language: rust
 
-rust:
-  - nightly
-  - 1.12.0
+rust: nightly
 
-addons:
-  apt:
-    packages:
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
+cache: cargo
+
+matrix:
+  allow_failures:
+    - env: ROLE=clippy
 
 before_script:
   - pip install 'travis-cargo<0.2' --user
   - export PATH=$HOME/.local/bin:$PATH
 
 script:
-  - travis-cargo --only nightly build
-  - travis-cargo --only 1.12.0 build -- --release
-  - travis-cargo test -- --features 'full aster visit'
-  - travis-cargo doc -- --features full
+  - |
+      case $ROLE in
+        build)
+          cargo build --no-default-features &&
+          cargo build &&
+          cargo build --features full &&
+          cargo doc --features full
+          ;;
+        test)
+          cargo test --features 'full aster visit'
+          ;;
+        clippy)
+          cargo build --features 'full aster visit clippy'
+          ;;
+      esac
 
 after_success:
-  - travis-cargo --only nightly doc-upload
+  - |
+      if [ "$ROLE" = build ]; then
+        travis-cargo doc-upload
+      fi
 
 env:
+  matrix:
+    - ROLE=build
+    - ROLE=test
+    - ROLE=clippy
   global:
     - TRAVIS_CARGO_NIGHTLY_FEATURE=""
     - secure: T66CcDYu3rXMEzm9L5jfIapYxGxyt5pkrt9f9PIAxjKDFsxFub9J9FCyalRjSwnojf/Oggf72r4s6gRJu0QNDyOF9uQ3mfKid2PBVNKjmVi7aTC7twaTIL0dV2EFj5VKuNFE0bebw7zq0e9i2sYnO6bNireQdAPVAJZVSK5UK1pV+DfT5ATKF0gLUzr8Ztzqg/Y09KCraF0aF4iIQ2L+EFZybgp57sJtwgQFYi2YoeOEJzLW6H7WaT/HeJ73wZJHBvfd8fFDW/FMFA4UGBNquRBhg39Lb1tIVTUi76pBhm/gHCkzYWhBLbLy6i/4rsNuQT1bdW3AQLnJ/QsQ+p/hrkbCODmu5SkwN9AGXPnjO6jU6SUIuHfojuS7l4Y9Gof3HtBd9IP01F/L4sQpowejdLG3PYWacezlUOXmr/ovoP9zGgodkig2QTxQ/aeOJaUgxcrB21SDRwBgT+j0cxcho/mKwNrZS5D6qeY2PLzUlCAlLdv/EGOiTTJE5/yvxMotNmzXImO4D6Mc9YDCOceMeh9EUm2MhAkVRCup0LjbS6VfkqphJ/dPjP90mmIbCoom3/NCbWXLsJ0IU+RMqNUdgZE4znuvP8U+is9vg1u2ryjsOhYRDKv9sQMsh0v9MQxh/p5aR11BD4LHkqE2YGBFcIeLfQeJVlqAZ9ikhq+B7d4=
