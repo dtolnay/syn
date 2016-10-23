@@ -88,7 +88,7 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {generics, macro_input, ty};
+    use {generics, macro_input, space, ty};
     use nom::IResult;
 
     #[cfg(feature = "full")]
@@ -135,7 +135,11 @@ mod parsing {
                  input: &str)
                  -> Result<T, String> {
         match f(input) {
-            IResult::Done(rest, t) => {
+            IResult::Done(mut rest, t) => {
+                rest = match space::whitespace(rest) {
+                    IResult::Done(rest, _) => rest,
+                    IResult::Error => rest,
+                };
                 if rest.is_empty() {
                     Ok(t)
                 } else if rest.len() == input.len() {

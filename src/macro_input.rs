@@ -22,7 +22,6 @@ pub mod parsing {
     use attr::parsing::outer_attr;
     use data::parsing::{visibility, struct_body, enum_body};
     use generics::parsing::{generics, where_clause};
-    use space::whitespace;
     use ident::parsing::ident;
 
     named!(pub macro_input -> MacroInput, do_parse!(
@@ -55,7 +54,6 @@ pub mod parsing {
                 body: Body::Enum(body),
             })
         ) >>
-        option!(whitespace) >>
         (item)
     ));
 }
