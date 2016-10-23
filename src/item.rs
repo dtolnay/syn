@@ -80,6 +80,20 @@ pub enum ItemKind {
     Mac(Mac),
 }
 
+impl From<MacroInput> for Item {
+    fn from(input: MacroInput) -> Item {
+        Item {
+            ident: input.ident,
+            vis: input.vis,
+            attrs: input.attrs,
+            node: match input.body {
+                Body::Enum(variants) => ItemKind::Enum(variants, input.generics),
+                Body::Struct(variant_data) => ItemKind::Struct(variant_data, input.generics),
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ViewPath {
     /// `foo::bar::baz as quux`
@@ -269,6 +283,8 @@ pub mod parsing {
         |
         item_mac
     ));
+
+    named!(pub items -> Vec<Item>, many0!(item));
 
     named!(item_mac -> Item, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -489,7 +505,7 @@ pub mod parsing {
         items: alt!(
             punct!(";") => { |_| None }
             |
-            delimited!(punct!("{"), many0!(item), punct!("}")) => { Some }
+            delimited!(punct!("{"), items, punct!("}")) => { Some }
         ) >>
         (Item {
             ident: id,

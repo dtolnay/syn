@@ -11,11 +11,11 @@ pub struct Crate {
 pub mod parsing {
     use super::*;
     use attr::parsing::inner_attr;
-    use item::parsing::item;
+    use item::parsing::items;
 
     named!(pub krate -> Crate, do_parse!(
         attrs: many0!(inner_attr) >>
-        items: many0!(item) >>
+        items: items >>
         (Crate {
             shebang: None,
             attrs: attrs,
