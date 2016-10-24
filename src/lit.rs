@@ -6,7 +6,7 @@ pub enum Lit {
     /// A string literal (`"foo"`)
     Str(String, StrStyle),
     /// A byte string (`b"foo"`)
-    ByteStr(Vec<u8>),
+    ByteStr(Vec<u8>, StrStyle),
     /// A byte char (`b'f'`)
     Byte(u8),
     /// A character literal (`'a'`)
@@ -43,13 +43,13 @@ impl<'a> From<&'a str> for Lit {
 
 impl From<Vec<u8>> for Lit {
     fn from(input: Vec<u8>) -> Lit {
-        Lit::ByteStr(input)
+        Lit::ByteStr(input, StrStyle::Cooked)
     }
 }
 
 impl<'a> From<&'a [u8]> for Lit {
     fn from(input: &[u8]) -> Lit {
-        Lit::ByteStr(input.into())
+        Lit::ByteStr(input.into(), StrStyle::Cooked)
     }
 }
 
@@ -168,12 +168,12 @@ pub mod parsing {
             punct!("b\""),
             cooked_string,
             tag!("\"")
-        ) => { |s: String| Lit::ByteStr(s.into_bytes()) }
+        ) => { |s: String| Lit::ByteStr(s.into_bytes(), StrStyle::Cooked) }
         |
         preceded!(
             punct!("br"),
             raw_string
-        ) => { |(s, _): (String, _)| Lit::ByteStr(s.into_bytes()) }
+        ) => { |(s, n): (String, _)| Lit::ByteStr(s.into_bytes(), StrStyle::Raw(n)) }
     ));
 
     named!(byte -> Lit, do_parse!(
@@ -262,6 +262,7 @@ mod printing {
     use quote::{Tokens, ToTokens};
     use std::{ascii, iter};
     use std::fmt::{self, Display};
+    use std::str;
 
     impl ToTokens for Lit {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -272,13 +273,18 @@ mod printing {
                         delim = iter::repeat("#").take(n).collect::<String>(),
                         string = s));
                 }
-                Lit::ByteStr(ref v) => {
+                Lit::ByteStr(ref v, StrStyle::Cooked) => {
                     let mut escaped = "b\"".to_string();
                     for &ch in v.iter() {
                         escaped.extend(ascii::escape_default(ch).map(|c| c as char));
                     }
                     escaped.push('"');
                     tokens.append(&escaped);
+                }
+                Lit::ByteStr(ref vec, StrStyle::Raw(n)) => {
+                    tokens.append(&format!("br{delim}\"{string}\"{delim}",
+                        delim = iter::repeat("#").take(n).collect::<String>(),
+                        string = str::from_utf8(vec).unwrap()));
                 }
                 Lit::Byte(b) => tokens.append(&format!("b{:?}", b as char)),
                 Lit::Char(ch) => ch.to_tokens(tokens),
