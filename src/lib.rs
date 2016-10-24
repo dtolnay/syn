@@ -2,6 +2,7 @@
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 
 #[cfg(feature = "printing")]
+#[macro_use]
 extern crate quote;
 
 #[cfg(feature = "parsing")]
@@ -68,6 +69,11 @@ pub use macro_input::{Body, MacroInput};
 mod op;
 pub use op::{BinOp, UnOp};
 
+#[cfg(feature = "expand")]
+mod registry;
+#[cfg(feature = "expand")]
+pub use registry::{CustomDerive, Expanded, Registry};
+
 #[cfg(feature = "parsing")]
 mod space;
 
@@ -106,6 +112,11 @@ mod parsing {
     #[cfg(feature = "full")]
     pub fn parse_item(input: &str) -> Result<Item, String> {
         unwrap("item", item::parsing::item, input)
+    }
+
+    #[cfg(feature = "full")]
+    pub fn parse_items(input: &str) -> Result<Vec<Item>, String> {
+        unwrap("items", item::parsing::items, input)
     }
 
     #[cfg(feature = "full")]

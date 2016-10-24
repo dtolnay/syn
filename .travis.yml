@@ -20,14 +20,14 @@ script:
         build)
           cargo build --no-default-features &&
           cargo build &&
-          cargo build --features full &&
-          cargo doc --features full
+          cargo build --features 'full expand' &&
+          cargo doc --features 'full expand'
           ;;
         test)
-          cargo test --features 'full aster visit'
+          cargo test --features 'full aster expand visit'
           ;;
         clippy)
-          cargo build --features 'full aster visit clippy'
+          cargo build --features 'full aster expand visit clippy'
           ;;
       esac
 
