@@ -102,8 +102,9 @@ fn test_expand(original: Tokens, expected: Tokens) {
     let mut expanded = String::new();
     let mut dst_file = File::open(&dst_path).expect("open output file");
     dst_file.read_to_string(&mut expanded).expect("read output file");
+    let krate = parse_crate(&expanded).expect("parse output file");
 
-    assert_eq!(expanded, expected.to_string());
+    assert_eq!(quote!(#krate), expected);
 }
 
 fn expand_a(input: MacroInput) -> Result<Expanded, String> {

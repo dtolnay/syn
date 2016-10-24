@@ -1,4 +1,5 @@
 use super::{Attribute, AttrStyle, Body, Crate, Ident, Item, ItemKind, MacroInput, MetaItem};
+use quote::Tokens;
 
 use std::collections::BTreeMap as Map;
 use std::fs::File;
@@ -82,7 +83,7 @@ impl<'a> Registry<'a> {
         let expanded = try!(expand_crate(self, krate));
 
         // Print the expanded code to a String
-        let out = quote!(#expanded).to_string();
+        let out = try!(pretty(quote!(#expanded)));
 
         // Create or truncate the dst file, opening in write-only mode
         let mut dst = match File::create(dst) {
@@ -332,4 +333,47 @@ fn combine_cfgs(cfg: Vec<MetaItem>) -> Option<Attribute> {
         value: MetaItem::List("cfg".into(), value),
         is_sugared_doc: false,
     })
+}
+
+#[cfg(not(feature = "pretty"))]
+fn pretty(tokens: Tokens) -> Result<String, String> {
+    Ok(tokens.to_string())
+}
+
+#[cfg(feature = "pretty")]
+fn pretty(tokens: Tokens) -> Result<String, String> {
+    use syntax::parse::{self, ParseSess};
+    use syntax::print::pprust;
+
+    let name = "syn".to_string();
+    let source = tokens.to_string();
+    let cfg = Vec::new();
+    let sess = ParseSess::new();
+    let krate = match parse::parse_crate_from_source_str(name, source, cfg, &sess) {
+        Ok(krate) => krate,
+        Err(mut err) => {
+            err.emit();
+            return Err("pretty printer failed to parse expanded code".into());
+        }
+    };
+
+    if sess.span_diagnostic.has_errors() {
+        return Err("pretty printer failed to parse expanded code".into());
+    }
+
+    let mut reader = &tokens.to_string().into_bytes()[..];
+    let mut writer = Vec::new();
+    let ann = pprust::NoAnn;
+
+    try!(pprust::print_crate(
+        sess.codemap(),
+        &sess.span_diagnostic,
+        &krate,
+        "".to_string(),
+        &mut reader,
+        Box::new(&mut writer),
+        &ann,
+        false).map_err(|err| err.to_string()));
+
+    String::from_utf8(writer).map_err(|err| err.to_string())
 }
