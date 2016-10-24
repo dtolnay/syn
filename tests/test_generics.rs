@@ -63,11 +63,9 @@ fn test_split_for_impl() {
         impl #impl_generics MyTrait for Test #ty_generics #where_clause {}
     };
 
-    let expected = concat!(
-        "impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
-        "MyTrait for Test < 'a , 'b , T > ",
-        "where T : Debug { }"
-    );
+    let expected = concat!("impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
+                           "MyTrait for Test < 'a , 'b , T > ",
+                           "where T : Debug { }");
 
     assert_eq!(expected, tokens.to_string());
 }
