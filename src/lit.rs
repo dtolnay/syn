@@ -145,9 +145,7 @@ pub mod parsing {
         int => { |(value, ty)| Lit::Int(value, ty) }
     // TODO: Float
         |
-        keyword!("true") => { |_| Lit::Bool(true) }
-        |
-        keyword!("false") => { |_| Lit::Bool(false) }
+        boolean
     ));
 
     named!(string -> Lit, alt!(
@@ -221,6 +219,12 @@ pub mod parsing {
             |
             epsilon!() => { |_| IntTy::Unsuffixed }
         )
+    ));
+
+    named!(boolean -> Lit, alt!(
+        keyword!("true") => { |_| Lit::Bool(true) }
+        |
+        keyword!("false") => { |_| Lit::Bool(false) }
     ));
 
     pub fn digits(input: &str) -> IResult<&str, u64> {
