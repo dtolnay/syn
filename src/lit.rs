@@ -132,6 +132,7 @@ pub mod parsing {
     use escape::{cooked_char, cooked_string, raw_string};
     use space::whitespace;
     use nom::IResult;
+    use unicode_xid::UnicodeXID;
 
     named!(pub lit -> Lit, alt!(
         string
@@ -142,8 +143,9 @@ pub mod parsing {
         |
         character
         |
+        float // must be before int
+        |
         int => { |(value, ty)| Lit::Int(value, ty) }
-    // TODO: Float
         |
         boolean
     ));
@@ -191,6 +193,19 @@ pub mod parsing {
         (Lit::Char(ch))
     ));
 
+    named!(float -> Lit, do_parse!(
+        option!(whitespace) >>
+        value: float_string >>
+        suffix: alt!(
+            tag!("f32") => { |_| FloatTy::F32 }
+            |
+            tag!("f64") => { |_| FloatTy::F64 }
+            |
+            epsilon!() => { |_| FloatTy::Unsuffixed }
+        ) >>
+        (Lit::Float(value, suffix))
+    ));
+
     named!(pub int -> (u64, IntTy), tuple!(
         preceded!(
             option!(whitespace),
@@ -226,6 +241,81 @@ pub mod parsing {
         |
         keyword!("false") => { |_| Lit::Bool(false) }
     ));
+
+    fn float_string(input: &str) -> IResult<&str, String> {
+        let mut chars = input.chars().peekable();
+        match chars.next() {
+            Some(ch) if ch >= '0' && ch <= '9' => {}
+            _ => return IResult::Error,
+        }
+
+        let mut len = 1;
+        let mut has_dot = false;
+        let mut has_exp = false;
+        while let Some(&ch) = chars.peek() {
+            match ch {
+                '0'...'9' | '_' => {
+                    chars.next();
+                    len += 1;
+                }
+                '.' => {
+                    if has_dot {
+                        break;
+                    }
+                    chars.next();
+                    if chars.peek()
+                        .map(|&ch| ch == '.' || UnicodeXID::is_xid_start(ch))
+                        .unwrap_or(false) {
+                        return IResult::Error;
+                    }
+                    len += 1;
+                    has_dot = true;
+                }
+                'e' | 'E' => {
+                    chars.next();
+                    len += 1;
+                    has_exp = true;
+                    break;
+                }
+                _ => break,
+            }
+        }
+
+        let rest = &input[len..];
+        if !(has_dot || has_exp || rest.starts_with("f32") || rest.starts_with("f64")) {
+            return IResult::Error;
+        }
+
+        if has_exp {
+            let mut has_exp_value = false;
+            while let Some(&ch) = chars.peek() {
+                match ch {
+                    '+' | '-' => {
+                        if has_exp_value {
+                            break;
+                        }
+                        chars.next();
+                        len += 1;
+                    }
+                    '0'...'9' => {
+                        chars.next();
+                        len += 1;
+                        has_exp_value = true;
+                    }
+                    '_' => {
+                        chars.next();
+                        len += 1;
+                    }
+                    _ => break,
+                }
+            }
+            if !has_exp_value {
+                return IResult::Error;
+            }
+        }
+
+        IResult::Done(&input[len..], input[..len].into())
+    }
 
     pub fn digits(input: &str) -> IResult<&str, u64> {
         let mut value = 0u64;
