@@ -305,11 +305,31 @@ pub mod parsing {
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty};
 
-    named!(pub expr -> Expr, do_parse!(
+    // Struct literals are ambiguous in certain positions
+    // https://github.com/rust-lang/rfcs/pull/92
+    macro_rules! named_ambiguous_expr {
+        ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
+            fn $name(i: &str, $allow_struct: bool) -> $crate::nom::IResult<&str, $o> {
+                $submac!(i, $($args)*)
+            }
+        };
+    }
+
+    macro_rules! ambiguous_expr {
+        ($i:expr, $allow_struct:ident) => {
+            ambiguous_expr($i, $allow_struct)
+        };
+    }
+
+    named!(pub expr -> Expr, ambiguous_expr!(true));
+
+    named!(expr_no_struct -> Expr, ambiguous_expr!(false));
+
+    named_ambiguous_expr!(ambiguous_expr -> Expr, allow_struct, do_parse!(
         mut e: alt!(
             expr_lit // must be before expr_struct
             |
-            expr_struct // must be before expr_path
+            cond_reduce!(allow_struct, expr_struct) // must be before expr_path
             |
             expr_paren // must be before expr_tup
             |
@@ -319,15 +339,15 @@ pub mod parsing {
             |
             expr_continue // must be before expr_path
             |
-            expr_ret // must be before expr_path
+            call!(expr_ret, allow_struct) // must be before expr_path
             |
-            expr_box
+            call!(expr_box, allow_struct)
             |
             expr_vec
             |
             expr_tup
             |
-            expr_unary
+            call!(expr_unary, allow_struct)
             |
             expr_if
             |
@@ -339,15 +359,15 @@ pub mod parsing {
             |
             expr_match
             |
-            expr_closure
+            call!(expr_closure, allow_struct)
             |
             expr_block
             |
-            expr_range
+            call!(expr_range, allow_struct)
             |
             expr_path
             |
-            expr_addr_of
+            call!(expr_addr_of, allow_struct)
             |
             expr_repeat
         ) >>
@@ -362,7 +382,7 @@ pub mod parsing {
                 e = Expr::MethodCall(method, ascript, args);
             })
             |
-            tap!(more: and_binary => {
+            tap!(more: call!(and_binary, allow_struct) => {
                 let (op, other) = more;
                 e = Expr::Binary(op, Box::new(e), Box::new(other));
             })
@@ -375,11 +395,11 @@ pub mod parsing {
                 e = Expr::Type(Box::new(e), Box::new(ty));
             })
             |
-            tap!(v: and_assign => {
+            tap!(v: call!(and_assign, allow_struct) => {
                 e = Expr::Assign(Box::new(e), Box::new(v));
             })
             |
-            tap!(more: and_assign_op => {
+            tap!(more: call!(and_assign_op, allow_struct) => {
                 let (op, v) = more;
                 e = Expr::AssignOp(op, Box::new(e), Box::new(v));
             })
@@ -396,7 +416,7 @@ pub mod parsing {
                 e = Expr::Index(Box::new(e), Box::new(i));
             })
             |
-            tap!(more: and_range => {
+            tap!(more: call!(and_range, allow_struct) => {
                 let (limits, hi) = more;
                 e = Expr::Range(Some(Box::new(e)), hi.map(Box::new), limits);
             })
@@ -417,9 +437,9 @@ pub mod parsing {
         (Expr::Paren(Box::new(e)))
     ));
 
-    named!(expr_box -> Expr, do_parse!(
+    named_ambiguous_expr!(expr_box -> Expr, allow_struct, do_parse!(
         keyword!("box") >>
-        inner: expr >>
+        inner: ambiguous_expr!(allow_struct) >>
         (Expr::Box(Box::new(inner)))
     ));
 
@@ -461,11 +481,14 @@ pub mod parsing {
         (Expr::Tup(elems))
     ));
 
-    named!(and_binary -> (BinOp, Expr), tuple!(binop, expr));
+    named_ambiguous_expr!(and_binary -> (BinOp, Expr), allow_struct, tuple!(
+        binop,
+        ambiguous_expr!(allow_struct)
+    ));
 
-    named!(expr_unary -> Expr, do_parse!(
+    named_ambiguous_expr!(expr_unary -> Expr, allow_struct, do_parse!(
         operator: unop >>
-        operand: expr >>
+        operand: ambiguous_expr!(allow_struct) >>
         (Expr::Unary(operator, Box::new(operand)))
     ));
 
@@ -489,11 +512,11 @@ pub mod parsing {
             keyword!("let") >>
             pat: pat >>
             punct!("=") >>
-            value: expr >>
+            value: expr_no_struct >>
             (Cond::Let(pat, value))
         )
         |
-        map!(expr, Cond::Expr)
+        map!(expr_no_struct, Cond::Expr)
     ));
 
     named!(expr_if -> Expr, do_parse!(
@@ -541,7 +564,7 @@ pub mod parsing {
         keyword!("for") >>
         pat: pat >>
         keyword!("in") >>
-        expr: expr >>
+        expr: expr_no_struct >>
         loop_block: block >>
         (Expr::ForLoop(Box::new(pat), Box::new(expr), loop_block, lbl))
     ));
@@ -555,7 +578,7 @@ pub mod parsing {
 
     named!(expr_match -> Expr, do_parse!(
         keyword!("match") >>
-        obj: expr >>
+        obj: expr_no_struct >>
         punct!("{") >>
         arms: many0!(do_parse!(
             attrs: many0!(outer_attr) >>
@@ -579,7 +602,7 @@ pub mod parsing {
         (Expr::Match(Box::new(obj), arms))
     ));
 
-    named!(expr_closure -> Expr, do_parse!(
+    named_ambiguous_expr!(expr_closure -> Expr, allow_struct, do_parse!(
         capture: capture_by >>
         punct!("|") >>
         inputs: terminated_list!(punct!(","), closure_arg) >>
@@ -592,7 +615,7 @@ pub mod parsing {
                 ((FunctionRetTy::Ty(ty), body))
             )
             |
-            map!(expr, |e| (
+            map!(ambiguous_expr!(allow_struct), |e| (
                 FunctionRetTy::Default,
                 Block {
                     stmts: vec![Stmt::Expr(Box::new(e))],
@@ -647,9 +670,9 @@ pub mod parsing {
         (Expr::Break(lbl))
     ));
 
-    named!(expr_ret -> Expr, do_parse!(
+    named_ambiguous_expr!(expr_ret -> Expr, allow_struct, do_parse!(
         keyword!("return") >>
-        ret_value: option!(expr) >>
+        ret_value: option!(ambiguous_expr!(allow_struct)) >>
         (Expr::Ret(ret_value.map(Box::new)))
     ));
 
@@ -695,9 +718,9 @@ pub mod parsing {
         }))
     ));
 
-    named!(expr_range -> Expr, do_parse!(
+    named_ambiguous_expr!(expr_range -> Expr, allow_struct, do_parse!(
         limits: range_limits >>
-        hi: option!(expr) >>
+        hi: option!(ambiguous_expr!(allow_struct)) >>
         (Expr::Range(None, hi.map(Box::new), limits))
     ));
 
@@ -709,16 +732,22 @@ pub mod parsing {
 
     named!(expr_path -> Expr, map!(qpath, |(qself, path)| Expr::Path(qself, path)));
 
-    named!(expr_addr_of -> Expr, do_parse!(
+    named_ambiguous_expr!(expr_addr_of -> Expr, allow_struct, do_parse!(
         punct!("&") >>
         mutability: mutability >>
-        expr: expr >>
+        expr: ambiguous_expr!(allow_struct) >>
         (Expr::AddrOf(mutability, Box::new(expr)))
     ));
 
-    named!(and_assign -> Expr, preceded!(punct!("="), expr));
+    named_ambiguous_expr!(and_assign -> Expr, allow_struct, preceded!(
+        punct!("="),
+        ambiguous_expr!(allow_struct)
+    ));
 
-    named!(and_assign_op -> (BinOp, Expr), tuple!(assign_op, expr));
+    named_ambiguous_expr!(and_assign_op -> (BinOp, Expr), allow_struct, tuple!(
+        assign_op,
+        ambiguous_expr!(allow_struct)
+    ));
 
     named!(and_field -> Ident, preceded!(punct!("."), ident));
 
@@ -726,7 +755,10 @@ pub mod parsing {
 
     named!(and_index -> Expr, delimited!(punct!("["), expr, punct!("]")));
 
-    named!(and_range -> (RangeLimits, Option<Expr>), tuple!(range_limits, option!(expr)));
+    named_ambiguous_expr!(and_range -> (RangeLimits, Option<Expr>), allow_struct, tuple!(
+        range_limits,
+        option!(ambiguous_expr!(allow_struct))
+    ));
 
     named!(pub block -> Block, do_parse!(
         punct!("{") >>

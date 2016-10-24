@@ -25,8 +25,8 @@ macro_rules! named {
 }
 
 macro_rules! call {
-    ($i:expr, $fun:expr) => {
-        $fun($i)
+    ($i:expr, $fun:expr $(, $args:expr)*) => {
+        $fun($i $(, $args)*)
     };
 }
 
@@ -75,6 +75,20 @@ macro_rules! cond {
 
     ($i:expr, $cond:expr, $f:expr) => {
         cond!($i, $cond, call!($f));
+    };
+}
+
+macro_rules! cond_reduce {
+    ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
+        if $cond {
+            $submac!($i, $($args)*)
+        } else {
+            $crate::nom::IResult::Error
+        }
+    };
+
+    ($i:expr, $cond:expr, $f:expr) => {
+        cond_reduce!($i, $cond, call!($f));
     };
 }
 
