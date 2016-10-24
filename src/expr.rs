@@ -301,7 +301,7 @@ pub mod parsing {
     use item::parsing::item;
     use lit::parsing::{digits, lit};
     use mac::parsing::mac;
-    use nom::IResult::Error;
+    use nom::IResult::{self, Error};
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty};
 
@@ -317,7 +317,7 @@ pub mod parsing {
 
     macro_rules! ambiguous_expr {
         ($i:expr, $allow_struct:ident) => {
-            ambiguous_expr($i, $allow_struct)
+            ambiguous_expr($i, $allow_struct, true)
         };
     }
 
@@ -325,108 +325,111 @@ pub mod parsing {
 
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
-    named_ambiguous_expr!(ambiguous_expr -> Expr, allow_struct, do_parse!(
-        mut e: alt!(
-            expr_lit // must be before expr_struct
-            |
-            cond_reduce!(allow_struct, expr_struct) // must be before expr_path
-            |
-            expr_paren // must be before expr_tup
-            |
-            expr_mac // must be before expr_path
-            |
-            expr_break // must be before expr_path
-            |
-            expr_continue // must be before expr_path
-            |
-            call!(expr_ret, allow_struct) // must be before expr_path
-            |
-            call!(expr_box, allow_struct)
-            |
-            expr_vec
-            |
-            expr_tup
-            |
-            call!(expr_unary, allow_struct)
-            |
-            expr_if
-            |
-            expr_while
-            |
-            expr_for_loop
-            |
-            expr_loop
-            |
-            expr_match
-            |
-            call!(expr_closure, allow_struct)
-            |
-            expr_block
-            |
-            call!(expr_range, allow_struct)
-            |
-            expr_path
-            |
-            call!(expr_addr_of, allow_struct)
-            |
-            expr_repeat
-        ) >>
-        many0!(alt!(
-            tap!(args: and_call => {
-                e = Expr::Call(Box::new(e), args);
-            })
-            |
-            tap!(more: and_method_call => {
-                let (method, ascript, mut args) = more;
-                args.insert(0, e);
-                e = Expr::MethodCall(method, ascript, args);
-            })
-            |
-            tap!(more: call!(and_binary, allow_struct) => {
-                let (op, other) = more;
-                e = Expr::Binary(op, Box::new(e), Box::new(other));
-            })
-            |
-            tap!(ty: and_cast => {
-                e = Expr::Cast(Box::new(e), Box::new(ty));
-            })
-            |
-            tap!(ty: and_ascription => {
-                e = Expr::Type(Box::new(e), Box::new(ty));
-            })
-            |
-            tap!(v: call!(and_assign, allow_struct) => {
-                e = Expr::Assign(Box::new(e), Box::new(v));
-            })
-            |
-            tap!(more: call!(and_assign_op, allow_struct) => {
-                let (op, v) = more;
-                e = Expr::AssignOp(op, Box::new(e), Box::new(v));
-            })
-            |
-            tap!(field: and_field => {
-                e = Expr::Field(Box::new(e), field);
-            })
-            |
-            tap!(field: and_tup_field => {
-                e = Expr::TupField(Box::new(e), field as usize);
-            })
-            |
-            tap!(i: and_index => {
-                e = Expr::Index(Box::new(e), Box::new(i));
-            })
-            |
-            tap!(more: call!(and_range, allow_struct) => {
-                let (limits, hi) = more;
-                e = Expr::Range(Some(Box::new(e)), hi.map(Box::new), limits);
-            })
-            |
-            tap!(_try: punct!("?") => {
-                e = Expr::Try(Box::new(e));
-            })
-        )) >>
-        (e)
-    ));
+    fn ambiguous_expr(i: &str, allow_struct: bool, allow_block: bool) -> IResult<&str, Expr> {
+        do_parse!(
+            i,
+            mut e: alt!(
+                expr_lit // must be before expr_struct
+                |
+                cond_reduce!(allow_struct, expr_struct) // must be before expr_path
+                |
+                expr_paren // must be before expr_tup
+                |
+                expr_mac // must be before expr_path
+                |
+                expr_break // must be before expr_path
+                |
+                expr_continue // must be before expr_path
+                |
+                call!(expr_ret, allow_struct) // must be before expr_path
+                |
+                call!(expr_box, allow_struct)
+                |
+                expr_vec
+                |
+                expr_tup
+                |
+                call!(expr_unary, allow_struct)
+                |
+                expr_if
+                |
+                expr_while
+                |
+                expr_for_loop
+                |
+                expr_loop
+                |
+                expr_match
+                |
+                call!(expr_closure, allow_struct)
+                |
+                cond_reduce!(allow_block, expr_block)
+                |
+                call!(expr_range, allow_struct)
+                |
+                expr_path
+                |
+                call!(expr_addr_of, allow_struct)
+                |
+                expr_repeat
+            ) >>
+            many0!(alt!(
+                tap!(args: and_call => {
+                    e = Expr::Call(Box::new(e), args);
+                })
+                |
+                tap!(more: and_method_call => {
+                    let (method, ascript, mut args) = more;
+                    args.insert(0, e);
+                    e = Expr::MethodCall(method, ascript, args);
+                })
+                |
+                tap!(more: call!(and_binary, allow_struct) => {
+                    let (op, other) = more;
+                    e = Expr::Binary(op, Box::new(e), Box::new(other));
+                })
+                |
+                tap!(ty: and_cast => {
+                    e = Expr::Cast(Box::new(e), Box::new(ty));
+                })
+                |
+                tap!(ty: and_ascription => {
+                    e = Expr::Type(Box::new(e), Box::new(ty));
+                })
+                |
+                tap!(v: call!(and_assign, allow_struct) => {
+                    e = Expr::Assign(Box::new(e), Box::new(v));
+                })
+                |
+                tap!(more: call!(and_assign_op, allow_struct) => {
+                    let (op, v) = more;
+                    e = Expr::AssignOp(op, Box::new(e), Box::new(v));
+                })
+                |
+                tap!(field: and_field => {
+                    e = Expr::Field(Box::new(e), field);
+                })
+                |
+                tap!(field: and_tup_field => {
+                    e = Expr::TupField(Box::new(e), field as usize);
+                })
+                |
+                tap!(i: and_index => {
+                    e = Expr::Index(Box::new(e), Box::new(i));
+                })
+                |
+                tap!(more: call!(and_range, allow_struct) => {
+                    let (limits, hi) = more;
+                    e = Expr::Range(Some(Box::new(e)), hi.map(Box::new), limits);
+                })
+                |
+                tap!(_try: punct!("?") => {
+                    e = Expr::Try(Box::new(e));
+                })
+            )) >>
+            (e)
+        )
+    }
 
     named!(expr_mac -> Expr, map!(mac, Expr::Mac));
 
@@ -757,7 +760,7 @@ pub mod parsing {
 
     named_ambiguous_expr!(and_range -> (RangeLimits, Option<Expr>), allow_struct, tuple!(
         range_limits,
-        option!(ambiguous_expr!(allow_struct))
+        option!(call!(ambiguous_expr, allow_struct, false))
     ));
 
     named!(pub block -> Block, do_parse!(
