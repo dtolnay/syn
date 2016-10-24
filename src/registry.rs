@@ -108,7 +108,11 @@ fn expand_crate(reg: &Registry, krate: Crate) -> Result<Crate, String> {
     Ok(Crate { items: items, ..krate })
 }
 
-fn expand_item(reg: &Registry, mut item: Item, cfg: Vec<MetaItem>, out: &mut Vec<Item>) -> Result<(), String> {
+fn expand_item(reg: &Registry,
+               mut item: Item,
+               cfg: Vec<MetaItem>,
+               out: &mut Vec<Item>)
+               -> Result<(), String> {
     let (body, generics) = match item.node {
         ItemKind::Enum(variants, generics) => (Body::Enum(variants), generics),
         ItemKind::Struct(variant_data, generics) => (Body::Struct(variant_data), generics),
@@ -310,17 +314,19 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Derive>, Option
 /// `#[cfg(all(a, b, c))]`, or nothing if there are no cfg expressions.
 fn combine_cfgs(cfg: Vec<MetaItem>) -> Option<Attribute> {
     // Flatten `all` cfgs so we don't nest `all` inside of `all`.
-    let cfg: Vec<_> = cfg.into_iter().flat_map(|cfg| {
-        let (name, nested) = match cfg {
-            MetaItem::List(name, nested) => (name, nested),
-            _ => return vec![cfg],
-        };
-        if name == "all" {
-            nested
-        } else {
-            vec![MetaItem::List(name, nested)]
-        }
-    }).collect();
+    let cfg: Vec<_> = cfg.into_iter()
+        .flat_map(|cfg| {
+            let (name, nested) = match cfg {
+                MetaItem::List(name, nested) => (name, nested),
+                _ => return vec![cfg],
+            };
+            if name == "all" {
+                nested
+            } else {
+                vec![MetaItem::List(name, nested)]
+            }
+        })
+        .collect();
 
     let value = match cfg.len() {
         0 => return None,
