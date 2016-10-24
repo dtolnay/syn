@@ -320,8 +320,8 @@ pub mod parsing {
     pub fn digits(input: &str) -> IResult<&str, u64> {
         let mut value = 0u64;
         let mut len = 0;
-        let mut bytes = input.bytes().peekable();
-        while let Some(&b) = bytes.peek() {
+        let mut empty = true;
+        for b in input.bytes() {
             match b {
                 b'0'...b'9' => {
                     value = match value.checked_mul(10) {
@@ -332,16 +332,22 @@ pub mod parsing {
                         Some(value) => value,
                         None => return IResult::Error,
                     };
-                    bytes.next();
+                    len += 1;
+                    empty = false;
+                }
+                b'_' => {
+                    if empty {
+                        return IResult::Error;
+                    }
                     len += 1;
                 }
                 _ => break,
             }
         }
-        if len > 0 {
-            IResult::Done(&input[len..], value)
-        } else {
+        if empty {
             IResult::Error
+        } else {
+            IResult::Done(&input[len..], value)
         }
     }
 }
