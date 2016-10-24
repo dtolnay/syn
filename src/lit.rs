@@ -317,32 +317,50 @@ pub mod parsing {
         IResult::Done(&input[len..], input[..len].into())
     }
 
-    pub fn digits(input: &str) -> IResult<&str, u64> {
+    pub fn digits(mut input: &str) -> IResult<&str, u64> {
+        let base = if input.starts_with("0x") {
+            input = &input[2..];
+            16
+        } else if input.starts_with("0o") {
+            input = &input[2..];
+            8
+        } else if input.starts_with("0b") {
+            input = &input[2..];
+            2
+        } else {
+            10
+        };
+
         let mut value = 0u64;
         let mut len = 0;
         let mut empty = true;
         for b in input.bytes() {
-            match b {
-                b'0'...b'9' => {
-                    value = match value.checked_mul(10) {
-                        Some(value) => value,
-                        None => return IResult::Error,
-                    };
-                    value = match value.checked_add((b - b'0') as u64) {
-                        Some(value) => value,
-                        None => return IResult::Error,
-                    };
-                    len += 1;
-                    empty = false;
-                }
+            let digit = match b {
+                b'0'...b'9' => (b - b'0') as u64,
+                b'a'...b'f' => 10 + (b - b'a') as u64,
+                b'A'...b'F' => 10 + (b - b'A') as u64,
                 b'_' => {
                     if empty {
                         return IResult::Error;
                     }
                     len += 1;
+                    continue;
                 }
                 _ => break,
+            };
+            if digit >= base {
+                return IResult::Error;
             }
+            value = match value.checked_mul(base) {
+                Some(value) => value,
+                None => return IResult::Error,
+            };
+            value = match value.checked_add(digit) {
+                Some(value) => value,
+                None => return IResult::Error,
+            };
+            len += 1;
+            empty = false;
         }
         if empty {
             IResult::Error
