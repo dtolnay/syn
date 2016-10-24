@@ -24,10 +24,10 @@ script:
           cargo doc --features 'full expand'
           ;;
         test)
-          cargo test --features 'full aster expand visit'
+          cargo test --features 'full aster expand pretty visit'
           ;;
         clippy)
-          cargo build --features 'full aster expand visit clippy'
+          cargo build --features 'full aster expand pretty visit clippy'
           ;;
       esac
 

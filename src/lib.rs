@@ -5,6 +5,9 @@
 #[macro_use]
 extern crate quote;
 
+#[cfg(feature = "pretty")]
+extern crate syntex_syntax as syntax;
+
 #[cfg(feature = "parsing")]
 extern crate unicode_xid;
 
