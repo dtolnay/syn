@@ -314,7 +314,7 @@ pub mod parsing {
             }
         }
 
-        IResult::Done(&input[len..], input[..len].into())
+        IResult::Done(&input[len..], input[..len].replace("_", ""))
     }
 
     pub fn digits(mut input: &str) -> IResult<&str, u64> {

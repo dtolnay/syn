@@ -22,6 +22,7 @@ literals! {
     // Int
     0
     0u8
+    1_0u8
 
     // Float
     0e0

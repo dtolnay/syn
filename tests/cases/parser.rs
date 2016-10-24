@@ -529,7 +529,8 @@ impl<'a> Parser<'a> {
                 Err(if self.prev_token_kind == PrevTokenKind::DocComment {
                     self.span_fatal_help(self.prev_span,
                         "found a documentation comment that doesn't document anything",
-                        "doc comments must come before what they document, maybe a comment was intended with `//`?")
+                        "doc comments must come before what they document, maybe a comment was \
+                        intended with `//`?")
                     } else {
                         let mut err = self.fatal(&format!("expected identifier, found `{}`",
                                                           self.this_token_to_string()));
@@ -1325,7 +1326,8 @@ impl<'a> Parser<'a> {
         if bounds.is_empty() {
             let prev_span = self.prev_span;
             self.span_err(prev_span,
-                          "at least one type parameter bound must be specified");
+                          "at least one type parameter bound \
+                          must be specified");
         }
 
         let sp = mk_sp(lo, self.prev_span.hi);
@@ -1450,7 +1452,8 @@ impl<'a> Parser<'a> {
         } else {
             let span = self.prev_span;
             self.span_err(span,
-                          "expected mut or const in raw pointer type (use `*mut T` or `*const T` as appropriate)");
+                          "expected mut or const in raw pointer type (use \
+                           `*mut T` or `*const T` as appropriate)");
             Mutability::Immutable
         };
         let t = self.parse_ty()?;
@@ -1950,7 +1953,8 @@ impl<'a> Parser<'a> {
                 token::BinOp(token::Shr) => { return Ok(res); }
                 _ => {
                     let this_token_str = self.this_token_to_string();
-                    let msg = format!("expected `,` or `>` after lifetime name, found `{}`",
+                    let msg = format!("expected `,` or `>` after lifetime \
+                                      name, found `{}`",
                                       this_token_str);
                     return Err(self.fatal(&msg[..]));
                 }
@@ -2059,7 +2063,8 @@ impl<'a> Parser<'a> {
         if end.is_none() && limits == RangeLimits::Closed {
             Err(self.span_fatal_help(self.span,
                                      "inclusive range with no end",
-                                     "inclusive ranges must be bounded at the end (`...b` or `a...b`)"))
+                                     "inclusive ranges must be bounded at the end \
+                                      (`...b` or `a...b`)"))
         } else {
             Ok(ExprKind::Range(start, end, limits))
         }
@@ -2451,7 +2456,8 @@ impl<'a> Parser<'a> {
                             let span = expr.attrs[0].span;
 
                             self.span_err(span,
-                                "attributes are not yet allowed on `if` expressions");
+                                "attributes are not yet allowed on `if` \
+                                expressions");
                         }
                     }
                     _ => {}
@@ -2502,7 +2508,8 @@ impl<'a> Parser<'a> {
                 if !tys.is_empty() {
                     let prev_span = self.prev_span;
                     self.span_err(prev_span,
-                                  "field expressions may not have type parameters");
+                                  "field expressions may not \
+                                   have type parameters");
                 }
 
                 let id = spanned(ident_span.lo, ident_span.hi, ident);
@@ -3400,7 +3407,8 @@ impl<'a> Parser<'a> {
                 }
             } else if ddpos.is_some() && self.eat(&token::DotDot) {
                 // Emit a friendly error, ignore `..` and continue parsing
-                self.span_err(self.prev_span, "`..` can only be used once per tuple or tuple struct pattern");
+                self.span_err(self.prev_span, "`..` can only be used once per \
+                                               tuple or tuple struct pattern");
             } else {
                 fields.push(self.parse_pat()?);
             }
@@ -3986,7 +3994,9 @@ impl<'a> Parser<'a> {
                 if style != MacStmtStyle::Braces {
                     if !self.eat(&token::Semi) {
                         self.span_err(self.prev_span,
-                                      "macros that expand to items must either be surrounded with braces or followed by a semicolon");
+                                      "macros that expand to items must \
+                                       either be surrounded with braces or \
+                                       followed by a semicolon");
                     }
                 }
                 Stmt {
@@ -4017,7 +4027,8 @@ impl<'a> Parser<'a> {
                             if s.prev_token_kind == PrevTokenKind::DocComment {
                                 s.span_err_help(s.prev_span,
                                     "found a documentation comment that doesn't document anything",
-                                    "doc comments must come before what they document, maybe a comment was intended with `//`?");
+                                    "doc comments must come before what they document, maybe a \
+                                    comment was intended with `//`?");
                             } else {
                                 s.span_err(s.span, "expected statement after outer attribute");
                             }
@@ -4336,7 +4347,8 @@ impl<'a> Parser<'a> {
 
         if missing_comma {
 
-            let msg = format!("expected `,` or `>` after lifetime name, found `{}`",
+            let msg = format!("expected `,` or `>` after lifetime \
+                              name, found `{}`",
                               self.this_token_to_string());
             let mut err = self.diagnostic().struct_span_err(self.span, &msg);
 
@@ -4349,7 +4361,9 @@ impl<'a> Parser<'a> {
                 }
             };
 
-            let msg = format!("did you mean a single argument type &'a Type, or did you mean the comma-separated arguments 'a, Type?");
+            let msg = format!("did you mean a single argument type &'a Type, \
+                              or did you mean the comma-separated arguments \
+                              'a, Type?");
             err.span_note(mk_sp(span_lo, span_hi), &msg);
             return Err(err);
         }
@@ -4396,7 +4410,8 @@ impl<'a> Parser<'a> {
     fn forbid_lifetime(&mut self) -> PResult<'a, ()> {
         if self.token.is_lifetime() {
             let span = self.span;
-            return Err(self.diagnostic().struct_span_err(span, "lifetime parameters must be declared prior to type parameters"))
+            return Err(self.diagnostic().struct_span_err(span, "lifetime parameters must be \
+                                                                declared prior to type parameters"))
         }
         Ok(())
     }
@@ -4469,7 +4484,8 @@ impl<'a> Parser<'a> {
 
                         if bounds.is_empty() {
                             self.span_err(span,
-                                          "each predicate in a `where` clause must have at least one bound in it");
+                                          "each predicate in a `where` clause must have \
+                                           at least one bound in it");
                         }
 
                         where_clause.predicates.push(ast::WherePredicate::BoundPredicate(
@@ -4495,7 +4511,8 @@ impl<'a> Parser<'a> {
                         // parsed_something = true;
                         // // FIXME(#18433)
                         self.span_err(span,
-                                     "equality constraints are not yet supported in where clauses (#20041)");
+                                     "equality constraints are not yet supported \
+                                     in where clauses (#20041)");
                     } else {
                         let prev_span = self.prev_span;
                         self.span_err(prev_span,
@@ -4512,7 +4529,8 @@ impl<'a> Parser<'a> {
         if !parsed_something {
             let prev_span = self.prev_span;
             self.span_err(prev_span,
-                          "a `where` clause must have at least one predicate in it");
+                          "a `where` clause must have at least one predicate \
+                           in it");
         }
 
         Ok(where_clause)
@@ -4859,12 +4877,15 @@ impl<'a> Parser<'a> {
                     _ => false,
                 };
                 if is_macro_rules {
-                    self.diagnostic().struct_span_err(span, "can't qualify macro_rules invocation with `pub`")
+                    self.diagnostic().struct_span_err(span, "can't qualify macro_rules \
+                                                             invocation with `pub`")
                                      .help("did you mean #[macro_export]?")
                                      .emit();
                 } else {
-                    self.diagnostic().struct_span_err(span, "can't qualify macro invocation with `pub`")
-                                     .help("try adjusting the macro to put `pub` inside the invocation")
+                    self.diagnostic().struct_span_err(span, "can't qualify macro \
+                                                             invocation with `pub`")
+                                     .help("try adjusting the macro to put `pub` \
+                                            inside the invocation")
                                      .emit();
                 }
             }
@@ -4980,7 +5001,8 @@ impl<'a> Parser<'a> {
 
         if opt_trait.is_some() && self.eat(&token::DotDot) {
             if generics.is_parameterized() {
-                self.span_err(impl_span, "default trait implementations are not allowed to have generics");
+                self.span_err(impl_span, "default trait implementations are not \
+                                          allowed to have generics");
             }
 
             self.expect(&token::OpenDelim(token::Brace))?;
@@ -5080,7 +5102,8 @@ impl<'a> Parser<'a> {
             body
         } else {
             let token_str = self.this_token_to_string();
-            return Err(self.fatal(&format!("expected `where`, `{{`, `(`, or `;` after struct name, found `{}`", token_str)))
+            return Err(self.fatal(&format!("expected `where`, `{{`, `(`, or `;` after struct \
+                                            name, found `{}`", token_str)))
         };
 
         Ok((class_name, ItemKind::Struct(vdata, generics), None))
@@ -5098,7 +5121,8 @@ impl<'a> Parser<'a> {
             VariantData::Struct(self.parse_record_struct_body()?, ast::DUMMY_NODE_ID)
         } else {
             let token_str = self.this_token_to_string();
-            return Err(self.fatal(&format!("expected `where` or `{{` after union name, found `{}`", token_str)))
+            return Err(self.fatal(&format!("expected `where` or `{{` after union \
+                                            name, found `{}`", token_str)))
         };
 
         Ok((class_name, ItemKind::Union(vdata, generics), None))
@@ -5114,7 +5138,8 @@ impl<'a> Parser<'a> {
             self.bump();
         } else {
             let token_str = self.this_token_to_string();
-            return Err(self.fatal(&format!("expected `where`, or `{{` after struct name, found `{}`",
+            return Err(self.fatal(&format!("expected `where`, or `{{` after struct \
+                                name, found `{}`",
                                 token_str)));
         }
 
@@ -5177,7 +5202,8 @@ impl<'a> Parser<'a> {
             token::CloseDelim(token::Brace) => {}
             token::DocComment(_) => return Err(self.span_fatal_help(self.span,
                         "found a documentation comment that doesn't document anything",
-                        "doc comments must come before what they document, maybe a comment was intended with `//`?")),
+                        "doc comments must come before what they document, maybe a comment was \
+                        intended with `//`?")),
             _ => return Err(self.span_fatal_help(self.span,
                     &format!("expected `,`, or `}}`, found `{}`", self.this_token_to_string()),
                     "struct fields should be separated by commas")),
@@ -5389,11 +5415,13 @@ impl<'a> Parser<'a> {
                 None => self.root_module_name.as_ref().unwrap().clone(),
             };
             err.span_note(id_sp,
-                          &format!("maybe move this module `{0}` to its own directory via `{0}/mod.rs`",
+                          &format!("maybe move this module `{0}` to its own directory \
+                                     via `{0}/mod.rs`",
                                     this_module));
             if paths.path_exists {
                 err.span_note(id_sp,
-                              &format!("... or maybe `use` the module `{}` instead of possibly redeclaring it",
+                              &format!("... or maybe `use` the module `{}` instead \
+                                        of possibly redeclaring it",
                                        paths.name));
             }
             return Err(err);
@@ -5650,7 +5678,8 @@ impl<'a> Parser<'a> {
                         let prev_span = self.prev_span;
                         self.span_err(
                             prev_span,
-                            &format!("invalid ABI: expected one of [{}], found `{}`",
+                            &format!("invalid ABI: expected one of [{}], \
+                                     found `{}`",
                                     abi::all_names().join(", "),
                                     s));
                         Ok(None)
@@ -6016,7 +6045,9 @@ impl<'a> Parser<'a> {
                 if !self.eat(&token::Semi) {
                     let prev_span = self.prev_span;
                     self.span_err(prev_span,
-                                  "macros that expand to items must either be surrounded with braces or followed by a semicolon");
+                                  "macros that expand to items must either \
+                                   be surrounded with braces or followed by \
+                                   a semicolon");
                 }
             }
 
