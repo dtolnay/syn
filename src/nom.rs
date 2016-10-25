@@ -444,7 +444,7 @@ macro_rules! alt {
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr }) => {
         match $subrule!($i, $($args)*) {
             $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, $gen(o)),
-            $crate::nom::IResult::Error => alt!($i)
+            $crate::nom::IResult::Error => $crate::nom::IResult::Error,
         }
     };
 
@@ -453,14 +453,7 @@ macro_rules! alt {
     };
 
     ($i:expr, $subrule:ident!( $($args:tt)*)) => {
-        match $subrule!( $i, $($args)* ) {
-            $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, o),
-            $crate::nom::IResult::Error => alt!($i),
-        }
-    };
-
-    ($i:expr) => {
-        $crate::nom::IResult::Error
+        $subrule!($i, $($args)*)
     };
 }
 
