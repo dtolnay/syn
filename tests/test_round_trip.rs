@@ -87,12 +87,11 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use regex::Regex;
     use std::rc::Rc;
     use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
-                             ImplItemKind, ItemKind, Lit, LitKind, Mac, MethodSig, TraitItem,
-                             TraitItemKind, TyParam};
+                             ImplItemKind, ItemKind, Mac, MethodSig, TraitItem, TraitItemKind,
+                             TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
-    use syntex_syntax::parse::token::{Lit as TokenLit, Token, intern as intern_n,
-                                      intern_and_get_ident as intern_s};
+    use syntex_syntax::parse::token::{Lit, Token, intern};
     use syntex_syntax::ptr::P;
     use syntex_syntax::tokenstream::{Delimited, SequenceRepetition, TokenTree};
     use syntex_syntax::util::move_map::MoveMap;
@@ -112,30 +111,16 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         }
 
         fn fold_lit(&mut self, l: Lit) -> Lit {
-            let node = match l.node {
-                LitKind::Str(value, style) => {
-                    LitKind::Str(intern_s(&self.multiline_regex.replace_all(&value, "")),
-                                 style)
-                }
-                LitKind::Float(repr, ty) => {
-                    LitKind::Float(intern_s(&repr.to_string().replace("_", "")), ty)
-                }
-                _ => l.node,
-            };
-            codemap::respan(self.new_span(l.span), node)
-        }
-
-        fn fold_token_lit(&mut self, l: TokenLit) -> TokenLit {
             match l {
-                TokenLit::Integer(repr) => {
-                    TokenLit::Integer(intern_n(&repr.to_string().replace("_", "")))
+                Lit::Integer(repr) => {
+                    Lit::Integer(intern(&repr.to_string().replace("_", "")))
                 }
-                TokenLit::Str_(repr) => {
-                    TokenLit::Str_(intern_n(&self.multiline_regex
+                Lit::Str_(repr) => {
+                    Lit::Str_(intern(&self.multiline_regex
                         .replace_all(&repr.to_string(), "")))
                 }
-                TokenLit::Float(repr) => {
-                    TokenLit::Float(intern_n(&repr.to_string().replace("_", "")))
+                Lit::Float(repr) => {
+                    Lit::Float(intern(&repr.to_string().replace("_", "")))
                 }
                 _ => l,
             }
@@ -168,7 +153,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                     node: match folded.node {
                         ExprKind::Lit(l) => {
                             // default fold_expr does not fold lits
-                            ExprKind::Lit(l.map(|l| self.fold_lit(l)))
+                            ExprKind::Lit(l.map(|l| self.fold_spanned(l)))
                         }
                         ExprKind::Binary(op, lhs, rhs) => {
                             // default fold_expr does not fold the op span
@@ -294,7 +279,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         fn fold_token(&mut self, t: Token) -> Token {
             match t {
                 // default fold_token does not fold literals
-                Token::Literal(lit, repr) => Token::Literal(self.fold_token_lit(lit), repr),
+                Token::Literal(lit, repr) => Token::Literal(self.fold_lit(lit), repr),
                 Token::Ident(id) => Token::Ident(self.fold_ident(id)),
                 Token::Lifetime(id) => Token::Lifetime(self.fold_ident(id)),
                 Token::Interpolated(nt) => Token::Interpolated(self.fold_interpolated(nt)),
