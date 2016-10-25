@@ -391,7 +391,11 @@ pub mod parsing {
     ));
 
     named!(path_list_item -> PathListItem, do_parse!(
-        name: ident >>
+        name: alt!(
+            ident
+            |
+            map!(keyword!("self"), Into::into)
+        ) >>
         rename: option!(preceded!(keyword!("as"), ident)) >>
         (PathListItem {
             name: name,
