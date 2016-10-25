@@ -50,16 +50,27 @@ impl<T: ?Sized> PartialEq<T> for Ident
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use space::whitespace;
+    use nom::IResult;
+    use space::skip_whitespace;
+    use unicode_xid::UnicodeXID;
 
-    fn ident_ch(ch: char) -> bool {
-        ch.is_alphanumeric() || ch == '_'
+    pub fn ident(mut input: &str) -> IResult<&str, Ident> {
+        input = skip_whitespace(input);
+
+        let mut chars = input.char_indices();
+        match chars.next() {
+            Some((_, ch)) if UnicodeXID::is_xid_start(ch) || ch == '_' => {}
+            _ => return IResult::Error,
+        }
+
+        while let Some((i, ch)) = chars.next() {
+            if !UnicodeXID::is_xid_continue(ch) {
+                return IResult::Done(&input[i..], input[..i].into());
+            }
+        }
+
+        IResult::Done("", input.into())
     }
-
-    named!(pub ident -> Ident, preceded!(
-        option!(whitespace),
-        map!(take_while1!(ident_ch), Into::into)
-    ));
 }
 
 #[cfg(feature = "printing")]
