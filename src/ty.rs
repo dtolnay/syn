@@ -365,6 +365,8 @@ pub mod parsing {
                 }
             })
         )
+        |
+        map!(keyword!("self"), |_| (None, "self".into()))
     ));
 
     named!(ty_poly_trait_ref -> Ty, do_parse!(
