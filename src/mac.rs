@@ -114,7 +114,7 @@ pub mod parsing {
     use super::*;
     use Lifetime;
     use generics::parsing::lifetime;
-    use ident::parsing::ident;
+    use ident::parsing::{ident, word};
     use lit::parsing::lit;
     use space::{block_comment, whitespace};
 
@@ -181,7 +181,7 @@ pub mod parsing {
         |
         map!(lit, Token::Literal)
         |
-        map!(ident, Token::Ident)
+        map!(word, Token::Ident)
         |
         map!(lifetime, |lt: Lifetime| Token::Lifetime(lt.ident))
         |

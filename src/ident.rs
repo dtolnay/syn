@@ -54,7 +54,26 @@ pub mod parsing {
     use space::skip_whitespace;
     use unicode_xid::UnicodeXID;
 
-    pub fn ident(mut input: &str) -> IResult<&str, Ident> {
+    pub fn ident(input: &str) -> IResult<&str, Ident> {
+        let (rest, id) = match word(input) {
+            IResult::Done(rest, id) => (rest, id),
+            IResult::Error => return IResult::Error,
+        };
+
+        match id.as_ref() {
+            // From https://doc.rust-lang.org/grammar.html#keywords
+            "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
+            "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
+            "if" | "impl" | "in" | "let" | "loop" | "macro" | "match" | "mod" | "move" |
+            "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
+            "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
+            "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
+            "while" | "yield" => IResult::Error,
+            _ => IResult::Done(rest, id),
+        }
+    }
+
+    pub fn word(mut input: &str) -> IResult<&str, Ident> {
         input = skip_whitespace(input);
 
         let mut chars = input.char_indices();
