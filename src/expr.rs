@@ -877,6 +877,8 @@ pub mod parsing {
         |
         pat_mac // must be before pat_ident
         |
+        pat_lit // must be before pat_ident
+        |
         pat_ident // must be before pat_path
         |
         pat_path
@@ -884,8 +886,6 @@ pub mod parsing {
         pat_tuple
         |
         pat_ref
-        |
-        pat_lit
     // TODO: Vec
     ));
 
