@@ -52,7 +52,18 @@ fn test_round_trip() {
         let back = quote!(#krate).to_string();
 
         let sess = ParseSess::new();
-        let before = syntex_parse(content, &sess).unwrap();
+        let before = match syntex_parse(content, &sess) {
+            Ok(before) => before,
+            Err(mut diagnostic) => {
+                diagnostic.cancel();
+                if diagnostic.message.starts_with("file not found for module") {
+                    errorf!("ignore\n");
+                    continue;
+                } else {
+                    panic!(diagnostic.message.clone());
+                }
+            }
+        };
         let after = match syntex_parse(back, &sess) {
             Ok(after) => after,
             Err(mut diagnostic) => {
