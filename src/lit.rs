@@ -130,7 +130,7 @@ impl_from_for_lit! {Float, [
 pub mod parsing {
     use super::*;
     use escape::{cooked_char, cooked_string, raw_string};
-    use space::whitespace;
+    use space::skip_whitespace;
     use nom::IResult;
     use unicode_xid::UnicodeXID;
 
@@ -194,7 +194,6 @@ pub mod parsing {
     ));
 
     named!(float -> Lit, do_parse!(
-        option!(whitespace) >>
         value: float_string >>
         suffix: alt!(
             tag!("f32") => { |_| FloatTy::F32 }
@@ -207,10 +206,7 @@ pub mod parsing {
     ));
 
     named!(pub int -> (u64, IntTy), tuple!(
-        preceded!(
-            option!(whitespace),
-            digits
-        ),
+        digits,
         alt!(
             tag!("isize") => { |_| IntTy::Isize }
             |
@@ -242,7 +238,9 @@ pub mod parsing {
         keyword!("false") => { |_| Lit::Bool(false) }
     ));
 
-    fn float_string(input: &str) -> IResult<&str, String> {
+    fn float_string(mut input: &str) -> IResult<&str, String> {
+        input = skip_whitespace(input);
+
         let mut chars = input.chars().peekable();
         match chars.next() {
             Some(ch) if ch >= '0' && ch <= '9' => {}
@@ -318,6 +316,8 @@ pub mod parsing {
     }
 
     pub fn digits(mut input: &str) -> IResult<&str, u64> {
+        input = skip_whitespace(input);
+
         let base = if input.starts_with("0x") {
             input = &input[2..];
             16

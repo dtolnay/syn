@@ -84,3 +84,10 @@ pub fn word_break(input: &str) -> IResult<&str, ()> {
         Some(_) | None => IResult::Done(input, ()),
     }
 }
+
+pub fn skip_whitespace(input: &str) -> &str {
+    match whitespace(input) {
+        IResult::Done(rest, _) => rest,
+        IResult::Error => input,
+    }
+}

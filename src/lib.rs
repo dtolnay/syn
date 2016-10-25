@@ -150,10 +150,7 @@ mod parsing {
                  -> Result<T, String> {
         match f(input) {
             IResult::Done(mut rest, t) => {
-                rest = match space::whitespace(rest) {
-                    IResult::Done(rest, _) => rest,
-                    IResult::Error => rest,
-                };
+                rest = space::skip_whitespace(rest);
                 if rest.is_empty() {
                     Ok(t)
                 } else if rest.len() == input.len() {
