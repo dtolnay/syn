@@ -32,11 +32,11 @@ macro_rules! call {
 
 macro_rules! map {
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
-        map_impl!($i, $submac!($($args)*), call!($g));
+        map_impl!($i, $submac!($($args)*), call!($g))
     };
 
     ($i:expr, $f:expr, $g:expr) => {
-        map_impl!($i, call!($f), call!($g));
+        map_impl!($i, call!($f), call!($g))
     };
 }
 
@@ -74,7 +74,7 @@ macro_rules! cond {
     };
 
     ($i:expr, $cond:expr, $f:expr) => {
-        cond!($i, $cond, call!($f));
+        cond!($i, $cond, call!($f))
     };
 }
 
@@ -88,7 +88,7 @@ macro_rules! cond_reduce {
     };
 
     ($i:expr, $cond:expr, $f:expr) => {
-        cond_reduce!($i, $cond, call!($f));
+        cond_reduce!($i, $cond, call!($f))
     };
 }
 
@@ -101,15 +101,15 @@ macro_rules! preceded {
     };
 
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
-        preceded!($i, $submac!($($args)*), call!($g));
+        preceded!($i, $submac!($($args)*), call!($g))
     };
 
     ($i:expr, $f:expr, $submac:ident!( $($args:tt)* )) => {
-        preceded!($i, call!($f), $submac!($($args)*));
+        preceded!($i, call!($f), $submac!($($args)*))
     };
 
     ($i:expr, $f:expr, $g:expr) => {
-        preceded!($i, call!($f), call!($g));
+        preceded!($i, call!($f), call!($g))
     };
 }
 
@@ -122,15 +122,15 @@ macro_rules! terminated {
     };
 
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
-        terminated!($i, $submac!($($args)*), call!($g));
+        terminated!($i, $submac!($($args)*), call!($g))
     };
 
     ($i:expr, $f:expr, $submac:ident!( $($args:tt)* )) => {
-        terminated!($i, call!($f), $submac!($($args)*));
+        terminated!($i, call!($f), $submac!($($args)*))
     };
 
     ($i:expr, $f:expr, $g:expr) => {
-        terminated!($i, call!($f), call!($g));
+        terminated!($i, call!($f), call!($g))
     };
 }
 
@@ -313,7 +313,7 @@ macro_rules! delimited {
     };
 
     ($i:expr, $f:expr, $($rest:tt)+) => {
-        delimited!($i, call!($f), $($rest)*);
+        delimited!($i, call!($f), $($rest)*)
     };
 }
 
@@ -354,15 +354,15 @@ macro_rules! separated_nonempty_list {
     }};
 
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
-        separated_nonempty_list!($i, $submac!($($args)*), call!($g));
+        separated_nonempty_list!($i, $submac!($($args)*), call!($g))
     };
 
     ($i:expr, $f:expr, $submac:ident!( $($args:tt)* )) => {
-        separated_nonempty_list!($i, call!($f), $submac!($($args)*));
+        separated_nonempty_list!($i, call!($f), $submac!($($args)*))
     };
 
     ($i:expr, $f:expr, $g:expr) => {
-        separated_nonempty_list!($i, call!($f), call!($g));
+        separated_nonempty_list!($i, call!($f), call!($g))
     };
 }
 
@@ -375,7 +375,7 @@ macro_rules! tuple {
 /// Internal parser, do not use directly
 macro_rules! tuple_parser {
     ($i:expr, ($($parsed:tt),*), $e:ident, $($rest:tt)*) => {
-        tuple_parser!($i, ($($parsed),*), call!($e), $($rest)*);
+        tuple_parser!($i, ($($parsed),*), call!($e), $($rest)*)
     };
 
     ($i:expr, (), $submac:ident!( $($args:tt)* ), $($rest:tt)*) => {
@@ -395,7 +395,7 @@ macro_rules! tuple_parser {
     };
 
     ($i:expr, ($($parsed:tt),*), $e:ident) => {
-        tuple_parser!($i, ($($parsed),*), call!($e));
+        tuple_parser!($i, ($($parsed),*), call!($e))
     };
 
     ($i:expr, (), $submac:ident!( $($args:tt)* )) => {
@@ -416,7 +416,7 @@ macro_rules! tuple_parser {
 
 macro_rules! alt {
     ($i:expr, $e:ident | $($rest:tt)*) => {
-        alt!($i, call!($e) | $($rest)*);
+        alt!($i, call!($e) | $($rest)*)
     };
 
     ($i:expr, $subrule:ident!( $($args:tt)*) | $($rest:tt)*) => {
@@ -434,11 +434,11 @@ macro_rules! alt {
     };
 
     ($i:expr, $e:ident => { $gen:expr } | $($rest:tt)*) => {
-        alt!($i, call!($e) => { $gen } | $($rest)*);
+        alt!($i, call!($e) => { $gen } | $($rest)*)
     };
 
     ($i:expr, $e:ident => { $gen:expr }) => {
-        alt!($i, call!($e) => { $gen });
+        alt!($i, call!($e) => { $gen })
     };
 
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr }) => {
@@ -449,7 +449,7 @@ macro_rules! alt {
     };
 
     ($i:expr, $e:ident) => {
-        alt!($i, call!($e));
+        alt!($i, call!($e))
     };
 
     ($i:expr, $subrule:ident!( $($args:tt)*)) => {
@@ -463,7 +463,7 @@ macro_rules! do_parse {
     };
 
     ($i:expr, $e:ident >> $($rest:tt)*) => {
-        do_parse!($i, call!($e) >> $($rest)*);
+        do_parse!($i, call!($e) >> $($rest)*)
     };
 
     ($i:expr, $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
@@ -475,7 +475,7 @@ macro_rules! do_parse {
     };
 
     ($i:expr, $field:ident : $e:ident >> $($rest:tt)*) => {
-        do_parse!($i, $field: call!($e) >> $($rest)*);
+        do_parse!($i, $field: call!($e) >> $($rest)*)
     };
 
     ($i:expr, $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
@@ -489,7 +489,7 @@ macro_rules! do_parse {
     };
 
     ($i:expr, mut $field:ident : $e:ident >> $($rest:tt)*) => {
-        do_parse!($i, $field: call!($e) >> $($rest)*);
+        do_parse!($i, $field: call!($e) >> $($rest)*)
     };
 
     ($i:expr, mut $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
