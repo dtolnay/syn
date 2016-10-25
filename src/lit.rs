@@ -390,7 +390,11 @@ mod printing {
                 Lit::ByteStr(ref v, StrStyle::Cooked) => {
                     let mut escaped = "b\"".to_string();
                     for &ch in v.iter() {
-                        escaped.extend(ascii::escape_default(ch).map(|c| c as char));
+                        match ch {
+                            0 => escaped.push_str(r"\0"),
+                            b'\'' => escaped.push('\''),
+                            _ => escaped.extend(ascii::escape_default(ch).map(|c| c as char)),
+                        }
                     }
                     escaped.push('"');
                     tokens.append(&escaped);
@@ -400,7 +404,18 @@ mod printing {
                         delim = iter::repeat("#").take(n).collect::<String>(),
                         string = str::from_utf8(vec).unwrap()));
                 }
-                Lit::Byte(b) => tokens.append(&format!("b{:?}", b as char)),
+                Lit::Byte(b) => {
+                    match b {
+                        0 => tokens.append(r"b'\0'"),
+                        b'\"' => tokens.append("b'\"'"),
+                        _ => {
+                            let mut escaped = "b'".to_string();
+                            escaped.extend(ascii::escape_default(b).map(|c| c as char));
+                            escaped.push('\'');
+                            tokens.append(&escaped);
+                        }
+                    }
+                }
                 Lit::Char(ch) => ch.to_tokens(tokens),
                 Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
                 Lit::Float(ref value, ty) => tokens.append(&format!("{}{}", value, ty)),
