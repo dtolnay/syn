@@ -445,9 +445,13 @@ pub mod parsing {
         |
         map!(ident, Into::into)
         |
-        map!(keyword!("super"), Into::into)
-        |
-        map!(keyword!("Self"), Into::into)
+        map!(alt!(
+            keyword!("super")
+            |
+            keyword!("self")
+            |
+            keyword!("Self")
+        ), Into::into)
     ));
 
     named!(type_binding -> TypeBinding, do_parse!(
