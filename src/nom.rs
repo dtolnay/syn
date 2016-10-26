@@ -61,12 +61,13 @@ macro_rules! not {
     };
 }
 
+// This is actually nom's cond_with_error.
 macro_rules! cond {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
         if $cond {
             match $submac!($i, $($args)*) {
                 $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, ::std::option::Option::Some(o)),
-                $crate::nom::IResult::Error => $crate::nom::IResult::Done($i, ::std::option::Option::None),
+                $crate::nom::IResult::Error => $crate::nom::IResult::Error,
             }
         } else {
             $crate::nom::IResult::Done($i, ::std::option::Option::None)

@@ -133,19 +133,19 @@ pub mod parsing {
     named!(pub delimited -> Delimited, alt!(
         delimited!(
             punct!("("),
-            many0!(token_tree),
+            token_trees,
             punct!(")")
         ) => { |tts| Delimited { delim: DelimToken::Paren, tts: tts } }
         |
         delimited!(
             punct!("["),
-            many0!(token_tree),
+            token_trees,
             punct!("]")
         ) => { |tts| Delimited { delim: DelimToken::Bracket, tts: tts } }
         |
         delimited!(
             punct!("{"),
-            many0!(token_tree),
+            token_trees,
             punct!("}")
         ) => { |tts| Delimited { delim: DelimToken::Brace, tts: tts } }
     ));

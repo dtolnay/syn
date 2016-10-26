@@ -293,14 +293,14 @@ pub enum BindingMode {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, TokenTree,
-         Ty};
+    use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Mac,
+         TokenTree, Ty};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
     use item::parsing::item;
     use lit::parsing::{digits, lit};
-    use mac::parsing::mac;
+    use mac::parsing::{mac, token_trees};
     use nom::IResult::{self, Error};
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty};
@@ -803,21 +803,24 @@ pub mod parsing {
 
     named!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(outer_attr) >>
-        mac: mac >>
-        semi: option!(punct!(";")) >>
-        ({
-            let style = if semi.is_some() {
-                MacStmtStyle::Semicolon
-            } else if let Some(&TokenTree::Delimited(Delimited { delim, .. })) = mac.tts.last() {
-                match delim {
-                    DelimToken::Paren | DelimToken::Bracket => MacStmtStyle::NoBraces,
-                    DelimToken::Brace => MacStmtStyle::Braces,
-                }
-            } else {
-                MacStmtStyle::NoBraces
-            };
-            Stmt::Mac(Box::new((mac, style, attrs)))
-        })
+        name: ident >>
+        punct!("!") >>
+    // Only parse braces here; paren and bracket will get parsed as
+    // expression statements
+        punct!("{") >>
+        tts: token_trees >>
+        punct!("}") >>
+        (Stmt::Mac(Box::new((
+            Mac {
+                path: name.into(),
+                tts: vec![TokenTree::Delimited(Delimited {
+                    delim: DelimToken::Brace,
+                    tts: tts,
+                })],
+            },
+            MacStmtStyle::Braces,
+            attrs,
+        ))))
     ));
 
     named!(stmt_local -> Stmt, do_parse!(
