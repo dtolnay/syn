@@ -482,12 +482,14 @@ pub mod parsing {
             lt: option!(lifetime) >>
             mutability: mutability >>
             keyword!("self") >>
+            not!(peek!(punct!(":"))) >>
             (FnArg::SelfRef(lt, mutability))
         )
         |
         do_parse!(
             mutability: mutability >>
             keyword!("self") >>
+            not!(peek!(punct!(":"))) >>
             (FnArg::SelfValue(mutability))
         )
         |
