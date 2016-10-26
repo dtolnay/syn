@@ -27,7 +27,8 @@ macro_rules! errorf {
 fn test_round_trip() {
     let mut failed = 0;
 
-    for entry in walkdir::WalkDir::new("tests/cases").into_iter() {
+    let walk = walkdir::WalkDir::new("tests/cases").sort_by(|a, b| a.cmp(b));
+    for entry in walk.into_iter() {
         let entry = entry.unwrap();
 
         let path = entry.path();
