@@ -57,8 +57,8 @@ fn test_round_trip() {
             Ok(before) => before,
             Err(mut diagnostic) => {
                 diagnostic.cancel();
-                if diagnostic.message.starts_with("file not found for module")
-                        || diagnostic.message.starts_with("couldn't read") {
+                if diagnostic.message.starts_with("file not found for module") ||
+                   diagnostic.message.starts_with("couldn't read") {
                     errorf!("ignore\n");
                     continue;
                 } else {
@@ -99,8 +99,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use std::rc::Rc;
     use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
                              ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
-                             NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind,
-                             TyParam};
+                             NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::parse::token::{Lit, Token, intern};
@@ -118,18 +117,14 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
 
         fn fold_lit(&mut self, l: Lit) -> Lit {
             match l {
-                Lit::Integer(repr) => {
-                    Lit::Integer(intern(&repr.to_string().replace("_", "")))
-                }
+                Lit::Integer(repr) => Lit::Integer(intern(&repr.to_string().replace("_", ""))),
                 Lit::Str_(_) => {
                     // Give up on comparing strings because there are so many
                     // equivalent representations of the same string; they are
                     // tested elsewhere
                     Lit::Str_(intern(""))
                 }
-                Lit::Float(repr) => {
-                    Lit::Float(intern(&repr.to_string().replace("_", "")))
-                }
+                Lit::Float(repr) => Lit::Float(intern(&repr.to_string().replace("_", ""))),
                 _ => l,
             }
         }
@@ -254,29 +249,35 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         }
 
         fn fold_meta_item(&mut self, meta_item: P<MetaItem>) -> P<MetaItem> {
-            meta_item.map(|Spanned {node, span}| Spanned {
-                node: match node {
-                    MetaItemKind::Word(id) => MetaItemKind::Word(id),
-                    MetaItemKind::List(id, mis) => {
-                        MetaItemKind::List(id, mis.move_map(|e| self.fold_meta_list_item(e)))
-                    }
-                    // default fold_meta_item does not fold the value span
-                    MetaItemKind::NameValue(id, lit) => MetaItemKind::NameValue(id, self.fold_spanned(lit))
-                },
-                span: self.new_span(span)
+            meta_item.map(|Spanned { node, span }| {
+                Spanned {
+                    node: match node {
+                        MetaItemKind::Word(id) => MetaItemKind::Word(id),
+                        MetaItemKind::List(id, mis) => {
+                            MetaItemKind::List(id, mis.move_map(|e| self.fold_meta_list_item(e)))
+                        }
+                        // default fold_meta_item does not fold the value span
+                        MetaItemKind::NameValue(id, lit) => {
+                            MetaItemKind::NameValue(id, self.fold_spanned(lit))
+                        }
+                    },
+                    span: self.new_span(span),
+                }
             })
         }
 
         fn fold_meta_list_item(&mut self, list_item: NestedMetaItem) -> NestedMetaItem {
             Spanned {
                 node: match list_item.node {
-                    NestedMetaItemKind::MetaItem(mi) =>  {
+                    NestedMetaItemKind::MetaItem(mi) => {
                         NestedMetaItemKind::MetaItem(self.fold_meta_item(mi))
-                    },
+                    }
                     // default fold_meta_list_item does not fold the span
-                    NestedMetaItemKind::Literal(lit) => NestedMetaItemKind::Literal(self.fold_spanned(lit))
+                    NestedMetaItemKind::Literal(lit) => {
+                        NestedMetaItemKind::Literal(self.fold_spanned(lit))
+                    }
                 },
-                span: self.new_span(list_item.span)
+                span: self.new_span(list_item.span),
             }
         }
 
