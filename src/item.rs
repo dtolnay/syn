@@ -243,7 +243,7 @@ pub enum FnArg {
 pub mod parsing {
     use super::*;
     use {DelimToken, FunctionRetTy, Generics, Ident, Mac, Path, TokenTree, VariantData, Visibility};
-    use attr::parsing::outer_attr;
+    use attr::parsing::{inner_attr, outer_attr};
     use data::parsing::{struct_like_body, visibility};
     use expr::parsing::{block, expr, pat};
     use generics::parsing::{generics, lifetime, ty_param_bound, where_clause};
@@ -504,20 +504,39 @@ pub mod parsing {
     ));
 
     named!(item_mod -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
+        outer_attrs: many0!(outer_attr) >>
         vis: visibility >>
         keyword!("mod") >>
         id: ident >>
-        items: alt!(
+        content: alt!(
             punct!(";") => { |_| None }
             |
-            delimited!(punct!("{"), items, punct!("}")) => { Some }
+            delimited!(
+                punct!("{"),
+                tuple!(
+                    many0!(inner_attr),
+                    items
+                ),
+                punct!("}")
+            ) => { Some }
         ) >>
-        (Item {
-            ident: id,
-            vis: vis,
-            attrs: attrs,
-            node: ItemKind::Mod(items),
+        (match content {
+            Some((inner_attrs, items)) => Item {
+                ident: id,
+                vis: vis,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend(inner_attrs);
+                    attrs
+                },
+                node: ItemKind::Mod(Some(items)),
+            },
+            None => Item {
+                ident: id,
+                vis: vis,
+                attrs: outer_attrs,
+                node: ItemKind::Mod(None),
+            },
         })
     ));
 
@@ -1039,6 +1058,7 @@ mod printing {
                     match *items {
                         Some(ref items) => {
                             tokens.append("{");
+                            tokens.append_all(self.attrs.inner());
                             tokens.append_all(items);
                             tokens.append("}");
                         }
