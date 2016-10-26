@@ -57,7 +57,8 @@ fn test_round_trip() {
             Ok(before) => before,
             Err(mut diagnostic) => {
                 diagnostic.cancel();
-                if diagnostic.message.starts_with("file not found for module") {
+                if diagnostic.message.starts_with("file not found for module")
+                        || diagnostic.message.starts_with("couldn't read") {
                     errorf!("ignore\n");
                     continue;
                 } else {
