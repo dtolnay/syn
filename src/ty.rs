@@ -204,6 +204,8 @@ pub mod parsing {
     named!(pub ty -> Ty, alt!(
         ty_poly_trait_ref // must be before ty_path
         |
+        ty_paren // must be before ty_tup
+        |
         ty_vec
         |
         ty_array
@@ -221,8 +223,6 @@ pub mod parsing {
         ty_path
         |
         ty_impl_trait
-        |
-        ty_paren
     ));
 
     named!(ty_vec -> Ty, do_parse!(
