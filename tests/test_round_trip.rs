@@ -96,7 +96,8 @@ fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Cr
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use std::rc::Rc;
     use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
-                             ImplItemKind, ItemKind, Mac, MethodSig, TraitItem, TraitItemKind,
+                             ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
+                             NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind,
                              TyParam};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
@@ -248,6 +249,33 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
             at.node.id.0 = 0;
             fold::noop_fold_attribute(at, self)
+        }
+
+        fn fold_meta_item(&mut self, meta_item: P<MetaItem>) -> P<MetaItem> {
+            meta_item.map(|Spanned {node, span}| Spanned {
+                node: match node {
+                    MetaItemKind::Word(id) => MetaItemKind::Word(id),
+                    MetaItemKind::List(id, mis) => {
+                        MetaItemKind::List(id, mis.move_map(|e| self.fold_meta_list_item(e)))
+                    }
+                    // default fold_meta_item does not fold the value span
+                    MetaItemKind::NameValue(id, lit) => MetaItemKind::NameValue(id, self.fold_spanned(lit))
+                },
+                span: self.new_span(span)
+            })
+        }
+
+        fn fold_meta_list_item(&mut self, list_item: NestedMetaItem) -> NestedMetaItem {
+            Spanned {
+                node: match list_item.node {
+                    NestedMetaItemKind::MetaItem(mi) =>  {
+                        NestedMetaItemKind::MetaItem(self.fold_meta_item(mi))
+                    },
+                    // default fold_meta_list_item does not fold the span
+                    NestedMetaItemKind::Literal(lit) => NestedMetaItemKind::Literal(self.fold_spanned(lit))
+                },
+                span: self.new_span(list_item.span)
+            }
         }
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {
