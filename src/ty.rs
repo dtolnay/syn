@@ -486,7 +486,12 @@ pub mod parsing {
     ));
 
     named!(pub fn_arg -> BareFnArg, do_parse!(
-        name: option!(terminated!(ident, punct!(":"))) >>
+        name: option!(do_parse!(
+            name: ident >>
+            punct!(":") >>
+            not!(peek!(tag!(":"))) >> // not ::
+            (name)
+        )) >>
         ty: ty >>
         (BareFnArg {
             name: name,
