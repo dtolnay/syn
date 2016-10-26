@@ -267,12 +267,14 @@ pub mod parsing {
     ));
 
     named!(ty_bare_fn -> Ty, do_parse!(
-        keyword!("fn") >>
-        lifetimes: opt_vec!(delimited!(
-            punct!("<"),
-            terminated_list!(punct!(","), lifetime_def),
-            punct!(">")
+        lifetimes: opt_vec!(do_parse!(
+            keyword!("for") >>
+            punct!("<") >>
+            lifetimes: terminated_list!(punct!(","), lifetime_def) >>
+            punct!(">") >>
+            (lifetimes)
         )) >>
+        keyword!("fn") >>
         punct!("(") >>
         inputs: terminated_list!(punct!(","), fn_arg) >>
         punct!(")") >>
@@ -702,12 +704,13 @@ mod printing {
 
     impl ToTokens for BareFnTy {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append("fn");
             if !self.lifetimes.is_empty() {
+                tokens.append("for");
                 tokens.append("<");
                 tokens.append_separated(&self.lifetimes, ",");
                 tokens.append(">");
             }
+            tokens.append("fn");
             tokens.append("(");
             tokens.append_separated(&self.inputs, ",");
             tokens.append(")");
