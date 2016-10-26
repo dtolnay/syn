@@ -1103,11 +1103,11 @@ mod printing {
                     unsafety.to_tokens(tokens);
                     tokens.append("trait");
                     self.ident.to_tokens(tokens);
+                    generics.to_tokens(tokens);
                     if !bound.is_empty() {
                         tokens.append(":");
                         tokens.append_separated(bound, "+");
                     }
-                    generics.to_tokens(tokens);
                     generics.where_clause.to_tokens(tokens);
                     tokens.append("{");
                     tokens.append_all(items);
