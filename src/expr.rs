@@ -905,7 +905,11 @@ pub mod parsing {
     named!(pat_ident -> Pat, do_parse!(
         mode: option!(keyword!("ref")) >>
         mutability: mutability >>
-        name: ident >>
+        name: alt!(
+            ident
+            |
+            keyword!("self") => { Into::into }
+        ) >>
         not!(peek!(punct!("<"))) >>
         not!(peek!(punct!("::"))) >>
         subpat: option!(preceded!(punct!("@"), pat)) >>
