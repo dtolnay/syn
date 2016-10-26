@@ -1209,6 +1209,7 @@ mod printing {
                     tokens.append(";");
                 }
                 TraitItemKind::Method(ref sig, ref block) => {
+                    sig.constness.to_tokens(tokens);
                     sig.unsafety.to_tokens(tokens);
                     sig.abi.to_tokens(tokens);
                     tokens.append("fn");
@@ -1271,6 +1272,7 @@ mod printing {
                 ImplItemKind::Method(ref sig, ref block) => {
                     self.vis.to_tokens(tokens);
                     self.defaultness.to_tokens(tokens);
+                    sig.constness.to_tokens(tokens);
                     sig.unsafety.to_tokens(tokens);
                     sig.abi.to_tokens(tokens);
                     tokens.append("fn");
