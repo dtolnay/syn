@@ -175,7 +175,9 @@ pub mod parsing {
         |
         punct!(".") => { |_| Token::Dot }
         |
-        map!(bin_op_eq, Token::BinOpEq)
+        map!(doc_comment, Token::DocComment) // must be before bin_op
+        |
+        map!(bin_op_eq, Token::BinOpEq) // must be before bin_op
         |
         map!(bin_op, Token::BinOp)
         |
@@ -184,8 +186,6 @@ pub mod parsing {
         map!(word, Token::Ident)
         |
         map!(lifetime, |lt: Lifetime| Token::Lifetime(lt.ident))
-        |
-        map!(doc_comment, Token::DocComment)
         |
         punct!("<=") => { |_| Token::Le }
         |
