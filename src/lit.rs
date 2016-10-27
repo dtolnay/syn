@@ -129,7 +129,7 @@ impl_from_for_lit! {Float, [
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use escape::{cooked_char, cooked_string, raw_string};
+    use escape::{cooked_byte_string, cooked_char, cooked_string, raw_string};
     use space::skip_whitespace;
     use nom::IResult;
     use unicode_xid::UnicodeXID;
@@ -168,9 +168,9 @@ pub mod parsing {
     named!(byte_string -> Lit, alt!(
         delimited!(
             punct!("b\""),
-            cooked_string,
+            cooked_byte_string,
             tag!("\"")
-        ) => { |s: String| Lit::ByteStr(s.into_bytes(), StrStyle::Cooked) }
+        ) => { |vec| Lit::ByteStr(vec, StrStyle::Cooked) }
         |
         preceded!(
             punct!("br"),
