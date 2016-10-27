@@ -25,6 +25,7 @@ literals! {
     b'\n'
     b'"'
     b'\''
+    b'\x91'
 
     // Char
     '0'

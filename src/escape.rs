@@ -122,6 +122,35 @@ pub fn cooked_char(input: &str) -> IResult<&str, char> {
     }
 }
 
+pub fn cooked_byte(input: &str) -> IResult<&str, u8> {
+    let mut bytes = input.bytes().enumerate();
+    let b = match bytes.next().map(|(_, b)| b) {
+        Some(b'\\') => {
+            match bytes.next().map(|(_, b)| b) {
+                Some(b'x') => backslash_x_byte(&mut bytes),
+                Some(b'n') => Some(b'\n'),
+                Some(b'r') => Some(b'\r'),
+                Some(b't') => Some(b'\t'),
+                Some(b'\\') => Some(b'\\'),
+                Some(b'0') => Some(b'\0'),
+                Some(b'\'') => Some(b'\''),
+                Some(b'"') => Some(b'"'),
+                _ => None,
+            }
+        }
+        b => b,
+    };
+    match b {
+        Some(b) => {
+            match bytes.next() {
+                Some((offset, _)) => IResult::Done(&input[offset..], b),
+                None => IResult::Done("", b),
+            }
+        }
+        None => IResult::Error,
+    }
+}
+
 pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
     let mut chars = input.char_indices();
     let mut n = 0;
