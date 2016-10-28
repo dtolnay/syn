@@ -79,7 +79,7 @@ fn expr() {
 
 fn pattern() {
     match x {
-        _ => {}
+        _ => unsafe {},
         box a => {}
         0...31 => {}
         A::B(a, .., b) => {}

@@ -583,26 +583,44 @@ pub mod parsing {
         keyword!("match") >>
         obj: expr_no_struct >>
         punct!("{") >>
-        arms: many0!(do_parse!(
-            attrs: many0!(outer_attr) >>
-            pats: separated_nonempty_list!(punct!("|"), pat) >>
-            guard: option!(preceded!(keyword!("if"), expr)) >>
-            punct!("=>") >>
-            body: alt!(
-                map!(block, |blk| Expr::Block(BlockCheckMode::Default, blk))
-                |
-                expr
-            ) >>
-            option!(punct!(",")) >>
-            (Arm {
-                attrs: attrs,
-                pats: pats,
-                guard: guard.map(Box::new),
-                body: Box::new(body),
-            })
+        mut arms: many0!(do_parse!(
+            arm: match_arm >>
+            cond!(arm_requires_comma(&arm), punct!(",")) >>
+            cond!(!arm_requires_comma(&arm), option!(punct!(","))) >>
+            (arm)
         )) >>
+        last_arm: option!(match_arm) >>
         punct!("}") >>
-        (Expr::Match(Box::new(obj), arms))
+        (Expr::Match(Box::new(obj), {
+            arms.extend(last_arm);
+            arms
+        }))
+    ));
+
+    fn arm_requires_comma(arm: &Arm) -> bool {
+        if let Expr::Block(BlockCheckMode::Default, _) = *arm.body {
+            false
+        } else {
+            true
+        }
+    }
+
+    named!(match_arm -> Arm, do_parse!(
+        attrs: many0!(outer_attr) >>
+        pats: separated_nonempty_list!(punct!("|"), pat) >>
+        guard: option!(preceded!(keyword!("if"), expr)) >>
+        punct!("=>") >>
+        body: alt!(
+            map!(block, |blk| Expr::Block(BlockCheckMode::Default, blk))
+            |
+            expr
+        ) >>
+        (Arm {
+            attrs: attrs,
+            pats: pats,
+            guard: guard.map(Box::new),
+            body: Box::new(body),
+        })
     ));
 
     named_ambiguous_expr!(expr_closure -> Expr, allow_struct, do_parse!(
@@ -1330,7 +1348,7 @@ mod printing {
             tokens.append("=>");
             self.body.to_tokens(tokens);
             match *self.body {
-                Expr::Block(_, _) => {
+                Expr::Block(BlockCheckMode::Default, _) => {
                     // no comma
                 }
                 _ => tokens.append(","),
