@@ -340,7 +340,7 @@ pub mod parsing {
                 b'a'...b'f' => 10 + (b - b'a') as u64,
                 b'A'...b'F' => 10 + (b - b'A') as u64,
                 b'_' => {
-                    if empty {
+                    if empty && base == 10 {
                         return IResult::Error;
                     }
                     len += 1;
