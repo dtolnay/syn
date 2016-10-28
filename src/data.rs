@@ -51,24 +51,40 @@ pub enum Visibility {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use WhereClause;
     use attr::parsing::outer_attr;
     use constant::parsing::const_expr;
+    use generics::parsing::where_clause;
     use ident::parsing::ident;
     use ty::parsing::ty;
 
-    named!(pub struct_body -> VariantData, alt!(
-        struct_like_body => { VariantData::Struct }
+    named!(pub struct_body -> (WhereClause, VariantData), alt!(
+        do_parse!(
+            wh: where_clause >>
+            body: struct_like_body >>
+            (wh, VariantData::Struct(body))
+        )
         |
-        terminated!(tuple_like_body, punct!(";")) => { VariantData::Tuple }
+        do_parse!(
+            body: tuple_like_body >>
+            wh: where_clause >>
+            punct!(";") >>
+            (wh, VariantData::Tuple(body))
+        )
         |
-        punct!(";") => { |_| VariantData::Unit }
+        do_parse!(
+            wh: where_clause >>
+            punct!(";") >>
+            (wh, VariantData::Unit)
+        )
     ));
 
-    named!(pub enum_body -> Vec<Variant>, do_parse!(
+    named!(pub enum_body -> (WhereClause, Vec<Variant>), do_parse!(
+        wh: where_clause >>
         punct!("{") >>
         variants: terminated_list!(punct!(","), variant) >>
         punct!("}") >>
-        (variants)
+        (wh, variants)
     ));
 
     named!(variant -> Variant, do_parse!(

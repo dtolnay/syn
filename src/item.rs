@@ -1102,14 +1102,21 @@ mod printing {
                     tokens.append("struct");
                     self.ident.to_tokens(tokens);
                     generics.to_tokens(tokens);
-                    generics.where_clause.to_tokens(tokens);
-                    variant_data.to_tokens(tokens);
                     match *variant_data {
                         VariantData::Struct(_) => {
+                            generics.where_clause.to_tokens(tokens);
+                            variant_data.to_tokens(tokens);
                             // no semicolon
                         }
-                        VariantData::Tuple(_) |
-                        VariantData::Unit => tokens.append(";"),
+                        VariantData::Tuple(_) => {
+                            variant_data.to_tokens(tokens);
+                            generics.where_clause.to_tokens(tokens);
+                            tokens.append(";");
+                        }
+                        VariantData::Unit => {
+                            generics.where_clause.to_tokens(tokens);
+                            tokens.append(";");
+                        }
                     }
                 }
                 ItemKind::Union(ref variant_data, ref generics) => {
