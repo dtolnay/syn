@@ -118,18 +118,16 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         }
 
         fn fold_lit(&mut self, l: Lit) -> Lit {
-            // Give up on comparing chars and strings because there are so many
-            // equivalent representations of the same string; they are tested
-            // elsewhere
+            // Give up on comparing literals inside of macros because there are
+            // so many equivalent representations of the same literal; they are
+            // tested elsewhere
             match l {
-                Lit::Char(_) => {
-                    Lit::Char(intern(""))
-                }
-                Lit::Integer(repr) => Lit::Integer(intern(&repr.to_string().replace("_", ""))),
-                Lit::Str_(_) => {
-                    Lit::Str_(intern(""))
-                }
-                Lit::Float(repr) => Lit::Float(intern(&repr.to_string().replace("_", ""))),
+                Lit::Byte(_) => Lit::Byte(intern("")),
+                Lit::Char(_) => Lit::Char(intern("")),
+                Lit::Integer(_) => Lit::Integer(intern("")),
+                Lit::Float(_) => Lit::Float(intern("")),
+                Lit::Str_(_) => Lit::Str_(intern("")),
+                Lit::ByteStr(_) => Lit::ByteStr(intern("")),
                 _ => l,
             }
         }
