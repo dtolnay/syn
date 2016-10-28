@@ -79,7 +79,9 @@ fn test_round_trip() {
         if before == after {
             errorf!("pass in {}ms\n", elapsed.num_milliseconds());
         } else {
-            errorf!("FAIL\nbefore: {:?}\nafter: {:?}\n", before, after);
+            errorf!("FAIL\nbefore: {}\nafter: {}\n",
+                    format!("{:?}", before).replace("\n", ""),
+                    format!("{:?}", after).replace("\n", ""));
             failed += 1;
         }
     }
