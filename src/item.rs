@@ -118,12 +118,6 @@ pub struct PathListItem {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Unsafety {
-    Unsafe,
-    Normal,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Constness {
     Const,
     NotConst,
@@ -135,15 +129,12 @@ pub enum Defaultness {
     Final,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Abi(pub String);
-
 /// Foreign module declaration.
 ///
 /// E.g. `extern { .. }` or `extern "C" { .. }`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ForeignMod {
-    pub abi: Option<Abi>,
+    pub abi: Abi,
     pub items: Vec<ForeignItem>,
 }
 
@@ -248,11 +239,10 @@ pub mod parsing {
     use expr::parsing::{block, expr, pat};
     use generics::parsing::{generics, lifetime, ty_param_bound, where_clause};
     use ident::parsing::ident;
-    use lit::parsing::quoted_string;
     use mac::parsing::delimited;
     use macro_input::{Body, MacroInput};
     use macro_input::parsing::macro_input;
-    use ty::parsing::{mutability, path, ty};
+    use ty::parsing::{abi, mutability, path, ty, unsafety};
 
     named!(pub item -> Item, alt!(
         item_extern_crate
@@ -445,7 +435,7 @@ pub mod parsing {
         vis: visibility >>
         constness: constness >>
         unsafety: unsafety >>
-        abi: option!(preceded!(keyword!("extern"), quoted_string)) >>
+        abi: option!(abi) >>
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
@@ -466,7 +456,7 @@ pub mod parsing {
                 }),
                 unsafety,
                 constness,
-                abi.map(Abi),
+                abi,
                 Generics {
                     where_clause: where_clause,
                     .. generics
@@ -542,8 +532,7 @@ pub mod parsing {
 
     named!(item_foreign_mod -> Item, do_parse!(
         attrs: many0!(outer_attr) >>
-        keyword!("extern") >>
-        abi: option!(quoted_string) >>
+        abi: abi >>
         punct!("{") >>
         items: many0!(foreign_item) >>
         punct!("}") >>
@@ -552,7 +541,7 @@ pub mod parsing {
             vis: Visibility::Inherited,
             attrs: attrs,
             node: ItemKind::ForeignMod(ForeignMod {
-                abi: abi.map(Abi),
+                abi: abi,
                 items: items,
             }),
         })
@@ -743,7 +732,7 @@ pub mod parsing {
         attrs: many0!(outer_attr) >>
         constness: constness >>
         unsafety: unsafety >>
-        abi: option!(preceded!(keyword!("extern"), quoted_string)) >>
+        abi: option!(abi) >>
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
@@ -761,7 +750,7 @@ pub mod parsing {
                 MethodSig {
                     unsafety: unsafety,
                     constness: constness,
-                    abi: abi.map(Abi),
+                    abi: abi,
                     decl: FnDecl {
                         inputs: inputs,
                         output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
@@ -886,7 +875,7 @@ pub mod parsing {
         defaultness: defaultness >>
         constness: constness >>
         unsafety: unsafety >>
-        abi: option!(preceded!(keyword!("extern"), quoted_string)) >>
+        abi: option!(abi) >>
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
@@ -905,7 +894,7 @@ pub mod parsing {
                 MethodSig {
                     unsafety: unsafety,
                     constness: constness,
-                    abi: abi.map(Abi),
+                    abi: abi,
                     decl: FnDecl {
                         inputs: inputs,
                         output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
@@ -969,12 +958,6 @@ pub mod parsing {
         keyword!("const") => { |_| Constness::Const }
         |
         epsilon!() => { |_| Constness::NotConst }
-    ));
-
-    named!(unsafety -> Unsafety, alt!(
-        keyword!("unsafe") => { |_| Unsafety::Unsafe }
-        |
-        epsilon!() => { |_| Unsafety::Normal }
     ));
 
     named!(defaultness -> Defaultness, alt!(
@@ -1067,10 +1050,7 @@ mod printing {
                 }
                 ItemKind::ForeignMod(ref foreign_mod) => {
                     self.vis.to_tokens(tokens);
-                    match foreign_mod.abi {
-                        Some(ref abi) => abi.to_tokens(tokens),
-                        None => tokens.append("extern"),
-                    }
+                    foreign_mod.abi.to_tokens(tokens);
                     tokens.append("{");
                     tokens.append_all(&foreign_mod.items);
                     tokens.append("}");
@@ -1396,17 +1376,6 @@ mod printing {
         }
     }
 
-    impl ToTokens for Unsafety {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Unsafety::Unsafe => tokens.append("unsafe"),
-                Unsafety::Normal => {
-                    // nothing
-                }
-            }
-        }
-    }
-
     impl ToTokens for Constness {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
@@ -1437,13 +1406,6 @@ mod printing {
                     // nothing
                 }
             }
-        }
-    }
-
-    impl ToTokens for Abi {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append("extern");
-            self.0.to_tokens(tokens);
         }
     }
 }

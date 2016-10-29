@@ -54,9 +54,9 @@ pub use ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{Abi, Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem,
+pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem,
                ForeignMod, ImplItem, ImplItemKind, ImplPolarity, Item, ItemKind, MethodSig,
-               PathListItem, TraitItem, TraitItemKind, Unsafety, ViewPath};
+               PathListItem, TraitItem, TraitItemKind, ViewPath};
 
 mod lit;
 pub use lit::{FloatTy, IntTy, Lit, StrStyle};
@@ -81,9 +81,9 @@ pub use registry::{CustomDerive, Expanded, Registry};
 mod space;
 
 mod ty;
-pub use ty::{AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy, Mutability,
-             ParenthesizedParameterData, Path, PathParameters, PathSegment, PolyTraitRef, QSelf,
-             Ty, TypeBinding};
+pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
+             Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
+             PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety};
 
 #[cfg(feature = "aster")]
 pub mod aster;

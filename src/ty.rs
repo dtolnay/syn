@@ -166,9 +166,23 @@ pub struct QSelf {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BareFnTy {
+    pub unsafety: Unsafety,
+    pub abi: Option<Abi>,
     pub lifetimes: Vec<LifetimeDef>,
     pub inputs: Vec<BareFnArg>,
     pub output: FunctionRetTy,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Unsafety {
+    Unsafe,
+    Normal,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Abi {
+    Named(String),
+    Extern,
 }
 
 /// An argument in a function type.
@@ -199,6 +213,7 @@ pub mod parsing {
     use constant::parsing::const_expr;
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
     use ident::parsing::ident;
+    use lit::parsing::quoted_string;
     use std::str;
 
     named!(pub ty -> Ty, alt!(
@@ -274,6 +289,8 @@ pub mod parsing {
             punct!(">") >>
             (lifetimes)
         )) >>
+        unsafety: unsafety >>
+        abi: option!(abi) >>
         keyword!("fn") >>
         punct!("(") >>
         inputs: terminated_list!(punct!(","), fn_arg) >>
@@ -283,6 +300,8 @@ pub mod parsing {
             ty
         )) >>
         (Ty::BareFn(Box::new(BareFnTy {
+            unsafety: unsafety,
+            abi: abi,
             lifetimes: lifetimes,
             inputs: inputs,
             output: match output {
@@ -496,6 +515,21 @@ pub mod parsing {
         (BareFnArg {
             name: name,
             ty: ty,
+        })
+    ));
+
+    named!(pub unsafety -> Unsafety, alt!(
+        keyword!("unsafe") => { |_| Unsafety::Unsafe }
+        |
+        epsilon!() => { |_| Unsafety::Normal }
+    ));
+
+    named!(pub abi -> Abi, do_parse!(
+        keyword!("extern") >>
+        name: option!(quoted_string) >>
+        (match name {
+            Some(name) => Abi::Named(name),
+            None => Abi::Extern,
         })
     ));
 }
@@ -715,6 +749,8 @@ mod printing {
                 tokens.append_separated(&self.lifetimes, ",");
                 tokens.append(">");
             }
+            self.unsafety.to_tokens(tokens);
+            self.abi.to_tokens(tokens);
             tokens.append("fn");
             tokens.append("(");
             tokens.append_separated(&self.inputs, ",");
@@ -733,6 +769,27 @@ mod printing {
                 tokens.append(":");
             }
             self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for Unsafety {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                Unsafety::Unsafe => tokens.append("unsafe"),
+                Unsafety::Normal => {
+                    // nothing
+                }
+            }
+        }
+    }
+
+    impl ToTokens for Abi {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("extern");
+            match *self {
+                Abi::Named(ref named) => named.to_tokens(tokens),
+                Abi::Extern => {}
+            }
         }
     }
 }
