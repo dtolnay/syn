@@ -907,7 +907,8 @@ pub mod parsing {
         pat_tuple
         |
         pat_ref
-    // TODO: Vec
+        |
+        pat_slice
     ));
 
     named!(pat_mac -> Pat, map!(mac, Pat::Mac));
@@ -1036,6 +1037,23 @@ pub mod parsing {
         punct!("...") >>
         hi: lit >>
         (Pat::Range(Box::new(lo), Box::new(hi)))
+    ));
+
+    named!(pat_slice -> Pat, do_parse!(
+        punct!("[") >>
+        before: separated_list!(punct!(","), pat) >>
+        after: option!(do_parse!(
+            cond!(!before.is_empty(), punct!(",")) >>
+            punct!("..") >>
+            after: many0!(preceded!(punct!(","), pat)) >>
+            cond!(!after.is_empty(), option!(punct!(","))) >>
+            (after)
+        )) >>
+        punct!("]") >>
+        (match after {
+            Some(after) => Pat::Slice(before, Some(Box::new(Pat::Wild)), after),
+            None => Pat::Slice(before, None, Vec::new()),
+        })
     ));
 
     named!(capture_by -> CaptureBy, alt!(
@@ -1454,7 +1472,25 @@ mod printing {
                     tokens.append("...");
                     hi.to_tokens(tokens);
                 }
-                Pat::Slice(ref _before, ref _dots, ref _after) => unimplemented!(),
+                Pat::Slice(ref before, ref dots, ref after) => {
+                    tokens.append("[");
+                    tokens.append_separated(before, ",");
+                    match *dots {
+                        Some(ref dots) if **dots == Pat::Wild => {
+                            if !before.is_empty() {
+                                tokens.append(",");
+                            }
+                            tokens.append("..");
+                            if !after.is_empty() {
+                                tokens.append(",");
+                            }
+                            tokens.append_separated(after, ",");
+                        }
+                        None => {}
+                        _ => unimplemented!(),
+                    }
+                    tokens.append("]");
+                }
                 Pat::Mac(ref mac) => mac.to_tokens(tokens),
             }
         }
