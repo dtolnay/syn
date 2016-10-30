@@ -312,7 +312,7 @@ pub mod parsing {
          TokenTree, Ty, UnOp};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
-    use ident::parsing::ident;
+    use ident::parsing::{ident, wordlike};
     use item::parsing::item;
     use lit::parsing::{digits, lit};
     use mac::parsing::{mac, token_trees};
@@ -729,7 +729,7 @@ pub mod parsing {
     ));
 
     named!(field_value -> FieldValue, do_parse!(
-        name: ident >>
+        name: wordlike >>
         punct!(":") >>
         value: expr >>
         (FieldValue {
@@ -984,7 +984,7 @@ pub mod parsing {
 
     named!(field_pat -> FieldPat, alt!(
         do_parse!(
-            ident: ident >>
+            ident: wordlike >>
             punct!(":") >>
             pat: pat >>
             (FieldPat {

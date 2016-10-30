@@ -90,6 +90,22 @@ pub mod parsing {
 
         IResult::Done("", input.into())
     }
+
+    pub fn wordlike(mut input: &str) -> IResult<&str, Ident> {
+        input = skip_whitespace(input);
+
+        for (i, ch) in input.char_indices() {
+            if !UnicodeXID::is_xid_start(ch) && !UnicodeXID::is_xid_continue(ch) {
+                return if i == 0 {
+                    IResult::Error
+                } else {
+                    IResult::Done(&input[i..], input[..i].into())
+                };
+            }
+        }
+
+        IResult::Done("", input.into())
+    }
 }
 
 #[cfg(feature = "printing")]
