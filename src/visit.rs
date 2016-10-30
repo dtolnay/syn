@@ -283,6 +283,10 @@ pub fn walk_const_expr<V: Visitor>(visitor: &mut V, len: &ConstExpr) {
         ConstExpr::Path(ref path) => {
             visitor.visit_path(path);
         }
+        ConstExpr::Index(ref expr, ref index) => {
+            visitor.visit_const_expr(expr);
+            visitor.visit_const_expr(index);
+        }
         ConstExpr::Paren(ref expr) => {
             visitor.visit_const_expr(expr);
         }

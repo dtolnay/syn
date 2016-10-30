@@ -18,6 +18,8 @@ pub enum ConstExpr {
     /// Variable reference, possibly containing `::` and/or type
     /// parameters, e.g. foo::bar::<baz>.
     Path(Path),
+    /// An indexing operation (`foo[2]`)
+    Index(Box<ConstExpr>, Box<ConstExpr>),
     /// No-op: used solely so we can pretty-print faithfully
     Paren(Box<ConstExpr>),
 }
@@ -53,6 +55,10 @@ pub mod parsing {
             tap!(ty: and_cast => {
                 e = ConstExpr::Cast(Box::new(e), Box::new(ty));
             })
+            |
+            tap!(i: and_index => {
+                e = ConstExpr::Index(Box::new(e), Box::new(i));
+            })
         )) >>
         (e)
     ));
@@ -75,6 +81,8 @@ pub mod parsing {
     named!(expr_lit -> ConstExpr, map!(lit, ConstExpr::Lit));
 
     named!(expr_path -> ConstExpr, map!(path, ConstExpr::Path));
+
+    named!(and_index -> ConstExpr, delimited!(punct!("["), const_expr, punct!("]")));
 
     named!(expr_paren -> ConstExpr, do_parse!(
         punct!("(") >>
@@ -120,6 +128,12 @@ mod printing {
                     ty.to_tokens(tokens);
                 }
                 ConstExpr::Path(ref path) => path.to_tokens(tokens),
+                ConstExpr::Index(ref expr, ref index) => {
+                    expr.to_tokens(tokens);
+                    tokens.append("[");
+                    index.to_tokens(tokens);
+                    tokens.append("]");
+                }
                 ConstExpr::Paren(ref expr) => {
                     tokens.append("(");
                     expr.to_tokens(tokens);
