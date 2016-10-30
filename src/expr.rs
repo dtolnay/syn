@@ -1602,6 +1602,7 @@ mod printing {
 
     impl ToTokens for Local {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             tokens.append("let");
             self.pat.to_tokens(tokens);
             if let Some(ref ty) = self.ty {
