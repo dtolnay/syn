@@ -10,6 +10,13 @@ pub fn cooked_string(input: &str) -> IResult<&str, String> {
             '"' => {
                 return IResult::Done(&input[byte_offset..], s);
             }
+            '\r' => {
+                if let Some((_, '\n')) = chars.next() {
+                    s.push('\n');
+                } else {
+                    break;
+                }
+            }
             '\\' => {
                 match chars.next() {
                     Some((_, 'x')) => {
@@ -31,7 +38,7 @@ pub fn cooked_string(input: &str) -> IResult<&str, String> {
                     }
                     Some((_, '\'')) => s.push('\''),
                     Some((_, '"')) => s.push('"'),
-                    Some((_, '\n')) => {
+                    Some((_, '\n')) | Some((_, '\r')) => {
                         while let Some(&(_, ch)) = chars.peek() {
                             if ch.is_whitespace() {
                                 chars.next();
@@ -59,6 +66,13 @@ pub fn cooked_byte_string(mut input: &str) -> IResult<&str, Vec<u8>> {
             b'"' => {
                 return IResult::Done(&input[offset..], vec);
             }
+            b'\r' => {
+                if let Some((_, b'\n')) = bytes.next() {
+                    vec.push(b'\n');
+                } else {
+                    break;
+                }
+            }
             b'\\' => {
                 match bytes.next() {
                     Some((_, b'x')) => {
@@ -74,7 +88,7 @@ pub fn cooked_byte_string(mut input: &str) -> IResult<&str, Vec<u8>> {
                     Some((_, b'0')) => vec.push(b'\0'),
                     Some((_, b'\'')) => vec.push(b'\''),
                     Some((_, b'"')) => vec.push(b'"'),
-                    Some((newline, b'\n')) => {
+                    Some((newline, b'\n')) | Some((newline, b'\r')) => {
                         let rest = &input[newline + 1..];
                         for (offset, ch) in rest.char_indices() {
                             if !ch.is_whitespace() {
@@ -164,11 +178,15 @@ pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
             _ => return IResult::Error,
         }
     }
+    let mut s = String::new();
     for (byte_offset, ch) in chars {
-        if ch == '"' && input[byte_offset + 1..].starts_with(&input[..n]) {
-            let rest = &input[byte_offset + 1 + n..];
-            let value = &input[n + 1..byte_offset];
-            return IResult::Done(rest, (value.to_owned(), n));
+        match ch {
+            '"' if input[byte_offset + 1..].starts_with(&input[..n]) => {
+                let rest = &input[byte_offset + 1 + n..];
+                return IResult::Done(rest, (s, n));
+            }
+            '\r' => {}
+            _ => s.push(ch),
         }
     }
     IResult::Error
