@@ -238,7 +238,7 @@ pub mod parsing {
          Visibility};
     use attr::parsing::{inner_attr, outer_attr};
     use data::parsing::{struct_like_body, visibility};
-    use expr::parsing::{block, expr, pat, within_block};
+    use expr::parsing::{expr, pat, within_block};
     use generics::parsing::{generics, lifetime, ty_param_bound, where_clause};
     use ident::parsing::ident;
     use mac::parsing::delimited;
@@ -744,7 +744,7 @@ pub mod parsing {
     ));
 
     named!(trait_item_method -> TraitItem, do_parse!(
-        attrs: many0!(outer_attr) >>
+        outer_attrs: many0!(outer_attr) >>
         constness: constness >>
         unsafety: unsafety >>
         abi: option!(abi) >>
@@ -756,28 +756,42 @@ pub mod parsing {
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
-        body: option!(block) >>
+        body: option!(delimited!(
+            punct!("{"),
+            tuple!(many0!(inner_attr), within_block),
+            punct!("}")
+        )) >>
         cond!(body.is_none(), punct!(";")) >>
-        (TraitItem {
-            ident: name,
-            attrs: attrs,
-            node: TraitItemKind::Method(
-                MethodSig {
-                    unsafety: unsafety,
-                    constness: constness,
-                    abi: abi,
-                    decl: FnDecl {
-                        inputs: inputs,
-                        output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
-                        variadic: false,
-                    },
-                    generics: Generics {
-                        where_clause: where_clause,
-                        .. generics
-                    },
+        ({
+            let (inner_attrs, stmts) = match body {
+                Some((inner_attrs, stmts)) => (inner_attrs, Some(stmts)),
+                None => (Vec::new(), None),
+            };
+            TraitItem {
+                ident: name,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend(inner_attrs);
+                    attrs
                 },
-                body,
-            ),
+                node: TraitItemKind::Method(
+                    MethodSig {
+                        unsafety: unsafety,
+                        constness: constness,
+                        abi: abi,
+                        decl: FnDecl {
+                            inputs: inputs,
+                            output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                            variadic: false,
+                        },
+                        generics: Generics {
+                            where_clause: where_clause,
+                            .. generics
+                        },
+                    },
+                    stmts.map(|stmts| Block { stmts: stmts }),
+                ),
+            }
         })
     ));
 
@@ -1329,7 +1343,10 @@ mod printing {
                         ty.to_tokens(tokens);
                     }
                     sig.generics.where_clause.to_tokens(tokens);
-                    block.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_all(self.attrs.inner());
+                    tokens.append_all(&block.stmts);
+                    tokens.append("}");
                 }
                 ImplItemKind::Type(ref ty) => {
                     self.vis.to_tokens(tokens);
