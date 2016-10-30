@@ -1022,6 +1022,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             match self.node {
                 ItemKind::ExternCrate(ref original) => {
+                    self.vis.to_tokens(tokens);
                     tokens.append("extern");
                     tokens.append("crate");
                     if let Some(ref original) = *original {
