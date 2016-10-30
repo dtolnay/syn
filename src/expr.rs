@@ -1031,22 +1031,26 @@ pub mod parsing {
         (Pat::Ref(Box::new(pat), mutability))
     ));
 
-    named!(pat_lit -> Pat, map!(lit_maybe_neg, |lit| Pat::Lit(Box::new(lit))));
+    named!(pat_lit -> Pat, map!(pat_lit_expr, |lit| Pat::Lit(Box::new(lit))));
 
     named!(pat_range -> Pat, do_parse!(
-        lo: lit_maybe_neg >>
+        lo: pat_lit_expr >>
         punct!("...") >>
-        hi: lit_maybe_neg >>
+        hi: pat_lit_expr >>
         (Pat::Range(Box::new(lo), Box::new(hi)))
     ));
 
-    named!(lit_maybe_neg -> Expr, do_parse!(
+    named!(pat_lit_expr -> Expr, do_parse!(
         neg: option!(punct!("-")) >>
-        v: lit >>
+        v: alt!(
+            lit => { Expr::Lit }
+            |
+            path => { |p| Expr::Path(None, p) }
+        ) >>
         (if neg.is_some() {
-            Expr::Unary(UnOp::Neg, Box::new(Expr::Lit(v)))
+            Expr::Unary(UnOp::Neg, Box::new(v))
         } else {
-            Expr::Lit(v)
+            v
         })
     ));
 
