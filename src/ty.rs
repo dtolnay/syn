@@ -210,7 +210,6 @@ pub enum FunctionRetTy {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {TraitBoundModifier, TyParamBound};
     #[cfg(feature = "full")]
     use ConstExpr;
     use constant::parsing::const_expr;
@@ -413,10 +412,8 @@ pub mod parsing {
     ));
 
     named!(ty_poly_trait_ref -> Ty, map!(
-        poly_trait_ref,
-        |trait_ref| Ty::PolyTraitRef(vec![
-            TyParamBound::Trait(trait_ref, TraitBoundModifier::None),
-        ])
+        separated_nonempty_list!(punct!("+"), ty_param_bound),
+        Ty::PolyTraitRef
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
