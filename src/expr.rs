@@ -1023,21 +1023,28 @@ pub mod parsing {
         )
         |
         do_parse!(
+            boxed: option!(keyword!("box")) >>
             mode: option!(keyword!("ref")) >>
             mutability: mutability >>
             ident: ident >>
-            (FieldPat {
-                ident: ident.clone(),
-                pat: Box::new(Pat::Ident(
+            ({
+                let mut pat = Pat::Ident(
                     if mode.is_some() {
                         BindingMode::ByRef(mutability)
                     } else {
                         BindingMode::ByValue(mutability)
                     },
-                    ident,
+                    ident.clone(),
                     None,
-                )),
-                is_shorthand: true,
+                );
+                if boxed.is_some() {
+                    pat = Pat::Box(Box::new(pat));
+                }
+                FieldPat {
+                    ident: ident,
+                    pat: Box::new(pat),
+                    is_shorthand: true,
+                }
             })
         )
     ));
