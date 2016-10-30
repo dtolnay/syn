@@ -1050,18 +1050,27 @@ pub mod parsing {
 
     named!(pat_slice -> Pat, do_parse!(
         punct!("[") >>
-        before: separated_list!(punct!(","), pat) >>
+        mut before: separated_list!(punct!(","), pat) >>
         after: option!(do_parse!(
-            cond!(!before.is_empty(), punct!(",")) >>
+            comma_before_dots: option!(cond_reduce!(!before.is_empty(), punct!(","))) >>
             punct!("..") >>
             after: many0!(preceded!(punct!(","), pat)) >>
             cond!(!after.is_empty(), option!(punct!(","))) >>
-            (after)
+            (comma_before_dots.is_some(), after)
         )) >>
         punct!("]") >>
         (match after {
-            Some(after) => Pat::Slice(before, Some(Box::new(Pat::Wild)), after),
             None => Pat::Slice(before, None, Vec::new()),
+            Some((true, after)) => {
+                if before.is_empty() {
+                    return IResult::Error;
+                }
+                Pat::Slice(before, Some(Box::new(Pat::Wild)), after)
+            }
+            Some((false, after)) => {
+                let rest = before.pop().unwrap_or(Pat::Wild);
+                Pat::Slice(before, Some(Box::new(rest)), after)
+            }
         })
     ));
 
@@ -1481,22 +1490,21 @@ mod printing {
                     tokens.append("...");
                     hi.to_tokens(tokens);
                 }
-                Pat::Slice(ref before, ref dots, ref after) => {
+                Pat::Slice(ref before, ref rest, ref after) => {
                     tokens.append("[");
                     tokens.append_separated(before, ",");
-                    match *dots {
-                        Some(ref dots) if **dots == Pat::Wild => {
-                            if !before.is_empty() {
-                                tokens.append(",");
-                            }
-                            tokens.append("..");
-                            if !after.is_empty() {
-                                tokens.append(",");
-                            }
-                            tokens.append_separated(after, ",");
+                    if let Some(ref rest) = *rest {
+                        if !before.is_empty() {
+                            tokens.append(",");
                         }
-                        None => {}
-                        _ => unimplemented!(),
+                        if **rest != Pat::Wild {
+                            rest.to_tokens(tokens);
+                        }
+                        tokens.append("..");
+                        if !after.is_empty() {
+                            tokens.append(",");
+                        }
+                        tokens.append_separated(after, ",");
                     }
                     tokens.append("]");
                 }
