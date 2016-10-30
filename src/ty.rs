@@ -171,6 +171,7 @@ pub struct BareFnTy {
     pub lifetimes: Vec<LifetimeDef>,
     pub inputs: Vec<BareFnArg>,
     pub output: FunctionRetTy,
+    pub variadic: bool,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -293,7 +294,9 @@ pub mod parsing {
         abi: option!(abi) >>
         keyword!("fn") >>
         punct!("(") >>
-        inputs: terminated_list!(punct!(","), fn_arg) >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        trailing_comma: option!(punct!(",")) >>
+        variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
         punct!(")") >>
         output: option!(preceded!(
             punct!("->"),
@@ -308,6 +311,7 @@ pub mod parsing {
                 Some(ty) => FunctionRetTy::Ty(ty),
                 None => FunctionRetTy::Default,
             },
+            variadic: variadic.is_some(),
         })))
     ));
 
@@ -754,6 +758,12 @@ mod printing {
             tokens.append("fn");
             tokens.append("(");
             tokens.append_separated(&self.inputs, ",");
+            if self.variadic {
+                if !self.inputs.is_empty() {
+                    tokens.append(",");
+                }
+                tokens.append("...");
+            }
             tokens.append(")");
             if let FunctionRetTy::Ty(ref ty) = self.output {
                 tokens.append("->");

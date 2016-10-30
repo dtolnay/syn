@@ -648,6 +648,7 @@ pub mod parsing {
             Box::new(FnDecl {
                 inputs: inputs,
                 output: ret_and_body.0,
+                variadic: false,
             }),
             ret_and_body.1,
         ))

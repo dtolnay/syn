@@ -217,6 +217,7 @@ pub struct MethodSig {
 pub struct FnDecl {
     pub inputs: Vec<FnArg>,
     pub output: FunctionRetTy,
+    pub variadic: bool,
 }
 
 /// An argument in a function header.
@@ -453,6 +454,7 @@ pub mod parsing {
                 Box::new(FnDecl {
                     inputs: inputs,
                     output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                    variadic: false,
                 }),
                 unsafety,
                 constness,
@@ -560,7 +562,9 @@ pub mod parsing {
         name: ident >>
         generics: generics >>
         punct!("(") >>
-        inputs: terminated_list!(punct!(","), fn_arg) >>
+        inputs: separated_list!(punct!(","), fn_arg) >>
+        trailing_comma: option!(punct!(",")) >>
+        variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
@@ -572,6 +576,7 @@ pub mod parsing {
                 Box::new(FnDecl {
                     inputs: inputs,
                     output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                    variadic: variadic.is_some(),
                 }),
                 Generics {
                     where_clause: where_clause,
@@ -754,6 +759,7 @@ pub mod parsing {
                     decl: FnDecl {
                         inputs: inputs,
                         output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                        variadic: false,
                     },
                     generics: Generics {
                         where_clause: where_clause,
@@ -898,6 +904,7 @@ pub mod parsing {
                     decl: FnDecl {
                         inputs: inputs,
                         output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
+                        variadic: false,
                     },
                     generics: Generics {
                         where_clause: where_clause,
@@ -1330,6 +1337,12 @@ mod printing {
                     generics.to_tokens(tokens);
                     tokens.append("(");
                     tokens.append_separated(&decl.inputs, ",");
+                    if decl.variadic {
+                        if !decl.inputs.is_empty() {
+                            tokens.append(",");
+                        }
+                        tokens.append("...");
+                    }
                     tokens.append(")");
                     if let FunctionRetTy::Ty(ref ty) = decl.output {
                         tokens.append("->");
