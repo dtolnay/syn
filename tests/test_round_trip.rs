@@ -12,6 +12,7 @@ use syntex_pos::Span;
 use syntex_syntax::ast;
 use syntex_syntax::parse::{self, ParseSess, PResult};
 use time::PreciseTime;
+use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 use std::fs::File;
 use std::io::{self, Read, Write};
@@ -23,16 +24,61 @@ macro_rules! errorf {
     };
 }
 
+fn filter(entry: &DirEntry) -> bool {
+    let path = entry.path();
+    if path.is_dir() {
+        return true; // otherwise walkdir does not visit the files
+    }
+    if path.extension().map(|e| e != "rs").unwrap_or(true) {
+        return false;
+    }
+    let path = path.to_string_lossy();
+    // TODO assert that parsing fails on the parse-fail cases
+    if path.starts_with("tests/rust/src/test/parse-fail") ||
+       path.starts_with("tests/rust/src/test/compile-fail") {
+        return false;
+    }
+    match path.as_ref() {
+        // TODO better support for attributes
+        "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
+        // not actually a test case
+        "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
+        // TODO weird glob import
+        "tests/rust/src/test/run-pass/import-glob-crate.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/test/run-pass/item-attributes.rs" |
+        // TODO trailing comma in attribute list
+        "tests/rust/src/test/run-pass/trailing-comma.rs" |
+        // TODO ?
+        "tests/rust/src/test/run-pass/try-macro.rs" |
+        // TODO type macros
+        "tests/rust/src/test/run-pass/type-macros-hlist.rs" |
+        // TODO type macros
+        "tests/rust/src/test/run-pass/type-macros-simple.rs" |
+        // TODO ignore byte order mark
+        "tests/rust/src/test/run-pass/utf8-bom.rs" |
+        // TODO type macros
+        "tests/rust/src/test/run-pass-fulldeps/proc_macro.rs" |
+        // TODO pub(crate)
+        "tests/rust/src/test/ui/span/pub-struct-field.rs" => false,
+        _ => true,
+    }
+}
+
 #[test]
 fn test_round_trip() {
     let mut failed = 0;
 
-    let walk = walkdir::WalkDir::new("tests/cases").sort_by(|a, b| a.cmp(b));
-    for entry in walk.into_iter() {
+    let walk = WalkDir::new("tests/rust").sort_by(|a, b| a.cmp(b));
+    for entry in walk.into_iter().filter_entry(filter) {
         let entry = entry.unwrap();
 
         let path = entry.path();
-        if path.extension().map(|e| e != "rs").unwrap_or(true) {
+        if path.is_dir() {
             continue;
         }
         errorf!("=== {}: ", path.display());
@@ -87,7 +133,7 @@ fn test_round_trip() {
             }
         });
         match equal {
-            Err(_) => errorf!("syntex panic\n"),
+            Err(_) => errorf!("ignoring syntex panic\n"),
             Ok(true) => {},
             Ok(false) => failed += 1,
         }
