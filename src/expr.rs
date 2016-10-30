@@ -19,6 +19,8 @@ impl From<ExprKind> for Expr {
 pub enum ExprKind {
     /// A `box x` expression.
     Box(Box<Expr>),
+    /// First expr is the place; second expr is the value.
+    InPlace(Box<Expr>, Box<Expr>),
     /// An array (`[a, b, c, d]`)
     Vec(Vec<Expr>),
     /// A function call
@@ -360,6 +362,8 @@ pub mod parsing {
                 |
                 call!(expr_box, allow_struct)
                 |
+                expr_in_place
+                |
                 expr_vec
                 |
                 expr_tup
@@ -459,6 +463,20 @@ pub mod parsing {
         keyword!("box") >>
         inner: ambiguous_expr!(allow_struct) >>
         (ExprKind::Box(Box::new(inner)))
+    ));
+
+    named!(expr_in_place -> ExprKind, do_parse!(
+        keyword!("in") >>
+        place: expr_no_struct >>
+        punct!("{") >>
+        value: within_block >>
+        punct!("}") >>
+        (ExprKind::InPlace(
+            Box::new(place),
+            Box::new(ExprKind::Block(BlockCheckMode::Default, Block {
+                stmts: value,
+            }).into()),
+        ))
     ));
 
     named!(expr_vec -> ExprKind, do_parse!(
@@ -1129,6 +1147,11 @@ mod printing {
                 ExprKind::Box(ref inner) => {
                     tokens.append("box");
                     inner.to_tokens(tokens);
+                }
+                ExprKind::InPlace(ref place, ref value) => {
+                    tokens.append("in");
+                    place.to_tokens(tokens);
+                    value.to_tokens(tokens);
                 }
                 ExprKind::Vec(ref tys) => {
                     tokens.append("[");
