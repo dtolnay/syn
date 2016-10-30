@@ -622,6 +622,7 @@ pub mod parsing {
         keyword!("type") >>
         id: ident >>
         generics: generics >>
+        where_clause: where_clause >>
         punct!("=") >>
         ty: ty >>
         punct!(";") >>
@@ -629,7 +630,13 @@ pub mod parsing {
             ident: id,
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Ty(Box::new(ty), generics),
+            node: ItemKind::Ty(
+                Box::new(ty),
+                Generics {
+                    where_clause: where_clause,
+                    ..generics
+                },
+            ),
         })
     ));
 
@@ -1106,6 +1113,7 @@ mod printing {
                     tokens.append("type");
                     self.ident.to_tokens(tokens);
                     generics.to_tokens(tokens);
+                    generics.where_clause.to_tokens(tokens);
                     tokens.append("=");
                     ty.to_tokens(tokens);
                     tokens.append(";");
