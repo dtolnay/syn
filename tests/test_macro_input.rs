@@ -33,8 +33,8 @@ fn test_struct() {
             Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::List("derive".into(), vec![
-                    MetaItem::Word("Debug".into()),
-                    MetaItem::Word("Clone".into()),
+                    NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
+                    NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
                 ]),
                 is_sugared_doc: false,
             },

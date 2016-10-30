@@ -1,4 +1,5 @@
-use super::{Attribute, AttrStyle, Body, Crate, Ident, Item, ItemKind, MacroInput, MetaItem};
+use super::{Attribute, AttrStyle, Body, Crate, Ident, Item, ItemKind, MacroInput, MetaItem,
+            NestedMetaItem};
 use quote::Tokens;
 
 use std::collections::BTreeMap as Map;
@@ -110,7 +111,7 @@ fn expand_crate(reg: &Registry, krate: Crate) -> Result<Crate, String> {
 
 fn expand_item(reg: &Registry,
                mut item: Item,
-               cfg: Vec<MetaItem>,
+               cfg: Vec<NestedMetaItem>,
                out: &mut Vec<Item>)
                -> Result<(), String> {
     let (body, generics) = match item.node {
@@ -135,7 +136,7 @@ fn expand_item(reg: &Registry,
 
 fn expand_macro_input(reg: &Registry,
                       mut input: MacroInput,
-                      inherited_cfg: Vec<MetaItem>,
+                      inherited_cfg: Vec<NestedMetaItem>,
                       out: &mut Vec<Item>)
                       -> Result<(), String> {
     let mut derives = Vec::new();
@@ -176,11 +177,11 @@ fn expand_macro_input(reg: &Registry,
 struct Derive {
     name: Ident,
     /// If the custom derive was behind a cfg_attr
-    cfg: Option<MetaItem>,
+    cfg: Option<NestedMetaItem>,
 }
 
 /// Pull custom derives and cfgs out of the given Attribute.
-fn parse_attr(reg: &Registry, attr: Attribute) -> (Vec<Derive>, Vec<MetaItem>, Option<Attribute>) {
+fn parse_attr(reg: &Registry, attr: Attribute) -> (Vec<Derive>, Vec<NestedMetaItem>, Option<Attribute>) {
     if attr.style != AttrStyle::Outer || attr.is_sugared_doc {
         return (Vec::new(), Vec::new(), Some(attr));
     }
@@ -222,20 +223,20 @@ fn parse_attr(reg: &Registry, attr: Attribute) -> (Vec<Derive>, Vec<MetaItem>, O
 
 /// Assuming the given nested meta-items came from a #[derive(...)] attribute,
 /// pull out the ones that are custom derives.
-fn parse_derive_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Ident>, Option<Attribute>) {
+fn parse_derive_attr(reg: &Registry, nested: Vec<NestedMetaItem>) -> (Vec<Ident>, Option<Attribute>) {
     let mut derives = Vec::new();
 
     let remaining: Vec<_> = nested.into_iter()
         .flat_map(|meta| {
             let word = match meta {
-                MetaItem::Word(word) => word,
+                NestedMetaItem::MetaItem(MetaItem::Word(word)) => word,
                 _ => return Some(meta),
             };
             if reg.derives.contains_key(word.as_ref()) {
                 derives.push(word);
                 None
             } else {
-                Some(MetaItem::Word(word))
+                Some(NestedMetaItem::MetaItem(MetaItem::Word(word)))
             }
         })
         .collect();
@@ -256,7 +257,7 @@ fn parse_derive_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Ident>, Opti
 
 /// Assuming the given nested meta-items came from a #[cfg_attr(...)] attribute,
 /// pull out any custom derives contained within.
-fn parse_cfg_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Derive>, Option<Attribute>) {
+fn parse_cfg_attr(reg: &Registry, nested: Vec<NestedMetaItem>) -> (Vec<Derive>, Option<Attribute>) {
     if nested.len() != 2 {
         let attr = Attribute {
             style: AttrStyle::Outer,
@@ -271,7 +272,7 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Derive>, Option
     let arg = iter.next().unwrap();
 
     let (name, nested) = match arg {
-        MetaItem::List(name, nested) => (name, nested),
+        NestedMetaItem::MetaItem(MetaItem::List(name, nested)) => (name, nested),
         _ => {
             let attr = Attribute {
                 style: AttrStyle::Outer,
@@ -295,7 +296,7 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Derive>, Option
         let attr = attr.map(|attr| {
             Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::List("cfg_attr".into(), vec![cfg, attr.value]),
+                value: MetaItem::List("cfg_attr".into(), vec![cfg, NestedMetaItem::MetaItem(attr.value)]),
                 is_sugared_doc: false,
             }
         });
@@ -303,7 +304,7 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Derive>, Option
     } else {
         let attr = Attribute {
             style: AttrStyle::Outer,
-            value: MetaItem::List("cfg_attr".into(), vec![cfg, MetaItem::List(name, nested)]),
+            value: MetaItem::List("cfg_attr".into(), vec![cfg, NestedMetaItem::MetaItem(MetaItem::List(name, nested))]),
             is_sugared_doc: false,
         };
         (Vec::new(), Some(attr))
@@ -312,18 +313,18 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<MetaItem>) -> (Vec<Derive>, Option
 
 /// Combine a list of cfg expressions into an attribute like `#[cfg(a)]` or
 /// `#[cfg(all(a, b, c))]`, or nothing if there are no cfg expressions.
-fn combine_cfgs(cfg: Vec<MetaItem>) -> Option<Attribute> {
+fn combine_cfgs(cfg: Vec<NestedMetaItem>) -> Option<Attribute> {
     // Flatten `all` cfgs so we don't nest `all` inside of `all`.
     let cfg: Vec<_> = cfg.into_iter()
         .flat_map(|cfg| {
             let (name, nested) = match cfg {
-                MetaItem::List(name, nested) => (name, nested),
+                NestedMetaItem::MetaItem(MetaItem::List(name, nested)) => (name, nested),
                 _ => return vec![cfg],
             };
             if name == "all" {
                 nested
             } else {
-                vec![MetaItem::List(name, nested)]
+                vec![NestedMetaItem::MetaItem(MetaItem::List(name, nested))]
             }
         })
         .collect();
@@ -331,7 +332,7 @@ fn combine_cfgs(cfg: Vec<MetaItem>) -> Option<Attribute> {
     let value = match cfg.len() {
         0 => return None,
         1 => cfg,
-        _ => vec![MetaItem::List("all".into(), cfg)],
+        _ => vec![NestedMetaItem::MetaItem(MetaItem::List("all".into(), cfg))],
     };
 
     Some(Attribute {

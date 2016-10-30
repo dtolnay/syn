@@ -23,7 +23,7 @@ mod helper;
 mod escape;
 
 mod attr;
-pub use attr::{Attribute, AttrStyle, MetaItem};
+pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem};
 
 mod constant;
 pub use constant::ConstExpr;
