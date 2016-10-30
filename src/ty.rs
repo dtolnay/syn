@@ -218,9 +218,9 @@ pub mod parsing {
     use std::str;
 
     named!(pub ty -> Ty, alt!(
-        ty_poly_trait_ref // must be before ty_path
-        |
         ty_paren // must be before ty_tup
+        |
+        ty_path // must be before ty_poly_trait_ref
         |
         ty_vec
         |
@@ -236,7 +236,7 @@ pub mod parsing {
         |
         ty_tup
         |
-        ty_path
+        ty_poly_trait_ref
         |
         ty_impl_trait
     ));
@@ -394,21 +394,11 @@ pub mod parsing {
         map!(keyword!("self"), |_| (None, "self".into()))
     ));
 
-    named!(ty_poly_trait_ref -> Ty, do_parse!(
-        keyword!("for") >>
-        punct!("<") >>
-        lifetimes: terminated_list!(punct!(","), lifetime_def) >>
-        punct!(">") >>
-        trait_ref: path >>
-        (Ty::PolyTraitRef(vec![
-            TyParamBound::Trait(
-                PolyTraitRef {
-                    bound_lifetimes: lifetimes,
-                    trait_ref: trait_ref,
-                },
-                TraitBoundModifier::None,
-            ),
-        ]))
+    named!(ty_poly_trait_ref -> Ty, map!(
+        poly_trait_ref,
+        |trait_ref| Ty::PolyTraitRef(vec![
+            TyParamBound::Trait(trait_ref, TraitBoundModifier::None),
+        ])
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
@@ -492,13 +482,13 @@ pub mod parsing {
     named!(pub poly_trait_ref -> PolyTraitRef, do_parse!(
         bound_lifetimes: bound_lifetimes >>
         trait_ref: path >>
-        parenthesized: cond!(
+        parenthesized: option!(cond_reduce!(
             trait_ref.segments.last().unwrap().parameters == PathParameters::none(),
-            option!(parenthesized_parameter_data)
-        ) >>
+            parenthesized_parameter_data
+        )) >>
         ({
             let mut trait_ref = trait_ref;
-            if let Some(Some(parenthesized)) = parenthesized {
+            if let Some(parenthesized) = parenthesized {
                 trait_ref.segments.last_mut().unwrap().parameters = parenthesized;
             }
             PolyTraitRef {
