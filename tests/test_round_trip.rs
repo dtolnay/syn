@@ -13,9 +13,9 @@ use syntex_syntax::ast;
 use syntex_syntax::parse::{self, ParseSess, PResult};
 use time::PreciseTime;
 
-
 use std::fs::File;
 use std::io::{self, Read, Write};
+use std::panic;
 
 macro_rules! errorf {
     ($($tt:tt)*) => {
@@ -52,37 +52,44 @@ fn test_round_trip() {
         };
         let back = quote!(#krate).to_string();
 
-        let sess = ParseSess::new();
-        let before = match syntex_parse(content, &sess) {
-            Ok(before) => before,
-            Err(mut diagnostic) => {
-                diagnostic.cancel();
-                if diagnostic.message.starts_with("file not found for module") ||
-                   diagnostic.message.starts_with("couldn't read") {
-                    errorf!("ignore\n");
-                    continue;
-                } else {
-                    panic!(diagnostic.message.clone());
+        let equal = panic::catch_unwind(|| {
+            let sess = ParseSess::new();
+            let before = match syntex_parse(content, &sess) {
+                Ok(before) => before,
+                Err(mut diagnostic) => {
+                    diagnostic.cancel();
+                    if diagnostic.message.starts_with("file not found for module") {
+                        errorf!("ignore\n");
+                        return true;
+                    } else {
+                        errorf!("FAIL: {}\n", diagnostic.message);
+                        return false;
+                    }
                 }
-            }
-        };
-        let after = match syntex_parse(back, &sess) {
-            Ok(after) => after,
-            Err(mut diagnostic) => {
-                errorf!("syntex failed to parse");
-                diagnostic.emit();
-                failed += 1;
-                continue;
-            }
-        };
+            };
+            let after = match syntex_parse(back, &sess) {
+                Ok(after) => after,
+                Err(mut diagnostic) => {
+                    errorf!("syntex failed to parse");
+                    diagnostic.emit();
+                    return false;
+                }
+            };
 
-        if before == after {
-            errorf!("pass in {}ms\n", elapsed.num_milliseconds());
-        } else {
-            errorf!("FAIL\nbefore: {}\nafter: {}\n",
-                    format!("{:?}", before).replace("\n", ""),
-                    format!("{:?}", after).replace("\n", ""));
-            failed += 1;
+            if before == after {
+                errorf!("pass in {}ms\n", elapsed.num_milliseconds());
+                true
+            } else {
+                errorf!("FAIL\nbefore: {}\nafter: {}\n",
+                        format!("{:?}", before).replace("\n", ""),
+                        format!("{:?}", after).replace("\n", ""));
+                false
+            }
+        });
+        match equal {
+            Err(_) => errorf!("syntex panic\n"),
+            Ok(true) => {},
+            Ok(false) => failed += 1,
         }
     }
 
