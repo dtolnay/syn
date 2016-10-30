@@ -290,5 +290,6 @@ pub fn walk_const_expr<V: Visitor>(visitor: &mut V, len: &ConstExpr) {
         ConstExpr::Paren(ref expr) => {
             visitor.visit_const_expr(expr);
         }
+        ConstExpr::Other(_) => {}
     }
 }
