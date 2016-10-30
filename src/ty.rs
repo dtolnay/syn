@@ -192,7 +192,7 @@ pub enum Unsafety {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Abi {
     Named(String),
-    Extern,
+    Rust,
 }
 
 /// An argument in a function type.
@@ -548,7 +548,7 @@ pub mod parsing {
         name: option!(quoted_string) >>
         (match name {
             Some(name) => Abi::Named(name),
-            None => Abi::Extern,
+            None => Abi::Rust,
         })
     ));
 }
@@ -818,7 +818,7 @@ mod printing {
             tokens.append("extern");
             match *self {
                 Abi::Named(ref named) => named.to_tokens(tokens),
-                Abi::Extern => {}
+                Abi::Rust => {}
             }
         }
     }
