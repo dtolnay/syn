@@ -105,6 +105,15 @@ impl PathParameters {
     pub fn none() -> Self {
         PathParameters::AngleBracketed(AngleBracketedParameterData::default())
     }
+
+    pub fn is_empty(&self) -> bool {
+        match *self {
+            PathParameters::AngleBracketed(ref bracketed) => {
+                bracketed.lifetimes.is_empty() && bracketed.types.is_empty() && bracketed.bindings.is_empty()
+            }
+            PathParameters::Parenthesized(_) => false,
+        }
+    }
 }
 
 /// A path like `Foo<'a, T>`
@@ -664,7 +673,12 @@ mod printing {
     impl ToTokens for PathSegment {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
-            self.parameters.to_tokens(tokens);
+            if self.ident.as_ref().is_empty() && self.parameters.is_empty() {
+                tokens.append("<");
+                tokens.append(">");
+            } else {
+                self.parameters.to_tokens(tokens);
+            }
         }
     }
 
