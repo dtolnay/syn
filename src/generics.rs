@@ -165,6 +165,7 @@ pub mod parsing {
                     cond!(!lifetimes.is_empty(), punct!(",")),
                     separated_nonempty_list!(punct!(","), ty_param)
                 )) >>
+                cond!(!lifetimes.is_empty() || !ty_params.is_empty(), option!(punct!(","))) >>
                 punct!(">") >>
                 (lifetimes, ty_params)
             )

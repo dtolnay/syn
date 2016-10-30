@@ -463,6 +463,7 @@ pub mod parsing {
                 cond!(!lifetimes.is_empty() || !types.is_empty(), punct!(",")),
                 separated_nonempty_list!(punct!(","), type_binding)
             )) >>
+            cond!(!lifetimes.is_empty() || !types.is_empty() || !bindings.is_empty(), option!(punct!(","))) >>
             punct!(">") >>
             (PathSegment {
                 ident: id.unwrap_or_else(|| "".into()),
