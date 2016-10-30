@@ -228,7 +228,7 @@ pub enum Pat {
     /// A literal
     Lit(Box<Expr>),
     /// A range pattern, e.g. `1...2`
-    Range(Box<Lit>, Box<Lit>),
+    Range(Box<Expr>, Box<Expr>),
     /// `[a, b, ..i, y, z]` is represented as:
     ///     `Pat::Slice(box [a, b], Some(i), box [y, z])`
     Slice(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
@@ -1031,21 +1031,23 @@ pub mod parsing {
         (Pat::Ref(Box::new(pat), mutability))
     ));
 
-    named!(pat_lit -> Pat, do_parse!(
+    named!(pat_lit -> Pat, map!(lit_maybe_neg, |lit| Pat::Lit(Box::new(lit))));
+
+    named!(pat_range -> Pat, do_parse!(
+        lo: lit_maybe_neg >>
+        punct!("...") >>
+        hi: lit_maybe_neg >>
+        (Pat::Range(Box::new(lo), Box::new(hi)))
+    ));
+
+    named!(lit_maybe_neg -> Expr, do_parse!(
         neg: option!(punct!("-")) >>
         v: lit >>
         (if neg.is_some() {
-            Pat::Lit(Box::new(Expr::Unary(UnOp::Neg, Box::new(Expr::Lit(v)))))
+            Expr::Unary(UnOp::Neg, Box::new(Expr::Lit(v)))
         } else {
-            Pat::Lit(Box::new(Expr::Lit(v)))
+            Expr::Lit(v)
         })
-    ));
-
-    named!(pat_range -> Pat, do_parse!(
-        lo: lit >>
-        punct!("...") >>
-        hi: lit >>
-        (Pat::Range(Box::new(lo), Box::new(hi)))
     ));
 
     named!(pat_slice -> Pat, do_parse!(
