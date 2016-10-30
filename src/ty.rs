@@ -211,7 +211,11 @@ pub enum FunctionRetTy {
 pub mod parsing {
     use super::*;
     use {TraitBoundModifier, TyParamBound};
+    #[cfg(feature = "full")]
+    use ConstExpr;
     use constant::parsing::const_expr;
+    #[cfg(feature = "full")]
+    use expr::parsing::expr;
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
@@ -248,12 +252,26 @@ pub mod parsing {
         (Ty::Slice(Box::new(elem)))
     ));
 
+    #[cfg(not(feature = "full"))]
     named!(ty_array -> Ty, do_parse!(
         punct!("[") >>
         elem: ty >>
         punct!(";") >>
         len: const_expr >>
         punct!("]") >>
+        (Ty::Array(Box::new(elem), len))
+    ));
+
+    #[cfg(feature = "full")]
+    named!(ty_array -> Ty, do_parse!(
+        punct!("[") >>
+        elem: ty >>
+        punct!(";") >>
+        len: alt!(
+            terminated!(const_expr, punct!("]"))
+            |
+            terminated!(expr, punct!("]")) => { ConstExpr::Other }
+        ) >>
         (Ty::Array(Box::new(elem), len))
     ));
 

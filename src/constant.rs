@@ -22,7 +22,19 @@ pub enum ConstExpr {
     Index(Box<ConstExpr>, Box<ConstExpr>),
     /// No-op: used solely so we can pretty-print faithfully
     Paren(Box<ConstExpr>),
+    /// If compiling with full support for expression syntax, any expression is
+    /// allowed
+    Other(Other),
 }
+
+#[cfg(not(feature = "full"))]
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Other {
+    _private: (),
+}
+
+#[cfg(feature = "full")]
+pub type Other = Expr;
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
@@ -139,7 +151,17 @@ mod printing {
                     expr.to_tokens(tokens);
                     tokens.append(")");
                 }
+                ConstExpr::Other(ref other) => {
+                    other.to_tokens(tokens);
+                }
             }
+        }
+    }
+
+    #[cfg(not(feature = "full"))]
+    impl ToTokens for Other {
+        fn to_tokens(&self, _tokens: &mut Tokens) {
+            unreachable!()
         }
     }
 }
