@@ -797,7 +797,7 @@ pub mod parsing {
         epsilon!() => { |_| BlockCheckMode::Default }
     ));
 
-    named!(within_block -> Vec<Stmt>, do_parse!(
+    named!(pub within_block -> Vec<Stmt>, do_parse!(
         many0!(punct!(";")) >>
         mut standalone: many0!(terminated!(standalone_stmt, many0!(punct!(";")))) >>
         last: option!(expr) >>
@@ -1547,9 +1547,7 @@ mod printing {
     impl ToTokens for Block {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append("{");
-            for stmt in &self.stmts {
-                stmt.to_tokens(tokens);
-            }
+            tokens.append_all(&self.stmts);
             tokens.append("}");
         }
     }

@@ -234,10 +234,11 @@ pub enum FnArg {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {DelimToken, FunctionRetTy, Generics, Ident, Mac, Path, TokenTree, VariantData, Visibility};
+    use {Block, DelimToken, FunctionRetTy, Generics, Ident, Mac, Path, TokenTree, VariantData,
+         Visibility};
     use attr::parsing::{inner_attr, outer_attr};
     use data::parsing::{struct_like_body, visibility};
-    use expr::parsing::{block, expr, pat};
+    use expr::parsing::{block, expr, pat, within_block};
     use generics::parsing::{generics, lifetime, ty_param_bound, where_clause};
     use ident::parsing::ident;
     use mac::parsing::delimited;
@@ -432,7 +433,7 @@ pub mod parsing {
     ));
 
     named!(item_fn -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
+        outer_attrs: many0!(outer_attr) >>
         vis: visibility >>
         constness: constness >>
         unsafety: unsafety >>
@@ -445,11 +446,18 @@ pub mod parsing {
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
-        body: block >>
+        punct!("{") >>
+        inner_attrs: many0!(inner_attr) >>
+        stmts: within_block >>
+        punct!("}") >>
         (Item {
             ident: name,
             vis: vis,
-            attrs: attrs,
+            attrs: {
+                let mut attrs = outer_attrs;
+                attrs.extend(inner_attrs);
+                attrs
+            },
             node: ItemKind::Fn(
                 Box::new(FnDecl {
                     inputs: inputs,
@@ -463,7 +471,9 @@ pub mod parsing {
                     where_clause: where_clause,
                     .. generics
                 },
-                Box::new(body),
+                Box::new(Block {
+                    stmts: stmts,
+                }),
             ),
         })
     ));
@@ -876,7 +886,7 @@ pub mod parsing {
     ));
 
     named!(impl_item_method -> ImplItem, do_parse!(
-        attrs: many0!(outer_attr) >>
+        outer_attrs: many0!(outer_attr) >>
         vis: visibility >>
         defaultness: defaultness >>
         constness: constness >>
@@ -890,12 +900,19 @@ pub mod parsing {
         punct!(")") >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
-        body: block >>
+        punct!("{") >>
+        inner_attrs: many0!(inner_attr) >>
+        stmts: within_block >>
+        punct!("}") >>
         (ImplItem {
             ident: name,
             vis: vis,
             defaultness: defaultness,
-            attrs: attrs,
+            attrs: {
+                let mut attrs = outer_attrs;
+                attrs.extend(inner_attrs);
+                attrs
+            },
             node: ImplItemKind::Method(
                 MethodSig {
                     unsafety: unsafety,
@@ -911,7 +928,9 @@ pub mod parsing {
                         .. generics
                     },
                 },
-                body,
+                Block {
+                    stmts: stmts,
+                },
             ),
         })
     ));
@@ -1039,7 +1058,10 @@ mod printing {
                         ty.to_tokens(tokens);
                     }
                     generics.where_clause.to_tokens(tokens);
-                    block.to_tokens(tokens);
+                    tokens.append("{");
+                    tokens.append_all(self.attrs.inner());
+                    tokens.append_all(&block.stmts);
+                    tokens.append("}");
                 }
                 ItemKind::Mod(ref items) => {
                     self.vis.to_tokens(tokens);
@@ -1240,7 +1262,12 @@ mod printing {
                     }
                     sig.generics.where_clause.to_tokens(tokens);
                     match *block {
-                        Some(ref block) => block.to_tokens(tokens),
+                        Some(ref block) => {
+                            tokens.append("{");
+                            tokens.append_all(self.attrs.inner());
+                            tokens.append_all(&block.stmts);
+                            tokens.append("}");
+                        }
                         None => tokens.append(";"),
                     }
                 }
