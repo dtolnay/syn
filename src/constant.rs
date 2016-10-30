@@ -18,6 +18,8 @@ pub enum ConstExpr {
     /// Variable reference, possibly containing `::` and/or type
     /// parameters, e.g. foo::bar::<baz>.
     Path(Path),
+    /// No-op: used solely so we can pretty-print faithfully
+    Paren(Box<ConstExpr>),
 }
 
 #[cfg(feature = "parsing")]
@@ -30,11 +32,13 @@ pub mod parsing {
 
     named!(pub const_expr -> ConstExpr, do_parse!(
         mut e: alt!(
-            expr_lit
-            |
             expr_unary
             |
-            path => { ConstExpr::Path }
+            expr_lit
+            |
+            expr_path
+            |
+            expr_paren
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
@@ -69,6 +73,15 @@ pub mod parsing {
     ));
 
     named!(expr_lit -> ConstExpr, map!(lit, ConstExpr::Lit));
+
+    named!(expr_path -> ConstExpr, map!(path, ConstExpr::Path));
+
+    named!(expr_paren -> ConstExpr, do_parse!(
+        punct!("(") >>
+        e: const_expr >>
+        punct!(")") >>
+        (ConstExpr::Paren(Box::new(e)))
+    ));
 
     named!(and_cast -> Ty, do_parse!(
         keyword!("as") >>
@@ -107,6 +120,11 @@ mod printing {
                     ty.to_tokens(tokens);
                 }
                 ConstExpr::Path(ref path) => path.to_tokens(tokens),
+                ConstExpr::Paren(ref expr) => {
+                    tokens.append("(");
+                    expr.to_tokens(tokens);
+                    tokens.append(")");
+                }
             }
         }
     }
