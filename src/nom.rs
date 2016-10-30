@@ -490,7 +490,7 @@ macro_rules! do_parse {
     };
 
     ($i:expr, mut $field:ident : $e:ident >> $($rest:tt)*) => {
-        do_parse!($i, $field: call!($e) >> $($rest)*)
+        do_parse!($i, mut $field: call!($e) >> $($rest)*)
     };
 
     ($i:expr, mut $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
