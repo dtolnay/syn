@@ -149,6 +149,7 @@ pub enum ExprKind {
 pub struct FieldValue {
     pub ident: Ident,
     pub expr: Expr,
+    pub is_shorthand: bool,
 }
 
 /// A Block (`{ .. }`).
@@ -746,13 +747,22 @@ pub mod parsing {
         (ExprKind::Struct(path, fields, base.map(Box::new)))
     ));
 
-    named!(field_value -> FieldValue, do_parse!(
-        name: wordlike >>
-        punct!(":") >>
-        value: expr >>
-        (FieldValue {
-            ident: name,
-            expr: value,
+    named!(field_value -> FieldValue, alt!(
+        do_parse!(
+            name: wordlike >>
+            punct!(":") >>
+            value: expr >>
+            (FieldValue {
+                ident: name,
+                expr: value,
+                is_shorthand: false,
+            })
+        )
+        |
+        map!(ident, |name: Ident| FieldValue {
+            ident: name.clone(),
+            expr: ExprKind::Path(None, name.into()).into(),
+            is_shorthand: true,
         })
     ));
 
@@ -1422,8 +1432,10 @@ mod printing {
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
-            tokens.append(":");
-            self.expr.to_tokens(tokens);
+            if !self.is_shorthand {
+                tokens.append(":");
+                self.expr.to_tokens(tokens);
+            }
         }
     }
 
