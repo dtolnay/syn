@@ -196,7 +196,7 @@ pub mod parsing {
         life: lifetime >>
         bounds: opt_vec!(preceded!(
             punct!(":"),
-            separated_nonempty_list!(punct!("+"), lifetime)
+            separated_list!(punct!("+"), lifetime)
         )) >>
         (LifetimeDef {
             attrs: attrs,
@@ -258,8 +258,10 @@ pub mod parsing {
     named!(where_predicate -> WherePredicate, alt!(
         do_parse!(
             ident: lifetime >>
-            punct!(":") >>
-            bounds: separated_nonempty_list!(punct!("+"), lifetime) >>
+            bounds: opt_vec!(preceded!(
+                punct!(":"),
+                separated_list!(punct!("+"), lifetime)
+            )) >>
             (WherePredicate::RegionPredicate(WhereRegionPredicate {
                 lifetime: ident,
                 bounds: bounds,
