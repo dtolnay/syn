@@ -4,7 +4,10 @@ language: rust
 
 rust: nightly
 
-cache: cargo
+cache:
+  cargo: true
+  directories:
+    - tests/rust
 
 matrix:
   allow_failures:
