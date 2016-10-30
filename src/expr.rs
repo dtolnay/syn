@@ -1504,7 +1504,12 @@ mod printing {
                                 tokens.append_separated(&pats[pos..], ",");
                             }
                         }
-                        None => tokens.append_separated(pats, ","),
+                        None => {
+                            tokens.append_separated(pats, ",");
+                            if pats.len() == 1 {
+                                tokens.append(",");
+                            }
+                        }
                     }
                     tokens.append(")");
                 }
