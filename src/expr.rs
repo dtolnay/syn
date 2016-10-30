@@ -226,7 +226,7 @@ pub enum Pat {
     /// A reference pattern, e.g. `&mut (a, b)`
     Ref(Box<Pat>, Mutability),
     /// A literal
-    Lit(Box<Lit>),
+    Lit(Box<Expr>),
     /// A range pattern, e.g. `1...2`
     Range(Box<Lit>, Box<Lit>),
     /// `[a, b, ..i, y, z]` is represented as:
@@ -294,7 +294,7 @@ pub enum BindingMode {
 pub mod parsing {
     use super::*;
     use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Mac,
-         TokenTree, Ty};
+         TokenTree, Ty, UnOp};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::ident;
@@ -1031,7 +1031,15 @@ pub mod parsing {
         (Pat::Ref(Box::new(pat), mutability))
     ));
 
-    named!(pat_lit -> Pat, map!(lit, |lit| Pat::Lit(Box::new(lit))));
+    named!(pat_lit -> Pat, do_parse!(
+        neg: option!(punct!("-")) >>
+        v: lit >>
+        (if neg.is_some() {
+            Pat::Lit(Box::new(Expr::Unary(UnOp::Neg, Box::new(Expr::Lit(v)))))
+        } else {
+            Pat::Lit(Box::new(Expr::Lit(v)))
+        })
+    ));
 
     named!(pat_range -> Pat, do_parse!(
         lo: lit >>
