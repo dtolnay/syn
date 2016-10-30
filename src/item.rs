@@ -367,6 +367,7 @@ pub mod parsing {
         punct!("::") >>
         punct!("{") >>
         items: separated_nonempty_list!(punct!(","), path_list_item) >>
+        option!(punct!(",")) >>
         punct!("}") >>
         (ViewPath::List(path, items))
     ));
@@ -375,6 +376,7 @@ pub mod parsing {
         global: option!(punct!("::")) >>
         punct!("{") >>
         items: separated_nonempty_list!(punct!(","), path_list_item) >>
+        option!(punct!(",")) >>
         punct!("}") >>
         (ViewPath::List(Path {
             global: global.is_some(),
