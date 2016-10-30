@@ -1031,7 +1031,14 @@ pub mod parsing {
         (Pat::Ref(Box::new(pat), mutability))
     ));
 
-    named!(pat_lit -> Pat, map!(pat_lit_expr, |lit| Pat::Lit(Box::new(lit))));
+    named!(pat_lit -> Pat, do_parse!(
+        lit: pat_lit_expr >>
+        (if let Expr::Path(_, _) = lit {
+            return IResult::Error; // these need to be parsed by pat_path
+        } else {
+            Pat::Lit(Box::new(lit))
+        })
+    ));
 
     named!(pat_range -> Pat, do_parse!(
         lo: pat_lit_expr >>
