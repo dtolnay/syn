@@ -872,6 +872,7 @@ pub mod parsing {
         punct!("{") >>
         tts: token_trees >>
         punct!("}") >>
+        semi: option!(punct!(";")) >>
         (Stmt::Mac(Box::new((
             Mac {
                 path: name.into(),
@@ -880,7 +881,11 @@ pub mod parsing {
                     tts: tts,
                 })],
             },
-            MacStmtStyle::Braces,
+            if semi.is_some() {
+                MacStmtStyle::Semicolon
+            } else {
+                MacStmtStyle::Braces
+            },
             attrs,
         ))))
     ));
