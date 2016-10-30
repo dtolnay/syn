@@ -91,6 +91,7 @@ pub mod parsing {
         IResult::Done("", input.into())
     }
 
+    #[cfg(feature = "full")]
     pub fn wordlike(mut input: &str) -> IResult<&str, Ident> {
         input = skip_whitespace(input);
 
