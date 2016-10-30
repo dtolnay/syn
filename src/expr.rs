@@ -897,7 +897,7 @@ pub mod parsing {
             e.attrs = attrs;
             if semi.is_some() {
                 Stmt::Semi(Box::new(e))
-            } else if !e.attrs.is_empty() || requires_semi(&e) {
+            } else if requires_semi(&e) {
                 return Error;
             } else {
                 Stmt::Expr(Box::new(e))
