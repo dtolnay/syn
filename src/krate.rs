@@ -14,13 +14,21 @@ pub mod parsing {
     use item::parsing::items;
 
     named!(pub krate -> Crate, do_parse!(
+        shebang: option!(shebang) >>
         attrs: many0!(inner_attr) >>
         items: items >>
         (Crate {
-            shebang: None,
+            shebang: shebang,
             attrs: attrs,
             items: items,
         })
+    ));
+
+    named!(shebang -> String, do_parse!(
+        tag!("#!") >>
+        not!(peek!(tag!("["))) >>
+        content: take_until!("\n") >>
+        (format!("#!{}", content))
     ));
 }
 
@@ -32,6 +40,9 @@ mod printing {
 
     impl ToTokens for Crate {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Some(ref shebang) = self.shebang {
+                tokens.append(&format!("{}\n", shebang));
+            }
             for attr in self.attrs.inner() {
                 attr.to_tokens(tokens);
             }
