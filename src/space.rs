@@ -18,7 +18,7 @@ pub fn whitespace(input: &str) -> IResult<&str, ()> {
                     continue;
                 }
                 break;
-            } else if s.starts_with("/*") && !s.starts_with("/**") && !s.starts_with("/*!") {
+            } else if s.starts_with("/*") && (!s.starts_with("/**") || s.starts_with("/***")) && !s.starts_with("/*!") {
                 match block_comment(s) {
                     IResult::Done(_, com) => {
                         i += com.len();
