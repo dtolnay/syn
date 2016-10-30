@@ -216,6 +216,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                                        self.fold_ident(field.ident.node)),
                 expr: self.fold_expr(field.expr),
                 span: self.new_span(field.span),
+                is_shorthand: field.is_shorthand,
             }
         }
 
