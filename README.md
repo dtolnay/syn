@@ -117,6 +117,25 @@ fn expand_num_fields(ast: syn::MacroInput) -> quote::Tokens {
 }
 ```
 
+## Optional features
+
+Syn puts a lot of functionality behind optional features in order to optimize
+compile time for the most common use cases. These are the available features and
+their effect on compile time. Dependencies are included in the compile times.
+
+Features | Compile time | Functionality
+--- | --- | ---
+*(none)* | 1 sec | The data structures representing the AST of Rust structs, enums, and types.
+parsing | 4 sec | Parsing Rust source code containing structs and enums into an AST.
+printing | 2 sec | Printing an AST of structs and enums as Rust source code.
+**parsing, printing** | **4 sec** | **This is the default.** Parsing and printing of Rust structs and enums. This is typically what you want for implementing Macros 1.1 custom derives.
+full | 2 sec | The data structures representing the full AST of all possible Rust code.
+full, parsing | 7 sec | Parsing any valid Rust source code to an AST.
+full, printing | 4 sec | Turning an AST into Rust source code.
+full, parsing, printing | 8 sec | Parsing and printing any Rust syntax.
+full, parsing, printing, expand | 9 sec | Expansion of custom derives in a file of Rust code. This is typically what you want for expanding custom derives on stable Rust using a build script.
+full, parsing, printing, expand, pretty | 60 sec | Expansion of custom derives with pretty-printed output. This is what you want when iterating on or debugging a custom derive, but the pretty printing should be disabled once you get everything working.
+
 ## License
 
 Licensed under either of
