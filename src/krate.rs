@@ -14,6 +14,7 @@ pub mod parsing {
     use item::parsing::items;
 
     named!(pub krate -> Crate, do_parse!(
+        option!(byte_order_mark) >>
         shebang: option!(shebang) >>
         attrs: many0!(inner_attr) >>
         items: items >>
@@ -23,6 +24,8 @@ pub mod parsing {
             items: items,
         })
     ));
+
+    named!(byte_order_mark -> &str, tag!("\u{feff}"));
 
     named!(shebang -> String, do_parse!(
         tag!("#!") >>

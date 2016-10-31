@@ -59,8 +59,6 @@ fn filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/type-macros-hlist.rs" |
         // TODO type macros
         "tests/rust/src/test/run-pass/type-macros-simple.rs" |
-        // TODO ignore byte order mark
-        "tests/rust/src/test/run-pass/utf8-bom.rs" |
         // TODO type macros
         "tests/rust/src/test/run-pass-fulldeps/proc_macro.rs" => false,
         _ => true,
