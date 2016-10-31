@@ -62,9 +62,7 @@ fn filter(entry: &DirEntry) -> bool {
         // TODO ignore byte order mark
         "tests/rust/src/test/run-pass/utf8-bom.rs" |
         // TODO type macros
-        "tests/rust/src/test/run-pass-fulldeps/proc_macro.rs" |
-        // TODO pub(crate)
-        "tests/rust/src/test/ui/span/pub-struct-field.rs" => false,
+        "tests/rust/src/test/run-pass-fulldeps/proc_macro.rs" => false,
         _ => true,
     }
 }
@@ -154,7 +152,8 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use std::rc::Rc;
     use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
                              ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
-                             NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam};
+                             NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
+                             Visibility};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
     use syntex_syntax::parse::token::{Lit, Token, intern};
@@ -381,6 +380,13 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                     Token::MatchNt(self.fold_ident(name), self.fold_ident(kind))
                 }
                 _ => t,
+            }
+        }
+
+        fn fold_vis(&mut self, vis: Visibility) -> Visibility {
+            match vis {
+                Visibility::Crate(span) => Visibility::Crate(self.new_span(span)),
+                _ => fold::noop_fold_vis(vis, self),
             }
         }
     }

@@ -42,9 +42,11 @@ pub struct Field {
     pub ty: Ty,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Visibility {
     Public,
+    Crate,
+    Restricted(Box<Path>),
     Inherited,
 }
 
@@ -56,7 +58,7 @@ pub mod parsing {
     use constant::parsing::const_expr;
     use generics::parsing::where_clause;
     use ident::parsing::ident;
-    use ty::parsing::ty;
+    use ty::parsing::{path, ty};
 
     named!(pub struct_body -> (WhereClause, VariantData), alt!(
         do_parse!(
@@ -147,6 +149,22 @@ pub mod parsing {
     ));
 
     named!(pub visibility -> Visibility, alt!(
+        do_parse!(
+            keyword!("pub") >>
+            punct!("(") >>
+            keyword!("crate") >>
+            punct!(")") >>
+            (Visibility::Crate)
+        )
+        |
+        do_parse!(
+            keyword!("pub") >>
+            punct!("(") >>
+            restricted: path >>
+            punct!(")") >>
+            (Visibility::Restricted(Box::new(restricted)))
+        )
+        |
         keyword!("pub") => { |_| Visibility::Public }
         |
         epsilon!() => { |_| Visibility::Inherited }
@@ -206,8 +224,21 @@ mod printing {
 
     impl ToTokens for Visibility {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Visibility::Public = *self {
-                tokens.append("pub");
+            match *self {
+                Visibility::Public => tokens.append("pub"),
+                Visibility::Crate => {
+                    tokens.append("pub");
+                    tokens.append("(");
+                    tokens.append("crate");
+                    tokens.append(")");
+                }
+                Visibility::Restricted(ref path) => {
+                    tokens.append("pub");
+                    tokens.append("(");
+                    path.to_tokens(tokens);
+                    tokens.append(")");
+                }
+                Visibility::Inherited => {}
             }
         }
     }
