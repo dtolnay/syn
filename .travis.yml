@@ -13,6 +13,9 @@ matrix:
   allow_failures:
     - env: ROLE=clippy
 
+git:
+  submodules: false
+
 before_script:
   - pip install 'travis-cargo<0.2' --user
   - export PATH=$HOME/.local/bin:$PATH
@@ -27,6 +30,7 @@ script:
           cargo doc --features 'full expand'
           ;;
         test)
+          git submodule update --init &&
           cargo test --features 'full aster expand pretty visit'
           ;;
         clippy)
