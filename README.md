@@ -85,13 +85,14 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input(&source).unwrap();
 
     // Build the output
-    let expanded = expand_num_fields(ast);
+    let expanded = expand_num_fields(&ast);
 
-    // Parse back to a token stream and return it
-    expanded.to_string().parse().unwrap()
+    // Return the original input struct unmodified, and the
+    // generated impl along with it
+    quote!(#ast #expanded).to_string().parse().unwrap()
 }
 
-fn expand_num_fields(ast: syn::MacroInput) -> quote::Tokens {
+fn expand_num_fields(ast: &syn::MacroInput) -> quote::Tokens {
     let n = match ast.body {
         syn::Body::Struct(ref data) => data.fields().len(),
         syn::Body::Enum(_) => panic!("#[derive(NumFields)] can only be used with structs"),
@@ -104,9 +105,6 @@ fn expand_num_fields(ast: syn::MacroInput) -> quote::Tokens {
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     quote! {
-        // Preserve the input struct unmodified
-        #ast
-
         // The generated impl
         impl #impl_generics ::mycrate::NumFields for #name #ty_generics #where_clause {
             fn num_fields() -> usize {
@@ -135,6 +133,60 @@ full, printing | 4 sec | Turning an AST into Rust source code.
 full, parsing, printing | 8 sec | Parsing and printing any Rust syntax.
 full, parsing, printing, expand | 9 sec | Expansion of custom derives in a file of Rust code. This is typically what you want for expanding custom derives on stable Rust using a build script.
 full, parsing, printing, expand, pretty | 60 sec | Expansion of custom derives with pretty-printed output. This is what you want when iterating on or debugging a custom derive, but the pretty printing should be disabled once you get everything working.
+
+## Custom derives on stable Rust
+
+Syn supports a way of expanding custom derives from a build script, similar to
+what [Serde is able to do with serde_codegen](https://serde.rs/codegen-stable.html).
+The advantage of using Syn for this purpose rather than Syntex is much faster
+compile time.
+
+Continuing with the `NumFields` example from above, it can be extended to
+support stable Rust like this. One or more custom derives are added to a
+[`Registry`](https://dtolnay.github.io/syn/syn/struct.Registry.html), which is
+then able to expand those derives in a source file at a particular path and
+write the expanded output to a different path. A custom derive is represented by
+the [`CustomDerive`](https://dtolnay.github.io/syn/syn/trait.CustomDerive.html)
+trait which takes a [`MacroInput`](https://dtolnay.github.io/syn/syn/struct.MacroInput.html)
+(either a struct or an enum) and [expands it](https://dtolnay.github.io/syn/syn/struct.Expanded.html)
+into zero or more new items and maybe a modified or unmodified instance of the
+original input.
+
+```rust
+pub fn expand_file<S, D>(src: S, dst: D) -> Result<(), String>
+    where S: AsRef<Path>,
+          D: AsRef<Path>
+{
+    let mut registry = syn::Registry::new();
+    registry.add_derive("NumFields", |input| {
+        let tokens = expand_num_fields(&input);
+        let items = syn::parse_items(&tokens.to_string()).unwrap();
+        Ok(syn::Expanded {
+            new_items: items,
+            original: Some(input),
+        })
+    });
+    registry.expand_file(src, dst)
+}
+```
+
+The codegen can be invoked from a build script as follows.
+
+```rust
+extern crate your_codegen;
+
+use std::env;
+use std::path::Path;
+
+fn main() {
+    let out_dir = env::var_os("OUT_DIR").unwrap();
+
+    let src = Path::new("src/codegen_types.in.rs");
+    let dst = Path::new(&out_dir).join("codegen_types.rs");
+
+    your_codegen::expand_file(&src, &dst).unwrap();
+}
+```
 
 ## License
 
