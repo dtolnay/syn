@@ -59,6 +59,30 @@ pub struct Path {
     pub segments: Vec<PathSegment>,
 }
 
+impl Path {
+    pub fn new_local<I>(segments: I) -> Self
+    where I: IntoIterator, I::Item: AsRef<str> {
+        Path {
+            global: false,
+            segments: segments.into_iter().map(|s| s.as_ref().into()).collect(),
+        }
+    }
+
+    pub fn new_global<I>(segments: I) -> Self
+    where I: IntoIterator, I::Item: AsRef<str> {
+        Path {
+            global: true,
+            segments: segments.into_iter().map(|s| s.as_ref().into()).collect(),
+        }
+    }
+}
+
+#[test]
+fn test_path_contstructors() {
+    assert_eq!(Path::new_local(&["foo", "bar"]).segments.len(), 2);
+    assert_eq!(Path::new_global(&["foo", "bar"]).segments.len(), 2);
+}
+
 impl<T> From<T> for Path
     where T: Into<PathSegment>
 {

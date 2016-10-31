@@ -116,6 +116,21 @@ impl WhereClause {
     pub fn none() -> Self {
         WhereClause { predicates: Vec::new() }
     }
+
+    pub fn push_simple_bound<P1, P2>(&mut self, type_: P1, trait_: P2)
+    where P1: Into<Path>, P2: Into<Path> {
+        self.predicates.push(WherePredicate::BoundPredicate(WhereBoundPredicate {
+            bound_lifetimes: Vec::new(),
+            bounded_ty: Ty::Path(None, type_.into()),
+            bounds: vec![TyParamBound::Trait(
+                PolyTraitRef {
+                    bound_lifetimes: Vec::new(),
+                    trait_ref: trait_.into(),
+                },
+                TraitBoundModifier::None
+            )],
+        }))
+    }
 }
 
 /// A single predicate in a `where` clause

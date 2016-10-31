@@ -17,7 +17,7 @@ Designed for fast compile time.
 
 ```toml
 [dependencies]
-syn = "0.10"
+syn = "0.10.1"
 quote = "0.3"
 
 [lib]
