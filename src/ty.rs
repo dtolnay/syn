@@ -109,7 +109,8 @@ impl PathParameters {
     pub fn is_empty(&self) -> bool {
         match *self {
             PathParameters::AngleBracketed(ref bracketed) => {
-                bracketed.lifetimes.is_empty() && bracketed.types.is_empty() && bracketed.bindings.is_empty()
+                bracketed.lifetimes.is_empty() && bracketed.types.is_empty() &&
+                bracketed.bindings.is_empty()
             }
             PathParameters::Parenthesized(_) => false,
         }

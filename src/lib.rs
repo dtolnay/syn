@@ -54,9 +54,9 @@ pub use ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem,
-               ForeignMod, ImplItem, ImplItemKind, ImplPolarity, Item, ItemKind, MethodSig,
-               PathListItem, TraitItem, TraitItemKind, ViewPath};
+pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ForeignMod,
+               ImplItem, ImplItemKind, ImplPolarity, Item, ItemKind, MethodSig, PathListItem,
+               TraitItem, TraitItemKind, ViewPath};
 
 mod lit;
 pub use lit::{FloatTy, IntTy, Lit, StrStyle};

@@ -181,7 +181,9 @@ struct Derive {
 }
 
 /// Pull custom derives and cfgs out of the given Attribute.
-fn parse_attr(reg: &Registry, attr: Attribute) -> (Vec<Derive>, Vec<NestedMetaItem>, Option<Attribute>) {
+fn parse_attr(reg: &Registry,
+              attr: Attribute)
+              -> (Vec<Derive>, Vec<NestedMetaItem>, Option<Attribute>) {
     if attr.style != AttrStyle::Outer || attr.is_sugared_doc {
         return (Vec::new(), Vec::new(), Some(attr));
     }
@@ -223,7 +225,9 @@ fn parse_attr(reg: &Registry, attr: Attribute) -> (Vec<Derive>, Vec<NestedMetaIt
 
 /// Assuming the given nested meta-items came from a #[derive(...)] attribute,
 /// pull out the ones that are custom derives.
-fn parse_derive_attr(reg: &Registry, nested: Vec<NestedMetaItem>) -> (Vec<Ident>, Option<Attribute>) {
+fn parse_derive_attr(reg: &Registry,
+                     nested: Vec<NestedMetaItem>)
+                     -> (Vec<Ident>, Option<Attribute>) {
     let mut derives = Vec::new();
 
     let remaining: Vec<_> = nested.into_iter()
@@ -296,7 +300,8 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<NestedMetaItem>) -> (Vec<Derive>, 
         let attr = attr.map(|attr| {
             Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::List("cfg_attr".into(), vec![cfg, NestedMetaItem::MetaItem(attr.value)]),
+                value: MetaItem::List("cfg_attr".into(),
+                                      vec![cfg, NestedMetaItem::MetaItem(attr.value)]),
                 is_sugared_doc: false,
             }
         });
@@ -304,7 +309,9 @@ fn parse_cfg_attr(reg: &Registry, nested: Vec<NestedMetaItem>) -> (Vec<Derive>, 
     } else {
         let attr = Attribute {
             style: AttrStyle::Outer,
-            value: MetaItem::List("cfg_attr".into(), vec![cfg, NestedMetaItem::MetaItem(MetaItem::List(name, nested))]),
+            value:
+                MetaItem::List("cfg_attr".into(),
+                               vec![cfg, NestedMetaItem::MetaItem(MetaItem::List(name, nested))]),
             is_sugared_doc: false,
         };
         (Vec::new(), Some(attr))

@@ -88,7 +88,8 @@ pub fn cooked_byte_string(mut input: &str) -> IResult<&str, Vec<u8>> {
                     Some((_, b'0')) => vec.push(b'\0'),
                     Some((_, b'\'')) => vec.push(b'\''),
                     Some((_, b'"')) => vec.push(b'"'),
-                    Some((newline, b'\n')) | Some((newline, b'\r')) => {
+                    Some((newline, b'\n')) |
+                    Some((newline, b'\r')) => {
                         let rest = &input[newline + 1..];
                         for (offset, ch) in rest.char_indices() {
                             if !ch.is_whitespace() {
