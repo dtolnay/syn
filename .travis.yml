@@ -8,6 +8,7 @@ cache:
   cargo: true
   directories:
     - tests/rust
+    - .git/modules
 
 matrix:
   allow_failures:
