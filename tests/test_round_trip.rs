@@ -51,8 +51,6 @@ fn filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO trailing comma in attribute list
-        "tests/rust/src/test/run-pass/trailing-comma.rs" |
         // TODO precedence issue with binop vs poly trait ref
         "tests/rust/src/test/run-pass/try-macro.rs" |
         // TODO type macros

@@ -1130,6 +1130,7 @@ pub mod parsing {
             cond!(!after.is_empty(), option!(punct!(","))) >>
             (comma_before_dots.is_some(), after)
         )) >>
+        cond!(after.is_none(), option!(punct!(","))) >>
         punct!("]") >>
         (match after {
             None => Pat::Slice(before, None, Vec::new()),
