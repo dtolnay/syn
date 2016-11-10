@@ -32,7 +32,7 @@ script:
           ;;
         test)
           git submodule update --init &&
-          cargo test --features 'full aster expand pretty visit'
+          cargo test --features 'full aster expand pretty visit' --release
           ;;
         clippy)
           cargo build --features 'full aster expand pretty visit clippy'
