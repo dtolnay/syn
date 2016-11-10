@@ -2,8 +2,8 @@ use super::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Expr {
-    node: ExprKind,
-    attrs: Vec<Attribute>,
+    pub node: ExprKind,
+    pub attrs: Vec<Attribute>,
 }
 
 impl From<ExprKind> for Expr {
