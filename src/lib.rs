@@ -19,8 +19,8 @@ mod nom;
 #[macro_use]
 mod helper;
 
-#[cfg(feature = "parsing")]
-mod escape;
+#[cfg(feature = "aster")]
+pub mod aster;
 
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem};
@@ -30,6 +30,9 @@ pub use constant::ConstExpr;
 
 mod data;
 pub use data::{Field, Variant, VariantData, Visibility};
+
+#[cfg(feature = "parsing")]
+mod escape;
 
 #[cfg(feature = "full")]
 mod expr;
@@ -43,11 +46,6 @@ pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam,
 #[cfg(feature = "printing")]
 pub use generics::{ImplGenerics, TyGenerics};
 
-#[cfg(feature = "full")]
-mod krate;
-#[cfg(feature = "full")]
-pub use krate::Crate;
-
 mod ident;
 pub use ident::Ident;
 
@@ -57,6 +55,11 @@ mod item;
 pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ForeignMod,
                ImplItem, ImplItemKind, ImplPolarity, Item, ItemKind, MethodSig, PathListItem,
                TraitItem, TraitItemKind, ViewPath};
+
+#[cfg(feature = "full")]
+mod krate;
+#[cfg(feature = "full")]
+pub use krate::Crate;
 
 mod lit;
 pub use lit::{FloatTy, IntTy, Lit, StrStyle};
@@ -84,9 +87,6 @@ mod ty;
 pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
              Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
              PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety};
-
-#[cfg(feature = "aster")]
-pub mod aster;
 
 #[cfg(feature = "visit")]
 pub mod visit;
