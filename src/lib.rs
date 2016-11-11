@@ -34,8 +34,8 @@ pub use data::{Field, Variant, VariantData, Visibility};
 #[cfg(feature = "full")]
 mod expr;
 #[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, BlockCheckMode, CaptureBy, Expr, ExprKind, FieldPat, Local,
-               MacStmtStyle, Pat, RangeLimits, Stmt};
+pub use expr::{Arm, BindingMode, Block, BlockCheckMode, CaptureBy, Expr, ExprKind, FieldPat,
+               FieldValue, Local, MacStmtStyle, Pat, RangeLimits, Stmt};
 
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
