@@ -87,9 +87,8 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     // Build the output
     let expanded = expand_num_fields(&ast);
 
-    // Return the original input struct unmodified, and the
-    // generated impl along with it
-    quote!(#ast #expanded).to_string().parse().unwrap()
+    // Return the generated impl as a TokenStream
+    expanded.to_string().parse().unwrap()
 }
 
 fn expand_num_fields(ast: &syn::MacroInput) -> quote::Tokens {
