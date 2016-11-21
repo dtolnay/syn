@@ -140,8 +140,7 @@ fn test_round_trip() {
 
 fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Crate> {
     let name = "test_round_trip".to_string();
-    let cfg = Vec::new();
-    parse::parse_crate_from_source_str(name, content, cfg, sess).map(respan_crate)
+    parse::parse_crate_from_source_str(name, content, sess).map(respan_crate)
 }
 
 fn respan_crate(krate: ast::Crate) -> ast::Crate {
@@ -370,7 +369,13 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 Token::Literal(lit, repr) => Token::Literal(self.fold_lit(lit), repr),
                 Token::Ident(id) => Token::Ident(self.fold_ident(id)),
                 Token::Lifetime(id) => Token::Lifetime(self.fold_ident(id)),
-                Token::Interpolated(nt) => Token::Interpolated(self.fold_interpolated(nt)),
+                Token::Interpolated(nt) => {
+                    let nt = match Rc::try_unwrap(nt) {
+                        Ok(nt) => nt,
+                        Err(nt) => (*nt).clone(),
+                    };
+                    Token::Interpolated(Rc::new(self.fold_interpolated(nt)))
+                }
                 Token::SubstNt(ident) => Token::SubstNt(self.fold_ident(ident)),
                 Token::MatchNt(name, kind) => {
                     Token::MatchNt(self.fold_ident(name), self.fold_ident(kind))
