@@ -48,7 +48,7 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
     };
 
     // Parse back to a token stream and return it
-    expanded.to_string().parse().unwrap()
+    expanded.parse().unwrap()
 }
 ```
 
@@ -88,7 +88,7 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     let expanded = expand_num_fields(&ast);
 
     // Return the generated impl as a TokenStream
-    expanded.to_string().parse().unwrap()
+    expanded.parse().unwrap()
 }
 
 fn expand_num_fields(ast: &syn::MacroInput) -> quote::Tokens {
