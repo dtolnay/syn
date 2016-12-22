@@ -63,7 +63,10 @@ pub enum Mutability {
 /// E.g. `std::cmp::PartialEq`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Path {
+    /// A `::foo` path, is relative to the crate root rather than current
+    /// module (like paths in an import).
     pub global: bool,
+    /// The segments in the path: the things separated by `::`.
     pub segments: Vec<PathSegment>,
 }
 
@@ -83,7 +86,13 @@ impl<T> From<T> for Path
 /// E.g. `std`, `String` or `Box<T>`
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PathSegment {
+    /// The identifier portion of this path segment.
     pub ident: Ident,
+    /// Type/lifetime parameters attached to this path. They come in
+    /// two flavors: `Path<A,B,C>` and `Path(A,B) -> C`. Note that
+    /// this is more than just simple syntactic sugar; the use of
+    /// parens affects the region binding rules, so we preserve the
+    /// distinction.
     pub parameters: PathParameters,
 }
 
