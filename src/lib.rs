@@ -144,6 +144,10 @@ mod parsing {
         unwrap("token trees", mac::parsing::token_trees, input)
     }
 
+    pub fn parse_ident(input: &str) -> Result<Ident, String> {
+        unwrap("identifier", ident::parsing::ident, input)
+    }
+
     fn unwrap<T>(name: &'static str,
                  f: fn(&str) -> IResult<&str, T>,
                  input: &str)
