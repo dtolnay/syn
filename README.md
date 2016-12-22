@@ -117,6 +117,45 @@ fn expand_num_fields(ast: &syn::MacroInput) -> quote::Tokens {
 }
 ```
 
+## Testing
+
+Macros 1.1 has a restriction that your proc-macro crate must export nothing but
+`proc_macro_derive` functions, and also `proc_macro_derive` procedural macros
+cannot be used from the same crate in which they are defined. These restrictions
+may be lifted in the future but for now they make writing tests a bit trickier
+than for other types of code.
+
+In particular, you will not be able to write test functions like `#[test] fn
+it_works() { ... }` in line with your code. Instead, either put tests in a
+[`tests` directory](https://doc.rust-lang.org/book/testing.html#the-tests-directory)
+or in a separate crate entirely.
+
+Additionally, if your procedural macro implements a particular trait, that trait
+must be defined in a separate crate from the procedural macro.
+
+As a concrete example, suppose your procedural macro crate is called `my_derive`
+and it implements a trait called `my_crate::MyTrait`. Your unit tests for the
+procedural macro can go in `my_derive/tests/test.rs` or into a separate crate
+`my_tests/tests/test.rs`. Either way the test would look something like this:
+
+```rust
+#![feature(proc_macro)]
+
+#[macro_use]
+extern crate my_derive;
+
+extern crate my_crate;
+use my_crate::MyTrait;
+
+#[test]
+fn it_works() {
+    #[derive(MyTrait)]
+    struct S { /* ... */ }
+
+    /* test the thing */
+}
+```
+
 ## Optional features
 
 Syn puts a lot of functionality behind optional features in order to optimize
