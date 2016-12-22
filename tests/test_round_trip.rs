@@ -52,13 +52,7 @@ fn filter(entry: &DirEntry) -> bool {
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/item-attributes.rs" |
         // TODO precedence issue with binop vs poly trait ref
-        "tests/rust/src/test/run-pass/try-macro.rs" |
-        // TODO type macros
-        "tests/rust/src/test/run-pass/type-macros-hlist.rs" |
-        // TODO type macros
-        "tests/rust/src/test/run-pass/type-macros-simple.rs" |
-        // TODO type macros
-        "tests/rust/src/test/run-pass-fulldeps/proc_macro.rs" => false,
+        "tests/rust/src/test/run-pass/try-macro.rs" => false,
         _ => true,
     }
 }

@@ -64,9 +64,9 @@ pub use krate::Crate;
 mod lit;
 pub use lit::{FloatTy, IntTy, Lit, StrStyle};
 
-#[cfg(feature = "full")]
+#[cfg(feature = "type-macros")]
 mod mac;
-#[cfg(feature = "full")]
+#[cfg(feature = "type-macros")]
 pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
 
 mod macro_input;
