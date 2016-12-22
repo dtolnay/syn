@@ -145,8 +145,9 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                              Visibility};
     use syntex_syntax::codemap::{self, Spanned};
     use syntex_syntax::fold::{self, Folder};
-    use syntex_syntax::parse::token::{Lit, Token, intern};
+    use syntex_syntax::parse::token::{Lit, Token};
     use syntex_syntax::ptr::P;
+    use syntex_syntax::symbol::Symbol;
     use syntex_syntax::tokenstream::{Delimited, SequenceRepetition, TokenTree};
     use syntex_syntax::util::move_map::MoveMap;
     use syntex_syntax::util::small_vector::SmallVector;
@@ -163,12 +164,12 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
             // so many equivalent representations of the same literal; they are
             // tested elsewhere
             match l {
-                Lit::Byte(_) => Lit::Byte(intern("")),
-                Lit::Char(_) => Lit::Char(intern("")),
-                Lit::Integer(_) => Lit::Integer(intern("")),
-                Lit::Float(_) => Lit::Float(intern("")),
-                Lit::Str_(_) => Lit::Str_(intern("")),
-                Lit::ByteStr(_) => Lit::ByteStr(intern("")),
+                Lit::Byte(_) => Lit::Byte(Symbol::intern("")),
+                Lit::Char(_) => Lit::Char(Symbol::intern("")),
+                Lit::Integer(_) => Lit::Integer(Symbol::intern("")),
+                Lit::Float(_) => Lit::Float(Symbol::intern("")),
+                Lit::Str_(_) => Lit::Str_(Symbol::intern("")),
+                Lit::ByteStr(_) => Lit::ByteStr(Symbol::intern("")),
                 _ => l,
             }
         }
@@ -289,26 +290,26 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         }
 
         fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
-            at.node.id.0 = 0;
+            at.id.0 = 0;
             fold::noop_fold_attribute(at, self)
         }
 
-        fn fold_meta_item(&mut self, meta_item: P<MetaItem>) -> P<MetaItem> {
-            meta_item.map(|Spanned { node, span }| {
-                Spanned {
-                    node: match node {
-                        MetaItemKind::Word(id) => MetaItemKind::Word(id),
-                        MetaItemKind::List(id, mis) => {
-                            MetaItemKind::List(id, mis.move_map(|e| self.fold_meta_list_item(e)))
-                        }
-                        // default fold_meta_item does not fold the value span
-                        MetaItemKind::NameValue(id, lit) => {
-                            MetaItemKind::NameValue(id, self.fold_spanned(lit))
-                        }
-                    },
-                    span: self.new_span(span),
-                }
-            })
+        fn fold_meta_item(&mut self, meta_item: MetaItem) -> MetaItem {
+            let MetaItem { name, node, span } = meta_item;
+            MetaItem {
+                name: name,
+                node: match node {
+                    MetaItemKind::Word => MetaItemKind::Word,
+                    MetaItemKind::List(nested) => {
+                        MetaItemKind::List(nested.move_map(|e| self.fold_meta_list_item(e)))
+                    }
+                    // default fold_meta_item does not fold the value span
+                    MetaItemKind::NameValue(lit) => {
+                        MetaItemKind::NameValue(self.fold_spanned(lit))
+                    }
+                },
+                span: self.new_span(span),
+            }
         }
 
         fn fold_meta_list_item(&mut self, list_item: NestedMetaItem) -> NestedMetaItem {
