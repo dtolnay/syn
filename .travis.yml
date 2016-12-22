@@ -24,7 +24,7 @@ before_script:
 script:
   - |
       case $ROLE in
-        build, build-stable)
+        build|build-stable)
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features 'full expand' &&
