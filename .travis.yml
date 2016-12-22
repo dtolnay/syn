@@ -24,7 +24,7 @@ before_script:
 script:
   - |
       case $ROLE in
-        build)
+        build, build-stable)
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features 'full expand' &&
@@ -47,9 +47,14 @@ after_success:
 
 env:
   matrix:
-    - ROLE=build
-    - ROLE=test
-    - ROLE=clippy
+    - env: ROLE=build-stable
+      rust: stable
+    - env: ROLE=build
+      rust: nightly
+    - env: ROLE=test
+      rust: nightly
+    - env: ROLE=clippy
+      rust: nightly
   global:
     - RUST_MIN_STACK=16000000
     - TRAVIS_CARGO_NIGHTLY_FEATURE=""
