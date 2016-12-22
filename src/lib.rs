@@ -97,7 +97,7 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {generics, macro_input, space, ty};
+    use {generics, ident, macro_input, space, ty};
     use nom::IResult;
 
     #[cfg(feature = "full")]
