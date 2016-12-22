@@ -28,8 +28,8 @@ use super::*;
 /// new default implementation gets introduced.)
 pub trait Visitor: Sized {
     fn visit_ident(&mut self, _ident: &Ident) {}
-    fn visit_macro_input(&mut self, macro_input: &MacroInput) {
-        walk_macro_input(self, macro_input)
+    fn visit_derive_input(&mut self, derive_input: &DeriveInput) {
+        walk_derive_input(self, derive_input)
     }
     fn visit_ty(&mut self, ty: &Ty) {
         walk_ty(self, ty)
@@ -110,18 +110,18 @@ pub fn walk_poly_trait_ref<V>(visitor: &mut V, trait_ref: &PolyTraitRef, _: &Tra
     visitor.visit_path(&trait_ref.trait_ref);
 }
 
-pub fn walk_macro_input<V: Visitor>(visitor: &mut V, macro_input: &MacroInput) {
-    visitor.visit_ident(&macro_input.ident);
-    visitor.visit_generics(&macro_input.generics);
-    match macro_input.body {
+pub fn walk_derive_input<V: Visitor>(visitor: &mut V, derive_input: &DeriveInput) {
+    visitor.visit_ident(&derive_input.ident);
+    visitor.visit_generics(&derive_input.generics);
+    match derive_input.body {
         Body::Enum(ref variants) => {
-            walk_list!(visitor, visit_variant, variants, &macro_input.generics);
+            walk_list!(visitor, visit_variant, variants, &derive_input.generics);
         }
         Body::Struct(ref variant_data) => {
-            visitor.visit_variant_data(variant_data, &macro_input.ident, &macro_input.generics);
+            visitor.visit_variant_data(variant_data, &derive_input.ident, &derive_input.generics);
         }
     }
-    walk_list!(visitor, visit_attribute, &macro_input.attrs);
+    walk_list!(visitor, visit_attribute, &derive_input.attrs);
 }
 
 pub fn walk_variant<V>(visitor: &mut V, variant: &Variant, generics: &Generics)

@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct MacroInput {
+pub struct DeriveInput {
     pub ident: Ident,
     pub vis: Visibility,
     pub attrs: Vec<Attribute>,
@@ -24,14 +24,14 @@ pub mod parsing {
     use generics::parsing::generics;
     use ident::parsing::ident;
 
-    named!(pub macro_input -> MacroInput, do_parse!(
+    named!(pub derive_input -> DeriveInput, do_parse!(
         attrs: many0!(outer_attr) >>
         vis: visibility >>
         which: alt!(keyword!("struct") | keyword!("enum")) >>
         id: ident >>
         generics: generics >>
         item: switch!(value!(which),
-            "struct" => map!(struct_body, move |(wh, body)| MacroInput {
+            "struct" => map!(struct_body, move |(wh, body)| DeriveInput {
                 ident: id,
                 vis: vis,
                 attrs: attrs,
@@ -42,7 +42,7 @@ pub mod parsing {
                 body: Body::Struct(body),
             })
             |
-            "enum" => map!(enum_body, move |(wh, body)| MacroInput {
+            "enum" => map!(enum_body, move |(wh, body)| DeriveInput {
                 ident: id,
                 vis: vis,
                 attrs: attrs,
@@ -64,7 +64,7 @@ mod printing {
     use data::VariantData;
     use quote::{Tokens, ToTokens};
 
-    impl ToTokens for MacroInput {
+    impl ToTokens for DeriveInput {
         fn to_tokens(&self, tokens: &mut Tokens) {
             for attr in self.attrs.outer() {
                 attr.to_tokens(tokens);

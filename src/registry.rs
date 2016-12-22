@@ -1,4 +1,4 @@
-use super::{Attribute, AttrStyle, Body, Crate, Ident, Item, ItemKind, MacroInput, MetaItem,
+use super::{Attribute, AttrStyle, Body, Crate, DeriveInput, Ident, Item, ItemKind, MetaItem,
             NestedMetaItem};
 use quote::Tokens;
 
@@ -14,7 +14,7 @@ pub trait CustomDerive {
     /// input item or preserves it unmodified, it must be returned back in the
     /// `original` field of Expanded. The custom derive may discard the input
     /// item by setting `original` to None.
-    fn expand(&self, input: MacroInput) -> Result<Expanded, String>;
+    fn expand(&self, input: DeriveInput) -> Result<Expanded, String>;
 }
 
 /// Produced by expanding a custom derive.
@@ -24,7 +24,7 @@ pub struct Expanded {
     /// The input to the custom derive, whether modified or unmodified. If the
     /// custom derive discards the input item it may do so by setting `original`
     /// to None.
-    pub original: Option<MacroInput>,
+    pub original: Option<DeriveInput>,
 }
 
 /// Registry of custom derives. Callers add custom derives to a registry, then
@@ -35,9 +35,9 @@ pub struct Registry<'a> {
 }
 
 impl<T> CustomDerive for T
-    where T: Fn(MacroInput) -> Result<Expanded, String>
+    where T: Fn(DeriveInput) -> Result<Expanded, String>
 {
-    fn expand(&self, input: MacroInput) -> Result<Expanded, String> {
+    fn expand(&self, input: DeriveInput) -> Result<Expanded, String> {
         self(input)
     }
 }
@@ -47,7 +47,7 @@ impl<'a> Registry<'a> {
         Default::default()
     }
 
-    /// Register a custom derive. A `fn(MacroInput) -> Result<Expanded, String>`
+    /// Register a custom derive. A `fn(DeriveInput) -> Result<Expanded, String>`
     /// may be used as a custom derive.
     ///
     /// ```ignore
@@ -124,21 +124,21 @@ fn expand_item(reg: &Registry,
             return Ok(());
         }
     };
-    let macro_input = MacroInput {
+    let derive_input = DeriveInput {
         ident: item.ident,
         vis: item.vis,
         attrs: item.attrs,
         generics: generics,
         body: body,
     };
-    expand_macro_input(reg, macro_input, cfg, out)
+    expand_derive_input(reg, derive_input, cfg, out)
 }
 
-fn expand_macro_input(reg: &Registry,
-                      mut input: MacroInput,
-                      inherited_cfg: Vec<NestedMetaItem>,
-                      out: &mut Vec<Item>)
-                      -> Result<(), String> {
+fn expand_derive_input(reg: &Registry,
+                       mut input: DeriveInput,
+                       inherited_cfg: Vec<NestedMetaItem>,
+                       out: &mut Vec<Item>)
+                       -> Result<(), String> {
     let mut derives = Vec::new();
     let mut all_cfg = inherited_cfg;
 

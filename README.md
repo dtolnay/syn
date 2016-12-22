@@ -43,7 +43,7 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse the string representation to an AST
-    let ast = syn::parse_macro_input(&source).unwrap();
+    let ast = syn::parse_derive_input(&source).unwrap();
 
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
@@ -85,7 +85,7 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse the string representation to an AST
-    let ast = syn::parse_macro_input(&source).unwrap();
+    let ast = syn::parse_derive_input(&source).unwrap();
 
     // Build the output
     let expanded = expand_num_fields(&ast);
@@ -94,7 +94,7 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     expanded.parse().unwrap()
 }
 
-fn expand_num_fields(ast: &syn::MacroInput) -> quote::Tokens {
+fn expand_num_fields(ast: &syn::DeriveInput) -> quote::Tokens {
     let n = match ast.body {
         syn::Body::Struct(ref data) => data.fields().len(),
         syn::Body::Enum(_) => panic!("#[derive(NumFields)] can only be used with structs"),
@@ -200,7 +200,7 @@ support stable Rust like this. One or more custom derives are added to a
 then able to expand those derives in a source file at a particular path and
 write the expanded output to a different path. A custom derive is represented by
 the [`CustomDerive`](https://dtolnay.github.io/syn/syn/trait.CustomDerive.html)
-trait which takes a [`MacroInput`](https://dtolnay.github.io/syn/syn/struct.MacroInput.html)
+trait which takes a [`DeriveInput`](https://dtolnay.github.io/syn/syn/struct.DeriveInput.html)
 (either a struct or an enum) and [expands it](https://dtolnay.github.io/syn/syn/struct.Expanded.html)
 into zero or more new items and maybe a modified or unmodified instance of the
 original input.

@@ -69,8 +69,11 @@ mod mac;
 #[cfg(feature = "type-macros")]
 pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
 
-mod macro_input;
-pub use macro_input::{Body, MacroInput};
+mod derive;
+pub use derive::{Body, DeriveInput};
+// Deprecated.
+#[doc(hidden)]
+pub type MacroInput = DeriveInput;
 
 mod op;
 pub use op::{BinOp, UnOp};
@@ -97,14 +100,14 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {generics, macro_input, space, ty};
+    use {derive, generics, space, ty};
     use nom::IResult;
 
     #[cfg(feature = "full")]
     use {expr, item, krate, mac};
 
-    pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
-        unwrap("macro input", macro_input::parsing::macro_input, input)
+    pub fn parse_derive_input(input: &str) -> Result<DeriveInput, String> {
+        unwrap("derive input", derive::parsing::derive_input, input)
     }
 
     #[cfg(feature = "full")]
@@ -146,6 +149,12 @@ mod parsing {
 
     pub fn parse_ident(input: &str) -> Result<Ident, String> {
         unwrap("identifier", ident::parsing::ident, input)
+    }
+
+    // Deprecated.
+    #[doc(hidden)]
+    pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
+        parse_derive_input(input)
     }
 
     fn unwrap<T>(name: &'static str,
