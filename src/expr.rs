@@ -116,8 +116,8 @@ pub enum ExprKind {
 
     /// A referencing operation (`&a` or `&mut a`)
     AddrOf(Mutability, Box<Expr>),
-    /// A `break`, with an optional label to break
-    Break(Option<Ident>),
+    /// A `break`, with an optional label to break, and an optional expression
+    Break(Option<Ident>, Option<Box<Expr>>),
     /// A `continue`, with an optional label
     Continue(Option<Ident>),
     /// A `return`, with an optional value to be returned
@@ -355,7 +355,7 @@ pub mod parsing {
                 |
                 expr_mac // must be before expr_path
                 |
-                expr_break // must be before expr_path
+                call!(expr_break, allow_struct) // must be before expr_path
                 |
                 expr_continue // must be before expr_path
                 |
@@ -720,10 +720,11 @@ pub mod parsing {
         (ExprKind::Continue(lbl))
     ));
 
-    named!(expr_break -> ExprKind, do_parse!(
+    named_ambiguous_expr!(expr_break -> ExprKind, allow_struct, do_parse!(
         keyword!("break") >>
         lbl: option!(label) >>
-        (ExprKind::Break(lbl))
+        val: option!(call!(ambiguous_expr, allow_struct, false)) >>
+        (ExprKind::Break(lbl, val.map(Box::new)))
     ));
 
     named_ambiguous_expr!(expr_ret -> ExprKind, allow_struct, do_parse!(
@@ -865,7 +866,7 @@ pub mod parsing {
 
     named!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(outer_attr) >>
-        name: ident >>
+        what: path >>
         punct!("!") >>
     // Only parse braces here; paren and bracket will get parsed as
     // expression statements
@@ -875,7 +876,7 @@ pub mod parsing {
         semi: option!(punct!(";")) >>
         (Stmt::Mac(Box::new((
             Mac {
-                path: name.into(),
+                path: what,
                 tts: vec![TokenTree::Delimited(Delimited {
                     delim: DelimToken::Brace,
                     tts: tts,
@@ -1396,9 +1397,10 @@ mod printing {
                     mutability.to_tokens(tokens);
                     expr.to_tokens(tokens);
                 }
-                ExprKind::Break(ref opt_label) => {
+                ExprKind::Break(ref opt_label, ref opt_val) => {
                     tokens.append("break");
                     opt_label.to_tokens(tokens);
+                    opt_val.to_tokens(tokens);
                 }
                 ExprKind::Continue(ref opt_label) => {
                     tokens.append("continue");
