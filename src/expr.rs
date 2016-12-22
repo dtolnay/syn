@@ -85,8 +85,8 @@ pub enum ExprKind {
     Loop(Block, Option<Ident>),
     /// A `match` block.
     Match(Box<Expr>, Vec<Arm>),
-    /// A closure (for example, `move |a, b, c| {a + b + c}`)
-    Closure(CaptureBy, Box<FnDecl>, Block),
+    /// A closure (for example, `move |a, b, c| a + b + c`)
+    Closure(CaptureBy, Box<FnDecl>, Box<Expr>),
     /// A block (`{ ... }` or `unsafe { ... }`)
     Block(Unsafety, Block),
 
@@ -661,15 +661,10 @@ pub mod parsing {
                 punct!("->") >>
                 ty: ty >>
                 body: block >>
-                ((FunctionRetTy::Ty(ty), body))
+                (FunctionRetTy::Ty(ty), ExprKind::Block(Unsafety::Normal, body).into())
             )
             |
-            map!(ambiguous_expr!(allow_struct), |e| (
-                FunctionRetTy::Default,
-                Block {
-                    stmts: vec![Stmt::Expr(Box::new(e))],
-                },
-            ))
+            map!(ambiguous_expr!(allow_struct), |e| (FunctionRetTy::Default, e))
         ) >>
         (ExprKind::Closure(
             capture,
@@ -678,7 +673,7 @@ pub mod parsing {
                 output: ret_and_body.0,
                 variadic: false,
             }),
-            ret_and_body.1,
+            Box::new(ret_and_body.1),
         ))
     ));
 
@@ -1286,7 +1281,7 @@ mod printing {
                     tokens.append_all(arms);
                     tokens.append("}");
                 }
-                ExprKind::Closure(capture, ref decl, ref body) => {
+                ExprKind::Closure(capture, ref decl, ref expr) => {
                     capture.to_tokens(tokens);
                     tokens.append("|");
                     for (i, input) in decl.inputs.iter().enumerate() {
@@ -1302,23 +1297,13 @@ mod printing {
                     }
                     tokens.append("|");
                     match decl.output {
-                        FunctionRetTy::Default => {
-                            if body.stmts.len() == 1 {
-                                if let Stmt::Expr(ref expr) = body.stmts[0] {
-                                    expr.to_tokens(tokens);
-                                } else {
-                                    body.to_tokens(tokens);
-                                }
-                            } else {
-                                body.to_tokens(tokens);
-                            }
-                        }
+                        FunctionRetTy::Default => { /* nothing */ }
                         FunctionRetTy::Ty(ref ty) => {
                             tokens.append("->");
                             ty.to_tokens(tokens);
-                            body.to_tokens(tokens);
                         }
                     }
+                    expr.to_tokens(tokens);
                 }
                 ExprKind::Block(rules, ref block) => {
                     rules.to_tokens(tokens);
