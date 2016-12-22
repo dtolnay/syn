@@ -88,7 +88,7 @@ pub enum ExprKind {
     /// A closure (for example, `move |a, b, c| {a + b + c}`)
     Closure(CaptureBy, Box<FnDecl>, Block),
     /// A block (`{ ... }` or `unsafe { ... }`)
-    Block(BlockCheckMode, Block),
+    Block(Unsafety, Block),
 
     /// An assignment (`a = foo()`)
     Assign(Box<Expr>, Box<Expr>),
@@ -159,12 +159,6 @@ pub struct FieldValue {
 pub struct Block {
     /// Statements in a block
     pub stmts: Vec<Stmt>,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum BlockCheckMode {
-    Default,
-    Unsafe,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -321,7 +315,7 @@ pub mod parsing {
     use mac::parsing::{mac, token_trees};
     use nom::IResult::{self, Error};
     use op::parsing::{assign_op, binop, unop};
-    use ty::parsing::{mutability, path, qpath, ty};
+    use ty::parsing::{mutability, path, qpath, ty, unsafety};
 
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
@@ -474,7 +468,7 @@ pub mod parsing {
         punct!("}") >>
         (ExprKind::InPlace(
             Box::new(place),
-            Box::new(ExprKind::Block(BlockCheckMode::Default, Block {
+            Box::new(ExprKind::Block(Unsafety::Normal, Block {
                 stmts: value,
             }).into()),
         ))
@@ -571,7 +565,7 @@ pub mod parsing {
                     punct!("{") >>
                     else_block: within_block >>
                     punct!("}") >>
-                    (ExprKind::Block(BlockCheckMode::Default, Block {
+                    (ExprKind::Block(Unsafety::Normal, Block {
                         stmts: else_block,
                     }).into())
                 )
@@ -632,7 +626,7 @@ pub mod parsing {
     ));
 
     fn arm_requires_comma(arm: &Arm) -> bool {
-        if let ExprKind::Block(BlockCheckMode::Default, _) = arm.body.node {
+        if let ExprKind::Block(Unsafety::Normal, _) = arm.body.node {
             false
         } else {
             true
@@ -645,7 +639,7 @@ pub mod parsing {
         guard: option!(preceded!(keyword!("if"), expr)) >>
         punct!("=>") >>
         body: alt!(
-            map!(block, |blk| ExprKind::Block(BlockCheckMode::Default, blk).into())
+            map!(block, |blk| ExprKind::Block(Unsafety::Normal, blk).into())
             |
             expr
         ) >>
@@ -777,7 +771,7 @@ pub mod parsing {
     ));
 
     named!(expr_block -> ExprKind, do_parse!(
-        rules: block_check_mode >>
+        rules: unsafety >>
         b: block >>
         (ExprKind::Block(rules, Block {
             stmts: b.stmts,
@@ -833,12 +827,6 @@ pub mod parsing {
         (Block {
             stmts: stmts,
         })
-    ));
-
-    named!(block_check_mode -> BlockCheckMode, alt!(
-        keyword!("unsafe") => { |_| BlockCheckMode::Unsafe }
-        |
-        epsilon!() => { |_| BlockCheckMode::Default }
     ));
 
     named!(pub within_block -> Vec<Stmt>, do_parse!(
@@ -1467,7 +1455,7 @@ mod printing {
             tokens.append("=>");
             self.body.to_tokens(tokens);
             match self.body.node {
-                ExprKind::Block(BlockCheckMode::Default, _) => {
+                ExprKind::Block(Unsafety::Normal, _) => {
                     // no comma
                 }
                 _ => tokens.append(","),
@@ -1645,17 +1633,6 @@ mod printing {
             tokens.append("{");
             tokens.append_all(&self.stmts);
             tokens.append("}");
-        }
-    }
-
-    impl ToTokens for BlockCheckMode {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                BlockCheckMode::Default => {
-                    // nothing
-                }
-                BlockCheckMode::Unsafe => tokens.append("unsafe"),
-            }
         }
     }
 

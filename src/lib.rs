@@ -37,8 +37,8 @@ mod escape;
 #[cfg(feature = "full")]
 mod expr;
 #[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, BlockCheckMode, CaptureBy, Expr, ExprKind, FieldPat,
-               FieldValue, Local, MacStmtStyle, Pat, RangeLimits, Stmt};
+pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, FieldValue,
+               Local, MacStmtStyle, Pat, RangeLimits, Stmt};
 
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
