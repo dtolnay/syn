@@ -13,6 +13,9 @@ Designed for fast compile time.
 - Compile time for `syn` (from scratch including all dependencies): **4 seconds**
 - Compile time for the `syntex`/`quasi`/`aster` stack: **60+ seconds**
 
+If you get stuck with Macros 1.1 I am happy to provide help even if the issue is
+not related to syn. Please file a ticket in this repo.
+
 ## Usage with Macros 1.1
 
 ```toml
