@@ -156,6 +156,18 @@ fn it_works() {
 }
 ```
 
+## Debugging
+
+When developing a procedural macro it can be helpful to look at what the
+generated code looks like. Use `cargo rustc -- -Zunstable-options
+--pretty=expanded` or the
+[`cargo expand`](https://github.com/dtolnay/cargo-expand) subcommand.
+
+To show the expanded code for some crate that uses your procedural macro, run
+`cargo expand` from that crate. To show the expanded code for one of your own
+test cases, run `cargo expand --test the_test_case` where the last argument is
+the name of the test file without the `.rs` extension.
+
 ## Optional features
 
 Syn puts a lot of functionality behind optional features in order to optimize
