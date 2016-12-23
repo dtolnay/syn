@@ -13,6 +13,9 @@ cache:
 matrix:
   allow_failures:
     - env: ROLE=clippy
+  include:
+    - env: ROLE=build
+      rust: stable
 
 git:
   submodules: false
@@ -24,7 +27,7 @@ before_script:
 script:
   - |
       case $ROLE in
-        build|build-stable)
+        build)
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features 'full expand' &&
@@ -37,24 +40,22 @@ script:
         clippy)
           cargo build --features 'full aster expand pretty visit clippy'
           ;;
+        *)
+          exit 1
+          ;;
       esac
 
 after_success:
   - |
-      if [ "$ROLE" = build ]; then
+      if [ "$ROLE" = build ] && [ "$TRAVIS_RUST_VERSION" = nightly ]; then
         travis-cargo doc-upload
       fi
 
 env:
   matrix:
-    - env: ROLE=build-stable
-      rust: stable
-    - env: ROLE=build
-      rust: nightly
-    - env: ROLE=test
-      rust: nightly
-    - env: ROLE=clippy
-      rust: nightly
+    - ROLE=build
+    - ROLE=test
+    - ROLE=clippy
   global:
     - RUST_MIN_STACK=16000000
     - TRAVIS_CARGO_NIGHTLY_FEATURE=""
