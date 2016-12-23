@@ -11,11 +11,17 @@ cache:
     - .git/modules
 
 matrix:
+  include:
+    - rust: stable
+      env: ROLE=build
+    - rust: beta
+      env: ROLE=build
+    - rust: 1.12.1
+      env: ROLE=build
+    - rust: 1.13.0
+      env: ROLE=build
   allow_failures:
     - env: ROLE=clippy
-  include:
-    - env: ROLE=build
-      rust: stable
 
 git:
   submodules: false
