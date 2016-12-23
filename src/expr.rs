@@ -306,7 +306,7 @@ pub enum BindingMode {
 pub mod parsing {
     use super::*;
     use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Mac,
-         TokenTree, Ty, UnOp};
+         TokenTree, Ty, UnOp, Unsafety};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::{ident, wordlike};
@@ -1143,7 +1143,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use {FnArg, FunctionRetTy, Mutability, Ty};
+    use {FnArg, FunctionRetTy, Mutability, Ty, Unsafety};
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
