@@ -42,7 +42,7 @@ extern crate quote;
 pub fn my_macro(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
-    // Parse the string representation to an AST
+    // Parse the string representation into a syntax tree
     let ast = syn::parse_macro_input(&source).unwrap();
 
     // Build the output, possibly using quasi-quotation
@@ -84,7 +84,7 @@ extern crate quote;
 pub fn num_fields(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
-    // Parse the string representation to an AST
+    // Parse the string representation into a syntax tree
     let ast = syn::parse_macro_input(&source).unwrap();
 
     // Build the output
