@@ -28,8 +28,6 @@ proc-macro = true
 ```
 
 ```rust
-#![feature(proc_macro, proc_macro_lib)]
-
 extern crate proc_macro;
 use proc_macro::TokenStream;
 
@@ -70,8 +68,6 @@ A complete Macros 1.1 implementation of `#[derive(NumFields)]` based on `syn`
 and [`quote`](https://github.com/dtolnay/quote) looks like this:
 
 ```rust
-#![feature(proc_macro, proc_macro_lib)]
-
 extern crate proc_macro;
 use proc_macro::TokenStream;
 
@@ -139,8 +135,6 @@ procedural macro can go in `my_derive/tests/test.rs` or into a separate crate
 `my_tests/tests/test.rs`. Either way the test would look something like this:
 
 ```rust
-#![feature(proc_macro)]
-
 #[macro_use]
 extern crate my_derive;
 
