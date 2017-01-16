@@ -162,6 +162,10 @@ To show the expanded code for some crate that uses your procedural macro, run
 test cases, run `cargo expand --test the_test_case` where the last argument is
 the name of the test file without the `.rs` extension.
 
+This write-up by Brandon W Maister discusses debugging in more detail:
+[Debugging Rust's new Custom Derive
+system](https://quodlibetor.github.io/posts/debugging-rusts-new-custom-derive-system/).
+
 ## Optional features
 
 Syn puts a lot of functionality behind optional features in order to optimize
