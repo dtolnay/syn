@@ -237,6 +237,7 @@ pub enum FunctionRetTy {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use {TyParamBound, TraitBoundModifier};
     #[cfg(feature = "full")]
     use ConstExpr;
     use constant::parsing::const_expr;
