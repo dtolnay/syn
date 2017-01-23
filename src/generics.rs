@@ -125,6 +125,8 @@ pub enum WherePredicate {
     BoundPredicate(WhereBoundPredicate),
     /// A lifetime predicate, e.g. `'a: 'b+'c`
     RegionPredicate(WhereRegionPredicate),
+    /// An equality predicate (unsupported)
+    EqPredicate(WhereEqPredicate),
 }
 
 /// A type bound.
@@ -147,6 +149,15 @@ pub struct WhereBoundPredicate {
 pub struct WhereRegionPredicate {
     pub lifetime: Lifetime,
     pub bounds: Vec<Lifetime>,
+}
+
+/// An equality predicate (unsupported).
+///
+/// E.g. `T=int`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct WhereEqPredicate {
+    pub lhs_ty: Ty,
+    pub rhs_ty: Ty,
 }
 
 #[cfg(feature = "parsing")]
@@ -414,6 +425,9 @@ mod printing {
                 WherePredicate::RegionPredicate(ref predicate) => {
                     predicate.to_tokens(tokens);
                 }
+                WherePredicate::EqPredicate(ref predicate) => {
+                    predicate.to_tokens(tokens);
+                }
             }
         }
     }
@@ -441,6 +455,14 @@ mod printing {
                 tokens.append(":");
                 tokens.append_separated(&self.bounds, "+");
             }
+        }
+    }
+
+    impl ToTokens for WhereEqPredicate {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.lhs_ty.to_tokens(tokens);
+            tokens.append("=");
+            self.rhs_ty.to_tokens(tokens);
         }
     }
 }
