@@ -213,15 +213,11 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
             }
             visitor.visit_path(path);
         }
-        Ty::ObjectSum(ref inner, ref bounds) => {
-            visitor.visit_ty(inner);
-            walk_list!(visitor, visit_ty_param_bound, bounds);
-        }
         Ty::Array(ref inner, ref len) => {
             visitor.visit_ty(inner);
             visitor.visit_const_expr(len);
         }
-        Ty::PolyTraitRef(ref bounds) |
+        Ty::TraitObject(ref bounds) |
         Ty::ImplTrait(ref bounds) => {
             walk_list!(visitor, visit_ty_param_bound, bounds);
         }
@@ -302,6 +298,12 @@ pub fn walk_generics<V: Visitor>(visitor: &mut V, generics: &Generics) {
                                                                    .. }) => {
                 visitor.visit_lifetime(lifetime);
                 walk_list!(visitor, visit_lifetime, bounds);
+            }
+            WherePredicate::EqPredicate(WhereEqPredicate { ref lhs_ty,
+                                                           ref rhs_ty,
+                                                           .. }) => {
+                visitor.visit_ty(lhs_ty);
+                visitor.visit_ty(rhs_ty);
             }
         }
     }
@@ -454,7 +456,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             visitor.visit_expr(place);
             visitor.visit_expr(value);
         }
-        ExprKind::Vec(ref exprs) => {
+        ExprKind::Array(ref exprs) => {
             walk_list!(visitor, visit_expr, exprs);
         }
         ExprKind::Call(ref callee, ref args) => {
