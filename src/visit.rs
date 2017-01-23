@@ -133,16 +133,11 @@ pub trait Visitor: Sized {
 }
 
 macro_rules! walk_list {
-    ($visitor: expr, $method: ident, $list: expr) => {
+    ($visitor:expr, $method:ident, $list:expr $(, $extra_args:expr)*) => {
         for elem in $list {
-            $visitor.$method(elem)
+            $visitor.$method(elem $(, $extra_args)*)
         }
     };
-    ($visitor: expr, $method: ident, $list: expr, $($extra_args: expr),*) => {
-        for elem in $list {
-            $visitor.$method(elem, $($extra_args,)*)
-        }
-    }
 }
 
 pub fn walk_opt_ident<V: Visitor>(visitor: &mut V, opt_ident: &Option<Ident>) {
