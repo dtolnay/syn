@@ -41,7 +41,7 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse the string representation into a syntax tree
-    let ast = syn::parse_macro_input(&source).unwrap();
+    let ast = syn::parse_derive_input(&source).unwrap();
 
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
@@ -81,7 +81,7 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse the string representation into a syntax tree
-    let ast = syn::parse_macro_input(&source).unwrap();
+    let ast = syn::parse_derive_input(&source).unwrap();
 
     // Build the output
     let expanded = expand_num_fields(&ast);
@@ -90,7 +90,7 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     expanded.parse().unwrap()
 }
 
-fn expand_num_fields(ast: &syn::MacroInput) -> quote::Tokens {
+fn expand_num_fields(ast: &syn::DeriveInput) -> quote::Tokens {
     let n = match ast.body {
         syn::Body::Struct(ref data) => data.fields().len(),
         syn::Body::Enum(_) => panic!("#[derive(NumFields)] can only be used with structs"),
