@@ -22,11 +22,11 @@ pub enum Ty {
     ///
     /// Type parameters are stored in the Path itself
     Path(Option<QSelf>, Path),
-    /// Something like `A+B`. Note that `B` must always be a path.
-    ObjectSum(Box<Ty>, Vec<TyParamBound>),
-    /// A type like `for<'a> Foo<&'a Bar>`
-    PolyTraitRef(Vec<TyParamBound>),
-    /// An `impl TraitA+TraitB` type.
+    /// A trait object type `Bound1 + Bound2 + Bound3`
+    /// where `Bound` is a trait or a lifetime.
+    TraitObject(Vec<TyParamBound>),
+    /// An `impl Bound1 + Bound2 + Bound3` type
+    /// where `Bound` is a trait or a lifetime.
     ImplTrait(Vec<TyParamBound>),
     /// No-op; kept solely so that we can pretty-print faithfully
     Paren(Box<Ty>),
@@ -394,11 +394,18 @@ pub mod parsing {
             if let Some(Some(parenthesized)) = parenthesized {
                 path.segments.last_mut().unwrap().parameters = parenthesized;
             }
-            let path = Ty::Path(qself, path);
             if bounds.is_empty() {
-                path
+                Ty::Path(qself, path)
             } else {
-                Ty::ObjectSum(Box::new(path), bounds)
+                let path = TyParamBound::Trait(
+                    PolyTraitRef {
+                        bound_lifetimes: Vec::new(),
+                        trait_ref: path,
+                    },
+                    TraitBoundModifier::None,
+                );
+                let bounds = Some(path).into_iter().chain(bounds).collect();
+                Ty::TraitObject(bounds)
             }
         })
     ));
@@ -454,7 +461,7 @@ pub mod parsing {
 
     named!(ty_poly_trait_ref -> Ty, map!(
         separated_nonempty_list!(punct!("+"), ty_param_bound),
-        Ty::PolyTraitRef
+        Ty::TraitObject
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
@@ -657,14 +664,7 @@ mod printing {
                         segment.to_tokens(tokens);
                     }
                 }
-                Ty::ObjectSum(ref ty, ref bounds) => {
-                    ty.to_tokens(tokens);
-                    for bound in bounds {
-                        tokens.append("+");
-                        bound.to_tokens(tokens);
-                    }
-                }
-                Ty::PolyTraitRef(ref bounds) => {
+                Ty::TraitObject(ref bounds) => {
                     tokens.append_separated(bounds, "+");
                 }
                 Ty::ImplTrait(ref bounds) => {
