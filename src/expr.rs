@@ -150,6 +150,7 @@ pub struct FieldValue {
     pub ident: Ident,
     pub expr: Expr,
     pub is_shorthand: bool,
+    pub attrs: Vec<Attribute>,
 }
 
 /// A Block (`{ .. }`).
@@ -294,6 +295,7 @@ pub struct FieldPat {
     /// The pattern the field is destructured to
     pub pat: Box<Pat>,
     pub is_shorthand: bool,
+    pub attrs: Vec<Attribute>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -746,6 +748,7 @@ pub mod parsing {
                 ident: name,
                 expr: value,
                 is_shorthand: false,
+                attrs: Vec::new(),
             })
         )
         |
@@ -753,6 +756,7 @@ pub mod parsing {
             ident: name.clone(),
             expr: ExprKind::Path(None, name.into()).into(),
             is_shorthand: true,
+            attrs: Vec::new(),
         })
     ));
 
@@ -1008,6 +1012,7 @@ pub mod parsing {
                 ident: ident,
                 pat: Box::new(pat),
                 is_shorthand: false,
+                attrs: Vec::new(),
             })
         )
         |
@@ -1033,6 +1038,7 @@ pub mod parsing {
                     ident: ident,
                     pat: Box::new(pat),
                     is_shorthand: true,
+                    attrs: Vec::new(),
                 }
             })
         )
