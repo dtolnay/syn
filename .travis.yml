@@ -37,7 +37,7 @@ script:
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features full &&
-          cargo doc --features full
+          cargo doc --features 'full visit'
           ;;
         test)
           git submodule update --init &&
