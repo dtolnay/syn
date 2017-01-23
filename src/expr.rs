@@ -22,7 +22,7 @@ pub enum ExprKind {
     /// First expr is the place; second expr is the value.
     InPlace(Box<Expr>, Box<Expr>),
     /// An array (`[a, b, c, d]`)
-    Vec(Vec<Expr>),
+    Array(Vec<Expr>),
     /// A function call
     ///
     /// The first field resolves to the function itself,
@@ -361,7 +361,7 @@ pub mod parsing {
                 |
                 expr_in_place
                 |
-                expr_vec
+                expr_array
                 |
                 expr_tup
                 |
@@ -476,11 +476,11 @@ pub mod parsing {
         ))
     ));
 
-    named!(expr_vec -> ExprKind, do_parse!(
+    named!(expr_array -> ExprKind, do_parse!(
         punct!("[") >>
         elems: terminated_list!(punct!(","), expr) >>
         punct!("]") >>
-        (ExprKind::Vec(elems))
+        (ExprKind::Array(elems))
     ));
 
     named!(and_call -> Vec<Expr>, do_parse!(
@@ -1166,7 +1166,7 @@ mod printing {
                     place.to_tokens(tokens);
                     value.to_tokens(tokens);
                 }
-                ExprKind::Vec(ref tys) => {
+                ExprKind::Array(ref tys) => {
                     tokens.append("[");
                     tokens.append_separated(tys, ",");
                     tokens.append("]");
