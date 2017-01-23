@@ -5,9 +5,6 @@
 #[macro_use]
 extern crate quote;
 
-#[cfg(feature = "pretty")]
-extern crate syntex_syntax as syntax;
-
 #[cfg(feature = "parsing")]
 extern crate unicode_xid;
 
@@ -75,11 +72,6 @@ pub use macro_input::{Body, MacroInput};
 
 mod op;
 pub use op::{BinOp, UnOp};
-
-#[cfg(feature = "expand")]
-mod registry;
-#[cfg(feature = "expand")]
-pub use registry::{CustomDerive, Expanded, Registry};
 
 #[cfg(feature = "parsing")]
 mod space;
