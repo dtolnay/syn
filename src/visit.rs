@@ -132,7 +132,6 @@ pub trait Visitor: Sized {
     }
 }
 
-#[macro_export]
 macro_rules! walk_list {
     ($visitor: expr, $method: ident, $list: expr) => {
         for elem in $list {
