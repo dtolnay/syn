@@ -10,7 +10,7 @@ Parse Rust structs and enums without a Syntex dependency, intended for use with
 
 Designed for fast compile time.
 
-- Compile time for `syn` (from scratch including all dependencies): **4 seconds**
+- Compile time for `syn` (from scratch including all dependencies): **6 seconds**
 - Compile time for the `syntex`/`quasi`/`aster` stack: **60+ seconds**
 
 If you get stuck with Macros 1.1 I am happy to provide help even if the issue is
@@ -174,14 +174,14 @@ their effect on compile time. Dependencies are included in the compile times.
 
 Features | Compile time | Functionality
 --- | --- | ---
-*(none)* | 1 sec | The data structures representing the AST of Rust structs, enums, and types.
-parsing | 4 sec | Parsing Rust source code containing structs and enums into an AST.
-printing | 2 sec | Printing an AST of structs and enums as Rust source code.
-**parsing, printing** | **4 sec** | **This is the default.** Parsing and printing of Rust structs and enums. This is typically what you want for implementing Macros 1.1 custom derives.
-full | 2 sec | The data structures representing the full AST of all possible Rust code.
-full, parsing | 7 sec | Parsing any valid Rust source code to an AST.
-full, printing | 4 sec | Turning an AST into Rust source code.
-full, parsing, printing | 8 sec | Parsing and printing any Rust syntax.
+*(none)* | 3 sec | The data structures representing the AST of Rust structs, enums, and types.
+parsing | 6 sec | Parsing Rust source code containing structs and enums into an AST.
+printing | 4 sec | Printing an AST of structs and enums as Rust source code.
+**parsing, printing** | **6 sec** | **This is the default.** Parsing and printing of Rust structs and enums. This is typically what you want for implementing Macros 1.1 custom derives.
+full | 4 sec | The data structures representing the full AST of all possible Rust code.
+full, parsing | 9 sec | Parsing any valid Rust source code to an AST.
+full, printing | 6 sec | Turning an AST into Rust source code.
+full, parsing, printing | 11 sec | Parsing and printing any Rust syntax.
 
 ## License
 
