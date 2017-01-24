@@ -2,7 +2,6 @@
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 
 #[cfg(feature = "printing")]
-#[macro_use]
 extern crate quote;
 
 #[cfg(feature = "parsing")]
