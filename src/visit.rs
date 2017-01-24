@@ -77,7 +77,6 @@ pub trait Visitor: Sized {
     }
     fn visit_lit(&mut self, _lit: &Lit) {}
 
-    #[cfg(feature = "type-macros")]
     fn visit_mac(&mut self, mac: &Mac) {
         walk_mac(self, mac);
     }
@@ -216,13 +215,7 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
             walk_list!(visitor, visit_ty_param_bound, bounds);
         }
         Ty::Mac(ref mac) => {
-            #[cfg(feature = "type-macros")]
-            fn walk_tymac<V: Visitor>(visitor: &mut V, mac: &Mac) {
-                visitor.visit_mac(mac);
-            }
-            #[cfg(not(feature = "type-macros"))]
-            fn walk_tymac<V: Visitor>(_: &mut V, _: &super::ty::Mac) {}
-            walk_tymac(visitor, mac);
+            visitor.visit_mac(mac);
         }
     }
 }
@@ -361,7 +354,6 @@ pub fn walk_const_expr<V: Visitor>(visitor: &mut V, len: &ConstExpr) {
     }
 }
 
-#[cfg(feature = "type-macros")]
 pub fn walk_mac<V: Visitor>(visitor: &mut V, mac: &Mac) {
     visitor.visit_path(&mac.path);
 }

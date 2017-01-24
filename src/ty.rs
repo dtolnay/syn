@@ -37,12 +37,6 @@ pub enum Ty {
     Mac(Mac),
 }
 
-#[cfg(not(feature = "type-macros"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Mac {
-    _private: (),
-}
-
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct MutTy {
     pub ty: Ty,
@@ -246,10 +240,7 @@ pub mod parsing {
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
-    #[cfg(feature = "type-macros")]
     use mac::parsing::mac;
-    #[cfg(not(feature = "type-macros"))]
-    use nom::IResult;
     use std::str;
 
     named!(pub ty -> Ty, alt!(
@@ -278,13 +269,7 @@ pub mod parsing {
         ty_impl_trait
     ));
 
-    #[cfg(feature = "type-macros")]
     named!(ty_mac -> Ty, map!(mac, Ty::Mac));
-
-    #[cfg(not(feature = "type-macros"))]
-    fn ty_mac(_: &str) -> IResult<&str, Ty> {
-        IResult::Error
-    }
 
     named!(ty_vec -> Ty, do_parse!(
         punct!("[") >>
@@ -854,13 +839,6 @@ mod printing {
                 Abi::Named(ref named) => named.to_tokens(tokens),
                 Abi::Rust => {}
             }
-        }
-    }
-
-    #[cfg(not(feature = "type-macros"))]
-    impl ToTokens for Mac {
-        fn to_tokens(&self, _tokens: &mut Tokens) {
-            unreachable!()
         }
     }
 }
