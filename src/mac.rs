@@ -116,7 +116,7 @@ pub mod parsing {
     use generics::parsing::lifetime;
     use ident::parsing::word;
     use lit::parsing::lit;
-    use space::{block_comment, whitespace};
+    use nom::space::{block_comment, whitespace};
     use ty::parsing::path;
 
     named!(pub mac -> Mac, do_parse!(

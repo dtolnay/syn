@@ -12,7 +12,7 @@ include = ["Cargo.toml", "src/**/*.rs"]
 default = ["parsing", "printing"]
 aster = []
 full = []
-parsing = ["unicode-xid"]
+parsing = ["unicode-xid", "syn_nom"]
 printing = ["quote"]
 visit = []
 
@@ -20,6 +20,7 @@ visit = []
 clippy = { version = "0.*", optional = true }
 quote = { version = "0.3.0", optional = true }
 unicode-xid = { version = "0.0.4", optional = true }
+syn_nom = { version = "0.1.0", path = "syn_nom/", optional = true }
 
 [dev-dependencies]
 syntex_pos = "0.52.0"

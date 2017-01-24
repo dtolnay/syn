@@ -1,9 +1,10 @@
-use nom::IResult;
+use IResult;
 use space::{skip_whitespace, word_break};
 
+#[macro_export]
 macro_rules! punct {
     ($i:expr, $punct:expr) => {
-        $crate::helper::punct($i, $punct)
+        $crate::punct($i, $punct)
     };
 }
 
@@ -16,9 +17,10 @@ pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a st
     }
 }
 
+#[macro_export]
 macro_rules! keyword {
     ($i:expr, $keyword:expr) => {
-        $crate::helper::keyword($i, $keyword)
+        $crate::keyword($i, $keyword)
     };
 }
 
@@ -34,11 +36,12 @@ pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a 
     }
 }
 
+#[macro_export]
 macro_rules! option {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, Some(o)),
-            $crate::nom::IResult::Error => $crate::nom::IResult::Done($i, None),
+            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, Some(o)),
+            $crate::IResult::Error => $crate::IResult::Done($i, None),
         }
     };
 
@@ -47,30 +50,33 @@ macro_rules! option {
     };
 }
 
+#[macro_export]
 macro_rules! opt_vec {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::nom::IResult::Done(i, o) => $crate::nom::IResult::Done(i, o),
-            $crate::nom::IResult::Error => $crate::nom::IResult::Done($i, Vec::new()),
+            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, o),
+            $crate::IResult::Error => $crate::IResult::Done($i, Vec::new()),
         }
     };
 }
 
+#[macro_export]
 macro_rules! epsilon {
     ($i:expr,) => {
-        $crate::nom::IResult::Done($i, ())
+        $crate::IResult::Done($i, ())
     };
 }
 
+#[macro_export]
 macro_rules! tap {
     ($i:expr, $name:ident : $submac:ident!( $($args:tt)* ) => $e:expr) => {
         match $submac!($i, $($args)*) {
-            $crate::nom::IResult::Done(i, o) => {
+            $crate::IResult::Done(i, o) => {
                 let $name = o;
                 $e;
-                $crate::nom::IResult::Done(i, ())
+                $crate::IResult::Done(i, ())
             }
-            $crate::nom::IResult::Error => $crate::nom::IResult::Error,
+            $crate::IResult::Error => $crate::IResult::Error,
         }
     };
 
@@ -79,15 +85,17 @@ macro_rules! tap {
     };
 }
 
+#[macro_export]
 macro_rules! separated_list {
     ($i:expr, punct!($sep:expr), $f:expr) => {
-        $crate::helper::separated_list($i, $sep, $f, false)
+        $crate::separated_list($i, $sep, $f, false)
     };
 }
 
+#[macro_export]
 macro_rules! terminated_list {
     ($i:expr, punct!($sep:expr), $f:expr) => {
-        $crate::helper::separated_list($i, $sep, $f, true)
+        $crate::separated_list($i, $sep, $f, true)
     };
 }
 

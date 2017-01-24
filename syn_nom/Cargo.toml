@@ -1,0 +1,12 @@
+[package]
+name = "syn_nom"
+version = "0.1.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "stripped-down Nom parser used by Syn"
+repository = "https://github.com/dtolnay/syn"
+documentation = "https://dtolnay.github.io/syn/syn_nom/"
+include = ["Cargo.toml", "src/**/*.rs"]
+
+[dependencies]
+unicode-xid = "0.0.4"

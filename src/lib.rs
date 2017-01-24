@@ -9,11 +9,7 @@ extern crate unicode_xid;
 
 #[cfg(feature = "parsing")]
 #[macro_use]
-mod nom;
-
-#[cfg(feature = "parsing")]
-#[macro_use]
-mod helper;
+extern crate syn_nom as nom;
 
 #[cfg(feature = "aster")]
 pub mod aster;
@@ -73,9 +69,6 @@ pub type MacroInput = DeriveInput;
 mod op;
 pub use op::{BinOp, UnOp};
 
-#[cfg(feature = "parsing")]
-mod space;
-
 mod ty;
 pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
              Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
@@ -90,8 +83,8 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {derive, generics, ident, mac, space, ty};
-    use nom::IResult;
+    use {derive, generics, ident, mac, ty};
+    use nom::{space, IResult};
 
     #[cfg(feature = "full")]
     use {expr, item, krate};

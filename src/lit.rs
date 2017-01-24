@@ -130,8 +130,8 @@ impl_from_for_lit! {Float, [
 pub mod parsing {
     use super::*;
     use escape::{cooked_byte, cooked_byte_string, cooked_char, cooked_string, raw_string};
-    use space::skip_whitespace;
     use nom::IResult;
+    use nom::space::skip_whitespace;
     use unicode_xid::UnicodeXID;
 
     named!(pub lit -> Lit, alt!(
