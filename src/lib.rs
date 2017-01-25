@@ -163,3 +163,53 @@ mod parsing {
         }
     }
 }
+
+#[cfg(feature = "parsing")]
+pub mod parser {
+    //! This module contains a set of exported nom parsers which can be used to
+    //! build nom parsers for custom grammars when used alongside the `syn_nom`
+    //! crate.
+    //!
+    //! `syn` uses its own custom fork of `nom`, `syn_nom`, which is smaller, and
+    //! thus improves build speeds. This should be used instead of `nom` when
+    //! building parsers using these parsers.
+
+    #[cfg(feature = "full")]
+    pub use krate::parsing::krate;
+
+    #[cfg(feature = "full")]
+    pub use item::parsing::item;
+
+    #[cfg(feature = "full")]
+    pub use item::parsing::items;
+
+    #[cfg(feature = "full")]
+    pub use expr::parsing::expr;
+
+    pub use lit::parsing::lit;
+
+    pub use lit::parsing::string as str_lit;
+
+    pub use lit::parsing::byte_string as byte_str_lit;
+
+    pub use lit::parsing::byte as byte_lit;
+
+    pub use lit::parsing::character as char_lit;
+
+    pub use lit::parsing::float as float_lit;
+
+    pub use lit::parsing::int as int_lit;
+
+    pub use lit::parsing::boolean as bool_lit;
+
+    pub use ty::parsing::ty;
+
+    pub use ty::parsing::path;
+
+    pub use generics::parsing::where_clause;
+
+    #[cfg(feature = "full")]
+    pub use mac::parsing::token_trees;
+
+    pub use ident::parsing::ident;
+}
