@@ -132,13 +132,16 @@ mod parsing {
         unwrap("where clause", generics::parsing::where_clause, input)
     }
 
-    #[cfg(feature = "full")]
     pub fn parse_token_trees(input: &str) -> Result<Vec<TokenTree>, String> {
         unwrap("token trees", mac::parsing::token_trees, input)
     }
 
     pub fn parse_ident(input: &str) -> Result<Ident, String> {
         unwrap("identifier", ident::parsing::ident, input)
+    }
+
+    pub fn parse_ty_param_bound(input: &str) -> Result<TyParamBound, String> {
+        unwrap("type parameter bound", generics::parsing::ty_param_bound, input)
     }
 
     // Deprecated.

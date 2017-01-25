@@ -69,3 +69,30 @@ fn test_split_for_impl() {
 
     assert_eq!(expected, tokens.to_string());
 }
+
+#[test]
+fn test_ty_param_bound() {
+    let tokens = quote!('a);
+    let expected = TyParamBound::Region(Lifetime::new("'a"));
+    assert_eq!(expected, parse_ty_param_bound(tokens.as_str()).unwrap());
+
+    let tokens = quote!(Debug);
+    let expected = TyParamBound::Trait(
+        PolyTraitRef {
+            bound_lifetimes: Vec::new(),
+            trait_ref: "Debug".into(),
+        },
+        TraitBoundModifier::None,
+    );
+    assert_eq!(expected, parse_ty_param_bound(tokens.as_str()).unwrap());
+
+    let tokens = quote!(?Sized);
+    let expected = TyParamBound::Trait(
+        PolyTraitRef {
+            bound_lifetimes: Vec::new(),
+            trait_ref: "Sized".into(),
+        },
+        TraitBoundModifier::Maybe,
+    );
+    assert_eq!(expected, parse_ty_param_bound(tokens.as_str()).unwrap());
+}
