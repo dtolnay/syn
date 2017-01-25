@@ -24,8 +24,8 @@ pub struct TyGenerics<'a>(&'a Generics);
 #[derive(Debug)]
 pub struct Turbofish<'a>(&'a Generics);
 
+#[cfg(feature = "printing")]
 impl Generics {
-    #[cfg(feature = "printing")]
     /// Split a type's generics into the pieces required for impl'ing a trait
     /// for that type.
     ///
@@ -50,8 +50,8 @@ impl Generics {
     }
 }
 
+#[cfg(feature = "printing")]
 impl<'a> TyGenerics<'a> {
-    #[cfg(feature = "printing")]
     /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
     pub fn as_turbofish(&self) -> Turbofish {
         Turbofish(self.0)
