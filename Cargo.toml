@@ -22,7 +22,7 @@ visit = []
 clippy = { version = "0.*", optional = true }
 quote = { version = "0.3.0", optional = true }
 syntex_syntax = { version = "0.50.0", optional = true }
-unicode-xid = { version = "0.0.3", optional = true }
+unicode-xid = { version = "0.0.4", optional = true }
 
 [dev-dependencies]
 syntex_pos = "0.50.0"
