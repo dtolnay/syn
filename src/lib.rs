@@ -41,7 +41,7 @@ pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam,
                    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
                    WhereRegionPredicate};
 #[cfg(feature = "printing")]
-pub use generics::{ImplGenerics, TyGenerics};
+pub use generics::{ImplGenerics, Turbofish, TyGenerics};
 
 mod ident;
 pub use ident::Ident;
@@ -90,11 +90,11 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {derive, generics, ident, space, ty};
+    use {derive, generics, ident, mac, space, ty};
     use nom::IResult;
 
     #[cfg(feature = "full")]
-    use {expr, item, krate, mac};
+    use {expr, item, krate};
 
     pub fn parse_derive_input(input: &str) -> Result<DeriveInput, String> {
         unwrap("derive input", derive::parsing::derive_input, input)

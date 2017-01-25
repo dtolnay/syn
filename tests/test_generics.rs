@@ -58,15 +58,19 @@ fn test_split_for_impl() {
     };
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
     let tokens = quote! {
         impl #impl_generics MyTrait for Test #ty_generics #where_clause {}
     };
-
     let expected = concat!("impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
                            "MyTrait for Test < 'a , 'b , T > ",
                            "where T : Debug { }");
+    assert_eq!(expected, tokens.to_string());
 
+    let turbofish = ty_generics.as_turbofish();
+    let tokens = quote! {
+        Test #turbofish
+    };
+    let expected = "Test :: < 'a , 'b , T >";
     assert_eq!(expected, tokens.to_string());
 }
 

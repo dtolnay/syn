@@ -19,6 +19,11 @@ pub struct ImplGenerics<'a>(&'a Generics);
 #[derive(Debug)]
 pub struct TyGenerics<'a>(&'a Generics);
 
+#[cfg(feature = "printing")]
+/// Returned by `TyGenerics::as_turbofish`.
+#[derive(Debug)]
+pub struct Turbofish<'a>(&'a Generics);
+
 impl Generics {
     #[cfg(feature = "printing")]
     /// Split a type's generics into the pieces required for impl'ing a trait
@@ -42,6 +47,14 @@ impl Generics {
     /// ```
     pub fn split_for_impl(&self) -> (ImplGenerics, TyGenerics, &WhereClause) {
         (ImplGenerics(self), TyGenerics(self), &self.where_clause)
+    }
+}
+
+impl<'a> TyGenerics<'a> {
+    #[cfg(feature = "printing")]
+    /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
+    pub fn as_turbofish(&self) -> Turbofish {
+        Turbofish(self.0)
     }
 }
 
@@ -356,6 +369,17 @@ mod printing {
                 let ty_params = self.0.ty_params.iter().map(|tp| &tp.ident);
                 tokens.append_separated(ty_params, ",");
                 tokens.append(">");
+            }
+        }
+    }
+
+    impl<'a> ToTokens for Turbofish<'a> {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            let has_lifetimes = !self.0.lifetimes.is_empty();
+            let has_ty_params = !self.0.ty_params.is_empty();
+            if has_lifetimes || has_ty_params {
+                tokens.append("::");
+                TyGenerics(self.0).to_tokens(tokens);
             }
         }
     }
