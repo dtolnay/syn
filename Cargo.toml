@@ -15,6 +15,7 @@ full = []
 parsing = ["unicode-xid"]
 printing = ["quote"]
 visit = []
+fold = []
 
 [dependencies]
 clippy = { version = "0.*", optional = true }

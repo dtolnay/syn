@@ -84,6 +84,9 @@ pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetT
 #[cfg(feature = "visit")]
 pub mod visit;
 
+#[cfg(feature = "fold")]
+pub mod fold;
+
 #[cfg(feature = "parsing")]
 pub use parsing::*;
 
