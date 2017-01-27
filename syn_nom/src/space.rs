@@ -1,4 +1,4 @@
-use nom::IResult;
+use IResult;
 use unicode_xid::UnicodeXID;
 
 pub fn whitespace(input: &str) -> IResult<&str, ()> {

@@ -58,7 +58,7 @@ impl<T: ?Sized> PartialEq<T> for Ident
 pub mod parsing {
     use super::*;
     use nom::IResult;
-    use space::skip_whitespace;
+    use nom::space::skip_whitespace;
     use unicode_xid::UnicodeXID;
 
     pub fn ident(input: &str) -> IResult<&str, Ident> {

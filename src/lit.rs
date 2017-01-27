@@ -130,33 +130,33 @@ impl_from_for_lit! {Float, [
 pub mod parsing {
     use super::*;
     use escape::{cooked_byte, cooked_byte_string, cooked_char, cooked_string, raw_string};
-    use space::skip_whitespace;
+    use nom::space::skip_whitespace;
     use nom::IResult;
     use unicode_xid::UnicodeXID;
 
     named!(pub lit -> Lit, alt!(
-        string
+        string => { |(value, style)| Lit::Str(value, style) }
         |
-        byte_string
+        byte_string => { |(value, style)| Lit::ByteStr(value, style) }
         |
-        byte
+        byte => { |b| Lit::Byte(b) }
         |
-        character
+        character => { |ch| Lit::Char(ch) }
         |
-        float // must be before int
+        float => { |(value, suffix)| Lit::Float(value, suffix) } // must be before int
         |
         int => { |(value, ty)| Lit::Int(value, ty) }
         |
-        boolean
+        boolean => { |value| Lit::Bool(value) }
     ));
 
-    named!(string -> Lit, alt!(
-        quoted_string => { |s| Lit::Str(s, StrStyle::Cooked) }
+    named!(pub string -> (String, StrStyle), alt!(
+        quoted_string => { |s| (s, StrStyle::Cooked) }
         |
         preceded!(
             punct!("r"),
             raw_string
-        ) => { |(s, n)| Lit::Str(s, StrStyle::Raw(n)) }
+        ) => { |(s, n)| (s, StrStyle::Raw(n)) }
     ));
 
     named!(pub quoted_string -> String, delimited!(
@@ -165,44 +165,43 @@ pub mod parsing {
         tag!("\"")
     ));
 
-    named!(byte_string -> Lit, alt!(
+    named!(pub byte_string -> (Vec<u8>, StrStyle), alt!(
         delimited!(
             punct!("b\""),
             cooked_byte_string,
             tag!("\"")
-        ) => { |vec| Lit::ByteStr(vec, StrStyle::Cooked) }
+        ) => { |vec| (vec, StrStyle::Cooked) }
         |
         preceded!(
             punct!("br"),
             raw_string
-        ) => { |(s, n): (String, _)| Lit::ByteStr(s.into_bytes(), StrStyle::Raw(n)) }
+        ) => { |(s, n): (String, _)| (s.into_bytes(), StrStyle::Raw(n)) }
     ));
 
-    named!(byte -> Lit, do_parse!(
+    named!(pub byte -> u8, do_parse!(
         punct!("b") >>
         tag!("'") >>
         b: cooked_byte >>
         tag!("'") >>
-        (Lit::Byte(b))
+        (b)
     ));
 
-    named!(character -> Lit, do_parse!(
+    named!(pub character -> char, do_parse!(
         punct!("'") >>
         ch: cooked_char >>
         tag!("'") >>
-        (Lit::Char(ch))
+        (ch)
     ));
 
-    named!(float -> Lit, do_parse!(
-        value: float_string >>
-        suffix: alt!(
+    named!(pub float -> (String, FloatTy), tuple!(
+        float_string,
+        alt!(
             tag!("f32") => { |_| FloatTy::F32 }
             |
             tag!("f64") => { |_| FloatTy::F64 }
             |
             epsilon!() => { |_| FloatTy::Unsuffixed }
-        ) >>
-        (Lit::Float(value, suffix))
+        )
     ));
 
     named!(pub int -> (u64, IntTy), tuple!(
@@ -232,10 +231,10 @@ pub mod parsing {
         )
     ));
 
-    named!(boolean -> Lit, alt!(
-        keyword!("true") => { |_| Lit::Bool(true) }
+    named!(pub boolean -> bool, alt!(
+        keyword!("true") => { |_| true }
         |
-        keyword!("false") => { |_| Lit::Bool(false) }
+        keyword!("false") => { |_| false }
     ));
 
     fn float_string(mut input: &str) -> IResult<&str, String> {
