@@ -9,7 +9,7 @@ extern crate unicode_xid;
 
 #[cfg(feature = "parsing")]
 #[macro_use]
-extern crate syn_nom as nom;
+extern crate synom;
 
 #[cfg(feature = "aster")]
 pub mod aster;
@@ -84,7 +84,7 @@ pub use parsing::*;
 mod parsing {
     use super::*;
     use {derive, generics, ident, mac, ty};
-    use nom::{space, IResult};
+    use synom::{space, IResult};
 
     #[cfg(feature = "full")]
     use {expr, item, krate};
@@ -165,51 +165,42 @@ mod parsing {
 }
 
 #[cfg(feature = "parsing")]
-pub mod parser {
+pub mod parse {
     //! This module contains a set of exported nom parsers which can be used to
-    //! build nom parsers for custom grammars when used alongside the `syn_nom`
-    //! crate.
+    //! parse custom grammars when used alongside the `synom` crate.
     //!
-    //! `syn` uses its own custom fork of `nom`, `syn_nom`, which is smaller, and
-    //! thus improves build speeds. This should be used instead of `nom` when
-    //! building parsers using these parsers.
-
-    #[cfg(feature = "full")]
-    pub use krate::parsing::krate;
+    //! Internally, `syn` uses a fork of `nom` called `synom` which resolves a
+    //! persistent pitfall of using `nom` to parse Rust by eliminating the
+    //! `IResult::Incomplete` variant. The `synom` crate should be used instead
+    //! of `nom` when working with the parsers in this module.
 
     #[cfg(feature = "full")]
     pub use item::parsing::item;
-
-    #[cfg(feature = "full")]
-    pub use item::parsing::items;
 
     #[cfg(feature = "full")]
     pub use expr::parsing::expr;
 
     pub use lit::parsing::lit;
 
-    pub use lit::parsing::string as str_lit;
+    pub use lit::parsing::string;
 
-    pub use lit::parsing::byte_string as byte_str_lit;
+    pub use lit::parsing::byte_string;
 
-    pub use lit::parsing::byte as byte_lit;
+    pub use lit::parsing::byte;
 
-    pub use lit::parsing::character as char_lit;
+    pub use lit::parsing::character;
 
-    pub use lit::parsing::float as float_lit;
+    pub use lit::parsing::float;
 
-    pub use lit::parsing::int as int_lit;
+    pub use lit::parsing::int;
 
-    pub use lit::parsing::boolean as bool_lit;
+    pub use lit::parsing::boolean;
 
     pub use ty::parsing::ty;
 
     pub use ty::parsing::path;
 
-    pub use generics::parsing::where_clause;
-
-    #[cfg(feature = "full")]
-    pub use mac::parsing::token_trees;
+    pub use mac::parsing::token_tree as tt;
 
     pub use ident::parsing::ident;
 }

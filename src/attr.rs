@@ -99,7 +99,7 @@ pub mod parsing {
     use super::*;
     use ident::parsing::ident;
     use lit::parsing::lit;
-    use nom::space::{block_comment, whitespace};
+    use synom::space::{block_comment, whitespace};
 
     #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, alt!(

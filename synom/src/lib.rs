@@ -6,8 +6,8 @@ extern crate unicode_xid;
 
 pub mod space;
 
-pub use helper::*;
-mod helper;
+#[doc(hidden)]
+pub mod helper;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum IResult<I, O> {
@@ -191,6 +191,8 @@ macro_rules! many0 {
     };
 }
 
+// Not public API.
+#[doc(hidden)]
 pub fn many0<'a, T>(mut input: &'a str,
                     f: fn(&'a str) -> IResult<&'a str, T>)
                     -> IResult<&'a str, Vec<T>> {

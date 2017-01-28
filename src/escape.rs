@@ -1,6 +1,6 @@
 use std::{char, str};
 use std::num::ParseIntError;
-use nom::IResult;
+use synom::IResult;
 
 pub fn cooked_string(input: &str) -> IResult<&str, String> {
     let mut s = String::new();

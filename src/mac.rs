@@ -116,7 +116,7 @@ pub mod parsing {
     use generics::parsing::lifetime;
     use ident::parsing::word;
     use lit::parsing::lit;
-    use nom::space::{block_comment, whitespace};
+    use synom::space::{block_comment, whitespace};
     use ty::parsing::path;
 
     named!(pub mac -> Mac, do_parse!(
@@ -151,7 +151,7 @@ pub mod parsing {
         ) => { |tts| Delimited { delim: DelimToken::Brace, tts: tts } }
     ));
 
-    named!(token_tree -> TokenTree, alt!(
+    named!(pub token_tree -> TokenTree, alt!(
         map!(token, TokenTree::Token)
         |
         map!(delimited, TokenTree::Delimited)

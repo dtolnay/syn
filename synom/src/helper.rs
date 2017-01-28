@@ -4,10 +4,12 @@ use space::{skip_whitespace, word_break};
 #[macro_export]
 macro_rules! punct {
     ($i:expr, $punct:expr) => {
-        $crate::punct($i, $punct)
+        $crate::helper::punct($i, $punct)
     };
 }
 
+// Not public API.
+#[doc(hidden)]
 pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
     let input = skip_whitespace(input);
     if input.starts_with(token) {
@@ -20,10 +22,12 @@ pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a st
 #[macro_export]
 macro_rules! keyword {
     ($i:expr, $keyword:expr) => {
-        $crate::keyword($i, $keyword)
+        $crate::helper::keyword($i, $keyword)
     };
 }
 
+// Not public API.
+#[doc(hidden)]
 pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
     match punct(input, token) {
         IResult::Done(rest, _) => {
@@ -88,17 +92,19 @@ macro_rules! tap {
 #[macro_export]
 macro_rules! separated_list {
     ($i:expr, punct!($sep:expr), $f:expr) => {
-        $crate::separated_list($i, $sep, $f, false)
+        $crate::helper::separated_list($i, $sep, $f, false)
     };
 }
 
 #[macro_export]
 macro_rules! terminated_list {
     ($i:expr, punct!($sep:expr), $f:expr) => {
-        $crate::separated_list($i, $sep, $f, true)
+        $crate::helper::separated_list($i, $sep, $f, true)
     };
 }
 
+// Not public API.
+#[doc(hidden)]
 pub fn separated_list<'a, T>(mut input: &'a str,
                              sep: &'static str,
                              f: fn(&'a str) -> IResult<&'a str, T>,
