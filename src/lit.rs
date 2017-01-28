@@ -129,29 +129,29 @@ impl_from_for_lit! {Float, [
 #[cfg(feature = "parsing")]
 #[derive(Debug, Clone)]
 pub struct StrLit {
-    value: String,
-    style: StrStyle,
+    pub value: String,
+    pub style: StrStyle,
 }
 
 #[cfg(feature = "parsing")]
 #[derive(Debug, Clone)]
 pub struct ByteStrLit {
-    value: Vec<u8>,
-    style: StrStyle,
+    pub value: Vec<u8>,
+    pub style: StrStyle,
 }
 
 #[cfg(feature = "parsing")]
 #[derive(Debug, Clone)]
 pub struct IntLit {
-    value: u64,
-    suffix: IntTy,
+    pub value: u64,
+    pub suffix: IntTy,
 }
 
 #[cfg(feature = "parsing")]
 #[derive(Debug, Clone)]
 pub struct FloatLit {
-    value: String,
-    suffix: FloatTy,
+    pub value: String,
+    pub suffix: FloatTy,
 }
 
 #[cfg(feature = "parsing")]
