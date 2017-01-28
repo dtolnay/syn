@@ -37,6 +37,7 @@ script:
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features full &&
+          (cd synom && cargo test) &&
           cargo doc --features 'full visit'
           ;;
         test)

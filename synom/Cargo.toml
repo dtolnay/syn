@@ -10,3 +10,9 @@ include = ["Cargo.toml", "src/**/*.rs"]
 
 [dependencies]
 unicode-xid = "0.0.4"
+
+[dev-dependencies.syn]
+version = "0.11"
+path = ".."
+features = ["parsing", "full"]
+default-features = false

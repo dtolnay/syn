@@ -11,10 +11,27 @@ pub mod helper;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum IResult<I, O> {
-    /// indicates a correct parsing, the first field containing the rest of the
-    /// unparsed data, the second field contains the parsed data
+    /// Parsing succeeded. The first field contains the rest of the unparsed
+    /// data and the second field contains the parse result.
     Done(I, O),
+    /// Parsing failed.
     Error,
+}
+
+impl<'a, O> IResult<&'a str, O> {
+    pub fn expect(self, name: &str) -> O {
+        match self {
+            IResult::Done(mut rest, o) => {
+                rest = space::skip_whitespace(rest);
+                if rest.is_empty() {
+                    o
+                } else {
+                    panic!("unparsed tokens after {}: {:?}", name, rest)
+                }
+            }
+            IResult::Error => panic!("failed to parse {}", name),
+        }
+    }
 }
 
 #[macro_export]
@@ -321,6 +338,33 @@ macro_rules! value {
     };
 }
 
+/// Value surrounded by a pair of delimiters.
+///
+/// - **Syntax:** `delimited!(OPEN, THING, CLOSE)`
+/// - **Output:** `THING`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Expr;
+/// use syn::parse::expr;
+///
+/// // An expression surrounded by [[ ... ]].
+/// named!(double_bracket_expr -> Expr,
+///     delimited!(
+///         punct!("[["),
+///         expr,
+///         punct!("]]")));
+///
+/// fn main() {
+///     let input = "[[ 1 + 1 ]]";
+///
+///     let parsed = double_bracket_expr(input).expect("double bracket expr");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! delimited {
     ($i:expr, $submac:ident!( $($args:tt)* ), $($rest:tt)+) => {
@@ -335,6 +379,33 @@ macro_rules! delimited {
     };
 }
 
+/// One or more of something separated by some separator.
+///
+/// - **Syntax:** `separated_nonempty_list!(SEPARATOR, THING)`
+/// - **Output:** `Vec<THING>`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Ty;
+/// use syn::parse::ty;
+///
+/// // One or more Rust types separated by commas.
+/// named!(comma_separated_types -> Vec<Ty>,
+///     separated_nonempty_list!(
+///         punct!(","),
+///         ty));
+///
+/// fn main() {
+///     let input = "&str, Map<K, V>, String";
+///
+///     let parsed = comma_separated_types(input).expect("comma-separated types");
+///
+///     assert_eq!(parsed.len(), 3);
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! separated_nonempty_list {
     ($i:expr, $sep:ident!( $($args:tt)* ), $submac:ident!( $($args2:tt)* )) => {{

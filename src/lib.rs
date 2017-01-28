@@ -156,7 +156,7 @@ mod parsing {
                     // parsed nothing
                     Err(format!("failed to parse {}: {:?}", name, rest))
                 } else {
-                    Err(format!("failed to parse tokens after {}: {:?}", name, rest))
+                    Err(format!("unparsed tokens after {}: {:?}", name, rest))
                 }
             }
             IResult::Error => Err(format!("failed to parse {}: {:?}", name, input)),
