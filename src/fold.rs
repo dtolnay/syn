@@ -569,15 +569,15 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F, Item { ident, vis, att
                    folder.fold_generics(generics))
             }
             Enum(variants, generics) => {
-                Enum(variants.lift(|v| folder.fold_variant(v, generics.clone())),
+                Enum(variants.lift(|v| folder.fold_variant(v)),
                      folder.fold_generics(generics))
             }
             Struct(variant_data, generics) => {
-                Struct(folder.fold_variant_data(variant_data, ident, generics.clone()),
+                Struct(folder.fold_variant_data(variant_data),
                        folder.fold_generics(generics))
             }
             Union(variant_data, generics) => {
-                Union(folder.fold_variant_data(variant_data, ident, generics.clone()),
+                Union(folder.fold_variant_data(variant_data),
                       folder.fold_generics(generics))
             }
             Trait(unsafety, generics, typbs, trait_items) => {
