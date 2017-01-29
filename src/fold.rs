@@ -186,9 +186,7 @@ pub fn noop_fold_derive_input<F: ?Sized + Folder>(folder: &mut F,
         attrs: attrs.lift(|a| folder.fold_attribute(a)),
         generics: folder.fold_generics(generics),
         body: match body {
-            Enum(variants) => {
-                Enum(variants.lift(move |v| folder.fold_variant(v)))
-            }
+            Enum(variants) => Enum(variants.lift(move |v| folder.fold_variant(v))),
             Struct(variant_data) => Struct(folder.fold_variant_data(variant_data)),
         },
     }
@@ -304,7 +302,9 @@ pub fn noop_fold_generics<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-pub fn noop_fold_ty_param_bound<F: ?Sized + Folder>(folder: &mut F, bound: TyParamBound) -> TyParamBound {
+pub fn noop_fold_ty_param_bound<F: ?Sized + Folder>(folder: &mut F,
+                                                    bound: TyParamBound)
+                                                    -> TyParamBound {
     use self::TyParamBound::*;
     match bound {
         Trait(ty, modifier) => Trait(folder.fold_poly_trait_ref(ty), modifier),
@@ -312,8 +312,9 @@ pub fn noop_fold_ty_param_bound<F: ?Sized + Folder>(folder: &mut F, bound: TyPar
     }
 }
 
-pub fn noop_fold_poly_trait_ref<F: ?Sized + Folder>(folder: &mut F, trait_ref: PolyTraitRef)
-                                           -> PolyTraitRef {
+pub fn noop_fold_poly_trait_ref<F: ?Sized + Folder>(folder: &mut F,
+                                                    trait_ref: PolyTraitRef)
+                                                    -> PolyTraitRef {
     PolyTraitRef {
         bound_lifetimes: trait_ref.bound_lifetimes
             .lift(|bl| folder.fold_lifetime_def(bl)),
@@ -322,8 +323,8 @@ pub fn noop_fold_poly_trait_ref<F: ?Sized + Folder>(folder: &mut F, trait_ref: P
 }
 
 pub fn noop_fold_variant_data<F: ?Sized + Folder>(folder: &mut F,
-                                         data: VariantData)
-                                         -> VariantData {
+                                                  data: VariantData)
+                                                  -> VariantData {
     use self::VariantData::*;
     match data {
         Struct(fields) => Struct(fields.lift(|f| folder.fold_field(f))),
@@ -374,8 +375,8 @@ pub fn noop_fold_path<F: ?Sized + Folder>(folder: &mut F, Path { global, segment
 }
 
 pub fn noop_fold_path_segment<F: ?Sized + Folder>(folder: &mut F,
-                                         PathSegment { ident, parameters }: PathSegment)
-                                         -> PathSegment {
+                                                  PathSegment { ident, parameters }: PathSegment)
+                                                  -> PathSegment {
     PathSegment {
         ident: folder.fold_ident(ident),
         parameters: folder.fold_path_parameters(parameters),
@@ -383,8 +384,8 @@ pub fn noop_fold_path_segment<F: ?Sized + Folder>(folder: &mut F,
 }
 
 pub fn noop_fold_path_parameters<F: ?Sized + Folder>(folder: &mut F,
-                                            path_parameters: PathParameters)
-                                            -> PathParameters {
+                                                     path_parameters: PathParameters)
+                                                     -> PathParameters {
     use self::PathParameters::*;
     match path_parameters {
         AngleBracketed(d) => {
@@ -406,8 +407,8 @@ pub fn noop_fold_path_parameters<F: ?Sized + Folder>(folder: &mut F,
 }
 
 pub fn noop_fold_assoc_type_binding<F: ?Sized + Folder>(folder: &mut F,
-                                               TypeBinding { ident, ty }: TypeBinding)
-                                               -> TypeBinding {
+                                                        TypeBinding { ident, ty }: TypeBinding)
+                                                        -> TypeBinding {
     TypeBinding {
         ident: folder.fold_ident(ident),
         ty: folder.fold_ty(ty),
@@ -419,7 +420,9 @@ pub fn noop_fold_attribute<F: ?Sized + Folder>(_: &mut F, _attr: Attribute) -> A
     _attr
 }
 
-pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F, ret_ty: FunctionRetTy) -> FunctionRetTy {
+pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F,
+                                               ret_ty: FunctionRetTy)
+                                               -> FunctionRetTy {
     use self::FunctionRetTy::*;
     match ret_ty {
         Default => Default,
@@ -469,13 +472,20 @@ pub fn noop_fold_tt<F: ?Sized + Folder>(folder: &mut F, tt: TokenTree) -> TokenT
     use self::TokenTree::*;
     use self::Token::*;
     match tt {
-        Token(token) => Token(match token {
-            Literal(lit) => Literal(folder.fold_lit(lit)),
-            Ident(ident) => Ident(folder.fold_ident(ident)),
-            Lifetime(ident) => Lifetime(folder.fold_ident(ident)),
-            x => x,
-        }),
-        Delimited(super::Delimited{delim, tts}) => Delimited(super::Delimited{delim: delim, tts: tts.lift(|v| noop_fold_tt(folder, v))}),
+        Token(token) => {
+            Token(match token {
+                Literal(lit) => Literal(folder.fold_lit(lit)),
+                Ident(ident) => Ident(folder.fold_ident(ident)),
+                Lifetime(ident) => Lifetime(folder.fold_ident(ident)),
+                x => x,
+            })
+        }
+        Delimited(super::Delimited { delim, tts }) => {
+            Delimited(super::Delimited {
+                delim: delim,
+                tts: tts.lift(|v| noop_fold_tt(folder, v)),
+            })
+        }
     }
 }
 
@@ -487,7 +497,9 @@ pub fn noop_fold_mac<F: ?Sized + Folder>(folder: &mut F, Mac { path, tts }: Mac)
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_crate<F: ?Sized + Folder>(folder: &mut F, Crate { shebang, attrs, items }: Crate) -> Crate {
+pub fn noop_fold_crate<F: ?Sized + Folder>(folder: &mut F,
+                                           Crate { shebang, attrs, items }: Crate)
+                                           -> Crate {
     Crate {
         shebang: shebang,
         attrs: attrs.lift(|a| folder.fold_attribute(a)),
@@ -512,7 +524,9 @@ fn noop_fold_vis<F: ?Sized + Folder>(folder: &mut F, vis: Visibility) -> Visibil
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F, Item { ident, vis, attrs, node }: Item) -> Item {
+pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
+                                          Item { ident, vis, attrs, node }: Item)
+                                          -> Item {
     use self::ItemKind::*;
     Item {
         ident: folder.fold_ident(ident.clone()),
@@ -791,8 +805,8 @@ pub fn noop_fold_pat<F: ?Sized + Folder>(folder: &mut F, pat: Pat) -> Pat {
 
 #[cfg(feature = "full")]
 pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F,
-                                    FnDecl { inputs, output, variadic }: FnDecl)
-                                    -> FnDecl {
+                                             FnDecl { inputs, output, variadic }: FnDecl)
+                                             -> FnDecl {
 
     FnDecl {
         inputs: inputs.lift(|a| {
@@ -814,8 +828,8 @@ pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F,
 
 #[cfg(feature = "full")]
 pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
-                                       TraitItem { ident, attrs, node }: TraitItem)
-                                       -> TraitItem {
+                                                TraitItem { ident, attrs, node }: TraitItem)
+                                                -> TraitItem {
     use self::TraitItemKind::*;
     TraitItem {
         ident: folder.fold_ident(ident),
@@ -847,9 +861,7 @@ pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F,
         attrs: attrs.lift(|v| folder.fold_attribute(v)),
         node: match node {
             Const(ty, expr) => Const(folder.fold_ty(ty), folder.fold_expr(expr)),
-            Method(sig, block) => {
-                Method(folder.fold_method_sig(sig), folder.fold_block(block))
-            }
+            Method(sig, block) => Method(folder.fold_method_sig(sig), folder.fold_block(block)),
             Type(ty) => Type(folder.fold_ty(ty)),
             Macro(mac) => Macro(folder.fold_mac(mac)),
         },
@@ -886,7 +898,9 @@ pub fn noop_fold_stmt<F: ?Sized + Folder>(folder: &mut F, stmt: Stmt) -> Stmt {
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_local<F: ?Sized + Folder>(folder: &mut F, Local { pat, ty, init, attrs }: Local) -> Local {
+pub fn noop_fold_local<F: ?Sized + Folder>(folder: &mut F,
+                                           Local { pat, ty, init, attrs }: Local)
+                                           -> Local {
     Local {
         pat: pat.lift(|v| folder.fold_pat(v)),
         ty: ty.map(|v| v.lift(|t| folder.fold_ty(t))),
