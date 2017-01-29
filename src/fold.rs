@@ -454,16 +454,20 @@ pub fn noop_fold_const_expr<F: ?Sized + Folder>(folder: &mut F, expr: ConstExpr)
                   i.lift(|e| folder.fold_const_expr(e)))
         }
         Paren(no_op) => Paren(no_op.lift(|e| folder.fold_const_expr(e))),
-        Other(e) => {
-                #[cfg(feature = "full")]            {
-                Other(folder.fold_expr(e))
-            }
-                #[cfg(not(feature = "full"))]            {
-                Other(e)
-            }
-        }
+        Other(e) => Other(noop_fold_other_const_expr(folder, e)),
     }
 }
+
+#[cfg(feature = "full")]
+fn noop_fold_other_const_expr<F: ?Sized + Folder>(folder: &mut F, e: Expr) -> Expr {
+    folder.fold_expr(e)
+}
+
+#[cfg(not(feature = "full"))]
+fn noop_fold_other_const_expr<F: ?Sized + Folder>(_: &mut F, e: constant::Other) -> constant::Other {
+    e
+}
+
 pub fn noop_fold_lit<F: ?Sized + Folder>(_: &mut F, _lit: Lit) -> Lit {
     _lit
 }
