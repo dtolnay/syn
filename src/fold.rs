@@ -1,7 +1,7 @@
 // Adapted from libsyntax.
 
 //! A Folder represents an AST->AST fold; it accepts an AST piece,
-//! and returns a piece of the same type. 
+//! and returns a piece of the same type.
 
 use super::*;
 
@@ -855,7 +855,7 @@ pub fn noop_fold_trait_item<F: Folder>(folder: &mut F,
                 Type(ty_pbs.lift(|v| folder.fold_ty_param_bound(v)),
                      ty.map(|v| folder.fold_ty(v)))
             }
-            Macro(mac) => Macro(folder.fold_mac(mac)),  
+            Macro(mac) => Macro(folder.fold_mac(mac)),
         },
     }
 }
