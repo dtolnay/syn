@@ -37,8 +37,10 @@ script:
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features full &&
+          cargo build --features 'visit fold' &&
+          cargo build --features 'full visit fold' &&
           (cd synom && cargo test) &&
-          cargo doc --features 'full visit'
+          cargo doc --features 'full visit fold'
           ;;
         test)
           git submodule update --init &&
