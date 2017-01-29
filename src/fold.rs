@@ -169,13 +169,10 @@ impl<T, U> LiftMut<T, U> for Vec<T> {
     }
 }
 
-
-// -
 pub fn noop_fold_ident<F: ?Sized + Folder>(_: &mut F, _ident: Ident) -> Ident {
     _ident
 }
 
-// -
 pub fn noop_fold_derive_input<F: ?Sized + Folder>(folder: &mut F,
                                          DeriveInput{ ident,
                                                       vis,
@@ -197,7 +194,6 @@ pub fn noop_fold_derive_input<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_ty<F: ?Sized + Folder>(folder: &mut F, ty: Ty) -> Ty {
     use self::Ty::*;
     match ty {
@@ -263,7 +259,6 @@ fn noop_fold_qself<F: ?Sized + Folder>(folder: &mut F, QSelf { ty, position }: Q
     }
 }
 
-// -
 pub fn noop_fold_generics<F: ?Sized + Folder>(folder: &mut F,
                                      Generics { lifetimes, ty_params, where_clause }: Generics)
                                      -> Generics {
@@ -309,7 +304,6 @@ pub fn noop_fold_generics<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_ty_param_bound<F: ?Sized + Folder>(folder: &mut F, bound: TyParamBound) -> TyParamBound {
     use self::TyParamBound::*;
     match bound {
@@ -318,7 +312,6 @@ pub fn noop_fold_ty_param_bound<F: ?Sized + Folder>(folder: &mut F, bound: TyPar
     }
 }
 
-// -
 pub fn noop_fold_poly_trait_ref<F: ?Sized + Folder>(folder: &mut F, trait_ref: PolyTraitRef)
                                            -> PolyTraitRef {
     PolyTraitRef {
@@ -328,7 +321,6 @@ pub fn noop_fold_poly_trait_ref<F: ?Sized + Folder>(folder: &mut F, trait_ref: P
     }
 }
 
-// -
 pub fn noop_fold_variant_data<F: ?Sized + Folder>(folder: &mut F,
                                          data: VariantData)
                                          -> VariantData {
@@ -340,7 +332,6 @@ pub fn noop_fold_variant_data<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_field<F: ?Sized + Folder>(folder: &mut F, field: Field) -> Field {
     Field {
         ident: field.ident.map(|i| folder.fold_ident(i)),
@@ -350,7 +341,6 @@ pub fn noop_fold_field<F: ?Sized + Folder>(folder: &mut F, field: Field) -> Fiel
     }
 }
 
-// -
 pub fn noop_fold_variant<F: ?Sized + Folder>(folder: &mut F,
                                     Variant { ident, attrs, data, discriminant }: Variant)
                                     -> Variant {
@@ -362,12 +352,10 @@ pub fn noop_fold_variant<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_lifetime<F: ?Sized + Folder>(folder: &mut F, _lifetime: Lifetime) -> Lifetime {
     Lifetime { ident: folder.fold_ident(_lifetime.ident) }
 }
 
-// -
 pub fn noop_fold_lifetime_def<F: ?Sized + Folder>(folder: &mut F,
                                          LifetimeDef { attrs, lifetime, bounds }: LifetimeDef)
                                          -> LifetimeDef {
@@ -378,7 +366,6 @@ pub fn noop_fold_lifetime_def<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_path<F: ?Sized + Folder>(folder: &mut F, Path { global, segments }: Path) -> Path {
     Path {
         global: global,
@@ -386,7 +373,6 @@ pub fn noop_fold_path<F: ?Sized + Folder>(folder: &mut F, Path { global, segment
     }
 }
 
-// -
 pub fn noop_fold_path_segment<F: ?Sized + Folder>(folder: &mut F,
                                          PathSegment { ident, parameters }: PathSegment)
                                          -> PathSegment {
@@ -396,7 +382,6 @@ pub fn noop_fold_path_segment<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_path_parameters<F: ?Sized + Folder>(folder: &mut F,
                                             path_parameters: PathParameters)
                                             -> PathParameters {
@@ -420,7 +405,6 @@ pub fn noop_fold_path_parameters<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 pub fn noop_fold_assoc_type_binding<F: ?Sized + Folder>(folder: &mut F,
                                                TypeBinding { ident, ty }: TypeBinding)
                                                -> TypeBinding {
@@ -431,12 +415,10 @@ pub fn noop_fold_assoc_type_binding<F: ?Sized + Folder>(folder: &mut F,
 
 }
 
-// -
 pub fn noop_fold_attribute<F: ?Sized + Folder>(_: &mut F, _attr: Attribute) -> Attribute {
     _attr
 }
 
-// -
 pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F, ret_ty: FunctionRetTy) -> FunctionRetTy {
     use self::FunctionRetTy::*;
     match ret_ty {
@@ -444,7 +426,6 @@ pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F, ret_ty: FunctionR
         Ty(ty) => Ty(folder.fold_ty(ty)),
     }
 }
-
 
 pub fn noop_fold_const_expr<F: ?Sized + Folder>(folder: &mut F, expr: ConstExpr) -> ConstExpr {
     use self::ConstExpr::*;
@@ -600,8 +581,6 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F, Item { ident, vis, att
     }
 }
 
-
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: Expr) -> Expr {
     use self::ExprKind::*;
@@ -742,7 +721,6 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
     }
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_foreign_item<F: ?Sized + Folder>(folder: &mut F,
                                          ForeignItem { ident, attrs, node, vis }: ForeignItem)
@@ -763,7 +741,6 @@ pub fn noop_fold_foreign_item<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_pat<F: ?Sized + Folder>(folder: &mut F, pat: Pat) -> Pat {
     use self::Pat::*;
@@ -812,7 +789,6 @@ pub fn noop_fold_pat<F: ?Sized + Folder>(folder: &mut F, pat: Pat) -> Pat {
     }
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F,
                                     FnDecl { inputs, output, variadic }: FnDecl)
@@ -836,7 +812,6 @@ pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F,
 
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
                                        TraitItem { ident, attrs, node }: TraitItem)
@@ -860,7 +835,6 @@ pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F,
                                       ImplItem { ident, vis, defaultness, attrs, node }: ImplItem)
@@ -882,7 +856,6 @@ pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_method_sig<F: ?Sized + Folder>(folder: &mut F, MethodSig{unsafety, constness, abi, decl, generics}:MethodSig) -> MethodSig {
     MethodSig {
@@ -895,7 +868,6 @@ pub fn noop_fold_method_sig<F: ?Sized + Folder>(folder: &mut F, MethodSig{unsafe
 
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_stmt<F: ?Sized + Folder>(folder: &mut F, stmt: Stmt) -> Stmt {
     use self::Stmt::*;
@@ -913,7 +885,6 @@ pub fn noop_fold_stmt<F: ?Sized + Folder>(folder: &mut F, stmt: Stmt) -> Stmt {
 
 }
 
-// -
 #[cfg(feature = "full")]
 pub fn noop_fold_local<F: ?Sized + Folder>(folder: &mut F, Local { pat, ty, init, attrs }: Local) -> Local {
     Local {
