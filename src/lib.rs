@@ -62,7 +62,7 @@ pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
 
 mod derive;
 pub use derive::{Body, DeriveInput};
-// Deprecated.
+// Deprecated. Use `DeriveInput` instead.
 #[doc(hidden)]
 pub type MacroInput = DeriveInput;
 
@@ -140,7 +140,7 @@ mod parsing {
         unwrap("type parameter bound", generics::parsing::ty_param_bound, input)
     }
 
-    // Deprecated.
+    // Deprecated. Use `parse_derive_input` instead.
     #[doc(hidden)]
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
         parse_derive_input(input)
