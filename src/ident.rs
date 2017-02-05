@@ -57,11 +57,11 @@ impl<T: ?Sized> PartialEq<T> for Ident
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::IResult;
+    use synom::{IResult, ParseState};
     use synom::space::skip_whitespace;
     use unicode_xid::UnicodeXID;
 
-    pub fn ident(input: &str) -> IResult<&str, Ident> {
+    pub fn ident(input: ParseState) -> IResult<ParseState, Ident> {
         let (rest, id) = match word(input) {
             IResult::Done(rest, id) => (rest, id),
             IResult::Error => return IResult::Error,
@@ -80,7 +80,7 @@ pub mod parsing {
         }
     }
 
-    pub fn word(mut input: &str) -> IResult<&str, Ident> {
+    pub fn word(mut input: ParseState) -> IResult<ParseState, Ident> {
         input = skip_whitespace(input);
 
         let mut chars = input.char_indices();
@@ -91,15 +91,15 @@ pub mod parsing {
 
         while let Some((i, ch)) = chars.next() {
             if !UnicodeXID::is_xid_continue(ch) {
-                return IResult::Done(&input[i..], input[..i].into());
+                return IResult::Done(input.advance(i), input.until(i).into());
             }
         }
 
-        IResult::Done("", input.into())
+        IResult::Done(input.finish(), input.rest().into())
     }
 
     #[cfg(feature = "full")]
-    pub fn wordlike(mut input: &str) -> IResult<&str, Ident> {
+    pub fn wordlike(mut input: ParseState) -> IResult<ParseState, Ident> {
         input = skip_whitespace(input);
 
         for (i, ch) in input.char_indices() {
@@ -107,12 +107,12 @@ pub mod parsing {
                 return if i == 0 {
                     IResult::Error
                 } else {
-                    IResult::Done(&input[i..], input[..i].into())
+                    IResult::Done(input.advance(i), input.until(i).into())
                 };
             }
         }
 
-        IResult::Done("", input.into())
+        IResult::Done(input.finish(), input.rest().into())
     }
 }
 

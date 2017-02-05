@@ -87,7 +87,7 @@ pub use parsing::*;
 mod parsing {
     use super::*;
     use {derive, generics, ident, mac, ty};
-    use synom::{space, IResult};
+    use synom::{space, IResult, ParseState};
 
     #[cfg(feature = "full")]
     use {expr, item, krate};
@@ -147,10 +147,10 @@ mod parsing {
     }
 
     fn unwrap<T>(name: &'static str,
-                 f: fn(&str) -> IResult<&str, T>,
+                 f: fn(ParseState) -> IResult<ParseState, T>,
                  input: &str)
                  -> Result<T, String> {
-        match f(input) {
+        match f(ParseState::new(input)) {
             IResult::Done(mut rest, t) => {
                 rest = space::skip_whitespace(rest);
                 if rest.is_empty() {

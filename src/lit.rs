@@ -159,7 +159,7 @@ pub mod parsing {
     use super::*;
     use escape::{cooked_byte, cooked_byte_string, cooked_char, cooked_string, raw_string};
     use synom::space::skip_whitespace;
-    use synom::IResult;
+    use synom::{IResult, ParseState};
     use unicode_xid::UnicodeXID;
 
     named!(pub lit -> Lit, alt!(
@@ -267,7 +267,7 @@ pub mod parsing {
         keyword!("false") => { |_| false }
     ));
 
-    fn float_string(mut input: &str) -> IResult<&str, String> {
+    fn float_string(mut input: ParseState) -> IResult<ParseState, String> {
         input = skip_whitespace(input);
 
         let mut chars = input.chars().peekable();
@@ -308,7 +308,7 @@ pub mod parsing {
             }
         }
 
-        let rest = &input[len..];
+        let rest = input.advance(len);
         if !(has_dot || has_exp || rest.starts_with("f32") || rest.starts_with("f64")) {
             return IResult::Error;
         }
@@ -341,20 +341,20 @@ pub mod parsing {
             }
         }
 
-        IResult::Done(&input[len..], input[..len].replace("_", ""))
+        IResult::Done(input.advance(len), input.until(len).replace("_", ""))
     }
 
-    pub fn digits(mut input: &str) -> IResult<&str, u64> {
+    pub fn digits(mut input: ParseState) -> IResult<ParseState, u64> {
         input = skip_whitespace(input);
 
         let base = if input.starts_with("0x") {
-            input = &input[2..];
+            input = input.advance(2);
             16
         } else if input.starts_with("0o") {
-            input = &input[2..];
+            input = input.advance(2);
             8
         } else if input.starts_with("0b") {
-            input = &input[2..];
+            input = input.advance(2);
             2
         } else {
             10
@@ -394,7 +394,7 @@ pub mod parsing {
         if empty {
             IResult::Error
         } else {
-            IResult::Done(&input[len..], value)
+            IResult::Done(input.advance(len), value)
         }
     }
 }

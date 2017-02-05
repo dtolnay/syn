@@ -4,10 +4,88 @@
 
 extern crate unicode_xid;
 
+use std::str::{CharIndices, Chars, Bytes};
+
 pub mod space;
 
 #[doc(hidden)]
 pub mod helper;
+
+/// A wrapper around a &'a str which keeps track of the current index into the
+/// source string. Provides a mechanism for determining source locations during
+/// the parse.
+#[derive(Debug, Copy, Clone)]
+pub struct ParseState<'a> {
+    input: &'a str,
+    index: usize,
+}
+
+impl<'a> ParseState<'a> {
+    pub fn new(s: &'a str) -> ParseState<'a> {
+        ParseState {
+            input: s,
+            index: 0,
+        }
+    }
+
+    pub fn rest(self) -> &'a str {
+        &self.input[self.index..]
+    }
+
+    pub fn is_empty(self) -> bool {
+        self.rest().is_empty()
+    }
+
+    pub fn len(self) -> usize {
+        self.rest().len()
+    }
+
+    pub fn starts_with(self, p: &str) -> bool {
+        self.rest().starts_with(p)
+    }
+
+    pub fn until(self, i: usize) -> &'a str {
+        &self.rest()[..i]
+    }
+
+    pub fn char_indices(self) -> CharIndices<'a> {
+        self.rest().char_indices()
+    }
+
+    pub fn chars(self) -> Chars<'a> {
+        self.rest().chars()
+    }
+
+    pub fn bytes(self) -> Bytes<'a> {
+        self.rest().bytes()
+    }
+
+    pub fn advance(self, i: usize) -> ParseState<'a> {
+        let index = i + self.index;
+        assert!(index <= self.input.len());
+        ParseState {
+            input: self.input,
+            index: index,
+        }
+    }
+
+    pub fn finish(self) -> ParseState<'a> {
+        ParseState {
+            input: self.input,
+            index: self.input.len(),
+        }
+    }
+
+    pub fn idx(self) -> usize {
+        self.index
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Span {
+    pub lo: usize,
+    pub hi: usize,
+}
 
 /// The result of a parser.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -19,7 +97,7 @@ pub enum IResult<I, O> {
     Error,
 }
 
-impl<'a, O> IResult<&'a str, O> {
+impl<'a, O> IResult<ParseState<'a>, O> {
     /// Unwraps the result, asserting the the parse is complete. Panics with a
     /// message based on the given string if the parse failed or is incomplete.
     pub fn expect(self, name: &str) -> O {
@@ -37,19 +115,33 @@ impl<'a, O> IResult<&'a str, O> {
     }
 }
 
+impl<'a, O: Eq> IResult<ParseState<'a>, O> {
+    /// This function primarially exists for testing parsers. It returns `true` if the IResult
+    /// "looks like" the passed in parameters. This means that the variant is IResult::Done,
+    /// the `ParseState::rest()` of the input matches `rest` and the result matches.
+    pub fn test_looks_like(&self, rest: &str, result: &O) -> bool {
+        match *self {
+            IResult::Done(input, ref o) => {
+                input.rest() == rest && o == result
+            }
+            IResult::Error => false,
+        }
+    }
+}
+
 /// Define a function from a parser combination.
 ///
 /// - **Syntax:** `named!(NAME -> TYPE, THING)`
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: &str) -> $crate::IResult<&str, $o> {
+        fn $name(i: $crate::ParseState) -> $crate::IResult<$crate::ParseState, $o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: &str) -> $crate::IResult<&str, $o> {
+        pub fn $name(i: $crate::ParseState) -> $crate::IResult<$crate::ParseState, $o> {
             $submac!(i, $($args)*)
         }
     };
@@ -409,9 +501,9 @@ macro_rules! many0 {
 
 // Not public API.
 #[doc(hidden)]
-pub fn many0<'a, T>(mut input: &'a str,
-                    f: fn(&'a str) -> IResult<&'a str, T>)
-                    -> IResult<&'a str, Vec<T>> {
+pub fn many0<'a, T>(mut input: ParseState<'a>,
+                    f: fn(ParseState<'a>) -> IResult<ParseState<'a>, T>)
+                    -> IResult<ParseState<'a>, Vec<T>> {
     let mut res = Vec::new();
 
     loop {
@@ -485,9 +577,9 @@ macro_rules! take_while1 {
         if offset == 0 {
             $crate::IResult::Error
         } else if offset < $input.len() {
-            $crate::IResult::Done(&$input[offset..], &$input[..offset])
+            $crate::IResult::Done($input.advance(offset), $input.until(offset))
         } else {
-            $crate::IResult::Done("", $input)
+            $crate::IResult::Done($input.finish(), $input.rest())
         }
     }};
 
@@ -522,7 +614,7 @@ macro_rules! take_until {
                 }
             }
             if parsed {
-                $crate::IResult::Done(&$input[offset..], &$input[..offset])
+                $crate::IResult::Done($input.advance(offset), $input.until(offset))
             } else {
                 $crate::IResult::Error
             }
@@ -534,7 +626,7 @@ macro_rules! take_until {
 macro_rules! tag {
     ($i:expr, $tag: expr) => {
         if $i.starts_with($tag) {
-            $crate::IResult::Done(&$i[$tag.len()..], &$i[0..$tag.len()])
+            $crate::IResult::Done($i.advance($tag.len()), $i.until($tag.len()))
         } else {
             $crate::IResult::Error
         }

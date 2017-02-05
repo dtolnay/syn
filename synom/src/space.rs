@@ -1,19 +1,19 @@
-use IResult;
+use {IResult, ParseState};
 use unicode_xid::UnicodeXID;
 
-pub fn whitespace(input: &str) -> IResult<&str, ()> {
+pub fn whitespace(input: ParseState) -> IResult<ParseState, ()> {
     if input.is_empty() {
         return IResult::Error;
     }
 
-    let bytes = input.as_bytes();
+    let bytes = input.rest().as_bytes();
     let mut i = 0;
     while i < bytes.len() {
-        let s = &input[i..];
+        let s = input.advance(i);
         if bytes[i] == b'/' {
             if s.starts_with("//") && (!s.starts_with("///") || s.starts_with("////")) &&
                !s.starts_with("//!") {
-                if let Some(len) = s.find('\n') {
+                if let Some(len) = s.rest().find('\n') {
                     i += len + 1;
                     continue;
                 }
@@ -51,16 +51,16 @@ pub fn whitespace(input: &str) -> IResult<&str, ()> {
             IResult::Error
         };
     }
-    IResult::Done("", ())
+    IResult::Done(input.finish(), ())
 }
 
-pub fn block_comment(input: &str) -> IResult<&str, &str> {
+pub fn block_comment(input: ParseState) -> IResult<ParseState, &str> {
     if !input.starts_with("/*") {
         return IResult::Error;
     }
 
     let mut depth = 0;
-    let bytes = input.as_bytes();
+    let bytes = input.rest().as_bytes();
     let mut i = 0;
     let upper = bytes.len() - 1;
     while i < upper {
@@ -70,7 +70,7 @@ pub fn block_comment(input: &str) -> IResult<&str, &str> {
         } else if bytes[i] == b'*' && bytes[i + 1] == b'/' {
             depth -= 1;
             if depth == 0 {
-                return IResult::Done(&input[i + 2..], &input[..i + 2]);
+                return IResult::Done(input.advance(i + 2), input.until(i + 2));
             }
             i += 1; // eat '/'
         }
@@ -79,14 +79,14 @@ pub fn block_comment(input: &str) -> IResult<&str, &str> {
     IResult::Error
 }
 
-pub fn word_break(input: &str) -> IResult<&str, ()> {
+pub fn word_break(input: ParseState) -> IResult<ParseState, ()> {
     match input.chars().next() {
         Some(ch) if UnicodeXID::is_xid_continue(ch) => IResult::Error,
         Some(_) | None => IResult::Done(input, ()),
     }
 }
 
-pub fn skip_whitespace(input: &str) -> &str {
+pub fn skip_whitespace(input: ParseState) -> ParseState {
     match whitespace(input) {
         IResult::Done(rest, _) => rest,
         IResult::Error => input,

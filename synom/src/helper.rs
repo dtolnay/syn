@@ -1,4 +1,4 @@
-use IResult;
+use {IResult, ParseState};
 use space::{skip_whitespace, word_break};
 
 /// Parse a piece of punctuation, skipping whitespace before it.
@@ -26,10 +26,10 @@ macro_rules! punct {
 
 // Not public API.
 #[doc(hidden)]
-pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
+pub fn punct<'a>(input: ParseState<'a>, token: &'static str) -> IResult<ParseState<'a>, &'a str> {
     let input = skip_whitespace(input);
     if input.starts_with(token) {
-        IResult::Done(&input[token.len()..], token)
+        IResult::Done(input.advance(token.len()), token)
     } else {
         IResult::Error
     }
@@ -62,7 +62,7 @@ macro_rules! keyword {
 
 // Not public API.
 #[doc(hidden)]
-pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
+pub fn keyword<'a>(input: ParseState<'a>, token: &'static str) -> IResult<ParseState<'a>, &'a str> {
     match punct(input, token) {
         IResult::Done(rest, _) => {
             match word_break(rest) {
@@ -286,11 +286,11 @@ macro_rules! terminated_list {
 
 // Not public API.
 #[doc(hidden)]
-pub fn separated_list<'a, T>(mut input: &'a str,
+pub fn separated_list<'a, T>(mut input: ParseState<'a>,
                              sep: &'static str,
-                             f: fn(&'a str) -> IResult<&'a str, T>,
+                             f: fn(ParseState<'a>) -> IResult<ParseState<'a>, T>,
                              terminated: bool)
-                             -> IResult<&'a str, Vec<T>> {
+                             -> IResult<ParseState<'a>, Vec<T>> {
     let mut res = Vec::new();
 
     // get the first element

@@ -316,6 +316,7 @@ pub mod parsing {
     use lit::parsing::{digits, lit};
     use mac::parsing::{mac, token_trees};
     use synom::IResult::{self, Error};
+    use synom::ParseState;
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty, unsafety};
 
@@ -323,7 +324,7 @@ pub mod parsing {
     // https://github.com/rust-lang/rfcs/pull/92
     macro_rules! named_ambiguous_expr {
         ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
-            fn $name(i: &str, $allow_struct: bool) -> $crate::synom::IResult<&str, $o> {
+            fn $name(i: $crate::synom::ParseState, $allow_struct: bool) -> $crate::synom::IResult<$crate::synom::ParseState, $o> {
                 $submac!(i, $($args)*)
             }
         };
@@ -339,7 +340,8 @@ pub mod parsing {
 
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
-    fn ambiguous_expr(i: &str, allow_struct: bool, allow_block: bool) -> IResult<&str, Expr> {
+    fn ambiguous_expr(i: ParseState, allow_struct: bool, allow_block: bool)
+                      -> IResult<ParseState, Expr> {
         do_parse!(
             i,
             mut e: alt!(
