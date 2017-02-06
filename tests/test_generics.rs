@@ -29,6 +29,7 @@ fn test_split_for_impl() {
                         style: AttrStyle::Outer,
                         value: MetaItem::Word("may_dangle".into()),
                         is_sugared_doc: false,
+                        span: EMPTY_SPAN,
                     },
                 ],
                 ident: Ident::new("T"),

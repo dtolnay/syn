@@ -48,6 +48,7 @@ fn test_struct() {
                     NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
                 ]),
                 is_sugared_doc: false,
+                span: EMPTY_SPAN,
             },
         ],
         generics: Generics::default(),
@@ -115,11 +116,13 @@ fn test_enum() {
                     }
                 ),
                 is_sugared_doc: true,
+                span: EMPTY_SPAN,
             },
             Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::Word("must_use".into()),
                 is_sugared_doc: false,
+                span: EMPTY_SPAN,
             },
         ],
         generics: Generics {

@@ -8,6 +8,7 @@ pub struct Attribute {
     pub style: AttrStyle,
     pub value: MetaItem,
     pub is_sugared_doc: bool,
+    pub span: Span,
 }
 
 impl Attribute {
@@ -102,7 +103,7 @@ pub mod parsing {
     use synom::space::{block_comment, whitespace};
 
     #[cfg(feature = "full")]
-    named!(pub inner_attr -> Attribute, alt!(
+    named!(pub inner_attr -> Attribute, add_span!(alt!(
         do_parse!(
             punct!("#") >>
             punct!("!") >>
@@ -113,6 +114,7 @@ pub mod parsing {
                 style: AttrStyle::Inner,
                 value: meta_item,
                 is_sugared_doc: false,
+                span: DUMMY_SPAN,
             })
         )
         |
@@ -129,6 +131,7 @@ pub mod parsing {
                     },
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
         |
@@ -146,11 +149,12 @@ pub mod parsing {
                     },
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
-    ));
+    )));
 
-    named!(pub outer_attr -> Attribute, alt!(
+    named!(pub outer_attr -> Attribute, add_span!(alt!(
         do_parse!(
             punct!("#") >>
             punct!("[") >>
@@ -160,6 +164,7 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 value: meta_item,
                 is_sugared_doc: false,
+                span: DUMMY_SPAN,
             })
         )
         |
@@ -177,6 +182,7 @@ pub mod parsing {
                     },
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
         |
@@ -194,9 +200,10 @@ pub mod parsing {
                     },
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
-    ));
+    )));
 
     named!(meta_item -> MetaItem, alt!(
         do_parse!(
@@ -235,7 +242,7 @@ mod printing {
             if let Attribute { style,
                                value: MetaItem::NameValue(ref name, Lit {
                                    node: LitKind::Str(ref value, StrStyle::Cooked), .. }),
-                               is_sugared_doc: true } = *self {
+                               is_sugared_doc: true, .. } = *self {
                 if name == "doc" {
                     match style {
                         AttrStyle::Inner if value.starts_with("//!") => {

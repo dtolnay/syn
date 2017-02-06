@@ -434,6 +434,7 @@ pub fn noop_fold_attribute<F: ?Sized + Folder>(folder: &mut F, attr: Attribute) 
         style: attr.style,
         value: folder.fold_meta_item(attr.value),
         is_sugared_doc: attr.is_sugared_doc,
+        span: folder.fold_span(attr.span),
     }
 }
 
