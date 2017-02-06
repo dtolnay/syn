@@ -146,6 +146,7 @@ pub struct ForeignItem {
     pub attrs: Vec<Attribute>,
     pub node: ForeignItemKind,
     pub vis: Visibility,
+    pub span: Span,
 }
 
 /// An item within an `extern` block
@@ -166,6 +167,7 @@ pub struct TraitItem {
     pub ident: Ident,
     pub attrs: Vec<Attribute>,
     pub node: TraitItemKind,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -191,6 +193,7 @@ pub struct ImplItem {
     pub defaultness: Defaultness,
     pub attrs: Vec<Attribute>,
     pub node: ImplItemKind,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -570,11 +573,11 @@ pub mod parsing {
         })
     ));
 
-    named!(foreign_item -> ForeignItem, alt!(
+    named!(foreign_item -> ForeignItem, add_span!(alt!(
         foreign_fn
         |
         foreign_static
-    ));
+    )));
 
     named!(foreign_fn -> ForeignItem, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -605,6 +608,7 @@ pub mod parsing {
                 },
             ),
             vis: vis,
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -622,6 +626,7 @@ pub mod parsing {
             attrs: attrs,
             node: ForeignItemKind::Static(Box::new(ty), mutability),
             vis: vis,
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -741,7 +746,7 @@ pub mod parsing {
         })
     ));
 
-    named!(trait_item -> TraitItem, alt!(
+    named!(trait_item -> TraitItem, add_span!(alt!(
         trait_item_const
         |
         trait_item_method
@@ -749,7 +754,7 @@ pub mod parsing {
         trait_item_type
         |
         trait_item_mac
-    ));
+    )));
 
     named!(trait_item_const -> TraitItem, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -763,6 +768,7 @@ pub mod parsing {
             ident: id,
             attrs: attrs,
             node: TraitItemKind::Const(ty, value),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -814,6 +820,7 @@ pub mod parsing {
                     },
                     stmts.map(|stmts| Block { stmts: stmts }),
                 ),
+                span: DUMMY_SPAN,
             }
         })
     ));
@@ -832,6 +839,7 @@ pub mod parsing {
             ident: id,
             attrs: attrs,
             node: TraitItemKind::Type(bounds, default),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -851,6 +859,7 @@ pub mod parsing {
                 path: what,
                 tts: vec![TokenTree::Delimited(body.0, body.1)],
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -893,7 +902,7 @@ pub mod parsing {
         })
     ));
 
-    named!(impl_item -> ImplItem, alt!(
+    named!(impl_item -> ImplItem, add_span!(alt!(
         impl_item_const
         |
         impl_item_method
@@ -901,7 +910,7 @@ pub mod parsing {
         impl_item_type
         |
         impl_item_macro
-    ));
+    )));
 
     named!(impl_item_const -> ImplItem, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -920,6 +929,7 @@ pub mod parsing {
             defaultness: defaultness,
             attrs: attrs,
             node: ImplItemKind::Const(ty, value),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -970,6 +980,7 @@ pub mod parsing {
                     stmts: stmts,
                 },
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -988,6 +999,7 @@ pub mod parsing {
             defaultness: defaultness,
             attrs: attrs,
             node: ImplItemKind::Type(ty),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -1009,6 +1021,7 @@ pub mod parsing {
                 path: what,
                 tts: vec![TokenTree::Delimited(body.0, body.1)],
             }),
+            span: DUMMY_SPAN,
         })
     ));
 

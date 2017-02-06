@@ -791,7 +791,11 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs, sp
 
 #[cfg(feature = "full")]
 pub fn noop_fold_foreign_item<F: ?Sized + Folder>(folder: &mut F,
-                                         ForeignItem { ident, attrs, node, vis }: ForeignItem)
+                                                  ForeignItem { ident,
+                                                                attrs,
+                                                                node,
+                                                                vis,
+                                                                span }: ForeignItem)
                                          -> ForeignItem {
     ForeignItem {
         ident: folder.fold_ident(ident),
@@ -806,6 +810,7 @@ pub fn noop_fold_foreign_item<F: ?Sized + Folder>(folder: &mut F,
             }
         },
         vis: noop_fold_vis(folder, vis),
+        span: folder.fold_span(span),
     }
 }
 
@@ -882,7 +887,10 @@ pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F,
 
 #[cfg(feature = "full")]
 pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
-                                                TraitItem { ident, attrs, node }: TraitItem)
+                                                TraitItem { ident,
+                                                            attrs,
+                                                            node,
+                                                            span }: TraitItem)
                                                 -> TraitItem {
     use TraitItemKind::*;
     TraitItem {
@@ -900,12 +908,18 @@ pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Macro(mac) => Macro(folder.fold_mac(mac)),
         },
+        span: folder.fold_span(span),
     }
 }
 
 #[cfg(feature = "full")]
 pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F,
-                                      ImplItem { ident, vis, defaultness, attrs, node }: ImplItem)
+                                               ImplItem { ident,
+                                                          vis,
+                                                          defaultness,
+                                                          attrs,
+                                                          node,
+                                                          span }: ImplItem)
                                       -> ImplItem {
     use ImplItemKind::*;
     ImplItem {
@@ -919,6 +933,7 @@ pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F,
             Type(ty) => Type(folder.fold_ty(ty)),
             Macro(mac) => Macro(folder.fold_mac(mac)),
         },
+        span: folder.fold_span(span),
     }
 }
 
