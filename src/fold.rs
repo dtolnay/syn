@@ -189,7 +189,8 @@ pub fn noop_fold_derive_input<F: ?Sized + Folder>(folder: &mut F,
                                                       vis,
                                                       attrs,
                                                       generics,
-                                                      body }: DeriveInput) -> DeriveInput {
+                                                      body,
+                                                      span }: DeriveInput) -> DeriveInput {
     use Body::*;
     DeriveInput {
         ident: folder.fold_ident(ident),
@@ -197,9 +198,10 @@ pub fn noop_fold_derive_input<F: ?Sized + Folder>(folder: &mut F,
         attrs: attrs.lift(|a| folder.fold_attribute(a)),
         generics: folder.fold_generics(generics),
         body: match body {
-            Enum(variants) => Enum(variants.lift(move |v| folder.fold_variant(v))),
+            Enum(variants) => Enum(variants.lift(|v| folder.fold_variant(v))),
             Struct(variant_data) => Struct(folder.fold_variant_data(variant_data)),
         },
+        span: folder.fold_span(span),
     }
 }
 
@@ -574,7 +576,7 @@ fn noop_fold_vis<F: ?Sized + Folder>(folder: &mut F, vis: Visibility) -> Visibil
 
 #[cfg(feature = "full")]
 pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
-                                          Item { ident, vis, attrs, node }: Item)
+                                          Item { ident, vis, attrs, node, span }: Item)
                                           -> Item {
     use ItemKind::*;
     Item {
@@ -641,6 +643,7 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Mac(mac) => Mac(folder.fold_mac(mac)),
         },
+        span: folder.fold_span(span),
     }
 }
 

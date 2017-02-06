@@ -9,6 +9,7 @@ pub struct Item {
     pub vis: Visibility,
     pub attrs: Vec<Attribute>,
     pub node: ItemKind,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -90,6 +91,7 @@ impl From<DeriveInput> for Item {
                 Body::Enum(variants) => ItemKind::Enum(variants, input.generics),
                 Body::Struct(variant_data) => ItemKind::Struct(variant_data, input.generics),
             },
+            span: input.span,
         }
     }
 }
@@ -246,7 +248,7 @@ pub mod parsing {
     use derive::parsing::derive_input;
     use ty::parsing::{abi, mutability, path, ty, unsafety};
 
-    named!(pub item -> Item, alt!(
+    named!(pub item -> Item, add_span!(alt!(
         item_extern_crate
         |
         item_use
@@ -274,7 +276,7 @@ pub mod parsing {
         item_impl
         |
         item_mac
-    ));
+    )));
 
     named!(pub items -> Vec<Item>, many0!(item));
 
@@ -296,6 +298,7 @@ pub mod parsing {
                 path: what,
                 tts: vec![TokenTree::Delimited(body.0, body.1)],
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -320,6 +323,7 @@ pub mod parsing {
                 vis: vis,
                 attrs: attrs,
                 node: ItemKind::ExternCrate(original_name),
+                span: DUMMY_SPAN,
             }
         })
     ));
@@ -335,6 +339,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             node: ItemKind::Use(Box::new(what)),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -411,6 +416,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             node: ItemKind::Static(Box::new(ty), mutability, Box::new(value)),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -429,6 +435,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             node: ItemKind::Const(Box::new(ty), Box::new(value)),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -475,6 +482,7 @@ pub mod parsing {
                     stmts: stmts,
                 }),
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -532,12 +540,14 @@ pub mod parsing {
                     attrs
                 },
                 node: ItemKind::Mod(Some(items)),
+                span: DUMMY_SPAN,
             },
             None => Item {
                 ident: id,
                 vis: vis,
                 attrs: outer_attrs,
                 node: ItemKind::Mod(None),
+                span: DUMMY_SPAN,
             },
         })
     ));
@@ -556,6 +566,7 @@ pub mod parsing {
                 abi: abi,
                 items: items,
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -635,6 +646,7 @@ pub mod parsing {
                     ..generics
                 },
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -651,7 +663,8 @@ pub mod parsing {
                 Body::Struct(variant_data) => {
                     ItemKind::Struct(variant_data, def.generics)
                 }
-            }
+            },
+            span: DUMMY_SPAN,
         }
     ));
 
@@ -674,6 +687,7 @@ pub mod parsing {
                     .. generics
                 },
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -705,6 +719,7 @@ pub mod parsing {
                 bounds,
                 body,
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -722,6 +737,7 @@ pub mod parsing {
             vis: Visibility::Inherited,
             attrs: attrs,
             node: ItemKind::DefaultImpl(unsafety, path),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -873,6 +889,7 @@ pub mod parsing {
                 Box::new(self_ty),
                 body,
             ),
+            span: DUMMY_SPAN,
         })
     ));
 

@@ -20,6 +20,7 @@ fn test_unit() {
         attrs: Vec::new(),
         generics: Generics::default(),
         body: Body::Struct(VariantData::Unit),
+        span: EMPTY_SPAN,
     };
 
     let result = StripSpans.fold_derive_input(parse_macro_input(raw).unwrap());
@@ -78,6 +79,7 @@ fn test_struct() {
                 }),
             },
         ])),
+        span: EMPTY_SPAN,
     };
 
     let result = StripSpans.fold_derive_input(parse_macro_input(raw).unwrap());
@@ -175,6 +177,7 @@ fn test_enum() {
                 })),
             },
         ]),
+        span: EMPTY_SPAN,
     };
 
     let result = StripSpans.fold_derive_input(parse_macro_input(raw).unwrap());
