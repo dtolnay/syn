@@ -83,9 +83,19 @@ pub trait Folder {
     fn fold_lit(&mut self, _lit: Lit) -> Lit {
         noop_fold_lit(self, _lit)
     }
+    fn fold_meta_item(&mut self, mitem: MetaItem) -> MetaItem {
+        noop_fold_meta_item(self, mitem)
+    }
 
     fn fold_mac(&mut self, mac: Mac) -> Mac {
         noop_fold_mac(self, mac)
+    }
+    fn fold_tt(&mut self, tt: TokenTree) -> TokenTree {
+        noop_fold_tt(self, tt)
+    }
+
+    fn fold_span(&mut self, span: Span) -> Span {
+        noop_fold_span(self, span)
     }
 
     #[cfg(feature = "full")]
@@ -417,8 +427,12 @@ pub fn noop_fold_assoc_type_binding<F: ?Sized + Folder>(folder: &mut F,
 
 }
 
-pub fn noop_fold_attribute<F: ?Sized + Folder>(_: &mut F, _attr: Attribute) -> Attribute {
-    _attr
+pub fn noop_fold_attribute<F: ?Sized + Folder>(folder: &mut F, attr: Attribute) -> Attribute {
+    Attribute {
+        style: attr.style,
+        value: folder.fold_meta_item(attr.value),
+        is_sugared_doc: attr.is_sugared_doc,
+    }
 }
 
 pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F,
@@ -469,36 +483,66 @@ fn noop_fold_other_const_expr<F: ?Sized + Folder>(_: &mut F, e: constant::Other)
     e
 }
 
-pub fn noop_fold_lit<F: ?Sized + Folder>(_: &mut F, _lit: Lit) -> Lit {
-    _lit
+pub fn noop_fold_lit<F: ?Sized + Folder>(folder: &mut F, lit: Lit) -> Lit {
+    Lit {
+        node: lit.node,
+        span: folder.fold_span(lit.span),
+    }
 }
 
 pub fn noop_fold_tt<F: ?Sized + Folder>(folder: &mut F, tt: TokenTree) -> TokenTree {
     use TokenTree::*;
     use Token::*;
     match tt {
-        Token(token) => {
+        Token(token, span) => {
             Token(match token {
                 Literal(lit) => Literal(folder.fold_lit(lit)),
                 Ident(ident) => Ident(folder.fold_ident(ident)),
                 Lifetime(ident) => Lifetime(folder.fold_ident(ident)),
                 x => x,
-            })
+            }, folder.fold_span(span))
         }
-        Delimited(super::Delimited { delim, tts }) => {
+        Delimited(super::Delimited { delim, tts }, span) => {
             Delimited(super::Delimited {
                 delim: delim,
-                tts: tts.lift(|v| noop_fold_tt(folder, v)),
-            })
+                tts: tts.lift(|v| folder.fold_tt(v)),
+            }, folder.fold_span(span))
         }
+    }
+}
+
+pub fn noop_fold_meta_item<F: ?Sized + Folder>(folder: &mut F, mitem: MetaItem) -> MetaItem {
+    match mitem {
+        MetaItem::Word(id) => MetaItem::Word(folder.fold_ident(id)),
+        MetaItem::List(id, nested) => {
+            let nested = nested.lift(|n| noop_fold_nested_meta_item(folder, n));
+            MetaItem::List(folder.fold_ident(id), nested)
+        }
+        MetaItem::NameValue(id, lit) => MetaItem::NameValue(folder.fold_ident(id),
+                                                            folder.fold_lit(lit)),
+    }
+}
+
+pub fn noop_fold_nested_meta_item<F: ?Sized + Folder>(folder: &mut F,
+                                                      nested_mitem: NestedMetaItem)
+                                                      -> NestedMetaItem {
+    match nested_mitem {
+        NestedMetaItem::MetaItem(mitem) =>
+            NestedMetaItem::MetaItem(folder.fold_meta_item(mitem)),
+        NestedMetaItem::Literal(lit) =>
+            NestedMetaItem::Literal(folder.fold_lit(lit)),
     }
 }
 
 pub fn noop_fold_mac<F: ?Sized + Folder>(folder: &mut F, Mac { path, tts }: Mac) -> Mac {
     Mac {
         path: folder.fold_path(path),
-        tts: tts.lift(|tt| noop_fold_tt(folder, tt)),
+        tts: tts.lift(|tt| folder.fold_tt(tt)),
     }
+}
+
+pub fn noop_fold_span<F: ?Sized + Folder>(_: &mut F, s: Span) -> Span {
+    s
 }
 
 #[cfg(feature = "full")]

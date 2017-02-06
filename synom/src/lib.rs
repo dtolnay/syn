@@ -81,12 +81,6 @@ impl<'a> ParseState<'a> {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Span {
-    pub lo: usize,
-    pub hi: usize,
-}
-
 /// The result of a parser.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum IResult<I, O> {

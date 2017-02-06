@@ -27,9 +27,18 @@ pub struct Mac {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum TokenTree {
     /// A single token
-    Token(Token),
+    Token(Token, Span),
     /// A delimited sequence of token trees
-    Delimited(Delimited),
+    Delimited(Delimited, Span),
+}
+
+impl TokenTree {
+    pub fn span(&self) -> Span {
+        match *self {
+            TokenTree::Token(_, span) => span,
+            TokenTree::Delimited(_, span) => span,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -122,10 +131,10 @@ pub mod parsing {
     named!(pub mac -> Mac, do_parse!(
         what: path >>
         punct!("!") >>
-        body: delimited >>
+        body: spanned!(delimited) >>
         (Mac {
             path: what,
-            tts: vec![TokenTree::Delimited(body)],
+            tts: vec![TokenTree::Delimited(body.0, body.1)],
         })
     ));
 
@@ -152,9 +161,9 @@ pub mod parsing {
     ));
 
     named!(pub token_tree -> TokenTree, alt!(
-        map!(token, TokenTree::Token)
+        spanned!(token) => { |(t, span)| { TokenTree::Token(t, span) } }
         |
-        map!(delimited, TokenTree::Delimited)
+        spanned!(delimited) => { |(d, span)| { TokenTree::Delimited(d, span) } }
     ));
 
     named!(token -> Token, alt!(
@@ -315,8 +324,8 @@ mod printing {
     impl ToTokens for TokenTree {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                TokenTree::Token(ref token) => token.to_tokens(tokens),
-                TokenTree::Delimited(ref delimited) => delimited.to_tokens(tokens),
+                TokenTree::Token(ref token, _) => token.to_tokens(tokens),
+                TokenTree::Delimited(ref delimited, _) => delimited.to_tokens(tokens),
             }
         }
     }

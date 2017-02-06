@@ -1,7 +1,16 @@
 extern crate syn;
-use syn::TokenTree::{self, Token};
+use syn::{TokenTree, Span, EMPTY_SPAN};
 use syn::DelimToken::*;
 use syn::Token::*;
+use syn::fold::Folder;
+
+struct StripSpans;
+impl Folder for StripSpans {
+    fn fold_span(&mut self, span: Span) -> Span {
+        assert!(span != EMPTY_SPAN);
+        EMPTY_SPAN
+    }
+}
 
 #[test]
 fn test_struct() {
@@ -14,12 +23,12 @@ fn test_struct() {
     ";
 
     let expected = vec![
-        Token(Pound),
+        token(Pound),
         delimited(Bracket, vec![
             ident("derive"),
             delimited(Paren, vec![
                 ident("Debug"),
-                Token(Comma),
+                token(Comma),
                 ident("Clone"),
             ]),
         ]),
@@ -29,22 +38,25 @@ fn test_struct() {
         delimited(Brace, vec![
             ident("pub"),
             ident("ident"),
-            Token(Colon),
+            token(Colon),
             ident("Ident"),
-            Token(Comma),
+            token(Comma),
 
             ident("pub"),
             ident("attrs"),
-            Token(Colon),
+            token(Colon),
             ident("Vec"),
-            Token(Lt),
+            token(Lt),
             ident("Attribute"),
-            Token(Gt),
-            Token(Comma),
+            token(Gt),
+            token(Comma),
         ]),
     ];
 
-    let result = syn::parse_token_trees(raw).unwrap();
+    let mut result = syn::parse_token_trees(raw).unwrap();
+    for tt in &mut result {
+        *tt = StripSpans.fold_tt(tt.clone());
+    }
     if result != expected {
         panic!("{:#?}\n!=\n{:#?}", result, expected);
     }
@@ -54,9 +66,13 @@ fn delimited(delim: syn::DelimToken, tts: Vec<TokenTree>) -> TokenTree {
     TokenTree::Delimited(syn::Delimited {
         delim: delim,
         tts: tts,
-    })
+    }, EMPTY_SPAN)
 }
 
 fn ident(s: &str) -> TokenTree {
-    TokenTree::Token(Ident(syn::Ident::new(s)))
+    TokenTree::Token(Ident(syn::Ident::new(s)), EMPTY_SPAN)
+}
+
+fn token(token: syn::Token) -> TokenTree {
+    TokenTree::Token(token, EMPTY_SPAN)
 }

@@ -1,8 +1,16 @@
+use {Span, EMPTY_SPAN};
+
 /// Literal kind.
 ///
 /// E.g. `"foo"`, `42`, `12.34` or `bool`
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Lit {
+pub struct Lit {
+    pub node: LitKind,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum LitKind {
     /// A string literal (`"foo"`)
     Str(String, StrStyle),
     /// A byte string (`b"foo"`)
@@ -31,37 +39,55 @@ pub enum StrStyle {
 
 impl From<String> for Lit {
     fn from(input: String) -> Lit {
-        Lit::Str(input, StrStyle::Cooked)
+        Lit {
+            node: LitKind::Str(input, StrStyle::Cooked),
+            span: EMPTY_SPAN,
+        }
     }
 }
 
 impl<'a> From<&'a str> for Lit {
     fn from(input: &str) -> Lit {
-        Lit::Str(input.into(), StrStyle::Cooked)
+        Lit {
+            node: LitKind::Str(input.into(), StrStyle::Cooked),
+            span: EMPTY_SPAN,
+        }
     }
 }
 
 impl From<Vec<u8>> for Lit {
     fn from(input: Vec<u8>) -> Lit {
-        Lit::ByteStr(input, StrStyle::Cooked)
+        Lit {
+            node: LitKind::ByteStr(input, StrStyle::Cooked),
+            span: EMPTY_SPAN,
+        }
     }
 }
 
 impl<'a> From<&'a [u8]> for Lit {
     fn from(input: &[u8]) -> Lit {
-        Lit::ByteStr(input.into(), StrStyle::Cooked)
+        Lit {
+            node: LitKind::ByteStr(input.into(), StrStyle::Cooked),
+            span: EMPTY_SPAN,
+        }
     }
 }
 
 impl From<char> for Lit {
     fn from(input: char) -> Lit {
-        Lit::Char(input)
+        Lit {
+            node: LitKind::Char(input),
+            span: EMPTY_SPAN,
+        }
     }
 }
 
 impl From<bool> for Lit {
     fn from(input: bool) -> Lit {
-        Lit::Bool(input)
+        Lit {
+            node: LitKind::Bool(input),
+            span: EMPTY_SPAN,
+        }
     }
 }
 
@@ -92,7 +118,10 @@ macro_rules! impl_from_for_lit {
         $(
             impl From<$rust_type> for Lit {
                 fn from(input: $rust_type) -> Lit {
-                    Lit::Int(input as u64, $syn_type)
+                    Lit {
+                        node: LitKind::Int(input as u64, $syn_type),
+                        span: EMPTY_SPAN,
+                    }
                 }
             }
         )+
@@ -101,7 +130,10 @@ macro_rules! impl_from_for_lit {
         $(
             impl From<$rust_type> for Lit {
                 fn from(input: $rust_type) -> Lit {
-                    Lit::Float(format!("{}", input), $syn_type)
+                    Lit {
+                        node: LitKind::Float(format!("{}", input), $syn_type),
+                        span: EMPTY_SPAN,
+                    }
                 }
             }
         )+
@@ -162,20 +194,26 @@ pub mod parsing {
     use synom::{IResult, ParseState};
     use unicode_xid::UnicodeXID;
 
-    named!(pub lit -> Lit, alt!(
-        string => { |StrLit { value, style }| Lit::Str(value, style) }
-        |
-        byte_string => { |ByteStrLit { value, style }| Lit::ByteStr(value, style) }
-        |
-        byte => { |b| Lit::Byte(b) }
-        |
-        character => { |ch| Lit::Char(ch) }
-        |
-        float => { |FloatLit { value, suffix }| Lit::Float(value, suffix) } // must be before int
-        |
-        int => { |IntLit { value, suffix }| Lit::Int(value, suffix) }
-        |
-        boolean => { |value| Lit::Bool(value) }
+    named!(pub lit -> Lit, do_parse!(
+        node: spanned!(alt!(
+            string => { |StrLit { value, style }| LitKind::Str(value, style) }
+            |
+            byte_string => { |ByteStrLit { value, style }| LitKind::ByteStr(value, style) }
+            |
+            byte => { |b| LitKind::Byte(b) }
+            |
+            character => { |ch| LitKind::Char(ch) }
+            |
+            float => { |FloatLit { value, suffix }| LitKind::Float(value, suffix) } // must be before int
+            |
+            int => { |IntLit { value, suffix }| LitKind::Int(value, suffix) }
+            |
+            boolean => { |value| LitKind::Bool(value) }
+        )) >>
+        (Lit {
+            node: node.0,
+            span: node.1,
+        })
     ));
 
     named!(pub string -> StrLit, alt!(
@@ -409,14 +447,14 @@ mod printing {
 
     impl ToTokens for Lit {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Lit::Str(ref s, StrStyle::Cooked) => s.to_tokens(tokens),
-                Lit::Str(ref s, StrStyle::Raw(n)) => {
+            match self.node {
+                LitKind::Str(ref s, StrStyle::Cooked) => s.to_tokens(tokens),
+                LitKind::Str(ref s, StrStyle::Raw(n)) => {
                     tokens.append(&format!("r{delim}\"{string}\"{delim}",
                         delim = iter::repeat("#").take(n).collect::<String>(),
                         string = s));
                 }
-                Lit::ByteStr(ref v, StrStyle::Cooked) => {
+                LitKind::ByteStr(ref v, StrStyle::Cooked) => {
                     let mut escaped = "b\"".to_string();
                     for &ch in v.iter() {
                         match ch {
@@ -428,12 +466,12 @@ mod printing {
                     escaped.push('"');
                     tokens.append(&escaped);
                 }
-                Lit::ByteStr(ref vec, StrStyle::Raw(n)) => {
+                LitKind::ByteStr(ref vec, StrStyle::Raw(n)) => {
                     tokens.append(&format!("br{delim}\"{string}\"{delim}",
                         delim = iter::repeat("#").take(n).collect::<String>(),
                         string = str::from_utf8(vec).unwrap()));
                 }
-                Lit::Byte(b) => {
+                LitKind::Byte(b) => {
                     match b {
                         0 => tokens.append(r"b'\0'"),
                         b'\"' => tokens.append("b'\"'"),
@@ -445,11 +483,11 @@ mod printing {
                         }
                     }
                 }
-                Lit::Char(ch) => ch.to_tokens(tokens),
-                Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
-                Lit::Float(ref value, ty) => tokens.append(&format!("{}{}", value, ty)),
-                Lit::Bool(true) => tokens.append("true"),
-                Lit::Bool(false) => tokens.append("false"),
+                LitKind::Char(ch) => ch.to_tokens(tokens),
+                LitKind::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
+                LitKind::Float(ref value, ty) => tokens.append(&format!("{}{}", value, ty)),
+                LitKind::Bool(true) => tokens.append("true"),
+                LitKind::Bool(false) => tokens.append("false"),
             }
         }
     }

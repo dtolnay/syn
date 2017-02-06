@@ -14,6 +14,10 @@ extern crate synom;
 #[cfg(feature = "aster")]
 pub mod aster;
 
+#[macro_use]
+mod span;
+pub use span::{Span, EMPTY_SPAN};
+
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem};
 
@@ -55,7 +59,7 @@ mod krate;
 pub use krate::Crate;
 
 mod lit;
-pub use lit::{FloatTy, IntTy, Lit, StrStyle};
+pub use lit::{FloatTy, IntTy, Lit, LitKind, StrStyle};
 
 mod mac;
 pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};

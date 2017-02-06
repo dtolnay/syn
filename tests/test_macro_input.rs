@@ -1,5 +1,14 @@
 extern crate syn;
 use syn::*;
+use syn::fold::Folder;
+
+struct StripSpans;
+impl Folder for StripSpans {
+    fn fold_span(&mut self, span: Span) -> Span {
+        assert!(span != EMPTY_SPAN);
+        EMPTY_SPAN
+    }
+}
 
 #[test]
 fn test_unit() {
@@ -13,7 +22,8 @@ fn test_unit() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let result = StripSpans.fold_derive_input(parse_macro_input(raw).unwrap());
+    assert_eq!(expected, result);
 }
 
 #[test]
@@ -70,7 +80,8 @@ fn test_struct() {
         ])),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let result = StripSpans.fold_derive_input(parse_macro_input(raw).unwrap());
+    assert_eq!(expected, result);
 }
 
 #[test]
@@ -93,10 +104,13 @@ fn test_enum() {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit::Str(
-                        "/// See the std::result module documentation for details.".into(),
-                        StrStyle::Cooked,
-                    ),
+                    Lit {
+                        node: LitKind::Str(
+                            "/// See the std::result module documentation for details.".into(),
+                            StrStyle::Cooked,
+                        ),
+                        span: EMPTY_SPAN,
+                    }
                 ),
                 is_sugared_doc: true,
             },
@@ -155,10 +169,16 @@ fn test_enum() {
                 ident: "Surprise".into(),
                 attrs: Vec::new(),
                 data: VariantData::Unit,
-                discriminant: Some(ConstExpr::Lit(Lit::Int(0, IntTy::Isize))),
+                discriminant: Some(ConstExpr::Lit(Lit {
+                    node: LitKind::Int(0, IntTy::Isize),
+                    span: EMPTY_SPAN,
+                })),
             },
         ]),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let result = StripSpans.fold_derive_input(parse_macro_input(raw).unwrap());
+    println!("{:#?}\n{:#?}", expected, result);
+
+    assert_eq!(expected, result);
 }

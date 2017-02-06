@@ -283,8 +283,8 @@ pub mod parsing {
         what: path >>
         punct!("!") >>
         name: option!(ident) >>
-        body: delimited >>
-        cond!(match body.delim {
+        body: spanned!(delimited) >>
+        cond!(match body.0.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -294,7 +294,7 @@ pub mod parsing {
             attrs: attrs,
             node: ItemKind::Mac(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body)],
+                tts: vec![TokenTree::Delimited(body.0, body.1)],
             }),
         })
     ));
@@ -823,8 +823,8 @@ pub mod parsing {
         attrs: many0!(outer_attr) >>
         what: path >>
         punct!("!") >>
-        body: delimited >>
-        cond!(match body.delim {
+        body: spanned!(delimited) >>
+        cond!(match body.0.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -833,7 +833,7 @@ pub mod parsing {
             attrs: attrs,
             node: TraitItemKind::Macro(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body)],
+                tts: vec![TokenTree::Delimited(body.0, body.1)],
             }),
         })
     ));
@@ -978,8 +978,8 @@ pub mod parsing {
         attrs: many0!(outer_attr) >>
         what: path >>
         punct!("!") >>
-        body: delimited >>
-        cond!(match body.delim {
+        body: spanned!(delimited) >>
+        cond!(match body.0.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -990,7 +990,7 @@ pub mod parsing {
             attrs: attrs,
             node: ImplItemKind::Macro(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body)],
+                tts: vec![TokenTree::Delimited(body.0, body.1)],
             }),
         })
     ));
@@ -1206,7 +1206,7 @@ mod printing {
                         tt.to_tokens(tokens);
                     }
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. }, _)) => {
                             // no semicolon
                         }
                         _ => tokens.append(";"),
@@ -1310,7 +1310,7 @@ mod printing {
                 TraitItemKind::Macro(ref mac) => {
                     mac.to_tokens(tokens);
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. }, _)) => {
                             // no semicolon
                         }
                         _ => tokens.append(";"),
@@ -1369,7 +1369,7 @@ mod printing {
                 ImplItemKind::Macro(ref mac) => {
                     mac.to_tokens(tokens);
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. }, _)) => {
                             // no semicolon
                         }
                         _ => tokens.append(";"),

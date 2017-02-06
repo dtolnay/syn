@@ -118,12 +118,15 @@ pub mod parsing {
         |
         do_parse!(
             punct!("//!") >>
-            content: take_until!("\n") >>
+            content: spanned!(take_until!("\n")) >>
             (Attribute {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    format!("//!{}", content).into(),
+                    Lit {
+                        span: content.1,
+                        ..format!("//!{}", content.0).into()
+                    },
                 ),
                 is_sugared_doc: true,
             })
@@ -132,12 +135,15 @@ pub mod parsing {
         do_parse!(
             option!(whitespace) >>
             peek!(tag!("/*!")) >>
-            com: block_comment >>
+            com: spanned!(block_comment) >>
             (Attribute {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    com.into(),
+                    Lit {
+                        span: com.1,
+                        ..Lit::from(com.0)
+                    },
                 ),
                 is_sugared_doc: true,
             })
@@ -160,12 +166,15 @@ pub mod parsing {
         do_parse!(
             punct!("///") >>
             not!(peek!(tag!("/"))) >>
-            content: take_until!("\n") >>
+            content: spanned!(take_until!("\n")) >>
             (Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    format!("///{}", content).into(),
+                    Lit {
+                        span: content.1,
+                        ..format!("///{}", content.0).into()
+                    },
                 ),
                 is_sugared_doc: true,
             })
@@ -174,12 +183,15 @@ pub mod parsing {
         do_parse!(
             option!(whitespace) >>
             peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
+            com: spanned!(block_comment) >>
             (Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    com.into(),
+                    Lit {
+                        span: com.1,
+                        ..com.0.into()
+                    },
                 ),
                 is_sugared_doc: true,
             })
@@ -215,14 +227,14 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use lit::{Lit, StrStyle};
+    use lit::{Lit, LitKind, StrStyle};
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if let Attribute { style,
-                               value: MetaItem::NameValue(ref name,
-                                                   Lit::Str(ref value, StrStyle::Cooked)),
+                               value: MetaItem::NameValue(ref name, Lit {
+                                   node: LitKind::Str(ref value, StrStyle::Cooked), .. }),
                                is_sugared_doc: true } = *self {
                 if name == "doc" {
                     match style {

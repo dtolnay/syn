@@ -860,7 +860,7 @@ pub mod parsing {
     // Only parse braces here; paren and bracket will get parsed as
     // expression statements
         punct!("{") >>
-        tts: token_trees >>
+        tts: spanned!(token_trees) >>
         punct!("}") >>
         semi: option!(punct!(";")) >>
         (Stmt::Mac(Box::new((
@@ -868,8 +868,8 @@ pub mod parsing {
                 path: what,
                 tts: vec![TokenTree::Delimited(Delimited {
                     delim: DelimToken::Brace,
-                    tts: tts,
-                })],
+                    tts: tts.0,
+                }, tts.1)],
             },
             if semi.is_some() {
                 MacStmtStyle::Semicolon
