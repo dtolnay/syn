@@ -6,6 +6,15 @@ pub struct Span {
     pub hi: usize,
 }
 
+impl Span {
+    pub fn extend(self, other: Span) -> Span {
+        Span {
+            lo: self.lo,
+            hi: other.hi,
+        }
+    }
+}
+
 pub const EMPTY_SPAN: Span = Span { lo: 0, hi: 0 };
 
 #[cfg(feature = "parsing")]

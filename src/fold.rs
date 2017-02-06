@@ -645,7 +645,7 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: Expr) -> Expr {
+pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs, span }: Expr) -> Expr {
     use ExprKind::*;
     Expr {
         node: match node {
@@ -781,6 +781,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
             Try(expr) => Try(expr.lift(|e| folder.fold_expr(e))),
         },
         attrs: attrs.into_iter().map(|a| folder.fold_attribute(a)).collect(),
+        span: folder.fold_span(span),
     }
 }
 
