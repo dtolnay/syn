@@ -56,6 +56,8 @@ pub use krate::Crate;
 
 mod lit;
 pub use lit::{FloatTy, IntTy, Lit, StrStyle};
+#[cfg(feature = "parsing")]
+pub use lit::{ByteStrLit, FloatLit, IntLit, StrLit};
 
 mod mac;
 pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
@@ -206,4 +208,6 @@ pub mod parse {
     pub use mac::parsing::token_tree as tt;
 
     pub use ident::parsing::ident;
+
+    pub use generics::parsing::lifetime;
 }
