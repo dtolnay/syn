@@ -170,8 +170,16 @@ pub mod parsing {
         |
         do_parse!(
             punct!("///") >>
+<<<<<<< HEAD
             not!(peek!(tag!("/"))) >>
             content: spanned!(take_until!("\n")) >>
+||||||| merged common ancestors
+            not!(peek!(tag!("/"))) >>
+            content: take_until!("\n") >>
+=======
+            not!(tag!("/")) >>
+            content: take_until!("\n") >>
+>>>>>>> origin/master
             (Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(

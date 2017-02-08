@@ -486,7 +486,7 @@ pub mod parsing {
                 cond!(!lifetimes.is_empty(), punct!(",")),
                 separated_nonempty_list!(
                     punct!(","),
-                    terminated!(ty, not!(peek!(punct!("="))))
+                    terminated!(ty, not!(punct!("=")))
                 )
             )) >>
             bindings: opt_vec!(preceded!(
@@ -551,7 +551,7 @@ pub mod parsing {
         name: option!(do_parse!(
             name: ident >>
             punct!(":") >>
-            not!(peek!(tag!(":"))) >> // not ::
+            not!(tag!(":")) >> // not ::
             (name)
         )) >>
         ty: ty >>

@@ -1,7 +1,10 @@
 use {IResult, ParseState};
 use space::{skip_whitespace, word_break};
 
-/// Parse a piece of punctuation, skipping whitespace before it.
+/// Parse a piece of punctuation like "+" or "+=".
+///
+/// See also `keyword!` for parsing keywords, which are subtly different from
+/// punctuation.
 ///
 /// - **Syntax:** `punct!("...")`
 /// - **Output:** `&str`
@@ -10,11 +13,15 @@ use space::{skip_whitespace, word_break};
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// named!(bang -> &str, punct!("!"));
+/// // Parse zero or more bangs.
+/// named!(many_bangs -> Vec<&str>,
+///     many0!(punct!("!"))
+/// );
 ///
 /// fn main() {
-///     let input = "   !";
-///     bang(input).expect("bang");
+///     let input = "!! !";
+///     let parsed = many_bangs(input).expect("bangs");
+///     assert_eq!(parsed, ["!", "!", "!"]);
 /// }
 /// ```
 #[macro_export]
@@ -35,7 +42,10 @@ pub fn punct<'a>(input: ParseState<'a>, token: &'static str) -> IResult<ParseSta
     }
 }
 
-/// Parse a keyword. The word must make up a complete identifier.
+/// Parse a keyword like "fn" or "struct".
+///
+/// See also `punct!` for parsing punctuation, which are subtly different from
+/// keywords.
 ///
 /// - **Syntax:** `keyword!("...")`
 /// - **Output:** `&str`
@@ -44,13 +54,24 @@ pub fn punct<'a>(input: ParseState<'a>, token: &'static str) -> IResult<ParseSta
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// named!(apple -> &str, keyword!("apple"));
+/// use synom::IResult;
+///
+/// // Parse zero or more "bang" keywords.
+/// named!(many_bangs -> Vec<&str>,
+///     terminated!(
+///         many0!(keyword!("bang")),
+///         punct!(";")
+///     )
+/// );
 ///
 /// fn main() {
-///     let input = "   apple";
-///     apple(input).expect("apple");
-///     let input = "apples";
-///     assert_eq!(apple(input), synom::IResult::Error);
+///     let input = "bang bang bang;";
+///     let parsed = many_bangs(input).expect("bangs");
+///     assert_eq!(parsed, ["bang", "bang", "bang"]);
+///
+///     let input = "bangbang;";
+///     let err = many_bangs(input);
+///     assert_eq!(err, IResult::Error);
 /// }
 /// ```
 #[macro_export]
@@ -74,11 +95,10 @@ pub fn keyword<'a>(input: ParseState<'a>, token: &'static str) -> IResult<ParseS
     }
 }
 
-/// Try to run the parser and wrap it in an `Option`, if it fails, succeed but
-/// produce a `None`.
+/// Turn a failed parse into `None` and a successful parse into `Some`.
 ///
 /// - **Syntax:** `option!(THING)`
-/// - **Output:** `THING`
+/// - **Output:** `Option<THING>`
 ///
 /// ```rust
 /// extern crate syn;
@@ -87,10 +107,13 @@ pub fn keyword<'a>(input: ParseState<'a>, token: &'static str) -> IResult<ParseS
 /// named!(maybe_bang -> Option<&str>, option!(punct!("!")));
 ///
 /// fn main() {
-///     let input = "   !";
-///     assert_eq!(maybe_bang(input).expect("maybe bang"), Some("!"));
+///     let input = "!";
+///     let parsed = maybe_bang(input).expect("maybe bang");
+///     assert_eq!(parsed, Some("!"));
+///
 ///     let input = "";
-///     assert_eq!(maybe_bang(input).expect("maybe bang"), None);
+///     let parsed = maybe_bang(input).expect("maybe bang");
+///     assert_eq!(parsed, None);
 /// }
 /// ```
 #[macro_export]
@@ -107,31 +130,43 @@ macro_rules! option {
     };
 }
 
-/// Try to run the parser, if it fails, succeed and produce an empty Vec.
+/// Turn a failed parse into an empty vector. The argument parser must itself
+/// return a vector.
 ///
-/// The argument parser must be a Vec.
+/// This is often more convenient than `option!(...)` when the argument produces
+/// a vector.
 ///
 /// - **Syntax:** `opt_vec!(THING)`
-/// - **Output:** `THING`
+/// - **Output:** `THING`, which must be `Vec<T>`
 ///
 /// ```rust
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::Expr;
-/// use syn::parse::expr;
+/// use syn::{Lifetime, Ty};
+/// use syn::parse::{lifetime, ty};
 ///
-/// named!(opt_expr_list -> Vec<Expr>, opt_vec!(
-///     separated_list!(punct!(","), expr)));
+/// named!(bound_lifetimes -> (Vec<Lifetime>, Ty), tuple!(
+///     opt_vec!(do_parse!(
+///         keyword!("for") >>
+///         punct!("<") >>
+///         lifetimes: terminated_list!(punct!(","), lifetime) >>
+///         punct!(">") >>
+///         (lifetimes)
+///     )),
+///     ty
+/// ));
 ///
 /// fn main() {
-///     let input = "a, 1 + 1, Object { construct: ion }";
-///     let result = opt_expr_list(input).expect("opt expr list");
-///     assert_eq!(result.len(), 3);
+///     let input = "for<'a, 'b> fn(&'a A) -> &'b B";
+///     let parsed = bound_lifetimes(input).expect("bound lifetimes");
+///     assert_eq!(parsed.0, [Lifetime::new("'a"), Lifetime::new("'b")]);
+///     println!("{:?}", parsed);
 ///
-///     let input = "";
-///     let result = opt_expr_list(input).expect("opt expr list");
-///     assert_eq!(result.len(), 0);
+///     let input = "From<String>";
+///     let parsed = bound_lifetimes(input).expect("bound lifetimes");
+///     assert!(parsed.0.is_empty());
+///     println!("{:?}", parsed);
 /// }
 /// ```
 #[macro_export]
@@ -146,17 +181,31 @@ macro_rules! opt_vec {
 
 /// Parses nothing and always succeeds.
 ///
+/// This can be useful as a fallthrough case in `alt!`.
+///
 /// - **Syntax:** `epsilon!()`
 /// - **Output:** `()`
 ///
 /// ```rust
+/// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// named!(epsi -> (), epsilon!());
+/// use syn::Mutability;
+///
+/// named!(mutability -> Mutability, alt!(
+///     keyword!("mut") => { |_| Mutability::Mutable }
+///     |
+///     epsilon!() => { |_| Mutability::Immutable }
+/// ));
 ///
 /// fn main() {
+///     let input = "mut";
+///     let parsed = mutability(input).expect("mutability");
+///     assert_eq!(parsed, Mutability::Mutable);
+///
 ///     let input = "";
-///     assert_eq!(epsi(input).expect("maybe bang"), ());
+///     let parsed = mutability(input).expect("mutability");
+///     assert_eq!(parsed, Mutability::Immutable);
 /// }
 /// ```
 #[macro_export]
@@ -181,7 +230,7 @@ macro_rules! epsilon {
 /// use syn::{Expr, ExprKind};
 /// use syn::parse::expr;
 ///
-/// named!(pub expr_with_arrow_call -> Expr, do_parse!(
+/// named!(expr_with_arrow_call -> Expr, do_parse!(
 ///     mut e: expr >>
 ///     many0!(tap!(arg: tuple!(punct!("=>"), expr) => {
 ///         e = Expr {
@@ -195,11 +244,12 @@ macro_rules! epsilon {
 /// fn main() {
 ///     let input = "something => argument1 => argument2";
 ///
-///     let result = expr_with_arrow_call(input).expect("expr with arrow call");
+///     let parsed = expr_with_arrow_call(input).expect("expr with arrow call");
 ///
-///     println!("result = {:?}", result);
+///     println!("{:?}", parsed);
 /// }
 /// ```
+#[doc(hidden)]
 #[macro_export]
 macro_rules! tap {
     ($i:expr, $name:ident : $submac:ident!( $($args:tt)* ) => $e:expr) => {
@@ -218,14 +268,20 @@ macro_rules! tap {
     };
 }
 
-/// Parses a series of things, separated by the given punctuation. Does not
-/// allow for a trailing seperator.
+/// Zero or more values separated by some separator. Does not allow a trailing
+/// seperator.
 ///
 /// The implementation requires that the first parameter is a `punct!` macro,
 /// and the second is a named parser.
 ///
 /// - **Syntax:** `separated_list!(punct!("..."), THING)`
 /// - **Output:** `Vec<THING>`
+///
+/// You may also be looking for:
+///
+/// - `separated_nonempty_list!` - one or more values
+/// - `terminated_list!` - zero or more, allows trailing separator
+/// - `many0!` - zero or more, no separator
 ///
 /// ```rust
 /// extern crate syn;
@@ -234,14 +290,15 @@ macro_rules! tap {
 /// use syn::Expr;
 /// use syn::parse::expr;
 ///
-/// named!(pub expr_list -> Vec<Expr>,
-///     separated_list!(punct!(","), expr));
+/// named!(expr_list -> Vec<Expr>,
+///     separated_list!(punct!(","), expr)
+/// );
 ///
 /// fn main() {
 ///     let input = "1 + 1, things, Construct { this: thing }";
 ///
-///     let result = expr_list(input).expect("expr list");
-///     assert_eq!(result.len(), 3);
+///     let parsed = expr_list(input).expect("expr list");
+///     assert_eq!(parsed.len(), 3);
 /// }
 /// ```
 #[macro_export]
@@ -251,14 +308,20 @@ macro_rules! separated_list {
     };
 }
 
-/// Parses a series of things, separated by the given punctuation. Allows for
-/// a trailing seperator.
+/// Zero or more values separated by some separator. A trailing separator is
+/// allowed.
 ///
 /// The implementation requires that the first parameter is a `punct!` macro,
 /// and the second is a named parser.
 ///
 /// - **Syntax:** `terminated_list!(punct!("..."), THING)`
 /// - **Output:** `Vec<THING>`
+///
+/// You may also be looking for:
+///
+/// - `separated_list!` - zero or more, allows trailing separator
+/// - `separated_nonempty_list!` - one or more values
+/// - `many0!` - zero or more, no separator
 ///
 /// ```rust
 /// extern crate syn;
@@ -267,14 +330,15 @@ macro_rules! separated_list {
 /// use syn::Expr;
 /// use syn::parse::expr;
 ///
-/// named!(pub expr_list -> Vec<Expr>,
-///     terminated_list!(punct!(","), expr));
+/// named!(expr_list -> Vec<Expr>,
+///     terminated_list!(punct!(","), expr)
+/// );
 ///
 /// fn main() {
 ///     let input = "1 + 1, things, Construct { this: thing },";
 ///
-///     let result = expr_list(input).expect("expr list");
-///     assert_eq!(result.len(), 3);
+///     let parsed = expr_list(input).expect("expr list");
+///     assert_eq!(parsed.len(), 3);
 /// }
 /// ```
 #[macro_export]
