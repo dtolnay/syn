@@ -23,13 +23,9 @@
 
 extern crate unicode_xid;
 
-<<<<<<< HEAD
 use std::str::{CharIndices, Chars, Bytes};
 
-||||||| merged common ancestors
-=======
 #[doc(hidden)]
->>>>>>> origin/master
 pub mod space;
 
 #[doc(hidden)]
@@ -720,54 +716,8 @@ macro_rules! peek {
         }
     };
 
-<<<<<<< HEAD
-#[macro_export]
-macro_rules! take_while1 {
-    ($input:expr, $submac:ident!( $($args:tt)* )) => {{
-        let mut offset = $input.len();
-        for (o, c) in $input.char_indices() {
-            if !$submac!(c, $($args)*) {
-                offset = o;
-                break;
-            }
-        }
-        if offset == 0 {
-            $crate::IResult::Error
-        } else if offset < $input.len() {
-            $crate::IResult::Done($input.advance(offset), $input.until(offset))
-        } else {
-            $crate::IResult::Done($input.finish(), $input.rest())
-        }
-    }};
-
-    ($input:expr, $f:expr) => {
-        take_while1!($input, call!($f));
-||||||| merged common ancestors
-#[macro_export]
-macro_rules! take_while1 {
-    ($input:expr, $submac:ident!( $($args:tt)* )) => {{
-        let mut offset = $input.len();
-        for (o, c) in $input.char_indices() {
-            if !$submac!(c, $($args)*) {
-                offset = o;
-                break;
-            }
-        }
-        if offset == 0 {
-            $crate::IResult::Error
-        } else if offset < $input.len() {
-            $crate::IResult::Done(&$input[offset..], &$input[..offset])
-        } else {
-            $crate::IResult::Done("", $input)
-        }
-    }};
-
-    ($input:expr, $f:expr) => {
-        take_while1!($input, call!($f));
-=======
     ($i:expr, $f:expr) => {
         peek!($i, call!($f))
->>>>>>> origin/master
     };
 }
 
@@ -819,13 +769,7 @@ macro_rules! take_until {
                 }
             }
             if parsed {
-<<<<<<< HEAD
-                $crate::IResult::Done($input.advance(offset), $input.until(offset))
-||||||| merged common ancestors
-                $crate::IResult::Done(&$input[offset..], &$input[..offset])
-=======
-                $crate::IResult::Done(&$i[offset..], &$i[..offset])
->>>>>>> origin/master
+                $crate::IResult::Done($i.advance(offset), $i.until(offset))
             } else {
                 $crate::IResult::Error
             }
@@ -874,13 +818,7 @@ macro_rules! take_until {
 macro_rules! tag {
     ($i:expr, $tag:expr) => {
         if $i.starts_with($tag) {
-<<<<<<< HEAD
             $crate::IResult::Done($i.advance($tag.len()), $i.until($tag.len()))
-||||||| merged common ancestors
-            $crate::IResult::Done(&$i[$tag.len()..], &$i[0..$tag.len()])
-=======
-            $crate::IResult::Done(&$i[$tag.len()..], &$i[..$tag.len()])
->>>>>>> origin/master
         } else {
             $crate::IResult::Error
         }

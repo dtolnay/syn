@@ -59,15 +59,9 @@ mod krate;
 pub use krate::Crate;
 
 mod lit;
-<<<<<<< HEAD
 pub use lit::{FloatTy, IntTy, Lit, LitKind, StrStyle};
-||||||| merged common ancestors
-pub use lit::{FloatTy, IntTy, Lit, StrStyle};
-=======
-pub use lit::{FloatTy, IntTy, Lit, StrStyle};
 #[cfg(feature = "parsing")]
 pub use lit::{ByteStrLit, FloatLit, IntLit, StrLit};
->>>>>>> origin/master
 
 mod mac;
 pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
