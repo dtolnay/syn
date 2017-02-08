@@ -159,7 +159,7 @@ pub mod parsing {
         |
         do_parse!(
             punct!("///") >>
-            not!(peek!(tag!("/"))) >>
+            not!(tag!("/")) >>
             content: take_until!("\n") >>
             (Attribute {
                 style: AttrStyle::Outer,

@@ -970,8 +970,8 @@ pub mod parsing {
             |
             keyword!("self") => { Into::into }
         ) >>
-        not!(peek!(punct!("<"))) >>
-        not!(peek!(punct!("::"))) >>
+        not!(punct!("<")) >>
+        not!(punct!("::")) >>
         subpat: option!(preceded!(punct!("@"), pat)) >>
         (Pat::Ident(
             if mode.is_some() {
