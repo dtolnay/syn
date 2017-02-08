@@ -9,6 +9,7 @@ pub mod space;
 #[doc(hidden)]
 pub mod helper;
 
+/// The result of a parser.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum IResult<I, O> {
     /// Parsing succeeded. The first field contains the rest of the unparsed
@@ -19,6 +20,8 @@ pub enum IResult<I, O> {
 }
 
 impl<'a, O> IResult<&'a str, O> {
+    /// Unwraps the result, asserting the the parse is complete. Panics with a
+    /// message based on the given string if the parse failed or is incomplete.
     pub fn expect(self, name: &str) -> O {
         match self {
             IResult::Done(mut rest, o) => {
@@ -34,6 +37,9 @@ impl<'a, O> IResult<&'a str, O> {
     }
 }
 
+/// Define a function from a parser combination.
+///
+/// - **Syntax:** `named!(NAME -> TYPE, THING)`
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
@@ -49,6 +55,34 @@ macro_rules! named {
     };
 }
 
+/// Invoke the function with the passed in arguments as a parser.
+///
+/// - **Syntax:** `call!(FUNCTION, ARGS...)`
+/// - **Output:** The result of invoking the function `FUNCTION`
+///
+/// ```rust
+/// #[macro_use] extern crate synom;
+///
+/// use synom::IResult;
+///
+/// fn parse_char(input: &str, ch: char) -> IResult<&str, char> {
+///     if input.starts_with(ch) {
+///         IResult::Done(&input[ch.len_utf8()..], ch)
+///     } else {
+///         IResult::Error
+///     }
+/// }
+///
+/// named!(an_a -> char, call!(parse_char, 'a'));
+///
+/// fn main() {
+///     let input = "a";
+///
+///     let parsed = an_a(input).expect("an a");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {
@@ -56,6 +90,32 @@ macro_rules! call {
     };
 }
 
+/// Perform a transformation on the result of a parser.
+///
+/// - **Syntax:** `map!(THING, TRANSFORM)`
+/// - **Output:** `THING` after being transformed by `TRANSFORM`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::{Item, Ident};
+/// use syn::parse::item;
+///
+/// fn get_item_ident(item: Item) -> Ident {
+///     item.ident
+/// }
+///
+/// named!(item_ident -> Ident, map!(item, get_item_ident));
+///
+/// fn main() {
+///     let input = "fn foo() {}";
+///
+///     let parsed = item_ident(input).expect("item identifier");
+///
+///     assert_eq!(parsed.as_ref(), "foo");
+/// }
+/// ```
 #[macro_export]
 macro_rules! map {
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
@@ -81,6 +141,27 @@ macro_rules! map_impl {
     };
 }
 
+/// Parses successfully if the passed-in parser fails to parse.
+///
+/// - **Syntax:** `not!(THING)`
+/// - **Output:** `""`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::parse::expr;
+///
+/// // Parse not an expression
+/// named!(not_an_expr -> &'static str, not!(call!(expr)));
+///
+/// fn main() {
+///     let input = "";
+///
+///     let parsed = not_an_expr(input).expect("not an expr");
+///     assert_eq!(parsed, "");
+/// }
+/// ```
 #[macro_export]
 macro_rules! not {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -92,6 +173,30 @@ macro_rules! not {
 }
 
 // This is actually nom's cond_with_error.
+/// Conditionally execute the passed-in parser.
+///
+/// - **Syntax:** `cond!(CONDITION, PARSER)`
+/// - **Output:** `Option<PARSER>`
+///
+/// ```rust
+/// #[macro_use] extern crate synom;
+///
+/// named!(maybe_bang_bang -> bool,
+///     do_parse!(
+///         bang: option!(punct!("!")) >>
+///         cond!(bang.is_some(), punct!("!")) >>
+///         (bang.is_some())));
+///
+/// fn main() {
+///     let input = "";
+///     let parsed = maybe_bang_bang(input).expect("not bang bang");
+///     assert_eq!(parsed, false);
+///
+///     let input = "!!";
+///     let parsed = maybe_bang_bang(input).expect("yes bang bang");
+///     assert_eq!(parsed, true);
+/// }
+/// ```
 #[macro_export]
 macro_rules! cond {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
@@ -110,6 +215,26 @@ macro_rules! cond {
     };
 }
 
+/// Fails with an error if CONDITION is not true. Otherwise parses PARSER
+///
+/// - **Syntax:** `cond_reduce!(CONDITION, PARSER)`
+/// - **Output:** `PARSER`
+///
+/// ```rust
+/// #[macro_use] extern crate synom;
+///
+/// named!(maybe_bang_bang -> bool,
+///     do_parse!(
+///         bang: option!(punct!("!")) >>
+///         cond!(bang.is_some(), punct!("!")) >>
+///         (bang.is_some())));
+///
+/// fn main() {
+///     let input = "!!";
+///     let parsed = maybe_bang_bang(input).expect("yes bang bang");
+///     assert_eq!(parsed, true);
+/// }
+/// ```
 #[macro_export]
 macro_rules! cond_reduce {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
@@ -125,6 +250,32 @@ macro_rules! cond_reduce {
     };
 }
 
+/// Value preceded by another macro
+///
+/// - **Syntax:** `preceded!(OPEN, THING)`
+/// - **Output:** `THING`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Expr;
+/// use syn::parse::expr;
+///
+/// // An expression preceded by ##.
+/// named!(pound_pound_expr -> Expr,
+///     preceded!(
+///         punct!("##"),
+///         expr));
+///
+/// fn main() {
+///     let input = "## 1 + 1";
+///
+///     let parsed = pound_pound_expr(input).expect("pound pound expr");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! preceded {
     ($i:expr, $submac:ident!( $($args:tt)* ), $submac2:ident!( $($args2:tt)* )) => {
@@ -147,6 +298,32 @@ macro_rules! preceded {
     };
 }
 
+/// Value followed by a terminator.
+///
+/// - **Syntax:** `terminated!(THING, CLOSE)`
+/// - **Output:** `THING`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Expr;
+/// use syn::parse::expr;
+///
+/// // An expression terminated by ##.
+/// named!(expr_pound_pound -> Expr,
+///     terminated!(
+///         expr,
+///         punct!("##")));
+///
+/// fn main() {
+///     let input = "1 + 1 ##";
+///
+///     let parsed = expr_pound_pound(input).expect("expr pound pound");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! terminated {
     ($i:expr, $submac:ident!( $($args:tt)* ), $submac2:ident!( $($args2:tt)* )) => {
@@ -169,6 +346,28 @@ macro_rules! terminated {
     };
 }
 
+/// A value repeated 0 or more times.
+///
+/// - **Syntax:** `many0!(THING)`
+/// - **Output:** `Vec<THING>`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Item;
+/// use syn::parse::item;
+///
+/// named!(items -> Vec<Item>, many0!(item));
+///
+/// fn main() {
+///     let input = "fn a() {} fn b() {}";
+///
+///     let parsed = items(input).expect("items");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! many0 {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {{
@@ -237,6 +436,32 @@ pub fn many0<'a, T>(mut input: &'a str,
     }
 }
 
+/// look for a value without consuming it.
+///
+/// - **Syntax:** `peek!(THING)`
+/// - **Output:** `Vec<THING>`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Ident;
+/// use syn::parse::{ident, expr};
+///
+/// named!(ident_expr -> Ident,
+///     do_parse!(
+///         i: peek!(call!(ident)) >>
+///         expr >>
+///         (i)));
+///
+/// fn main() {
+///     let input = "apple";
+///
+///     let parsed = ident_expr(input).expect("ident");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! peek {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -456,6 +681,28 @@ macro_rules! separated_nonempty_list {
     };
 }
 
+/// Run a series of parsers, and produce all of the results in a tuple.
+///
+/// - **Syntax:** `tuple!(THING1, THING2, ...)`
+/// - **Output:** `(THING1, THING2, ...)`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Ty;
+/// use syn::parse::ty;
+///
+/// named!(two_types -> (Ty, Ty), tuple!(ty, ty));
+///
+/// fn main() {
+///     let input = "&str Map<K, V>";
+///
+///     let parsed = two_types(input).expect("two_types");
+///
+///     println!("{:?}", parsed);
+/// }
+/// ```
 #[macro_export]
 macro_rules! tuple {
     ($i:expr, $($rest:tt)*) => {
@@ -507,6 +754,32 @@ macro_rules! tuple_parser {
     };
 }
 
+/// Run a series of parsers, returning the result of the first one which succeeds.
+///
+/// Optionally allows for the result to be transformed.
+///
+/// - **Syntax:** `alt!(THING1 | THING2 => { FUNC } | ...)`
+/// - **Output:** Either `THING1` or `FUNC(THING2)` or ...
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Ident;
+/// use syn::parse::ident;
+///
+/// named!(ident_or_bang -> Ident,
+///     alt!(ident |
+///          punct!("!") => { |_| "BANG".into() }));
+///
+/// fn main() {
+///     let input = "!";
+///     ident_or_bang(input).expect("ident_or_bang");
+///
+///     let input = "foo";
+///     ident_or_bang(input).expect("ident_or_bang");
+/// }
+/// ```
 #[macro_export]
 macro_rules! alt {
     ($i:expr, $e:ident | $($rest:tt)*) => {
@@ -551,6 +824,35 @@ macro_rules! alt {
     };
 }
 
+/// Run a series of parsers, one after another, optionally assigning the results
+/// a name. Fails if any of the parsers fail.
+///
+/// Produces the result of evaluating the final expression in brackets with all
+/// of the previously named results bound.
+///
+/// The variable bindings may be marked as `mut`.
+///
+/// - **Syntax:** `alt!(name: THING1 >> THING2 >> (RESULT))`
+/// - **Output:** `RESULT`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::{Ident, TokenTree};
+/// use syn::parse::{ident, tt};
+///
+/// named!(simple_mac -> (Ident, TokenTree), do_parse!(
+///     name: ident >>
+///     punct!("!") >>
+///     body: tt >>
+///     ((name, body))));
+///
+/// fn main() {
+///     let input = "foo!(some, random, junk)";
+///     simple_mac(input).expect("macro");
+/// }
+/// ```
 #[macro_export]
 macro_rules! do_parse {
     ($i:expr, ( $($rest:expr),* )) => {
