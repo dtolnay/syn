@@ -16,7 +16,7 @@ pub mod aster;
 
 #[macro_use]
 mod span;
-pub use span::{Span, EMPTY_SPAN, DUMMY_SPAN};
+pub use span::{Span, Spanned, EMPTY_SPAN, DUMMY_SPAN};
 
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem};

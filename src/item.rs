@@ -289,7 +289,7 @@ pub mod parsing {
         punct!("!") >>
         name: option!(ident) >>
         body: spanned!(delimited) >>
-        cond!(match body.0.delim {
+        cond!(match body.node.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -299,7 +299,7 @@ pub mod parsing {
             attrs: attrs,
             node: ItemKind::Mac(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body.0, body.1)],
+                tts: vec![TokenTree::Delimited(body.node, body.span)],
             }),
             span: DUMMY_SPAN,
         })
@@ -848,7 +848,7 @@ pub mod parsing {
         what: path >>
         punct!("!") >>
         body: spanned!(delimited) >>
-        cond!(match body.0.delim {
+        cond!(match body.node.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -857,7 +857,7 @@ pub mod parsing {
             attrs: attrs,
             node: TraitItemKind::Macro(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body.0, body.1)],
+                tts: vec![TokenTree::Delimited(body.node, body.span)],
             }),
             span: DUMMY_SPAN,
         })
@@ -1008,7 +1008,7 @@ pub mod parsing {
         what: path >>
         punct!("!") >>
         body: spanned!(delimited) >>
-        cond!(match body.0.delim {
+        cond!(match body.node.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -1019,7 +1019,7 @@ pub mod parsing {
             attrs: attrs,
             node: ImplItemKind::Macro(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body.0, body.1)],
+                tts: vec![TokenTree::Delimited(body.node, body.span)],
             }),
             span: DUMMY_SPAN,
         })

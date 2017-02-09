@@ -1,4 +1,4 @@
-use {Span, EMPTY_SPAN};
+use {Span, Spanned, EMPTY_SPAN};
 
 /// Literal kind.
 ///
@@ -35,6 +35,15 @@ pub enum StrStyle {
     ///
     /// The uint is the number of `#` symbols used
     Raw(usize),
+}
+
+impl<T: Into<Lit>> From<Spanned<T>> for Lit {
+    fn from(input: Spanned<T>) -> Lit {
+        Lit {
+            span: input.span,
+            ..input.node.into()
+        }
+    }
 }
 
 impl From<String> for Lit {
@@ -211,8 +220,8 @@ pub mod parsing {
             boolean => { |value| LitKind::Bool(value) }
         )) >>
         (Lit {
-            node: node.0,
-            span: node.1,
+            node: node.node,
+            span: node.span,
         })
     ));
 

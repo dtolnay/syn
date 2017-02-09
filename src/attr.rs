@@ -126,9 +126,12 @@ pub mod parsing {
                 value: MetaItem::NameValue(
                     "doc".into(),
                     Lit {
-                        span: content.1,
-                        ..format!("//!{}", content.0).into()
-                    },
+                        span: Span {
+                            lo: content.span.lo - 3, // include the '//!'
+                            hi: content.span.hi,
+                        },
+                        .. format!("//!{}", content.node).into()
+                    }
                 ),
                 is_sugared_doc: true,
                 span: DUMMY_SPAN,
@@ -143,10 +146,7 @@ pub mod parsing {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit {
-                        span: com.1,
-                        ..Lit::from(com.0)
-                    },
+                    com.into(),
                 ),
                 is_sugared_doc: true,
                 span: DUMMY_SPAN,
@@ -177,8 +177,11 @@ pub mod parsing {
                 value: MetaItem::NameValue(
                     "doc".into(),
                     Lit {
-                        span: content.1,
-                        ..format!("///{}", content.0).into()
+                        span: Span {
+                            lo: content.span.lo - 3, // Include the '///'
+                            hi: content.span.hi,
+                        },
+                        .. format!("///{}", content.node).into()
                     },
                 ),
                 is_sugared_doc: true,
@@ -194,10 +197,7 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    Lit {
-                        span: com.1,
-                        ..com.0.into()
-                    },
+                    com.into(),
                 ),
                 is_sugared_doc: true,
                 span: DUMMY_SPAN,

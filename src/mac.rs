@@ -134,7 +134,7 @@ pub mod parsing {
         body: spanned!(delimited) >>
         (Mac {
             path: what,
-            tts: vec![TokenTree::Delimited(body.0, body.1)],
+            tts: vec![TokenTree::Delimited(body.node, body.span)],
         })
     ));
 
@@ -161,9 +161,9 @@ pub mod parsing {
     ));
 
     named!(pub token_tree -> TokenTree, alt!(
-        spanned!(token) => { |(t, span)| { TokenTree::Token(t, span) } }
+        spanned!(token) => { |t: Spanned<Token>| { TokenTree::Token(t.node, t.span) } }
         |
-        spanned!(delimited) => { |(d, span)| { TokenTree::Delimited(d, span) } }
+        spanned!(delimited) => { |d: Spanned<Delimited>| { TokenTree::Delimited(d.node, d.span) } }
     ));
 
     named!(token -> Token, alt!(

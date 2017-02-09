@@ -25,12 +25,7 @@ pub mod parsing {
     use generics::parsing::generics;
     use ident::parsing::ident;
 
-    fn set_span((mut input, span): (DeriveInput, Span)) -> DeriveInput {
-        input.span = span;
-        input
-    }
-
-    named!(pub derive_input -> DeriveInput, map!(spanned!(do_parse!(
+    named!(pub derive_input -> DeriveInput, add_span!(do_parse!(
         attrs: many0!(outer_attr) >>
         vis: visibility >>
         which: alt!(keyword!("struct") | keyword!("enum")) >>
@@ -62,7 +57,7 @@ pub mod parsing {
             })
         ) >>
         (item)
-    )), set_span));
+    )));
 }
 
 #[cfg(feature = "printing")]
