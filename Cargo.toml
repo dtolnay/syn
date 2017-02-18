@@ -25,8 +25,8 @@ unicode-xid = { version = "0.0.4", optional = true }
 synom = { version = "0.11", path = "synom", optional = true }
 
 [dev-dependencies]
-syntex_pos = "0.52"
-syntex_syntax = "0.52"
+syntex_pos = "0.58"
+syntex_syntax = "0.58"
 tempdir = "0.3.5"
 time = "0.1.35"
 walkdir = "1.0.1"

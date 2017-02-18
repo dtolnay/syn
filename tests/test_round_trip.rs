@@ -92,11 +92,11 @@ fn test_round_trip() {
                 Ok(before) => before,
                 Err(mut diagnostic) => {
                     diagnostic.cancel();
-                    if diagnostic.message.starts_with("file not found for module") {
+                    if diagnostic.message().starts_with("file not found for module") {
                         errorf!("ignore\n");
                         return true;
                     } else {
-                        errorf!("FAIL: {}\n", diagnostic.message);
+                        errorf!("FAIL: {}\n", diagnostic.message());
                         return false;
                     }
                 }
@@ -252,6 +252,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 expr: self.fold_expr(field.expr),
                 span: self.new_span(field.span),
                 is_shorthand: field.is_shorthand,
+                attrs: ast::ThinVec::new(),
             }
         }
 
@@ -340,9 +341,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                     TokenTree::Delimited(self.new_span(span),
                                          Rc::new(Delimited {
                                              delim: delimed.delim,
-                                             open_span: self.new_span(delimed.open_span),
                                              tts: self.fold_tts(&delimed.tts),
-                                             close_span: self.new_span(delimed.close_span),
                                          }))
                 }
                 TokenTree::Sequence(span, ref seq) => {
