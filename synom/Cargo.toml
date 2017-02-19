@@ -7,7 +7,8 @@ description = "Stripped-down Nom parser used by Syn"
 repository = "https://github.com/dtolnay/syn"
 documentation = "https://dtolnay.github.io/syn/synom/"
 categories = ["development-tools::procedural-macro-helpers"]
-include = ["Cargo.toml", "src/**/*.rs"]
+readme = "../README.md"
+include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [dependencies]
 unicode-xid = "0.0.4"
