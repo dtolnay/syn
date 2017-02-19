@@ -89,7 +89,7 @@ pub mod parsing {
             _ => return IResult::Error,
         }
 
-        while let Some((i, ch)) = chars.next() {
+        for (i, ch) in chars {
             if !UnicodeXID::is_xid_continue(ch) {
                 return IResult::Done(&input[i..], input[..i].into());
             }

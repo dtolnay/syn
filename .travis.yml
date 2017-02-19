@@ -49,7 +49,8 @@ script:
           ;;
         clippy)
           cargo install clippy --debug --force || exit
-          cargo clippy --features 'full aster visit fold'
+          cargo clippy --features 'full aster visit fold' -- -Dclippy
+          (cd synom && cargo clippy -- -Dclippy)
           ;;
         *)
           exit 1

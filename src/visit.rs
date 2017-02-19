@@ -375,10 +375,7 @@ pub fn walk_item<V: Visitor>(visitor: &mut V, item: &Item) {
         ItemKind::Use(ref view_path) => {
             visitor.visit_view_path(view_path);
         }
-        ItemKind::Static(ref ty, _, ref expr) => {
-            visitor.visit_ty(ty);
-            visitor.visit_expr(expr);
-        }
+        ItemKind::Static(ref ty, _, ref expr) |
         ItemKind::Const(ref ty, ref expr) => {
             visitor.visit_ty(ty);
             visitor.visit_expr(expr);
@@ -403,9 +400,7 @@ pub fn walk_item<V: Visitor>(visitor: &mut V, item: &Item) {
         ItemKind::Enum(ref variant, ref generics) => {
             walk_list!(visitor, visit_variant, variant, generics);
         }
-        ItemKind::Struct(ref variant_data, ref generics) => {
-            visitor.visit_variant_data(variant_data, &item.ident, generics);
-        }
+        ItemKind::Struct(ref variant_data, ref generics) |
         ItemKind::Union(ref variant_data, ref generics) => {
             visitor.visit_variant_data(variant_data, &item.ident, generics);
         }
@@ -432,18 +427,13 @@ pub fn walk_item<V: Visitor>(visitor: &mut V, item: &Item) {
 }
 
 #[cfg(feature = "full")]
+#[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
 pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
     walk_list!(visitor, visit_attribute, &expr.attrs);
     match expr.node {
-        ExprKind::Box(ref expr) => {
-            visitor.visit_expr(expr);
-        }
         ExprKind::InPlace(ref place, ref value) => {
             visitor.visit_expr(place);
             visitor.visit_expr(value);
-        }
-        ExprKind::Array(ref exprs) => {
-            walk_list!(visitor, visit_expr, exprs);
         }
         ExprKind::Call(ref callee, ref args) => {
             visitor.visit_expr(callee);
@@ -454,12 +444,9 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             walk_list!(visitor, visit_ty, ty_args);
             walk_list!(visitor, visit_expr, args);
         }
+        ExprKind::Array(ref exprs) |
         ExprKind::Tup(ref exprs) => {
             walk_list!(visitor, visit_expr, exprs);
-        }
-        ExprKind::Binary(_, ref lhs, ref rhs) => {
-            visitor.visit_expr(lhs);
-            visitor.visit_expr(rhs);
         }
         ExprKind::Unary(_, ref operand) => {
             visitor.visit_expr(operand);
@@ -467,10 +454,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
         ExprKind::Lit(ref lit) => {
             visitor.visit_lit(lit);
         }
-        ExprKind::Cast(ref expr, ref ty) => {
-            visitor.visit_expr(expr);
-            visitor.visit_ty(ty);
-        }
+        ExprKind::Cast(ref expr, ref ty) |
         ExprKind::Type(ref expr, ref ty) => {
             visitor.visit_expr(expr);
             visitor.visit_ty(ty);
@@ -529,10 +513,8 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
         ExprKind::Block(_, ref block) => {
             walk_list!(visitor, visit_stmt, &block.stmts);
         }
-        ExprKind::Assign(ref lhs, ref rhs) => {
-            visitor.visit_expr(lhs);
-            visitor.visit_expr(rhs);
-        }
+        ExprKind::Binary(_, ref lhs, ref rhs) |
+        ExprKind::Assign(ref lhs, ref rhs) |
         ExprKind::AssignOp(_, ref lhs, ref rhs) => {
             visitor.visit_expr(lhs);
             visitor.visit_expr(rhs);
@@ -561,9 +543,6 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_ty(&qself.ty);
             }
             visitor.visit_path(path);
-        }
-        ExprKind::AddrOf(_, ref expr) => {
-            visitor.visit_expr(expr);
         }
         ExprKind::Break(ref maybe_label, ref maybe_expr) => {
             walk_opt_ident(visitor, maybe_label);
@@ -596,9 +575,9 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             visitor.visit_expr(value);
             visitor.visit_expr(times);
         }
-        ExprKind::Paren(ref expr) => {
-            visitor.visit_expr(expr);
-        }
+        ExprKind::Box(ref expr) |
+        ExprKind::AddrOf(_, ref expr) |
+        ExprKind::Paren(ref expr) |
         ExprKind::Try(ref expr) => {
             visitor.visit_expr(expr);
         }

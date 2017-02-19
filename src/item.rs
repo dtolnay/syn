@@ -848,7 +848,7 @@ pub mod parsing {
                 polarity: impl_polarity >>
                 path: path >>
                 keyword!("for") >>
-                ((polarity, Some(path)))
+                (polarity, Some(path))
             )
             |
             epsilon!() => { |_| (ImplPolarity::Positive, None) }

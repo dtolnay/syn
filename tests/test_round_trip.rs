@@ -132,7 +132,7 @@ fn test_round_trip() {
     }
 }
 
-fn syntex_parse<'a>(content: String, sess: &'a ParseSess) -> PResult<'a, ast::Crate> {
+fn syntex_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = "test_round_trip".to_string();
     parse::parse_crate_from_source_str(name, content, sess).map(respan_crate)
 }

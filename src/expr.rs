@@ -204,7 +204,7 @@ pub struct Local {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 // Clippy false positive
 // https://github.com/Manishearth/rust-clippy/issues/1241
-#[cfg_attr(feature = "clippy", allow(enum_variant_names))]
+#[cfg_attr(feature = "cargo-clippy", allow(enum_variant_names))]
 pub enum Pat {
     /// Represents a wildcard pattern (`_`)
     Wild,
@@ -339,6 +339,7 @@ pub mod parsing {
 
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
+    #[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
     fn ambiguous_expr(i: &str, allow_struct: bool, allow_block: bool) -> IResult<&str, Expr> {
         do_parse!(
             i,

@@ -4,6 +4,7 @@
 //! and returns a piece of the same type.
 
 use super::*;
+#[cfg(not(feature = "full"))]
 use constant;
 
 /// AST->AST fold.
@@ -149,6 +150,9 @@ trait LiftOnce<T, U> {
 
 impl<T, U> LiftOnce<T, U> for Box<T> {
     type Output = Box<U>;
+    // Clippy false positive
+    // https://github.com/Manishearth/rust-clippy/issues/1478
+    #[cfg_attr(feature = "cargo-clippy", allow(boxed_local))]
     fn lift<F>(self, f: F) -> Box<U>
         where F: FnOnce(T) -> U
     {

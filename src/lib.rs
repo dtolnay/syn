@@ -1,5 +1,4 @@
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
+#![cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
 
 #[cfg(feature = "printing")]
 extern crate quote;
