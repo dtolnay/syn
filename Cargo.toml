@@ -19,7 +19,6 @@ visit = []
 fold = []
 
 [dependencies]
-clippy = { version = "0.*", optional = true }
 quote = { version = "0.3", optional = true }
 unicode-xid = { version = "0.0.4", optional = true }
 synom = { version = "0.11", path = "synom", optional = true }

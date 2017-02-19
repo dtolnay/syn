@@ -22,6 +22,7 @@ matrix:
       env: ROLE=build
   allow_failures:
     - env: ROLE=clippy
+  fast_finish: true
 
 git:
   submodules: false
@@ -44,10 +45,11 @@ script:
           ;;
         test)
           git submodule update --init &&
-          cargo test --features 'full aster visit' --release
+          cargo test --features 'full aster visit fold' --release
           ;;
         clippy)
-          cargo build --features 'full aster visit clippy'
+          cargo install clippy --debug --force || exit
+          cargo clippy --features 'full aster visit fold'
           ;;
         *)
           exit 1
