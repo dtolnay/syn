@@ -8,6 +8,7 @@ pub struct Attribute {
     pub style: AttrStyle,
     pub value: MetaItem,
     pub is_sugared_doc: bool,
+    pub span: Span,
 }
 
 impl Attribute {
@@ -102,7 +103,7 @@ pub mod parsing {
     use synom::space::{block_comment, whitespace};
 
     #[cfg(feature = "full")]
-    named!(pub inner_attr -> Attribute, alt!(
+    named!(pub inner_attr -> Attribute, add_span!(alt!(
         do_parse!(
             punct!("#") >>
             punct!("!") >>
@@ -113,26 +114,34 @@ pub mod parsing {
                 style: AttrStyle::Inner,
                 value: meta_item,
                 is_sugared_doc: false,
+                span: DUMMY_SPAN,
             })
         )
         |
         do_parse!(
             punct!("//!") >>
-            content: take_until!("\n") >>
+            content: spanned!(take_until!("\n")) >>
             (Attribute {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    format!("//!{}", content).into(),
+                    Lit {
+                        span: Span {
+                            lo: content.span.lo - 3, // include the '//!'
+                            hi: content.span.hi,
+                        },
+                        .. format!("//!{}", content.node).into()
+                    }
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
         |
         do_parse!(
             option!(whitespace) >>
             peek!(tag!("/*!")) >>
-            com: block_comment >>
+            com: spanned!(block_comment) >>
             (Attribute {
                 style: AttrStyle::Inner,
                 value: MetaItem::NameValue(
@@ -140,11 +149,12 @@ pub mod parsing {
                     com.into(),
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
-    ));
+    )));
 
-    named!(pub outer_attr -> Attribute, alt!(
+    named!(pub outer_attr -> Attribute, add_span!(alt!(
         do_parse!(
             punct!("#") >>
             punct!("[") >>
@@ -154,27 +164,35 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 value: meta_item,
                 is_sugared_doc: false,
+                span: DUMMY_SPAN,
             })
         )
         |
         do_parse!(
             punct!("///") >>
             not!(tag!("/")) >>
-            content: take_until!("\n") >>
+            content: spanned!(take_until!("\n")) >>
             (Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
                     "doc".into(),
-                    format!("///{}", content).into(),
+                    Lit {
+                        span: Span {
+                            lo: content.span.lo - 3, // Include the '///'
+                            hi: content.span.hi,
+                        },
+                        .. format!("///{}", content.node).into()
+                    },
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
         |
         do_parse!(
             option!(whitespace) >>
             peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
+            com: spanned!(block_comment) >>
             (Attribute {
                 style: AttrStyle::Outer,
                 value: MetaItem::NameValue(
@@ -182,9 +200,10 @@ pub mod parsing {
                     com.into(),
                 ),
                 is_sugared_doc: true,
+                span: DUMMY_SPAN,
             })
         )
-    ));
+    )));
 
     named!(meta_item -> MetaItem, alt!(
         do_parse!(
@@ -215,15 +234,15 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use lit::{Lit, StrStyle};
+    use lit::{Lit, LitKind, StrStyle};
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if let Attribute { style,
-                               value: MetaItem::NameValue(ref name,
-                                                   Lit::Str(ref value, StrStyle::Cooked)),
-                               is_sugared_doc: true } = *self {
+                               value: MetaItem::NameValue(ref name, Lit {
+                                   node: LitKind::Str(ref value, StrStyle::Cooked), .. }),
+                               is_sugared_doc: true, .. } = *self {
                 if name == "doc" {
                     match style {
                         AttrStyle::Inner if value.starts_with("//!") => {

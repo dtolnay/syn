@@ -1,14 +1,14 @@
 use std::{char, str};
 use std::num::ParseIntError;
-use synom::IResult;
+use synom::{IResult, ParseState};
 
-pub fn cooked_string(input: &str) -> IResult<&str, String> {
+pub fn cooked_string(input: ParseState) -> IResult<ParseState, String> {
     let mut s = String::new();
     let mut chars = input.char_indices().peekable();
     while let Some((byte_offset, ch)) = chars.next() {
         match ch {
             '"' => {
-                return IResult::Done(&input[byte_offset..], s);
+                return IResult::Done(input.advance(byte_offset), s);
             }
             '\r' => {
                 if let Some((_, '\n')) = chars.next() {
@@ -58,13 +58,13 @@ pub fn cooked_string(input: &str) -> IResult<&str, String> {
     IResult::Error
 }
 
-pub fn cooked_byte_string(mut input: &str) -> IResult<&str, Vec<u8>> {
+pub fn cooked_byte_string(mut input: ParseState) -> IResult<ParseState, Vec<u8>> {
     let mut vec = Vec::new();
     let mut bytes = input.bytes().enumerate();
     'outer: while let Some((offset, b)) = bytes.next() {
         match b {
             b'"' => {
-                return IResult::Done(&input[offset..], vec);
+                return IResult::Done(input.advance(offset), vec);
             }
             b'\r' => {
                 if let Some((_, b'\n')) = bytes.next() {
@@ -90,10 +90,10 @@ pub fn cooked_byte_string(mut input: &str) -> IResult<&str, Vec<u8>> {
                     Some((_, b'"')) => vec.push(b'"'),
                     Some((newline, b'\n')) |
                     Some((newline, b'\r')) => {
-                        let rest = &input[newline + 1..];
+                        let rest = input.advance(newline + 1);
                         for (offset, ch) in rest.char_indices() {
                             if !ch.is_whitespace() {
-                                input = &rest[offset..];
+                                input = rest.advance(offset);
                                 bytes = input.bytes().enumerate();
                                 continue 'outer;
                             }
@@ -112,7 +112,7 @@ pub fn cooked_byte_string(mut input: &str) -> IResult<&str, Vec<u8>> {
     IResult::Error
 }
 
-pub fn cooked_char(input: &str) -> IResult<&str, char> {
+pub fn cooked_char(input: ParseState) -> IResult<ParseState, char> {
     let mut chars = input.char_indices();
     let ch = match chars.next().map(|(_, ch)| ch) {
         Some('\\') => {
@@ -131,13 +131,14 @@ pub fn cooked_char(input: &str) -> IResult<&str, char> {
         }
         ch => ch,
     };
-    match ch {
-        Some(ch) => IResult::Done(chars.as_str(), ch),
-        None => IResult::Error,
+    match (ch, chars.next()) {
+        (Some(ch), Some((i, _))) => IResult::Done(input.advance(i), ch),
+        (Some(ch), None) => IResult::Done(input.finish(), ch),
+        _ => IResult::Error,
     }
 }
 
-pub fn cooked_byte(input: &str) -> IResult<&str, u8> {
+pub fn cooked_byte(input: ParseState) -> IResult<ParseState, u8> {
     let mut bytes = input.bytes().enumerate();
     let b = match bytes.next().map(|(_, b)| b) {
         Some(b'\\') => {
@@ -158,15 +159,15 @@ pub fn cooked_byte(input: &str) -> IResult<&str, u8> {
     match b {
         Some(b) => {
             match bytes.next() {
-                Some((offset, _)) => IResult::Done(&input[offset..], b),
-                None => IResult::Done("", b),
+                Some((offset, _)) => IResult::Done(input.advance(offset), b),
+                None => IResult::Done(input.finish(), b),
             }
         }
         None => IResult::Error,
     }
 }
 
-pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
+pub fn raw_string(input: ParseState) -> IResult<ParseState, (String, usize)> {
     let mut chars = input.char_indices();
     let mut n = 0;
     while let Some((byte_offset, ch)) = chars.next() {
@@ -182,8 +183,8 @@ pub fn raw_string(input: &str) -> IResult<&str, (String, usize)> {
     let mut s = String::new();
     for (byte_offset, ch) in chars {
         match ch {
-            '"' if input[byte_offset + 1..].starts_with(&input[..n]) => {
-                let rest = &input[byte_offset + 1 + n..];
+            '"' if input.advance(byte_offset + 1).starts_with(input.until(n)) => {
+                let rest = input.advance(byte_offset + 1 + n);
                 return IResult::Done(rest, (s, n));
             }
             '\r' => {}
@@ -281,12 +282,12 @@ fn backslash_u<I>(chars: &mut I) -> Option<char>
 fn test_cooked_string() {
     let input = "\\x62 \\\n \\u{7} \\u{64} \\u{bf5} \\u{12ba} \\u{1F395} \\u{102345}\"";
     let expected = "\x62 \u{7} \u{64} \u{bf5} \u{12ba} \u{1F395} \u{102345}";
-    assert_eq!(cooked_string(input), IResult::Done("\"", expected.to_string()));
+    assert!(cooked_string(ParseState::new(input)).test_looks_like("\"", &expected.to_string()));
 }
 
 #[test]
 fn test_cooked_byte_string() {
     let input = "\\x62 \\\n \\xEF\"";
     let expected = b"\x62 \xEF";
-    assert_eq!(cooked_byte_string(input), IResult::Done("\"", expected.to_vec()));
+    assert!(cooked_byte_string(ParseState::new(input)).test_looks_like("\"", &expected.to_vec()));
 }

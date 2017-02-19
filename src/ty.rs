@@ -241,7 +241,6 @@ pub mod parsing {
     use ident::parsing::ident;
     use lit::parsing::quoted_string;
     use mac::parsing::mac;
-    use std::str;
 
     named!(pub ty -> Ty, alt!(
         ty_paren // must be before ty_tup

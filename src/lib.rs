@@ -14,6 +14,10 @@ extern crate synom;
 #[cfg(feature = "aster")]
 pub mod aster;
 
+#[macro_use]
+mod span;
+pub use span::{Span, Spanned, EMPTY_SPAN, DUMMY_SPAN};
+
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem};
 
@@ -55,7 +59,7 @@ mod krate;
 pub use krate::Crate;
 
 mod lit;
-pub use lit::{FloatTy, IntTy, Lit, StrStyle};
+pub use lit::{FloatTy, IntTy, Lit, LitKind, StrStyle};
 #[cfg(feature = "parsing")]
 pub use lit::{ByteStrLit, FloatLit, IntLit, StrLit};
 
@@ -89,7 +93,7 @@ pub use parsing::*;
 mod parsing {
     use super::*;
     use {derive, generics, ident, mac, ty};
-    use synom::{space, IResult};
+    use synom::{space, IResult, ParseState};
 
     #[cfg(feature = "full")]
     use {expr, item, krate};
@@ -149,10 +153,10 @@ mod parsing {
     }
 
     fn unwrap<T>(name: &'static str,
-                 f: fn(&str) -> IResult<&str, T>,
+                 f: fn(ParseState) -> IResult<ParseState, T>,
                  input: &str)
                  -> Result<T, String> {
-        match f(input) {
+        match f(ParseState::new(input)) {
             IResult::Done(mut rest, t) => {
                 rest = space::skip_whitespace(rest);
                 if rest.is_empty() {

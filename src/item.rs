@@ -9,6 +9,7 @@ pub struct Item {
     pub vis: Visibility,
     pub attrs: Vec<Attribute>,
     pub node: ItemKind,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -90,6 +91,7 @@ impl From<DeriveInput> for Item {
                 Body::Enum(variants) => ItemKind::Enum(variants, input.generics),
                 Body::Struct(variant_data) => ItemKind::Struct(variant_data, input.generics),
             },
+            span: input.span,
         }
     }
 }
@@ -144,6 +146,7 @@ pub struct ForeignItem {
     pub attrs: Vec<Attribute>,
     pub node: ForeignItemKind,
     pub vis: Visibility,
+    pub span: Span,
 }
 
 /// An item within an `extern` block
@@ -164,6 +167,7 @@ pub struct TraitItem {
     pub ident: Ident,
     pub attrs: Vec<Attribute>,
     pub node: TraitItemKind,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -189,6 +193,7 @@ pub struct ImplItem {
     pub defaultness: Defaultness,
     pub attrs: Vec<Attribute>,
     pub node: ImplItemKind,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -246,7 +251,7 @@ pub mod parsing {
     use derive::parsing::derive_input;
     use ty::parsing::{abi, mutability, path, ty, unsafety};
 
-    named!(pub item -> Item, alt!(
+    named!(pub item -> Item, add_span!(alt!(
         item_extern_crate
         |
         item_use
@@ -274,7 +279,7 @@ pub mod parsing {
         item_impl
         |
         item_mac
-    ));
+    )));
 
     named!(pub items -> Vec<Item>, many0!(item));
 
@@ -283,8 +288,8 @@ pub mod parsing {
         what: path >>
         punct!("!") >>
         name: option!(ident) >>
-        body: delimited >>
-        cond!(match body.delim {
+        body: spanned!(delimited) >>
+        cond!(match body.node.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -294,8 +299,9 @@ pub mod parsing {
             attrs: attrs,
             node: ItemKind::Mac(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body)],
+                tts: vec![TokenTree::Delimited(body.node, body.span)],
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -320,6 +326,7 @@ pub mod parsing {
                 vis: vis,
                 attrs: attrs,
                 node: ItemKind::ExternCrate(original_name),
+                span: DUMMY_SPAN,
             }
         })
     ));
@@ -335,6 +342,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             node: ItemKind::Use(Box::new(what)),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -411,6 +419,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             node: ItemKind::Static(Box::new(ty), mutability, Box::new(value)),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -429,6 +438,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             node: ItemKind::Const(Box::new(ty), Box::new(value)),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -475,6 +485,7 @@ pub mod parsing {
                     stmts: stmts,
                 }),
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -532,12 +543,14 @@ pub mod parsing {
                     attrs
                 },
                 node: ItemKind::Mod(Some(items)),
+                span: DUMMY_SPAN,
             },
             None => Item {
                 ident: id,
                 vis: vis,
                 attrs: outer_attrs,
                 node: ItemKind::Mod(None),
+                span: DUMMY_SPAN,
             },
         })
     ));
@@ -556,14 +569,15 @@ pub mod parsing {
                 abi: abi,
                 items: items,
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
-    named!(foreign_item -> ForeignItem, alt!(
+    named!(foreign_item -> ForeignItem, add_span!(alt!(
         foreign_fn
         |
         foreign_static
-    ));
+    )));
 
     named!(foreign_fn -> ForeignItem, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -594,6 +608,7 @@ pub mod parsing {
                 },
             ),
             vis: vis,
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -611,6 +626,7 @@ pub mod parsing {
             attrs: attrs,
             node: ForeignItemKind::Static(Box::new(ty), mutability),
             vis: vis,
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -635,6 +651,7 @@ pub mod parsing {
                     ..generics
                 },
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -651,7 +668,8 @@ pub mod parsing {
                 Body::Struct(variant_data) => {
                     ItemKind::Struct(variant_data, def.generics)
                 }
-            }
+            },
+            span: DUMMY_SPAN,
         }
     ));
 
@@ -674,6 +692,7 @@ pub mod parsing {
                     .. generics
                 },
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -705,6 +724,7 @@ pub mod parsing {
                 bounds,
                 body,
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -722,10 +742,11 @@ pub mod parsing {
             vis: Visibility::Inherited,
             attrs: attrs,
             node: ItemKind::DefaultImpl(unsafety, path),
+            span: DUMMY_SPAN,
         })
     ));
 
-    named!(trait_item -> TraitItem, alt!(
+    named!(trait_item -> TraitItem, add_span!(alt!(
         trait_item_const
         |
         trait_item_method
@@ -733,7 +754,7 @@ pub mod parsing {
         trait_item_type
         |
         trait_item_mac
-    ));
+    )));
 
     named!(trait_item_const -> TraitItem, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -747,6 +768,7 @@ pub mod parsing {
             ident: id,
             attrs: attrs,
             node: TraitItemKind::Const(ty, value),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -798,6 +820,7 @@ pub mod parsing {
                     },
                     stmts.map(|stmts| Block { stmts: stmts }),
                 ),
+                span: DUMMY_SPAN,
             }
         })
     ));
@@ -816,6 +839,7 @@ pub mod parsing {
             ident: id,
             attrs: attrs,
             node: TraitItemKind::Type(bounds, default),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -823,8 +847,8 @@ pub mod parsing {
         attrs: many0!(outer_attr) >>
         what: path >>
         punct!("!") >>
-        body: delimited >>
-        cond!(match body.delim {
+        body: spanned!(delimited) >>
+        cond!(match body.node.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -833,8 +857,9 @@ pub mod parsing {
             attrs: attrs,
             node: TraitItemKind::Macro(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body)],
+                tts: vec![TokenTree::Delimited(body.node, body.span)],
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -873,10 +898,11 @@ pub mod parsing {
                 Box::new(self_ty),
                 body,
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
-    named!(impl_item -> ImplItem, alt!(
+    named!(impl_item -> ImplItem, add_span!(alt!(
         impl_item_const
         |
         impl_item_method
@@ -884,7 +910,7 @@ pub mod parsing {
         impl_item_type
         |
         impl_item_macro
-    ));
+    )));
 
     named!(impl_item_const -> ImplItem, do_parse!(
         attrs: many0!(outer_attr) >>
@@ -903,6 +929,7 @@ pub mod parsing {
             defaultness: defaultness,
             attrs: attrs,
             node: ImplItemKind::Const(ty, value),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -953,6 +980,7 @@ pub mod parsing {
                     stmts: stmts,
                 },
             ),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -971,6 +999,7 @@ pub mod parsing {
             defaultness: defaultness,
             attrs: attrs,
             node: ImplItemKind::Type(ty),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -978,8 +1007,8 @@ pub mod parsing {
         attrs: many0!(outer_attr) >>
         what: path >>
         punct!("!") >>
-        body: delimited >>
-        cond!(match body.delim {
+        body: spanned!(delimited) >>
+        cond!(match body.node.delim {
             DelimToken::Paren | DelimToken::Bracket => true,
             DelimToken::Brace => false,
         }, punct!(";")) >>
@@ -990,8 +1019,9 @@ pub mod parsing {
             attrs: attrs,
             node: ImplItemKind::Macro(Mac {
                 path: what,
-                tts: vec![TokenTree::Delimited(body)],
+                tts: vec![TokenTree::Delimited(body.node, body.span)],
             }),
+            span: DUMMY_SPAN,
         })
     ));
 
@@ -1206,7 +1236,7 @@ mod printing {
                         tt.to_tokens(tokens);
                     }
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. }, _)) => {
                             // no semicolon
                         }
                         _ => tokens.append(";"),
@@ -1310,7 +1340,7 @@ mod printing {
                 TraitItemKind::Macro(ref mac) => {
                     mac.to_tokens(tokens);
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. }, _)) => {
                             // no semicolon
                         }
                         _ => tokens.append(";"),
@@ -1369,7 +1399,7 @@ mod printing {
                 ImplItemKind::Macro(ref mac) => {
                     mac.to_tokens(tokens);
                     match mac.tts.last() {
-                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. })) => {
+                        Some(&TokenTree::Delimited(Delimited { delim: DelimToken::Brace, .. }, _)) => {
                             // no semicolon
                         }
                         _ => tokens.append(";"),

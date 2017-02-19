@@ -7,6 +7,7 @@ pub struct DeriveInput {
     pub attrs: Vec<Attribute>,
     pub generics: Generics,
     pub body: Body,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -24,7 +25,7 @@ pub mod parsing {
     use generics::parsing::generics;
     use ident::parsing::ident;
 
-    named!(pub derive_input -> DeriveInput, do_parse!(
+    named!(pub derive_input -> DeriveInput, add_span!(do_parse!(
         attrs: many0!(outer_attr) >>
         vis: visibility >>
         which: alt!(keyword!("struct") | keyword!("enum")) >>
@@ -40,6 +41,7 @@ pub mod parsing {
                     .. generics
                 },
                 body: Body::Struct(body),
+                span: DUMMY_SPAN,
             })
             |
             "enum" => map!(enum_body, move |(wh, body)| DeriveInput {
@@ -51,10 +53,11 @@ pub mod parsing {
                     .. generics
                 },
                 body: Body::Enum(body),
+                span: DUMMY_SPAN,
             })
         ) >>
         (item)
-    ));
+    )));
 }
 
 #[cfg(feature = "printing")]

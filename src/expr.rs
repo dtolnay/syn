@@ -4,14 +4,22 @@ use super::*;
 pub struct Expr {
     pub node: ExprKind,
     pub attrs: Vec<Attribute>,
+    pub span: Span,
 }
 
-impl From<ExprKind> for Expr {
-    fn from(node: ExprKind) -> Expr {
+impl Expr {
+    pub fn new(node: ExprKind, span: Span) -> Expr {
         Expr {
             node: node,
             attrs: Vec::new(),
+            span: span,
         }
+    }
+}
+
+impl From<Spanned<ExprKind>> for Expr {
+    fn from(spanned: Spanned<ExprKind>) -> Expr {
+        Expr::new(spanned.node, spanned.span)
     }
 }
 
@@ -143,6 +151,12 @@ pub enum ExprKind {
 
     /// `expr?`
     Try(Box<Expr>),
+}
+
+impl ExprKind {
+    pub fn span(self, span: Span) -> Expr {
+        Expr::new(self, span)
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -316,6 +330,7 @@ pub mod parsing {
     use lit::parsing::{digits, lit};
     use mac::parsing::{mac, token_trees};
     use synom::IResult::{self, Error};
+    use synom::ParseState;
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty, unsafety};
 
@@ -323,7 +338,7 @@ pub mod parsing {
     // https://github.com/rust-lang/rfcs/pull/92
     macro_rules! named_ambiguous_expr {
         ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
-            fn $name(i: &str, $allow_struct: bool) -> $crate::synom::IResult<&str, $o> {
+            fn $name(i: $crate::synom::ParseState, $allow_struct: bool) -> $crate::synom::IResult<$crate::synom::ParseState, $o> {
                 $submac!(i, $($args)*)
             }
         };
@@ -339,10 +354,11 @@ pub mod parsing {
 
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
-    fn ambiguous_expr(i: &str, allow_struct: bool, allow_block: bool) -> IResult<&str, Expr> {
+    fn ambiguous_expr(i: ParseState, allow_struct: bool, allow_block: bool)
+                      -> IResult<ParseState, Expr> {
         do_parse!(
             i,
-            mut e: alt!(
+            mut e: map!(spanned!(alt!(
                 expr_lit // must be before expr_struct
                 |
                 cond_reduce!(allow_struct, expr_struct) // must be before expr_path
@@ -388,62 +404,112 @@ pub mod parsing {
                 call!(expr_addr_of, allow_struct)
                 |
                 expr_repeat
-            ) >>
+            )), <Expr as From<Spanned<ExprKind>>>::from) >>
             many0!(alt!(
-                tap!(args: and_call => {
-                    e = ExprKind::Call(Box::new(e.into()), args);
+                tap!(args: spanned!(and_call) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Call(Box::new(e), args.node),
+                        span: span.extend(args.span),
+                    }.into();
                 })
                 |
-                tap!(more: and_method_call => {
-                    let (method, ascript, mut args) = more;
-                    args.insert(0, e.into());
-                    e = ExprKind::MethodCall(method, ascript, args);
+                tap!(more: spanned!(and_method_call) => {
+                    let span = e.span;
+                    let new_span = more.span;
+                    let (method, ascript, mut args) = more.node;
+                    args.insert(0, e);
+                    e = Spanned {
+                        node: ExprKind::MethodCall(method, ascript, args),
+                        span: span.extend(new_span),
+                    }.into();
                 })
                 |
-                tap!(more: call!(and_binary, allow_struct) => {
-                    let (op, other) = more;
-                    e = ExprKind::Binary(op, Box::new(e.into()), Box::new(other));
+                tap!(more: spanned!(call!(and_binary, allow_struct)) => {
+                    let (span, new_span) = (e.span, more.span);
+                    let (op, other) = more.node;
+                    e = Spanned {
+                        node: ExprKind::Binary(op, Box::new(e), Box::new(other)),
+                        span: span.extend(new_span),
+                    }.into();
                 })
                 |
-                tap!(ty: and_cast => {
-                    e = ExprKind::Cast(Box::new(e.into()), Box::new(ty));
+                tap!(ty: spanned!(and_cast) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Cast(Box::new(e), Box::new(ty.node)),
+                        span: span.extend(ty.span),
+                    }.into();
                 })
                 |
-                tap!(ty: and_ascription => {
-                    e = ExprKind::Type(Box::new(e.into()), Box::new(ty));
+                tap!(ty: spanned!(and_ascription) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Type(Box::new(e), Box::new(ty.node)),
+                        span: span.extend(ty.span),
+                    }.into();
                 })
                 |
-                tap!(v: call!(and_assign, allow_struct) => {
-                    e = ExprKind::Assign(Box::new(e.into()), Box::new(v));
+                tap!(v: spanned!(call!(and_assign, allow_struct)) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Assign(Box::new(e), Box::new(v.node)),
+                        span: span.extend(v.span),
+                    }.into();
                 })
                 |
-                tap!(more: call!(and_assign_op, allow_struct) => {
-                    let (op, v) = more;
-                    e = ExprKind::AssignOp(op, Box::new(e.into()), Box::new(v));
+                tap!(more: spanned!(call!(and_assign_op, allow_struct)) => {
+                    let (span, new_span) = (e.span, more.span);
+                    let (op, v) = more.node;
+                    e = Spanned {
+                        node: ExprKind::AssignOp(op, Box::new(e), Box::new(v)),
+                        span: span.extend(new_span),
+                    }.into();
                 })
                 |
-                tap!(field: and_field => {
-                    e = ExprKind::Field(Box::new(e.into()), field);
+                tap!(field: spanned!(and_field) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Field(Box::new(e), field.node),
+                        span: span.extend(field.span),
+                    }.into();
                 })
                 |
-                tap!(field: and_tup_field => {
-                    e = ExprKind::TupField(Box::new(e.into()), field as usize);
+                tap!(field: spanned!(and_tup_field) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::TupField(Box::new(e), field.node as usize),
+                        span: span.extend(field.span),
+                    }.into();
                 })
                 |
-                tap!(i: and_index => {
-                    e = ExprKind::Index(Box::new(e.into()), Box::new(i));
+                tap!(i: spanned!(and_index) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Index(Box::new(e), Box::new(i.node)),
+                        span: span.extend(i.span),
+                    }.into();
                 })
                 |
-                tap!(more: call!(and_range, allow_struct) => {
-                    let (limits, hi) = more;
-                    e = ExprKind::Range(Some(Box::new(e.into())), hi.map(Box::new), limits);
+                tap!(more: spanned!(call!(and_range, allow_struct)) => {
+                    let (span, new_span) = (e.span, more.span);
+                    let (limits, hi) = more.node;
+                    e = Spanned {
+                        node: ExprKind::Range(Some(Box::new(e)),
+                                              hi.map(Box::new), limits),
+                        span: span.extend(new_span),
+                    }.into();
                 })
                 |
-                tap!(_try: punct!("?") => {
-                    e = ExprKind::Try(Box::new(e.into()));
+                tap!(try: spanned!(punct!("?")) => {
+                    let span = e.span;
+                    e = Spanned {
+                        node: ExprKind::Try(Box::new(e)),
+                        span: span.extend(try.span),
+                    }.into();
                 })
             )) >>
-            (e.into())
+            (e)
         )
     }
 
@@ -465,14 +531,12 @@ pub mod parsing {
     named!(expr_in_place -> ExprKind, do_parse!(
         keyword!("in") >>
         place: expr_no_struct >>
-        punct!("{") >>
-        value: within_block >>
-        punct!("}") >>
+        value: spanned!(delimited!(punct!("{"), within_block, punct!("}"))) >>
         (ExprKind::InPlace(
             Box::new(place),
             Box::new(ExprKind::Block(Unsafety::Normal, Block {
-                stmts: value,
-            }).into()),
+                stmts: value.node,
+            }).span(value.span)),
         ))
     ));
 
@@ -555,39 +619,29 @@ pub mod parsing {
     named!(expr_if -> ExprKind, do_parse!(
         keyword!("if") >>
         cond: cond >>
-        punct!("{") >>
-        then_block: within_block >>
-        punct!("}") >>
-        else_block: option!(preceded!(
+        then_block: block >>
+        else_block: option!(spanned!(preceded!(
             keyword!("else"),
             alt!(
                 expr_if
                 |
                 do_parse!(
-                    punct!("{") >>
-                    else_block: within_block >>
-                    punct!("}") >>
-                    (ExprKind::Block(Unsafety::Normal, Block {
-                        stmts: else_block,
-                    }).into())
+                    else_block: block >>
+                    (ExprKind::Block(Unsafety::Normal, else_block))
                 )
             )
-        )) >>
+        ))) >>
         (match cond {
             Cond::Let(pat, expr) => ExprKind::IfLet(
                 Box::new(pat),
                 Box::new(expr),
-                Block {
-                    stmts: then_block,
-                },
-                else_block.map(|els| Box::new(els.into())),
+                then_block,
+                else_block.map(|Spanned{ node, span }| Box::new(node.span(span))),
             ),
             Cond::Expr(cond) => ExprKind::If(
                 Box::new(cond),
-                Block {
-                    stmts: then_block,
-                },
-                else_block.map(|els| Box::new(els.into())),
+                then_block,
+                else_block.map(|Spanned{ node, span }| Box::new(node.span(span))),
             ),
         })
     ));
@@ -641,7 +695,8 @@ pub mod parsing {
         guard: option!(preceded!(keyword!("if"), expr)) >>
         punct!("=>") >>
         body: alt!(
-            map!(block, |blk| ExprKind::Block(Unsafety::Normal, blk).into())
+            map!(spanned!(block),
+                 |Spanned{ node, span }| ExprKind::Block(Unsafety::Normal, node).span(span))
             |
             expr
         ) >>
@@ -662,8 +717,9 @@ pub mod parsing {
             do_parse!(
                 punct!("->") >>
                 ty: ty >>
-                body: block >>
-                (FunctionRetTy::Ty(ty), ExprKind::Block(Unsafety::Normal, body).into())
+                body: spanned!(block) >>
+                (FunctionRetTy::Ty(ty),
+                 ExprKind::Block(Unsafety::Normal, body.node).span(body.span))
             )
             |
             map!(ambiguous_expr!(allow_struct), |e| (FunctionRetTy::Default, e))
@@ -752,9 +808,9 @@ pub mod parsing {
             })
         )
         |
-        map!(ident, |name: Ident| FieldValue {
-            ident: name.clone(),
-            expr: ExprKind::Path(None, name.into()).into(),
+        map!(spanned!(ident), |Spanned{ node, span }: Spanned<Ident>| FieldValue {
+            ident: node.clone(),
+            expr: ExprKind::Path(None, node.into()).span(span),
             is_shorthand: true,
             attrs: Vec::new(),
         })
@@ -855,19 +911,21 @@ pub mod parsing {
         attrs: many0!(outer_attr) >>
         what: path >>
         punct!("!") >>
-    // Only parse braces here; paren and bracket will get parsed as
-    // expression statements
-        punct!("{") >>
-        tts: token_trees >>
-        punct!("}") >>
+        // Only parse braces here; paren and bracket will get parsed as
+        // expression statements
+        tts: spanned!(delimited!(
+            punct!("{"),
+            token_trees,
+            punct!("}")
+        )) >>
         semi: option!(punct!(";")) >>
         (Stmt::Mac(Box::new((
             Mac {
                 path: what,
                 tts: vec![TokenTree::Delimited(Delimited {
                     delim: DelimToken::Brace,
-                    tts: tts,
-                })],
+                    tts: tts.node,
+                }, tts.span)],
             },
             if semi.is_some() {
                 MacStmtStyle::Semicolon
@@ -1096,19 +1154,19 @@ pub mod parsing {
         (Pat::Range(Box::new(lo), Box::new(hi)))
     ));
 
-    named!(pat_lit_expr -> Expr, do_parse!(
+    named!(pat_lit_expr -> Expr, map!(spanned!(do_parse!(
         neg: option!(punct!("-")) >>
-        v: alt!(
+        v: spanned!(alt!(
             lit => { ExprKind::Lit }
             |
             path => { |p| ExprKind::Path(None, p) }
-        ) >>
+        )) >>
         (if neg.is_some() {
-            ExprKind::Unary(UnOp::Neg, Box::new(v.into())).into()
+            ExprKind::Unary(UnOp::Neg, Box::new(v.into()))
         } else {
-            v.into()
+            v.node
         })
-    ));
+    )), <Expr as From<Spanned<ExprKind>>>::from));
 
     named!(pat_slice -> Pat, do_parse!(
         punct!("[") >>
