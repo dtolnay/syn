@@ -182,7 +182,7 @@ pub mod parse {
     pub use item::parsing::item;
 
     #[cfg(feature = "full")]
-    pub use expr::parsing::expr;
+    pub use expr::parsing::{expr, pat, block, stmt};
 
     pub use lit::parsing::{lit, string, byte_string, byte, character, float, int, boolean};
 
