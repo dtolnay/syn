@@ -184,25 +184,9 @@ pub mod parse {
     #[cfg(feature = "full")]
     pub use expr::parsing::expr;
 
-    pub use lit::parsing::lit;
+    pub use lit::parsing::{lit, string, byte_string, byte, character, float, int, boolean};
 
-    pub use lit::parsing::string;
-
-    pub use lit::parsing::byte_string;
-
-    pub use lit::parsing::byte;
-
-    pub use lit::parsing::character;
-
-    pub use lit::parsing::float;
-
-    pub use lit::parsing::int;
-
-    pub use lit::parsing::boolean;
-
-    pub use ty::parsing::ty;
-
-    pub use ty::parsing::path;
+    pub use ty::parsing::{ty, path};
 
     pub use mac::parsing::token_tree as tt;
 
