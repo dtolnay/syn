@@ -326,7 +326,7 @@ macro_rules! tap {
 #[macro_export]
 macro_rules! separated_list {
     // Try to use this branch if possible - makes a difference in compile time.
-    ($i:expr, punct!($sep:expr), $f:expr) => {
+    ($i:expr, punct!($sep:expr), $f:ident) => {
         $crate::helper::separated_list($i, $sep, $f, false)
     };
 
