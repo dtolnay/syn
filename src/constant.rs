@@ -43,8 +43,6 @@ pub mod parsing {
     use lit::parsing::lit;
     use op::parsing::{binop, unop};
     use ty::parsing::{path, ty};
-    #[cfg(feature = "full")] use expr::parsing::expr;
-    #[cfg(not(feature = "full"))] use synom::IResult;
 
     named!(pub const_expr -> ConstExpr, do_parse!(
         mut e: alt!(
@@ -55,8 +53,11 @@ pub mod parsing {
             expr_path
             |
             expr_paren
-            |
-            expr_other
+            // Cannot handle ConstExpr::Other here because for example
+            // `[u32; n!()]` would end up successfully parsing `n` as
+            // ConstExpr::Path and then fail to parse `!()`. Instead, callers
+            // are required to handle Other. See ty::parsing::array_len and
+            // data::parsing::discriminant.
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
@@ -97,14 +98,6 @@ pub mod parsing {
     named!(expr_lit -> ConstExpr, map!(lit, ConstExpr::Lit));
 
     named!(expr_path -> ConstExpr, map!(path, ConstExpr::Path));
-
-    #[cfg(feature = "full")]
-    named!(expr_other -> ConstExpr, map!(expr, ConstExpr::Other));
-
-    #[cfg(not(feature = "full"))]
-    fn expr_other(_: &str) -> IResult<&str, ConstExpr> {
-        IResult::Error
-    }
 
     named!(and_index -> ConstExpr, delimited!(punct!("["), const_expr, punct!("]")));
 
