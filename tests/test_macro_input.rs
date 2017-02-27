@@ -75,15 +75,19 @@ fn test_struct() {
 
 #[test]
 fn test_enum() {
-    let raw = "
+    let raw = r#"
         /// See the std::result module documentation for details.
         #[must_use]
         pub enum Result<T, E> {
             Ok(T),
             Err(E),
             Surprise = 0isize,
+
+            // Smuggling data into a proc_macro_derive,
+            // in the style of https://github.com/dtolnay/proc-macro-hack
+            ProcMacroHack = (0, "data").0,
         }
-    ";
+    "#;
 
     let expected = MacroInput {
         ident: "Result".into(),
@@ -156,6 +160,30 @@ fn test_enum() {
                 attrs: Vec::new(),
                 data: VariantData::Unit,
                 discriminant: Some(ConstExpr::Lit(Lit::Int(0, IntTy::Isize))),
+            },
+            Variant {
+                ident: "ProcMacroHack".into(),
+                attrs: Vec::new(),
+                data: VariantData::Unit,
+                discriminant: Some(ConstExpr::Other(Expr {
+                    node: ExprKind::TupField(
+                        Box::new(Expr {
+                            node: ExprKind::Tup(vec![
+                                Expr {
+                                    node: ExprKind::Lit(Lit::Int(0, IntTy::Unsuffixed)),
+                                    attrs: Vec::new(),
+                                },
+                                Expr {
+                                    node: ExprKind::Lit(Lit::Str("data".into(), StrStyle::Cooked)),
+                                    attrs: Vec::new(),
+                                },
+                            ]),
+                            attrs: Vec::new(),
+                        }),
+                        0
+                    ),
+                    attrs: Vec::new(),
+                })),
             },
         ]),
     };
