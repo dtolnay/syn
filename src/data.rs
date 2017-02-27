@@ -57,6 +57,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     use ConstExpr;
     use attr::parsing::outer_attr;
+    #[cfg(feature = "full")]
     use constant::parsing::const_expr;
     #[cfg(feature = "full")]
     use expr::parsing::expr;
@@ -113,7 +114,7 @@ pub mod parsing {
     ));
 
     #[cfg(not(feature = "full"))]
-    use self::const_expr as discriminant;
+    use constant::parsing::const_expr as discriminant;
 
     #[cfg(feature = "full")]
     named!(discriminant -> ConstExpr, alt!(

@@ -234,6 +234,7 @@ pub mod parsing {
     use {TyParamBound, TraitBoundModifier};
     #[cfg(feature = "full")]
     use ConstExpr;
+    #[cfg(feature = "full")]
     use constant::parsing::const_expr;
     #[cfg(feature = "full")]
     use expr::parsing::expr;
@@ -288,7 +289,7 @@ pub mod parsing {
     ));
 
     #[cfg(not(feature = "full"))]
-    use self::const_expr as array_len;
+    use constant::parsing::const_expr as array_len;
 
     #[cfg(feature = "full")]
     named!(array_len -> ConstExpr, alt!(
