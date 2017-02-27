@@ -178,6 +178,8 @@ pub mod parse {
     //! `IResult::Incomplete` variant. The `synom` crate should be used instead
     //! of `nom` when working with the parsers in this module.
 
+    pub use synom::IResult;
+
     #[cfg(feature = "full")]
     pub use item::parsing::item;
 
