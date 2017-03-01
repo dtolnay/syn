@@ -368,7 +368,7 @@ macro_rules! separated_list {
     }};
 
     ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $f:expr) => {
-        separated_list!($i, $sepmac!($(separgs)*), call!($f))
+        separated_list!($i, $sepmac!($($separgs)*), call!($f))
     };
 
     ($i:expr, $sep:expr, $fmac:ident!( $($fargs:tt)* )) => {
