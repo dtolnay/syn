@@ -59,7 +59,7 @@ script:
 
 after_success:
   - |
-      if [ "$ROLE" = build ] && [ -n "$TRAVIS_TAG" ] && rustc --version | grep -q nightly; then
+      if [ "$ROLE" = build ] && [ "$TRAVIS_RUST_VERSION" = nightly ]; then
         travis-cargo doc-upload
       fi
 
