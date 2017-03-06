@@ -87,7 +87,7 @@ pub use parsing::*;
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::*;
-    use {derive, generics, ident, mac, ty};
+    use {derive, generics, ident, mac, ty, attr};
     use synom::{space, IResult};
 
     #[cfg(feature = "full")]
