@@ -141,6 +141,15 @@ mod parsing {
         unwrap("type parameter bound", generics::parsing::ty_param_bound, input)
     }
 
+    pub fn parse_outer_attr(input: &str) -> Result<Attribute, String> {
+        unwrap("outer attribute", attr::parsing::outer_attr, input)
+    }
+
+    #[cfg(feature = "full")]
+    pub fn parse_inner_attr(input: &str) -> Result<Attribute, String> {
+        unwrap("inner attribute", attr::parsing::inner_attr, input)
+    }
+
     // Deprecated. Use `parse_derive_input` instead.
     #[doc(hidden)]
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
