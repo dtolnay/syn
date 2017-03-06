@@ -74,6 +74,7 @@ fn test_struct() {
 }
 
 #[test]
+#[cfg(feature = "full")]
 fn test_enum() {
     let raw = r#"
         /// See the std::result module documentation for details.
