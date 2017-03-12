@@ -5,18 +5,17 @@ extern crate quote;
 extern crate syn;
 extern crate syntex_pos;
 extern crate syntex_syntax;
-extern crate time;
 extern crate walkdir;
 
 use syntex_pos::Span;
 use syntex_syntax::ast;
 use syntex_syntax::parse::{self, ParseSess, PResult};
-use time::PreciseTime;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 use std::fs::File;
 use std::io::{self, Read, Write};
 use std::panic;
+use std::time::Instant;
 
 macro_rules! errorf {
     ($($tt:tt)*) => {
@@ -75,9 +74,9 @@ fn test_round_trip() {
         let mut content = String::new();
         file.read_to_string(&mut content).unwrap();
 
-        let start = PreciseTime::now();
+        let start = Instant::now();
         let (krate, elapsed) = match syn::parse_crate(&content) {
-            Ok(krate) => (krate, start.to(PreciseTime::now())),
+            Ok(krate) => (krate, start.elapsed()),
             Err(msg) => {
                 errorf!("syn failed to parse\n{}\n", msg);
                 failed += 1;
@@ -111,7 +110,7 @@ fn test_round_trip() {
             };
 
             if before == after {
-                errorf!("pass in {}ms\n", elapsed.num_milliseconds());
+                errorf!("pass in {}ms\n", (elapsed.as_secs() * 1000) as u64 + elapsed.subsec_nanos() / 1000_000);
                 true
             } else {
                 errorf!("FAIL\nbefore: {}\nafter: {}\n",
