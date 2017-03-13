@@ -110,7 +110,7 @@ fn test_round_trip() {
             };
 
             if before == after {
-                errorf!("pass in {}ms\n", (elapsed.as_secs() * 1000) as u64 + elapsed.subsec_nanos() / 1000_000);
+                errorf!("pass in {}ms\n", elapsed.as_secs() * 1000 + elapsed.subsec_nanos() as u64 / 1_000_000);
                 true
             } else {
                 errorf!("FAIL\nbefore: {}\nafter: {}\n",
