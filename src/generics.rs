@@ -337,7 +337,10 @@ mod printing {
                 tokens.append("<");
                 tokens.append_separated(&self.0.lifetimes, ",");
                 // Leave off the type parameter defaults
-                for (i, ty_param) in self.0.ty_params.iter().enumerate() {
+                for (i, ty_param) in self.0
+                        .ty_params
+                        .iter()
+                        .enumerate() {
                     if i > 0 || has_lifetimes {
                         tokens.append(",");
                     }
@@ -360,13 +363,19 @@ mod printing {
             if has_lifetimes || has_ty_params {
                 tokens.append("<");
                 // Leave off the lifetime bounds and attributes
-                let lifetimes = self.0.lifetimes.iter().map(|ld| &ld.lifetime);
+                let lifetimes = self.0
+                    .lifetimes
+                    .iter()
+                    .map(|ld| &ld.lifetime);
                 tokens.append_separated(lifetimes, ",");
                 if has_lifetimes && has_ty_params {
                     tokens.append(",");
                 }
                 // Leave off the type parameter bounds, defaults, and attributes
-                let ty_params = self.0.ty_params.iter().map(|tp| &tp.ident);
+                let ty_params = self.0
+                    .ty_params
+                    .iter()
+                    .map(|tp| &tp.ident);
                 tokens.append_separated(ty_params, ",");
                 tokens.append(">");
             }

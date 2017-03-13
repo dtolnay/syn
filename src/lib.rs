@@ -28,8 +28,8 @@ mod escape;
 #[cfg(feature = "full")]
 mod expr;
 #[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, FieldValue,
-               Local, MacStmtStyle, Pat, RangeLimits, Stmt};
+pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, FieldValue, Local,
+               MacStmtStyle, Pat, RangeLimits, Stmt};
 
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
@@ -138,7 +138,9 @@ mod parsing {
     }
 
     pub fn parse_ty_param_bound(input: &str) -> Result<TyParamBound, String> {
-        unwrap("type parameter bound", generics::parsing::ty_param_bound, input)
+        unwrap("type parameter bound",
+               generics::parsing::ty_param_bound,
+               input)
     }
 
     pub fn parse_outer_attr(input: &str) -> Result<Attribute, String> {
