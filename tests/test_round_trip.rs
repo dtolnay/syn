@@ -110,7 +110,8 @@ fn test_round_trip() {
             };
 
             if before == after {
-                errorf!("pass in {}ms\n", elapsed.as_secs() * 1000 + elapsed.subsec_nanos() as u64 / 1_000_000);
+                errorf!("pass in {}ms\n",
+                        elapsed.as_secs() * 1000 + elapsed.subsec_nanos() as u64 / 1_000_000);
                 true
             } else {
                 errorf!("FAIL\nbefore: {}\nafter: {}\n",
@@ -121,7 +122,7 @@ fn test_round_trip() {
         });
         match equal {
             Err(_) => errorf!("ignoring syntex panic\n"),
-            Ok(true) => {},
+            Ok(true) => {}
             Ok(false) => failed += 1,
         }
     }
@@ -258,35 +259,35 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
         fn fold_trait_item(&mut self, i: TraitItem) -> SmallVector<TraitItem> {
             let noop = fold::noop_fold_trait_item(i, self).expect_one("");
             SmallVector::one(TraitItem {
-                node: match noop.node {
-                    TraitItemKind::Method(sig, body) => {
+                                 node: match noop.node {
+                                     TraitItemKind::Method(sig, body) => {
                         TraitItemKind::Method(MethodSig {
                                                   constness: self.fold_spanned(sig.constness),
                                                   ..sig
                                               },
                                               body)
                     }
-                    node => node,
-                },
-                ..noop
-            })
+                                     node => node,
+                                 },
+                                 ..noop
+                             })
         }
 
         fn fold_impl_item(&mut self, i: ImplItem) -> SmallVector<ImplItem> {
             let noop = fold::noop_fold_impl_item(i, self).expect_one("");
             SmallVector::one(ImplItem {
-                node: match noop.node {
-                    ImplItemKind::Method(sig, body) => {
+                                 node: match noop.node {
+                                     ImplItemKind::Method(sig, body) => {
                         ImplItemKind::Method(MethodSig {
                                                  constness: self.fold_spanned(sig.constness),
                                                  ..sig
                                              },
                                              body)
                     }
-                    node => node,
-                },
-                ..noop
-            })
+                                     node => node,
+                                 },
+                                 ..noop
+                             })
         }
 
         fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
@@ -304,9 +305,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                         MetaItemKind::List(nested.move_map(|e| self.fold_meta_list_item(e)))
                     }
                     // default fold_meta_item does not fold the value span
-                    MetaItemKind::NameValue(lit) => {
-                        MetaItemKind::NameValue(self.fold_spanned(lit))
-                    }
+                    MetaItemKind::NameValue(lit) => MetaItemKind::NameValue(self.fold_spanned(lit)),
                 },
                 span: self.new_span(span),
             }
@@ -339,9 +338,9 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                 TokenTree::Delimited(span, ref delimed) => {
                     TokenTree::Delimited(self.new_span(span),
                                          Rc::new(Delimited {
-                                             delim: delimed.delim,
-                                             tts: self.fold_tts(&delimed.tts),
-                                         }))
+                                                     delim: delimed.delim,
+                                                     tts: self.fold_tts(&delimed.tts),
+                                                 }))
                 }
                 TokenTree::Sequence(span, ref seq) => {
                     TokenTree::Sequence(self.new_span(span),

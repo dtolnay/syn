@@ -29,31 +29,30 @@ fn test_struct() {
     let expected = MacroInput {
         ident: "Item".into(),
         vis: Visibility::Public,
-        attrs: vec![
-            Attribute {
-                style: AttrStyle::Outer,
-                value: MetaItem::List("derive".into(), vec![
+        attrs: vec![Attribute {
+                        style: AttrStyle::Outer,
+                        value: MetaItem::List("derive".into(),
+                                              vec![
                     NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
                     NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
                 ]),
-                is_sugared_doc: false,
-            },
-        ],
+                        is_sugared_doc: false,
+                    }],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Struct(vec![
-            Field {
-                ident: Some("ident".into()),
-                vis: Visibility::Public,
-                attrs: Vec::new(),
-                ty: Ty::Path(None, "Ident".into()),
-            },
-            Field {
-                ident: Some("attrs".into()),
-                vis: Visibility::Public,
-                attrs: Vec::new(),
-                ty: Ty::Path(None, Path {
-                    global: false,
-                    segments: vec![
+        body: Body::Struct(VariantData::Struct(vec![Field {
+                                                        ident: Some("ident".into()),
+                                                        vis: Visibility::Public,
+                                                        attrs: Vec::new(),
+                                                        ty: Ty::Path(None, "Ident".into()),
+                                                    },
+                                                    Field {
+                                                        ident: Some("attrs".into()),
+                                                        vis: Visibility::Public,
+                                                        attrs: Vec::new(),
+                                                        ty: Ty::Path(None,
+                                                                     Path {
+                                                                         global: false,
+                                                                         segments: vec![
                         PathSegment {
                             ident: "Vec".into(),
                             parameters: PathParameters::AngleBracketed(
@@ -65,9 +64,8 @@ fn test_struct() {
                             ),
                         }
                     ],
-                }),
-            },
-        ])),
+                                                                     }),
+                                                    }])),
     };
 
     assert_eq!(expected, parse_macro_input(raw).unwrap());
@@ -113,20 +111,18 @@ fn test_enum() {
         ],
         generics: Generics {
             lifetimes: Vec::new(),
-            ty_params: vec![
-                TyParam {
-                    attrs: Vec::new(),
-                    ident: "T".into(),
-                    bounds: Vec::new(),
-                    default: None,
-                },
-                TyParam {
-                    attrs: Vec::new(),
-                    ident: "E".into(),
-                    bounds: Vec::new(),
-                    default: None,
-                },
-            ],
+            ty_params: vec![TyParam {
+                                attrs: Vec::new(),
+                                ident: "T".into(),
+                                bounds: Vec::new(),
+                                default: None,
+                            },
+                            TyParam {
+                                attrs: Vec::new(),
+                                ident: "E".into(),
+                                bounds: Vec::new(),
+                                default: None,
+                            }],
             where_clause: WhereClause { predicates: Vec::new() },
         },
         body: Body::Enum(vec![

@@ -13,36 +13,29 @@ fn test_struct() {
         }
     ";
 
-    let expected = vec![
-        Token(Pound),
-        delimited(Bracket, vec![
-            ident("derive"),
-            delimited(Paren, vec![
-                ident("Debug"),
-                Token(Comma),
-                ident("Clone"),
-            ]),
-        ]),
-        ident("pub"),
-        ident("struct"),
-        ident("Item"),
-        delimited(Brace, vec![
-            ident("pub"),
-            ident("ident"),
-            Token(Colon),
-            ident("Ident"),
-            Token(Comma),
+    let expected =
+        vec![Token(Pound),
+             delimited(Bracket,
+                       vec![ident("derive"),
+                            delimited(Paren, vec![ident("Debug"), Token(Comma), ident("Clone")])]),
+             ident("pub"),
+             ident("struct"),
+             ident("Item"),
+             delimited(Brace,
+                       vec![ident("pub"),
+                            ident("ident"),
+                            Token(Colon),
+                            ident("Ident"),
+                            Token(Comma),
 
-            ident("pub"),
-            ident("attrs"),
-            Token(Colon),
-            ident("Vec"),
-            Token(Lt),
-            ident("Attribute"),
-            Token(Gt),
-            Token(Comma),
-        ]),
-    ];
+                            ident("pub"),
+                            ident("attrs"),
+                            Token(Colon),
+                            ident("Vec"),
+                            Token(Lt),
+                            ident("Attribute"),
+                            Token(Gt),
+                            Token(Comma)])];
 
     let result = syn::parse_token_trees(raw).unwrap();
     if result != expected {
@@ -52,9 +45,9 @@ fn test_struct() {
 
 fn delimited(delim: syn::DelimToken, tts: Vec<TokenTree>) -> TokenTree {
     TokenTree::Delimited(syn::Delimited {
-        delim: delim,
-        tts: tts,
-    })
+                             delim: delim,
+                             tts: tts,
+                         })
 }
 
 fn ident(s: &str) -> TokenTree {
