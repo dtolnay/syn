@@ -58,7 +58,7 @@ impl<'a> TyGenerics<'a> {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct Lifetime {
     pub ident: Ident,
 }

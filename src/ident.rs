@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::fmt::{self, Display};
 
-#[derive(Debug, Clone, Eq, Hash)]
+#[derive(Debug, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Ident(String);
 
 impl Ident {
