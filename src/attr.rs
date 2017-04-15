@@ -182,6 +182,8 @@ impl<'a, T> FilterAttrs<'a> for T
 pub mod parsing {
     use super::*;
     use ident::parsing::ident;
+    use lit::{Lit, StrStyle};
+    use mac::{Token, TokenTree};
     use mac::parsing::token_trees;
     use synom::space::{block_comment, whitespace};
 
@@ -293,6 +295,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use lit::{Lit, StrStyle};
+    use mac::{Token, TokenTree};
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Attribute {
