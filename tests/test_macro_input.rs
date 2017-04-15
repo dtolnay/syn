@@ -30,14 +30,17 @@ fn test_struct() {
         ident: "Item".into(),
         vis: Visibility::Public,
         attrs: vec![Attribute {
-                        style: AttrStyle::Outer,
-                        value: MetaItem::List("derive".into(),
-                                              vec![
-                    NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
-                    NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
-                ]),
-                        is_sugared_doc: false,
-                    }],
+            style: AttrStyle::Outer,
+            name: "derive".into(),
+            tts: vec![
+                TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
+                    TokenTree::Token(Token::Ident(Ident::from("Debug"))),
+                    TokenTree::Token(Token::Comma),
+                    TokenTree::Token(Token::Ident(Ident::from("Clone"))),
+                ]})
+            ],
+            is_sugared_doc: false,
+        }],
         generics: Generics::default(),
         body: Body::Struct(VariantData::Struct(vec![Field {
                                                         ident: Some("ident".into()),
@@ -68,7 +71,16 @@ fn test_struct() {
                                                     }])),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    let expected_meta_item = MetaItem::List(vec![
+        NestedMetaItem::MetaItem(Ident::from("Debug"), MetaItem::Word),
+        NestedMetaItem::MetaItem(Ident::from("Clone"), MetaItem::Word),
+    ]);
+
+    assert_eq!(expected_meta_item, actual.attrs[0].meta_item().unwrap());
 }
 
 #[test]
@@ -94,18 +106,20 @@ fn test_enum() {
         attrs: vec![
             Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::NameValue(
-                    "doc".into(),
-                    Lit::Str(
+                name: "doc".into(),
+                tts: vec![
+                    TokenTree::Token(Token::Eq),
+                    TokenTree::Token(Token::Literal(Lit::Str(
                         "/// See the std::result module documentation for details.".into(),
                         StrStyle::Cooked,
-                    ),
-                ),
+                    ))),
+                ],
                 is_sugared_doc: true,
             },
             Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::Word("must_use".into()),
+                name: "must_use".into(),
+                tts: vec![],
                 is_sugared_doc: false,
             },
         ],
@@ -185,5 +199,19 @@ fn test_enum() {
         ]),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    let expected_meta_items = vec![
+        MetaItem::NameValue(Lit::Str(
+            "/// See the std::result module documentation for details.".into(),
+            StrStyle::Cooked,
+        )),
+        MetaItem::Word,
+    ];
+
+    let actual_meta_items: Vec<_> = actual.attrs.into_iter().map(|attr| attr.meta_item().unwrap()).collect();
+
+    assert_eq!(expected_meta_items, actual_meta_items);
 }
