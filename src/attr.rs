@@ -68,13 +68,11 @@ impl Attribute {
                             if rest.is_empty() {
                                 list_of_nested_meta_items_from_tokens(result, rest)
                             }
+                            else if let TokenTree::Token(Token::Comma) = rest[0] {
+                                list_of_nested_meta_items_from_tokens(result, &rest[1..])
+                            }
                             else {
-                                if let TokenTree::Token(Token::Comma) = rest[0] {
-                                    list_of_nested_meta_items_from_tokens(result, &rest[1..])
-                                }
-                                else {
-                                   None
-                                }
+                                None
                             }
                         }
 
