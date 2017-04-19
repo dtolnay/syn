@@ -215,3 +215,46 @@ fn test_enum() {
 
     assert_eq!(expected_meta_items, actual_meta_items);
 }
+
+#[test]
+fn test_attr_with_path() {
+    let raw =r#"
+        #[::attr_args::identity
+            fn main() { assert_eq!(foo(), "Hello, world!"); }]
+        struct Dummy;
+    "#;
+
+    let expected = MacroInput {
+        ident: "Dummy".into(),
+        vis: Visibility::Inherited,
+        attrs: vec![Attribute {
+            style: AttrStyle::Outer,
+            path: Path { global: true, segments: vec!["attr_args".into(), "identity".into()] },
+            tts: vec![
+                TokenTree::Token(Token::Ident(Ident::from("fn"))),
+                TokenTree::Token(Token::Ident(Ident::from("main"))),
+                TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![] }),
+                TokenTree::Delimited(Delimited { delim: DelimToken::Brace, tts: vec![
+                    TokenTree::Token(Token::Ident(Ident::from("assert_eq"))),
+                    TokenTree::Token(Token::Not),
+                    TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
+                        TokenTree::Token(Token::Ident(Ident::from("foo"))),
+                        TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![] }),
+                        TokenTree::Token(Token::Comma),
+                        TokenTree::Token(Token::Literal(Lit::Str("Hello, world!".into(), StrStyle::Cooked))),
+                    ]}),
+                    TokenTree::Token(Token::Semi),
+                ]})
+            ],
+            is_sugared_doc: false,
+        }],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    assert!(actual.attrs[0].meta_item().is_none());
+}
