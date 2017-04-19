@@ -6,12 +6,24 @@ use std::iter;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Attribute {
     pub style: AttrStyle,
+
+    /// The path of the attribute.
+    ///
+    /// E.g. `derive` in `#[derive(Copy)]`
+    /// E.g. `crate::precondition` in `#[crate::precondition x < 5]`
     pub path: Path,
+
+    /// Any tokens after the path.
+    ///
+    /// E.g. `( Copy )` in `#[derive(Copy)]`
+    /// E.g. `x < 5` in `#[crate::precondition x < 5]`
     pub tts: Vec<TokenTree>,
+
     pub is_sugared_doc: bool,
 }
 
 impl Attribute {
+    /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
     pub fn meta_item(&self) -> Option<MetaItem> {
         if self.tts.is_empty() {
             return Some(MetaItem::Word);
@@ -298,6 +310,7 @@ mod printing {
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            // If this was a sugared doc, emit it in its original form instead of `#[doc = "..."]`
             match *self {
                 Attribute {
                     style,
