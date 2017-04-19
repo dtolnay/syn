@@ -307,6 +307,7 @@ mod printing {
     use lit::{Lit, StrStyle};
     use mac::{Token, TokenTree};
     use quote::{Tokens, ToTokens};
+    use ty::Path;
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
