@@ -31,7 +31,7 @@ fn test_struct() {
         vis: Visibility::Public,
         attrs: vec![Attribute {
             style: AttrStyle::Outer,
-            name: "derive".into(),
+            path: "derive".into(),
             tts: vec![
                 TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
                     TokenTree::Token(Token::Ident(Ident::from("Debug"))),
@@ -106,7 +106,7 @@ fn test_enum() {
         attrs: vec![
             Attribute {
                 style: AttrStyle::Outer,
-                name: "doc".into(),
+                path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
                     TokenTree::Token(Token::Literal(Lit::Str(
@@ -118,7 +118,7 @@ fn test_enum() {
             },
             Attribute {
                 style: AttrStyle::Outer,
-                name: "must_use".into(),
+                path: "must_use".into(),
                 tts: vec![],
                 is_sugared_doc: false,
             },

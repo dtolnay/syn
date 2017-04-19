@@ -6,7 +6,7 @@ use std::iter;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Attribute {
     pub style: AttrStyle,
-    pub name: Ident,
+    pub path: Path,
     pub tts: Vec<TokenTree>,
     pub is_sugared_doc: bool,
 }
@@ -179,28 +179,28 @@ impl<'a, T> FilterAttrs<'a> for T
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use ident::parsing::ident;
     use lit::{Lit, StrStyle};
     use mac::{Token, TokenTree};
     use mac::parsing::token_trees;
     use synom::space::{block_comment, whitespace};
+    use ty::parsing::path;
 
     #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
             punct!("!") >>
-            name_and_tts: delimited!(
+            path_and_tts: delimited!(
                 punct!("["),
-                tuple!(ident, token_trees),
+                tuple!(path, token_trees),
                 punct!("]")
             ) >>
             ({
-                let (name, tts) = name_and_tts;
+                let (path, tts) = path_and_tts;
 
                 Attribute {
                     style: AttrStyle::Inner,
-                    name: name,
+                    path: path,
                     tts: tts,
                     is_sugared_doc: false,
                 }
@@ -212,7 +212,7 @@ pub mod parsing {
             content: take_until!("\n") >>
             (Attribute {
                 style: AttrStyle::Inner,
-                name: "doc".into(),
+                path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
                     TokenTree::Token(Token::Literal(Lit::Str(format!("//!{}", content).into(), StrStyle::Cooked))),
@@ -227,7 +227,7 @@ pub mod parsing {
             com: block_comment >>
             (Attribute {
                 style: AttrStyle::Inner,
-                name: "doc".into(),
+                path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
                     TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
@@ -240,17 +240,17 @@ pub mod parsing {
     named!(pub outer_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
-            name_and_tts: delimited!(
+            path_and_tts: delimited!(
                 punct!("["),
-                tuple!(ident, token_trees),
+                tuple!(path, token_trees),
                 punct!("]")
             ) >>
             ({
-                let (name, tts) = name_and_tts;
+                let (path, tts) = path_and_tts;
 
                 Attribute {
                     style: AttrStyle::Outer,
-                    name: name,
+                    path: path,
                     tts: tts,
                     is_sugared_doc: false,
                 }
@@ -263,7 +263,7 @@ pub mod parsing {
             content: take_until!("\n") >>
             (Attribute {
                 style: AttrStyle::Outer,
-                name: "doc".into(),
+                path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
                     TokenTree::Token(Token::Literal(Lit::Str(format!("///{}", content).into(), StrStyle::Cooked))),
@@ -278,7 +278,7 @@ pub mod parsing {
             com: block_comment >>
             (Attribute {
                 style: AttrStyle::Outer,
-                name: "doc".into(),
+                path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
                     TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
@@ -298,11 +298,21 @@ mod printing {
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Attribute { style, ref name, ref tts, is_sugared_doc: true } = *self {
-                if name == "doc" && tts.len() == 2 {
-                    match (&tts[0], &tts[1]) {
+            match *self {
+                Attribute {
+                    style,
+                    path: Path { global: false, ref segments },
+                    ref tts,
+                    is_sugared_doc: true,
+                } if segments.len() == 1 &&
+                     segments[0].ident == "doc" &&
+                     segments[0].parameters.is_empty() &&
+                     tts.len() == 2 =>
+                {
+                    match (&self.tts[0], &self.tts[1]) {
                         (&TokenTree::Token(Token::Eq),
-                         &TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked)))) => {
+                         &TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked)))) =>
+                        {
                             match style {
                                 AttrStyle::Inner if value.starts_with("//!") => {
                                     tokens.append(&format!("{}\n", value));
@@ -327,6 +337,8 @@ mod printing {
                         _ => {}
                     }
                 }
+
+                _ => {}
             }
 
             tokens.append("#");
@@ -334,7 +346,7 @@ mod printing {
                 tokens.append("!");
             }
             tokens.append("[");
-            self.name.to_tokens(tokens);
+            self.path.to_tokens(tokens);
             tokens.append_all(&self.tts);
             tokens.append("]");
         }
