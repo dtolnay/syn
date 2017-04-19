@@ -25,8 +25,14 @@ pub struct Attribute {
 impl Attribute {
     /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
     pub fn meta_item(&self) -> Option<MetaItem> {
+        let name = if self.path.segments.len() == 1 {
+            &self.path.segments[0].ident
+        } else {
+            return None;
+        };
+
         if self.tts.is_empty() {
-            return Some(MetaItem::Word);
+            return Some(MetaItem::Word(name.clone()));
         }
 
         if self.tts.len() == 1 {
@@ -43,7 +49,7 @@ impl Attribute {
                             if tts.len() >= 3 {
                                 match (&tts[1], &tts[2]) {
                                     (&TokenTree::Token(Token::Eq), &TokenTree::Token(Token::Literal(ref lit))) => {
-                                        return Some((NestedMetaItem::MetaItem(ident.clone(), MetaItem::NameValue(lit.clone())), &tts[3..]));
+                                        return Some((NestedMetaItem::MetaItem(MetaItem::NameValue(ident.clone(), lit.clone())), &tts[3..]));
                                     }
 
                                     _ => {}
@@ -54,7 +60,7 @@ impl Attribute {
                                 if let TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: ref inner_tts }) = tts[1] {
                                     return match list_of_nested_meta_items_from_tokens(vec![], inner_tts) {
                                         Some(nested_meta_items) => {
-                                            Some((NestedMetaItem::MetaItem(ident.clone(), MetaItem::List(nested_meta_items)), &tts[2..]))
+                                            Some((NestedMetaItem::MetaItem(MetaItem::List(ident.clone(), nested_meta_items)), &tts[2..]))
                                         }
 
                                         None => None
@@ -62,7 +68,7 @@ impl Attribute {
                                 }
                             }
 
-                            Some((NestedMetaItem::MetaItem(ident.clone(), MetaItem::Word), &tts[1..]))
+                            Some((NestedMetaItem::MetaItem(MetaItem::Word(ident.clone())), &tts[1..]))
                         }
 
                         _ => None
@@ -93,7 +99,7 @@ impl Attribute {
                 }
 
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(vec![], tts) {
-                    return Some(MetaItem::List(nested_meta_items));
+                    return Some(MetaItem::List(name.clone(), nested_meta_items));
                 }
             }
         }
@@ -101,7 +107,7 @@ impl Attribute {
         if self.tts.len() == 2 {
             match (&self.tts[0], &self.tts[1]) {
                 (&TokenTree::Token(Token::Eq), &TokenTree::Token(Token::Literal(ref lit))) => {
-                    return Some(MetaItem::NameValue(lit.clone()));
+                    return Some(MetaItem::NameValue(name.clone(), lit.clone()));
                 }
 
                 _ => {}
@@ -132,17 +138,31 @@ pub enum MetaItem {
     /// Word meta item.
     ///
     /// E.g. `test` as in `#[test]`
-    Word,
+    Word(Ident),
 
     /// List meta item.
     ///
     /// E.g. `derive(..)` as in `#[derive(..)]`
-    List(Vec<NestedMetaItem>),
+    List(Ident, Vec<NestedMetaItem>),
 
     /// Name-value meta item.
     ///
     /// E.g. `feature = "foo"` as in `#[feature = "foo"]`
-    NameValue(Lit),
+    NameValue(Ident, Lit),
+}
+
+impl MetaItem {
+    /// Name of the item.
+    ///
+    /// E.g. `test` as in `#[test]`, `derive` as in `#[derive(..)]`, and
+    /// `feature` as in `#[feature = "foo"]`.
+    pub fn name(&self) -> &str {
+        match *self {
+            MetaItem::Word(ref name) |
+            MetaItem::List(ref name, _) |
+            MetaItem::NameValue(ref name, _) => name.as_ref(),
+        }
+    }
 }
 
 /// Possible values inside of compile-time attribute lists.
@@ -152,8 +172,8 @@ pub enum MetaItem {
 pub enum NestedMetaItem {
     /// A full `MetaItem`.
     ///
-    /// E.g. `Copy` in `#[derive(Copy)]` would be a `(Ident::from("Copy"), MetaItem::Word)`.
-    MetaItem(Ident, MetaItem),
+    /// E.g. `Copy` in `#[derive(Copy)]` would be a `MetaItem::Word(Ident::from("Copy"))`.
+    MetaItem(MetaItem),
 
     /// A Rust literal.
     ///
@@ -369,13 +389,17 @@ mod printing {
     impl ToTokens for MetaItem {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                MetaItem::Word => {}
-                MetaItem::List(ref inner) => {
+                MetaItem::Word(ref ident) => {
+                    ident.to_tokens(tokens);
+                }
+                MetaItem::List(ref ident, ref inner) => {
+                    ident.to_tokens(tokens);
                     tokens.append("(");
                     tokens.append_separated(inner, ",");
                     tokens.append(")");
                 }
-                MetaItem::NameValue(ref value) => {
+                MetaItem::NameValue(ref name, ref value) => {
+                    name.to_tokens(tokens);
                     tokens.append("=");
                     value.to_tokens(tokens);
                 }
@@ -386,8 +410,7 @@ mod printing {
     impl ToTokens for NestedMetaItem {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                NestedMetaItem::MetaItem(ref ident, ref nested) => {
-                    ident.to_tokens(tokens);
+                NestedMetaItem::MetaItem(ref nested) => {
                     nested.to_tokens(tokens);
                 }
                 NestedMetaItem::Literal(ref lit) => {

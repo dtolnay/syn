@@ -3,38 +3,48 @@ use syn::*;
 
 #[test]
 fn test_meta_item_word() {
-    run_test("#[foo]", MetaItem::Word)
+    run_test("#[foo]", MetaItem::Word("foo".into()))
 }
 
 #[test]
 fn test_meta_item_name_value() {
-    run_test("#[foo = 5]", MetaItem::NameValue(Lit::Int(5, IntTy::Unsuffixed)))
+    run_test("#[foo = 5]", MetaItem::NameValue("foo".into(),
+        Lit::Int(5, IntTy::Unsuffixed)))
 }
 
 #[test]
 fn test_meta_item_list_lit() {
-    run_test("#[foo(5)]", MetaItem::List(vec![NestedMetaItem::Literal(Lit::Int(5, IntTy::Unsuffixed))]))
+    run_test("#[foo(5)]", MetaItem::List("foo".into(), vec![
+        NestedMetaItem::Literal(Lit::Int(5, IntTy::Unsuffixed)),
+    ]))
 }
 
 #[test]
 fn test_meta_item_list_word() {
-    run_test("#[foo(bar)]", MetaItem::List(vec![NestedMetaItem::MetaItem(Ident::from("bar"), MetaItem::Word)]))
+    run_test("#[foo(bar)]", MetaItem::List("foo".into(), vec![
+        NestedMetaItem::MetaItem(MetaItem::Word("bar".into())),
+    ]))
 }
 
 #[test]
 fn test_meta_item_list_name_value() {
-    run_test("#[foo(bar = 5)]", MetaItem::List(vec![NestedMetaItem::MetaItem(Ident::from("bar"), MetaItem::NameValue(Lit::Int(5, IntTy::Unsuffixed)))]))
+    run_test("#[foo(bar = 5)]", MetaItem::List("foo".into(), vec![
+        NestedMetaItem::MetaItem(MetaItem::NameValue("bar".into(),
+            Lit::Int(5, IntTy::Unsuffixed))),
+    ]))
 }
 
 #[test]
 fn test_meta_item_multiple() {
-    run_test("#[foo(word, name = 5, list(name2 = 6), word2)]", MetaItem::List(vec![
-        NestedMetaItem::MetaItem(Ident::from("word"), MetaItem::Word),
-        NestedMetaItem::MetaItem(Ident::from("name"), MetaItem::NameValue(Lit::Int(5, IntTy::Unsuffixed))),
-        NestedMetaItem::MetaItem(Ident::from("list"), MetaItem::List(vec![
-            NestedMetaItem::MetaItem(Ident::from("name2"), MetaItem::NameValue(Lit::Int(6, IntTy::Unsuffixed)))
+    run_test("#[foo(word, name = 5, list(name2 = 6), word2)]", MetaItem::List("foo".into(), vec![
+        NestedMetaItem::MetaItem(MetaItem::Word("word".into())),
+        NestedMetaItem::MetaItem(MetaItem::NameValue("name".into(),
+            Lit::Int(5, IntTy::Unsuffixed))),
+        NestedMetaItem::MetaItem(MetaItem::List("list".into(), vec![
+            NestedMetaItem::MetaItem(MetaItem::NameValue("name2".into(),
+                Lit::Int(6, IntTy::Unsuffixed)))
         ])),
-        NestedMetaItem::MetaItem(Ident::from("word2"), MetaItem::Word),
+        NestedMetaItem::MetaItem(MetaItem::Word("word2".into())),
     ]))
 }
 
