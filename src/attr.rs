@@ -47,12 +47,10 @@ impl Attribute {
 
                         TokenTree::Token(Token::Ident(ref ident)) => {
                             if tts.len() >= 3 {
-                                match (&tts[1], &tts[2]) {
-                                    (&TokenTree::Token(Token::Eq), &TokenTree::Token(Token::Literal(ref lit))) => {
+                                if let TokenTree::Token(Token::Eq) = tts[1] {
+                                    if let TokenTree::Token(Token::Literal(ref lit)) = tts[2] {
                                         return Some((NestedMetaItem::MetaItem(MetaItem::NameValue(ident.clone(), lit.clone())), &tts[3..]));
                                     }
-
-                                    _ => {}
                                 }
                             }
 
@@ -105,12 +103,10 @@ impl Attribute {
         }
 
         if self.tts.len() == 2 {
-            match (&self.tts[0], &self.tts[1]) {
-                (&TokenTree::Token(Token::Eq), &TokenTree::Token(Token::Literal(ref lit))) => {
+            if let TokenTree::Token(Token::Eq) = self.tts[0] {
+                if let TokenTree::Token(Token::Literal(ref lit)) = self.tts[1] {
                     return Some(MetaItem::NameValue(name.clone(), lit.clone()));
                 }
-
-                _ => {}
             }
         }
 
@@ -343,10 +339,8 @@ mod printing {
                      segments[0].parameters.is_empty() &&
                      tts.len() == 2 =>
                 {
-                    match (&self.tts[0], &self.tts[1]) {
-                        (&TokenTree::Token(Token::Eq),
-                         &TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked)))) =>
-                        {
+                    if let TokenTree::Token(Token::Eq) = self.tts[0] {
+                        if let TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked))) = self.tts[1] {
                             match style {
                                 AttrStyle::Inner if value.starts_with("//!") => {
                                     tokens.append(&format!("{}\n", value));
@@ -367,8 +361,6 @@ mod printing {
                                 _ => {}
                             }
                         }
-
-                        _ => {}
                     }
                 }
 
