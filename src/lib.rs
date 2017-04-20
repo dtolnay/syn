@@ -1,3 +1,5 @@
+#![doc(html_root_url = "https://dtolnay.github.io/syn")]
+
 #![cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
 
 #[cfg(feature = "printing")]
