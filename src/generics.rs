@@ -93,12 +93,24 @@ impl LifetimeDef {
     }
 }
 
+/// A generic type parameter, e.g. `T: Into<String>`.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct TyParam {
     pub attrs: Vec<Attribute>,
     pub ident: Ident,
     pub bounds: Vec<TyParamBound>,
     pub default: Option<Ty>,
+}
+
+impl From<Ident> for TyParam {
+    fn from(ident: Ident) -> Self {
+        TyParam {
+            attrs: vec![],
+            ident: ident,
+            bounds: vec![],
+            default: None,
+        }
+    }
 }
 
 /// The AST represents all type param bounds as types.
