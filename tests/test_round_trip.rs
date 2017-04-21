@@ -32,6 +32,11 @@ fn filter(entry: &DirEntry) -> bool {
         return false;
     }
     let path = path.to_string_lossy();
+    let path = if cfg!(windows) {
+        path.replace('\\', "/").into()
+    } else {
+        path
+    };
     // TODO assert that parsing fails on the parse-fail cases
     if path.starts_with("tests/rust/src/test/parse-fail") ||
        path.starts_with("tests/rust/src/test/compile-fail") {
@@ -58,6 +63,12 @@ fn filter(entry: &DirEntry) -> bool {
 
 #[test]
 fn test_round_trip() {
+    {
+        let min_stack_value = std::env::var("RUST_MIN_STACK").expect("RUST_MIN_STACK env var should be set since some tests require it.");
+        let min_stack_value: usize = min_stack_value.parse().expect("RUST_MIN_STACK env var should be set since some tests require it.");
+        assert!(min_stack_value >= 16000000);
+    }
+
     let mut failed = 0;
 
     let walk = WalkDir::new("tests/rust").sort_by(|a, b| a.cmp(b));
