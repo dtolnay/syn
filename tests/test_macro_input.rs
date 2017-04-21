@@ -258,3 +258,61 @@ fn test_attr_with_path() {
 
     assert!(actual.attrs[0].meta_item().is_none());
 }
+
+#[test]
+fn test_attr_with_non_mod_style_path() {
+    let raw =r#"
+        #[inert <T>]
+        struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Inherited,
+        attrs: vec![Attribute {
+            style: AttrStyle::Outer,
+            path: Path { global: false, segments: vec!["inert".into()] },
+            tts: vec![
+                TokenTree::Token(Token::Lt),
+                TokenTree::Token(Token::Ident("T".into())),
+                TokenTree::Token(Token::Gt),
+            ],
+            is_sugared_doc: false,
+        }],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    assert!(actual.attrs[0].meta_item().is_none());
+}
+
+#[test]
+fn test_attr_with_mod_style_path_with_self() {
+    let raw =r#"
+        #[foo::self]
+        struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Inherited,
+        attrs: vec![Attribute {
+            style: AttrStyle::Outer,
+            path: Path { global: false, segments: vec!["foo".into(), "self".into()] },
+            tts: vec![],
+            is_sugared_doc: false,
+        }],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    assert!(actual.attrs[0].meta_item().is_none());
+}

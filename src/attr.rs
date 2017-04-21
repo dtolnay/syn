@@ -211,7 +211,7 @@ pub mod parsing {
     use mac::{Token, TokenTree};
     use mac::parsing::token_trees;
     use synom::space::{block_comment, whitespace};
-    use ty::parsing::path;
+    use ty::parsing::mod_style_path;
 
     #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, alt!(
@@ -220,7 +220,7 @@ pub mod parsing {
             punct!("!") >>
             path_and_tts: delimited!(
                 punct!("["),
-                tuple!(path, token_trees),
+                tuple!(mod_style_path, token_trees),
                 punct!("]")
             ) >>
             ({
@@ -270,7 +270,7 @@ pub mod parsing {
             punct!("#") >>
             path_and_tts: delimited!(
                 punct!("["),
-                tuple!(path, token_trees),
+                tuple!(mod_style_path, token_trees),
                 punct!("]")
             ) >>
             ({
