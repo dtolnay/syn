@@ -519,6 +519,27 @@ pub mod parsing {
         ), Into::into)
     ));
 
+    named!(pub mod_style_path -> Path, do_parse!(
+        global: option!(punct!("::")) >>
+        segments: separated_nonempty_list!(punct!("::"), mod_style_path_segment) >>
+        (Path {
+            global: global.is_some(),
+            segments: segments,
+        })
+    ));
+
+    named!(mod_style_path_segment -> PathSegment, alt!(
+        map!(ident, Into::into)
+        |
+        map!(alt!(
+            keyword!("super")
+            |
+            keyword!("self")
+            |
+            keyword!("Self")
+        ), Into::into)
+    ));
+
     named!(type_binding -> TypeBinding, do_parse!(
         id: ident >>
         punct!("=") >>

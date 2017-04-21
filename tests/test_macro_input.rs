@@ -30,14 +30,17 @@ fn test_struct() {
         ident: "Item".into(),
         vis: Visibility::Public,
         attrs: vec![Attribute {
-                        style: AttrStyle::Outer,
-                        value: MetaItem::List("derive".into(),
-                                              vec![
-                    NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
-                    NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
-                ]),
-                        is_sugared_doc: false,
-                    }],
+            style: AttrStyle::Outer,
+            path: "derive".into(),
+            tts: vec![
+                TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
+                    TokenTree::Token(Token::Ident("Debug".into())),
+                    TokenTree::Token(Token::Comma),
+                    TokenTree::Token(Token::Ident("Clone".into())),
+                ]})
+            ],
+            is_sugared_doc: false,
+        }],
         generics: Generics::default(),
         body: Body::Struct(VariantData::Struct(vec![Field {
                                                         ident: Some("ident".into()),
@@ -68,7 +71,16 @@ fn test_struct() {
                                                     }])),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    let expected_meta_item = MetaItem::List("derive".into(), vec![
+        NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
+        NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
+    ]);
+
+    assert_eq!(expected_meta_item, actual.attrs[0].meta_item().unwrap());
 }
 
 #[test]
@@ -94,18 +106,20 @@ fn test_enum() {
         attrs: vec![
             Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::NameValue(
-                    "doc".into(),
-                    Lit::Str(
+                path: "doc".into(),
+                tts: vec![
+                    TokenTree::Token(Token::Eq),
+                    TokenTree::Token(Token::Literal(Lit::Str(
                         "/// See the std::result module documentation for details.".into(),
                         StrStyle::Cooked,
-                    ),
-                ),
+                    ))),
+                ],
                 is_sugared_doc: true,
             },
             Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::Word("must_use".into()),
+                path: "must_use".into(),
+                tts: vec![],
                 is_sugared_doc: false,
             },
         ],
@@ -185,5 +199,120 @@ fn test_enum() {
         ]),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    let expected_meta_items = vec![
+        MetaItem::NameValue("doc".into(), Lit::Str(
+            "/// See the std::result module documentation for details.".into(),
+            StrStyle::Cooked,
+        )),
+        MetaItem::Word("must_use".into()),
+    ];
+
+    let actual_meta_items: Vec<_> = actual.attrs.into_iter().map(|attr| attr.meta_item().unwrap()).collect();
+
+    assert_eq!(expected_meta_items, actual_meta_items);
+}
+
+#[test]
+fn test_attr_with_path() {
+    let raw =r#"
+        #[::attr_args::identity
+            fn main() { assert_eq!(foo(), "Hello, world!"); }]
+        struct Dummy;
+    "#;
+
+    let expected = MacroInput {
+        ident: "Dummy".into(),
+        vis: Visibility::Inherited,
+        attrs: vec![Attribute {
+            style: AttrStyle::Outer,
+            path: Path { global: true, segments: vec!["attr_args".into(), "identity".into()] },
+            tts: vec![
+                TokenTree::Token(Token::Ident("fn".into())),
+                TokenTree::Token(Token::Ident("main".into())),
+                TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![] }),
+                TokenTree::Delimited(Delimited { delim: DelimToken::Brace, tts: vec![
+                    TokenTree::Token(Token::Ident("assert_eq".into())),
+                    TokenTree::Token(Token::Not),
+                    TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
+                        TokenTree::Token(Token::Ident("foo".into())),
+                        TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![] }),
+                        TokenTree::Token(Token::Comma),
+                        TokenTree::Token(Token::Literal(Lit::Str("Hello, world!".into(), StrStyle::Cooked))),
+                    ]}),
+                    TokenTree::Token(Token::Semi),
+                ]})
+            ],
+            is_sugared_doc: false,
+        }],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    assert!(actual.attrs[0].meta_item().is_none());
+}
+
+#[test]
+fn test_attr_with_non_mod_style_path() {
+    let raw =r#"
+        #[inert <T>]
+        struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Inherited,
+        attrs: vec![Attribute {
+            style: AttrStyle::Outer,
+            path: Path { global: false, segments: vec!["inert".into()] },
+            tts: vec![
+                TokenTree::Token(Token::Lt),
+                TokenTree::Token(Token::Ident("T".into())),
+                TokenTree::Token(Token::Gt),
+            ],
+            is_sugared_doc: false,
+        }],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    assert!(actual.attrs[0].meta_item().is_none());
+}
+
+#[test]
+fn test_attr_with_mod_style_path_with_self() {
+    let raw =r#"
+        #[foo::self]
+        struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Inherited,
+        attrs: vec![Attribute {
+            style: AttrStyle::Outer,
+            path: Path { global: false, segments: vec!["foo".into(), "self".into()] },
+            tts: vec![],
+            is_sugared_doc: false,
+        }],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+
+    assert!(actual.attrs[0].meta_item().is_none());
 }

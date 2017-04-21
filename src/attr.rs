@@ -6,13 +6,111 @@ use std::iter;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Attribute {
     pub style: AttrStyle,
-    pub value: MetaItem,
+
+    /// The path of the attribute.
+    ///
+    /// E.g. `derive` in `#[derive(Copy)]`
+    /// E.g. `crate::precondition` in `#[crate::precondition x < 5]`
+    pub path: Path,
+
+    /// Any tokens after the path.
+    ///
+    /// E.g. `( Copy )` in `#[derive(Copy)]`
+    /// E.g. `x < 5` in `#[crate::precondition x < 5]`
+    pub tts: Vec<TokenTree>,
+
     pub is_sugared_doc: bool,
 }
 
 impl Attribute {
-    pub fn name(&self) -> &str {
-        self.value.name()
+    /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
+    pub fn meta_item(&self) -> Option<MetaItem> {
+        let name = if self.path.segments.len() == 1 {
+            &self.path.segments[0].ident
+        } else {
+            return None;
+        };
+
+        if self.tts.is_empty() {
+            return Some(MetaItem::Word(name.clone()));
+        }
+
+        if self.tts.len() == 1 {
+            if let TokenTree::Delimited(Delimited { delim: DelimToken::Paren, ref tts }) = self.tts[0] {
+                fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[TokenTree])> {
+                    assert!(!tts.is_empty());
+
+                    match tts[0] {
+                        TokenTree::Token(Token::Literal(ref lit)) => {
+                            Some((NestedMetaItem::Literal(lit.clone()), &tts[1..]))
+                        }
+
+                        TokenTree::Token(Token::Ident(ref ident)) => {
+                            if tts.len() >= 3 {
+                                if let TokenTree::Token(Token::Eq) = tts[1] {
+                                    if let TokenTree::Token(Token::Literal(ref lit)) = tts[2] {
+                                        return Some((NestedMetaItem::MetaItem(MetaItem::NameValue(ident.clone(), lit.clone())), &tts[3..]));
+                                    }
+                                }
+                            }
+
+                            if tts.len() >= 2 {
+                                if let TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: ref inner_tts }) = tts[1] {
+                                    return match list_of_nested_meta_items_from_tokens(vec![], inner_tts) {
+                                        Some(nested_meta_items) => {
+                                            Some((NestedMetaItem::MetaItem(MetaItem::List(ident.clone(), nested_meta_items)), &tts[2..]))
+                                        }
+
+                                        None => None
+                                    };
+                                }
+                            }
+
+                            Some((NestedMetaItem::MetaItem(MetaItem::Word(ident.clone())), &tts[1..]))
+                        }
+
+                        _ => None
+                    }
+                }
+
+                fn list_of_nested_meta_items_from_tokens(mut result: Vec<NestedMetaItem>, tts: &[TokenTree]) -> Option<Vec<NestedMetaItem>> {
+                    if tts.is_empty() {
+                        return Some(result);
+                    }
+
+                    match nested_meta_item_from_tokens(tts) {
+                        Some((nested_meta_item, rest)) => {
+                            result.push(nested_meta_item);
+                            if rest.is_empty() {
+                                list_of_nested_meta_items_from_tokens(result, rest)
+                            }
+                            else if let TokenTree::Token(Token::Comma) = rest[0] {
+                                list_of_nested_meta_items_from_tokens(result, &rest[1..])
+                            }
+                            else {
+                                None
+                            }
+                        }
+
+                        None => None
+                    }
+                }
+
+                if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(vec![], tts) {
+                    return Some(MetaItem::List(name.clone(), nested_meta_items));
+                }
+            }
+        }
+
+        if self.tts.len() == 2 {
+            if let TokenTree::Token(Token::Eq) = self.tts[0] {
+                if let TokenTree::Token(Token::Literal(ref lit)) = self.tts[1] {
+                    return Some(MetaItem::NameValue(name.clone(), lit.clone()));
+                }
+            }
+        }
+
+        None
     }
 }
 
@@ -109,22 +207,31 @@ impl<'a, T> FilterAttrs<'a> for T
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use ident::parsing::ident;
-    use lit::parsing::lit;
+    use lit::{Lit, StrStyle};
+    use mac::{Token, TokenTree};
+    use mac::parsing::token_trees;
     use synom::space::{block_comment, whitespace};
+    use ty::parsing::mod_style_path;
 
     #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
             punct!("!") >>
-            punct!("[") >>
-            meta_item: meta_item >>
-            punct!("]") >>
-            (Attribute {
-                style: AttrStyle::Inner,
-                value: meta_item,
-                is_sugared_doc: false,
+            path_and_tts: delimited!(
+                punct!("["),
+                tuple!(mod_style_path, token_trees),
+                punct!("]")
+            ) >>
+            ({
+                let (path, tts) = path_and_tts;
+
+                Attribute {
+                    style: AttrStyle::Inner,
+                    path: path,
+                    tts: tts,
+                    is_sugared_doc: false,
+                }
             })
         )
         |
@@ -133,10 +240,11 @@ pub mod parsing {
             content: take_until!("\n") >>
             (Attribute {
                 style: AttrStyle::Inner,
-                value: MetaItem::NameValue(
-                    "doc".into(),
-                    format!("//!{}", content).into(),
-                ),
+                path: "doc".into(),
+                tts: vec![
+                    TokenTree::Token(Token::Eq),
+                    TokenTree::Token(Token::Literal(Lit::Str(format!("//!{}", content).into(), StrStyle::Cooked))),
+                ],
                 is_sugared_doc: true,
             })
         )
@@ -147,10 +255,11 @@ pub mod parsing {
             com: block_comment >>
             (Attribute {
                 style: AttrStyle::Inner,
-                value: MetaItem::NameValue(
-                    "doc".into(),
-                    com.into(),
-                ),
+                path: "doc".into(),
+                tts: vec![
+                    TokenTree::Token(Token::Eq),
+                    TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
+                ],
                 is_sugared_doc: true,
             })
         )
@@ -159,13 +268,20 @@ pub mod parsing {
     named!(pub outer_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
-            punct!("[") >>
-            meta_item: meta_item >>
-            punct!("]") >>
-            (Attribute {
-                style: AttrStyle::Outer,
-                value: meta_item,
-                is_sugared_doc: false,
+            path_and_tts: delimited!(
+                punct!("["),
+                tuple!(mod_style_path, token_trees),
+                punct!("]")
+            ) >>
+            ({
+                let (path, tts) = path_and_tts;
+
+                Attribute {
+                    style: AttrStyle::Outer,
+                    path: path,
+                    tts: tts,
+                    is_sugared_doc: false,
+                }
             })
         )
         |
@@ -175,10 +291,11 @@ pub mod parsing {
             content: take_until!("\n") >>
             (Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::NameValue(
-                    "doc".into(),
-                    format!("///{}", content).into(),
-                ),
+                path: "doc".into(),
+                tts: vec![
+                    TokenTree::Token(Token::Eq),
+                    TokenTree::Token(Token::Literal(Lit::Str(format!("///{}", content).into(), StrStyle::Cooked))),
+                ],
                 is_sugared_doc: true,
             })
         )
@@ -189,38 +306,14 @@ pub mod parsing {
             com: block_comment >>
             (Attribute {
                 style: AttrStyle::Outer,
-                value: MetaItem::NameValue(
-                    "doc".into(),
-                    com.into(),
-                ),
+                path: "doc".into(),
+                tts: vec![
+                    TokenTree::Token(Token::Eq),
+                    TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
+                ],
                 is_sugared_doc: true,
             })
         )
-    ));
-
-    named!(meta_item -> MetaItem, alt!(
-        do_parse!(
-            id: ident >>
-            punct!("(") >>
-            inner: terminated_list!(punct!(","), nested_meta_item) >>
-            punct!(")") >>
-            (MetaItem::List(id, inner))
-        )
-        |
-        do_parse!(
-            name: ident >>
-            punct!("=") >>
-            value: lit >>
-            (MetaItem::NameValue(name, value))
-        )
-        |
-        map!(ident, MetaItem::Word)
-    ));
-
-    named!(nested_meta_item -> NestedMetaItem, alt!(
-        meta_item => { NestedMetaItem::MetaItem }
-        |
-        lit => { NestedMetaItem::Literal }
     ));
 }
 
@@ -228,35 +321,50 @@ pub mod parsing {
 mod printing {
     use super::*;
     use lit::{Lit, StrStyle};
+    use mac::{Token, TokenTree};
     use quote::{Tokens, ToTokens};
+    use ty::Path;
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Attribute { style,
-                               value: MetaItem::NameValue(ref name,
-                                                   Lit::Str(ref value, StrStyle::Cooked)),
-                               is_sugared_doc: true } = *self {
-                if name == "doc" {
-                    match style {
-                        AttrStyle::Inner if value.starts_with("//!") => {
-                            tokens.append(&format!("{}\n", value));
-                            return;
+            // If this was a sugared doc, emit it in its original form instead of `#[doc = "..."]`
+            match *self {
+                Attribute {
+                    style,
+                    path: Path { global: false, ref segments },
+                    ref tts,
+                    is_sugared_doc: true,
+                } if segments.len() == 1 &&
+                     segments[0].ident == "doc" &&
+                     segments[0].parameters.is_empty() &&
+                     tts.len() == 2 =>
+                {
+                    if let TokenTree::Token(Token::Eq) = self.tts[0] {
+                        if let TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked))) = self.tts[1] {
+                            match style {
+                                AttrStyle::Inner if value.starts_with("//!") => {
+                                    tokens.append(&format!("{}\n", value));
+                                    return;
+                                }
+                                AttrStyle::Inner if value.starts_with("/*!") => {
+                                    tokens.append(value);
+                                    return;
+                                }
+                                AttrStyle::Outer if value.starts_with("///") => {
+                                    tokens.append(&format!("{}\n", value));
+                                    return;
+                                }
+                                AttrStyle::Outer if value.starts_with("/**") => {
+                                    tokens.append(value);
+                                    return;
+                                }
+                                _ => {}
+                            }
                         }
-                        AttrStyle::Inner if value.starts_with("/*!") => {
-                            tokens.append(value);
-                            return;
-                        }
-                        AttrStyle::Outer if value.starts_with("///") => {
-                            tokens.append(&format!("{}\n", value));
-                            return;
-                        }
-                        AttrStyle::Outer if value.starts_with("/**") => {
-                            tokens.append(value);
-                            return;
-                        }
-                        _ => {}
                     }
                 }
+
+                _ => {}
             }
 
             tokens.append("#");
@@ -264,7 +372,8 @@ mod printing {
                 tokens.append("!");
             }
             tokens.append("[");
-            self.value.to_tokens(tokens);
+            self.path.to_tokens(tokens);
+            tokens.append_all(&self.tts);
             tokens.append("]");
         }
     }
