@@ -31,32 +31,73 @@ fn filter(entry: &DirEntry) -> bool {
     if path.extension().map(|e| e != "rs").unwrap_or(true) {
         return false;
     }
-    let path = path.to_string_lossy();
-    let path = if cfg!(windows) {
-        path.replace('\\', "/").into()
+    let path_string = path.to_string_lossy();
+    let path_string = if cfg!(windows) {
+        path_string.replace('\\', "/").into()
     } else {
-        path
+        path_string
     };
     // TODO assert that parsing fails on the parse-fail cases
-    if path.starts_with("tests/rust/src/test/parse-fail") ||
-       path.starts_with("tests/rust/src/test/compile-fail") {
+    if path_string.starts_with("tests/rust/src/test/parse-fail") ||
+       path_string.starts_with("tests/rust/src/test/compile-fail") {
         return false;
     }
-    match path.as_ref() {
+
+    if path_string.starts_with("tests/rust/src/test/ui") {
+        let stderr_path = path.with_extension("stderr");
+        if stderr_path.exists() {
+            // Expected to fail in some way
+            return false;
+        }
+    }
+
+    match path_string.as_ref() {
+        // TODO placement syntax
+        "tests/rust/src/libcollections/tests/binary_heap.rs" |
+        // TODO placement syntax
+        "tests/rust/src/libcollections/tests/vec.rs" |
+        // TODO placement syntax
+        "tests/rust/src/libcollections/tests/vec_deque.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/libcompiler_builtins/lib.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/librustc_data_structures/blake2b.rs" |
+        // TODO placement syntax
+        "tests/rust/src/librustc_mir/build/matches/test.rs" |
+        // TODO placement syntax
+        "tests/rust/src/libstd/collections/hash/map.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/libstd/net/ip.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/test/incremental/hashes/enum_defs.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" |
+        // TODO catch expressions
+        "tests/rust/src/test/run-pass/catch-expr.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/i128.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/i128-ffi.rs" |
         // TODO weird glob import
         "tests/rust/src/test/run-pass/import-glob-crate.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/issue-38987.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/item-attributes.rs" |
+        // TODO exclusive range syntax
+        "tests/rust/src/test/run-pass/match-range.rs" |
         // TODO precedence issue with binop vs poly trait ref
-        "tests/rust/src/test/run-pass/try-macro.rs" => false,
+        "tests/rust/src/test/run-pass/try-macro.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/u128.rs" |
+        // TODO pub(restricted) syntax
+        "tests/rust/src/test/ui/resolve/auxiliary/privacy-struct-ctor.rs" => false,
         _ => true,
     }
 }
@@ -104,11 +145,10 @@ fn test_round_trip() {
                     diagnostic.cancel();
                     if diagnostic.message().starts_with("file not found for module") {
                         errorf!("ignore\n");
-                        return true;
                     } else {
-                        errorf!("FAIL: {}\n", diagnostic.message());
-                        return false;
+                        errorf!("ignore - syntex failed to parse original content: {}\n", diagnostic.message());
                     }
+                    return true;
                 }
             };
             let after = match syntex_parse(back, &sess) {
