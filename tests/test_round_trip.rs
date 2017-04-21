@@ -52,20 +52,52 @@ fn filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
+        // TODO placement syntax
+        "tests/rust/src/libcollections/tests/binary_heap.rs" |
+        // TODO placement syntax
+        "tests/rust/src/libcollections/tests/vec.rs" |
+        // TODO placement syntax
+        "tests/rust/src/libcollections/tests/vec_deque.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/libcompiler_builtins/lib.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/librustc_data_structures/blake2b.rs" |
+        // TODO placement syntax
+        "tests/rust/src/librustc_mir/build/matches/test.rs" |
+        // TODO placement syntax
+        "tests/rust/src/libstd/collections/hash/map.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/libstd/net/ip.rs" |
+        // TODO better support for attributes
+        "tests/rust/src/test/incremental/hashes/enum_defs.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" |
+        // TODO catch expressions
+        "tests/rust/src/test/run-pass/catch-expr.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/i128.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/i128-ffi.rs" |
         // TODO weird glob import
         "tests/rust/src/test/run-pass/import-glob-crate.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/issue-38987.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/item-attributes.rs" |
+        // TODO exclusive range syntax
+        "tests/rust/src/test/run-pass/match-range.rs" |
         // TODO precedence issue with binop vs poly trait ref
-        "tests/rust/src/test/run-pass/try-macro.rs" => false,
+        "tests/rust/src/test/run-pass/try-macro.rs" |
+        // TODO 128-bit integer literals
+        "tests/rust/src/test/run-pass/u128.rs" |
+        // TODO pub(restricted) syntax
+        "tests/rust/src/test/ui/resolve/auxiliary/privacy-struct-ctor.rs" => false,
         _ => true,
     }
 }
