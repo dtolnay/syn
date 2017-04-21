@@ -32,6 +32,11 @@ fn filter(entry: &DirEntry) -> bool {
         return false;
     }
     let path = path.to_string_lossy();
+    let path = if cfg!(windows) {
+        path.replace('\\', "/").into()
+    } else {
+        path
+    };
     // TODO assert that parsing fails on the parse-fail cases
     if path.starts_with("tests/rust/src/test/parse-fail") ||
        path.starts_with("tests/rust/src/test/compile-fail") {
