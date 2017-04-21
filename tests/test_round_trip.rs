@@ -31,18 +31,27 @@ fn filter(entry: &DirEntry) -> bool {
     if path.extension().map(|e| e != "rs").unwrap_or(true) {
         return false;
     }
-    let path = path.to_string_lossy();
-    let path = if cfg!(windows) {
-        path.replace('\\', "/").into()
+    let path_string = path.to_string_lossy();
+    let path_string = if cfg!(windows) {
+        path_string.replace('\\', "/").into()
     } else {
-        path
+        path_string
     };
     // TODO assert that parsing fails on the parse-fail cases
-    if path.starts_with("tests/rust/src/test/parse-fail") ||
-       path.starts_with("tests/rust/src/test/compile-fail") {
+    if path_string.starts_with("tests/rust/src/test/parse-fail") ||
+       path_string.starts_with("tests/rust/src/test/compile-fail") {
         return false;
     }
-    match path.as_ref() {
+
+    if path_string.starts_with("tests/rust/src/test/ui") {
+        let stderr_path = path.with_extension("stderr");
+        if stderr_path.exists() {
+            // Expected to fail in some way
+            return false;
+        }
+    }
+
+    match path_string.as_ref() {
         // TODO better support for attributes
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
         // not actually a test case
