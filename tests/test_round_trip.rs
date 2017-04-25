@@ -74,8 +74,6 @@ fn filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" |
-        // TODO catch expressions
-        "tests/rust/src/test/run-pass/catch-expr.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
         // TODO 128-bit integer literals

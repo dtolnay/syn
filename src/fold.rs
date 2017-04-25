@@ -686,6 +686,9 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     }
                 }))
             }
+            Catch(block) => {
+                Catch(folder.fold_block(block))
+            }
             Closure(capture_by, fn_decl, expr) => {
                 Closure(capture_by,
                         fn_decl.lift(|v| folder.fold_fn_decl(v)),
