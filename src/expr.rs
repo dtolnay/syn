@@ -176,6 +176,11 @@ pub enum ExprKind {
 
     /// `expr?`
     Try(Box<Expr>),
+
+    /// A catch expression.
+    ///
+    /// E.g. `do catch { block }`
+    Catch(Block),
 }
 
 /// A field-value pair in a struct literal.
@@ -427,6 +432,8 @@ pub mod parsing {
                 |
                 expr_match
                 |
+                expr_catch
+                |
                 call!(expr_closure, allow_struct)
                 |
                 cond_reduce!(allow_block, expr_block)
@@ -675,6 +682,13 @@ pub mod parsing {
             arms.extend(last_arm);
             arms
         }))
+    ));
+
+    named!(expr_catch -> ExprKind, do_parse!(
+        keyword!("do") >>
+        keyword!("catch") >>
+        catch_block: block >>
+        (ExprKind::Catch(catch_block))
     ));
 
     fn arm_requires_comma(arm: &Arm) -> bool {
@@ -1336,6 +1350,11 @@ mod printing {
                     tokens.append("{");
                     tokens.append_all(arms);
                     tokens.append("}");
+                }
+                ExprKind::Catch(ref body) => {
+                    tokens.append("do");
+                    tokens.append("catch");
+                    body.to_tokens(tokens);
                 }
                 ExprKind::Closure(capture, ref decl, ref expr) => {
                     capture.to_tokens(tokens);

@@ -502,6 +502,9 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_expr(body);
             }
         }
+        ExprKind::Catch(ref body) => {
+            walk_list!(visitor, visit_stmt, &body.stmts);
+        }
         ExprKind::Closure(_, ref decl, ref expr) => {
             visitor.visit_fn_decl(decl);
             visitor.visit_expr(expr);
