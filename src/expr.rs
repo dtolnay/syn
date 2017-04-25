@@ -290,7 +290,7 @@ pub enum Pat {
     /// A literal
     Lit(Box<Expr>),
     /// A range pattern, e.g. `1...2`
-    Range(Box<Expr>, Box<Expr>),
+    Range(Box<Expr>, Box<Expr>, RangeLimits),
     /// `[a, b, ..i, y, z]` is represented as:
     ///     `Pat::Slice(box [a, b], Some(i), box [y, z])`
     Slice(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
@@ -1141,9 +1141,9 @@ pub mod parsing {
 
     named!(pat_range -> Pat, do_parse!(
         lo: pat_lit_expr >>
-        punct!("...") >>
+        limits: range_limits >>
         hi: pat_lit_expr >>
-        (Pat::Range(Box::new(lo), Box::new(hi)))
+        (Pat::Range(Box::new(lo), Box::new(hi), limits))
     ));
 
     named!(pat_lit_expr -> Expr, do_parse!(
@@ -1393,10 +1393,7 @@ mod printing {
                 }
                 ExprKind::Range(ref from, ref to, limits) => {
                     from.to_tokens(tokens);
-                    match limits {
-                        RangeLimits::HalfOpen => tokens.append(".."),
-                        RangeLimits::Closed => tokens.append("..."),
-                    }
+                    limits.to_tokens(tokens);
                     to.to_tokens(tokens);
                 }
                 ExprKind::Path(None, ref path) => path.to_tokens(tokens),
@@ -1602,9 +1599,9 @@ mod printing {
                     target.to_tokens(tokens);
                 }
                 Pat::Lit(ref lit) => lit.to_tokens(tokens),
-                Pat::Range(ref lo, ref hi) => {
+                Pat::Range(ref lo, ref hi, ref limits) => {
                     lo.to_tokens(tokens);
-                    tokens.append("...");
+                    limits.to_tokens(tokens);
                     hi.to_tokens(tokens);
                 }
                 Pat::Slice(ref before, ref rest, ref after) => {
@@ -1626,6 +1623,15 @@ mod printing {
                     tokens.append("]");
                 }
                 Pat::Mac(ref mac) => mac.to_tokens(tokens),
+            }
+        }
+    }
+
+    impl ToTokens for RangeLimits {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                RangeLimits::HalfOpen => tokens.append(".."),
+                RangeLimits::Closed => tokens.append("..."),
             }
         }
     }

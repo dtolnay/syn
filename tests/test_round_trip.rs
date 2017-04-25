@@ -90,8 +90,6 @@ fn filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/issue-38987.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO exclusive range syntax
-        "tests/rust/src/test/run-pass/match-range.rs" |
         // TODO precedence issue with binop vs poly trait ref
         "tests/rust/src/test/run-pass/try-macro.rs" |
         // TODO 128-bit integer literals
