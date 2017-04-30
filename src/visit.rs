@@ -635,7 +635,7 @@ pub fn walk_pat<V: Visitor>(visitor: &mut V, pat: &Pat) {
         Pat::Lit(ref expr) => {
             visitor.visit_expr(expr);
         }
-        Pat::Range(ref start, ref end) => {
+        Pat::Range(ref start, ref end, _) => {
             visitor.visit_expr(start);
             visitor.visit_expr(end);
         }

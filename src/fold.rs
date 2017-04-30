@@ -805,9 +805,10 @@ pub fn noop_fold_pat<F: ?Sized + Folder>(folder: &mut F, pat: Pat) -> Pat {
         Box(b) => Box(b.lift(|p| folder.fold_pat(p))),
         Ref(b, mutability) => Ref(b.lift(|p| folder.fold_pat(p)), mutability),
         Lit(expr) => Lit(expr.lift(|e| folder.fold_expr(e))),
-        Range(l, r) => {
+        Range(l, r, limits) => {
             Range(l.lift(|e| folder.fold_expr(e)),
-                  r.lift(|e| folder.fold_expr(e)))
+                  r.lift(|e| folder.fold_expr(e)),
+                  limits)
         }
         Slice(lefts, pat, rights) => {
             Slice(lefts.lift(|p| folder.fold_pat(p)),
