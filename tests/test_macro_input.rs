@@ -316,3 +316,85 @@ fn test_attr_with_mod_style_path_with_self() {
 
     assert!(actual.attrs[0].meta_item().is_none());
 }
+
+#[test]
+fn test_pub_restricted() {
+    // Taken from tests/rust/src/test/ui/resolve/auxiliary/privacy-struct-ctor.rs
+    let raw =r#"
+        pub(in m) struct Z(pub(in m::n) u8);
+    "#;
+
+    let expected = MacroInput {
+        ident: "Z".into(),
+        vis: Visibility::Restricted(Box::new("m".into())),
+        attrs: vec![],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Tuple(vec![Field {
+            ident: None,
+            vis: Visibility::Restricted(Box::new(Path { global: false, segments: vec!["m".into(), "n".into()] })),
+            attrs: vec![],
+            ty: Ty::Path(None, "u8".into()),
+        }])),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn test_pub_restricted_crate() {
+    let raw =r#"
+        pub(crate) struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Crate,
+        attrs: vec![],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn test_pub_restricted_super() {
+    let raw =r#"
+        pub(super) struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Restricted(Box::new("super".into())),
+        attrs: vec![],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn test_pub_restricted_in_super() {
+    let raw =r#"
+        pub(in super) struct S;
+    "#;
+
+    let expected = MacroInput {
+        ident: "S".into(),
+        vis: Visibility::Restricted(Box::new("super".into())),
+        attrs: vec![],
+        generics: Generics::default(),
+        body: Body::Struct(VariantData::Unit),
+    };
+
+    let actual = parse_macro_input(raw).unwrap();
+
+    assert_eq!(expected, actual);
+}

@@ -91,9 +91,7 @@ fn filter(entry: &DirEntry) -> bool {
         // TODO precedence issue with binop vs poly trait ref
         "tests/rust/src/test/run-pass/try-macro.rs" |
         // TODO 128-bit integer literals
-        "tests/rust/src/test/run-pass/u128.rs" |
-        // TODO pub(restricted) syntax
-        "tests/rust/src/test/ui/resolve/auxiliary/privacy-struct-ctor.rs" => false,
+        "tests/rust/src/test/run-pass/u128.rs" => false,
         _ => true,
     }
 }

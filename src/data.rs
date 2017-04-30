@@ -77,7 +77,7 @@ pub enum Visibility {
     /// Crate-visible, i.e. `pub(crate)`.
     Crate,
 
-    /// Restricted, e.g. `pub(some::module)`.
+    /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
     Restricted(Box<Path>),
 
     /// Inherited, i.e. private.
@@ -97,7 +97,7 @@ pub mod parsing {
     use expr::parsing::expr;
     use generics::parsing::where_clause;
     use ident::parsing::ident;
-    use ty::parsing::{path, ty};
+    use ty::parsing::{mod_style_path, ty};
 
     named!(pub struct_body -> (WhereClause, VariantData), alt!(
         do_parse!(
@@ -212,7 +212,24 @@ pub mod parsing {
         do_parse!(
             keyword!("pub") >>
             punct!("(") >>
-            restricted: path >>
+            keyword!("self") >>
+            punct!(")") >>
+            (Visibility::Restricted(Box::new("self".into())))
+        )
+        |
+        do_parse!(
+            keyword!("pub") >>
+            punct!("(") >>
+            keyword!("super") >>
+            punct!(")") >>
+            (Visibility::Restricted(Box::new("super".into())))
+        )
+        |
+        do_parse!(
+            keyword!("pub") >>
+            punct!("(") >>
+            keyword!("in") >>
+            restricted: mod_style_path >>
             punct!(")") >>
             (Visibility::Restricted(Box::new(restricted)))
         )
@@ -227,6 +244,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
+    use ty::PathParameters;
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -287,6 +305,17 @@ mod printing {
                 Visibility::Restricted(ref path) => {
                     tokens.append("pub");
                     tokens.append("(");
+
+                    if !path.global &&
+                       path.segments.len() == 1 &&
+                       (path.segments[0].ident == "self" || path.segments[0].ident == "super") &&
+                       path.segments[0].parameters == PathParameters::none() {
+
+                        // Don't emit preceding `in` if path is `self` or `super`
+                    } else {
+                        tokens.append("in");
+                    }
+
                     path.to_tokens(tokens);
                     tokens.append(")");
                 }
