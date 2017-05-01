@@ -41,7 +41,7 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse the string representation into a syntax tree
-    let ast = syn::parse_derive_input(&source).unwrap();
+    let ast: syn::DeriveInput = source.parse().unwrap();
 
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
@@ -81,7 +81,7 @@ pub fn num_fields(input: TokenStream) -> TokenStream {
     let source = input.to_string();
 
     // Parse the string representation into a syntax tree
-    let ast = syn::parse_derive_input(&source).unwrap();
+    let ast: syn::DeriveInput = source.parse().unwrap();
 
     // Build the output
     let expanded = expand_num_fields(&ast);

@@ -1,3 +1,8 @@
+//! Test the now-deprecated `parse_macro_input` function. 
+//!
+//! Deprecation warnings are suppressed to keep the output clean.
+#![allow(deprecated)]
+
 extern crate syn;
 use syn::*;
 
