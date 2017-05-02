@@ -88,6 +88,8 @@ pub use parsing::*;
 
 #[cfg(feature = "parsing")]
 mod parsing {
+    use std::str::FromStr;
+
     use super::*;
     use {derive, generics, ident, mac, ty, attr};
     use synom::{space, IResult};
@@ -95,6 +97,8 @@ mod parsing {
     #[cfg(feature = "full")]
     use {expr, item, krate};
 
+    /// Parse the stringified representation of a struct or enum passed
+    /// to a `proc_macro_derive` function.
     pub fn parse_derive_input(input: &str) -> Result<DeriveInput, String> {
         unwrap("derive input", derive::parsing::derive_input, input)
     }
@@ -123,6 +127,7 @@ mod parsing {
         unwrap("type", ty::parsing::ty, input)
     }
 
+    /// Parse a path, such as `std::str::FromStr` or `::syn::parse_path`.
     pub fn parse_path(input: &str) -> Result<Path, String> {
         unwrap("path", ty::parsing::path, input)
     }
@@ -145,19 +150,109 @@ mod parsing {
                input)
     }
 
+    /// Parse an attribute declared outside the item it annotates, such as
+    /// a struct annotation. They are written as `#[...]`.
     pub fn parse_outer_attr(input: &str) -> Result<Attribute, String> {
         unwrap("outer attribute", attr::parsing::outer_attr, input)
     }
 
+    /// Parse an attribute declared inside the item it annotates. These are used
+    /// for crate annotations or for mod-level declarations when modules are in
+    /// their own files. They are written as `#![...]`.
     #[cfg(feature = "full")]
     pub fn parse_inner_attr(input: &str) -> Result<Attribute, String> {
         unwrap("inner attribute", attr::parsing::inner_attr, input)
     }
 
-    // Deprecated. Use `parse_derive_input` instead.
+    /// Deprecated: Use `parse_derive_input` instead.
     #[doc(hidden)]
+    #[deprecated(since="0.11.0", note = "Use `parse_derive_input` instead")]
     pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
         parse_derive_input(input)
+    }
+
+    /// Alias for `syn::parse_derive_input`.
+    impl FromStr for DeriveInput {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_derive_input(s)
+        }
+    }
+
+    /// Alias for `syn::parse_crate`.
+    #[cfg(feature = "full")]
+    impl FromStr for Crate {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_crate(s)
+        }
+    }
+
+    /// Alias for `syn::parse_item`.
+    #[cfg(feature = "full")]
+    impl FromStr for Item {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_item(s)
+        }
+    }
+
+    /// Alias for `syn::parse_expr`.
+    #[cfg(feature = "full")]
+    impl FromStr for Expr {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_expr(s)
+        }
+    }
+
+    /// Alias for `syn::parse_type`.
+    impl FromStr for Ty {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_type(s)
+        }
+    }
+
+    /// Alias for `syn::parse_path`.
+    impl FromStr for Path {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_path(s)
+        }
+    }
+
+    /// Alias for `syn::parse_where_clause`.
+    impl FromStr for WhereClause {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_where_clause(s)
+        }
+    }
+
+    /// Alias for `syn::parse_ident`.
+    impl FromStr for Ident {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_ident(s)
+        }
+    }
+
+    /// Alias for `syn::parse_ty_param_bound`.
+    impl FromStr for TyParamBound {
+        type Err = String;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            parse_ty_param_bound(s)
+        }
     }
 
     fn unwrap<T>(name: &'static str,
