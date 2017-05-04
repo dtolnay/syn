@@ -41,7 +41,6 @@ script:
           cargo build --features 'visit fold' &&
           cargo build --features 'full visit fold' &&
           (cd synom && cargo test) &&
-          cargo doc --features 'full visit fold'
           ;;
         test)
           git submodule update --init &&
@@ -60,6 +59,12 @@ script:
 after_success:
   - |
       if [ "$ROLE" = build ] && [ "$TRAVIS_RUST_VERSION" = nightly ]; then
+        CURRENT=$(curl -sS https://crates.io/api/v1/crates/syn | jq -r .crate.max_version)
+        echo "Documenting syn ${CURRENT}"
+        curl -sSLo syn.crate.tgz "https://crates.io/api/v1/crates/syn/${CURRENT}/download"
+        tar xf syn.crate.tgz
+        cd "syn-${CURRENT}"
+        cargo doc --features 'full visit fold'
         travis-cargo doc-upload
       fi
 
