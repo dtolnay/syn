@@ -6,11 +6,18 @@ use std::iter;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Attribute {
     pub style: AttrStyle,
+    #[deprecated(since = "0.11.12", note = "Not all attributes have to be well-formed meta items. \
+        Use `Attribute::meta_item` to attempt parsing instead")]
     pub value: MetaItem,
     pub is_sugared_doc: bool,
 }
 
 impl Attribute {
+    /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
+    pub fn meta_item(&self) -> Option<MetaItem> {
+        Some(self.value.clone())
+    }
+
     pub fn name(&self) -> &str {
         self.value.name()
     }
