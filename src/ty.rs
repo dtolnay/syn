@@ -1,67 +1,95 @@
 use super::*;
 
-/// The different kinds of types recognized by the compiler
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Ty {
-    /// A variable-length array (`[T]`)
-    Slice(Box<Ty>),
-    /// A fixed length array (`[T; n]`)
-    Array(Box<Ty>, ConstExpr),
-    /// A raw pointer (`*const T` or `*mut T`)
-    Ptr(Box<MutTy>),
-    /// A reference (`&'a T` or `&'a mut T`)
-    Rptr(Option<Lifetime>, Box<MutTy>),
-    /// A bare function (e.g. `fn(usize) -> bool`)
-    BareFn(Box<BareFnTy>),
-    /// The never type (`!`)
-    Never,
-    /// A tuple (`(A, B, C, D, ...)`)
-    Tup(Vec<Ty>),
-    /// A path (`module::module::...::Type`), optionally
-    /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
+ast_enum_of_structs! {
+    /// The different kinds of types recognized by the compiler
+    pub enum Ty {
+        /// A variable-length array (`[T]`)
+        pub Slice(TySlice {
+            pub ty: Box<Ty>,
+        }),
+        /// A fixed length array (`[T; n]`)
+        pub Array(TyArray {
+            pub ty: Box<Ty>,
+            pub amt: ConstExpr,
+        }),
+        /// A raw pointer (`*const T` or `*mut T`)
+        pub Ptr(TyPtr {
+            pub ty: Box<MutTy>,
+        }),
+        /// A reference (`&'a T` or `&'a mut T`)
+        pub Rptr(TyRptr {
+            pub lifetime: Option<Lifetime>,
+            pub ty: Box<MutTy>,
+        }),
+        /// A bare function (e.g. `fn(usize) -> bool`)
+        pub BareFn(TyBareFn {
+            pub ty: Box<BareFnTy>,
+        }),
+        /// The never type (`!`)
+        pub Never(TyNever {}),
+        /// A tuple (`(A, B, C, D, ...)`)
+        pub Tup(TyTup {
+            pub tys: Vec<Ty>,
+        }),
+        /// A path (`module::module::...::Type`), optionally
+        /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
+        ///
+        /// Type parameters are stored in the Path itself
+        pub Path(TyPath {
+            pub qself: Option<QSelf>,
+            pub path: Path,
+        }),
+        /// A trait object type `Bound1 + Bound2 + Bound3`
+        /// where `Bound` is a trait or a lifetime.
+        pub TraitObject(TyTraitObject {
+            pub bounds: Vec<TyParamBound>,
+        }),
+        /// An `impl Bound1 + Bound2 + Bound3` type
+        /// where `Bound` is a trait or a lifetime.
+        pub ImplTrait(TyImplTrait {
+            pub bounds: Vec<TyParamBound>,
+        }),
+        /// No-op; kept solely so that we can pretty-print faithfully
+        pub Paren(TyParen {
+            pub ty: Box<Ty>,
+        }),
+        /// TyKind::Infer means the type should be inferred instead of it having been
+        /// specified. This can appear anywhere in a type.
+        pub Infer(TyInfer {}),
+        /// A macro in the type position.
+        pub Mac(Mac),
+    }
+}
+
+ast_struct! {
+    pub struct MutTy {
+        pub ty: Ty,
+        pub mutability: Mutability,
+    }
+}
+
+ast_enum! {
+    #[derive(Copy)]
+    pub enum Mutability {
+        Mutable,
+        Immutable,
+    }
+}
+
+ast_struct! {
+    /// A "Path" is essentially Rust's notion of a name.
     ///
-    /// Type parameters are stored in the Path itself
-    Path(Option<QSelf>, Path),
-    /// A trait object type `Bound1 + Bound2 + Bound3`
-    /// where `Bound` is a trait or a lifetime.
-    TraitObject(Vec<TyParamBound>),
-    /// An `impl Bound1 + Bound2 + Bound3` type
-    /// where `Bound` is a trait or a lifetime.
-    ImplTrait(Vec<TyParamBound>),
-    /// No-op; kept solely so that we can pretty-print faithfully
-    Paren(Box<Ty>),
-    /// TyKind::Infer means the type should be inferred instead of it having been
-    /// specified. This can appear anywhere in a type.
-    Infer,
-    /// A macro in the type position.
-    Mac(Mac),
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MutTy {
-    pub ty: Ty,
-    pub mutability: Mutability,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Mutability {
-    Mutable,
-    Immutable,
-}
-
-/// A "Path" is essentially Rust's notion of a name.
-///
-/// It's represented as a sequence of identifiers,
-/// along with a bunch of supporting information.
-///
-/// E.g. `std::cmp::PartialEq`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Path {
-    /// A `::foo` path, is relative to the crate root rather than current
-    /// module (like paths in an import).
-    pub global: bool,
-    /// The segments in the path: the things separated by `::`.
-    pub segments: Vec<PathSegment>,
+    /// It's represented as a sequence of identifiers,
+    /// along with a bunch of supporting information.
+    ///
+    /// E.g. `std::cmp::PartialEq`
+    pub struct Path {
+        /// A `::foo` path, is relative to the crate root rather than current
+        /// module (like paths in an import).
+        pub global: bool,
+        /// The segments in the path: the things separated by `::`.
+        pub segments: Vec<PathSegment>,
+    }
 }
 
 impl<T> From<T> for Path
@@ -75,19 +103,20 @@ impl<T> From<T> for Path
     }
 }
 
-/// A segment of a path: an identifier, an optional lifetime, and a set of types.
-///
-/// E.g. `std`, `String` or `Box<T>`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct PathSegment {
-    /// The identifier portion of this path segment.
-    pub ident: Ident,
-    /// Type/lifetime parameters attached to this path. They come in
-    /// two flavors: `Path<A,B,C>` and `Path(A,B) -> C`. Note that
-    /// this is more than just simple syntactic sugar; the use of
-    /// parens affects the region binding rules, so we preserve the
-    /// distinction.
-    pub parameters: PathParameters,
+ast_struct! {
+    /// A segment of a path: an identifier, an optional lifetime, and a set of types.
+    ///
+    /// E.g. `std`, `String` or `Box<T>`
+    pub struct PathSegment {
+        /// The identifier portion of this path segment.
+        pub ident: Ident,
+        /// Type/lifetime parameters attached to this path. They come in
+        /// two flavors: `Path<A,B,C>` and `Path(A,B) -> C`. Note that
+        /// this is more than just simple syntactic sugar; the use of
+        /// parens affects the region binding rules, so we preserve the
+        /// distinction.
+        pub parameters: PathParameters,
+    }
 }
 
 impl<T> From<T> for PathSegment
@@ -101,15 +130,16 @@ impl<T> From<T> for PathSegment
     }
 }
 
-/// Parameters of a path segment.
-///
-/// E.g. `<A, B>` as in `Foo<A, B>` or `(A, B)` as in `Foo(A, B)`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum PathParameters {
-    /// The `<'a, A, B, C>` in `foo::bar::baz::<'a, A, B, C>`
-    AngleBracketed(AngleBracketedParameterData),
-    /// The `(A, B)` and `C` in `Foo(A, B) -> C`
-    Parenthesized(ParenthesizedParameterData),
+ast_enum! {
+    /// Parameters of a path segment.
+    ///
+    /// E.g. `<A, B>` as in `Foo<A, B>` or `(A, B)` as in `Foo(A, B)`
+    pub enum PathParameters {
+        /// The `<'a, A, B, C>` in `foo::bar::baz::<'a, A, B, C>`
+        AngleBracketed(AngleBracketedParameterData),
+        /// The `(A, B)` and `C` in `Foo(A, B) -> C`
+        Parenthesized(ParenthesizedParameterData),
+    }
 }
 
 impl PathParameters {
@@ -128,104 +158,118 @@ impl PathParameters {
     }
 }
 
-/// A path like `Foo<'a, T>`
-#[derive(Debug, Clone, Eq, PartialEq, Default, Hash)]
-pub struct AngleBracketedParameterData {
-    /// The lifetime parameters for this path segment.
-    pub lifetimes: Vec<Lifetime>,
-    /// The type parameters for this path segment, if present.
-    pub types: Vec<Ty>,
-    /// Bindings (equality constraints) on associated types, if present.
+ast_struct! {
+    /// A path like `Foo<'a, T>`
+    #[derive(Default)]
+    pub struct AngleBracketedParameterData {
+        /// The lifetime parameters for this path segment.
+        pub lifetimes: Vec<Lifetime>,
+        /// The type parameters for this path segment, if present.
+        pub types: Vec<Ty>,
+        /// Bindings (equality constraints) on associated types, if present.
+        ///
+        /// E.g., `Foo<A=Bar>`.
+        pub bindings: Vec<TypeBinding>,
+    }
+}
+
+ast_struct! {
+    /// Bind a type to an associated type: `A=Foo`.
+    pub struct TypeBinding {
+        pub ident: Ident,
+        pub ty: Ty,
+    }
+}
+
+
+ast_struct! {
+    /// A path like `Foo(A,B) -> C`
+    pub struct ParenthesizedParameterData {
+        /// `(A, B)`
+        pub inputs: Vec<Ty>,
+        /// `C`
+        pub output: Option<Ty>,
+    }
+}
+
+ast_struct! {
+    pub struct PolyTraitRef {
+        /// The `'a` in `<'a> Foo<&'a T>`
+        pub bound_lifetimes: Vec<LifetimeDef>,
+        /// The `Foo<&'a T>` in `<'a> Foo<&'a T>`
+        pub trait_ref: Path,
+    }
+}
+
+ast_struct! {
+    /// The explicit Self type in a "qualified path". The actual
+    /// path, including the trait and the associated item, is stored
+    /// separately. `position` represents the index of the associated
+    /// item qualified with this Self type.
     ///
-    /// E.g., `Foo<A=Bar>`.
-    pub bindings: Vec<TypeBinding>,
-}
-
-/// Bind a type to an associated type: `A=Foo`.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct TypeBinding {
-    pub ident: Ident,
-    pub ty: Ty,
-}
-
-/// A path like `Foo(A,B) -> C`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ParenthesizedParameterData {
-    /// `(A, B)`
-    pub inputs: Vec<Ty>,
-    /// `C`
-    pub output: Option<Ty>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct PolyTraitRef {
-    /// The `'a` in `<'a> Foo<&'a T>`
-    pub bound_lifetimes: Vec<LifetimeDef>,
-    /// The `Foo<&'a T>` in `<'a> Foo<&'a T>`
-    pub trait_ref: Path,
-}
-
-/// The explicit Self type in a "qualified path". The actual
-/// path, including the trait and the associated item, is stored
-/// separately. `position` represents the index of the associated
-/// item qualified with this Self type.
-///
-/// ```rust,ignore
-/// <Vec<T> as a::b::Trait>::AssociatedItem
-///  ^~~~~     ~~~~~~~~~~~~~~^
-///  ty        position = 3
-///
-/// <Vec<T>>::AssociatedItem
-///  ^~~~~    ^
-///  ty       position = 0
-/// ```
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct QSelf {
-    pub ty: Box<Ty>,
-    pub position: usize,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct BareFnTy {
-    pub unsafety: Unsafety,
-    pub abi: Option<Abi>,
-    pub lifetimes: Vec<LifetimeDef>,
-    pub inputs: Vec<BareFnArg>,
-    pub output: FunctionRetTy,
-    pub variadic: bool,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Unsafety {
-    Unsafe,
-    Normal,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Abi {
-    Named(String),
-    Rust,
-}
-
-/// An argument in a function type.
-///
-/// E.g. `bar: usize` as in `fn foo(bar: usize)`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct BareFnArg {
-    pub name: Option<Ident>,
-    pub ty: Ty,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum FunctionRetTy {
-    /// Return type is not specified.
+    /// ```rust,ignore
+    /// <Vec<T> as a::b::Trait>::AssociatedItem
+    ///  ^~~~~     ~~~~~~~~~~~~~~^
+    ///  ty        position = 3
     ///
-    /// Functions default to `()` and
-    /// closures default to inference. Span points to where return
-    /// type would be inserted.
-    Default,
-    /// Everything else
-    Ty(Ty),
+    /// <Vec<T>>::AssociatedItem
+    ///  ^~~~~    ^
+    ///  ty       position = 0
+    /// ```
+    pub struct QSelf {
+        pub ty: Box<Ty>,
+        pub position: usize,
+    }
+}
+
+ast_struct! {
+    pub struct BareFnTy {
+        pub unsafety: Unsafety,
+        pub abi: Option<Abi>,
+        pub lifetimes: Vec<LifetimeDef>,
+        pub inputs: Vec<BareFnArg>,
+        pub output: FunctionRetTy,
+        pub variadic: bool,
+    }
+}
+
+ast_enum! {
+    #[derive(Copy)]
+    pub enum Unsafety {
+        Unsafe,
+        Normal,
+    }
+}
+
+ast_enum! {
+    pub enum Abi {
+        Named(String),
+        Rust,
+    }
+}
+
+ast_struct! {
+    /// An argument in a function type.
+    ///
+    /// E.g. `bar: usize` as in `fn foo(bar: usize)`
+    pub struct BareFnArg {
+        pub name: Option<Ident>,
+        pub ty: Ty,
+    }
+}
+
+
+ast_enum! {
+    pub enum FunctionRetTy {
+        /// Return type is not specified.
+        ///
+        /// Functions default to `()` and
+        /// closures default to inference. Span points to where return
+        /// type would be inserted.
+        Default,
+        /// Everything else
+        Ty(Ty),
+    }
 }
 
 #[cfg(feature = "parsing")]
@@ -276,7 +320,7 @@ pub mod parsing {
         punct!("[") >>
         elem: ty >>
         punct!("]") >>
-        (Ty::Slice(Box::new(elem)))
+        (TySlice { ty: Box::new(elem) }.into())
     ));
 
     named!(ty_array -> Ty, do_parse!(
@@ -285,7 +329,7 @@ pub mod parsing {
         punct!(";") >>
         len: array_len >>
         punct!("]") >>
-        (Ty::Array(Box::new(elem), len))
+        (TyArray { ty: Box::new(elem), amt: len }.into())
     ));
 
     #[cfg(not(feature = "full"))]
@@ -309,10 +353,12 @@ pub mod parsing {
             keyword!("mut") => { |_| Mutability::Mutable }
         ) >>
         target: ty >>
-        (Ty::Ptr(Box::new(MutTy {
-            ty: target,
-            mutability: mutability,
-        })))
+        (TyPtr {
+            ty: Box::new(MutTy {
+                ty: target,
+                mutability: mutability,
+            }),
+        }.into())
     ));
 
     named!(ty_rptr -> Ty, do_parse!(
@@ -320,10 +366,13 @@ pub mod parsing {
         life: option!(lifetime) >>
         mutability: mutability >>
         target: ty >>
-        (Ty::Rptr(life, Box::new(MutTy {
-            ty: target,
-            mutability: mutability,
-        })))
+        (TyRptr {
+            lifetime: life,
+            ty: Box::new(MutTy {
+                ty: target,
+                mutability: mutability,
+            }),
+        }.into())
     ));
 
     named!(ty_bare_fn -> Ty, do_parse!(
@@ -346,26 +395,28 @@ pub mod parsing {
             punct!("->"),
             ty
         )) >>
-        (Ty::BareFn(Box::new(BareFnTy {
-            unsafety: unsafety,
-            abi: abi,
-            lifetimes: lifetimes,
-            inputs: inputs,
-            output: match output {
-                Some(ty) => FunctionRetTy::Ty(ty),
-                None => FunctionRetTy::Default,
-            },
-            variadic: variadic.is_some(),
-        })))
+        (TyBareFn {
+            ty: Box::new(BareFnTy {
+                unsafety: unsafety,
+                abi: abi,
+                lifetimes: lifetimes,
+                inputs: inputs,
+                output: match output {
+                    Some(ty) => FunctionRetTy::Ty(ty),
+                    None => FunctionRetTy::Default,
+                },
+                variadic: variadic.is_some(),
+            }),
+        }.into())
     ));
 
-    named!(ty_never -> Ty, map!(punct!("!"), |_| Ty::Never));
+    named!(ty_never -> Ty, map!(punct!("!"), |_| TyNever {}.into()));
 
     named!(ty_tup -> Ty, do_parse!(
         punct!("(") >>
         elems: terminated_list!(punct!(","), ty) >>
         punct!(")") >>
-        (Ty::Tup(elems))
+        (TyTup { tys: elems }.into())
     ));
 
     named!(ty_path -> Ty, do_parse!(
@@ -381,7 +432,7 @@ pub mod parsing {
                 path.segments.last_mut().unwrap().parameters = parenthesized;
             }
             if bounds.is_empty() {
-                Ty::Path(qself, path)
+                TyPath { qself: qself, path: path }.into()
             } else {
                 let path = TyParamBound::Trait(
                     PolyTraitRef {
@@ -391,7 +442,7 @@ pub mod parsing {
                     TraitBoundModifier::None,
                 );
                 let bounds = Some(path).into_iter().chain(bounds).collect();
-                Ty::TraitObject(bounds)
+                TyTraitObject { bounds: bounds }.into()
             }
         })
     ));
@@ -447,20 +498,20 @@ pub mod parsing {
 
     named!(ty_poly_trait_ref -> Ty, map!(
         separated_nonempty_list!(punct!("+"), ty_param_bound),
-        Ty::TraitObject
+        |x| TyTraitObject { bounds: x }.into()
     ));
 
     named!(ty_impl_trait -> Ty, do_parse!(
         keyword!("impl") >>
         elem: separated_nonempty_list!(punct!("+"), ty_param_bound) >>
-        (Ty::ImplTrait(elem))
+        (TyImplTrait { bounds: elem }.into())
     ));
 
     named!(ty_paren -> Ty, do_parse!(
         punct!("(") >>
         elem: ty >>
         punct!(")") >>
-        (Ty::Paren(Box::new(elem)))
+        (TyParen { ty: Box::new(elem) }.into())
     ));
 
     named!(pub mutability -> Mutability, alt!(
@@ -604,90 +655,122 @@ mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
 
-    impl ToTokens for Ty {
+    impl ToTokens for TySlice {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Ty::Slice(ref inner) => {
-                    tokens.append("[");
-                    inner.to_tokens(tokens);
-                    tokens.append("]");
-                }
-                Ty::Array(ref inner, ref len) => {
-                    tokens.append("[");
-                    inner.to_tokens(tokens);
-                    tokens.append(";");
-                    len.to_tokens(tokens);
-                    tokens.append("]");
-                }
-                Ty::Ptr(ref target) => {
-                    tokens.append("*");
-                    match target.mutability {
-                        Mutability::Mutable => tokens.append("mut"),
-                        Mutability::Immutable => tokens.append("const"),
-                    }
-                    target.ty.to_tokens(tokens);
-                }
-                Ty::Rptr(ref lifetime, ref target) => {
-                    tokens.append("&");
-                    lifetime.to_tokens(tokens);
-                    target.mutability.to_tokens(tokens);
-                    target.ty.to_tokens(tokens);
-                }
-                Ty::BareFn(ref func) => {
-                    func.to_tokens(tokens);
-                }
-                Ty::Never => {
-                    tokens.append("!");
-                }
-                Ty::Tup(ref elems) => {
-                    tokens.append("(");
-                    tokens.append_separated(elems, ",");
-                    if elems.len() == 1 {
-                        tokens.append(",");
-                    }
-                    tokens.append(")");
-                }
-                Ty::Path(None, ref path) => {
-                    path.to_tokens(tokens);
-                }
-                Ty::Path(Some(ref qself), ref path) => {
-                    tokens.append("<");
-                    qself.ty.to_tokens(tokens);
-                    if qself.position > 0 {
-                        tokens.append("as");
-                        for (i, segment) in path.segments
-                                .iter()
-                                .take(qself.position)
-                                .enumerate() {
-                            if i > 0 || path.global {
-                                tokens.append("::");
-                            }
-                            segment.to_tokens(tokens);
-                        }
-                    }
-                    tokens.append(">");
-                    for segment in path.segments.iter().skip(qself.position) {
-                        tokens.append("::");
-                        segment.to_tokens(tokens);
-                    }
-                }
-                Ty::TraitObject(ref bounds) => {
-                    tokens.append_separated(bounds, "+");
-                }
-                Ty::ImplTrait(ref bounds) => {
-                    tokens.append("impl");
-                    tokens.append_separated(bounds, "+");
-                }
-                Ty::Paren(ref inner) => {
-                    tokens.append("(");
-                    inner.to_tokens(tokens);
-                    tokens.append(")");
-                }
-                Ty::Infer => {
-                    tokens.append("_");
-                }
-                Ty::Mac(ref mac) => mac.to_tokens(tokens),
+            tokens.append("[");
+            self.ty.to_tokens(tokens);
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for TyArray {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("[");
+            self.ty.to_tokens(tokens);
+            tokens.append(";");
+            self.amt.to_tokens(tokens);
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for TyPtr {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("*");
+            match self.ty.mutability {
+                Mutability::Mutable => tokens.append("mut"),
+                Mutability::Immutable => tokens.append("const"),
             }
+            self.ty.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TyRptr {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("&");
+            self.lifetime.to_tokens(tokens);
+            match self.ty.mutability {
+                Mutability::Mutable => tokens.append("mut"),
+                Mutability::Immutable => {}
+            }
+            self.ty.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TyBareFn {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.ty.to_tokens(tokens)
+        }
+    }
+
+    impl ToTokens for TyNever {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("!");
+        }
+    }
+
+    impl ToTokens for TyTup {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("(");
+            tokens.append_separated(&self.tys, ",");
+            if self.tys.len() == 1 {
+                tokens.append(",");
+            }
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for TyPath {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            let qself = match self.qself {
+                Some(ref qself) => qself,
+                None => return self.path.to_tokens(tokens),
+            };
+            tokens.append("<");
+            qself.ty.to_tokens(tokens);
+            if qself.position > 0 {
+                tokens.append("as");
+                for (i, segment) in self.path.segments
+                        .iter()
+                        .take(qself.position)
+                        .enumerate() {
+                    if i > 0 || self.path.global {
+                        tokens.append("::");
+                    }
+                    segment.to_tokens(tokens);
+                }
+            }
+            tokens.append(">");
+            for segment in self.path.segments.iter().skip(qself.position) {
+                tokens.append("::");
+                segment.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for TyTraitObject {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_separated(&self.bounds, "+");
+        }
+    }
+
+    impl ToTokens for TyImplTrait {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("impl");
+            tokens.append_separated(&self.bounds, "+");
+        }
+    }
+
+    impl ToTokens for TyParen {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("(");
+            self.ty.to_tokens(tokens);
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for TyInfer {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("_");
         }
     }
 

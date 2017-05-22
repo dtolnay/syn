@@ -1,13 +1,14 @@
 use super::*;
 
-/// An expression.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Expr {
-    /// Type of the expression.
-    pub node: ExprKind,
+ast_struct! {
+    /// An expression.
+    pub struct Expr {
+        /// Type of the expression.
+        pub node: ExprKind,
 
-    /// Attributes tagged on the expression.
-    pub attrs: Vec<Attribute>,
+        /// Attributes tagged on the expression.
+        pub attrs: Vec<Attribute>,
+    }
 }
 
 impl From<ExprKind> for Expr {
@@ -19,350 +20,472 @@ impl From<ExprKind> for Expr {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ExprKind {
-    /// A `box x` expression.
-    Box(Box<Expr>),
+ast_enum_of_structs! {
+    pub enum ExprKind {
+        /// A `box x` expression.
+        pub Box(ExprBox {
+            pub expr: Box<Expr>,
+        }),
 
-    /// First expr is the place; second expr is the value.
-    ///
-    /// E.g. 'plae <- val'.
-    InPlace(Box<Expr>, Box<Expr>),
+        /// E.g. 'place <- val'.
+        pub InPlace(ExprInPlace {
+            pub place: Box<Expr>,
+            pub value: Box<Expr>,
+        }),
 
-    /// An array, e.g. `[a, b, c, d]`.
-    Array(Vec<Expr>),
+        /// An array, e.g. `[a, b, c, d]`.
+        pub Array(ExprArray {
+            pub exprs: Vec<Expr>,
+        }),
 
-    /// A function call.
-    ///
-    /// The first field resolves to the function itself,
-    /// and the second field is the list of arguments
-    Call(Box<Expr>, Vec<Expr>),
+        /// A function call.
+        pub Call(ExprCall {
+            pub func: Box<Expr>,
+            pub args: Vec<Expr>,
+        }),
 
-    /// A method call (`x.foo::<Bar, Baz>(a, b, c, d)`)
-    ///
-    /// The `Ident` is the identifier for the method name.
-    /// The vector of `Ty`s are the ascripted type parameters for the method
-    /// (within the angle brackets).
-    ///
-    /// The first element of the vector of `Expr`s is the expression that evaluates
-    /// to the object on which the method is being called on (the receiver),
-    /// and the remaining elements are the rest of the arguments.
-    ///
-    /// Thus, `x.foo::<Bar, Baz>(a, b, c, d)` is represented as
-    /// `ExprKind::MethodCall(foo, [Bar, Baz], [x, a, b, c, d])`.
-    MethodCall(Ident, Vec<Ty>, Vec<Expr>),
+        /// A method call (`x.foo::<Bar, Baz>(a, b, c, d)`)
+        ///
+        /// The `Ident` is the identifier for the method name.
+        /// The vector of `Ty`s are the ascripted type parameters for the method
+        /// (within the angle brackets).
+        ///
+        /// The first element of the vector of `Expr`s is the expression that evaluates
+        /// to the object on which the method is being called on (the receiver),
+        /// and the remaining elements are the rest of the arguments.
+        ///
+        /// Thus, `x.foo::<Bar, Baz>(a, b, c, d)` is represented as
+        /// `ExprKind::MethodCall(foo, [Bar, Baz], [x, a, b, c, d])`.
+        pub MethodCall(ExprMethodCall {
+            pub method: Ident,
+            pub typarams: Vec<Ty>,
+            pub args: Vec<Expr>,
+        }),
 
-    /// A tuple, e.g. `(a, b, c, d)`.
-    Tup(Vec<Expr>),
+        /// A tuple, e.g. `(a, b, c, d)`.
+        pub Tup(ExprTup {
+            pub args: Vec<Expr>,
+        }),
 
-    /// A binary operation, e.g. `a + b`, `a * b`.
-    Binary(BinOp, Box<Expr>, Box<Expr>),
+        /// A binary operation, e.g. `a + b`, `a * b`.
+        pub Binary(ExprBinary {
+            pub op: BinOp,
+            pub left: Box<Expr>,
+            pub right: Box<Expr>,
+        }),
 
-    /// A unary operation, e.g. `!x`, `*x`.
-    Unary(UnOp, Box<Expr>),
+        /// A unary operation, e.g. `!x`, `*x`.
+        pub Unary(ExprUnary {
+            pub op: UnOp,
+            pub expr: Box<Expr>,
+        }),
 
-    /// A literal, e.g. `1`, `"foo"`.
-    Lit(Lit),
+        /// A literal, e.g. `1`, `"foo"`.
+        pub Lit(Lit),
 
-    /// A cast, e.g. `foo as f64`.
-    Cast(Box<Expr>, Box<Ty>),
+        /// A cast, e.g. `foo as f64`.
+        pub Cast(ExprCast {
+            pub expr: Box<Expr>,
+            pub ty: Box<Ty>,
+        }),
 
-    /// A type ascription, e.g. `foo: f64`.
-    Type(Box<Expr>, Box<Ty>),
+        /// A type ascription, e.g. `foo: f64`.
+        pub Type(ExprType {
+            pub expr: Box<Expr>,
+            pub ty: Box<Ty>,
+        }),
 
-    /// An `if` block, with an optional else block
-    ///
-    /// E.g., `if expr { block } else { expr }`
-    If(Box<Expr>, Block, Option<Box<Expr>>),
+        /// An `if` block, with an optional else block
+        ///
+        /// E.g., `if expr { block } else { expr }`
+        pub If(ExprIf {
+            pub cond: Box<Expr>,
+            pub if_true: Block,
+            pub if_false: Option<Box<Expr>>,
+        }),
 
-    /// An `if let` expression with an optional else block
-    ///
-    /// E.g., `if let pat = expr { block } else { expr }`
-    ///
-    /// This is desugared to a `match` expression.
-    IfLet(Box<Pat>, Box<Expr>, Block, Option<Box<Expr>>),
+        /// An `if let` expression with an optional else block
+        ///
+        /// E.g., `if let pat = expr { block } else { expr }`
+        ///
+        /// This is desugared to a `match` expression.
+        pub IfLet(ExprIfLet {
+            pub pat: Box<Pat>,
+            pub expr: Box<Expr>,
+            pub if_true: Block,
+            pub if_false: Option<Box<Expr>>,
+        }),
 
-    /// A while loop, with an optional label
-    ///
-    /// E.g., `'label: while expr { block }`
-    While(Box<Expr>, Block, Option<Ident>),
+        /// A while loop, with an optional label
+        ///
+        /// E.g., `'label: while expr { block }`
+        pub While(ExprWhile {
+            pub cond: Box<Expr>,
+            pub body: Block,
+            pub label: Option<Ident>,
+        }),
 
-    /// A while-let loop, with an optional label.
-    ///
-    /// E.g., `'label: while let pat = expr { block }`
-    ///
-    /// This is desugared to a combination of `loop` and `match` expressions.
-    WhileLet(Box<Pat>, Box<Expr>, Block, Option<Ident>),
+        /// A while-let loop, with an optional label.
+        ///
+        /// E.g., `'label: while let pat = expr { block }`
+        ///
+        /// This is desugared to a combination of `loop` and `match` expressions.
+        pub WhileLet(ExprWhileLet {
+            pub pat: Box<Pat>,
+            pub expr: Box<Expr>,
+            pub body: Block,
+            pub label: Option<Ident>,
+        }),
 
-    /// A for loop, with an optional label.
-    ///
-    /// E.g., `'label: for pat in expr { block }`
-    ///
-    /// This is desugared to a combination of `loop` and `match` expressions.
-    ForLoop(Box<Pat>, Box<Expr>, Block, Option<Ident>),
+        /// A for loop, with an optional label.
+        ///
+        /// E.g., `'label: for pat in expr { block }`
+        ///
+        /// This is desugared to a combination of `loop` and `match` expressions.
+        pub ForLoop(ExprForLoop {
+            pub pat: Box<Pat>,
+            pub expr: Box<Expr>,
+            pub body: Block,
+            pub label: Option<Ident>,
+        }),
 
-    /// Conditionless loop with an optional label.
-    ///
-    /// E.g. `'label: loop { block }`
-    Loop(Block, Option<Ident>),
+        /// Conditionless loop with an optional label.
+        ///
+        /// E.g. `'label: loop { block }`
+        pub Loop(ExprLoop {
+            pub body: Block,
+            pub label: Option<Ident>,
+        }),
 
-    /// A `match` block.
-    Match(Box<Expr>, Vec<Arm>),
+        /// A `match` block.
+        pub Match(ExprMatch {
+            pub expr: Box<Expr>,
+            pub arms: Vec<Arm>,
+        }),
 
-    /// A closure (for example, `move |a, b, c| a + b + c`)
-    Closure(CaptureBy, Box<FnDecl>, Box<Expr>),
+        /// A closure (for example, `move |a, b, c| a + b + c`)
+        pub Closure(ExprClosure {
+            pub capture: CaptureBy,
+            pub decl: Box<FnDecl>,
+            pub body: Box<Expr>,
+        }),
 
-    /// A block (`{ ... }` or `unsafe { ... }`)
-    Block(Unsafety, Block),
+        /// A block (`{ ... }` or `unsafe { ... }`)
+        pub Block(ExprBlock {
+            pub unsafety: Unsafety,
+            pub block: Block,
+        }),
 
-    /// An assignment (`a = foo()`)
-    Assign(Box<Expr>, Box<Expr>),
+        /// An assignment (`a = foo()`)
+        pub Assign(ExprAssign {
+            pub left: Box<Expr>,
+            pub right: Box<Expr>,
+        }),
 
-    /// An assignment with an operator
-    ///
-    /// For example, `a += 1`.
-    AssignOp(BinOp, Box<Expr>, Box<Expr>),
+        /// An assignment with an operator
+        ///
+        /// For example, `a += 1`.
+        pub AssignOp(ExprAssignOp {
+            pub op: BinOp,
+            pub left: Box<Expr>,
+            pub right: Box<Expr>,
+        }),
 
-    /// Access of a named struct field (`obj.foo`)
-    Field(Box<Expr>, Ident),
+        /// Access of a named struct field (`obj.foo`)
+        pub Field(ExprField {
+            pub expr: Box<Expr>,
+            pub field: Ident,
+        }),
 
-    /// Access of an unnamed field of a struct or tuple-struct
-    ///
-    /// For example, `foo.0`.
-    TupField(Box<Expr>, usize),
+        /// Access of an unnamed field of a struct or tuple-struct
+        ///
+        /// For example, `foo.0`.
+        pub TupField(ExprTupField {
+            pub expr: Box<Expr>,
+            pub field: usize,
+        }),
 
-    /// An indexing operation (`foo[2]`)
-    Index(Box<Expr>, Box<Expr>),
+        /// An indexing operation (`foo[2]`)
+        pub Index(ExprIndex {
+            pub expr: Box<Expr>,
+            pub index: Box<Expr>,
+        }),
 
-    /// A range (`1..2`, `1..`, `..2`, `1...2`, `1...`, `...2`)
-    Range(Option<Box<Expr>>, Option<Box<Expr>>, RangeLimits),
+        /// A range (`1..2`, `1..`, `..2`, `1...2`, `1...`, `...2`)
+        pub Range(ExprRange {
+            pub from: Option<Box<Expr>>,
+            pub to: Option<Box<Expr>>,
+            pub limits: RangeLimits,
+        }),
 
-    /// Variable reference, possibly containing `::` and/or type
-    /// parameters, e.g. foo::bar::<baz>.
-    ///
-    /// Optionally "qualified",
-    /// E.g. `<Vec<T> as SomeTrait>::SomeType`.
-    Path(Option<QSelf>, Path),
+        /// Variable reference, possibly containing `::` and/or type
+        /// parameters, e.g. foo::bar::<baz>.
+        ///
+        /// Optionally "qualified",
+        /// E.g. `<Vec<T> as SomeTrait>::SomeType`.
+        pub Path(ExprPath {
+            pub qself: Option<QSelf>,
+            pub path: Path,
+        }),
 
-    /// A referencing operation (`&a` or `&mut a`)
-    AddrOf(Mutability, Box<Expr>),
+        /// A referencing operation (`&a` or `&mut a`)
+        pub AddrOf(ExprAddrOf {
+            pub mutbl: Mutability,
+            pub expr: Box<Expr>,
+        }),
 
-    /// A `break`, with an optional label to break, and an optional expression
-    Break(Option<Ident>, Option<Box<Expr>>),
+        /// A `break`, with an optional label to break, and an optional expression
+        pub Break(ExprBreak {
+            pub label: Option<Ident>,
+            pub expr: Option<Box<Expr>>,
+        }),
 
-    /// A `continue`, with an optional label
-    Continue(Option<Ident>),
+        /// A `continue`, with an optional label
+        pub Continue(ExprContinue {
+            pub label: Option<Ident>,
+        }),
 
-    /// A `return`, with an optional value to be returned
-    Ret(Option<Box<Expr>>),
+        /// A `return`, with an optional value to be returned
+        pub Ret(ExprRet {
+            pub expr: Option<Box<Expr>>,
+        }),
 
-    /// A macro invocation; pre-expansion
-    Mac(Mac),
+        /// A macro invocation; pre-expansion
+        pub Mac(Mac),
 
-    /// A struct literal expression.
-    ///
-    /// For example, `Foo {x: 1, y: 2}`, or
-    /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
-    Struct(Path, Vec<FieldValue>, Option<Box<Expr>>),
+        /// A struct literal expression.
+        ///
+        /// For example, `Foo {x: 1, y: 2}`, or
+        /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
+        pub Struct(ExprStruct {
+            pub path: Path,
+            pub fields: Vec<FieldValue>,
+            pub rest: Option<Box<Expr>>,
+        }),
 
-    /// An array literal constructed from one repeated element.
-    ///
-    /// For example, `[1; 5]`. The first expression is the element
-    /// to be repeated; the second is the number of times to repeat it.
-    Repeat(Box<Expr>, Box<Expr>),
+        /// An array literal constructed from one repeated element.
+        ///
+        /// For example, `[1; 5]`. The first expression is the element
+        /// to be repeated; the second is the number of times to repeat it.
+        pub Repeat(ExprRepeat {
+            pub expr: Box<Expr>,
+            pub amt: Box<Expr>,
+        }),
 
-    /// No-op: used solely so we can pretty-print faithfully
-    Paren(Box<Expr>),
+        /// No-op: used solely so we can pretty-print faithfully
+        pub Paren(ExprParen {
+            pub expr: Box<Expr>,
+        }),
 
-    /// `expr?`
-    Try(Box<Expr>),
+        /// `expr?`
+        pub Try(ExprTry {
+            pub expr: Box<Expr>,
+        }),
 
-    /// A catch expression.
-    ///
-    /// E.g. `do catch { block }`
-    Catch(Block),
+        /// A catch expression.
+        ///
+        /// E.g. `do catch { block }`
+        pub Catch(ExprCatch {
+            pub block: Block,
+        }),
+    }
 }
 
-/// A field-value pair in a struct literal.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct FieldValue {
-    /// Name of the field.
-    pub ident: Ident,
+ast_struct! {
+    /// A field-value pair in a struct literal.
+    pub struct FieldValue {
+        /// Name of the field.
+        pub ident: Ident,
 
-    /// Value of the field.
-    pub expr: Expr,
+        /// Value of the field.
+        pub expr: Expr,
 
-    /// Whether this is a shorthand field, e.g. `Struct { x }`
-    /// instead of `Struct { x: x }`.
-    pub is_shorthand: bool,
+        /// Whether this is a shorthand field, e.g. `Struct { x }`
+        /// instead of `Struct { x: x }`.
+        pub is_shorthand: bool,
 
-    /// Attributes tagged on the field.
-    pub attrs: Vec<Attribute>,
+        /// Attributes tagged on the field.
+        pub attrs: Vec<Attribute>,
+    }
 }
 
-/// A Block (`{ .. }`).
-///
-/// E.g. `{ .. }` as in `fn foo() { .. }`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Block {
-    /// Statements in a block
-    pub stmts: Vec<Stmt>,
+ast_struct! {
+    /// A Block (`{ .. }`).
+    ///
+    /// E.g. `{ .. }` as in `fn foo() { .. }`
+    pub struct Block {
+        /// Statements in a block
+        pub stmts: Vec<Stmt>,
+    }
 }
 
-/// A statement, usually ending in a semicolon.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Stmt {
-    /// A local (let) binding.
-    Local(Box<Local>),
+ast_enum! {
+    /// A statement, usually ending in a semicolon.
+    pub enum Stmt {
+        /// A local (let) binding.
+        Local(Box<Local>),
 
-    /// An item definition.
-    Item(Box<Item>),
+        /// An item definition.
+        Item(Box<Item>),
 
-    /// Expr without trailing semicolon.
-    Expr(Box<Expr>),
+        /// Expr without trailing semicolon.
+        Expr(Box<Expr>),
 
-    /// Expression with trailing semicolon;
-    Semi(Box<Expr>),
+        /// Expression with trailing semicolon;
+        Semi(Box<Expr>),
 
-    /// Macro invocation.
-    Mac(Box<(Mac, MacStmtStyle, Vec<Attribute>)>),
+        /// Macro invocation.
+        Mac(Box<(Mac, MacStmtStyle, Vec<Attribute>)>),
+    }
 }
 
-/// How a macro was invoked.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum MacStmtStyle {
-    /// The macro statement had a trailing semicolon, e.g. `foo! { ... };`
-    /// `foo!(...);`, `foo![...];`
-    Semicolon,
+ast_enum! {
+    /// How a macro was invoked.
+    #[derive(Copy)]
+    pub enum MacStmtStyle {
+        /// The macro statement had a trailing semicolon, e.g. `foo! { ... };`
+        /// `foo!(...);`, `foo![...];`
+        Semicolon,
 
-    /// The macro statement had braces; e.g. foo! { ... }
-    Braces,
+        /// The macro statement had braces; e.g. foo! { ... }
+        Braces,
 
-    /// The macro statement had parentheses or brackets and no semicolon; e.g.
-    /// `foo!(...)`. All of these will end up being converted into macro
-    /// expressions.
-    NoBraces,
+        /// The macro statement had parentheses or brackets and no semicolon; e.g.
+        /// `foo!(...)`. All of these will end up being converted into macro
+        /// expressions.
+        NoBraces,
+    }
 }
 
-/// Local represents a `let` statement, e.g., `let <pat>:<ty> = <expr>;`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Local {
-    pub pat: Box<Pat>,
-    pub ty: Option<Box<Ty>>,
+ast_struct! {
+    /// Local represents a `let` statement, e.g., `let <pat>:<ty> = <expr>;`
+    pub struct Local {
+        pub pat: Box<Pat>,
+        pub ty: Option<Box<Ty>>,
 
-    /// Initializer expression to set the value, if any
-    pub init: Option<Box<Expr>>,
-    pub attrs: Vec<Attribute>,
+        /// Initializer expression to set the value, if any
+        pub init: Option<Box<Expr>>,
+        pub attrs: Vec<Attribute>,
+    }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-// Clippy false positive
-// https://github.com/Manishearth/rust-clippy/issues/1241
-#[cfg_attr(feature = "cargo-clippy", allow(enum_variant_names))]
-pub enum Pat {
-    /// Represents a wildcard pattern (`_`)
-    Wild,
+ast_enum! {
+    // Clippy false positive
+    // https://github.com/Manishearth/rust-clippy/issues/1241
+    #[cfg_attr(feature = "cargo-clippy", allow(enum_variant_names))]
+    pub enum Pat {
+        /// Represents a wildcard pattern (`_`)
+        Wild,
 
-    /// A `Pat::Ident` may either be a new bound variable (`ref mut binding @ OPT_SUBPATTERN`),
-    /// or a unit struct/variant pattern, or a const pattern (in the last two cases the third
-    /// field must be `None`). Disambiguation cannot be done with parser alone, so it happens
-    /// during name resolution.
-    Ident(BindingMode, Ident, Option<Box<Pat>>),
+        /// A `Pat::Ident` may either be a new bound variable (`ref mut binding @ OPT_SUBPATTERN`),
+        /// or a unit struct/variant pattern, or a const pattern (in the last two cases the third
+        /// field must be `None`). Disambiguation cannot be done with parser alone, so it happens
+        /// during name resolution.
+        Ident(BindingMode, Ident, Option<Box<Pat>>),
 
-    /// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.
-    /// The `bool` is `true` in the presence of a `..`.
-    Struct(Path, Vec<FieldPat>, bool),
+        /// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.
+        /// The `bool` is `true` in the presence of a `..`.
+        Struct(Path, Vec<FieldPat>, bool),
 
-    /// A tuple struct/variant pattern `Variant(x, y, .., z)`.
-    /// If the `..` pattern fragment is present, then `Option<usize>` denotes its position.
-    /// 0 <= position <= subpats.len()
-    TupleStruct(Path, Vec<Pat>, Option<usize>),
+        /// A tuple struct/variant pattern `Variant(x, y, .., z)`.
+        /// If the `..` pattern fragment is present, then `Option<usize>` denotes its position.
+        /// 0 <= position <= subpats.len()
+        TupleStruct(Path, Vec<Pat>, Option<usize>),
 
-    /// A possibly qualified path pattern.
-    /// Unquailfied path patterns `A::B::C` can legally refer to variants, structs, constants
-    /// or associated constants. Quailfied path patterns `<A>::B::C`/`<A as Trait>::B::C` can
-    /// only legally refer to associated constants.
-    Path(Option<QSelf>, Path),
+        /// A possibly qualified path pattern.
+        /// Unquailfied path patterns `A::B::C` can legally refer to variants, structs, constants
+        /// or associated constants. Quailfied path patterns `<A>::B::C`/`<A as Trait>::B::C` can
+        /// only legally refer to associated constants.
+        Path(Option<QSelf>, Path),
 
-    /// A tuple pattern `(a, b)`.
-    /// If the `..` pattern fragment is present, then `Option<usize>` denotes its position.
-    /// 0 <= position <= subpats.len()
-    Tuple(Vec<Pat>, Option<usize>),
-    /// A `box` pattern
-    Box(Box<Pat>),
-    /// A reference pattern, e.g. `&mut (a, b)`
-    Ref(Box<Pat>, Mutability),
-    /// A literal
-    Lit(Box<Expr>),
-    /// A range pattern, e.g. `1...2`
-    Range(Box<Expr>, Box<Expr>, RangeLimits),
-    /// `[a, b, ..i, y, z]` is represented as:
-    ///     `Pat::Slice(box [a, b], Some(i), box [y, z])`
-    Slice(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
-    /// A macro pattern; pre-expansion
-    Mac(Mac),
+        /// A tuple pattern `(a, b)`.
+        /// If the `..` pattern fragment is present, then `Option<usize>` denotes its position.
+        /// 0 <= position <= subpats.len()
+        Tuple(Vec<Pat>, Option<usize>),
+        /// A `box` pattern
+        Box(Box<Pat>),
+        /// A reference pattern, e.g. `&mut (a, b)`
+        Ref(Box<Pat>, Mutability),
+        /// A literal
+        Lit(Box<Expr>),
+        /// A range pattern, e.g. `1...2`
+        Range(Box<Expr>, Box<Expr>, RangeLimits),
+        /// `[a, b, ..i, y, z]` is represented as:
+        ///     `Pat::Slice(box [a, b], Some(i), box [y, z])`
+        Slice(Vec<Pat>, Option<Box<Pat>>, Vec<Pat>),
+        /// A macro pattern; pre-expansion
+        Mac(Mac),
+    }
 }
 
-/// An arm of a 'match'.
-///
-/// E.g. `0...10 => { println!("match!") }` as in
-///
-/// ```rust,ignore
-/// match n {
-///     0...10 => { println!("match!") },
-///     // ..
-/// }
-/// ```
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Arm {
-    pub attrs: Vec<Attribute>,
-    pub pats: Vec<Pat>,
-    pub guard: Option<Box<Expr>>,
-    pub body: Box<Expr>,
+ast_struct! {
+    /// An arm of a 'match'.
+    ///
+    /// E.g. `0...10 => { println!("match!") }` as in
+    ///
+    /// ```rust,ignore
+    /// match n {
+    ///     0...10 => { println!("match!") },
+    ///     // ..
+    /// }
+    /// ```
+    pub struct Arm {
+        pub attrs: Vec<Attribute>,
+        pub pats: Vec<Pat>,
+        pub guard: Option<Box<Expr>>,
+        pub body: Box<Expr>,
+    }
 }
 
-/// A capture clause
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum CaptureBy {
-    Value,
-    Ref,
+ast_enum! {
+    /// A capture clause
+    #[derive(Copy)]
+    pub enum CaptureBy {
+        Value,
+        Ref,
+    }
 }
 
-/// Limit types of a range (inclusive or exclusive)
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum RangeLimits {
-    /// Inclusive at the beginning, exclusive at the end
-    HalfOpen,
-    /// Inclusive at the beginning and end
-    Closed,
+ast_enum! {
+    /// Limit types of a range (inclusive or exclusive)
+    #[derive(Copy)]
+    pub enum RangeLimits {
+        /// Inclusive at the beginning, exclusive at the end
+        HalfOpen,
+        /// Inclusive at the beginning and end
+        Closed,
+    }
 }
 
-/// A single field in a struct pattern
-///
-/// Patterns like the fields of Foo `{ x, ref y, ref mut z }`
-/// are treated the same as `x: x, y: ref y, z: ref mut z`,
-/// except `is_shorthand` is true
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct FieldPat {
-    /// The identifier for the field
-    pub ident: Ident,
-    /// The pattern the field is destructured to
-    pub pat: Box<Pat>,
-    pub is_shorthand: bool,
-    pub attrs: Vec<Attribute>,
+ast_struct! {
+    /// A single field in a struct pattern
+    ///
+    /// Patterns like the fields of Foo `{ x, ref y, ref mut z }`
+    /// are treated the same as `x: x, y: ref y, z: ref mut z`,
+    /// except `is_shorthand` is true
+    pub struct FieldPat {
+        /// The identifier for the field
+        pub ident: Ident,
+        /// The pattern the field is destructured to
+        pub pat: Box<Pat>,
+        pub is_shorthand: bool,
+        pub attrs: Vec<Attribute>,
+    }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum BindingMode {
-    ByRef(Mutability),
-    ByValue(Mutability),
+ast_enum! {
+    #[derive(Copy)]
+    pub enum BindingMode {
+        ByRef(Mutability),
+        ByValue(Mutability),
+    }
 }
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
     use {BinOp, Delimited, DelimToken, FnArg, FnDecl, FunctionRetTy, Ident, Lifetime, Mac,
-         TokenTree, Ty, UnOp, Unsafety};
+         TokenTree, Ty, UnOp, Unsafety, ArgCaptured, TyInfer};
     use attr::parsing::outer_attr;
     use generics::parsing::lifetime;
     use ident::parsing::{ident, wordlike};
@@ -448,56 +571,93 @@ pub mod parsing {
             ) >>
             many0!(alt!(
                 tap!(args: and_call => {
-                    e = ExprKind::Call(Box::new(e.into()), args);
+                    e = ExprCall {
+                        func: Box::new(e.into()),
+                        args: args,
+                    }.into();
                 })
                 |
                 tap!(more: and_method_call => {
                     let (method, ascript, mut args) = more;
                     args.insert(0, e.into());
-                    e = ExprKind::MethodCall(method, ascript, args);
+                    e = ExprMethodCall {
+                        method: method,
+                        typarams: ascript,
+                        args: args,
+                    }.into();
                 })
                 |
                 tap!(more: call!(and_binary, allow_struct) => {
                     let (op, other) = more;
-                    e = ExprKind::Binary(op, Box::new(e.into()), Box::new(other));
+                    e = ExprBinary {
+                        op: op,
+                        left: Box::new(e.into()),
+                        right: Box::new(other),
+                    }.into();
                 })
                 |
                 tap!(ty: and_cast => {
-                    e = ExprKind::Cast(Box::new(e.into()), Box::new(ty));
+                    e = ExprCast {
+                        expr: Box::new(e.into()),
+                        ty: Box::new(ty),
+                    }.into();
                 })
                 |
                 tap!(ty: and_ascription => {
-                    e = ExprKind::Type(Box::new(e.into()), Box::new(ty));
+                    e = ExprType {
+                        expr: Box::new(e.into()),
+                        ty: Box::new(ty),
+                    }.into();
                 })
                 |
                 tap!(v: call!(and_assign, allow_struct) => {
-                    e = ExprKind::Assign(Box::new(e.into()), Box::new(v));
+                    e = ExprAssign {
+                        left: Box::new(e.into()),
+                        right: Box::new(v),
+                    }.into();
                 })
                 |
                 tap!(more: call!(and_assign_op, allow_struct) => {
                     let (op, v) = more;
-                    e = ExprKind::AssignOp(op, Box::new(e.into()), Box::new(v));
+                    e = ExprAssignOp {
+                        op: op,
+                        left: Box::new(e.into()),
+                        right: Box::new(v),
+                    }.into();
                 })
                 |
                 tap!(field: and_field => {
-                    e = ExprKind::Field(Box::new(e.into()), field);
+                    e = ExprField {
+                        expr: Box::new(e.into()),
+                        field: field,
+                    }.into();
                 })
                 |
                 tap!(field: and_tup_field => {
-                    e = ExprKind::TupField(Box::new(e.into()), field as usize);
+                    e = ExprTupField {
+                        expr: Box::new(e.into()),
+                        field: field as usize,
+                    }.into();
                 })
                 |
                 tap!(i: and_index => {
-                    e = ExprKind::Index(Box::new(e.into()), Box::new(i));
+                    e = ExprIndex {
+                        expr: Box::new(e.into()),
+                        index: Box::new(i),
+                    }.into();
                 })
                 |
                 tap!(more: call!(and_range, allow_struct) => {
                     let (limits, hi) = more;
-                    e = ExprKind::Range(Some(Box::new(e.into())), hi.map(Box::new), limits);
+                    e = ExprRange {
+                        from: Some(Box::new(e.into())),
+                        to: hi.map(Box::new),
+                        limits: limits,
+                    }.into();
                 })
                 |
                 tap!(_try: punct!("?") => {
-                    e = ExprKind::Try(Box::new(e.into()));
+                    e = ExprTry { expr: Box::new(e.into()) }.into();
                 })
             )) >>
             (e.into())
@@ -510,13 +670,13 @@ pub mod parsing {
         punct!("(") >>
         e: expr >>
         punct!(")") >>
-        (ExprKind::Paren(Box::new(e)))
+        (ExprParen { expr: Box::new(e) }.into())
     ));
 
     named_ambiguous_expr!(expr_box -> ExprKind, allow_struct, do_parse!(
         keyword!("box") >>
         inner: ambiguous_expr!(allow_struct) >>
-        (ExprKind::Box(Box::new(inner)))
+        (ExprBox { expr: Box::new(inner) }.into())
     ));
 
     named!(expr_in_place -> ExprKind, do_parse!(
@@ -525,19 +685,23 @@ pub mod parsing {
         punct!("{") >>
         value: within_block >>
         punct!("}") >>
-        (ExprKind::InPlace(
-            Box::new(place),
-            Box::new(ExprKind::Block(Unsafety::Normal, Block {
-                stmts: value,
-            }).into()),
-        ))
+        (ExprInPlace {
+            place: Box::new(place),
+            value: Box::new(Expr {
+                node: ExprBlock {
+                    unsafety: Unsafety::Normal,
+                    block: Block { stmts: value, },
+                }.into(),
+                attrs: Vec::new(),
+            }),
+        }.into())
     ));
 
     named!(expr_array -> ExprKind, do_parse!(
         punct!("[") >>
         elems: terminated_list!(punct!(","), expr) >>
         punct!("]") >>
-        (ExprKind::Array(elems))
+        (ExprArray { exprs: elems }.into())
     ));
 
     named!(and_call -> Vec<Expr>, do_parse!(
@@ -568,7 +732,7 @@ pub mod parsing {
         punct!("(") >>
         elems: terminated_list!(punct!(","), expr) >>
         punct!(")") >>
-        (ExprKind::Tup(elems))
+        (ExprTup { args: elems }.into())
     ));
 
     named_ambiguous_expr!(and_binary -> (BinOp, Expr), allow_struct, tuple!(
@@ -579,7 +743,7 @@ pub mod parsing {
     named_ambiguous_expr!(expr_unary -> ExprKind, allow_struct, do_parse!(
         operator: unop >>
         operand: ambiguous_expr!(allow_struct) >>
-        (ExprKind::Unary(operator, Box::new(operand)))
+        (ExprUnary { op: operator, expr: Box::new(operand) }.into())
     ));
 
     named!(expr_lit -> ExprKind, map!(lit, ExprKind::Lit));
@@ -624,28 +788,29 @@ pub mod parsing {
                     punct!("{") >>
                     else_block: within_block >>
                     punct!("}") >>
-                    (ExprKind::Block(Unsafety::Normal, Block {
-                        stmts: else_block,
+                    (ExprKind::Block(ExprBlock {
+                        unsafety: Unsafety::Normal,
+                        block: Block { stmts: else_block },
                     }).into())
                 )
             )
         )) >>
         (match cond {
-            Cond::Let(pat, expr) => ExprKind::IfLet(
-                Box::new(pat),
-                Box::new(expr),
-                Block {
+            Cond::Let(pat, expr) => ExprIfLet {
+                pat: Box::new(pat),
+                expr: Box::new(expr),
+                if_true: Block {
                     stmts: then_block,
                 },
-                else_block.map(|els| Box::new(els.into())),
-            ),
-            Cond::Expr(cond) => ExprKind::If(
-                Box::new(cond),
-                Block {
+                if_false: else_block.map(|els| Box::new(els.into())),
+            }.into(),
+            Cond::Expr(cond) => ExprIf {
+                cond: Box::new(cond),
+                if_true: Block {
                     stmts: then_block,
                 },
-                else_block.map(|els| Box::new(els.into())),
-            ),
+                if_false: else_block.map(|els| Box::new(els.into())),
+            }.into(),
         })
     ));
 
@@ -656,14 +821,19 @@ pub mod parsing {
         keyword!("in") >>
         expr: expr_no_struct >>
         loop_block: block >>
-        (ExprKind::ForLoop(Box::new(pat), Box::new(expr), loop_block, lbl))
+        (ExprForLoop {
+            pat: Box::new(pat),
+            expr: Box::new(expr),
+            body: loop_block,
+            label: lbl,
+        }.into())
     ));
 
     named!(expr_loop -> ExprKind, do_parse!(
         lbl: option!(terminated!(label, punct!(":"))) >>
         keyword!("loop") >>
         loop_block: block >>
-        (ExprKind::Loop(loop_block, lbl))
+        (ExprLoop { body: loop_block, label: lbl }.into())
     ));
 
     named!(expr_match -> ExprKind, do_parse!(
@@ -678,21 +848,24 @@ pub mod parsing {
         )) >>
         last_arm: option!(match_arm) >>
         punct!("}") >>
-        (ExprKind::Match(Box::new(obj), {
-            arms.extend(last_arm);
-            arms
-        }))
+        (ExprMatch {
+            expr: Box::new(obj),
+            arms: {
+                arms.extend(last_arm);
+                arms
+            },
+        }.into())
     ));
 
     named!(expr_catch -> ExprKind, do_parse!(
         keyword!("do") >>
         keyword!("catch") >>
         catch_block: block >>
-        (ExprKind::Catch(catch_block))
+        (ExprCatch { block: catch_block }.into())
     ));
 
     fn arm_requires_comma(arm: &Arm) -> bool {
-        if let ExprKind::Block(Unsafety::Normal, _) = arm.body.node {
+        if let ExprKind::Block(ExprBlock { unsafety: Unsafety::Normal, .. }) = arm.body.node {
             false
         } else {
             true
@@ -705,7 +878,12 @@ pub mod parsing {
         guard: option!(preceded!(keyword!("if"), expr)) >>
         punct!("=>") >>
         body: alt!(
-            map!(block, |blk| ExprKind::Block(Unsafety::Normal, blk).into())
+            map!(block, |blk| {
+                ExprKind::Block(ExprBlock {
+                    unsafety: Unsafety::Normal,
+                    block: blk,
+                }).into()
+            })
             |
             expr
         ) >>
@@ -727,26 +905,32 @@ pub mod parsing {
                 punct!("->") >>
                 ty: ty >>
                 body: block >>
-                (FunctionRetTy::Ty(ty), ExprKind::Block(Unsafety::Normal, body).into())
+                (FunctionRetTy::Ty(ty), ExprKind::Block(ExprBlock {
+                    unsafety: Unsafety::Normal,
+                    block: body,
+                }).into())
             )
             |
             map!(ambiguous_expr!(allow_struct), |e| (FunctionRetTy::Default, e))
         ) >>
-        (ExprKind::Closure(
-            capture,
-            Box::new(FnDecl {
+        (ExprClosure {
+            capture: capture,
+            decl: Box::new(FnDecl {
                 inputs: inputs,
                 output: ret_and_body.0,
                 variadic: false,
             }),
-            Box::new(ret_and_body.1),
-        ))
+            body: Box::new(ret_and_body.1),
+        }.into())
     ));
 
     named!(closure_arg -> FnArg, do_parse!(
         pat: pat >>
         ty: option!(preceded!(punct!(":"), ty)) >>
-        (FnArg::Captured(pat, ty.unwrap_or(Ty::Infer)))
+        (ArgCaptured {
+            pat: pat,
+            ty: ty.unwrap_or_else(|| TyInfer {}.into()),
+        }.into())
     ));
 
     named!(expr_while -> ExprKind, do_parse!(
@@ -755,37 +939,37 @@ pub mod parsing {
         cond: cond >>
         while_block: block >>
         (match cond {
-            Cond::Let(pat, expr) => ExprKind::WhileLet(
-                Box::new(pat),
-                Box::new(expr),
-                while_block,
-                lbl,
-            ),
-            Cond::Expr(cond) => ExprKind::While(
-                Box::new(cond),
-                while_block,
-                lbl,
-            ),
+            Cond::Let(pat, expr) => ExprWhileLet {
+                pat: Box::new(pat),
+                expr: Box::new(expr),
+                body: while_block,
+                label: lbl,
+            }.into(),
+            Cond::Expr(cond) => ExprWhile {
+                cond: Box::new(cond),
+                body: while_block,
+                label: lbl,
+            }.into(),
         })
     ));
 
     named!(expr_continue -> ExprKind, do_parse!(
         keyword!("continue") >>
         lbl: option!(label) >>
-        (ExprKind::Continue(lbl))
+        (ExprContinue { label: lbl }.into())
     ));
 
     named_ambiguous_expr!(expr_break -> ExprKind, allow_struct, do_parse!(
         keyword!("break") >>
         lbl: option!(label) >>
         val: option!(call!(ambiguous_expr, allow_struct, false)) >>
-        (ExprKind::Break(lbl, val.map(Box::new)))
+        (ExprBreak { label: lbl, expr: val.map(Box::new) }.into())
     ));
 
     named_ambiguous_expr!(expr_ret -> ExprKind, allow_struct, do_parse!(
         keyword!("return") >>
         ret_value: option!(ambiguous_expr!(allow_struct)) >>
-        (ExprKind::Ret(ret_value.map(Box::new)))
+        (ExprRet { expr: ret_value.map(Box::new) }.into())
     ));
 
     named!(expr_struct -> ExprKind, do_parse!(
@@ -800,7 +984,11 @@ pub mod parsing {
         )) >>
         cond!(!fields.is_empty() && base.is_none(), option!(punct!(","))) >>
         punct!("}") >>
-        (ExprKind::Struct(path, fields, base.map(Box::new)))
+        (ExprStruct {
+            path: path,
+            fields: fields,
+            rest: base.map(Box::new),
+        }.into())
     ));
 
     named!(field_value -> FieldValue, alt!(
@@ -818,7 +1006,7 @@ pub mod parsing {
         |
         map!(ident, |name: Ident| FieldValue {
             ident: name.clone(),
-            expr: ExprKind::Path(None, name.into()).into(),
+            expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
             is_shorthand: true,
             attrs: Vec::new(),
         })
@@ -830,21 +1018,22 @@ pub mod parsing {
         punct!(";") >>
         times: expr >>
         punct!("]") >>
-        (ExprKind::Repeat(Box::new(value), Box::new(times)))
+        (ExprRepeat { expr: Box::new(value), amt: Box::new(times) }.into())
     ));
 
     named!(expr_block -> ExprKind, do_parse!(
         rules: unsafety >>
         b: block >>
-        (ExprKind::Block(rules, Block {
-            stmts: b.stmts,
-        }))
+        (ExprBlock {
+            unsafety: rules,
+            block: Block { stmts: b.stmts },
+        }.into())
     ));
 
     named_ambiguous_expr!(expr_range -> ExprKind, allow_struct, do_parse!(
         limits: range_limits >>
         hi: option!(ambiguous_expr!(allow_struct)) >>
-        (ExprKind::Range(None, hi.map(Box::new), limits))
+        (ExprRange { from: None, to: hi.map(Box::new), limits: limits }.into())
     ));
 
     named!(range_limits -> RangeLimits, alt!(
@@ -853,13 +1042,15 @@ pub mod parsing {
         punct!("..") => { |_| RangeLimits::HalfOpen }
     ));
 
-    named!(expr_path -> ExprKind, map!(qpath, |(qself, path)| ExprKind::Path(qself, path)));
+    named!(expr_path -> ExprKind, map!(qpath, |(qself, path)| {
+        ExprPath { qself: qself, path: path }.into()
+    }));
 
     named_ambiguous_expr!(expr_addr_of -> ExprKind, allow_struct, do_parse!(
         punct!("&") >>
         mutability: mutability >>
         expr: ambiguous_expr!(allow_struct) >>
-        (ExprKind::AddrOf(mutability, Box::new(expr)))
+        (ExprAddrOf { mutbl: mutability, expr: Box::new(expr) }.into())
     ));
 
     named_ambiguous_expr!(and_assign -> Expr, allow_struct, preceded!(
@@ -961,14 +1152,14 @@ pub mod parsing {
 
     fn requires_semi(e: &Expr) -> bool {
         match e.node {
-            ExprKind::If(_, _, _) |
-            ExprKind::IfLet(_, _, _, _) |
-            ExprKind::While(_, _, _) |
-            ExprKind::WhileLet(_, _, _, _) |
-            ExprKind::ForLoop(_, _, _, _) |
-            ExprKind::Loop(_, _) |
-            ExprKind::Match(_, _) |
-            ExprKind::Block(_, _) => false,
+            ExprKind::If(_) |
+            ExprKind::IfLet(_) |
+            ExprKind::While(_) |
+            ExprKind::WhileLet(_) |
+            ExprKind::ForLoop(_) |
+            ExprKind::Loop(_) |
+            ExprKind::Match(_) |
+            ExprKind::Block(_) => false,
 
             _ => true,
         }
@@ -1146,7 +1337,7 @@ pub mod parsing {
 
     named!(pat_lit -> Pat, do_parse!(
         lit: pat_lit_expr >>
-        (if let ExprKind::Path(_, _) = lit.node {
+        (if let ExprKind::Path(_) = lit.node {
             return IResult::Error; // these need to be parsed by pat_path
         } else {
             Pat::Lit(Box::new(lit))
@@ -1165,10 +1356,13 @@ pub mod parsing {
         v: alt!(
             lit => { ExprKind::Lit }
             |
-            path => { |p| ExprKind::Path(None, p) }
+            path => { |p| ExprPath { qself: None, path: p }.into() }
         ) >>
         (if neg.is_some() {
-            ExprKind::Unary(UnOp::Neg, Box::new(v.into())).into()
+            ExprKind::Unary(ExprUnary {
+                op: UnOp::Neg,
+                expr: Box::new(v.into())
+            }).into()
         } else {
             v.into()
         })
@@ -1213,279 +1407,384 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use {FnArg, FunctionRetTy, Mutability, Ty, Unsafety};
+    use {FnArg, FunctionRetTy, Mutability, Ty, Unsafety, ArgCaptured};
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Expr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            match self.node {
-                ExprKind::Box(ref inner) => {
-                    tokens.append("box");
-                    inner.to_tokens(tokens);
+            self.node.to_tokens(tokens)
+        }
+    }
+
+    impl ToTokens for ExprBox {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("box");
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprInPlace {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("in");
+            self.place.to_tokens(tokens);
+            self.value.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprArray {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("[");
+            tokens.append_separated(&self.exprs, ",");
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for ExprCall {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.func.to_tokens(tokens);
+            tokens.append("(");
+            tokens.append_separated(&self.args, ",");
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for ExprMethodCall {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.args[0].to_tokens(tokens);
+            tokens.append(".");
+            self.method.to_tokens(tokens);
+            if !self.typarams.is_empty() {
+                tokens.append("::");
+                tokens.append("<");
+                tokens.append_separated(&self.typarams, ",");
+                tokens.append(">");
+            }
+            tokens.append("(");
+            tokens.append_separated(&self.args[1..], ",");
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for ExprTup {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("(");
+            tokens.append_separated(&self.args, ",");
+            if self.args.len() == 1 {
+                tokens.append(",");
+            }
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for ExprBinary {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.left.to_tokens(tokens);
+            self.op.to_tokens(tokens);
+            self.right.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprUnary {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.op.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprCast {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append("as");
+            self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprType {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append(":");
+            self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprIf {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("if");
+            self.cond.to_tokens(tokens);
+            self.if_true.to_tokens(tokens);
+            if let Some(ref else_block) = self.if_false {
+                tokens.append("else");
+                else_block.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for ExprIfLet {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("if");
+            tokens.append("let");
+            self.pat.to_tokens(tokens);
+            tokens.append("=");
+            self.expr.to_tokens(tokens);
+            self.if_true.to_tokens(tokens);
+            if let Some(ref else_block) = self.if_false {
+                tokens.append("else");
+                else_block.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for ExprWhile {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Some(ref label) = self.label {
+                label.to_tokens(tokens);
+                tokens.append(":");
+            }
+            tokens.append("while");
+            self.cond.to_tokens(tokens);
+            self.body.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprWhileLet {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Some(ref label) = self.label {
+                label.to_tokens(tokens);
+                tokens.append(":");
+            }
+            tokens.append("while");
+            tokens.append("let");
+            self.pat.to_tokens(tokens);
+            tokens.append("=");
+            self.expr.to_tokens(tokens);
+            self.body.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprForLoop {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Some(ref label) = self.label {
+                label.to_tokens(tokens);
+                tokens.append(":");
+            }
+            tokens.append("for");
+            self.pat.to_tokens(tokens);
+            tokens.append("in");
+            self.expr.to_tokens(tokens);
+            self.body.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprLoop {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            if let Some(ref label) = self.label {
+                label.to_tokens(tokens);
+                tokens.append(":");
+            }
+            tokens.append("loop");
+            self.body.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprMatch {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("match");
+            self.expr.to_tokens(tokens);
+            tokens.append("{");
+            tokens.append_all(&self.arms);
+            tokens.append("}");
+        }
+    }
+
+    impl ToTokens for ExprCatch {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("do");
+            tokens.append("catch");
+            self.block.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprClosure {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.capture.to_tokens(tokens);
+            tokens.append("|");
+            for (i, input) in self.decl.inputs.iter().enumerate() {
+                if i > 0 {
+                    tokens.append(",");
                 }
-                ExprKind::InPlace(ref place, ref value) => {
-                    tokens.append("in");
-                    place.to_tokens(tokens);
-                    value.to_tokens(tokens);
-                }
-                ExprKind::Array(ref tys) => {
-                    tokens.append("[");
-                    tokens.append_separated(tys, ",");
-                    tokens.append("]");
-                }
-                ExprKind::Call(ref func, ref args) => {
-                    func.to_tokens(tokens);
-                    tokens.append("(");
-                    tokens.append_separated(args, ",");
-                    tokens.append(")");
-                }
-                ExprKind::MethodCall(ref ident, ref ascript, ref args) => {
-                    args[0].to_tokens(tokens);
-                    tokens.append(".");
-                    ident.to_tokens(tokens);
-                    if !ascript.is_empty() {
-                        tokens.append("::");
-                        tokens.append("<");
-                        tokens.append_separated(ascript, ",");
-                        tokens.append(">");
+                match *input {
+                    FnArg::Captured(ArgCaptured { ref pat, ty: Ty::Infer(_) }) => {
+                        pat.to_tokens(tokens);
                     }
-                    tokens.append("(");
-                    tokens.append_separated(&args[1..], ",");
-                    tokens.append(")");
-                }
-                ExprKind::Tup(ref fields) => {
-                    tokens.append("(");
-                    tokens.append_separated(fields, ",");
-                    if fields.len() == 1 {
-                        tokens.append(",");
-                    }
-                    tokens.append(")");
-                }
-                ExprKind::Binary(op, ref left, ref right) => {
-                    left.to_tokens(tokens);
-                    op.to_tokens(tokens);
-                    right.to_tokens(tokens);
-                }
-                ExprKind::Unary(op, ref expr) => {
-                    op.to_tokens(tokens);
-                    expr.to_tokens(tokens);
-                }
-                ExprKind::Lit(ref lit) => lit.to_tokens(tokens),
-                ExprKind::Cast(ref expr, ref ty) => {
-                    expr.to_tokens(tokens);
-                    tokens.append("as");
-                    ty.to_tokens(tokens);
-                }
-                ExprKind::Type(ref expr, ref ty) => {
-                    expr.to_tokens(tokens);
-                    tokens.append(":");
-                    ty.to_tokens(tokens);
-                }
-                ExprKind::If(ref cond, ref then_block, ref else_block) => {
-                    tokens.append("if");
-                    cond.to_tokens(tokens);
-                    then_block.to_tokens(tokens);
-                    if let Some(ref else_block) = *else_block {
-                        tokens.append("else");
-                        else_block.to_tokens(tokens);
-                    }
-                }
-                ExprKind::IfLet(ref pat, ref expr, ref then_block, ref else_block) => {
-                    tokens.append("if");
-                    tokens.append("let");
-                    pat.to_tokens(tokens);
-                    tokens.append("=");
-                    expr.to_tokens(tokens);
-                    then_block.to_tokens(tokens);
-                    if let Some(ref else_block) = *else_block {
-                        tokens.append("else");
-                        else_block.to_tokens(tokens);
-                    }
-                }
-                ExprKind::While(ref cond, ref body, ref label) => {
-                    if let Some(ref label) = *label {
-                        label.to_tokens(tokens);
-                        tokens.append(":");
-                    }
-                    tokens.append("while");
-                    cond.to_tokens(tokens);
-                    body.to_tokens(tokens);
-                }
-                ExprKind::WhileLet(ref pat, ref expr, ref body, ref label) => {
-                    if let Some(ref label) = *label {
-                        label.to_tokens(tokens);
-                        tokens.append(":");
-                    }
-                    tokens.append("while");
-                    tokens.append("let");
-                    pat.to_tokens(tokens);
-                    tokens.append("=");
-                    expr.to_tokens(tokens);
-                    body.to_tokens(tokens);
-                }
-                ExprKind::ForLoop(ref pat, ref expr, ref body, ref label) => {
-                    if let Some(ref label) = *label {
-                        label.to_tokens(tokens);
-                        tokens.append(":");
-                    }
-                    tokens.append("for");
-                    pat.to_tokens(tokens);
-                    tokens.append("in");
-                    expr.to_tokens(tokens);
-                    body.to_tokens(tokens);
-                }
-                ExprKind::Loop(ref body, ref label) => {
-                    if let Some(ref label) = *label {
-                        label.to_tokens(tokens);
-                        tokens.append(":");
-                    }
-                    tokens.append("loop");
-                    body.to_tokens(tokens);
-                }
-                ExprKind::Match(ref expr, ref arms) => {
-                    tokens.append("match");
-                    expr.to_tokens(tokens);
-                    tokens.append("{");
-                    tokens.append_all(arms);
-                    tokens.append("}");
-                }
-                ExprKind::Catch(ref body) => {
-                    tokens.append("do");
-                    tokens.append("catch");
-                    body.to_tokens(tokens);
-                }
-                ExprKind::Closure(capture, ref decl, ref expr) => {
-                    capture.to_tokens(tokens);
-                    tokens.append("|");
-                    for (i, input) in decl.inputs.iter().enumerate() {
-                        if i > 0 {
-                            tokens.append(",");
-                        }
-                        match *input {
-                            FnArg::Captured(ref pat, Ty::Infer) => {
-                                pat.to_tokens(tokens);
-                            }
-                            _ => input.to_tokens(tokens),
-                        }
-                    }
-                    tokens.append("|");
-                    match decl.output {
-                        FunctionRetTy::Default => { /* nothing */ }
-                        FunctionRetTy::Ty(ref ty) => {
-                            tokens.append("->");
-                            ty.to_tokens(tokens);
-                        }
-                    }
-                    expr.to_tokens(tokens);
-                }
-                ExprKind::Block(rules, ref block) => {
-                    rules.to_tokens(tokens);
-                    block.to_tokens(tokens);
-                }
-                ExprKind::Assign(ref var, ref expr) => {
-                    var.to_tokens(tokens);
-                    tokens.append("=");
-                    expr.to_tokens(tokens);
-                }
-                ExprKind::AssignOp(op, ref var, ref expr) => {
-                    var.to_tokens(tokens);
-                    tokens.append(op.assign_op().unwrap());
-                    expr.to_tokens(tokens);
-                }
-                ExprKind::Field(ref expr, ref field) => {
-                    expr.to_tokens(tokens);
-                    tokens.append(".");
-                    field.to_tokens(tokens);
-                }
-                ExprKind::TupField(ref expr, field) => {
-                    expr.to_tokens(tokens);
-                    tokens.append(".");
-                    tokens.append(&field.to_string());
-                }
-                ExprKind::Index(ref expr, ref index) => {
-                    expr.to_tokens(tokens);
-                    tokens.append("[");
-                    index.to_tokens(tokens);
-                    tokens.append("]");
-                }
-                ExprKind::Range(ref from, ref to, limits) => {
-                    from.to_tokens(tokens);
-                    limits.to_tokens(tokens);
-                    to.to_tokens(tokens);
-                }
-                ExprKind::Path(None, ref path) => path.to_tokens(tokens),
-                ExprKind::Path(Some(ref qself), ref path) => {
-                    tokens.append("<");
-                    qself.ty.to_tokens(tokens);
-                    if qself.position > 0 {
-                        tokens.append("as");
-                        for (i, segment) in path.segments
-                                .iter()
-                                .take(qself.position)
-                                .enumerate() {
-                            if i > 0 || path.global {
-                                tokens.append("::");
-                            }
-                            segment.to_tokens(tokens);
-                        }
-                    }
-                    tokens.append(">");
-                    for segment in path.segments.iter().skip(qself.position) {
-                        tokens.append("::");
-                        segment.to_tokens(tokens);
-                    }
-                }
-                ExprKind::AddrOf(mutability, ref expr) => {
-                    tokens.append("&");
-                    mutability.to_tokens(tokens);
-                    expr.to_tokens(tokens);
-                }
-                ExprKind::Break(ref opt_label, ref opt_val) => {
-                    tokens.append("break");
-                    opt_label.to_tokens(tokens);
-                    opt_val.to_tokens(tokens);
-                }
-                ExprKind::Continue(ref opt_label) => {
-                    tokens.append("continue");
-                    opt_label.to_tokens(tokens);
-                }
-                ExprKind::Ret(ref opt_expr) => {
-                    tokens.append("return");
-                    opt_expr.to_tokens(tokens);
-                }
-                ExprKind::Mac(ref mac) => mac.to_tokens(tokens),
-                ExprKind::Struct(ref path, ref fields, ref base) => {
-                    path.to_tokens(tokens);
-                    tokens.append("{");
-                    tokens.append_separated(fields, ",");
-                    if let Some(ref base) = *base {
-                        if !fields.is_empty() {
-                            tokens.append(",");
-                        }
-                        tokens.append("..");
-                        base.to_tokens(tokens);
-                    }
-                    tokens.append("}");
-                }
-                ExprKind::Repeat(ref expr, ref times) => {
-                    tokens.append("[");
-                    expr.to_tokens(tokens);
-                    tokens.append(";");
-                    times.to_tokens(tokens);
-                    tokens.append("]");
-                }
-                ExprKind::Paren(ref expr) => {
-                    tokens.append("(");
-                    expr.to_tokens(tokens);
-                    tokens.append(")");
-                }
-                ExprKind::Try(ref expr) => {
-                    expr.to_tokens(tokens);
-                    tokens.append("?");
+                    _ => input.to_tokens(tokens),
                 }
             }
+            tokens.append("|");
+            match self.decl.output {
+                FunctionRetTy::Default => { /* nothing */ }
+                FunctionRetTy::Ty(ref ty) => {
+                    tokens.append("->");
+                    ty.to_tokens(tokens);
+                }
+            }
+            self.body.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprBlock {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.unsafety.to_tokens(tokens);
+            self.block.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprAssign {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.left.to_tokens(tokens);
+            tokens.append("=");
+            self.right.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprAssignOp {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.left.to_tokens(tokens);
+            tokens.append(self.op.assign_op().unwrap());
+            self.right.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprField {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append(".");
+            self.field.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprTupField {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append(".");
+            tokens.append(&self.field.to_string());
+        }
+    }
+
+    impl ToTokens for ExprIndex {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append("[");
+            self.index.to_tokens(tokens);
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for ExprRange {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.from.to_tokens(tokens);
+            self.limits.to_tokens(tokens);
+            self.to.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprPath {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            let qself = match self.qself {
+                Some(ref qself) => qself,
+                None => return self.path.to_tokens(tokens),
+            };
+            tokens.append("<");
+            qself.ty.to_tokens(tokens);
+            if qself.position > 0 {
+                tokens.append("as");
+                for (i, segment) in self.path.segments
+                        .iter()
+                        .take(qself.position)
+                        .enumerate() {
+                    if i > 0 || self.path.global {
+                        tokens.append("::");
+                    }
+                    segment.to_tokens(tokens);
+                }
+            }
+            tokens.append(">");
+            for segment in self.path.segments.iter().skip(qself.position) {
+                tokens.append("::");
+                segment.to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for ExprAddrOf {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("&");
+            self.mutbl.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprBreak {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("break");
+            self.label.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprContinue {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("continue");
+            self.label.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprRet {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("return");
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ExprStruct {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.path.to_tokens(tokens);
+            tokens.append("{");
+            tokens.append_separated(&self.fields, ",");
+            if let Some(ref base) = self.rest {
+                if !self.fields.is_empty() {
+                    tokens.append(",");
+                }
+                tokens.append("..");
+                base.to_tokens(tokens);
+            }
+            tokens.append("}");
+        }
+    }
+
+    impl ToTokens for ExprRepeat {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("[");
+            self.expr.to_tokens(tokens);
+            tokens.append(";");
+            self.amt.to_tokens(tokens);
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for ExprParen {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("(");
+            self.expr.to_tokens(tokens);
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for ExprTry {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append("?");
         }
     }
 
@@ -1512,7 +1811,7 @@ mod printing {
             tokens.append("=>");
             self.body.to_tokens(tokens);
             match self.body.node {
-                ExprKind::Block(Unsafety::Normal, _) => {
+                ExprKind::Block(ExprBlock { unsafety: Unsafety::Normal, .. }) => {
                     // no comma
                 }
                 _ => tokens.append(","),

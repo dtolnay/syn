@@ -1,4 +1,4 @@
-//! Test the now-deprecated `parse_macro_input` function. 
+//! Test the now-deprecated `parse_macro_input` function.
 //!
 //! Deprecation warnings are suppressed to keep the output clean.
 #![allow(deprecated)]
@@ -47,43 +47,56 @@ fn test_struct() {
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Struct(vec![Field {
-                                                        ident: Some("ident".into()),
-                                                        vis: Visibility::Public,
-                                                        attrs: Vec::new(),
-                                                        ty: Ty::Path(None, "Ident".into()),
-                                                    },
-                                                    Field {
-                                                        ident: Some("attrs".into()),
-                                                        vis: Visibility::Public,
-                                                        attrs: Vec::new(),
-                                                        ty: Ty::Path(None,
-                                                                     Path {
-                                                                         global: false,
-                                                                         segments: vec![
-                        PathSegment {
-                            ident: "Vec".into(),
-                            parameters: PathParameters::AngleBracketed(
-                                AngleBracketedParameterData {
-                                    lifetimes: Vec::new(),
-                                    types: vec![Ty::Path(None, "Attribute".into())],
-                                    bindings: Vec::new(),
-                                },
-                            ),
-                        }
-                    ],
-                                                                     }),
-                                                    }])),
+        body: Body::Struct(VariantData::Struct(vec![
+            Field {
+                ident: Some("ident".into()),
+                vis: Visibility::Public,
+                attrs: Vec::new(),
+                ty: TyPath {
+                    qself: None,
+                    path: "Ident".into(),
+                }.into(),
+            },
+            Field {
+                ident: Some("attrs".into()),
+                vis: Visibility::Public,
+                attrs: Vec::new(),
+                ty: TyPath {
+                    qself: None,
+                    path: Path {
+                        global: false,
+                        segments: vec![
+                            PathSegment {
+                                ident: "Vec".into(),
+                                parameters: PathParameters::AngleBracketed(
+                                    AngleBracketedParameterData {
+                                        lifetimes: Vec::new(),
+                                        types: vec![TyPath {
+                                            qself: None,
+                                            path: "Attribute".into(),
+                                        }.into()],
+                                        bindings: Vec::new(),
+                                    },
+                                ),
+                            }
+                        ],
+                    },
+                }.into(),
+            },
+        ]))
     };
 
     let actual = parse_macro_input(raw).unwrap();
 
     assert_eq!(expected, actual);
 
-    let expected_meta_item = MetaItem::List("derive".into(), vec![
-        NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
-        NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
-    ]);
+    let expected_meta_item: MetaItem = MetaItemList {
+        ident: "derive".into(),
+        nested: vec![
+            NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
+            NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
+        ],
+    }.into();
 
     assert_eq!(expected_meta_item, actual.attrs[0].meta_item().unwrap());
 }
@@ -153,7 +166,7 @@ fn test_enum() {
                         ident: None,
                         vis: Visibility::Inherited,
                         attrs: Vec::new(),
-                        ty: Ty::Path(None, "T".into()),
+                        ty: TyPath { qself: None, path: "T".into() }.into(),
                     },
                 ]),
                 discriminant: None,
@@ -166,7 +179,7 @@ fn test_enum() {
                         ident: None,
                         vis: Visibility::Inherited,
                         attrs: Vec::new(),
-                        ty: Ty::Path(None, "E".into()),
+                        ty: TyPath { qself: None, path: "E".into() }.into(),
                     },
                 ]),
                 discriminant: None,
@@ -182,22 +195,24 @@ fn test_enum() {
                 attrs: Vec::new(),
                 data: VariantData::Unit,
                 discriminant: Some(ConstExpr::Other(Expr {
-                    node: ExprKind::TupField(
-                        Box::new(Expr {
-                            node: ExprKind::Tup(vec![
-                                Expr {
-                                    node: ExprKind::Lit(Lit::Int(0, IntTy::Unsuffixed)),
-                                    attrs: Vec::new(),
-                                },
-                                Expr {
-                                    node: ExprKind::Lit(Lit::Str("data".into(), StrStyle::Cooked)),
-                                    attrs: Vec::new(),
-                                },
-                            ]),
+                    node: ExprTupField {
+                        expr: Box::new(Expr {
+                            node: ExprTup {
+                                args: vec![
+                                    Expr {
+                                        node: ExprKind::Lit(Lit::Int(0, IntTy::Unsuffixed)),
+                                        attrs: Vec::new(),
+                                    },
+                                    Expr {
+                                        node: ExprKind::Lit(Lit::Str("data".into(), StrStyle::Cooked)),
+                                        attrs: Vec::new(),
+                                    },
+                                ],
+                            }.into(),
                             attrs: Vec::new(),
                         }),
-                        0
-                    ),
+                        field: 0
+                    }.into(),
                     attrs: Vec::new(),
                 })),
             },
@@ -209,10 +224,13 @@ fn test_enum() {
     assert_eq!(expected, actual);
 
     let expected_meta_items = vec![
-        MetaItem::NameValue("doc".into(), Lit::Str(
-            "/// See the std::result module documentation for details.".into(),
-            StrStyle::Cooked,
-        )),
+        MetaNameValue {
+            ident: "doc".into(),
+            lit: Lit::Str(
+                "/// See the std::result module documentation for details.".into(),
+                StrStyle::Cooked,
+            ),
+        }.into(),
         MetaItem::Word("must_use".into()),
     ];
 
@@ -338,7 +356,7 @@ fn test_pub_restricted() {
             ident: None,
             vis: Visibility::Restricted(Box::new(Path { global: false, segments: vec!["m".into(), "n".into()] })),
             attrs: vec![],
-            ty: Ty::Path(None, "u8".into()),
+            ty: TyPath { qself: None, path: "u8".into() }.into(),
         }])),
     };
 

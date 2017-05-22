@@ -15,11 +15,16 @@ extern crate synom;
 #[cfg(feature = "aster")]
 pub mod aster;
 
+#[macro_use]
+mod macros;
+
 mod attr;
-pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem};
+pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem, MetaItemList,
+               MetaNameValue};
 
 mod constant;
-pub use constant::ConstExpr;
+pub use constant::{ConstExpr, ConstCall, ConstBinary, ConstUnary, ConstCast,
+                   ConstIndex, ConstParen};
 
 mod data;
 pub use data::{Field, Variant, VariantData, Visibility};
@@ -31,7 +36,13 @@ mod escape;
 mod expr;
 #[cfg(feature = "full")]
 pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, FieldValue, Local,
-               MacStmtStyle, Pat, RangeLimits, Stmt};
+               MacStmtStyle, Pat, RangeLimits, Stmt, ExprBox, ExprInPlace,
+               ExprArray, ExprCall, ExprMethodCall, ExprTup, ExprBinary, ExprUnary,
+               ExprCast, ExprType, ExprIf, ExprIfLet, ExprWhile, ExprWhileLet,
+               ExprForLoop, ExprLoop, ExprMatch, ExprClosure, ExprBlock,
+               ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
+               ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
+               ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch};
 
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
@@ -46,9 +57,15 @@ pub use ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ForeignMod,
+pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ItemForeignMod,
                ImplItem, ImplItemKind, ImplPolarity, Item, ItemKind, MethodSig, PathListItem,
-               TraitItem, TraitItemKind, ViewPath};
+               TraitItem, TraitItemKind, ViewPath, ItemExternCrate, ItemUse,
+               ItemStatic, ItemConst, ItemFn, ItemMod, ItemTy, ItemEnum,
+               ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
+               PathSimple, PathGlob, PathList, ForeignItemFn, ForeignItemStatic,
+               TraitItemConst, TraitItemMethod, TraitItemType,
+               ImplItemConst, ImplItemMethod, ImplItemType, ArgSelfRef,
+               ArgSelf, ArgCaptured};
 
 #[cfg(feature = "full")]
 mod krate;
@@ -75,7 +92,9 @@ pub use op::{BinOp, UnOp};
 mod ty;
 pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
              Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
-             PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety};
+             PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety, TySlice, TyArray,
+             TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath, TyTraitObject,
+             TyImplTrait, TyParen, TyInfer};
 
 #[cfg(feature = "visit")]
 pub mod visit;

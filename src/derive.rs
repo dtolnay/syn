@@ -1,32 +1,35 @@
 use super::*;
 
-/// Struct or enum sent to a `proc_macro_derive` macro.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct DeriveInput {
-    /// Name of the struct or enum.
-    pub ident: Ident,
+ast_struct! {
+    /// Struct or enum sent to a `proc_macro_derive` macro.
+    pub struct DeriveInput {
+        /// Name of the struct or enum.
+        pub ident: Ident,
 
-    /// Visibility of the struct or enum.
-    pub vis: Visibility,
+        /// Visibility of the struct or enum.
+        pub vis: Visibility,
 
-    /// Attributes tagged on the whole struct or enum.
-    pub attrs: Vec<Attribute>,
+        /// Attributes tagged on the whole struct or enum.
+        pub attrs: Vec<Attribute>,
 
-    /// Generics required to complete the definition.
-    pub generics: Generics,
+        /// Generics required to complete the definition.
+        pub generics: Generics,
 
-    /// Data within the struct or enum.
-    pub body: Body,
+        /// Data within the struct or enum.
+        pub body: Body,
+    }
 }
 
-/// Body of a derived struct or enum.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Body {
-    /// It's an enum.
-    Enum(Vec<Variant>),
 
-    /// It's a struct.
-    Struct(VariantData),
+ast_enum! {
+    /// Body of a derived struct or enum.
+    pub enum Body {
+        /// It's an enum.
+        Enum(Vec<Variant>),
+
+        /// It's a struct.
+        Struct(VariantData),
+    }
 }
 
 #[cfg(feature = "parsing")]

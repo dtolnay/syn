@@ -1,83 +1,129 @@
 use super::*;
 
-/// An item
-///
-/// The name might be a dummy name in case of anonymous items
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Item {
-    pub ident: Ident,
-    pub vis: Visibility,
-    pub attrs: Vec<Attribute>,
-    pub node: ItemKind,
+ast_struct! {
+    /// An item
+    ///
+    /// The name might be a dummy name in case of anonymous items
+    pub struct Item {
+        pub ident: Ident,
+        pub vis: Visibility,
+        pub attrs: Vec<Attribute>,
+        pub node: ItemKind,
+    }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ItemKind {
-    /// An`extern crate` item, with optional original crate name.
-    ///
-    /// E.g. `extern crate foo` or `extern crate foo_bar as foo`
-    ExternCrate(Option<Ident>),
-    /// A use declaration (`use` or `pub use`) item.
-    ///
-    /// E.g. `use foo;`, `use foo::bar;` or `use foo::bar as FooBar;`
-    Use(Box<ViewPath>),
-    /// A static item (`static` or `pub static`).
-    ///
-    /// E.g. `static FOO: i32 = 42;` or `static FOO: &'static str = "bar";`
-    Static(Box<Ty>, Mutability, Box<Expr>),
-    /// A constant item (`const` or `pub const`).
-    ///
-    /// E.g. `const FOO: i32 = 42;`
-    Const(Box<Ty>, Box<Expr>),
-    /// A function declaration (`fn` or `pub fn`).
-    ///
-    /// E.g. `fn foo(bar: usize) -> usize { .. }`
-    Fn(Box<FnDecl>, Unsafety, Constness, Option<Abi>, Generics, Box<Block>),
-    /// A module declaration (`mod` or `pub mod`).
-    ///
-    /// E.g. `mod foo;` or `mod foo { .. }`
-    Mod(Option<Vec<Item>>),
-    /// An external module (`extern` or `pub extern`).
-    ///
-    /// E.g. `extern {}` or `extern "C" {}`
-    ForeignMod(ForeignMod),
-    /// A type alias (`type` or `pub type`).
-    ///
-    /// E.g. `type Foo = Bar<u8>;`
-    Ty(Box<Ty>, Generics),
-    /// An enum definition (`enum` or `pub enum`).
-    ///
-    /// E.g. `enum Foo<A, B> { C<A>, D<B> }`
-    Enum(Vec<Variant>, Generics),
-    /// A struct definition (`struct` or `pub struct`).
-    ///
-    /// E.g. `struct Foo<A> { x: A }`
-    Struct(VariantData, Generics),
-    /// A union definition (`union` or `pub union`).
-    ///
-    /// E.g. `union Foo<A, B> { x: A, y: B }`
-    Union(VariantData, Generics),
-    /// A Trait declaration (`trait` or `pub trait`).
-    ///
-    /// E.g. `trait Foo { .. }` or `trait Foo<T> { .. }`
-    Trait(Unsafety, Generics, Vec<TyParamBound>, Vec<TraitItem>),
-    /// Default trait implementation.
-    ///
-    /// E.g. `impl Trait for .. {}` or `impl<T> Trait<T> for .. {}`
-    DefaultImpl(Unsafety, Path),
-    /// An implementation.
-    ///
-    /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
-    Impl(Unsafety,
-         ImplPolarity,
-         Generics,
-         Option<Path>, // (optional) trait this impl implements
-         Box<Ty>, // self
-         Vec<ImplItem>),
-    /// A macro invocation (which includes macro definition).
-    ///
-    /// E.g. `macro_rules! foo { .. }` or `foo!(..)`
-    Mac(Mac),
+ast_enum_of_structs! {
+    pub enum ItemKind {
+        /// An`extern crate` item, with optional original crate name.
+        ///
+        /// E.g. `extern crate foo` or `extern crate foo_bar as foo`
+        pub ExternCrate(ItemExternCrate {
+            pub original: Option<Ident>,
+        }),
+        /// A use declaration (`use` or `pub use`) item.
+        ///
+        /// E.g. `use foo;`, `use foo::bar;` or `use foo::bar as FooBar;`
+        pub Use(ItemUse {
+            pub path: Box<ViewPath>,
+        }),
+        /// A static item (`static` or `pub static`).
+        ///
+        /// E.g. `static FOO: i32 = 42;` or `static FOO: &'static str = "bar";`
+        pub Static(ItemStatic {
+            pub ty: Box<Ty>,
+            pub mutbl: Mutability,
+            pub expr: Box<Expr>,
+        }),
+        /// A constant item (`const` or `pub const`).
+        ///
+        /// E.g. `const FOO: i32 = 42;`
+        pub Const(ItemConst {
+            pub ty: Box<Ty>,
+            pub expr: Box<Expr>,
+        }),
+        /// A function declaration (`fn` or `pub fn`).
+        ///
+        /// E.g. `fn foo(bar: usize) -> usize { .. }`
+        pub Fn(ItemFn {
+            pub decl: Box<FnDecl>,
+            pub unsafety: Unsafety,
+            pub constness: Constness,
+            pub abi: Option<Abi>,
+            pub generics: Generics,
+            pub block: Box<Block>,
+        }),
+        /// A module declaration (`mod` or `pub mod`).
+        ///
+        /// E.g. `mod foo;` or `mod foo { .. }`
+        pub Mod(ItemMod {
+            pub items: Option<Vec<Item>>,
+        }),
+        /// An external module (`extern` or `pub extern`).
+        ///
+        /// E.g. `extern {}` or `extern "C" {}`
+        pub ForeignMod(ItemForeignMod),
+        /// A type alias (`type` or `pub type`).
+        ///
+        /// E.g. `type Foo = Bar<u8>;`
+        pub Ty(ItemTy {
+            pub ty: Box<Ty>,
+            pub generics: Generics,
+        }),
+        /// An enum definition (`enum` or `pub enum`).
+        ///
+        /// E.g. `enum Foo<A, B> { C<A>, D<B> }`
+        pub Enum(ItemEnum {
+            pub variants: Vec<Variant>,
+            pub generics: Generics,
+        }),
+        /// A struct definition (`struct` or `pub struct`).
+        ///
+        /// E.g. `struct Foo<A> { x: A }`
+        pub Struct(ItemStruct {
+            pub data: VariantData,
+            pub generics: Generics,
+        }),
+        /// A union definition (`union` or `pub union`).
+        ///
+        /// E.g. `union Foo<A, B> { x: A, y: B }`
+        pub Union(ItemUnion {
+            pub data: VariantData,
+            pub generics: Generics,
+        }),
+        /// A Trait declaration (`trait` or `pub trait`).
+        ///
+        /// E.g. `trait Foo { .. }` or `trait Foo<T> { .. }`
+        pub Trait(ItemTrait {
+            pub unsafety: Unsafety,
+            pub generics: Generics,
+            pub supertraits: Vec<TyParamBound>,
+            pub items: Vec<TraitItem>,
+        }),
+        /// Default trait implementation.
+        ///
+        /// E.g. `impl Trait for .. {}` or `impl<T> Trait<T> for .. {}`
+        pub DefaultImpl(ItemDefaultImpl {
+            pub unsafety: Unsafety,
+            pub path: Path,
+        }),
+        /// An implementation.
+        ///
+        /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
+        pub Impl(ItemImpl {
+            pub unsafety: Unsafety,
+            pub polarity: ImplPolarity,
+            pub generics: Generics,
+            pub trait_: Option<Path>, // (optional) trait this impl implements
+            pub self_ty: Box<Ty>, // self
+            pub items: Vec<ImplItem>,
+        }),
+        /// A macro invocation (which includes macro definition).
+        ///
+        /// E.g. `macro_rules! foo { .. }` or `foo!(..)`
+        pub Mac(Mac),
+    }
+
+    do_not_generate_to_tokens
 }
 
 impl From<DeriveInput> for Item {
@@ -87,148 +133,221 @@ impl From<DeriveInput> for Item {
             vis: input.vis,
             attrs: input.attrs,
             node: match input.body {
-                Body::Enum(variants) => ItemKind::Enum(variants, input.generics),
-                Body::Struct(variant_data) => ItemKind::Struct(variant_data, input.generics),
+                Body::Enum(variants) => {
+                    ItemEnum {
+                        variants: variants,
+                        generics: input.generics,
+                    }.into()
+                }
+                Body::Struct(variant_data) => {
+                    ItemStruct {
+                        data: variant_data,
+                        generics: input.generics,
+                    }.into()
+                }
             },
         }
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ViewPath {
-    /// `foo::bar::baz as quux`
+ast_enum_of_structs! {
+    pub enum ViewPath {
+        /// `foo::bar::baz as quux`
+        ///
+        /// or just
+        ///
+        /// `foo::bar::baz` (with `as baz` implicitly on the right)
+        pub Simple(PathSimple {
+            pub path: Path,
+            pub rename: Option<Ident>,
+        }),
+
+        /// `foo::bar::*`
+        pub Glob(PathGlob {
+            pub path: Path,
+        }),
+
+        /// `foo::bar::{a, b, c}`
+        pub List(PathList {
+            pub path: Path,
+            pub items: Vec<PathListItem>,
+        }),
+    }
+}
+
+ast_struct! {
+    pub struct PathListItem {
+        pub name: Ident,
+        /// renamed in list, e.g. `use foo::{bar as baz};`
+        pub rename: Option<Ident>,
+    }
+}
+
+ast_enum! {
+    #[derive(Copy)]
+    pub enum Constness {
+        Const,
+        NotConst,
+    }
+}
+
+ast_enum! {
+    #[derive(Copy)]
+    pub enum Defaultness {
+        Default,
+        Final,
+    }
+}
+
+ast_struct! {
+    /// Foreign module declaration.
     ///
-    /// or just
+    /// E.g. `extern { .. }` or `extern "C" { .. }`
+    pub struct ItemForeignMod {
+        pub abi: Abi,
+        pub items: Vec<ForeignItem>,
+    }
+}
+
+ast_struct! {
+    pub struct ForeignItem {
+        pub ident: Ident,
+        pub attrs: Vec<Attribute>,
+        pub node: ForeignItemKind,
+        pub vis: Visibility,
+    }
+}
+
+ast_enum_of_structs! {
+    /// An item within an `extern` block
+    pub enum ForeignItemKind {
+        /// A foreign function
+        pub Fn(ForeignItemFn {
+            pub decl: Box<FnDecl>,
+            pub generics: Generics,
+        }),
+        /// A foreign static item (`static ext: u8`)
+        pub Static(ForeignItemStatic {
+            pub ty: Box<Ty>,
+            pub mutbl: Mutability,
+        }),
+    }
+
+    do_not_generate_to_tokens
+}
+
+ast_struct! {
+    /// Represents an item declaration within a trait declaration,
+    /// possibly including a default implementation. A trait item is
+    /// either required (meaning it doesn't have an implementation, just a
+    /// signature) or provided (meaning it has a default implementation).
+    pub struct TraitItem {
+        pub ident: Ident,
+        pub attrs: Vec<Attribute>,
+        pub node: TraitItemKind,
+    }
+}
+
+ast_enum_of_structs! {
+    pub enum TraitItemKind {
+        pub Const(TraitItemConst {
+            pub ty: Ty,
+            pub default: Option<Expr>,
+        }),
+        pub Method(TraitItemMethod {
+            pub sig: MethodSig,
+            pub default: Option<Block>,
+        }),
+        pub Type(TraitItemType {
+            pub bounds: Vec<TyParamBound>,
+            pub default: Option<Ty>,
+        }),
+        pub Macro(Mac),
+    }
+
+    do_not_generate_to_tokens
+}
+
+ast_enum! {
+    #[derive(Copy)]
+    pub enum ImplPolarity {
+        /// `impl Trait for Type`
+        Positive,
+        /// `impl !Trait for Type`
+        Negative,
+    }
+}
+
+ast_struct! {
+    pub struct ImplItem {
+        pub ident: Ident,
+        pub vis: Visibility,
+        pub defaultness: Defaultness,
+        pub attrs: Vec<Attribute>,
+        pub node: ImplItemKind,
+    }
+}
+
+ast_enum_of_structs! {
+    pub enum ImplItemKind {
+        pub Const(ImplItemConst {
+            pub ty: Ty,
+            pub expr: Expr,
+        }),
+        pub Method(ImplItemMethod {
+            pub sig: MethodSig,
+            pub block: Block,
+        }),
+        pub Type(ImplItemType {
+            pub ty: Ty,
+        }),
+        pub Macro(Mac),
+    }
+
+    do_not_generate_to_tokens
+}
+
+ast_struct! {
+    /// Represents a method's signature in a trait declaration,
+    /// or in an implementation.
+    pub struct MethodSig {
+        pub unsafety: Unsafety,
+        pub constness: Constness,
+        pub abi: Option<Abi>,
+        pub decl: FnDecl,
+        pub generics: Generics,
+    }
+}
+
+ast_struct! {
+    /// Header (not the body) of a function declaration.
     ///
-    /// `foo::bar::baz` (with `as baz` implicitly on the right)
-    Simple(Path, Option<Ident>),
-
-    /// `foo::bar::*`
-    Glob(Path),
-
-    /// `foo::bar::{a, b, c}`
-    List(Path, Vec<PathListItem>),
+    /// E.g. `fn foo(bar: baz)`
+    pub struct FnDecl {
+        pub inputs: Vec<FnArg>,
+        pub output: FunctionRetTy,
+        pub variadic: bool,
+    }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct PathListItem {
-    pub name: Ident,
-    /// renamed in list, e.g. `use foo::{bar as baz};`
-    pub rename: Option<Ident>,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Constness {
-    Const,
-    NotConst,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Defaultness {
-    Default,
-    Final,
-}
-
-/// Foreign module declaration.
-///
-/// E.g. `extern { .. }` or `extern "C" { .. }`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ForeignMod {
-    pub abi: Abi,
-    pub items: Vec<ForeignItem>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ForeignItem {
-    pub ident: Ident,
-    pub attrs: Vec<Attribute>,
-    pub node: ForeignItemKind,
-    pub vis: Visibility,
-}
-
-/// An item within an `extern` block
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ForeignItemKind {
-    /// A foreign function
-    Fn(Box<FnDecl>, Generics),
-    /// A foreign static item (`static ext: u8`)
-    Static(Box<Ty>, Mutability),
-}
-
-/// Represents an item declaration within a trait declaration,
-/// possibly including a default implementation. A trait item is
-/// either required (meaning it doesn't have an implementation, just a
-/// signature) or provided (meaning it has a default implementation).
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct TraitItem {
-    pub ident: Ident,
-    pub attrs: Vec<Attribute>,
-    pub node: TraitItemKind,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum TraitItemKind {
-    Const(Ty, Option<Expr>),
-    Method(MethodSig, Option<Block>),
-    Type(Vec<TyParamBound>, Option<Ty>),
-    Macro(Mac),
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum ImplPolarity {
-    /// `impl Trait for Type`
-    Positive,
-    /// `impl !Trait for Type`
-    Negative,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct ImplItem {
-    pub ident: Ident,
-    pub vis: Visibility,
-    pub defaultness: Defaultness,
-    pub attrs: Vec<Attribute>,
-    pub node: ImplItemKind,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ImplItemKind {
-    Const(Ty, Expr),
-    Method(MethodSig, Block),
-    Type(Ty),
-    Macro(Mac),
-}
-
-/// Represents a method's signature in a trait declaration,
-/// or in an implementation.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct MethodSig {
-    pub unsafety: Unsafety,
-    pub constness: Constness,
-    pub abi: Option<Abi>,
-    pub decl: FnDecl,
-    pub generics: Generics,
-}
-
-/// Header (not the body) of a function declaration.
-///
-/// E.g. `fn foo(bar: baz)`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct FnDecl {
-    pub inputs: Vec<FnArg>,
-    pub output: FunctionRetTy,
-    pub variadic: bool,
-}
-
-/// An argument in a function header.
-///
-/// E.g. `bar: usize` as in `fn foo(bar: usize)`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum FnArg {
-    SelfRef(Option<Lifetime>, Mutability),
-    SelfValue(Mutability),
-    Captured(Pat, Ty),
-    Ignored(Ty),
+ast_enum_of_structs! {
+    /// An argument in a function header.
+    ///
+    /// E.g. `bar: usize` as in `fn foo(bar: usize)`
+    pub enum FnArg {
+        pub SelfRef(ArgSelfRef {
+            pub lifetime: Option<Lifetime>,
+            pub mutbl: Mutability,
+        }),
+        pub SelfValue(ArgSelf {
+            pub mutbl: Mutability,
+        }),
+        pub Captured(ArgCaptured {
+            pub pat: Pat,
+            pub ty: Ty,
+        }),
+        pub Ignored(Ty),
+    }
 }
 
 #[cfg(feature = "parsing")]
@@ -319,7 +438,7 @@ pub mod parsing {
                 ident: name,
                 vis: vis,
                 attrs: attrs,
-                node: ItemKind::ExternCrate(original_name),
+                node: ItemExternCrate { original: original_name }.into(),
             }
         })
     ));
@@ -334,7 +453,7 @@ pub mod parsing {
             ident: "".into(),
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Use(Box::new(what)),
+            node: ItemUse { path: Box::new(what) }.into(),
         })
     ));
 
@@ -352,14 +471,14 @@ pub mod parsing {
     named!(view_path_simple -> ViewPath, do_parse!(
         path: path >>
         rename: option!(preceded!(keyword!("as"), ident)) >>
-        (ViewPath::Simple(path, rename))
+        (PathSimple { path: path, rename: rename }.into())
     ));
 
     named!(view_path_glob -> ViewPath, do_parse!(
         path: path >>
         punct!("::") >>
         punct!("*") >>
-        (ViewPath::Glob(path))
+        (PathGlob { path: path }.into())
     ));
 
     named!(view_path_list -> ViewPath, do_parse!(
@@ -368,7 +487,7 @@ pub mod parsing {
         punct!("{") >>
         items: terminated_list!(punct!(","), path_list_item) >>
         punct!("}") >>
-        (ViewPath::List(path, items))
+        (PathList { path: path, items: items }.into())
     ));
 
     named!(view_path_list_root -> ViewPath, do_parse!(
@@ -376,10 +495,13 @@ pub mod parsing {
         punct!("{") >>
         items: terminated_list!(punct!(","), path_list_item) >>
         punct!("}") >>
-        (ViewPath::List(Path {
-            global: global.is_some(),
-            segments: Vec::new(),
-        }, items))
+        (PathList {
+            path: Path {
+                global: global.is_some(),
+                segments: Vec::new(),
+            },
+            items: items,
+        }.into())
     ));
 
     named!(path_list_item -> PathListItem, do_parse!(
@@ -410,7 +532,11 @@ pub mod parsing {
             ident: id,
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Static(Box::new(ty), mutability, Box::new(value)),
+            node: ItemStatic {
+                ty: Box::new(ty),
+                mutbl: mutability,
+                expr: Box::new(value),
+            }.into(),
         })
     ));
 
@@ -428,7 +554,7 @@ pub mod parsing {
             ident: id,
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Const(Box::new(ty), Box::new(value)),
+            node: ItemConst { ty: Box::new(ty), expr: Box::new(value) }.into(),
         })
     ));
 
@@ -458,23 +584,23 @@ pub mod parsing {
                 attrs.extend(inner_attrs);
                 attrs
             },
-            node: ItemKind::Fn(
-                Box::new(FnDecl {
+            node: ItemFn {
+                decl: Box::new(FnDecl {
                     inputs: inputs,
                     output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
                     variadic: false,
                 }),
-                unsafety,
-                constness,
-                abi,
-                Generics {
+                unsafety: unsafety,
+                constness: constness,
+                abi: abi,
+                generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
-                Box::new(Block {
+                block: Box::new(Block {
                     stmts: stmts,
                 }),
-            ),
+            }.into(),
         })
     ));
 
@@ -485,21 +611,21 @@ pub mod parsing {
             mutability: mutability >>
             keyword!("self") >>
             not!(punct!(":")) >>
-            (FnArg::SelfRef(lt, mutability))
+            (ArgSelfRef { lifetime: lt, mutbl: mutability }.into())
         )
         |
         do_parse!(
             mutability: mutability >>
             keyword!("self") >>
             not!(punct!(":")) >>
-            (FnArg::SelfValue(mutability))
+            (ArgSelf { mutbl: mutability }.into())
         )
         |
         do_parse!(
             pat: pat >>
             punct!(":") >>
             ty: ty >>
-            (FnArg::Captured(pat, ty))
+            (ArgCaptured { pat: pat, ty: ty }.into())
         )
         |
         ty => { FnArg::Ignored }
@@ -531,13 +657,13 @@ pub mod parsing {
                     attrs.extend(inner_attrs);
                     attrs
                 },
-                node: ItemKind::Mod(Some(items)),
+                node: ItemMod { items: Some(items) }.into(),
             },
             None => Item {
                 ident: id,
                 vis: vis,
                 attrs: outer_attrs,
-                node: ItemKind::Mod(None),
+                node: ItemMod { items: None }.into(),
             },
         })
     ));
@@ -552,10 +678,10 @@ pub mod parsing {
             ident: "".into(),
             vis: Visibility::Inherited,
             attrs: attrs,
-            node: ItemKind::ForeignMod(ForeignMod {
+            node: ItemForeignMod {
                 abi: abi,
                 items: items,
-            }),
+            }.into(),
         })
     ));
 
@@ -582,17 +708,17 @@ pub mod parsing {
         (ForeignItem {
             ident: name,
             attrs: attrs,
-            node: ForeignItemKind::Fn(
-                Box::new(FnDecl {
+            node: ForeignItemFn {
+                decl: Box::new(FnDecl {
                     inputs: inputs,
                     output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
                     variadic: variadic.is_some(),
                 }),
-                Generics {
+                generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
-            ),
+            }.into(),
             vis: vis,
         })
     ));
@@ -609,7 +735,7 @@ pub mod parsing {
         (ForeignItem {
             ident: id,
             attrs: attrs,
-            node: ForeignItemKind::Static(Box::new(ty), mutability),
+            node: ForeignItemStatic { ty: Box::new(ty), mutbl: mutability }.into(),
             vis: vis,
         })
     ));
@@ -628,13 +754,13 @@ pub mod parsing {
             ident: id,
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Ty(
-                Box::new(ty),
-                Generics {
+            node: ItemTy {
+                ty: Box::new(ty),
+                generics: Generics {
                     where_clause: where_clause,
                     ..generics
                 },
-            ),
+            }.into(),
         })
     ));
 
@@ -646,10 +772,10 @@ pub mod parsing {
             attrs: def.attrs,
             node: match def.body {
                 Body::Enum(variants) => {
-                    ItemKind::Enum(variants, def.generics)
+                    ItemEnum { variants: variants, generics: def.generics }.into()
                 }
                 Body::Struct(variant_data) => {
-                    ItemKind::Struct(variant_data, def.generics)
+                    ItemStruct { data: variant_data, generics: def.generics }.into()
                 }
             }
         }
@@ -667,13 +793,13 @@ pub mod parsing {
             ident: id,
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Union(
-                VariantData::Struct(fields),
-                Generics {
+            node: ItemUnion {
+                data: VariantData::Struct(fields),
+                generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
-            ),
+            }.into(),
         })
     ));
 
@@ -696,15 +822,15 @@ pub mod parsing {
             ident: id,
             vis: vis,
             attrs: attrs,
-            node: ItemKind::Trait(
-                unsafety,
-                Generics {
+            node: ItemTrait {
+                unsafety: unsafety,
+                generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
-                bounds,
-                body,
-            ),
+                supertraits: bounds,
+                items: body,
+            }.into(),
         })
     ));
 
@@ -721,7 +847,7 @@ pub mod parsing {
             ident: "".into(),
             vis: Visibility::Inherited,
             attrs: attrs,
-            node: ItemKind::DefaultImpl(unsafety, path),
+            node: ItemDefaultImpl { unsafety: unsafety, path: path }.into(),
         })
     ));
 
@@ -746,7 +872,7 @@ pub mod parsing {
         (TraitItem {
             ident: id,
             attrs: attrs,
-            node: TraitItemKind::Const(ty, value),
+            node: TraitItemConst { ty: ty, default: value }.into(),
         })
     ));
 
@@ -781,8 +907,8 @@ pub mod parsing {
                     attrs.extend(inner_attrs);
                     attrs
                 },
-                node: TraitItemKind::Method(
-                    MethodSig {
+                node: TraitItemMethod {
+                    sig: MethodSig {
                         unsafety: unsafety,
                         constness: constness,
                         abi: abi,
@@ -796,8 +922,8 @@ pub mod parsing {
                             .. generics
                         },
                     },
-                    stmts.map(|stmts| Block { stmts: stmts }),
-                ),
+                    default: stmts.map(|stmts| Block { stmts: stmts }),
+                }.into(),
             }
         })
     ));
@@ -815,7 +941,7 @@ pub mod parsing {
         (TraitItem {
             ident: id,
             attrs: attrs,
-            node: TraitItemKind::Type(bounds, default),
+            node: TraitItemType { bounds: bounds, default: default }.into(),
         })
     ));
 
@@ -862,17 +988,17 @@ pub mod parsing {
             ident: "".into(),
             vis: Visibility::Inherited,
             attrs: attrs,
-            node: ItemKind::Impl(
-                unsafety,
-                polarity_path.0,
-                Generics {
+            node: ItemImpl {
+                unsafety: unsafety,
+                polarity: polarity_path.0,
+                generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
-                polarity_path.1,
-                Box::new(self_ty),
-                body,
-            ),
+                trait_: polarity_path.1,
+                self_ty: Box::new(self_ty),
+                items: body,
+            }.into(),
         })
     ));
 
@@ -902,7 +1028,7 @@ pub mod parsing {
             vis: vis,
             defaultness: defaultness,
             attrs: attrs,
-            node: ImplItemKind::Const(ty, value),
+            node: ImplItemConst { ty: ty, expr: value}.into(),
         })
     ));
 
@@ -934,8 +1060,8 @@ pub mod parsing {
                 attrs.extend(inner_attrs);
                 attrs
             },
-            node: ImplItemKind::Method(
-                MethodSig {
+            node: ImplItemMethod {
+                sig: MethodSig {
                     unsafety: unsafety,
                     constness: constness,
                     abi: abi,
@@ -949,10 +1075,10 @@ pub mod parsing {
                         .. generics
                     },
                 },
-                Block {
+                block: Block {
                     stmts: stmts,
                 },
-            ),
+            }.into(),
         })
     ));
 
@@ -970,7 +1096,7 @@ pub mod parsing {
             vis: vis,
             defaultness: defaultness,
             attrs: attrs,
-            node: ImplItemKind::Type(ty),
+            node: ImplItemType { ty: ty }.into(),
         })
     ));
 
@@ -1026,70 +1152,70 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             match self.node {
-                ItemKind::ExternCrate(ref original) => {
+                ItemKind::ExternCrate(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("extern");
                     tokens.append("crate");
-                    if let Some(ref original) = *original {
+                    if let Some(ref original) = item.original {
                         original.to_tokens(tokens);
                         tokens.append("as");
                     }
                     self.ident.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Use(ref view_path) => {
+                ItemKind::Use(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("use");
-                    view_path.to_tokens(tokens);
+                    item.path.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Static(ref ty, ref mutability, ref expr) => {
+                ItemKind::Static(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("static");
-                    mutability.to_tokens(tokens);
+                    item.mutbl.to_tokens(tokens);
                     self.ident.to_tokens(tokens);
                     tokens.append(":");
-                    ty.to_tokens(tokens);
+                    item.ty.to_tokens(tokens);
                     tokens.append("=");
-                    expr.to_tokens(tokens);
+                    item.expr.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Const(ref ty, ref expr) => {
+                ItemKind::Const(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("const");
                     self.ident.to_tokens(tokens);
                     tokens.append(":");
-                    ty.to_tokens(tokens);
+                    item.ty.to_tokens(tokens);
                     tokens.append("=");
-                    expr.to_tokens(tokens);
+                    item.expr.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Fn(ref decl, unsafety, constness, ref abi, ref generics, ref block) => {
+                ItemKind::Fn(ref item) => {
                     self.vis.to_tokens(tokens);
-                    constness.to_tokens(tokens);
-                    unsafety.to_tokens(tokens);
-                    abi.to_tokens(tokens);
+                    item.constness.to_tokens(tokens);
+                    item.unsafety.to_tokens(tokens);
+                    item.abi.to_tokens(tokens);
                     tokens.append("fn");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
+                    item.generics.to_tokens(tokens);
                     tokens.append("(");
-                    tokens.append_separated(&decl.inputs, ",");
+                    tokens.append_separated(&item.decl.inputs, ",");
                     tokens.append(")");
-                    if let FunctionRetTy::Ty(ref ty) = decl.output {
+                    if let FunctionRetTy::Ty(ref ty) = item.decl.output {
                         tokens.append("->");
                         ty.to_tokens(tokens);
                     }
-                    generics.where_clause.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
                     tokens.append("{");
                     tokens.append_all(self.attrs.inner());
-                    tokens.append_all(&block.stmts);
+                    tokens.append_all(&item.block.stmts);
                     tokens.append("}");
                 }
-                ItemKind::Mod(ref items) => {
+                ItemKind::Mod(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("mod");
                     self.ident.to_tokens(tokens);
-                    match *items {
+                    match item.items {
                         Some(ref items) => {
                             tokens.append("{");
                             tokens.append_all(self.attrs.inner());
@@ -1106,96 +1232,96 @@ mod printing {
                     tokens.append_all(&foreign_mod.items);
                     tokens.append("}");
                 }
-                ItemKind::Ty(ref ty, ref generics) => {
+                ItemKind::Ty(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("type");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
-                    generics.where_clause.to_tokens(tokens);
+                    item.generics.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
                     tokens.append("=");
-                    ty.to_tokens(tokens);
+                    item.ty.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ItemKind::Enum(ref variants, ref generics) => {
+                ItemKind::Enum(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("enum");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
-                    generics.where_clause.to_tokens(tokens);
+                    item.generics.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
                     tokens.append("{");
-                    for variant in variants {
+                    for variant in &item.variants {
                         variant.to_tokens(tokens);
                         tokens.append(",");
                     }
                     tokens.append("}");
                 }
-                ItemKind::Struct(ref variant_data, ref generics) => {
+                ItemKind::Struct(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("struct");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
-                    match *variant_data {
+                    item.generics.to_tokens(tokens);
+                    match item.data {
                         VariantData::Struct(_) => {
-                            generics.where_clause.to_tokens(tokens);
-                            variant_data.to_tokens(tokens);
+                            item.generics.where_clause.to_tokens(tokens);
+                            item.data.to_tokens(tokens);
                             // no semicolon
                         }
                         VariantData::Tuple(_) => {
-                            variant_data.to_tokens(tokens);
-                            generics.where_clause.to_tokens(tokens);
+                            item.data.to_tokens(tokens);
+                            item.generics.where_clause.to_tokens(tokens);
                             tokens.append(";");
                         }
                         VariantData::Unit => {
-                            generics.where_clause.to_tokens(tokens);
+                            item.generics.where_clause.to_tokens(tokens);
                             tokens.append(";");
                         }
                     }
                 }
-                ItemKind::Union(ref variant_data, ref generics) => {
+                ItemKind::Union(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("union");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
-                    generics.where_clause.to_tokens(tokens);
-                    variant_data.to_tokens(tokens);
+                    item.generics.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
+                    item.data.to_tokens(tokens);
                 }
-                ItemKind::Trait(unsafety, ref generics, ref bound, ref items) => {
+                ItemKind::Trait(ref item) => {
                     self.vis.to_tokens(tokens);
-                    unsafety.to_tokens(tokens);
+                    item.unsafety.to_tokens(tokens);
                     tokens.append("trait");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
-                    if !bound.is_empty() {
+                    item.generics.to_tokens(tokens);
+                    if !item.supertraits.is_empty() {
                         tokens.append(":");
-                        tokens.append_separated(bound, "+");
+                        tokens.append_separated(&item.supertraits, "+");
                     }
-                    generics.where_clause.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
                     tokens.append("{");
-                    tokens.append_all(items);
+                    tokens.append_all(&item.items);
                     tokens.append("}");
                 }
-                ItemKind::DefaultImpl(unsafety, ref path) => {
-                    unsafety.to_tokens(tokens);
+                ItemKind::DefaultImpl(ref item) => {
+                    item.unsafety.to_tokens(tokens);
                     tokens.append("impl");
-                    path.to_tokens(tokens);
+                    item.path.to_tokens(tokens);
                     tokens.append("for");
                     tokens.append("..");
                     tokens.append("{");
                     tokens.append("}");
                 }
-                ItemKind::Impl(unsafety, polarity, ref generics, ref path, ref ty, ref items) => {
-                    unsafety.to_tokens(tokens);
+                ItemKind::Impl(ref item) => {
+                    item.unsafety.to_tokens(tokens);
                     tokens.append("impl");
-                    generics.to_tokens(tokens);
-                    if let Some(ref path) = *path {
-                        polarity.to_tokens(tokens);
+                    item.generics.to_tokens(tokens);
+                    if let Some(ref path) = item.trait_ {
+                        item.polarity.to_tokens(tokens);
                         path.to_tokens(tokens);
                         tokens.append("for");
                     }
-                    ty.to_tokens(tokens);
-                    generics.where_clause.to_tokens(tokens);
+                    item.self_ty.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
                     tokens.append("{");
-                    tokens.append_all(items);
+                    tokens.append_all(&item.items);
                     tokens.append("}");
                 }
                 ItemKind::Mac(ref mac) => {
@@ -1216,31 +1342,33 @@ mod printing {
         }
     }
 
-    impl ToTokens for ViewPath {
+    impl ToTokens for PathSimple {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                ViewPath::Simple(ref path, ref rename) => {
-                    path.to_tokens(tokens);
-                    if let Some(ref rename) = *rename {
-                        tokens.append("as");
-                        rename.to_tokens(tokens);
-                    }
-                }
-                ViewPath::Glob(ref path) => {
-                    path.to_tokens(tokens);
-                    tokens.append("::");
-                    tokens.append("*");
-                }
-                ViewPath::List(ref path, ref items) => {
-                    path.to_tokens(tokens);
-                    if path.global || !path.segments.is_empty() {
-                        tokens.append("::");
-                    }
-                    tokens.append("{");
-                    tokens.append_separated(items, ",");
-                    tokens.append("}");
-                }
+            self.path.to_tokens(tokens);
+            if let Some(ref rename) = self.rename {
+                tokens.append("as");
+                rename.to_tokens(tokens);
             }
+        }
+    }
+
+    impl ToTokens for PathGlob {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.path.to_tokens(tokens);
+            tokens.append("::");
+            tokens.append("*");
+        }
+    }
+
+    impl ToTokens for PathList {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.path.to_tokens(tokens);
+            if self.path.global || !self.path.segments.is_empty() {
+                tokens.append("::");
+            }
+            tokens.append("{");
+            tokens.append_separated(&self.items, ",");
+            tokens.append("}");
         }
     }
 
@@ -1258,33 +1386,33 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             match self.node {
-                TraitItemKind::Const(ref ty, ref expr) => {
+                TraitItemKind::Const(ref item) => {
                     tokens.append("const");
                     self.ident.to_tokens(tokens);
                     tokens.append(":");
-                    ty.to_tokens(tokens);
-                    if let Some(ref expr) = *expr {
+                    item.ty.to_tokens(tokens);
+                    if let Some(ref expr) = item.default {
                         tokens.append("=");
                         expr.to_tokens(tokens);
                     }
                     tokens.append(";");
                 }
-                TraitItemKind::Method(ref sig, ref block) => {
-                    sig.constness.to_tokens(tokens);
-                    sig.unsafety.to_tokens(tokens);
-                    sig.abi.to_tokens(tokens);
+                TraitItemKind::Method(ref item) => {
+                    item.sig.constness.to_tokens(tokens);
+                    item.sig.unsafety.to_tokens(tokens);
+                    item.sig.abi.to_tokens(tokens);
                     tokens.append("fn");
                     self.ident.to_tokens(tokens);
-                    sig.generics.to_tokens(tokens);
+                    item.sig.generics.to_tokens(tokens);
                     tokens.append("(");
-                    tokens.append_separated(&sig.decl.inputs, ",");
+                    tokens.append_separated(&item.sig.decl.inputs, ",");
                     tokens.append(")");
-                    if let FunctionRetTy::Ty(ref ty) = sig.decl.output {
+                    if let FunctionRetTy::Ty(ref ty) = item.sig.decl.output {
                         tokens.append("->");
                         ty.to_tokens(tokens);
                     }
-                    sig.generics.where_clause.to_tokens(tokens);
-                    match *block {
+                    item.sig.generics.where_clause.to_tokens(tokens);
+                    match item.default {
                         Some(ref block) => {
                             tokens.append("{");
                             tokens.append_all(self.attrs.inner());
@@ -1294,14 +1422,14 @@ mod printing {
                         None => tokens.append(";"),
                     }
                 }
-                TraitItemKind::Type(ref bound, ref default) => {
+                TraitItemKind::Type(ref item) => {
                     tokens.append("type");
                     self.ident.to_tokens(tokens);
-                    if !bound.is_empty() {
+                    if !item.bounds.is_empty() {
                         tokens.append(":");
-                        tokens.append_separated(bound, "+");
+                        tokens.append_separated(&item.bounds, "+");
                     }
-                    if let Some(ref default) = *default {
+                    if let Some(ref default) = item.default {
                         tokens.append("=");
                         default.to_tokens(tokens);
                     }
@@ -1324,46 +1452,46 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             match self.node {
-                ImplItemKind::Const(ref ty, ref expr) => {
+                ImplItemKind::Const(ref item) => {
                     self.vis.to_tokens(tokens);
                     self.defaultness.to_tokens(tokens);
                     tokens.append("const");
                     self.ident.to_tokens(tokens);
                     tokens.append(":");
-                    ty.to_tokens(tokens);
+                    item.ty.to_tokens(tokens);
                     tokens.append("=");
-                    expr.to_tokens(tokens);
+                    item.expr.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ImplItemKind::Method(ref sig, ref block) => {
+                ImplItemKind::Method(ref item) => {
                     self.vis.to_tokens(tokens);
                     self.defaultness.to_tokens(tokens);
-                    sig.constness.to_tokens(tokens);
-                    sig.unsafety.to_tokens(tokens);
-                    sig.abi.to_tokens(tokens);
+                    item.sig.constness.to_tokens(tokens);
+                    item.sig.unsafety.to_tokens(tokens);
+                    item.sig.abi.to_tokens(tokens);
                     tokens.append("fn");
                     self.ident.to_tokens(tokens);
-                    sig.generics.to_tokens(tokens);
+                    item.sig.generics.to_tokens(tokens);
                     tokens.append("(");
-                    tokens.append_separated(&sig.decl.inputs, ",");
+                    tokens.append_separated(&item.sig.decl.inputs, ",");
                     tokens.append(")");
-                    if let FunctionRetTy::Ty(ref ty) = sig.decl.output {
+                    if let FunctionRetTy::Ty(ref ty) = item.sig.decl.output {
                         tokens.append("->");
                         ty.to_tokens(tokens);
                     }
-                    sig.generics.where_clause.to_tokens(tokens);
+                    item.sig.generics.where_clause.to_tokens(tokens);
                     tokens.append("{");
                     tokens.append_all(self.attrs.inner());
-                    tokens.append_all(&block.stmts);
+                    tokens.append_all(&item.block.stmts);
                     tokens.append("}");
                 }
-                ImplItemKind::Type(ref ty) => {
+                ImplItemKind::Type(ref item) => {
                     self.vis.to_tokens(tokens);
                     self.defaultness.to_tokens(tokens);
                     tokens.append("type");
                     self.ident.to_tokens(tokens);
                     tokens.append("=");
-                    ty.to_tokens(tokens);
+                    item.ty.to_tokens(tokens);
                     tokens.append(";");
                 }
                 ImplItemKind::Macro(ref mac) => {
@@ -1383,62 +1511,61 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             match self.node {
-                ForeignItemKind::Fn(ref decl, ref generics) => {
+                ForeignItemKind::Fn(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("fn");
                     self.ident.to_tokens(tokens);
-                    generics.to_tokens(tokens);
+                    item.generics.to_tokens(tokens);
                     tokens.append("(");
-                    tokens.append_separated(&decl.inputs, ",");
-                    if decl.variadic {
-                        if !decl.inputs.is_empty() {
+                    tokens.append_separated(&item.decl.inputs, ",");
+                    if item.decl.variadic {
+                        if !item.decl.inputs.is_empty() {
                             tokens.append(",");
                         }
                         tokens.append("...");
                     }
                     tokens.append(")");
-                    if let FunctionRetTy::Ty(ref ty) = decl.output {
+                    if let FunctionRetTy::Ty(ref ty) = item.decl.output {
                         tokens.append("->");
                         ty.to_tokens(tokens);
                     }
-                    generics.where_clause.to_tokens(tokens);
+                    item.generics.where_clause.to_tokens(tokens);
                     tokens.append(";");
                 }
-                ForeignItemKind::Static(ref ty, mutability) => {
+                ForeignItemKind::Static(ref item) => {
                     self.vis.to_tokens(tokens);
                     tokens.append("static");
-                    mutability.to_tokens(tokens);
+                    item.mutbl.to_tokens(tokens);
                     self.ident.to_tokens(tokens);
                     tokens.append(":");
-                    ty.to_tokens(tokens);
+                    item.ty.to_tokens(tokens);
                     tokens.append(";");
                 }
             }
         }
     }
 
-    impl ToTokens for FnArg {
+    impl ToTokens for ArgSelfRef {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                FnArg::SelfRef(ref lifetime, mutability) => {
-                    tokens.append("&");
-                    lifetime.to_tokens(tokens);
-                    mutability.to_tokens(tokens);
-                    tokens.append("self");
-                }
-                FnArg::SelfValue(mutability) => {
-                    mutability.to_tokens(tokens);
-                    tokens.append("self");
-                }
-                FnArg::Captured(ref pat, ref ty) => {
-                    pat.to_tokens(tokens);
-                    tokens.append(":");
-                    ty.to_tokens(tokens);
-                }
-                FnArg::Ignored(ref ty) => {
-                    ty.to_tokens(tokens);
-                }
-            }
+            tokens.append("&");
+            self.lifetime.to_tokens(tokens);
+            self.mutbl.to_tokens(tokens);
+            tokens.append("self");
+        }
+    }
+
+    impl ToTokens for ArgSelf {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.mutbl.to_tokens(tokens);
+            tokens.append("self");
+        }
+    }
+
+    impl ToTokens for ArgCaptured {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.pat.to_tokens(tokens);
+            tokens.append(":");
+            self.ty.to_tokens(tokens);
         }
     }
 

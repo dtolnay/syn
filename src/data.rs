@@ -1,32 +1,34 @@
 use super::*;
 
-/// An enum variant.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Variant {
-    /// Name of the variant.
-    pub ident: Ident,
+ast_struct! {
+    /// An enum variant.
+    pub struct Variant {
+        /// Name of the variant.
+        pub ident: Ident,
 
-    /// Attributes tagged on the variant.
-    pub attrs: Vec<Attribute>,
+        /// Attributes tagged on the variant.
+        pub attrs: Vec<Attribute>,
 
-    /// Type of variant.
-    pub data: VariantData,
+        /// Type of variant.
+        pub data: VariantData,
 
-    /// Explicit discriminant, e.g. `Foo = 1`
-    pub discriminant: Option<ConstExpr>,
+        /// Explicit discriminant, e.g. `Foo = 1`
+        pub discriminant: Option<ConstExpr>,
+    }
 }
 
-/// Data stored within an enum variant or struct.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum VariantData {
-    /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-    Struct(Vec<Field>),
+ast_enum! {
+    /// Data stored within an enum variant or struct.
+    pub enum VariantData {
+        /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
+        Struct(Vec<Field>),
 
-    /// Tuple variant, e.g. `Some(T)`.
-    Tuple(Vec<Field>),
+        /// Tuple variant, e.g. `Some(T)`.
+        Tuple(Vec<Field>),
 
-    /// Unit variant, e.g. `None`.
-    Unit,
+        /// Unit variant, e.g. `None`.
+        Unit,
+    }
 }
 
 impl VariantData {
@@ -49,39 +51,40 @@ impl VariantData {
     }
 }
 
-/// A field of a struct or enum variant.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Field {
-    /// Name of the field, if any.
-    ///
-    /// Fields of tuple structs have no names.
-    pub ident: Option<Ident>,
+ast_struct! {
+    /// A field of a struct or enum variant.
+    pub struct Field {
+        /// Name of the field, if any.
+        ///
+        /// Fields of tuple structs have no names.
+        pub ident: Option<Ident>,
 
-    /// Visibility of the field.
-    pub vis: Visibility,
+        /// Visibility of the field.
+        pub vis: Visibility,
 
-    /// Attributes tagged on the field.
-    pub attrs: Vec<Attribute>,
+        /// Attributes tagged on the field.
+        pub attrs: Vec<Attribute>,
 
-    /// Type of the field.
-    pub ty: Ty,
+        /// Type of the field.
+        pub ty: Ty,
+    }
 }
 
+ast_enum! {
+    /// Visibility level of an item.
+    pub enum Visibility {
+        /// Public, i.e. `pub`.
+        Public,
 
-/// Visibility level of an item.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Visibility {
-    /// Public, i.e. `pub`.
-    Public,
+        /// Crate-visible, i.e. `pub(crate)`.
+        Crate,
 
-    /// Crate-visible, i.e. `pub(crate)`.
-    Crate,
+        /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
+        Restricted(Box<Path>),
 
-    /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
-    Restricted(Box<Path>),
-
-    /// Inherited, i.e. private.
-    Inherited,
+        /// Inherited, i.e. private.
+        Inherited,
+    }
 }
 
 #[cfg(feature = "parsing")]

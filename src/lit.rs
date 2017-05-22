@@ -1,32 +1,34 @@
-/// Literal kind.
-///
-/// E.g. `"foo"`, `42`, `12.34` or `bool`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Lit {
-    /// A string literal (`"foo"`)
-    Str(String, StrStyle),
-    /// A byte string (`b"foo"`)
-    ByteStr(Vec<u8>, StrStyle),
-    /// A byte char (`b'f'`)
-    Byte(u8),
-    /// A character literal (`'a'`)
-    Char(char),
-    /// An integer literal (`1`)
-    Int(u64, IntTy),
-    /// A float literal (`1f64` or `1E10f64` or `1.0E10`)
-    Float(String, FloatTy),
-    /// A boolean literal
-    Bool(bool),
+ast_enum! {
+    /// Literal kind.
+    ///
+    /// E.g. `"foo"`, `42`, `12.34` or `bool`
+    pub enum Lit {
+        /// A string literal (`"foo"`)
+        Str(String, StrStyle),
+        /// A byte string (`b"foo"`)
+        ByteStr(Vec<u8>, StrStyle),
+        /// A byte char (`b'f'`)
+        Byte(u8),
+        /// A character literal (`'a'`)
+        Char(char),
+        /// An integer literal (`1`)
+        Int(u64, IntTy),
+        /// A float literal (`1f64` or `1E10f64` or `1.0E10`)
+        Float(String, FloatTy),
+        /// A boolean literal
+        Bool(bool),
+    }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum StrStyle {
-    /// A regular string, like `"foo"`
-    Cooked,
-    /// A raw string, like `r##"foo"##`
-    ///
-    /// The uint is the number of `#` symbols used
-    Raw(usize),
+ast_enum! {
+    pub enum StrStyle {
+        /// A regular string, like `"foo"`
+        Cooked,
+        /// A raw string, like `r##"foo"##`
+        ///
+        /// The uint is the number of `#` symbols used
+        Raw(usize),
+    }
 }
 
 impl From<String> for Lit {
@@ -65,26 +67,30 @@ impl From<bool> for Lit {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum IntTy {
-    Isize,
-    I8,
-    I16,
-    I32,
-    I64,
-    Usize,
-    U8,
-    U16,
-    U32,
-    U64,
-    Unsuffixed,
+ast_enum! {
+    #[derive(Copy)]
+    pub enum IntTy {
+        Isize,
+        I8,
+        I16,
+        I32,
+        I64,
+        Usize,
+        U8,
+        U16,
+        U32,
+        U64,
+        Unsuffixed,
+    }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum FloatTy {
-    F32,
-    F64,
-    Unsuffixed,
+ast_enum! {
+    #[derive(Copy)]
+    pub enum FloatTy {
+        F32,
+        F64,
+        Unsuffixed,
+    }
 }
 
 macro_rules! impl_from_for_lit {

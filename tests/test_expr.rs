@@ -90,45 +90,45 @@ fn test_catch_expr() {
 
     assert_let!(ItemKind::Struct(..) = actual.items[0].node);
 
-    assert_let!(Item { node: ItemKind::Fn(_, _, _, _, _, ref body), .. } = actual.items[1]; {
-        assert_let!(Stmt::Local(ref local) = body.stmts[0]; {
+    assert_let!(Item { node: ItemKind::Fn(ItemFn { ref block, .. }), .. } = actual.items[1]; {
+        assert_let!(Stmt::Local(ref local) = block.stmts[0]; {
             assert_let!(Local { init: Some(ref init_expr), .. } = **local; {
                 assert_let!(Expr { node: ExprKind::Catch(..), .. } = **init_expr);
             });
         });
 
-        assert_let!(Stmt::Local(ref local) = body.stmts[2]; {
+        assert_let!(Stmt::Local(ref local) = block.stmts[2]; {
             assert_let!(Pat::Ident(BindingMode::ByValue(Mutability::Mutable), ref ident, None) = *local.pat; {
                 assert_eq!(ident, "catch");
             });
         });
 
-        assert_let!(Stmt::Expr(ref expr) = body.stmts[3]; {
-            assert_let!(Expr { node: ExprKind::While(ref loop_expr, _, None), .. } = **expr; {
-                assert_let!(Expr { node: ExprKind::Path(None, ref loop_var), .. } = **loop_expr; {
-                    assert_eq!(*loop_var, "catch".into());
+        assert_let!(Stmt::Expr(ref expr) = block.stmts[3]; {
+            assert_let!(Expr { node: ExprKind::While(ExprWhile { ref cond, .. }), .. } = **expr; {
+                assert_let!(Expr { node: ExprKind::Path(ExprPath { qself: None, ref path }), .. } = **cond; {
+                    assert_eq!(*path, "catch".into());
                 });
             });
         });
 
-        assert_let!(Stmt::Semi(ref expr) = body.stmts[5]; {
-            assert_let!(Expr { node: ExprKind::Assign(ref left, ref right), .. } = **expr; {
-                assert_let!(Expr { node: ExprKind::Path(None, ref loop_var), .. } = **left; {
-                    assert_eq!(*loop_var, "catch".into());
+        assert_let!(Stmt::Semi(ref expr) = block.stmts[5]; {
+            assert_let!(Expr { node: ExprKind::Assign(ExprAssign { ref left, ref right }), .. } = **expr; {
+                assert_let!(Expr { node: ExprKind::Path(ExprPath { qself: None, ref path }), .. } = **left; {
+                    assert_eq!(*path, "catch".into());
                 });
 
-                assert_let!(Expr { node: ExprKind::If(ref if_expr, _, _), .. } = **right; {
-                    assert_let!(Expr { node: ExprKind::Path(None, ref if_var), .. } = **if_expr; {
-                        assert_eq!(*if_var, "catch".into());
+                assert_let!(Expr { node: ExprKind::If(ExprIf { ref cond, .. }), .. } = **right; {
+                    assert_let!(Expr { node: ExprKind::Path(ExprPath { qself: None, ref path }), .. } = **cond; {
+                        assert_eq!(*path, "catch".into());
                     });
                 });
             });
         });
 
-        assert_let!(Stmt::Semi(ref expr) = body.stmts[7]; {
-            assert_let!(Expr { node: ExprKind::Match(ref match_expr, _), .. } = **expr; {
-                assert_let!(Expr { node: ExprKind::Path(None, ref match_var), .. } = **match_expr; {
-                    assert_eq!(*match_var, "catch".into());
+        assert_let!(Stmt::Semi(ref expr) = block.stmts[7]; {
+            assert_let!(Expr { node: ExprKind::Match(ExprMatch { ref expr, .. }), .. } = **expr; {
+                assert_let!(Expr { node: ExprKind::Path(ExprPath { qself: None, ref path }), .. } = **expr; {
+                    assert_eq!(*path, "catch".into());
                 });
             });
         });
