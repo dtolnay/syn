@@ -1,7 +1,7 @@
 use super::*;
 
 /// An enum variant.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Hash)]
 pub struct Variant {
     /// Name of the variant.
     pub ident: Ident,
@@ -27,6 +27,12 @@ pub enum VariantData {
 
     /// Unit variant, e.g. `None`.
     Unit,
+}
+
+impl Default for VariantData {
+    fn default() -> Self {
+        VariantData::Unit
+    }
 }
 
 impl VariantData {
@@ -82,6 +88,12 @@ pub enum Visibility {
 
     /// Inherited, i.e. private.
     Inherited,
+}
+
+impl Default for Visibility {
+    fn default() -> Self {
+        Visibility::Inherited
+    }
 }
 
 #[cfg(feature = "parsing")]
