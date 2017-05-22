@@ -37,6 +37,12 @@ pub enum Ty {
     Mac(Mac),
 }
 
+impl Default for Ty {
+    fn default() -> Self {
+        Ty::Never
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct MutTy {
     pub ty: Ty,
@@ -47,6 +53,12 @@ pub struct MutTy {
 pub enum Mutability {
     Mutable,
     Immutable,
+}
+
+impl Default for Mutability {
+    fn default() -> Self {
+        Mutability::Immutable
+    }
 }
 
 /// A "Path" is essentially Rust's notion of a name.
@@ -128,6 +140,12 @@ impl PathParameters {
     }
 }
 
+impl Default for PathParameters {
+    fn default() -> Self {
+        PathParameters::none()
+    }
+}
+
 /// A path like `Foo<'a, T>`
 #[derive(Debug, Clone, Eq, PartialEq, Default, Hash)]
 pub struct AngleBracketedParameterData {
@@ -199,6 +217,12 @@ pub struct BareFnTy {
 pub enum Unsafety {
     Unsafe,
     Normal,
+}
+
+impl Default for Unsafety {
+    fn default() -> Self {
+        Unsafety::Normal
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
