@@ -16,9 +16,7 @@ matrix:
       env: ROLE=build
     - rust: beta
       env: ROLE=build
-    - rust: 1.12.1
-      env: ROLE=build
-    - rust: 1.13.0
+    - rust: 1.15.1
       env: ROLE=build
   allow_failures:
     - env: ROLE=clippy
