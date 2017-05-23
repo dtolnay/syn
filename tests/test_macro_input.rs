@@ -2,6 +2,7 @@
 //!
 //! Deprecation warnings are suppressed to keep the output clean.
 #![allow(deprecated)]
+#![cfg(feature = "extra-traits")]
 
 extern crate syn;
 use syn::*;

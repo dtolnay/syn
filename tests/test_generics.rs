@@ -1,3 +1,5 @@
+#![cfg(feature = "extra-traits")]
+
 extern crate syn;
 use syn::*;
 

@@ -38,11 +38,14 @@ script:
           cargo build --features full &&
           cargo build --features 'visit fold' &&
           cargo build --features 'full visit fold' &&
+          cargo build --no-default-features --features 'full parsing printing' &&
+          cargo build --no-default-features --features 'visit fold parsing printing' &&
+          cargo build --no-default-features --features 'full visit fold parsing printing' &&
           (cd synom && cargo test)
           ;;
         test)
           git submodule update --init &&
-          cargo test --features 'full aster visit fold' --release
+          cargo test --all-features --release
           ;;
         clippy)
           cargo install clippy --debug --force || exit

@@ -184,7 +184,7 @@ ast_struct! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Constness {
         Const,
         NotConst,
@@ -192,7 +192,7 @@ ast_enum! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Defaultness {
         Default,
         Final,
@@ -269,7 +269,7 @@ ast_enum_of_structs! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum ImplPolarity {
         /// `impl Trait for Type`
         Positive,

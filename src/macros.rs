@@ -1,21 +1,12 @@
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
-        pub struct $name:ident {
-            $(
-                $(#[$field_attr:meta])*
-                pub $field:ident: $ty:ty,
-            )*
-        }
+        pub struct $name:ident $($rest:tt)*
     ) => {
         $(#[$attr])*
-        #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-        pub struct $name {
-            $(
-                $(#[$field_attr])*
-                pub $field: $ty,
-            )*
-        }
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name $($rest)*
     }
 }
 
@@ -25,7 +16,8 @@ macro_rules! ast_enum {
         pub enum $name:ident { $($variants:tt)* }
     ) => (
         $(#[$enum_attr])*
-        #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
         pub enum $name {
             $($variants)*
         }
