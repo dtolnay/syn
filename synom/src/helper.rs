@@ -1,5 +1,6 @@
 use IResult;
 use space::{skip_whitespace, word_break};
+use delimited::Delimited;
 
 /// Parse a piece of punctuation like "+" or "+=".
 ///
@@ -152,7 +153,7 @@ macro_rules! option {
 ///         punct!("<") >>
 ///         lifetimes: terminated_list!(punct!(","), lifetime) >>
 ///         punct!(">") >>
-///         (lifetimes)
+///         (lifetimes.into_vec())
 ///     )),
 ///     ty
 /// ));
@@ -193,7 +194,7 @@ macro_rules! opt_vec {
 /// use syn::Mutability;
 ///
 /// named!(mutability -> Mutability, alt!(
-///     keyword!("mut") => { |_| Mutability::Mutable }
+///     keyword!("mut") => { |_| Mutability::Mutable(Default::default()) }
 ///     |
 ///     epsilon!() => { |_| Mutability::Immutable }
 /// ));
@@ -201,7 +202,7 @@ macro_rules! opt_vec {
 /// fn main() {
 ///     let input = "mut";
 ///     let parsed = mutability(input).expect("mutability");
-///     assert_eq!(parsed, Mutability::Mutable);
+///     assert_eq!(parsed, Mutability::Mutable(Default::default()));
 ///
 ///     let input = "";
 ///     let parsed = mutability(input).expect("mutability");
@@ -236,7 +237,8 @@ macro_rules! epsilon {
 ///         e = Expr {
 ///             node: ExprCall {
 ///                 func: Box::new(e),
-///                 args: vec![arg.1],
+///                 args: vec![arg.1].into(),
+///                 paren_token: Default::default(),
 ///             }.into(),
 ///             attrs: Vec::new(),
 ///         };
@@ -289,9 +291,11 @@ macro_rules! tap {
 ///
 /// use syn::Expr;
 /// use syn::parse::expr;
+/// use synom::delimited::Delimited;
 ///
 /// named!(expr_list -> Vec<Expr>,
-///     separated_list!(punct!(","), expr)
+///     map!(separated_list!(punct!(","), expr),
+///          |v: Delimited<_, _>| v.into_vec())
 /// );
 ///
 /// fn main() {
@@ -308,10 +312,14 @@ macro_rules! tap {
 ///
 /// use syn::Ident;
 /// use syn::parse::ident;
+/// use synom::delimited::Delimited;
 ///
 /// named!(run_on -> Vec<Ident>,
 ///     terminated!(
-///         separated_list!(keyword!("and"), preceded!(punct!("$"), ident)),
+///         map!(
+///             separated_list!(keyword!("and"), preceded!(punct!("$"), ident)),
+///             |v: Delimited<_, _>| v.into_vec()
+///         ),
 ///         punct!("...")
 ///     )
 /// );
@@ -328,46 +336,11 @@ macro_rules! tap {
 /// ```
 #[macro_export]
 macro_rules! separated_list {
-    // Try to use this branch if possible - makes a difference in compile time.
-    ($i:expr, punct!($sep:expr), $f:ident) => {
-        $crate::helper::separated_list($i, $sep, $f, false)
-    };
-
     ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $fmac:ident!( $($fargs:tt)* )) => {{
-        let mut res = ::std::vec::Vec::new();
-        let mut input = $i;
-
-        // get the first element
-        match $fmac!(input, $($fargs)*) {
-            $crate::IResult::Error => $crate::IResult::Done(input, res),
-            $crate::IResult::Done(i, o) => {
-                if i.len() == input.len() {
-                    $crate::IResult::Error
-                } else {
-                    res.push(o);
-                    input = i;
-
-                    // get the separator first
-                    while let $crate::IResult::Done(i2, _) = $sepmac!(input, $($separgs)*) {
-                        if i2.len() == input.len() {
-                            break;
-                        }
-
-                        // get the element next
-                        if let $crate::IResult::Done(i3, o3) = $fmac!(i2, $($fargs)*) {
-                            if i3.len() == i2.len() {
-                                break;
-                            }
-                            res.push(o3);
-                            input = i3;
-                        } else {
-                            break;
-                        }
-                    }
-                    $crate::IResult::Done(input, res)
-                }
-            }
-        }
+        $crate::helper::separated_list($i,
+                                       |d| $sepmac!(d, $($separgs)*),
+                                       |d| $fmac!(d, $($fargs)*),
+                                       false)
     }};
 
     ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $f:expr) => {
@@ -401,8 +374,9 @@ macro_rules! separated_list {
 ///
 /// use syn::Expr;
 /// use syn::parse::expr;
+/// use synom::delimited::Delimited;
 ///
-/// named!(expr_list -> Vec<Expr>,
+/// named!(expr_list -> Delimited<Expr, &str>,
 ///     terminated_list!(punct!(","), expr)
 /// );
 ///
@@ -420,8 +394,9 @@ macro_rules! separated_list {
 ///
 /// use syn::Ident;
 /// use syn::parse::ident;
+/// use synom::delimited::Delimited;
 ///
-/// named!(run_on -> Vec<Ident>,
+/// named!(run_on -> Delimited<Ident, &str>,
 ///     terminated!(
 ///         terminated_list!(keyword!("and"), preceded!(punct!("$"), ident)),
 ///         punct!("...")
@@ -431,7 +406,7 @@ macro_rules! separated_list {
 /// fn main() {
 ///     let input = "$expr and $ident and $pat and ...";
 ///
-///     let parsed = run_on(input).expect("run-on sentence");
+///     let parsed = run_on(input).expect("run-on sentence").into_vec();
 ///     assert_eq!(parsed.len(), 3);
 ///     assert_eq!(parsed[0], "expr");
 ///     assert_eq!(parsed[1], "ident");
@@ -440,49 +415,11 @@ macro_rules! separated_list {
 /// ```
 #[macro_export]
 macro_rules! terminated_list {
-    // Try to use this branch if possible - makes a difference in compile time.
-    ($i:expr, punct!($sep:expr), $f:ident) => {
-        $crate::helper::separated_list($i, $sep, $f, true)
-    };
-
     ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $fmac:ident!( $($fargs:tt)* )) => {{
-        let mut res = ::std::vec::Vec::new();
-        let mut input = $i;
-
-        // get the first element
-        match $fmac!(input, $($fargs)*) {
-            $crate::IResult::Error => $crate::IResult::Done(input, res),
-            $crate::IResult::Done(i, o) => {
-                if i.len() == input.len() {
-                    $crate::IResult::Error
-                } else {
-                    res.push(o);
-                    input = i;
-
-                    // get the separator first
-                    while let $crate::IResult::Done(i2, _) = $sepmac!(input, $($separgs)*) {
-                        if i2.len() == input.len() {
-                            break;
-                        }
-
-                        // get the element next
-                        if let $crate::IResult::Done(i3, o3) = $fmac!(i2, $($fargs)*) {
-                            if i3.len() == i2.len() {
-                                break;
-                            }
-                            res.push(o3);
-                            input = i3;
-                        } else {
-                            break;
-                        }
-                    }
-                    if let $crate::IResult::Done(after, _) = $sepmac!(input, $($separgs)*) {
-                        input = after;
-                    }
-                    $crate::IResult::Done(input, res)
-                }
-            }
-        }
+        $crate::helper::separated_list($i,
+                                       |d| $sepmac!(d, $($separgs)*),
+                                       |d| $fmac!(d, $($fargs)*),
+                                       true)
     }};
 
     ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $f:expr) => {
@@ -500,47 +437,50 @@ macro_rules! terminated_list {
 
 // Not public API.
 #[doc(hidden)]
-pub fn separated_list<'a, T>(mut input: &'a str,
-                             sep: &'static str,
-                             f: fn(&'a str) -> IResult<&'a str, T>,
-                             terminated: bool)
-                             -> IResult<&'a str, Vec<T>> {
-    let mut res = Vec::new();
+pub fn separated_list<'a, F1, D, F2, T>(mut input: &'a str,
+                                        mut sep: F1,
+                                        mut parse: F2,
+                                        terminated: bool)
+    -> IResult<&'a str, Delimited<T, D>>
+    where F1: FnMut(&'a str) -> IResult<&'a str, D>,
+          F2: FnMut(&'a str) -> IResult<&'a str, T>,
+{
+    let mut res = Delimited::new();
 
     // get the first element
-    match f(input) {
+    match parse(input) {
         IResult::Error => IResult::Done(input, res),
         IResult::Done(i, o) => {
             if i.len() == input.len() {
-                IResult::Error
-            } else {
-                res.push(o);
-                input = i;
-
-                // get the separator first
-                while let IResult::Done(i2, _) = punct(input, sep) {
-                    if i2.len() == input.len() {
-                        break;
-                    }
-
-                    // get the element next
-                    if let IResult::Done(i3, o3) = f(i2) {
-                        if i3.len() == i2.len() {
-                            break;
-                        }
-                        res.push(o3);
-                        input = i3;
-                    } else {
-                        break;
-                    }
-                }
-                if terminated {
-                    if let IResult::Done(after, _) = punct(input, sep) {
-                        input = after;
-                    }
-                }
-                IResult::Done(input, res)
+                return IResult::Error
             }
+            input = i;
+            res.push_first(o);
+
+            // get the separator first
+            while let IResult::Done(i2, s) = sep(input) {
+                if i2.len() == input.len() {
+                    break;
+                }
+
+                // get the element next
+                if let IResult::Done(i3, o3) = parse(i2) {
+                    if i3.len() == i2.len() {
+                        break;
+                    }
+                    res.push_next(o3, s);
+                    input = i3;
+                } else {
+                    break;
+                }
+            }
+            if terminated {
+                if let IResult::Done(after, sep) = sep(input) {
+                    res.push_trailing(sep);
+                    input = after;
+                }
+            }
+            IResult::Done(input, res)
         }
     }
 }

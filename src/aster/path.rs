@@ -1,5 +1,5 @@
 use {AngleBracketedParameterData, Generics, Ident, Lifetime, ParenthesizedParameterData, Path,
-     PathParameters, PathSegment, Ty, TypeBinding};
+     PathParameters, PathSegment, Ty, TypeBinding, FunctionRetTy};
 use aster::ident::ToIdent;
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::IntoLifetime;
@@ -139,9 +139,10 @@ impl<F> PathSegmentsBuilder<F>
 
     pub fn build(self) -> F::Result {
         self.callback.invoke(Path {
-                                 global: self.global,
-                                 segments: self.segments,
-                             })
+            global: self.global,
+            segments: self.segments.into(),
+            leading_colon: None,
+        })
     }
 }
 
@@ -181,10 +182,10 @@ impl<F> PathSegmentBuilder<F>
 
     pub fn with_generics(self, generics: Generics) -> Self {
         // Strip off the bounds.
-        let lifetimes = generics.lifetimes.iter().map(|lifetime_def| lifetime_def.lifetime.clone());
+        let lifetimes = generics.lifetimes.iter().map(|lifetime_def| lifetime_def.item().lifetime.clone());
 
         let tys =
-            generics.ty_params.iter().map(|ty_param| TyBuilder::new().id(ty_param.ident.clone()));
+            generics.ty_params.iter().map(|ty_param| TyBuilder::new().id(ty_param.item().ident.clone()));
 
         self.with_lifetimes(lifetimes).with_tys(tys)
     }
@@ -252,23 +253,29 @@ impl<F> PathSegmentBuilder<F>
 
     pub fn build_return(self, output: Option<Ty>) -> F::Result {
         let data = ParenthesizedParameterData {
-            inputs: self.tys,
-            output: output,
+            inputs: self.tys.into(),
+            output: match output {
+                Some(ty) => FunctionRetTy::Ty(ty, Default::default()),
+                None => FunctionRetTy::Default,
+            },
+            paren_token: Default::default(),
         };
 
         let parameters = PathParameters::Parenthesized(data);
 
         self.callback.invoke(PathSegment {
-                                 ident: self.id,
-                                 parameters: parameters,
-                             })
+            ident: self.id,
+            parameters: parameters,
+        })
     }
 
     pub fn build(self) -> F::Result {
         let data = AngleBracketedParameterData {
-            lifetimes: self.lifetimes,
-            types: self.tys,
-            bindings: self.bindings,
+            lifetimes: self.lifetimes.into(),
+            types: self.tys.into(),
+            bindings: self.bindings.into(),
+            gt_token: Default::default(),
+            lt_token: Default::default(),
         };
 
         let parameters = PathParameters::AngleBracketed(data);
@@ -306,9 +313,10 @@ impl<F> Invoke<Ty> for TypeBindingBuilder<F>
         let id = self.id;
 
         self.builder.with_binding(TypeBinding {
-                                      ident: id,
-                                      ty: ty,
-                                  })
+            ident: id,
+            ty: ty,
+            eq_token: Default::default(),
+        })
     }
 }
 

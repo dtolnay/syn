@@ -1,9 +1,32 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
-use syn::TokenTree::{self, Token};
-use syn::DelimToken::*;
-use syn::Token::*;
+extern crate proc_macro2;
+
+use syn::TokenTree;
+use proc_macro2::{TokenKind, OpKind, Delimiter};
+use proc_macro2::Delimiter::*;
+
+fn op(c: char) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Op(c, OpKind::Alone),
+    })
+}
+
+fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Sequence(delim, tokens.into_iter().map(|t| t.0).collect()),
+    })
+}
+
+fn word(sym: &str) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Word(sym.into()),
+    })
+}
 
 #[test]
 fn test_struct() {
@@ -15,43 +38,39 @@ fn test_struct() {
         }
     ";
 
-    let expected =
-        vec![Token(Pound),
-             delimited(Bracket,
-                       vec![ident("derive"),
-                            delimited(Paren, vec![ident("Debug"), Token(Comma), ident("Clone")])]),
-             ident("pub"),
-             ident("struct"),
-             ident("Item"),
-             delimited(Brace,
-                       vec![ident("pub"),
-                            ident("ident"),
-                            Token(Colon),
-                            ident("Ident"),
-                            Token(Comma),
+    let expected = vec![
+        op('#'),
+        delimited(Bracket, vec![
+           word("derive"),
+           delimited(Parenthesis, vec![
+               word("Debug"),
+               op(','),
+               word("Clone"),
+           ]),
+        ]),
+        word("pub"),
+        word("struct"),
+        word("Item"),
+        delimited(Brace, vec![
+           word("pub"),
+           word("ident"),
+           op(':'),
+           word("Ident"),
+           op(','),
 
-                            ident("pub"),
-                            ident("attrs"),
-                            Token(Colon),
-                            ident("Vec"),
-                            Token(Lt),
-                            ident("Attribute"),
-                            Token(Gt),
-                            Token(Comma)])];
+           word("pub"),
+           word("attrs"),
+           op(':'),
+           word("Vec"),
+           op('<'),
+           word("Attribute"),
+           op('>'),
+           op(','),
+        ],
+    )];
 
     let result = syn::parse_token_trees(raw).unwrap();
     if result != expected {
         panic!("{:#?}\n!=\n{:#?}", result, expected);
     }
-}
-
-fn delimited(delim: syn::DelimToken, tts: Vec<TokenTree>) -> TokenTree {
-    TokenTree::Delimited(syn::Delimited {
-                             delim: delim,
-                             tts: tts,
-                         })
-}
-
-fn ident(s: &str) -> TokenTree {
-    TokenTree::Token(Ident(syn::Ident::new(s)))
 }

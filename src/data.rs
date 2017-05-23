@@ -1,4 +1,5 @@
 use super::*;
+use delimited::Delimited;
 
 ast_struct! {
     /// An enum variant.
@@ -14,6 +15,8 @@ ast_struct! {
 
         /// Explicit discriminant, e.g. `Foo = 1`
         pub discriminant: Option<ConstExpr>,
+
+        pub eq_token: Option<tokens::Eq>,
     }
 }
 
@@ -21,10 +24,10 @@ ast_enum! {
     /// Data stored within an enum variant or struct.
     pub enum VariantData {
         /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-        Struct(Vec<Field>),
+        Struct(Delimited<Field, tokens::Comma>, tokens::Brace),
 
         /// Tuple variant, e.g. `Some(T)`.
-        Tuple(Vec<Field>),
+        Tuple(Delimited<Field, tokens::Comma>, tokens::Paren),
 
         /// Unit variant, e.g. `None`.
         Unit,
@@ -32,23 +35,24 @@ ast_enum! {
 }
 
 impl VariantData {
-    /// Slice containing the fields stored in the variant.
-    pub fn fields(&self) -> &[Field] {
-        match *self {
-            VariantData::Struct(ref fields) |
-            VariantData::Tuple(ref fields) => fields,
-            VariantData::Unit => &[],
-        }
-    }
-
-    /// Mutable slice containing the fields stored in the variant.
-    pub fn fields_mut(&mut self) -> &mut [Field] {
-        match *self {
-            VariantData::Struct(ref mut fields) |
-            VariantData::Tuple(ref mut fields) => fields,
-            VariantData::Unit => &mut [],
-        }
-    }
+    // TODO: expose this?
+    // /// Slice containing the fields stored in the variant.
+    // pub fn fields(&self) -> &Delimited<Field, tokens::Comma> {
+    //     match *self {
+    //         VariantData::Struct(ref fields, _) |
+    //         VariantData::Tuple(ref fields, _) => fields,
+    //         VariantData::Unit => &[],
+    //     }
+    // }
+    //
+    // /// Mutable slice containing the fields stored in the variant.
+    // pub fn fields_mut(&mut self) -> &mut Delimited<Field, tokens::Comma> {
+    //     match *self {
+    //         VariantData::Struct(ref mut fields, _) |
+    //         VariantData::Tuple(ref mut fields, _) => fields,
+    //         VariantData::Unit => &mut [],
+    //     }
+    // }
 }
 
 ast_struct! {
@@ -67,23 +71,36 @@ ast_struct! {
 
         /// Type of the field.
         pub ty: Ty,
+
+        pub colon_token: Option<tokens::Colon>,
     }
 }
 
-ast_enum! {
+ast_enum_of_structs! {
     /// Visibility level of an item.
     pub enum Visibility {
         /// Public, i.e. `pub`.
-        Public,
+        pub Public(VisPublic {
+            pub pub_token: tokens::Pub,
+        }),
 
         /// Crate-visible, i.e. `pub(crate)`.
-        Crate,
+        pub Crate(VisCrate {
+            pub pub_token: tokens::Pub,
+            pub paren_token: tokens::Paren,
+            pub crate_token: tokens::Crate,
+        }),
 
         /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
-        Restricted(Box<Path>),
+        pub Restricted(VisRestricted {
+            pub pub_token: tokens::Pub,
+            pub paren_token: tokens::Paren,
+            pub in_token: Option<tokens::In>,
+            pub path: Box<Path>,
+        }),
 
         /// Inherited, i.e. private.
-        Inherited,
+        pub Inherited(VisInherited {}),
     }
 }
 
@@ -102,42 +119,43 @@ pub mod parsing {
     use ident::parsing::ident;
     use ty::parsing::{mod_style_path, ty};
 
-    named!(pub struct_body -> (WhereClause, VariantData), alt!(
+    named!(pub struct_body -> (WhereClause, VariantData, Option<tokens::Semi>), alt!(
         do_parse!(
             wh: where_clause >>
             body: struct_like_body >>
-            (wh, VariantData::Struct(body))
+            (wh, VariantData::Struct(body.0, body.1), None)
         )
         |
         do_parse!(
             body: tuple_like_body >>
             wh: where_clause >>
             punct!(";") >>
-            (wh, VariantData::Tuple(body))
+            (wh, VariantData::Tuple(body.0, body.1), Some(tokens::Semi::default()))
         )
         |
         do_parse!(
             wh: where_clause >>
             punct!(";") >>
-            (wh, VariantData::Unit)
+            (wh, VariantData::Unit, Some(tokens::Semi::default()))
         )
     ));
 
-    named!(pub enum_body -> (WhereClause, Vec<Variant>), do_parse!(
+    named!(pub enum_body -> (WhereClause, Delimited<Variant, tokens::Comma>, tokens::Brace), do_parse!(
         wh: where_clause >>
         punct!("{") >>
-        variants: terminated_list!(punct!(","), variant) >>
+        variants: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
+                                   variant) >>
         punct!("}") >>
-        (wh, variants)
+        (wh, variants, tokens::Brace::default())
     ));
 
     named!(variant -> Variant, do_parse!(
         attrs: many0!(outer_attr) >>
         id: ident >>
         data: alt!(
-            struct_like_body => { VariantData::Struct }
+            struct_like_body => { |(d, b)| VariantData::Struct(d, b) }
             |
-            tuple_like_body => { VariantData::Tuple }
+            tuple_like_body => { |(d, b)| VariantData::Tuple(d, b) }
             |
             epsilon!() => { |_| VariantData::Unit }
         ) >>
@@ -146,6 +164,7 @@ pub mod parsing {
             ident: id,
             attrs: attrs,
             data: data,
+            eq_token: disr.as_ref().map(|_| tokens::Eq::default()),
             discriminant: disr,
         })
     ));
@@ -163,18 +182,20 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(after_discriminant -> &str, peek!(alt!(punct!(",") | punct!("}"))));
 
-    named!(pub struct_like_body -> Vec<Field>, do_parse!(
+    named!(pub struct_like_body -> (Delimited<Field, tokens::Comma>, tokens::Brace), do_parse!(
         punct!("{") >>
-        fields: terminated_list!(punct!(","), struct_field) >>
+        fields: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
+                                 struct_field) >>
         punct!("}") >>
-        (fields)
+        (fields, tokens::Brace::default())
     ));
 
-    named!(tuple_like_body -> Vec<Field>, do_parse!(
+    named!(tuple_like_body -> (Delimited<Field, tokens::Comma>, tokens::Paren), do_parse!(
         punct!("(") >>
-        fields: terminated_list!(punct!(","), tuple_field) >>
+        fields: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
+                                 tuple_field) >>
         punct!(")") >>
-        (fields)
+        (fields, tokens::Paren::default())
     ));
 
     named!(struct_field -> Field, do_parse!(
@@ -188,6 +209,7 @@ pub mod parsing {
             vis: vis,
             attrs: attrs,
             ty: ty,
+            colon_token: Some(tokens::Colon::default()),
         })
     ));
 
@@ -197,6 +219,7 @@ pub mod parsing {
         ty: ty >>
         (Field {
             ident: None,
+            colon_token: None,
             vis: vis,
             attrs: attrs,
             ty: ty,
@@ -209,7 +232,11 @@ pub mod parsing {
             punct!("(") >>
             keyword!("crate") >>
             punct!(")") >>
-            (Visibility::Crate)
+            (Visibility::Crate(VisCrate {
+                crate_token: tokens::Crate::default(),
+                paren_token: tokens::Paren::default(),
+                pub_token: tokens::Pub::default(),
+            }))
         )
         |
         do_parse!(
@@ -217,7 +244,12 @@ pub mod parsing {
             punct!("(") >>
             keyword!("self") >>
             punct!(")") >>
-            (Visibility::Restricted(Box::new("self".into())))
+            (Visibility::Restricted(VisRestricted {
+                path: Box::new("self".into()),
+                in_token: None,
+                paren_token: tokens::Paren::default(),
+                pub_token: tokens::Pub::default(),
+            }))
         )
         |
         do_parse!(
@@ -225,7 +257,12 @@ pub mod parsing {
             punct!("(") >>
             keyword!("super") >>
             punct!(")") >>
-            (Visibility::Restricted(Box::new("super".into())))
+            (Visibility::Restricted(VisRestricted {
+                path: Box::new("super".into()),
+                in_token: None,
+                paren_token: tokens::Paren::default(),
+                pub_token: tokens::Pub::default(),
+            }))
         )
         |
         do_parse!(
@@ -234,12 +271,21 @@ pub mod parsing {
             keyword!("in") >>
             restricted: mod_style_path >>
             punct!(")") >>
-            (Visibility::Restricted(Box::new(restricted)))
+            (Visibility::Restricted(VisRestricted {
+                path: Box::new(restricted),
+                in_token: Some(tokens::In::default()),
+                paren_token: tokens::Paren::default(),
+                pub_token: tokens::Pub::default(),
+            }))
         )
         |
-        keyword!("pub") => { |_| Visibility::Public }
+        keyword!("pub") => { |_| {
+            Visibility::Public(VisPublic {
+                pub_token: tokens::Pub::default(),
+            })
+        } }
         |
-        epsilon!() => { |_| Visibility::Inherited }
+        epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
     ));
 }
 
@@ -250,30 +296,26 @@ mod printing {
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            for attr in &self.attrs {
-                attr.to_tokens(tokens);
-            }
+            tokens.append_all(&self.attrs);
             self.ident.to_tokens(tokens);
             self.data.to_tokens(tokens);
-            if let Some(ref disr) = self.discriminant {
-                tokens.append("=");
-                disr.to_tokens(tokens);
-            }
+            self.eq_token.to_tokens(tokens);
+            self.discriminant.to_tokens(tokens);
         }
     }
 
     impl ToTokens for VariantData {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                VariantData::Struct(ref fields) => {
-                    tokens.append("{");
-                    tokens.append_separated(fields, ",");
-                    tokens.append("}");
+                VariantData::Struct(ref fields, ref brace) => {
+                    brace.surround(tokens, |tokens| {
+                        fields.to_tokens(tokens);
+                    });
                 }
-                VariantData::Tuple(ref fields) => {
-                    tokens.append("(");
-                    tokens.append_separated(fields, ",");
-                    tokens.append(")");
+                VariantData::Tuple(ref fields, ref paren) => {
+                    paren.surround(tokens, |tokens| {
+                        fields.to_tokens(tokens);
+                    });
                 }
                 VariantData::Unit => {}
             }
@@ -282,47 +324,41 @@ mod printing {
 
     impl ToTokens for Field {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            for attr in &self.attrs {
-                attr.to_tokens(tokens);
-            }
+            tokens.append_all(&self.attrs);
             self.vis.to_tokens(tokens);
-            if let Some(ref ident) = self.ident {
-                ident.to_tokens(tokens);
-                tokens.append(":");
-            }
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for Visibility {
+    impl ToTokens for VisPublic {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Visibility::Public => tokens.append("pub"),
-                Visibility::Crate => {
-                    tokens.append("pub");
-                    tokens.append("(");
-                    tokens.append("crate");
-                    tokens.append(")");
-                }
-                Visibility::Restricted(ref path) => {
-                    tokens.append("pub");
-                    tokens.append("(");
+            self.pub_token.to_tokens(tokens)
+        }
+    }
 
-                    if !path.global &&
-                       path.segments.len() == 1 &&
-                       (path.segments[0].ident == "self" || path.segments[0].ident == "super") &&
-                       path.segments[0].parameters.is_empty() {
+    impl ToTokens for VisCrate {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.pub_token.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.crate_token.to_tokens(tokens);
+            })
+        }
+    }
 
-                        // Don't emit preceding `in` if path is `self` or `super`
-                    } else {
-                        tokens.append("in");
-                    }
+    impl ToTokens for VisRestricted {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.pub_token.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.in_token.to_tokens(tokens);
+                self.path.to_tokens(tokens);
+            });
+        }
+    }
 
-                    path.to_tokens(tokens);
-                    tokens.append(")");
-                }
-                Visibility::Inherited => {}
-            }
+    impl ToTokens for VisInherited {
+        fn to_tokens(&self, _tokens: &mut Tokens) {
         }
     }
 }

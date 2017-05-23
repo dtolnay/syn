@@ -23,11 +23,18 @@
 
 extern crate unicode_xid;
 
+#[cfg(feature = "printing")]
+extern crate quote;
+
+#[cfg(feature = "parsing")]
 #[doc(hidden)]
 pub mod space;
 
+#[cfg(feature = "parsing")]
 #[doc(hidden)]
 pub mod helper;
+
+pub mod delimited;
 
 /// The result of a parser.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -49,9 +56,10 @@ impl<'a, O> IResult<&'a str, O> {
     ///
     /// use syn::Ty;
     /// use syn::parse::ty;
+    /// use synom::delimited::Delimited;
     ///
     /// // One or more Rust types separated by commas.
-    /// named!(comma_separated_types -> Vec<Ty>,
+    /// named!(comma_separated_types -> Delimited<Ty, &str>,
     ///     separated_nonempty_list!(punct!(","), ty)
     /// );
     ///
@@ -88,8 +96,9 @@ impl<'a, O> IResult<&'a str, O> {
 /// # #[macro_use] extern crate synom;
 /// # use syn::Ty;
 /// # use syn::parse::ty;
+/// # use synom::delimited::Delimited;
 /// // One or more Rust types separated by commas.
-/// named!(pub comma_separated_types -> Vec<Ty>,
+/// named!(pub comma_separated_types -> Delimited<Ty, &str>,
 ///     separated_nonempty_list!(punct!(","), ty)
 /// );
 /// # fn main() {}
@@ -255,7 +264,11 @@ macro_rules! not {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::parse::boolean;
+/// named!(boolean -> bool, alt!(
+///     keyword!("true") => { |_| true }
+///     |
+///     keyword!("false") => { |_| false }
+/// ));
 ///
 /// // Parses a tuple of booleans like `(true, false, false)`, possibly with a
 /// // dotdot indicating omitted values like `(true, true, .., true)`. Returns
@@ -278,7 +291,7 @@ macro_rules! not {
 ///     // Allow trailing comma if there is no dotdot but there are elements.
 ///     cond!(!before.is_empty() && after.is_none(), option!(punct!(","))) >>
 ///     punct!(")") >>
-///     (before, after)
+///     (before.into_vec(), after)
 /// ));
 ///
 /// fn main() {
@@ -332,13 +345,17 @@ macro_rules! cond {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::parse::boolean;
-///
 /// #[derive(Debug, PartialEq)]
 /// struct VariadicBools {
 ///     data: Vec<bool>,
 ///     variadic: bool,
 /// }
+///
+/// named!(boolean -> bool, alt!(
+///     keyword!("true") => { |_| true }
+///     |
+///     keyword!("false") => { |_| false }
+/// ));
 ///
 /// // Parse one or more comma-separated booleans, possibly ending in "..." to
 /// // indicate there may be more.
@@ -358,7 +375,7 @@ macro_rules! cond {
 ///     //     Gives `Some("...")` for variadic and `None` otherwise. Perfect!
 ///     variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
 ///     (VariadicBools {
-///         data: data,
+///         data: data.into_vec(),
 ///         variadic: variadic.is_some(),
 ///     })
 /// ));
@@ -706,7 +723,7 @@ macro_rules! take_until {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::StrLit;
+/// use syn::Lit;
 /// use syn::parse::string;
 /// use synom::IResult;
 ///
@@ -714,7 +731,7 @@ macro_rules! take_until {
 /// named!(owned_string -> String,
 ///     map!(
 ///         terminated!(string, tag!("s")),
-///         |lit: StrLit| lit.value
+///         |lit: Lit| lit.to_string()
 ///     )
 /// );
 ///
@@ -931,9 +948,10 @@ macro_rules! delimited {
 ///
 /// use syn::Ty;
 /// use syn::parse::ty;
+/// use synom::delimited::Delimited;
 ///
 /// // One or more Rust types separated by commas.
-/// named!(comma_separated_types -> Vec<Ty>,
+/// named!(comma_separated_types -> Delimited<Ty, &str>,
 ///     separated_nonempty_list!(punct!(","), ty)
 /// );
 ///
@@ -949,7 +967,7 @@ macro_rules! delimited {
 #[macro_export]
 macro_rules! separated_nonempty_list {
     ($i:expr, $sep:ident!( $($args:tt)* ), $submac:ident!( $($args2:tt)* )) => {{
-        let mut res   = ::std::vec::Vec::new();
+        let mut res   = $crate::delimited::Delimited::new();
         let mut input = $i;
 
         // get the first element
@@ -959,19 +977,19 @@ macro_rules! separated_nonempty_list {
                 if i.len() == input.len() {
                     $crate::IResult::Error
                 } else {
-                    res.push(o);
                     input = i;
+                    res.push_first(o);
 
-                    while let $crate::IResult::Done(i2, _) = $sep!(input, $($args)*) {
+                    while let $crate::IResult::Done(i2, s) = $sep!(input, $($args)*) {
                         if i2.len() == input.len() {
                             break;
                         }
 
                         if let $crate::IResult::Done(i3, o3) = $submac!(i2, $($args2)*) {
+                            res.push_next(o3, s);
                             if i3.len() == i2.len() {
                                 break;
                             }
-                            res.push(o3);
                             input = i3;
                         } else {
                             break;

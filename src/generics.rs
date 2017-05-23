@@ -1,12 +1,15 @@
 use super::*;
+use delimited::Delimited;
 
 ast_struct! {
     /// Represents lifetimes and type parameters attached to a declaration
     /// of a function, enum, trait, etc.
     #[derive(Default)]
     pub struct Generics {
-        pub lifetimes: Vec<LifetimeDef>,
-        pub ty_params: Vec<TyParam>,
+        pub lt_token: Option<tokens::Lt>,
+        pub gt_token: Option<tokens::Gt>,
+        pub lifetimes: Delimited<LifetimeDef, tokens::Comma>,
+        pub ty_params: Delimited<TyParam, tokens::Comma>,
         pub where_clause: WhereClause,
     }
 }
@@ -40,7 +43,7 @@ impl Generics {
     /// # extern crate quote;
     /// # fn main() {
     /// # let generics: syn::Generics = Default::default();
-    /// # let name = syn::Ident::new("MyType");
+    /// # let name = syn::Ident::from("MyType");
     /// let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     /// quote! {
     ///     impl #impl_generics MyTrait for #name #ty_generics #where_clause {
@@ -71,7 +74,7 @@ ast_struct! {
 
 impl Lifetime {
     pub fn new<T: Into<Ident>>(t: T) -> Self {
-        let id = Ident::new(t);
+        let id = t.into();
         if !id.as_ref().starts_with('\'') {
             panic!("lifetime name must start with apostrophe as in \"'a\", \
                    got {:?}",
@@ -82,11 +85,23 @@ impl Lifetime {
 }
 
 ast_struct! {
+    /// A set of bound lifetimes, e.g. `for<'a, 'b, 'c>`
+    #[derive(Default)]
+    pub struct BoundLifetimes {
+        pub for_token: tokens::For,
+        pub lt_token: tokens::Lt,
+        pub lifetimes: Delimited<LifetimeDef, tokens::Comma>,
+        pub gt_token: tokens::Gt,
+    }
+}
+
+ast_struct! {
     /// A lifetime definition, e.g. `'a: 'b+'c+'d`
     pub struct LifetimeDef {
         pub attrs: Vec<Attribute>,
         pub lifetime: Lifetime,
-        pub bounds: Vec<Lifetime>,
+        pub colon_token: Option<tokens::Colon>,
+        pub bounds: Delimited<Lifetime, tokens::Add>,
     }
 }
 
@@ -95,7 +110,8 @@ impl LifetimeDef {
         LifetimeDef {
             attrs: Vec::new(),
             lifetime: Lifetime::new(t),
-            bounds: Vec::new(),
+            colon_token: None,
+            bounds: Delimited::new(),
         }
     }
 }
@@ -105,7 +121,9 @@ ast_struct! {
     pub struct TyParam {
         pub attrs: Vec<Attribute>,
         pub ident: Ident,
-        pub bounds: Vec<TyParamBound>,
+        pub colon_token: Option<tokens::Colon>,
+        pub bounds: Delimited<TyParamBound, tokens::Add>,
+        pub eq_token: Option<tokens::Eq>,
         pub default: Option<Ty>,
     }
 }
@@ -115,7 +133,9 @@ impl From<Ident> for TyParam {
         TyParam {
             attrs: vec![],
             ident: ident,
-            bounds: vec![],
+            colon_token: None,
+            bounds: Delimited::new(),
+            eq_token: None,
             default: None,
         }
     }
@@ -138,7 +158,7 @@ ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
-        Maybe,
+        Maybe(tokens::Question),
     }
 }
 
@@ -146,13 +166,14 @@ ast_struct! {
     /// A `where` clause in a definition
     #[derive(Default)]
     pub struct WhereClause {
-        pub predicates: Vec<WherePredicate>,
+        pub where_token: Option<tokens::Where>,
+        pub predicates: Delimited<WherePredicate, tokens::Comma>,
     }
 }
 
 impl WhereClause {
     pub fn none() -> Self {
-        WhereClause { predicates: Vec::new() }
+        WhereClause::default()
     }
 }
 
@@ -162,22 +183,25 @@ ast_enum_of_structs! {
         /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
         pub BoundPredicate(WhereBoundPredicate {
             /// Any lifetimes from a `for` binding
-            pub bound_lifetimes: Vec<LifetimeDef>,
+            pub bound_lifetimes: Option<BoundLifetimes>,
             /// The type being bounded
             pub bounded_ty: Ty,
+            pub colon_token: tokens::Colon,
             /// Trait and lifetime bounds (`Clone+Send+'static`)
-            pub bounds: Vec<TyParamBound>,
+            pub bounds: Delimited<TyParamBound, tokens::Add>,
         }),
 
         /// A lifetime predicate, e.g. `'a: 'b+'c`
         pub RegionPredicate(WhereRegionPredicate {
             pub lifetime: Lifetime,
-            pub bounds: Vec<Lifetime>,
+            pub colon_token: Option<tokens::Colon>,
+            pub bounds: Delimited<Lifetime, tokens::Add>,
         }),
 
         /// An equality predicate (unsupported)
         pub EqPredicate(WhereEqPredicate {
             pub lhs_ty: Ty,
+            pub eq_token: tokens::Eq,
             pub rhs_ty: Ty,
         }),
     }
@@ -194,22 +218,29 @@ pub mod parsing {
         alt!(
             do_parse!(
                 punct!("<") >>
-                lifetimes: separated_list!(punct!(","), lifetime_def) >>
-                ty_params: opt_vec!(preceded!(
-                    cond!(!lifetimes.is_empty(), punct!(",")),
-                    separated_nonempty_list!(punct!(","), ty_param)
-                )) >>
-                cond!(!lifetimes.is_empty() || !ty_params.is_empty(), option!(punct!(","))) >>
+                lifetimes: terminated_list!(
+                    map!(punct!(","), |_| tokens::Comma::default()),
+                    lifetime_def
+                ) >>
+                ty_params: cond!(
+                    lifetimes.is_empty() || lifetimes.trailing_delim(),
+                    terminated_list!(
+                        map!(punct!(","), |_| tokens::Comma::default()),
+                        ty_param
+                    )
+                ) >>
                 punct!(">") >>
-                (lifetimes, ty_params)
+                (lifetimes, ty_params, true)
             )
             |
-            epsilon!() => { |_| (Vec::new(), Vec::new()) }
+            epsilon!() => { |_| (Delimited::new(), None, false) }
         ),
-        |(lifetimes, ty_params)| Generics {
+        |(lifetimes, ty_params, any): (_, Option<_>, _)| Generics {
             lifetimes: lifetimes,
-            ty_params: ty_params,
-            where_clause: Default::default(),
+            ty_params: ty_params.unwrap_or_default(),
+            where_clause: WhereClause::default(),
+            gt_token: if any {Some(tokens::Gt::default())} else {None},
+            lt_token: if any {Some(tokens::Lt::default())} else {None},
         }
     ));
 
@@ -229,32 +260,43 @@ pub mod parsing {
     named!(pub lifetime_def -> LifetimeDef, do_parse!(
         attrs: many0!(outer_attr) >>
         life: lifetime >>
-        bounds: opt_vec!(preceded!(
-            punct!(":"),
-            separated_list!(punct!("+"), lifetime)
-        )) >>
+        colon: option!(punct!(":")) >>
+        bounds: cond!(
+            colon.is_some(),
+            separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
+                                     lifetime)
+        ) >>
         (LifetimeDef {
             attrs: attrs,
             lifetime: life,
-            bounds: bounds,
+            bounds: bounds.unwrap_or_default(),
+            colon_token: colon.map(|_| tokens::Colon::default()),
         })
     ));
 
-    named!(pub bound_lifetimes -> Vec<LifetimeDef>, opt_vec!(do_parse!(
+    named!(pub bound_lifetimes -> Option<BoundLifetimes>, option!(do_parse!(
         keyword!("for") >>
         punct!("<") >>
-        lifetimes: terminated_list!(punct!(","), lifetime_def) >>
+        lifetimes: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
+                                    lifetime_def) >>
         punct!(">") >>
-        (lifetimes)
+        (BoundLifetimes {
+            for_token: tokens::For::default(),
+            lt_token: tokens::Lt::default(),
+            gt_token: tokens::Gt::default(),
+            lifetimes: lifetimes,
+        })
     )));
 
     named!(ty_param -> TyParam, do_parse!(
         attrs: many0!(outer_attr) >>
         id: ident >>
-        bounds: opt_vec!(preceded!(
-            punct!(":"),
-            separated_nonempty_list!(punct!("+"), ty_param_bound)
-        )) >>
+        colon: option!(punct!(":")) >>
+        bounds: cond!(
+            colon.is_some(),
+            separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
+                                     ty_param_bound)
+        ) >>
         default: option!(preceded!(
             punct!("="),
             ty
@@ -262,14 +304,16 @@ pub mod parsing {
         (TyParam {
             attrs: attrs,
             ident: id,
-            bounds: bounds,
+            bounds: bounds.unwrap_or_default(),
+            colon_token: colon.map(|_| tokens::Colon::default()),
+            eq_token: default.as_ref().map(|_| tokens::Eq::default()),
             default: default,
         })
     ));
 
     named!(pub ty_param_bound -> TyParamBound, alt!(
         preceded!(punct!("?"), poly_trait_ref) => {
-            |poly| TyParamBound::Trait(poly, TraitBoundModifier::Maybe)
+            |poly| TyParamBound::Trait(poly, TraitBoundModifier::Maybe(tokens::Question::default()))
         }
         |
         lifetime => { TyParamBound::Region }
@@ -282,24 +326,32 @@ pub mod parsing {
     named!(pub where_clause -> WhereClause, alt!(
         do_parse!(
             keyword!("where") >>
-            predicates: separated_nonempty_list!(punct!(","), where_predicate) >>
-            option!(punct!(",")) >>
-            (WhereClause { predicates: predicates })
+            predicates: terminated_list!(
+                map!(punct!(","), |_| tokens::Comma::default()),
+                where_predicate
+            ) >>
+            (WhereClause {
+                predicates: predicates,
+                where_token: Some(tokens::Where::default()),
+            })
         )
         |
-        epsilon!() => { |_| Default::default() }
+        epsilon!() => { |_| WhereClause::default() }
     ));
 
     named!(where_predicate -> WherePredicate, alt!(
         do_parse!(
             ident: lifetime >>
-            bounds: opt_vec!(preceded!(
-                punct!(":"),
-                separated_list!(punct!("+"), lifetime)
-            )) >>
+            colon: option!(punct!(":")) >>
+            bounds: cond!(
+                colon.is_some(),
+                separated_list!(map!(punct!("+"), |_| tokens::Add::default()),
+                                lifetime)
+            ) >>
             (WherePredicate::RegionPredicate(WhereRegionPredicate {
                 lifetime: ident,
-                bounds: bounds,
+                bounds: bounds.unwrap_or_default(),
+                colon_token: colon.map(|_| tokens::Colon::default()),
             }))
         )
         |
@@ -307,11 +359,13 @@ pub mod parsing {
             bound_lifetimes: bound_lifetimes >>
             bounded_ty: ty >>
             punct!(":") >>
-            bounds: separated_nonempty_list!(punct!("+"), ty_param_bound) >>
+            bounds: separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
+                                             ty_param_bound) >>
             (WherePredicate::BoundPredicate(WhereBoundPredicate {
                 bound_lifetimes: bound_lifetimes,
                 bounded_ty: bounded_ty,
                 bounds: bounds,
+                colon_token: tokens::Colon::default(),
             }))
         )
     ));
@@ -325,70 +379,44 @@ mod printing {
 
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            let has_lifetimes = !self.lifetimes.is_empty();
-            let has_ty_params = !self.ty_params.is_empty();
-            if has_lifetimes || has_ty_params {
-                tokens.append("<");
-                tokens.append_separated(&self.lifetimes, ",");
-                if has_lifetimes && has_ty_params {
-                    tokens.append(",");
-                }
-                tokens.append_separated(&self.ty_params, ",");
-                tokens.append(">");
-            }
+            self.lt_token.to_tokens(tokens);
+            self.lifetimes.to_tokens(tokens);
+            self.ty_params.to_tokens(tokens);
+            self.gt_token.to_tokens(tokens);
         }
     }
 
     impl<'a> ToTokens for ImplGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            let has_lifetimes = !self.0.lifetimes.is_empty();
-            let has_ty_params = !self.0.ty_params.is_empty();
-            if has_lifetimes || has_ty_params {
-                tokens.append("<");
-                tokens.append_separated(&self.0.lifetimes, ",");
-                // Leave off the type parameter defaults
-                for (i, ty_param) in self.0
-                        .ty_params
-                        .iter()
-                        .enumerate() {
-                    if i > 0 || has_lifetimes {
-                        tokens.append(",");
-                    }
-                    tokens.append_all(ty_param.attrs.outer());
-                    ty_param.ident.to_tokens(tokens);
-                    if !ty_param.bounds.is_empty() {
-                        tokens.append(":");
-                        tokens.append_separated(&ty_param.bounds, "+");
-                    }
-                }
-                tokens.append(">");
+            self.0.lt_token.to_tokens(tokens);
+            self.0.lifetimes.to_tokens(tokens);
+            for param in self.0.ty_params.iter() {
+                 // Leave off the type parameter defaults
+                let item = param.item();
+                tokens.append_all(item.attrs.outer());
+                item.ident.to_tokens(tokens);
+                item.colon_token.to_tokens(tokens);
+                item.bounds.to_tokens(tokens);
+                param.delimiter().to_tokens(tokens);
             }
+            self.0.gt_token.to_tokens(tokens);
         }
     }
 
     impl<'a> ToTokens for TyGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            let has_lifetimes = !self.0.lifetimes.is_empty();
-            let has_ty_params = !self.0.ty_params.is_empty();
-            if has_lifetimes || has_ty_params {
-                tokens.append("<");
-                // Leave off the lifetime bounds and attributes
-                let lifetimes = self.0
-                    .lifetimes
-                    .iter()
-                    .map(|ld| &ld.lifetime);
-                tokens.append_separated(lifetimes, ",");
-                if has_lifetimes && has_ty_params {
-                    tokens.append(",");
-                }
-                // Leave off the type parameter bounds, defaults, and attributes
-                let ty_params = self.0
-                    .ty_params
-                    .iter()
-                    .map(|tp| &tp.ident);
-                tokens.append_separated(ty_params, ",");
-                tokens.append(">");
+            self.0.lt_token.to_tokens(tokens);
+            // Leave off the lifetime bounds and attributes
+            for param in self.0.lifetimes.iter() {
+                param.item().lifetime.to_tokens(tokens);
+                param.delimiter().to_tokens(tokens);
             }
+            // Leave off the type parameter defaults
+            for param in self.0.ty_params.iter() {
+                param.item().ident.to_tokens(tokens);
+                param.delimiter().to_tokens(tokens);
+            }
+            self.0.gt_token.to_tokens(tokens);
         }
     }
 
@@ -397,7 +425,7 @@ mod printing {
             let has_lifetimes = !self.0.lifetimes.is_empty();
             let has_ty_params = !self.0.ty_params.is_empty();
             if has_lifetimes || has_ty_params {
-                tokens.append("::");
+                tokens::Colon2::default().to_tokens(tokens);
                 TyGenerics(self.0).to_tokens(tokens);
             }
         }
@@ -409,14 +437,21 @@ mod printing {
         }
     }
 
+    impl ToTokens for BoundLifetimes {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.for_token.to_tokens(tokens);
+            self.lt_token.to_tokens(tokens);
+            self.lifetimes.to_tokens(tokens);
+            self.gt_token.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for LifetimeDef {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.lifetime.to_tokens(tokens);
-            if !self.bounds.is_empty() {
-                tokens.append(":");
-                tokens.append_separated(&self.bounds, "+");
-            }
+            self.colon_token.to_tokens(tokens);
+            self.bounds.to_tokens(tokens);
         }
     }
 
@@ -424,14 +459,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.ident.to_tokens(tokens);
-            if !self.bounds.is_empty() {
-                tokens.append(":");
-                tokens.append_separated(&self.bounds, "+");
-            }
-            if let Some(ref default) = self.default {
-                tokens.append("=");
-                default.to_tokens(tokens);
-            }
+            self.colon_token.to_tokens(tokens);
+            self.bounds.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.default.to_tokens(tokens);
         }
     }
 
@@ -440,55 +471,50 @@ mod printing {
             match *self {
                 TyParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
                 TyParamBound::Trait(ref trait_ref, ref modifier) => {
-                    match *modifier {
-                        TraitBoundModifier::None => {}
-                        TraitBoundModifier::Maybe => tokens.append("?"),
-                    }
+                    modifier.to_tokens(tokens);
                     trait_ref.to_tokens(tokens);
                 }
             }
         }
     }
 
+    impl ToTokens for TraitBoundModifier {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                TraitBoundModifier::None => {}
+                TraitBoundModifier::Maybe(ref t) => t.to_tokens(tokens),
+            }
+        }
+    }
+
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !self.predicates.is_empty() {
-                tokens.append("where");
-                tokens.append_separated(&self.predicates, ",");
-            }
+            self.where_token.to_tokens(tokens);
+            self.predicates.to_tokens(tokens);
         }
     }
 
     impl ToTokens for WhereBoundPredicate {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !self.bound_lifetimes.is_empty() {
-                tokens.append("for");
-                tokens.append("<");
-                tokens.append_separated(&self.bound_lifetimes, ",");
-                tokens.append(">");
-            }
+            self.bound_lifetimes.to_tokens(tokens);
             self.bounded_ty.to_tokens(tokens);
-            if !self.bounds.is_empty() {
-                tokens.append(":");
-                tokens.append_separated(&self.bounds, "+");
-            }
+            self.colon_token.to_tokens(tokens);
+            self.bounds.to_tokens(tokens);
         }
     }
 
     impl ToTokens for WhereRegionPredicate {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lifetime.to_tokens(tokens);
-            if !self.bounds.is_empty() {
-                tokens.append(":");
-                tokens.append_separated(&self.bounds, "+");
-            }
+            self.colon_token.to_tokens(tokens);
+            self.bounds.to_tokens(tokens);
         }
     }
 
     impl ToTokens for WhereEqPredicate {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lhs_ty.to_tokens(tokens);
-            tokens.append("=");
+            self.eq_token.to_tokens(tokens);
             self.rhs_ty.to_tokens(tokens);
         }
     }

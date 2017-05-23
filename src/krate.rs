@@ -44,15 +44,12 @@ mod printing {
 
     impl ToTokens for Crate {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Some(ref shebang) = self.shebang {
-                tokens.append(&format!("{}\n", shebang));
-            }
-            for attr in self.attrs.inner() {
-                attr.to_tokens(tokens);
-            }
-            for item in &self.items {
-                item.to_tokens(tokens);
-            }
+            // TODO: how to handle shebang?
+            // if let Some(ref shebang) = self.shebang {
+            //     tokens.append(&format!("{}\n", shebang));
+            // }
+            tokens.append_all(self.attrs.inner());
+            tokens.append_all(&self.items);
         }
     }
 }

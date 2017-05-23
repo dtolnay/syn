@@ -1,170 +1,100 @@
-ast_enum! {
-    /// Literal kind.
-    ///
-    /// E.g. `"foo"`, `42`, `12.34` or `bool`
-    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
-    pub enum Lit {
-        /// A string literal (`"foo"`)
-        Str(String, StrStyle),
-        /// A byte string (`b"foo"`)
-        ByteStr(Vec<u8>, StrStyle),
-        /// A byte char (`b'f'`)
-        Byte(u8),
-        /// A character literal (`'a'`)
-        Char(char),
-        /// An integer literal (`1`)
-        Int(u64, IntTy),
-        /// A float literal (`1f64` or `1E10f64` or `1.0E10`)
-        Float(String, FloatTy),
-        /// A boolean literal
-        Bool(bool),
+use std::fmt;
+use std::hash::{Hash, Hasher};
+
+use proc_macro2::{self, Literal, TokenKind};
+
+use {Span, TokenTree};
+
+#[derive(Clone)]
+pub struct Lit {
+    pub value: LitKind,
+    pub span: Span,
+}
+
+#[derive(Clone)]
+pub enum LitKind {
+    Bool(bool),
+    Other(Literal),
+}
+
+impl Lit {
+    pub fn into_token_tree(self) -> TokenTree {
+        let kind = match self.value {
+            LitKind::Bool(true) => TokenKind::Word("true".into()),
+            LitKind::Bool(false) => TokenKind::Word("false".into()),
+            LitKind::Other(l) => TokenKind::Literal(l),
+        };
+        TokenTree(proc_macro2::TokenTree {
+            span: self.span.0,
+            kind: kind,
+        })
     }
 }
 
-ast_enum! {
-    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
-    pub enum StrStyle {
-        /// A regular string, like `"foo"`
-        Cooked,
-        /// A raw string, like `r##"foo"##`
-        ///
-        /// The uint is the number of `#` symbols used
-        Raw(usize),
+impl fmt::Display for Lit {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.value, f)
     }
 }
 
-impl From<String> for Lit {
-    fn from(input: String) -> Lit {
-        Lit::Str(input, StrStyle::Cooked)
+impl fmt::Debug for Lit {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.value, f)
     }
 }
 
-impl<'a> From<&'a str> for Lit {
-    fn from(input: &str) -> Lit {
-        Lit::Str(input.into(), StrStyle::Cooked)
+impl PartialEq for Lit {
+    fn eq(&self, other: &Lit) -> bool {
+        self.value == other.value
     }
 }
 
-impl From<Vec<u8>> for Lit {
-    fn from(input: Vec<u8>) -> Lit {
-        Lit::ByteStr(input, StrStyle::Cooked)
+impl Eq for Lit {}
+
+impl Hash for Lit {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        self.value.hash(hasher)
     }
 }
 
-impl<'a> From<&'a [u8]> for Lit {
-    fn from(input: &[u8]) -> Lit {
-        Lit::ByteStr(input.into(), StrStyle::Cooked)
+impl fmt::Display for LitKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            LitKind::Bool(b) => b.fmt(f),
+            LitKind::Other(ref l) => l.fmt(f),
+        }
     }
 }
 
-impl From<char> for Lit {
-    fn from(input: char) -> Lit {
-        Lit::Char(input)
+impl fmt::Debug for LitKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            LitKind::Bool(b) => b.fmt(f),
+            LitKind::Other(ref l) => fmt::Display::fmt(l, f),
+        }
     }
 }
 
-impl From<bool> for Lit {
-    fn from(input: bool) -> Lit {
-        Lit::Bool(input)
-    }
-}
-
-ast_enum! {
-    #[derive(Copy)]
-    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
-    pub enum IntTy {
-        Isize,
-        I8,
-        I16,
-        I32,
-        I64,
-        Usize,
-        U8,
-        U16,
-        U32,
-        U64,
-        Unsuffixed,
-    }
-}
-
-ast_enum! {
-    #[derive(Copy)]
-    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
-    pub enum FloatTy {
-        F32,
-        F64,
-        Unsuffixed,
-    }
-}
-
-macro_rules! impl_from_for_lit {
-    (Int, [$($rust_type:ty => $syn_type:expr),+]) => {
-        $(
-            impl From<$rust_type> for Lit {
-                fn from(input: $rust_type) -> Lit {
-                    Lit::Int(input as u64, $syn_type)
-                }
+impl PartialEq for LitKind {
+    fn eq(&self, other: &LitKind) -> bool {
+        match (self, other) {
+            (&LitKind::Bool(b1), &LitKind::Bool(b2)) => b1 == b2,
+            (&LitKind::Other(ref l1), &LitKind::Other(ref l2)) => {
+                l1.to_string() == l2.to_string()
             }
-        )+
-    };
-    (Float, [$($rust_type:ty => $syn_type:expr),+]) => {
-        $(
-            impl From<$rust_type> for Lit {
-                fn from(input: $rust_type) -> Lit {
-                    Lit::Float(format!("{}", input), $syn_type)
-                }
-            }
-        )+
-    };
-}
-
-impl_from_for_lit! {Int, [
-    isize => IntTy::Isize,
-    i8 => IntTy::I8,
-    i16 => IntTy::I16,
-    i32 => IntTy::I32,
-    i64 => IntTy::I64,
-    usize => IntTy::Usize,
-    u8 => IntTy::U8,
-    u16 => IntTy::U16,
-    u32 => IntTy::U32,
-    u64 => IntTy::U64
-]}
-
-impl_from_for_lit! {Float, [
-    f32 => FloatTy::F32,
-    f64 => FloatTy::F64
-]}
-
-#[cfg(feature = "parsing")]
-ast_struct! {
-    pub struct StrLit {
-        pub value: String,
-        pub style: StrStyle,
+            _ => false,
+        }
     }
 }
 
-#[cfg(feature = "parsing")]
-ast_struct! {
-    pub struct ByteStrLit {
-        pub value: Vec<u8>,
-        pub style: StrStyle,
-    }
-}
+impl Eq for LitKind {}
 
-#[cfg(feature = "parsing")]
-ast_struct! {
-    pub struct IntLit {
-        pub value: u64,
-        pub suffix: IntTy,
-    }
-}
-
-#[cfg(feature = "parsing")]
-ast_struct! {
-    pub struct FloatLit {
-        pub value: String,
-        pub suffix: FloatTy,
+impl Hash for LitKind {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        match *self {
+            LitKind::Bool(b) => (0u8, b).hash(hasher),
+            LitKind::Other(ref l) => (1u8, l.to_string()).hash(hasher),
+        }
     }
 }
 
@@ -172,33 +102,41 @@ ast_struct! {
 pub mod parsing {
     use super::*;
     use escape::{cooked_byte, cooked_byte_string, cooked_char, cooked_string, raw_string};
-    use synom::space::skip_whitespace;
+    use proc_macro2::Literal;
     use synom::IResult;
+    use synom::space::skip_whitespace;
     use unicode_xid::UnicodeXID;
 
+    fn l<T: Into<Literal>>(t: T) -> Lit {
+        Lit {
+            value: LitKind::Other(t.into()),
+            span: Default::default(),
+        }
+    }
+
     named!(pub lit -> Lit, alt!(
-        string => { |StrLit { value, style }| Lit::Str(value, style) }
+        string
         |
-        byte_string => { |ByteStrLit { value, style }| Lit::ByteStr(value, style) }
+        byte_string
         |
-        byte => { |b| Lit::Byte(b) }
+        byte
         |
-        character => { |ch| Lit::Char(ch) }
+        character
         |
-        float => { |FloatLit { value, suffix }| Lit::Float(value, suffix) } // must be before int
+        float
         |
-        int => { |IntLit { value, suffix }| Lit::Int(value, suffix) }
+        int
         |
-        boolean => { |value| Lit::Bool(value) }
+        boolean
     ));
 
-    named!(pub string -> StrLit, alt!(
-        quoted_string => { |s| StrLit { value: s, style: StrStyle::Cooked } }
+    named!(pub string -> Lit, alt!(
+        quoted_string => { |s: String| l(&s[..]) }
         |
         preceded!(
             punct!("r"),
             raw_string
-        ) => { |(s, n)| StrLit { value: s, style: StrStyle::Raw(n) }}
+        ) => { |(s, n): (String, _)| l(Literal::raw_string(&s[..], n)) }
     ));
 
     named!(pub quoted_string -> String, delimited!(
@@ -207,78 +145,84 @@ pub mod parsing {
         tag!("\"")
     ));
 
-    named!(pub byte_string -> ByteStrLit, alt!(
+    named!(pub byte_string -> Lit, alt!(
         delimited!(
             punct!("b\""),
             cooked_byte_string,
             tag!("\"")
-        ) => { |vec| ByteStrLit { value: vec, style: StrStyle::Cooked } }
+        ) => { |vec: Vec<u8>| l(Literal::byte_string(&vec)) }
         |
         preceded!(
             punct!("br"),
             raw_string
-        ) => { |(s, n): (String, _)| ByteStrLit { value: s.into_bytes(), style: StrStyle::Raw(n) } }
+        ) => { |(s, n): (String, _)| l(Literal::raw_byte_string(&s, n)) }
     ));
 
-    named!(pub byte -> u8, do_parse!(
+    named!(pub byte -> Lit, do_parse!(
         punct!("b") >>
         tag!("'") >>
         b: cooked_byte >>
         tag!("'") >>
-        (b)
+        (l(Literal::byte_char(b)))
     ));
 
-    named!(pub character -> char, do_parse!(
+    named!(pub character -> Lit, do_parse!(
         punct!("'") >>
         ch: cooked_char >>
         tag!("'") >>
-        (ch)
+        (l(ch))
     ));
 
-    named!(pub float -> FloatLit, do_parse!(
+    named!(pub float -> Lit, do_parse!(
         value: float_string >>
         suffix: alt!(
-            tag!("f32") => { |_| FloatTy::F32 }
+            tag!("f32")
             |
-            tag!("f64") => { |_| FloatTy::F64 }
+            tag!("f64")
             |
-            epsilon!() => { |_| FloatTy::Unsuffixed }
+            epsilon!() => { |_| "" }
         ) >>
-        (FloatLit { value: value, suffix: suffix })
+        (l(Literal::float(&format!("{}{}", value, suffix))))
     ));
 
-    named!(pub int -> IntLit, do_parse!(
+    named!(pub int -> Lit, do_parse!(
         value: digits >>
         suffix: alt!(
-            tag!("isize") => { |_| IntTy::Isize }
+            tag!("isize")
             |
-            tag!("i8") => { |_| IntTy::I8 }
+            tag!("i8")
             |
-            tag!("i16") => { |_| IntTy::I16 }
+            tag!("i16")
             |
-            tag!("i32") => { |_| IntTy::I32 }
+            tag!("i32")
             |
-            tag!("i64") => { |_| IntTy::I64 }
+            tag!("i64")
             |
-            tag!("usize") => { |_| IntTy::Usize }
+            tag!("usize")
             |
-            tag!("u8") => { |_| IntTy::U8 }
+            tag!("u8")
             |
-            tag!("u16") => { |_| IntTy::U16 }
+            tag!("u16")
             |
-            tag!("u32") => { |_| IntTy::U32 }
+            tag!("u32")
             |
-            tag!("u64") => { |_| IntTy::U64 }
+            tag!("u64")
             |
-            epsilon!() => { |_| IntTy::Unsuffixed }
+            epsilon!() => { |_| "" }
         ) >>
-        (IntLit { value: value, suffix: suffix })
+        (l(Literal::integer(&format!("{}{}", value, suffix))))
     ));
 
-    named!(pub boolean -> bool, alt!(
-        keyword!("true") => { |_| true }
+    named!(pub boolean -> Lit, alt!(
+        keyword!("true") => { |_| Lit {
+            span: Span::default(),
+            value: LitKind::Bool(true),
+        } }
         |
-        keyword!("false") => { |_| false }
+        keyword!("false") => { |_| Lit {
+            span: Span::default(),
+            value: LitKind::Bool(false),
+        } }
     ));
 
     fn float_string(mut input: &str) -> IResult<&str, String> {
@@ -358,26 +302,23 @@ pub mod parsing {
         IResult::Done(&input[len..], input[..len].replace("_", ""))
     }
 
-    pub fn digits(mut input: &str) -> IResult<&str, u64> {
+    pub fn digits(mut input: &str) -> IResult<&str, &str> {
         input = skip_whitespace(input);
 
         let base = if input.starts_with("0x") {
-            input = &input[2..];
             16
         } else if input.starts_with("0o") {
-            input = &input[2..];
             8
         } else if input.starts_with("0b") {
-            input = &input[2..];
             2
         } else {
             10
         };
 
         let mut value = 0u64;
-        let mut len = 0;
+        let mut len = if base == 10 {0} else {2};
         let mut empty = true;
-        for b in input.bytes() {
+        for b in input[len..].bytes() {
             let digit = match b {
                 b'0'...b'9' => (b - b'0') as u64,
                 b'a'...b'f' => 10 + (b - b'a') as u64,
@@ -408,7 +349,7 @@ pub mod parsing {
         if empty {
             IResult::Error
         } else {
-            IResult::Done(&input[len..], value)
+            IResult::Done(&input[len..], &input[..len])
         }
     }
 }
@@ -417,82 +358,20 @@ pub mod parsing {
 mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
-    use std::{ascii, iter};
-    use std::fmt::{self, Display};
-    use std::str;
+
+    use proc_macro2::{TokenTree, TokenKind};
 
     impl ToTokens for Lit {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Lit::Str(ref s, StrStyle::Cooked) => s.to_tokens(tokens),
-                Lit::Str(ref s, StrStyle::Raw(n)) => {
-                    tokens.append(&format!("r{delim}\"{string}\"{delim}",
-                                           delim = iter::repeat("#").take(n).collect::<String>(),
-                                           string = s));
-                }
-                Lit::ByteStr(ref v, StrStyle::Cooked) => {
-                    let mut escaped = "b\"".to_string();
-                    for &ch in v.iter() {
-                        match ch {
-                            0 => escaped.push_str(r"\0"),
-                            b'\'' => escaped.push('\''),
-                            _ => escaped.extend(ascii::escape_default(ch).map(|c| c as char)),
-                        }
-                    }
-                    escaped.push('"');
-                    tokens.append(&escaped);
-                }
-                Lit::ByteStr(ref vec, StrStyle::Raw(n)) => {
-                    tokens.append(&format!("br{delim}\"{string}\"{delim}",
-                                           delim = iter::repeat("#").take(n).collect::<String>(),
-                                           string = str::from_utf8(vec).unwrap()));
-                }
-                Lit::Byte(b) => {
-                    match b {
-                        0 => tokens.append(r"b'\0'"),
-                        b'\"' => tokens.append("b'\"'"),
-                        _ => {
-                            let mut escaped = "b'".to_string();
-                            escaped.extend(ascii::escape_default(b).map(|c| c as char));
-                            escaped.push('\'');
-                            tokens.append(&escaped);
-                        }
-                    }
-                }
-                Lit::Char(ch) => ch.to_tokens(tokens),
-                Lit::Int(value, ty) => tokens.append(&format!("{}{}", value, ty)),
-                Lit::Float(ref value, ty) => tokens.append(&format!("{}{}", value, ty)),
-                Lit::Bool(true) => tokens.append("true"),
-                Lit::Bool(false) => tokens.append("false"),
-            }
-        }
-    }
-
-    impl Display for IntTy {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-            match *self {
-                IntTy::Isize => formatter.write_str("isize"),
-                IntTy::I8 => formatter.write_str("i8"),
-                IntTy::I16 => formatter.write_str("i16"),
-                IntTy::I32 => formatter.write_str("i32"),
-                IntTy::I64 => formatter.write_str("i64"),
-                IntTy::Usize => formatter.write_str("usize"),
-                IntTy::U8 => formatter.write_str("u8"),
-                IntTy::U16 => formatter.write_str("u16"),
-                IntTy::U32 => formatter.write_str("u32"),
-                IntTy::U64 => formatter.write_str("u64"),
-                IntTy::Unsuffixed => Ok(()),
-            }
-        }
-    }
-
-    impl Display for FloatTy {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-            match *self {
-                FloatTy::F32 => formatter.write_str("f32"),
-                FloatTy::F64 => formatter.write_str("f64"),
-                FloatTy::Unsuffixed => Ok(()),
-            }
+            let kind = match self.value {
+                LitKind::Bool(true) => TokenKind::Word("true".into()),
+                LitKind::Bool(false) => TokenKind::Word("false".into()),
+                LitKind::Other(ref l) => TokenKind::Literal(l.clone()),
+            };
+            tokens.append(TokenTree {
+                span: self.span.0,
+                kind: kind,
+            });
         }
     }
 }

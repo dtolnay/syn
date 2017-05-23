@@ -1,7 +1,17 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
+extern crate proc_macro2;
+
 use syn::*;
+use proc_macro2::Literal;
+
+fn lit<T: Into<Literal>>(t: T) -> Lit {
+    Lit {
+        value: LitKind::Other(t.into()),
+        span: Default::default(),
+    }
+}
 
 #[test]
 fn test_meta_item_word() {
@@ -12,7 +22,8 @@ fn test_meta_item_word() {
 fn test_meta_item_name_value() {
     run_test("#[foo = 5]", MetaNameValue {
         ident: "foo".into(),
-        lit: Lit::Int(5, IntTy::Unsuffixed),
+        eq_token: Default::default(),
+        lit: lit(Literal::integer("5")),
     })
 }
 
@@ -20,9 +31,10 @@ fn test_meta_item_name_value() {
 fn test_meta_item_list_lit() {
     run_test("#[foo(5)]", MetaItemList {
         ident: "foo".into(),
+        paren_token: Default::default(),
         nested: vec![
-            NestedMetaItem::Literal(Lit::Int(5, IntTy::Unsuffixed)),
-        ],
+            NestedMetaItem::Literal(lit(Literal::integer("5"))),
+        ].into(),
     })
 }
 
@@ -30,9 +42,10 @@ fn test_meta_item_list_lit() {
 fn test_meta_item_list_word() {
     run_test("#[foo(bar)]", MetaItemList {
         ident: "foo".into(),
+        paren_token: Default::default(),
         nested: vec![
             NestedMetaItem::MetaItem(MetaItem::Word("bar".into())),
-        ],
+        ].into(),
     })
 }
 
@@ -40,12 +53,14 @@ fn test_meta_item_list_word() {
 fn test_meta_item_list_name_value() {
     run_test("#[foo(bar = 5)]", MetaItemList {
         ident: "foo".into(),
+        paren_token: Default::default(),
         nested: vec![
             NestedMetaItem::MetaItem(MetaNameValue {
                 ident: "bar".into(),
-                lit: Lit::Int(5, IntTy::Unsuffixed),
+                eq_token: Default::default(),
+                lit: lit(Literal::integer("5"))
             }.into()),
-        ],
+        ].into(),
     })
 }
 
@@ -53,23 +68,27 @@ fn test_meta_item_list_name_value() {
 fn test_meta_item_multiple() {
     run_test("#[foo(word, name = 5, list(name2 = 6), word2)]", MetaItemList {
         ident: "foo".into(),
+        paren_token: Default::default(),
         nested: vec![
             NestedMetaItem::MetaItem(MetaItem::Word("word".into())),
             NestedMetaItem::MetaItem(MetaNameValue {
                 ident: "name".into(),
-                lit: Lit::Int(5, IntTy::Unsuffixed),
+                eq_token: Default::default(),
+                lit: lit(Literal::integer("5")),
             }.into()),
             NestedMetaItem::MetaItem(MetaItemList {
                 ident: "list".into(),
+                paren_token: Default::default(),
                 nested: vec![
                     NestedMetaItem::MetaItem(MetaNameValue {
                         ident: "name2".into(),
-                        lit: Lit::Int(6, IntTy::Unsuffixed),
+                        eq_token: Default::default(),
+                        lit: lit(Literal::integer("6")),
                     }.into())
-                ],
+                ].into(),
             }.into()),
             NestedMetaItem::MetaItem(MetaItem::Word("word2".into())),
-        ],
+        ].into(),
     })
 }
 

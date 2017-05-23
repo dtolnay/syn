@@ -1,4 +1,5 @@
 use super::*;
+use delimited::Delimited;
 
 ast_enum_of_structs! {
     pub enum ConstExpr {
@@ -8,7 +9,9 @@ ast_enum_of_structs! {
             pub func: Box<ConstExpr>,
 
             /// The arguments to the function being called
-            pub args: Vec<ConstExpr>,
+            pub args: Delimited<ConstExpr, tokens::Comma>,
+
+            pub paren_token: tokens::Paren,
         }),
 
         /// A binary operation (For example: `a + b`, `a * b`)
@@ -42,6 +45,8 @@ ast_enum_of_structs! {
 
             /// Type casted to
             pub ty: Box<Ty>,
+
+            pub as_token: tokens::As,
         }),
 
         /// Variable reference, possibly containing `::` and/or type
@@ -55,12 +60,15 @@ ast_enum_of_structs! {
 
             /// Index expression
             pub index: Box<ConstExpr>,
+
+            pub bracket_token: tokens::Bracket,
         }),
 
         /// No-op: used solely so we can pretty-print faithfully
         pub Paren(ConstParen {
             /// Expression that's parenthesized
             pub expr: Box<ConstExpr>,
+            pub paren_token: tokens::Paren,
         }),
 
         /// If compiling with full support for expression syntax, any expression is
@@ -103,7 +111,12 @@ pub mod parsing {
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
-                e = ConstCall { func: Box::new(e), args: args }.into();
+                let (args, paren) = args;
+                e = ConstCall {
+                    func: Box::new(e),
+                    args: args,
+                    paren_token: paren,
+                }.into();
             })
             |
             tap!(more: and_binary => {
@@ -112,21 +125,32 @@ pub mod parsing {
             })
             |
             tap!(ty: and_cast => {
-                e = ConstCast { expr: Box::new(e), ty: Box::new(ty) }.into();
+                let (ty, token) = ty;
+                e = ConstCast {
+                    expr: Box::new(e),
+                    ty: Box::new(ty),
+                    as_token: token,
+                }.into();
             })
             |
             tap!(i: and_index => {
-                e = ConstIndex { expr: Box::new(e), index: Box::new(i) }.into();
+                let (i, bracket) = i;
+                e = ConstIndex {
+                    expr: Box::new(e),
+                    index: Box::new(i),
+                    bracket_token: bracket,
+                }.into();
             })
         )) >>
         (e)
     ));
 
-    named!(and_call -> Vec<ConstExpr>, do_parse!(
+    named!(and_call -> (Delimited<ConstExpr, tokens::Comma>, tokens::Paren), do_parse!(
         punct!("(") >>
-        args: terminated_list!(punct!(","), const_expr) >>
+        args: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
+                               const_expr) >>
         punct!(")") >>
-        (args)
+        (args, tokens::Paren::default())
     ));
 
     named!(and_binary -> (BinOp, ConstExpr), tuple!(binop, const_expr));
@@ -141,19 +165,27 @@ pub mod parsing {
 
     named!(expr_path -> ConstExpr, map!(path, ConstExpr::Path));
 
-    named!(and_index -> ConstExpr, delimited!(punct!("["), const_expr, punct!("]")));
+    named!(and_index -> (ConstExpr, tokens::Bracket), do_parse!(
+        punct!("[") >>
+        expr: const_expr >>
+        punct!("]") >>
+        (expr, tokens::Bracket::default())
+    ));
 
     named!(expr_paren -> ConstExpr, do_parse!(
         punct!("(") >>
         e: const_expr >>
         punct!(")") >>
-        (ConstParen { expr: Box::new(e) }.into())
+        (ConstParen {
+            expr: Box::new(e),
+            paren_token: tokens::Paren::default(),
+        }.into())
     ));
 
-    named!(and_cast -> Ty, do_parse!(
+    named!(and_cast -> (Ty, tokens::As), do_parse!(
         keyword!("as") >>
         ty: ty >>
-        (ty)
+        (ty, tokens::As::default())
     ));
 }
 
@@ -165,9 +197,9 @@ mod printing {
     impl ToTokens for ConstCall {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.func.to_tokens(tokens);
-            tokens.append("(");
-            tokens.append_separated(&self.args, ",");
-            tokens.append(")");
+            self.paren_token.surround(tokens, |tokens| {
+                self.args.to_tokens(tokens);
+            })
         }
     }
 
@@ -189,7 +221,7 @@ mod printing {
     impl ToTokens for ConstCast {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
-            tokens.append("as");
+            self.as_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
         }
     }
@@ -197,17 +229,17 @@ mod printing {
     impl ToTokens for ConstIndex {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
-            tokens.append("[");
-            self.index.to_tokens(tokens);
-            tokens.append("]");
+            self.bracket_token.surround(tokens, |tokens| {
+                self.index.to_tokens(tokens);
+            })
         }
     }
 
     impl ToTokens for ConstParen {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append("(");
-            self.expr.to_tokens(tokens);
-            tokens.append(")");
+            self.paren_token.surround(tokens, |tokens| {
+                self.expr.to_tokens(tokens);
+            })
         }
     }
 

@@ -13,6 +13,19 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-
 [dependencies]
 unicode-xid = "0.0.4"
 
+[dependencies.quote]
+git = 'https://github.com/alexcrichton/quote'
+branch = 'new-tokens'
+optional = true
+
+[features]
+printing = ["quote"]
+parsing = []
+default = ["parsing"]
+
+[dev-dependencies]
+proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
+
 [dev-dependencies.syn]
 version = "0.11"
 path = ".."

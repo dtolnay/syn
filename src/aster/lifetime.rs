@@ -1,5 +1,6 @@
 use {Ident, Lifetime, LifetimeDef};
 use aster::invoke::{Invoke, Identity};
+use delimited::Delimited;
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +37,8 @@ impl IntoLifetimeDef for Lifetime {
         LifetimeDef {
             attrs: vec![],
             lifetime: self,
-            bounds: vec![],
+            bounds: Delimited::new(),
+            colon_token: Default::default(),
         }
     }
 }
@@ -95,9 +97,10 @@ impl<F> LifetimeDefBuilder<F>
 
     pub fn build(self) -> F::Result {
         self.callback.invoke(LifetimeDef {
-                                 attrs: vec![],
-                                 lifetime: self.lifetime,
-                                 bounds: self.bounds,
-                             })
+            attrs: vec![],
+            lifetime: self.lifetime,
+            bounds: self.bounds.into(),
+            colon_token: Default::default(),
+        })
     }
 }
