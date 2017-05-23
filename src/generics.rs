@@ -12,19 +12,22 @@ ast_struct! {
 }
 
 #[cfg(feature = "printing")]
-/// Returned by `Generics::split_for_impl`.
-#[derive(Debug)]
-pub struct ImplGenerics<'a>(&'a Generics);
+ast_struct! {
+    /// Returned by `Generics::split_for_impl`.
+    pub struct ImplGenerics<'a>(&'a Generics);
+}
 
 #[cfg(feature = "printing")]
-/// Returned by `Generics::split_for_impl`.
-#[derive(Debug)]
-pub struct TyGenerics<'a>(&'a Generics);
+ast_struct! {
+    /// Returned by `Generics::split_for_impl`.
+    pub struct TyGenerics<'a>(&'a Generics);
+}
 
 #[cfg(feature = "printing")]
-/// Returned by `TyGenerics::as_turbofish`.
-#[derive(Debug)]
-pub struct Turbofish<'a>(&'a Generics);
+ast_struct! {
+    /// Returned by `TyGenerics::as_turbofish`.
+    pub struct Turbofish<'a>(&'a Generics);
+}
 
 #[cfg(feature = "printing")]
 impl Generics {
@@ -132,7 +135,7 @@ ast_enum! {
 ast_enum! {
     /// A modifier on a bound, currently this is only used for `?Sized`, where the
     /// modifier is `Maybe`. Negative bounds should also be handled here.
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
         Maybe,

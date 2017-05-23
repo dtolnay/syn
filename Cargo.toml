@@ -10,13 +10,15 @@ categories = ["development-tools::procedural-macro-helpers"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [features]
-default = ["parsing", "printing"]
+default = ["parsing", "printing", "clone-impls"]
 aster = []
 full = []
 parsing = ["unicode-xid", "synom"]
 printing = ["quote"]
 visit = []
 fold = []
+clone-impls = []
+extra-traits = []
 
 [dependencies]
 quote = { version = "0.3.7", optional = true }

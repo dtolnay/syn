@@ -341,7 +341,7 @@ ast_enum! {
 
 ast_enum! {
     /// How a macro was invoked.
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum MacStmtStyle {
         /// The macro statement had a trailing semicolon, e.g. `foo! { ... };`
         /// `foo!(...);`, `foo![...];`
@@ -439,7 +439,7 @@ ast_struct! {
 
 ast_enum! {
     /// A capture clause
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum CaptureBy {
         Value,
         Ref,
@@ -448,7 +448,7 @@ ast_enum! {
 
 ast_enum! {
     /// Limit types of a range (inclusive or exclusive)
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum RangeLimits {
         /// Inclusive at the beginning, exclusive at the end
         HalfOpen,
@@ -474,7 +474,7 @@ ast_struct! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BindingMode {
         ByRef(Mutability),
         ByValue(Mutability),
@@ -1823,7 +1823,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 Pat::Wild => tokens.append("_"),
-                Pat::Ident(mode, ref ident, ref subpat) => {
+                Pat::Ident(ref mode, ref ident, ref subpat) => {
                     mode.to_tokens(tokens);
                     ident.to_tokens(tokens);
                     if let Some(ref subpat) = *subpat {
@@ -1911,7 +1911,7 @@ mod printing {
                     tokens.append("box");
                     inner.to_tokens(tokens);
                 }
-                Pat::Ref(ref target, mutability) => {
+                Pat::Ref(ref target, ref mutability) => {
                     tokens.append("&");
                     mutability.to_tokens(tokens);
                     target.to_tokens(tokens);
@@ -1929,8 +1929,9 @@ mod printing {
                         if !before.is_empty() {
                             tokens.append(",");
                         }
-                        if **rest != Pat::Wild {
-                            rest.to_tokens(tokens);
+                        match **rest {
+                            Pat::Wild => {}
+                            _ => rest.to_tokens(tokens),
                         }
                         tokens.append("..");
                         if !after.is_empty() {
@@ -2012,10 +2013,10 @@ mod printing {
                     tokens.append(";");
                 }
                 Stmt::Mac(ref mac) => {
-                    let (ref mac, style, ref attrs) = **mac;
+                    let (ref mac, ref style, ref attrs) = **mac;
                     tokens.append_all(attrs.outer());
                     mac.to_tokens(tokens);
-                    match style {
+                    match *style {
                         MacStmtStyle::Semicolon => tokens.append(";"),
                         MacStmtStyle::Braces | MacStmtStyle::NoBraces => {
                             // no semicolon

@@ -247,7 +247,6 @@ pub mod parsing {
 mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
-    use ty::PathParameters;
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -312,7 +311,7 @@ mod printing {
                     if !path.global &&
                        path.segments.len() == 1 &&
                        (path.segments[0].ident == "self" || path.segments[0].ident == "super") &&
-                       path.segments[0].parameters == PathParameters::none() {
+                       path.segments[0].parameters.is_empty() {
 
                         // Don't emit preceding `in` if path is `self` or `super`
                     } else {

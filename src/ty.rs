@@ -69,7 +69,7 @@ ast_struct! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Mutability {
         Mutable,
         Immutable,
@@ -234,7 +234,7 @@ ast_struct! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Unsafety {
         Unsafe,
         Normal,
@@ -422,7 +422,7 @@ pub mod parsing {
     named!(ty_path -> Ty, do_parse!(
         qpath: qpath >>
         parenthesized: cond!(
-            qpath.1.segments.last().unwrap().parameters == PathParameters::none(),
+            qpath.1.segments.last().unwrap().parameters.is_empty(),
             option!(parenthesized_parameter_data)
         ) >>
         bounds: many0!(preceded!(punct!("+"), ty_param_bound)) >>
@@ -605,7 +605,7 @@ pub mod parsing {
         bound_lifetimes: bound_lifetimes >>
         trait_ref: path >>
         parenthesized: option!(cond_reduce!(
-            trait_ref.segments.last().unwrap().parameters == PathParameters::none(),
+            trait_ref.segments.last().unwrap().parameters.is_empty(),
             parenthesized_parameter_data
         )) >>
         ({

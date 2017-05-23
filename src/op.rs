@@ -1,5 +1,5 @@
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOp {
         /// The `+` operator (addition)
         Add,
@@ -41,7 +41,7 @@ ast_enum! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum UnOp {
         /// The `*` operator for dereferencing
         Deref,

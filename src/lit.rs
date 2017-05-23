@@ -2,6 +2,7 @@ ast_enum! {
     /// Literal kind.
     ///
     /// E.g. `"foo"`, `42`, `12.34` or `bool`
+    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
     pub enum Lit {
         /// A string literal (`"foo"`)
         Str(String, StrStyle),
@@ -21,6 +22,7 @@ ast_enum! {
 }
 
 ast_enum! {
+    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
     pub enum StrStyle {
         /// A regular string, like `"foo"`
         Cooked,
@@ -69,6 +71,7 @@ impl From<bool> for Lit {
 
 ast_enum! {
     #[derive(Copy)]
+    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
     pub enum IntTy {
         Isize,
         I8,
@@ -86,6 +89,7 @@ ast_enum! {
 
 ast_enum! {
     #[derive(Copy)]
+    #[cfg_attr(not(feature = "clone-impls"), derive(Clone))]
     pub enum FloatTy {
         F32,
         F64,
@@ -133,31 +137,35 @@ impl_from_for_lit! {Float, [
 ]}
 
 #[cfg(feature = "parsing")]
-#[derive(Debug, Clone)]
-pub struct StrLit {
-    pub value: String,
-    pub style: StrStyle,
+ast_struct! {
+    pub struct StrLit {
+        pub value: String,
+        pub style: StrStyle,
+    }
 }
 
 #[cfg(feature = "parsing")]
-#[derive(Debug, Clone)]
-pub struct ByteStrLit {
-    pub value: Vec<u8>,
-    pub style: StrStyle,
+ast_struct! {
+    pub struct ByteStrLit {
+        pub value: Vec<u8>,
+        pub style: StrStyle,
+    }
 }
 
 #[cfg(feature = "parsing")]
-#[derive(Debug, Clone)]
-pub struct IntLit {
-    pub value: u64,
-    pub suffix: IntTy,
+ast_struct! {
+    pub struct IntLit {
+        pub value: u64,
+        pub suffix: IntTy,
+    }
 }
 
 #[cfg(feature = "parsing")]
-#[derive(Debug, Clone)]
-pub struct FloatLit {
-    pub value: String,
-    pub suffix: FloatTy,
+ast_struct! {
+    pub struct FloatLit {
+        pub value: String,
+        pub suffix: FloatTy,
+    }
 }
 
 #[cfg(feature = "parsing")]

@@ -133,7 +133,7 @@ ast_enum! {
     /// Distinguishes between Attributes that decorate items and Attributes that
     /// are contained as statements within items. These two cases need to be
     /// distinguished for pretty-printing.
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum AttrStyle {
         /// Attribute of the form `#![...]`.
         Outer,
@@ -230,14 +230,20 @@ impl<'a, T> FilterAttrs<'a> for T
 
     fn outer(self) -> Self::Ret {
         fn is_outer(attr: &&Attribute) -> bool {
-            attr.style == AttrStyle::Outer
+            match attr.style {
+                AttrStyle::Outer => true,
+                _ => false,
+            }
         }
         self.into_iter().filter(is_outer)
     }
 
     fn inner(self) -> Self::Ret {
         fn is_inner(attr: &&Attribute) -> bool {
-            attr.style == AttrStyle::Inner
+            match attr.style {
+                AttrStyle::Inner => true,
+                _ => false,
+            }
         }
         self.into_iter().filter(is_inner)
     }
@@ -369,7 +375,7 @@ mod printing {
             // If this was a sugared doc, emit it in its original form instead of `#[doc = "..."]`
             match *self {
                 Attribute {
-                    style,
+                    ref style,
                     path: Path { global: false, ref segments },
                     ref tts,
                     is_sugared_doc: true,
@@ -380,7 +386,7 @@ mod printing {
                 {
                     if let TokenTree::Token(Token::Eq) = self.tts[0] {
                         if let TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked))) = self.tts[1] {
-                            match style {
+                            match *style {
                                 AttrStyle::Inner if value.starts_with("//!") => {
                                     tokens.append(&format!("{}\n", value));
                                     return;

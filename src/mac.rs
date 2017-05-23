@@ -89,7 +89,7 @@ ast_enum! {
 }
 
 ast_enum! {
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOpToken {
         Plus,
         Minus,
@@ -106,7 +106,7 @@ ast_enum! {
 
 ast_enum! {
     /// A delimiter token
-    #[derive(Copy)]
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum DelimToken {
         /// A round parenthesis: `(` or `)`
         Paren,
@@ -371,8 +371,8 @@ mod printing {
                 Token::OrOr => tokens.append("||"),
                 Token::Not => tokens.append("!"),
                 Token::Tilde => tokens.append("~"),
-                Token::BinOp(binop) => tokens.append(binop.op()),
-                Token::BinOpEq(binop) => tokens.append(binop.assign_op()),
+                Token::BinOp(ref binop) => tokens.append(binop.op()),
+                Token::BinOpEq(ref binop) => tokens.append(binop.assign_op()),
                 Token::At => tokens.append("@"),
                 Token::Dot => tokens.append("."),
                 Token::DotDot => tokens.append(".."),

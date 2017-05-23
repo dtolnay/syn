@@ -16,5 +16,5 @@ unicode-xid = "0.0.4"
 [dev-dependencies.syn]
 version = "0.11"
 path = ".."
-features = ["parsing", "full"]
+features = ["parsing", "full", "extra-traits"]
 default-features = false
