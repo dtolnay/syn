@@ -27,13 +27,15 @@ fn test_split_for_impl() {
                                         }],
                             ident: Ident::new("T"),
                             bounds: vec![TyParamBound::Region(Lifetime::new("'a"))],
-                            default: Some(Ty::Tup(Vec::new())),
+                            default: Some(TyTup { tys: Vec::new() }.into()),
                         }],
         where_clause: WhereClause {
             predicates: vec![WherePredicate::BoundPredicate(WhereBoundPredicate {
                                                                 bound_lifetimes: Vec::new(),
-                                                                bounded_ty:
-                                                                    Ty::Path(None, "T".into()),
+                                                                bounded_ty: TyPath {
+                                                                    qself: None,
+                                                                    path: "T".into(),
+                                                                }.into(),
                                                                 bounds: vec![
                         TyParamBound::Trait(
                             PolyTraitRef {

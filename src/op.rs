@@ -1,51 +1,55 @@
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum BinOp {
-    /// The `+` operator (addition)
-    Add,
-    /// The `-` operator (subtraction)
-    Sub,
-    /// The `*` operator (multiplication)
-    Mul,
-    /// The `/` operator (division)
-    Div,
-    /// The `%` operator (modulus)
-    Rem,
-    /// The `&&` operator (logical and)
-    And,
-    /// The `||` operator (logical or)
-    Or,
-    /// The `^` operator (bitwise xor)
-    BitXor,
-    /// The `&` operator (bitwise and)
-    BitAnd,
-    /// The `|` operator (bitwise or)
-    BitOr,
-    /// The `<<` operator (shift left)
-    Shl,
-    /// The `>>` operator (shift right)
-    Shr,
-    /// The `==` operator (equality)
-    Eq,
-    /// The `<` operator (less than)
-    Lt,
-    /// The `<=` operator (less than or equal to)
-    Le,
-    /// The `!=` operator (not equal to)
-    Ne,
-    /// The `>=` operator (greater than or equal to)
-    Ge,
-    /// The `>` operator (greater than)
-    Gt,
+ast_enum! {
+    #[derive(Copy)]
+    pub enum BinOp {
+        /// The `+` operator (addition)
+        Add,
+        /// The `-` operator (subtraction)
+        Sub,
+        /// The `*` operator (multiplication)
+        Mul,
+        /// The `/` operator (division)
+        Div,
+        /// The `%` operator (modulus)
+        Rem,
+        /// The `&&` operator (logical and)
+        And,
+        /// The `||` operator (logical or)
+        Or,
+        /// The `^` operator (bitwise xor)
+        BitXor,
+        /// The `&` operator (bitwise and)
+        BitAnd,
+        /// The `|` operator (bitwise or)
+        BitOr,
+        /// The `<<` operator (shift left)
+        Shl,
+        /// The `>>` operator (shift right)
+        Shr,
+        /// The `==` operator (equality)
+        Eq,
+        /// The `<` operator (less than)
+        Lt,
+        /// The `<=` operator (less than or equal to)
+        Le,
+        /// The `!=` operator (not equal to)
+        Ne,
+        /// The `>=` operator (greater than or equal to)
+        Ge,
+        /// The `>` operator (greater than)
+        Gt,
+    }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum UnOp {
-    /// The `*` operator for dereferencing
-    Deref,
-    /// The `!` operator for logical inversion
-    Not,
-    /// The `-` operator for negation
-    Neg,
+ast_enum! {
+    #[derive(Copy)]
+    pub enum UnOp {
+        /// The `*` operator for dereferencing
+        Deref,
+        /// The `!` operator for logical inversion
+        Not,
+        /// The `-` operator for negation
+        Neg,
+    }
 }
 
 #[cfg(feature = "parsing")]

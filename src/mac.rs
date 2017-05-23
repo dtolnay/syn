@@ -1,112 +1,120 @@
 use super::*;
 
-/// Represents a macro invocation. The Path indicates which macro
-/// is being invoked, and the vector of token-trees contains the source
-/// of the macro invocation.
-///
-/// NB: the additional ident for a `macro_rules`-style macro is actually
-/// stored in the enclosing item. Oog.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Mac {
-    pub path: Path,
-    pub tts: Vec<TokenTree>,
+ast_struct! {
+    /// Represents a macro invocation. The Path indicates which macro
+    /// is being invoked, and the vector of token-trees contains the source
+    /// of the macro invocation.
+    ///
+    /// NB: the additional ident for a `macro_rules`-style macro is actually
+    /// stored in the enclosing item. Oog.
+    pub struct Mac {
+        pub path: Path,
+        pub tts: Vec<TokenTree>,
+    }
 }
 
-/// When the main rust parser encounters a syntax-extension invocation, it
-/// parses the arguments to the invocation as a token-tree. This is a very
-/// loose structure, such that all sorts of different AST-fragments can
-/// be passed to syntax extensions using a uniform type.
-///
-/// If the syntax extension is an MBE macro, it will attempt to match its
-/// LHS token tree against the provided token tree, and if it finds a
-/// match, will transcribe the RHS token tree, splicing in any captured
-/// `macro_parser::matched_nonterminals` into the `SubstNt`s it finds.
-///
-/// The RHS of an MBE macro is the only place `SubstNt`s are substituted.
-/// Nothing special happens to misnamed or misplaced `SubstNt`s.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum TokenTree {
-    /// A single token
-    Token(Token),
-    /// A delimited sequence of token trees
-    Delimited(Delimited),
+ast_enum! {
+    /// When the main rust parser encounters a syntax-extension invocation, it
+    /// parses the arguments to the invocation as a token-tree. This is a very
+    /// loose structure, such that all sorts of different AST-fragments can
+    /// be passed to syntax extensions using a uniform type.
+    ///
+    /// If the syntax extension is an MBE macro, it will attempt to match its
+    /// LHS token tree against the provided token tree, and if it finds a
+    /// match, will transcribe the RHS token tree, splicing in any captured
+    /// `macro_parser::matched_nonterminals` into the `SubstNt`s it finds.
+    ///
+    /// The RHS of an MBE macro is the only place `SubstNt`s are substituted.
+    /// Nothing special happens to misnamed or misplaced `SubstNt`s.
+    pub enum TokenTree {
+        /// A single token
+        Token(Token),
+        /// A delimited sequence of token trees
+        Delimited(Delimited),
+    }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Delimited {
-    /// The type of delimiter
-    pub delim: DelimToken,
-    /// The delimited sequence of token trees
-    pub tts: Vec<TokenTree>,
+ast_struct! {
+    pub struct Delimited {
+        /// The type of delimiter
+        pub delim: DelimToken,
+        /// The delimited sequence of token trees
+        pub tts: Vec<TokenTree>,
+    }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum Token {
-    // Expression-operator symbols.
-    Eq,
-    Lt,
-    Le,
-    EqEq,
-    Ne,
-    Ge,
-    Gt,
-    AndAnd,
-    OrOr,
-    Not,
-    Tilde,
-    BinOp(BinOpToken),
-    BinOpEq(BinOpToken),
+ast_enum! {
+    pub enum Token {
+        // Expression-operator symbols.
+        Eq,
+        Lt,
+        Le,
+        EqEq,
+        Ne,
+        Ge,
+        Gt,
+        AndAnd,
+        OrOr,
+        Not,
+        Tilde,
+        BinOp(BinOpToken),
+        BinOpEq(BinOpToken),
 
-    // Structural symbols
-    At,
-    Dot,
-    DotDot,
-    DotDotDot,
-    Comma,
-    Semi,
-    Colon,
-    ModSep,
-    RArrow,
-    LArrow,
-    FatArrow,
-    Pound,
-    Dollar,
-    Question,
+        // Structural symbols
+        At,
+        Dot,
+        DotDot,
+        DotDotDot,
+        Comma,
+        Semi,
+        Colon,
+        ModSep,
+        RArrow,
+        LArrow,
+        FatArrow,
+        Pound,
+        Dollar,
+        Question,
 
-    // Literals
-    Literal(Lit),
+        // Literals
+        Literal(Lit),
 
-    // Name components
-    Ident(Ident),
-    Underscore,
-    Lifetime(Ident),
+        // Name components
+        Ident(Ident),
+        Underscore,
+        Lifetime(Ident),
 
-    DocComment(String),
+        DocComment(String),
+    }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum BinOpToken {
-    Plus,
-    Minus,
-    Star,
-    Slash,
-    Percent,
-    Caret,
-    And,
-    Or,
-    Shl,
-    Shr,
+ast_enum! {
+    #[derive(Copy)]
+    pub enum BinOpToken {
+        Plus,
+        Minus,
+        Star,
+        Slash,
+        Percent,
+        Caret,
+        And,
+        Or,
+        Shl,
+        Shr,
+    }
 }
 
-/// A delimiter token
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum DelimToken {
-    /// A round parenthesis: `(` or `)`
-    Paren,
-    /// A square bracket: `[` or `]`
-    Bracket,
-    /// A curly brace: `{` or `}`
-    Brace,
+ast_enum! {
+    /// A delimiter token
+    #[derive(Copy)]
+    pub enum DelimToken {
+        /// A round parenthesis: `(` or `)`
+        Paren,
+        /// A square bracket: `[` or `]`
+        Bracket,
+        /// A curly brace: `{` or `}`
+        Brace,
+    }
 }
 
 #[cfg(feature = "parsing")]

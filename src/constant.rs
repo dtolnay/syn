@@ -1,38 +1,72 @@
 use super::*;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum ConstExpr {
-    /// A function call
-    ///
-    /// The first field resolves to the function itself,
-    /// and the second field is the list of arguments
-    Call(Box<ConstExpr>, Vec<ConstExpr>),
+ast_enum_of_structs! {
+    pub enum ConstExpr {
+        /// A function call
+        pub Call(ConstCall {
+            /// The function being called
+            pub func: Box<ConstExpr>,
 
-    /// A binary operation (For example: `a + b`, `a * b`)
-    Binary(BinOp, Box<ConstExpr>, Box<ConstExpr>),
+            /// The arguments to the function being called
+            pub args: Vec<ConstExpr>,
+        }),
 
-    /// A unary operation (For example: `!x`, `*x`)
-    Unary(UnOp, Box<ConstExpr>),
+        /// A binary operation (For example: `a + b`, `a * b`)
+        pub Binary(ConstBinary {
+            /// The binary operation this represents
+            pub op: BinOp,
 
-    /// A literal (For example: `1`, `"foo"`)
-    Lit(Lit),
+            /// The left-hand-side of the constant binary op
+            pub left: Box<ConstExpr>,
 
-    /// A cast (`foo as f64`)
-    Cast(Box<ConstExpr>, Box<Ty>),
+            /// The right-hand-side of the constant binary op
+            pub right: Box<ConstExpr>,
+        }),
 
-    /// Variable reference, possibly containing `::` and/or type
-    /// parameters, e.g. foo::bar::<baz>.
-    Path(Path),
+        /// A unary operation (For example: `!x`, `*x`)
+        pub Unary(ConstUnary {
+            /// Operation being performed
+            pub op: UnOp,
 
-    /// An indexing operation (`foo[2]`)
-    Index(Box<ConstExpr>, Box<ConstExpr>),
+            /// Expression acted on
+            pub expr: Box<ConstExpr>,
+        }),
 
-    /// No-op: used solely so we can pretty-print faithfully
-    Paren(Box<ConstExpr>),
+        /// A literal (For example: `1`, `"foo"`)
+        pub Lit(Lit),
 
-    /// If compiling with full support for expression syntax, any expression is
-    /// allowed
-    Other(Other),
+        /// A cast (`foo as f64`)
+        pub Cast(ConstCast {
+            /// Value being casted
+            pub expr: Box<ConstExpr>,
+
+            /// Type casted to
+            pub ty: Box<Ty>,
+        }),
+
+        /// Variable reference, possibly containing `::` and/or type
+        /// parameters, e.g. foo::bar::<baz>.
+        pub Path(Path),
+
+        /// An indexing operation (`foo[2]`)
+        pub Index(ConstIndex {
+            /// Value that is being indexed
+            pub expr: Box<ConstExpr>,
+
+            /// Index expression
+            pub index: Box<ConstExpr>,
+        }),
+
+        /// No-op: used solely so we can pretty-print faithfully
+        pub Paren(ConstParen {
+            /// Expression that's parenthesized
+            pub expr: Box<ConstExpr>,
+        }),
+
+        /// If compiling with full support for expression syntax, any expression is
+        /// allowed
+        pub Other(Other),
+    }
 }
 
 #[cfg(not(feature = "full"))]
@@ -69,20 +103,20 @@ pub mod parsing {
         ) >>
         many0!(alt!(
             tap!(args: and_call => {
-                e = ConstExpr::Call(Box::new(e), args);
+                e = ConstCall { func: Box::new(e), args: args }.into();
             })
             |
             tap!(more: and_binary => {
                 let (op, other) = more;
-                e = ConstExpr::Binary(op, Box::new(e), Box::new(other));
+                e = ConstBinary { op: op, left: Box::new(e), right: Box::new(other) }.into();
             })
             |
             tap!(ty: and_cast => {
-                e = ConstExpr::Cast(Box::new(e), Box::new(ty));
+                e = ConstCast { expr: Box::new(e), ty: Box::new(ty) }.into();
             })
             |
             tap!(i: and_index => {
-                e = ConstExpr::Index(Box::new(e), Box::new(i));
+                e = ConstIndex { expr: Box::new(e), index: Box::new(i) }.into();
             })
         )) >>
         (e)
@@ -100,7 +134,7 @@ pub mod parsing {
     named!(expr_unary -> ConstExpr, do_parse!(
         operator: unop >>
         operand: const_expr >>
-        (ConstExpr::Unary(operator, Box::new(operand)))
+        (ConstUnary { op: operator, expr: Box::new(operand) }.into())
     ));
 
     named!(expr_lit -> ConstExpr, map!(lit, ConstExpr::Lit));
@@ -113,7 +147,7 @@ pub mod parsing {
         punct!("(") >>
         e: const_expr >>
         punct!(")") >>
-        (ConstExpr::Paren(Box::new(e)))
+        (ConstParen { expr: Box::new(e) }.into())
     ));
 
     named!(and_cast -> Ty, do_parse!(
@@ -128,46 +162,52 @@ mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
 
-    impl ToTokens for ConstExpr {
+    impl ToTokens for ConstCall {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                ConstExpr::Call(ref func, ref args) => {
-                    func.to_tokens(tokens);
-                    tokens.append("(");
-                    tokens.append_separated(args, ",");
-                    tokens.append(")");
-                }
-                ConstExpr::Binary(op, ref left, ref right) => {
-                    left.to_tokens(tokens);
-                    op.to_tokens(tokens);
-                    right.to_tokens(tokens);
-                }
-                ConstExpr::Unary(op, ref expr) => {
-                    op.to_tokens(tokens);
-                    expr.to_tokens(tokens);
-                }
-                ConstExpr::Lit(ref lit) => lit.to_tokens(tokens),
-                ConstExpr::Cast(ref expr, ref ty) => {
-                    expr.to_tokens(tokens);
-                    tokens.append("as");
-                    ty.to_tokens(tokens);
-                }
-                ConstExpr::Path(ref path) => path.to_tokens(tokens),
-                ConstExpr::Index(ref expr, ref index) => {
-                    expr.to_tokens(tokens);
-                    tokens.append("[");
-                    index.to_tokens(tokens);
-                    tokens.append("]");
-                }
-                ConstExpr::Paren(ref expr) => {
-                    tokens.append("(");
-                    expr.to_tokens(tokens);
-                    tokens.append(")");
-                }
-                ConstExpr::Other(ref other) => {
-                    other.to_tokens(tokens);
-                }
-            }
+            self.func.to_tokens(tokens);
+            tokens.append("(");
+            tokens.append_separated(&self.args, ",");
+            tokens.append(")");
+        }
+    }
+
+    impl ToTokens for ConstBinary {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.left.to_tokens(tokens);
+            self.op.to_tokens(tokens);
+            self.right.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ConstUnary {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.op.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ConstCast {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append("as");
+            self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ConstIndex {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.expr.to_tokens(tokens);
+            tokens.append("[");
+            self.index.to_tokens(tokens);
+            tokens.append("]");
+        }
+    }
+
+    impl ToTokens for ConstParen {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append("(");
+            self.expr.to_tokens(tokens);
+            tokens.append(")");
         }
     }
 

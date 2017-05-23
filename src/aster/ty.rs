@@ -1,4 +1,5 @@
 use {Generics, Lifetime, MutTy, Mutability, Path, QSelf, Ty, TyParamBound};
+use {TyPath, TySlice, TyNever, TyInfer, TyTup, TyRptr, TyImplTrait};
 use aster::ident::ToIdent;
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::IntoLifetime;
@@ -36,11 +37,11 @@ impl<F> TyBuilder<F>
     }
 
     pub fn build_path(self, path: Path) -> F::Result {
-        self.build(Ty::Path(None, path))
+        self.build(Ty::Path(TyPath { qself: None, path: path }))
     }
 
     pub fn build_qpath(self, qself: QSelf, path: Path) -> F::Result {
-        self.build(Ty::Path(Some(qself), path))
+        self.build(Ty::Path(TyPath { qself: Some(qself), path: path }))
     }
 
     pub fn path(self) -> PathBuilder<TyPathBuilder<F>> {
@@ -115,7 +116,7 @@ impl<F> TyBuilder<F>
     }
 
     pub fn build_slice(self, ty: Ty) -> F::Result {
-        self.build(Ty::Slice(Box::new(ty)))
+        self.build(Ty::Slice(TySlice { ty: Box::new(ty) }))
     }
 
     pub fn slice(self) -> TyBuilder<TySliceBuilder<F>> {
@@ -131,11 +132,11 @@ impl<F> TyBuilder<F>
     }
 
     pub fn never(self) -> F::Result {
-        self.build(Ty::Never)
+        self.build(Ty::Never(TyNever {}))
     }
 
     pub fn infer(self) -> F::Result {
-        self.build(Ty::Infer)
+        self.build(Ty::Infer(TyInfer {}))
     }
 
     pub fn option(self) -> TyBuilder<TyOptionBuilder<F>> {
@@ -236,7 +237,10 @@ impl<F> TyRefBuilder<F>
             ty: ty,
             mutability: self.mutability,
         };
-        self.builder.build(Ty::Rptr(self.lifetime, Box::new(ty)))
+        self.builder.build(Ty::Rptr(TyRptr {
+            lifetime: self.lifetime,
+            ty: Box::new(ty),
+        }))
     }
 
     pub fn ty(self) -> TyBuilder<Self> {
@@ -432,7 +436,9 @@ impl<F> TyImplTraitTyBuilder<F>
 
     pub fn build(self) -> F::Result {
         let bounds = self.bounds;
-        self.builder.build(Ty::ImplTrait(bounds))
+        self.builder.build(Ty::ImplTrait(TyImplTrait {
+            bounds: bounds,
+        }))
     }
 }
 
@@ -473,7 +479,7 @@ impl<F> TyTupleBuilder<F>
     }
 
     pub fn build(self) -> F::Result {
-        self.builder.build(Ty::Tup(self.tys))
+        self.builder.build(Ty::Tup(TyTup { tys: self.tys }))
     }
 }
 

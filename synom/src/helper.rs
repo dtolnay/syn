@@ -227,14 +227,17 @@ macro_rules! epsilon {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::{Expr, ExprKind};
+/// use syn::{Expr, ExprCall};
 /// use syn::parse::expr;
 ///
 /// named!(expr_with_arrow_call -> Expr, do_parse!(
 ///     mut e: expr >>
 ///     many0!(tap!(arg: tuple!(punct!("=>"), expr) => {
 ///         e = Expr {
-///             node: ExprKind::Call(Box::new(e), vec![arg.1]),
+///             node: ExprCall {
+///                 func: Box::new(e),
+///                 args: vec![arg.1],
+///             }.into(),
 ///             attrs: Vec::new(),
 ///         };
 ///     })) >>

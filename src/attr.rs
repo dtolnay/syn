@@ -2,24 +2,25 @@ use super::*;
 
 use std::iter;
 
-/// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Attribute {
-    pub style: AttrStyle,
+ast_struct! {
+    /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
+    pub struct Attribute {
+        pub style: AttrStyle,
 
-    /// The path of the attribute.
-    ///
-    /// E.g. `derive` in `#[derive(Copy)]`
-    /// E.g. `crate::precondition` in `#[crate::precondition x < 5]`
-    pub path: Path,
+        /// The path of the attribute.
+        ///
+        /// E.g. `derive` in `#[derive(Copy)]`
+        /// E.g. `crate::precondition` in `#[crate::precondition x < 5]`
+        pub path: Path,
 
-    /// Any tokens after the path.
-    ///
-    /// E.g. `( Copy )` in `#[derive(Copy)]`
-    /// E.g. `x < 5` in `#[crate::precondition x < 5]`
-    pub tts: Vec<TokenTree>,
+        /// Any tokens after the path.
+        ///
+        /// E.g. `( Copy )` in `#[derive(Copy)]`
+        /// E.g. `x < 5` in `#[crate::precondition x < 5]`
+        pub tts: Vec<TokenTree>,
 
-    pub is_sugared_doc: bool,
+        pub is_sugared_doc: bool,
+    }
 }
 
 impl Attribute {
@@ -49,7 +50,11 @@ impl Attribute {
                             if tts.len() >= 3 {
                                 if let TokenTree::Token(Token::Eq) = tts[1] {
                                     if let TokenTree::Token(Token::Literal(ref lit)) = tts[2] {
-                                        return Some((NestedMetaItem::MetaItem(MetaItem::NameValue(ident.clone(), lit.clone())), &tts[3..]));
+                                        let pair = MetaNameValue {
+                                            ident: ident.clone(),
+                                            lit: lit.clone(),
+                                        };
+                                        return Some((NestedMetaItem::MetaItem(MetaItem::NameValue(pair)), &tts[3..]));
                                     }
                                 }
                             }
@@ -58,7 +63,11 @@ impl Attribute {
                                 if let TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: ref inner_tts }) = tts[1] {
                                     return match list_of_nested_meta_items_from_tokens(vec![], inner_tts) {
                                         Some(nested_meta_items) => {
-                                            Some((NestedMetaItem::MetaItem(MetaItem::List(ident.clone(), nested_meta_items)), &tts[2..]))
+                                            let list = MetaItemList {
+                                                ident: ident.clone(),
+                                                nested: nested_meta_items,
+                                            };
+                                            Some((NestedMetaItem::MetaItem(MetaItem::List(list)), &tts[2..]))
                                         }
 
                                         None => None
@@ -97,7 +106,10 @@ impl Attribute {
                 }
 
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(vec![], tts) {
-                    return Some(MetaItem::List(name.clone(), nested_meta_items));
+                    return Some(MetaItem::List(MetaItemList {
+                        ident: name.clone(),
+                        nested: nested_meta_items,
+                    }));
                 }
             }
         }
@@ -105,7 +117,10 @@ impl Attribute {
         if self.tts.len() == 2 {
             if let TokenTree::Token(Token::Eq) = self.tts[0] {
                 if let TokenTree::Token(Token::Literal(ref lit)) = self.tts[1] {
-                    return Some(MetaItem::NameValue(name.clone(), lit.clone()));
+                    return Some(MetaItem::NameValue(MetaNameValue {
+                        ident: name.clone(),
+                        lit: lit.clone(),
+                    }));
                 }
             }
         }
@@ -114,37 +129,60 @@ impl Attribute {
     }
 }
 
-/// Distinguishes between Attributes that decorate items and Attributes that
-/// are contained as statements within items. These two cases need to be
-/// distinguished for pretty-printing.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum AttrStyle {
-    /// Attribute of the form `#![...]`.
-    Outer,
+ast_enum! {
+    /// Distinguishes between Attributes that decorate items and Attributes that
+    /// are contained as statements within items. These two cases need to be
+    /// distinguished for pretty-printing.
+    #[derive(Copy)]
+    pub enum AttrStyle {
+        /// Attribute of the form `#![...]`.
+        Outer,
 
-    /// Attribute of the form `#[...]`.
-    Inner,
+        /// Attribute of the form `#[...]`.
+        Inner,
+    }
 }
 
-/// A compile-time attribute item.
-///
-/// E.g. `#[test]`, `#[derive(..)]` or `#[feature = "foo"]`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum MetaItem {
-    /// Word meta item.
+ast_enum_of_structs! {
+    /// A compile-time attribute item.
     ///
-    /// E.g. `test` as in `#[test]`
-    Word(Ident),
+    /// E.g. `#[test]`, `#[derive(..)]` or `#[feature = "foo"]`
+    pub enum MetaItem {
+        /// Word meta item.
+        ///
+        /// E.g. `test` as in `#[test]`
+        pub Word(Ident),
 
-    /// List meta item.
-    ///
-    /// E.g. `derive(..)` as in `#[derive(..)]`
-    List(Ident, Vec<NestedMetaItem>),
+        /// List meta item.
+        ///
+        /// E.g. `derive(..)` as in `#[derive(..)]`
+        pub List(MetaItemList {
+            /// Name of this attribute.
+            ///
+            /// E.g. `derive` in `#[derive(..)]`
+            pub ident: Ident,
 
-    /// Name-value meta item.
-    ///
-    /// E.g. `feature = "foo"` as in `#[feature = "foo"]`
-    NameValue(Ident, Lit),
+            /// Arguments to this attribute
+            ///
+            /// E.g. `..` in `#[derive(..)]`
+            pub nested: Vec<NestedMetaItem>,
+        }),
+
+        /// Name-value meta item.
+        ///
+        /// E.g. `feature = "foo"` as in `#[feature = "foo"]`
+        pub NameValue(MetaNameValue {
+            /// Name of this attribute.
+            ///
+            /// E.g. `feature` in `#[feature = "foo"]`
+            pub ident: Ident,
+
+            /// Arguments to this attribute
+            ///
+            /// E.g. `"foo"` in `#[feature = "foo"]`
+            pub lit: Lit,
+        }),
+    }
 }
 
 impl MetaItem {
@@ -154,27 +192,28 @@ impl MetaItem {
     /// `feature` as in `#[feature = "foo"]`.
     pub fn name(&self) -> &str {
         match *self {
-            MetaItem::Word(ref name) |
-            MetaItem::List(ref name, _) |
-            MetaItem::NameValue(ref name, _) => name.as_ref(),
+            MetaItem::Word(ref name) => name.as_ref(),
+            MetaItem::NameValue(ref pair) => pair.ident.as_ref(),
+            MetaItem::List(ref list) => list.ident.as_ref(),
         }
     }
 }
 
-/// Possible values inside of compile-time attribute lists.
-///
-/// E.g. the '..' in `#[name(..)]`.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum NestedMetaItem {
-    /// A full `MetaItem`.
+ast_enum_of_structs! {
+    /// Possible values inside of compile-time attribute lists.
     ///
-    /// E.g. `Copy` in `#[derive(Copy)]` would be a `MetaItem::Word(Ident::from("Copy"))`.
-    MetaItem(MetaItem),
+    /// E.g. the '..' in `#[name(..)]`.
+    pub enum NestedMetaItem {
+        /// A full `MetaItem`.
+        ///
+        /// E.g. `Copy` in `#[derive(Copy)]` would be a `MetaItem::Word(Ident::from("Copy"))`.
+        pub MetaItem(MetaItem),
 
-    /// A Rust literal.
-    ///
-    /// E.g. `"name"` in `#[rename("name")]`.
-    Literal(Lit),
+        /// A Rust literal.
+        ///
+        /// E.g. `"name"` in `#[rename("name")]`.
+        pub Literal(Lit),
+    }
 }
 
 pub trait FilterAttrs<'a> {
@@ -378,37 +417,20 @@ mod printing {
         }
     }
 
-    impl ToTokens for MetaItem {
+    impl ToTokens for MetaItemList {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                MetaItem::Word(ref ident) => {
-                    ident.to_tokens(tokens);
-                }
-                MetaItem::List(ref ident, ref inner) => {
-                    ident.to_tokens(tokens);
-                    tokens.append("(");
-                    tokens.append_separated(inner, ",");
-                    tokens.append(")");
-                }
-                MetaItem::NameValue(ref name, ref value) => {
-                    name.to_tokens(tokens);
-                    tokens.append("=");
-                    value.to_tokens(tokens);
-                }
-            }
+            self.ident.to_tokens(tokens);
+            tokens.append("(");
+            tokens.append_separated(&self.nested, ",");
+            tokens.append(")");
         }
     }
 
-    impl ToTokens for NestedMetaItem {
+    impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                NestedMetaItem::MetaItem(ref nested) => {
-                    nested.to_tokens(tokens);
-                }
-                NestedMetaItem::Literal(ref lit) => {
-                    lit.to_tokens(tokens);
-                }
-            }
+            self.ident.to_tokens(tokens);
+            tokens.append("=");
+            self.lit.to_tokens(tokens);
         }
     }
 }

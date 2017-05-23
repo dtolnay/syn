@@ -1,12 +1,14 @@
 use super::*;
 
-/// Represents lifetimes and type parameters attached to a declaration
-/// of a function, enum, trait, etc.
-#[derive(Debug, Clone, Eq, PartialEq, Default, Hash)]
-pub struct Generics {
-    pub lifetimes: Vec<LifetimeDef>,
-    pub ty_params: Vec<TyParam>,
-    pub where_clause: WhereClause,
+ast_struct! {
+    /// Represents lifetimes and type parameters attached to a declaration
+    /// of a function, enum, trait, etc.
+    #[derive(Default)]
+    pub struct Generics {
+        pub lifetimes: Vec<LifetimeDef>,
+        pub ty_params: Vec<TyParam>,
+        pub where_clause: WhereClause,
+    }
 }
 
 #[cfg(feature = "printing")]
@@ -58,9 +60,10 @@ impl<'a> TyGenerics<'a> {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
-pub struct Lifetime {
-    pub ident: Ident,
+ast_struct! {
+    pub struct Lifetime {
+        pub ident: Ident,
+    }
 }
 
 impl Lifetime {
@@ -75,12 +78,13 @@ impl Lifetime {
     }
 }
 
-/// A lifetime definition, e.g. `'a: 'b+'c+'d`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct LifetimeDef {
-    pub attrs: Vec<Attribute>,
-    pub lifetime: Lifetime,
-    pub bounds: Vec<Lifetime>,
+ast_struct! {
+    /// A lifetime definition, e.g. `'a: 'b+'c+'d`
+    pub struct LifetimeDef {
+        pub attrs: Vec<Attribute>,
+        pub lifetime: Lifetime,
+        pub bounds: Vec<Lifetime>,
+    }
 }
 
 impl LifetimeDef {
@@ -93,13 +97,14 @@ impl LifetimeDef {
     }
 }
 
-/// A generic type parameter, e.g. `T: Into<String>`.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct TyParam {
-    pub attrs: Vec<Attribute>,
-    pub ident: Ident,
-    pub bounds: Vec<TyParamBound>,
-    pub default: Option<Ty>,
+ast_struct! {
+    /// A generic type parameter, e.g. `T: Into<String>`.
+    pub struct TyParam {
+        pub attrs: Vec<Attribute>,
+        pub ident: Ident,
+        pub bounds: Vec<TyParamBound>,
+        pub default: Option<Ty>,
+    }
 }
 
 impl From<Ident> for TyParam {
@@ -113,28 +118,33 @@ impl From<Ident> for TyParam {
     }
 }
 
-/// The AST represents all type param bounds as types.
-/// `typeck::collect::compute_bounds` matches these against
-/// the "special" built-in traits (see `middle::lang_items`) and
-/// detects Copy, Send and Sync.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum TyParamBound {
-    Trait(PolyTraitRef, TraitBoundModifier),
-    Region(Lifetime),
+ast_enum! {
+    /// The AST represents all type param bounds as types.
+    /// `typeck::collect::compute_bounds` matches these against
+    /// the "special" built-in traits (see `middle::lang_items`) and
+    /// detects Copy, Send and Sync.
+    pub enum TyParamBound {
+        Trait(PolyTraitRef, TraitBoundModifier),
+        Region(Lifetime),
+    }
 }
 
-/// A modifier on a bound, currently this is only used for `?Sized`, where the
-/// modifier is `Maybe`. Negative bounds should also be handled here.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum TraitBoundModifier {
-    None,
-    Maybe,
+ast_enum! {
+    /// A modifier on a bound, currently this is only used for `?Sized`, where the
+    /// modifier is `Maybe`. Negative bounds should also be handled here.
+    #[derive(Copy)]
+    pub enum TraitBoundModifier {
+        None,
+        Maybe,
+    }
 }
 
-/// A `where` clause in a definition
-#[derive(Debug, Clone, Eq, PartialEq, Default, Hash)]
-pub struct WhereClause {
-    pub predicates: Vec<WherePredicate>,
+ast_struct! {
+    /// A `where` clause in a definition
+    #[derive(Default)]
+    pub struct WhereClause {
+        pub predicates: Vec<WherePredicate>,
+    }
 }
 
 impl WhereClause {
@@ -143,46 +153,31 @@ impl WhereClause {
     }
 }
 
-/// A single predicate in a `where` clause
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum WherePredicate {
-    /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
-    BoundPredicate(WhereBoundPredicate),
-    /// A lifetime predicate, e.g. `'a: 'b+'c`
-    RegionPredicate(WhereRegionPredicate),
-    /// An equality predicate (unsupported)
-    EqPredicate(WhereEqPredicate),
-}
+ast_enum_of_structs! {
+    /// A single predicate in a `where` clause
+    pub enum WherePredicate {
+        /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
+        pub BoundPredicate(WhereBoundPredicate {
+            /// Any lifetimes from a `for` binding
+            pub bound_lifetimes: Vec<LifetimeDef>,
+            /// The type being bounded
+            pub bounded_ty: Ty,
+            /// Trait and lifetime bounds (`Clone+Send+'static`)
+            pub bounds: Vec<TyParamBound>,
+        }),
 
-/// A type bound.
-///
-/// E.g. `for<'c> Foo: Send+Clone+'c`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct WhereBoundPredicate {
-    /// Any lifetimes from a `for` binding
-    pub bound_lifetimes: Vec<LifetimeDef>,
-    /// The type being bounded
-    pub bounded_ty: Ty,
-    /// Trait and lifetime bounds (`Clone+Send+'static`)
-    pub bounds: Vec<TyParamBound>,
-}
+        /// A lifetime predicate, e.g. `'a: 'b+'c`
+        pub RegionPredicate(WhereRegionPredicate {
+            pub lifetime: Lifetime,
+            pub bounds: Vec<Lifetime>,
+        }),
 
-/// A lifetime predicate.
-///
-/// E.g. `'a: 'b+'c`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct WhereRegionPredicate {
-    pub lifetime: Lifetime,
-    pub bounds: Vec<Lifetime>,
-}
-
-/// An equality predicate (unsupported).
-///
-/// E.g. `T=int`
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct WhereEqPredicate {
-    pub lhs_ty: Ty,
-    pub rhs_ty: Ty,
+        /// An equality predicate (unsupported)
+        pub EqPredicate(WhereEqPredicate {
+            pub lhs_ty: Ty,
+            pub rhs_ty: Ty,
+        }),
+    }
 }
 
 #[cfg(feature = "parsing")]
@@ -441,8 +436,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 TyParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
-                TyParamBound::Trait(ref trait_ref, modifier) => {
-                    match modifier {
+                TyParamBound::Trait(ref trait_ref, ref modifier) => {
+                    match *modifier {
                         TraitBoundModifier::None => {}
                         TraitBoundModifier::Maybe => tokens.append("?"),
                     }
@@ -457,22 +452,6 @@ mod printing {
             if !self.predicates.is_empty() {
                 tokens.append("where");
                 tokens.append_separated(&self.predicates, ",");
-            }
-        }
-    }
-
-    impl ToTokens for WherePredicate {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                WherePredicate::BoundPredicate(ref predicate) => {
-                    predicate.to_tokens(tokens);
-                }
-                WherePredicate::RegionPredicate(ref predicate) => {
-                    predicate.to_tokens(tokens);
-                }
-                WherePredicate::EqPredicate(ref predicate) => {
-                    predicate.to_tokens(tokens);
-                }
             }
         }
     }

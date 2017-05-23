@@ -1,10 +1,11 @@
 use super::*;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Crate {
-    pub shebang: Option<String>,
-    pub attrs: Vec<Attribute>,
-    pub items: Vec<Item>,
+ast_struct! {
+    pub struct Crate {
+        pub shebang: Option<String>,
+        pub attrs: Vec<Attribute>,
+        pub items: Vec<Item>,
+    }
 }
 
 #[cfg(feature = "parsing")]
