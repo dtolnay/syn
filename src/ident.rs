@@ -1,12 +1,21 @@
 use std::borrow::Cow;
+use std::cmp::Ordering;
 use std::fmt::{self, Display};
 
-#[derive(Debug, Clone, Eq, Hash, Ord, PartialOrd)]
+#[derive(Debug, Clone, Eq, Hash, Ord)]
 pub struct Ident(String);
 
 impl Ident {
     pub fn new<T: Into<Ident>>(t: T) -> Self {
         t.into()
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    pub fn into_string(self) -> String {
+        self.0
     }
 }
 
@@ -22,9 +31,21 @@ impl<'a> From<Cow<'a, str>> for Ident {
     }
 }
 
+impl<'a> Into<Cow<'a, str>> for Ident {
+    fn into(self) -> Cow<'a, str> {
+        Cow::Owned(self.0)
+    }
+}
+
 impl From<String> for Ident {
     fn from(s: String) -> Self {
         Ident(s)
+    }
+}
+
+impl Into<String> for Ident {
+    fn into(self) -> String {
+        self.0
     }
 }
 
@@ -51,6 +72,14 @@ impl<T: ?Sized> PartialEq<T> for Ident
 {
     fn eq(&self, other: &T) -> bool {
         self.0 == other.as_ref()
+    }
+}
+
+impl<T: ?Sized> PartialOrd<T> for Ident
+    where T: AsRef<str>
+{
+    fn partial_cmp(&self, other: &T) -> Option<Ordering> {
+        self.0.as_str().partial_cmp(other.as_ref())
     }
 }
 
