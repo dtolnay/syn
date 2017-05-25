@@ -369,15 +369,16 @@ pub mod parsing {
     use item::parsing::item;
     use lit::parsing::{digits, lit};
     use mac::parsing::{mac, token_trees};
-    use synom::IResult::{self, Error};
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty, unsafety};
+    use synom::{self, IResult};
 
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
     macro_rules! named_ambiguous_expr {
         ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
-            fn $name(i: &str, $allow_struct: bool) -> $crate::synom::IResult<&str, $o> {
+            fn $name(i: &[$crate::synom::TokenTree], $allow_struct: bool)
+                     -> $crate::synom::IResult<&[$crate::synom::TokenTree], $o> {
                 $submac!(i, $($args)*)
             }
         };
@@ -394,7 +395,10 @@ pub mod parsing {
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
     #[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
-    fn ambiguous_expr(i: &str, allow_struct: bool, allow_block: bool) -> IResult<&str, Expr> {
+    fn ambiguous_expr(i: &[synom::TokenTree],
+                      allow_struct: bool,
+                      allow_block: bool)
+                      -> IResult<&[synom::TokenTree], Expr> {
         do_parse!(
             i,
             mut e: alt!(
@@ -507,9 +511,7 @@ pub mod parsing {
     named!(expr_mac -> ExprKind, map!(mac, ExprKind::Mac));
 
     named!(expr_paren -> ExprKind, do_parse!(
-        punct!("(") >>
-        e: expr >>
-        punct!(")") >>
+        e: delim!(Parenthesis, expr) >>
         (ExprKind::Paren(Box::new(e)))
     ));
 
@@ -522,9 +524,7 @@ pub mod parsing {
     named!(expr_in_place -> ExprKind, do_parse!(
         keyword!("in") >>
         place: expr_no_struct >>
-        punct!("{") >>
-        value: within_block >>
-        punct!("}") >>
+        value: delim!(Brace, within_block) >>
         (ExprKind::InPlace(
             Box::new(place),
             Box::new(ExprKind::Block(Unsafety::Normal, Block {
@@ -533,17 +533,13 @@ pub mod parsing {
         ))
     ));
 
-    named!(expr_array -> ExprKind, do_parse!(
-        punct!("[") >>
+    named!(expr_array -> ExprKind, delim!(Bracket, do_parse!(
         elems: terminated_list!(punct!(","), expr) >>
-        punct!("]") >>
         (ExprKind::Array(elems))
-    ));
+    )));
 
     named!(and_call -> Vec<Expr>, do_parse!(
-        punct!("(") >>
-        args: terminated_list!(punct!(","), expr) >>
-        punct!(")") >>
+        args: delim!(Parenthesis, terminated_list!(punct!(","), expr)) >>
         (args)
     ));
 
@@ -558,16 +554,12 @@ pub mod parsing {
                 punct!(">")
             )
         )) >>
-        punct!("(") >>
-        args: terminated_list!(punct!(","), expr) >>
-        punct!(")") >>
+        args: delim!(Parenthesis, terminated_list!(punct!(","), expr)) >>
         (method, ascript, args)
     ));
 
     named!(expr_tup -> ExprKind, do_parse!(
-        punct!("(") >>
-        elems: terminated_list!(punct!(","), expr) >>
-        punct!(")") >>
+        elems: delim!(Parenthesis, terminated_list!(punct!(","), expr)) >>
         (ExprKind::Tup(elems))
     ));
 
@@ -612,18 +604,14 @@ pub mod parsing {
     named!(expr_if -> ExprKind, do_parse!(
         keyword!("if") >>
         cond: cond >>
-        punct!("{") >>
-        then_block: within_block >>
-        punct!("}") >>
+        then_block: delim!(Brace, within_block) >>
         else_block: option!(preceded!(
             keyword!("else"),
             alt!(
                 expr_if
                 |
                 do_parse!(
-                    punct!("{") >>
-                    else_block: within_block >>
-                    punct!("}") >>
+                    else_block: delim!(Brace, within_block) >>
                     (ExprKind::Block(Unsafety::Normal, Block {
                         stmts: else_block,
                     }).into())
@@ -669,19 +657,20 @@ pub mod parsing {
     named!(expr_match -> ExprKind, do_parse!(
         keyword!("match") >>
         obj: expr_no_struct >>
-        punct!("{") >>
-        mut arms: many0!(do_parse!(
-            arm: match_arm >>
-            cond!(arm_requires_comma(&arm), punct!(",")) >>
-            cond!(!arm_requires_comma(&arm), option!(punct!(","))) >>
-            (arm)
+        res: delim!(Brace, do_parse!(
+            mut arms: many0!(do_parse!(
+                arm: match_arm >>
+                    cond!(arm_requires_comma(&arm), punct!(",")) >>
+                    cond!(!arm_requires_comma(&arm), option!(punct!(","))) >>
+                    (arm)
+            )) >>
+            last_arm: option!(match_arm) >>
+            (ExprKind::Match(Box::new(obj), {
+                arms.extend(last_arm);
+                arms
+            }))
         )) >>
-        last_arm: option!(match_arm) >>
-        punct!("}") >>
-        (ExprKind::Match(Box::new(obj), {
-            arms.extend(last_arm);
-            arms
-        }))
+        (res)
     ));
 
     named!(expr_catch -> ExprKind, do_parse!(
@@ -790,17 +779,18 @@ pub mod parsing {
 
     named!(expr_struct -> ExprKind, do_parse!(
         path: path >>
-        punct!("{") >>
-        fields: separated_list!(punct!(","), field_value) >>
-        base: option!(do_parse!(
-            cond!(!fields.is_empty(), punct!(",")) >>
-            punct!("..") >>
-            base: expr >>
-            (base)
+        res: delim!(Brace, do_parse!(
+            fields: separated_list!(punct!(","), field_value) >>
+            base: option!(do_parse!(
+                cond!(!fields.is_empty(), punct!(",")) >>
+                    punct!("..") >>
+                    base: expr >>
+                    (base)
+            )) >>
+            cond!(!fields.is_empty() && base.is_none(), option!(punct!(","))) >>
+            (ExprKind::Struct(path, fields, base.map(Box::new)))
         )) >>
-        cond!(!fields.is_empty() && base.is_none(), option!(punct!(","))) >>
-        punct!("}") >>
-        (ExprKind::Struct(path, fields, base.map(Box::new)))
+        (res)
     ));
 
     named!(field_value -> FieldValue, alt!(
@@ -824,14 +814,12 @@ pub mod parsing {
         })
     ));
 
-    named!(expr_repeat -> ExprKind, do_parse!(
-        punct!("[") >>
+    named!(expr_repeat -> ExprKind, delim!(Bracket, do_parse!(
         value: expr >>
         punct!(";") >>
         times: expr >>
-        punct!("]") >>
         (ExprKind::Repeat(Box::new(value), Box::new(times)))
-    ));
+    )));
 
     named!(expr_block -> ExprKind, do_parse!(
         rules: unsafety >>
@@ -876,7 +864,7 @@ pub mod parsing {
 
     named!(and_tup_field -> u64, preceded!(punct!("."), digits));
 
-    named!(and_index -> Expr, delimited!(punct!("["), expr, punct!("]")));
+    named!(and_index -> Expr, delim!(Bracket, expr));
 
     named_ambiguous_expr!(and_range -> (RangeLimits, Option<Expr>), allow_struct, tuple!(
         range_limits,
@@ -884,9 +872,7 @@ pub mod parsing {
     ));
 
     named!(pub block -> Block, do_parse!(
-        punct!("{") >>
-        stmts: within_block >>
-        punct!("}") >>
+        stmts: delim!(Brace, within_block) >>
         (Block {
             stmts: stmts,
         })
@@ -921,9 +907,7 @@ pub mod parsing {
         punct!("!") >>
     // Only parse braces here; paren and bracket will get parsed as
     // expression statements
-        punct!("{") >>
-        tts: token_trees >>
-        punct!("}") >>
+        tts: delim!(Brace, token_trees) >>
         semi: option!(punct!(";")) >>
         (Stmt::Mac(Box::new((
             Mac {
@@ -983,7 +967,7 @@ pub mod parsing {
             if semi.is_some() {
                 Stmt::Semi(Box::new(e))
             } else if requires_semi(&e) {
-                return Error;
+                return IResult::Error;
             } else {
                 Stmt::Expr(Box::new(e))
             }
@@ -1056,15 +1040,16 @@ pub mod parsing {
 
     named!(pat_struct -> Pat, do_parse!(
         path: path >>
-        punct!("{") >>
-        fields: separated_list!(punct!(","), field_pat) >>
-        more: option!(preceded!(
-            cond!(!fields.is_empty(), punct!(",")),
-            punct!("..")
+        res: delim!(Brace, do_parse!(
+            fields: separated_list!(punct!(","), field_pat) >>
+            more: option!(preceded!(
+                cond!(!fields.is_empty(), punct!(",")),
+                punct!("..")
+            )) >>
+            cond!(!fields.is_empty() && more.is_none(), option!(punct!(","))) >>
+            (Pat::Struct(path, fields, more.is_some()))
         )) >>
-        cond!(!fields.is_empty() && more.is_none(), option!(punct!(","))) >>
-        punct!("}") >>
-        (Pat::Struct(path, fields, more.is_some()))
+        (res)
     ));
 
     named!(field_pat -> FieldPat, alt!(
@@ -1115,8 +1100,7 @@ pub mod parsing {
         |(pats, dotdot)| Pat::Tuple(pats, dotdot)
     ));
 
-    named!(pat_tuple_helper -> (Vec<Pat>, Option<usize>), do_parse!(
-        punct!("(") >>
+    named!(pat_tuple_helper -> (Vec<Pat>, Option<usize>), delim!(Parenthesis, do_parse!(
         mut elems: separated_list!(punct!(","), pat) >>
         dotdot: option!(do_parse!(
             cond!(!elems.is_empty(), punct!(",")) >>
@@ -1126,7 +1110,6 @@ pub mod parsing {
             (rest)
         )) >>
         cond!(!elems.is_empty() && dotdot.is_none(), option!(punct!(","))) >>
-        punct!(")") >>
         (match dotdot {
             Some(rest) => {
                 let pos = elems.len();
@@ -1135,7 +1118,7 @@ pub mod parsing {
             }
             None => (elems, None),
         })
-    ));
+    )));
 
     named!(pat_ref -> Pat, do_parse!(
         punct!("&") >>
@@ -1174,8 +1157,7 @@ pub mod parsing {
         })
     ));
 
-    named!(pat_slice -> Pat, do_parse!(
-        punct!("[") >>
+    named!(pat_slice -> Pat, delim!(Bracket, do_parse!(
         mut before: separated_list!(punct!(","), pat) >>
         after: option!(do_parse!(
             comma_before_dots: option!(cond_reduce!(!before.is_empty(), punct!(","))) >>
@@ -1185,7 +1167,6 @@ pub mod parsing {
             (comma_before_dots.is_some(), after)
         )) >>
         cond!(after.is_none(), option!(punct!(","))) >>
-        punct!("]") >>
         (match after {
             None => Pat::Slice(before, None, Vec::new()),
             Some((true, after)) => {
@@ -1199,7 +1180,7 @@ pub mod parsing {
                 Pat::Slice(before, Some(Box::new(rest)), after)
             }
         })
-    ));
+    )));
 
     named!(capture_by -> CaptureBy, alt!(
         keyword!("move") => { |_| CaptureBy::Value }

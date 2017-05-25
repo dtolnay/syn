@@ -210,19 +210,43 @@ pub mod parsing {
     use lit::{Lit, StrStyle};
     use mac::{Token, TokenTree};
     use mac::parsing::token_trees;
-    use synom::space::{block_comment, whitespace};
     use ty::parsing::mod_style_path;
+    use synom::{TokenKind, IResult};
+
+    pub fn inner_doc_comment(i: &[synom::TokenTree]) -> IResult<&[synom::TokenTree], String> {
+        match i.first() {
+            Some(&synom::TokenTree { kind: TokenKind::Literal(ref lit), .. }) => {
+                let s = lit.to_string();
+                if s.starts_with("//!") || s.starts_with("/*!") {
+                    IResult::Done(&i[1..], s)
+                } else {
+                    IResult::Error
+                }
+            }
+            _ => IResult::Error,
+        }
+    }
+
+    pub fn outer_doc_comment(i: &[synom::TokenTree]) -> IResult<&[synom::TokenTree], String> {
+        match i.first() {
+            Some(&synom::TokenTree { kind: TokenKind::Literal(ref lit), .. }) => {
+                let s = lit.to_string();
+                if s.starts_with("///") || s.starts_with("/**") {
+                    IResult::Done(&i[1..], s)
+                } else {
+                    IResult::Error
+                }
+            }
+            _ => IResult::Error,
+        }
+    }
 
     #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
             punct!("!") >>
-            path_and_tts: delimited!(
-                punct!("["),
-                tuple!(mod_style_path, token_trees),
-                punct!("]")
-            ) >>
+            path_and_tts: delim!(Bracket, tuple!(mod_style_path, token_trees)) >>
             ({
                 let (path, tts) = path_and_tts;
 
@@ -236,29 +260,13 @@ pub mod parsing {
         )
         |
         do_parse!(
-            punct!("//!") >>
-            content: take_until!("\n") >>
+            comment: inner_doc_comment >>
             (Attribute {
                 style: AttrStyle::Inner,
                 path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(format!("//!{}", content).into(), StrStyle::Cooked))),
-                ],
-                is_sugared_doc: true,
-            })
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tag!("/*!")) >>
-            com: block_comment >>
-            (Attribute {
-                style: AttrStyle::Inner,
-                path: "doc".into(),
-                tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
+                    TokenTree::Token(Token::Literal(Lit::Str(comment.into(), StrStyle::Cooked))),
                 ],
                 is_sugared_doc: true,
             })
@@ -268,11 +276,7 @@ pub mod parsing {
     named!(pub outer_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
-            path_and_tts: delimited!(
-                punct!("["),
-                tuple!(mod_style_path, token_trees),
-                punct!("]")
-            ) >>
+            path_and_tts: delim!(Bracket, tuple!(mod_style_path, token_trees)) >>
             ({
                 let (path, tts) = path_and_tts;
 
@@ -286,30 +290,13 @@ pub mod parsing {
         )
         |
         do_parse!(
-            punct!("///") >>
-            not!(tag!("/")) >>
-            content: take_until!("\n") >>
+            comment: outer_doc_comment >>
             (Attribute {
                 style: AttrStyle::Outer,
                 path: "doc".into(),
                 tts: vec![
                     TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(format!("///{}", content).into(), StrStyle::Cooked))),
-                ],
-                is_sugared_doc: true,
-            })
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
-            (Attribute {
-                style: AttrStyle::Outer,
-                path: "doc".into(),
-                tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
+                    TokenTree::Token(Token::Literal(Lit::Str(comment.into(), StrStyle::Cooked))),
                 ],
                 is_sugared_doc: true,
             })

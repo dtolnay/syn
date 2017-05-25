@@ -240,9 +240,10 @@ pub mod parsing {
     use expr::parsing::expr;
     use generics::parsing::{lifetime, lifetime_def, ty_param_bound, bound_lifetimes};
     use ident::parsing::ident;
-    use lit::parsing::quoted_string;
+    use lit::parsing::string;
     use mac::parsing::mac;
-    use std::str;
+    #[cfg(feature = "full")]
+    use synom::{IResult, TokenTree};
 
     named!(pub ty -> Ty, alt!(
         ty_paren // must be before ty_tup
@@ -272,34 +273,27 @@ pub mod parsing {
 
     named!(ty_mac -> Ty, map!(mac, Ty::Mac));
 
-    named!(ty_vec -> Ty, do_parse!(
-        punct!("[") >>
+    named!(ty_vec -> Ty, delim!(Bracket, do_parse!(
         elem: ty >>
-        punct!("]") >>
         (Ty::Slice(Box::new(elem)))
-    ));
+    )));
 
-    named!(ty_array -> Ty, do_parse!(
-        punct!("[") >>
+    named!(ty_array -> Ty, delim!(Bracket, do_parse!(
         elem: ty >>
         punct!(";") >>
         len: array_len >>
-        punct!("]") >>
         (Ty::Array(Box::new(elem), len))
-    ));
+    )));
 
     #[cfg(not(feature = "full"))]
     use constant::parsing::const_expr as array_len;
 
     #[cfg(feature = "full")]
     named!(array_len -> ConstExpr, alt!(
-        terminated!(const_expr, after_array_len)
+        terminated!(const_expr, input_end!())
         |
-        terminated!(expr, after_array_len) => { ConstExpr::Other }
+        terminated!(expr, input_end!()) => { ConstExpr::Other }
     ));
-
-    #[cfg(feature = "full")]
-    named!(after_array_len -> &str, peek!(punct!("]")));
 
     named!(ty_ptr -> Ty, do_parse!(
         punct!("*") >>
@@ -337,11 +331,12 @@ pub mod parsing {
         unsafety: unsafety >>
         abi: option!(abi) >>
         keyword!("fn") >>
-        punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        trailing_comma: option!(punct!(",")) >>
-        variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
-        punct!(")") >>
+        inputs_and_variadic: delim!(Parenthesis, do_parse!(
+            inputs: separated_list!(punct!(","), fn_arg) >>
+            trailing_comma: option!(punct!(",")) >>
+            variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
+            ((inputs, variadic.is_some()))
+        )) >>
         output: option!(preceded!(
             punct!("->"),
             ty
@@ -350,21 +345,19 @@ pub mod parsing {
             unsafety: unsafety,
             abi: abi,
             lifetimes: lifetimes,
-            inputs: inputs,
+            inputs: inputs_and_variadic.0,
             output: match output {
                 Some(ty) => FunctionRetTy::Ty(ty),
                 None => FunctionRetTy::Default,
             },
-            variadic: variadic.is_some(),
+            variadic: inputs_and_variadic.1,
         })))
     ));
 
     named!(ty_never -> Ty, map!(punct!("!"), |_| Ty::Never));
 
     named!(ty_tup -> Ty, do_parse!(
-        punct!("(") >>
-        elems: terminated_list!(punct!(","), ty) >>
-        punct!(")") >>
+        elems: delim!(Parenthesis, terminated_list!(punct!(","), ty)) >>
         (Ty::Tup(elems))
     ));
 
@@ -397,9 +390,7 @@ pub mod parsing {
     ));
 
     named!(parenthesized_parameter_data -> PathParameters, do_parse!(
-        punct!("(") >>
-        inputs: terminated_list!(punct!(","), ty) >>
-        punct!(")") >>
+        inputs: delim!(Parenthesis, terminated_list!(punct!(","), ty)) >>
         output: option!(preceded!(
             punct!("->"),
             ty
@@ -457,9 +448,7 @@ pub mod parsing {
     ));
 
     named!(ty_paren -> Ty, do_parse!(
-        punct!("(") >>
-        elem: ty >>
-        punct!(")") >>
+        elem: delim!(Parenthesis, ty) >>
         (Ty::Paren(Box::new(elem)))
     ));
 
@@ -572,8 +561,8 @@ pub mod parsing {
     named!(pub fn_arg -> BareFnArg, do_parse!(
         name: option!(do_parse!(
             name: ident >>
+            not!(punct!("::")) >>
             punct!(":") >>
-            not!(tag!(":")) >> // not ::
             (name)
         )) >>
         ty: ty >>
@@ -591,7 +580,7 @@ pub mod parsing {
 
     named!(pub abi -> Abi, do_parse!(
         keyword!("extern") >>
-        name: option!(quoted_string) >>
+        name: option!(string) >>
         (match name {
             Some(name) => Abi::Named(name),
             None => Abi::Rust,

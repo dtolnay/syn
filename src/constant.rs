@@ -89,9 +89,7 @@ pub mod parsing {
     ));
 
     named!(and_call -> Vec<ConstExpr>, do_parse!(
-        punct!("(") >>
-        args: terminated_list!(punct!(","), const_expr) >>
-        punct!(")") >>
+        args: delim!(Parenthesis, terminated_list!(punct!(","), const_expr)) >>
         (args)
     ));
 
@@ -107,12 +105,10 @@ pub mod parsing {
 
     named!(expr_path -> ConstExpr, map!(path, ConstExpr::Path));
 
-    named!(and_index -> ConstExpr, delimited!(punct!("["), const_expr, punct!("]")));
+    named!(and_index -> ConstExpr, delim!(Brace, const_expr));
 
     named!(expr_paren -> ConstExpr, do_parse!(
-        punct!("(") >>
-        e: const_expr >>
-        punct!(")") >>
+        e: delim!(Parenthesis, const_expr) >>
         (ConstExpr::Paren(Box::new(e)))
     ));
 

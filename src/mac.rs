@@ -116,8 +116,8 @@ pub mod parsing {
     use generics::parsing::lifetime;
     use ident::parsing::word;
     use lit::parsing::lit;
-    use synom::space::{block_comment, whitespace};
     use ty::parsing::path;
+    use attr::parsing::{inner_doc_comment, outer_doc_comment};
 
     named!(pub mac -> Mac, do_parse!(
         what: path >>
@@ -132,22 +132,19 @@ pub mod parsing {
     named!(pub token_trees -> Vec<TokenTree>, many0!(token_tree));
 
     named!(pub delimited -> Delimited, alt!(
-        delimited!(
-            punct!("("),
-            token_trees,
-            punct!(")")
+        delim!(
+            Parenthesis,
+            token_trees
         ) => { |tts| Delimited { delim: DelimToken::Paren, tts: tts } }
         |
-        delimited!(
-            punct!("["),
-            token_trees,
-            punct!("]")
+        delim!(
+            Bracket,
+            token_trees
         ) => { |tts| Delimited { delim: DelimToken::Bracket, tts: tts } }
         |
-        delimited!(
-            punct!("{"),
-            token_trees,
-            punct!("}")
+        delim!(
+            Brace,
+            token_trees
         ) => { |tts| Delimited { delim: DelimToken::Brace, tts: tts } }
     ));
 
@@ -268,32 +265,9 @@ pub mod parsing {
     ));
 
     named!(doc_comment -> String, alt!(
-        do_parse!(
-            punct!("//!") >>
-            content: take_until!("\n") >>
-            (format!("//!{}", content))
-        )
+        inner_doc_comment
         |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tag!("/*!")) >>
-            com: block_comment >>
-            (com.to_owned())
-        )
-        |
-        do_parse!(
-            punct!("///") >>
-            not!(tag!("/")) >>
-            content: take_until!("\n") >>
-            (format!("///{}", content))
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
-            (com.to_owned())
-        )
+        outer_doc_comment
     ));
 }
 

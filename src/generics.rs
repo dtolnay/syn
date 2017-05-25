@@ -191,6 +191,7 @@ pub mod parsing {
     use attr::parsing::outer_attr;
     use ident::parsing::ident;
     use ty::parsing::{ty, poly_trait_ref};
+    use synom::{TokenTree, IResult};
 
     named!(pub generics -> Generics, map!(
         alt!(
@@ -215,18 +216,21 @@ pub mod parsing {
         }
     ));
 
-    named!(pub lifetime -> Lifetime, preceded!(
-        punct!("'"),
-        alt!(
-            map!(ident, |id| Lifetime {
-                ident: format!("'{}", id).into(),
-            })
-            |
-            map!(keyword!("static"), |_| Lifetime {
-                ident: "'static".into(),
-            })
-        )
-    ));
+    pub fn lifetime(input: &[TokenTree]) -> IResult<&[TokenTree], Lifetime> {
+        use synom::*;
+        if let Some(&TokenTree { kind: TokenKind::Word(ref id), .. }) = input.first() {
+            // Check if this word is _actually_ a lifetime, and treat that differently
+            if id.chars().next().unwrap() == '\'' {
+                IResult::Done(&input[1..], Lifetime {
+                    ident: id.to_string().into()
+                })
+            } else {
+                IResult::Error
+            }
+        } else {
+            IResult::Error
+        }
+    }
 
     named!(pub lifetime_def -> LifetimeDef, do_parse!(
         attrs: many0!(outer_attr) >>

@@ -157,244 +157,159 @@ pub struct FloatLit {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use escape::{cooked_byte, cooked_byte_string, cooked_char, cooked_string, raw_string};
-    use synom::space::skip_whitespace;
-    use synom::IResult;
-    use unicode_xid::UnicodeXID;
+    use synom::{IResult, TokenTree, TokenKind};
+    use relex;
 
-    named!(pub lit -> Lit, alt!(
-        string => { |StrLit { value, style }| Lit::Str(value, style) }
-        |
-        byte_string => { |ByteStrLit { value, style }| Lit::ByteStr(value, style) }
-        |
-        byte => { |b| Lit::Byte(b) }
-        |
-        character => { |ch| Lit::Char(ch) }
-        |
-        float => { |FloatLit { value, suffix }| Lit::Float(value, suffix) } // must be before int
-        |
-        int => { |IntLit { value, suffix }| Lit::Int(value, suffix) }
-        |
-        boolean => { |value| Lit::Bool(value) }
-    ));
-
-    named!(pub string -> StrLit, alt!(
-        quoted_string => { |s| StrLit { value: s, style: StrStyle::Cooked } }
-        |
-        preceded!(
-            punct!("r"),
-            raw_string
-        ) => { |(s, n)| StrLit { value: s, style: StrStyle::Raw(n) }}
-    ));
-
-    named!(pub quoted_string -> String, delimited!(
-        punct!("\""),
-        cooked_string,
-        tag!("\"")
-    ));
-
-    named!(pub byte_string -> ByteStrLit, alt!(
-        delimited!(
-            punct!("b\""),
-            cooked_byte_string,
-            tag!("\"")
-        ) => { |vec| ByteStrLit { value: vec, style: StrStyle::Cooked } }
-        |
-        preceded!(
-            punct!("br"),
-            raw_string
-        ) => { |(s, n): (String, _)| ByteStrLit { value: s.into_bytes(), style: StrStyle::Raw(n) } }
-    ));
-
-    named!(pub byte -> u8, do_parse!(
-        punct!("b") >>
-        tag!("'") >>
-        b: cooked_byte >>
-        tag!("'") >>
-        (b)
-    ));
-
-    named!(pub character -> char, do_parse!(
-        punct!("'") >>
-        ch: cooked_char >>
-        tag!("'") >>
-        (ch)
-    ));
-
-    named!(pub float -> FloatLit, do_parse!(
-        value: float_string >>
-        suffix: alt!(
-            tag!("f32") => { |_| FloatTy::F32 }
-            |
-            tag!("f64") => { |_| FloatTy::F64 }
-            |
-            epsilon!() => { |_| FloatTy::Unsuffixed }
-        ) >>
-        (FloatLit { value: value, suffix: suffix })
-    ));
-
-    named!(pub int -> IntLit, do_parse!(
-        value: digits >>
-        suffix: alt!(
-            tag!("isize") => { |_| IntTy::Isize }
-            |
-            tag!("i8") => { |_| IntTy::I8 }
-            |
-            tag!("i16") => { |_| IntTy::I16 }
-            |
-            tag!("i32") => { |_| IntTy::I32 }
-            |
-            tag!("i64") => { |_| IntTy::I64 }
-            |
-            tag!("usize") => { |_| IntTy::Usize }
-            |
-            tag!("u8") => { |_| IntTy::U8 }
-            |
-            tag!("u16") => { |_| IntTy::U16 }
-            |
-            tag!("u32") => { |_| IntTy::U32 }
-            |
-            tag!("u64") => { |_| IntTy::U64 }
-            |
-            epsilon!() => { |_| IntTy::Unsuffixed }
-        ) >>
-        (IntLit { value: value, suffix: suffix })
-    ));
-
-    named!(pub boolean -> bool, alt!(
-        keyword!("true") => { |_| true }
-        |
-        keyword!("false") => { |_| false }
-    ));
-
-    fn float_string(mut input: &str) -> IResult<&str, String> {
-        input = skip_whitespace(input);
-
-        let mut chars = input.chars().peekable();
-        match chars.next() {
-            Some(ch) if ch >= '0' && ch <= '9' => {}
-            _ => return IResult::Error,
-        }
-
-        let mut len = 1;
-        let mut has_dot = false;
-        let mut has_exp = false;
-        while let Some(&ch) = chars.peek() {
-            match ch {
-                '0'...'9' | '_' => {
-                    chars.next();
-                    len += 1;
-                }
-                '.' => {
-                    if has_dot {
-                        break;
+    pub fn lit(i: &[TokenTree]) -> IResult<&[TokenTree], Lit> {
+        match i.first() {
+            Some(&TokenTree{ kind: TokenKind::Literal(ref l), .. }) => {
+                // XXX: I'm using my lexer for this temporarially, as it makes
+                // my life easier. A final version shouldn't be this hacky,
+                // though we'll probably want `proc_macro::Literal` -> actual
+                // literal value conversions to be in a separate crate, rather
+                // than requiring syn (which seems a bit heavyweight for that).
+                let tok = if let Ok(tok) = relex::relex_literal(&l.to_string()) {
+                    tok
+                } else {
+                    return IResult::Error
+                };
+                let lit = match tok {
+                    relex::LToken::Lit(relex::Lit::Byte(b)) => {
+                        Lit::Byte(b)
                     }
-                    chars.next();
-                    if chars.peek()
-                           .map(|&ch| ch == '.' || UnicodeXID::is_xid_start(ch))
-                           .unwrap_or(false) {
-                        return IResult::Error;
+                    relex::LToken::Lit(relex::Lit::Char(c)) => {
+                        Lit::Char(c)
                     }
-                    len += 1;
-                    has_dot = true;
-                }
-                'e' | 'E' => {
-                    chars.next();
-                    len += 1;
-                    has_exp = true;
-                    break;
-                }
-                _ => break,
+                    relex::LToken::Lit(relex::Lit::Integer(v, suffix)) => {
+                        let suffix = match suffix {
+                            relex::IntSuffix::Unsuffixed =>
+                                IntTy::Unsuffixed,
+                            relex::IntSuffix::Isize =>
+                                IntTy::Isize,
+                            relex::IntSuffix::Usize =>
+                                IntTy::Usize,
+                            relex::IntSuffix::I8 =>
+                                IntTy::I8,
+                            relex::IntSuffix::U8 =>
+                                IntTy::U8,
+                            relex::IntSuffix::I16 =>
+                                IntTy::I16,
+                            relex::IntSuffix::U16 =>
+                                IntTy::U16,
+                            relex::IntSuffix::I32 =>
+                                IntTy::I32,
+                            relex::IntSuffix::U32 =>
+                                IntTy::U32,
+                            relex::IntSuffix::I64 =>
+                                IntTy::I64,
+                            relex::IntSuffix::U64 =>
+                                IntTy::U64,
+                        };
+                        Lit::Int(v, suffix)
+                    }
+                    relex::LToken::Lit(relex::Lit::Float(v, suffix)) => {
+                        let suffix = match suffix {
+                            relex::FloatSuffix::Unsuffixed =>
+                                FloatTy::Unsuffixed,
+                            relex::FloatSuffix::F32 =>
+                                FloatTy::F32,
+                            relex::FloatSuffix::F64 =>
+                                FloatTy::F64,
+                        };
+                        Lit::Float(v, suffix)
+                    }
+                    relex::LToken::Lit(relex::Lit::Str(s, relex::StrStyle::Cooked)) => {
+                        Lit::Str(s, StrStyle::Cooked)
+                    }
+                    relex::LToken::Lit(relex::Lit::Str(s, relex::StrStyle::Raw(n))) => {
+                        Lit::Str(s, StrStyle::Raw(n))
+                    }
+                    relex::LToken::Lit(relex::Lit::ByteStr(s, relex::StrStyle::Cooked)) => {
+                        Lit::ByteStr(s, StrStyle::Cooked)
+                    }
+                    relex::LToken::Lit(relex::Lit::ByteStr(s, relex::StrStyle::Raw(n))) => {
+                        Lit::ByteStr(s, StrStyle::Raw(n))
+                    }
+                    _ => return IResult::Error
+                };
+
+                IResult::Done(&i[1..], lit)
             }
-        }
-
-        let rest = &input[len..];
-        if !(has_dot || has_exp || rest.starts_with("f32") || rest.starts_with("f64")) {
-            return IResult::Error;
-        }
-
-        if has_exp {
-            let mut has_exp_value = false;
-            while let Some(&ch) = chars.peek() {
-                match ch {
-                    '+' | '-' => {
-                        if has_exp_value {
-                            break;
-                        }
-                        chars.next();
-                        len += 1;
-                    }
-                    '0'...'9' => {
-                        chars.next();
-                        len += 1;
-                        has_exp_value = true;
-                    }
-                    '_' => {
-                        chars.next();
-                        len += 1;
-                    }
-                    _ => break,
+            Some(&TokenTree{ kind: TokenKind::Word(ref w), .. }) => {
+                if &**w == "true" {
+                    IResult::Done(&i[1..], Lit::Bool(true))
+                } else if &**w == "false" {
+                    IResult::Done(&i[1..], Lit::Bool(false))
+                } else {
+                    IResult::Error
                 }
             }
-            if !has_exp_value {
-                return IResult::Error;
-            }
+            _ => IResult::Error
         }
-
-        IResult::Done(&input[len..], input[..len].replace("_", ""))
     }
 
-    pub fn digits(mut input: &str) -> IResult<&str, u64> {
-        input = skip_whitespace(input);
-
-        let base = if input.starts_with("0x") {
-            input = &input[2..];
-            16
-        } else if input.starts_with("0o") {
-            input = &input[2..];
-            8
-        } else if input.starts_with("0b") {
-            input = &input[2..];
-            2
+    #[cfg(feature = "full")]
+    pub fn digits(i: &[TokenTree]) -> IResult<&[TokenTree], u64> {
+        if let IResult::Done(r, Lit::Int(v, IntTy::Unsuffixed)) = lit(i) {
+            IResult::Done(r, v)
         } else {
-            10
-        };
-
-        let mut value = 0u64;
-        let mut len = 0;
-        let mut empty = true;
-        for b in input.bytes() {
-            let digit = match b {
-                b'0'...b'9' => (b - b'0') as u64,
-                b'a'...b'f' => 10 + (b - b'a') as u64,
-                b'A'...b'F' => 10 + (b - b'A') as u64,
-                b'_' => {
-                    if empty && base == 10 {
-                        return IResult::Error;
-                    }
-                    len += 1;
-                    continue;
-                }
-                _ => break,
-            };
-            if digit >= base {
-                return IResult::Error;
-            }
-            value = match value.checked_mul(base) {
-                Some(value) => value,
-                None => return IResult::Error,
-            };
-            value = match value.checked_add(digit) {
-                Some(value) => value,
-                None => return IResult::Error,
-            };
-            len += 1;
-            empty = false;
-        }
-        if empty {
             IResult::Error
+        }
+    }
+
+    pub fn string(i: &[TokenTree]) -> IResult<&[TokenTree], String> {
+        if let IResult::Done(r, Lit::Str(v, _)) = lit(i) {
+            IResult::Done(r, v)
         } else {
-            IResult::Done(&input[len..], value)
+            IResult::Error
+        }
+    }
+
+    pub fn byte_string(i: &[TokenTree]) -> IResult<&[TokenTree], Vec<u8>> {
+        if let IResult::Done(r, Lit::ByteStr(v, _)) = lit(i) {
+            IResult::Done(r, v)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn byte(i: &[TokenTree]) -> IResult<&[TokenTree], u8> {
+        if let IResult::Done(r, Lit::Byte(b)) = lit(i) {
+            IResult::Done(r, b)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn character(i: &[TokenTree]) -> IResult<&[TokenTree], char> {
+        if let IResult::Done(r, Lit::Char(c)) = lit(i) {
+            IResult::Done(r, c)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn float(i: &[TokenTree]) -> IResult<&[TokenTree], String> {
+        if let IResult::Done(r, Lit::Float(f, _)) = lit(i) {
+            IResult::Done(r, f)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn int(i: &[TokenTree]) -> IResult<&[TokenTree], u64> {
+        if let IResult::Done(r, Lit::Int(v, _)) = lit(i) {
+            IResult::Done(r, v)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn boolean(i: &[TokenTree]) -> IResult<&[TokenTree], bool> {
+        if let IResult::Done(r, Lit::Bool(b)) = lit(i) {
+            IResult::Done(r, b)
+        } else {
+            IResult::Error
         }
     }
 }

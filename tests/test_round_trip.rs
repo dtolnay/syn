@@ -3,6 +3,7 @@
 #[macro_use]
 extern crate quote;
 extern crate syn;
+extern crate synom;
 extern crate syntex_pos;
 extern crate syntex_syntax;
 extern crate walkdir;
@@ -124,7 +125,7 @@ fn test_round_trip() {
         let (krate, elapsed) = match syn::parse_crate(&content) {
             Ok(krate) => (krate, start.elapsed()),
             Err(msg) => {
-                errorf!("syn failed to parse\n{}\n", msg);
+                errorf!("syn failed to parse\n{:?}\n", msg);
                 failed += 1;
                 continue;
             }

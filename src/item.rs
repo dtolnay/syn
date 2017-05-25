@@ -365,17 +365,13 @@ pub mod parsing {
     named!(view_path_list -> ViewPath, do_parse!(
         path: path >>
         punct!("::") >>
-        punct!("{") >>
-        items: terminated_list!(punct!(","), path_list_item) >>
-        punct!("}") >>
+        items: delim!(Brace, terminated_list!(punct!(","), path_list_item)) >>
         (ViewPath::List(path, items))
     ));
 
     named!(view_path_list_root -> ViewPath, do_parse!(
         global: option!(punct!("::")) >>
-        punct!("{") >>
-        items: terminated_list!(punct!(","), path_list_item) >>
-        punct!("}") >>
+        items: delim!(Brace, terminated_list!(punct!(","), path_list_item)) >>
         (ViewPath::List(Path {
             global: global.is_some(),
             segments: Vec::new(),
@@ -441,21 +437,18 @@ pub mod parsing {
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(punct!(","), fn_arg) >>
-        punct!(")") >>
+        inputs: delim!(Parenthesis, terminated_list!(punct!(","), fn_arg)) >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
-        punct!("{") >>
-        inner_attrs: many0!(inner_attr) >>
-        stmts: within_block >>
-        punct!("}") >>
+        inner_attrs_stmts: delim!(Brace, tuple!(
+            many0!(inner_attr), within_block
+        )) >>
         (Item {
             ident: name,
             vis: vis,
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
+                attrs.extend(inner_attrs_stmts.0);
                 attrs
             },
             node: ItemKind::Fn(
@@ -472,7 +465,7 @@ pub mod parsing {
                     .. generics
                 },
                 Box::new(Block {
-                    stmts: stmts,
+                    stmts: inner_attrs_stmts.1,
                 }),
             ),
         })
@@ -513,13 +506,12 @@ pub mod parsing {
         content: alt!(
             punct!(";") => { |_| None }
             |
-            delimited!(
-                punct!("{"),
+            delim!(
+                Brace,
                 tuple!(
                     many0!(inner_attr),
                     items
-                ),
-                punct!("}")
+                )
             ) => { Some }
         ) >>
         (match content {
@@ -545,9 +537,7 @@ pub mod parsing {
     named!(item_foreign_mod -> Item, do_parse!(
         attrs: many0!(outer_attr) >>
         abi: abi >>
-        punct!("{") >>
-        items: many0!(foreign_item) >>
-        punct!("}") >>
+        items: delim!(Brace, many0!(foreign_item)) >>
         (Item {
             ident: "".into(),
             vis: Visibility::Inherited,
@@ -571,11 +561,12 @@ pub mod parsing {
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
-        punct!("(") >>
-        inputs: separated_list!(punct!(","), fn_arg) >>
-        trailing_comma: option!(punct!(",")) >>
-        variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
-        punct!(")") >>
+        inputs_and_variadic: delim!(Parenthesis, do_parse!(
+            inputs: separated_list!(punct!(","), fn_arg) >>
+            trailing_comma: option!(punct!(",")) >>
+            variadic: option!(cond_reduce!(trailing_comma.is_some(), punct!("..."))) >>
+            ((inputs, variadic.is_some()))
+        )) >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
         punct!(";") >>
@@ -584,9 +575,9 @@ pub mod parsing {
             attrs: attrs,
             node: ForeignItemKind::Fn(
                 Box::new(FnDecl {
-                    inputs: inputs,
+                    inputs: inputs_and_variadic.0,
                     output: ret.map(FunctionRetTy::Ty).unwrap_or(FunctionRetTy::Default),
-                    variadic: variadic.is_some(),
+                    variadic: inputs_and_variadic.1,
                 }),
                 Generics {
                     where_clause: where_clause,
@@ -689,9 +680,7 @@ pub mod parsing {
             separated_nonempty_list!(punct!("+"), ty_param_bound)
         )) >>
         where_clause: where_clause >>
-        punct!("{") >>
-        body: many0!(trait_item) >>
-        punct!("}") >>
+        body: delim!(Brace, many0!(trait_item)) >>
         (Item {
             ident: id,
             vis: vis,
@@ -715,8 +704,7 @@ pub mod parsing {
         path: path >>
         keyword!("for") >>
         punct!("..") >>
-        punct!("{") >>
-        punct!("}") >>
+        delim!(Brace, epsilon!()) >>
         (Item {
             ident: "".into(),
             vis: Visibility::Inherited,
@@ -758,15 +746,12 @@ pub mod parsing {
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(punct!(","), fn_arg) >>
-        punct!(")") >>
+        inputs: delim!(Parenthesis, terminated_list!(punct!(","), fn_arg)) >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
-        body: option!(delimited!(
-            punct!("{"),
-            tuple!(many0!(inner_attr), within_block),
-            punct!("}")
+        body: option!(delim!(
+            Brace,
+            tuple!(many0!(inner_attr), within_block)
         )) >>
         cond!(body.is_none(), punct!(";")) >>
         ({
@@ -855,9 +840,7 @@ pub mod parsing {
         ) >>
         self_ty: ty >>
         where_clause: where_clause >>
-        punct!("{") >>
-        body: many0!(impl_item) >>
-        punct!("}") >>
+        body: delim!(Brace, many0!(impl_item)) >>
         (Item {
             ident: "".into(),
             vis: Visibility::Inherited,
@@ -916,22 +899,19 @@ pub mod parsing {
         keyword!("fn") >>
         name: ident >>
         generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(punct!(","), fn_arg) >>
-        punct!(")") >>
+        inputs: delim!(Parenthesis, terminated_list!(punct!(","), fn_arg)) >>
         ret: option!(preceded!(punct!("->"), ty)) >>
         where_clause: where_clause >>
-        punct!("{") >>
-        inner_attrs: many0!(inner_attr) >>
-        stmts: within_block >>
-        punct!("}") >>
+        inner_attrs_stmts: delim!(Brace, tuple!(
+            many0!(inner_attr), within_block
+        )) >>
         (ImplItem {
             ident: name,
             vis: vis,
             defaultness: defaultness,
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
+                attrs.extend(inner_attrs_stmts.0);
                 attrs
             },
             node: ImplItemKind::Method(
@@ -950,7 +930,7 @@ pub mod parsing {
                     },
                 },
                 Block {
-                    stmts: stmts,
+                    stmts: inner_attrs_stmts.1,
                 },
             ),
         })

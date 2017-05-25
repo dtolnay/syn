@@ -122,9 +122,7 @@ pub mod parsing {
 
     named!(pub enum_body -> (WhereClause, Vec<Variant>), do_parse!(
         wh: where_clause >>
-        punct!("{") >>
-        variants: terminated_list!(punct!(","), variant) >>
-        punct!("}") >>
+        variants: delim!(Brace, terminated_list!(punct!(","), variant)) >>
         (wh, variants)
     ));
 
@@ -157,20 +155,26 @@ pub mod parsing {
         terminated!(expr, after_discriminant) => { ConstExpr::Other }
     ));
 
+    // XXX: HACKY
     #[cfg(feature = "full")]
-    named!(after_discriminant -> &str, peek!(alt!(punct!(",") | punct!("}"))));
+    pub fn eof(input: &[synom::TokenTree]) -> synom::IResult<&[synom::TokenTree], &'static str> {
+        if input.is_empty() {
+            synom::IResult::Done(&[], "")
+        } else {
+            synom::IResult::Error
+        }
+    }
+
+    #[cfg(feature = "full")]
+    named!(after_discriminant -> &str, peek!(alt!(punct!(",") | input_end!())));
 
     named!(pub struct_like_body -> Vec<Field>, do_parse!(
-        punct!("{") >>
-        fields: terminated_list!(punct!(","), struct_field) >>
-        punct!("}") >>
+        fields: delim!(Brace, terminated_list!(punct!(","), struct_field)) >>
         (fields)
     ));
 
     named!(tuple_like_body -> Vec<Field>, do_parse!(
-        punct!("(") >>
-        fields: terminated_list!(punct!(","), tuple_field) >>
-        punct!(")") >>
+        fields: delim!(Parenthesis, terminated_list!(punct!(","), tuple_field)) >>
         (fields)
     ));
 
@@ -203,34 +207,25 @@ pub mod parsing {
     named!(pub visibility -> Visibility, alt!(
         do_parse!(
             keyword!("pub") >>
-            punct!("(") >>
-            keyword!("crate") >>
-            punct!(")") >>
+            delim!(Parenthesis, keyword!("crate")) >>
             (Visibility::Crate)
         )
         |
         do_parse!(
             keyword!("pub") >>
-            punct!("(") >>
-            keyword!("self") >>
-            punct!(")") >>
+            delim!(Parenthesis, keyword!("self")) >>
             (Visibility::Restricted(Box::new("self".into())))
         )
         |
         do_parse!(
             keyword!("pub") >>
-            punct!("(") >>
-            keyword!("super") >>
-            punct!(")") >>
+            delim!(Parenthesis, keyword!("super")) >>
             (Visibility::Restricted(Box::new("super".into())))
         )
         |
         do_parse!(
             keyword!("pub") >>
-            punct!("(") >>
-            keyword!("in") >>
-            restricted: mod_style_path >>
-            punct!(")") >>
+            restricted: delim!(Parenthesis, preceded!(keyword!("in"), mod_style_path)) >>
             (Visibility::Restricted(Box::new(restricted)))
         )
         |

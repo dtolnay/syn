@@ -37,7 +37,7 @@ fn test_struct() {
                             Token(Gt),
                             Token(Comma)])];
 
-    let result = syn::parse_token_trees(raw).unwrap();
+    let result = syn::parse_token_trees(raw.parse().unwrap()).unwrap();
     if result != expected {
         panic!("{:#?}\n!=\n{:#?}", result, expected);
     }

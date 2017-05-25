@@ -49,6 +49,6 @@ fn test_meta_item_multiple() {
 }
 
 fn run_test(input: &str, expected: &MetaItem) {
-    let attr = parse_outer_attr(input).unwrap();
+    let attr = parse_outer_attr(input.parse().unwrap()).unwrap();
     assert_eq!(expected, &attr.meta_item().unwrap());
 }

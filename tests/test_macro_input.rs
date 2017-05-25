@@ -18,7 +18,7 @@ fn test_unit() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    assert_eq!(expected, parse_macro_input(raw).unwrap());
+    assert_eq!(expected, parse_macro_input(raw.parse().unwrap()).unwrap());
 }
 
 #[test]
@@ -76,7 +76,7 @@ fn test_struct() {
                                                     }])),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -204,7 +204,7 @@ fn test_enum() {
         ]),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -257,7 +257,7 @@ fn test_attr_with_path() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -288,7 +288,7 @@ fn test_attr_with_non_mod_style_path() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -315,7 +315,7 @@ fn test_attr_with_mod_style_path_with_self() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -342,7 +342,7 @@ fn test_pub_restricted() {
         }])),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -361,7 +361,7 @@ fn test_pub_restricted_crate() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -380,7 +380,7 @@ fn test_pub_restricted_super() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -399,7 +399,7 @@ fn test_pub_restricted_in_super() {
         body: Body::Struct(VariantData::Unit),
     };
 
-    let actual = parse_macro_input(raw).unwrap();
+    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
 
     assert_eq!(expected, actual);
 }

@@ -21,13 +21,50 @@
 //! For our use case, this strategy is a huge improvement in usability,
 //! correctness, and compile time over nom's `ws!` strategy.
 
-extern crate unicode_xid;
-
-#[doc(hidden)]
-pub mod space;
+extern crate proc_macro2;
 
 #[doc(hidden)]
 pub mod helper;
+
+// re-export TokenStream et. al. from proc_macro2, so that parsers which want to
+// use us don't have to manually import the type.
+pub use proc_macro2::{TokenStream, TokenTree, TokenKind, Delimiter, OpKind, LexError};
+
+use std::ops::Deref;
+
+/// A `TokenStream` does not provide a data format which is usable as a `synom`
+/// parser input. This type extracts `TokenTrees` from a `TokenStream` into a
+/// buffer, which can be iterated over as the `synom` input type.
+pub struct InputBuf {
+    data: Vec<TokenTree>,
+}
+
+impl InputBuf {
+    /// Transform the input `TokenStream` into a buffer which can be iterated
+    /// over as a `synom` parser input. Use the `Deref` implementation on this
+    /// type to extract the actual buffer type.
+    pub fn new(ts: TokenStream) -> Self {
+        fn flatten_stream(tt: TokenTree) -> Vec<TokenTree> {
+            match tt.kind {
+                TokenKind::Sequence(Delimiter::None, ts) => {
+                    ts.into_iter().flat_map(flatten_stream).collect()
+                }
+                _ => vec![tt]
+            }
+        }
+
+        InputBuf {
+            data: ts.into_iter().flat_map(flatten_stream).collect()
+        }
+    }
+}
+
+impl Deref for InputBuf {
+    type Target = [TokenTree];
+    fn deref(&self) -> &[TokenTree] {
+        &self.data
+    }
+}
 
 /// The result of a parser.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -39,7 +76,7 @@ pub enum IResult<I, O> {
     Error,
 }
 
-impl<'a, O> IResult<&'a str, O> {
+impl<'a, O> IResult<&'a [TokenTree], O> {
     /// Unwraps the result, asserting the the parse is complete. Panics with a
     /// message based on the given string if the parse failed or is incomplete.
     ///
@@ -66,12 +103,11 @@ impl<'a, O> IResult<&'a str, O> {
     /// ```
     pub fn expect(self, name: &str) -> O {
         match self {
-            IResult::Done(mut rest, o) => {
-                rest = space::skip_whitespace(rest);
+            IResult::Done(rest, o) => {
                 if rest.is_empty() {
                     o
                 } else {
-                    panic!("unparsed tokens after {}: {:?}", name, rest)
+                    panic!("unparsed tokens after {}: {:?}", name, /* rest */ ())
                 }
             }
             IResult::Error => panic!("failed to parse {}", name),
@@ -97,13 +133,13 @@ impl<'a, O> IResult<&'a str, O> {
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: &str) -> $crate::IResult<&str, $o> {
+        fn $name(i: &[$crate::TokenTree]) -> $crate::IResult<&[$crate::TokenTree], $o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: &str) -> $crate::IResult<&str, $o> {
+        pub fn $name(i: &[$crate::TokenTree]) -> $crate::IResult<&[$crate::TokenTree], $o> {
             $submac!(i, $($args)*)
         }
     };
@@ -564,9 +600,9 @@ macro_rules! many0 {
 //
 // Not public API.
 #[doc(hidden)]
-pub fn many0<'a, T>(mut input: &'a str,
-                    f: fn(&'a str) -> IResult<&'a str, T>)
-                    -> IResult<&'a str, Vec<T>> {
+pub fn many0<'a, T>(mut input: &'a [TokenTree],
+                    f: fn(&'a [TokenTree]) -> IResult<&'a [TokenTree], T>)
+                    -> IResult<&'a [TokenTree], Vec<T>> {
     let mut res = Vec::new();
 
     loop {
@@ -689,54 +725,6 @@ macro_rules! take_until {
             }
         }
     }};
-}
-
-/// Parse the given string from exactly the current position in the input. You
-/// almost always want `punct!` or `keyword!` instead of this.
-///
-/// The `tag!` parser is equivalent to `punct!` but does not ignore leading
-/// whitespace. Both `punct!` and `keyword!` skip over leading whitespace. See
-/// an explanation of synom's whitespace handling strategy in the top-level
-/// crate documentation.
-///
-/// - **Syntax:** `tag!("...")`
-/// - **Output:** `"..."`
-///
-/// ```rust
-/// extern crate syn;
-/// #[macro_use] extern crate synom;
-///
-/// use syn::StrLit;
-/// use syn::parse::string;
-/// use synom::IResult;
-///
-/// // Parse a proposed syntax for an owned string literal: "abc"s
-/// named!(owned_string -> String,
-///     map!(
-///         terminated!(string, tag!("s")),
-///         |lit: StrLit| lit.value
-///     )
-/// );
-///
-/// fn main() {
-///     let input = r#"  "abc"s  "#;
-///     let parsed = owned_string(input).expect("owned string literal");
-///     println!("{:?}", parsed);
-///
-///     let input = r#"  "abc" s  "#;
-///     let err = owned_string(input);
-///     assert_eq!(err, IResult::Error);
-/// }
-/// ```
-#[macro_export]
-macro_rules! tag {
-    ($i:expr, $tag:expr) => {
-        if $i.starts_with($tag) {
-            $crate::IResult::Done(&$i[$tag.len()..], &$i[..$tag.len()])
-        } else {
-            $crate::IResult::Error
-        }
-    };
 }
 
 /// Pattern-match the result of a parser to select which other parser to run.
@@ -1222,4 +1210,21 @@ macro_rules! do_parse {
             },
         }
     };
+}
+
+#[macro_export]
+macro_rules! input_end {
+    ($i:expr,) => {
+        $crate::input_end($i)
+    };
+}
+
+// Not a public API
+#[doc(hidden)]
+pub fn input_end(input: &[TokenTree]) -> IResult<&'static [TokenTree], &'static str> {
+    if input.is_empty() {
+        IResult::Done(&[], "")
+    } else {
+        IResult::Error
+    }
 }
