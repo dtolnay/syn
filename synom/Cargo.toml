@@ -12,12 +12,8 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-
 publish = false # this branch contains breaking changes
 
 [dependencies]
+quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 unicode-xid = "0.0.4"
-
-[dependencies.quote]
-git = 'https://github.com/alexcrichton/quote'
-branch = 'new-tokens'
-optional = true
 
 [features]
 printing = ["quote"]

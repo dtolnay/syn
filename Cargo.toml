@@ -22,14 +22,10 @@ clone-impls = []
 extra-traits = []
 
 [dependencies]
+quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
 unicode-xid = { version = "0.0.4", optional = true }
 synom = { version = "0.11", path = "synom", default-features = true }
-
-[dependencies.quote]
-git = 'https://github.com/alexcrichton/quote'
-branch = 'new-tokens'
-optional = true
 
 [dev-dependencies]
 syntex_pos = "0.58"
