@@ -9,6 +9,7 @@ documentation = "https://docs.rs/synom/"
 categories = ["development-tools::procedural-macro-helpers"]
 readme = "../README.md"
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+publish = false # this branch contains breaking changes
 
 [dependencies]
 unicode-xid = "0.0.4"
