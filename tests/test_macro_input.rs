@@ -5,7 +5,39 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
+extern crate proc_macro2;
+
 use syn::*;
+use proc_macro2::{TokenKind, OpKind, Delimiter, Literal};
+use proc_macro2::Delimiter::{Parenthesis, Brace};
+
+fn op(c: char) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Op(c, OpKind::Alone),
+    })
+}
+
+fn lit<T: Into<Literal>>(t: T) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Literal(t.into()),
+    })
+}
+
+fn word(sym: &str) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Word(sym.into()),
+    })
+}
+
+fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Sequence(delim, tokens.into_iter().map(|t| t.0).collect()),
+    })
+}
 
 #[test]
 fn test_unit() {
@@ -13,10 +45,14 @@ fn test_unit() {
 
     let expected = MacroInput {
         ident: "Unit".into(),
-        vis: Visibility::Inherited,
+        vis: Visibility::Inherited(VisInherited {}),
         attrs: Vec::new(),
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+            data: VariantData::Unit,
+        }),
     };
 
     assert_eq!(expected, parse_macro_input(raw).unwrap());
@@ -28,63 +64,80 @@ fn test_struct() {
         #[derive(Debug, Clone)]
         pub struct Item {
             pub ident: Ident,
-            pub attrs: Vec<Attribute>,
+            pub attrs: Vec<Attribute>
         }
     ";
 
     let expected = MacroInput {
         ident: "Item".into(),
-        vis: Visibility::Public,
+        vis: Visibility::Public(VisPublic {
+            pub_token: Default::default(),
+        }),
         attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
             style: AttrStyle::Outer,
             path: "derive".into(),
             tts: vec![
-                TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
-                    TokenTree::Token(Token::Ident("Debug".into())),
-                    TokenTree::Token(Token::Comma),
-                    TokenTree::Token(Token::Ident("Clone".into())),
-                ]})
+                delimited(Parenthesis, vec![
+                    word("Debug"),
+                    op(','),
+                    word("Clone"),
+                ]),
             ],
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Struct(vec![
-            Field {
-                ident: Some("ident".into()),
-                vis: Visibility::Public,
-                attrs: Vec::new(),
-                ty: TyPath {
-                    qself: None,
-                    path: "Ident".into(),
-                }.into(),
-            },
-            Field {
-                ident: Some("attrs".into()),
-                vis: Visibility::Public,
-                attrs: Vec::new(),
-                ty: TyPath {
-                    qself: None,
-                    path: Path {
-                        global: false,
-                        segments: vec![
-                            PathSegment {
-                                ident: "Vec".into(),
-                                parameters: PathParameters::AngleBracketed(
-                                    AngleBracketedParameterData {
-                                        lifetimes: Vec::new(),
-                                        types: vec![TyPath {
-                                            qself: None,
-                                            path: "Attribute".into(),
-                                        }.into()],
-                                        bindings: Vec::new(),
-                                    },
-                                ),
-                            }
-                        ],
-                    },
-                }.into(),
-            },
-        ]))
+        body: Body::Struct(BodyStruct {
+            semi_token: None,
+            struct_token: Default::default(),
+            data: VariantData::Struct(vec![
+                Field {
+                    ident: Some("ident".into()),
+                    colon_token: Some(Default::default()),
+                    vis: Visibility::Public(VisPublic {
+                        pub_token: Default::default(),
+                    }),
+                    attrs: Vec::new(),
+                    ty: TyPath {
+                        qself: None,
+                        path: "Ident".into(),
+                    }.into(),
+                },
+                Field {
+                    ident: Some("attrs".into()),
+                    colon_token: Some(Default::default()),
+                    vis: Visibility::Public(VisPublic {
+                        pub_token: Default::default(),
+                    }),
+                    attrs: Vec::new(),
+                    ty: TyPath {
+                        qself: None,
+                        path: Path {
+                            leading_colon: None,
+                            global: false,
+                            segments: vec![
+                                PathSegment {
+                                    ident: "Vec".into(),
+                                    parameters: PathParameters::AngleBracketed(
+                                        AngleBracketedParameterData {
+                                            gt_token: Some(Default::default()),
+                                            lt_token: Some(Default::default()),
+                                            lifetimes: Default::default(),
+                                            types: vec![Ty::from(TyPath {
+                                                qself: None,
+                                                path: "Attribute".into(),
+                                            })].into(),
+                                            bindings: Default::default(),
+                                        },
+                                    ),
+                                }
+                            ].into(),
+                        },
+                    }.into(),
+                },
+            ].into(), Default::default()),
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -93,10 +146,11 @@ fn test_struct() {
 
     let expected_meta_item: MetaItem = MetaItemList {
         ident: "derive".into(),
+        paren_token: Default::default(),
         nested: vec![
             NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
             NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
-        ],
+        ].into(),
     }.into();
 
     assert_eq!(expected_meta_item, actual.attrs[0].meta_item().unwrap());
@@ -115,27 +169,30 @@ fn test_enum() {
 
             // Smuggling data into a proc_macro_derive,
             // in the style of https://github.com/dtolnay/proc-macro-hack
-            ProcMacroHack = (0, "data").0,
+            ProcMacroHack = (0, "data").0
         }
     "#;
 
     let expected = MacroInput {
         ident: "Result".into(),
-        vis: Visibility::Public,
+        vis: Visibility::Public(VisPublic {
+            pub_token: Default::default(),
+        }),
         attrs: vec![
             Attribute {
+                bracket_token: Default::default(),
+                pound_token: Default::default(),
                 style: AttrStyle::Outer,
                 path: "doc".into(),
                 tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(
-                        "/// See the std::result module documentation for details.".into(),
-                        StrStyle::Cooked,
-                    ))),
+                    op('='),
+                    lit(Literal::doccomment("/// See the std::result module documentation for details.")),
                 ],
                 is_sugared_doc: true,
             },
             Attribute {
+                bracket_token: Default::default(),
+                pound_token: Default::default(),
                 style: AttrStyle::Outer,
                 path: "must_use".into(),
                 tts: vec![],
@@ -143,81 +200,114 @@ fn test_enum() {
             },
         ],
         generics: Generics {
-            lifetimes: Vec::new(),
-            ty_params: vec![TyParam {
-                                attrs: Vec::new(),
-                                ident: "T".into(),
-                                bounds: Vec::new(),
-                                default: None,
-                            },
-                            TyParam {
-                                attrs: Vec::new(),
-                                ident: "E".into(),
-                                bounds: Vec::new(),
-                                default: None,
-                            }],
-            where_clause: WhereClause { predicates: Vec::new() },
-        },
-        body: Body::Enum(vec![
-            Variant {
-                ident: "Ok".into(),
-                attrs: Vec::new(),
-                data: VariantData::Tuple(vec![
-                    Field {
-                        ident: None,
-                        vis: Visibility::Inherited,
-                        attrs: Vec::new(),
-                        ty: TyPath { qself: None, path: "T".into() }.into(),
-                    },
-                ]),
-                discriminant: None,
-            },
-            Variant {
-                ident: "Err".into(),
-                attrs: Vec::new(),
-                data: VariantData::Tuple(vec![
-                    Field {
-                        ident: None,
-                        vis: Visibility::Inherited,
-                        attrs: Vec::new(),
-                        ty: TyPath { qself: None, path: "E".into() }.into(),
-                    },
-                ]),
-                discriminant: None,
-            },
-            Variant {
-                ident: "Surprise".into(),
-                attrs: Vec::new(),
-                data: VariantData::Unit,
-                discriminant: Some(ConstExpr::Lit(Lit::Int(0, IntTy::Isize))),
-            },
-            Variant {
-                ident: "ProcMacroHack".into(),
-                attrs: Vec::new(),
-                data: VariantData::Unit,
-                discriminant: Some(ConstExpr::Other(Expr {
-                    node: ExprTupField {
-                        expr: Box::new(Expr {
-                            node: ExprTup {
-                                args: vec![
-                                    Expr {
-                                        node: ExprKind::Lit(Lit::Int(0, IntTy::Unsuffixed)),
-                                        attrs: Vec::new(),
-                                    },
-                                    Expr {
-                                        node: ExprKind::Lit(Lit::Str("data".into(), StrStyle::Cooked)),
-                                        attrs: Vec::new(),
-                                    },
-                                ],
-                            }.into(),
-                            attrs: Vec::new(),
-                        }),
-                        field: 0
-                    }.into(),
+            lifetimes: Default::default(),
+            lt_token: Some(Default::default()),
+            gt_token: Some(Default::default()),
+            ty_params: vec![
+                TyParam {
                     attrs: Vec::new(),
-                })),
-            },
-        ]),
+                    ident: "T".into(),
+                    bounds: Default::default(),
+                    default: None,
+                    colon_token: None,
+                    eq_token: None,
+                },
+                TyParam {
+                    attrs: Vec::new(),
+                    ident: "E".into(),
+                    bounds: Default::default(),
+                    colon_token: None,
+                    eq_token: None,
+                    default: None,
+                },
+            ].into(),
+            where_clause: WhereClause::default(),
+        },
+        body: Body::Enum(BodyEnum {
+            variants: vec![
+                Variant {
+                    ident: "Ok".into(),
+                    attrs: Vec::new(),
+                    eq_token: None,
+                    data: VariantData::Tuple(vec![
+                        Field {
+                            colon_token: None,
+                            ident: None,
+                            vis: Visibility::Inherited(VisInherited {}),
+                            attrs: Vec::new(),
+                            ty: TyPath { qself: None, path: "T".into() }.into(),
+                        },
+                    ].into(), Default::default()),
+                    discriminant: None,
+                },
+                Variant {
+                    ident: "Err".into(),
+                    attrs: Vec::new(),
+                    eq_token: None,
+                    data: VariantData::Tuple(vec![
+                        Field {
+                            ident: None,
+                            colon_token: None,
+                            vis: Visibility::Inherited(VisInherited {}),
+                            attrs: Vec::new(),
+                            ty: TyPath { qself: None, path: "E".into() }.into(),
+                        },
+                    ].into(), Default::default()),
+                    discriminant: None,
+                },
+                Variant {
+                    ident: "Surprise".into(),
+                    attrs: Vec::new(),
+                    data: VariantData::Unit,
+                    eq_token: Some(Default::default()),
+                    discriminant: Some(ConstExpr::Lit(Lit {
+                        value: LitKind::Other(0isize.into()),
+                        span: Default::default(),
+                    })),
+                },
+                Variant {
+                    ident: "ProcMacroHack".into(),
+                    attrs: Vec::new(),
+                    data: VariantData::Unit,
+                    eq_token: Some(Default::default()),
+                    discriminant: Some(ConstExpr::Other(Expr {
+                        node: ExprTupField {
+                            expr: Box::new(Expr {
+                                node: ExprTup {
+                                    lone_comma: None,
+                                    paren_token: Default::default(),
+                                    args: vec![
+                                        Expr {
+                                            node: ExprKind::Lit(Lit {
+                                                value: LitKind::Other(Literal::integer("0")),
+                                                span: Default::default(),
+                                            }),
+                                            attrs: Vec::new(),
+                                        },
+                                        Expr {
+                                            node: ExprKind::Lit(Lit {
+                                                value: LitKind::Other("data".into()),
+                                                span: Default::default(),
+                                            }),
+                                            attrs: Vec::new(),
+                                        },
+                                    ].into(),
+                                }.into(),
+                                attrs: Vec::new(),
+                            }),
+                            dot_token: Default::default(),
+                            field: Lit {
+                                value: LitKind::Other(Literal::integer("0")),
+                                span: Default::default(),
+                            },
+                        }.into(),
+                        attrs: Vec::new(),
+                    })),
+                },
+            ].into(),
+            brace_token: Default::default(),
+            enum_token: Default::default(),
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -227,10 +317,11 @@ fn test_enum() {
     let expected_meta_items = vec![
         MetaNameValue {
             ident: "doc".into(),
-            lit: Lit::Str(
-                "/// See the std::result module documentation for details.".into(),
-                StrStyle::Cooked,
-            ),
+            eq_token: Default::default(),
+            lit: Lit {
+                value: LitKind::Other(Literal::doccomment("/// See the std::result module documentation for details.")),
+                span: Default::default(),
+            },
         }.into(),
         MetaItem::Word("must_use".into()),
     ];
@@ -250,30 +341,43 @@ fn test_attr_with_path() {
 
     let expected = MacroInput {
         ident: "Dummy".into(),
-        vis: Visibility::Inherited,
+        vis: Visibility::Inherited(VisInherited {}),
         attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
             style: AttrStyle::Outer,
-            path: Path { global: true, segments: vec!["attr_args".into(), "identity".into()] },
+            path: Path {
+                global: true,
+                leading_colon: Some(Default::default()),
+                segments: vec![
+                    PathSegment::from("attr_args"),
+                    PathSegment::from("identity"),
+                ].into(),
+            },
             tts: vec![
-                TokenTree::Token(Token::Ident("fn".into())),
-                TokenTree::Token(Token::Ident("main".into())),
-                TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![] }),
-                TokenTree::Delimited(Delimited { delim: DelimToken::Brace, tts: vec![
-                    TokenTree::Token(Token::Ident("assert_eq".into())),
-                    TokenTree::Token(Token::Not),
-                    TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![
-                        TokenTree::Token(Token::Ident("foo".into())),
-                        TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: vec![] }),
-                        TokenTree::Token(Token::Comma),
-                        TokenTree::Token(Token::Literal(Lit::Str("Hello, world!".into(), StrStyle::Cooked))),
-                    ]}),
-                    TokenTree::Token(Token::Semi),
-                ]})
+                word("fn"),
+                word("main"),
+                delimited(Parenthesis, vec![]),
+                delimited(Brace, vec![
+                    word("assert_eq"),
+                    op('!'),
+                    delimited(Parenthesis, vec![
+                        word("foo"),
+                        delimited(Parenthesis, vec![]),
+                        op(','),
+                        lit("Hello, world!"),
+                    ]),
+                    op(';'),
+                ]),
             ],
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            data: VariantData::Unit,
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -292,19 +396,31 @@ fn test_attr_with_non_mod_style_path() {
 
     let expected = MacroInput {
         ident: "S".into(),
-        vis: Visibility::Inherited,
+        vis: Visibility::Inherited(VisInherited {}),
         attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
             style: AttrStyle::Outer,
-            path: Path { global: false, segments: vec!["inert".into()] },
+            path: Path {
+                global: false,
+                leading_colon: None,
+                segments: vec![
+                    PathSegment::from("inert"),
+                ].into(),
+            },
             tts: vec![
-                TokenTree::Token(Token::Lt),
-                TokenTree::Token(Token::Ident("T".into())),
-                TokenTree::Token(Token::Gt),
+                op('<'),
+                word("T"),
+                op('>'),
             ],
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            data: VariantData::Unit,
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -323,15 +439,28 @@ fn test_attr_with_mod_style_path_with_self() {
 
     let expected = MacroInput {
         ident: "S".into(),
-        vis: Visibility::Inherited,
+        vis: Visibility::Inherited(VisInherited {}),
         attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
             style: AttrStyle::Outer,
-            path: Path { global: false, segments: vec!["foo".into(), "self".into()] },
+            path: Path {
+                global: false,
+                leading_colon: None,
+                segments: vec![
+                    PathSegment::from("foo"),
+                    PathSegment::from("self"),
+                ].into(),
+            },
             tts: vec![],
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            data: VariantData::Unit,
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -350,15 +479,40 @@ fn test_pub_restricted() {
 
     let expected = MacroInput {
         ident: "Z".into(),
-        vis: Visibility::Restricted(Box::new("m".into())),
+        vis: Visibility::Restricted(VisRestricted {
+            path: Box::new("m".into()),
+            in_token: Some(Default::default()),
+            paren_token: Default::default(),
+            pub_token: Default::default(),
+        }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Tuple(vec![Field {
-            ident: None,
-            vis: Visibility::Restricted(Box::new(Path { global: false, segments: vec!["m".into(), "n".into()] })),
-            attrs: vec![],
-            ty: TyPath { qself: None, path: "u8".into() }.into(),
-        }])),
+        body: Body::Struct(BodyStruct {
+            data: VariantData::Tuple(vec![Field {
+                ident: None,
+                vis: Visibility::Restricted(VisRestricted {
+                    path: Box::new(Path {
+                        global: false,
+                        leading_colon: None,
+                        segments: vec![
+                            PathSegment::from("m"),
+                            PathSegment::from("n"),
+                        ].into(),
+                    }),
+                    in_token: Some(Default::default()),
+                    paren_token: Default::default(),
+                    pub_token: Default::default(),
+                }),
+                colon_token: None,
+                attrs: vec![],
+                ty: TyPath {
+                    qself: None,
+                    path: "u8".into(),
+                }.into(),
+            }].into(), Default::default()),
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -374,10 +528,18 @@ fn test_pub_restricted_crate() {
 
     let expected = MacroInput {
         ident: "S".into(),
-        vis: Visibility::Crate,
+        vis: Visibility::Crate(VisCrate {
+            pub_token: Default::default(),
+            crate_token: Default::default(),
+            paren_token: Default::default(),
+        }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+            data: VariantData::Unit,
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -393,10 +555,19 @@ fn test_pub_restricted_super() {
 
     let expected = MacroInput {
         ident: "S".into(),
-        vis: Visibility::Restricted(Box::new("super".into())),
+        vis: Visibility::Restricted(VisRestricted {
+            path: Box::new("super".into()),
+            in_token: None,
+            paren_token: Default::default(),
+            pub_token: Default::default(),
+        }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+            data: VariantData::Unit,
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();
@@ -412,10 +583,19 @@ fn test_pub_restricted_in_super() {
 
     let expected = MacroInput {
         ident: "S".into(),
-        vis: Visibility::Restricted(Box::new("super".into())),
+        vis: Visibility::Restricted(VisRestricted {
+            path: Box::new("super".into()),
+            in_token: Some(Default::default()),
+            paren_token: Default::default(),
+            pub_token: Default::default(),
+        }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(VariantData::Unit),
+        body: Body::Struct(BodyStruct {
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+            data: VariantData::Unit,
+        }),
     };
 
     let actual = parse_macro_input(raw).unwrap();

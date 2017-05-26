@@ -1,11 +1,16 @@
 use super::*;
+use delimited::Delimited;
 
 use std::iter;
+
+use proc_macro2::{self, Delimiter, TokenKind, OpKind};
 
 ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
     pub struct Attribute {
         pub style: AttrStyle,
+        pub pound_token: tokens::Pound,
+        pub bracket_token: tokens::Bracket,
 
         /// The path of the attribute.
         ///
@@ -27,7 +32,7 @@ impl Attribute {
     /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
     pub fn meta_item(&self) -> Option<MetaItem> {
         let name = if self.path.segments.len() == 1 {
-            &self.path.segments[0].ident
+            &self.path.segments.get(0).item().ident
         } else {
             return None;
         };
@@ -37,76 +42,11 @@ impl Attribute {
         }
 
         if self.tts.len() == 1 {
-            if let TokenTree::Delimited(Delimited { delim: DelimToken::Paren, ref tts }) = self.tts[0] {
-                fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[TokenTree])> {
-                    assert!(!tts.is_empty());
-
-                    match tts[0] {
-                        TokenTree::Token(Token::Literal(ref lit)) => {
-                            Some((NestedMetaItem::Literal(lit.clone()), &tts[1..]))
-                        }
-
-                        TokenTree::Token(Token::Ident(ref ident)) => {
-                            if tts.len() >= 3 {
-                                if let TokenTree::Token(Token::Eq) = tts[1] {
-                                    if let TokenTree::Token(Token::Literal(ref lit)) = tts[2] {
-                                        let pair = MetaNameValue {
-                                            ident: ident.clone(),
-                                            lit: lit.clone(),
-                                        };
-                                        return Some((NestedMetaItem::MetaItem(MetaItem::NameValue(pair)), &tts[3..]));
-                                    }
-                                }
-                            }
-
-                            if tts.len() >= 2 {
-                                if let TokenTree::Delimited(Delimited { delim: DelimToken::Paren, tts: ref inner_tts }) = tts[1] {
-                                    return match list_of_nested_meta_items_from_tokens(vec![], inner_tts) {
-                                        Some(nested_meta_items) => {
-                                            let list = MetaItemList {
-                                                ident: ident.clone(),
-                                                nested: nested_meta_items,
-                                            };
-                                            Some((NestedMetaItem::MetaItem(MetaItem::List(list)), &tts[2..]))
-                                        }
-
-                                        None => None
-                                    };
-                                }
-                            }
-
-                            Some((NestedMetaItem::MetaItem(MetaItem::Word(ident.clone())), &tts[1..]))
-                        }
-
-                        _ => None
-                    }
-                }
-
-                fn list_of_nested_meta_items_from_tokens(mut result: Vec<NestedMetaItem>, tts: &[TokenTree]) -> Option<Vec<NestedMetaItem>> {
-                    if tts.is_empty() {
-                        return Some(result);
-                    }
-
-                    match nested_meta_item_from_tokens(tts) {
-                        Some((nested_meta_item, rest)) => {
-                            result.push(nested_meta_item);
-                            if rest.is_empty() {
-                                list_of_nested_meta_items_from_tokens(result, rest)
-                            }
-                            else if let TokenTree::Token(Token::Comma) = rest[0] {
-                                list_of_nested_meta_items_from_tokens(result, &rest[1..])
-                            }
-                            else {
-                                None
-                            }
-                        }
-
-                        None => None
-                    }
-                }
-
-                if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(vec![], tts) {
+            if let TokenKind::Sequence(Delimiter::Parenthesis, ref ts) = self.tts[0].0.kind {
+                let tokens = ts.clone().into_iter().collect::<Vec<_>>();
+                if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
+                        paren_token: tokens::Paren(Span(self.tts[0].0.span)),
                         ident: name.clone(),
                         nested: nested_meta_items,
                     }));
@@ -115,11 +55,15 @@ impl Attribute {
         }
 
         if self.tts.len() == 2 {
-            if let TokenTree::Token(Token::Eq) = self.tts[0] {
-                if let TokenTree::Token(Token::Literal(ref lit)) = self.tts[1] {
+            if let TokenKind::Op('=', OpKind::Alone) = self.tts[0].0.kind {
+                if let TokenKind::Literal(ref lit) = self.tts[1].0.kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: name.clone(),
-                        lit: lit.clone(),
+                        eq_token: tokens::Eq([Span(self.tts[0].0.span)]),
+                        lit: Lit {
+                            value: LitKind::Other(lit.clone()),
+                            span: Span(self.tts[1].0.span),
+                        },
                     }));
                 }
             }
@@ -129,17 +73,109 @@ impl Attribute {
     }
 }
 
+fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
+    -> Option<(NestedMetaItem, &[proc_macro2::TokenTree])>
+{
+    assert!(!tts.is_empty());
+
+    match tts[0].kind {
+        TokenKind::Literal(ref lit) => {
+            let lit = Lit {
+                value: LitKind::Other(lit.clone()),
+                span: Span(tts[0].span),
+            };
+            Some((NestedMetaItem::Literal(lit), &tts[1..]))
+        }
+
+        TokenKind::Word(sym) => {
+            let ident = Ident::new(sym, Span(tts[0].span));
+            if tts.len() >= 3 {
+                if let TokenKind::Op('=', OpKind::Alone) = tts[1].kind {
+                    if let TokenKind::Literal(ref lit) = tts[2].kind {
+                        let pair = MetaNameValue {
+                            ident: Ident::new(sym, Span(tts[0].span)),
+                            eq_token: tokens::Eq([Span(tts[1].span)]),
+                            lit: Lit {
+                                value: LitKind::Other(lit.clone()),
+                                span: Span(tts[2].span),
+                            },
+                        };
+                        return Some((MetaItem::NameValue(pair).into(), &tts[3..]));
+                    }
+                }
+            }
+
+            if tts.len() >= 2 {
+                if let TokenKind::Sequence(Delimiter::Parenthesis, ref inner_tts) = tts[1].kind {
+                    let inner_tts = inner_tts.clone().into_iter().collect::<Vec<_>>();
+                    return match list_of_nested_meta_items_from_tokens(&inner_tts) {
+                        Some(nested_meta_items) => {
+                            let list = MetaItemList {
+                                ident: ident,
+                                paren_token: tokens::Paren(Span(tts[1].span)),
+                                nested: nested_meta_items,
+                            };
+                            Some((MetaItem::List(list).into(), &tts[2..]))
+                        }
+
+                        None => None
+                    };
+                }
+            }
+
+            Some((MetaItem::Word(ident).into(), &tts[1..]))
+        }
+
+        _ => None
+    }
+}
+
+fn list_of_nested_meta_items_from_tokens(mut tts: &[proc_macro2::TokenTree])
+    -> Option<Delimited<NestedMetaItem, tokens::Comma>>
+{
+    let mut delimited = Delimited::new();
+    let mut first = true;
+
+    while !tts.is_empty() {
+        let prev_comma = if first {
+            first = false;
+            None
+        } else if let TokenKind::Op(',', OpKind::Alone) = tts[0].kind {
+            let tok = tokens::Comma([Span(tts[0].span)]);
+            tts = &tts[1..];
+            if tts.is_empty() {
+                break
+            }
+            Some(tok)
+        } else {
+            return None
+        };
+        let (nested, rest) = match nested_meta_item_from_tokens(tts) {
+            Some(pair) => pair,
+            None => return None,
+        };
+        match prev_comma {
+            Some(comma) => delimited.push_next(nested, comma),
+            None => delimited.push_first(nested),
+        }
+        tts = rest;
+    }
+
+    Some(delimited)
+}
+
+
 ast_enum! {
     /// Distinguishes between Attributes that decorate items and Attributes that
     /// are contained as statements within items. These two cases need to be
     /// distinguished for pretty-printing.
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum AttrStyle {
-        /// Attribute of the form `#![...]`.
+        /// Attribute of the form `#[...]`.
         Outer,
 
-        /// Attribute of the form `#[...]`.
-        Inner,
+        /// Attribute of the form `#![...]`.
+        Inner(tokens::Bang),
     }
 }
 
@@ -162,10 +198,12 @@ ast_enum_of_structs! {
             /// E.g. `derive` in `#[derive(..)]`
             pub ident: Ident,
 
+            pub paren_token: tokens::Paren,
+
             /// Arguments to this attribute
             ///
             /// E.g. `..` in `#[derive(..)]`
-            pub nested: Vec<NestedMetaItem>,
+            pub nested: Delimited<NestedMetaItem, tokens::Comma>,
         }),
 
         /// Name-value meta item.
@@ -176,6 +214,8 @@ ast_enum_of_structs! {
             ///
             /// E.g. `feature` in `#[feature = "foo"]`
             pub ident: Ident,
+
+            pub eq_token: tokens::Eq,
 
             /// Arguments to this attribute
             ///
@@ -241,7 +281,7 @@ impl<'a, T> FilterAttrs<'a> for T
     fn inner(self) -> Self::Ret {
         fn is_inner(attr: &&Attribute) -> bool {
             match attr.style {
-                AttrStyle::Inner => true,
+                AttrStyle::Inner(_) => true,
                 _ => false,
             }
         }
@@ -252,11 +292,25 @@ impl<'a, T> FilterAttrs<'a> for T
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use lit::{Lit, StrStyle};
-    use mac::{Token, TokenTree};
+    use mac::TokenTree;
     use mac::parsing::token_trees;
     use synom::space::{block_comment, whitespace};
     use ty::parsing::mod_style_path;
+    use proc_macro2::{self, TokenKind, OpKind, Literal};
+
+    fn eq() -> TokenTree {
+        TokenTree(proc_macro2::TokenTree {
+            span: Default::default(),
+            kind: TokenKind::Op('=', OpKind::Alone),
+        })
+    }
+
+    fn doc(s: &str) -> TokenTree {
+        TokenTree(proc_macro2::TokenTree {
+            span: Default::default(),
+            kind: TokenKind::Literal(Literal::doccomment(s)),
+        })
+    }
 
     #[cfg(feature = "full")]
     named!(pub inner_attr -> Attribute, alt!(
@@ -272,10 +326,12 @@ pub mod parsing {
                 let (path, tts) = path_and_tts;
 
                 Attribute {
-                    style: AttrStyle::Inner,
+                    style: AttrStyle::Inner(tokens::Bang::default()),
                     path: path,
                     tts: tts,
                     is_sugared_doc: false,
+                    pound_token: tokens::Pound::default(),
+                    bracket_token: tokens::Bracket::default(),
                 }
             })
         )
@@ -284,13 +340,15 @@ pub mod parsing {
             punct!("//!") >>
             content: take_until!("\n") >>
             (Attribute {
-                style: AttrStyle::Inner,
+                style: AttrStyle::Inner(tokens::Bang::default()),
                 path: "doc".into(),
                 tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(format!("//!{}", content).into(), StrStyle::Cooked))),
+                    eq(),
+                    doc(&format!("//!{}", content)),
                 ],
                 is_sugared_doc: true,
+                pound_token: tokens::Pound::default(),
+                bracket_token: tokens::Bracket::default(),
             })
         )
         |
@@ -299,13 +357,15 @@ pub mod parsing {
             peek!(tag!("/*!")) >>
             com: block_comment >>
             (Attribute {
-                style: AttrStyle::Inner,
+                style: AttrStyle::Inner(tokens::Bang::default()),
                 path: "doc".into(),
                 tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
+                    eq(),
+                    doc(com),
                 ],
                 is_sugared_doc: true,
+                pound_token: tokens::Pound::default(),
+                bracket_token: tokens::Bracket::default(),
             })
         )
     ));
@@ -326,6 +386,8 @@ pub mod parsing {
                     path: path,
                     tts: tts,
                     is_sugared_doc: false,
+                    pound_token: tokens::Pound::default(),
+                    bracket_token: tokens::Bracket::default(),
                 }
             })
         )
@@ -338,10 +400,12 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 path: "doc".into(),
                 tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(format!("///{}", content).into(), StrStyle::Cooked))),
+                    eq(),
+                    doc(&format!("///{}", content)),
                 ],
                 is_sugared_doc: true,
+                pound_token: tokens::Pound::default(),
+                bracket_token: tokens::Bracket::default(),
             })
         )
         |
@@ -353,10 +417,12 @@ pub mod parsing {
                 style: AttrStyle::Outer,
                 path: "doc".into(),
                 tts: vec![
-                    TokenTree::Token(Token::Eq),
-                    TokenTree::Token(Token::Literal(Lit::Str(com.into(), StrStyle::Cooked))),
+                    eq(),
+                    doc(com),
                 ],
                 is_sugared_doc: true,
+                pound_token: tokens::Pound::default(),
+                bracket_token: tokens::Bracket::default(),
             })
         )
     ));
@@ -365,77 +431,71 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use lit::{Lit, StrStyle};
-    use mac::{Token, TokenTree};
     use quote::{Tokens, ToTokens};
-    use ty::Path;
+    use proc_macro2::{Literal, TokenTree};
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
             // If this was a sugared doc, emit it in its original form instead of `#[doc = "..."]`
-            match *self {
-                Attribute {
-                    ref style,
-                    path: Path { global: false, ref segments },
-                    ref tts,
-                    is_sugared_doc: true,
-                } if segments.len() == 1 &&
-                     segments[0].ident == "doc" &&
-                     segments[0].parameters.is_empty() &&
-                     tts.len() == 2 =>
-                {
-                    if let TokenTree::Token(Token::Eq) = self.tts[0] {
-                        if let TokenTree::Token(Token::Literal(Lit::Str(ref value, StrStyle::Cooked))) = self.tts[1] {
-                            match *style {
-                                AttrStyle::Inner if value.starts_with("//!") => {
-                                    tokens.append(&format!("{}\n", value));
-                                    return;
-                                }
-                                AttrStyle::Inner if value.starts_with("/*!") => {
-                                    tokens.append(value);
-                                    return;
-                                }
-                                AttrStyle::Outer if value.starts_with("///") => {
-                                    tokens.append(&format!("{}\n", value));
-                                    return;
-                                }
-                                AttrStyle::Outer if value.starts_with("/**") => {
-                                    tokens.append(value);
-                                    return;
-                                }
-                                _ => {}
+            if self.is_sugared_doc {
+                if let Some(MetaItem::NameValue(ref pair)) = self.meta_item() {
+                    if pair.ident == "doc" {
+                        let value = pair.lit.value.to_string();
+                        match self.style {
+                            AttrStyle::Inner(_) if value.starts_with("//!") => {
+                                let doc = Literal::doccomment(&format!("{}\n", value));
+                                tokens.append(TokenTree {
+                                    span: pair.lit.span.0,
+                                    kind: TokenKind::Literal(doc),
+                                });
+                                return;
                             }
+                            AttrStyle::Inner(_) if value.starts_with("/*!") => {
+                                pair.lit.to_tokens(tokens);
+                                return;
+                            }
+                            AttrStyle::Outer if value.starts_with("///") => {
+                                let doc = Literal::doccomment(&format!("{}\n", value));
+                                tokens.append(TokenTree {
+                                    span: pair.lit.span.0,
+                                    kind: TokenKind::Literal(doc),
+                                });
+                                return;
+                            }
+                            AttrStyle::Outer if value.starts_with("/**") => {
+                                pair.lit.to_tokens(tokens);
+                                return;
+                            }
+                            _ => {}
                         }
                     }
                 }
-
-                _ => {}
             }
 
-            tokens.append("#");
-            if let AttrStyle::Inner = self.style {
-                tokens.append("!");
+            self.pound_token.to_tokens(tokens);
+            if let AttrStyle::Inner(ref b) = self.style {
+                b.to_tokens(tokens);
             }
-            tokens.append("[");
-            self.path.to_tokens(tokens);
-            tokens.append_all(&self.tts);
-            tokens.append("]");
+            self.bracket_token.surround(tokens, |tokens| {
+                self.path.to_tokens(tokens);
+                tokens.append_all(&self.tts);
+            });
         }
     }
 
     impl ToTokens for MetaItemList {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
-            tokens.append("(");
-            tokens.append_separated(&self.nested, ",");
-            tokens.append(")");
+            self.paren_token.surround(tokens, |tokens| {
+                self.nested.to_tokens(tokens);
+            })
         }
     }
 
     impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
-            tokens.append("=");
+            self.eq_token.to_tokens(tokens);
             self.lit.to_tokens(tokens);
         }
     }

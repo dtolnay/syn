@@ -1,4 +1,5 @@
 use {Ident, LifetimeDef, Path, PolyTraitRef, TraitBoundModifier, Ty, TyParam, TyParamBound};
+use BoundLifetimes;
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::{IntoLifetime, IntoLifetimeDef, LifetimeDefBuilder};
 use aster::path::{IntoPath, PathBuilder};
@@ -43,7 +44,7 @@ impl<F> TyParamBuilder<F>
         TyParamBuilder {
             callback: callback,
             id: ty_param.ident,
-            bounds: ty_param.bounds,
+            bounds: ty_param.bounds.into_vec(),
             default: ty_param.default,
         }
     }
@@ -87,11 +88,13 @@ impl<F> TyParamBuilder<F>
 
     pub fn build(self) -> F::Result {
         self.callback.invoke(TyParam {
-                                 attrs: vec![],
-                                 ident: self.id,
-                                 bounds: self.bounds,
-                                 default: self.default,
-                             })
+            attrs: vec![],
+            ident: self.id,
+            bounds: self.bounds.into(),
+            default: self.default,
+            colon_token: Default::default(),
+            eq_token: Default::default(),
+        })
     }
 }
 
@@ -165,7 +168,7 @@ impl<F> TyParamBoundBuilder<F>
     {
         let builder = TraitTyParamBoundBuilder {
             builder: self,
-            modifier: TraitBoundModifier::Maybe,
+            modifier: TraitBoundModifier::Maybe(Default::default()),
         };
 
         PolyTraitRefBuilder::with_callback(path, builder)
@@ -245,9 +248,12 @@ impl<F> PolyTraitRefBuilder<F>
 
     pub fn build(self) -> F::Result {
         self.callback.invoke(PolyTraitRef {
-                                 bound_lifetimes: self.lifetimes,
-                                 trait_ref: self.trait_ref,
-                             })
+            bound_lifetimes: Some(BoundLifetimes {
+                lifetimes: self.lifetimes.into(),
+                ..Default::default()
+            }),
+            trait_ref: self.trait_ref,
+        })
     }
 }
 

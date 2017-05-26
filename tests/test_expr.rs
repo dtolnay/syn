@@ -1,3 +1,5 @@
+#![cfg(feature = "extra-traits")]
+
 extern crate syn;
 use syn::*;
 
@@ -98,7 +100,7 @@ fn test_catch_expr() {
         });
 
         assert_let!(Stmt::Local(ref local) = block.stmts[2]; {
-            assert_let!(Pat::Ident(BindingMode::ByValue(Mutability::Mutable), ref ident, None) = *local.pat; {
+            assert_let!(Pat::Ident(PatIdent { mode: BindingMode::ByValue(Mutability::Mutable(_)), ref ident, .. }) = *local.pat; {
                 assert_eq!(ident, "catch");
             });
         });
@@ -111,8 +113,8 @@ fn test_catch_expr() {
             });
         });
 
-        assert_let!(Stmt::Semi(ref expr) = block.stmts[5]; {
-            assert_let!(Expr { node: ExprKind::Assign(ExprAssign { ref left, ref right }), .. } = **expr; {
+        assert_let!(Stmt::Semi(ref expr, _) = block.stmts[5]; {
+            assert_let!(Expr { node: ExprKind::Assign(ExprAssign { ref left, ref right, .. }), .. } = **expr; {
                 assert_let!(Expr { node: ExprKind::Path(ExprPath { qself: None, ref path }), .. } = **left; {
                     assert_eq!(*path, "catch".into());
                 });
@@ -125,7 +127,7 @@ fn test_catch_expr() {
             });
         });
 
-        assert_let!(Stmt::Semi(ref expr) = block.stmts[7]; {
+        assert_let!(Stmt::Semi(ref expr, _) = block.stmts[7]; {
             assert_let!(Expr { node: ExprKind::Match(ExprMatch { ref expr, .. }), .. } = **expr; {
                 assert_let!(Expr { node: ExprKind::Path(ExprPath { qself: None, ref path }), .. } = **expr; {
                     assert_eq!(*path, "catch".into());

@@ -116,7 +116,10 @@ impl<F> TyBuilder<F>
     }
 
     pub fn build_slice(self, ty: Ty) -> F::Result {
-        self.build(Ty::Slice(TySlice { ty: Box::new(ty) }))
+        self.build(Ty::Slice(TySlice {
+            ty: Box::new(ty),
+            bracket_token: Default::default(),
+        }))
     }
 
     pub fn slice(self) -> TyBuilder<TySliceBuilder<F>> {
@@ -132,11 +135,15 @@ impl<F> TyBuilder<F>
     }
 
     pub fn never(self) -> F::Result {
-        self.build(Ty::Never(TyNever {}))
+        self.build(Ty::Never(TyNever {
+            bang_token: Default::default(),
+        }))
     }
 
     pub fn infer(self) -> F::Result {
-        self.build(Ty::Infer(TyInfer {}))
+        self.build(Ty::Infer(TyInfer {
+            underscore_token: Default::default()
+        }))
     }
 
     pub fn option(self) -> TyBuilder<TyOptionBuilder<F>> {
@@ -221,7 +228,7 @@ impl<F> TyRefBuilder<F>
     where F: Invoke<Ty>
 {
     pub fn mut_(mut self) -> Self {
-        self.mutability = Mutability::Mutable;
+        self.mutability = Mutability::Mutable(Default::default());
         self
     }
 
@@ -240,6 +247,7 @@ impl<F> TyRefBuilder<F>
         self.builder.build(Ty::Rptr(TyRptr {
             lifetime: self.lifetime,
             ty: Box::new(ty),
+            and_token: Default::default(),
         }))
     }
 
@@ -414,7 +422,9 @@ impl<F> TyImplTraitTyBuilder<F>
     }
 
     pub fn with_generics(self, generics: Generics) -> Self {
-        self.with_lifetimes(generics.lifetimes.into_iter().map(|def| def.lifetime))
+        self.with_lifetimes(generics.lifetimes.iter().map(|def| {
+            Lifetime { ident: def.item().lifetime.ident.clone() }
+        }))
     }
 
     pub fn with_lifetimes<I, L>(mut self, lifetimes: I) -> Self
@@ -437,7 +447,8 @@ impl<F> TyImplTraitTyBuilder<F>
     pub fn build(self) -> F::Result {
         let bounds = self.bounds;
         self.builder.build(Ty::ImplTrait(TyImplTrait {
-            bounds: bounds,
+            bounds: bounds.into(),
+            impl_token: Default::default(),
         }))
     }
 }
@@ -479,7 +490,11 @@ impl<F> TyTupleBuilder<F>
     }
 
     pub fn build(self) -> F::Result {
-        self.builder.build(Ty::Tup(TyTup { tys: self.tys }))
+        self.builder.build(Ty::Tup(TyTup {
+            tys: self.tys.into(),
+            paren_token: Default::default(),
+            lone_comma: None,
+        }))
     }
 }
 

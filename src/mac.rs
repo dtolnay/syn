@@ -1,4 +1,9 @@
+#[cfg(feature = "extra-traits")]
+use std::fmt;
+
 use super::*;
+
+use proc_macro2::{TokenKind, Delimiter};
 
 ast_struct! {
     /// Represents a macro invocation. The Path indicates which macro
@@ -9,123 +14,141 @@ ast_struct! {
     /// stored in the enclosing item. Oog.
     pub struct Mac {
         pub path: Path,
-        pub tts: Vec<TokenTree>,
+        pub bang_token: tokens::Bang,
+        pub tokens: Vec<TokenTree>,
     }
 }
 
-ast_enum! {
-    /// When the main rust parser encounters a syntax-extension invocation, it
-    /// parses the arguments to the invocation as a token-tree. This is a very
-    /// loose structure, such that all sorts of different AST-fragments can
-    /// be passed to syntax extensions using a uniform type.
-    ///
-    /// If the syntax extension is an MBE macro, it will attempt to match its
-    /// LHS token tree against the provided token tree, and if it finds a
-    /// match, will transcribe the RHS token tree, splicing in any captured
-    /// `macro_parser::matched_nonterminals` into the `SubstNt`s it finds.
-    ///
-    /// The RHS of an MBE macro is the only place `SubstNt`s are substituted.
-    /// Nothing special happens to misnamed or misplaced `SubstNt`s.
-    pub enum TokenTree {
-        /// A single token
-        Token(Token),
-        /// A delimited sequence of token trees
-        Delimited(Delimited),
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+pub struct TokenTree(pub proc_macro2::TokenTree);
+
+impl Mac {
+    pub fn is_braced(&self) -> bool {
+        match self.tokens.last() {
+            Some(t) => t.is_braced(),
+            None => false,
+        }
     }
 }
 
-ast_struct! {
-    pub struct Delimited {
-        /// The type of delimiter
-        pub delim: DelimToken,
-        /// The delimited sequence of token trees
-        pub tts: Vec<TokenTree>,
+impl TokenTree {
+    pub fn is_braced(&self) -> bool {
+        match self.0.kind {
+            TokenKind::Sequence(Delimiter::Brace, _) => true,
+            _ => false,
+        }
     }
 }
 
-ast_enum! {
-    pub enum Token {
-        // Expression-operator symbols.
-        Eq,
-        Lt,
-        Le,
-        EqEq,
-        Ne,
-        Ge,
-        Gt,
-        AndAnd,
-        OrOr,
-        Not,
-        Tilde,
-        BinOp(BinOpToken),
-        BinOpEq(BinOpToken),
+#[cfg(feature = "extra-traits")]
+impl PartialEq for TokenTree {
+    fn eq(&self, other: &TokenTree) -> bool {
+        use proc_macro2::OpKind;
 
-        // Structural symbols
-        At,
-        Dot,
-        DotDot,
-        DotDotDot,
-        Comma,
-        Semi,
-        Colon,
-        ModSep,
-        RArrow,
-        LArrow,
-        FatArrow,
-        Pound,
-        Dollar,
-        Question,
+        match (&self.0.kind, &other.0.kind) {
+            (&TokenKind::Sequence(d1, ref s1), &TokenKind::Sequence(d2, ref s2)) => {
+                match (d1, d2) {
+                    (Delimiter::Parenthesis, Delimiter::Parenthesis) |
+                    (Delimiter::Brace, Delimiter::Brace) |
+                    (Delimiter::Bracket, Delimiter::Bracket) => {}
+                    (Delimiter::None, Delimiter::None) => {}
+                    _ => return false,
+                }
 
-        // Literals
-        Literal(Lit),
+                let s1 = s1.clone().into_iter();
+                let mut s2 = s2.clone().into_iter();
 
-        // Name components
-        Ident(Ident),
-        Underscore,
-        Lifetime(Ident),
-
-        DocComment(String),
+                for item1 in s1 {
+                    let item2 = match s2.next() {
+                        Some(item) => item,
+                        None => return false,
+                    };
+                    if TokenTree(item1) != TokenTree(item2) {
+                        return false
+                    }
+                }
+                s2.next().is_none()
+            }
+            (&TokenKind::Op(o1, k1), &TokenKind::Op(o2, k2)) => {
+                o1 == o2 && match (k1, k2) {
+                    (OpKind::Alone, OpKind::Alone) |
+                    (OpKind::Joint, OpKind::Joint) => true,
+                    _ => false,
+                }
+            }
+            (&TokenKind::Literal(ref l1), &TokenKind::Literal(ref l2)) => {
+                l1.to_string() == l2.to_string()
+            }
+            (&TokenKind::Word(ref s1), &TokenKind::Word(ref s2)) => {
+                s1.as_str() == s2.as_str()
+            }
+            _ => false,
+        }
     }
 }
 
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum BinOpToken {
-        Plus,
-        Minus,
-        Star,
-        Slash,
-        Percent,
-        Caret,
-        And,
-        Or,
-        Shl,
-        Shr,
+#[cfg(feature = "extra-traits")]
+impl Eq for TokenTree {}
+
+#[cfg(feature = "extra-traits")]
+impl ::std::hash::Hash for TokenTree {
+    fn hash<H: ::std::hash::Hasher>(&self, h: &mut H) {
+        use proc_macro2::OpKind;
+
+        match self.0.kind {
+            TokenKind::Sequence(delim, ref stream) => {
+                0u8.hash(h);
+                match delim {
+                    Delimiter::Parenthesis => 0u8.hash(h),
+                    Delimiter::Brace => 1u8.hash(h),
+                    Delimiter::Bracket => 2u8.hash(h),
+                    Delimiter::None => 3u8.hash(h),
+                }
+
+                for item in stream.clone().into_iter() {
+                    TokenTree(item).hash(h);
+                }
+                0xffu8.hash(h); // terminator w/ a variant we don't normally hash
+            }
+            TokenKind::Op(op, kind) => {
+                1u8.hash(h);
+                op.hash(h);
+                match kind {
+                    OpKind::Alone => 0u8.hash(h),
+                    OpKind::Joint => 1u8.hash(h),
+                }
+            }
+            TokenKind::Literal(ref lit) => (2u8, lit.to_string()).hash(h),
+            TokenKind::Word(ref word) => (3u8, word.as_str()).hash(h),
+        }
     }
 }
 
-ast_enum! {
-    /// A delimiter token
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum DelimToken {
-        /// A round parenthesis: `(` or `)`
-        Paren,
-        /// A square bracket: `[` or `]`
-        Bracket,
-        /// A curly brace: `{` or `}`
-        Brace,
+#[cfg(feature = "extra-traits")]
+impl fmt::Debug for TokenTree {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.to_string().fmt(f)
     }
 }
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use Lifetime;
+    use {Lifetime};
     use generics::parsing::lifetime;
     use ident::parsing::word;
     use lit::parsing::lit;
-    use synom::space::{block_comment, whitespace};
+    use synom::IResult;
+    use synom::space::{block_comment, whitespace, skip_whitespace};
     use ty::parsing::path;
+    use proc_macro2::{self, TokenStream, TokenKind, Delimiter, OpKind, Literal};
+
+    fn tt(kind: TokenKind) -> TokenTree {
+        TokenTree(proc_macro2::TokenTree {
+            kind: kind,
+            span: Default::default(),
+        })
+    }
 
     named!(pub mac -> Mac, do_parse!(
         what: path >>
@@ -133,146 +156,166 @@ pub mod parsing {
         body: delimited >>
         (Mac {
             path: what,
-            tts: vec![TokenTree::Delimited(body)],
+            bang_token: tokens::Bang::default(),
+            tokens: vec![body],
         })
     ));
 
     named!(pub token_trees -> Vec<TokenTree>, many0!(token_tree));
 
-    named!(pub delimited -> Delimited, alt!(
+    named!(pub token_stream -> TokenStream,
+           map!(token_trees, |t: Vec<TokenTree>| t.into_iter().map(|t| t.0).collect()));
+
+    named!(pub delimited -> TokenTree, alt!(
         delimited!(
             punct!("("),
-            token_trees,
+            token_stream,
             punct!(")")
-        ) => { |tts| Delimited { delim: DelimToken::Paren, tts: tts } }
+        ) => { |ts| tt(TokenKind::Sequence(Delimiter::Parenthesis, ts)) }
         |
         delimited!(
             punct!("["),
-            token_trees,
+            token_stream,
             punct!("]")
-        ) => { |tts| Delimited { delim: DelimToken::Bracket, tts: tts } }
+        ) => { |ts| tt(TokenKind::Sequence(Delimiter::Bracket, ts)) }
         |
         delimited!(
             punct!("{"),
-            token_trees,
+            token_stream,
             punct!("}")
-        ) => { |tts| Delimited { delim: DelimToken::Brace, tts: tts } }
+        ) => { |ts| tt(TokenKind::Sequence(Delimiter::Brace, ts)) }
     ));
 
     named!(pub token_tree -> TokenTree, alt!(
-        map!(token, TokenTree::Token)
+        token
         |
-        map!(delimited, TokenTree::Delimited)
+        delimited
     ));
 
-    named!(token -> Token, alt!(
-        keyword!("_") => { |_| Token::Underscore }
+    macro_rules! punct1 {
+        ($i:expr, $punct:expr) => {
+            punct1($i, $punct)
+        }
+    }
+
+    fn punct1<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, char> {
+        let input = skip_whitespace(input);
+        if input.starts_with(token) {
+            IResult::Done(&input[1..], token.chars().next().unwrap())
+        } else {
+            IResult::Error
+        }
+    }
+
+    named!(token -> TokenTree, alt!(
+        keyword!("_") => { |_| tt(TokenKind::Op('_', OpKind::Alone)) }
         |
-        punct!("&&") => { |_| Token::AndAnd } // must be before BinOp
+        punct1!("&&") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before BinOp
         |
-        punct!("||") => { |_| Token::OrOr } // must be before BinOp
+        punct1!("||") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before BinOp
         |
-        punct!("->") => { |_| Token::RArrow } // must be before BinOp
+        punct1!("->") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before BinOp
         |
-        punct!("<-") => { |_| Token::LArrow } // must be before Lt
+        punct1!("<-") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before Lt
         |
-        punct!("=>") => { |_| Token::FatArrow } // must be before Eq
+        punct1!("=>") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before Eq
         |
-        punct!("...") => { |_| Token::DotDotDot } // must be before DotDot
+        punct1!("...") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before DotDot
         |
-        punct!("..") => { |_| Token::DotDot } // must be before Dot
+        punct1!("..") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before Dot
         |
-        punct!(".") => { |_| Token::Dot }
+        punct1!(".") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        map!(doc_comment, Token::DocComment) // must be before bin_op
+        // must be before bin_op
+        map!(doc_comment, |s: String| tt(TokenKind::Literal(Literal::doccomment(&s))))
         |
-        map!(bin_op_eq, Token::BinOpEq) // must be before bin_op
+        bin_op_eq // must be before bin_op
         |
-        map!(bin_op, Token::BinOp)
+        bin_op
         |
-        map!(lit, Token::Literal)
+        map!(lit, |l: Lit| l.into_token_tree())
         |
-        map!(word, Token::Ident)
+        map!(word, |w: Ident| tt(TokenKind::Word(w.sym)))
         |
-        map!(lifetime, |lt: Lifetime| Token::Lifetime(lt.ident))
+        map!(lifetime, |lt: Lifetime| tt(TokenKind::Word(lt.ident.sym)))
         |
-        punct!("<=") => { |_| Token::Le }
+        punct1!("<=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("==") => { |_| Token::EqEq }
+        punct1!("==") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("!=") => { |_| Token::Ne }
+        punct1!("!=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!(">=") => { |_| Token::Ge }
+        punct1!(">=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("::") => { |_| Token::ModSep }
+        punct1!("::") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("=") => { |_| Token::Eq }
+        punct1!("=") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("<") => { |_| Token::Lt }
+        punct1!("<") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!(">") => { |_| Token::Gt }
+        punct1!(">") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("!") => { |_| Token::Not }
+        punct1!("!") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("~") => { |_| Token::Tilde }
+        punct1!("~") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("@") => { |_| Token::At }
+        punct1!("@") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!(",") => { |_| Token::Comma }
+        punct1!(",") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!(";") => { |_| Token::Semi }
+        punct1!(";") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!(":") => { |_| Token::Colon }
+        punct1!(":") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("#") => { |_| Token::Pound }
+        punct1!("#") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("$") => { |_| Token::Dollar }
+        punct1!("$") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("?") => { |_| Token::Question }
+        punct1!("?") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
     ));
 
-    named!(bin_op -> BinOpToken, alt!(
-        punct!("+") => { |_| BinOpToken::Plus }
+    named!(bin_op -> TokenTree, alt!(
+        punct1!("+") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("-") => { |_| BinOpToken::Minus }
+        punct1!("-") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("*") => { |_| BinOpToken::Star }
+        punct1!("*") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("/") => { |_| BinOpToken::Slash }
+        punct1!("/") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("%") => { |_| BinOpToken::Percent }
+        punct1!("%") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("^") => { |_| BinOpToken::Caret }
+        punct1!("^") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("&") => { |_| BinOpToken::And }
+        punct1!("&") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("|") => { |_| BinOpToken::Or }
+        punct1!("|") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
         |
-        punct!("<<") => { |_| BinOpToken::Shl }
+        punct1!("<<") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!(">>") => { |_| BinOpToken::Shr }
+        punct1!(">>") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
     ));
 
-    named!(bin_op_eq -> BinOpToken, alt!(
-        punct!("+=") => { |_| BinOpToken::Plus }
+    named!(bin_op_eq -> TokenTree, alt!(
+        punct1!("+=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("-=") => { |_| BinOpToken::Minus }
+        punct1!("-=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("*=") => { |_| BinOpToken::Star }
+        punct1!("*=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("/=") => { |_| BinOpToken::Slash }
+        punct1!("/=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("%=") => { |_| BinOpToken::Percent }
+        punct1!("%=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("^=") => { |_| BinOpToken::Caret }
+        punct1!("^=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("&=") => { |_| BinOpToken::And }
+        punct1!("&=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("|=") => { |_| BinOpToken::Or }
+        punct1!("|=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!("<<=") => { |_| BinOpToken::Shl }
+        punct1!("<<=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
         |
-        punct!(">>=") => { |_| BinOpToken::Shr }
+        punct1!(">>=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
     ));
 
     named!(doc_comment -> String, alt!(
@@ -313,126 +356,14 @@ mod printing {
     impl ToTokens for Mac {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
-            tokens.append("!");
-            for tt in &self.tts {
-                tt.to_tokens(tokens);
-            }
+            self.bang_token.to_tokens(tokens);
+            tokens.append_all(&self.tokens);
         }
     }
 
     impl ToTokens for TokenTree {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                TokenTree::Token(ref token) => token.to_tokens(tokens),
-                TokenTree::Delimited(ref delimited) => delimited.to_tokens(tokens),
-            }
-        }
-    }
-
-    impl DelimToken {
-        fn open(&self) -> &'static str {
-            match *self {
-                DelimToken::Paren => "(",
-                DelimToken::Bracket => "[",
-                DelimToken::Brace => "{",
-            }
-        }
-
-        fn close(&self) -> &'static str {
-            match *self {
-                DelimToken::Paren => ")",
-                DelimToken::Bracket => "]",
-                DelimToken::Brace => "}",
-            }
-        }
-    }
-
-    impl ToTokens for Delimited {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append(self.delim.open());
-            for tt in &self.tts {
-                tt.to_tokens(tokens);
-            }
-            tokens.append(self.delim.close());
-        }
-    }
-
-    impl ToTokens for Token {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Token::Eq => tokens.append("="),
-                Token::Lt => tokens.append("<"),
-                Token::Le => tokens.append("<="),
-                Token::EqEq => tokens.append("=="),
-                Token::Ne => tokens.append("!="),
-                Token::Ge => tokens.append(">="),
-                Token::Gt => tokens.append(">"),
-                Token::AndAnd => tokens.append("&&"),
-                Token::OrOr => tokens.append("||"),
-                Token::Not => tokens.append("!"),
-                Token::Tilde => tokens.append("~"),
-                Token::BinOp(ref binop) => tokens.append(binop.op()),
-                Token::BinOpEq(ref binop) => tokens.append(binop.assign_op()),
-                Token::At => tokens.append("@"),
-                Token::Dot => tokens.append("."),
-                Token::DotDot => tokens.append(".."),
-                Token::DotDotDot => tokens.append("..."),
-                Token::Comma => tokens.append(","),
-                Token::Semi => tokens.append(";"),
-                Token::Colon => tokens.append(":"),
-                Token::ModSep => tokens.append("::"),
-                Token::RArrow => tokens.append("->"),
-                Token::LArrow => tokens.append("<-"),
-                Token::FatArrow => tokens.append("=>"),
-                Token::Pound => tokens.append("#"),
-                Token::Dollar => tokens.append("$"),
-                Token::Question => tokens.append("?"),
-                Token::Literal(ref lit) => lit.to_tokens(tokens),
-                Token::Ident(ref ident) |
-                Token::Lifetime(ref ident) => ident.to_tokens(tokens),
-                Token::Underscore => tokens.append("_"),
-                Token::DocComment(ref com) => {
-                    tokens.append(&format!("{}\n", com));
-                }
-            }
-        }
-    }
-
-    impl BinOpToken {
-        fn op(&self) -> &'static str {
-            match *self {
-                BinOpToken::Plus => "+",
-                BinOpToken::Minus => "-",
-                BinOpToken::Star => "*",
-                BinOpToken::Slash => "/",
-                BinOpToken::Percent => "%",
-                BinOpToken::Caret => "^",
-                BinOpToken::And => "&",
-                BinOpToken::Or => "|",
-                BinOpToken::Shl => "<<",
-                BinOpToken::Shr => ">>",
-            }
-        }
-
-        fn assign_op(&self) -> &'static str {
-            match *self {
-                BinOpToken::Plus => "+=",
-                BinOpToken::Minus => "-=",
-                BinOpToken::Star => "*=",
-                BinOpToken::Slash => "/=",
-                BinOpToken::Percent => "%=",
-                BinOpToken::Caret => "^=",
-                BinOpToken::And => "&=",
-                BinOpToken::Or => "|=",
-                BinOpToken::Shl => "<<=",
-                BinOpToken::Shr => ">>=",
-            }
-        }
-    }
-
-    impl ToTokens for BinOpToken {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append(self.op());
+            self.0.to_tokens(tokens);
         }
     }
 }

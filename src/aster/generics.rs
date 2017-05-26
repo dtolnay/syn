@@ -5,6 +5,8 @@ use aster::path::IntoPath;
 use aster::ty_param::TyParamBuilder;
 use aster::where_predicate::WherePredicateBuilder;
 
+use delimited::Delimited;
+
 pub struct GenericsBuilder<F = Identity> {
     callback: F,
     lifetimes: Vec<LifetimeDef>,
@@ -37,16 +39,16 @@ impl<F> GenericsBuilder<F>
     pub fn from_generics_with_callback(generics: Generics, callback: F) -> Self {
         GenericsBuilder {
             callback: callback,
-            lifetimes: generics.lifetimes,
-            ty_params: generics.ty_params,
-            predicates: generics.where_clause.predicates,
+            lifetimes: generics.lifetimes.into_vec(),
+            ty_params: generics.ty_params.into_vec(),
+            predicates: generics.where_clause.predicates.into_vec(),
         }
     }
 
     pub fn with(self, generics: Generics) -> Self {
-        self.with_lifetimes(generics.lifetimes.into_iter())
-            .with_ty_params(generics.ty_params.into_iter())
-            .with_predicates(generics.where_clause.predicates.into_iter())
+        self.with_lifetimes(generics.lifetimes.into_vec().into_iter())
+            .with_ty_params(generics.ty_params.into_vec().into_iter())
+            .with_predicates(generics.where_clause.predicates.into_vec().into_iter())
     }
 
     pub fn with_lifetimes<I, L>(mut self, iter: I) -> Self
@@ -141,7 +143,7 @@ impl<F> GenericsBuilder<F>
         let lifetime = lifetime.into_lifetime();
 
         for lifetime_def in &mut self.lifetimes {
-            lifetime_def.bounds.push(lifetime.clone());
+            lifetime_def.bounds.push_default(lifetime.clone());
         }
 
         for ty_param in &mut self.ty_params {
@@ -174,14 +176,14 @@ impl<F> GenericsBuilder<F>
 
     pub fn strip_lifetimes(mut self) -> Self {
         for lifetime in &mut self.lifetimes {
-            lifetime.bounds = vec![];
+            lifetime.bounds = Delimited::new();
         }
         self
     }
 
     pub fn strip_ty_params(mut self) -> Self {
         for ty_param in &mut self.ty_params {
-            ty_param.bounds = vec![];
+            ty_param.bounds = Delimited::new();
         }
         self
     }
@@ -193,10 +195,15 @@ impl<F> GenericsBuilder<F>
 
     pub fn build(self) -> F::Result {
         self.callback.invoke(Generics {
-                                 lifetimes: self.lifetimes,
-                                 ty_params: self.ty_params,
-                                 where_clause: WhereClause { predicates: self.predicates },
-                             })
+            lifetimes: self.lifetimes.into(),
+            ty_params: self.ty_params.into(),
+            where_clause: WhereClause {
+                predicates: self.predicates.into(),
+                where_token: Default::default(),
+            },
+            lt_token: Default::default(),
+            gt_token: Default::default(),
+        })
     }
 }
 

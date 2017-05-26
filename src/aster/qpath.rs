@@ -3,6 +3,7 @@ use aster::ident::ToIdent;
 use aster::invoke::{Invoke, Identity};
 use aster::path::{PathBuilder, PathSegmentBuilder};
 use aster::ty::TyBuilder;
+use delimited::Delimited;
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -74,7 +75,8 @@ impl<F> QPathTyBuilder<F>
     {
         let path = Path {
             global: false,
-            segments: vec![],
+            segments: Delimited::new(),
+            leading_colon: None,
         };
         self.as_().build(path).id(id)
     }
@@ -84,7 +86,8 @@ impl<F> QPathTyBuilder<F>
     {
         let path = Path {
             global: false,
-            segments: vec![],
+            segments: Delimited::new(),
+            leading_colon: None,
         };
         self.as_().build(path).segment(id)
     }
@@ -101,6 +104,9 @@ impl<F> Invoke<Path> for QPathTyBuilder<F>
             qself: QSelf {
                 ty: Box::new(self.ty),
                 position: path.segments.len(),
+                as_token: Default::default(),
+                gt_token: Default::default(),
+                lt_token: Default::default(),
             },
             path: path,
         }
@@ -137,7 +143,7 @@ impl<F> Invoke<PathSegment> for QPathQSelfBuilder<F>
     type Result = F::Result;
 
     fn invoke(mut self, segment: PathSegment) -> F::Result {
-        self.path.segments.push(segment);
+        self.path.segments.push_default(segment);
         self.builder.build(self.qself, self.path)
     }
 }

@@ -1,5 +1,5 @@
 use {Ident, Lifetime, LifetimeDef, Ty, TyParamBound, WhereBoundPredicate, WherePredicate,
-     WhereRegionPredicate};
+     WhereRegionPredicate, BoundLifetimes};
 use aster::invoke::{Invoke, Identity};
 use aster::lifetime::{IntoLifetime, IntoLifetimeDef, LifetimeDefBuilder};
 use aster::path::IntoPath;
@@ -201,9 +201,13 @@ impl<F> WhereBoundPredicateTyBoundsBuilder<F>
 
     pub fn build(self) -> F::Result {
         let predicate = WhereBoundPredicate {
-            bound_lifetimes: self.bound_lifetimes,
+            bound_lifetimes: Some(BoundLifetimes {
+                lifetimes: self.bound_lifetimes.into(),
+                ..Default::default()
+            }),
             bounded_ty: self.ty,
-            bounds: self.bounds,
+            bounds: self.bounds.into(),
+            colon_token: Default::default(),
         };
 
         self.callback.invoke(WherePredicate::BoundPredicate(predicate))
@@ -251,7 +255,8 @@ impl<F> WhereRegionPredicateBuilder<F>
     pub fn build(self) -> F::Result {
         let predicate = WhereRegionPredicate {
             lifetime: self.lifetime,
-            bounds: self.bounds,
+            bounds: self.bounds.into(),
+            colon_token: Default::default(),
         };
 
         self.callback.invoke(WherePredicate::RegionPredicate(predicate))

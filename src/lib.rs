@@ -2,14 +2,15 @@
 
 #![cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
 
+extern crate proc_macro2;
+
 #[cfg(feature = "printing")]
 extern crate quote;
 
 #[cfg(feature = "parsing")]
 extern crate unicode_xid;
 
-#[cfg(feature = "parsing")]
-#[macro_use]
+#[cfg_attr(feature = "parsing", macro_use)]
 extern crate synom;
 
 #[cfg(feature = "aster")]
@@ -27,7 +28,8 @@ pub use constant::{ConstExpr, ConstCall, ConstBinary, ConstUnary, ConstCast,
                    ConstIndex, ConstParen};
 
 mod data;
-pub use data::{Field, Variant, VariantData, Visibility};
+pub use data::{Field, Variant, VariantData, Visibility, VisRestricted, VisCrate,
+               VisPublic, VisInherited};
 
 #[cfg(feature = "parsing")]
 mod escape;
@@ -42,12 +44,14 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, Fie
                ExprForLoop, ExprLoop, ExprMatch, ExprClosure, ExprBlock,
                ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
-               ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch};
+               ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
+               PatIdent, PatWild, PatStruct, PatTuple, PatTupleStruct, PatPath,
+               PatBox, PatRef, PatLit, PatRange, PatSlice};
 
 mod generics;
 pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
                    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
-                   WhereRegionPredicate};
+                   WhereRegionPredicate, BoundLifetimes};
 #[cfg(feature = "printing")]
 pub use generics::{ImplGenerics, Turbofish, TyGenerics};
 
@@ -73,15 +77,13 @@ mod krate;
 pub use krate::Crate;
 
 mod lit;
-pub use lit::{FloatTy, IntTy, Lit, StrStyle};
-#[cfg(feature = "parsing")]
-pub use lit::{ByteStrLit, FloatLit, IntLit, StrLit};
+pub use lit::{Lit, LitKind};
 
 mod mac;
-pub use mac::{BinOpToken, DelimToken, Delimited, Mac, Token, TokenTree};
+pub use mac::{Mac, TokenTree};
 
 mod derive;
-pub use derive::{Body, DeriveInput};
+pub use derive::{Body, DeriveInput, BodyEnum, BodyStruct};
 // Deprecated. Use `DeriveInput` instead.
 #[doc(hidden)]
 pub type MacroInput = DeriveInput;
@@ -95,6 +97,14 @@ pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetT
              PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety, TySlice, TyArray,
              TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath, TyTraitObject,
              TyImplTrait, TyParen, TyInfer};
+#[cfg(feature = "printing")]
+pub use ty::PathTokens;
+
+mod span;
+pub use span::Span;
+
+pub mod tokens;
+pub use synom::delimited;
 
 #[cfg(feature = "visit")]
 pub mod visit;

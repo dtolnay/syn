@@ -7,6 +7,8 @@ use super::*;
 #[cfg(not(feature = "full"))]
 use constant;
 
+use delimited::{Delimited, Element};
+
 /// AST->AST fold.
 ///
 /// Each method of the Folder trait is a hook to be potentially overridden. Each
@@ -174,6 +176,20 @@ impl<T, U> LiftMut<T, U> for Vec<T> {
     }
 }
 
+impl<T, D, U> LiftMut<T, U> for Delimited<T, D> {
+    type Output = Delimited<U, D>;
+    fn lift<F>(self, mut f: F) -> Self::Output
+        where F: FnMut(T) -> U
+    {
+        self.into_iter().map(|e| {
+            match e {
+                Element::Delimited(t, d) => Element::Delimited(f(t), d),
+                Element::End(t) => Element::End(f(t))
+            }
+        }).collect()
+    }
+}
+
 pub fn noop_fold_ident<F: ?Sized + Folder>(_: &mut F, _ident: Ident) -> Ident {
     _ident
 }
@@ -191,8 +207,18 @@ body }: DeriveInput) -> DeriveInput{
         attrs: attrs.lift(|a| folder.fold_attribute(a)),
         generics: folder.fold_generics(generics),
         body: match body {
-            Enum(variants) => Enum(variants.lift(move |v| folder.fold_variant(v))),
-            Struct(variant_data) => Struct(folder.fold_variant_data(variant_data)),
+            Enum(data) => {
+                Enum(BodyEnum {
+                    variants: data.variants.lift(move |v| folder.fold_variant(v)),
+                    ..data
+                })
+            }
+            Struct(data) => {
+                Struct(BodyStruct {
+                    data: folder.fold_variant_data(data.data),
+                    ..data
+                })
+            }
         },
     }
 }
@@ -202,136 +228,151 @@ pub fn noop_fold_ty<F: ?Sized + Folder>(folder: &mut F, ty: Ty) -> Ty {
     use Ty::*;
 
     match ty {
-        Slice(TySlice { ty }) => {
+        Slice(t) => {
             Slice(TySlice {
-                ty: ty.lift(|v| folder.fold_ty(v)),
+                ty: t.ty.lift(|v| folder.fold_ty(v)),
+                ..t
             })
         }
-        Paren(TyParen { ty }) => {
+        Paren(t) => {
             Paren(TyParen {
-                ty: ty.lift(|v| folder.fold_ty(v)),
+                ty: t.ty.lift(|v| folder.fold_ty(v)),
+                ..t
             })
         }
-        Ptr(TyPtr { ty }) => {
-            let ty = *ty;
+        Ptr(t) => {
+            let ty = *t.ty;
             let MutTy { ty, mutability } = ty;
             Ptr(TyPtr {
                 ty: Box::new(MutTy {
                     ty: folder.fold_ty(ty),
                     mutability: mutability,
                 }),
+                ..t
             })
         }
-        Rptr(TyRptr { lifetime, ty }) => {
-            let ty = *ty;
+        Rptr(t) => {
+            let ty = *t.ty;
             let MutTy { ty, mutability } = ty;
             Rptr(TyRptr {
-                lifetime: lifetime.map(|l| folder.fold_lifetime(l)),
+                lifetime: t.lifetime.map(|l| folder.fold_lifetime(l)),
                 ty: Box::new(MutTy {
                     ty: folder.fold_ty(ty),
                     mutability: mutability,
                 }),
+                ..t
             })
         }
         Never(t) => Never(t),
         Infer(t) => Infer(t),
-        Tup(TyTup { tys }) => {
+        Tup(t) => {
             Tup(TyTup {
-                tys: tys.lift(|x| folder.fold_ty(x)),
+                tys: t.tys.lift(|x| folder.fold_ty(x)),
+                ..t
             })
         }
-        BareFn(TyBareFn { ty }) => {
-            let ty = *ty;
-            let BareFnTy { unsafety, abi, lifetimes, inputs, output, variadic } = ty;
+        BareFn(t) => {
+            let ty = *t.ty;
             BareFn(TyBareFn {
                 ty: Box::new(BareFnTy {
-                    unsafety: unsafety,
-                    abi: abi,
-                    lifetimes: lifetimes.lift(|l| folder.fold_lifetime_def(l)),
-                    inputs: inputs.lift(|v| {
+                    lifetimes: ty.lifetimes.map(|l| {
+                        noop_fold_bound_lifetimes(folder, l)
+                    }),
+                    inputs: ty.inputs.lift(|v| {
                         BareFnArg {
-                            name: v.name.map(|n| folder.fold_ident(n)),
+                            name: v.name.map(|n| (folder.fold_ident(n.0), n.1)),
                             ty: folder.fold_ty(v.ty),
                         }
                     }),
-                    output: folder.fold_fn_ret_ty(output),
-                    variadic: variadic,
+                    output: folder.fold_fn_ret_ty(ty.output),
+                    ..ty
                 }),
             })
         }
-        Path(TyPath { qself, path }) => {
+        Path(t) => {
             Path(TyPath {
-                qself: qself.map(|v| noop_fold_qself(folder, v)),
-                path: folder.fold_path(path),
+                qself: t.qself.map(|v| noop_fold_qself(folder, v)),
+                path: folder.fold_path(t.path),
             })
         }
-        Array(TyArray { ty, amt }) => {
+        Array(t) => {
             Array(TyArray {
-                ty: ty.lift(|v| folder.fold_ty(v)),
-                amt: folder.fold_const_expr(amt),
+                ty: t.ty.lift(|v| folder.fold_ty(v)),
+                amt: folder.fold_const_expr(t.amt),
+                ..t
             })
         }
-        TraitObject(TyTraitObject { bounds }) => {
+        TraitObject(t) => {
             TraitObject(TyTraitObject {
-                bounds: bounds.lift(|v| folder.fold_ty_param_bound(v)),
+                bounds: t.bounds.lift(|v| folder.fold_ty_param_bound(v)),
             })
         }
-        ImplTrait(TyImplTrait { bounds }) => {
+        ImplTrait(t) => {
             ImplTrait(TyImplTrait {
-                bounds: bounds.lift(|v| folder.fold_ty_param_bound(v)),
+                bounds: t.bounds.lift(|v| folder.fold_ty_param_bound(v)),
+                ..t
             })
         }
         Mac(mac) => Mac(folder.fold_mac(mac)),
     }
 }
 
-fn noop_fold_qself<F: ?Sized + Folder>(folder: &mut F, QSelf { ty, position }: QSelf) -> QSelf {
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))] // clippy lies
+fn noop_fold_qself<F: ?Sized + Folder>(folder: &mut F, qself: QSelf) -> QSelf {
     QSelf {
-        ty: Box::new(folder.fold_ty(*(ty))),
-        position: position,
+        ty: Box::new(folder.fold_ty(*(qself.ty))),
+        ..qself
     }
 }
 
 pub fn noop_fold_generics<F: ?Sized + Folder>(folder: &mut F,
-                                     Generics { lifetimes, ty_params, where_clause }: Generics)
+                                              generics: Generics)
 -> Generics{
     use WherePredicate::*;
     Generics {
-        lifetimes: lifetimes.lift(|l| folder.fold_lifetime_def(l)),
-        ty_params: ty_params.lift(|ty| {
+        lifetimes: generics.lifetimes.lift(|l| folder.fold_lifetime_def(l)),
+        ty_params: generics.ty_params.lift(|ty| {
             TyParam {
                 attrs: ty.attrs.lift(|a| folder.fold_attribute(a)),
                 ident: folder.fold_ident(ty.ident),
                 bounds: ty.bounds.lift(|ty_pb| folder.fold_ty_param_bound(ty_pb)),
                 default: ty.default.map(|v| folder.fold_ty(v)),
+                ..ty
             }
         }),
         where_clause: WhereClause {
-            predicates: where_clause.predicates.lift(|p| match p {
-                                                         BoundPredicate(bound_predicate) => {
+            predicates: generics.where_clause.predicates.lift(|p| {
+                match p {
+                    BoundPredicate(bound_predicate) => {
                         BoundPredicate(WhereBoundPredicate {
                             bound_lifetimes: bound_predicate.bound_lifetimes
-                                .lift(|l| folder.fold_lifetime_def(l)),
+                                .map(|l| noop_fold_bound_lifetimes(folder, l)),
                             bounded_ty: folder.fold_ty(bound_predicate.bounded_ty),
                             bounds: bound_predicate.bounds
                                 .lift(|ty_pb| folder.fold_ty_param_bound(ty_pb)),
+                            ..bound_predicate
                         })
                     }
-                                                         RegionPredicate(region_predicate) => {
+                    RegionPredicate(region_predicate) => {
                         RegionPredicate(WhereRegionPredicate {
                             lifetime: folder.fold_lifetime(region_predicate.lifetime),
                             bounds: region_predicate.bounds
                                 .lift(|b| folder.fold_lifetime(b)),
+                            ..region_predicate
                         })
                     }
-                                                         EqPredicate(eq_predicate) => {
+                    EqPredicate(eq_predicate) => {
                         EqPredicate(WhereEqPredicate {
                             lhs_ty: folder.fold_ty(eq_predicate.lhs_ty),
                             rhs_ty: folder.fold_ty(eq_predicate.rhs_ty),
+                            ..eq_predicate
                         })
                     }
-                                                     }),
+                }
+            }),
+            ..generics.where_clause
         },
+        ..generics
     }
 }
 
@@ -349,7 +390,9 @@ pub fn noop_fold_poly_trait_ref<F: ?Sized + Folder>(folder: &mut F,
                                                     trait_ref: PolyTraitRef)
                                                     -> PolyTraitRef {
     PolyTraitRef {
-        bound_lifetimes: trait_ref.bound_lifetimes.lift(|bl| folder.fold_lifetime_def(bl)),
+        bound_lifetimes: trait_ref.bound_lifetimes.map(|bl| {
+            noop_fold_bound_lifetimes(folder, bl)
+        }),
         trait_ref: folder.fold_path(trait_ref.trait_ref),
     }
 }
@@ -359,8 +402,8 @@ pub fn noop_fold_variant_data<F: ?Sized + Folder>(folder: &mut F,
                                                   -> VariantData {
     use VariantData::*;
     match data {
-        Struct(fields) => Struct(fields.lift(|f| folder.fold_field(f))),
-        Tuple(fields) => Tuple(fields.lift(|f| folder.fold_field(f))),
+        Struct(fields, t) => Struct(fields.lift(|f| folder.fold_field(f)), t),
+        Tuple(fields, t) => Tuple(fields.lift(|f| folder.fold_field(f)), t),
         Unit => Unit,
     }
 }
@@ -371,17 +414,20 @@ pub fn noop_fold_field<F: ?Sized + Folder>(folder: &mut F, field: Field) -> Fiel
         vis: noop_fold_vis(folder, field.vis),
         attrs: field.attrs.lift(|a| folder.fold_attribute(a)),
         ty: folder.fold_ty(field.ty),
+        ..field
     }
 }
 
 pub fn noop_fold_variant<F: ?Sized + Folder>(folder: &mut F,
-                                    Variant { ident, attrs, data, discriminant }: Variant)
--> Variant{
+                                             variant: Variant)
+    -> Variant
+{
     Variant {
-        ident: folder.fold_ident(ident),
-        attrs: attrs.lift(|v| folder.fold_attribute(v)),
-        data: folder.fold_variant_data(data),
-        discriminant: discriminant.map(|ce| folder.fold_const_expr(ce)),
+        ident: folder.fold_ident(variant.ident),
+        attrs: variant.attrs.lift(|v| folder.fold_attribute(v)),
+        data: folder.fold_variant_data(variant.data),
+        discriminant: variant.discriminant.map(|ce| folder.fold_const_expr(ce)),
+        ..variant
     }
 }
 
@@ -389,29 +435,41 @@ pub fn noop_fold_lifetime<F: ?Sized + Folder>(folder: &mut F, _lifetime: Lifetim
     Lifetime { ident: folder.fold_ident(_lifetime.ident) }
 }
 
-pub fn noop_fold_lifetime_def<F: ?Sized + Folder>(folder: &mut F,
-                                         LifetimeDef { attrs, lifetime, bounds }: LifetimeDef)
--> LifetimeDef{
-    LifetimeDef {
-        attrs: attrs.lift(|x| folder.fold_attribute(x)),
-        lifetime: folder.fold_lifetime(lifetime),
-        bounds: bounds.lift(|l| folder.fold_lifetime(l)),
+pub fn noop_fold_bound_lifetimes<F: ?Sized + Folder>(folder: &mut F,
+                                                     b: BoundLifetimes)
+    -> BoundLifetimes
+{
+    BoundLifetimes {
+        lifetimes: b.lifetimes.lift(|l| folder.fold_lifetime_def(l)),
+        ..b
     }
 }
 
-pub fn noop_fold_path<F: ?Sized + Folder>(folder: &mut F, Path { global, segments }: Path) -> Path {
+pub fn noop_fold_lifetime_def<F: ?Sized + Folder>(folder: &mut F,
+                                                  def: LifetimeDef)
+    -> LifetimeDef
+{
+    LifetimeDef {
+        attrs: def.attrs.lift(|x| folder.fold_attribute(x)),
+        lifetime: folder.fold_lifetime(def.lifetime),
+        bounds: def.bounds.lift(|l| folder.fold_lifetime(l)),
+        ..def
+    }
+}
+
+pub fn noop_fold_path<F: ?Sized + Folder>(folder: &mut F, path: Path) -> Path {
     Path {
-        global: global,
-        segments: segments.lift(|s| folder.fold_path_segment(s)),
+        segments: path.segments.lift(|s| folder.fold_path_segment(s)),
+        ..path
     }
 }
 
 pub fn noop_fold_path_segment<F: ?Sized + Folder>(folder: &mut F,
-                                                  PathSegment { ident, parameters }: PathSegment)
+                                                  seg: PathSegment)
                                                   -> PathSegment {
     PathSegment {
-        ident: folder.fold_ident(ident),
-        parameters: folder.fold_path_parameters(parameters),
+        ident: folder.fold_ident(seg.ident),
+        parameters: folder.fold_path_parameters(seg.parameters),
     }
 }
 
@@ -421,37 +479,36 @@ pub fn noop_fold_path_parameters<F: ?Sized + Folder>(folder: &mut F,
     use PathParameters::*;
     match path_parameters {
         AngleBracketed(d) => {
-            let AngleBracketedParameterData { lifetimes, types, bindings } = d;
             AngleBracketed(AngleBracketedParameterData {
-                               lifetimes: lifetimes.into_iter()
-                                   .map(|l| folder.fold_lifetime(l))
-                                   .collect(),
-                               types: types.lift(|ty| folder.fold_ty(ty)),
-                               bindings: bindings.lift(|tb| folder.fold_assoc_type_binding(tb)),
-                           })
+                lifetimes: d.lifetimes.lift(|l| folder.fold_lifetime(l)),
+                types: d.types.lift(|ty| folder.fold_ty(ty)),
+                bindings: d.bindings.lift(|tb| folder.fold_assoc_type_binding(tb)),
+                ..d
+            })
         }
         Parenthesized(d) => {
-            let ParenthesizedParameterData { inputs, output } = d;
             Parenthesized(ParenthesizedParameterData {
-                              inputs: inputs.lift(|i| folder.fold_ty(i)),
-                              output: output.map(|v| folder.fold_ty(v)),
-                          })
+                inputs: d.inputs.lift(|i| folder.fold_ty(i)),
+                output: folder.fold_fn_ret_ty(d.output),
+                ..d
+            })
         }
     }
 }
 
 pub fn noop_fold_assoc_type_binding<F: ?Sized + Folder>(folder: &mut F,
-                                                        TypeBinding { ident, ty }: TypeBinding)
-                                                        -> TypeBinding {
+                                                        binding: TypeBinding)
+    -> TypeBinding
+{
     TypeBinding {
-        ident: folder.fold_ident(ident),
-        ty: folder.fold_ty(ty),
+        ident: folder.fold_ident(binding.ident),
+        ty: folder.fold_ty(binding.ty),
+        ..binding
     }
-
 }
 
-pub fn noop_fold_attribute<F: ?Sized + Folder>(_: &mut F, _attr: Attribute) -> Attribute {
-    _attr
+pub fn noop_fold_attribute<F: ?Sized + Folder>(_: &mut F, attr: Attribute) -> Attribute {
+    attr
 }
 
 pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F,
@@ -460,7 +517,7 @@ pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F,
     use FunctionRetTy::*;
     match ret_ty {
         Default => Default,
-        Ty(ty) => Ty(folder.fold_ty(ty)),
+        Ty(ty, t) => Ty(folder.fold_ty(ty), t),
     }
 }
 
@@ -469,42 +526,46 @@ pub fn noop_fold_const_expr<F: ?Sized + Folder>(folder: &mut F, expr: ConstExpr)
     use constant::ConstExpr::*;
 
     match expr {
-        Call(ConstCall { func, args }) => {
+        Call(c) => {
             Call(ConstCall {
-                func: func.lift(|e| folder.fold_const_expr(e)),
-                args: args.lift(|v| folder.fold_const_expr(v)),
+                func: c.func.lift(|e| folder.fold_const_expr(e)),
+                args: c.args.lift(|v| folder.fold_const_expr(v)),
+                ..c
             })
         }
-        Binary(ConstBinary { op, left, right }) => {
+        Binary(c) => {
             Binary(ConstBinary {
-                op: op,
-                left: left.lift(|e| folder.fold_const_expr(e)),
-                right: right.lift(|e| folder.fold_const_expr(e)),
+                left: c.left.lift(|e| folder.fold_const_expr(e)),
+                right: c.right.lift(|e| folder.fold_const_expr(e)),
+                ..c
             })
         }
-        Unary(ConstUnary { op, expr }) => {
+        Unary(c) => {
             Unary(ConstUnary {
-                op: op,
-                expr: expr.lift(|e| folder.fold_const_expr(e)),
+                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
+                ..c
             })
         }
         Lit(l) => Lit(folder.fold_lit(l)),
-        Cast(ConstCast { expr, ty }) => {
+        Cast(c) => {
             Cast(ConstCast {
-                expr: expr.lift(|e| folder.fold_const_expr(e)),
-                ty: ty.lift(|v| folder.fold_ty(v)),
+                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
+                ty: c.ty.lift(|v| folder.fold_ty(v)),
+                ..c
             })
         }
         Path(p) => Path(folder.fold_path(p)),
-        Index(ConstIndex { expr, index }) => {
+        Index(c) => {
             Index(ConstIndex {
-                expr: expr.lift(|e| folder.fold_const_expr(e)),
-                index: index.lift(|e| folder.fold_const_expr(e)),
+                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
+                index: c.index.lift(|e| folder.fold_const_expr(e)),
+                ..c
             })
         }
-        Paren(ConstParen { expr }) => {
+        Paren(c) => {
             Paren(ConstParen {
-                expr: expr.lift(|e| folder.fold_const_expr(e)),
+                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
+                ..c
             })
         }
         Other(e) => Other(noop_fold_other_const_expr(folder, e)),
@@ -528,57 +589,74 @@ pub fn noop_fold_lit<F: ?Sized + Folder>(_: &mut F, _lit: Lit) -> Lit {
 }
 
 pub fn noop_fold_tt<F: ?Sized + Folder>(folder: &mut F, tt: TokenTree) -> TokenTree {
-    use TokenTree::*;
-    use Token::*;
-    match tt {
-        Token(token) => {
-            Token(match token {
-                      Literal(lit) => Literal(folder.fold_lit(lit)),
-                      Ident(ident) => Ident(folder.fold_ident(ident)),
-                      Lifetime(ident) => Lifetime(folder.fold_ident(ident)),
-                      x => x,
-                  })
+    use proc_macro2::{TokenKind, TokenTree as TokenTree2};
+    match tt.0.kind {
+        TokenKind::Word(sym) => {
+            let sym = folder.fold_ident(Ident::new(sym, Span(tt.0.span)));
+            TokenTree(TokenTree2 {
+                span: sym.span.0,
+                kind: TokenKind::Word(sym.sym),
+            })
         }
-        Delimited(super::Delimited { delim, tts }) => {
-            Delimited(super::Delimited {
-                          delim: delim,
-                          tts: tts.lift(|v| noop_fold_tt(folder, v)),
-                      })
+        TokenKind::Op(..) => tt,
+        TokenKind::Literal(lit) => {
+            folder.fold_lit(Lit {
+                value: LitKind::Other(lit),
+                span: Span(tt.0.span),
+            }).into_token_tree()
+        }
+        TokenKind::Sequence(delim, stream) => {
+            let stream = stream.into_iter().map(|tt| {
+                noop_fold_tt(folder, TokenTree(tt)).0
+            }).collect();
+            TokenTree(TokenTree2 {
+                span: tt.0.span,
+                kind: TokenKind::Sequence(delim, stream),
+            })
         }
     }
 }
 
-pub fn noop_fold_mac<F: ?Sized + Folder>(folder: &mut F, Mac { path, tts }: Mac) -> Mac {
+pub fn noop_fold_mac<F: ?Sized + Folder>(folder: &mut F, mac: Mac) -> Mac {
     Mac {
-        path: folder.fold_path(path),
-        tts: tts.lift(|tt| noop_fold_tt(folder, tt)),
+        path: folder.fold_path(mac.path),
+        tokens: mac.tokens.lift(|tt| noop_fold_tt(folder, tt)),
+        ..mac
     }
 }
 
 #[cfg(feature = "full")]
 pub fn noop_fold_crate<F: ?Sized + Folder>(folder: &mut F,
-                                           Crate { shebang, attrs, items }: Crate)
+                                           krate: Crate)
                                            -> Crate {
     Crate {
-        shebang: shebang,
-        attrs: attrs.lift(|a| folder.fold_attribute(a)),
-        items: items.lift(|i| folder.fold_item(i)),
+        attrs: krate.attrs.lift(|a| folder.fold_attribute(a)),
+        items: krate.items.lift(|i| folder.fold_item(i)),
+        ..krate
     }
 
 }
 
 #[cfg(feature = "full")]
 pub fn noop_fold_block<F: ?Sized + Folder>(folder: &mut F, block: Block) -> Block {
-    Block { stmts: block.stmts.lift(|s| folder.fold_stmt(s)) }
+    Block {
+        stmts: block.stmts.lift(|s| folder.fold_stmt(s)),
+        ..block
+    }
 }
 
 fn noop_fold_vis<F: ?Sized + Folder>(folder: &mut F, vis: Visibility) -> Visibility {
     use Visibility::*;
     match vis {
-        Crate => Crate,
-        Inherited => Inherited,
-        Public => Public,
-        Restricted(path) => Restricted(path.lift(|p| folder.fold_path(p))),
+        Crate(t) => Crate(t),
+        Inherited(i) => Inherited(i),
+        Public(p) => Public(p),
+        Restricted(data) => {
+            Restricted(VisRestricted {
+                path: data.path.lift(|p| folder.fold_path(p)),
+                ..data
+            })
+        }
     }
 }
 
@@ -593,105 +671,105 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
         vis: noop_fold_vis(folder, vis),
         attrs: attrs.lift(|a| folder.fold_attribute(a)),
         node: match node {
-            ExternCrate(ItemExternCrate { original }) => {
+            ExternCrate(i) => {
                 ExternCrate(ItemExternCrate {
-                    original: original.map(|i| folder.fold_ident(i)),
+                    original: i.original.map(|i| folder.fold_ident(i)),
+                    ..i
                 })
             }
-            Use(ItemUse { path }) => {
+            Use(i) => {
                 Use(ItemUse {
-                    path: Box::new(folder.fold_view_path(*path)),
+                    path: Box::new(folder.fold_view_path(*i.path)),
+                    ..i
                 })
             }
-            Static(ItemStatic { ty, mutbl, expr }) => {
+            Static(i) => {
                 Static(ItemStatic {
-                    ty: Box::new(folder.fold_ty(*ty)),
-                    mutbl: mutbl,
-                    expr: expr.lift(|e| folder.fold_expr(e)),
+                    ty: Box::new(folder.fold_ty(*i.ty)),
+                    mutbl: i.mutbl,
+                    expr: i.expr.lift(|e| folder.fold_expr(e)),
+                    ..i
                 })
             }
-            Const(ItemConst { ty, expr }) => {
+            Const(i) => {
                 Const(ItemConst {
-                    ty: ty.lift(|ty| folder.fold_ty(ty)),
-                    expr: expr.lift(|e| folder.fold_expr(e)),
+                    ty: i.ty.lift(|ty| folder.fold_ty(ty)),
+                    expr: i.expr.lift(|e| folder.fold_expr(e)),
+                    ..i
                 })
             }
-            Fn(ItemFn { decl, unsafety, constness, abi, generics, block }) => {
+            Fn(i) => {
                 Fn(ItemFn {
-                    decl: decl.lift(|v| folder.fold_fn_decl(v)),
-                    unsafety: unsafety,
-                    constness: constness,
-                    abi: abi,
-                    generics: folder.fold_generics(generics),
-                    block: block.lift(|v| folder.fold_block(v)),
+                    decl: i.decl.lift(|v| folder.fold_fn_decl(v)),
+                    block: i.block.lift(|v| folder.fold_block(v)),
+                    ..i
                 })
             }
-            Mod(ItemMod { items }) => {
+            Mod(i) => {
                 Mod(ItemMod {
-                    items: items.map(|items| items.lift(|i| folder.fold_item(i))),
+                    items: i.items.map(|items| {
+                        (items.0.lift(|i| folder.fold_item(i)), items.1)
+                    }),
+                    ..i
                 })
             }
-            ForeignMod(ItemForeignMod { abi, items }) => {
+            ForeignMod(i) => {
                 ForeignMod(ItemForeignMod {
-                    abi: abi,
-                    items: items.lift(|foreign_item| {
+                    items: i.items.lift(|foreign_item| {
                         folder.fold_foreign_item(foreign_item)
                     }),
+                    ..i
                 })
             }
-            Ty(ItemTy { ty, generics }) => {
+            Ty(i) => {
                 Ty(ItemTy {
-                    ty: ty.lift(|ty| folder.fold_ty(ty)),
-                    generics: folder.fold_generics(generics),
+                    ty: i.ty.lift(|ty| folder.fold_ty(ty)),
+                    generics: folder.fold_generics(i.generics),
+                    ..i
                 })
             }
-            Enum(ItemEnum { variants, generics }) => {
+            Enum(i) => {
                 Enum(ItemEnum {
-                    variants: variants.lift(|v| folder.fold_variant(v)),
-                    generics: folder.fold_generics(generics),
+                    variants: i.variants.lift(|v| folder.fold_variant(v)),
+                    generics: folder.fold_generics(i.generics),
+                    ..i
                 })
             }
-            Struct(ItemStruct { data, generics }) => {
+            Struct(i) => {
                 Struct(ItemStruct {
-                    data: folder.fold_variant_data(data),
-                    generics: folder.fold_generics(generics),
+                    data: folder.fold_variant_data(i.data),
+                    generics: folder.fold_generics(i.generics),
+                    ..i
                 })
             }
-            Union(ItemUnion { data, generics }) => {
+            Union(i) => {
                 Union(ItemUnion {
-                    data: folder.fold_variant_data(data),
-                    generics: folder.fold_generics(generics),
+                    data: folder.fold_variant_data(i.data),
+                    generics: folder.fold_generics(i.generics),
+                    ..i
                 })
             }
-            Trait(ItemTrait { unsafety, generics, supertraits, items }) => {
+            Trait(i) => {
                 Trait(ItemTrait {
-                    unsafety: unsafety,
-                    generics: folder.fold_generics(generics),
-                    supertraits: supertraits.lift(|typb| folder.fold_ty_param_bound(typb)),
-                    items: items.lift(|ti| folder.fold_trait_item(ti)),
+                    generics: folder.fold_generics(i.generics),
+                    supertraits: i.supertraits.lift(|typb| folder.fold_ty_param_bound(typb)),
+                    items: i.items.lift(|ti| folder.fold_trait_item(ti)),
+                    ..i
                 })
             }
-            DefaultImpl(ItemDefaultImpl { unsafety, path }) => {
+            DefaultImpl(i) => {
                 DefaultImpl(ItemDefaultImpl {
-                    unsafety: unsafety,
-                    path: folder.fold_path(path),
+                    path: folder.fold_path(i.path),
+                    ..i
                 })
             }
-            Impl(ItemImpl {
-                unsafety,
-                polarity,
-                generics,
-                trait_,
-                self_ty,
-                items,
-            }) => {
+            Impl(i) => {
                 Impl(ItemImpl {
-                    unsafety: unsafety,
-                    polarity: polarity,
-                    generics: folder.fold_generics(generics),
-                    trait_: trait_.map(|p| folder.fold_path(p)),
-                    self_ty: self_ty.lift(|ty| folder.fold_ty(ty)),
-                    items: items.lift(|i| folder.fold_impl_item(i)),
+                    generics: folder.fold_generics(i.generics),
+                    trait_: i.trait_.map(|p| folder.fold_path(p)),
+                    self_ty: i.self_ty.lift(|ty| folder.fold_ty(ty)),
+                    items: i.items.lift(|i| folder.fold_impl_item(i)),
+                    ..i
                 })
             }
             Mac(mac) => Mac(folder.fold_mac(mac)),
@@ -706,229 +784,264 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
 
     Expr {
         node: match node {
-            Box(ExprBox { expr }) => {
-                Box(ExprBox { expr: expr.lift(|e| folder.fold_expr(e)) })
+            Box(e) => {
+                Box(ExprBox {
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
+                })
             }
-            InPlace(ExprInPlace { place, value }) => {
+            InPlace(e) => {
                 InPlace(ExprInPlace {
-                    place: place.lift(|e| folder.fold_expr(e)),
-                    value: value.lift(|e| folder.fold_expr(e)),
+                    place: e.place.lift(|e| folder.fold_expr(e)),
+                    value: e.value.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Array(ExprArray { exprs }) => {
+            Array(e) => {
                 Array(ExprArray {
-                    exprs: exprs.lift(|e| folder.fold_expr(e)),
+                    exprs: e.exprs.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Call(ExprCall { func, args }) => {
+            Call(e) => {
                 Call(ExprCall {
-                    func: func.lift(|e| folder.fold_expr(e)),
-                    args: args.lift(|e| folder.fold_expr(e)),
+                    func: e.func.lift(|e| folder.fold_expr(e)),
+                    args: e.args.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            MethodCall(ExprMethodCall { method, typarams, args }) => {
+            MethodCall(e) => {
                 MethodCall(ExprMethodCall {
-                    method: folder.fold_ident(method),
-                    typarams: typarams.lift(|t| folder.fold_ty(t)),
-                    args: args.lift(|e| folder.fold_expr(e)),
+                    method: folder.fold_ident(e.method),
+                    typarams: e.typarams.lift(|t| folder.fold_ty(t)),
+                    args: e.args.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Tup(ExprTup { args }) => {
+            Tup(e) => {
                 Tup(ExprTup {
-                    args: args.lift(|e| folder.fold_expr(e)),
+                    args: e.args.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Binary(ExprBinary { op, left, right }) => {
+            Binary(e) => {
                 Binary(ExprBinary {
-                    op: op,
-                    left: left.lift(|e| folder.fold_expr(e)),
-                    right: right.lift(|e| folder.fold_expr(e)),
+                    left: e.left.lift(|e| folder.fold_expr(e)),
+                    right: e.right.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Unary(ExprUnary { op, expr }) => {
+            Unary(e) => {
                 Unary(ExprUnary {
-                    op: op,
-                    expr: expr.lift(|e| folder.fold_expr(e)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
             Lit(lit) => Lit(folder.fold_lit(lit)),
-            Cast(ExprCast { expr, ty }) => {
+            Cast(e) => {
                 Cast(ExprCast {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    ty: ty.lift(|t| folder.fold_ty(t)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ty: e.ty.lift(|t| folder.fold_ty(t)),
+                    ..e
                 })
             }
-            Type(ExprType { expr, ty }) => {
+            Type(e) => {
                 Type(ExprType {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    ty: ty.lift(|t| folder.fold_ty(t)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ty: e.ty.lift(|t| folder.fold_ty(t)),
+                    ..e
                 })
             }
-            If(ExprIf { cond, if_true, if_false }) => {
+            If(e) => {
                 If(ExprIf {
-                    cond: cond.lift(|e| folder.fold_expr(e)),
-                    if_true: folder.fold_block(if_true),
-                    if_false: if_false.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    cond: e.cond.lift(|e| folder.fold_expr(e)),
+                    if_true: folder.fold_block(e.if_true),
+                    if_false: e.if_false.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    ..e
                 })
             }
-            IfLet(ExprIfLet { pat, expr, if_true, if_false }) => {
+            IfLet(e) => {
                 IfLet(ExprIfLet {
-                    pat: pat.lift(|p| folder.fold_pat(p)),
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    if_true: folder.fold_block(if_true),
-                    if_false: if_false.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    pat: e.pat.lift(|p| folder.fold_pat(p)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    if_true: folder.fold_block(e.if_true),
+                    if_false: e.if_false.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    ..e
                 })
             }
-            While(ExprWhile { cond, body, label }) => {
+            While(e) => {
                 While(ExprWhile {
-                    cond: cond.lift(|e| folder.fold_expr(e)),
-                    body: folder.fold_block(body),
-                    label: label.map(|i| folder.fold_ident(i)),
+                    cond: e.cond.lift(|e| folder.fold_expr(e)),
+                    body: folder.fold_block(e.body),
+                    label: e.label.map(|i| folder.fold_ident(i)),
+                    ..e
                 })
             }
-            WhileLet(ExprWhileLet { pat, expr, body, label }) => {
+            WhileLet(e) => {
                 WhileLet(ExprWhileLet {
-                    pat: pat.lift(|p| folder.fold_pat(p)),
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    body: folder.fold_block(body),
-                    label: label.map(|i| folder.fold_ident(i)),
+                    pat: e.pat.lift(|p| folder.fold_pat(p)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    body: folder.fold_block(e.body),
+                    label: e.label.map(|i| folder.fold_ident(i)),
+                    ..e
                 })
             }
-            ForLoop(ExprForLoop { pat, expr, body, label }) => {
+            ForLoop(e) => {
                 ForLoop(ExprForLoop {
-                    pat: pat.lift(|p| folder.fold_pat(p)),
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    body: folder.fold_block(body),
-                    label: label.map(|i| folder.fold_ident(i)),
+                    pat: e.pat.lift(|p| folder.fold_pat(p)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    body: folder.fold_block(e.body),
+                    label: e.label.map(|i| folder.fold_ident(i)),
+                    ..e
                 })
             }
-            Loop(ExprLoop { body, label }) => {
+            Loop(e) => {
                 Loop(ExprLoop {
-                    body: folder.fold_block(body),
-                    label: label.map(|i| folder.fold_ident(i)),
+                    body: folder.fold_block(e.body),
+                    label: e.label.map(|i| folder.fold_ident(i)),
+                    ..e
                 })
             }
-            Match(ExprMatch { expr, arms }) => {
+            Match(e) => {
                 Match(ExprMatch {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    arms: arms.lift(|Arm { attrs, pats, guard, body }: Arm| {
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    arms: e.arms.lift(|a: Arm| {
                         Arm {
-                            attrs: attrs.lift(|a| folder.fold_attribute(a)),
-                            pats: pats.lift(|p| folder.fold_pat(p)),
-                            guard: guard.map(|v| v.lift(|e| folder.fold_expr(e))),
-                            body: body.lift(|e| folder.fold_expr(e)),
+                            attrs: a.attrs.lift(|a| folder.fold_attribute(a)),
+                            pats: a.pats.lift(|p| folder.fold_pat(p)),
+                            guard: a.guard.map(|v| v.lift(|e| folder.fold_expr(e))),
+                            body: a.body.lift(|e| folder.fold_expr(e)),
+                            ..a
                         }
-                    })
+                    }),
+                    ..e
                 })
             }
-            Catch(ExprCatch { block }) => {
-                Catch(ExprCatch { block: folder.fold_block(block) })
+            Catch(e) => {
+                Catch(ExprCatch {
+                    block: folder.fold_block(e.block),
+                    ..e
+                })
             }
-            Closure(ExprClosure { capture, decl, body }) => {
+            Closure(e) => {
                 Closure(ExprClosure {
-                    capture: capture,
-                    decl: decl.lift(|v| folder.fold_fn_decl(v)),
-                    body: body.lift(|e| folder.fold_expr(e)),
+                    decl: e.decl.lift(|v| folder.fold_fn_decl(v)),
+                    body: e.body.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Block(ExprBlock { unsafety, block }) => {
+            Block(e) => {
                 Block(ExprBlock {
-                    unsafety: unsafety,
-                    block: folder.fold_block(block),
+                    block: folder.fold_block(e.block),
+                    ..e
                 })
             }
-            Assign(ExprAssign { left, right }) => {
+            Assign(e) => {
                 Assign(ExprAssign {
-                    left: left.lift(|e| folder.fold_expr(e)),
-                    right: right.lift(|e| folder.fold_expr(e)),
+                    left: e.left.lift(|e| folder.fold_expr(e)),
+                    right: e.right.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            AssignOp(ExprAssignOp { op, left, right }) => {
+            AssignOp(e) => {
                 AssignOp(ExprAssignOp {
-                    op: op,
-                    left: left.lift(|e| folder.fold_expr(e)),
-                    right: right.lift(|e| folder.fold_expr(e)),
+                    left: e.left.lift(|e| folder.fold_expr(e)),
+                    right: e.right.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Field(ExprField { expr, field }) => {
+            Field(e) => {
                 Field(ExprField {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    field: folder.fold_ident(field),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    field: folder.fold_ident(e.field),
+                    ..e
                 })
             }
-            TupField(ExprTupField { expr, field }) => {
+            TupField(e) => {
                 TupField(ExprTupField {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    field: field,
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Index(ExprIndex { expr, index }) => {
+            Index(e) => {
                 Index(ExprIndex {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    index: index.lift(|e| folder.fold_expr(e)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    index: e.index.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Range(ExprRange { from, to, limits }) => {
+            Range(e) => {
                 Range(ExprRange {
-                    from: from.map(|v| v.lift(|e| folder.fold_expr(e))),
-                    to: to.map(|v| v.lift(|e| folder.fold_expr(e))),
-                    limits: limits,
+                    from: e.from.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    to: e.to.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    ..e
                 })
             }
-            Path(ExprPath { qself, path }) => {
+            Path(e) => {
                 Path(ExprPath {
-                    qself: qself.map(|v| noop_fold_qself(folder, v)),
-                    path: folder.fold_path(path),
+                    qself: e.qself.map(|v| noop_fold_qself(folder, v)),
+                    path: folder.fold_path(e.path),
                 })
             }
-            AddrOf(ExprAddrOf { mutbl, expr }) => {
+            AddrOf(e) => {
                 AddrOf(ExprAddrOf {
-                    mutbl: mutbl,
-                    expr: expr.lift(|e| folder.fold_expr(e)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Break(ExprBreak { label, expr }) => {
+            Break(e) => {
                 Break(ExprBreak {
-                    label: label.map(|i| folder.fold_ident(i)),
-                    expr: expr.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    label: e.label.map(|i| folder.fold_ident(i)),
+                    expr: e.expr.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    ..e
                 })
             }
-            Continue(ExprContinue { label }) => {
+            Continue(e) => {
                 Continue(ExprContinue {
-                    label: label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_ident(i)),
+                    ..e
                 })
             }
-            Ret(ExprRet { expr }) => {
+            Ret(e) => {
                 Ret(ExprRet {
-                    expr: expr.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    expr: e.expr.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    ..e
                 })
             }
             Mac(mac) => Mac(folder.fold_mac(mac)),
-            Struct(ExprStruct { path, fields, rest }) => {
+            Struct(e) => {
                 Struct(ExprStruct {
-                    path: folder.fold_path(path),
-                    fields: fields.lift(|FieldValue { ident, expr, is_shorthand, attrs }: FieldValue| {
+                    path: folder.fold_path(e.path),
+                    fields: e.fields.lift(|field: FieldValue| {
                         FieldValue {
-                            ident: folder.fold_ident(ident),
-                            expr: folder.fold_expr(expr),
-                            is_shorthand: is_shorthand,
-                            attrs: attrs.lift(|v| folder.fold_attribute(v)),
+                            ident: folder.fold_ident(field.ident),
+                            expr: folder.fold_expr(field.expr),
+                            attrs: field.attrs.lift(|v| folder.fold_attribute(v)),
+                            ..field
                         }
                     }),
-                    rest: rest.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    rest: e.rest.map(|v| v.lift(|e| folder.fold_expr(e))),
+                    ..e
                 })
             }
-            Repeat(ExprRepeat { expr, amt }) => {
+            Repeat(e) => {
                 Repeat(ExprRepeat {
-                    expr: expr.lift(|e| folder.fold_expr(e)),
-                    amt: amt.lift(|e| folder.fold_expr(e)),
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    amt: e.amt.lift(|e| folder.fold_expr(e)),
+                    ..e
                 })
             }
-            Paren(ExprParen { expr }) => {
-                Paren(ExprParen { expr: expr.lift(|e| folder.fold_expr(e)) })
+            Paren(e) => {
+                Paren(ExprParen {
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
+                })
             }
-            Try(ExprTry { expr }) => {
-                Try(ExprTry { expr: expr.lift(|e| folder.fold_expr(e)) })
+            Try(e) => {
+                Try(ExprTry {
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
+                })
             }
         },
         attrs: attrs.into_iter().map(|a| folder.fold_attribute(a)).collect(),
@@ -937,28 +1050,28 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
 
 #[cfg(feature = "full")]
 pub fn noop_fold_foreign_item<F: ?Sized + Folder>(folder: &mut F,
-                                         ForeignItem { ident, attrs, node, vis }: ForeignItem)
+                                                  item: ForeignItem)
 -> ForeignItem{
     use item::*;
 
     ForeignItem {
-        ident: folder.fold_ident(ident),
-        attrs: attrs.into_iter().map(|a| folder.fold_attribute(a)).collect(),
-        node: match node {
-            ForeignItemKind::Fn(ForeignItemFn { decl, generics }) => {
+        ident: folder.fold_ident(item.ident),
+        attrs: item.attrs.into_iter().map(|a| folder.fold_attribute(a)).collect(),
+        node: match item.node {
+            ForeignItemKind::Fn(item) => {
                 ForeignItemKind::Fn(ForeignItemFn {
-                    decl: decl.lift(|v| folder.fold_fn_decl(v)),
-                    generics: folder.fold_generics(generics),
+                    decl: item.decl.lift(|v| folder.fold_fn_decl(v)),
                 })
             }
-            ForeignItemKind::Static(ForeignItemStatic { ty, mutbl }) => {
+            ForeignItemKind::Static(item) => {
                 ForeignItemKind::Static(ForeignItemStatic {
-                    ty: ty.lift(|v| folder.fold_ty(v)),
-                    mutbl: mutbl,
+                    ty: item.ty.lift(|v| folder.fold_ty(v)),
+                    ..item
                 })
             }
         },
-        vis: noop_fold_vis(folder, vis),
+        vis: noop_fold_vis(folder, item.vis),
+        ..item
     }
 }
 
@@ -966,113 +1079,146 @@ pub fn noop_fold_foreign_item<F: ?Sized + Folder>(folder: &mut F,
 pub fn noop_fold_pat<F: ?Sized + Folder>(folder: &mut F, pat: Pat) -> Pat {
     use Pat::*;
     match pat {
-        Wild => Wild,
-        Ident(binding_mode, ident, pat) => {
-            Ident(binding_mode,
-                  folder.fold_ident(ident),
-                  pat.map(|p| p.lift(|p| folder.fold_pat(p))))
+        Wild(b) => Wild(b),
+        Ident(p) => {
+            Ident(PatIdent {
+                ident: folder.fold_ident(p.ident),
+                subpat: p.subpat.map(|p| p.lift(|p| folder.fold_pat(p))),
+                ..p
+            })
         }
-        Struct(path, field_patterns, dots) => {
-            Struct(folder.fold_path(path),
-                   field_patterns.lift(|FieldPat { ident, pat, is_shorthand, attrs }: FieldPat| {
+        Struct(p) => {
+            Struct(PatStruct {
+                path: folder.fold_path(p.path),
+                fields: p.fields.lift(|field: FieldPat| {
                     FieldPat {
-                        ident: folder.fold_ident(ident),
-                        pat: pat.lift(|p| folder.fold_pat(p)),
-                        is_shorthand: is_shorthand,
-                        attrs: attrs.lift(|a| folder.fold_attribute(a)),
+                        ident: folder.fold_ident(field.ident),
+                        pat: field.pat.lift(|p| folder.fold_pat(p)),
+                        attrs: field.attrs.lift(|a| folder.fold_attribute(a)),
+                        ..field
                     }
                 }),
-                   dots)
+                ..p
+            })
         }
-        TupleStruct(path, pats, len) => {
-            TupleStruct(folder.fold_path(path),
-                        pats.lift(|p| folder.fold_pat(p)),
-                        len)
+        TupleStruct(p) => {
+            TupleStruct(PatTupleStruct {
+                path: folder.fold_path(p.path),
+                pat: PatTuple {
+                    pats: p.pat.pats.lift(|p| folder.fold_pat(p)),
+                    ..p.pat
+                },
+            })
         }
-        Path(qself, path) => {
-            Path(qself.map(|v| noop_fold_qself(folder, v)),
-                 folder.fold_path(path))
+        Path(p) => {
+            Path(PatPath {
+                qself: p.qself.map(|v| noop_fold_qself(folder, v)),
+                path: folder.fold_path(p.path),
+            })
         }
-        Tuple(pats, len) => Tuple(pats.lift(|p| folder.fold_pat(p)), len),
-        Box(b) => Box(b.lift(|p| folder.fold_pat(p))),
-        Ref(b, mutability) => Ref(b.lift(|p| folder.fold_pat(p)), mutability),
-        Lit(expr) => Lit(expr.lift(|e| folder.fold_expr(e))),
-        Range(l, r, limits) => {
-            Range(l.lift(|e| folder.fold_expr(e)),
-                  r.lift(|e| folder.fold_expr(e)),
-                  limits)
+        Tuple(p) => {
+            Tuple(PatTuple {
+                pats: p.pats.lift(|p| folder.fold_pat(p)),
+                ..p
+            })
         }
-        Slice(lefts, pat, rights) => {
-            Slice(lefts.lift(|p| folder.fold_pat(p)),
-                  pat.map(|v| v.lift(|p| folder.fold_pat(p))),
-                  rights.lift(|p| folder.fold_pat(p)))
+        Box(p) => {
+            Box(PatBox {
+                pat: p.pat.lift(|p| folder.fold_pat(p)),
+                ..p
+            })
+        }
+        Ref(p) => {
+            Ref(PatRef {
+                pat: p.pat.lift(|p| folder.fold_pat(p)),
+                ..p
+            })
+        }
+        Lit(p) => {
+            Lit(PatLit {
+                expr: p.expr.lift(|e| folder.fold_expr(e)),
+            })
+        }
+        Range(p) => {
+            Range(PatRange {
+                hi: p.hi.lift(|e| folder.fold_expr(e)),
+                lo: p.lo.lift(|e| folder.fold_expr(e)),
+                ..p
+            })
+        }
+        Slice(p) => {
+            Slice(PatSlice {
+                front: p.front.lift(|p| folder.fold_pat(p)),
+                middle: p.middle.map(|v| v.lift(|p| folder.fold_pat(p))),
+                back: p.back.lift(|p| folder.fold_pat(p)),
+                ..p
+            })
         }
         Mac(mac) => Mac(folder.fold_mac(mac)),
     }
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F,
-                                             FnDecl { inputs, output, variadic }: FnDecl)
-                                             -> FnDecl {
-
+pub fn noop_fold_fn_decl<F: ?Sized + Folder>(folder: &mut F, decl: FnDecl)
+    -> FnDecl
+{
     FnDecl {
-        inputs: inputs.lift(|a| {
+        inputs: decl.inputs.lift(|a| {
             use item::*;
             use FnArg::*;
             match a {
-                SelfRef(ArgSelfRef { lifetime, mutbl }) => {
+                SelfRef(a) => {
                     SelfRef(ArgSelfRef {
-                        lifetime: lifetime.map(|v| folder.fold_lifetime(v)),
-                        mutbl: mutbl,
+                        lifetime: a.lifetime.map(|v| folder.fold_lifetime(v)),
+                        ..a
                     })
                 }
-                SelfValue(ArgSelf { mutbl } ) => {
-                    SelfValue(ArgSelf {
-                        mutbl: mutbl,
-                    })
-                }
-                Captured(ArgCaptured { pat, ty }) => {
+                SelfValue(a) => SelfValue(a),
+                Captured(a) => {
                     Captured(ArgCaptured {
-                        pat: folder.fold_pat(pat),
-                        ty: folder.fold_ty(ty),
+                        pat: folder.fold_pat(a.pat),
+                        ty: folder.fold_ty(a.ty),
+                        ..a
                     })
                 }
                 Ignored(ty) => Ignored(folder.fold_ty(ty)),
             }
         }),
-        output: folder.fold_fn_ret_ty(output),
-        variadic: variadic,
+        output: folder.fold_fn_ret_ty(decl.output),
+        generics: folder.fold_generics(decl.generics),
+        ..decl
     }
-
 }
 
 #[cfg(feature = "full")]
 pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
-                                                TraitItem { ident, attrs, node }: TraitItem)
+                                                item: TraitItem)
                                                 -> TraitItem {
     use item::*;
     use TraitItemKind::*;
     TraitItem {
-        ident: folder.fold_ident(ident),
-        attrs: attrs.lift(|v| folder.fold_attribute(v)),
-        node: match node {
-            Const(TraitItemConst { ty, default }) => {
+        ident: folder.fold_ident(item.ident),
+        attrs: item.attrs.lift(|v| folder.fold_attribute(v)),
+        node: match item.node {
+            Const(i) => {
                 Const(TraitItemConst {
-                    ty: folder.fold_ty(ty),
-                    default: default.map(|v| folder.fold_expr(v)),
+                    ty: folder.fold_ty(i.ty),
+                    default: i.default.map(|v| folder.fold_expr(v)),
+                    ..i
                 })
             }
-            Method(TraitItemMethod { sig, default }) => {
+            Method(i) => {
                 Method(TraitItemMethod {
-                    sig: folder.fold_method_sig(sig),
-                    default: default.map(|v| folder.fold_block(v)),
+                    sig: folder.fold_method_sig(i.sig),
+                    default: i.default.map(|v| folder.fold_block(v)),
+                    ..i
                 })
             }
-            Type(TraitItemType { bounds, default }) => {
+            Type(i) => {
                 Type(TraitItemType {
-                    bounds: bounds.lift(|v| folder.fold_ty_param_bound(v)),
-                    default: default.map(|v| folder.fold_ty(v)),
+                    bounds: i.bounds.lift(|v| folder.fold_ty_param_bound(v)),
+                    default: i.default.map(|v| folder.fold_ty(v)),
+                    ..i
                 })
             }
             Macro(mac) => Macro(folder.fold_mac(mac)),
@@ -1081,48 +1227,49 @@ pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F,
-                                      ImplItem { ident, vis, defaultness, attrs, node }: ImplItem)
--> ImplItem{
+pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F, item: ImplItem)
+    -> ImplItem
+{
     use item::*;
     use ImplItemKind::*;
 
     ImplItem {
-        ident: folder.fold_ident(ident),
-        vis: noop_fold_vis(folder, vis),
-        defaultness: defaultness,
-        attrs: attrs.lift(|v| folder.fold_attribute(v)),
-        node: match node {
-            Const(ImplItemConst { ty, expr }) => {
+        ident: folder.fold_ident(item.ident),
+        vis: noop_fold_vis(folder, item.vis),
+        attrs: item.attrs.lift(|v| folder.fold_attribute(v)),
+        node: match item.node {
+            Const(i) => {
                 Const(ImplItemConst {
-                    ty: folder.fold_ty(ty),
-                    expr: folder.fold_expr(expr),
+                    ty: folder.fold_ty(i.ty),
+                    expr: folder.fold_expr(i.expr),
+                    ..i
                 })
             }
-            Method(ImplItemMethod { sig, block }) => {
+            Method(i) => {
                 Method(ImplItemMethod {
-                    sig: folder.fold_method_sig(sig),
-                    block: folder.fold_block(block),
+                    sig: folder.fold_method_sig(i.sig),
+                    block: folder.fold_block(i.block),
                 })
             }
-            Type(ImplItemType { ty }) => {
+            Type(i) => {
                 Type(ImplItemType {
-                    ty: folder.fold_ty(ty),
+                    ty: folder.fold_ty(i.ty),
+                    ..i
                 })
             }
             Macro(mac) => Macro(folder.fold_mac(mac)),
         },
+        ..item
     }
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_method_sig<F: ?Sized + Folder>(folder: &mut F, MethodSig{unsafety, constness, abi, decl, generics}:MethodSig) -> MethodSig{
+pub fn noop_fold_method_sig<F: ?Sized + Folder>(folder: &mut F, sig: MethodSig)
+    -> MethodSig
+{
     MethodSig {
-        unsafety: unsafety,
-        constness: constness,
-        abi: abi,
-        decl: folder.fold_fn_decl(decl),
-        generics: folder.fold_generics(generics),
+        decl: folder.fold_fn_decl(sig.decl),
+        ..sig
     }
 
 }
@@ -1134,7 +1281,7 @@ pub fn noop_fold_stmt<F: ?Sized + Folder>(folder: &mut F, stmt: Stmt) -> Stmt {
         Local(local) => Local(local.lift(|l| folder.fold_local(l))),
         Item(item) => Item(item.lift(|v| folder.fold_item(v))),
         Expr(expr) => Expr(expr.lift(|v| folder.fold_expr(v))),
-        Semi(expr) => Semi(expr.lift(|v| folder.fold_expr(v))),
+        Semi(expr, t) => Semi(expr.lift(|v| folder.fold_expr(v)), t),
         Mac(mac_stmt) => {
             Mac(mac_stmt.lift(|(mac, style, attrs)| {
                                   (folder.fold_mac(mac),
@@ -1147,14 +1294,15 @@ pub fn noop_fold_stmt<F: ?Sized + Folder>(folder: &mut F, stmt: Stmt) -> Stmt {
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_local<F: ?Sized + Folder>(folder: &mut F,
-                                           Local { pat, ty, init, attrs }: Local)
-                                           -> Local {
+pub fn noop_fold_local<F: ?Sized + Folder>(folder: &mut F, local: Local)
+    -> Local
+{
     Local {
-        pat: pat.lift(|v| folder.fold_pat(v)),
-        ty: ty.map(|v| v.lift(|t| folder.fold_ty(t))),
-        init: init.map(|v| v.lift(|e| folder.fold_expr(e))),
-        attrs: attrs.lift(|a| folder.fold_attribute(a)),
+        pat: local.pat.lift(|v| folder.fold_pat(v)),
+        ty: local.ty.map(|v| v.lift(|t| folder.fold_ty(t))),
+        init: local.init.map(|v| v.lift(|e| folder.fold_expr(e))),
+        attrs: local.attrs.lift(|a| folder.fold_attribute(a)),
+        ..local
     }
 }
 
@@ -1163,26 +1311,30 @@ pub fn noop_fold_view_path<F: ?Sized + Folder>(folder: &mut F, view_path: ViewPa
     use item::*;
     use ViewPath::*;
     match view_path {
-        Simple(PathSimple { path, rename }) => {
+        Simple(p) => {
             Simple(PathSimple {
-                path: folder.fold_path(path),
-                rename: rename.map(|i| folder.fold_ident(i)),
+                path: folder.fold_path(p.path),
+                rename: p.rename.map(|i| folder.fold_ident(i)),
+                ..p
             })
         }
-        Glob(PathGlob { path }) => {
+        Glob(p) => {
             Glob(PathGlob {
-                path: folder.fold_path(path),
+                path: folder.fold_path(p.path),
+                ..p
             })
         }
-        List(PathList { path, items }) => {
+        List(p) => {
             List(PathList {
-                path: folder.fold_path(path),
-                items: items.lift(|PathListItem { name, rename }: PathListItem| {
+                path: folder.fold_path(p.path),
+                items: p.items.lift(|item: PathListItem| {
                     PathListItem {
-                        name: folder.fold_ident(name),
-                        rename: rename.map(|i| folder.fold_ident(i)),
+                        name: folder.fold_ident(item.name),
+                        rename: item.rename.map(|i| folder.fold_ident(i)),
+                        ..item
                     }
                 }),
+                ..p
             })
         }
     }
