@@ -325,7 +325,8 @@ pub mod parsing {
     use ident::parsing::ident;
     use lit::parsing::string;
     use mac::parsing::mac;
-    use std::str;
+    #[cfg(feature = "full")]
+    use synom::{IResult, TokenTree};
 
     named!(pub ty -> Ty, alt!(
         ty_paren // must be before ty_tup
@@ -355,8 +356,7 @@ pub mod parsing {
 
     named!(ty_mac -> Ty, map!(mac, Ty::Mac));
 
-    named!(ty_vec -> Ty, do_parse!(
-        punct!("[") >>
+    named!(ty_vec -> Ty, delim!(Bracket, do_parse!(
         elem: ty >>
         punct!("]") >>
         (TySlice {
@@ -365,8 +365,7 @@ pub mod parsing {
         }.into())
     ));
 
-    named!(ty_array -> Ty, do_parse!(
-        punct!("[") >>
+    named!(ty_array -> Ty, delim!(Bracket, do_parse!(
         elem: ty >>
         punct!(";") >>
         len: array_len >>
@@ -384,13 +383,10 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(array_len -> ConstExpr, alt!(
-        terminated!(const_expr, after_array_len)
+        terminated!(const_expr, input_end!())
         |
-        terminated!(expr, after_array_len) => { ConstExpr::Other }
+        terminated!(expr, input_end!()) => { ConstExpr::Other }
     ));
-
-    #[cfg(feature = "full")]
-    named!(after_array_len -> &str, peek!(punct!("]")));
 
     named!(ty_ptr -> Ty, do_parse!(
         punct!("*") >>
@@ -732,8 +728,8 @@ pub mod parsing {
     named!(pub fn_arg -> BareFnArg, do_parse!(
         name: option!(do_parse!(
             name: ident >>
+            not!(punct!("::")) >>
             punct!(":") >>
-            not!(tag!(":")) >> // not ::
             (name)
         )) >>
         ty: ty >>

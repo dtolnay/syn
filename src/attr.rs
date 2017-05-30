@@ -294,7 +294,6 @@ pub mod parsing {
     use super::*;
     use mac::TokenTree;
     use mac::parsing::token_trees;
-    use synom::space::{block_comment, whitespace};
     use ty::parsing::mod_style_path;
     use proc_macro2::{self, TokenKind, OpKind, Literal};
 
@@ -317,11 +316,7 @@ pub mod parsing {
         do_parse!(
             punct!("#") >>
             punct!("!") >>
-            path_and_tts: delimited!(
-                punct!("["),
-                tuple!(mod_style_path, token_trees),
-                punct!("]")
-            ) >>
+            path_and_tts: delim!(Bracket, tuple!(mod_style_path, token_trees)) >>
             ({
                 let (path, tts) = path_and_tts;
 
@@ -337,8 +332,7 @@ pub mod parsing {
         )
         |
         do_parse!(
-            punct!("//!") >>
-            content: take_until!("\n") >>
+            comment: inner_doc_comment >>
             (Attribute {
                 style: AttrStyle::Inner(tokens::Bang::default()),
                 path: "doc".into(),
@@ -373,11 +367,7 @@ pub mod parsing {
     named!(pub outer_attr -> Attribute, alt!(
         do_parse!(
             punct!("#") >>
-            path_and_tts: delimited!(
-                punct!("["),
-                tuple!(mod_style_path, token_trees),
-                punct!("]")
-            ) >>
+            path_and_tts: delim!(Bracket, tuple!(mod_style_path, token_trees)) >>
             ({
                 let (path, tts) = path_and_tts;
 

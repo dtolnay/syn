@@ -46,7 +46,7 @@ pub enum IResult<I, O> {
     Error,
 }
 
-impl<'a, O> IResult<&'a str, O> {
+impl<'a, O> IResult<&'a [TokenTree], O> {
     /// Unwraps the result, asserting the the parse is complete. Panics with a
     /// message based on the given string if the parse failed or is incomplete.
     ///
@@ -74,12 +74,11 @@ impl<'a, O> IResult<&'a str, O> {
     /// ```
     pub fn expect(self, name: &str) -> O {
         match self {
-            IResult::Done(mut rest, o) => {
-                rest = space::skip_whitespace(rest);
+            IResult::Done(rest, o) => {
                 if rest.is_empty() {
                     o
                 } else {
-                    panic!("unparsed tokens after {}: {:?}", name, rest)
+                    panic!("unparsed tokens after {}: {:?}", name, /* rest */ ())
                 }
             }
             IResult::Error => panic!("failed to parse {}", name),
@@ -106,13 +105,13 @@ impl<'a, O> IResult<&'a str, O> {
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: &str) -> $crate::IResult<&str, $o> {
+        fn $name(i: &[$crate::TokenTree]) -> $crate::IResult<&[$crate::TokenTree], $o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: &str) -> $crate::IResult<&str, $o> {
+        pub fn $name(i: &[$crate::TokenTree]) -> $crate::IResult<&[$crate::TokenTree], $o> {
             $submac!(i, $($args)*)
         }
     };
@@ -581,9 +580,9 @@ macro_rules! many0 {
 //
 // Not public API.
 #[doc(hidden)]
-pub fn many0<'a, T>(mut input: &'a str,
-                    f: fn(&'a str) -> IResult<&'a str, T>)
-                    -> IResult<&'a str, Vec<T>> {
+pub fn many0<'a, T>(mut input: &'a [TokenTree],
+                    f: fn(&'a [TokenTree]) -> IResult<&'a [TokenTree], T>)
+                    -> IResult<&'a [TokenTree], Vec<T>> {
     let mut res = Vec::new();
 
     loop {
@@ -1240,4 +1239,21 @@ macro_rules! do_parse {
             },
         }
     };
+}
+
+#[macro_export]
+macro_rules! input_end {
+    ($i:expr,) => {
+        $crate::input_end($i)
+    };
+}
+
+// Not a public API
+#[doc(hidden)]
+pub fn input_end(input: &[TokenTree]) -> IResult<&'static [TokenTree], &'static str> {
+    if input.is_empty() {
+        IResult::Done(&[], "")
+    } else {
+        IResult::Error
+    }
 }

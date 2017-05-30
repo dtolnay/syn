@@ -319,32 +319,9 @@ pub mod parsing {
     ));
 
     named!(doc_comment -> String, alt!(
-        do_parse!(
-            punct!("//!") >>
-            content: take_until!("\n") >>
-            (format!("//!{}", content))
-        )
+        inner_doc_comment
         |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tag!("/*!")) >>
-            com: block_comment >>
-            (com.to_owned())
-        )
-        |
-        do_parse!(
-            punct!("///") >>
-            not!(tag!("/")) >>
-            content: take_until!("\n") >>
-            (format!("///{}", content))
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
-            (com.to_owned())
-        )
+        outer_doc_comment
     ));
 }
 

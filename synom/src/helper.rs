@@ -34,13 +34,33 @@ macro_rules! punct {
 
 // Not public API.
 #[doc(hidden)]
-pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
-    let input = skip_whitespace(input);
-    if input.starts_with(token) {
-        IResult::Done(&input[token.len()..], token)
-    } else {
-        IResult::Error
+pub fn punct<'a>(input: &'a [TokenTree], token: &'static str) -> IResult<&'a [TokenTree], &'a str> {
+    // Extract the chars from token, so we know how many tokens to expect, check
+    // if we are running past EOF, then confirm that the tokens exist as
+    // requested.
+    let expected = token.chars().collect::<Vec<_>>();
+    if input.len() < expected.len() {
+        return IResult::Error;
     }
+    for i in 0..expected.len() {
+        if let TokenKind::Op(c, ok) = input[i].kind {
+            if c != expected[i] {
+                return IResult::Error;
+            }
+
+            // The last token in the sequence does not have to be marked as
+            // OpKind::Joint. Unfortunately OpKind doesn't implement
+            // Eq/PartialEq right now.
+            match ok {
+                OpKind::Alone if i != expected.len() - 1 => return IResult::Error,
+                _ => {}
+            }
+        } else {
+            return IResult::Error;
+        }
+    }
+
+    IResult::Done(&input[expected.len()..], token)
 }
 
 /// Parse a keyword like "fn" or "struct".
@@ -84,15 +104,11 @@ macro_rules! keyword {
 
 // Not public API.
 #[doc(hidden)]
-pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
-    match punct(input, token) {
-        IResult::Done(rest, _) => {
-            match word_break(rest) {
-                IResult::Done(_, _) => IResult::Done(rest, token),
-                IResult::Error => IResult::Error,
-            }
-        }
-        IResult::Error => IResult::Error,
+pub fn keyword<'a>(input: &'a [TokenTree], token: &'static str) -> IResult<&'a [TokenTree], &'static str> {
+    match input.first() {
+        Some(&TokenTree{ kind: TokenKind::Word(ref symbol), .. }) if &**symbol == token =>
+            IResult::Done(&input[1..], token),
+        _ => IResult::Error,
     }
 }
 
@@ -482,5 +498,47 @@ pub fn separated_list<'a, F1, D, F2, T>(mut input: &'a str,
             }
             IResult::Done(input, res)
         }
+    }
+}
+
+#[macro_export]
+macro_rules! delim {
+    ($i:expr, $delim:ident, $fmac:ident!( $($fargs:tt)* )) => {
+        match $crate::helper::delim_impl($i, $crate::Delimiter::$delim) {
+            Some((i, ib)) => {
+                match $fmac!(&*ib, $($fargs)*) {
+                    $crate::IResult::Done(rest, val) => {
+                        if rest.is_empty() {
+                            $crate::IResult::Done(i, val)
+                        } else {
+                            $crate::IResult::Error
+                        }
+                    }
+                    _ => $crate::IResult::Error,
+                }
+            }
+            _ => $crate::IResult::Error,
+        }
+    };
+    ($i:expr, $delim:ident, $f:expr) => {
+        delim!($i, $delim, call!($f))
+    };
+}
+
+// Not a public API
+#[doc(hidden)]
+pub fn delim_impl(input: &[TokenTree],
+                  expected_delim: Delimiter)
+                  -> Option<(&[TokenTree], InputBuf)> {
+    // NOTE: The `as u32` hack is being used as `Delimiter` doesn't implement
+    // `PartialEq` or `Eq` despite being a simple c-style enum.
+    match input.first() {
+        Some(&TokenTree {
+            kind: TokenKind::Sequence(delim, ref stream),
+            ..
+        }) if delim as u32 == expected_delim as u32 => {
+            Some((&input[1..], InputBuf::new(stream.clone())))
+        }
+        _ => None
     }
 }

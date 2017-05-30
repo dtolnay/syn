@@ -8,7 +8,7 @@ extern crate proc_macro2;
 extern crate quote;
 
 #[cfg(feature = "parsing")]
-extern crate unicode_xid;
+extern crate relex;
 
 #[cfg_attr(feature = "parsing", macro_use)]
 extern crate synom;
@@ -30,9 +30,6 @@ pub use constant::{ConstExpr, ConstCall, ConstBinary, ConstUnary, ConstCast,
 mod data;
 pub use data::{Field, Variant, VariantData, Visibility, VisRestricted, VisCrate,
                VisPublic, VisInherited};
-
-#[cfg(feature = "parsing")]
-mod escape;
 
 #[cfg(feature = "full")]
 mod expr;
@@ -121,59 +118,108 @@ mod parsing {
 
     use super::*;
     use {derive, generics, ident, mac, ty, attr};
-    use synom::{space, IResult};
+    use synom::{IResult, TokenStream};
+
+    use std::convert::From;
+    use std::error::Error;
+    use std::fmt;
 
     #[cfg(feature = "full")]
     use {expr, item, krate};
 
+    #[derive(Debug)]
+    pub struct ParseError(String);
+
+    impl Error for ParseError {
+        fn description(&self) -> &str {
+            &self.0
+        }
+    }
+
+    impl fmt::Display for ParseError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            <String as fmt::Display>::fmt(&self.0, f)
+        }
+    }
+
+    impl From<synom::LexError> for ParseError {
+        fn from(_: synom::LexError) -> ParseError {
+            ParseError("error while lexing input string".to_owned())
+        }
+    }
+
     /// Parse the stringified representation of a struct or enum passed
     /// to a `proc_macro_derive` function.
-    pub fn parse_derive_input(input: &str) -> Result<DeriveInput, String> {
+    pub fn parse_derive_input(input: TokenStream) -> Result<DeriveInput, ParseError> {
         unwrap("derive input", derive::parsing::derive_input, input)
     }
 
+    /// Parse an entire crate into an AST. This function takes a string as input
+    /// instead of a TokenStream, as we need to handle parsing the BOM and
+    /// shebang from the string.
     #[cfg(feature = "full")]
-    pub fn parse_crate(input: &str) -> Result<Crate, String> {
-        unwrap("crate", krate::parsing::krate, input)
+    pub fn parse_crate(mut input: &str) -> Result<Crate, ParseError> {
+        // Strip the BOM if it is present
+        const BOM: &str = "\u{feff}";
+        if input.starts_with(BOM) {
+            input = &input[BOM.len()..];
+        }
+
+        let mut shebang = None;
+        if input.starts_with("#!") && !input.starts_with("#![") {
+            if let Some(idx) = input.find('\n') {
+                shebang = Some(input[..idx].to_string());
+                input = &input[idx..];
+            } else {
+                shebang = Some(input.to_string());
+                input = "";
+            }
+        }
+
+        let mut krate = unwrap("crate", krate::parsing::krate,
+                           input.parse()?)?;
+        krate.shebang = shebang;
+        Ok(krate)
+
     }
 
     #[cfg(feature = "full")]
-    pub fn parse_item(input: &str) -> Result<Item, String> {
+    pub fn parse_item(input: TokenStream) -> Result<Item, ParseError> {
         unwrap("item", item::parsing::item, input)
     }
 
     #[cfg(feature = "full")]
-    pub fn parse_items(input: &str) -> Result<Vec<Item>, String> {
+    pub fn parse_items(input: TokenStream) -> Result<Vec<Item>, ParseError> {
         unwrap("items", item::parsing::items, input)
     }
 
     #[cfg(feature = "full")]
-    pub fn parse_expr(input: &str) -> Result<Expr, String> {
+    pub fn parse_expr(input: TokenStream) -> Result<Expr, ParseError> {
         unwrap("expression", expr::parsing::expr, input)
     }
 
-    pub fn parse_type(input: &str) -> Result<Ty, String> {
+    pub fn parse_type(input: TokenStream) -> Result<Ty, ParseError> {
         unwrap("type", ty::parsing::ty, input)
     }
 
     /// Parse a path, such as `std::str::FromStr` or `::syn::parse_path`.
-    pub fn parse_path(input: &str) -> Result<Path, String> {
+    pub fn parse_path(input: TokenStream) -> Result<Path, ParseError> {
         unwrap("path", ty::parsing::path, input)
     }
 
-    pub fn parse_where_clause(input: &str) -> Result<WhereClause, String> {
+    pub fn parse_where_clause(input: TokenStream) -> Result<WhereClause, ParseError> {
         unwrap("where clause", generics::parsing::where_clause, input)
     }
 
-    pub fn parse_token_trees(input: &str) -> Result<Vec<TokenTree>, String> {
+    pub fn parse_token_trees(input: TokenStream) -> Result<Vec<TokenTree>, ParseError> {
         unwrap("token trees", mac::parsing::token_trees, input)
     }
 
-    pub fn parse_ident(input: &str) -> Result<Ident, String> {
+    pub fn parse_ident(input: TokenStream) -> Result<Ident, ParseError> {
         unwrap("identifier", ident::parsing::ident, input)
     }
 
-    pub fn parse_ty_param_bound(input: &str) -> Result<TyParamBound, String> {
+    pub fn parse_ty_param_bound(input: TokenStream) -> Result<TyParamBound, ParseError> {
         unwrap("type parameter bound",
                generics::parsing::ty_param_bound,
                input)
@@ -181,7 +227,7 @@ mod parsing {
 
     /// Parse an attribute declared outside the item it annotates, such as
     /// a struct annotation. They are written as `#[...]`.
-    pub fn parse_outer_attr(input: &str) -> Result<Attribute, String> {
+    pub fn parse_outer_attr(input: TokenStream) -> Result<Attribute, ParseError> {
         unwrap("outer attribute", attr::parsing::outer_attr, input)
     }
 
@@ -189,30 +235,30 @@ mod parsing {
     /// for crate annotations or for mod-level declarations when modules are in
     /// their own files. They are written as `#![...]`.
     #[cfg(feature = "full")]
-    pub fn parse_inner_attr(input: &str) -> Result<Attribute, String> {
+    pub fn parse_inner_attr(input: TokenStream) -> Result<Attribute, ParseError> {
         unwrap("inner attribute", attr::parsing::inner_attr, input)
     }
 
     /// Deprecated: Use `parse_derive_input` instead.
     #[doc(hidden)]
     #[deprecated(since="0.11.0", note = "Use `parse_derive_input` instead")]
-    pub fn parse_macro_input(input: &str) -> Result<MacroInput, String> {
+    pub fn parse_macro_input(input: TokenStream) -> Result<MacroInput, ParseError> {
         parse_derive_input(input)
     }
 
     /// Alias for `syn::parse_derive_input`.
     impl FromStr for DeriveInput {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_derive_input(s)
+            parse_derive_input(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_crate`.
     #[cfg(feature = "full")]
     impl FromStr for Crate {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
             parse_crate(s)
@@ -222,85 +268,85 @@ mod parsing {
     /// Alias for `syn::parse_item`.
     #[cfg(feature = "full")]
     impl FromStr for Item {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_item(s)
+            parse_item(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_expr`.
     #[cfg(feature = "full")]
     impl FromStr for Expr {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_expr(s)
+            parse_expr(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_type`.
     impl FromStr for Ty {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_type(s)
+            parse_type(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_path`.
     impl FromStr for Path {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_path(s)
+            parse_path(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_where_clause`.
     impl FromStr for WhereClause {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_where_clause(s)
+            parse_where_clause(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_ident`.
     impl FromStr for Ident {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_ident(s)
+            parse_ident(s.parse()?)
         }
     }
 
     /// Alias for `syn::parse_ty_param_bound`.
     impl FromStr for TyParamBound {
-        type Err = String;
+        type Err = ParseError;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            parse_ty_param_bound(s)
+            parse_ty_param_bound(s.parse()?)
         }
     }
 
     fn unwrap<T>(name: &'static str,
-                 f: fn(&str) -> IResult<&str, T>,
-                 input: &str)
-                 -> Result<T, String> {
-        match f(input) {
-            IResult::Done(mut rest, t) => {
-                rest = space::skip_whitespace(rest);
+                 f: fn(&[synom::TokenTree]) -> IResult<&[synom::TokenTree], T>,
+                 input: TokenStream)
+                 -> Result<T, ParseError> {
+        let input = synom::InputBuf::new(input);
+        match f(&input) {
+            IResult::Done(rest, t) => {
                 if rest.is_empty() {
                     Ok(t)
                 } else if rest.len() == input.len() {
                     // parsed nothing
-                    Err(format!("failed to parse {}: {:?}", name, rest))
+                    Err(ParseError(format!("failed to parse {}", name)))
                 } else {
-                    Err(format!("unparsed tokens after {}: {:?}", name, rest))
+                    Err(ParseError(format!("unparsed tokens after {}", name)))
                 }
             }
-            IResult::Error => Err(format!("failed to parse {}: {:?}", name, input)),
+            IResult::Error => Err(ParseError(format!("failed to parse {}", name))),
         }
     }
 }

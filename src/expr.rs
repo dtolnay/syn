@@ -598,6 +598,7 @@ pub mod parsing {
     use synom::IResult::{self, Error};
     use op::parsing::{assign_op, binop, unop};
     use ty::parsing::{mutability, path, qpath, ty, unsafety};
+    use synom::{self, IResult};
 
     use proc_macro2::{self, TokenKind, Delimiter};
 
@@ -605,7 +606,8 @@ pub mod parsing {
     // https://github.com/rust-lang/rfcs/pull/92
     macro_rules! named_ambiguous_expr {
         ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
-            fn $name(i: &str, $allow_struct: bool) -> $crate::synom::IResult<&str, $o> {
+            fn $name(i: &[$crate::synom::TokenTree], $allow_struct: bool)
+                     -> $crate::synom::IResult<&[$crate::synom::TokenTree], $o> {
                 $submac!(i, $($args)*)
             }
         };
@@ -622,7 +624,10 @@ pub mod parsing {
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
     #[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
-    fn ambiguous_expr(i: &str, allow_struct: bool, allow_block: bool) -> IResult<&str, Expr> {
+    fn ambiguous_expr(i: &[synom::TokenTree],
+                      allow_struct: bool,
+                      allow_block: bool)
+                      -> IResult<&[synom::TokenTree], Expr> {
         do_parse!(
             i,
             mut e: alt!(
@@ -931,9 +936,7 @@ pub mod parsing {
     named!(expr_if -> ExprKind, do_parse!(
         keyword!("if") >>
         cond: cond >>
-        punct!("{") >>
-        then_block: within_block >>
-        punct!("}") >>
+        then_block: delim!(Brace, within_block) >>
         else_block: option!(preceded!(
             keyword!("else"),
             alt!(
@@ -1013,12 +1016,18 @@ pub mod parsing {
     named!(expr_match -> ExprKind, do_parse!(
         keyword!("match") >>
         obj: expr_no_struct >>
-        punct!("{") >>
-        mut arms: many0!(do_parse!(
-            arm: match_arm >>
-            cond!(arm_requires_comma(&arm), punct!(",")) >>
-            cond!(!arm_requires_comma(&arm), option!(punct!(","))) >>
-            (arm)
+        res: delim!(Brace, do_parse!(
+            mut arms: many0!(do_parse!(
+                arm: match_arm >>
+                    cond!(arm_requires_comma(&arm), punct!(",")) >>
+                    cond!(!arm_requires_comma(&arm), option!(punct!(","))) >>
+                    (arm)
+            )) >>
+            last_arm: option!(match_arm) >>
+            (ExprKind::Match(Box::new(obj), {
+                arms.extend(last_arm);
+                arms
+            }))
         )) >>
         last_arm: option!(match_arm) >>
         punct!("}") >>
@@ -1236,8 +1245,7 @@ pub mod parsing {
         })
     ));
 
-    named!(expr_repeat -> ExprKind, do_parse!(
-        punct!("[") >>
+    named!(expr_repeat -> ExprKind, delim!(Bracket, do_parse!(
         value: expr >>
         punct!(";") >>
         times: expr >>
@@ -1312,9 +1320,7 @@ pub mod parsing {
     ));
 
     named!(pub block -> Block, do_parse!(
-        punct!("{") >>
-        stmts: within_block >>
-        punct!("}") >>
+        stmts: delim!(Brace, within_block) >>
         (Block {
             stmts: stmts,
             brace_token: tokens::Brace::default(),
@@ -1417,7 +1423,7 @@ pub mod parsing {
             if semi.is_some() {
                 Stmt::Semi(Box::new(e), tokens::Semi::default())
             } else if requires_semi(&e) {
-                return Error;
+                return IResult::Error;
             } else {
                 Stmt::Expr(Box::new(e))
             }
@@ -1602,7 +1608,7 @@ pub mod parsing {
                 elems
             },
         })
-    ));
+    )));
 
     named!(pat_ref -> Pat, do_parse!(
         punct!("&") >>

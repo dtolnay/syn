@@ -674,16 +674,15 @@ pub mod parsing {
         punct!(")") >>
         ret: fn_ret_ty >>
         where_clause: where_clause >>
-        punct!("{") >>
-        inner_attrs: many0!(inner_attr) >>
-        stmts: within_block >>
-        punct!("}") >>
+        inner_attrs_stmts: delim!(Brace, tuple!(
+            many0!(inner_attr), within_block
+        )) >>
         (Item {
             ident: name,
             vis: vis,
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
+                attrs.extend(inner_attrs_stmts.0);
                 attrs
             },
             node: ItemFn {
@@ -757,13 +756,12 @@ pub mod parsing {
         content: alt!(
             punct!(";") => { |_| None }
             |
-            delimited!(
-                punct!("{"),
+            delim!(
+                Brace,
                 tuple!(
                     many0!(inner_attr),
                     items
-                ),
-                punct!("}")
+                )
             ) => { Some }
         ) >>
         (match content {
@@ -797,9 +795,7 @@ pub mod parsing {
     named!(item_foreign_mod -> Item, do_parse!(
         attrs: many0!(outer_attr) >>
         abi: abi >>
-        punct!("{") >>
-        items: many0!(foreign_item) >>
-        punct!("}") >>
+        items: delim!(Brace, many0!(foreign_item)) >>
         (Item {
             ident: "".into(),
             vis: VisInherited {}.into(),
@@ -972,9 +968,7 @@ pub mod parsing {
                                      ty_param_bound)
         ) >>
         where_clause: where_clause >>
-        punct!("{") >>
-        body: many0!(trait_item) >>
-        punct!("}") >>
+        body: delim!(Brace, many0!(trait_item)) >>
         (Item {
             ident: id,
             vis: vis,
@@ -1001,8 +995,7 @@ pub mod parsing {
         path: path >>
         keyword!("for") >>
         punct!("..") >>
-        punct!("{") >>
-        punct!("}") >>
+        delim!(Brace, epsilon!()) >>
         (Item {
             ident: "".into(),
             vis: VisInherited {}.into(),
@@ -1063,10 +1056,9 @@ pub mod parsing {
         punct!(")") >>
         ret: fn_ret_ty >>
         where_clause: where_clause >>
-        body: option!(delimited!(
-            punct!("{"),
-            tuple!(many0!(inner_attr), within_block),
-            punct!("}")
+        body: option!(delim!(
+            Brace,
+            tuple!(many0!(inner_attr), within_block)
         )) >>
         semi: cond!(body.is_none(), punct!(";")) >>
         ({
@@ -1170,9 +1162,7 @@ pub mod parsing {
         ) >>
         self_ty: ty >>
         where_clause: where_clause >>
-        punct!("{") >>
-        body: many0!(impl_item) >>
-        punct!("}") >>
+        body: delim!(Brace, many0!(impl_item)) >>
         (Item {
             ident: "".into(),
             vis: VisInherited {}.into(),
@@ -1247,17 +1237,16 @@ pub mod parsing {
         punct!(")") >>
         ret: fn_ret_ty >>
         where_clause: where_clause >>
-        punct!("{") >>
-        inner_attrs: many0!(inner_attr) >>
-        stmts: within_block >>
-        punct!("}") >>
+        inner_attrs_stmts: delim!(Brace, tuple!(
+            many0!(inner_attr), within_block
+        )) >>
         (ImplItem {
             ident: name,
             vis: vis,
             defaultness: defaultness,
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
+                attrs.extend(inner_attrs_stmts.0);
                 attrs
             },
             node: ImplItemMethod {

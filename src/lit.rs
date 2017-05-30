@@ -247,59 +247,100 @@ pub mod parsing {
                     if has_dot {
                         break;
                     }
-                    chars.next();
-                    if chars.peek()
-                           .map(|&ch| ch == '.' || UnicodeXID::is_xid_start(ch))
-                           .unwrap_or(false) {
-                        return IResult::Error;
+                    relex::LToken::Lit(relex::Lit::Char(c)) => {
+                        Lit::Char(c)
                     }
-                    len += 1;
-                    has_dot = true;
-                }
-                'e' | 'E' => {
-                    chars.next();
-                    len += 1;
-                    has_exp = true;
-                    break;
-                }
-                _ => break,
-            }
-        }
+                    relex::LToken::Lit(relex::Lit::Integer(v, suffix)) => {
+                        let suffix = match suffix {
+                            relex::IntSuffix::Unsuffixed =>
+                                IntTy::Unsuffixed,
+                            relex::IntSuffix::Isize =>
+                                IntTy::Isize,
+                            relex::IntSuffix::Usize =>
+                                IntTy::Usize,
+                            relex::IntSuffix::I8 =>
+                                IntTy::I8,
+                            relex::IntSuffix::U8 =>
+                                IntTy::U8,
+                            relex::IntSuffix::I16 =>
+                                IntTy::I16,
+                            relex::IntSuffix::U16 =>
+                                IntTy::U16,
+                            relex::IntSuffix::I32 =>
+                                IntTy::I32,
+                            relex::IntSuffix::U32 =>
+                                IntTy::U32,
+                            relex::IntSuffix::I64 =>
+                                IntTy::I64,
+                            relex::IntSuffix::U64 =>
+                                IntTy::U64,
+                        };
+                        Lit::Int(v, suffix)
+                    }
+                    relex::LToken::Lit(relex::Lit::Float(v, suffix)) => {
+                        let suffix = match suffix {
+                            relex::FloatSuffix::Unsuffixed =>
+                                FloatTy::Unsuffixed,
+                            relex::FloatSuffix::F32 =>
+                                FloatTy::F32,
+                            relex::FloatSuffix::F64 =>
+                                FloatTy::F64,
+                        };
+                        Lit::Float(v, suffix)
+                    }
+                    relex::LToken::Lit(relex::Lit::Str(s, relex::StrStyle::Cooked)) => {
+                        Lit::Str(s, StrStyle::Cooked)
+                    }
+                    relex::LToken::Lit(relex::Lit::Str(s, relex::StrStyle::Raw(n))) => {
+                        Lit::Str(s, StrStyle::Raw(n))
+                    }
+                    relex::LToken::Lit(relex::Lit::ByteStr(s, relex::StrStyle::Cooked)) => {
+                        Lit::ByteStr(s, StrStyle::Cooked)
+                    }
+                    relex::LToken::Lit(relex::Lit::ByteStr(s, relex::StrStyle::Raw(n))) => {
+                        Lit::ByteStr(s, StrStyle::Raw(n))
+                    }
+                    _ => return IResult::Error
+                };
 
-        let rest = &input[len..];
-        if !(has_dot || has_exp || rest.starts_with("f32") || rest.starts_with("f64")) {
-            return IResult::Error;
-        }
-
-        if has_exp {
-            let mut has_exp_value = false;
-            while let Some(&ch) = chars.peek() {
-                match ch {
-                    '+' | '-' => {
-                        if has_exp_value {
-                            break;
-                        }
-                        chars.next();
-                        len += 1;
-                    }
-                    '0'...'9' => {
-                        chars.next();
-                        len += 1;
-                        has_exp_value = true;
-                    }
-                    '_' => {
-                        chars.next();
-                        len += 1;
-                    }
-                    _ => break,
+                IResult::Done(&i[1..], lit)
+            }
+            Some(&TokenTree{ kind: TokenKind::Word(ref w), .. }) => {
+                if &**w == "true" {
+                    IResult::Done(&i[1..], Lit::Bool(true))
+                } else if &**w == "false" {
+                    IResult::Done(&i[1..], Lit::Bool(false))
+                } else {
+                    IResult::Error
                 }
             }
-            if !has_exp_value {
-                return IResult::Error;
-            }
+            _ => IResult::Error
         }
+    }
 
-        IResult::Done(&input[len..], input[..len].replace("_", ""))
+    #[cfg(feature = "full")]
+    pub fn digits(i: &[TokenTree]) -> IResult<&[TokenTree], u64> {
+        if let IResult::Done(r, Lit::Int(v, IntTy::Unsuffixed)) = lit(i) {
+            IResult::Done(r, v)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn string(i: &[TokenTree]) -> IResult<&[TokenTree], String> {
+        if let IResult::Done(r, Lit::Str(v, _)) = lit(i) {
+            IResult::Done(r, v)
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn byte_string(i: &[TokenTree]) -> IResult<&[TokenTree], Vec<u8>> {
+        if let IResult::Done(r, Lit::ByteStr(v, _)) = lit(i) {
+            IResult::Done(r, v)
+        } else {
+            IResult::Error
+        }
     }
 
     pub fn digits(mut input: &str) -> IResult<&str, &str> {
@@ -312,8 +353,9 @@ pub mod parsing {
         } else if input.starts_with("0b") {
             2
         } else {
-            10
-        };
+            IResult::Error
+        }
+    }
 
         let mut value = 0u64;
         let mut len = if base == 10 {0} else {2};
@@ -346,8 +388,19 @@ pub mod parsing {
             len += 1;
             empty = false;
         }
-        if empty {
+    }
+
+    pub fn int(i: &[TokenTree]) -> IResult<&[TokenTree], u64> {
+        if let IResult::Done(r, Lit::Int(v, _)) = lit(i) {
+            IResult::Done(r, v)
+        } else {
             IResult::Error
+        }
+    }
+
+    pub fn boolean(i: &[TokenTree]) -> IResult<&[TokenTree], bool> {
+        if let IResult::Done(r, Lit::Bool(b)) = lit(i) {
+            IResult::Done(r, b)
         } else {
             IResult::Done(&input[len..], &input[..len])
         }

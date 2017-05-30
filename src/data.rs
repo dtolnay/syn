@@ -179,8 +179,18 @@ pub mod parsing {
         terminated!(expr, after_discriminant) => { ConstExpr::Other }
     ));
 
+    // XXX: HACKY
     #[cfg(feature = "full")]
-    named!(after_discriminant -> &str, peek!(alt!(punct!(",") | punct!("}"))));
+    pub fn eof(input: &[synom::TokenTree]) -> synom::IResult<&[synom::TokenTree], &'static str> {
+        if input.is_empty() {
+            synom::IResult::Done(&[], "")
+        } else {
+            synom::IResult::Error
+        }
+    }
+
+    #[cfg(feature = "full")]
+    named!(after_discriminant -> &str, peek!(alt!(punct!(",") | input_end!())));
 
     named!(pub struct_like_body -> (Delimited<Field, tokens::Comma>, tokens::Brace), do_parse!(
         punct!("{") >>
