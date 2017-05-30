@@ -1,6 +1,6 @@
 [package]
 name = "synom"
-version = "0.12.0"
+version = "0.11.3"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Stripped-down Nom parser used by Syn"
@@ -14,17 +14,17 @@ publish = false # this branch contains breaking changes
 [dependencies]
 quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 unicode-xid = "0.0.4"
+proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
 
 [features]
 printing = ["quote"]
 parsing = []
-default = ["parsing"]
-
-[dev-dependencies]
-proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
+default = []
+clone-impls = []
+extra-traits = []
 
 [dev-dependencies.syn]
-version = "0.12"
+version = "0.11"
 path = ".."
 features = ["parsing", "full", "extra-traits"]
 default-features = false

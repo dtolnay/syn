@@ -2,7 +2,8 @@ use std::iter::FromIterator;
 use std::slice;
 use std::vec;
 
-#[derive(Eq, PartialEq, Hash, Debug, Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash, Debug))]
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Delimited<T, D> {
     inner: Vec<(T, Option<D>)>
 }
@@ -217,6 +218,74 @@ impl<T, D> Element<T, D> {
         match *self {
             Element::Delimited(_, ref d) => Some(d),
             Element::End(_) => None,
+        }
+    }
+}
+
+#[cfg(feature = "parsing")]
+mod parsing {
+    use proc_macro2::TokenTree;
+
+    use super::Delimited;
+    use {IResult, Synom};
+
+    impl<T, D> Delimited<T, D>
+        where T: Synom,
+              D: Synom,
+    {
+        pub fn parse_separated(input: &[TokenTree])
+            -> IResult<&[TokenTree], Self>
+        {
+            Self::parse(input, false)
+        }
+
+        pub fn parse_terminated(input: &[TokenTree])
+            -> IResult<&[TokenTree], Self>
+        {
+            Self::parse(input, true)
+        }
+
+        fn parse(mut input: &[TokenTree], terminated: bool)
+            -> IResult<&[TokenTree], Self>
+        {
+            let mut res = Delimited::new();
+
+            // get the first element
+            match T::parse(input) {
+                IResult::Error => IResult::Done(input, res),
+                IResult::Done(i, o) => {
+                    if i.len() == input.len() {
+                        return IResult::Error
+                    }
+                    input = i;
+                    res.push_first(o);
+
+                    // get the separator first
+                    while let IResult::Done(i2, s) = D::parse(input) {
+                        if i2.len() == input.len() {
+                            break;
+                        }
+
+                        // get the element next
+                        if let IResult::Done(i3, o3) = T::parse(i2) {
+                            if i3.len() == i2.len() {
+                                break;
+                            }
+                            res.push_next(o3, s);
+                            input = i3;
+                        } else {
+                            break;
+                        }
+                    }
+                    if terminated {
+                        if let IResult::Done(after, sep) = D::parse(input) {
+                            res.push_trailing(sep);
+                            input = after;
+                        }
+                    }
+                    IResult::Done(input, res)
+                }
+            }
         }
     }
 }

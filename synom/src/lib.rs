@@ -22,19 +22,21 @@
 //! correctness, and compile time over nom's `ws!` strategy.
 
 extern crate unicode_xid;
+extern crate proc_macro2;
 
 #[cfg(feature = "printing")]
 extern crate quote;
 
-#[cfg(feature = "parsing")]
 #[doc(hidden)]
-pub mod space;
+pub use proc_macro2::TokenTree;
 
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
 pub mod helper;
 
 pub mod delimited;
+pub mod tokens;
+pub mod span;
 
 /// The result of a parser.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -84,6 +86,10 @@ impl<'a, O> IResult<&'a [TokenTree], O> {
             IResult::Error => panic!("failed to parse {}", name),
         }
     }
+}
+
+pub trait Synom: Sized {
+    fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self>;
 }
 
 /// Define a function from a parser combination.
