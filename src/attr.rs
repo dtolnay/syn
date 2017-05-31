@@ -292,137 +292,123 @@ impl<'a, T> FilterAttrs<'a> for T
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use mac::TokenTree;
-    use mac::parsing::token_trees;
-    use ty::parsing::mod_style_path;
-    use proc_macro2::{self, TokenKind, OpKind, Literal};
+    use synom::IResult;
+    use synom::tokens::*;
+    use proc_macro2::{TokenKind, OpKind, TokenTree};
 
     fn eq() -> TokenTree {
-        TokenTree(proc_macro2::TokenTree {
+        TokenTree {
             span: Default::default(),
             kind: TokenKind::Op('=', OpKind::Alone),
-        })
+        }
     }
 
-    fn doc(s: &str) -> TokenTree {
-        TokenTree(proc_macro2::TokenTree {
-            span: Default::default(),
-            kind: TokenKind::Literal(Literal::doccomment(s)),
-        })
+    impl Attribute {
+        #[cfg(feature = "full")]
+        pub fn parse_inner(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    pound: syn!(Pound) >>
+                    bang: syn!(Bang) >>
+                    path_and_tts: brackets!(tuple!(
+                        call!(::Path::parse_mod_style),
+                        call!(::TokenTree::parse_list)
+                    )) >>
+                    ({
+                        let ((path, tts), bracket) = path_and_tts;
+
+                        Attribute {
+                            style: AttrStyle::Inner(bang),
+                            path: path,
+                            tts: tts,
+                            is_sugared_doc: false,
+                            pound_token: pound,
+                            bracket_token: bracket,
+                        }
+                    })
+                )
+                |
+                map!(
+                    lit_doc_comment,
+                    |lit| Attribute {
+                        style: AttrStyle::Inner(tokens::Bang::default()),
+                        path: "doc".into(),
+                        tts: vec![
+                            ::TokenTree(eq()),
+                            ::TokenTree(lit),
+                        ],
+                        is_sugared_doc: true,
+                        pound_token: tokens::Pound::default(),
+                        bracket_token: tokens::Bracket::default(),
+                    }
+                )
+            }
+        }
+
+        pub fn parse_outer(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    pound: syn!(Pound) >>
+                    path_and_tts: brackets!(tuple!(
+                        call!(::Path::parse_mod_style),
+                        call!(::TokenTree::parse_list)
+                    )) >>
+                    ({
+                        let ((path, tts), bracket) = path_and_tts;
+
+                        Attribute {
+                            style: AttrStyle::Outer,
+                            path: path,
+                            tts: tts,
+                            is_sugared_doc: false,
+                            pound_token: pound,
+                            bracket_token: bracket,
+                        }
+                    })
+                )
+                |
+                map!(
+                    lit_doc_comment,
+                    |lit| Attribute {
+                        style: AttrStyle::Outer,
+                        path: "doc".into(),
+                        tts: vec![
+                            ::TokenTree(eq()),
+                            ::TokenTree(lit),
+                        ],
+                        is_sugared_doc: true,
+                        pound_token: tokens::Pound::default(),
+                        bracket_token: tokens::Bracket::default(),
+                    }
+                )
+            }
+        }
     }
 
-    #[cfg(feature = "full")]
-    named!(pub inner_attr -> Attribute, alt!(
-        do_parse!(
-            punct!("#") >>
-            punct!("!") >>
-            path_and_tts: delim!(Bracket, tuple!(mod_style_path, token_trees)) >>
-            ({
-                let (path, tts) = path_and_tts;
-
-                Attribute {
-                    style: AttrStyle::Inner(tokens::Bang::default()),
-                    path: path,
-                    tts: tts,
-                    is_sugared_doc: false,
-                    pound_token: tokens::Pound::default(),
-                    bracket_token: tokens::Bracket::default(),
-                }
-            })
-        )
-        |
-        do_parse!(
-            comment: inner_doc_comment >>
-            (Attribute {
-                style: AttrStyle::Inner(tokens::Bang::default()),
-                path: "doc".into(),
-                tts: vec![
-                    eq(),
-                    doc(&format!("//!{}", content)),
-                ],
-                is_sugared_doc: true,
-                pound_token: tokens::Pound::default(),
-                bracket_token: tokens::Bracket::default(),
-            })
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tag!("/*!")) >>
-            com: block_comment >>
-            (Attribute {
-                style: AttrStyle::Inner(tokens::Bang::default()),
-                path: "doc".into(),
-                tts: vec![
-                    eq(),
-                    doc(com),
-                ],
-                is_sugared_doc: true,
-                pound_token: tokens::Pound::default(),
-                bracket_token: tokens::Bracket::default(),
-            })
-        )
-    ));
-
-    named!(pub outer_attr -> Attribute, alt!(
-        do_parse!(
-            punct!("#") >>
-            path_and_tts: delim!(Bracket, tuple!(mod_style_path, token_trees)) >>
-            ({
-                let (path, tts) = path_and_tts;
-
-                Attribute {
-                    style: AttrStyle::Outer,
-                    path: path,
-                    tts: tts,
-                    is_sugared_doc: false,
-                    pound_token: tokens::Pound::default(),
-                    bracket_token: tokens::Bracket::default(),
-                }
-            })
-        )
-        |
-        do_parse!(
-            punct!("///") >>
-            not!(tag!("/")) >>
-            content: take_until!("\n") >>
-            (Attribute {
-                style: AttrStyle::Outer,
-                path: "doc".into(),
-                tts: vec![
-                    eq(),
-                    doc(&format!("///{}", content)),
-                ],
-                is_sugared_doc: true,
-                pound_token: tokens::Pound::default(),
-                bracket_token: tokens::Bracket::default(),
-            })
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
-            (Attribute {
-                style: AttrStyle::Outer,
-                path: "doc".into(),
-                tts: vec![
-                    eq(),
-                    doc(com),
-                ],
-                is_sugared_doc: true,
-                pound_token: tokens::Pound::default(),
-                bracket_token: tokens::Bracket::default(),
-            })
-        )
-    ));
+    fn lit_doc_comment(input: &[TokenTree]) -> IResult<&[TokenTree], TokenTree> {
+        let mut tokens = input.iter();
+        let tok = match tokens.next() {
+            Some(tok) => tok,
+            None => return IResult::Error,
+        };
+        let literal = match tok.kind {
+            TokenKind::Literal(ref l) => l.to_string(),
+            _ => return IResult::Error,
+        };
+        if literal.starts_with("//") || literal.starts_with("/*") {
+            IResult::Done(tokens.as_slice(), tok.clone())
+        } else {
+            IResult::Error
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
-    use proc_macro2::{Literal, TokenTree};
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -431,32 +417,9 @@ mod printing {
                 if let Some(MetaItem::NameValue(ref pair)) = self.meta_item() {
                     if pair.ident == "doc" {
                         let value = pair.lit.value.to_string();
-                        match self.style {
-                            AttrStyle::Inner(_) if value.starts_with("//!") => {
-                                let doc = Literal::doccomment(&format!("{}\n", value));
-                                tokens.append(TokenTree {
-                                    span: pair.lit.span.0,
-                                    kind: TokenKind::Literal(doc),
-                                });
-                                return;
-                            }
-                            AttrStyle::Inner(_) if value.starts_with("/*!") => {
-                                pair.lit.to_tokens(tokens);
-                                return;
-                            }
-                            AttrStyle::Outer if value.starts_with("///") => {
-                                let doc = Literal::doccomment(&format!("{}\n", value));
-                                tokens.append(TokenTree {
-                                    span: pair.lit.span.0,
-                                    kind: TokenKind::Literal(doc),
-                                });
-                                return;
-                            }
-                            AttrStyle::Outer if value.starts_with("/**") => {
-                                pair.lit.to_tokens(tokens);
-                                return;
-                            }
-                            _ => {}
+                        if value.starts_with('/') {
+                            pair.lit.to_tokens(tokens);
+                            return
                         }
                     }
                 }

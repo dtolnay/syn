@@ -46,51 +46,144 @@ ast_enum_of_structs! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use Generics;
-    use attr::parsing::outer_attr;
-    use data::parsing::{visibility, struct_body, enum_body};
-    use generics::parsing::generics;
-    use ident::parsing::ident;
 
-    named!(pub derive_input -> DeriveInput, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        which: alt!(keyword!("struct") | keyword!("enum")) >>
-        id: ident >>
-        generics: generics >>
-        item: switch!(value!(which),
-            "struct" => map!(struct_body, move |(wh, body, semi)| DeriveInput {
-                ident: id,
-                vis: vis,
-                attrs: attrs,
-                generics: Generics {
-                    where_clause: wh,
-                    .. generics
-                },
-                body: Body::Struct(BodyStruct {
-                    struct_token: tokens::Struct::default(),
-                    data: body,
-                    semi_token: semi,
-                }),
-            })
-            |
-            "enum" => map!(enum_body, move |(wh, body, brace)| DeriveInput {
-                ident: id,
-                vis: vis,
-                attrs: attrs,
-                generics: Generics {
-                    where_clause: wh,
-                    .. generics
-                },
-                body: Body::Enum(BodyEnum {
-                    variants: body,
-                    brace_token: brace,
-                    enum_token: tokens::Enum::default(),
-                }),
-            })
-        ) >>
-        (item)
+    use proc_macro2::TokenTree;
+    use synom::{IResult, Synom};
+    use synom::tokens::*;
+
+    impl Synom for DeriveInput {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                vis: syn!(Visibility) >>
+                which: alt!(
+                    syn!(Struct) => { Ok }
+                    |
+                    // weird hack to get around exhaustiveness check below
+                    syn!(Enum) => { |e| Err((e, 1)) }
+                ) >>
+                id: syn!(Ident) >>
+                generics: syn!(Generics) >>
+                item: switch!(value!(which),
+                    Ok(s) => map!(struct_body, move |(wh, body, semi)| DeriveInput {
+                        ident: id,
+                        vis: vis,
+                        attrs: attrs,
+                        generics: Generics {
+                            where_clause: wh,
+                            .. generics
+                        },
+                        body: Body::Struct(BodyStruct {
+                            struct_token: s,
+                            data: body,
+                            semi_token: semi,
+                        }),
+                    })
+                    |
+                    Err((e, 1)) => map!(enum_body, move |(wh, body, brace)| DeriveInput {
+                        ident: id,
+                        vis: vis,
+                        attrs: attrs,
+                        generics: Generics {
+                            where_clause: wh,
+                            .. generics
+                        },
+                        body: Body::Enum(BodyEnum {
+                            variants: body,
+                            brace_token: brace,
+                            enum_token: e,
+                        }),
+                    })
+                ) >>
+                (item)
+            }
+        }
+
+        fn description() -> Option<&'static str> {
+            Some("derive input")
+        }
+    }
+
+
+    named!(struct_body -> (WhereClause, VariantData, Option<tokens::Semi>), alt!(
+        do_parse!(
+            wh: syn!(WhereClause) >>
+            body: struct_like_body >>
+            (wh, VariantData::Struct(body.0, body.1), None)
+        )
+        |
+        do_parse!(
+            body: tuple_like_body >>
+            wh: syn!(WhereClause) >>
+            semi: syn!(Semi) >>
+            (wh, VariantData::Tuple(body.0, body.1), Some(semi))
+        )
+        |
+        do_parse!(
+            wh: syn!(WhereClause) >>
+            semi: syn!(Semi) >>
+            (wh, VariantData::Unit, Some(semi))
+        )
     ));
+
+    named!(enum_body -> (WhereClause, Delimited<Variant, tokens::Comma>, tokens::Brace), do_parse!(
+        wh: syn!(WhereClause) >>
+        data: braces!(Delimited::parse_terminated) >>
+        (wh, data.0, data.1)
+    ));
+
+    impl Synom for Variant {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                id: syn!(Ident) >>
+                data: alt!(
+                    struct_like_body => { |(d, b)| VariantData::Struct(d, b) }
+                    |
+                    tuple_like_body => { |(d, b)| VariantData::Tuple(d, b) }
+                    |
+                    epsilon!() => { |_| VariantData::Unit }
+                ) >>
+                disr: option!(do_parse!(
+                    eq: syn!(Eq) >>
+                    disr: discriminant >>
+                    (eq, disr)
+                )) >>
+                (Variant {
+                    ident: id,
+                    attrs: attrs,
+                    data: data,
+                    eq_token: disr.as_ref().map(|p| tokens::Eq((p.0).0)),
+                    discriminant: disr.map(|p| p.1),
+                })
+            }
+        }
+    }
+
+    #[cfg(not(feature = "full"))]
+    named!(discriminant -> ConstExpr, syn!(ConstExpr));
+
+    #[cfg(feature = "full")]
+    named!(discriminant -> ConstExpr, alt!(
+        terminated!(syn!(ConstExpr), after_discriminant)
+        |
+        terminated!(syn!(Expr), after_discriminant) => { ConstExpr::Other }
+    ));
+
+    #[cfg(feature = "full")]
+    named!(after_discriminant -> (), peek!(alt!(
+        syn!(Comma) => { |_| () }
+        |
+        input_end!() => { |_| () }
+    )));
+
+    named!(struct_like_body -> (Delimited<Field, tokens::Comma>, tokens::Brace),
+           braces!(call!(Delimited::parse_terminated_with, Field::parse_struct)));
+
+    named!(tuple_like_body -> (Delimited<Field, tokens::Comma>, tokens::Paren),
+           parens!(call!(Delimited::parse_terminated_with, Field::parse_tuple)));
 }
 
 #[cfg(feature = "printing")]

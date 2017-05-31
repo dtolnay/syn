@@ -55,7 +55,7 @@ fn test_unit() {
         }),
     };
 
-    assert_eq!(expected, parse_macro_input(raw.parse().unwrap()).unwrap());
+    assert_eq!(expected, raw.parse().unwrap());
 }
 
 #[test]
@@ -140,7 +140,7 @@ fn test_struct() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 
@@ -310,7 +310,7 @@ fn test_enum() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 
@@ -380,7 +380,7 @@ fn test_attr_with_path() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 
@@ -423,7 +423,7 @@ fn test_attr_with_non_mod_style_path() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 
@@ -463,7 +463,7 @@ fn test_attr_with_mod_style_path_with_self() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 
@@ -515,7 +515,7 @@ fn test_pub_restricted() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -542,7 +542,7 @@ fn test_pub_restricted_crate() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -570,7 +570,7 @@ fn test_pub_restricted_super() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -598,7 +598,7 @@ fn test_pub_restricted_in_super() {
         }),
     };
 
-    let actual = parse_macro_input(raw.parse().unwrap()).unwrap();
+    let actual = raw.parse().unwrap();
 
     assert_eq!(expected, actual);
 }

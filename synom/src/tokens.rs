@@ -1,3 +1,10 @@
+//! Discrete tokens that can be parsed out by synom.
+//!
+//! This module contains a number of useful tokens like `+=` and `/` along with
+//! keywords like `crate` and such. These structures are used to track the spans
+//! of these tokens and all implment the `ToTokens` and `Synom` traits when the
+//! corresponding feature is activated.
+
 use span::Span;
 
 macro_rules! tokens {
@@ -150,18 +157,19 @@ tokens! {
     }
     syms: {
         (pub struct As                      => "as"),
-        (pub struct Box                     => "box"),
+        (pub struct Box_                    => "box"),
         (pub struct Break                   => "break"),
+        (pub struct CapSelf                 => "Self"),
         (pub struct Catch                   => "catch"),
         (pub struct Const                   => "const"),
         (pub struct Continue                => "continue"),
         (pub struct Crate                   => "crate"),
-        (pub struct Default                 => "default"),
+        (pub struct Default_                => "default"),
         (pub struct Do                      => "do"),
         (pub struct Else                    => "else"),
         (pub struct Enum                    => "enum"),
         (pub struct Extern                  => "extern"),
-        (pub struct Fn                      => "fn"),
+        (pub struct Fn_                     => "fn"),
         (pub struct For                     => "for"),
         (pub struct If                      => "if"),
         (pub struct Impl                    => "impl"),
@@ -178,6 +186,7 @@ tokens! {
         (pub struct Self_                   => "self"),
         (pub struct Static                  => "static"),
         (pub struct Struct                  => "struct"),
+        (pub struct Super                   => "super"),
         (pub struct Trait                   => "trait"),
         (pub struct Type                    => "type"),
         (pub struct Union                   => "union"),
@@ -190,7 +199,7 @@ tokens! {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::{TokenTree, TokenKind, Delimiter};
+    use proc_macro2::{TokenTree, TokenKind, Delimiter, OpKind};
 
     use IResult;
     use span::Span;
@@ -224,19 +233,26 @@ mod parsing {
         where T: FromSpans,
     {
         let mut spans = [Span::default(); 3];
-        assert!(s.chars().count() <= spans.len());
+        assert!(s.len() <= spans.len());
         let chars = s.chars();
         let mut it = tokens.iter();
 
-        for (ch, slot) in chars.zip(&mut spans) {
-            let (span, c) = match it.next() {
-                Some(&TokenTree { span, kind: TokenKind::Op(c, _) }) => (span, c),
+        for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
+            let tok = match it.next() {
+                Some(tok) => tok,
                 _ => return IResult::Error
             };
-            if c != ch {
-                return IResult::Error
+            let kind = match tok.kind {
+                TokenKind::Op(c, kind) if c == ch => kind,
+                _ => return IResult::Error
+            };
+            if i != s.len() - 1 {
+                match kind {
+                    OpKind::Joint => {}
+                    OpKind::Alone => return IResult::Error,
+                }
             }
-            *slot = Span(span);
+            *slot = Span(tok.span);
         }
         IResult::Done(it.as_slice(), new(T::from_spans(&spans)))
     }
@@ -290,7 +306,7 @@ mod parsing {
         let rest = others.clone().into_iter().collect::<Vec<_>>();
         match f(&rest) {
             IResult::Done(remaining, ret) => {
-                if remaining.len() == 0 {
+                if remaining.is_empty() {
                     IResult::Done(tokens.as_slice(), (ret, new(Span(span))))
                 } else {
                     IResult::Error

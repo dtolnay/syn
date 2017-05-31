@@ -1,10 +1,12 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
+extern crate synom;
 extern crate proc_macro2;
 
+use proc_macro2::{Literal, TokenStream};
 use syn::*;
-use proc_macro2::Literal;
+use synom::IResult;
 
 fn lit<T: Into<Literal>>(t: T) -> Lit {
     Lit {
@@ -93,6 +95,14 @@ fn test_meta_item_multiple() {
 }
 
 fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
-    let attr = parse_outer_attr(input).unwrap();
+    let tokens = input.parse::<TokenStream>().unwrap();
+    let tokens = tokens.into_iter().collect::<Vec<_>>();
+    let attr = match Attribute::parse_outer(&tokens) {
+        IResult::Done(rest, e) => {
+            assert!(rest.is_empty());
+            e
+        }
+        IResult::Error => panic!("failed to parse"),
+    };
     assert_eq!(expected.into(), attr.meta_item().unwrap());
 }

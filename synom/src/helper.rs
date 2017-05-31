@@ -1,62 +1,3 @@
-use proc_macro2::{TokenTree, TokenKind};
-
-use IResult;
-use span::Span;
-
-/// Parse a keyword like "fn" or "struct".
-///
-/// See also `punct!` for parsing punctuation, which are subtly different from
-/// keywords.
-///
-/// - **Syntax:** `keyword!("...")`
-/// - **Output:** `&str`
-///
-/// ```rust
-/// extern crate syn;
-/// #[macro_use] extern crate synom;
-///
-/// use synom::IResult;
-///
-/// // Parse zero or more "bang" keywords.
-/// named!(many_bangs -> Vec<&str>,
-///     terminated!(
-///         many0!(keyword!("bang")),
-///         punct!(";")
-///     )
-/// );
-///
-/// fn main() {
-///     let input = "bang bang bang;";
-///     let parsed = many_bangs(input).expect("bangs");
-///     assert_eq!(parsed, ["bang", "bang", "bang"]);
-///
-///     let input = "bangbang;";
-///     let err = many_bangs(input);
-///     assert_eq!(err, IResult::Error);
-/// }
-/// ```
-#[macro_export]
-macro_rules! keyword {
-    ($i:expr, $keyword:expr) => {
-        $crate::helper::keyword($i, $keyword)
-    };
-}
-
-// Not public API.
-#[doc(hidden)]
-pub fn keyword<'a>(input: &'a [TokenTree], token: &'static str) -> IResult<&'a [TokenTree], Span> {
-    match input.first() {
-        Some(&TokenTree{ kind: TokenKind::Word(ref symbol), span }) => {
-            if symbol.as_str() == token {
-                IResult::Done(&input[1..], Span(span))
-            } else {
-                IResult::Error
-            }
-        }
-        _ => IResult::Error,
-    }
-}
-
 /// Turn a failed parse into `None` and a successful parse into `Some`.
 ///
 /// - **Syntax:** `option!(THING)`
@@ -66,17 +7,11 @@ pub fn keyword<'a>(input: &'a [TokenTree], token: &'static str) -> IResult<&'a [
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// named!(maybe_bang -> Option<&str>, option!(punct!("!")));
+/// use syn::tokens::Bang;
 ///
-/// fn main() {
-///     let input = "!";
-///     let parsed = maybe_bang(input).expect("maybe bang");
-///     assert_eq!(parsed, Some("!"));
+/// named!(maybe_bang -> Option<Bang>, option!(syn!(Bang)));
 ///
-///     let input = "";
-///     let parsed = maybe_bang(input).expect("maybe bang");
-///     assert_eq!(parsed, None);
-/// }
+/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! option {
@@ -106,30 +41,21 @@ macro_rules! option {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::{Lifetime, Ty};
-/// use syn::parse::{lifetime, ty};
+/// use syn::delimited::Delimited;
+/// use syn::tokens::*;
 ///
 /// named!(bound_lifetimes -> (Vec<Lifetime>, Ty), tuple!(
 ///     opt_vec!(do_parse!(
-///         keyword!("for") >>
-///         punct!("<") >>
-///         lifetimes: terminated_list!(punct!(","), lifetime) >>
-///         punct!(">") >>
+///         syn!(For) >>
+///         syn!(Lt) >>
+///         lifetimes: call!(Delimited::<Lifetime, Comma>::parse_terminated) >>
+///         syn!(Gt) >>
 ///         (lifetimes.into_vec())
 ///     )),
-///     ty
+///     syn!(Ty)
 /// ));
 ///
-/// fn main() {
-///     let input = "for<'a, 'b> fn(&'a A) -> &'b B";
-///     let parsed = bound_lifetimes(input).expect("bound lifetimes");
-///     assert_eq!(parsed.0, [Lifetime::new("'a"), Lifetime::new("'b")]);
-///     println!("{:?}", parsed);
-///
-///     let input = "From<String>";
-///     let parsed = bound_lifetimes(input).expect("bound lifetimes");
-///     assert!(parsed.0.is_empty());
-///     println!("{:?}", parsed);
-/// }
+/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! opt_vec {
@@ -153,23 +79,15 @@ macro_rules! opt_vec {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Mutability;
+/// use synom::tokens::Mut;
 ///
 /// named!(mutability -> Mutability, alt!(
-///     keyword!("mut") => { |_| Mutability::Mutable(Default::default()) }
+///     syn!(Mut) => { Mutability::Mutable }
 ///     |
 ///     epsilon!() => { |_| Mutability::Immutable }
 /// ));
 ///
-/// fn main() {
-///     let input = "mut";
-///     let parsed = mutability(input).expect("mutability");
-///     assert_eq!(parsed, Mutability::Mutable(Default::default()));
-///
-///     let input = "";
-///     let parsed = mutability(input).expect("mutability");
-///     assert_eq!(parsed, Mutability::Immutable);
-/// }
-/// ```
+/// # fn main() {}
 #[macro_export]
 macro_rules! epsilon {
     ($i:expr,) => {
@@ -190,11 +108,11 @@ macro_rules! epsilon {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::{Expr, ExprCall};
-/// use syn::parse::expr;
+/// use syn::tokens::RArrow;
 ///
 /// named!(expr_with_arrow_call -> Expr, do_parse!(
-///     mut e: expr >>
-///     many0!(tap!(arg: tuple!(punct!("=>"), expr) => {
+///     mut e: syn!(Expr) >>
+///     many0!(tap!(arg: tuple!(syn!(RArrow), syn!(Expr)) => {
 ///         e = Expr {
 ///             node: ExprCall {
 ///                 func: Box::new(e),
@@ -207,13 +125,7 @@ macro_rules! epsilon {
 ///     (e)
 /// ));
 ///
-/// fn main() {
-///     let input = "something => argument1 => argument2";
-///
-///     let parsed = expr_with_arrow_call(input).expect("expr with arrow call");
-///
-///     println!("{:?}", parsed);
-/// }
+/// # fn main() {}
 /// ```
 #[doc(hidden)]
 #[macro_export]
@@ -231,5 +143,90 @@ macro_rules! tap {
 
     ($i:expr, $name:ident : $f:expr => $e:expr) => {
         tap!($i, $name: call!($f) => $e);
+    };
+}
+
+/// Parse a type through the `Synom` trait.
+///
+/// This is a convenience macro used to invoke the `Synom::parse` method for a
+/// type, you'll find this in quite a few parsers. This is also the primary way
+/// to parse punctuation.
+///
+/// - **Syntax:** `syn!(TYPE)`
+/// - **Output:** `TYPE`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Expr;
+/// use synom::tokens::Dot;
+///
+/// named!(expression -> Expr, syn!(Expr));
+///
+/// named!(expression_dot -> (Expr, Dot), tuple!(syn!(Expr), syn!(Dot)));
+///
+/// # fn main() {}
+/// ```
+#[macro_export]
+macro_rules! syn {
+    ($i:expr, $t:ty) => {
+        call!($i, <$t as $crate::Synom>::parse)
+    };
+}
+
+/// Parse a parenthesized-surrounded subtree.
+///
+/// This macro will invoke a sub-parser inside of all tokens contained in
+/// parenthesis. The sub-parser is required to consume all tokens within the
+/// parens or else this parser will return an error.
+///
+/// - **Syntax:** `parens!(SUBPARSER)`
+/// - **Output:** `(SUBPARSER_RET, Paren)`
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Expr;
+/// use synom::tokens::Paren;
+///
+/// named!(expr_paren -> (Expr, Paren), parens!(syn!(Expr)));
+///
+/// # fn main() {}
+/// ```
+#[macro_export]
+macro_rules! parens {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
+        $crate::tokens::Paren::parse($i, |i| $submac!(i, $($args)*))
+    };
+
+    ($i:expr, $f:expr) => {
+        parens!($i, call!($f));
+    };
+}
+
+
+/// Same as the `parens` macro, but for brackets.
+#[macro_export]
+macro_rules! brackets {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
+        $crate::tokens::Bracket::parse($i, |i| $submac!(i, $($args)*))
+    };
+
+    ($i:expr, $f:expr) => {
+        brackets!($i, call!($f));
+    };
+}
+
+/// Same as the `parens` macro, but for braces.
+#[macro_export]
+macro_rules! braces {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
+        $crate::tokens::Brace::parse($i, |i| $submac!(i, $($args)*))
+    };
+
+    ($i:expr, $f:expr) => {
+        braces!($i, call!($f));
     };
 }

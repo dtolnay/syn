@@ -6,6 +6,7 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::Symbol;
 
 use Span;
+use tokens;
 
 #[derive(Clone)]
 pub struct Ident {
@@ -25,6 +26,24 @@ impl Ident {
 impl<'a> From<&'a str> for Ident {
     fn from(s: &str) -> Self {
         Ident::new(s.into(), Span::default())
+    }
+}
+
+impl From<tokens::Self_> for Ident {
+    fn from(tok: tokens::Self_) -> Self {
+        Ident::new("self".into(), tok.0)
+    }
+}
+
+impl From<tokens::CapSelf> for Ident {
+    fn from(tok: tokens::CapSelf) -> Self {
+        Ident::new("Self".into(), tok.0)
+    }
+}
+
+impl From<tokens::Super> for Ident {
+    fn from(tok: tokens::Super) -> Self {
+        Ident::new("super".into(), tok.0)
     }
 }
 
@@ -95,13 +114,24 @@ impl Hash for Ident {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::{TokenTree, TokenKind, IResult};
-    #[cfg(feature = "full")]
-    use lit::parsing::int;
+    use proc_macro2::{TokenTree, TokenKind};
+    use synom::{Synom, IResult};
 
-    pub fn ident(input: &[TokenTree]) -> IResult<&[TokenTree], Ident> {
-        if let IResult::Done(rest, id) = word(input) {
-            match id.as_ref() {
+    impl Synom for Ident {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            let mut tokens = input.iter();
+            let token = match tokens.next() {
+                Some(token) => token,
+                None => return IResult::Error,
+            };
+            let word = match token.kind {
+                TokenKind::Word(s) => s,
+                _ => return IResult::Error,
+            };
+            if word.as_str().starts_with('\'') {
+                return IResult::Error
+            }
+            match word.as_str() {
                 // From https://doc.rust-lang.org/grammar.html#keywords
                 "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
                 "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
@@ -109,33 +139,20 @@ pub mod parsing {
                 "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
                 "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
                 "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
-                "while" | "yield" => IResult::Error,
-                _ => IResult::Done(rest, id),
+                "while" | "yield" => return IResult::Error,
+                _ => {}
             }
-        } else {
-            IResult::Error
+
+            IResult::Done(tokens.as_slice(), Ident {
+                span: Span(token.span),
+                sym: word,
+            })
+        }
+
+        fn description() -> Option<&'static str> {
+            Some("identifier")
         }
     }
-
-    pub fn word(input: &[TokenTree]) -> IResult<&[TokenTree], Ident> {
-        if let Some(&TokenTree { kind: TokenKind::Word(ref id), .. }) = input.first() {
-            // Check if this word is _actually_ a lifetime, and treat that differently
-            if id.chars().next().unwrap() == '\'' {
-                IResult::Error
-            } else {
-                IResult::Done(&input[1..], Ident(id.to_string()))
-            }
-        } else {
-            IResult::Error
-        }
-    }
-
-    #[cfg(feature = "full")]
-    named!(pub wordlike -> Ident, alt!(
-        word
-        |
-        int => { |d| format!("{}", d).into() }
-    ));
 }
 
 #[cfg(feature = "printing")]

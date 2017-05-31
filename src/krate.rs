@@ -11,32 +11,51 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use attr::parsing::inner_attr;
-    use item::parsing::items;
 
-    named!(pub krate -> Crate, do_parse!(
-        // NOTE: The byte order mark and shebang are not tokens which can appear
-        // in a TokenStream, so we can't parse them anymore.
+    use synom::{IResult, Synom, ParseError};
+    use proc_macro2::TokenTree;
 
-        //option!(byte_order_mark) >>
-        //shebang: option!(shebang) >>
-        attrs: many0!(inner_attr) >>
-        items: items >>
-        (Crate {
-            shebang: None,
-            attrs: attrs,
-            items: items,
-        })
-    ));
+    impl Synom for Crate {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_inner)) >>
+                items: many0!(syn!(Item)) >>
+                (Crate {
+                    shebang: None,
+                    attrs: attrs,
+                    items: items,
+                })
+            }
+        }
 
-    // named!(byte_order_mark -> &str, tag!("\u{feff}"));
+        fn description() -> Option<&'static str> {
+            Some("crate")
+        }
 
-    // named!(shebang -> String, do_parse!(
-    //     tag!("#!") >>
-    //     not!(tag!("[")) >>
-    //     content: take_until!("\n") >>
-    //     (format!("#!{}", content))
-    // ));
+        fn parse_str_all(mut input: &str) -> Result<Self, ParseError> {
+            // Strip the BOM if it is present
+            const BOM: &'static str = "\u{feff}";
+            if input.starts_with(BOM) {
+                input = &input[BOM.len()..];
+            }
+
+            let mut shebang = None;
+            if input.starts_with("#!") && !input.starts_with("#![") {
+                if let Some(idx) = input.find('\n') {
+                    shebang = Some(input[..idx].to_string());
+                    input = &input[idx..];
+                } else {
+                    shebang = Some(input.to_string());
+                    input = "";
+                }
+            }
+
+            let mut krate: Crate = Self::parse_all(input.parse()?)?;
+            krate.shebang = shebang;
+            Ok(krate)
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
@@ -47,10 +66,6 @@ mod printing {
 
     impl ToTokens for Crate {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            // TODO: how to handle shebang?
-            // if let Some(ref shebang) = self.shebang {
-            //     tokens.append(&format!("{}\n", shebang));
-            // }
             tokens.append_all(self.attrs.inner());
             tokens.append_all(&self.items);
         }
