@@ -243,7 +243,7 @@ ast_enum! {
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Defaultness {
-        Default(tokens::Default),
+        Default(tokens::Default_),
         Final,
     }
 }
@@ -380,7 +380,7 @@ ast_struct! {
     ///
     /// E.g. `fn foo(bar: baz)`
     pub struct FnDecl {
-        pub fn_token: tokens::Fn,
+        pub fn_token: tokens::Fn_,
         pub paren_token: tokens::Paren,
         pub inputs: Delimited<FnArg, tokens::Comma>,
         pub output: FunctionRetTy,
@@ -417,62 +417,64 @@ ast_enum_of_structs! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {Block, Generics, Ident, Mac, Path, VariantData};
-    use attr::parsing::{inner_attr, outer_attr};
-    use data::parsing::{struct_like_body, visibility};
-    use expr::parsing::{expr, pat, within_block};
-    use generics::parsing::{generics, lifetime, ty_param_bound, where_clause};
-    use ident::parsing::ident;
-    use mac::parsing::delimited;
-    use derive::{Body, DeriveInput};
-    use derive::parsing::derive_input;
-    use ty::parsing::{abi, mutability, path, ty, unsafety, fn_ret_ty};
 
-    named!(pub item -> Item, alt!(
-        item_extern_crate
-        |
-        item_use
-        |
-        item_static
-        |
-        item_const
-        |
-        item_fn
-        |
-        item_mod
-        |
-        item_foreign_mod
-        |
-        item_ty
-        |
-        item_struct_or_enum
-        |
-        item_union
-        |
-        item_trait
-        |
-        item_default_impl
-        |
-        item_impl
-        |
-        item_mac
-    ));
+    use proc_macro2::TokenTree;
+    use synom::{IResult, Synom};
+    use synom::tokens::*;
+    use synom::tokens;
 
-    named!(pub items -> Vec<Item>, many0!(item));
+    impl Synom for Item {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                item_extern_crate
+                |
+                item_use
+                |
+                item_static
+                |
+                item_const
+                |
+                item_fn
+                |
+                item_mod
+                |
+                item_foreign_mod
+                |
+                item_ty
+                |
+                item_struct_or_enum
+                |
+                item_union
+                |
+                item_trait
+                |
+                item_default_impl
+                |
+                item_impl
+                |
+                item_mac
+            }
+        }
+
+        fn description() -> Option<&'static str> {
+            Some("item")
+        }
+    }
 
     named!(item_mac -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        what: path >>
-        punct!("!") >>
-        name: option!(ident) >>
-        body: delimited >>
-        cond!(!body.is_braced(), punct!(";")) >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        what: syn!(Path) >>
+        bang: syn!(Bang) >>
+        name: option!(syn!(Ident)) >>
+        body: call!(::TokenTree::parse_delimited) >>
+        cond!(!body.is_braced(), syn!(Semi)) >>
         (Item {
             ident: name.unwrap_or_else(|| Ident::from("")),
             vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemKind::Mac(Mac {
-                bang_token: tokens::Bang::default(),
+                bang_token: bang,
                 path: what,
                 tokens: vec![body],
             }),
@@ -480,144 +482,159 @@ pub mod parsing {
     ));
 
     named!(item_extern_crate -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("extern") >>
-        keyword!("crate") >>
-        id: ident >>
-        rename: option!(preceded!(
-            keyword!("as"),
-            ident
-        )) >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        extern_: syn!(Extern) >>
+        crate_: syn!(tokens::Crate) >>
+        id: syn!(Ident) >>
+        rename: option!(tuple!(syn!(As), syn!(Ident))) >>
+        semi: syn!(Semi) >>
         ({
-            let (name, original_name) = match rename {
-                Some(rename) => (rename, Some(id)),
-                None => (id, None),
+            let (name, original_name, as_) = match rename {
+                Some((as_, rename)) => (rename, Some(id), Some(as_)),
+                None => (id, None, None),
             };
             Item {
                 ident: name,
                 vis: vis,
                 attrs: attrs,
                 node: ItemExternCrate {
-                    as_token: original_name.as_ref().map(|_| tokens::As::default()),
+                    as_token: as_,
                     original: original_name,
-                    extern_token: tokens::Extern::default(),
-                    crate_token: tokens::Crate::default(),
-                    semi_token: tokens::Semi::default(),
+                    extern_token: extern_,
+                    crate_token: crate_,
+                    semi_token: semi,
                 }.into(),
             }
         })
     ));
 
     named!(item_use -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("use") >>
-        what: view_path >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        use_: syn!(Use) >>
+        what: syn!(ViewPath) >>
+        semi: syn!(Semi) >>
         (Item {
             ident: "".into(),
             vis: vis,
             attrs: attrs,
             node: ItemUse {
                 path: Box::new(what),
-                use_token: tokens::Use::default(),
-                semi_token: tokens::Semi::default(),
+                use_token: use_,
+                semi_token: semi,
             }.into(),
         })
     ));
 
-    named!(view_path -> ViewPath, alt!(
-        view_path_glob
-        |
-        view_path_list
-        |
-        view_path_list_root
-        |
-        view_path_simple // must be last
-    ));
+    impl Synom for ViewPath {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(PathGlob) => { ViewPath::Glob }
+                |
+                syn!(PathList) => { ViewPath::List }
+                |
+                syn!(PathSimple) => { ViewPath::Simple } // must be last
+            }
+        }
+    }
 
+    impl Synom for PathSimple {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                path: syn!(Path) >>
+                rename: option!(tuple!(syn!(As), syn!(Ident))) >>
+                (PathSimple {
+                    path: path,
+                    as_token: rename.as_ref().map(|p| As((p.0).0)),
+                    rename: rename.map(|p| p.1),
+                })
+            }
+        }
+    }
 
-    named!(view_path_simple -> ViewPath, do_parse!(
-        path: path >>
-        rename: option!(preceded!(keyword!("as"), ident)) >>
-        (PathSimple {
-            path: path,
-            as_token: rename.as_ref().map(|_| tokens::As::default()),
-            rename: rename,
-        }.into())
-    ));
+    impl Synom for PathGlob {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                path: syn!(Path) >>
+                colon2: syn!(Colon2) >>
+                star: syn!(Star) >>
+                (PathGlob {
+                    path: path,
+                    colon2_token: colon2,
+                    star_token: star,
+                })
+            }
+        }
+    }
 
-    named!(view_path_glob -> ViewPath, do_parse!(
-        path: path >>
-        punct!("::") >>
-        punct!("*") >>
-        (PathGlob {
-            path: path,
-            colon2_token: tokens::Colon2::default(),
-            star_token: tokens::Star::default(),
-        }.into())
-    ));
+    impl Synom for PathList {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    path: syn!(Path) >>
+                    colon2: syn!(Colon2) >>
+                    items: braces!(call!(Delimited::parse_terminated)) >>
+                    (PathList {
+                        path: path,
+                        items: items.0,
+                        brace_token: items.1,
+                        colon2_token: colon2,
+                    })
+                )
+                |
+                do_parse!(
+                    global: option!(syn!(Colon2)) >>
+                    items: braces!(call!(Delimited::parse_terminated)) >>
+                    (PathList {
+                        path: Path {
+                            global: global.is_some(),
+                            segments: Delimited::new(),
+                            leading_colon: None,
+                        },
+                        colon2_token: global.unwrap_or_default(),
+                        brace_token: items.1,
+                        items: items.0,
+                    })
+                )
+            }
+        }
+    }
 
-    named!(view_path_list -> ViewPath, do_parse!(
-        path: path >>
-        punct!("::") >>
-        punct!("{") >>
-        items: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                path_list_item) >>
-        punct!("}") >>
-        (PathList {
-            path: path,
-            items: items,
-            brace_token: tokens::Brace::default(),
-            colon2_token: tokens::Colon2::default(),
-        }.into())
-    ));
-
-    named!(view_path_list_root -> ViewPath, do_parse!(
-        global: option!(punct!("::")) >>
-        punct!("{") >>
-        items: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                path_list_item) >>
-        punct!("}") >>
-        (PathList {
-            path: Path {
-                global: global.is_some(),
-                segments: Delimited::new(),
-                leading_colon: None,
-            },
-            colon2_token: tokens::Colon2::default(),
-            brace_token: tokens::Brace::default(),
-            items: items,
-        }.into())
-    ));
-
-    named!(path_list_item -> PathListItem, do_parse!(
-        name: alt!(
-            ident
-            |
-            map!(keyword!("self"), Into::into)
-        ) >>
-        rename: option!(preceded!(keyword!("as"), ident)) >>
-        (PathListItem {
-            name: name,
-            as_token: rename.as_ref().map(|_| tokens::As::default()),
-            rename: rename,
-        })
-    ));
+    impl Synom for PathListItem {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                name: alt!(
+                    syn!(Ident)
+                    |
+                    map!(syn!(Self_), Into::into)
+                ) >>
+                rename: option!(tuple!(syn!(As), syn!(Ident))) >>
+                (PathListItem {
+                    name: name,
+                    as_token: rename.as_ref().map(|p| As((p.0).0)),
+                    rename: rename.map(|p| p.1),
+                })
+            }
+        }
+    }
 
     named!(item_static -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("static") >>
-        mutability: mutability >>
-        id: ident >>
-        punct!(":") >>
-        ty: ty >>
-        punct!("=") >>
-        value: expr >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        static_: syn!(Static) >>
+        mutability: syn!(Mutability) >>
+        id: syn!(Ident) >>
+        colon: syn!(Colon) >>
+        ty: syn!(Ty) >>
+        eq: syn!(Eq) >>
+        value: syn!(Expr) >>
+        semi: syn!(Semi) >>
         (Item {
             ident: id,
             vis: vis,
@@ -626,24 +643,24 @@ pub mod parsing {
                 ty: Box::new(ty),
                 mutbl: mutability,
                 expr: Box::new(value),
-                static_token: tokens::Static::default(),
-                colon_token: tokens::Colon::default(),
-                eq_token: tokens::Eq::default(),
-                semi_token: tokens::Semi::default(),
+                static_token: static_,
+                colon_token: colon,
+                eq_token: eq,
+                semi_token: semi,
             }.into(),
         })
     ));
 
     named!(item_const -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("const") >>
-        id: ident >>
-        punct!(":") >>
-        ty: ty >>
-        punct!("=") >>
-        value: expr >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        const_: syn!(Const) >>
+        id: syn!(Ident) >>
+        colon: syn!(Colon) >>
+        ty: syn!(Ty) >>
+        eq: syn!(Eq) >>
+        value: syn!(Expr) >>
+        semi: syn!(Semi) >>
         (Item {
             ident: id,
             vis: vis,
@@ -651,47 +668,44 @@ pub mod parsing {
             node: ItemConst {
                 ty: Box::new(ty),
                 expr: Box::new(value),
-                const_token: tokens::Const::default(),
-                colon_token: tokens::Colon::default(),
-                eq_token: tokens::Eq::default(),
-                semi_token: tokens::Semi::default(),
+                const_token: const_,
+                colon_token: colon,
+                eq_token: eq,
+                semi_token: semi,
             }.into(),
         })
     ));
 
     named!(item_fn -> Item, do_parse!(
-        outer_attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        constness: constness >>
-        unsafety: unsafety >>
-        abi: option!(abi) >>
-        keyword!("fn") >>
-        name: ident >>
-        generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 fn_arg) >>
-        punct!(")") >>
-        ret: fn_ret_ty >>
-        where_clause: where_clause >>
-        punct!("{") >>
-        inner_attrs: many0!(inner_attr) >>
-        stmts: within_block >>
-        punct!("}") >>
+        outer_attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        constness: syn!(Constness) >>
+        unsafety: syn!(Unsafety) >>
+        abi: option!(syn!(Abi)) >>
+        fn_: syn!(Fn_) >>
+        name: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        inputs: parens!(Delimited::parse_terminated) >>
+        ret: syn!(FunctionRetTy) >>
+        where_clause: syn!(WhereClause) >>
+        inner_attrs_stmts: braces!(tuple!(
+            many0!(call!(Attribute::parse_inner)),
+            call!(Block::parse_within)
+        )) >>
         (Item {
             ident: name,
             vis: vis,
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
+                attrs.extend((inner_attrs_stmts.0).0);
                 attrs
             },
             node: ItemFn {
                 decl: Box::new(FnDecl {
                     dot_tokens: None,
-                    fn_token: tokens::Fn::default(),
-                    paren_token: tokens::Paren::default(),
-                    inputs: inputs,
+                    fn_token: fn_,
+                    paren_token: inputs.1,
+                    inputs: inputs.0,
                     output: ret,
                     variadic: false,
                     generics: Generics {
@@ -703,71 +717,74 @@ pub mod parsing {
                 constness: constness,
                 abi: abi,
                 block: Box::new(Block {
-                    stmts: stmts,
-                    brace_token: tokens::Brace::default(),
+                    brace_token: inner_attrs_stmts.1,
+                    stmts: (inner_attrs_stmts.0).1,
                 }),
             }.into(),
         })
     ));
 
-    named!(fn_arg -> FnArg, alt!(
-        do_parse!(
-            punct!("&") >>
-            lt: option!(lifetime) >>
-            mutability: mutability >>
-            keyword!("self") >>
-            not!(punct!(":")) >>
-            (ArgSelfRef {
-                lifetime: lt,
-                mutbl: mutability,
-                and_token: tokens::And::default(),
-                self_token: tokens::Self_::default(),
-            }.into())
-        )
-        |
-        do_parse!(
-            mutability: mutability >>
-            keyword!("self") >>
-            not!(punct!(":")) >>
-            (ArgSelf {
-                mutbl: mutability,
-                self_token: tokens::Self_::default(),
-            }.into())
-        )
-        |
-        do_parse!(
-            pat: pat >>
-            punct!(":") >>
-            ty: ty >>
-            (ArgCaptured {
-                pat: pat,
-                ty: ty,
-                colon_token: tokens::Colon::default(),
-            }.into())
-        )
-        |
-        ty => { FnArg::Ignored }
-    ));
+    impl Synom for FnArg {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    and: syn!(And) >>
+                    lt: option!(syn!(Lifetime)) >>
+                    mutability: syn!(Mutability) >>
+                    self_: syn!(Self_) >>
+                    not!(syn!(Colon)) >>
+                    (ArgSelfRef {
+                        lifetime: lt,
+                        mutbl: mutability,
+                        and_token: and,
+                        self_token: self_,
+                    }.into())
+                )
+                |
+                do_parse!(
+                    mutability: syn!(Mutability) >>
+                    self_: syn!(Self_) >>
+                    not!(syn!(Colon)) >>
+                    (ArgSelf {
+                        mutbl: mutability,
+                        self_token: self_,
+                    }.into())
+                )
+                |
+                do_parse!(
+                    pat: syn!(Pat) >>
+                    colon: syn!(Colon) >>
+                    ty: syn!(Ty) >>
+                    (ArgCaptured {
+                        pat: pat,
+                        ty: ty,
+                        colon_token: colon,
+                    }.into())
+                )
+                |
+                syn!(Ty) => { FnArg::Ignored }
+            }
+        }
+    }
 
     named!(item_mod -> Item, do_parse!(
-        outer_attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("mod") >>
-        id: ident >>
+        outer_attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        mod_: syn!(Mod) >>
+        id: syn!(Ident) >>
         content: alt!(
-            punct!(";") => { |_| None }
+            syn!(Semi) => { Ok }
             |
-            delimited!(
-                punct!("{"),
+            braces!(
                 tuple!(
-                    many0!(inner_attr),
-                    items
-                ),
-                punct!("}")
-            ) => { Some }
+                    many0!(call!(Attribute::parse_inner)),
+                    many0!(syn!(Item))
+                )
+            ) => { Err }
         ) >>
         (match content {
-            Some((inner_attrs, items)) => Item {
+            Err(((inner_attrs, items), braces)) => Item {
                 ident: id,
                 vis: vis,
                 attrs: {
@@ -776,130 +793,133 @@ pub mod parsing {
                     attrs
                 },
                 node: ItemMod {
-                    mod_token: tokens::Mod::default(),
+                    mod_token: mod_,
                     semi_token: None,
-                    items: Some((items, tokens::Brace::default())),
+                    items: Some((items, braces)),
                 }.into(),
             },
-            None => Item {
+            Ok(semi) => Item {
                 ident: id,
                 vis: vis,
                 attrs: outer_attrs,
                 node: ItemMod {
                     items: None,
-                    mod_token: tokens::Mod::default(),
-                    semi_token: Some(tokens::Semi::default()),
+                    mod_token: mod_,
+                    semi_token: Some(semi),
                 }.into(),
             },
         })
     ));
 
     named!(item_foreign_mod -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        abi: abi >>
-        punct!("{") >>
-        items: many0!(foreign_item) >>
-        punct!("}") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        abi: syn!(Abi) >>
+        items: braces!(many0!(syn!(ForeignItem))) >>
         (Item {
             ident: "".into(),
             vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemForeignMod {
-                brace_token: tokens::Brace::default(),
+                brace_token: items.1,
                 abi: abi,
-                items: items,
+                items: items.0,
             }.into(),
         })
     ));
 
-    named!(foreign_item -> ForeignItem, alt!(
-        foreign_fn
-        |
-        foreign_static
-    ));
+    impl Synom for ForeignItem {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                foreign_fn
+                |
+                foreign_static
+            }
+        }
+    }
 
     named!(foreign_fn -> ForeignItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("fn") >>
-        name: ident >>
-        generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 fn_arg) >>
-        variadic: cond!(inputs.is_empty() || inputs.trailing_delim(),
-                        option!(punct!("..."))) >>
-        punct!(")") >>
-        ret: fn_ret_ty >>
-        where_clause: where_clause >>
-        punct!(";") >>
-        (ForeignItem {
-            ident: name,
-            attrs: attrs,
-            semi_token: tokens::Semi::default(),
-            node: ForeignItemFn {
-                decl: Box::new(FnDecl {
-                    fn_token: tokens::Fn::default(),
-                    paren_token: tokens::Paren::default(),
-                    inputs: inputs,
-                    variadic: variadic.map(|m| m.is_some()).unwrap_or(false),
-                    dot_tokens: if variadic.map(|m| m.is_some()).unwrap_or(false) {
-                        Some(tokens::Dot3::default())
-                    } else {
-                        None
-                    },
-                    output: ret,
-                    generics: Generics {
-                        where_clause: where_clause,
-                        .. generics
-                    },
-                }),
-            }.into(),
-            vis: vis,
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        fn_: syn!(Fn_) >>
+        name: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        inputs: parens!(do_parse!(
+            args: call!(Delimited::parse_terminated) >>
+            variadic: cond!(args.is_empty() || args.trailing_delim(),
+                            option!(syn!(Dot3))) >>
+            (args, variadic)
+        )) >>
+        ret: syn!(FunctionRetTy) >>
+        where_clause: syn!(WhereClause) >>
+        semi: syn!(Semi) >>
+        ({
+            let ((inputs, variadic), parens) = inputs;
+            let variadic = variadic.and_then(|v| v);
+            ForeignItem {
+                ident: name,
+                attrs: attrs,
+                semi_token: semi,
+                node: ForeignItemFn {
+                    decl: Box::new(FnDecl {
+                        fn_token: fn_,
+                        paren_token: parens,
+                        inputs: inputs,
+                        variadic: variadic.is_some(),
+                        dot_tokens: variadic,
+                        output: ret,
+                        generics: Generics {
+                            where_clause: where_clause,
+                            .. generics
+                        },
+                    }),
+                }.into(),
+                vis: vis,
+            }
         })
     ));
 
     named!(foreign_static -> ForeignItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("static") >>
-        mutability: mutability >>
-        id: ident >>
-        punct!(":") >>
-        ty: ty >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        static_: syn!(Static) >>
+        mutability: syn!(Mutability) >>
+        id: syn!(Ident) >>
+        colon: syn!(Colon) >>
+        ty: syn!(Ty) >>
+        semi: syn!(Semi) >>
         (ForeignItem {
             ident: id,
             attrs: attrs,
-            semi_token: tokens::Semi::default(),
+            semi_token: semi,
             node: ForeignItemStatic {
                 ty: Box::new(ty),
                 mutbl: mutability,
-                static_token: tokens::Static::default(),
-                colon_token: tokens::Colon::default(),
+                static_token: static_,
+                colon_token: colon,
             }.into(),
             vis: vis,
         })
     ));
 
     named!(item_ty -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("type") >>
-        id: ident >>
-        generics: generics >>
-        where_clause: where_clause >>
-        punct!("=") >>
-        ty: ty >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        type_: syn!(Type) >>
+        id: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        where_clause: syn!(WhereClause) >>
+        eq: syn!(Eq) >>
+        ty: syn!(Ty) >>
+        semi: syn!(Semi) >>
         (Item {
             ident: id,
             vis: vis,
             attrs: attrs,
             node: ItemTy {
-                type_token: tokens::Type::default(),
-                eq_token: tokens::Eq::default(),
-                semi_token: tokens::Semi::default(),
+                type_token: type_,
+                eq_token: eq,
+                semi_token: semi,
                 ty: Box::new(ty),
                 generics: Generics {
                     where_clause: where_clause,
@@ -910,7 +930,7 @@ pub mod parsing {
     ));
 
     named!(item_struct_or_enum -> Item, map!(
-        derive_input,
+        syn!(DeriveInput),
         |def: DeriveInput| Item {
             ident: def.ident,
             vis: def.vis,
@@ -937,19 +957,20 @@ pub mod parsing {
     ));
 
     named!(item_union -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        keyword!("union") >>
-        id: ident >>
-        generics: generics >>
-        where_clause: where_clause >>
-        fields: struct_like_body >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        union_: syn!(Union) >>
+        id: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        where_clause: syn!(WhereClause) >>
+        fields: braces!(call!(Delimited::parse_terminated_with,
+                              Field::parse_struct)) >>
         (Item {
             ident: id,
             vis: vis,
             attrs: attrs,
             node: ItemUnion {
-                union_token: tokens::Union::default(),
+                union_token: union_,
                 data: VariantData::Struct(fields.0, fields.1),
                 generics: Generics {
                     where_clause: where_clause,
@@ -960,49 +981,45 @@ pub mod parsing {
     ));
 
     named!(item_trait -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        unsafety: unsafety >>
-        keyword!("trait") >>
-        id: ident >>
-        generics: generics >>
-        colon: option!(punct!(":")) >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        unsafety: syn!(Unsafety) >>
+        trait_: syn!(Trait) >>
+        id: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        colon: option!(syn!(Colon)) >>
         bounds: cond!(colon.is_some(),
-            separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                     ty_param_bound)
+            call!(Delimited::parse_separated_nonempty)
         ) >>
-        where_clause: where_clause >>
-        punct!("{") >>
-        body: many0!(trait_item) >>
-        punct!("}") >>
+        where_clause: syn!(WhereClause) >>
+        body: braces!(many0!(syn!(TraitItem))) >>
         (Item {
             ident: id,
             vis: vis,
             attrs: attrs,
             node: ItemTrait {
-                trait_token: tokens::Trait::default(),
-                brace_token: tokens::Brace::default(),
-                colon_token: colon.map(|_| tokens::Colon::default()),
+                trait_token: trait_,
+                brace_token: body.1,
+                colon_token: colon,
                 unsafety: unsafety,
                 generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
                 supertraits: bounds.unwrap_or_default(),
-                items: body,
+                items: body.0,
             }.into(),
         })
     ));
 
     named!(item_default_impl -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        unsafety: unsafety >>
-        keyword!("impl") >>
-        path: path >>
-        keyword!("for") >>
-        punct!("..") >>
-        punct!("{") >>
-        punct!("}") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        unsafety: syn!(Unsafety) >>
+        impl_: syn!(Impl) >>
+        path: syn!(Path) >>
+        for_: syn!(For) >>
+        dot2: syn!(Dot2) >>
+        braces: braces!(epsilon!()) >>
         (Item {
             ident: "".into(),
             vis: VisInherited {}.into(),
@@ -1010,68 +1027,70 @@ pub mod parsing {
             node: ItemDefaultImpl {
                 unsafety: unsafety,
                 path: path,
-                impl_token: tokens::Impl::default(),
-                for_token: tokens::For::default(),
-                dot2_token: tokens::Dot2::default(),
-                brace_token: tokens::Brace::default(),
+                impl_token: impl_,
+                for_token: for_,
+                dot2_token: dot2,
+                brace_token: braces.1,
             }.into(),
         })
     ));
 
-    named!(trait_item -> TraitItem, alt!(
-        trait_item_const
-        |
-        trait_item_method
-        |
-        trait_item_type
-        |
-        trait_item_mac
-    ));
+    impl Synom for TraitItem {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                trait_item_const
+                |
+                trait_item_method
+                |
+                trait_item_type
+                |
+                trait_item_mac
+            }
+        }
+    }
 
     named!(trait_item_const -> TraitItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        keyword!("const") >>
-        id: ident >>
-        punct!(":") >>
-        ty: ty >>
-        value: option!(preceded!(punct!("="), expr)) >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        const_: syn!(Const) >>
+        id: syn!(Ident) >>
+        colon: syn!(Colon) >>
+        ty: syn!(Ty) >>
+        value: option!(tuple!(syn!(Eq), syn!(Expr))) >>
+        semi: syn!(Semi) >>
         (TraitItem {
             ident: id,
             attrs: attrs,
             node: TraitItemConst {
                 ty: ty,
-                const_token: tokens::Const::default(),
-                colon_token: tokens::Colon::default(),
-                eq_token: value.as_ref().map(|_| tokens::Eq::default()),
-                default: value,
-                semi_token: tokens::Semi::default(),
+                const_token: const_,
+                colon_token: colon,
+                eq_token: value.as_ref().map(|p| Eq((p.0).0)),
+                default: value.map(|p| p.1),
+                semi_token: semi,
             }.into(),
         })
     ));
 
     named!(trait_item_method -> TraitItem, do_parse!(
-        outer_attrs: many0!(outer_attr) >>
-        constness: constness >>
-        unsafety: unsafety >>
-        abi: option!(abi) >>
-        keyword!("fn") >>
-        name: ident >>
-        generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()), fn_arg) >>
-        punct!(")") >>
-        ret: fn_ret_ty >>
-        where_clause: where_clause >>
-        body: option!(delimited!(
-            punct!("{"),
-            tuple!(many0!(inner_attr), within_block),
-            punct!("}")
+        outer_attrs: many0!(call!(Attribute::parse_outer)) >>
+        constness: syn!(Constness) >>
+        unsafety: syn!(Unsafety) >>
+        abi: option!(syn!(Abi)) >>
+        fn_: syn!(Fn_) >>
+        name: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        inputs: parens!(call!(Delimited::parse_terminated)) >>
+        ret: syn!(FunctionRetTy) >>
+        where_clause: syn!(WhereClause) >>
+        body: option!(braces!(
+            tuple!(many0!(call!(Attribute::parse_inner)),
+                   call!(Block::parse_within))
         )) >>
-        semi: cond!(body.is_none(), punct!(";")) >>
+        semi: cond!(body.is_none(), syn!(Semi)) >>
         ({
             let (inner_attrs, stmts) = match body {
-                Some((inner_attrs, stmts)) => (inner_attrs, Some(stmts)),
+                Some(((inner_attrs, stmts), b)) => (inner_attrs, Some((stmts, b))),
                 None => (Vec::new(), None),
             };
             TraitItem {
@@ -1082,17 +1101,17 @@ pub mod parsing {
                     attrs
                 },
                 node: TraitItemMethod {
-                    semi_token: semi.map(|_| tokens::Semi::default()),
+                    semi_token: semi,
                     sig: MethodSig {
                         unsafety: unsafety,
                         constness: constness,
                         abi: abi,
                         decl: FnDecl {
-                            inputs: inputs,
+                            inputs: inputs.0,
                             output: ret,
                             variadic: false,
-                            fn_token: tokens::Fn::default(),
-                            paren_token: tokens::Paren::default(),
+                            fn_token: fn_,
+                            paren_token: inputs.1,
                             dot_tokens: None,
                             generics: Generics {
                                 where_clause: where_clause,
@@ -1102,8 +1121,8 @@ pub mod parsing {
                     },
                     default: stmts.map(|stmts| {
                         Block {
-                            stmts: stmts,
-                            brace_token: tokens::Brace::default(),
+                            stmts: stmts.0,
+                            brace_token: stmts.1,
                         }
                     }),
                 }.into(),
@@ -1112,75 +1131,66 @@ pub mod parsing {
     ));
 
     named!(trait_item_type -> TraitItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        keyword!("type") >>
-        id: ident >>
-        colon: option!(punct!(":")) >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        type_: syn!(Type) >>
+        id: syn!(Ident) >>
+        colon: option!(syn!(Colon)) >>
         bounds: cond!(colon.is_some(),
-            separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                     ty_param_bound)
+            call!(Delimited::parse_separated_nonempty)
         ) >>
-        default: option!(preceded!(punct!("="), ty)) >>
-        punct!(";") >>
+        default: option!(tuple!(syn!(Eq), syn!(Ty))) >>
+        semi: syn!(Semi) >>
         (TraitItem {
             ident: id,
             attrs: attrs,
             node: TraitItemType {
-                type_token: tokens::Type::default(),
-                colon_token: colon.map(|_| tokens::Colon::default()),
+                type_token: type_,
+                colon_token: colon,
+                eq_token: default.as_ref().map(|p| Eq((p.0).0)),
                 bounds: bounds.unwrap_or_default(),
-                eq_token: default.as_ref().map(|_| tokens::Eq::default()),
-                semi_token: tokens::Semi::default(),
-                default: default,
+                semi_token: semi,
+                default: default.map(|p| p.1),
             }.into(),
         })
     ));
 
     named!(trait_item_mac -> TraitItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        what: path >>
-        punct!("!") >>
-        body: delimited >>
-        cond!(!body.is_braced(), punct!(";")) >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        mac: syn!(Mac) >>
+        cond!(!mac.is_braced(), syn!(Semi)) >>
         (TraitItem {
             ident: "".into(),
             attrs: attrs,
-            node: TraitItemKind::Macro(Mac {
-                path: what,
-                bang_token: tokens::Bang::default(),
-                tokens: vec![body],
-            }),
+            node: TraitItemKind::Macro(mac),
         })
     ));
 
     named!(item_impl -> Item, do_parse!(
-        attrs: many0!(outer_attr) >>
-        unsafety: unsafety >>
-        keyword!("impl") >>
-        generics: generics >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        unsafety: syn!(Unsafety) >>
+        impl_: syn!(Impl) >>
+        generics: syn!(Generics) >>
         polarity_path: alt!(
             do_parse!(
-                polarity: impl_polarity >>
-                path: path >>
-                keyword!("for") >>
-                (polarity, Some(path))
+                polarity: syn!(ImplPolarity) >>
+                path: syn!(Path) >>
+                for_: syn!(For) >>
+                (polarity, Some(path), Some(for_))
             )
             |
-            epsilon!() => { |_| (ImplPolarity::Positive, None) }
+            epsilon!() => { |_| (ImplPolarity::Positive, None, None) }
         ) >>
-        self_ty: ty >>
-        where_clause: where_clause >>
-        punct!("{") >>
-        body: many0!(impl_item) >>
-        punct!("}") >>
+        self_ty: syn!(Ty) >>
+        where_clause: syn!(WhereClause) >>
+        body: braces!(many0!(syn!(ImplItem))) >>
         (Item {
             ident: "".into(),
             vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemImpl {
-                impl_token: tokens::Impl::default(),
-                brace_token: tokens::Brace::default(),
-                for_token: polarity_path.1.as_ref().map(|_| tokens::For::default()),
+                impl_token: impl_,
+                brace_token: body.1,
+                for_token: polarity_path.2,
                 unsafety: unsafety,
                 polarity: polarity_path.0,
                 generics: Generics {
@@ -1189,32 +1199,37 @@ pub mod parsing {
                 },
                 trait_: polarity_path.1,
                 self_ty: Box::new(self_ty),
-                items: body,
+                items: body.0,
             }.into(),
         })
     ));
 
-    named!(impl_item -> ImplItem, alt!(
-        impl_item_const
-        |
-        impl_item_method
-        |
-        impl_item_type
-        |
-        impl_item_macro
-    ));
+    impl Synom for ImplItem {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                impl_item_const
+                |
+                impl_item_method
+                |
+                impl_item_type
+                |
+                impl_item_macro
+            }
+        }
+    }
 
     named!(impl_item_const -> ImplItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        defaultness: defaultness >>
-        keyword!("const") >>
-        id: ident >>
-        punct!(":") >>
-        ty: ty >>
-        punct!("=") >>
-        value: expr >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        defaultness: syn!(Defaultness) >>
+        const_: syn!(Const) >>
+        id: syn!(Ident) >>
+        colon: syn!(Colon) >>
+        ty: syn!(Ty) >>
+        eq: syn!(Eq) >>
+        value: syn!(Expr) >>
+        semi: syn!(Semi) >>
         (ImplItem {
             ident: id,
             vis: vis,
@@ -1223,41 +1238,38 @@ pub mod parsing {
             node: ImplItemConst {
                 ty: ty,
                 expr: value,
-                const_token: tokens::Const::default(),
-                colon_token: tokens::Colon::default(),
-                eq_token: tokens::Eq::default(),
-                semi_token: tokens::Semi::default(),
+                const_token: const_,
+                colon_token: colon,
+                eq_token: eq,
+                semi_token: semi,
             }.into(),
         })
     ));
 
     named!(impl_item_method -> ImplItem, do_parse!(
-        outer_attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        defaultness: defaultness >>
-        constness: constness >>
-        unsafety: unsafety >>
-        abi: option!(abi) >>
-        keyword!("fn") >>
-        name: ident >>
-        generics: generics >>
-        punct!("(") >>
-        inputs: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 fn_arg) >>
-        punct!(")") >>
-        ret: fn_ret_ty >>
-        where_clause: where_clause >>
-        punct!("{") >>
-        inner_attrs: many0!(inner_attr) >>
-        stmts: within_block >>
-        punct!("}") >>
+        outer_attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        defaultness: syn!(Defaultness) >>
+        constness: syn!(Constness) >>
+        unsafety: syn!(Unsafety) >>
+        abi: option!(syn!(Abi)) >>
+        fn_: syn!(Fn_) >>
+        name: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        inputs: parens!(call!(Delimited::parse_terminated)) >>
+        ret: syn!(FunctionRetTy) >>
+        where_clause: syn!(WhereClause) >>
+        inner_attrs_stmts: braces!(tuple!(
+            many0!(call!(Attribute::parse_inner)),
+            call!(Block::parse_within)
+        )) >>
         (ImplItem {
             ident: name,
             vis: vis,
             defaultness: defaultness,
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
+                attrs.extend((inner_attrs_stmts.0).0);
                 attrs
             },
             node: ImplItemMethod {
@@ -1266,9 +1278,9 @@ pub mod parsing {
                     constness: constness,
                     abi: abi,
                     decl: FnDecl {
-                        fn_token: tokens::Fn::default(),
-                        paren_token: tokens::Paren::default(),
-                        inputs: inputs,
+                        fn_token: fn_,
+                        paren_token: inputs.1,
+                        inputs: inputs.0,
                         output: ret,
                         variadic: false,
                         generics: Generics {
@@ -1279,72 +1291,81 @@ pub mod parsing {
                     },
                 },
                 block: Block {
-                    brace_token: tokens::Brace::default(),
-                    stmts: stmts,
+                    brace_token: inner_attrs_stmts.1,
+                    stmts: (inner_attrs_stmts.0).1,
                 },
             }.into(),
         })
     ));
 
     named!(impl_item_type -> ImplItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        defaultness: defaultness >>
-        keyword!("type") >>
-        id: ident >>
-        punct!("=") >>
-        ty: ty >>
-        punct!(";") >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        defaultness: syn!(Defaultness) >>
+        type_: syn!(Type) >>
+        id: syn!(Ident) >>
+        eq: syn!(Eq) >>
+        ty: syn!(Ty) >>
+        semi: syn!(Semi) >>
         (ImplItem {
             ident: id,
             vis: vis,
             defaultness: defaultness,
             attrs: attrs,
             node: ImplItemType {
-                type_token: tokens::Type::default(),
-                eq_token: tokens::Eq::default(),
-                semi_token: tokens::Semi::default(),
+                type_token: type_,
+                eq_token: eq,
+                semi_token: semi,
                 ty: ty,
             }.into(),
         })
     ));
 
     named!(impl_item_macro -> ImplItem, do_parse!(
-        attrs: many0!(outer_attr) >>
-        what: path >>
-        punct!("!") >>
-        body: delimited >>
-        cond!(!body.is_braced(), punct!(";")) >>
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        mac: syn!(Mac) >>
+        cond!(!mac.is_braced(), syn!(Semi)) >>
         (ImplItem {
             ident: "".into(),
             vis: VisInherited {}.into(),
             defaultness: Defaultness::Final,
             attrs: attrs,
-            node: ImplItemKind::Macro(Mac {
-                path: what,
-                bang_token: tokens::Bang::default(),
-                tokens: vec![body],
-            }),
+            node: ImplItemKind::Macro(mac),
         })
     ));
 
-    named!(impl_polarity -> ImplPolarity, alt!(
-        punct!("!") => { |_| ImplPolarity::Negative(tokens::Bang::default()) }
-        |
-        epsilon!() => { |_| ImplPolarity::Positive }
-    ));
+    impl Synom for ImplPolarity {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(Bang) => { ImplPolarity::Negative }
+                |
+                epsilon!() => { |_| ImplPolarity::Positive }
+            }
+        }
+    }
 
-    named!(constness -> Constness, alt!(
-        keyword!("const") => { |_| Constness::Const(tokens::Const::default()) }
-        |
-        epsilon!() => { |_| Constness::NotConst }
-    ));
+    impl Synom for Constness {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(Const) => { Constness::Const }
+                |
+                epsilon!() => { |_| Constness::NotConst }
+            }
+        }
+    }
 
-    named!(defaultness -> Defaultness, alt!(
-        keyword!("default") => { |_| Defaultness::Default(tokens::Default::default()) }
-        |
-        epsilon!() => { |_| Defaultness::Final }
-    ));
+    impl Synom for Defaultness {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(Default_) => { Defaultness::Default }
+                |
+                epsilon!() => { |_| Defaultness::Final }
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]

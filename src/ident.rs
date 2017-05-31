@@ -6,6 +6,7 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::Symbol;
 
 use Span;
+use tokens;
 
 #[derive(Clone)]
 pub struct Ident {
@@ -25,6 +26,24 @@ impl Ident {
 impl<'a> From<&'a str> for Ident {
     fn from(s: &str) -> Self {
         Ident::new(s.into(), Span::default())
+    }
+}
+
+impl From<tokens::Self_> for Ident {
+    fn from(tok: tokens::Self_) -> Self {
+        Ident::new("self".into(), tok.0)
+    }
+}
+
+impl From<tokens::CapSelf> for Ident {
+    fn from(tok: tokens::CapSelf) -> Self {
+        Ident::new("Self".into(), tok.0)
+    }
+}
+
+impl From<tokens::Super> for Ident {
+    fn from(tok: tokens::Super) -> Self {
+        Ident::new("super".into(), tok.0)
     }
 }
 
@@ -95,62 +114,44 @@ impl Hash for Ident {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::IResult;
-    use synom::space::skip_whitespace;
-    use unicode_xid::UnicodeXID;
+    use proc_macro2::{TokenTree, TokenKind};
+    use synom::{Synom, IResult};
 
-    pub fn ident(input: &str) -> IResult<&str, Ident> {
-        let (rest, id) = match word(input) {
-            IResult::Done(rest, id) => (rest, id),
-            IResult::Error => return IResult::Error,
-        };
-
-        match id.as_ref() {
-            // From https://doc.rust-lang.org/grammar.html#keywords
-            "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
-            "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
-            "if" | "impl" | "in" | "let" | "loop" | "macro" | "match" | "mod" | "move" |
-            "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
-            "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
-            "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
-            "while" | "yield" => IResult::Error,
-            _ => IResult::Done(rest, id),
-        }
-    }
-
-    pub fn word(mut input: &str) -> IResult<&str, Ident> {
-        input = skip_whitespace(input);
-
-        let mut chars = input.char_indices();
-        match chars.next() {
-            Some((_, ch)) if UnicodeXID::is_xid_start(ch) || ch == '_' => {}
-            _ => return IResult::Error,
-        }
-
-        for (i, ch) in chars {
-            if !UnicodeXID::is_xid_continue(ch) {
-                return IResult::Done(&input[i..], input[..i].into());
+    impl Synom for Ident {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            let mut tokens = input.iter();
+            let token = match tokens.next() {
+                Some(token) => token,
+                None => return IResult::Error,
+            };
+            let word = match token.kind {
+                TokenKind::Word(s) => s,
+                _ => return IResult::Error,
+            };
+            if word.as_str().starts_with('\'') {
+                return IResult::Error
             }
-        }
-
-        IResult::Done("", input.into())
-    }
-
-    #[cfg(feature = "full")]
-    pub fn wordlike(mut input: &str) -> IResult<&str, Ident> {
-        input = skip_whitespace(input);
-
-        for (i, ch) in input.char_indices() {
-            if !UnicodeXID::is_xid_start(ch) && !UnicodeXID::is_xid_continue(ch) {
-                return if i == 0 {
-                           IResult::Error
-                       } else {
-                           IResult::Done(&input[i..], input[..i].into())
-                       };
+            match word.as_str() {
+                // From https://doc.rust-lang.org/grammar.html#keywords
+                "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
+                "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
+                "if" | "impl" | "in" | "let" | "loop" | "macro" | "match" | "mod" | "move" |
+                "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
+                "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
+                "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
+                "while" | "yield" => return IResult::Error,
+                _ => {}
             }
+
+            IResult::Done(tokens.as_slice(), Ident {
+                span: Span(token.span),
+                sym: word,
+            })
         }
 
-        IResult::Done("", input.into())
+        fn description() -> Option<&'static str> {
+            Some("identifier")
+        }
     }
 }
 

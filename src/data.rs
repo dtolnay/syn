@@ -107,186 +107,109 @@ ast_enum_of_structs! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use WhereClause;
-    #[cfg(feature = "full")]
-    use ConstExpr;
-    use attr::parsing::outer_attr;
-    #[cfg(feature = "full")]
-    use constant::parsing::const_expr;
-    #[cfg(feature = "full")]
-    use expr::parsing::expr;
-    use generics::parsing::where_clause;
-    use ident::parsing::ident;
-    use ty::parsing::{mod_style_path, ty};
 
-    named!(pub struct_body -> (WhereClause, VariantData, Option<tokens::Semi>), alt!(
-        do_parse!(
-            wh: where_clause >>
-            body: struct_like_body >>
-            (wh, VariantData::Struct(body.0, body.1), None)
-        )
-        |
-        do_parse!(
-            body: tuple_like_body >>
-            wh: where_clause >>
-            punct!(";") >>
-            (wh, VariantData::Tuple(body.0, body.1), Some(tokens::Semi::default()))
-        )
-        |
-        do_parse!(
-            wh: where_clause >>
-            punct!(";") >>
-            (wh, VariantData::Unit, Some(tokens::Semi::default()))
-        )
-    ));
+    use synom::{IResult, Synom};
+    use synom::tokens;
+    use synom::tokens::*;
+    use proc_macro2::TokenTree;
 
-    named!(pub enum_body -> (WhereClause, Delimited<Variant, tokens::Comma>, tokens::Brace), do_parse!(
-        wh: where_clause >>
-        punct!("{") >>
-        variants: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                   variant) >>
-        punct!("}") >>
-        (wh, variants, tokens::Brace::default())
-    ));
+    impl Field {
+        pub fn parse_struct(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                vis: syn!(Visibility) >>
+                id: syn!(Ident) >>
+                colon: syn!(Colon) >>
+                ty: syn!(Ty) >>
+                (Field {
+                    ident: Some(id),
+                    vis: vis,
+                    attrs: attrs,
+                    ty: ty,
+                    colon_token: Some(colon),
+                })
+            }
+        }
 
-    named!(variant -> Variant, do_parse!(
-        attrs: many0!(outer_attr) >>
-        id: ident >>
-        data: alt!(
-            struct_like_body => { |(d, b)| VariantData::Struct(d, b) }
-            |
-            tuple_like_body => { |(d, b)| VariantData::Tuple(d, b) }
-            |
-            epsilon!() => { |_| VariantData::Unit }
-        ) >>
-        disr: option!(preceded!(punct!("="), discriminant)) >>
-        (Variant {
-            ident: id,
-            attrs: attrs,
-            data: data,
-            eq_token: disr.as_ref().map(|_| tokens::Eq::default()),
-            discriminant: disr,
-        })
-    ));
+        pub fn parse_tuple(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                vis: syn!(Visibility) >>
+                ty: syn!(Ty) >>
+                (Field {
+                    ident: None,
+                    colon_token: None,
+                    vis: vis,
+                    attrs: attrs,
+                    ty: ty,
+                })
+            }
+        }
+    }
 
-    #[cfg(not(feature = "full"))]
-    use constant::parsing::const_expr as discriminant;
-
-    #[cfg(feature = "full")]
-    named!(discriminant -> ConstExpr, alt!(
-        terminated!(const_expr, after_discriminant)
-        |
-        terminated!(expr, after_discriminant) => { ConstExpr::Other }
-    ));
-
-    #[cfg(feature = "full")]
-    named!(after_discriminant -> &str, peek!(alt!(punct!(",") | punct!("}"))));
-
-    named!(pub struct_like_body -> (Delimited<Field, tokens::Comma>, tokens::Brace), do_parse!(
-        punct!("{") >>
-        fields: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 struct_field) >>
-        punct!("}") >>
-        (fields, tokens::Brace::default())
-    ));
-
-    named!(tuple_like_body -> (Delimited<Field, tokens::Comma>, tokens::Paren), do_parse!(
-        punct!("(") >>
-        fields: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 tuple_field) >>
-        punct!(")") >>
-        (fields, tokens::Paren::default())
-    ));
-
-    named!(struct_field -> Field, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        id: ident >>
-        punct!(":") >>
-        ty: ty >>
-        (Field {
-            ident: Some(id),
-            vis: vis,
-            attrs: attrs,
-            ty: ty,
-            colon_token: Some(tokens::Colon::default()),
-        })
-    ));
-
-    named!(tuple_field -> Field, do_parse!(
-        attrs: many0!(outer_attr) >>
-        vis: visibility >>
-        ty: ty >>
-        (Field {
-            ident: None,
-            colon_token: None,
-            vis: vis,
-            attrs: attrs,
-            ty: ty,
-        })
-    ));
-
-    named!(pub visibility -> Visibility, alt!(
-        do_parse!(
-            keyword!("pub") >>
-            punct!("(") >>
-            keyword!("crate") >>
-            punct!(")") >>
-            (Visibility::Crate(VisCrate {
-                crate_token: tokens::Crate::default(),
-                paren_token: tokens::Paren::default(),
-                pub_token: tokens::Pub::default(),
-            }))
-        )
-        |
-        do_parse!(
-            keyword!("pub") >>
-            punct!("(") >>
-            keyword!("self") >>
-            punct!(")") >>
-            (Visibility::Restricted(VisRestricted {
-                path: Box::new("self".into()),
-                in_token: None,
-                paren_token: tokens::Paren::default(),
-                pub_token: tokens::Pub::default(),
-            }))
-        )
-        |
-        do_parse!(
-            keyword!("pub") >>
-            punct!("(") >>
-            keyword!("super") >>
-            punct!(")") >>
-            (Visibility::Restricted(VisRestricted {
-                path: Box::new("super".into()),
-                in_token: None,
-                paren_token: tokens::Paren::default(),
-                pub_token: tokens::Pub::default(),
-            }))
-        )
-        |
-        do_parse!(
-            keyword!("pub") >>
-            punct!("(") >>
-            keyword!("in") >>
-            restricted: mod_style_path >>
-            punct!(")") >>
-            (Visibility::Restricted(VisRestricted {
-                path: Box::new(restricted),
-                in_token: Some(tokens::In::default()),
-                paren_token: tokens::Paren::default(),
-                pub_token: tokens::Pub::default(),
-            }))
-        )
-        |
-        keyword!("pub") => { |_| {
-            Visibility::Public(VisPublic {
-                pub_token: tokens::Pub::default(),
-            })
-        } }
-        |
-        epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
-    ));
+    impl Synom for Visibility {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    pub_token: syn!(Pub) >>
+                    other: parens!(syn!(tokens::Crate)) >>
+                    (Visibility::Crate(VisCrate {
+                        crate_token: other.0,
+                        paren_token: other.1,
+                        pub_token: pub_token,
+                    }))
+                )
+                |
+                do_parse!(
+                    pub_token: syn!(Pub) >>
+                    other: parens!(syn!(Self_)) >>
+                    (Visibility::Restricted(VisRestricted {
+                        path: Box::new(other.0.into()),
+                        in_token: None,
+                        paren_token: other.1,
+                        pub_token: pub_token,
+                    }))
+                )
+                |
+                do_parse!(
+                    pub_token: syn!(Pub) >>
+                    other: parens!(syn!(Super)) >>
+                    (Visibility::Restricted(VisRestricted {
+                        path: Box::new(other.0.into()),
+                        in_token: None,
+                        paren_token: other.1,
+                        pub_token: pub_token,
+                    }))
+                )
+                |
+                do_parse!(
+                    pub_token: syn!(Pub) >>
+                    other: parens!(do_parse!(
+                        in_tok: syn!(In) >>
+                        restricted: call!(Path::parse_mod_style) >>
+                        (in_tok, restricted)
+                    )) >>
+                    (Visibility::Restricted(VisRestricted {
+                        path: Box::new((other.0).1),
+                        in_token: Some((other.0).0),
+                        paren_token: other.1,
+                        pub_token: pub_token,
+                    }))
+                )
+                |
+                syn!(Pub) => { |tok| {
+                    Visibility::Public(VisPublic {
+                        pub_token: tok,
+                    })
+                } }
+                |
+                epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]

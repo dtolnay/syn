@@ -18,14 +18,14 @@ parsing = ["unicode-xid", "synom/parsing"]
 printing = ["quote", "synom/printing"]
 visit = []
 fold = []
-clone-impls = []
-extra-traits = []
+clone-impls = ["synom/clone-impls"]
+extra-traits = ["synom/extra-traits"]
 
 [dependencies]
 quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
 unicode-xid = { version = "0.0.4", optional = true }
-synom = { version = "0.11", path = "synom", default-features = true }
+synom = { version = "0.11", path = "synom" }
 
 [dev-dependencies]
 syntex_pos = "0.58"

@@ -77,75 +77,90 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use synom::{TokenTree, IResult, Synom};
+    use synom::tokens::*;
 
-    named!(pub binop -> BinOp, alt!(
-        punct!("&&") => { |_| BinOp::And(tokens::AndAnd::default()) }
-        |
-        punct!("||") => { |_| BinOp::Or(tokens::OrOr::default()) }
-        |
-        punct!("<<") => { |_| BinOp::Shl(tokens::Shl::default()) }
-        |
-        punct!(">>") => { |_| BinOp::Shr(tokens::Shr::default()) }
-        |
-        punct!("==") => { |_| BinOp::Eq(tokens::EqEq::default()) }
-        |
-        punct!("<=") => { |_| BinOp::Le(tokens::Le::default()) }
-        |
-        punct!("!=") => { |_| BinOp::Ne(tokens::Ne::default()) }
-        |
-        punct!(">=") => { |_| BinOp::Ge(tokens::Ge::default()) }
-        |
-        punct!("+") => { |_| BinOp::Add(tokens::Add::default()) }
-        |
-        punct!("-") => { |_| BinOp::Sub(tokens::Sub::default()) }
-        |
-        punct!("*") => { |_| BinOp::Mul(tokens::Star::default()) }
-        |
-        punct!("/") => { |_| BinOp::Div(tokens::Div::default()) }
-        |
-        punct!("%") => { |_| BinOp::Rem(tokens::Rem::default()) }
-        |
-        punct!("^") => { |_| BinOp::BitXor(tokens::Caret::default()) }
-        |
-        punct!("&") => { |_| BinOp::BitAnd(tokens::And::default()) }
-        |
-        punct!("|") => { |_| BinOp::BitOr(tokens::Or::default()) }
-        |
-        punct!("<") => { |_| BinOp::Lt(tokens::Lt::default()) }
-        |
-        punct!(">") => { |_| BinOp::Gt(tokens::Gt::default()) }
-    ));
+    impl BinOp {
+        pub fn parse_binop(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(AndAnd) => { BinOp::And }
+                |
+                syn!(OrOr) => { BinOp::Or }
+                |
+                syn!(Shl) => { BinOp::Shl }
+                |
+                syn!(Shr) => { BinOp::Shr }
+                |
+                syn!(EqEq) => { BinOp::Eq }
+                |
+                syn!(Le) => { BinOp::Le }
+                |
+                syn!(Ne) => { BinOp::Ne }
+                |
+                syn!(Ge) => { BinOp::Ge }
+                |
+                syn!(Add) => { BinOp::Add }
+                |
+                syn!(Sub) => { BinOp::Sub }
+                |
+                syn!(Star) => { BinOp::Mul }
+                |
+                syn!(Div) => { BinOp::Div }
+                |
+                syn!(Rem) => { BinOp::Rem }
+                |
+                syn!(Caret) => { BinOp::BitXor }
+                |
+                syn!(And) => { BinOp::BitAnd }
+                |
+                syn!(Or) => { BinOp::BitOr }
+                |
+                syn!(Lt) => { BinOp::Lt }
+                |
+                syn!(Gt) => { BinOp::Gt }
+            }
+        }
 
-    #[cfg(feature = "full")]
-    named!(pub assign_op -> BinOp, alt!(
-        punct!("+=") => { |_| BinOp::AddEq(tokens::AddEq::default()) }
-        |
-        punct!("-=") => { |_| BinOp::SubEq(tokens::SubEq::default()) }
-        |
-        punct!("*=") => { |_| BinOp::MulEq(tokens::MulEq::default()) }
-        |
-        punct!("/=") => { |_| BinOp::DivEq(tokens::DivEq::default()) }
-        |
-        punct!("%=") => { |_| BinOp::RemEq(tokens::RemEq::default()) }
-        |
-        punct!("^=") => { |_| BinOp::BitXorEq(tokens::CaretEq::default()) }
-        |
-        punct!("&=") => { |_| BinOp::BitAndEq(tokens::AndEq::default()) }
-        |
-        punct!("|=") => { |_| BinOp::BitOrEq(tokens::OrEq::default()) }
-        |
-        punct!("<<=") => { |_| BinOp::ShlEq(tokens::ShlEq::default()) }
-        |
-        punct!(">>=") => { |_| BinOp::ShrEq(tokens::ShrEq::default()) }
-    ));
+        #[cfg(feature = "full")]
+        pub fn parse_assign_op(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(AddEq) => { BinOp::AddEq }
+                |
+                syn!(SubEq) => { BinOp::SubEq }
+                |
+                syn!(MulEq) => { BinOp::MulEq }
+                |
+                syn!(DivEq) => { BinOp::DivEq }
+                |
+                syn!(RemEq) => { BinOp::RemEq }
+                |
+                syn!(CaretEq) => { BinOp::BitXorEq }
+                |
+                syn!(AndEq) => { BinOp::BitAndEq }
+                |
+                syn!(OrEq) => { BinOp::BitOrEq }
+                |
+                syn!(ShlEq) => { BinOp::ShlEq }
+                |
+                syn!(ShrEq) => { BinOp::ShrEq }
+            }
+        }
+    }
 
-    named!(pub unop -> UnOp, alt!(
-        punct!("*") => { |_| UnOp::Deref(tokens::Star::default()) }
-        |
-        punct!("!") => { |_| UnOp::Not(tokens::Bang::default()) }
-        |
-        punct!("-") => { |_| UnOp::Neg(tokens::Sub::default()) }
-    ));
+    impl Synom for UnOp {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(Star) => { UnOp::Deref }
+                |
+                syn!(Bang) => { UnOp::Not }
+                |
+                syn!(Sub) => { UnOp::Neg }
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]

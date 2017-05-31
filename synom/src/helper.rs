@@ -1,101 +1,3 @@
-use IResult;
-use space::{skip_whitespace, word_break};
-use delimited::Delimited;
-
-/// Parse a piece of punctuation like "+" or "+=".
-///
-/// See also `keyword!` for parsing keywords, which are subtly different from
-/// punctuation.
-///
-/// - **Syntax:** `punct!("...")`
-/// - **Output:** `&str`
-///
-/// ```rust
-/// extern crate syn;
-/// #[macro_use] extern crate synom;
-///
-/// // Parse zero or more bangs.
-/// named!(many_bangs -> Vec<&str>,
-///     many0!(punct!("!"))
-/// );
-///
-/// fn main() {
-///     let input = "!! !";
-///     let parsed = many_bangs(input).expect("bangs");
-///     assert_eq!(parsed, ["!", "!", "!"]);
-/// }
-/// ```
-#[macro_export]
-macro_rules! punct {
-    ($i:expr, $punct:expr) => {
-        $crate::helper::punct($i, $punct)
-    };
-}
-
-// Not public API.
-#[doc(hidden)]
-pub fn punct<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
-    let input = skip_whitespace(input);
-    if input.starts_with(token) {
-        IResult::Done(&input[token.len()..], token)
-    } else {
-        IResult::Error
-    }
-}
-
-/// Parse a keyword like "fn" or "struct".
-///
-/// See also `punct!` for parsing punctuation, which are subtly different from
-/// keywords.
-///
-/// - **Syntax:** `keyword!("...")`
-/// - **Output:** `&str`
-///
-/// ```rust
-/// extern crate syn;
-/// #[macro_use] extern crate synom;
-///
-/// use synom::IResult;
-///
-/// // Parse zero or more "bang" keywords.
-/// named!(many_bangs -> Vec<&str>,
-///     terminated!(
-///         many0!(keyword!("bang")),
-///         punct!(";")
-///     )
-/// );
-///
-/// fn main() {
-///     let input = "bang bang bang;";
-///     let parsed = many_bangs(input).expect("bangs");
-///     assert_eq!(parsed, ["bang", "bang", "bang"]);
-///
-///     let input = "bangbang;";
-///     let err = many_bangs(input);
-///     assert_eq!(err, IResult::Error);
-/// }
-/// ```
-#[macro_export]
-macro_rules! keyword {
-    ($i:expr, $keyword:expr) => {
-        $crate::helper::keyword($i, $keyword)
-    };
-}
-
-// Not public API.
-#[doc(hidden)]
-pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a str> {
-    match punct(input, token) {
-        IResult::Done(rest, _) => {
-            match word_break(rest) {
-                IResult::Done(_, _) => IResult::Done(rest, token),
-                IResult::Error => IResult::Error,
-            }
-        }
-        IResult::Error => IResult::Error,
-    }
-}
-
 /// Turn a failed parse into `None` and a successful parse into `Some`.
 ///
 /// - **Syntax:** `option!(THING)`
@@ -105,17 +7,11 @@ pub fn keyword<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, &'a 
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// named!(maybe_bang -> Option<&str>, option!(punct!("!")));
+/// use syn::tokens::Bang;
 ///
-/// fn main() {
-///     let input = "!";
-///     let parsed = maybe_bang(input).expect("maybe bang");
-///     assert_eq!(parsed, Some("!"));
+/// named!(maybe_bang -> Option<Bang>, option!(syn!(Bang)));
 ///
-///     let input = "";
-///     let parsed = maybe_bang(input).expect("maybe bang");
-///     assert_eq!(parsed, None);
-/// }
+/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! option {
@@ -145,30 +41,21 @@ macro_rules! option {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::{Lifetime, Ty};
-/// use syn::parse::{lifetime, ty};
+/// use syn::delimited::Delimited;
+/// use syn::tokens::*;
 ///
 /// named!(bound_lifetimes -> (Vec<Lifetime>, Ty), tuple!(
 ///     opt_vec!(do_parse!(
-///         keyword!("for") >>
-///         punct!("<") >>
-///         lifetimes: terminated_list!(punct!(","), lifetime) >>
-///         punct!(">") >>
+///         syn!(For) >>
+///         syn!(Lt) >>
+///         lifetimes: call!(Delimited::<Lifetime, Comma>::parse_terminated) >>
+///         syn!(Gt) >>
 ///         (lifetimes.into_vec())
 ///     )),
-///     ty
+///     syn!(Ty)
 /// ));
 ///
-/// fn main() {
-///     let input = "for<'a, 'b> fn(&'a A) -> &'b B";
-///     let parsed = bound_lifetimes(input).expect("bound lifetimes");
-///     assert_eq!(parsed.0, [Lifetime::new("'a"), Lifetime::new("'b")]);
-///     println!("{:?}", parsed);
-///
-///     let input = "From<String>";
-///     let parsed = bound_lifetimes(input).expect("bound lifetimes");
-///     assert!(parsed.0.is_empty());
-///     println!("{:?}", parsed);
-/// }
+/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! opt_vec {
@@ -192,23 +79,15 @@ macro_rules! opt_vec {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Mutability;
+/// use synom::tokens::Mut;
 ///
 /// named!(mutability -> Mutability, alt!(
-///     keyword!("mut") => { |_| Mutability::Mutable(Default::default()) }
+///     syn!(Mut) => { Mutability::Mutable }
 ///     |
 ///     epsilon!() => { |_| Mutability::Immutable }
 /// ));
 ///
-/// fn main() {
-///     let input = "mut";
-///     let parsed = mutability(input).expect("mutability");
-///     assert_eq!(parsed, Mutability::Mutable(Default::default()));
-///
-///     let input = "";
-///     let parsed = mutability(input).expect("mutability");
-///     assert_eq!(parsed, Mutability::Immutable);
-/// }
-/// ```
+/// # fn main() {}
 #[macro_export]
 macro_rules! epsilon {
     ($i:expr,) => {
@@ -229,11 +108,11 @@ macro_rules! epsilon {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::{Expr, ExprCall};
-/// use syn::parse::expr;
+/// use syn::tokens::RArrow;
 ///
 /// named!(expr_with_arrow_call -> Expr, do_parse!(
-///     mut e: expr >>
-///     many0!(tap!(arg: tuple!(punct!("=>"), expr) => {
+///     mut e: syn!(Expr) >>
+///     many0!(tap!(arg: tuple!(syn!(RArrow), syn!(Expr)) => {
 ///         e = Expr {
 ///             node: ExprCall {
 ///                 func: Box::new(e),
@@ -246,13 +125,7 @@ macro_rules! epsilon {
 ///     (e)
 /// ));
 ///
-/// fn main() {
-///     let input = "something => argument1 => argument2";
-///
-///     let parsed = expr_with_arrow_call(input).expect("expr with arrow call");
-///
-///     println!("{:?}", parsed);
-/// }
+/// # fn main() {}
 /// ```
 #[doc(hidden)]
 #[macro_export]
@@ -273,214 +146,87 @@ macro_rules! tap {
     };
 }
 
-/// Zero or more values separated by some separator. Does not allow a trailing
-/// seperator.
+/// Parse a type through the `Synom` trait.
 ///
-/// - **Syntax:** `separated_list!(punct!("..."), THING)`
-/// - **Output:** `Vec<THING>`
+/// This is a convenience macro used to invoke the `Synom::parse` method for a
+/// type, you'll find this in quite a few parsers. This is also the primary way
+/// to parse punctuation.
 ///
-/// You may also be looking for:
-///
-/// - `separated_nonempty_list!` - one or more values
-/// - `terminated_list!` - zero or more, allows trailing separator
-/// - `many0!` - zero or more, no separator
+/// - **Syntax:** `syn!(TYPE)`
+/// - **Output:** `TYPE`
 ///
 /// ```rust
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
-/// use syn::parse::expr;
-/// use synom::delimited::Delimited;
+/// use synom::tokens::Dot;
 ///
-/// named!(expr_list -> Vec<Expr>,
-///     map!(separated_list!(punct!(","), expr),
-///          |v: Delimited<_, _>| v.into_vec())
-/// );
+/// named!(expression -> Expr, syn!(Expr));
 ///
-/// fn main() {
-///     let input = "1 + 1, things, Construct { this: thing }";
+/// named!(expression_dot -> (Expr, Dot), tuple!(syn!(Expr), syn!(Dot)));
 ///
-///     let parsed = expr_list(input).expect("expr list");
-///     assert_eq!(parsed.len(), 3);
-/// }
-/// ```
-///
-/// ```rust
-/// extern crate syn;
-/// #[macro_use] extern crate synom;
-///
-/// use syn::Ident;
-/// use syn::parse::ident;
-/// use synom::delimited::Delimited;
-///
-/// named!(run_on -> Vec<Ident>,
-///     terminated!(
-///         map!(
-///             separated_list!(keyword!("and"), preceded!(punct!("$"), ident)),
-///             |v: Delimited<_, _>| v.into_vec()
-///         ),
-///         punct!("...")
-///     )
-/// );
-///
-/// fn main() {
-///     let input = "$expr and $ident and $pat ...";
-///
-///     let parsed = run_on(input).expect("run-on sentence");
-///     assert_eq!(parsed.len(), 3);
-///     assert_eq!(parsed[0], "expr");
-///     assert_eq!(parsed[1], "ident");
-///     assert_eq!(parsed[2], "pat");
-/// }
+/// # fn main() {}
 /// ```
 #[macro_export]
-macro_rules! separated_list {
-    ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $fmac:ident!( $($fargs:tt)* )) => {{
-        $crate::helper::separated_list($i,
-                                       |d| $sepmac!(d, $($separgs)*),
-                                       |d| $fmac!(d, $($fargs)*),
-                                       false)
-    }};
-
-    ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $f:expr) => {
-        separated_list!($i, $sepmac!($($separgs)*), call!($f))
-    };
-
-    ($i:expr, $sep:expr, $fmac:ident!( $($fargs:tt)* )) => {
-        separated_list!($i, call!($sep), $fmac!($($fargs)*))
-    };
-
-    ($i:expr, $sep:expr, $f:expr) => {
-        separated_list!($i, call!($sep), call!($f))
+macro_rules! syn {
+    ($i:expr, $t:ty) => {
+        call!($i, <$t as $crate::Synom>::parse)
     };
 }
 
-/// Zero or more values separated by some separator. A trailing separator is
-/// allowed.
+/// Parse a parenthesized-surrounded subtree.
 ///
-/// - **Syntax:** `terminated_list!(punct!("..."), THING)`
-/// - **Output:** `Vec<THING>`
+/// This macro will invoke a sub-parser inside of all tokens contained in
+/// parenthesis. The sub-parser is required to consume all tokens within the
+/// parens or else this parser will return an error.
 ///
-/// You may also be looking for:
-///
-/// - `separated_list!` - zero or more, allows trailing separator
-/// - `separated_nonempty_list!` - one or more values
-/// - `many0!` - zero or more, no separator
+/// - **Syntax:** `parens!(SUBPARSER)`
+/// - **Output:** `(SUBPARSER_RET, Paren)`
 ///
 /// ```rust
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
-/// use syn::parse::expr;
-/// use synom::delimited::Delimited;
+/// use synom::tokens::Paren;
 ///
-/// named!(expr_list -> Delimited<Expr, &str>,
-///     terminated_list!(punct!(","), expr)
-/// );
+/// named!(expr_paren -> (Expr, Paren), parens!(syn!(Expr)));
 ///
-/// fn main() {
-///     let input = "1 + 1, things, Construct { this: thing },";
-///
-///     let parsed = expr_list(input).expect("expr list");
-///     assert_eq!(parsed.len(), 3);
-/// }
-/// ```
-///
-/// ```rust
-/// extern crate syn;
-/// #[macro_use] extern crate synom;
-///
-/// use syn::Ident;
-/// use syn::parse::ident;
-/// use synom::delimited::Delimited;
-///
-/// named!(run_on -> Delimited<Ident, &str>,
-///     terminated!(
-///         terminated_list!(keyword!("and"), preceded!(punct!("$"), ident)),
-///         punct!("...")
-///     )
-/// );
-///
-/// fn main() {
-///     let input = "$expr and $ident and $pat and ...";
-///
-///     let parsed = run_on(input).expect("run-on sentence").into_vec();
-///     assert_eq!(parsed.len(), 3);
-///     assert_eq!(parsed[0], "expr");
-///     assert_eq!(parsed[1], "ident");
-///     assert_eq!(parsed[2], "pat");
-/// }
+/// # fn main() {}
 /// ```
 #[macro_export]
-macro_rules! terminated_list {
-    ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $fmac:ident!( $($fargs:tt)* )) => {{
-        $crate::helper::separated_list($i,
-                                       |d| $sepmac!(d, $($separgs)*),
-                                       |d| $fmac!(d, $($fargs)*),
-                                       true)
-    }};
-
-    ($i:expr, $sepmac:ident!( $($separgs:tt)* ), $f:expr) => {
-        terminated_list!($i, $sepmac!($($separgs)*), call!($f))
+macro_rules! parens {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
+        $crate::tokens::Paren::parse($i, |i| $submac!(i, $($args)*))
     };
 
-    ($i:expr, $sep:expr, $fmac:ident!( $($fargs:tt)* )) => {
-        terminated_list!($i, call!($sep), $fmac!($($fargs)*))
-    };
-
-    ($i:expr, $sep:expr, $f:expr) => {
-        terminated_list!($i, call!($sep), call!($f))
+    ($i:expr, $f:expr) => {
+        parens!($i, call!($f));
     };
 }
 
-// Not public API.
-#[doc(hidden)]
-pub fn separated_list<'a, F1, D, F2, T>(mut input: &'a str,
-                                        mut sep: F1,
-                                        mut parse: F2,
-                                        terminated: bool)
-    -> IResult<&'a str, Delimited<T, D>>
-    where F1: FnMut(&'a str) -> IResult<&'a str, D>,
-          F2: FnMut(&'a str) -> IResult<&'a str, T>,
-{
-    let mut res = Delimited::new();
 
-    // get the first element
-    match parse(input) {
-        IResult::Error => IResult::Done(input, res),
-        IResult::Done(i, o) => {
-            if i.len() == input.len() {
-                return IResult::Error
-            }
-            input = i;
-            res.push_first(o);
+/// Same as the `parens` macro, but for brackets.
+#[macro_export]
+macro_rules! brackets {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
+        $crate::tokens::Bracket::parse($i, |i| $submac!(i, $($args)*))
+    };
 
-            // get the separator first
-            while let IResult::Done(i2, s) = sep(input) {
-                if i2.len() == input.len() {
-                    break;
-                }
+    ($i:expr, $f:expr) => {
+        brackets!($i, call!($f));
+    };
+}
 
-                // get the element next
-                if let IResult::Done(i3, o3) = parse(i2) {
-                    if i3.len() == i2.len() {
-                        break;
-                    }
-                    res.push_next(o3, s);
-                    input = i3;
-                } else {
-                    break;
-                }
-            }
-            if terminated {
-                if let IResult::Done(after, sep) = sep(input) {
-                    res.push_trailing(sep);
-                    input = after;
-                }
-            }
-            IResult::Done(input, res)
-        }
-    }
+/// Same as the `parens` macro, but for braces.
+#[macro_export]
+macro_rules! braces {
+    ($i:expr, $submac:ident!( $($args:tt)* )) => {
+        $crate::tokens::Brace::parse($i, |i| $submac!(i, $($args)*))
+    };
+
+    ($i:expr, $f:expr) => {
+        braces!($i, call!($f));
+    };
 }

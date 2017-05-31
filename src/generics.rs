@@ -210,165 +210,206 @@ ast_enum_of_structs! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use attr::parsing::outer_attr;
-    use ident::parsing::ident;
-    use ty::parsing::{ty, poly_trait_ref};
 
-    named!(pub generics -> Generics, map!(
-        alt!(
-            do_parse!(
-                punct!("<") >>
-                lifetimes: terminated_list!(
-                    map!(punct!(","), |_| tokens::Comma::default()),
-                    lifetime_def
-                ) >>
-                ty_params: cond!(
-                    lifetimes.is_empty() || lifetimes.trailing_delim(),
-                    terminated_list!(
-                        map!(punct!(","), |_| tokens::Comma::default()),
-                        ty_param
+    use synom::{IResult, Synom};
+    use synom::tokens::*;
+    use proc_macro2::{TokenTree, TokenKind};
+
+    impl Synom for Generics {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            map! {
+                input,
+                alt!(
+                    do_parse!(
+                        lt: syn!(Lt) >>
+                        lifetimes: call!(Delimited::parse_terminated) >>
+                        ty_params: cond!(
+                            lifetimes.is_empty() || lifetimes.trailing_delim(),
+                            call!(Delimited::parse_terminated)
+                        ) >>
+                        gt: syn!(Gt) >>
+                        (lifetimes, ty_params, Some(lt), Some(gt))
                     )
+                    |
+                    epsilon!() => { |_| (Delimited::new(), None, None, None) }
+                ),
+                |(lifetimes, ty_params, lt, gt): (_, Option<_>, _, _)| Generics {
+                    lifetimes: lifetimes,
+                    ty_params: ty_params.unwrap_or_default(),
+                    where_clause: WhereClause::default(),
+                    gt_token: gt,
+                    lt_token: lt,
+                }
+            }
+        }
+    }
+
+    impl Synom for Lifetime {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            let mut tokens = input.iter();
+            let token = match tokens.next() {
+                Some(token) => token,
+                None => return IResult::Error,
+            };
+            if let TokenKind::Word(s) = token.kind {
+                if s.as_str().starts_with('\'') {
+                    return IResult::Done(tokens.as_slice(), Lifetime {
+                        ident: Ident {
+                            span: Span(token.span),
+                            sym: s,
+                        },
+                    })
+                }
+            }
+            IResult::Error
+        }
+    }
+
+    impl Synom for LifetimeDef {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                life: syn!(Lifetime) >>
+                colon: option!(syn!(Colon)) >>
+                bounds: cond!(
+                    colon.is_some(),
+                    call!(Delimited::parse_separated_nonempty)
                 ) >>
-                punct!(">") >>
-                (lifetimes, ty_params, true)
-            )
-            |
-            epsilon!() => { |_| (Delimited::new(), None, false) }
-        ),
-        |(lifetimes, ty_params, any): (_, Option<_>, _)| Generics {
-            lifetimes: lifetimes,
-            ty_params: ty_params.unwrap_or_default(),
-            where_clause: WhereClause::default(),
-            gt_token: if any {Some(tokens::Gt::default())} else {None},
-            lt_token: if any {Some(tokens::Lt::default())} else {None},
+                (LifetimeDef {
+                    attrs: attrs,
+                    lifetime: life,
+                    bounds: bounds.unwrap_or_default(),
+                    colon_token: colon.map(|_| tokens::Colon::default()),
+                })
+            }
         }
-    ));
+    }
 
-    named!(pub lifetime -> Lifetime, preceded!(
-        punct!("'"),
-        alt!(
-            map!(ident, |id| Lifetime {
-                ident: format!("'{}", id).into(),
-            })
-            |
-            map!(keyword!("static"), |_| Lifetime {
-                ident: "'static".into(),
-            })
-        )
-    ));
-
-    named!(pub lifetime_def -> LifetimeDef, do_parse!(
-        attrs: many0!(outer_attr) >>
-        life: lifetime >>
-        colon: option!(punct!(":")) >>
-        bounds: cond!(
-            colon.is_some(),
-            separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                     lifetime)
-        ) >>
-        (LifetimeDef {
-            attrs: attrs,
-            lifetime: life,
-            bounds: bounds.unwrap_or_default(),
-            colon_token: colon.map(|_| tokens::Colon::default()),
-        })
-    ));
-
-    named!(pub bound_lifetimes -> Option<BoundLifetimes>, option!(do_parse!(
-        keyword!("for") >>
-        punct!("<") >>
-        lifetimes: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                    lifetime_def) >>
-        punct!(">") >>
-        (BoundLifetimes {
-            for_token: tokens::For::default(),
-            lt_token: tokens::Lt::default(),
-            gt_token: tokens::Gt::default(),
-            lifetimes: lifetimes,
-        })
-    )));
-
-    named!(ty_param -> TyParam, do_parse!(
-        attrs: many0!(outer_attr) >>
-        id: ident >>
-        colon: option!(punct!(":")) >>
-        bounds: cond!(
-            colon.is_some(),
-            separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                     ty_param_bound)
-        ) >>
-        default: option!(preceded!(
-            punct!("="),
-            ty
-        )) >>
-        (TyParam {
-            attrs: attrs,
-            ident: id,
-            bounds: bounds.unwrap_or_default(),
-            colon_token: colon.map(|_| tokens::Colon::default()),
-            eq_token: default.as_ref().map(|_| tokens::Eq::default()),
-            default: default,
-        })
-    ));
-
-    named!(pub ty_param_bound -> TyParamBound, alt!(
-        preceded!(punct!("?"), poly_trait_ref) => {
-            |poly| TyParamBound::Trait(poly, TraitBoundModifier::Maybe(tokens::Question::default()))
+    impl Synom for BoundLifetimes {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                for_: syn!(For) >>
+                lt: syn!(Lt) >>
+                lifetimes: call!(Delimited::parse_terminated) >>
+                gt: syn!(Gt) >>
+                (BoundLifetimes {
+                    for_token: for_,
+                    lt_token: lt,
+                    gt_token: gt,
+                    lifetimes: lifetimes,
+                })
+            }
         }
-        |
-        lifetime => { TyParamBound::Region }
-        |
-        poly_trait_ref => {
-            |poly| TyParamBound::Trait(poly, TraitBoundModifier::None)
+    }
+
+    impl Synom for TyParam {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                id: syn!(Ident) >>
+                colon: option!(syn!(Colon)) >>
+                bounds: cond!(
+                    colon.is_some(),
+                    call!(Delimited::parse_separated_nonempty)
+                ) >>
+                default: option!(do_parse!(
+                    eq: syn!(Eq) >>
+                    ty: syn!(Ty) >>
+                    (eq, ty)
+                )) >>
+                (TyParam {
+                    attrs: attrs,
+                    ident: id,
+                    bounds: bounds.unwrap_or_default(),
+                    colon_token: colon,
+                    eq_token: default.as_ref().map(|d| tokens::Eq((d.0).0)),
+                    default: default.map(|d| d.1),
+                })
+            }
         }
-    ));
+    }
 
-    named!(pub where_clause -> WhereClause, alt!(
-        do_parse!(
-            keyword!("where") >>
-            predicates: terminated_list!(
-                map!(punct!(","), |_| tokens::Comma::default()),
-                where_predicate
-            ) >>
-            (WhereClause {
-                predicates: predicates,
-                where_token: Some(tokens::Where::default()),
-            })
-        )
-        |
-        epsilon!() => { |_| WhereClause::default() }
-    ));
+    impl Synom for TyParamBound {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    question: syn!(Question) >>
+                    poly: syn!(PolyTraitRef) >>
+                    (TyParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
+                )
+                |
+                syn!(Lifetime) => { TyParamBound::Region }
+                |
+                syn!(PolyTraitRef) => {
+                    |poly| TyParamBound::Trait(poly, TraitBoundModifier::None)
+                }
+            }
+        }
 
-    named!(where_predicate -> WherePredicate, alt!(
-        do_parse!(
-            ident: lifetime >>
-            colon: option!(punct!(":")) >>
-            bounds: cond!(
-                colon.is_some(),
-                separated_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                lifetime)
-            ) >>
-            (WherePredicate::RegionPredicate(WhereRegionPredicate {
-                lifetime: ident,
-                bounds: bounds.unwrap_or_default(),
-                colon_token: colon.map(|_| tokens::Colon::default()),
-            }))
-        )
-        |
-        do_parse!(
-            bound_lifetimes: bound_lifetimes >>
-            bounded_ty: ty >>
-            punct!(":") >>
-            bounds: separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                             ty_param_bound) >>
-            (WherePredicate::BoundPredicate(WhereBoundPredicate {
-                bound_lifetimes: bound_lifetimes,
-                bounded_ty: bounded_ty,
-                bounds: bounds,
-                colon_token: tokens::Colon::default(),
-            }))
-        )
-    ));
+        fn description() -> Option<&'static str> {
+            Some("type parameter buond")
+        }
+    }
+
+    impl Synom for WhereClause {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    where_: syn!(Where) >>
+                    predicates: call!(Delimited::parse_terminated) >>
+                    (WhereClause {
+                        predicates: predicates,
+                        where_token: Some(where_),
+                    })
+                )
+                |
+                epsilon!() => { |_| WhereClause::default() }
+            }
+        }
+
+        fn description() -> Option<&'static str> {
+            Some("where clause")
+        }
+    }
+
+    impl Synom for WherePredicate {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    ident: syn!(Lifetime) >>
+                    colon: option!(syn!(Colon)) >>
+                    bounds: cond!(
+                        colon.is_some(),
+                        call!(Delimited::parse_separated)
+                    ) >>
+                    (WherePredicate::RegionPredicate(WhereRegionPredicate {
+                        lifetime: ident,
+                        bounds: bounds.unwrap_or_default(),
+                        colon_token: colon,
+                    }))
+                )
+                |
+                do_parse!(
+                    bound_lifetimes: option!(syn!(BoundLifetimes)) >>
+                    bounded_ty: syn!(Ty) >>
+                    colon: syn!(Colon) >>
+                    bounds: call!(Delimited::parse_separated_nonempty) >>
+                    (WherePredicate::BoundPredicate(WhereBoundPredicate {
+                        bound_lifetimes: bound_lifetimes,
+                        bounded_ty: bounded_ty,
+                        bounds: bounds,
+                        colon_token: colon,
+                    }))
+                )
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]

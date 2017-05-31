@@ -20,7 +20,7 @@ not related to syn. Please file a ticket in this repo.
 
 ```toml
 [dependencies]
-syn = "0.11"
+syn = "0.12"
 quote = "0.3"
 
 [lib]

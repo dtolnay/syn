@@ -134,218 +134,42 @@ impl fmt::Debug for TokenTree {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {Lifetime};
-    use generics::parsing::lifetime;
-    use ident::parsing::word;
-    use lit::parsing::lit;
-    use synom::IResult;
-    use synom::space::{block_comment, whitespace, skip_whitespace};
-    use ty::parsing::path;
-    use proc_macro2::{self, TokenStream, TokenKind, Delimiter, OpKind, Literal};
 
-    fn tt(kind: TokenKind) -> TokenTree {
-        TokenTree(proc_macro2::TokenTree {
-            kind: kind,
-            span: Default::default(),
-        })
-    }
+    use proc_macro2::{TokenKind, TokenTree};
+    use synom::tokens::*;
+    use synom::{Synom, IResult};
 
-    named!(pub mac -> Mac, do_parse!(
-        what: path >>
-        punct!("!") >>
-        body: delimited >>
-        (Mac {
-            path: what,
-            bang_token: tokens::Bang::default(),
-            tokens: vec![body],
-        })
-    ));
-
-    named!(pub token_trees -> Vec<TokenTree>, many0!(token_tree));
-
-    named!(pub token_stream -> TokenStream,
-           map!(token_trees, |t: Vec<TokenTree>| t.into_iter().map(|t| t.0).collect()));
-
-    named!(pub delimited -> TokenTree, alt!(
-        delimited!(
-            punct!("("),
-            token_stream,
-            punct!(")")
-        ) => { |ts| tt(TokenKind::Sequence(Delimiter::Parenthesis, ts)) }
-        |
-        delimited!(
-            punct!("["),
-            token_stream,
-            punct!("]")
-        ) => { |ts| tt(TokenKind::Sequence(Delimiter::Bracket, ts)) }
-        |
-        delimited!(
-            punct!("{"),
-            token_stream,
-            punct!("}")
-        ) => { |ts| tt(TokenKind::Sequence(Delimiter::Brace, ts)) }
-    ));
-
-    named!(pub token_tree -> TokenTree, alt!(
-        token
-        |
-        delimited
-    ));
-
-    macro_rules! punct1 {
-        ($i:expr, $punct:expr) => {
-            punct1($i, $punct)
+    impl Synom for Mac {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                what: syn!(Path) >>
+                bang: syn!(Bang) >>
+                body: call!(::TokenTree::parse_delimited) >>
+                (Mac {
+                    path: what,
+                    bang_token: bang,
+                    tokens: vec![body],
+                })
+            }
         }
     }
 
-    fn punct1<'a>(input: &'a str, token: &'static str) -> IResult<&'a str, char> {
-        let input = skip_whitespace(input);
-        if input.starts_with(token) {
-            IResult::Done(&input[1..], token.chars().next().unwrap())
-        } else {
-            IResult::Error
+    impl ::TokenTree {
+        pub fn parse_list(input: &[TokenTree]) -> IResult<&[TokenTree], Vec<Self>> {
+            IResult::Done(&[], input.iter().cloned().map(::TokenTree).collect())
+        }
+
+        pub fn parse_delimited(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            let mut tokens = input.iter();
+            match tokens.next() {
+                Some(token @ &TokenTree { kind: TokenKind::Sequence(..), .. }) => {
+                    IResult::Done(tokens.as_slice(), ::TokenTree(token.clone()))
+                }
+                _ => IResult::Error,
+            }
         }
     }
-
-    named!(token -> TokenTree, alt!(
-        keyword!("_") => { |_| tt(TokenKind::Op('_', OpKind::Alone)) }
-        |
-        punct1!("&&") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before BinOp
-        |
-        punct1!("||") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before BinOp
-        |
-        punct1!("->") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before BinOp
-        |
-        punct1!("<-") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before Lt
-        |
-        punct1!("=>") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before Eq
-        |
-        punct1!("...") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before DotDot
-        |
-        punct1!("..") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) } // must be before Dot
-        |
-        punct1!(".") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        // must be before bin_op
-        map!(doc_comment, |s: String| tt(TokenKind::Literal(Literal::doccomment(&s))))
-        |
-        bin_op_eq // must be before bin_op
-        |
-        bin_op
-        |
-        map!(lit, |l: Lit| l.into_token_tree())
-        |
-        map!(word, |w: Ident| tt(TokenKind::Word(w.sym)))
-        |
-        map!(lifetime, |lt: Lifetime| tt(TokenKind::Word(lt.ident.sym)))
-        |
-        punct1!("<=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("==") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("!=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!(">=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("::") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("=") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("<") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!(">") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("!") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("~") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("@") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!(",") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!(";") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!(":") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("#") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("$") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("?") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-    ));
-
-    named!(bin_op -> TokenTree, alt!(
-        punct1!("+") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("-") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("*") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("/") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("%") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("^") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("&") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("|") => { |c| tt(TokenKind::Op(c, OpKind::Alone)) }
-        |
-        punct1!("<<") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!(">>") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-    ));
-
-    named!(bin_op_eq -> TokenTree, alt!(
-        punct1!("+=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("-=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("*=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("/=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("%=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("^=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("&=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("|=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!("<<=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-        |
-        punct1!(">>=") => { |c| tt(TokenKind::Op(c, OpKind::Joint)) }
-    ));
-
-    named!(doc_comment -> String, alt!(
-        do_parse!(
-            punct!("//!") >>
-            content: take_until!("\n") >>
-            (format!("//!{}", content))
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tag!("/*!")) >>
-            com: block_comment >>
-            (com.to_owned())
-        )
-        |
-        do_parse!(
-            punct!("///") >>
-            not!(tag!("/")) >>
-            content: take_until!("\n") >>
-            (format!("///{}", content))
-        )
-        |
-        do_parse!(
-            option!(whitespace) >>
-            peek!(tuple!(tag!("/**"), not!(tag!("*")))) >>
-            com: block_comment >>
-            (com.to_owned())
-        )
-    ));
 }
 
 #[cfg(feature = "printing")]

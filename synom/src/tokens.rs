@@ -1,4 +1,11 @@
-use Span;
+//! Discrete tokens that can be parsed out by synom.
+//!
+//! This module contains a number of useful tokens like `+=` and `/` along with
+//! keywords like `crate` and such. These structures are used to track the spans
+//! of these tokens and all implment the `ToTokens` and `Synom` traits when the
+//! corresponding feature is activated.
+
+use span::Span;
 
 macro_rules! tokens {
     (
@@ -20,11 +27,10 @@ macro_rules! tokens {
 
 macro_rules! op {
     (pub struct $name:ident($($contents:tt)*) => $s:expr) => {
-        ast_struct! {
-            #[cfg_attr(feature = "clone-impls", derive(Copy))]
-            #[derive(Default)]
-            pub struct $name(pub $($contents)*);
-        }
+        #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[derive(Default)]
+        pub struct $name(pub $($contents)*);
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
@@ -32,16 +38,24 @@ macro_rules! op {
                 printing::op($s, &self.0, tokens);
             }
         }
+
+        #[cfg(feature = "parsing")]
+        impl ::Synom for $name {
+            fn parse(tokens: &[::proc_macro2::TokenTree])
+                -> ::IResult<&[::proc_macro2::TokenTree], $name>
+            {
+                parsing::op($s, tokens, $name)
+            }
+        }
     }
 }
 
 macro_rules! sym {
     (pub struct $name:ident => $s:expr) => {
-        ast_struct! {
-            #[cfg_attr(feature = "clone-impls", derive(Copy))]
-            #[derive(Default)]
-            pub struct $name(pub Span);
-        }
+        #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[derive(Default)]
+        pub struct $name(pub Span);
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
@@ -49,25 +63,42 @@ macro_rules! sym {
                 printing::sym($s, &self.0, tokens);
             }
         }
+
+        #[cfg(feature = "parsing")]
+        impl ::Synom for $name {
+            fn parse(tokens: &[::proc_macro2::TokenTree])
+                -> ::IResult<&[::proc_macro2::TokenTree], $name>
+            {
+                parsing::sym($s, tokens, $name)
+            }
+        }
     }
 }
 
 macro_rules! delim {
     (pub struct $name:ident => $s:expr) => {
-        ast_struct! {
-            #[cfg_attr(feature = "clone-impls", derive(Copy))]
-            #[derive(Default)]
-            pub struct $name(pub Span);
-        }
+        #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[derive(Default)]
+        pub struct $name(pub Span);
 
-        #[cfg(feature = "printing")]
         impl $name {
+            #[cfg(feature = "printing")]
             pub fn surround<F>(&self,
                                tokens: &mut ::quote::Tokens,
                                f: F)
                 where F: FnOnce(&mut ::quote::Tokens)
             {
                 printing::delim($s, &self.0, tokens, f);
+            }
+
+            #[cfg(feature = "parsing")]
+            pub fn parse<F, R>(tokens: &[::proc_macro2::TokenTree], f: F)
+                -> ::IResult<&[::proc_macro2::TokenTree], (R, $name)>
+                where F: FnOnce(&[::proc_macro2::TokenTree])
+                            -> ::IResult<&[::proc_macro2::TokenTree], R>
+            {
+                parsing::delim($s, tokens, $name, f)
             }
         }
     }
@@ -126,18 +157,19 @@ tokens! {
     }
     syms: {
         (pub struct As                      => "as"),
-        (pub struct Box                     => "box"),
+        (pub struct Box_                    => "box"),
         (pub struct Break                   => "break"),
+        (pub struct CapSelf                 => "Self"),
         (pub struct Catch                   => "catch"),
         (pub struct Const                   => "const"),
         (pub struct Continue                => "continue"),
         (pub struct Crate                   => "crate"),
-        (pub struct Default                 => "default"),
+        (pub struct Default_                => "default"),
         (pub struct Do                      => "do"),
         (pub struct Else                    => "else"),
         (pub struct Enum                    => "enum"),
         (pub struct Extern                  => "extern"),
-        (pub struct Fn                      => "fn"),
+        (pub struct Fn_                     => "fn"),
         (pub struct For                     => "for"),
         (pub struct If                      => "if"),
         (pub struct Impl                    => "impl"),
@@ -154,6 +186,7 @@ tokens! {
         (pub struct Self_                   => "self"),
         (pub struct Static                  => "static"),
         (pub struct Struct                  => "struct"),
+        (pub struct Super                   => "super"),
         (pub struct Trait                   => "trait"),
         (pub struct Type                    => "type"),
         (pub struct Union                   => "union"),
@@ -164,11 +197,132 @@ tokens! {
     }
 }
 
+#[cfg(feature = "parsing")]
+mod parsing {
+    use proc_macro2::{TokenTree, TokenKind, Delimiter, OpKind};
+
+    use IResult;
+    use span::Span;
+
+    pub trait FromSpans: Sized {
+        fn from_spans(spans: &[Span]) -> Self;
+    }
+
+    impl FromSpans for [Span; 1] {
+        fn from_spans(spans: &[Span]) -> Self {
+            [spans[0]]
+        }
+    }
+
+    impl FromSpans for [Span; 2] {
+        fn from_spans(spans: &[Span]) -> Self {
+            [spans[0], spans[1]]
+        }
+    }
+
+    impl FromSpans for [Span; 3] {
+        fn from_spans(spans: &[Span]) -> Self {
+            [spans[0], spans[1], spans[2]]
+        }
+    }
+
+    pub fn op<'a, T, R>(s: &str,
+                        tokens: &'a [TokenTree],
+                        new: fn(T) -> R)
+            -> IResult<&'a [TokenTree], R>
+        where T: FromSpans,
+    {
+        let mut spans = [Span::default(); 3];
+        assert!(s.len() <= spans.len());
+        let chars = s.chars();
+        let mut it = tokens.iter();
+
+        for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
+            let tok = match it.next() {
+                Some(tok) => tok,
+                _ => return IResult::Error
+            };
+            let kind = match tok.kind {
+                TokenKind::Op(c, kind) if c == ch => kind,
+                _ => return IResult::Error
+            };
+            if i != s.len() - 1 {
+                match kind {
+                    OpKind::Joint => {}
+                    OpKind::Alone => return IResult::Error,
+                }
+            }
+            *slot = Span(tok.span);
+        }
+        IResult::Done(it.as_slice(), new(T::from_spans(&spans)))
+    }
+
+    pub fn sym<'a, T>(sym: &str,
+                      tokens: &'a [TokenTree],
+                      new: fn(Span) -> T)
+        -> IResult<&'a [TokenTree], T>
+    {
+        let mut tokens = tokens.iter();
+        let (span, s) = match tokens.next() {
+            Some(&TokenTree { span, kind: TokenKind::Word(sym) }) => (span, sym),
+            _ => return IResult::Error,
+        };
+        if s.as_str() == sym {
+            IResult::Done(tokens.as_slice(), new(Span(span)))
+        } else {
+            IResult::Error
+        }
+    }
+
+    pub fn delim<'a, F, R, T>(delim: &str,
+                              tokens: &'a [TokenTree],
+                              new: fn(Span) -> T,
+                              f: F)
+        -> ::IResult<&'a [TokenTree], (R, T)>
+        where F: FnOnce(&[TokenTree]) -> IResult<&[TokenTree], R>
+    {
+        let delim = match delim {
+            "(" => Delimiter::Parenthesis,
+            "{" => Delimiter::Brace,
+            "[" => Delimiter::Bracket,
+            _ => panic!("unknown delimiter: {}", delim),
+        };
+        let mut tokens = tokens.iter();
+        let (span, d, others) = match tokens.next() {
+            Some(&TokenTree { span, kind: TokenKind::Sequence(d, ref rest) }) => {
+                (span, d, rest)
+            }
+            _ => return IResult::Error,
+        };
+        match (delim, d) {
+            (Delimiter::Parenthesis, Delimiter::Parenthesis) |
+            (Delimiter::Brace, Delimiter::Brace) |
+            (Delimiter::Bracket, Delimiter::Bracket) => {}
+            _ => return IResult::Error,
+        }
+
+        // TODO: Need a custom type to avoid this allocation every time we try
+        // this branch
+        let rest = others.clone().into_iter().collect::<Vec<_>>();
+        match f(&rest) {
+            IResult::Done(remaining, ret) => {
+                if remaining.is_empty() {
+                    IResult::Done(tokens.as_slice(), (ret, new(Span(span))))
+                } else {
+                    IResult::Error
+                }
+            }
+            IResult::Error => IResult::Error,
+        }
+    }
+}
+
 #[cfg(feature = "printing")]
 mod printing {
-    use Span;
     use proc_macro2::{TokenTree, TokenKind, OpKind};
     use quote::Tokens;
+
+    use span::Span;
 
     pub fn op(s: &str, spans: &[Span], tokens: &mut Tokens) {
         assert_eq!(s.len(), spans.len());

@@ -2,7 +2,8 @@ use std::iter::FromIterator;
 use std::slice;
 use std::vec;
 
-#[derive(Eq, PartialEq, Hash, Debug, Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash, Debug))]
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Delimited<T, D> {
     inner: Vec<(T, Option<D>)>
 }
@@ -42,16 +43,12 @@ impl<T, D> Delimited<T, D> {
         Iter { inner: self.inner.iter() }
     }
 
-    pub fn into_iter(self) -> IntoIter<T, D> {
-        IntoIter { inner: self.inner.into_iter() }
-    }
-
     pub fn items(&self) -> Items<T, D> {
         Items { inner: self.inner.iter() }
     }
 
     pub fn push(&mut self, token: Element<T, D>) {
-        assert!(self.len() == 0 || self.trailing_delim());
+        assert!(self.is_empty() || self.trailing_delim());
         match token {
             Element::Delimited(t, d) => self.inner.push((t, Some(d))),
             Element::End(t) => self.inner.push((t, None)),
@@ -75,7 +72,7 @@ impl<T, D> Delimited<T, D> {
     }
 
     pub fn push_default(&mut self, token: T) where D: Default {
-        if self.len() == 0 {
+        if self.is_empty() {
             self.inner.push((token, None));
         } else {
             self.push_next(token, D::default());
@@ -130,7 +127,25 @@ impl<T, D> FromIterator<Element<T, D>> for Delimited<T, D> {
                 Element::End(a) => ret.inner.push((a, None)),
             }
         }
-        return ret
+        ret
+    }
+}
+
+impl<'a, T, D> IntoIterator for &'a Delimited<T, D> {
+    type Item = Element<&'a T, &'a D>;
+    type IntoIter = Iter<'a, T, D>;
+
+    fn into_iter(self) -> Iter<'a, T, D> {
+        <Delimited<T, D>>::iter(self)
+    }
+}
+
+impl<T, D> IntoIterator for Delimited<T, D> {
+    type Item = Element<T, D>;
+    type IntoIter = IntoIter<T, D>;
+
+    fn into_iter(self) -> IntoIter<T, D> {
+        IntoIter { inner: self.inner.into_iter() }
     }
 }
 
@@ -217,6 +232,105 @@ impl<T, D> Element<T, D> {
         match *self {
             Element::Delimited(_, ref d) => Some(d),
             Element::End(_) => None,
+        }
+    }
+}
+
+#[cfg(feature = "parsing")]
+mod parsing {
+    use proc_macro2::TokenTree;
+
+    use super::Delimited;
+    use {IResult, Synom};
+
+    impl<T, D> Delimited<T, D>
+        where T: Synom,
+              D: Synom,
+    {
+        pub fn parse_separated(input: &[TokenTree])
+            -> IResult<&[TokenTree], Self>
+        {
+            Self::parse(input, T::parse, false)
+        }
+
+        pub fn parse_separated_nonempty(input: &[TokenTree])
+            -> IResult<&[TokenTree], Self>
+        {
+            Self::parse_separated_nonempty_with(input, T::parse)
+        }
+
+        pub fn parse_terminated(input: &[TokenTree])
+            -> IResult<&[TokenTree], Self>
+        {
+            Self::parse_terminated_with(input, T::parse)
+        }
+    }
+
+    impl<T, D> Delimited<T, D>
+        where D: Synom,
+    {
+        pub fn parse_separated_nonempty_with(
+                input: &[TokenTree],
+                parse: fn(&[TokenTree]) -> IResult<&[TokenTree], T>)
+            -> IResult<&[TokenTree], Self>
+        {
+            match Self::parse(input, parse, false) {
+                IResult::Done(_, ref b) if b.is_empty() => IResult::Error,
+                other => other,
+            }
+        }
+
+        pub fn parse_terminated_with(
+                input: &[TokenTree],
+                parse: fn(&[TokenTree]) -> IResult<&[TokenTree], T>)
+            -> IResult<&[TokenTree], Self>
+        {
+            Self::parse(input, parse, true)
+        }
+
+        fn parse(mut input: &[TokenTree],
+                 parse: fn(&[TokenTree]) -> IResult<&[TokenTree], T>,
+                 terminated: bool)
+            -> IResult<&[TokenTree], Self>
+        {
+            let mut res = Delimited::new();
+
+            // get the first element
+            match parse(input) {
+                IResult::Error => IResult::Done(input, res),
+                IResult::Done(i, o) => {
+                    if i.len() == input.len() {
+                        return IResult::Error
+                    }
+                    input = i;
+                    res.push_first(o);
+
+                    // get the separator first
+                    while let IResult::Done(i2, s) = D::parse(input) {
+                        if i2.len() == input.len() {
+                            break;
+                        }
+
+                        // get the element next
+                        if let IResult::Done(i3, o3) = parse(i2) {
+                            if i3.len() == i2.len() {
+                                break;
+                            }
+                            res.push_next(o3, s);
+                            input = i3;
+                        } else {
+                            break;
+                        }
+                    }
+                    if terminated {
+                        if let IResult::Done(after, sep) = D::parse(input) {
+                            res.push_trailing(sep);
+                            input = after;
+                        }
+                    }
+                    IResult::Done(input, res)
+                }
+            }
         }
     }
 }

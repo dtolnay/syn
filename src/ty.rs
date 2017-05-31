@@ -257,7 +257,7 @@ ast_struct! {
         pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Unsafety,
         pub abi: Option<Abi>,
-        pub fn_token: tokens::Fn,
+        pub fn_token: tokens::Fn_,
         pub paren_token: tokens::Paren,
         pub inputs: Delimited<BareFnArg, tokens::Comma>,
         pub variadic: Option<tokens::Dot3>,
@@ -314,172 +314,213 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use {TyParamBound, TraitBoundModifier};
-    #[cfg(feature = "full")]
-    use ConstExpr;
-    #[cfg(feature = "full")]
-    use constant::parsing::const_expr;
-    #[cfg(feature = "full")]
-    use expr::parsing::expr;
-    use generics::parsing::{lifetime, ty_param_bound, bound_lifetimes};
-    use ident::parsing::ident;
-    use lit::parsing::string;
-    use mac::parsing::mac;
-    use std::str;
+    // use {TyParamBound, TraitBoundModifier};
+    // #[cfg(feature = "full")]
+    // use ConstExpr;
+    // #[cfg(feature = "full")]
+    // use constant::parsing::const_expr;
+    // #[cfg(feature = "full")]
+    // use expr::parsing::expr;
+    // use generics::parsing::{lifetime, ty_param_bound, bound_lifetimes};
+    // use ident::parsing::ident;
+    // use lit::parsing::string;
+    // use mac::parsing::mac;
+    use proc_macro2::TokenTree;
+    use synom::{IResult, Synom};
+    use synom::tokens::*;
 
-    named!(pub ty -> Ty, alt!(
-        ty_paren // must be before ty_tup
-        |
-        ty_mac // must be before ty_path
-        |
-        ty_path // must be before ty_poly_trait_ref
-        |
-        ty_vec
-        |
-        ty_array
-        |
-        ty_ptr
-        |
-        ty_rptr
-        |
-        ty_bare_fn
-        |
-        ty_never
-        |
-        ty_tup
-        |
-        ty_poly_trait_ref
-        |
-        ty_impl_trait
-    ));
+    impl Synom for Ty {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                // must be before mac
+                syn!(TyParen) => { Ty::Paren }
+                |
+                // must be before path
+                syn!(Mac) => { Ty::Mac }
+                |
+                // must be before ty_poly_trait_ref
+                ty_path
+                |
+                syn!(TySlice) => { Ty::Slice }
+                |
+                syn!(TyArray) => { Ty::Array }
+                |
+                syn!(TyPtr) => { Ty::Ptr }
+                |
+                syn!(TyRptr) => { Ty::Rptr }
+                |
+                syn!(TyBareFn) => { Ty::BareFn }
+                |
+                syn!(TyNever) => { Ty::Never }
+                |
+                syn!(TyTup) => { Ty::Tup }
+                |
+                ty_poly_trait_ref
+                |
+                syn!(TyImplTrait) => { Ty::ImplTrait }
+            }
+        }
 
-    named!(ty_mac -> Ty, map!(mac, Ty::Mac));
+        fn description() -> Option<&'static str> {
+            Some("type")
+        }
+    }
 
-    named!(ty_vec -> Ty, do_parse!(
-        punct!("[") >>
-        elem: ty >>
-        punct!("]") >>
-        (TySlice {
-            ty: Box::new(elem),
-            bracket_token: tokens::Bracket::default(),
-        }.into())
-    ));
+    impl Synom for TySlice {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            map! {
+                input,
+                brackets!(syn!(Ty)),
+                |(ty, b)| TySlice {
+                    ty: Box::new(ty),
+                    bracket_token: b,
+                }
+            }
+        }
+    }
 
-    named!(ty_array -> Ty, do_parse!(
-        punct!("[") >>
-        elem: ty >>
-        punct!(";") >>
-        len: array_len >>
-        punct!("]") >>
-        (TyArray {
-            ty: Box::new(elem),
-            amt: len,
-            bracket_token: tokens::Bracket::default(),
-            semi_token: tokens::Semi::default(),
-        }.into())
-    ));
+    impl Synom for TyArray {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            map! {
+                input,
+                brackets!(do_parse!(
+                    elem: syn!(Ty) >>
+                    semi: syn!(Semi) >>
+                    len: array_len >>
+                    (elem, semi, len)
+                )),
+                |((elem, semi, len), brackets)| {
+                    TyArray {
+                        ty: Box::new(elem),
+                        amt: len,
+                        bracket_token: brackets,
+                        semi_token: semi,
+                    }
+                }
+            }
+        }
+    }
 
     #[cfg(not(feature = "full"))]
-    use constant::parsing::const_expr as array_len;
+    named!(array_len -> ConstExpr, syn!(ConstExpr));
 
     #[cfg(feature = "full")]
     named!(array_len -> ConstExpr, alt!(
-        terminated!(const_expr, after_array_len)
+        terminated!(syn!(ConstExpr), input_end!())
         |
-        terminated!(expr, after_array_len) => { ConstExpr::Other }
+        terminated!(syn!(Expr), input_end!()) => { ConstExpr::Other }
     ));
 
-    #[cfg(feature = "full")]
-    named!(after_array_len -> &str, peek!(punct!("]")));
+    impl Synom for TyPtr {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                star: syn!(Star) >>
+                mutability: alt!(
+                    syn!(Const) => { |c| (Mutability::Immutable, Some(c)) }
+                    |
+                    syn!(Mut) => { |m| (Mutability::Mutable(m), None) }
+                ) >>
+                target: syn!(Ty) >>
+                (TyPtr {
+                    const_token: mutability.1,
+                    star_token: star,
+                    ty: Box::new(MutTy {
+                        ty: target,
+                        mutability: mutability.0,
+                    }),
+                })
+            }
+        }
+    }
 
-    named!(ty_ptr -> Ty, do_parse!(
-        punct!("*") >>
-        mutability: alt!(
-            keyword!("const") => { |_| Mutability::Immutable }
-            |
-            keyword!("mut") => { |_| Mutability::Mutable(tokens::Mut::default()) }
-        ) >>
-        target: ty >>
-        (TyPtr {
-            const_token: match mutability {
-                Mutability::Mutable(_) => None,
-                Mutability::Immutable => Some(tokens::Const::default()),
-            },
-            star_token: tokens::Star::default(),
-            ty: Box::new(MutTy {
-                ty: target,
-                mutability: mutability,
-            }),
-        }.into())
-    ));
+    impl Synom for TyRptr {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                amp: syn!(And) >>
+                life: option!(syn!(Lifetime)) >>
+                mutability: syn!(Mutability) >>
+                target: syn!(Ty) >>
+                (TyRptr {
+                    lifetime: life,
+                    ty: Box::new(MutTy {
+                        ty: target,
+                        mutability: mutability,
+                    }),
+                    and_token: amp,
+                })
+            }
+        }
+    }
 
-    named!(ty_rptr -> Ty, do_parse!(
-        punct!("&") >>
-        life: option!(lifetime) >>
-        mutability: mutability >>
-        target: ty >>
-        (TyRptr {
-            lifetime: life,
-            ty: Box::new(MutTy {
-                ty: target,
-                mutability: mutability,
-            }),
-            and_token: tokens::And::default(),
-        }.into())
-    ));
+    impl Synom for TyBareFn {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                lifetimes: option!(syn!(BoundLifetimes)) >>
+                unsafety: syn!(Unsafety) >>
+                abi: option!(syn!(Abi)) >>
+                fn_: syn!(Fn_) >>
+                parens: parens!(do_parse!(
+                    inputs: call!(Delimited::parse_terminated) >>
+                    variadic: option!(cond_reduce!(inputs.is_empty() || inputs.trailing_delim(),
+                                                   syn!(Dot3))) >>
+                    (inputs, variadic)
+                )) >>
+                output: syn!(FunctionRetTy) >>
+                (TyBareFn {
+                    ty: Box::new(BareFnTy {
+                        unsafety: unsafety,
+                        abi: abi,
+                        lifetimes: lifetimes,
+                        output: output,
+                        variadic: (parens.0).1,
+                        fn_token: fn_,
+                        paren_token: parens.1,
+                        inputs: (parens.0).0,
+                    }),
+                })
+            }
+        }
+    }
 
-    named!(ty_bare_fn -> Ty, do_parse!(
-        lifetimes: bound_lifetimes >>
-        unsafety: unsafety >>
-        abi: option!(abi) >>
-        keyword!("fn") >>
-        punct!("(") >>
-        inputs: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 fn_arg) >>
-        variadic: option!(cond_reduce!(inputs.is_empty() || inputs.trailing_delim(),
-                                       punct!("..."))) >>
-        punct!(")") >>
-        output: fn_ret_ty >>
-        (TyBareFn {
-            ty: Box::new(BareFnTy {
-                unsafety: unsafety,
-                abi: abi,
-                lifetimes: lifetimes,
-                inputs: inputs,
-                output: output,
-                variadic: variadic.map(|_| tokens::Dot3::default()),
-                fn_token: tokens::Fn::default(),
-                paren_token: tokens::Paren::default(),
-            }),
-        }.into())
-    ));
+    impl Synom for TyNever {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            map! {
+                input,
+                syn!(Bang),
+                |b| TyNever { bang_token: b }
+            }
+        }
+    }
 
-    named!(ty_never -> Ty, map!(punct!("!"), |_| TyNever {
-        bang_token: tokens::Bang::default(),
-    }.into()));
-
-    named!(ty_tup -> Ty, do_parse!(
-        punct!("(") >>
-        elems: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                ty) >>
-        punct!(")") >>
-        (TyTup {
-            tys: elems,
-            paren_token: tokens::Paren::default(),
-            lone_comma: None, // TODO: does this just not parse?
-        }.into())
-    ));
+    impl Synom for TyTup {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                data: parens!(call!(Delimited::parse_terminated)) >>
+                (TyTup {
+                    tys: data.0,
+                    paren_token: data.1,
+                    lone_comma: None, // TODO: does this just not parse?
+                })
+            }
+        }
+    }
 
     named!(ty_path -> Ty, do_parse!(
         qpath: qpath >>
         parenthesized: cond!(
             qpath.1.segments.get(qpath.1.segments.len() - 1).item().parameters.is_empty(),
-            option!(parenthesized_parameter_data)
+            option!(syn!(ParenthesizedParameterData))
         ) >>
-        bounds: many0!(preceded!(punct!("+"), ty_param_bound)) >>
+        bounds: many0!(tuple!(syn!(Add), syn!(TyParamBound))) >>
         ({
             let (qself, mut path) = qpath;
             if let Some(Some(parenthesized)) = parenthesized {
+                let parenthesized = PathParameters::Parenthesized(parenthesized);
                 let len = path.segments.len();
                 path.segments.get_mut(len - 1).item_mut().parameters = parenthesized;
             }
@@ -495,7 +536,7 @@ pub mod parsing {
                 );
                 let mut new_bounds = Delimited::new();
                 new_bounds.push_first(path);
-                for bound in bounds {
+                for (_tok, bound) in bounds {
                     new_bounds.push_default(bound);
                 }
                 TyTraitObject { bounds: new_bounds }.into()
@@ -503,263 +544,299 @@ pub mod parsing {
         })
     ));
 
-    named!(parenthesized_parameter_data -> PathParameters, do_parse!(
-        punct!("(") >>
-        inputs: terminated_list!(map!(punct!(","), |_| tokens::Comma::default()),
-                                 ty) >>
-        punct!(")") >>
-        output: fn_ret_ty >>
-        (PathParameters::Parenthesized(
-            ParenthesizedParameterData {
-                paren_token: tokens::Paren::default(),
-                inputs: inputs,
-                output: output,
-            },
-        ))
-    ));
-
-    named!(pub fn_ret_ty -> FunctionRetTy, map!(
-        option!(preceded!(
-            punct!("->"),
-            ty
-        )),
-        |ty| {
-            match ty {
-                Some(ty) => FunctionRetTy::Ty(ty, tokens::RArrow::default()),
-                None => FunctionRetTy::Default,
-            }
-        }
-    ));
-
     named!(pub qpath -> (Option<QSelf>, Path), alt!(
-        map!(path, |p| (None, p))
+        map!(syn!(Path), |p| (None, p))
         |
         do_parse!(
-            punct!("<") >>
-            this: map!(ty, Box::new) >>
-            path: option!(preceded!(
-                keyword!("as"),
-                path
+            lt: syn!(Lt) >>
+            this: map!(syn!(Ty), Box::new) >>
+            path: option!(do_parse!(
+                as_: syn!(As) >>
+                path: syn!(Path) >>
+                (as_, path)
             )) >>
-            punct!(">") >>
-            punct!("::") >>
-            rest: separated_nonempty_list!(
-                map!(punct!("::"), |_| tokens::Colon2::default()),
-                path_segment
-            ) >>
+            gt: syn!(Gt) >>
+            colon2: syn!(Colon2) >>
+            rest: call!(Delimited::parse_separated_nonempty) >>
             ({
-                let as_token = path.as_ref().map(|_| tokens::As::default());
-                let (pos, path) = match path {
-                    Some(mut path) => {
+                let (pos, path, as_) = match path {
+                    Some((as_, mut path)) => {
                         let pos = path.segments.len();
                         if !path.segments.is_empty() && !path.segments.trailing_delim() {
-                            path.segments.push_trailing(tokens::Colon2::default());
+                            path.segments.push_trailing(colon2);
                         }
-                        for item in rest.into_iter() {
+                        for item in rest {
                             path.segments.push(item);
                         }
-                        (pos, path)
+                        (pos, path, Some(as_))
                     }
                     None => {
                         (0, Path {
                             leading_colon: None,
                             global: false,
                             segments: rest,
-                        })
+                        }, None)
                     }
                 };
                 (Some(QSelf {
                     ty: this,
                     position: pos,
-                    gt_token: tokens::Gt::default(),
-                    lt_token: tokens::Lt::default(),
-                    as_token: as_token,
+                    gt_token: gt,
+                    lt_token: lt,
+                    as_token: as_,
                 }), path)
             })
         )
         |
-        map!(keyword!("self"), |_| (None, "self".into()))
+        map!(syn!(Self_), |s: Self_| (None, s.into()))
     ));
 
+    impl Synom for ParenthesizedParameterData {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                data: parens!(call!(Delimited::parse_terminated)) >>
+                output: syn!(FunctionRetTy) >>
+                (ParenthesizedParameterData {
+                    paren_token: data.1,
+                    inputs: data.0,
+                    output: output,
+                })
+            }
+        }
+    }
+
+    impl Synom for FunctionRetTy {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    arrow: syn!(RArrow) >>
+                    ty: syn!(Ty) >>
+                    (FunctionRetTy::Ty(ty, arrow))
+                )
+                |
+                epsilon!() => { |_| FunctionRetTy::Default }
+            }
+        }
+    }
+
     named!(ty_poly_trait_ref -> Ty, map!(
-        separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                 ty_param_bound),
+        call!(Delimited::parse_separated_nonempty),
         |x| TyTraitObject { bounds: x }.into()
     ));
 
-    named!(ty_impl_trait -> Ty, do_parse!(
-        keyword!("impl") >>
-        elem: separated_nonempty_list!(map!(punct!("+"), |_| tokens::Add::default()),
-                                       ty_param_bound) >>
-        (TyImplTrait {
-            impl_token: tokens::Impl::default(),
-            bounds: elem,
-        }.into())
-    ));
+    impl Synom for TyImplTrait {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                impl_: syn!(Impl) >>
+                elem: call!(Delimited::parse_separated_nonempty) >>
+                (TyImplTrait {
+                    impl_token: impl_,
+                    bounds: elem,
+                })
+            }
+        }
+    }
 
-    named!(ty_paren -> Ty, do_parse!(
-        punct!("(") >>
-        elem: ty >>
-        punct!(")") >>
-        (TyParen {
-            paren_token: tokens::Paren::default(),
-            ty: Box::new(elem),
-        }.into())
-    ));
+    impl Synom for TyParen {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                data: parens!(syn!(Ty)) >>
+                (TyParen {
+                    paren_token: data.1,
+                    ty: Box::new(data.0),
+                })
+            }
+        }
+    }
 
-    named!(pub mutability -> Mutability, alt!(
-        keyword!("mut") => { |_| Mutability::Mutable(tokens::Mut::default()) }
-        |
-        epsilon!() => { |_| Mutability::Immutable }
-    ));
+    impl Synom for Mutability {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(Mut) => { Mutability::Mutable }
+                |
+                epsilon!() => { |_| Mutability::Immutable }
+            }
+        }
+    }
 
-    named!(pub path -> Path, do_parse!(
-        global: option!(punct!("::")) >>
-        segments: separated_nonempty_list!(map!(punct!("::"), |_| tokens::Colon2::default()),
-                                           path_segment) >>
-        (Path {
-            global: global.is_some(),
-            segments: segments,
-            leading_colon: global.map(|_| tokens::Colon2::default()),
-        })
-    ));
+    impl Synom for Path {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                global: option!(syn!(Colon2)) >>
+                segments: call!(Delimited::parse_separated_nonempty) >>
+                (Path {
+                    global: global.is_some(),
+                    segments: segments,
+                    leading_colon: global,
+                })
+            }
+        }
+    }
 
-    named!(path_segment -> PathSegment, alt!(
-        do_parse!(
-            id: option!(ident) >>
-            punct!("<") >>
-            lifetimes: terminated_list!(
-                map!(punct!(","), |_| tokens::Comma::default()),
-                lifetime
-            ) >>
-            types: cond!(
-                lifetimes.is_empty() || lifetimes.trailing_delim(),
-                terminated_list!(
-                    map!(punct!(","), |_| tokens::Comma::default()),
-                    terminated!(ty, not!(punct!("=")))
+    impl Synom for PathSegment {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                do_parse!(
+                    id: option!(syn!(Ident)) >>
+                    lt: syn!(Lt) >>
+                    lifetimes: call!(Delimited::parse_terminated) >>
+                    types: cond!(
+                        lifetimes.is_empty() || lifetimes.trailing_delim(),
+                        call!(Delimited::parse_terminated_with,
+                              ty_no_eq_after)
+                    ) >>
+                    bindings: cond!(
+                        match types {
+                            Some(ref t) => t.is_empty() || t.trailing_delim(),
+                            None => lifetimes.is_empty() || lifetimes.trailing_delim(),
+                        },
+                        call!(Delimited::parse_terminated)
+                    ) >>
+                    gt: syn!(Gt) >>
+                    (PathSegment {
+                        ident: id.unwrap_or_else(|| "".into()),
+                        parameters: PathParameters::AngleBracketed(
+                            AngleBracketedParameterData {
+                                gt_token: Some(gt),
+                                lt_token: Some(lt),
+                                lifetimes: lifetimes,
+                                types: types.unwrap_or_default(),
+                                bindings: bindings.unwrap_or_default(),
+                            }
+                        ),
+                    })
                 )
-            ) >>
-            bindings: cond!(
-                match types {
-                    Some(ref t) => t.is_empty() || t.trailing_delim(),
-                    None => lifetimes.is_empty() || lifetimes.trailing_delim(),
-                },
-                terminated_list!(
-                    map!(punct!(","), |_| tokens::Comma::default()),
-                    type_binding
-                )
-            ) >>
-            punct!(">") >>
-            (PathSegment {
-                ident: id.unwrap_or_else(|| "".into()),
-                parameters: PathParameters::AngleBracketed(
-                    AngleBracketedParameterData {
-                        gt_token: Some(tokens::Gt::default()),
-                        lt_token: Some(tokens::Lt::default()),
-                        lifetimes: lifetimes,
-                        types: types.unwrap_or_default(),
-                        bindings: bindings.unwrap_or_default(),
-                    }
-                ),
-            })
-        )
-        |
-        map!(ident, Into::into)
-        |
-        map!(alt!(
-            keyword!("super")
-            |
-            keyword!("self")
-            |
-            keyword!("Self")
-        ), Into::into)
-    ));
+                |
+                mod_style_path_segment
+            }
+        }
+    }
+    named!(ty_no_eq_after -> Ty, terminated!(syn!(Ty), not!(syn!(Eq))));
 
-    named!(pub mod_style_path -> Path, do_parse!(
-        global: option!(punct!("::")) >>
-        segments: separated_nonempty_list!(map!(punct!("::"), |_| tokens::Colon2::default()),
-                                           mod_style_path_segment) >>
-        (Path {
-            global: global.is_some(),
-            segments: segments,
-            leading_colon: global.map(|_| tokens::Colon2::default()),
-        })
-    ));
+    impl Path {
+        pub fn parse_mod_style(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                global: option!(syn!(Colon2)) >>
+                segments: call!(Delimited::parse_separated_nonempty_with,
+                                mod_style_path_segment) >>
+                (Path {
+                    global: global.is_some(),
+                    segments: segments,
+                    leading_colon: global,
+                })
+            }
+        }
+    }
 
     named!(mod_style_path_segment -> PathSegment, alt!(
-        map!(ident, Into::into)
+        map!(syn!(Ident), Into::into)
         |
-        map!(alt!(
-            keyword!("super")
+        alt!(
+            syn!(Super) => { Into::into }
             |
-            keyword!("self")
+            syn!(Self_) => { Into::into }
             |
-            keyword!("Self")
-        ), Into::into)
+            syn!(CapSelf) => { Into::into }
+        )
     ));
 
-    named!(type_binding -> TypeBinding, do_parse!(
-        id: ident >>
-        punct!("=") >>
-        ty: ty >>
-        (TypeBinding {
-            ident: id,
-            eq_token: tokens::Eq::default(),
-            ty: ty,
-        })
-    ));
-
-    named!(pub poly_trait_ref -> PolyTraitRef, do_parse!(
-        bound_lifetimes: bound_lifetimes >>
-        trait_ref: path >>
-        parenthesized: option!(cond_reduce!(
-            trait_ref.segments.get(trait_ref.segments.len() - 1).item().parameters.is_empty(),
-            parenthesized_parameter_data
-        )) >>
-        ({
-            let mut trait_ref = trait_ref;
-            if let Some(parenthesized) = parenthesized {
-                let len = trait_ref.segments.len();
-                trait_ref.segments.get_mut(len - 1).item_mut().parameters = parenthesized;
+    impl Synom for TypeBinding {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                id: syn!(Ident) >>
+                eq: syn!(Eq) >>
+                ty: syn!(Ty) >>
+                (TypeBinding {
+                    ident: id,
+                    eq_token: eq,
+                    ty: ty,
+                })
             }
-            PolyTraitRef {
-                bound_lifetimes: bound_lifetimes,
-                trait_ref: trait_ref,
+        }
+    }
+
+    impl Synom for PolyTraitRef {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                bound_lifetimes: option!(syn!(BoundLifetimes)) >>
+                trait_ref: syn!(Path) >>
+                parenthesized: option!(cond_reduce!(
+                    trait_ref.segments.get(trait_ref.segments.len() - 1).item().parameters.is_empty(),
+                    syn!(ParenthesizedParameterData)
+                )) >>
+                ({
+                    let mut trait_ref = trait_ref;
+                    if let Some(parenthesized) = parenthesized {
+                        let parenthesized = PathParameters::Parenthesized(parenthesized);
+                        let len = trait_ref.segments.len();
+                        trait_ref.segments.get_mut(len - 1).item_mut().parameters = parenthesized;
+                    }
+                    PolyTraitRef {
+                        bound_lifetimes: bound_lifetimes,
+                        trait_ref: trait_ref,
+                    }
+                })
             }
-        })
-    ));
+        }
+    }
 
-    named!(pub fn_arg -> BareFnArg, do_parse!(
-        name: option!(do_parse!(
-            name: ident >>
-            punct!(":") >>
-            not!(tag!(":")) >> // not ::
-            (name)
-        )) >>
-        ty: ty >>
-        (BareFnArg {
-            name: name.map(|t| (t, tokens::Colon::default())),
-            ty: ty,
-        })
-    ));
+    impl Synom for BareFnArg {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                name: option!(do_parse!(
+                    name: syn!(Ident) >>
+                    not!(syn!(Colon2)) >>
+                    colon: syn!(Colon) >>
+                    (name, colon)
+                )) >>
+                ty: syn!(Ty) >>
+                (BareFnArg {
+                    name: name,
+                    ty: ty,
+                })
+            }
+        }
+    }
 
-    named!(pub unsafety -> Unsafety, alt!(
-        keyword!("unsafe") => { |_| Unsafety::Unsafe(tokens::Unsafe::default()) }
-        |
-        epsilon!() => { |_| Unsafety::Normal }
-    ));
+    impl Synom for Unsafety {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            alt! {
+                input,
+                syn!(Unsafe) => { Unsafety::Unsafe }
+                |
+                epsilon!() => { |_| Unsafety::Normal }
+            }
+        }
+    }
 
-    named!(pub abi -> Abi, do_parse!(
-        keyword!("extern") >>
-        name: option!(string) >>
-        (Abi {
-            extern_token: tokens::Extern::default(),
-            kind: match name {
-                Some(name) => AbiKind::Named(name),
-                None => AbiKind::Default,
-            },
-        })
-    ));
+    impl Synom for Abi {
+        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+            do_parse! {
+                input,
+                extern_: syn!(Extern) >>
+                // TODO: this parses all literals, not just strings
+                name: option!(syn!(Lit)) >>
+                (Abi {
+                    extern_token: extern_,
+                    kind: match name {
+                        Some(name) => AbiKind::Named(name),
+                        None => AbiKind::Default,
+                    },
+                })
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]

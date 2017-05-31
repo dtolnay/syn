@@ -4,7 +4,7 @@ extern crate syn;
 extern crate proc_macro2;
 
 use syn::TokenTree;
-use proc_macro2::{TokenKind, OpKind, Delimiter};
+use proc_macro2::{TokenKind, OpKind, Delimiter, TokenStream};
 use proc_macro2::Delimiter::*;
 
 fn op(c: char) -> TokenTree {
@@ -69,7 +69,10 @@ fn test_struct() {
         ],
     )];
 
-    let result = syn::parse_token_trees(raw).unwrap();
+    let result = raw.parse::<TokenStream>().unwrap()
+                    .into_iter()
+                    .map(TokenTree)
+                    .collect::<Vec<_>>();
     if result != expected {
         panic!("{:#?}\n!=\n{:#?}", result, expected);
     }

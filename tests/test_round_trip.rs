@@ -3,6 +3,7 @@
 #[macro_use]
 extern crate quote;
 extern crate syn;
+extern crate synom;
 extern crate syntex_pos;
 extern crate syntex_syntax;
 extern crate walkdir;
@@ -121,10 +122,10 @@ fn test_round_trip() {
         file.read_to_string(&mut content).unwrap();
 
         let start = Instant::now();
-        let (krate, elapsed) = match syn::parse_crate(&content) {
+        let (krate, elapsed) = match content.parse::<syn::Crate>() {
             Ok(krate) => (krate, start.elapsed()),
             Err(msg) => {
-                errorf!("syn failed to parse\n{}\n", msg);
+                errorf!("syn failed to parse\n{:?}\n", msg);
                 failed += 1;
                 continue;
             }

@@ -86,7 +86,7 @@ fn test_catch_expr() {
         }
     "#;
 
-    let actual = parse_crate(raw).unwrap();
+    let actual = raw.parse::<Crate>().unwrap();
 
     assert_eq!(&actual.items[0].ident, "catch");
 
