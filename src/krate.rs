@@ -16,18 +16,15 @@ pub mod parsing {
     use proc_macro2::TokenTree;
 
     impl Synom for Crate {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                attrs: many0!(call!(Attribute::parse_inner)) >>
-                items: many0!(syn!(Item)) >>
-                (Crate {
-                    shebang: None,
-                    attrs: attrs,
-                    items: items,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_inner)) >>
+            items: many0!(syn!(Item)) >>
+            (Crate {
+                shebang: None,
+                attrs: attrs,
+                items: items,
+            })
+        ));
 
         fn description() -> Option<&'static str> {
             Some("crate")
