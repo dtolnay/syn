@@ -101,26 +101,25 @@ impl Hash for LitKind {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use proc_macro2::TokenTree;
-    use synom::{Synom, IResult};
+    use synom::{Synom, PResult, Cursor, parse_error};
 
     impl Synom for Lit {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+        fn parse(input: Cursor) -> PResult<Self> {
             let mut tokens = input.iter();
             let token = match tokens.next() {
                 Some(token) => token,
-                None => return IResult::Error,
+                None => return parse_error(),
             };
             let kind = match token.kind {
                 TokenKind::Literal(ref l) => LitKind::Other(l.clone()),
                 TokenKind::Word(ref s) if s.as_str() == "true" => LitKind::Bool(true),
                 TokenKind::Word(ref s) if s.as_str() == "false" => LitKind::Bool(false),
-                _ => return IResult::Error,
+                _ => return parse_error(),
             };
-            IResult::Done(tokens.as_slice(), Lit {
+            Ok((tokens.as_slice(), Lit {
                 span: Span(token.span),
                 value: kind,
-            })
+            }))
         }
     }
 }

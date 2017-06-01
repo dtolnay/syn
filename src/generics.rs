@@ -211,144 +211,129 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::{IResult, Synom};
+    use synom::{PResult, Cursor, Synom, parse_error};
     use synom::tokens::*;
-    use proc_macro2::{TokenTree, TokenKind};
+    use proc_macro2::TokenKind;
 
     impl Synom for Generics {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            map! {
-                input,
-                alt!(
-                    do_parse!(
-                        lt: syn!(Lt) >>
-                        lifetimes: call!(Delimited::parse_terminated) >>
-                        ty_params: cond!(
-                            lifetimes.is_empty() || lifetimes.trailing_delim(),
-                            call!(Delimited::parse_terminated)
-                        ) >>
-                        gt: syn!(Gt) >>
-                        (lifetimes, ty_params, Some(lt), Some(gt))
-                    )
-                    |
-                    epsilon!() => { |_| (Delimited::new(), None, None, None) }
-                ),
-                |(lifetimes, ty_params, lt, gt): (_, Option<_>, _, _)| Generics {
-                    lifetimes: lifetimes,
-                    ty_params: ty_params.unwrap_or_default(),
-                    where_clause: WhereClause::default(),
-                    gt_token: gt,
-                    lt_token: lt,
-                }
+        named!(parse -> Self, map!(
+            alt!(
+                do_parse!(
+                    lt: syn!(Lt) >>
+                    lifetimes: call!(Delimited::parse_terminated) >>
+                    ty_params: cond!(
+                        lifetimes.is_empty() || lifetimes.trailing_delim(),
+                        call!(Delimited::parse_terminated)
+                    ) >>
+                    gt: syn!(Gt) >>
+                    (lifetimes, ty_params, Some(lt), Some(gt))
+                )
+                |
+                epsilon!() => { |_| (Delimited::new(), None, None, None) }
+            ),
+            |(lifetimes, ty_params, lt, gt): (_, Option<_>, _, _)| Generics {
+                lifetimes: lifetimes,
+                ty_params: ty_params.unwrap_or_default(),
+                where_clause: WhereClause::default(),
+                gt_token: gt,
+                lt_token: lt,
             }
-        }
+        ));
     }
 
     impl Synom for Lifetime {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+        fn parse(input: Cursor) -> PResult<Self> {
             let mut tokens = input.iter();
             let token = match tokens.next() {
                 Some(token) => token,
-                None => return IResult::Error,
+                None => return parse_error(),
             };
             if let TokenKind::Word(s) = token.kind {
                 if s.as_str().starts_with('\'') {
-                    return IResult::Done(tokens.as_slice(), Lifetime {
+                    return Ok((tokens.as_slice(), Lifetime {
                         ident: Ident {
                             span: Span(token.span),
                             sym: s,
                         },
-                    })
+                    }))
                 }
             }
-            IResult::Error
+            parse_error()
         }
     }
 
     impl Synom for LifetimeDef {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                attrs: many0!(call!(Attribute::parse_outer)) >>
-                life: syn!(Lifetime) >>
-                colon: option!(syn!(Colon)) >>
-                bounds: cond!(
-                    colon.is_some(),
-                    call!(Delimited::parse_separated_nonempty)
-                ) >>
-                (LifetimeDef {
-                    attrs: attrs,
-                    lifetime: life,
-                    bounds: bounds.unwrap_or_default(),
-                    colon_token: colon.map(|_| tokens::Colon::default()),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_outer)) >>
+            life: syn!(Lifetime) >>
+            colon: option!(syn!(Colon)) >>
+            bounds: cond!(
+                colon.is_some(),
+                call!(Delimited::parse_separated_nonempty)
+            ) >>
+            (LifetimeDef {
+                attrs: attrs,
+                lifetime: life,
+                bounds: bounds.unwrap_or_default(),
+                colon_token: colon.map(|_| tokens::Colon::default()),
+            })
+        ));
     }
 
     impl Synom for BoundLifetimes {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                for_: syn!(For) >>
-                lt: syn!(Lt) >>
-                lifetimes: call!(Delimited::parse_terminated) >>
-                gt: syn!(Gt) >>
-                (BoundLifetimes {
-                    for_token: for_,
-                    lt_token: lt,
-                    gt_token: gt,
-                    lifetimes: lifetimes,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            for_: syn!(For) >>
+            lt: syn!(Lt) >>
+            lifetimes: call!(Delimited::parse_terminated) >>
+            gt: syn!(Gt) >>
+            (BoundLifetimes {
+                for_token: for_,
+                lt_token: lt,
+                gt_token: gt,
+                lifetimes: lifetimes,
+            })
+        ));
     }
 
     impl Synom for TyParam {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                attrs: many0!(call!(Attribute::parse_outer)) >>
-                id: syn!(Ident) >>
-                colon: option!(syn!(Colon)) >>
-                bounds: cond!(
-                    colon.is_some(),
-                    call!(Delimited::parse_separated_nonempty)
-                ) >>
-                default: option!(do_parse!(
-                    eq: syn!(Eq) >>
-                    ty: syn!(Ty) >>
-                    (eq, ty)
-                )) >>
-                (TyParam {
-                    attrs: attrs,
-                    ident: id,
-                    bounds: bounds.unwrap_or_default(),
-                    colon_token: colon,
-                    eq_token: default.as_ref().map(|d| tokens::Eq((d.0).0)),
-                    default: default.map(|d| d.1),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_outer)) >>
+            id: syn!(Ident) >>
+            colon: option!(syn!(Colon)) >>
+            bounds: cond!(
+                colon.is_some(),
+                call!(Delimited::parse_separated_nonempty)
+            ) >>
+            default: option!(do_parse!(
+                eq: syn!(Eq) >>
+                ty: syn!(Ty) >>
+                (eq, ty)
+            )) >>
+            (TyParam {
+                attrs: attrs,
+                ident: id,
+                bounds: bounds.unwrap_or_default(),
+                colon_token: colon,
+                eq_token: default.as_ref().map(|d| tokens::Eq((d.0).0)),
+                default: default.map(|d| d.1),
+            })
+        ));
     }
 
     impl Synom for TyParamBound {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    question: syn!(Question) >>
-                    poly: syn!(PolyTraitRef) >>
-                    (TyParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
-                )
-                |
-                syn!(Lifetime) => { TyParamBound::Region }
-                |
-                syn!(PolyTraitRef) => {
-                    |poly| TyParamBound::Trait(poly, TraitBoundModifier::None)
-                }
+        named!(parse -> Self, alt!(
+            do_parse!(
+                question: syn!(Question) >>
+                poly: syn!(PolyTraitRef) >>
+                (TyParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
+            )
+            |
+            syn!(Lifetime) => { TyParamBound::Region }
+            |
+            syn!(PolyTraitRef) => {
+                |poly| TyParamBound::Trait(poly, TraitBoundModifier::None)
             }
-        }
+        ));
 
         fn description() -> Option<&'static str> {
             Some("type parameter buond")
@@ -356,21 +341,18 @@ pub mod parsing {
     }
 
     impl Synom for WhereClause {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    where_: syn!(Where) >>
-                    predicates: call!(Delimited::parse_terminated) >>
-                    (WhereClause {
-                        predicates: predicates,
-                        where_token: Some(where_),
-                    })
-                )
-                |
-                epsilon!() => { |_| WhereClause::default() }
-            }
-        }
+        named!(parse -> Self, alt!(
+            do_parse!(
+                where_: syn!(Where) >>
+                predicates: call!(Delimited::parse_terminated) >>
+                (WhereClause {
+                    predicates: predicates,
+                    where_token: Some(where_),
+                })
+            )
+            |
+            epsilon!() => { |_| WhereClause::default() }
+        ));
 
         fn description() -> Option<&'static str> {
             Some("where clause")
@@ -378,37 +360,34 @@ pub mod parsing {
     }
 
     impl Synom for WherePredicate {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    ident: syn!(Lifetime) >>
-                    colon: option!(syn!(Colon)) >>
-                    bounds: cond!(
-                        colon.is_some(),
-                        call!(Delimited::parse_separated)
-                    ) >>
-                    (WherePredicate::RegionPredicate(WhereRegionPredicate {
-                        lifetime: ident,
-                        bounds: bounds.unwrap_or_default(),
-                        colon_token: colon,
-                    }))
-                )
-                |
-                do_parse!(
-                    bound_lifetimes: option!(syn!(BoundLifetimes)) >>
-                    bounded_ty: syn!(Ty) >>
-                    colon: syn!(Colon) >>
-                    bounds: call!(Delimited::parse_separated_nonempty) >>
-                    (WherePredicate::BoundPredicate(WhereBoundPredicate {
-                        bound_lifetimes: bound_lifetimes,
-                        bounded_ty: bounded_ty,
-                        bounds: bounds,
-                        colon_token: colon,
-                    }))
-                )
-            }
-        }
+        named!(parse -> Self, alt!(
+            do_parse!(
+                ident: syn!(Lifetime) >>
+                colon: option!(syn!(Colon)) >>
+                bounds: cond!(
+                    colon.is_some(),
+                    call!(Delimited::parse_separated)
+                ) >>
+                (WherePredicate::RegionPredicate(WhereRegionPredicate {
+                    lifetime: ident,
+                    bounds: bounds.unwrap_or_default(),
+                    colon_token: colon,
+                }))
+            )
+            |
+            do_parse!(
+                bound_lifetimes: option!(syn!(BoundLifetimes)) >>
+                bounded_ty: syn!(Ty) >>
+                colon: syn!(Colon) >>
+                bounds: call!(Delimited::parse_separated_nonempty) >>
+                (WherePredicate::BoundPredicate(WhereBoundPredicate {
+                    bound_lifetimes: bound_lifetimes,
+                    bounded_ty: bounded_ty,
+                    bounds: bounds,
+                    colon_token: colon,
+                }))
+            )
+        ));
     }
 }
 

@@ -108,107 +108,97 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::{IResult, Synom};
+    use synom::Synom;
     use synom::tokens;
     use synom::tokens::*;
-    use proc_macro2::TokenTree;
 
     impl Field {
-        pub fn parse_struct(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                attrs: many0!(call!(Attribute::parse_outer)) >>
-                vis: syn!(Visibility) >>
-                id: syn!(Ident) >>
-                colon: syn!(Colon) >>
-                ty: syn!(Ty) >>
-                (Field {
-                    ident: Some(id),
-                    vis: vis,
-                    attrs: attrs,
-                    ty: ty,
-                    colon_token: Some(colon),
-                })
-            }
-        }
+        named!(pub parse_struct -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_outer)) >>
+            vis: syn!(Visibility) >>
+            id: syn!(Ident) >>
+            colon: syn!(Colon) >>
+            ty: syn!(Ty) >>
+            (Field {
+                ident: Some(id),
+                vis: vis,
+                attrs: attrs,
+                ty: ty,
+                colon_token: Some(colon),
+            })
+        ));
 
-        pub fn parse_tuple(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                attrs: many0!(call!(Attribute::parse_outer)) >>
-                vis: syn!(Visibility) >>
-                ty: syn!(Ty) >>
-                (Field {
-                    ident: None,
-                    colon_token: None,
-                    vis: vis,
-                    attrs: attrs,
-                    ty: ty,
-                })
-            }
-        }
+        named!(pub parse_tuple -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_outer)) >>
+            vis: syn!(Visibility) >>
+            ty: syn!(Ty) >>
+            (Field {
+                ident: None,
+                colon_token: None,
+                vis: vis,
+                attrs: attrs,
+                ty: ty,
+            })
+        ));
     }
 
     impl Synom for Visibility {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    pub_token: syn!(Pub) >>
-                    other: parens!(syn!(tokens::Crate)) >>
-                    (Visibility::Crate(VisCrate {
-                        crate_token: other.0,
-                        paren_token: other.1,
-                        pub_token: pub_token,
-                    }))
-                )
-                |
-                do_parse!(
-                    pub_token: syn!(Pub) >>
-                    other: parens!(syn!(Self_)) >>
-                    (Visibility::Restricted(VisRestricted {
-                        path: Box::new(other.0.into()),
-                        in_token: None,
-                        paren_token: other.1,
-                        pub_token: pub_token,
-                    }))
-                )
-                |
-                do_parse!(
-                    pub_token: syn!(Pub) >>
-                    other: parens!(syn!(Super)) >>
-                    (Visibility::Restricted(VisRestricted {
-                        path: Box::new(other.0.into()),
-                        in_token: None,
-                        paren_token: other.1,
-                        pub_token: pub_token,
-                    }))
-                )
-                |
-                do_parse!(
-                    pub_token: syn!(Pub) >>
-                    other: parens!(do_parse!(
-                        in_tok: syn!(In) >>
-                        restricted: call!(Path::parse_mod_style) >>
-                        (in_tok, restricted)
-                    )) >>
-                    (Visibility::Restricted(VisRestricted {
-                        path: Box::new((other.0).1),
-                        in_token: Some((other.0).0),
-                        paren_token: other.1,
-                        pub_token: pub_token,
-                    }))
-                )
-                |
-                syn!(Pub) => { |tok| {
-                    Visibility::Public(VisPublic {
-                        pub_token: tok,
-                    })
-                } }
-                |
-                epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
-            }
-        }
+        named!(parse -> Self, alt!(
+            do_parse!(
+                pub_token: syn!(Pub) >>
+                other: parens!(syn!(tokens::Crate)) >>
+                (Visibility::Crate(VisCrate {
+                    crate_token: other.0,
+                    paren_token: other.1,
+                    pub_token: pub_token,
+                }))
+            )
+            |
+            do_parse!(
+                pub_token: syn!(Pub) >>
+                other: parens!(syn!(Self_)) >>
+                (Visibility::Restricted(VisRestricted {
+                    path: Box::new(other.0.into()),
+                    in_token: None,
+                    paren_token: other.1,
+                    pub_token: pub_token,
+                }))
+            )
+            |
+            do_parse!(
+                pub_token: syn!(Pub) >>
+                other: parens!(syn!(Super)) >>
+                (Visibility::Restricted(VisRestricted {
+                    path: Box::new(other.0.into()),
+                    in_token: None,
+                    paren_token: other.1,
+                    pub_token: pub_token,
+                }))
+            )
+            |
+            do_parse!(
+                pub_token: syn!(Pub) >>
+                other: parens!(do_parse!(
+                    in_tok: syn!(In) >>
+                    restricted: call!(Path::parse_mod_style) >>
+                    (in_tok, restricted)
+                )) >>
+                (Visibility::Restricted(VisRestricted {
+                    path: Box::new((other.0).1),
+                    in_token: Some((other.0).0),
+                    paren_token: other.1,
+                    pub_token: pub_token,
+                }))
+            )
+            |
+            syn!(Pub) => { |tok| {
+                Visibility::Public(VisPublic {
+                    pub_token: tok,
+                })
+            } }
+            |
+            epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
+        ));
     }
 }
 

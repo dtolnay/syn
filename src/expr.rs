@@ -589,16 +589,16 @@ pub mod parsing {
     use super::*;
     use ty::parsing::qpath;
 
-    use proc_macro2::{TokenTree, TokenStream, TokenKind, Delimiter};
-    use synom::{IResult, Synom};
+    use proc_macro2::{TokenStream, TokenKind, Delimiter};
+    use synom::{PResult, Cursor, Synom, parse_error};
     use synom::tokens::*;
 
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
     macro_rules! named_ambiguous_expr {
         ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
-            fn $name(i: &[$crate::synom::TokenTree], $allow_struct: bool)
-                     -> $crate::synom::IResult<&[$crate::synom::TokenTree], $o> {
+            fn $name(i: $crate::synom::Cursor, $allow_struct: bool)
+                     -> $crate::synom::PResult<$o> {
                 $submac!(i, $($args)*)
             }
         };
@@ -611,9 +611,7 @@ pub mod parsing {
     }
 
     impl Synom for Expr {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            ambiguous_expr!(input, true)
-        }
+        named!(parse -> Self, ambiguous_expr!(true));
 
         fn description() -> Option<&'static str> {
             Some("expression")
@@ -624,10 +622,10 @@ pub mod parsing {
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
     #[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
-    fn ambiguous_expr(i: &[synom::TokenTree],
+    fn ambiguous_expr(i: Cursor,
                       allow_struct: bool,
                       allow_block: bool)
-                      -> IResult<&[synom::TokenTree], Expr> {
+                      -> PResult<Expr> {
         do_parse! {
             i,
             mut e: alt!(
@@ -793,16 +791,13 @@ pub mod parsing {
     }
 
     impl Synom for ExprParen {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                e: parens!(syn!(Expr)) >>
-                (ExprParen {
-                    expr: Box::new(e.0),
-                    paren_token: e.1,
-                }.into())
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            e: parens!(syn!(Expr)) >>
+            (ExprParen {
+                expr: Box::new(e.0),
+                paren_token: e.1,
+            }.into())
+        ));
     }
 
     named_ambiguous_expr!(expr_box -> ExprKind, allow_struct, do_parse!(
@@ -815,41 +810,35 @@ pub mod parsing {
     ));
 
     impl Synom for ExprInPlace {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                in_: syn!(In) >>
-                place: expr_no_struct >>
-                value: braces!(call!(Block::parse_within)) >>
-                (ExprInPlace {
-                    in_token: in_,
-                    place: Box::new(place),
-                    value: Box::new(Expr {
-                        node: ExprBlock {
-                            unsafety: Unsafety::Normal,
-                            block: Block {
-                                stmts: value.0,
-                                brace_token: value.1,
-                            },
-                        }.into(),
-                        attrs: Vec::new(),
-                    }),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            in_: syn!(In) >>
+            place: expr_no_struct >>
+            value: braces!(call!(Block::parse_within)) >>
+            (ExprInPlace {
+                in_token: in_,
+                place: Box::new(place),
+                value: Box::new(Expr {
+                    node: ExprBlock {
+                        unsafety: Unsafety::Normal,
+                        block: Block {
+                            stmts: value.0,
+                            brace_token: value.1,
+                        },
+                    }.into(),
+                    attrs: Vec::new(),
+                }),
+            })
+        ));
     }
 
     impl Synom for ExprArray {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                elems: brackets!(call!(Delimited::parse_terminated)) >>
-                (ExprArray {
-                    exprs: elems.0,
-                    bracket_token: elems.1,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            elems: brackets!(call!(Delimited::parse_terminated)) >>
+            (ExprArray {
+                exprs: elems.0,
+                bracket_token: elems.1,
+            })
+        ));
     }
 
     named!(and_call -> (Delimited<Expr, tokens::Comma>, tokens::Paren),
@@ -891,17 +880,14 @@ pub mod parsing {
     ));
 
     impl Synom for ExprTup {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                elems: parens!(call!(Delimited::parse_terminated)) >>
-                (ExprTup {
-                    args: elems.0,
-                    paren_token: elems.1,
-                    lone_comma: None, // TODO: parse this
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            elems: parens!(call!(Delimited::parse_terminated)) >>
+            (ExprTup {
+                args: elems.0,
+                paren_token: elems.1,
+                lone_comma: None, // TODO: parse this
+            })
+        ));
     }
 
     named_ambiguous_expr!(and_binary -> (BinOp, Expr), allow_struct, tuple!(
@@ -925,53 +911,47 @@ pub mod parsing {
            map!(tuple!(syn!(Colon), syn!(Ty)), |(a, b)| (b, a)));
 
     impl Synom for ExprIfLet {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                if_: syn!(If) >>
-                let_: syn!(Let) >>
-                pat: syn!(Pat) >>
-                eq: syn!(Eq) >>
-                cond: expr_no_struct >>
-                then_block: braces!(call!(Block::parse_within)) >>
-                else_block: option!(else_block) >>
-                (ExprIfLet {
-                    pat: Box::new(pat),
-                    let_token: let_,
-                    eq_token: eq,
-                    expr: Box::new(cond),
-                    if_true: Block {
-                        stmts: then_block.0,
-                        brace_token: then_block.1,
-                    },
-                    if_token: if_,
-                    else_token: else_block.as_ref().map(|p| Else((p.0).0)),
-                    if_false: else_block.map(|p| Box::new(p.1.into())),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            if_: syn!(If) >>
+            let_: syn!(Let) >>
+            pat: syn!(Pat) >>
+            eq: syn!(Eq) >>
+            cond: expr_no_struct >>
+            then_block: braces!(call!(Block::parse_within)) >>
+            else_block: option!(else_block) >>
+            (ExprIfLet {
+                pat: Box::new(pat),
+                let_token: let_,
+                eq_token: eq,
+                expr: Box::new(cond),
+                if_true: Block {
+                    stmts: then_block.0,
+                    brace_token: then_block.1,
+                },
+                if_token: if_,
+                else_token: else_block.as_ref().map(|p| Else((p.0).0)),
+                if_false: else_block.map(|p| Box::new(p.1.into())),
+            })
+        ));
     }
 
     impl Synom for ExprIf {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                if_: syn!(If) >>
-                cond: expr_no_struct >>
-                then_block: braces!(call!(Block::parse_within)) >>
-                else_block: option!(else_block) >>
-                (ExprIf {
-                    cond: Box::new(cond),
-                    if_true: Block {
-                        stmts: then_block.0,
-                        brace_token: then_block.1,
-                    },
-                    if_token: if_,
-                    else_token: else_block.as_ref().map(|p| Else((p.0).0)),
-                    if_false: else_block.map(|p| Box::new(p.1.into())),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            if_: syn!(If) >>
+            cond: expr_no_struct >>
+            then_block: braces!(call!(Block::parse_within)) >>
+            else_block: option!(else_block) >>
+            (ExprIf {
+                cond: Box::new(cond),
+                if_true: Block {
+                    stmts: then_block.0,
+                    brace_token: then_block.1,
+                },
+                if_token: if_,
+                else_token: else_block.as_ref().map(|p| Else((p.0).0)),
+                if_false: else_block.map(|p| Box::new(p.1.into())),
+            })
+        ));
     }
 
     named!(else_block -> (Else, ExprKind), do_parse!(
@@ -997,98 +977,86 @@ pub mod parsing {
 
 
     impl Synom for ExprForLoop {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                lbl: option!(tuple!(label, syn!(Colon))) >>
-                for_: syn!(For) >>
-                pat: syn!(Pat) >>
-                in_: syn!(In) >>
-                expr: expr_no_struct >>
-                loop_block: syn!(Block) >>
-                (ExprForLoop {
-                    for_token: for_,
-                    in_token: in_,
-                    pat: Box::new(pat),
-                    expr: Box::new(expr),
-                    body: loop_block,
-                    colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
-                    label: lbl.map(|p| p.0),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            lbl: option!(tuple!(label, syn!(Colon))) >>
+            for_: syn!(For) >>
+            pat: syn!(Pat) >>
+            in_: syn!(In) >>
+            expr: expr_no_struct >>
+            loop_block: syn!(Block) >>
+            (ExprForLoop {
+                for_token: for_,
+                in_token: in_,
+                pat: Box::new(pat),
+                expr: Box::new(expr),
+                body: loop_block,
+                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                label: lbl.map(|p| p.0),
+            })
+        ));
     }
 
     impl Synom for ExprLoop {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                lbl: option!(tuple!(label, syn!(Colon))) >>
-                loop_: syn!(Loop) >>
-                loop_block: syn!(Block) >>
-                (ExprLoop {
-                    loop_token: loop_,
-                    body: loop_block,
-                    colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
-                    label: lbl.map(|p| p.0),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            lbl: option!(tuple!(label, syn!(Colon))) >>
+            loop_: syn!(Loop) >>
+            loop_block: syn!(Block) >>
+            (ExprLoop {
+                loop_token: loop_,
+                body: loop_block,
+                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                label: lbl.map(|p| p.0),
+            })
+        ));
     }
 
     impl Synom for ExprMatch {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                match_: syn!(Match) >>
-                obj: expr_no_struct >>
-                res: braces!(do_parse!(
-                    mut arms: many0!(do_parse!(
-                        arm: syn!(Arm) >>
-                            cond!(arm_requires_comma(&arm), syn!(Comma)) >>
-                            cond!(!arm_requires_comma(&arm), option!(syn!(Comma))) >>
-                            (arm)
-                    )) >>
-                    last_arm: option!(syn!(Arm)) >>
-                    ({
-                        arms.extend(last_arm);
-                        arms
-                    })
+        named!(parse -> Self, do_parse!(
+            match_: syn!(Match) >>
+            obj: expr_no_struct >>
+            res: braces!(do_parse!(
+                mut arms: many0!(do_parse!(
+                    arm: syn!(Arm) >>
+                        cond!(arm_requires_comma(&arm), syn!(Comma)) >>
+                        cond!(!arm_requires_comma(&arm), option!(syn!(Comma))) >>
+                        (arm)
                 )) >>
+                last_arm: option!(syn!(Arm)) >>
                 ({
-                    let (mut arms, brace) = res;
-                    ExprMatch {
-                        expr: Box::new(obj),
-                        match_token: match_,
-                        brace_token: brace,
-                        arms: {
-                            for arm in &mut arms {
-                                if arm_requires_comma(arm) {
-                                    arm.comma = Some(tokens::Comma::default());
-                                }
-                            }
-                            arms
-                        },
-                    }
+                    arms.extend(last_arm);
+                    arms
                 })
-            }
-        }
+            )) >>
+            ({
+                let (mut arms, brace) = res;
+                ExprMatch {
+                    expr: Box::new(obj),
+                    match_token: match_,
+                    brace_token: brace,
+                    arms: {
+                        for arm in &mut arms {
+                            if arm_requires_comma(arm) {
+                                arm.comma = Some(tokens::Comma::default());
+                            }
+                        }
+                        arms
+                    },
+                }
+            })
+        ));
     }
 
     impl Synom for ExprCatch {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                do_: syn!(Do) >>
-                catch_: syn!(Catch) >>
-                catch_block: syn!(Block) >>
-                (ExprCatch {
-                    block: catch_block,
-                    do_token: do_,
-                    catch_token: catch_,
-                }.into())
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            do_: syn!(Do) >>
+            catch_: syn!(Catch) >>
+            catch_block: syn!(Block) >>
+            (ExprCatch {
+                block: catch_block,
+                do_token: do_,
+                catch_token: catch_,
+            }.into())
+        ));
     }
 
     fn arm_requires_comma(arm: &Arm) -> bool {
@@ -1100,34 +1068,31 @@ pub mod parsing {
     }
 
     impl Synom for Arm {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                attrs: many0!(call!(Attribute::parse_outer)) >>
-                pats: call!(Delimited::parse_separated_nonempty) >>
-                guard: option!(tuple!(syn!(If), syn!(Expr))) >>
-                rocket: syn!(Rocket) >>
-                body: alt!(
-                    map!(syn!(Block), |blk| {
-                        ExprKind::Block(ExprBlock {
-                            unsafety: Unsafety::Normal,
-                            block: blk,
-                        }).into()
-                    })
-                    |
-                    syn!(Expr)
-                ) >>
-                (Arm {
-                    rocket_token: rocket,
-                    if_token: guard.as_ref().map(|p| If((p.0).0)),
-                    attrs: attrs,
-                    pats: pats,
-                    guard: guard.map(|p| Box::new(p.1)),
-                    body: Box::new(body),
-                    comma: None,
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_outer)) >>
+            pats: call!(Delimited::parse_separated_nonempty) >>
+            guard: option!(tuple!(syn!(If), syn!(Expr))) >>
+            rocket: syn!(Rocket) >>
+            body: alt!(
+                map!(syn!(Block), |blk| {
+                    ExprKind::Block(ExprBlock {
+                        unsafety: Unsafety::Normal,
+                        block: blk,
+                    }).into()
                 })
-            }
-        }
+                |
+                syn!(Expr)
+            ) >>
+            (Arm {
+                rocket_token: rocket,
+                if_token: guard.as_ref().map(|p| If((p.0).0)),
+                attrs: attrs,
+                pats: pats,
+                guard: guard.map(|p| Box::new(p.1)),
+                body: Box::new(body),
+                comma: None,
+            })
+        ));
     }
 
     named_ambiguous_expr!(expr_closure -> ExprKind, allow_struct, do_parse!(
@@ -1184,61 +1149,52 @@ pub mod parsing {
     ));
 
     impl Synom for ExprWhile {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                lbl: option!(tuple!(label, syn!(Colon))) >>
-                while_: syn!(While) >>
-                cond: expr_no_struct >>
-                while_block: syn!(Block) >>
-                (ExprWhile {
-                    while_token: while_,
-                    colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
-                    cond: Box::new(cond),
-                    body: while_block,
-                    label: lbl.map(|p| p.0),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            lbl: option!(tuple!(label, syn!(Colon))) >>
+            while_: syn!(While) >>
+            cond: expr_no_struct >>
+            while_block: syn!(Block) >>
+            (ExprWhile {
+                while_token: while_,
+                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                cond: Box::new(cond),
+                body: while_block,
+                label: lbl.map(|p| p.0),
+            })
+        ));
     }
 
     impl Synom for ExprWhileLet {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                lbl: option!(tuple!(label, syn!(Colon))) >>
-                while_: syn!(While) >>
-                let_: syn!(Let) >>
-                pat: syn!(Pat) >>
-                eq: syn!(Eq) >>
-                value: expr_no_struct >>
-                while_block: syn!(Block) >>
-                (ExprWhileLet {
-                    eq_token: eq,
-                    let_token: let_,
-                    while_token: while_,
-                    colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
-                    pat: Box::new(pat),
-                    expr: Box::new(value),
-                    body: while_block,
-                    label: lbl.map(|p| p.0),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            lbl: option!(tuple!(label, syn!(Colon))) >>
+            while_: syn!(While) >>
+            let_: syn!(Let) >>
+            pat: syn!(Pat) >>
+            eq: syn!(Eq) >>
+            value: expr_no_struct >>
+            while_block: syn!(Block) >>
+            (ExprWhileLet {
+                eq_token: eq,
+                let_token: let_,
+                while_token: while_,
+                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                pat: Box::new(pat),
+                expr: Box::new(value),
+                body: while_block,
+                label: lbl.map(|p| p.0),
+            })
+        ));
     }
 
     impl Synom for ExprContinue {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                cont: syn!(Continue) >>
-                lbl: option!(label) >>
-                (ExprContinue {
-                    continue_token: cont,
-                    label: lbl,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            cont: syn!(Continue) >>
+            lbl: option!(label) >>
+            (ExprContinue {
+                continue_token: cont,
+                label: lbl,
+            })
+        ));
     }
 
     named_ambiguous_expr!(expr_break -> ExprKind, allow_struct, do_parse!(
@@ -1262,101 +1218,89 @@ pub mod parsing {
     ));
 
     impl Synom for ExprStruct {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                path: syn!(Path) >>
-                data: braces!(do_parse!(
-                    fields: call!(Delimited::parse_terminated) >>
-                    base: option!(
-                        cond!(fields.is_empty() || fields.trailing_delim(),
-                            do_parse!(
-                                dots: syn!(Dot2) >>
-                                base: syn!(Expr) >>
-                                (dots, base)
-                            )
+        named!(parse -> Self, do_parse!(
+            path: syn!(Path) >>
+            data: braces!(do_parse!(
+                fields: call!(Delimited::parse_terminated) >>
+                base: option!(
+                    cond!(fields.is_empty() || fields.trailing_delim(),
+                        do_parse!(
+                            dots: syn!(Dot2) >>
+                            base: syn!(Expr) >>
+                            (dots, base)
                         )
-                    ) >>
-                    (fields, base)
-                )) >>
-                ({
-                    let ((fields, base), brace) = data;
-                    let (dots, rest) = match base.and_then(|b| b) {
-                        Some((dots, base)) => (Some(dots), Some(base)),
-                        None => (None, None),
-                    };
-                    ExprStruct {
-                        brace_token: brace,
-                        path: path,
-                        fields: fields,
-                        dot2_token: dots,
-                        rest: rest.map(Box::new),
-                    }
-                })
-            }
-        }
+                    )
+                ) >>
+                (fields, base)
+            )) >>
+            ({
+                let ((fields, base), brace) = data;
+                let (dots, rest) = match base.and_then(|b| b) {
+                    Some((dots, base)) => (Some(dots), Some(base)),
+                    None => (None, None),
+                };
+                ExprStruct {
+                    brace_token: brace,
+                    path: path,
+                    fields: fields,
+                    dot2_token: dots,
+                    rest: rest.map(Box::new),
+                }
+            })
+        ));
     }
 
     impl Synom for FieldValue {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    name: wordlike >>
-                    colon: syn!(Colon) >>
-                    value: syn!(Expr) >>
-                    (FieldValue {
-                        ident: name,
-                        expr: value,
-                        is_shorthand: false,
-                        attrs: Vec::new(),
-                        colon_token: Some(colon),
-                    })
-                )
-                |
-                map!(syn!(Ident), |name: Ident| FieldValue {
-                    ident: name.clone(),
-                    expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
-                    is_shorthand: true,
+        named!(parse -> Self, alt!(
+            do_parse!(
+                name: wordlike >>
+                colon: syn!(Colon) >>
+                value: syn!(Expr) >>
+                (FieldValue {
+                    ident: name,
+                    expr: value,
+                    is_shorthand: false,
                     attrs: Vec::new(),
-                    colon_token: None,
+                    colon_token: Some(colon),
                 })
-            }
-        }
+            )
+            |
+            map!(syn!(Ident), |name: Ident| FieldValue {
+                ident: name.clone(),
+                expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
+                is_shorthand: true,
+                attrs: Vec::new(),
+                colon_token: None,
+            })
+        ));
     }
 
     impl Synom for ExprRepeat {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                data: brackets!(do_parse!(
-                    value: syn!(Expr) >>
-                    semi: syn!(Semi) >>
-                    times: syn!(Expr) >>
-                    (value, semi, times)
-                )) >>
-                (ExprRepeat {
-                    expr: Box::new((data.0).0),
-                    amt: Box::new((data.0).2),
-                    bracket_token: data.1,
-                    semi_token: (data.0).1,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            data: brackets!(do_parse!(
+                value: syn!(Expr) >>
+                semi: syn!(Semi) >>
+                times: syn!(Expr) >>
+                (value, semi, times)
+            )) >>
+            (ExprRepeat {
+                expr: Box::new((data.0).0),
+                amt: Box::new((data.0).2),
+                bracket_token: data.1,
+                semi_token: (data.0).1,
+            })
+        ));
     }
 
     impl Synom for ExprBlock {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                rules: syn!(Unsafety) >>
-                b: syn!(Block) >>
-                (ExprBlock {
-                    unsafety: rules,
-                    block: b,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            rules: syn!(Unsafety) >>
+            b: syn!(Block) >>
+            (ExprBlock {
+                unsafety: rules,
+                block: b,
+            })
+        ));
     }
 
     named_ambiguous_expr!(expr_range -> ExprKind, allow_struct, do_parse!(
@@ -1366,27 +1310,22 @@ pub mod parsing {
     ));
 
     impl Synom for RangeLimits {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(Dot3) => { RangeLimits::Closed }
-                |
-                syn!(Dot2) => { RangeLimits::HalfOpen }
-            }
-        }
+        named!(parse -> Self, alt!(
+            // Must come before Dot2
+            syn!(Dot3) => { RangeLimits::Closed }
+            |
+            syn!(Dot2) => { RangeLimits::HalfOpen }
+        ));
     }
 
     impl Synom for ExprPath {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                pair: qpath >>
-                (ExprPath {
-                    qself: pair.0,
-                    path: pair.1,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            pair: qpath >>
+            (ExprPath {
+                qself: pair.0,
+                path: pair.1,
+            })
+        ));
     }
 
     named_ambiguous_expr!(expr_addr_of -> ExprKind, allow_struct, do_parse!(
@@ -1426,49 +1365,40 @@ pub mod parsing {
     ));
 
     impl Synom for Block {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                stmts: braces!(call!(Block::parse_within)) >>
-                (Block {
-                    stmts: stmts.0,
-                    brace_token: stmts.1,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            stmts: braces!(call!(Block::parse_within)) >>
+            (Block {
+                stmts: stmts.0,
+                brace_token: stmts.1,
+            })
+        ));
     }
 
     impl Block {
-        pub fn parse_within(input: &[TokenTree]) -> IResult<&[TokenTree], Vec<Stmt>> {
-            do_parse! {
-                input,
-                many0!(syn!(Semi)) >>
-                mut standalone: many0!(terminated!(syn!(Stmt), many0!(syn!(Semi)))) >>
-                last: option!(syn!(Expr)) >>
-                (match last {
-                    None => standalone,
-                    Some(last) => {
-                        standalone.push(Stmt::Expr(Box::new(last)));
-                        standalone
-                    }
-                })
-            }
-        }
+        named!(pub parse_within -> Vec<Stmt>, do_parse!(
+            many0!(syn!(Semi)) >>
+            mut standalone: many0!(terminated!(syn!(Stmt), many0!(syn!(Semi)))) >>
+            last: option!(syn!(Expr)) >>
+            (match last {
+                None => standalone,
+                Some(last) => {
+                    standalone.push(Stmt::Expr(Box::new(last)));
+                    standalone
+                }
+            })
+        ));
     }
 
     impl Synom for Stmt {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                stmt_mac
-                |
-                stmt_local
-                |
-                stmt_item
-                |
-                stmt_expr
-            }
-        }
+        named!(parse -> Self, alt!(
+            stmt_mac
+            |
+            stmt_local
+            |
+            stmt_item
+            |
+            stmt_expr
+        ));
     }
 
     named!(stmt_mac -> Stmt, do_parse!(
@@ -1541,7 +1471,7 @@ pub mod parsing {
             if let Some(s) = semi {
                 Stmt::Semi(Box::new(e), s)
             } else if requires_semi(&e) {
-                return IResult::Error;
+                return parse_error();
             } else {
                 Stmt::Expr(Box::new(e))
             }
@@ -1549,174 +1479,153 @@ pub mod parsing {
     ));
 
     impl Synom for Pat {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(PatWild) => { Pat::Wild } // must be before pat_ident
-                |
-                syn!(PatBox) => { Pat::Box }  // must be before pat_ident
-                |
-                syn!(PatRange) => { Pat::Range } // must be before pat_lit
-                |
-                syn!(PatTupleStruct) => { Pat::TupleStruct }  // must be before pat_ident
-                |
-                syn!(PatStruct) => { Pat::Struct } // must be before pat_ident
-                |
-                syn!(Mac) => { Pat::Mac } // must be before pat_ident
-                |
-                syn!(PatLit) => { Pat::Lit } // must be before pat_ident
-                |
-                syn!(PatIdent) => { Pat::Ident } // must be before pat_path
-                |
-                syn!(PatPath) => { Pat::Path }
-                |
-                syn!(PatTuple) => { Pat::Tuple }
-                |
-                syn!(PatRef) => { Pat::Ref }
-                |
-                syn!(PatSlice) => { Pat::Slice }
-            }
-        }
+        named!(parse -> Self, alt!(
+            syn!(PatWild) => { Pat::Wild } // must be before pat_ident
+            |
+            syn!(PatBox) => { Pat::Box }  // must be before pat_ident
+            |
+            syn!(PatRange) => { Pat::Range } // must be before pat_lit
+            |
+            syn!(PatTupleStruct) => { Pat::TupleStruct }  // must be before pat_ident
+            |
+            syn!(PatStruct) => { Pat::Struct } // must be before pat_ident
+            |
+            syn!(Mac) => { Pat::Mac } // must be before pat_ident
+            |
+            syn!(PatLit) => { Pat::Lit } // must be before pat_ident
+            |
+            syn!(PatIdent) => { Pat::Ident } // must be before pat_path
+            |
+            syn!(PatPath) => { Pat::Path }
+            |
+            syn!(PatTuple) => { Pat::Tuple }
+            |
+            syn!(PatRef) => { Pat::Ref }
+            |
+            syn!(PatSlice) => { Pat::Slice }
+        ));
     }
 
     impl Synom for PatWild {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            map! {
-                input,
-                syn!(Underscore),
-                |u| PatWild { underscore_token: u }
-            }
-        }
+        named!(parse -> Self, map!(
+            syn!(Underscore),
+            |u| PatWild { underscore_token: u }
+        ));
     }
 
     impl Synom for PatBox {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                boxed: syn!(Box_) >>
-                pat: syn!(Pat) >>
-                (PatBox {
-                    pat: Box::new(pat),
-                    box_token: boxed,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            boxed: syn!(Box_) >>
+            pat: syn!(Pat) >>
+            (PatBox {
+                pat: Box::new(pat),
+                box_token: boxed,
+            })
+        ));
     }
 
     impl Synom for PatIdent {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                mode: option!(syn!(Ref)) >>
-                mutability: syn!(Mutability) >>
-                name: alt!(
-                    syn!(Ident)
-                    |
-                    syn!(Self_) => { Into::into }
-                ) >>
-                not!(syn!(Lt)) >>
-                not!(syn!(Colon2)) >>
-                subpat: option!(tuple!(syn!(At), syn!(Pat))) >>
-                (PatIdent {
-                    mode: match mode {
-                        Some(mode) => BindingMode::ByRef(mode, mutability),
-                        None => BindingMode::ByValue(mutability),
-                    },
-                    ident: name,
-                    at_token: subpat.as_ref().map(|p| At((p.0).0)),
-                    subpat: subpat.map(|p| Box::new(p.1)),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            mode: option!(syn!(Ref)) >>
+            mutability: syn!(Mutability) >>
+            name: alt!(
+                syn!(Ident)
+                |
+                syn!(Self_) => { Into::into }
+            ) >>
+            not!(syn!(Lt)) >>
+            not!(syn!(Colon2)) >>
+            subpat: option!(tuple!(syn!(At), syn!(Pat))) >>
+            (PatIdent {
+                mode: match mode {
+                    Some(mode) => BindingMode::ByRef(mode, mutability),
+                    None => BindingMode::ByValue(mutability),
+                },
+                ident: name,
+                at_token: subpat.as_ref().map(|p| At((p.0).0)),
+                subpat: subpat.map(|p| Box::new(p.1)),
+            })
+        ));
     }
 
     impl Synom for PatTupleStruct {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                path: syn!(Path) >>
-                tuple: syn!(PatTuple) >>
-                (PatTupleStruct {
-                    path: path,
-                    pat: tuple,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            path: syn!(Path) >>
+            tuple: syn!(PatTuple) >>
+            (PatTupleStruct {
+                path: path,
+                pat: tuple,
+            })
+        ));
     }
 
     impl Synom for PatStruct {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                path: syn!(Path) >>
-                data: braces!(do_parse!(
-                    fields: call!(Delimited::parse_terminated) >>
-                    base: option!(
-                        cond!(fields.is_empty() || fields.trailing_delim(),
-                              syn!(Dot2))
-                    ) >>
-                    (fields, base)
-                )) >>
-                (PatStruct {
-                    path: path,
-                    fields: (data.0).0,
-                    brace_token: data.1,
-                    dot2_token: (data.0).1.and_then(|m| m),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            path: syn!(Path) >>
+            data: braces!(do_parse!(
+                fields: call!(Delimited::parse_terminated) >>
+                base: option!(
+                    cond!(fields.is_empty() || fields.trailing_delim(),
+                          syn!(Dot2))
+                ) >>
+                (fields, base)
+            )) >>
+            (PatStruct {
+                path: path,
+                fields: (data.0).0,
+                brace_token: data.1,
+                dot2_token: (data.0).1.and_then(|m| m),
+            })
+        ));
     }
 
     impl Synom for FieldPat {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    ident: wordlike >>
-                    colon: syn!(Colon) >>
-                    pat: syn!(Pat) >>
-                    (FieldPat {
+        named!(parse -> Self, alt!(
+            do_parse!(
+                ident: wordlike >>
+                colon: syn!(Colon) >>
+                pat: syn!(Pat) >>
+                (FieldPat {
+                    ident: ident,
+                    pat: Box::new(pat),
+                    is_shorthand: false,
+                    attrs: Vec::new(),
+                    colon_token: Some(colon),
+                })
+            )
+            |
+            do_parse!(
+                boxed: option!(syn!(Box_)) >>
+                mode: option!(syn!(Ref)) >>
+                mutability: syn!(Mutability) >>
+                ident: syn!(Ident) >>
+                ({
+                    let mut pat: Pat = PatIdent {
+                        mode: if let Some(mode) = mode {
+                            BindingMode::ByRef(mode, mutability)
+                        } else {
+                            BindingMode::ByValue(mutability)
+                        },
+                        ident: ident.clone(),
+                        subpat: None,
+                        at_token: None,
+                    }.into();
+                    if let Some(boxed) = boxed {
+                        pat = PatBox {
+                            pat: Box::new(pat),
+                            box_token: boxed,
+                        }.into();
+                    }
+                    FieldPat {
                         ident: ident,
                         pat: Box::new(pat),
-                        is_shorthand: false,
+                        is_shorthand: true,
                         attrs: Vec::new(),
-                        colon_token: Some(colon),
-                    })
-                )
-                |
-                do_parse!(
-                    boxed: option!(syn!(Box_)) >>
-                    mode: option!(syn!(Ref)) >>
-                    mutability: syn!(Mutability) >>
-                    ident: syn!(Ident) >>
-                    ({
-                        let mut pat: Pat = PatIdent {
-                            mode: if let Some(mode) = mode {
-                                BindingMode::ByRef(mode, mutability)
-                            } else {
-                                BindingMode::ByValue(mutability)
-                            },
-                            ident: ident.clone(),
-                            subpat: None,
-                            at_token: None,
-                        }.into();
-                        if let Some(boxed) = boxed {
-                            pat = PatBox {
-                                pat: Box::new(pat),
-                                box_token: boxed,
-                            }.into();
-                        }
-                        FieldPat {
-                            ident: ident,
-                            pat: Box::new(pat),
-                            is_shorthand: true,
-                            attrs: Vec::new(),
-                            colon_token: None,
-                        }
-                    })
-                )
-            }
-        }
+                        colon_token: None,
+                    }
+                })
+            )
+        ));
     }
 
     named!(wordlike -> Ident, alt!(
@@ -1729,114 +1638,99 @@ pub mod parsing {
                 if s.parse::<u32>().is_ok() {
                     Ident::new(s.into(), lit.span)
                 } else {
-                    return IResult::Error
+                    return parse_error();
                 }
             })
         )
     ));
 
     impl Synom for PatPath {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            map! {
-                input,
-                syn!(ExprPath),
-                |p: ExprPath| PatPath { qself: p.qself, path: p.path }
-            }
-        }
+        named!(parse -> Self, map!(
+            syn!(ExprPath),
+            |p: ExprPath| PatPath { qself: p.qself, path: p.path }
+        ));
     }
 
     impl Synom for PatTuple {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                data: parens!(do_parse!(
-                    elems: call!(Delimited::parse_terminated) >>
-                    dotdot: map!(cond!(
-                        elems.is_empty() || elems.trailing_delim(),
-                        option!(do_parse!(
-                            dots: syn!(Dot2) >>
-                            trailing: option!(syn!(Comma)) >>
-                            (dots, trailing)
-                        ))
-                    ), |x: Option<_>| x.and_then(|x| x)) >>
-                    rest: cond!(match dotdot {
-                                    Some((_, Some(_))) => true,
-                                    _ => false,
-                                },
-                                call!(Delimited::parse_terminated)) >>
-                    (elems, dotdot, rest)
-                )) >>
-                ({
-                    let ((mut elems, dotdot, rest), parens) = data;
-                    let (dotdot, trailing) = match dotdot {
-                        Some((a, b)) => (Some(a), Some(b)),
-                        None => (None, None),
-                    };
-                    PatTuple {
-                        paren_token: parens,
-                        dots_pos: dotdot.as_ref().map(|_| elems.len()),
-                        dot2_token: dotdot,
-                        comma_token: trailing.and_then(|b| b),
-                        pats: {
-                            if let Some(rest) = rest {
-                                for elem in rest {
-                                    elems.push(elem);
-                                }
+        named!(parse -> Self, do_parse!(
+            data: parens!(do_parse!(
+                elems: call!(Delimited::parse_terminated) >>
+                dotdot: map!(cond!(
+                    elems.is_empty() || elems.trailing_delim(),
+                    option!(do_parse!(
+                        dots: syn!(Dot2) >>
+                        trailing: option!(syn!(Comma)) >>
+                        (dots, trailing)
+                    ))
+                ), |x: Option<_>| x.and_then(|x| x)) >>
+                rest: cond!(match dotdot {
+                                Some((_, Some(_))) => true,
+                                _ => false,
+                            },
+                            call!(Delimited::parse_terminated)) >>
+                (elems, dotdot, rest)
+            )) >>
+            ({
+                let ((mut elems, dotdot, rest), parens) = data;
+                let (dotdot, trailing) = match dotdot {
+                    Some((a, b)) => (Some(a), Some(b)),
+                    None => (None, None),
+                };
+                PatTuple {
+                    paren_token: parens,
+                    dots_pos: dotdot.as_ref().map(|_| elems.len()),
+                    dot2_token: dotdot,
+                    comma_token: trailing.and_then(|b| b),
+                    pats: {
+                        if let Some(rest) = rest {
+                            for elem in rest {
+                                elems.push(elem);
                             }
-                            elems
-                        },
-                    }
-                })
-            }
-        }
+                        }
+                        elems
+                    },
+                }
+            })
+        ));
     }
 
     impl Synom for PatRef {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                and: syn!(And) >>
-                mutability: syn!(Mutability) >>
-                pat: syn!(Pat) >>
-                (PatRef {
-                    pat: Box::new(pat),
-                    mutbl: mutability,
-                    and_token: and,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            and: syn!(And) >>
+            mutability: syn!(Mutability) >>
+            pat: syn!(Pat) >>
+            (PatRef {
+                pat: Box::new(pat),
+                mutbl: mutability,
+                and_token: and,
+            })
+        ));
     }
 
     impl Synom for PatLit {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                lit: pat_lit_expr >>
-                (if let ExprKind::Path(_) = lit.node {
-                    return IResult::Error; // these need to be parsed by pat_path
-                } else {
-                    PatLit {
-                        expr: Box::new(lit),
-                    }
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            lit: pat_lit_expr >>
+            (if let ExprKind::Path(_) = lit.node {
+                return parse_error(); // these need to be parsed by pat_path
+            } else {
+                PatLit {
+                    expr: Box::new(lit),
+                }
+            })
+        ));
     }
 
     impl Synom for PatRange {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                lo: pat_lit_expr >>
-                limits: syn!(RangeLimits) >>
-                hi: pat_lit_expr >>
-                (PatRange {
-                    lo: Box::new(lo),
-                    hi: Box::new(hi),
-                    limits: limits,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            lo: pat_lit_expr >>
+            limits: syn!(RangeLimits) >>
+            hi: pat_lit_expr >>
+            (PatRange {
+                lo: Box::new(lo),
+                hi: Box::new(hi),
+                limits: limits,
+            })
+        ));
     }
 
     named!(pat_lit_expr -> Expr, do_parse!(
@@ -1857,59 +1751,53 @@ pub mod parsing {
     ));
 
     impl Synom for PatSlice {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            map! {
-                input,
-                brackets!(do_parse!(
-                    before: call!(Delimited::parse_terminated) >>
-                    middle: option!(do_parse!(
-                        dots: syn!(Dot2) >>
-                        trailing: option!(syn!(Comma)) >>
-                        (dots, trailing)
-                    )) >>
-                    after: cond!(
-                        match middle {
-                            Some((_, ref trailing)) => trailing.is_some(),
-                            _ => false,
-                        },
-                        call!(Delimited::parse_terminated)
-                    ) >>
-                    (before, middle, after)
-                )),
-                |((before, middle, after), brackets)| {
-                    let mut before: Delimited<Pat, tokens::Comma> = before;
-                    let after: Option<Delimited<Pat, tokens::Comma>> = after;
-                    let middle: Option<(Dot2, Option<Comma>)> = middle;
-                    PatSlice {
-                        dot2_token: middle.as_ref().map(|m| Dot2((m.0).0)),
-                        comma_token: middle.as_ref().and_then(|m| {
-                            m.1.as_ref().map(|m| Comma(m.0))
-                        }),
-                        bracket_token: brackets,
-                        middle: middle.and_then(|_| {
-                            if !before.is_empty() && !before.trailing_delim() {
-                                Some(Box::new(before.pop().unwrap().into_item()))
-                            } else {
-                                None
-                            }
-                        }),
-                        front: before,
-                        back: after.unwrap_or_default(),
-                    }
+        named!(parse -> Self, map!(
+            brackets!(do_parse!(
+                before: call!(Delimited::parse_terminated) >>
+                middle: option!(do_parse!(
+                    dots: syn!(Dot2) >>
+                    trailing: option!(syn!(Comma)) >>
+                    (dots, trailing)
+                )) >>
+                after: cond!(
+                    match middle {
+                        Some((_, ref trailing)) => trailing.is_some(),
+                        _ => false,
+                    },
+                    call!(Delimited::parse_terminated)
+                ) >>
+                (before, middle, after)
+            )),
+            |((before, middle, after), brackets)| {
+                let mut before: Delimited<Pat, tokens::Comma> = before;
+                let after: Option<Delimited<Pat, tokens::Comma>> = after;
+                let middle: Option<(Dot2, Option<Comma>)> = middle;
+                PatSlice {
+                    dot2_token: middle.as_ref().map(|m| Dot2((m.0).0)),
+                    comma_token: middle.as_ref().and_then(|m| {
+                        m.1.as_ref().map(|m| Comma(m.0))
+                    }),
+                    bracket_token: brackets,
+                    middle: middle.and_then(|_| {
+                        if !before.is_empty() && !before.trailing_delim() {
+                            Some(Box::new(before.pop().unwrap().into_item()))
+                        } else {
+                            None
+                        }
+                    }),
+                    front: before,
+                    back: after.unwrap_or_default(),
                 }
             }
-        }
+        ));
     }
 
     impl Synom for CaptureBy {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(Move) => { CaptureBy::Value }
-                |
-                epsilon!() => { |_| CaptureBy::Ref }
-            }
-        }
+        named!(parse -> Self, alt!(
+            syn!(Move) => { CaptureBy::Value }
+            |
+            epsilon!() => { |_| CaptureBy::Ref }
+        ));
     }
 
     named!(label -> Ident, map!(syn!(Lifetime), |lt: Lifetime| lt.ident));

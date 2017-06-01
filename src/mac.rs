@@ -137,36 +137,33 @@ pub mod parsing {
 
     use proc_macro2::{TokenKind, TokenTree};
     use synom::tokens::*;
-    use synom::{Synom, IResult};
+    use synom::{Synom, PResult, Cursor, parse_error};
 
     impl Synom for Mac {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                what: syn!(Path) >>
-                bang: syn!(Bang) >>
-                body: call!(::TokenTree::parse_delimited) >>
-                (Mac {
-                    path: what,
-                    bang_token: bang,
-                    tokens: vec![body],
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            what: syn!(Path) >>
+            bang: syn!(Bang) >>
+            body: call!(::TokenTree::parse_delimited) >>
+            (Mac {
+                path: what,
+                bang_token: bang,
+                tokens: vec![body],
+            })
+        ));
     }
 
     impl ::TokenTree {
-        pub fn parse_list(input: &[TokenTree]) -> IResult<&[TokenTree], Vec<Self>> {
-            IResult::Done(&[], input.iter().cloned().map(::TokenTree).collect())
+        pub fn parse_list(input: Cursor) -> PResult<Vec<Self>> {
+            Ok((&[], input.iter().cloned().map(::TokenTree).collect()))
         }
 
-        pub fn parse_delimited(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+        pub fn parse_delimited(input: Cursor) -> PResult<Self> {
             let mut tokens = input.iter();
             match tokens.next() {
                 Some(token @ &TokenTree { kind: TokenKind::Sequence(..), .. }) => {
-                    IResult::Done(tokens.as_slice(), ::TokenTree(token.clone()))
+                    Ok((tokens.as_slice(), ::TokenTree(token.clone())))
                 }
-                _ => IResult::Error,
+                _ => parse_error(),
             }
         }
     }

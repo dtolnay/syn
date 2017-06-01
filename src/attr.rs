@@ -292,7 +292,7 @@ impl<'a, T> FilterAttrs<'a> for T
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::IResult;
+    use synom::{PResult, Cursor, parse_error};
     use synom::tokens::*;
     use proc_macro2::{TokenKind, OpKind, TokenTree};
 
@@ -305,102 +305,96 @@ pub mod parsing {
 
     impl Attribute {
         #[cfg(feature = "full")]
-        pub fn parse_inner(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    pound: syn!(Pound) >>
-                    bang: syn!(Bang) >>
-                    path_and_tts: brackets!(tuple!(
-                        call!(::Path::parse_mod_style),
-                        call!(::TokenTree::parse_list)
-                    )) >>
-                    ({
-                        let ((path, tts), bracket) = path_and_tts;
+        named!(pub parse_inner -> Self, alt!(
+            do_parse!(
+                pound: syn!(Pound) >>
+                bang: syn!(Bang) >>
+                path_and_tts: brackets!(tuple!(
+                    call!(::Path::parse_mod_style),
+                    call!(::TokenTree::parse_list)
+                )) >>
+                ({
+                    let ((path, tts), bracket) = path_and_tts;
 
-                        Attribute {
-                            style: AttrStyle::Inner(bang),
-                            path: path,
-                            tts: tts,
-                            is_sugared_doc: false,
-                            pound_token: pound,
-                            bracket_token: bracket,
-                        }
-                    })
-                )
-                |
-                map!(
-                    lit_doc_comment,
-                    |lit| Attribute {
-                        style: AttrStyle::Inner(tokens::Bang::default()),
-                        path: "doc".into(),
-                        tts: vec![
-                            ::TokenTree(eq()),
-                            ::TokenTree(lit),
-                        ],
-                        is_sugared_doc: true,
-                        pound_token: tokens::Pound::default(),
-                        bracket_token: tokens::Bracket::default(),
+                    Attribute {
+                        style: AttrStyle::Inner(bang),
+                        path: path,
+                        tts: tts,
+                        is_sugared_doc: false,
+                        pound_token: pound,
+                        bracket_token: bracket,
                     }
-                )
-            }
-        }
+                })
+            )
+            |
+            map!(
+                lit_doc_comment,
+                |lit| Attribute {
+                    style: AttrStyle::Inner(tokens::Bang::default()),
+                    path: "doc".into(),
+                    tts: vec![
+                        ::TokenTree(eq()),
+                        ::TokenTree(lit),
+                    ],
+                    is_sugared_doc: true,
+                    pound_token: tokens::Pound::default(),
+                    bracket_token: tokens::Bracket::default(),
+                }
+            )
+        ));
 
-        pub fn parse_outer(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    pound: syn!(Pound) >>
-                    path_and_tts: brackets!(tuple!(
-                        call!(::Path::parse_mod_style),
-                        call!(::TokenTree::parse_list)
-                    )) >>
-                    ({
-                        let ((path, tts), bracket) = path_and_tts;
+        named!(pub parse_outer -> Self, alt!(
+            do_parse!(
+                pound: syn!(Pound) >>
+                path_and_tts: brackets!(tuple!(
+                    call!(::Path::parse_mod_style),
+                    call!(::TokenTree::parse_list)
+                )) >>
+                ({
+                    let ((path, tts), bracket) = path_and_tts;
 
-                        Attribute {
-                            style: AttrStyle::Outer,
-                            path: path,
-                            tts: tts,
-                            is_sugared_doc: false,
-                            pound_token: pound,
-                            bracket_token: bracket,
-                        }
-                    })
-                )
-                |
-                map!(
-                    lit_doc_comment,
-                    |lit| Attribute {
+                    Attribute {
                         style: AttrStyle::Outer,
-                        path: "doc".into(),
-                        tts: vec![
-                            ::TokenTree(eq()),
-                            ::TokenTree(lit),
-                        ],
-                        is_sugared_doc: true,
-                        pound_token: tokens::Pound::default(),
-                        bracket_token: tokens::Bracket::default(),
+                        path: path,
+                        tts: tts,
+                        is_sugared_doc: false,
+                        pound_token: pound,
+                        bracket_token: bracket,
                     }
-                )
-            }
-        }
+                })
+            )
+            |
+            map!(
+                lit_doc_comment,
+                |lit| Attribute {
+                    style: AttrStyle::Outer,
+                    path: "doc".into(),
+                    tts: vec![
+                        ::TokenTree(eq()),
+                        ::TokenTree(lit),
+                    ],
+                    is_sugared_doc: true,
+                    pound_token: tokens::Pound::default(),
+                    bracket_token: tokens::Bracket::default(),
+                }
+            )
+        ));
     }
 
-    fn lit_doc_comment(input: &[TokenTree]) -> IResult<&[TokenTree], TokenTree> {
+    fn lit_doc_comment(input: Cursor) -> PResult<TokenTree> {
         let mut tokens = input.iter();
         let tok = match tokens.next() {
             Some(tok) => tok,
-            None => return IResult::Error,
+            None => return parse_error(),
         };
         let literal = match tok.kind {
             TokenKind::Literal(ref l) => l.to_string(),
-            _ => return IResult::Error,
+            _ => return parse_error(),
         };
         if literal.starts_with("//") || literal.starts_with("/*") {
-            IResult::Done(tokens.as_slice(), tok.clone())
+            Ok((tokens.as_slice(), tok.clone()))
         } else {
-            IResult::Error
+            parse_error()
         }
     }
 }

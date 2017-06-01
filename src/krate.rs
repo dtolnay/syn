@@ -12,8 +12,7 @@ ast_struct! {
 pub mod parsing {
     use super::*;
 
-    use synom::{IResult, Synom, ParseError};
-    use proc_macro2::TokenTree;
+    use synom::{Synom, ParseError};
 
     impl Synom for Crate {
         named!(parse -> Self, do_parse!(
