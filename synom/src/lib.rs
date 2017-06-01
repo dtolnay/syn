@@ -57,7 +57,7 @@ pub type PResult<'a, O> = Result<(Cursor<'a>, O), ParseError>;
 ///
 /// NOTE: We should provide better error messages in the future.
 pub fn parse_error<O>() -> PResult<'static, O> {
-    Err(ParseError("error parsing value".to_string()))
+    Err(ParseError(None))
 }
 
 pub trait Synom: Sized {
@@ -69,7 +69,8 @@ pub trait Synom: Sized {
 
     fn parse_all(input: TokenStream) -> Result<Self, ParseError> {
         let tokens = input.into_iter().collect::<Vec<_>>();
-        let err = match Self::parse(&tokens) {
+        let result = Self::parse(&tokens);
+        let err = match result {
             Ok((rest, t)) => {
                 if rest.is_empty() {
                     return Ok(t)
@@ -80,11 +81,11 @@ pub trait Synom: Sized {
                     "unparsed tokens after"
                 }
             }
-            Err(_) => "failed to parse"
+            Err(ref err) => err.description(),
         };
         match Self::description() {
-            Some(s) => Err(ParseError(format!("{} {}", err, s))),
-            None => Err(ParseError(err.to_string())),
+            Some(s) => Err(ParseError(Some(format!("{} {}", err, s)))),
+            None => Err(ParseError(Some(err.to_string()))),
         }
     }
 
@@ -101,23 +102,26 @@ pub trait Synom: Sized {
 }
 
 #[derive(Debug)]
-pub struct ParseError(String);
+pub struct ParseError(Option<String>);
 
 impl Error for ParseError {
     fn description(&self) -> &str {
-        &self.0
+        match self.0 {
+            Some(ref desc) => desc,
+            None => "failed to parse",
+        }
     }
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <String as fmt::Display>::fmt(&self.0, f)
+        <str as fmt::Display>::fmt(self.description(), f)
     }
 }
 
 impl From<LexError> for ParseError {
     fn from(_: LexError) -> ParseError {
-        ParseError("error while lexing input string".to_owned())
+        ParseError(Some("error while lexing input string".to_owned()))
     }
 }
 
