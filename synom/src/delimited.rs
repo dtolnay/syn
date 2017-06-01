@@ -238,29 +238,24 @@ impl<T, D> Element<T, D> {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::TokenTree;
-
     use super::Delimited;
-    use {IResult, Synom};
+    use {PResult, Cursor, Synom, parse_error};
 
     impl<T, D> Delimited<T, D>
         where T: Synom,
               D: Synom,
     {
-        pub fn parse_separated(input: &[TokenTree])
-            -> IResult<&[TokenTree], Self>
+        pub fn parse_separated(input: Cursor) -> PResult<Self>
         {
             Self::parse(input, T::parse, false)
         }
 
-        pub fn parse_separated_nonempty(input: &[TokenTree])
-            -> IResult<&[TokenTree], Self>
+        pub fn parse_separated_nonempty(input: Cursor) -> PResult<Self>
         {
             Self::parse_separated_nonempty_with(input, T::parse)
         }
 
-        pub fn parse_terminated(input: &[TokenTree])
-            -> IResult<&[TokenTree], Self>
+        pub fn parse_terminated(input: Cursor) -> PResult<Self>
         {
             Self::parse_terminated_with(input, T::parse)
         }
@@ -270,49 +265,49 @@ mod parsing {
         where D: Synom,
     {
         pub fn parse_separated_nonempty_with(
-                input: &[TokenTree],
-                parse: fn(&[TokenTree]) -> IResult<&[TokenTree], T>)
-            -> IResult<&[TokenTree], Self>
+                input: Cursor,
+                parse: fn(Cursor) -> PResult<T>)
+            -> PResult<Self>
         {
             match Self::parse(input, parse, false) {
-                IResult::Done(_, ref b) if b.is_empty() => IResult::Error,
+                Ok((_, ref b)) if b.is_empty() => parse_error(),
                 other => other,
             }
         }
 
         pub fn parse_terminated_with(
-                input: &[TokenTree],
-                parse: fn(&[TokenTree]) -> IResult<&[TokenTree], T>)
-            -> IResult<&[TokenTree], Self>
+                input: Cursor,
+                parse: fn(Cursor) -> PResult<T>)
+            -> PResult<Self>
         {
             Self::parse(input, parse, true)
         }
 
-        fn parse(mut input: &[TokenTree],
-                 parse: fn(&[TokenTree]) -> IResult<&[TokenTree], T>,
+        fn parse(mut input: Cursor,
+                 parse: fn(Cursor) -> PResult<T>,
                  terminated: bool)
-            -> IResult<&[TokenTree], Self>
+            -> PResult<Self>
         {
             let mut res = Delimited::new();
 
             // get the first element
             match parse(input) {
-                IResult::Error => IResult::Done(input, res),
-                IResult::Done(i, o) => {
+                Err(_) => Ok((input, res)),
+                Ok((i, o)) => {
                     if i.len() == input.len() {
-                        return IResult::Error
+                        return parse_error();
                     }
                     input = i;
                     res.push_first(o);
 
                     // get the separator first
-                    while let IResult::Done(i2, s) = D::parse(input) {
+                    while let Ok((i2, s)) = D::parse(input) {
                         if i2.len() == input.len() {
                             break;
                         }
 
                         // get the element next
-                        if let IResult::Done(i3, o3) = parse(i2) {
+                        if let Ok((i3, o3)) = parse(i2) {
                             if i3.len() == i2.len() {
                                 break;
                             }
@@ -323,12 +318,12 @@ mod parsing {
                         }
                     }
                     if terminated {
-                        if let IResult::Done(after, sep) = D::parse(input) {
+                        if let Ok((after, sep)) = D::parse(input) {
                             res.push_trailing(sep);
                             input = after;
                         }
                     }
-                    IResult::Done(input, res)
+                    Ok((input, res))
                 }
             }
         }

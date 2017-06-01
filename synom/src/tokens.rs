@@ -41,9 +41,7 @@ macro_rules! op {
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
-            fn parse(tokens: &[::proc_macro2::TokenTree])
-                -> ::IResult<&[::proc_macro2::TokenTree], $name>
-            {
+            fn parse(tokens: $crate::Cursor) -> $crate::PResult<$name> {
                 parsing::op($s, tokens, $name)
             }
         }
@@ -66,9 +64,7 @@ macro_rules! sym {
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
-            fn parse(tokens: &[::proc_macro2::TokenTree])
-                -> ::IResult<&[::proc_macro2::TokenTree], $name>
-            {
+            fn parse(tokens: $crate::Cursor) -> $crate::PResult<$name> {
                 parsing::sym($s, tokens, $name)
             }
         }
@@ -93,10 +89,8 @@ macro_rules! delim {
             }
 
             #[cfg(feature = "parsing")]
-            pub fn parse<F, R>(tokens: &[::proc_macro2::TokenTree], f: F)
-                -> ::IResult<&[::proc_macro2::TokenTree], (R, $name)>
-                where F: FnOnce(&[::proc_macro2::TokenTree])
-                            -> ::IResult<&[::proc_macro2::TokenTree], R>
+            pub fn parse<F, R>(tokens: $crate::Cursor, f: F) -> $crate::PResult<(R, $name)>
+                where F: FnOnce($crate::Cursor) -> $crate::PResult<R>
             {
                 parsing::delim($s, tokens, $name, f)
             }
@@ -201,7 +195,7 @@ tokens! {
 mod parsing {
     use proc_macro2::{TokenTree, TokenKind, Delimiter, OpKind};
 
-    use IResult;
+    use {PResult, Cursor, parse_error};
     use span::Span;
 
     pub trait FromSpans: Sized {
@@ -227,9 +221,9 @@ mod parsing {
     }
 
     pub fn op<'a, T, R>(s: &str,
-                        tokens: &'a [TokenTree],
+                        tokens: Cursor<'a>,
                         new: fn(T) -> R)
-            -> IResult<&'a [TokenTree], R>
+            -> PResult<'a, R>
         where T: FromSpans,
     {
         let mut spans = [Span::default(); 3];
@@ -240,46 +234,46 @@ mod parsing {
         for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
             let tok = match it.next() {
                 Some(tok) => tok,
-                _ => return IResult::Error
+                _ => return parse_error(),
             };
             let kind = match tok.kind {
                 TokenKind::Op(c, kind) if c == ch => kind,
-                _ => return IResult::Error
+                _ => return parse_error(),
             };
             if i != s.len() - 1 {
                 match kind {
                     OpKind::Joint => {}
-                    OpKind::Alone => return IResult::Error,
+                    OpKind::Alone => return parse_error(),
                 }
             }
             *slot = Span(tok.span);
         }
-        IResult::Done(it.as_slice(), new(T::from_spans(&spans)))
+        Ok((it.as_slice(), new(T::from_spans(&spans))))
     }
 
     pub fn sym<'a, T>(sym: &str,
-                      tokens: &'a [TokenTree],
+                      tokens: Cursor<'a>,
                       new: fn(Span) -> T)
-        -> IResult<&'a [TokenTree], T>
+        -> PResult<'a, T>
     {
         let mut tokens = tokens.iter();
         let (span, s) = match tokens.next() {
             Some(&TokenTree { span, kind: TokenKind::Word(sym) }) => (span, sym),
-            _ => return IResult::Error,
+            _ => return parse_error(),
         };
         if s.as_str() == sym {
-            IResult::Done(tokens.as_slice(), new(Span(span)))
+            Ok((tokens.as_slice(), new(Span(span))))
         } else {
-            IResult::Error
+            parse_error()
         }
     }
 
     pub fn delim<'a, F, R, T>(delim: &str,
-                              tokens: &'a [TokenTree],
+                              tokens: Cursor<'a>,
                               new: fn(Span) -> T,
                               f: F)
-        -> ::IResult<&'a [TokenTree], (R, T)>
-        where F: FnOnce(&[TokenTree]) -> IResult<&[TokenTree], R>
+        -> PResult<'a, (R, T)>
+        where F: FnOnce(Cursor) -> PResult<R>
     {
         let delim = match delim {
             "(" => Delimiter::Parenthesis,
@@ -292,27 +286,27 @@ mod parsing {
             Some(&TokenTree { span, kind: TokenKind::Sequence(d, ref rest) }) => {
                 (span, d, rest)
             }
-            _ => return IResult::Error,
+            _ => return parse_error(),
         };
         match (delim, d) {
             (Delimiter::Parenthesis, Delimiter::Parenthesis) |
             (Delimiter::Brace, Delimiter::Brace) |
             (Delimiter::Bracket, Delimiter::Bracket) => {}
-            _ => return IResult::Error,
+            _ => return parse_error(),
         }
 
         // TODO: Need a custom type to avoid this allocation every time we try
-        // this branch
+        // this branch. (issue dtolnay/syn#148)
         let rest = others.clone().into_iter().collect::<Vec<_>>();
         match f(&rest) {
-            IResult::Done(remaining, ret) => {
+            Ok((remaining, ret)) => {
                 if remaining.is_empty() {
-                    IResult::Done(tokens.as_slice(), (ret, new(Span(span))))
+                    Ok((tokens.as_slice(), (ret, new(Span(span)))))
                 } else {
-                    IResult::Error
+                    parse_error()
                 }
             }
-            IResult::Error => IResult::Error,
+            Err(err) => Err(err),
         }
     }
 }

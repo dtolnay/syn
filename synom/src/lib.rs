@@ -1,5 +1,5 @@
 //! Adapted from [`nom`](https://github.com/Geal/nom) by removing the
-//! `IResult::Incomplete` variant which:
+//! `IPResult::Incomplete` variant which:
 //!
 //! - we don't need,
 //! - is an unintuitive footgun when working with non-streaming use cases, and
@@ -44,35 +44,24 @@ pub mod delimited;
 pub mod tokens;
 pub mod span;
 
-/// The result of a parser.
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum IResult<I, O> {
-    /// Parsing succeeded. The first field contains the rest of the unparsed
-    /// data and the second field contains the parse result.
-    Done(I, O),
-    /// Parsing failed.
-    Error,
-}
+/// A cursor into a Vec<TokenTree>.
+///
+/// NOTE: This type is currently unnecessary, but will make future refactorings
+/// which change this type easier.
+pub type Cursor<'a> = &'a [TokenTree];
 
-impl<'a, O> IResult<&'a [TokenTree], O> {
-    /// Unwraps the result, asserting the the parse is complete. Panics with a
-    /// message based on the given string if the parse failed or is incomplete.
-    pub fn expect(self, name: &str) -> O {
-        match self {
-            IResult::Done(rest, o) => {
-                if rest.is_empty() {
-                    o
-                } else {
-                    panic!("unparsed tokens after {}: {:?}", name, /* rest */ ())
-                }
-            }
-            IResult::Error => panic!("failed to parse {}", name),
-        }
-    }
+/// The result of a parser
+pub type PResult<'a, O> = Result<(Cursor<'a>, O), ParseError>;
+
+/// An error with a default error message.
+///
+/// NOTE: We should provide better error messages in the future.
+pub fn parse_error<O>() -> PResult<'static, O> {
+    Err(ParseError("error parsing value".to_string()))
 }
 
 pub trait Synom: Sized {
-    fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self>;
+    fn parse(input: Cursor) -> PResult<Self>;
 
     fn description() -> Option<&'static str> {
         None
@@ -81,7 +70,7 @@ pub trait Synom: Sized {
     fn parse_all(input: TokenStream) -> Result<Self, ParseError> {
         let tokens = input.into_iter().collect::<Vec<_>>();
         let err = match Self::parse(&tokens) {
-            IResult::Done(rest, t) => {
+            Ok((rest, t)) => {
                 if rest.is_empty() {
                     return Ok(t)
                 } else if rest.len() == tokens.len() {
@@ -91,7 +80,7 @@ pub trait Synom: Sized {
                     "unparsed tokens after"
                 }
             }
-            IResult::Error => "failed to parse"
+            Err(_) => "failed to parse"
         };
         match Self::description() {
             Some(s) => Err(ParseError(format!("{} {}", err, s))),
@@ -133,8 +122,8 @@ impl From<LexError> for ParseError {
 }
 
 impl Synom for TokenStream {
-    fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-        IResult::Done(&[], input.iter().cloned().collect())
+    fn parse(input: &[TokenTree]) -> PResult<Self> {
+        Ok((&[], input.iter().cloned().collect()))
     }
 }
 
@@ -157,13 +146,13 @@ impl Synom for TokenStream {
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: &[$crate::TokenTree]) -> $crate::IResult<&[$crate::TokenTree], $o> {
+        fn $name(i: $crate::Cursor) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: &[$crate::TokenTree]) -> $crate::IResult<&[$crate::TokenTree], $o> {
+        pub fn $name(i: $crate::Cursor) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
@@ -173,7 +162,7 @@ macro_rules! named {
 ///
 /// - **Syntax:** `call!(FUNCTION, ARGS...)`
 ///
-///   where the signature of the function is `fn(&[U], ARGS...) -> IResult<&[U], T>`
+///   where the signature of the function is `fn(&[U], ARGS...) -> IPResult<&[U], T>`
 /// - **Output:** `T`, the result of invoking the function `FUNCTION`
 #[macro_export]
 macro_rules! call {
@@ -213,10 +202,10 @@ macro_rules! call {
 macro_rules! map {
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) => {
-                $crate::IResult::Done(i, call!(o, $g))
-            }
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) =>
+                ::std::result::Result::Ok((i, call!(o, $g))),
         }
     };
 
@@ -234,8 +223,9 @@ macro_rules! map {
 macro_rules! not {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Done(_, _) => $crate::IResult::Error,
-            $crate::IResult::Error => $crate::IResult::Done($i, ()),
+            ::std::result::Result::Ok(_) => $crate::parse_error(),
+            ::std::result::Result::Err(_) =>
+                ::std::result::Result::Ok(($i, ())),
         }
     };
 }
@@ -251,11 +241,12 @@ macro_rules! cond {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
         if $cond {
             match $submac!($i, $($args)*) {
-                $crate::IResult::Done(i, o) => $crate::IResult::Done(i, ::std::option::Option::Some(o)),
-                $crate::IResult::Error => $crate::IResult::Error,
+                ::std::result::Result::Ok((i, o)) =>
+                    ::std::result::Result::Ok((i, ::std::option::Option::Some(o))),
+                ::std::result::Result::Err(x) => ::std::result::Result::Err(x),
             }
         } else {
-            $crate::IResult::Done($i, ::std::option::Option::None)
+            ::std::result::Result::Ok(($i, ::std::option::Option::None))
         }
     };
 
@@ -276,7 +267,7 @@ macro_rules! cond_reduce {
         if $cond {
             $submac!($i, $($args)*)
         } else {
-            $crate::IResult::Error
+            $crate::parse_error()
         }
     };
 
@@ -308,8 +299,10 @@ macro_rules! cond_reduce {
 macro_rules! terminated {
     ($i:expr, $submac:ident!( $($args:tt)* ), $submac2:ident!( $($args2:tt)* )) => {
         match tuple!($i, $submac!($($args)*), $submac2!($($args2)*)) {
-            $crate::IResult::Done(remaining, (o, _)) => $crate::IResult::Done(remaining, o),
-            $crate::IResult::Error => $crate::IResult::Error,
+            ::std::result::Result::Ok((i, (o, _))) =>
+                ::std::result::Result::Ok((i, o)),
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
         }
     };
 
@@ -355,19 +348,19 @@ macro_rules! many0 {
 
         loop {
             if input.is_empty() {
-                ret = $crate::IResult::Done(input, res);
+                ret = ::std::result::Result::Ok((input, res));
                 break;
             }
 
             match $submac!(input, $($args)*) {
-                $crate::IResult::Error => {
-                    ret = $crate::IResult::Done(input, res);
+                ::std::result::Result::Err(_) => {
+                    ret = ::std::result::Result::Ok((input, res));
                     break;
                 }
-                $crate::IResult::Done(i, o) => {
+                ::std::result::Result::Ok((i, o)) => {
                     // loop trip must always consume (otherwise infinite loops)
                     if i.len() == input.len() {
-                        ret = $crate::IResult::Error;
+                        ret = $crate::parse_error();
                         break;
                     }
 
@@ -390,24 +383,22 @@ macro_rules! many0 {
 //
 // Not public API.
 #[doc(hidden)]
-pub fn many0<'a, T>(mut input: &'a [TokenTree],
-                    f: fn(&'a [TokenTree]) -> IResult<&'a [TokenTree], T>)
-                    -> IResult<&'a [TokenTree], Vec<T>> {
+pub fn many0<'a, T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T>> {
     let mut res = Vec::new();
 
     loop {
         if input.is_empty() {
-            return IResult::Done(input, res);
+            return Ok((input, res));
         }
 
         match f(input) {
-            IResult::Error => {
-                return IResult::Done(input, res);
+            Err(_) => {
+                return Ok((input, res));
             }
-            IResult::Done(i, o) => {
+            Ok((i, o)) => {
                 // loop trip must always consume (otherwise infinite loops)
                 if i.len() == input.len() {
-                    return IResult::Error;
+                    return parse_error();
                 }
 
                 res.push(o);
@@ -427,7 +418,6 @@ pub fn many0<'a, T>(mut input: &'a [TokenTree],
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::{Expr, Ident};
-/// use synom::IResult;
 ///
 /// // Parse an expression that begins with an identifier.
 /// named!(ident_expr -> (Ident, Expr),
@@ -440,8 +430,8 @@ pub fn many0<'a, T>(mut input: &'a [TokenTree],
 macro_rules! peek {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Done(_, o) => $crate::IResult::Done($i, o),
-            $crate::IResult::Error => $crate::IResult::Error,
+            ::std::result::Result::Ok((_, o)) => ::std::result::Result::Ok(($i, o)),
+            ::std::result::Result::Err(err) => ::std::result::Result::Err(err),
         }
     };
 
@@ -506,12 +496,12 @@ macro_rules! peek {
 macro_rules! switch {
     ($i:expr, $submac:ident!( $($args:tt)* ), $($p:pat => $subrule:ident!( $($args2:tt)* ))|* ) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) => match o {
+            ::std::result::Result::Err(err) => ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) => match o {
                 $(
                     $p => $subrule!(i, $($args2)*),
                 )*
-                _ => $crate::IResult::Error,
+                _ => $crate::parse_error(),
             }
         }
     };
@@ -574,7 +564,7 @@ macro_rules! switch {
 #[macro_export]
 macro_rules! value {
     ($i:expr, $res:expr) => {
-        $crate::IResult::Done($i, $res)
+        ::std::result::Result::Ok(($i, $res))
     };
 }
 
@@ -610,16 +600,18 @@ macro_rules! tuple_parser {
 
     ($i:expr, (), $submac:ident!( $($args:tt)* ), $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) =>
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) =>
                 tuple_parser!(i, (o), $($rest)*),
         }
     };
 
     ($i:expr, ($($parsed:tt)*), $submac:ident!( $($args:tt)* ), $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) =>
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) =>
                 tuple_parser!(i, ($($parsed)* , o), $($rest)*),
         }
     };
@@ -634,13 +626,15 @@ macro_rules! tuple_parser {
 
     ($i:expr, ($($parsed:expr),*), $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, ($($parsed),*, o))
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) =>
+                ::std::result::Result::Ok((i, ($($parsed),*, o))),
         }
     };
 
     ($i:expr, ($($parsed:expr),*)) => {
-        $crate::IResult::Done($i, ($($parsed),*))
+        ::std::result::Result::Ok(($i, ($($parsed),*)))
     };
 }
 
@@ -677,15 +671,16 @@ macro_rules! alt {
 
     ($i:expr, $subrule:ident!( $($args:tt)*) | $($rest:tt)*) => {
         match $subrule!($i, $($args)*) {
-            res @ $crate::IResult::Done(_, _) => res,
+            res @ ::std::result::Result::Ok(_) => res,
             _ => alt!($i, $($rest)*)
         }
     };
 
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr } | $($rest:tt)+) => {
         match $subrule!($i, $($args)*) {
-            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, $gen(o)),
-            $crate::IResult::Error => alt!($i, $($rest)*)
+            ::std::result::Result::Ok((i, o)) =>
+                ::std::result::Result::Ok((i, $gen(o))),
+            ::std::result::Result::Err(_) => alt!($i, $($rest)*),
         }
     };
 
@@ -699,8 +694,10 @@ macro_rules! alt {
 
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr }) => {
         match $subrule!($i, $($args)*) {
-            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, $gen(o)),
-            $crate::IResult::Error => $crate::IResult::Error,
+            ::std::result::Result::Ok((i, o)) =>
+                ::std::result::Result::Ok((i, $gen(o))),
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
         }
     };
 
@@ -744,7 +741,7 @@ macro_rules! alt {
 #[macro_export]
 macro_rules! do_parse {
     ($i:expr, ( $($rest:expr),* )) => {
-        $crate::IResult::Done($i, ( $($rest),* ))
+        ::std::result::Result::Ok(($i, ( $($rest),* )))
     };
 
     ($i:expr, $e:ident >> $($rest:tt)*) => {
@@ -753,8 +750,9 @@ macro_rules! do_parse {
 
     ($i:expr, $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, _) =>
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, _)) =>
                 do_parse!(i, $($rest)*),
         }
     };
@@ -765,8 +763,9 @@ macro_rules! do_parse {
 
     ($i:expr, $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) => {
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) => {
                 let $field = o;
                 do_parse!(i, $($rest)*)
             },
@@ -779,8 +778,9 @@ macro_rules! do_parse {
 
     ($i:expr, mut $field:ident : $submac:ident!( $($args:tt)* ) >> $($rest:tt)*) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Error => $crate::IResult::Error,
-            $crate::IResult::Done(i, o) => {
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((i, o)) => {
                 let mut $field = o;
                 do_parse!(i, $($rest)*)
             },
@@ -797,10 +797,10 @@ macro_rules! input_end {
 
 // Not a public API
 #[doc(hidden)]
-pub fn input_end(input: &[TokenTree]) -> IResult<&'static [TokenTree], &'static str> {
+pub fn input_end(input: Cursor) -> PResult<'static, &'static str> {
     if input.is_empty() {
-        IResult::Done(&[], "")
+        Ok((&[], ""))
     } else {
-        IResult::Error
+        parse_error()
     }
 }

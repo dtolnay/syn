@@ -17,8 +17,10 @@
 macro_rules! option {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, Some(o)),
-            $crate::IResult::Error => $crate::IResult::Done($i, None),
+            ::std::result::Result::Ok((i, o)) =>
+                ::std::result::Result::Ok((i, Some(o))),
+            ::std::result::Result::Err(_) =>
+                ::std::result::Result::Ok(($i, None)),
         }
     };
 
@@ -61,8 +63,10 @@ macro_rules! option {
 macro_rules! opt_vec {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Done(i, o) => $crate::IResult::Done(i, o),
-            $crate::IResult::Error => $crate::IResult::Done($i, Vec::new()),
+            ::std::result::Result::Ok((i, o)) =>
+                ::std::result::Result::Ok((i, o)),
+            ::std::result::Result::Err(_) =>
+                ::std::result::Result::Ok(($i, Vec::new()))
         }
     };
 }
@@ -91,7 +95,7 @@ macro_rules! opt_vec {
 #[macro_export]
 macro_rules! epsilon {
     ($i:expr,) => {
-        $crate::IResult::Done($i, ())
+        ::std::result::Result::Ok(($i, ()))
     };
 }
 
@@ -132,12 +136,13 @@ macro_rules! epsilon {
 macro_rules! tap {
     ($i:expr, $name:ident : $submac:ident!( $($args:tt)* ) => $e:expr) => {
         match $submac!($i, $($args)*) {
-            $crate::IResult::Done(i, o) => {
+            ::std::result::Result::Ok((i, o)) => {
                 let $name = o;
                 $e;
-                $crate::IResult::Done(i, ())
+                ::std::result::Result::Ok((i, ()))
             }
-            $crate::IResult::Error => $crate::IResult::Error,
+            ::std::result::Result::Err(err) =>
+                ::std::result::Result::Err(err),
         }
     };
 
