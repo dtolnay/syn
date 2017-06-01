@@ -190,6 +190,7 @@ tokens! {
         (pub struct Use                     => "use"),
         (pub struct Where                   => "where"),
         (pub struct While                   => "while"),
+        (pub struct Yield                   => "yield"),
     }
 }
 

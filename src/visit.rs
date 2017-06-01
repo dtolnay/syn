@@ -591,6 +591,12 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             visitor.visit_expr(amt);
         }
         #[cfg(feature = "full")]
+        Yield(ExprYield { ref expr, .. }) => {
+            if let Some(ref expr) = *expr {
+                visitor.visit_expr(expr);
+            }
+        }
+        #[cfg(feature = "full")]
         TupField(ExprTupField { ref expr, .. }) |
         Unary(ExprUnary { ref expr, .. }) |
         Box(ExprBox { ref expr, .. }) |

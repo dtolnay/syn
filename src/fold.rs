@@ -892,6 +892,13 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                 })
             }
             #[cfg(feature = "full")]
+            Yield(e) => {
+                Yield(ExprYield {
+                    expr: e.expr.map(|e| e.lift(|e| folder.fold_expr(e))),
+                    ..e
+                })
+            }
+            #[cfg(feature = "full")]
             Closure(e) => {
                 Closure(ExprClosure {
                     decl: e.decl.lift(|v| folder.fold_fn_decl(v)),
