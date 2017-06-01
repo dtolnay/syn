@@ -418,44 +418,40 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use proc_macro2::TokenTree;
-    use synom::{IResult, Synom};
+    use synom::Synom;
     use synom::tokens::*;
     use synom::tokens;
 
     impl Synom for Item {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                item_extern_crate
-                |
-                item_use
-                |
-                item_static
-                |
-                item_const
-                |
-                item_fn
-                |
-                item_mod
-                |
-                item_foreign_mod
-                |
-                item_ty
-                |
-                item_struct_or_enum
-                |
-                item_union
-                |
-                item_trait
-                |
-                item_default_impl
-                |
-                item_impl
-                |
-                item_mac
-            }
-        }
+        named!(parse -> Self, alt!(
+            item_extern_crate
+            |
+            item_use
+            |
+            item_static
+            |
+            item_const
+            |
+            item_fn
+            |
+            item_mod
+            |
+            item_foreign_mod
+            |
+            item_ty
+            |
+            item_struct_or_enum
+            |
+            item_union
+            |
+            item_trait
+            |
+            item_default_impl
+            |
+            item_impl
+            |
+            item_mac
+        ));
 
         fn description() -> Option<&'static str> {
             Some("item")
@@ -528,100 +524,85 @@ pub mod parsing {
     ));
 
     impl Synom for ViewPath {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(PathGlob) => { ViewPath::Glob }
-                |
-                syn!(PathList) => { ViewPath::List }
-                |
-                syn!(PathSimple) => { ViewPath::Simple } // must be last
-            }
-        }
+        named!(parse -> Self, alt!(
+            syn!(PathGlob) => { ViewPath::Glob }
+            |
+            syn!(PathList) => { ViewPath::List }
+            |
+            syn!(PathSimple) => { ViewPath::Simple } // must be last
+        ));
     }
 
     impl Synom for PathSimple {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                path: syn!(Path) >>
-                rename: option!(tuple!(syn!(As), syn!(Ident))) >>
-                (PathSimple {
-                    path: path,
-                    as_token: rename.as_ref().map(|p| As((p.0).0)),
-                    rename: rename.map(|p| p.1),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            path: syn!(Path) >>
+            rename: option!(tuple!(syn!(As), syn!(Ident))) >>
+            (PathSimple {
+                path: path,
+                as_token: rename.as_ref().map(|p| As((p.0).0)),
+                rename: rename.map(|p| p.1),
+            })
+        ));
     }
 
     impl Synom for PathGlob {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                path: syn!(Path) >>
-                colon2: syn!(Colon2) >>
-                star: syn!(Star) >>
-                (PathGlob {
-                    path: path,
-                    colon2_token: colon2,
-                    star_token: star,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            path: syn!(Path) >>
+            colon2: syn!(Colon2) >>
+            star: syn!(Star) >>
+            (PathGlob {
+                path: path,
+                colon2_token: colon2,
+                star_token: star,
+            })
+        ));
     }
 
     impl Synom for PathList {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    path: syn!(Path) >>
-                    colon2: syn!(Colon2) >>
-                    items: braces!(call!(Delimited::parse_terminated)) >>
-                    (PathList {
-                        path: path,
-                        items: items.0,
-                        brace_token: items.1,
-                        colon2_token: colon2,
-                    })
-                )
-                |
-                do_parse!(
-                    global: option!(syn!(Colon2)) >>
-                    items: braces!(call!(Delimited::parse_terminated)) >>
-                    (PathList {
-                        path: Path {
-                            global: global.is_some(),
-                            segments: Delimited::new(),
-                            leading_colon: None,
-                        },
-                        colon2_token: global.unwrap_or_default(),
-                        brace_token: items.1,
-                        items: items.0,
-                    })
-                )
-            }
-        }
+        named!(parse -> Self, alt!(
+            do_parse!(
+                path: syn!(Path) >>
+                colon2: syn!(Colon2) >>
+                items: braces!(call!(Delimited::parse_terminated)) >>
+                (PathList {
+                    path: path,
+                    items: items.0,
+                    brace_token: items.1,
+                    colon2_token: colon2,
+                })
+            )
+            |
+            do_parse!(
+                global: option!(syn!(Colon2)) >>
+                items: braces!(call!(Delimited::parse_terminated)) >>
+                (PathList {
+                    path: Path {
+                        global: global.is_some(),
+                        segments: Delimited::new(),
+                        leading_colon: None,
+                    },
+                    colon2_token: global.unwrap_or_default(),
+                    brace_token: items.1,
+                    items: items.0,
+                })
+            )
+        ));
     }
 
     impl Synom for PathListItem {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                name: alt!(
-                    syn!(Ident)
-                    |
-                    map!(syn!(Self_), Into::into)
-                ) >>
-                rename: option!(tuple!(syn!(As), syn!(Ident))) >>
-                (PathListItem {
-                    name: name,
-                    as_token: rename.as_ref().map(|p| As((p.0).0)),
-                    rename: rename.map(|p| p.1),
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            name: alt!(
+                syn!(Ident)
+                |
+                map!(syn!(Self_), Into::into)
+            ) >>
+            rename: option!(tuple!(syn!(As), syn!(Ident))) >>
+            (PathListItem {
+                name: name,
+                as_token: rename.as_ref().map(|p| As((p.0).0)),
+                rename: rename.map(|p| p.1),
+            })
+        ));
     }
 
     named!(item_static -> Item, do_parse!(
@@ -725,47 +706,44 @@ pub mod parsing {
     ));
 
     impl Synom for FnArg {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                do_parse!(
-                    and: syn!(And) >>
-                    lt: option!(syn!(Lifetime)) >>
-                    mutability: syn!(Mutability) >>
-                    self_: syn!(Self_) >>
-                    not!(syn!(Colon)) >>
-                    (ArgSelfRef {
-                        lifetime: lt,
-                        mutbl: mutability,
-                        and_token: and,
-                        self_token: self_,
-                    }.into())
-                )
-                |
-                do_parse!(
-                    mutability: syn!(Mutability) >>
-                    self_: syn!(Self_) >>
-                    not!(syn!(Colon)) >>
-                    (ArgSelf {
-                        mutbl: mutability,
-                        self_token: self_,
-                    }.into())
-                )
-                |
-                do_parse!(
-                    pat: syn!(Pat) >>
-                    colon: syn!(Colon) >>
-                    ty: syn!(Ty) >>
-                    (ArgCaptured {
-                        pat: pat,
-                        ty: ty,
-                        colon_token: colon,
-                    }.into())
-                )
-                |
-                syn!(Ty) => { FnArg::Ignored }
-            }
-        }
+        named!(parse -> Self, alt!(
+            do_parse!(
+                and: syn!(And) >>
+                lt: option!(syn!(Lifetime)) >>
+                mutability: syn!(Mutability) >>
+                self_: syn!(Self_) >>
+                not!(syn!(Colon)) >>
+                (ArgSelfRef {
+                    lifetime: lt,
+                    mutbl: mutability,
+                    and_token: and,
+                    self_token: self_,
+                }.into())
+            )
+            |
+            do_parse!(
+                mutability: syn!(Mutability) >>
+                self_: syn!(Self_) >>
+                not!(syn!(Colon)) >>
+                (ArgSelf {
+                    mutbl: mutability,
+                    self_token: self_,
+                }.into())
+            )
+            |
+            do_parse!(
+                pat: syn!(Pat) >>
+                colon: syn!(Colon) >>
+                ty: syn!(Ty) >>
+                (ArgCaptured {
+                    pat: pat,
+                    ty: ty,
+                    colon_token: colon,
+                }.into())
+            )
+            |
+            syn!(Ty) => { FnArg::Ignored }
+        ));
     }
 
     named!(item_mod -> Item, do_parse!(
@@ -828,14 +806,11 @@ pub mod parsing {
     ));
 
     impl Synom for ForeignItem {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                foreign_fn
-                |
-                foreign_static
-            }
-        }
+        named!(parse -> Self, alt!(
+            foreign_fn
+            |
+            foreign_static
+        ));
     }
 
     named!(foreign_fn -> ForeignItem, do_parse!(
@@ -1036,18 +1011,15 @@ pub mod parsing {
     ));
 
     impl Synom for TraitItem {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                trait_item_const
-                |
-                trait_item_method
-                |
-                trait_item_type
-                |
-                trait_item_mac
-            }
-        }
+        named!(parse -> Self, alt!(
+            trait_item_const
+            |
+            trait_item_method
+            |
+            trait_item_type
+            |
+            trait_item_mac
+        ));
     }
 
     named!(trait_item_const -> TraitItem, do_parse!(
@@ -1205,18 +1177,15 @@ pub mod parsing {
     ));
 
     impl Synom for ImplItem {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                impl_item_const
-                |
-                impl_item_method
-                |
-                impl_item_type
-                |
-                impl_item_macro
-            }
-        }
+        named!(parse -> Self, alt!(
+            impl_item_const
+            |
+            impl_item_method
+            |
+            impl_item_type
+            |
+            impl_item_macro
+        ));
     }
 
     named!(impl_item_const -> ImplItem, do_parse!(
@@ -1335,36 +1304,27 @@ pub mod parsing {
     ));
 
     impl Synom for ImplPolarity {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(Bang) => { ImplPolarity::Negative }
-                |
-                epsilon!() => { |_| ImplPolarity::Positive }
-            }
-        }
+        named!(parse -> Self, alt!(
+            syn!(Bang) => { ImplPolarity::Negative }
+            |
+            epsilon!() => { |_| ImplPolarity::Positive }
+        ));
     }
 
     impl Synom for Constness {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(Const) => { Constness::Const }
-                |
-                epsilon!() => { |_| Constness::NotConst }
-            }
-        }
+        named!(parse -> Self, alt!(
+            syn!(Const) => { Constness::Const }
+            |
+            epsilon!() => { |_| Constness::NotConst }
+        ));
     }
 
     impl Synom for Defaultness {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            alt! {
-                input,
-                syn!(Default_) => { Defaultness::Default }
-                |
-                epsilon!() => { |_| Defaultness::Final }
-            }
-        }
+        named!(parse -> Self, alt!(
+            syn!(Default_) => { Defaultness::Default }
+            |
+            epsilon!() => { |_| Defaultness::Final }
+        ));
     }
 }
 

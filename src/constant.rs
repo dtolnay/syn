@@ -89,64 +89,60 @@ pub type Other = Expr;
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use proc_macro2::TokenTree;
-    use synom::{IResult, Synom};
+    use synom::Synom;
     use synom::tokens::*;
 
     impl Synom for ConstExpr {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                mut e: alt!(
-                    map!(syn!(ConstUnary), |e: ConstUnary| e.into())
-                    |
-                    map!(syn!(Lit), |e: Lit| e.into())
-                    |
-                    map!(syn!(Path), |e: Path| e.into())
-                    |
-                    map!(syn!(ConstParen), |e: ConstParen| e.into())
-                    // Cannot handle ConstExpr::Other here because for example
-                    // `[u32; n!()]` would end up successfully parsing `n` as
-                    // ConstExpr::Path and then fail to parse `!()`. Instead, callers
-                    // are required to handle Other. See ty::parsing::array_len and
-                    // data::parsing::discriminant.
-                ) >>
-                many0!(alt!(
-                    tap!(args: and_call => {
-                        let (args, paren) = args;
-                        e = ConstCall {
-                            func: Box::new(e),
-                            args: args,
-                            paren_token: paren,
-                        }.into();
-                    })
-                    |
-                    tap!(more: and_binary => {
-                        let (op, other) = more;
-                        e = ConstBinary { op: op, left: Box::new(e), right: Box::new(other) }.into();
-                    })
-                    |
-                    tap!(ty: and_cast => {
-                        let (ty, token) = ty;
-                        e = ConstCast {
-                            expr: Box::new(e),
-                            ty: Box::new(ty),
-                            as_token: token,
-                        }.into();
-                    })
-                    |
-                    tap!(i: and_index => {
-                        let (i, bracket) = i;
-                        e = ConstIndex {
-                            expr: Box::new(e),
-                            index: Box::new(i),
-                            bracket_token: bracket,
-                        }.into();
-                    })
-                )) >>
-                (e)
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            mut e: alt!(
+                map!(syn!(ConstUnary), |e: ConstUnary| e.into())
+                |
+                map!(syn!(Lit), |e: Lit| e.into())
+                |
+                map!(syn!(Path), |e: Path| e.into())
+                |
+                map!(syn!(ConstParen), |e: ConstParen| e.into())
+                // Cannot handle ConstExpr::Other here because for example
+                // `[u32; n!()]` would end up successfully parsing `n` as
+                // ConstExpr::Path and then fail to parse `!()`. Instead, callers
+                // are required to handle Other. See ty::parsing::array_len and
+                // data::parsing::discriminant.
+            ) >>
+            many0!(alt!(
+                tap!(args: and_call => {
+                    let (args, paren) = args;
+                    e = ConstCall {
+                        func: Box::new(e),
+                        args: args,
+                        paren_token: paren,
+                    }.into();
+                })
+                |
+                tap!(more: and_binary => {
+                    let (op, other) = more;
+                    e = ConstBinary { op: op, left: Box::new(e), right: Box::new(other) }.into();
+                })
+                |
+                tap!(ty: and_cast => {
+                    let (ty, token) = ty;
+                    e = ConstCast {
+                        expr: Box::new(e),
+                        ty: Box::new(ty),
+                        as_token: token,
+                    }.into();
+                })
+                |
+                tap!(i: and_index => {
+                    let (i, bracket) = i;
+                    e = ConstIndex {
+                        expr: Box::new(e),
+                        index: Box::new(i),
+                        bracket_token: bracket,
+                    }.into();
+                })
+            )) >>
+            (e)
+        ));
     }
 
     named!(and_call -> (Delimited<ConstExpr, tokens::Comma>, tokens::Paren),
@@ -156,30 +152,24 @@ pub mod parsing {
            tuple!(call!(BinOp::parse_binop), syn!(ConstExpr)));
 
     impl Synom for ConstUnary {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                operator: syn!(UnOp) >>
-                operand: syn!(ConstExpr) >>
-                (ConstUnary { op: operator, expr: Box::new(operand) })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            operator: syn!(UnOp) >>
+            operand: syn!(ConstExpr) >>
+            (ConstUnary { op: operator, expr: Box::new(operand) })
+        ));
     }
 
     named!(and_index -> (ConstExpr, tokens::Bracket),
            brackets!(syn!(ConstExpr)));
 
     impl Synom for ConstParen {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
-            do_parse! {
-                input,
-                parens: parens!(syn!(ConstExpr)) >>
-                (ConstParen {
-                    expr: Box::new(parens.0),
-                    paren_token: parens.1,
-                })
-            }
-        }
+        named!(parse -> Self, do_parse!(
+            parens: parens!(syn!(ConstExpr)) >>
+            (ConstParen {
+                expr: Box::new(parens.0),
+                paren_token: parens.1,
+            })
+        ));
     }
 
     named!(and_cast -> (Ty, tokens::As), do_parse!(

@@ -114,22 +114,22 @@ impl Hash for Ident {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use proc_macro2::{TokenTree, TokenKind};
-    use synom::{Synom, IResult};
+    use proc_macro2::TokenKind;
+    use synom::{Synom, PResult, Cursor, parse_error};
 
     impl Synom for Ident {
-        fn parse(input: &[TokenTree]) -> IResult<&[TokenTree], Self> {
+        fn parse(input: Cursor) -> PResult<Self> {
             let mut tokens = input.iter();
             let token = match tokens.next() {
                 Some(token) => token,
-                None => return IResult::Error,
+                None => return parse_error(),
             };
             let word = match token.kind {
                 TokenKind::Word(s) => s,
-                _ => return IResult::Error,
+                _ => return parse_error(),
             };
             if word.as_str().starts_with('\'') {
-                return IResult::Error
+                return parse_error();
             }
             match word.as_str() {
                 // From https://doc.rust-lang.org/grammar.html#keywords
@@ -139,14 +139,14 @@ pub mod parsing {
                 "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
                 "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
                 "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
-                "while" | "yield" => return IResult::Error,
+                "while" | "yield" => return parse_error(),
                 _ => {}
             }
 
-            IResult::Done(tokens.as_slice(), Ident {
+            Ok((tokens.as_slice(), Ident {
                 span: Span(token.span),
                 sym: word,
-            })
+            }))
         }
 
         fn description() -> Option<&'static str> {
