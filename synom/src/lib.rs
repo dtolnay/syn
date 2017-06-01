@@ -43,6 +43,7 @@ pub mod helper;
 pub mod delimited;
 pub mod tokens;
 pub mod span;
+pub mod cursor;
 
 /// A cursor into a Vec<TokenTree>.
 ///
