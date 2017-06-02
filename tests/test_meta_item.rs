@@ -4,6 +4,7 @@ extern crate syn;
 extern crate synom;
 extern crate proc_macro2;
 
+use synom::SynomBuffer;
 use proc_macro2::{Literal, TokenStream};
 use syn::*;
 
@@ -95,10 +96,10 @@ fn test_meta_item_multiple() {
 
 fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
     let tokens = input.parse::<TokenStream>().unwrap();
-    let tokens = tokens.into_iter().collect::<Vec<_>>();
-    let attr = match Attribute::parse_outer(&tokens) {
+    let buf = SynomBuffer::new(tokens);
+    let attr = match Attribute::parse_outer(buf.begin()) {
         Ok((rest, e)) => {
-            assert!(rest.is_empty());
+            assert!(rest.eof());
             e
         }
         Err(_) => panic!("failed to parse"),
