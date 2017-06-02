@@ -8,7 +8,7 @@ use proc_macro2::Symbol;
 use Span;
 use tokens;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Ident {
     pub sym: Symbol,
     pub span: Span,
@@ -74,12 +74,6 @@ impl AsRef<str> for Ident {
 impl Display for Ident {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.sym.as_str().fmt(formatter)
-    }
-}
-
-impl fmt::Debug for Ident {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(self.sym.as_str(), formatter)
     }
 }
 
