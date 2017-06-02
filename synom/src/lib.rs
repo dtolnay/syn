@@ -45,11 +45,7 @@ pub mod tokens;
 pub mod span;
 pub mod cursor;
 
-/// A cursor into a Vec<TokenTree>.
-///
-/// NOTE: This type is currently unnecessary, but will make future refactorings
-/// which change this type easier.
-pub type Cursor<'a> = &'a [TokenTree];
+pub use cursor::{SynomBuffer, Cursor};
 
 /// The result of a parser
 pub type PResult<'a, O> = Result<(Cursor<'a>, O), ParseError>;
@@ -69,13 +65,13 @@ pub trait Synom: Sized {
     }
 
     fn parse_all(input: TokenStream) -> Result<Self, ParseError> {
-        let tokens = input.into_iter().collect::<Vec<_>>();
-        let result = Self::parse(&tokens);
+        let buf = SynomBuffer::new(input);
+        let result = Self::parse(buf.begin());
         let err = match result {
             Ok((rest, t)) => {
-                if rest.is_empty() {
+                if rest.eof() {
                     return Ok(t)
-                } else if rest.len() == tokens.len() {
+                } else if rest == buf.begin() {
                     // parsed nothing
                     "failed to parse"
                 } else {
@@ -127,8 +123,8 @@ impl From<LexError> for ParseError {
 }
 
 impl Synom for TokenStream {
-    fn parse(input: &[TokenTree]) -> PResult<Self> {
-        Ok((&[], input.iter().cloned().collect()))
+    fn parse(input: Cursor) -> PResult<Self> {
+        Ok((Cursor::empty(), input.token_stream()))
     }
 }
 
@@ -352,7 +348,7 @@ macro_rules! many0 {
         let mut input = $i;
 
         loop {
-            if input.is_empty() {
+            if input.eof() {
                 ret = ::std::result::Result::Ok((input, res));
                 break;
             }
@@ -364,7 +360,7 @@ macro_rules! many0 {
                 }
                 ::std::result::Result::Ok((i, o)) => {
                     // loop trip must always consume (otherwise infinite loops)
-                    if i.len() == input.len() {
+                    if i == input {
                         ret = $crate::parse_error();
                         break;
                     }
@@ -392,7 +388,7 @@ pub fn many0<'a, T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<V
     let mut res = Vec::new();
 
     loop {
-        if input.is_empty() {
+        if input.eof() {
             return Ok((input, res));
         }
 
@@ -402,7 +398,7 @@ pub fn many0<'a, T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<V
             }
             Ok((i, o)) => {
                 // loop trip must always consume (otherwise infinite loops)
-                if i.len() == input.len() {
+                if i == input {
                     return parse_error();
                 }
 
@@ -803,8 +799,8 @@ macro_rules! input_end {
 // Not a public API
 #[doc(hidden)]
 pub fn input_end(input: Cursor) -> PResult<'static, &'static str> {
-    if input.is_empty() {
-        Ok((&[], ""))
+    if input.eof() {
+        Ok((Cursor::empty(), ""))
     } else {
         parse_error()
     }
