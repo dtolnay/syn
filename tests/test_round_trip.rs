@@ -11,6 +11,7 @@ extern crate walkdir;
 use syntex_pos::Span;
 use syntex_syntax::ast;
 use syntex_syntax::parse::{self, ParseSess, PResult};
+use syntex_syntax::codemap::FilePathMapping;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 use std::fs::File;
@@ -133,7 +134,7 @@ fn test_round_trip() {
         let back = quote!(#krate).to_string();
 
         let equal = panic::catch_unwind(|| {
-            let sess = ParseSess::new();
+            let sess = ParseSess::new(FilePathMapping::empty());
             let before = match syntex_parse(content, &sess) {
                 Ok(before) => before,
                 Err(mut diagnostic) => {
@@ -194,7 +195,7 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
     use syntex_syntax::parse::token::{Lit, Token};
     use syntex_syntax::ptr::P;
     use syntex_syntax::symbol::Symbol;
-    use syntex_syntax::tokenstream::{Delimited, SequenceRepetition, TokenTree};
+    use syntex_syntax::tokenstream::{Delimited, TokenTree};
     use syntex_syntax::util::move_map::MoveMap;
     use syntex_syntax::util::small_vector::SmallVector;
 
@@ -376,27 +377,17 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
             fold::noop_fold_mac(mac, self)
         }
 
-        fn fold_tt(&mut self, tt: &TokenTree) -> TokenTree {
-            match *tt {
+        fn fold_tt(&mut self, tt: TokenTree) -> TokenTree {
+            match tt {
                 TokenTree::Token(span, ref tok) => {
                     TokenTree::Token(self.new_span(span), self.fold_token(tok.clone()))
                 }
                 TokenTree::Delimited(span, ref delimed) => {
                     TokenTree::Delimited(self.new_span(span),
-                                         Rc::new(Delimited {
-                                                     delim: delimed.delim,
-                                                     tts: self.fold_tts(&delimed.tts),
-                                                 }))
-                }
-                TokenTree::Sequence(span, ref seq) => {
-                    TokenTree::Sequence(self.new_span(span),
-                                        Rc::new(SequenceRepetition {
-                                            tts: self.fold_tts(&seq.tts),
-                                            separator: seq.separator
-                                                .clone()
-                                                .map(|tok| self.fold_token(tok)),
-                                            ..**seq
-                                        }))
+                                         Delimited {
+                                             delim: delimed.delim,
+                                             tts: self.fold_tts(delimed.tts.clone().into()).into(),
+                                         })
                 }
             }
         }
@@ -415,9 +406,6 @@ fn respan_crate(krate: ast::Crate) -> ast::Crate {
                     Token::Interpolated(Rc::new(self.fold_interpolated(nt)))
                 }
                 Token::SubstNt(ident) => Token::SubstNt(self.fold_ident(ident)),
-                Token::MatchNt(name, kind) => {
-                    Token::MatchNt(self.fold_ident(name), self.fold_ident(kind))
-                }
                 _ => t,
             }
         }
