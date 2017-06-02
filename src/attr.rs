@@ -382,19 +382,19 @@ pub mod parsing {
     }
 
     fn lit_doc_comment(input: Cursor) -> PResult<TokenTree> {
-        let mut tokens = input.iter();
-        let tok = match tokens.next() {
-            Some(tok) => tok,
-            None => return parse_error(),
-        };
-        let literal = match tok.kind {
-            TokenKind::Literal(ref l) => l.to_string(),
-            _ => return parse_error(),
-        };
-        if literal.starts_with("//") || literal.starts_with("/*") {
-            Ok((tokens.as_slice(), tok.clone()))
-        } else {
-            parse_error()
+        match input.literal() {
+            Some((rest, span, lit)) => {
+                let literal = lit.to_string();
+                if literal.starts_with("//") || literal.starts_with("/*") {
+                    Ok((rest, TokenTree {
+                        span: span,
+                        kind: TokenKind::Literal(lit)
+                    }))
+                } else {
+                    parse_error()
+                }
+            }
+            _ => parse_error()
         }
     }
 }
