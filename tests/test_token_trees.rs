@@ -7,10 +7,17 @@ use syn::TokenTree;
 use proc_macro2::{TokenKind, OpKind, Delimiter, TokenStream};
 use proc_macro2::Delimiter::*;
 
-fn op(c: char) -> TokenTree {
+fn alone(c: char) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenKind::Op(c, OpKind::Alone),
+    })
+}
+
+fn joint(c: char) -> TokenTree {
+    TokenTree(proc_macro2::TokenTree {
+        span: Default::default(),
+        kind: TokenKind::Op(c, OpKind::Joint),
     })
 }
 
@@ -39,12 +46,12 @@ fn test_struct() {
     ";
 
     let expected = vec![
-        op('#'),
+        alone('#'),
         delimited(Bracket, vec![
            word("derive"),
            delimited(Parenthesis, vec![
                word("Debug"),
-               op(','),
+               alone(','),
                word("Clone"),
            ]),
         ]),
@@ -54,18 +61,18 @@ fn test_struct() {
         delimited(Brace, vec![
            word("pub"),
            word("ident"),
-           op(':'),
+           alone(':'),
            word("Ident"),
-           op(','),
+           alone(','),
 
            word("pub"),
            word("attrs"),
-           op(':'),
+           alone(':'),
            word("Vec"),
-           op('<'),
+           alone('<'),
            word("Attribute"),
-           op('>'),
-           op(','),
+           joint('>'),
+           alone(','),
         ],
     )];
 
