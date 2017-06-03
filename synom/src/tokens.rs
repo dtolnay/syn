@@ -193,7 +193,7 @@ tokens! {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::{TokenTree, TokenKind, Delimiter, OpKind};
+    use proc_macro2::{Delimiter, OpKind};
 
     use {PResult, Cursor, parse_error};
     use span::Span;
@@ -221,7 +221,7 @@ mod parsing {
     }
 
     pub fn op<'a, T, R>(s: &str,
-                        tokens: Cursor<'a>,
+                        mut tokens: Cursor<'a>,
                         new: fn(T) -> R)
             -> PResult<'a, R>
         where T: FromSpans,
@@ -229,26 +229,22 @@ mod parsing {
         let mut spans = [Span::default(); 3];
         assert!(s.len() <= spans.len());
         let chars = s.chars();
-        let mut it = tokens.iter();
 
         for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
-            let tok = match it.next() {
-                Some(tok) => tok,
-                _ => return parse_error(),
-            };
-            let kind = match tok.kind {
-                TokenKind::Op(c, kind) if c == ch => kind,
-                _ => return parse_error(),
-            };
-            if i != s.len() - 1 {
-                match kind {
-                    OpKind::Joint => {}
-                    OpKind::Alone => return parse_error(),
+            match tokens.op() {
+                Some((rest, span, c, kind)) if c == ch => {
+                    if i != s.len() - 1 {
+                        if kind != OpKind::Joint {
+                            return parse_error();
+                        }
+                    }
+                    *slot = Span(span);
+                    tokens = rest;
                 }
+                _ => return parse_error()
             }
-            *slot = Span(tok.span);
         }
-        Ok((it.as_slice(), new(T::from_spans(&spans))))
+        Ok((tokens, new(T::from_spans(&spans))))
     }
 
     pub fn sym<'a, T>(sym: &str,
@@ -256,16 +252,12 @@ mod parsing {
                       new: fn(Span) -> T)
         -> PResult<'a, T>
     {
-        let mut tokens = tokens.iter();
-        let (span, s) = match tokens.next() {
-            Some(&TokenTree { span, kind: TokenKind::Word(sym) }) => (span, sym),
-            _ => return parse_error(),
-        };
-        if s.as_str() == sym {
-            Ok((tokens.as_slice(), new(Span(span))))
-        } else {
-            parse_error()
+        if let Some((rest, span, s)) = tokens.word() {
+            if s.as_str() == sym {
+                return Ok((rest, new(Span(span))));
+            }
         }
+        parse_error()
     }
 
     pub fn delim<'a, F, R, T>(delim: &str,
@@ -275,39 +267,25 @@ mod parsing {
         -> PResult<'a, (R, T)>
         where F: FnOnce(Cursor) -> PResult<R>
     {
+        // NOTE: We should support none-delimited sequences here.
         let delim = match delim {
             "(" => Delimiter::Parenthesis,
             "{" => Delimiter::Brace,
             "[" => Delimiter::Bracket,
             _ => panic!("unknown delimiter: {}", delim),
         };
-        let mut tokens = tokens.iter();
-        let (span, d, others) = match tokens.next() {
-            Some(&TokenTree { span, kind: TokenKind::Sequence(d, ref rest) }) => {
-                (span, d, rest)
-            }
-            _ => return parse_error(),
-        };
-        match (delim, d) {
-            (Delimiter::Parenthesis, Delimiter::Parenthesis) |
-            (Delimiter::Brace, Delimiter::Brace) |
-            (Delimiter::Bracket, Delimiter::Bracket) => {}
-            _ => return parse_error(),
-        }
 
-        // TODO: Need a custom type to avoid this allocation every time we try
-        // this branch. (issue dtolnay/syn#148)
-        let rest = others.clone().into_iter().collect::<Vec<_>>();
-        match f(&rest) {
-            Ok((remaining, ret)) => {
-                if remaining.is_empty() {
-                    Ok((tokens.as_slice(), (ret, new(Span(span)))))
-                } else {
-                    parse_error()
+        if let Some(seqinfo) = tokens.seq(delim) {
+            match f(seqinfo.inside) {
+                Ok((remaining, ret)) => {
+                    if remaining.eof() {
+                        return Ok((seqinfo.outside, (ret, new(Span(seqinfo.span)))));
+                    }
                 }
+                Err(err) => return Err(err),
             }
-            Err(err) => Err(err),
         }
+        parse_error()
     }
 }
 

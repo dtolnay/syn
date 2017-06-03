@@ -154,14 +154,13 @@ pub mod parsing {
 
     impl ::TokenTree {
         pub fn parse_list(input: Cursor) -> PResult<Vec<Self>> {
-            Ok((&[], input.iter().cloned().map(::TokenTree).collect()))
+            Ok((Cursor::empty(), input.token_stream().into_iter().map(::TokenTree).collect()))
         }
 
         pub fn parse_delimited(input: Cursor) -> PResult<Self> {
-            let mut tokens = input.iter();
-            match tokens.next() {
-                Some(token @ &TokenTree { kind: TokenKind::Sequence(..), .. }) => {
-                    Ok((tokens.as_slice(), ::TokenTree(token.clone())))
+            match input.token_tree() {
+                Some((rest, token @ TokenTree { kind: TokenKind::Sequence(..), .. })) => {
+                    Ok((rest, ::TokenTree(token)))
                 }
                 _ => parse_error(),
             }

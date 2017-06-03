@@ -213,7 +213,6 @@ pub mod parsing {
 
     use synom::{PResult, Cursor, Synom, parse_error};
     use synom::tokens::*;
-    use proc_macro2::TokenKind;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(
@@ -243,20 +242,18 @@ pub mod parsing {
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
-            let mut tokens = input.iter();
-            let token = match tokens.next() {
-                Some(token) => token,
-                None => return parse_error(),
-            };
-            if let TokenKind::Word(s) = token.kind {
-                if s.as_str().starts_with('\'') {
-                    return Ok((tokens.as_slice(), Lifetime {
-                        ident: Ident {
-                            span: Span(token.span),
-                            sym: s,
-                        },
-                    }))
+            match input.word() {
+                Some((rest, span, sym)) => {
+                    if sym.as_str().starts_with('\'') {
+                        return Ok((rest, Lifetime {
+                            ident: Ident {
+                                span: Span(span),
+                                sym: sym
+                            }
+                        }));
+                    }
                 }
+                _ => {}
             }
             parse_error()
         }

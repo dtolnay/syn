@@ -108,24 +108,18 @@ impl Hash for Ident {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use proc_macro2::TokenKind;
     use synom::{Synom, PResult, Cursor, parse_error};
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {
-            let mut tokens = input.iter();
-            let token = match tokens.next() {
-                Some(token) => token,
-                None => return parse_error(),
-            };
-            let word = match token.kind {
-                TokenKind::Word(s) => s,
+            let (rest, span, sym) = match input.word() {
+                Some(word) => word,
                 _ => return parse_error(),
             };
-            if word.as_str().starts_with('\'') {
+            if sym.as_str().starts_with('\'') {
                 return parse_error();
             }
-            match word.as_str() {
+            match sym.as_str() {
                 // From https://doc.rust-lang.org/grammar.html#keywords
                 "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
                 "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
@@ -137,9 +131,9 @@ pub mod parsing {
                 _ => {}
             }
 
-            Ok((tokens.as_slice(), Ident {
-                span: Span(token.span),
-                sym: word,
+            Ok((rest, Ident {
+                span: Span(span),
+                sym: sym,
             }))
         }
 

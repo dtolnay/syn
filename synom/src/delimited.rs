@@ -294,7 +294,7 @@ mod parsing {
             match parse(input) {
                 Err(_) => Ok((input, res)),
                 Ok((i, o)) => {
-                    if i.len() == input.len() {
+                    if i == input {
                         return parse_error();
                     }
                     input = i;
@@ -302,13 +302,13 @@ mod parsing {
 
                     // get the separator first
                     while let Ok((i2, s)) = D::parse(input) {
-                        if i2.len() == input.len() {
+                        if i2 == input {
                             break;
                         }
 
                         // get the element next
                         if let Ok((i3, o3)) = parse(i2) {
-                            if i3.len() == i2.len() {
+                            if i3 == i2 {
                                 break;
                             }
                             res.push_next(o3, s);
