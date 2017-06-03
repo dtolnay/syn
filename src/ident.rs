@@ -4,11 +4,27 @@ use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
 use proc_macro2::Symbol;
+use unicode_xid::UnicodeXID;
 
 use Span;
 use tokens;
 
-#[derive(Clone, Debug)]
+/// A word of Rust code, such as a keyword or variable name.
+///
+/// An identifier consists of at least one Unicode code point, the first of
+/// which has the XID_Start property and the rest of which have the XID_Continue
+/// property. An underscore may be used as the first character as long as it is
+/// not the only character.
+///
+/// - The empty string is not an identifier. Use `Option<Ident>`.
+/// - An underscore by itself is not an identifier. Use
+///   `syn::tokens::Underscore` instead.
+/// - A lifetime is not an identifier. Use `syn::Lifetime` instead.
+///
+/// An identifier constructed with `Ident::new` is permitted to be a Rust
+/// keyword, though parsing an identifier with `syn!(Ident)` rejects Rust
+/// keywords.
+#[derive(Copy, Clone, Debug)]
 pub struct Ident {
     pub sym: Symbol,
     pub span: Span,
@@ -16,6 +32,42 @@ pub struct Ident {
 
 impl Ident {
     pub fn new(sym: Symbol, span: Span) -> Self {
+        let s = sym.as_str();
+
+        if s.is_empty() {
+            panic!("ident is not allowed to be empty; use Option<Ident>");
+        }
+
+        if s.starts_with('\'') {
+            panic!("ident is not allowed to be a lifetime; use syn::Lifetime");
+        }
+
+        if s == "_" {
+            panic!("`_` is not a valid ident; use syn::tokens::Underscore");
+        }
+
+        fn xid_ok(s: &str) -> bool {
+            let mut chars = s.chars();
+            let first = chars.next().unwrap();
+            if !(UnicodeXID::is_xid_start(first) || first == '_') {
+                return false;
+            }
+            for ch in chars {
+                if !UnicodeXID::is_xid_continue(ch) {
+                    return false;
+                }
+            }
+            true
+        }
+
+        fn integer_ok(s: &str) -> bool {
+            s.bytes().all(|digit| digit >= b'0' && digit <= b'9')
+        }
+
+        if !(xid_ok(s) || integer_ok(s)) {
+            panic!("{:?} is not a valid ident", s);
+        }
+
         Ident {
             sym: sym,
             span: span,
@@ -56,12 +108,6 @@ impl<'a> From<Cow<'a, str>> for Ident {
 impl From<String> for Ident {
     fn from(s: String) -> Self {
         Ident::new(s[..].into(), Span::default())
-    }
-}
-
-impl From<usize> for Ident {
-    fn from(u: usize) -> Self {
-        Ident::new(u.to_string()[..].into(), Span::default())
     }
 }
 

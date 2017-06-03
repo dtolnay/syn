@@ -3,6 +3,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
 
 extern crate proc_macro2;
+extern crate unicode_xid;
 
 #[cfg(feature = "printing")]
 extern crate quote;

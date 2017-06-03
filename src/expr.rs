@@ -1253,11 +1253,11 @@ pub mod parsing {
     impl Synom for FieldValue {
         named!(parse -> Self, alt!(
             do_parse!(
-                name: wordlike >>
+                ident: field_ident >>
                 colon: syn!(Colon) >>
                 value: syn!(Expr) >>
                 (FieldValue {
-                    ident: name,
+                    ident: ident,
                     expr: value,
                     is_shorthand: false,
                     attrs: Vec::new(),
@@ -1413,6 +1413,7 @@ pub mod parsing {
             Mac {
                 path: what,
                 bang_token: bang,
+                ident: None,
                 tokens: vec![TokenTree(proc_macro2::TokenTree {
                     span: ((data.1).0).0,
                     kind: TokenKind::Sequence(Delimiter::Brace, data.0),
@@ -1582,7 +1583,7 @@ pub mod parsing {
     impl Synom for FieldPat {
         named!(parse -> Self, alt!(
             do_parse!(
-                ident: wordlike >>
+                ident: field_ident >>
                 colon: syn!(Colon) >>
                 pat: syn!(Pat) >>
                 (FieldPat {
@@ -1628,14 +1629,14 @@ pub mod parsing {
         ));
     }
 
-    named!(wordlike -> Ident, alt!(
+    named!(field_ident -> Ident, alt!(
         syn!(Ident)
         |
         do_parse!(
             lit: syn!(Lit) >>
             ({
-                let s = lit.value.to_string();
-                if s.parse::<u32>().is_ok() {
+                let s = lit.to_string();
+                if s.parse::<usize>().is_ok() {
                     Ident::new(s.into(), lit.span)
                 } else {
                     return parse_error();

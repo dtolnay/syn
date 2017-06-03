@@ -101,10 +101,15 @@ ast_struct! {
     pub struct Path {
         /// A `::foo` path, is relative to the crate root rather than current
         /// module (like paths in an import).
-        pub global: bool,
         pub leading_colon: Option<tokens::Colon2>,
         /// The segments in the path: the things separated by `::`.
         pub segments: Delimited<PathSegment, tokens::Colon2>,
+    }
+}
+
+impl Path {
+    pub fn global(&self) -> bool {
+        self.leading_colon.is_some()
     }
 }
 
@@ -118,7 +123,6 @@ impl<T> From<T> for Path
 {
     fn from(segment: T) -> Self {
         Path {
-            global: false,
             leading_colon: None,
             segments: vec![(segment.into(), None)].into(),
         }
@@ -147,7 +151,7 @@ impl<T> From<T> for PathSegment
     fn from(ident: T) -> Self {
         PathSegment {
             ident: ident.into(),
-            parameters: PathParameters::none(),
+            parameters: PathParameters::None,
         }
     }
 }
@@ -157,6 +161,7 @@ ast_enum! {
     ///
     /// E.g. `<A, B>` as in `Foo<A, B>` or `(A, B)` as in `Foo(A, B)`
     pub enum PathParameters {
+        None,
         /// The `<'a, A, B, C>` in `foo::bar::baz::<'a, A, B, C>`
         AngleBracketed(AngleBracketedParameterData),
         /// The `(A, B)` and `C` in `Foo(A, B) -> C`
@@ -164,13 +169,16 @@ ast_enum! {
     }
 }
 
-impl PathParameters {
-    pub fn none() -> Self {
-        PathParameters::AngleBracketed(AngleBracketedParameterData::default())
+impl Default for PathParameters {
+    fn default() -> Self {
+        PathParameters::None
     }
+}
 
+impl PathParameters {
     pub fn is_empty(&self) -> bool {
         match *self {
+            PathParameters::None => true,
             PathParameters::AngleBracketed(ref bracketed) => {
                 bracketed.lifetimes.is_empty() && bracketed.types.is_empty() &&
                 bracketed.bindings.is_empty()
@@ -182,11 +190,9 @@ impl PathParameters {
 
 ast_struct! {
     /// A path like `Foo<'a, T>`
-    #[derive(Default)]
     pub struct AngleBracketedParameterData {
-        pub lt_token: Option<tokens::Lt>,
-        pub gt_token: Option<tokens::Gt>,
-
+        pub turbofish: Option<tokens::Colon2>,
+        pub lt_token: tokens::Lt,
         /// The lifetime parameters for this path segment.
         pub lifetimes: Delimited<Lifetime, tokens::Comma>,
         /// The type parameters for this path segment, if present.
@@ -195,6 +201,7 @@ ast_struct! {
         ///
         /// E.g., `Foo<A=Bar>`.
         pub bindings: Delimited<TypeBinding, tokens::Comma>,
+        pub gt_token: tokens::Gt,
     }
 }
 
@@ -245,10 +252,9 @@ ast_struct! {
     /// ```
     pub struct QSelf {
         pub lt_token: tokens::Lt,
-        pub gt_token: tokens::Gt,
-        pub as_token: Option<tokens::As>,
         pub ty: Box<Ty>,
-        pub position: usize,
+        pub position: Option<(tokens::As, usize)>,
+        pub gt_token: tokens::Gt,
     }
 }
 
@@ -513,7 +519,7 @@ pub mod parsing {
         |
         do_parse!(
             lt: syn!(Lt) >>
-            this: map!(syn!(Ty), Box::new) >>
+            this: syn!(Ty) >>
             path: option!(do_parse!(
                 as_: syn!(As) >>
                 path: syn!(Path) >>
@@ -523,7 +529,7 @@ pub mod parsing {
             colon2: syn!(Colon2) >>
             rest: call!(Delimited::parse_separated_nonempty) >>
             ({
-                let (pos, path, as_) = match path {
+                let (pos, path) = match path {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
                         if !path.segments.is_empty() && !path.segments.trailing_delim() {
@@ -532,22 +538,20 @@ pub mod parsing {
                         for item in rest {
                             path.segments.push(item);
                         }
-                        (pos, path, Some(as_))
+                        (Some((as_, pos)), path)
                     }
                     None => {
-                        (0, Path {
-                            leading_colon: None,
-                            global: false,
+                        (None, Path {
+                            leading_colon: Some(colon2),
                             segments: rest,
-                        }, None)
+                        })
                     }
                 };
                 (Some(QSelf {
-                    ty: this,
+                    lt_token: lt,
+                    ty: Box::new(this),
                     position: pos,
                     gt_token: gt,
-                    lt_token: lt,
-                    as_token: as_,
                 }), path)
             })
         )
@@ -615,12 +619,11 @@ pub mod parsing {
 
     impl Synom for Path {
         named!(parse -> Self, do_parse!(
-            global: option!(syn!(Colon2)) >>
+            colon: option!(syn!(Colon2)) >>
             segments: call!(Delimited::parse_separated_nonempty) >>
             (Path {
-                global: global.is_some(),
+                leading_colon: colon,
                 segments: segments,
-                leading_colon: global,
             })
         ));
     }
@@ -628,7 +631,8 @@ pub mod parsing {
     impl Synom for PathSegment {
         named!(parse -> Self, alt!(
             do_parse!(
-                id: option!(syn!(Ident)) >>
+                ident: syn!(Ident) >>
+                turbofish: option!(syn!(Colon2)) >>
                 lt: syn!(Lt) >>
                 lifetimes: call!(Delimited::parse_terminated) >>
                 types: cond!(
@@ -645,14 +649,15 @@ pub mod parsing {
                 ) >>
                 gt: syn!(Gt) >>
                 (PathSegment {
-                    ident: id.unwrap_or_else(|| "".into()),
+                    ident: ident,
                     parameters: PathParameters::AngleBracketed(
                         AngleBracketedParameterData {
-                            gt_token: Some(gt),
-                            lt_token: Some(lt),
+                            turbofish: turbofish,
+                            lt_token: lt,
                             lifetimes: lifetimes,
                             types: types.unwrap_or_default(),
                             bindings: bindings.unwrap_or_default(),
+                            gt_token: gt,
                         }
                     ),
                 })
@@ -661,17 +666,17 @@ pub mod parsing {
             mod_style_path_segment
         ));
     }
+
     named!(ty_no_eq_after -> Ty, terminated!(syn!(Ty), not!(syn!(Eq))));
 
     impl Path {
         named!(pub parse_mod_style -> Self, do_parse!(
-            global: option!(syn!(Colon2)) >>
+            colon: option!(syn!(Colon2)) >>
             segments: call!(Delimited::parse_separated_nonempty_with,
                             mod_style_path_segment) >>
             (Path {
-                global: global.is_some(),
+                leading_colon: colon,
                 segments: segments,
-                leading_colon: global,
             })
         ));
     }
@@ -840,14 +845,12 @@ mod printing {
             };
             qself.lt_token.to_tokens(tokens);
             qself.ty.to_tokens(tokens);
-            if qself.position > 0 {
-                qself.as_token.to_tokens(tokens);
+            let mut segments = self.1.segments.iter();
+            if let Some((as_token, pos)) = qself.position {
+                as_token.to_tokens(tokens);
                 self.1.leading_colon.to_tokens(tokens);
-                for (i, segment) in self.1.segments
-                        .iter()
-                        .take(qself.position)
-                        .enumerate() {
-                    if i == qself.position - 1 {
+                for (i, segment) in (&mut segments).take(pos).enumerate() {
+                    if i + 1 == pos {
                         segment.item().to_tokens(tokens);
                         qself.gt_token.to_tokens(tokens);
                         segment.delimiter().to_tokens(tokens);
@@ -857,8 +860,9 @@ mod printing {
                 }
             } else {
                 qself.gt_token.to_tokens(tokens);
+                self.1.leading_colon.to_tokens(tokens);
             }
-            for segment in self.1.segments.iter().skip(qself.position) {
+            for segment in segments {
                 segment.to_tokens(tokens);
             }
         }
@@ -916,6 +920,7 @@ mod printing {
     impl ToTokens for PathParameters {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
+                PathParameters::None => {}
                 PathParameters::AngleBracketed(ref parameters) => {
                     parameters.to_tokens(tokens);
                 }
@@ -928,6 +933,7 @@ mod printing {
 
     impl ToTokens for AngleBracketedParameterData {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            self.turbofish.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
             self.lifetimes.to_tokens(tokens);
             self.types.to_tokens(tokens);

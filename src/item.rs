@@ -2,12 +2,8 @@ use super::*;
 use delimited::Delimited;
 
 ast_struct! {
-    /// An item
-    ///
-    /// The name might be a dummy name in case of anonymous items
+    /// Things that can appear directly inside of a module.
     pub struct Item {
-        pub ident: Ident,
-        pub vis: Visibility,
         pub attrs: Vec<Attribute>,
         pub node: ItemKind,
     }
@@ -15,20 +11,22 @@ ast_struct! {
 
 ast_enum_of_structs! {
     pub enum ItemKind {
-        /// An`extern crate` item, with optional original crate name.
+        /// An `extern crate` item, with optional original crate name.
         ///
         /// E.g. `extern crate foo` or `extern crate foo_bar as foo`
         pub ExternCrate(ItemExternCrate {
+            pub vis: Visibility,
             pub extern_token: tokens::Extern,
             pub crate_token: tokens::Crate,
-            pub as_token: Option<tokens::As>,
-            pub original: Option<Ident>,
+            pub ident: Ident,
+            pub rename: Option<(tokens::As, Ident)>,
             pub semi_token: tokens::Semi,
         }),
         /// A use declaration (`use` or `pub use`) item.
         ///
         /// E.g. `use foo;`, `use foo::bar;` or `use foo::bar as FooBar;`
         pub Use(ItemUse {
+            pub vis: Visibility,
             pub use_token: tokens::Use,
             pub path: Box<ViewPath>,
             pub semi_token: tokens::Semi,
@@ -37,94 +35,111 @@ ast_enum_of_structs! {
         ///
         /// E.g. `static FOO: i32 = 42;` or `static FOO: &'static str = "bar";`
         pub Static(ItemStatic {
+            pub vis: Visibility,
             pub static_token: tokens::Static,
-            pub colon_token: tokens::Colon,
-            pub eq_token: tokens::Eq,
-            pub semi_token: tokens::Semi,
-            pub ty: Box<Ty>,
             pub mutbl: Mutability,
+            pub ident: Ident,
+            pub colon_token: tokens::Colon,
+            pub ty: Box<Ty>,
+            pub eq_token: tokens::Eq,
             pub expr: Box<Expr>,
+            pub semi_token: tokens::Semi,
         }),
         /// A constant item (`const` or `pub const`).
         ///
         /// E.g. `const FOO: i32 = 42;`
         pub Const(ItemConst {
+            pub vis: Visibility,
             pub const_token: tokens::Const,
+            pub ident: Ident,
             pub colon_token: tokens::Colon,
-            pub eq_token: tokens::Eq,
-            pub semi_token: tokens::Semi,
             pub ty: Box<Ty>,
+            pub eq_token: tokens::Eq,
             pub expr: Box<Expr>,
+            pub semi_token: tokens::Semi,
         }),
         /// A function declaration (`fn` or `pub fn`).
         ///
         /// E.g. `fn foo(bar: usize) -> usize { .. }`
         pub Fn(ItemFn {
-            pub decl: Box<FnDecl>,
-            pub unsafety: Unsafety,
+            pub vis: Visibility,
             pub constness: Constness,
+            pub unsafety: Unsafety,
             pub abi: Option<Abi>,
+            pub decl: Box<FnDecl>,
+            pub ident: Ident,
             pub block: Box<Block>,
         }),
         /// A module declaration (`mod` or `pub mod`).
         ///
         /// E.g. `mod foo;` or `mod foo { .. }`
         pub Mod(ItemMod {
+            pub vis: Visibility,
             pub mod_token: tokens::Mod,
-            pub semi_token: Option<tokens::Semi>,
-            pub items: Option<(Vec<Item>, tokens::Brace)>,
+            pub ident: Ident,
+            pub content: Option<(tokens::Brace, Vec<Item>)>,
+            pub semi: Option<tokens::Semi>,
         }),
         /// An external module (`extern` or `pub extern`).
         ///
         /// E.g. `extern {}` or `extern "C" {}`
         pub ForeignMod(ItemForeignMod {
-            pub brace_token: tokens::Brace,
             pub abi: Abi,
+            pub brace_token: tokens::Brace,
             pub items: Vec<ForeignItem>,
         }),
-
         /// A type alias (`type` or `pub type`).
         ///
         /// E.g. `type Foo = Bar<u8>;`
         pub Ty(ItemTy {
+            pub vis: Visibility,
             pub type_token: tokens::Type,
-            pub eq_token: tokens::Eq,
-            pub semi_token: tokens::Semi,
-            pub ty: Box<Ty>,
+            pub ident: Ident,
             pub generics: Generics,
+            pub eq_token: tokens::Eq,
+            pub ty: Box<Ty>,
+            pub semi_token: tokens::Semi,
         }),
         /// An enum definition (`enum` or `pub enum`).
         ///
         /// E.g. `enum Foo<A, B> { C<A>, D<B> }`
         pub Enum(ItemEnum {
+            pub vis: Visibility,
             pub enum_token: tokens::Enum,
+            pub ident: Ident,
+            pub generics: Generics,
             pub brace_token: tokens::Brace,
             pub variants: Delimited<Variant, tokens::Comma>,
-            pub generics: Generics,
         }),
         /// A struct definition (`struct` or `pub struct`).
         ///
         /// E.g. `struct Foo<A> { x: A }`
         pub Struct(ItemStruct {
+            pub vis: Visibility,
             pub struct_token: tokens::Struct,
-            pub data: VariantData,
+            pub ident: Ident,
             pub generics: Generics,
+            pub data: VariantData,
             pub semi_token: Option<tokens::Semi>,
         }),
         /// A union definition (`union` or `pub union`).
         ///
         /// E.g. `union Foo<A, B> { x: A, y: B }`
         pub Union(ItemUnion {
+            pub vis: Visibility,
             pub union_token: tokens::Union,
-            pub data: VariantData,
+            pub ident: Ident,
             pub generics: Generics,
+            pub data: VariantData,
         }),
         /// A Trait declaration (`trait` or `pub trait`).
         ///
         /// E.g. `trait Foo { .. }` or `trait Foo<T> { .. }`
         pub Trait(ItemTrait {
-            pub trait_token: tokens::Trait,
+            pub vis: Visibility,
             pub unsafety: Unsafety,
+            pub trait_token: tokens::Trait,
+            pub ident: Ident,
             pub generics: Generics,
             pub colon_token: Option<tokens::Colon>,
             pub supertraits: Delimited<TyParamBound, tokens::Add>,
@@ -136,8 +151,8 @@ ast_enum_of_structs! {
         /// E.g. `impl Trait for .. {}` or `impl<T> Trait<T> for .. {}`
         pub DefaultImpl(ItemDefaultImpl {
             pub unsafety: Unsafety,
-            pub path: Path,
             pub impl_token: tokens::Impl,
+            pub path: Path,
             pub for_token: tokens::For,
             pub dot2_token: tokens::Dot2,
             pub brace_token: tokens::Brace,
@@ -146,13 +161,13 @@ ast_enum_of_structs! {
         ///
         /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
         pub Impl(ItemImpl {
-            pub impl_token: tokens::Impl,
             pub unsafety: Unsafety,
-            pub polarity: ImplPolarity,
+            pub impl_token: tokens::Impl,
             pub generics: Generics,
-            pub for_token: Option<tokens::For>,
-            pub trait_: Option<Path>, // (optional) trait this impl implements
-            pub self_ty: Box<Ty>, // self
+            /// Trait this impl implements.
+            pub trait_: Option<(ImplPolarity, Path, tokens::For)>,
+            /// The Self type of the impl.
+            pub self_ty: Box<Ty>,
             pub brace_token: tokens::Brace,
             pub items: Vec<ImplItem>,
         }),
@@ -168,24 +183,26 @@ ast_enum_of_structs! {
 impl From<DeriveInput> for Item {
     fn from(input: DeriveInput) -> Item {
         Item {
-            ident: input.ident,
-            vis: input.vis,
             attrs: input.attrs,
             node: match input.body {
                 Body::Enum(data) => {
                     ItemEnum {
-                        variants: data.variants,
+                        vis: input.vis,
+                        enum_token: data.enum_token,
+                        ident: input.ident,
                         generics: input.generics,
                         brace_token: data.brace_token,
-                        enum_token: data.enum_token,
+                        variants: data.variants,
                     }.into()
                 }
                 Body::Struct(data) => {
                     ItemStruct {
-                        data: data.data,
-                        generics: input.generics,
-                        semi_token: data.semi_token,
+                        vis: input.vis,
                         struct_token: data.struct_token,
+                        ident: input.ident,
+                        generics: input.generics,
+                        data: data.data,
+                        semi_token: data.semi_token,
                     }.into()
                 }
             },
@@ -283,7 +300,6 @@ ast_struct! {
     /// either required (meaning it doesn't have an implementation, just a
     /// signature) or provided (meaning it has a default implementation).
     pub struct TraitItem {
-        pub ident: Ident,
         pub attrs: Vec<Attribute>,
         pub node: TraitItemKind,
     }
@@ -293,10 +309,10 @@ ast_enum_of_structs! {
     pub enum TraitItemKind {
         pub Const(TraitItemConst {
             pub const_token: tokens::Const,
+            pub ident: Ident,
             pub colon_token: tokens::Colon,
             pub ty: Ty,
-            pub default: Option<Expr>,
-            pub eq_token: Option<tokens::Eq>,
+            pub default: Option<(tokens::Eq, Expr)>,
             pub semi_token: tokens::Semi,
         }),
         pub Method(TraitItemMethod {
@@ -306,10 +322,10 @@ ast_enum_of_structs! {
         }),
         pub Type(TraitItemType {
             pub type_token: tokens::Type,
+            pub ident: Ident,
             pub colon_token: Option<tokens::Colon>,
             pub bounds: Delimited<TyParamBound, tokens::Add>,
-            pub eq_token: Option<tokens::Eq>,
-            pub default: Option<Ty>,
+            pub default: Option<(tokens::Eq, Ty)>,
             pub semi_token: tokens::Semi,
         }),
         pub Macro(Mac),
@@ -330,9 +346,6 @@ ast_enum! {
 
 ast_struct! {
     pub struct ImplItem {
-        pub ident: Ident,
-        pub vis: Visibility,
-        pub defaultness: Defaultness,
         pub attrs: Vec<Attribute>,
         pub node: ImplItemKind,
     }
@@ -341,22 +354,30 @@ ast_struct! {
 ast_enum_of_structs! {
     pub enum ImplItemKind {
         pub Const(ImplItemConst {
+            pub vis: Visibility,
+            pub defaultness: Defaultness,
             pub const_token: tokens::Const,
+            pub ident: Ident,
             pub colon_token: tokens::Colon,
-            pub eq_token: tokens::Eq,
-            pub semi_token: tokens::Semi,
             pub ty: Ty,
+            pub eq_token: tokens::Eq,
             pub expr: Expr,
+            pub semi_token: tokens::Semi,
         }),
         pub Method(ImplItemMethod {
+            pub vis: Visibility,
+            pub defaultness: Defaultness,
             pub sig: MethodSig,
             pub block: Block,
         }),
         pub Type(ImplItemType {
+            pub vis: Visibility,
+            pub defaultness: Defaultness,
             pub type_token: tokens::Type,
+            pub ident: Ident,
             pub eq_token: tokens::Eq,
-            pub semi_token: tokens::Semi,
             pub ty: Ty,
+            pub semi_token: tokens::Semi,
         }),
         pub Macro(Mac),
     }
@@ -368,9 +389,10 @@ ast_struct! {
     /// Represents a method's signature in a trait declaration,
     /// or in an implementation.
     pub struct MethodSig {
-        pub unsafety: Unsafety,
         pub constness: Constness,
+        pub unsafety: Unsafety,
         pub abi: Option<Abi>,
+        pub ident: Ident,
         pub decl: FnDecl,
     }
 }
@@ -462,16 +484,15 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         what: syn!(Path) >>
         bang: syn!(Bang) >>
-        name: option!(syn!(Ident)) >>
+        ident: option!(syn!(Ident)) >>
         body: call!(::TokenTree::parse_delimited) >>
         cond!(!body.is_braced(), syn!(Semi)) >>
         (Item {
-            ident: name.unwrap_or_else(|| Ident::from("")),
-            vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemKind::Mac(Mac {
-                bang_token: bang,
                 path: what,
+                bang_token: bang,
+                ident: ident,
                 tokens: vec![body],
             }),
         })
@@ -482,26 +503,19 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         extern_: syn!(Extern) >>
         crate_: syn!(tokens::Crate) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         rename: option!(tuple!(syn!(As), syn!(Ident))) >>
         semi: syn!(Semi) >>
-        ({
-            let (name, original_name, as_) = match rename {
-                Some((as_, rename)) => (rename, Some(id), Some(as_)),
-                None => (id, None, None),
-            };
-            Item {
-                ident: name,
+        (Item {
+            attrs: attrs,
+            node: ItemExternCrate {
                 vis: vis,
-                attrs: attrs,
-                node: ItemExternCrate {
-                    as_token: as_,
-                    original: original_name,
-                    extern_token: extern_,
-                    crate_token: crate_,
-                    semi_token: semi,
-                }.into(),
-            }
+                extern_token: extern_,
+                crate_token: crate_,
+                ident: ident,
+                rename: rename,
+                semi_token: semi,
+            }.into(),
         })
     ));
 
@@ -512,12 +526,11 @@ pub mod parsing {
         what: syn!(ViewPath) >>
         semi: syn!(Semi) >>
         (Item {
-            ident: "".into(),
-            vis: vis,
             attrs: attrs,
             node: ItemUse {
-                path: Box::new(what),
+                vis: vis,
                 use_token: use_,
+                path: Box::new(what),
                 semi_token: semi,
             }.into(),
         })
@@ -573,15 +586,14 @@ pub mod parsing {
             )
             |
             do_parse!(
-                global: option!(syn!(Colon2)) >>
+                colon: option!(syn!(Colon2)) >>
                 items: braces!(call!(Delimited::parse_terminated)) >>
                 (PathList {
                     path: Path {
-                        global: global.is_some(),
-                        segments: Delimited::new(),
                         leading_colon: None,
+                        segments: Delimited::new(),
                     },
-                    colon2_token: global.unwrap_or_default(),
+                    colon2_token: colon.unwrap_or_default(),
                     brace_token: items.1,
                     items: items.0,
                 })
@@ -610,23 +622,23 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         static_: syn!(Static) >>
         mutability: syn!(Mutability) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         colon: syn!(Colon) >>
         ty: syn!(Ty) >>
         eq: syn!(Eq) >>
         value: syn!(Expr) >>
         semi: syn!(Semi) >>
         (Item {
-            ident: id,
-            vis: vis,
             attrs: attrs,
             node: ItemStatic {
-                ty: Box::new(ty),
-                mutbl: mutability,
-                expr: Box::new(value),
+                vis: vis,
                 static_token: static_,
+                mutbl: mutability,
+                ident: ident,
                 colon_token: colon,
+                ty: Box::new(ty),
                 eq_token: eq,
+                expr: Box::new(value),
                 semi_token: semi,
             }.into(),
         })
@@ -636,22 +648,22 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         const_: syn!(Const) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         colon: syn!(Colon) >>
         ty: syn!(Ty) >>
         eq: syn!(Eq) >>
         value: syn!(Expr) >>
         semi: syn!(Semi) >>
         (Item {
-            ident: id,
-            vis: vis,
             attrs: attrs,
             node: ItemConst {
-                ty: Box::new(ty),
-                expr: Box::new(value),
+                vis: vis,
                 const_token: const_,
+                ident: ident,
                 colon_token: colon,
+                ty: Box::new(ty),
                 eq_token: eq,
+                expr: Box::new(value),
                 semi_token: semi,
             }.into(),
         })
@@ -664,7 +676,7 @@ pub mod parsing {
         unsafety: syn!(Unsafety) >>
         abi: option!(syn!(Abi)) >>
         fn_: syn!(Fn_) >>
-        name: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(Delimited::parse_terminated) >>
         ret: syn!(FunctionRetTy) >>
@@ -674,14 +686,16 @@ pub mod parsing {
             call!(Block::parse_within)
         )) >>
         (Item {
-            ident: name,
-            vis: vis,
             attrs: {
                 let mut attrs = outer_attrs;
                 attrs.extend((inner_attrs_stmts.0).0);
                 attrs
             },
             node: ItemFn {
+                vis: vis,
+                constness: constness,
+                unsafety: unsafety,
+                abi: abi,
                 decl: Box::new(FnDecl {
                     dot_tokens: None,
                     fn_token: fn_,
@@ -694,9 +708,7 @@ pub mod parsing {
                         .. generics
                     },
                 }),
-                unsafety: unsafety,
-                constness: constness,
-                abi: abi,
+                ident: ident,
                 block: Box::new(Block {
                     brace_token: inner_attrs_stmts.1,
                     stmts: (inner_attrs_stmts.0).1,
@@ -750,42 +762,38 @@ pub mod parsing {
         outer_attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         mod_: syn!(Mod) >>
-        id: syn!(Ident) >>
-        content: alt!(
-            syn!(Semi) => { Ok }
+        ident: syn!(Ident) >>
+        content_semi: alt!(
+            syn!(Semi) => {|semi| (
+                Vec::new(),
+                None,
+                Some(semi),
+            )}
             |
             braces!(
                 tuple!(
                     many0!(call!(Attribute::parse_inner)),
                     many0!(syn!(Item))
                 )
-            ) => { Err }
+            ) => {|((inner_attrs, items), brace)| (
+                inner_attrs,
+                Some((brace, items)),
+                None,
+            )}
         ) >>
-        (match content {
-            Err(((inner_attrs, items), braces)) => Item {
-                ident: id,
-                vis: vis,
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                node: ItemMod {
-                    mod_token: mod_,
-                    semi_token: None,
-                    items: Some((items, braces)),
-                }.into(),
+        (Item {
+            attrs: {
+                let mut attrs = outer_attrs;
+                attrs.extend(content_semi.0);
+                attrs
             },
-            Ok(semi) => Item {
-                ident: id,
+            node: ItemMod {
                 vis: vis,
-                attrs: outer_attrs,
-                node: ItemMod {
-                    items: None,
-                    mod_token: mod_,
-                    semi_token: Some(semi),
-                }.into(),
-            },
+                mod_token: mod_,
+                ident: ident,
+                content: content_semi.1,
+                semi: content_semi.2,
+            }.into(),
         })
     ));
 
@@ -794,12 +802,10 @@ pub mod parsing {
         abi: syn!(Abi) >>
         items: braces!(many0!(syn!(ForeignItem))) >>
         (Item {
-            ident: "".into(),
-            vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemForeignMod {
-                brace_token: items.1,
                 abi: abi,
+                brace_token: items.1,
                 items: items.0,
             }.into(),
         })
@@ -817,7 +823,7 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         fn_: syn!(Fn_) >>
-        name: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(do_parse!(
             args: call!(Delimited::parse_terminated) >>
@@ -832,7 +838,7 @@ pub mod parsing {
             let ((inputs, variadic), parens) = inputs;
             let variadic = variadic.and_then(|v| v);
             ForeignItem {
-                ident: name,
+                ident: ident,
                 attrs: attrs,
                 semi_token: semi,
                 node: ForeignItemFn {
@@ -859,12 +865,12 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         static_: syn!(Static) >>
         mutability: syn!(Mutability) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         colon: syn!(Colon) >>
         ty: syn!(Ty) >>
         semi: syn!(Semi) >>
         (ForeignItem {
-            ident: id,
+            ident: ident,
             attrs: attrs,
             semi_token: semi,
             node: ForeignItemStatic {
@@ -881,76 +887,51 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         type_: syn!(Type) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         where_clause: syn!(WhereClause) >>
         eq: syn!(Eq) >>
         ty: syn!(Ty) >>
         semi: syn!(Semi) >>
         (Item {
-            ident: id,
-            vis: vis,
             attrs: attrs,
             node: ItemTy {
+                vis: vis,
                 type_token: type_,
-                eq_token: eq,
-                semi_token: semi,
-                ty: Box::new(ty),
+                ident: ident,
                 generics: Generics {
                     where_clause: where_clause,
                     ..generics
                 },
+                eq_token: eq,
+                ty: Box::new(ty),
+                semi_token: semi,
             }.into(),
         })
     ));
 
-    named!(item_struct_or_enum -> Item, map!(
-        syn!(DeriveInput),
-        |def: DeriveInput| Item {
-            ident: def.ident,
-            vis: def.vis,
-            attrs: def.attrs,
-            node: match def.body {
-                Body::Enum(data) => {
-                    ItemEnum {
-                        variants: data.variants,
-                        brace_token: data.brace_token,
-                        enum_token: data.enum_token,
-                        generics: def.generics,
-                    }.into()
-                }
-                Body::Struct(data) => {
-                    ItemStruct {
-                        data: data.data,
-                        struct_token: data.struct_token,
-                        semi_token: data.semi_token,
-                        generics: def.generics,
-                    }.into()
-                }
-            }
-        }
-    ));
+    named!(item_struct_or_enum -> Item, map!(syn!(DeriveInput), Into::into));
 
     named!(item_union -> Item, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         union_: syn!(Union) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         where_clause: syn!(WhereClause) >>
         fields: braces!(call!(Delimited::parse_terminated_with,
                               Field::parse_struct)) >>
         (Item {
-            ident: id,
-            vis: vis,
             attrs: attrs,
             node: ItemUnion {
+                vis: vis,
                 union_token: union_,
-                data: VariantData::Struct(fields.0, fields.1),
+                ident: ident,
                 generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
+                data: VariantData::Struct(fields.0, fields.1),
             }.into(),
         })
     ));
@@ -960,7 +941,7 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         unsafety: syn!(Unsafety) >>
         trait_: syn!(Trait) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         colon: option!(syn!(Colon)) >>
         bounds: cond!(colon.is_some(),
@@ -969,19 +950,19 @@ pub mod parsing {
         where_clause: syn!(WhereClause) >>
         body: braces!(many0!(syn!(TraitItem))) >>
         (Item {
-            ident: id,
-            vis: vis,
             attrs: attrs,
             node: ItemTrait {
-                trait_token: trait_,
-                brace_token: body.1,
-                colon_token: colon,
+                vis: vis,
                 unsafety: unsafety,
+                trait_token: trait_,
+                ident: ident,
                 generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
+                colon_token: colon,
                 supertraits: bounds.unwrap_or_default(),
+                brace_token: body.1,
                 items: body.0,
             }.into(),
         })
@@ -996,13 +977,11 @@ pub mod parsing {
         dot2: syn!(Dot2) >>
         braces: braces!(epsilon!()) >>
         (Item {
-            ident: "".into(),
-            vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemDefaultImpl {
                 unsafety: unsafety,
-                path: path,
                 impl_token: impl_,
+                path: path,
                 for_token: for_,
                 dot2_token: dot2,
                 brace_token: braces.1,
@@ -1025,20 +1004,19 @@ pub mod parsing {
     named!(trait_item_const -> TraitItem, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         const_: syn!(Const) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         colon: syn!(Colon) >>
         ty: syn!(Ty) >>
-        value: option!(tuple!(syn!(Eq), syn!(Expr))) >>
+        default: option!(tuple!(syn!(Eq), syn!(Expr))) >>
         semi: syn!(Semi) >>
         (TraitItem {
-            ident: id,
             attrs: attrs,
             node: TraitItemConst {
-                ty: ty,
                 const_token: const_,
+                ident: ident,
                 colon_token: colon,
-                eq_token: value.as_ref().map(|p| Eq((p.0).0)),
-                default: value.map(|p| p.1),
+                ty: ty,
+                default: default,
                 semi_token: semi,
             }.into(),
         })
@@ -1050,7 +1028,7 @@ pub mod parsing {
         unsafety: syn!(Unsafety) >>
         abi: option!(syn!(Abi)) >>
         fn_: syn!(Fn_) >>
-        name: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(call!(Delimited::parse_terminated)) >>
         ret: syn!(FunctionRetTy) >>
@@ -1066,18 +1044,17 @@ pub mod parsing {
                 None => (Vec::new(), None),
             };
             TraitItem {
-                ident: name,
                 attrs: {
                     let mut attrs = outer_attrs;
                     attrs.extend(inner_attrs);
                     attrs
                 },
                 node: TraitItemMethod {
-                    semi_token: semi,
                     sig: MethodSig {
-                        unsafety: unsafety,
                         constness: constness,
+                        unsafety: unsafety,
                         abi: abi,
+                        ident: ident,
                         decl: FnDecl {
                             inputs: inputs.0,
                             output: ret,
@@ -1097,6 +1074,7 @@ pub mod parsing {
                             brace_token: stmts.1,
                         }
                     }),
+                    semi_token: semi,
                 }.into(),
             }
         })
@@ -1105,7 +1083,7 @@ pub mod parsing {
     named!(trait_item_type -> TraitItem, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         type_: syn!(Type) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         colon: option!(syn!(Colon)) >>
         bounds: cond!(colon.is_some(),
             call!(Delimited::parse_separated_nonempty)
@@ -1113,15 +1091,14 @@ pub mod parsing {
         default: option!(tuple!(syn!(Eq), syn!(Ty))) >>
         semi: syn!(Semi) >>
         (TraitItem {
-            ident: id,
             attrs: attrs,
             node: TraitItemType {
                 type_token: type_,
+                ident: ident,
                 colon_token: colon,
-                eq_token: default.as_ref().map(|p| Eq((p.0).0)),
                 bounds: bounds.unwrap_or_default(),
+                default: default,
                 semi_token: semi,
-                default: default.map(|p| p.1),
             }.into(),
         })
     ));
@@ -1131,7 +1108,6 @@ pub mod parsing {
         mac: syn!(Mac) >>
         cond!(!mac.is_braced(), syn!(Semi)) >>
         (TraitItem {
-            ident: "".into(),
             attrs: attrs,
             node: TraitItemKind::Macro(mac),
         })
@@ -1147,30 +1123,26 @@ pub mod parsing {
                 polarity: syn!(ImplPolarity) >>
                 path: syn!(Path) >>
                 for_: syn!(For) >>
-                (polarity, Some(path), Some(for_))
+                (Some((polarity, path, for_)))
             )
             |
-            epsilon!() => { |_| (ImplPolarity::Positive, None, None) }
+            epsilon!() => { |_| None }
         ) >>
         self_ty: syn!(Ty) >>
         where_clause: syn!(WhereClause) >>
         body: braces!(many0!(syn!(ImplItem))) >>
         (Item {
-            ident: "".into(),
-            vis: VisInherited {}.into(),
             attrs: attrs,
             node: ItemImpl {
-                impl_token: impl_,
-                brace_token: body.1,
-                for_token: polarity_path.2,
                 unsafety: unsafety,
-                polarity: polarity_path.0,
+                impl_token: impl_,
                 generics: Generics {
                     where_clause: where_clause,
                     .. generics
                 },
-                trait_: polarity_path.1,
+                trait_: polarity_path,
                 self_ty: Box::new(self_ty),
+                brace_token: body.1,
                 items: body.0,
             }.into(),
         })
@@ -1184,7 +1156,7 @@ pub mod parsing {
             |
             impl_item_type
             |
-            impl_item_macro
+            impl_item_mac
         ));
     }
 
@@ -1193,23 +1165,23 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         defaultness: syn!(Defaultness) >>
         const_: syn!(Const) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         colon: syn!(Colon) >>
         ty: syn!(Ty) >>
         eq: syn!(Eq) >>
         value: syn!(Expr) >>
         semi: syn!(Semi) >>
         (ImplItem {
-            ident: id,
-            vis: vis,
-            defaultness: defaultness,
             attrs: attrs,
             node: ImplItemConst {
-                ty: ty,
-                expr: value,
+                vis: vis,
+                defaultness: defaultness,
                 const_token: const_,
+                ident: ident,
                 colon_token: colon,
+                ty: ty,
                 eq_token: eq,
+                expr: value,
                 semi_token: semi,
             }.into(),
         })
@@ -1223,7 +1195,7 @@ pub mod parsing {
         unsafety: syn!(Unsafety) >>
         abi: option!(syn!(Abi)) >>
         fn_: syn!(Fn_) >>
-        name: syn!(Ident) >>
+        ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(call!(Delimited::parse_terminated)) >>
         ret: syn!(FunctionRetTy) >>
@@ -1233,19 +1205,19 @@ pub mod parsing {
             call!(Block::parse_within)
         )) >>
         (ImplItem {
-            ident: name,
-            vis: vis,
-            defaultness: defaultness,
             attrs: {
                 let mut attrs = outer_attrs;
                 attrs.extend((inner_attrs_stmts.0).0);
                 attrs
             },
             node: ImplItemMethod {
+                vis: vis,
+                defaultness: defaultness,
                 sig: MethodSig {
-                    unsafety: unsafety,
                     constness: constness,
+                    unsafety: unsafety,
                     abi: abi,
+                    ident: ident,
                     decl: FnDecl {
                         fn_token: fn_,
                         paren_token: inputs.1,
@@ -1272,32 +1244,29 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         defaultness: syn!(Defaultness) >>
         type_: syn!(Type) >>
-        id: syn!(Ident) >>
+        ident: syn!(Ident) >>
         eq: syn!(Eq) >>
         ty: syn!(Ty) >>
         semi: syn!(Semi) >>
         (ImplItem {
-            ident: id,
-            vis: vis,
-            defaultness: defaultness,
             attrs: attrs,
             node: ImplItemType {
+                vis: vis,
+                defaultness: defaultness,
                 type_token: type_,
+                ident: ident,
                 eq_token: eq,
-                semi_token: semi,
                 ty: ty,
+                semi_token: semi,
             }.into(),
         })
     ));
 
-    named!(impl_item_macro -> ImplItem, do_parse!(
+    named!(impl_item_mac -> ImplItem, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mac: syn!(Mac) >>
         cond!(!mac.is_braced(), syn!(Semi)) >>
         (ImplItem {
-            ident: "".into(),
-            vis: VisInherited {}.into(),
-            defaultness: Defaultness::Final,
             attrs: attrs,
             node: ImplItemKind::Macro(mac),
         })
@@ -1340,25 +1309,27 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             match self.node {
                 ItemKind::ExternCrate(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.extern_token.to_tokens(tokens);
                     item.crate_token.to_tokens(tokens);
-                    item.original.to_tokens(tokens);
-                    item.as_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
+                    if let Some((as_token, ref rename)) = item.rename {
+                        as_token.to_tokens(tokens);
+                        rename.to_tokens(tokens);
+                    }
                     item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Use(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.use_token.to_tokens(tokens);
                     item.path.to_tokens(tokens);
                     item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Static(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.static_token.to_tokens(tokens);
                     item.mutbl.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.ty.to_tokens(tokens);
                     item.eq_token.to_tokens(tokens);
@@ -1366,9 +1337,9 @@ mod printing {
                     item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Const(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.const_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.ty.to_tokens(tokens);
                     item.eq_token.to_tokens(tokens);
@@ -1376,39 +1347,38 @@ mod printing {
                     item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Fn(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.constness.to_tokens(tokens);
                     item.unsafety.to_tokens(tokens);
                     item.abi.to_tokens(tokens);
-                    NamedDecl(&item.decl, &self.ident).to_tokens(tokens);
+                    NamedDecl(&item.decl, item.ident).to_tokens(tokens);
                     item.block.brace_token.surround(tokens, |tokens| {
                         tokens.append_all(self.attrs.inner());
                         tokens.append_all(&item.block.stmts);
                     });
                 }
                 ItemKind::Mod(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.mod_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
-                    if let Some((ref items, ref brace)) = item.items {
+                    item.ident.to_tokens(tokens);
+                    if let Some((brace, ref items)) = item.content {
                         brace.surround(tokens, |tokens| {
                             tokens.append_all(self.attrs.inner());
                             tokens.append_all(items);
                         });
                     }
-                    item.semi_token.to_tokens(tokens);
+                    item.semi.to_tokens(tokens);
                 }
                 ItemKind::ForeignMod(ref item) => {
-                    self.vis.to_tokens(tokens);
                     item.abi.to_tokens(tokens);
                     item.brace_token.surround(tokens, |tokens| {
                         tokens.append_all(&item.items);
                     });
                 }
                 ItemKind::Ty(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.type_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     item.generics.where_clause.to_tokens(tokens);
                     item.eq_token.to_tokens(tokens);
@@ -1416,9 +1386,9 @@ mod printing {
                     item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Enum(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.enum_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     item.generics.where_clause.to_tokens(tokens);
                     item.brace_token.surround(tokens, |tokens| {
@@ -1426,9 +1396,9 @@ mod printing {
                     });
                 }
                 ItemKind::Struct(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.struct_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     match item.data {
                         VariantData::Struct(..) => {
@@ -1446,18 +1416,18 @@ mod printing {
                     item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Union(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.union_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     item.generics.where_clause.to_tokens(tokens);
                     item.data.to_tokens(tokens);
                 }
                 ItemKind::Trait(ref item) => {
-                    self.vis.to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
                     item.unsafety.to_tokens(tokens);
                     item.trait_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.supertraits.to_tokens(tokens);
@@ -1478,9 +1448,11 @@ mod printing {
                     item.unsafety.to_tokens(tokens);
                     item.impl_token.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
-                    item.polarity.to_tokens(tokens);
-                    item.trait_.to_tokens(tokens);
-                    item.for_token.to_tokens(tokens);
+                    if let Some((polarity, ref path, for_token)) = item.trait_ {
+                        polarity.to_tokens(tokens);
+                        path.to_tokens(tokens);
+                        for_token.to_tokens(tokens);
+                    }
                     item.self_ty.to_tokens(tokens);
                     item.generics.where_clause.to_tokens(tokens);
                     item.brace_token.surround(tokens, |tokens| {
@@ -1490,7 +1462,7 @@ mod printing {
                 ItemKind::Mac(ref mac) => {
                     mac.path.to_tokens(tokens);
                     mac.bang_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    mac.ident.to_tokens(tokens);
                     tokens.append_all(&mac.tokens);
                     if !mac.is_braced() {
                         tokens::Semi::default().to_tokens(tokens);
@@ -1540,15 +1512,17 @@ mod printing {
             match self.node {
                 TraitItemKind::Const(ref item) => {
                     item.const_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.ty.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.default.to_tokens(tokens);
+                    if let Some((eq_token, ref default)) = item.default {
+                        eq_token.to_tokens(tokens);
+                        default.to_tokens(tokens);
+                    }
                     item.semi_token.to_tokens(tokens);
                 }
                 TraitItemKind::Method(ref item) => {
-                    NamedMethod(&item.sig, &self.ident).to_tokens(tokens);
+                    item.sig.to_tokens(tokens);
                     match item.default {
                         Some(ref block) => {
                             block.brace_token.surround(tokens, |tokens| {
@@ -1563,11 +1537,13 @@ mod printing {
                 }
                 TraitItemKind::Type(ref item) => {
                     item.type_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.bounds.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.default.to_tokens(tokens);
+                    if let Some((eq_token, ref default)) = item.default {
+                        eq_token.to_tokens(tokens);
+                        default.to_tokens(tokens);
+                    }
                     item.semi_token.to_tokens(tokens);
                 }
                 TraitItemKind::Macro(ref mac) => {
@@ -1583,12 +1559,12 @@ mod printing {
     impl ToTokens for ImplItem {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            self.vis.to_tokens(tokens);
-            self.defaultness.to_tokens(tokens);
             match self.node {
                 ImplItemKind::Const(ref item) => {
+                    item.vis.to_tokens(tokens);
+                    item.defaultness.to_tokens(tokens);
                     item.const_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.ty.to_tokens(tokens);
                     item.eq_token.to_tokens(tokens);
@@ -1596,15 +1572,19 @@ mod printing {
                     item.semi_token.to_tokens(tokens);
                 }
                 ImplItemKind::Method(ref item) => {
-                    NamedMethod(&item.sig, &self.ident).to_tokens(tokens);
+                    item.vis.to_tokens(tokens);
+                    item.defaultness.to_tokens(tokens);
+                    item.sig.to_tokens(tokens);
                     item.block.brace_token.surround(tokens, |tokens| {
                         tokens.append_all(self.attrs.inner());
                         tokens.append_all(&item.block.stmts);
                     });
                 }
                 ImplItemKind::Type(ref item) => {
+                    item.vis.to_tokens(tokens);
+                    item.defaultness.to_tokens(tokens);
                     item.type_token.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
+                    item.ident.to_tokens(tokens);
                     item.eq_token.to_tokens(tokens);
                     item.ty.to_tokens(tokens);
                     item.semi_token.to_tokens(tokens);
@@ -1612,6 +1592,7 @@ mod printing {
                 ImplItemKind::Macro(ref mac) => {
                     mac.to_tokens(tokens);
                     if !mac.is_braced() {
+                        // FIXME needs a span
                         tokens::Semi::default().to_tokens(tokens);
                     }
                 }
@@ -1625,7 +1606,7 @@ mod printing {
             self.vis.to_tokens(tokens);
             match self.node {
                 ForeignItemKind::Fn(ref item) => {
-                    NamedDecl(&item.decl, &self.ident).to_tokens(tokens)
+                    NamedDecl(&item.decl, self.ident).to_tokens(tokens)
                 }
                 ForeignItemKind::Static(ref item) => {
                     item.static_token.to_tokens(tokens);
@@ -1639,18 +1620,16 @@ mod printing {
         }
     }
 
-    struct NamedMethod<'a>(&'a MethodSig, &'a Ident);
-
-    impl<'a> ToTokens for NamedMethod<'a> {
+    impl ToTokens for MethodSig {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.0.constness.to_tokens(tokens);
-            self.0.unsafety.to_tokens(tokens);
-            self.0.abi.to_tokens(tokens);
-            NamedDecl(&self.0.decl, self.1).to_tokens(tokens);
+            self.constness.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
+            self.abi.to_tokens(tokens);
+            NamedDecl(&self.decl, self.ident).to_tokens(tokens);
         }
     }
 
-    struct NamedDecl<'a>(&'a FnDecl, &'a Ident);
+    struct NamedDecl<'a>(&'a FnDecl, Ident);
 
     impl<'a> ToTokens for NamedDecl<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
