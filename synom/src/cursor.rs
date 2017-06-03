@@ -28,13 +28,6 @@ enum Entry {
     End(*const Entry),
 }
 
-// A `Sync` impl is necessary here because we need a global `Entry` object for
-// the empty sequence case. This impl is requied as `*const Entry` is neither
-// `Send` nor `Sync` by default.
-unsafe impl Sync for Entry {}
-// We also implement `Send` for completeness, but we never use it.
-unsafe impl Send for Entry {}
-
 /// A buffer of data which contains a structured representation of the input
 /// `TokenStream` object.
 #[derive(Debug)]
@@ -140,18 +133,24 @@ pub struct Cursor<'a> {
     marker: PhantomData<&'a Entry>,
 }
 
-// We can safely implement `Send` and `Sync` for `Cursor` because it is
-// basically an `&Entry`.
-unsafe impl<'a> Send for Cursor<'a> {}
-unsafe impl<'a> Sync for Cursor<'a> {}
-
 impl<'a> Cursor<'a> {
     /// Create a cursor referencing a static empty TokenStream.
     pub fn empty() -> Self {
-        static EMPTY_ENTRY: Entry = Entry::End(0 as *const Entry);
+        // It's safe in this situation for us to put an `Entry` object in global
+        // storage, despite it not actually being safe to send across threads
+        // (`Symbol` is a reference into a thread-local table). This is because
+        // this entry never includes a `Symbol` object.
+        //
+        // This wrapper struct allows us to break the rules and put a `Sync`
+        // object in global storage.
+        struct UnsafeSyncEntry(Entry);
+        unsafe impl Sync for UnsafeSyncEntry {}
+        static EMPTY_ENTRY: UnsafeSyncEntry =
+            UnsafeSyncEntry(Entry::End(0 as *const Entry));
+
         Cursor {
-            ptr: &EMPTY_ENTRY,
-            scope: &EMPTY_ENTRY,
+            ptr: &EMPTY_ENTRY.0,
+            scope: &EMPTY_ENTRY.0,
             marker: PhantomData,
         }
     }
