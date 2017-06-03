@@ -1,9 +1,11 @@
 #![cfg(feature = "extra-traits")]
 
+#[macro_use]
+extern crate quote;
 extern crate syn;
 extern crate proc_macro2;
 
-use syn::TokenTree;
+use syn::{Lit, TokenTree};
 use proc_macro2::{TokenKind, OpKind, Delimiter, TokenStream};
 use proc_macro2::Delimiter::*;
 
@@ -83,4 +85,11 @@ fn test_struct() {
     if result != expected {
         panic!("{:#?}\n!=\n{:#?}", result, expected);
     }
+}
+
+#[test]
+fn test_literal_mangling() {
+    let raw = "0_4";
+    let parsed = raw.parse::<Lit>().unwrap();
+    assert_eq!(raw, quote!(#parsed).to_string());
 }
