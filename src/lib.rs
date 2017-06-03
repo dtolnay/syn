@@ -136,6 +136,7 @@ mod parsing {
         Ident,
         WhereClause,
         Ty,
+        Lit,
     }
 
     #[cfg(feature = "full")]
