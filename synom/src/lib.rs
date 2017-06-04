@@ -194,7 +194,7 @@ macro_rules! call {
 ///
 /// // Or equivalently:
 /// named!(if_condition2 -> Expr,
-///     map!(syn!(ExprIf), |if_: ExprIf| *if_.cond)
+///     map!(syn!(ExprIf), |if_| *if_.cond)
 /// );
 /// #
 /// # fn main() {}
@@ -206,13 +206,21 @@ macro_rules! map {
             ::std::result::Result::Err(err) =>
                 ::std::result::Result::Err(err),
             ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, call!(o, $g))),
+                ::std::result::Result::Ok((i, $crate::invoke($g, o))),
         }
     };
 
     ($i:expr, $f:expr, $g:expr) => {
         map!($i, call!($f), $g)
     };
+}
+
+// Somehow this helps with type inference in `map!`.
+//
+// Not public API.
+#[doc(hidden)]
+pub fn invoke<T, R, F: FnOnce(T) -> R>(f: F, t: T) -> R {
+    f(t)
 }
 
 /// Parses successfully if the given parser fails to parse. Does not consume any

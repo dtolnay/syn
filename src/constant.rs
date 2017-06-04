@@ -95,13 +95,13 @@ pub mod parsing {
     impl Synom for ConstExpr {
         named!(parse -> Self, do_parse!(
             mut e: alt!(
-                map!(syn!(ConstUnary), |e: ConstUnary| e.into())
+                map!(syn!(ConstUnary), |e| e.into())
                 |
-                map!(syn!(Lit), |e: Lit| e.into())
+                map!(syn!(Lit), |e| e.into())
                 |
-                map!(syn!(Path), |e: Path| e.into())
+                map!(syn!(Path), |e| e.into())
                 |
-                map!(syn!(ConstParen), |e: ConstParen| e.into())
+                map!(syn!(ConstParen), |e| e.into())
                 // Cannot handle ConstExpr::Other here because for example
                 // `[u32; n!()]` would end up successfully parsing `n` as
                 // ConstExpr::Path and then fail to parse `!()`. Instead, callers

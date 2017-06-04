@@ -556,7 +556,7 @@ pub mod parsing {
             })
         )
         |
-        map!(syn!(Self_), |s: Self_| (None, s.into()))
+        map!(syn!(Self_), |s| (None, s.into()))
     ));
 
     impl Synom for ParenthesizedParameterData {

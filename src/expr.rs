@@ -1265,7 +1265,7 @@ pub mod parsing {
                 })
             )
             |
-            map!(syn!(Ident), |name: Ident| FieldValue {
+            map!(syn!(Ident), |name| FieldValue {
                 ident: name.clone(),
                 expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
                 is_shorthand: true,
@@ -1648,7 +1648,7 @@ pub mod parsing {
     impl Synom for PatPath {
         named!(parse -> Self, map!(
             syn!(ExprPath),
-            |p: ExprPath| PatPath { qself: p.qself, path: p.path }
+            |p| PatPath { qself: p.qself, path: p.path }
         ));
     }
 
@@ -1663,7 +1663,7 @@ pub mod parsing {
                         trailing: option!(syn!(Comma)) >>
                         (dots, trailing)
                     ))
-                ), |x: Option<_>| x.and_then(|x| x)) >>
+                ), |x| x.and_then(|x| x)) >>
                 rest: cond!(match dotdot {
                                 Some((_, Some(_))) => true,
                                 _ => false,

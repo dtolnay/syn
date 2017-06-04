@@ -212,7 +212,7 @@ pub mod parsing {
                 |
                 epsilon!() => { |_| (Delimited::new(), None, None, None) }
             ),
-            |(lifetimes, ty_params, lt, gt): (_, Option<_>, _, _)| Generics {
+            |(lifetimes, ty_params, lt, gt)| Generics {
                 lifetimes: lifetimes,
                 ty_params: ty_params.unwrap_or_default(),
                 where_clause: WhereClause::default(),
