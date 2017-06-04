@@ -12,7 +12,6 @@ publish = false # this branch contains breaking changes
 
 [features]
 default = ["parsing", "printing", "clone-impls"]
-aster = []
 full = []
 parsing = ["unicode-xid", "synom/parsing"]
 printing = ["quote", "synom/printing"]

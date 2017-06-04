@@ -10,9 +10,6 @@ extern crate quote;
 #[cfg_attr(feature = "parsing", macro_use)]
 extern crate synom;
 
-#[cfg(feature = "aster")]
-pub mod aster;
-
 #[macro_use]
 mod macros;
 
