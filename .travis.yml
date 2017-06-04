@@ -41,7 +41,7 @@ script:
           ;;
         test)
           git submodule update --init &&
-          cargo test --all-features --release
+          cargo test --features 'full extra-traits' --release
           ;;
         clippy)
           cargo install clippy --debug --force || exit
