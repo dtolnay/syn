@@ -156,6 +156,20 @@ macro_rules! named {
             $submac!(i, $($args)*)
         }
     };
+
+    // These two variants are for defining named parsers which have custom
+    // arguments, and are called with `call!()`
+    ($name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
+        fn $name(i: $crate::Cursor, $($params)*) -> $crate::PResult<$o> {
+            $submac!(i, $($args)*)
+        }
+    };
+
+    (pub $name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
+        pub fn $name(i: $crate::Cursor, $($params)*) -> $crate::PResult<$o> {
+            $submac!(i, $($args)*)
+        }
+    };
 }
 
 /// Invoke the given parser function with the passed in arguments.
