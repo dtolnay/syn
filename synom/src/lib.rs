@@ -181,22 +181,22 @@ macro_rules! call {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::{Item, Ident};
+/// use syn::{Expr, ExprIf};
 ///
-/// fn get_item_ident(item: Item) -> Ident {
-///     item.ident
+/// fn get_cond(if_: ExprIf) -> Expr {
+///     *if_.cond
 /// }
 ///
-/// // Parses an item and returns the name (identifier) of the item only.
-/// named!(item_ident -> Ident,
-///     map!(syn!(Item), get_item_ident)
+/// // Parses an `if` statement but returns the condition part only.
+/// named!(if_condition -> Expr,
+///     map!(syn!(ExprIf), get_cond)
 /// );
 ///
 /// // Or equivalently:
-/// named!(item_ident2 -> Ident,
-///     map!(syn!(Item), |i: Item| i.ident)
+/// named!(if_condition2 -> Expr,
+///     map!(syn!(ExprIf), |if_: ExprIf| *if_.cond)
 /// );
-///
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
