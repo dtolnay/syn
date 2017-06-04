@@ -846,7 +846,7 @@ mod printing {
             qself.lt_token.to_tokens(tokens);
             qself.ty.to_tokens(tokens);
             let mut segments = self.1.segments.iter();
-            if let Some((as_token, pos)) = qself.position {
+            if let Some((ref as_token, pos)) = qself.position {
                 as_token.to_tokens(tokens);
                 self.1.leading_colon.to_tokens(tokens);
                 for (i, segment) in (&mut segments).take(pos).enumerate() {

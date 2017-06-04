@@ -1313,7 +1313,7 @@ mod printing {
                     item.extern_token.to_tokens(tokens);
                     item.crate_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
-                    if let Some((as_token, ref rename)) = item.rename {
+                    if let Some((ref as_token, ref rename)) = item.rename {
                         as_token.to_tokens(tokens);
                         rename.to_tokens(tokens);
                     }
@@ -1361,7 +1361,7 @@ mod printing {
                     item.vis.to_tokens(tokens);
                     item.mod_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
-                    if let Some((brace, ref items)) = item.content {
+                    if let Some((ref brace, ref items)) = item.content {
                         brace.surround(tokens, |tokens| {
                             tokens.append_all(self.attrs.inner());
                             tokens.append_all(items);
@@ -1448,7 +1448,7 @@ mod printing {
                     item.unsafety.to_tokens(tokens);
                     item.impl_token.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
-                    if let Some((polarity, ref path, for_token)) = item.trait_ {
+                    if let Some((ref polarity, ref path, ref for_token)) = item.trait_ {
                         polarity.to_tokens(tokens);
                         path.to_tokens(tokens);
                         for_token.to_tokens(tokens);
@@ -1515,7 +1515,7 @@ mod printing {
                     item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.ty.to_tokens(tokens);
-                    if let Some((eq_token, ref default)) = item.default {
+                    if let Some((ref eq_token, ref default)) = item.default {
                         eq_token.to_tokens(tokens);
                         default.to_tokens(tokens);
                     }
@@ -1540,7 +1540,7 @@ mod printing {
                     item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
                     item.bounds.to_tokens(tokens);
-                    if let Some((eq_token, ref default)) = item.default {
+                    if let Some((ref eq_token, ref default)) = item.default {
                         eq_token.to_tokens(tokens);
                         default.to_tokens(tokens);
                     }
