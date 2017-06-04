@@ -41,7 +41,7 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, Fie
                PatBox, PatRef, PatLit, PatRange, PatSlice};
 
 mod generics;
-pub use generics::{Generics, Lifetime, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
+pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
                    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
                    WhereRegionPredicate, BoundLifetimes};
 #[cfg(feature = "printing")]
@@ -67,6 +67,9 @@ pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignIt
 mod krate;
 #[cfg(feature = "full")]
 pub use krate::Crate;
+
+mod lifetime;
+pub use lifetime::Lifetime;
 
 mod lit;
 pub use lit::{Lit, LitKind};

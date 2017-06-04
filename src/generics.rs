@@ -67,24 +67,6 @@ impl<'a> TyGenerics<'a> {
 }
 
 ast_struct! {
-    pub struct Lifetime {
-        pub ident: Ident,
-    }
-}
-
-impl Lifetime {
-    pub fn new<T: Into<Ident>>(t: T) -> Self {
-        let id = t.into();
-        if !id.as_ref().starts_with('\'') {
-            panic!("lifetime name must start with apostrophe as in \"'a\", \
-                   got {:?}",
-                   id.as_ref());
-        }
-        Lifetime { ident: id }
-    }
-}
-
-ast_struct! {
     /// A set of bound lifetimes, e.g. `for<'a, 'b, 'c>`
     #[derive(Default)]
     pub struct BoundLifetimes {
@@ -106,10 +88,10 @@ ast_struct! {
 }
 
 impl LifetimeDef {
-    pub fn new<T: Into<Ident>>(t: T) -> Self {
+    pub fn new(lifetime: Lifetime) -> Self {
         LifetimeDef {
             attrs: Vec::new(),
-            lifetime: Lifetime::new(t),
+            lifetime: lifetime,
             colon_token: None,
             bounds: Delimited::new(),
         }
@@ -211,7 +193,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::{PResult, Cursor, Synom, parse_error};
+    use synom::Synom;
     use synom::tokens::*;
 
     impl Synom for Generics {
@@ -238,25 +220,6 @@ pub mod parsing {
                 lt_token: lt,
             }
         ));
-    }
-
-    impl Synom for Lifetime {
-        fn parse(input: Cursor) -> PResult<Self> {
-            match input.word() {
-                Some((rest, span, sym)) => {
-                    if sym.as_str().starts_with('\'') {
-                        return Ok((rest, Lifetime {
-                            ident: Ident {
-                                span: Span(span),
-                                sym: sym
-                            }
-                        }));
-                    }
-                }
-                _ => {}
-            }
-            parse_error()
-        }
     }
 
     impl Synom for LifetimeDef {
@@ -445,12 +408,6 @@ mod printing {
                 tokens::Colon2::default().to_tokens(tokens);
                 TyGenerics(self.0).to_tokens(tokens);
             }
-        }
-    }
-
-    impl ToTokens for Lifetime {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.ident.to_tokens(tokens);
         }
     }
 

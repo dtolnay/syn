@@ -115,20 +115,20 @@ fn test_struct() {
                         qself: None,
                         path: Path {
                             leading_colon: None,
-                            global: false,
                             segments: vec![
                                 PathSegment {
                                     ident: "Vec".into(),
                                     parameters: PathParameters::AngleBracketed(
                                         AngleBracketedParameterData {
-                                            gt_token: Some(Default::default()),
-                                            lt_token: Some(Default::default()),
+                                            turbofish: None,
+                                            lt_token: Default::default(),
                                             lifetimes: Default::default(),
                                             types: vec![Ty::from(TyPath {
                                                 qself: None,
                                                 path: "Attribute".into(),
                                             })].into(),
                                             bindings: Default::default(),
+                                            gt_token: Default::default(),
                                         },
                                     ),
                                 }
@@ -347,7 +347,6 @@ fn test_attr_with_path() {
             pound_token: Default::default(),
             style: AttrStyle::Outer,
             path: Path {
-                global: true,
                 leading_colon: Some(Default::default()),
                 segments: vec![
                     PathSegment::from("attr_args"),
@@ -402,7 +401,6 @@ fn test_attr_with_non_mod_style_path() {
             pound_token: Default::default(),
             style: AttrStyle::Outer,
             path: Path {
-                global: false,
                 leading_colon: None,
                 segments: vec![
                     PathSegment::from("inert"),
@@ -445,7 +443,6 @@ fn test_attr_with_mod_style_path_with_self() {
             pound_token: Default::default(),
             style: AttrStyle::Outer,
             path: Path {
-                global: false,
                 leading_colon: None,
                 segments: vec![
                     PathSegment::from("foo"),
@@ -492,7 +489,6 @@ fn test_pub_restricted() {
                 ident: None,
                 vis: Visibility::Restricted(VisRestricted {
                     path: Box::new(Path {
-                        global: false,
                         leading_colon: None,
                         segments: vec![
                             PathSegment::from("m"),

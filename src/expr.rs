@@ -139,7 +139,7 @@ ast_enum_of_structs! {
         pub While(ExprWhile {
             pub cond: Box<Expr>,
             pub body: Block,
-            pub label: Option<Ident>,
+            pub label: Option<Lifetime>,
             pub colon_token: Option<tokens::Colon>,
             pub while_token: tokens::While,
         }),
@@ -153,7 +153,7 @@ ast_enum_of_structs! {
             pub pat: Box<Pat>,
             pub expr: Box<Expr>,
             pub body: Block,
-            pub label: Option<Ident>,
+            pub label: Option<Lifetime>,
             pub colon_token: Option<tokens::Colon>,
             pub while_token: tokens::While,
             pub let_token: tokens::Let,
@@ -169,7 +169,7 @@ ast_enum_of_structs! {
             pub pat: Box<Pat>,
             pub expr: Box<Expr>,
             pub body: Block,
-            pub label: Option<Ident>,
+            pub label: Option<Lifetime>,
             pub for_token: tokens::For,
             pub colon_token: Option<tokens::Colon>,
             pub in_token: tokens::In,
@@ -180,7 +180,7 @@ ast_enum_of_structs! {
         /// E.g. `'label: loop { block }`
         pub Loop(ExprLoop {
             pub body: Block,
-            pub label: Option<Ident>,
+            pub label: Option<Lifetime>,
             pub loop_token: tokens::Loop,
             pub colon_token: Option<tokens::Colon>,
         }),
@@ -273,14 +273,14 @@ ast_enum_of_structs! {
 
         /// A `break`, with an optional label to break, and an optional expression
         pub Break(ExprBreak {
-            pub label: Option<Ident>,
+            pub label: Option<Lifetime>,
             pub expr: Option<Box<Expr>>,
             pub break_token: tokens::Break,
         }),
 
         /// A `continue`, with an optional label
         pub Continue(ExprContinue {
-            pub label: Option<Ident>,
+            pub label: Option<Lifetime>,
             pub continue_token: tokens::Continue,
         }),
 
@@ -978,7 +978,7 @@ pub mod parsing {
 
     impl Synom for ExprForLoop {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(label, syn!(Colon))) >>
+            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
             for_: syn!(For) >>
             pat: syn!(Pat) >>
             in_: syn!(In) >>
@@ -998,7 +998,7 @@ pub mod parsing {
 
     impl Synom for ExprLoop {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(label, syn!(Colon))) >>
+            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
             loop_: syn!(Loop) >>
             loop_block: syn!(Block) >>
             (ExprLoop {
@@ -1150,7 +1150,7 @@ pub mod parsing {
 
     impl Synom for ExprWhile {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(label, syn!(Colon))) >>
+            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
             while_: syn!(While) >>
             cond: expr_no_struct >>
             while_block: syn!(Block) >>
@@ -1166,7 +1166,7 @@ pub mod parsing {
 
     impl Synom for ExprWhileLet {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(label, syn!(Colon))) >>
+            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
             while_: syn!(While) >>
             let_: syn!(Let) >>
             pat: syn!(Pat) >>
@@ -1189,7 +1189,7 @@ pub mod parsing {
     impl Synom for ExprContinue {
         named!(parse -> Self, do_parse!(
             cont: syn!(Continue) >>
-            lbl: option!(label) >>
+            lbl: option!(syn!(Lifetime)) >>
             (ExprContinue {
                 continue_token: cont,
                 label: lbl,
@@ -1199,7 +1199,7 @@ pub mod parsing {
 
     named_ambiguous_expr!(expr_break -> ExprKind, allow_struct, do_parse!(
         break_: syn!(Break) >>
-        lbl: option!(label) >>
+        lbl: option!(syn!(Lifetime)) >>
         val: option!(call!(ambiguous_expr, allow_struct, false)) >>
         (ExprBreak {
             label: lbl,
@@ -1800,8 +1800,6 @@ pub mod parsing {
             epsilon!() => { |_| CaptureBy::Ref }
         ));
     }
-
-    named!(label -> Ident, map!(syn!(Lifetime), |lt: Lifetime| lt.ident));
 }
 
 #[cfg(feature = "printing")]

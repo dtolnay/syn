@@ -15,14 +15,14 @@ fn test_split_for_impl() {
         lifetimes: vec![
             LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new("'a"),
+                lifetime: Lifetime::new("'a".into(), Span::default()),
                 bounds: Default::default(),
                 colon_token: None,
             },
             LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new("'b"),
-                bounds: vec![Lifetime::new("'a")].into(),
+                lifetime: Lifetime::new("'b".into(), Span::default()),
+                bounds: vec![Lifetime::new("'a".into(), Span::default())].into(),
                 colon_token: Some(tokens::Colon::default()),
             },
         ].into(),
@@ -37,7 +37,7 @@ fn test_split_for_impl() {
                     is_sugared_doc: false,
                 }],
                 ident: "T".into(),
-                bounds: vec![TyParamBound::Region(Lifetime::new("'a"))].into(),
+                bounds: vec![TyParamBound::Region(Lifetime::new("'a".into(), Span::default()))].into(),
                 default: Some(TyTup {
                     tys: Default::default(),
                     lone_comma: None,
@@ -92,7 +92,7 @@ fn test_split_for_impl() {
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    let expected = TyParamBound::Region(Lifetime::new("'a"));
+    let expected = TyParamBound::Region(Lifetime::new("'a".into(), Span::default()));
     assert_eq!(expected, tokens.to_string().parse().unwrap());
 
     let tokens = quote!(Debug);

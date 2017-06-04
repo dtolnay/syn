@@ -88,9 +88,9 @@ fn test_catch_expr() {
 
     let actual = raw.parse::<Crate>().unwrap();
 
-    assert_eq!(&actual.items[0].ident, "catch");
-
-    assert_let!(ItemKind::Struct(..) = actual.items[0].node);
+    assert_let!(ItemKind::Struct(ItemStruct { ref ident, .. }) = actual.items[0].node; {
+        assert_eq!(ident, "catch");
+    });
 
     assert_let!(Item { node: ItemKind::Fn(ItemFn { ref block, .. }), .. } = actual.items[1]; {
         assert_let!(Stmt::Local(ref local) = block.stmts[0]; {
