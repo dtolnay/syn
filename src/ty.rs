@@ -324,39 +324,51 @@ pub mod parsing {
     use synom::tokens::*;
 
     impl Synom for Ty {
-        named!(parse -> Self, alt!(
-            // must be before mac
-            syn!(TyParen) => { Ty::Paren }
-            |
-            // must be before path
-            syn!(Mac) => { Ty::Mac }
-            |
-            // must be before ty_poly_trait_ref
-            ty_path
-            |
-            syn!(TySlice) => { Ty::Slice }
-            |
-            syn!(TyArray) => { Ty::Array }
-            |
-            syn!(TyPtr) => { Ty::Ptr }
-            |
-            syn!(TyRptr) => { Ty::Rptr }
-            |
-            syn!(TyBareFn) => { Ty::BareFn }
-            |
-            syn!(TyNever) => { Ty::Never }
-            |
-            syn!(TyTup) => { Ty::Tup }
-            |
-            ty_poly_trait_ref
-            |
-            syn!(TyImplTrait) => { Ty::ImplTrait }
-        ));
+        named!(parse -> Self, call!(ambig_ty, true));
 
         fn description() -> Option<&'static str> {
             Some("type")
         }
     }
+
+    impl Ty {
+        /// In some positions, types may not contain the `+` character, to
+        /// disambiguate them. For example in the expression `1 as T`, T may not
+        /// contain a `+` character.
+        ///
+        /// This parser does not allow a `+`, while the default parser does.
+        named!(without_plus -> Self, call!(ambig_ty, false));
+    }
+
+    named!(ambig_ty(allow_plus: bool) -> Ty, alt!(
+        // must be before mac
+        syn!(TyParen) => { Ty::Paren }
+        |
+        // must be before path
+        syn!(Mac) => { Ty::Mac }
+        |
+        // must be before ty_poly_trait_ref
+        call!(ty_path, allow_plus)
+        |
+        syn!(TySlice) => { Ty::Slice }
+        |
+        syn!(TyArray) => { Ty::Array }
+        |
+        syn!(TyPtr) => { Ty::Ptr }
+        |
+        syn!(TyRptr) => { Ty::Rptr }
+        |
+        syn!(TyBareFn) => { Ty::BareFn }
+        |
+        syn!(TyNever) => { Ty::Never }
+        |
+        syn!(TyTup) => { Ty::Tup }
+        |
+        // Don't try parsing poly_trait_ref if we aren't allowing it
+        call!(ty_poly_trait_ref, allow_plus)
+        |
+        syn!(TyImplTrait) => { Ty::ImplTrait }
+    ));
 
     impl Synom for TySlice {
         named!(parse -> Self, map!(
@@ -405,7 +417,7 @@ pub mod parsing {
                 |
                 syn!(Mut) => { |m| (Mutability::Mutable(m), None) }
             ) >>
-            target: syn!(Ty) >>
+            target: call!(Ty::without_plus) >>
             (TyPtr {
                 const_token: mutability.1,
                 star_token: star,
@@ -422,7 +434,8 @@ pub mod parsing {
             amp: syn!(And) >>
             life: option!(syn!(Lifetime)) >>
             mutability: syn!(Mutability) >>
-            target: syn!(Ty) >>
+            // & binds tighter than +, so we don't allow + here.
+            target: call!(Ty::without_plus) >>
             (TyRptr {
                 lifetime: life,
                 ty: Box::new(MutTy {
@@ -480,13 +493,21 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_path -> Ty, do_parse!(
+    named!(ty_path(allow_plus: bool) -> Ty, do_parse!(
         qpath: qpath >>
         parenthesized: cond!(
             qpath.1.segments.get(qpath.1.segments.len() - 1).item().parameters.is_empty(),
             option!(syn!(ParenthesizedParameterData))
         ) >>
-        bounds: many0!(tuple!(syn!(Add), syn!(TyParamBound))) >>
+        // Only allow parsing additional bounds if allow_plus is true.
+        bounds: alt!(
+            cond_reduce!(
+                allow_plus,
+                many0!(tuple!(syn!(Add), syn!(TyParamBound)))
+            )
+            |
+            value!(vec![])
+        ) >>
         ({
             let (qself, mut path) = qpath;
             if let Some(Some(parenthesized)) = parenthesized {
@@ -583,14 +604,22 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_poly_trait_ref -> Ty, map!(
-        call!(Delimited::parse_separated_nonempty),
-        |x| TyTraitObject { bounds: x }.into()
+    // Only allow multiple trait references if allow_plus is true.
+    named!(ty_poly_trait_ref(allow_plus: bool) -> Ty, alt!(
+        cond_reduce!(allow_plus, call!(Delimited::parse_separated_nonempty)) => {
+            |x| TyTraitObject { bounds: x }.into()
+        }
+        |
+        syn!(TyParamBound) => {
+            |x| TyTraitObject { bounds: vec![x].into() }.into()
+        }
     ));
 
     impl Synom for TyImplTrait {
         named!(parse -> Self, do_parse!(
             impl_: syn!(Impl) >>
+            // NOTE: rust-lang/rust#34511 includes discussion about whether or
+            // not + should be allowed in ImplTrait directly without ().
             elem: call!(Delimited::parse_separated_nonempty) >>
             (TyImplTrait {
                 impl_token: impl_,
