@@ -131,6 +131,7 @@ tokens! {
         (pub struct Pound([Span; 1])        => "#"),
         (pub struct Question([Span; 1])     => "?"),
         (pub struct RArrow([Span; 2])       => "->"),
+        (pub struct LArrow([Span; 2])       => "<-"),
         (pub struct Rem([Span; 1])          => "%"),
         (pub struct RemEq([Span; 2])        => "%="),
         (pub struct Rocket([Span; 2])       => "=>"),
