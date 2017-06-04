@@ -32,8 +32,8 @@ ast_enum_of_structs! {
         /// E.g. 'place <- val' or `in place { val }`.
         pub InPlace(ExprInPlace {
             pub place: Box<Expr>,
+            pub kind: InPlaceKind,
             pub value: Box<Expr>,
-            pub in_token: tokens::In,
         }),
 
         /// An array, e.g. `[a, b, c, d]`.
@@ -584,6 +584,14 @@ ast_enum! {
     }
 }
 
+ast_enum! {
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
+    pub enum InPlaceKind {
+        Arrow(tokens::LArrow),
+        In(tokens::In),
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
@@ -730,17 +738,15 @@ pub mod parsing {
         mut e: call!(range_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
-                syn!(LArrow) >>
+                arrow: syn!(LArrow) >>
                 // Recurse into self to parse right-associative operator.
                 rhs: call!(placement_expr, allow_struct, true) >>
                 ({
-                    // XXX: Stop transforming the <- syntax into the InPlace
-                    // syntax.
                     e = ExprInPlace {
                         // op: BinOp::Place(larrow),
                         place: Box::new(e.into()),
+                        kind: InPlaceKind::Arrow(arrow),
                         value: Box::new(rhs.into()),
-                        in_token: tokens::In::default(),
                     }.into();
                 })
             )
@@ -813,7 +819,12 @@ pub mod parsing {
         // must be above Gt
         syn!(Ge) => { BinOp::Ge }
         |
-        syn!(Lt) => { BinOp::Lt }
+        do_parse!(
+            // Make sure that we don't eat the < part of a <- operator
+            not!(syn!(LArrow)) >>
+            t: syn!(Lt) >>
+            (BinOp::Lt(t))
+        )
         |
         syn!(Gt) => { BinOp::Gt }
     ));
@@ -1091,8 +1102,8 @@ pub mod parsing {
             place: expr_no_struct >>
             value: braces!(call!(Block::parse_within)) >>
             (ExprInPlace {
-                in_token: in_,
                 place: Box::new(place),
+                kind: InPlaceKind::In(in_),
                 value: Box::new(Expr {
                     node: ExprBlock {
                         unsafety: Unsafety::Normal,
@@ -2059,9 +2070,18 @@ mod printing {
 
     impl ToTokens for ExprInPlace {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.in_token.to_tokens(tokens);
-            self.place.to_tokens(tokens);
-            self.value.to_tokens(tokens);
+            match self.kind {
+                InPlaceKind::Arrow(ref arrow) => {
+                    self.place.to_tokens(tokens);
+                    arrow.to_tokens(tokens);
+                    self.value.to_tokens(tokens);
+                }
+                InPlaceKind::In(ref _in) => {
+                    _in.to_tokens(tokens);
+                    self.place.to_tokens(tokens);
+                    self.value.to_tokens(tokens);
+                }
+            }
         }
     }
 

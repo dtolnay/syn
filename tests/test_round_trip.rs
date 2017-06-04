@@ -54,18 +54,8 @@ fn filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // TODO placement syntax
-        "tests/rust/src/libcollections/tests/binary_heap.rs" |
-        // TODO placement syntax
-        "tests/rust/src/libcollections/tests/vec.rs" |
-        // TODO placement syntax
-        "tests/rust/src/libcollections/tests/vec_deque.rs" |
         // TODO better support for attributes
         "tests/rust/src/librustc_data_structures/blake2b.rs" |
-        // TODO placement syntax
-        "tests/rust/src/librustc_mir/build/matches/test.rs" |
-        // TODO placement syntax
-        "tests/rust/src/libstd/collections/hash/map.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/incremental/hashes/enum_defs.rs" |
         // TODO better support for attributes

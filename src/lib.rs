@@ -38,7 +38,7 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, Fie
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
                ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
                PatIdent, PatWild, PatStruct, PatTuple, PatTupleStruct, PatPath,
-               PatBox, PatRef, PatLit, PatRange, PatSlice};
+               PatBox, PatRef, PatLit, PatRange, PatSlice, InPlaceKind};
 
 mod generics;
 pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,

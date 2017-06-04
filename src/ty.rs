@@ -337,7 +337,7 @@ pub mod parsing {
         /// contain a `+` character.
         ///
         /// This parser does not allow a `+`, while the default parser does.
-        named!(without_plus -> Self, call!(ambig_ty, false));
+        named!(pub without_plus -> Self, call!(ambig_ty, false));
     }
 
     named!(ambig_ty(allow_plus: bool) -> Ty, alt!(
