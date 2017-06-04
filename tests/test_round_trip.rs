@@ -86,12 +86,27 @@ fn filter(entry: &DirEntry) -> bool {
     }
 }
 
+/// Abort immediately after this many failures.
+fn abort_after() -> u32 {
+    if let Ok(s) = std::env::var("ABORT_AFTER_FAILURE") {
+        if let Ok(n) = s.parse::<u32>() {
+            return n;
+        }
+    }
+    std::u32::MAX
+}
+
 #[test]
 fn test_round_trip() {
     {
         let min_stack_value = std::env::var("RUST_MIN_STACK").expect("RUST_MIN_STACK env var should be set since some tests require it.");
         let min_stack_value: usize = min_stack_value.parse().expect("RUST_MIN_STACK env var should be set since some tests require it.");
         assert!(min_stack_value >= 16000000);
+    }
+
+    let abort_after = abort_after();
+    if abort_after == 0 {
+        panic!("Skipping all round_trip tests");
     }
 
     let mut failed = 0;
@@ -116,6 +131,9 @@ fn test_round_trip() {
             Err(msg) => {
                 errorf!("syn failed to parse\n{:?}\n", msg);
                 failed += 1;
+                if failed >= abort_after {
+                    panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+                }
                 continue;
             }
         };
@@ -158,7 +176,12 @@ fn test_round_trip() {
         match equal {
             Err(_) => errorf!("ignoring syntex panic\n"),
             Ok(true) => {}
-            Ok(false) => failed += 1,
+            Ok(false) => {
+                failed += 1;
+                if failed >= abort_after {
+                    panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+                }
+            },
         }
     }
 
