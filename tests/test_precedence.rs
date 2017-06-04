@@ -95,9 +95,9 @@ fn test_rustc_precedence() {
         let mut content = String::new();
         file.read_to_string(&mut content).unwrap();
 
-        let (l_passed, l_failed) = match content.parse::<syn::Crate>() {
-            Ok(krate) => {
-                let exprs = collect_exprs(krate);
+        let (l_passed, l_failed) = match syn::parse_file(&content) {
+            Ok(file) => {
+                let exprs = collect_exprs(file);
                 test_expressions(exprs)
             }
             Err(msg) => {
@@ -351,7 +351,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 }
 
 /// Walk through a crate collecting all expressions we can find in it.
-fn collect_exprs(krate: syn::Crate) -> Vec<syn::Expr> {
+fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
     use synom::delimited::Delimited;
     use syn::*;
     use syn::fold::*;
@@ -373,6 +373,6 @@ fn collect_exprs(krate: syn::Crate) -> Vec<syn::Expr> {
     }
 
     let mut folder = CollectExprsFolder(vec![]);
-    folder.fold_crate(krate);
+    folder.fold_file(file);
     folder.0
 }

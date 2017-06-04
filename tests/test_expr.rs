@@ -86,7 +86,7 @@ fn test_catch_expr() {
         }
     "#;
 
-    let actual = raw.parse::<Crate>().unwrap();
+    let actual: File = syn::parse_str(raw).unwrap();
 
     assert_let!(ItemKind::Struct(ItemStruct { ref ident, .. }) = actual.items[0].node; {
         assert_eq!(ident, "catch");

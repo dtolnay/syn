@@ -1,19 +1,22 @@
+extern crate syntex_syntax;
+extern crate syntex_pos;
+
 use std::rc::Rc;
-use syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
+use self::syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
                          ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
                          NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
                          Visibility};
-use syntex_syntax::codemap::{self, Spanned};
-use syntex_syntax::fold::{self, Folder};
-use syntex_syntax::parse::token::{Lit, Token};
-use syntex_syntax::ptr::P;
-use syntex_syntax::symbol::Symbol;
-use syntex_syntax::tokenstream::{Delimited, TokenTree};
-use syntex_syntax::util::move_map::MoveMap;
-use syntex_syntax::util::small_vector::SmallVector;
+use self::syntex_syntax::codemap::{self, Spanned};
+use self::syntex_syntax::fold::{self, Folder};
+use self::syntex_syntax::parse::token::{Lit, Token};
+use self::syntex_syntax::ptr::P;
+use self::syntex_syntax::symbol::Symbol;
+use self::syntex_syntax::tokenstream::{Delimited, TokenTree};
+use self::syntex_syntax::util::move_map::MoveMap;
+use self::syntex_syntax::util::small_vector::SmallVector;
 
-use syntex_pos::{Span, DUMMY_SP};
-use syntex_syntax::ast;
+use self::syntex_pos::{Span, DUMMY_SP};
+use self::syntex_syntax::ast;
 
 struct Respanner;
 

@@ -2,6 +2,7 @@
 
 #![cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
 
+extern crate proc_macro;
 extern crate proc_macro2;
 extern crate unicode_xid;
 
@@ -62,9 +63,9 @@ pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignIt
                ArgSelf, ArgCaptured};
 
 #[cfg(feature = "full")]
-mod krate;
+mod file;
 #[cfg(feature = "full")]
-pub use krate::Crate;
+pub use file::File;
 
 mod lifetime;
 pub use lifetime::Lifetime;
@@ -100,45 +101,177 @@ pub mod visit;
 #[cfg(feature = "fold")]
 pub mod fold;
 
+////////////////////////////////////////////////////////////////////////////////
+
 #[cfg(feature = "parsing")]
-mod parsing {
-    use std::str::FromStr;
+pub use synom::ParseError;
 
-    use super::*;
-    use synom::{Synom, ParseError};
-    use proc_macro2::TokenStream;
+#[cfg(feature = "parsing")]
+use synom::{Synom, SynomBuffer};
 
-    macro_rules! traits {
-        ($($ty:ident,)*) => ($(
-            impl From<TokenStream> for $ty {
-                fn from(stream: TokenStream) -> $ty {
-                    $ty::parse_all_unwrap(stream)
-                }
+/// Parse tokens of source code into the chosen syn data type.
+///
+/// This is preferred over parsing a string because tokens are able to preserve
+/// information about where in the user's code they were originally written (the
+/// "span" of the token), possibly allowing the compiler to produce better error
+/// messages.
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// extern crate proc_macro;
+/// use proc_macro::TokenStream;
+///
+/// extern crate syn;
+///
+/// #[macro_use]
+/// extern crate quote;
+///
+/// use syn::DeriveInput;
+///
+/// #[proc_macro_derive(MyMacro)]
+/// pub fn my_macro(input: TokenStream) -> TokenStream {
+///     // Parse the tokens into a syntax tree
+///     let ast: DeriveInput = syn::parse(input).unwrap();
+///
+///     // Build the output, possibly using quasi-quotation
+///     let expanded = quote! {
+///         /* ... */
+///     };
+///
+///     // Parse back to a token stream and return it
+///     expanded.parse().unwrap()
+/// }
+/// ```
+#[cfg(feature = "parsing")]
+pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>
+    where T: Synom,
+{
+    _parse(tokens.into())
+}
+
+#[cfg(feature = "parsing")]
+fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
+    where T: Synom,
+{
+    let buf = SynomBuffer::new(tokens);
+    let result = T::parse(buf.begin());
+    let err = match result {
+        Ok((rest, t)) => {
+            if rest.eof() {
+                return Ok(t);
+            } else if rest == buf.begin() {
+                // parsed nothing
+                ParseError::new("failed to parse anything")
+            } else {
+                ParseError::new("failed to parse all tokens")
             }
+        }
+        Err(err) => err,
+    };
+    match T::description() {
+        Some(s) => Err(ParseError::new(format!("parsing {}: {}", s, err))),
+        None => Err(err),
+    }
+}
 
-            impl FromStr for $ty {
-                type Err = ParseError;
+/// Parse a string of Rust code into the chosen syn data type.
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate syn;
+/// #
+/// # #[macro_use]
+/// # extern crate error_chain;
+///
+/// use syn::Expr;
+/// #
+/// # error_chain! {
+/// #     foreign_links {
+/// #         Syn(syn::ParseError);
+/// #     }
+/// # }
+///
+/// fn run() -> Result<()> {
+///     let code = "assert_eq!(u8::max_value(), 255)";
+///     let expr = syn::parse_str::<Expr>(code)?;
+///     println!("{:#?}", expr);
+///     Ok(())
+/// }
+/// #
+/// # fn main() { run().unwrap() }
+/// ```
+#[cfg(feature = "parsing")]
+pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
+    _parse(s.parse()?)
+}
 
-                fn from_str(s: &str) -> Result<Self, Self::Err> {
-                    $ty::parse_str_all(s)
-                }
-            }
-        )*)
+// FIXME the name parse_file makes it sound like you might pass in a path to a
+// file, rather than the content.
+/// Parse the content of a file of Rust code.
+///
+/// This is different from `syn::parse_str::<File>(content)` in two ways:
+///
+/// - It discards a leading byte order mark `\u{FEFF}` if the file has one.
+/// - It preserves the shebang line of the file, such as `#!/usr/bin/env rustx`.
+///
+/// If present, either of these would be an error using `from_str`.
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// extern crate syn;
+/// #
+/// # #[macro_use]
+/// # extern crate error_chain;
+///
+/// use std::fs::File;
+/// use std::io::Read;
+/// #
+/// # error_chain! {
+/// #     foreign_links {
+/// #         Io(std::io::Error);
+/// #         Syn(syn::ParseError);
+/// #     }
+/// # }
+///
+/// fn run() -> Result<()> {
+///     let mut file = File::open("path/to/code.rs")?;
+///     let mut content = String::new();
+///     file.read_to_string(&mut content)?;
+///
+///     let ast = syn::parse_file(&content)?;
+///     if let Some(shebang) = ast.shebang {
+///         println!("{}", shebang);
+///     }
+///     println!("{} items", ast.items.len());
+///
+///     Ok(())
+/// }
+/// #
+/// # fn main() { run().unwrap() }
+/// ```
+#[cfg(all(feature = "parsing", feature = "full"))]
+pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
+    // Strip the BOM if it is present
+    const BOM: &'static str = "\u{feff}";
+    if content.starts_with(BOM) {
+        content = &content[BOM.len()..];
     }
 
-    traits! {
-        DeriveInput,
-        TyParamBound,
-        Ident,
-        WhereClause,
-        Ty,
-        Lit,
+    let mut shebang = None;
+    if content.starts_with("#!") && !content.starts_with("#![") {
+        if let Some(idx) = content.find('\n') {
+            shebang = Some(content[..idx].to_string());
+            content = &content[idx..];
+        } else {
+            shebang = Some(content.to_string());
+            content = "";
+        }
     }
 
-    #[cfg(feature = "full")]
-    traits! {
-        Expr,
-        Item,
-        Crate,
-    }
+    let mut file: File = parse_str(content)?;
+    file.shebang = shebang;
+    Ok(file)
 }

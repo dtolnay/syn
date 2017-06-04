@@ -1,8 +1,11 @@
+#![allow(dead_code)]
+
 extern crate walkdir;
 
-use walkdir::DirEntry;
 use std::env;
 use std::u32;
+
+use self::walkdir::DirEntry;
 
 macro_rules! errorf {
     ($($tt:tt)*) => {

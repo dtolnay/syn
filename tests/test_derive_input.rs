@@ -51,7 +51,7 @@ fn test_unit() {
         }),
     };
 
-    assert_eq!(expected, raw.parse().unwrap());
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn test_struct() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -309,7 +309,7 @@ fn test_enum() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -378,7 +378,7 @@ fn test_attr_with_path() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -420,7 +420,7 @@ fn test_attr_with_non_mod_style_path() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -459,7 +459,7 @@ fn test_attr_with_mod_style_path_with_self() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 
@@ -510,7 +510,7 @@ fn test_pub_restricted() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -537,7 +537,7 @@ fn test_pub_restricted_crate() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -565,7 +565,7 @@ fn test_pub_restricted_super() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -593,7 +593,7 @@ fn test_pub_restricted_in_super() {
         }),
     };
 
-    let actual = raw.parse().unwrap();
+    let actual = syn::parse_str(raw).unwrap();
 
     assert_eq!(expected, actual);
 }

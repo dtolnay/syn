@@ -21,8 +21,9 @@
 //! For our use case, this strategy is a huge improvement in usability,
 //! correctness, and compile time over nom's `ws!` strategy.
 
-extern crate unicode_xid;
+extern crate proc_macro;
 extern crate proc_macro2;
+extern crate unicode_xid;
 
 #[cfg(feature = "printing")]
 extern crate quote;
@@ -33,8 +34,6 @@ pub use proc_macro2::{TokenTree, TokenStream};
 use std::convert::From;
 use std::error::Error;
 use std::fmt;
-
-use proc_macro2::LexError;
 
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
@@ -63,38 +62,6 @@ pub trait Synom: Sized {
     fn description() -> Option<&'static str> {
         None
     }
-
-    fn parse_all(input: TokenStream) -> Result<Self, ParseError> {
-        let buf = SynomBuffer::new(input);
-        let descr = Self::description().unwrap_or("unnamed parser");
-        let err = match Self::parse(buf.begin()) {
-            Ok((rest, t)) => {
-                if rest.eof() {
-                    return Ok(t)
-                } else if rest == buf.begin() {
-                    // parsed nothing
-                    format!("parsed no input while parsing {}", descr)
-                } else {
-                    // Partially parsed the output. Print the input which remained.
-                    format!("unparsed tokens after parsing {}:\n{}",
-                            descr, rest.token_stream())
-                }
-            }
-            Err(ref err) => format!("{} while parsing {}", err.description(), descr),
-        };
-        Err(ParseError(Some(err)))
-    }
-
-    fn parse_str_all(input: &str) -> Result<Self, ParseError> {
-        Self::parse_all(input.parse()?)
-    }
-
-    fn parse_all_unwrap(input: TokenStream) -> Self {
-        // TODO: eventually try to provide super nice error messages here as
-        // this is what most users will hit. Hopefully the compiler will give us
-        // an interface one day to give an extra-good error message here.
-        Self::parse_all(input).unwrap()
-    }
 }
 
 #[derive(Debug)]
@@ -115,9 +82,23 @@ impl fmt::Display for ParseError {
     }
 }
 
-impl From<LexError> for ParseError {
-    fn from(_: LexError) -> ParseError {
+impl From<proc_macro2::LexError> for ParseError {
+    fn from(_: proc_macro2::LexError) -> ParseError {
         ParseError(Some("error while lexing input string".to_owned()))
+    }
+}
+
+impl From<proc_macro::LexError> for ParseError {
+    fn from(_: proc_macro::LexError) -> ParseError {
+        ParseError(Some("error while lexing input string".to_owned()))
+    }
+}
+
+impl ParseError {
+    // For syn use only. Not public API.
+    #[doc(hidden)]
+    pub fn new<T: Into<String>>(msg: T) -> Self {
+        ParseError(Some(msg.into()))
     }
 }
 

@@ -47,7 +47,7 @@ fn test_round_trip() {
         file.read_to_string(&mut content).unwrap();
 
         let start = Instant::now();
-        let (krate, elapsed) = match content.parse::<syn::Crate>() {
+        let (krate, elapsed) = match syn::parse_file(&content) {
             Ok(krate) => (krate, start.elapsed()),
             Err(msg) => {
                 errorf!("syn failed to parse\n{:?}\n", msg);
