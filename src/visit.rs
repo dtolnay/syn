@@ -188,6 +188,7 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
 
     match *ty {
         Ty::Slice(TySlice { ref ty, .. }) |
+        Ty::Group(TyGroup { ref ty, .. }) |
         Ty::Paren(TyParen { ref ty, .. }) => visitor.visit_ty(ty),
         Ty::Ptr(TyPtr { ref ty, .. }) => visitor.visit_ty(&ty.ty),
         Ty::Rptr(TyRptr { ref lifetime, ref ty, .. }) => {
@@ -599,6 +600,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
         Box(ExprBox { ref expr, .. }) |
         AddrOf(ExprAddrOf { ref expr, .. }) |
         Paren(ExprParen { ref expr, .. }) |
+        Group(ExprGroup { ref expr, .. }) |
         Try(ExprTry { ref expr, .. }) => {
             visitor.visit_expr(expr);
         }

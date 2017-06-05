@@ -131,6 +131,7 @@ tokens! {
         (pub struct Pound([Span; 1])        => "#"),
         (pub struct Question([Span; 1])     => "?"),
         (pub struct RArrow([Span; 2])       => "->"),
+        (pub struct LArrow([Span; 2])       => "<-"),
         (pub struct Rem([Span; 1])          => "%"),
         (pub struct RemEq([Span; 2])        => "%="),
         (pub struct Rocket([Span; 2])       => "=>"),
@@ -148,6 +149,7 @@ tokens! {
         (pub struct Brace                   => "{"),
         (pub struct Bracket                 => "["),
         (pub struct Paren                   => "("),
+        (pub struct Group                   => " "),
     }
     syms: {
         (pub struct As                      => "as"),
@@ -272,6 +274,7 @@ mod parsing {
             "(" => Delimiter::Parenthesis,
             "{" => Delimiter::Brace,
             "[" => Delimiter::Bracket,
+            " " => Delimiter::None,
             _ => panic!("unknown delimiter: {}", delim),
         };
 

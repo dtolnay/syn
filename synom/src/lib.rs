@@ -66,24 +66,23 @@ pub trait Synom: Sized {
 
     fn parse_all(input: TokenStream) -> Result<Self, ParseError> {
         let buf = SynomBuffer::new(input);
-        let result = Self::parse(buf.begin());
-        let err = match result {
+        let descr = Self::description().unwrap_or("unnamed parser");
+        let err = match Self::parse(buf.begin()) {
             Ok((rest, t)) => {
                 if rest.eof() {
                     return Ok(t)
                 } else if rest == buf.begin() {
                     // parsed nothing
-                    "failed to parse"
+                    format!("parsed no input while parsing {}", descr)
                 } else {
-                    "unparsed tokens after"
+                    // Partially parsed the output. Print the input which remained.
+                    format!("unparsed tokens after parsing {}:\n{}",
+                            descr, rest.token_stream())
                 }
             }
-            Err(ref err) => err.description(),
+            Err(ref err) => format!("{} while parsing {}", err.description(), descr),
         };
-        match Self::description() {
-            Some(s) => Err(ParseError(Some(format!("{} {}", err, s)))),
-            None => Err(ParseError(Some(err.to_string()))),
-        }
+        Err(ParseError(Some(err)))
     }
 
     fn parse_str_all(input: &str) -> Result<Self, ParseError> {
@@ -154,6 +153,20 @@ macro_rules! named {
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
         pub fn $name(i: $crate::Cursor) -> $crate::PResult<$o> {
+            $submac!(i, $($args)*)
+        }
+    };
+
+    // These two variants are for defining named parsers which have custom
+    // arguments, and are called with `call!()`
+    ($name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
+        fn $name(i: $crate::Cursor, $($params)*) -> $crate::PResult<$o> {
+            $submac!(i, $($args)*)
+        }
+    };
+
+    (pub $name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
+        pub fn $name(i: $crate::Cursor, $($params)*) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };

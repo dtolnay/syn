@@ -29,11 +29,11 @@ ast_enum_of_structs! {
             pub box_token: tokens::Box_,
         }),
 
-        /// E.g. 'place <- val'.
+        /// E.g. 'place <- val' or `in place { val }`.
         pub InPlace(ExprInPlace {
             pub place: Box<Expr>,
+            pub kind: InPlaceKind,
             pub value: Box<Expr>,
-            pub in_token: tokens::In,
         }),
 
         /// An array, e.g. `[a, b, c, d]`.
@@ -322,6 +322,16 @@ ast_enum_of_structs! {
             pub paren_token: tokens::Paren,
         }),
 
+        /// No-op: used solely so we can pretty-print faithfully
+        ///
+        /// A `group` represents a `None`-delimited span in the input
+        /// `TokenStream` which affects the precidence of the resulting
+        /// expression. They are used for macro hygiene.
+        pub Group(ExprGroup {
+            pub expr: Box<Expr>,
+            pub group_token: tokens::Group,
+        }),
+
         /// `expr?`
         pub Try(ExprTry {
             pub expr: Box<Expr>,
@@ -584,6 +594,14 @@ ast_enum! {
     }
 }
 
+ast_enum! {
+    #[cfg_attr(feature = "clone-impls", derive(Copy))]
+    pub enum InPlaceKind {
+        Arrow(tokens::LArrow),
+        In(tokens::In),
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
@@ -593,20 +611,31 @@ pub mod parsing {
     use synom::{PResult, Cursor, Synom, parse_error};
     use synom::tokens::*;
 
-    // Struct literals are ambiguous in certain positions
-    // https://github.com/rust-lang/rfcs/pull/92
-    macro_rules! named_ambiguous_expr {
-        ($name:ident -> $o:ty, $allow_struct:ident, $submac:ident!( $($args:tt)* )) => {
-            fn $name(i: $crate::synom::Cursor, $allow_struct: bool)
-                     -> $crate::synom::PResult<$o> {
-                $submac!(i, $($args)*)
-            }
-        };
-    }
-
+    /// When we're parsing expressions which occur before blocks, like in
+    /// an if statement's condition, we cannot parse a struct literal.
+    ///
+    /// Struct literals are ambiguous in certain positions
+    /// https://github.com/rust-lang/rfcs/pull/92
     macro_rules! ambiguous_expr {
         ($i:expr, $allow_struct:ident) => {
             ambiguous_expr($i, $allow_struct, true)
+        };
+    }
+
+    /// When we are parsing an optional suffix expression, we cannot allow
+    /// blocks if structs are not allowed.
+    ///
+    /// Example:
+    /// ```ignore
+    /// if break { } { }
+    /// // is ambiguous between:
+    /// if (break { }) { }
+    /// // - or -
+    /// if (break) { } { }
+    /// ```
+    macro_rules! opt_ambiguous_expr {
+        ($i:expr, $allow_struct:ident) => {
+            option!($i, call!(ambiguous_expr, $allow_struct, $allow_struct))
         };
     }
 
@@ -621,173 +650,462 @@ pub mod parsing {
 
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
-    #[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
-    fn ambiguous_expr(i: Cursor,
-                      allow_struct: bool,
-                      allow_block: bool)
-                      -> PResult<Expr> {
-        do_parse! {
+    /// Parse an arbitrary expression.
+    pub fn ambiguous_expr(i: Cursor,
+                          allow_struct: bool,
+                          allow_block: bool)
+                          -> PResult<Expr> {
+        map!(
             i,
-            mut e: alt!(
-                syn!(Lit) => { ExprKind::Lit } // must be before expr_struct
-                |
-                // must be before expr_path
-                cond_reduce!(allow_struct, map!(syn!(ExprStruct), ExprKind::Struct))
-                |
-                syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
-                |
-                syn!(Mac) => { ExprKind::Mac } // must be before expr_path
-                |
-                call!(expr_break, allow_struct) // must be before expr_path
-                |
-                syn!(ExprContinue) => { ExprKind::Continue } // must be before expr_path
-                |
-                call!(expr_ret, allow_struct) // must be before expr_path
-                |
-                call!(expr_box, allow_struct)
-                |
-                syn!(ExprInPlace) => { ExprKind::InPlace }
-                |
-                syn!(ExprArray) => { ExprKind::Array }
-                |
-                syn!(ExprTup) => { ExprKind::Tup }
-                |
-                call!(expr_unary, allow_struct)
-                |
-                syn!(ExprIf) => { ExprKind::If }
-                |
-                syn!(ExprIfLet) => { ExprKind::IfLet }
-                |
-                syn!(ExprWhile) => { ExprKind::While }
-                |
-                syn!(ExprWhileLet) => { ExprKind::WhileLet }
-                |
-                syn!(ExprForLoop) => { ExprKind::ForLoop }
-                |
-                syn!(ExprLoop) => { ExprKind::Loop }
-                |
-                syn!(ExprMatch) => { ExprKind::Match }
-                |
-                syn!(ExprCatch) => { ExprKind::Catch }
-                |
-                call!(expr_closure, allow_struct)
-                |
-                cond_reduce!(allow_block, map!(syn!(ExprBlock), ExprKind::Block))
-                |
-                call!(expr_range, allow_struct)
-                |
-                syn!(ExprPath) => { ExprKind::Path }
-                |
-                call!(expr_addr_of, allow_struct)
-                |
-                syn!(ExprRepeat) => { ExprKind::Repeat }
-            ) >>
-            many0!(alt!(
-                tap!(args: and_call => {
-                    let (args, paren) = args;
-                    e = ExprCall {
-                        func: Box::new(e.into()),
-                        args: args,
-                        paren_token: paren,
-                    }.into();
-                })
-                |
-                tap!(more: and_method_call => {
-                    let mut call = more;
-                    call.expr = Box::new(e.into());
-                    e = call.into();
-                })
-                |
-                tap!(more: call!(and_binary, allow_struct) => {
-                    let (op, other) = more;
-                    e = ExprBinary {
-                        op: op,
-                        left: Box::new(e.into()),
-                        right: Box::new(other),
-                    }.into();
-                })
-                |
-                tap!(ty: and_cast => {
-                    let (ty, token) = ty;
-                    e = ExprCast {
-                        expr: Box::new(e.into()),
-                        ty: Box::new(ty),
-                        as_token: token,
-                    }.into();
-                })
-                |
-                tap!(ty: and_ascription => {
-                    let (ty, token) = ty;
-                    e = ExprType {
-                        expr: Box::new(e.into()),
-                        ty: Box::new(ty),
-                        colon_token: token,
-                    }.into();
-                })
-                |
-                tap!(v: call!(and_assign, allow_struct) => {
-                    let (v, token) = v;
+            call!(assign_expr, allow_struct, allow_block),
+            ExprKind::into
+        )
+    }
+
+    /// Parse a left-associative binary operator.
+    macro_rules! binop {
+        (
+            $name: ident,
+            $next: ident,
+            $submac: ident!( $($args:tt)* )
+        ) => {
+            named!($name(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+                mut e: call!($next, allow_struct, allow_block) >>
+                many0!(do_parse!(
+                    op: $submac!($($args)*) >>
+                    rhs: call!($next, allow_struct, true) >>
+                    ({
+                        e = ExprBinary {
+                            left: Box::new(e.into()),
+                            op: op,
+                            right: Box::new(rhs.into()),
+                        }.into();
+                    })
+                )) >>
+                (e)
+            ));
+        }
+    }
+
+    /// ```ignore
+    /// <placement> = <placement> ..
+    /// <placement> += <placement> ..
+    /// <placement> -= <placement> ..
+    /// <placement> *= <placement> ..
+    /// <placement> /= <placement> ..
+    /// <placement> %= <placement> ..
+    /// <placement> ^= <placement> ..
+    /// <placement> &= <placement> ..
+    /// <placement> |= <placement> ..
+    /// <placement> <<= <placement> ..
+    /// <placement> >>= <placement> ..
+    /// ```
+    ///
+    /// NOTE: This operator is right-associative.
+    named!(assign_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+        mut e: call!(placement_expr, allow_struct, allow_block) >>
+        alt!(
+            do_parse!(
+                eq: syn!(Eq) >>
+                // Recurse into self to parse right-associative operator.
+                rhs: call!(assign_expr, allow_struct, true) >>
+                ({
                     e = ExprAssign {
                         left: Box::new(e.into()),
-                        eq_token: token,
-                        right: Box::new(v),
+                        eq_token: eq,
+                        right: Box::new(rhs.into()),
                     }.into();
                 })
-                |
-                tap!(more: call!(and_assign_op, allow_struct) => {
-                    let (op, v) = more;
+            )
+            |
+            do_parse!(
+                op: call!(BinOp::parse_assign_op) >>
+                // Recurse into self to parse right-associative operator.
+                rhs: call!(assign_expr, allow_struct, true) >>
+                ({
                     e = ExprAssignOp {
-                        op: op,
                         left: Box::new(e.into()),
-                        right: Box::new(v),
+                        op: op,
+                        right: Box::new(rhs.into()),
                     }.into();
                 })
-                |
-                tap!(field: and_field => {
-                    let (field, token) = field;
-                    e = ExprField {
+            )
+            |
+            epsilon!()
+        ) >>
+        (e)
+    ));
+
+    /// ```ignore
+    /// <range> <- <range> ..
+    /// ```
+    ///
+    /// NOTE: The `in place { expr }` version of this syntax is parsed in
+    /// `atom_expr`, not here.
+    ///
+    /// NOTE: This operator is right-associative.
+    named!(placement_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+        mut e: call!(range_expr, allow_struct, allow_block) >>
+        alt!(
+            do_parse!(
+                arrow: syn!(LArrow) >>
+                // Recurse into self to parse right-associative operator.
+                rhs: call!(placement_expr, allow_struct, true) >>
+                ({
+                    e = ExprInPlace {
+                        // op: BinOp::Place(larrow),
+                        place: Box::new(e.into()),
+                        kind: InPlaceKind::Arrow(arrow),
+                        value: Box::new(rhs.into()),
+                    }.into();
+                })
+            )
+            |
+            epsilon!()
+        ) >>
+        (e)
+    ));
+
+    /// ```ignore
+    /// <or> ... <or> ..
+    /// <or> .. <or> ..
+    /// <or> ..
+    /// ```
+    ///
+    /// NOTE: This is currently parsed oddly - I'm not sure of what the exact
+    /// rules are for parsing these expressions are, but this is not correct.
+    /// For example, `a .. b .. c` is not a legal expression. It should not
+    /// be parsed as either `(a .. b) .. c` or `a .. (b .. c)` apparently.
+    ///
+    /// NOTE: The form of ranges which don't include a preceding expression are
+    /// parsed by `atom_expr`, rather than by this function.
+    named!(range_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+        mut e: call!(or_expr, allow_struct, allow_block) >>
+        many0!(do_parse!(
+            limits: syn!(RangeLimits) >>
+            // We don't want to allow blocks here if we don't allow structs. See
+            // the reasoning for `opt_ambiguous_expr!` above.
+            hi: option!(call!(or_expr, allow_struct, allow_struct)) >>
+            ({
+                e = ExprRange {
+                    from: Some(Box::new(e.into())),
+                    limits: limits,
+                    to: hi.map(|e| Box::new(e.into())),
+                }.into();
+            })
+        )) >>
+        (e)
+    ));
+
+    /// ```ignore
+    /// <and> || <and> ...
+    /// ```
+    binop!(or_expr, and_expr, map!(syn!(OrOr), BinOp::Or));
+
+    /// ```ignore
+    /// <compare> && <compare> ...
+    /// ```
+    binop!(and_expr, compare_expr, map!(syn!(AndAnd), BinOp::And));
+
+    /// ```ignore
+    /// <bitor> == <bitor> ...
+    /// <bitor> != <bitor> ...
+    /// <bitor> >= <bitor> ...
+    /// <bitor> <= <bitor> ...
+    /// <bitor> > <bitor> ...
+    /// <bitor> < <bitor> ...
+    /// ```
+    ///
+    /// NOTE: This operator appears to be parsed as left-associative, but errors
+    /// if it is used in a non-associative manner.
+    binop!(compare_expr, bitor_expr, alt!(
+        syn!(EqEq) => { BinOp::Eq }
+        |
+        syn!(Ne) => { BinOp::Ne }
+        |
+        // must be above Lt
+        syn!(Le) => { BinOp::Le }
+        |
+        // must be above Gt
+        syn!(Ge) => { BinOp::Ge }
+        |
+        do_parse!(
+            // Make sure that we don't eat the < part of a <- operator
+            not!(syn!(LArrow)) >>
+            t: syn!(Lt) >>
+            (BinOp::Lt(t))
+        )
+        |
+        syn!(Gt) => { BinOp::Gt }
+    ));
+
+    /// ```ignore
+    /// <bitxor> | <bitxor> ...
+    /// ```
+    binop!(bitor_expr, bitxor_expr, do_parse!(
+        not!(syn!(OrOr)) >>
+        not!(syn!(OrEq)) >>
+        t: syn!(Or) >>
+        (BinOp::BitOr(t))
+    ));
+
+    /// ```ignore
+    /// <bitand> ^ <bitand> ...
+    /// ```
+    binop!(bitxor_expr, bitand_expr, do_parse!(
+        // NOTE: Make sure we aren't looking at ^=.
+        not!(syn!(CaretEq)) >>
+        t: syn!(Caret) >>
+        (BinOp::BitXor(t))
+    ));
+
+    /// ```ignore
+    /// <shift> & <shift> ...
+    /// ```
+    binop!(bitand_expr, shift_expr, do_parse!(
+        // NOTE: Make sure we aren't looking at && or &=.
+        not!(syn!(AndAnd)) >>
+        not!(syn!(AndEq)) >>
+        t: syn!(And) >>
+        (BinOp::BitAnd(t))
+    ));
+
+    /// ```ignore
+    /// <arith> << <arith> ...
+    /// <arith> >> <arith> ...
+    /// ```
+    binop!(shift_expr, arith_expr, alt!(
+        syn!(Shl) => { BinOp::Shl }
+        |
+        syn!(Shr) => { BinOp::Shr }
+    ));
+
+    /// ```ignore
+    /// <term> + <term> ...
+    /// <term> - <term> ...
+    /// ```
+    binop!(arith_expr, term_expr, alt!(
+        syn!(Add) => { BinOp::Add }
+        |
+        syn!(Sub) => { BinOp::Sub }
+    ));
+
+    /// ```ignore
+    /// <cast> * <cast> ...
+    /// <cast> / <cast> ...
+    /// <cast> % <cast> ...
+    /// ```
+    binop!(term_expr, cast_expr, alt!(
+        syn!(Star) => { BinOp::Mul }
+        |
+        syn!(Div) => { BinOp::Div }
+        |
+        syn!(Rem) => { BinOp::Rem }
+    ));
+
+    /// ```ignore
+    /// <unary> as <ty>
+    /// <unary> : <ty>
+    /// ```
+    named!(cast_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+        mut e: call!(unary_expr, allow_struct, allow_block) >>
+        many0!(alt!(
+            do_parse!(
+                as_: syn!(As) >>
+                // We can't accept `A + B` in cast expressions, as it's
+                // ambiguous with the + expression.
+                ty: call!(Ty::without_plus) >>
+                ({
+                    e = ExprCast {
                         expr: Box::new(e.into()),
-                        field: field,
-                        dot_token: token,
+                        as_token: as_,
+                        ty: Box::new(ty),
                     }.into();
                 })
-                |
-                tap!(field: and_tup_field => {
-                    let (field, token) = field;
-                    e = ExprTupField {
+            )
+            |
+            do_parse!(
+                colon: syn!(Colon) >>
+                // We can't accept `A + B` in cast expressions, as it's
+                // ambiguous with the + expression.
+                ty: call!(Ty::without_plus) >>
+                ({
+                    e = ExprType {
                         expr: Box::new(e.into()),
-                        field: field,
-                        dot_token: token,
+                        colon_token: colon,
+                        ty: Box::new(ty),
                     }.into();
                 })
-                |
-                tap!(i: and_index => {
-                    let (i, token) = i;
-                    e = ExprIndex {
-                        expr: Box::new(e.into()),
-                        bracket_token: token,
-                        index: Box::new(i),
-                    }.into();
-                })
-                |
-                tap!(more: call!(and_range, allow_struct) => {
-                    let (limits, hi) = more;
-                    e = ExprRange {
-                        from: Some(Box::new(e.into())),
-                        to: hi.map(Box::new),
-                        limits: limits,
-                    }.into();
-                })
-                |
-                tap!(question: syn!(Question) => {
-                    e = ExprTry {
-                        expr: Box::new(e.into()),
-                        question_token: question,
-                    }.into();
-                })
-            )) >>
-            (e.into())
-        }
+            )
+        )) >>
+        (e)
+    ));
+
+    /// ```
+    /// <UnOp> <trailer>
+    /// & <trailer>
+    /// &mut <trailer>
+    /// box <trailer>
+    /// ```
+    named!(unary_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
+        do_parse!(
+            op: syn!(UnOp) >>
+            expr: call!(unary_expr, allow_struct, true) >>
+            (ExprUnary {
+                op: op,
+                expr: Box::new(expr.into()),
+            }.into())
+        )
+        |
+        do_parse!(
+            and: syn!(And) >>
+            mutability: syn!(Mutability) >>
+            expr: call!(unary_expr, allow_struct, true) >>
+            (ExprAddrOf {
+                and_token: and,
+                mutbl: mutability,
+                expr: Box::new(expr.into()),
+            }.into())
+        )
+        |
+        do_parse!(
+            box_: syn!(Box_) >>
+            expr: call!(unary_expr, allow_struct, true) >>
+            (ExprBox {
+                box_token: box_,
+                expr: Box::new(expr.into()),
+            }.into())
+        )
+        |
+        call!(trailer_expr, allow_struct, allow_block)
+    ));
+
+    /// ```ignore
+    /// <atom> (..<args>) ...
+    /// <atom> . <ident> (..<args>) ...
+    /// <atom> . <ident> ...
+    /// <atom> . <lit> ...
+    /// <atom> [ <expr> ] ...
+    /// <atom> ? ...
+    /// ```
+    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+        mut e: call!(atom_expr, allow_struct, allow_block) >>
+        many0!(alt!(
+            tap!(args: and_call => {
+                let (args, paren) = args;
+                e = ExprCall {
+                    func: Box::new(e.into()),
+                    args: args,
+                    paren_token: paren,
+                }.into();
+            })
+            |
+            tap!(more: and_method_call => {
+                let mut call = more;
+                call.expr = Box::new(e.into());
+                e = call.into();
+            })
+            |
+            tap!(field: and_field => {
+                let (field, token) = field;
+                e = ExprField {
+                    expr: Box::new(e.into()),
+                    field: field,
+                    dot_token: token,
+                }.into();
+            })
+            |
+            tap!(field: and_tup_field => {
+                let (field, token) = field;
+                e = ExprTupField {
+                    expr: Box::new(e.into()),
+                    field: field,
+                    dot_token: token,
+                }.into();
+            })
+            |
+            tap!(i: and_index => {
+                let (i, token) = i;
+                e = ExprIndex {
+                    expr: Box::new(e.into()),
+                    bracket_token: token,
+                    index: Box::new(i),
+                }.into();
+            })
+            |
+            tap!(question: syn!(Question) => {
+                e = ExprTry {
+                    expr: Box::new(e.into()),
+                    question_token: question,
+                }.into();
+            })
+        )) >>
+        (e)
+    ));
+
+    /// Parse all atomic expressions which don't have to worry about precidence
+    /// interactions, as they are fully contained.
+    named!(atom_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
+        syn!(ExprGroup) => { ExprKind::Group } // must be placed first
+        |
+        syn!(Lit) => { ExprKind::Lit } // must be before expr_struct
+        |
+        // must be before expr_path
+        cond_reduce!(allow_struct, map!(syn!(ExprStruct), ExprKind::Struct))
+        |
+        syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
+        |
+        syn!(Mac) => { ExprKind::Mac } // must be before expr_path
+        |
+        call!(expr_break, allow_struct) // must be before expr_path
+        |
+        syn!(ExprContinue) => { ExprKind::Continue } // must be before expr_path
+        |
+        call!(expr_ret, allow_struct) // must be before expr_path
+        |
+        // NOTE: The `in place { expr }` form. `place <- expr` is parsed above.
+        syn!(ExprInPlace) => { ExprKind::InPlace }
+        |
+        syn!(ExprArray) => { ExprKind::Array }
+        |
+        syn!(ExprTup) => { ExprKind::Tup }
+        |
+        syn!(ExprIf) => { ExprKind::If }
+        |
+        syn!(ExprIfLet) => { ExprKind::IfLet }
+        |
+        syn!(ExprWhile) => { ExprKind::While }
+        |
+        syn!(ExprWhileLet) => { ExprKind::WhileLet }
+        |
+        syn!(ExprForLoop) => { ExprKind::ForLoop }
+        |
+        syn!(ExprLoop) => { ExprKind::Loop }
+        |
+        syn!(ExprMatch) => { ExprKind::Match }
+        |
+        syn!(ExprCatch) => { ExprKind::Catch }
+        |
+        call!(expr_closure, allow_struct)
+        |
+        cond_reduce!(allow_block, map!(syn!(ExprBlock), ExprKind::Block))
+        |
+        // NOTE: This is the prefix-form of range
+        call!(expr_range, allow_struct)
+        |
+        syn!(ExprPath) => { ExprKind::Path }
+        |
+        syn!(ExprRepeat) => { ExprKind::Repeat }
+    ));
+
+    impl Synom for ExprGroup {
+        named!(parse -> Self, do_parse!(
+            e: grouped!(syn!(Expr)) >>
+            (ExprGroup {
+                expr: Box::new(e.0),
+                group_token: e.1,
+            }.into())
+        ));
     }
 
     impl Synom for ExprParen {
@@ -800,23 +1118,14 @@ pub mod parsing {
         ));
     }
 
-    named_ambiguous_expr!(expr_box -> ExprKind, allow_struct, do_parse!(
-        box_: syn!(Box_) >>
-        inner: ambiguous_expr!(allow_struct) >>
-        (ExprBox {
-            expr: Box::new(inner),
-            box_token: box_,
-        }.into())
-    ));
-
     impl Synom for ExprInPlace {
         named!(parse -> Self, do_parse!(
             in_: syn!(In) >>
             place: expr_no_struct >>
             value: braces!(call!(Block::parse_within)) >>
             (ExprInPlace {
-                in_token: in_,
                 place: Box::new(place),
+                kind: InPlaceKind::In(in_),
                 value: Box::new(Expr {
                     node: ExprBlock {
                         unsafety: Unsafety::Normal,
@@ -889,26 +1198,6 @@ pub mod parsing {
             })
         ));
     }
-
-    named_ambiguous_expr!(and_binary -> (BinOp, Expr), allow_struct, tuple!(
-        call!(BinOp::parse_binop),
-        ambiguous_expr!(allow_struct)
-    ));
-
-    named_ambiguous_expr!(expr_unary -> ExprKind, allow_struct, do_parse!(
-        operator: syn!(UnOp) >>
-        operand: ambiguous_expr!(allow_struct) >>
-        (ExprUnary { op: operator, expr: Box::new(operand) }.into())
-    ));
-
-    named!(and_cast -> (Ty, As), do_parse!(
-        as_: syn!(As) >>
-        ty: syn!(Ty) >>
-        (ty, as_)
-    ));
-
-    named!(and_ascription -> (Ty, Colon),
-           map!(tuple!(syn!(Colon), syn!(Ty)), |(a, b)| (b, a)));
 
     impl Synom for ExprIfLet {
         named!(parse -> Self, do_parse!(
@@ -1095,7 +1384,7 @@ pub mod parsing {
         ));
     }
 
-    named_ambiguous_expr!(expr_closure -> ExprKind, allow_struct, do_parse!(
+    named!(expr_closure(allow_struct: bool) -> ExprKind, do_parse!(
         capture: syn!(CaptureBy) >>
         or1: syn!(Or) >>
         inputs: call!(Delimited::parse_terminated_with, fn_arg) >>
@@ -1197,10 +1486,12 @@ pub mod parsing {
         ));
     }
 
-    named_ambiguous_expr!(expr_break -> ExprKind, allow_struct, do_parse!(
+    named!(expr_break(allow_struct: bool) -> ExprKind, do_parse!(
         break_: syn!(Break) >>
         lbl: option!(syn!(Lifetime)) >>
-        val: option!(call!(ambiguous_expr, allow_struct, false)) >>
+        // We can't allow blocks after a `break` expression when we wouldn't
+        // allow structs, as this expression is ambiguous.
+        val: opt_ambiguous_expr!(allow_struct) >>
         (ExprBreak {
             label: lbl,
             expr: val.map(Box::new),
@@ -1208,8 +1499,13 @@ pub mod parsing {
         }.into())
     ));
 
-    named_ambiguous_expr!(expr_ret -> ExprKind, allow_struct, do_parse!(
+    named!(expr_ret(allow_struct: bool) -> ExprKind, do_parse!(
         return_: syn!(Return) >>
+        // NOTE: return is greedy and eats blocks after it even when in a
+        // position where structs are not allowed, such as in if statement
+        // conditions. For example:
+        //
+        // if return { println!("A") } { } // Prints "A"
         ret_value: option!(ambiguous_expr!(allow_struct)) >>
         (ExprRet {
             expr: ret_value.map(Box::new),
@@ -1303,9 +1599,9 @@ pub mod parsing {
         ));
     }
 
-    named_ambiguous_expr!(expr_range -> ExprKind, allow_struct, do_parse!(
+    named!(expr_range(allow_struct: bool) -> ExprKind, do_parse!(
         limits: syn!(RangeLimits) >>
-        hi: option!(ambiguous_expr!(allow_struct)) >>
+        hi: opt_ambiguous_expr!(allow_struct) >>
         (ExprRange { from: None, to: hi.map(Box::new), limits: limits }.into())
     ));
 
@@ -1328,29 +1624,6 @@ pub mod parsing {
         ));
     }
 
-    named_ambiguous_expr!(expr_addr_of -> ExprKind, allow_struct, do_parse!(
-        and: syn!(And) >>
-        mutability: syn!(Mutability) >>
-        expr: ambiguous_expr!(allow_struct) >>
-        (ExprAddrOf {
-            mutbl: mutability,
-            expr: Box::new(expr),
-            and_token: and,
-        }.into())
-    ));
-
-    named_ambiguous_expr!(and_assign -> (Expr, Eq), allow_struct,
-        map!(
-            tuple!(syn!(Eq), ambiguous_expr!(allow_struct)),
-            |(a, b)| (b, a)
-        )
-    );
-
-    named_ambiguous_expr!(and_assign_op -> (BinOp, Expr), allow_struct, tuple!(
-        call!(BinOp::parse_assign_op),
-        ambiguous_expr!(allow_struct)
-    ));
-
     named!(and_field -> (Ident, Dot),
            map!(tuple!(syn!(Dot), syn!(Ident)), |(a, b)| (b, a)));
 
@@ -1358,11 +1631,6 @@ pub mod parsing {
            map!(tuple!(syn!(Dot), syn!(Lit)), |(a, b)| (b, a)));
 
     named!(and_index -> (Expr, tokens::Bracket), brackets!(syn!(Expr)));
-
-    named_ambiguous_expr!(and_range -> (RangeLimits, Option<Expr>), allow_struct, tuple!(
-        syn!(RangeLimits),
-        option!(call!(ambiguous_expr, allow_struct, false))
-    ));
 
     impl Synom for Block {
         named!(parse -> Self, do_parse!(
@@ -1824,9 +2092,18 @@ mod printing {
 
     impl ToTokens for ExprInPlace {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.in_token.to_tokens(tokens);
-            self.place.to_tokens(tokens);
-            self.value.to_tokens(tokens);
+            match self.kind {
+                InPlaceKind::Arrow(ref arrow) => {
+                    self.place.to_tokens(tokens);
+                    arrow.to_tokens(tokens);
+                    self.value.to_tokens(tokens);
+                }
+                InPlaceKind::In(ref _in) => {
+                    _in.to_tokens(tokens);
+                    self.place.to_tokens(tokens);
+                    self.value.to_tokens(tokens);
+                }
+            }
         }
     }
 
@@ -2116,6 +2393,14 @@ mod printing {
                 self.semi_token.to_tokens(tokens);
                 self.amt.to_tokens(tokens);
             })
+        }
+    }
+
+    impl ToTokens for ExprGroup {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.group_token.surround(tokens, |tokens| {
+                self.expr.to_tokens(tokens);
+            });
         }
     }
 

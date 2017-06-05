@@ -54,18 +54,8 @@ fn filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // TODO placement syntax
-        "tests/rust/src/libcollections/tests/binary_heap.rs" |
-        // TODO placement syntax
-        "tests/rust/src/libcollections/tests/vec.rs" |
-        // TODO placement syntax
-        "tests/rust/src/libcollections/tests/vec_deque.rs" |
         // TODO better support for attributes
         "tests/rust/src/librustc_data_structures/blake2b.rs" |
-        // TODO placement syntax
-        "tests/rust/src/librustc_mir/build/matches/test.rs" |
-        // TODO placement syntax
-        "tests/rust/src/libstd/collections/hash/map.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/incremental/hashes/enum_defs.rs" |
         // TODO better support for attributes
@@ -79,11 +69,19 @@ fn filter(entry: &DirEntry) -> bool {
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
         // TODO better support for attributes
-        "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO precedence issue with binop vs poly trait ref
-        "tests/rust/src/test/run-pass/try-macro.rs" => false,
+        "tests/rust/src/test/run-pass/item-attributes.rs" => false,
         _ => true,
     }
+}
+
+/// Abort immediately after this many failures.
+fn abort_after() -> u32 {
+    if let Ok(s) = std::env::var("ABORT_AFTER_FAILURE") {
+        if let Ok(n) = s.parse::<u32>() {
+            return n;
+        }
+    }
+    std::u32::MAX
 }
 
 #[test]
@@ -92,6 +90,11 @@ fn test_round_trip() {
         let min_stack_value = std::env::var("RUST_MIN_STACK").expect("RUST_MIN_STACK env var should be set since some tests require it.");
         let min_stack_value: usize = min_stack_value.parse().expect("RUST_MIN_STACK env var should be set since some tests require it.");
         assert!(min_stack_value >= 16000000);
+    }
+
+    let abort_after = abort_after();
+    if abort_after == 0 {
+        panic!("Skipping all round_trip tests");
     }
 
     let mut failed = 0;
@@ -116,6 +119,9 @@ fn test_round_trip() {
             Err(msg) => {
                 errorf!("syn failed to parse\n{:?}\n", msg);
                 failed += 1;
+                if failed >= abort_after {
+                    panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+                }
                 continue;
             }
         };
@@ -158,7 +164,12 @@ fn test_round_trip() {
         match equal {
             Err(_) => errorf!("ignoring syntex panic\n"),
             Ok(true) => {}
-            Ok(false) => failed += 1,
+            Ok(false) => {
+                failed += 1;
+                if failed >= abort_after {
+                    panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+                }
+            },
         }
     }
 
