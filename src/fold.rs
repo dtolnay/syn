@@ -235,7 +235,7 @@ pub fn noop_fold_ty<F: ?Sized + Folder>(folder: &mut F, ty: Ty) -> Ty {
             })
         }
         Group(t) => {
-            Group(TyGrpup {
+            Group(TyGroup {
                 ty: t.ty.lift(|v| folder.fold_ty(v)),
                 ..t
             })
@@ -437,8 +437,8 @@ pub fn noop_fold_variant<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-pub fn noop_fold_lifetime<F: ?Sized + Folder>(folder: &mut F, _lifetime: Lifetime) -> Lifetime {
-    Lifetime { ident: folder.fold_ident(_lifetime.ident) }
+pub fn noop_fold_lifetime<F: ?Sized + Folder>(_: &mut F, _lifetime: Lifetime) -> Lifetime {
+    _lifetime
 }
 
 pub fn noop_fold_bound_lifetimes<F: ?Sized + Folder>(folder: &mut F,
@@ -484,6 +484,7 @@ pub fn noop_fold_path_parameters<F: ?Sized + Folder>(folder: &mut F,
                                                      -> PathParameters {
     use PathParameters::*;
     match path_parameters {
+        None => None,
         AngleBracketed(d) => {
             AngleBracketed(AngleBracketedParameterData {
                 lifetimes: d.lifetimes.lift(|l| folder.fold_lifetime(l)),
@@ -668,37 +669,41 @@ fn noop_fold_vis<F: ?Sized + Folder>(folder: &mut F, vis: Visibility) -> Visibil
 
 #[cfg(feature = "full")]
 pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
-                                          Item { ident, vis, attrs, node }: Item)
+                                          Item { attrs, node }: Item)
                                           -> Item {
     use item::*;
     use ItemKind::*;
     Item {
-        ident: folder.fold_ident(ident.clone()),
-        vis: noop_fold_vis(folder, vis),
         attrs: attrs.lift(|a| folder.fold_attribute(a)),
         node: match node {
             ExternCrate(i) => {
                 ExternCrate(ItemExternCrate {
-                    original: i.original.map(|i| folder.fold_ident(i)),
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
+                    rename: i.rename.map(|(_as, id)| (_as, folder.fold_ident(id))),
                     ..i
                 })
             }
             Use(i) => {
                 Use(ItemUse {
+                    vis: noop_fold_vis(folder, i.vis),
                     path: Box::new(folder.fold_view_path(*i.path)),
                     ..i
                 })
             }
             Static(i) => {
                 Static(ItemStatic {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     ty: Box::new(folder.fold_ty(*i.ty)),
-                    mutbl: i.mutbl,
                     expr: i.expr.lift(|e| folder.fold_expr(e)),
                     ..i
                 })
             }
             Const(i) => {
                 Const(ItemConst {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     ty: i.ty.lift(|ty| folder.fold_ty(ty)),
                     expr: i.expr.lift(|e| folder.fold_expr(e)),
                     ..i
@@ -706,6 +711,7 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Fn(i) => {
                 Fn(ItemFn {
+                    vis: noop_fold_vis(folder, i.vis),
                     decl: i.decl.lift(|v| folder.fold_fn_decl(v)),
                     block: i.block.lift(|v| folder.fold_block(v)),
                     ..i
@@ -713,8 +719,10 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Mod(i) => {
                 Mod(ItemMod {
-                    items: i.items.map(|items| {
-                        (items.0.lift(|i| folder.fold_item(i)), items.1)
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
+                    content: i.content.map(|(brace, items)| {
+                        (brace, items.lift(|i| folder.fold_item(i)))
                     }),
                     ..i
                 })
@@ -729,6 +737,8 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Ty(i) => {
                 Ty(ItemTy {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     ty: i.ty.lift(|ty| folder.fold_ty(ty)),
                     generics: folder.fold_generics(i.generics),
                     ..i
@@ -736,6 +746,8 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Enum(i) => {
                 Enum(ItemEnum {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     variants: i.variants.lift(|v| folder.fold_variant(v)),
                     generics: folder.fold_generics(i.generics),
                     ..i
@@ -743,6 +755,8 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Struct(i) => {
                 Struct(ItemStruct {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     data: folder.fold_variant_data(i.data),
                     generics: folder.fold_generics(i.generics),
                     ..i
@@ -750,6 +764,8 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Union(i) => {
                 Union(ItemUnion {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     data: folder.fold_variant_data(i.data),
                     generics: folder.fold_generics(i.generics),
                     ..i
@@ -757,6 +773,8 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Trait(i) => {
                 Trait(ItemTrait {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     generics: folder.fold_generics(i.generics),
                     supertraits: i.supertraits.lift(|typb| folder.fold_ty_param_bound(typb)),
                     items: i.items.lift(|ti| folder.fold_trait_item(ti)),
@@ -772,7 +790,8 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
             Impl(i) => {
                 Impl(ItemImpl {
                     generics: folder.fold_generics(i.generics),
-                    trait_: i.trait_.map(|p| folder.fold_path(p)),
+                    trait_: i.trait_.map(|(polarity, p, _for)|
+                                         (polarity, folder.fold_path(p), _for)),
                     self_ty: i.self_ty.lift(|ty| folder.fold_ty(ty)),
                     items: i.items.lift(|i| folder.fold_impl_item(i)),
                     ..i
@@ -879,7 +898,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                 While(ExprWhile {
                     cond: e.cond.lift(|e| folder.fold_expr(e)),
                     body: folder.fold_block(e.body),
-                    label: e.label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_lifetime(i)),
                     ..e
                 })
             }
@@ -888,7 +907,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     pat: e.pat.lift(|p| folder.fold_pat(p)),
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
                     body: folder.fold_block(e.body),
-                    label: e.label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_lifetime(i)),
                     ..e
                 })
             }
@@ -897,14 +916,14 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     pat: e.pat.lift(|p| folder.fold_pat(p)),
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
                     body: folder.fold_block(e.body),
-                    label: e.label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_lifetime(i)),
                     ..e
                 })
             }
             Loop(e) => {
                 Loop(ExprLoop {
                     body: folder.fold_block(e.body),
-                    label: e.label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_lifetime(i)),
                     ..e
                 })
             }
@@ -997,14 +1016,14 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
             }
             Break(e) => {
                 Break(ExprBreak {
-                    label: e.label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_lifetime(i)),
                     expr: e.expr.map(|v| v.lift(|e| folder.fold_expr(e))),
                     ..e
                 })
             }
             Continue(e) => {
                 Continue(ExprContinue {
-                    label: e.label.map(|i| folder.fold_ident(i)),
+                    label: e.label.map(|i| folder.fold_lifetime(i)),
                     ..e
                 })
             }
@@ -1209,13 +1228,13 @@ pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
     use item::*;
     use TraitItemKind::*;
     TraitItem {
-        ident: folder.fold_ident(item.ident),
         attrs: item.attrs.lift(|v| folder.fold_attribute(v)),
         node: match item.node {
             Const(i) => {
                 Const(TraitItemConst {
+                    ident: folder.fold_ident(i.ident),
                     ty: folder.fold_ty(i.ty),
-                    default: i.default.map(|v| folder.fold_expr(v)),
+                    default: i.default.map(|(eq, v)| (eq, folder.fold_expr(v))),
                     ..i
                 })
             }
@@ -1228,8 +1247,9 @@ pub fn noop_fold_trait_item<F: ?Sized + Folder>(folder: &mut F,
             }
             Type(i) => {
                 Type(TraitItemType {
+                    ident: folder.fold_ident(i.ident),
                     bounds: i.bounds.lift(|v| folder.fold_ty_param_bound(v)),
-                    default: i.default.map(|v| folder.fold_ty(v)),
+                    default: i.default.map(|(eq, v)| (eq, folder.fold_ty(v))),
                     ..i
                 })
             }
@@ -1246,12 +1266,12 @@ pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F, item: ImplItem)
     use ImplItemKind::*;
 
     ImplItem {
-        ident: folder.fold_ident(item.ident),
-        vis: noop_fold_vis(folder, item.vis),
         attrs: item.attrs.lift(|v| folder.fold_attribute(v)),
         node: match item.node {
             Const(i) => {
                 Const(ImplItemConst {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     ty: folder.fold_ty(i.ty),
                     expr: folder.fold_expr(i.expr),
                     ..i
@@ -1259,12 +1279,16 @@ pub fn noop_fold_impl_item<F: ?Sized + Folder>(folder: &mut F, item: ImplItem)
             }
             Method(i) => {
                 Method(ImplItemMethod {
+                    vis: noop_fold_vis(folder, i.vis),
                     sig: folder.fold_method_sig(i.sig),
                     block: folder.fold_block(i.block),
+                    ..i
                 })
             }
             Type(i) => {
                 Type(ImplItemType {
+                    vis: noop_fold_vis(folder, i.vis),
+                    ident: folder.fold_ident(i.ident),
                     ty: folder.fold_ty(i.ty),
                     ..i
                 })
@@ -1280,6 +1304,7 @@ pub fn noop_fold_method_sig<F: ?Sized + Folder>(folder: &mut F, sig: MethodSig)
     -> MethodSig
 {
     MethodSig {
+        ident: folder.fold_ident(sig.ident),
         decl: folder.fold_fn_decl(sig.decl),
         ..sig
     }
