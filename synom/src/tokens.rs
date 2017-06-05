@@ -149,6 +149,7 @@ tokens! {
         (pub struct Brace                   => "{"),
         (pub struct Bracket                 => "["),
         (pub struct Paren                   => "("),
+        (pub struct Group                   => " "),
     }
     syms: {
         (pub struct As                      => "as"),
@@ -273,6 +274,7 @@ mod parsing {
             "(" => Delimiter::Parenthesis,
             "{" => Delimiter::Brace,
             "[" => Delimiter::Bracket,
+            " " => Delimiter::None,
             _ => panic!("unknown delimiter: {}", delim),
         };
 

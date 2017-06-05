@@ -66,6 +66,11 @@ ast_enum_of_structs! {
             pub paren_token: tokens::Paren,
             pub ty: Box<Ty>,
         }),
+        /// No-op: kept solely so that we can pretty-print faithfully
+        pub Group(TyGroup {
+            pub group_token: tokens::Group,
+            pub ty: Box<Ty>,
+        }),
         /// TyKind::Infer means the type should be inferred instead of it having been
         /// specified. This can appear anywhere in a type.
         pub Infer(TyInfer {
@@ -341,6 +346,8 @@ pub mod parsing {
     }
 
     named!(ambig_ty(allow_plus: bool) -> Ty, alt!(
+        syn!(TyGroup) => { Ty::Group }
+        |
         // must be before mac
         syn!(TyParen) => { Ty::Paren }
         |
@@ -628,6 +635,16 @@ pub mod parsing {
         ));
     }
 
+    impl Synom for TyGroup {
+        named!(parse -> Self, do_parse!(
+            data: grouped!(syn!(Ty)) >>
+            (TyGroup {
+                group_token: data.1,
+                ty: Box::new(data.0),
+            })
+        ));
+    }
+
     impl Synom for TyParen {
         named!(parse -> Self, do_parse!(
             data: parens!(syn!(Ty)) >>
@@ -907,6 +924,14 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.impl_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TyGroup {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.group_token.surround(tokens, |tokens| {
+                self.ty.to_tokens(tokens);
+            });
         }
     }
 

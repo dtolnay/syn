@@ -38,7 +38,7 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, Fie
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
                ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
                PatIdent, PatWild, PatStruct, PatTuple, PatTupleStruct, PatPath,
-               PatBox, PatRef, PatLit, PatRange, PatSlice, InPlaceKind};
+               PatBox, PatRef, PatLit, PatRange, PatSlice, InPlaceKind, ExprGroup};
 
 mod generics;
 pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
@@ -91,7 +91,7 @@ pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetT
              Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
              PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety, TySlice, TyArray,
              TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath, TyTraitObject,
-             TyImplTrait, TyParen, TyInfer};
+             TyImplTrait, TyParen, TyInfer, TyGroup};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 

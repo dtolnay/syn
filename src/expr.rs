@@ -322,6 +322,16 @@ ast_enum_of_structs! {
             pub paren_token: tokens::Paren,
         }),
 
+        /// No-op: used solely so we can pretty-print faithfully
+        ///
+        /// A `group` represents a `None`-delimited span in the input
+        /// `TokenStream` which affects the precidence of the resulting
+        /// expression. They are used for macro hygiene.
+        pub Group(ExprGroup {
+            pub expr: Box<Expr>,
+            pub group_token: tokens::Group,
+        }),
+
         /// `expr?`
         pub Try(ExprTry {
             pub expr: Box<Expr>,
@@ -1036,6 +1046,8 @@ pub mod parsing {
     /// Parse all atomic expressions which don't have to worry about precidence
     /// interactions, as they are fully contained.
     named!(atom_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
+        syn!(ExprGroup) => { ExprKind::Group } // must be placed first
+        |
         syn!(Lit) => { ExprKind::Lit } // must be before expr_struct
         |
         // must be before expr_path
@@ -1085,6 +1097,16 @@ pub mod parsing {
         |
         syn!(ExprRepeat) => { ExprKind::Repeat }
     ));
+
+    impl Synom for ExprGroup {
+        named!(parse -> Self, do_parse!(
+            e: grouped!(syn!(Expr)) >>
+            (ExprGroup {
+                expr: Box::new(e.0),
+                group_token: e.1,
+            }.into())
+        ));
+    }
 
     impl Synom for ExprParen {
         named!(parse -> Self, do_parse!(
@@ -2371,6 +2393,14 @@ mod printing {
                 self.semi_token.to_tokens(tokens);
                 self.amt.to_tokens(tokens);
             })
+        }
+    }
+
+    impl ToTokens for ExprGroup {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.group_token.surround(tokens, |tokens| {
+                self.expr.to_tokens(tokens);
+            });
         }
     }
 

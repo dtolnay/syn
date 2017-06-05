@@ -234,6 +234,12 @@ pub fn noop_fold_ty<F: ?Sized + Folder>(folder: &mut F, ty: Ty) -> Ty {
                 ..t
             })
         }
+        Group(t) => {
+            Group(TyGrpup {
+                ty: t.ty.lift(|v| folder.fold_ty(v)),
+                ..t
+            })
+        }
         Paren(t) => {
             Paren(TyParen {
                 ty: t.ty.lift(|v| folder.fold_ty(v)),
@@ -1033,6 +1039,12 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
             }
             Paren(e) => {
                 Paren(ExprParen {
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
+                    ..e
+                })
+            }
+            Group(e) => {
+                Group(ExprGroup {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
                     ..e
                 })
