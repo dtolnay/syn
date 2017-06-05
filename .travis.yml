@@ -36,16 +36,20 @@ script:
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features full &&
+          cargo build --features 'visit fold' &&
+          cargo build --features 'full visit fold' &&
           cargo build --no-default-features --features 'full parsing printing' &&
+          cargo build --no-default-features --features 'visit fold parsing printing' &&
+          cargo build --no-default-features --features 'full visit fold parsing printing' &&
           (cd synom && cargo test)
           ;;
         test)
           git submodule update --init &&
-          cargo test --features 'full extra-traits' --release
+          cargo test --all-features --release
           ;;
         clippy)
           cargo install clippy --debug --force || exit
-          cargo clippy --features full -- -Dclippy
+          cargo clippy --features 'full visit fold' -- -Dclippy
           (cd synom && cargo clippy -- -Dclippy)
           ;;
         *)
@@ -65,7 +69,7 @@ after_success:
         curl -sSLo synom.crate.tgz "https://crates.io/api/v1/crates/synom/${SYNOM}/download" &&
         tar xf synom.crate.tgz &&
         mv "synom-${SYNOM}" synom &&
-        cargo doc --features full &&
+        cargo doc --features 'full visit fold' &&
         travis-cargo doc-upload
       fi
 
