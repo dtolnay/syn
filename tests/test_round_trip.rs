@@ -69,9 +69,7 @@ fn filter(entry: &DirEntry) -> bool {
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
         // TODO better support for attributes
-        "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO precedence issue with binop vs poly trait ref
-        "tests/rust/src/test/run-pass/try-macro.rs" => false,
+        "tests/rust/src/test/run-pass/item-attributes.rs" => false,
         _ => true,
     }
 }
