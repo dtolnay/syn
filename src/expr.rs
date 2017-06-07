@@ -1098,6 +1098,26 @@ pub mod parsing {
         syn!(ExprRepeat) => { ExprKind::Repeat }
     ));
 
+    named!(expr_nosemi -> Expr, map!(alt!(
+        syn!(ExprIf) => { ExprKind::If }
+        |
+        syn!(ExprIfLet) => { ExprKind::IfLet }
+        |
+        syn!(ExprWhile) => { ExprKind::While }
+        |
+        syn!(ExprWhileLet) => { ExprKind::WhileLet }
+        |
+        syn!(ExprForLoop) => { ExprKind::ForLoop }
+        |
+        syn!(ExprLoop) => { ExprKind::Loop }
+        |
+        syn!(ExprMatch) => { ExprKind::Match }
+        |
+        syn!(ExprCatch) => { ExprKind::Catch }
+        |
+        syn!(ExprBlock) => { ExprKind::Block }
+    ), Expr::from));
+
     impl Synom for ExprGroup {
         named!(parse -> Self, do_parse!(
             e: grouped!(syn!(Expr)) >>
@@ -1665,6 +1685,8 @@ pub mod parsing {
             |
             stmt_item
             |
+            stmt_blockexpr
+            |
             stmt_expr
         ));
     }
@@ -1716,34 +1738,31 @@ pub mod parsing {
 
     named!(stmt_item -> Stmt, map!(syn!(Item), |i| Stmt::Item(Box::new(i))));
 
-    fn requires_semi(e: &Expr) -> bool {
-        match e.node {
-            ExprKind::If(_) |
-            ExprKind::IfLet(_) |
-            ExprKind::While(_) |
-            ExprKind::WhileLet(_) |
-            ExprKind::ForLoop(_) |
-            ExprKind::Loop(_) |
-            ExprKind::Match(_) |
-            ExprKind::Block(_) => false,
-
-            _ => true,
-        }
-    }
+    named!(stmt_blockexpr -> Stmt, do_parse!(
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        mut e: expr_nosemi >>
+        // If the next token is a `.` or a `?` it is special-cased to parse as
+        // an expression instead of a blockexpression.
+        not!(syn!(Dot)) >>
+        not!(syn!(Question)) >>
+        semi: option!(syn!(Semi)) >>
+        ({
+            e.attrs = attrs;
+            if let Some(semi) = semi {
+                Stmt::Semi(Box::new(e), semi)
+            } else {
+                Stmt::Expr(Box::new(e))
+            }
+        })
+    ));
 
     named!(stmt_expr -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mut e: syn!(Expr) >>
-        semi: option!(syn!(Semi)) >>
+        semi: syn!(Semi) >>
         ({
             e.attrs = attrs;
-            if let Some(s) = semi {
-                Stmt::Semi(Box::new(e), s)
-            } else if requires_semi(&e) {
-                return parse_error();
-            } else {
-                Stmt::Expr(Box::new(e))
-            }
+            Stmt::Semi(Box::new(e), semi)
         })
     ));
 
