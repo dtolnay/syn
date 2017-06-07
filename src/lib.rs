@@ -79,9 +79,6 @@ pub use mac::{Mac, TokenTree};
 
 mod derive;
 pub use derive::{Body, DeriveInput, BodyEnum, BodyStruct};
-// Deprecated. Use `DeriveInput` instead.
-#[doc(hidden)]
-pub type MacroInput = DeriveInput;
 
 mod op;
 pub use op::{BinOp, UnOp};
