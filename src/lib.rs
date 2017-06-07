@@ -18,10 +18,6 @@ mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem, MetaItemList,
                MetaNameValue};
 
-mod constant;
-pub use constant::{ConstExpr, ConstCall, ConstBinary, ConstUnary, ConstCast,
-                   ConstIndex, ConstParen};
-
 mod data;
 pub use data::{Field, Variant, VariantData, Visibility, VisRestricted, VisCrate,
                VisPublic, VisInherited};

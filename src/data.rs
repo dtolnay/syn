@@ -14,7 +14,7 @@ ast_struct! {
         pub data: VariantData,
 
         /// Explicit discriminant, e.g. `Foo = 1`
-        pub discriminant: Option<ConstExpr>,
+        pub discriminant: Option<Expr>,
 
         pub eq_token: Option<tokens::Eq>,
     }

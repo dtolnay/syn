@@ -14,7 +14,7 @@ ast_enum_of_structs! {
             pub bracket_token: tokens::Bracket,
             pub ty: Box<Ty>,
             pub semi_token: tokens::Semi,
-            pub amt: ConstExpr,
+            pub amt: Expr,
         }),
         /// A raw pointer (`*const T` or `*mut T`)
         pub Ptr(TyPtr {
@@ -392,7 +392,7 @@ pub mod parsing {
             brackets!(do_parse!(
                 elem: syn!(Ty) >>
                     semi: syn!(Semi) >>
-                    len: array_len >>
+                    len: syn!(Expr) >>
                     (elem, semi, len)
             )),
             |((elem, semi, len), brackets)| {
@@ -405,16 +405,6 @@ pub mod parsing {
             }
         ));
     }
-
-    #[cfg(not(feature = "full"))]
-    named!(array_len -> ConstExpr, syn!(ConstExpr));
-
-    #[cfg(feature = "full")]
-    named!(array_len -> ConstExpr, alt!(
-        terminated!(syn!(ConstExpr), input_end!())
-        |
-        terminated!(syn!(Expr), input_end!()) => { ConstExpr::Other }
-    ));
 
     impl Synom for TyPtr {
         named!(parse -> Self, do_parse!(

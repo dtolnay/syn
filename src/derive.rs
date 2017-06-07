@@ -142,7 +142,7 @@ pub mod parsing {
             ) >>
             disr: option!(do_parse!(
                 eq: syn!(Eq) >>
-                disr: discriminant >>
+                disr: syn!(Expr) >>
                 (eq, disr)
             )) >>
             (Variant {
@@ -154,23 +154,6 @@ pub mod parsing {
             })
         ));
     }
-
-    #[cfg(not(feature = "full"))]
-    named!(discriminant -> ConstExpr, syn!(ConstExpr));
-
-    #[cfg(feature = "full")]
-    named!(discriminant -> ConstExpr, alt!(
-        terminated!(syn!(ConstExpr), after_discriminant)
-        |
-        terminated!(syn!(Expr), after_discriminant) => { ConstExpr::Other }
-    ));
-
-    #[cfg(feature = "full")]
-    named!(after_discriminant -> (), peek!(alt!(
-        syn!(Comma) => { |_| () }
-        |
-        input_end!() => { |_| () }
-    )));
 
     named!(struct_like_body -> (Delimited<Field, tokens::Comma>, tokens::Brace),
            braces!(call!(Delimited::parse_terminated_with, Field::parse_struct)));
