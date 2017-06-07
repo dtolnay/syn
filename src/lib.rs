@@ -22,19 +22,21 @@ mod data;
 pub use data::{Field, Variant, VariantData, Visibility, VisRestricted, VisCrate,
                VisPublic, VisInherited};
 
-#[cfg(feature = "full")]
 mod expr;
-#[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, CaptureBy, Expr, ExprKind, FieldPat, FieldValue, Local,
-               MacStmtStyle, Pat, RangeLimits, Stmt, ExprBox, ExprInPlace,
-               ExprArray, ExprCall, ExprMethodCall, ExprTup, ExprBinary, ExprUnary,
-               ExprCast, ExprType, ExprIf, ExprIfLet, ExprWhile, ExprWhileLet,
+pub use expr::{Expr, ExprKind, ExprBox, ExprInPlace, ExprArray, ExprCall,
+               ExprMethodCall, ExprTup, ExprBinary, ExprUnary, ExprCast,
+               ExprType, ExprIf, ExprIfLet, ExprWhile, ExprWhileLet,
                ExprForLoop, ExprLoop, ExprMatch, ExprClosure, ExprBlock,
                ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
                ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
-               PatIdent, PatWild, PatStruct, PatTuple, PatTupleStruct, PatPath,
-               PatBox, PatRef, PatLit, PatRange, PatSlice, InPlaceKind, ExprGroup};
+               ExprGroup};
+
+#[cfg(feature = "full")]
+pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
+               MacStmtStyle, Pat, RangeLimits, Stmt, PatIdent, PatWild,
+               PatStruct, PatTuple, PatTupleStruct, PatPath, PatBox, PatRef,
+               PatLit, PatRange, PatSlice, InPlaceKind};
 
 mod generics;
 pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,

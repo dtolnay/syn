@@ -24,20 +24,20 @@ impl From<ExprKind> for Expr {
 ast_enum_of_structs! {
     pub enum ExprKind {
         /// A `box x` expression.
-        pub Box(ExprBox {
+        pub Box(ExprBox #full {
             pub expr: Box<Expr>,
             pub box_token: tokens::Box_,
         }),
 
         /// E.g. 'place <- val' or `in place { val }`.
-        pub InPlace(ExprInPlace {
+        pub InPlace(ExprInPlace #full {
             pub place: Box<Expr>,
             pub kind: InPlaceKind,
             pub value: Box<Expr>,
         }),
 
         /// An array, e.g. `[a, b, c, d]`.
-        pub Array(ExprArray {
+        pub Array(ExprArray #full {
             pub exprs: Delimited<Expr, tokens::Comma>,
             pub bracket_token: tokens::Bracket,
         }),
@@ -57,7 +57,7 @@ ast_enum_of_structs! {
         ///
         /// Thus, `x.foo::<Bar, Baz>(a, b, c, d)` is represented as
         /// `ExprKind::MethodCall(foo, [Bar, Baz], [x, a, b, c, d])`.
-        pub MethodCall(ExprMethodCall {
+        pub MethodCall(ExprMethodCall #full {
             pub expr: Box<Expr>,
             pub method: Ident,
             pub typarams: Delimited<Ty, tokens::Comma>,
@@ -70,7 +70,7 @@ ast_enum_of_structs! {
         }),
 
         /// A tuple, e.g. `(a, b, c, d)`.
-        pub Tup(ExprTup {
+        pub Tup(ExprTup #full {
             pub args: Delimited<Expr, tokens::Comma>,
             pub paren_token: tokens::Paren,
             pub lone_comma: Option<tokens::Comma>,
@@ -109,7 +109,7 @@ ast_enum_of_structs! {
         /// An `if` block, with an optional else block
         ///
         /// E.g., `if expr { block } else { expr }`
-        pub If(ExprIf {
+        pub If(ExprIf #full {
             pub cond: Box<Expr>,
             pub if_true: Block,
             pub if_false: Option<Box<Expr>>,
@@ -122,7 +122,7 @@ ast_enum_of_structs! {
         /// E.g., `if let pat = expr { block } else { expr }`
         ///
         /// This is desugared to a `match` expression.
-        pub IfLet(ExprIfLet {
+        pub IfLet(ExprIfLet #full {
             pub pat: Box<Pat>,
             pub expr: Box<Expr>,
             pub if_true: Block,
@@ -136,7 +136,7 @@ ast_enum_of_structs! {
         /// A while loop, with an optional label
         ///
         /// E.g., `'label: while expr { block }`
-        pub While(ExprWhile {
+        pub While(ExprWhile #full {
             pub cond: Box<Expr>,
             pub body: Block,
             pub label: Option<Lifetime>,
@@ -149,7 +149,7 @@ ast_enum_of_structs! {
         /// E.g., `'label: while let pat = expr { block }`
         ///
         /// This is desugared to a combination of `loop` and `match` expressions.
-        pub WhileLet(ExprWhileLet {
+        pub WhileLet(ExprWhileLet #full {
             pub pat: Box<Pat>,
             pub expr: Box<Expr>,
             pub body: Block,
@@ -165,7 +165,7 @@ ast_enum_of_structs! {
         /// E.g., `'label: for pat in expr { block }`
         ///
         /// This is desugared to a combination of `loop` and `match` expressions.
-        pub ForLoop(ExprForLoop {
+        pub ForLoop(ExprForLoop #full {
             pub pat: Box<Pat>,
             pub expr: Box<Expr>,
             pub body: Block,
@@ -178,7 +178,7 @@ ast_enum_of_structs! {
         /// Conditionless loop with an optional label.
         ///
         /// E.g. `'label: loop { block }`
-        pub Loop(ExprLoop {
+        pub Loop(ExprLoop #full {
             pub body: Block,
             pub label: Option<Lifetime>,
             pub loop_token: tokens::Loop,
@@ -186,7 +186,7 @@ ast_enum_of_structs! {
         }),
 
         /// A `match` block.
-        pub Match(ExprMatch {
+        pub Match(ExprMatch #full {
             pub match_token: tokens::Match,
             pub brace_token: tokens::Brace,
             pub expr: Box<Expr>,
@@ -194,7 +194,7 @@ ast_enum_of_structs! {
         }),
 
         /// A closure (for example, `move |a, b, c| a + b + c`)
-        pub Closure(ExprClosure {
+        pub Closure(ExprClosure #full {
             pub capture: CaptureBy,
             pub decl: Box<FnDecl>,
             pub body: Box<Expr>,
@@ -203,13 +203,13 @@ ast_enum_of_structs! {
         }),
 
         /// A block (`{ ... }` or `unsafe { ... }`)
-        pub Block(ExprBlock {
+        pub Block(ExprBlock #full {
             pub unsafety: Unsafety,
             pub block: Block,
         }),
 
         /// An assignment (`a = foo()`)
-        pub Assign(ExprAssign {
+        pub Assign(ExprAssign #full {
             pub left: Box<Expr>,
             pub right: Box<Expr>,
             pub eq_token: tokens::Eq,
@@ -218,14 +218,14 @@ ast_enum_of_structs! {
         /// An assignment with an operator
         ///
         /// For example, `a += 1`.
-        pub AssignOp(ExprAssignOp {
+        pub AssignOp(ExprAssignOp #full {
             pub op: BinOp,
             pub left: Box<Expr>,
             pub right: Box<Expr>,
         }),
 
         /// Access of a named struct field (`obj.foo`)
-        pub Field(ExprField {
+        pub Field(ExprField #full {
             pub expr: Box<Expr>,
             pub field: Ident,
             pub dot_token: tokens::Dot,
@@ -234,7 +234,7 @@ ast_enum_of_structs! {
         /// Access of an unnamed field of a struct or tuple-struct
         ///
         /// For example, `foo.0`.
-        pub TupField(ExprTupField {
+        pub TupField(ExprTupField #full {
             pub expr: Box<Expr>,
             pub field: Lit,
             pub dot_token: tokens::Dot,
@@ -248,7 +248,7 @@ ast_enum_of_structs! {
         }),
 
         /// A range (`1..2`, `1..`, `..2`, `1...2`, `1...`, `...2`)
-        pub Range(ExprRange {
+        pub Range(ExprRange #full {
             pub from: Option<Box<Expr>>,
             pub to: Option<Box<Expr>>,
             pub limits: RangeLimits,
@@ -265,27 +265,27 @@ ast_enum_of_structs! {
         }),
 
         /// A referencing operation (`&a` or `&mut a`)
-        pub AddrOf(ExprAddrOf {
+        pub AddrOf(ExprAddrOf #full {
             pub and_token: tokens::And,
             pub mutbl: Mutability,
             pub expr: Box<Expr>,
         }),
 
         /// A `break`, with an optional label to break, and an optional expression
-        pub Break(ExprBreak {
+        pub Break(ExprBreak #full {
             pub label: Option<Lifetime>,
             pub expr: Option<Box<Expr>>,
             pub break_token: tokens::Break,
         }),
 
         /// A `continue`, with an optional label
-        pub Continue(ExprContinue {
+        pub Continue(ExprContinue #full {
             pub label: Option<Lifetime>,
             pub continue_token: tokens::Continue,
         }),
 
         /// A `return`, with an optional value to be returned
-        pub Ret(ExprRet {
+        pub Ret(ExprRet #full {
             pub expr: Option<Box<Expr>>,
             pub return_token: tokens::Return,
         }),
@@ -297,7 +297,7 @@ ast_enum_of_structs! {
         ///
         /// For example, `Foo {x: 1, y: 2}`, or
         /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
-        pub Struct(ExprStruct {
+        pub Struct(ExprStruct #full {
             pub path: Path,
             pub fields: Delimited<FieldValue, tokens::Comma>,
             pub rest: Option<Box<Expr>>,
@@ -309,7 +309,7 @@ ast_enum_of_structs! {
         ///
         /// For example, `[1; 5]`. The first expression is the element
         /// to be repeated; the second is the number of times to repeat it.
-        pub Repeat(ExprRepeat {
+        pub Repeat(ExprRepeat #full {
             pub bracket_token: tokens::Bracket,
             pub semi_token: tokens::Semi,
             pub expr: Box<Expr>,
@@ -333,7 +333,7 @@ ast_enum_of_structs! {
         }),
 
         /// `expr?`
-        pub Try(ExprTry {
+        pub Try(ExprTry #full {
             pub expr: Box<Expr>,
             pub question_token: tokens::Question,
         }),
@@ -341,7 +341,7 @@ ast_enum_of_structs! {
         /// A catch expression.
         ///
         /// E.g. `do catch { block }`
-        pub Catch(ExprCatch {
+        pub Catch(ExprCatch #full {
             pub do_token: tokens::Do,
             pub catch_token: tokens::Catch,
             pub block: Block,
@@ -349,6 +349,7 @@ ast_enum_of_structs! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_struct! {
     /// A field-value pair in a struct literal.
     pub struct FieldValue {
@@ -369,6 +370,7 @@ ast_struct! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_struct! {
     /// A Block (`{ .. }`).
     ///
@@ -380,6 +382,7 @@ ast_struct! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum! {
     /// A statement, usually ending in a semicolon.
     pub enum Stmt {
@@ -400,6 +403,7 @@ ast_enum! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum! {
     /// How a macro was invoked.
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
@@ -418,6 +422,7 @@ ast_enum! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_struct! {
     /// Local represents a `let` statement, e.g., `let <pat>:<ty> = <expr>;`
     pub struct Local {
@@ -435,6 +440,7 @@ ast_struct! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum_of_structs! {
     // Clippy false positive
     // https://github.com/Manishearth/rust-clippy/issues/1241
@@ -527,6 +533,7 @@ ast_enum_of_structs! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_struct! {
     /// An arm of a 'match'.
     ///
@@ -549,6 +556,7 @@ ast_struct! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum! {
     /// A capture clause
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
@@ -558,6 +566,7 @@ ast_enum! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum! {
     /// Limit types of a range (inclusive or exclusive)
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
@@ -569,6 +578,7 @@ ast_enum! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_struct! {
     /// A single field in a struct pattern
     ///
@@ -586,6 +596,7 @@ ast_struct! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BindingMode {
@@ -594,6 +605,7 @@ ast_enum! {
     }
 }
 
+#[cfg(feature = "full")]
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum InPlaceKind {
@@ -607,8 +619,11 @@ pub mod parsing {
     use super::*;
     use ty::parsing::qpath;
 
+    #[cfg(feature = "full")]
     use proc_macro2::{TokenStream, TokenKind, Delimiter};
-    use synom::{PResult, Cursor, Synom, parse_error};
+    use synom::{PResult, Cursor, Synom};
+    #[cfg(feature = "full")]
+    use synom::parse_error;
     use synom::tokens::*;
 
     /// When we're parsing expressions which occur before blocks, like in
@@ -633,6 +648,7 @@ pub mod parsing {
     /// // - or -
     /// if (break) { } { }
     /// ```
+    #[cfg(feature = "full")]
     macro_rules! opt_ambiguous_expr {
         ($i:expr, $allow_struct:ident) => {
             option!($i, call!(ambiguous_expr, $allow_struct, $allow_struct))
@@ -647,17 +663,32 @@ pub mod parsing {
         }
     }
 
-
+    #[cfg(feature = "full")]
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
     /// Parse an arbitrary expression.
-    pub fn ambiguous_expr(i: Cursor,
-                          allow_struct: bool,
-                          allow_block: bool)
-                          -> PResult<Expr> {
+    #[cfg(feature = "full")]
+    fn ambiguous_expr(i: Cursor,
+                      allow_struct: bool,
+                      allow_block: bool)
+                      -> PResult<Expr> {
         map!(
             i,
             call!(assign_expr, allow_struct, allow_block),
+            ExprKind::into
+        )
+    }
+
+    #[cfg(not(feature = "full"))]
+    fn ambiguous_expr(i: Cursor,
+                      allow_struct: bool,
+                      allow_block: bool)
+                      -> PResult<Expr> {
+        map!(
+            i,
+            // NOTE: We intentionally skip assign_expr, placement_expr, and
+            // range_expr, as they are not parsed in non-full mode.
+            call!(or_expr, allow_struct, allow_block),
             ExprKind::into
         )
     }
@@ -702,6 +733,7 @@ pub mod parsing {
     /// ```
     ///
     /// NOTE: This operator is right-associative.
+    #[cfg(feature = "full")]
     named!(assign_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(placement_expr, allow_struct, allow_block) >>
         alt!(
@@ -744,6 +776,7 @@ pub mod parsing {
     /// `atom_expr`, not here.
     ///
     /// NOTE: This operator is right-associative.
+    #[cfg(feature = "full")]
     named!(placement_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(range_expr, allow_struct, allow_block) >>
         alt!(
@@ -779,6 +812,7 @@ pub mod parsing {
     ///
     /// NOTE: The form of ranges which don't include a preceding expression are
     /// parsed by `atom_expr`, rather than by this function.
+    #[cfg(feature = "full")]
     named!(range_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(or_expr, allow_struct, allow_block) >>
         many0!(do_parse!(
@@ -947,6 +981,7 @@ pub mod parsing {
     /// &mut <trailer>
     /// box <trailer>
     /// ```
+    #[cfg(feature = "full")]
     named!(unary_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
         do_parse!(
             op: syn!(UnOp) >>
@@ -980,6 +1015,21 @@ pub mod parsing {
         call!(trailer_expr, allow_struct, allow_block)
     ));
 
+    // XXX: This duplication is ugly
+    #[cfg(not(feature = "full"))]
+    named!(unary_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
+        do_parse!(
+            op: syn!(UnOp) >>
+            expr: call!(unary_expr, allow_struct, true) >>
+            (ExprUnary {
+                op: op,
+                expr: Box::new(expr.into()),
+            }.into())
+        )
+        |
+        call!(trailer_expr, allow_struct, allow_block)
+    ));
+
     /// ```ignore
     /// <atom> (..<args>) ...
     /// <atom> . <ident> (..<args>) ...
@@ -988,6 +1038,7 @@ pub mod parsing {
     /// <atom> [ <expr> ] ...
     /// <atom> ? ...
     /// ```
+    #[cfg(feature = "full")]
     named!(trailer_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
@@ -1043,8 +1094,35 @@ pub mod parsing {
         (e)
     ));
 
+    // XXX: Duplication == ugly
+    #[cfg(not(feature = "full"))]
+    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+        mut e: call!(atom_expr, allow_struct, allow_block) >>
+        many0!(alt!(
+            tap!(args: and_call => {
+                let (args, paren) = args;
+                e = ExprCall {
+                    func: Box::new(e.into()),
+                    args: args,
+                    paren_token: paren,
+                }.into();
+            })
+            |
+            tap!(i: and_index => {
+                let (i, token) = i;
+                e = ExprIndex {
+                    expr: Box::new(e.into()),
+                    bracket_token: token,
+                    index: Box::new(i),
+                }.into();
+            })
+        )) >>
+        (e)
+    ));
+
     /// Parse all atomic expressions which don't have to worry about precidence
     /// interactions, as they are fully contained.
+    #[cfg(feature = "full")]
     named!(atom_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
         syn!(ExprGroup) => { ExprKind::Group } // must be placed first
         |
@@ -1098,6 +1176,21 @@ pub mod parsing {
         syn!(ExprRepeat) => { ExprKind::Repeat }
     ));
 
+    #[cfg(not(feature = "full"))]
+    named!(atom_expr(_allow_struct: bool, _allow_block: bool) -> ExprKind, alt!(
+        syn!(ExprGroup) => { ExprKind::Group } // must be placed first
+        |
+        syn!(Lit) => { ExprKind::Lit } // must be before expr_struct
+        |
+        syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
+        |
+        syn!(Mac) => { ExprKind::Mac } // must be before expr_path
+        |
+        syn!(ExprPath) => { ExprKind::Path }
+    ));
+
+
+    #[cfg(feature = "full")]
     named!(expr_nosemi -> Expr, map!(alt!(
         syn!(ExprIf) => { ExprKind::If }
         |
@@ -1138,6 +1231,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprInPlace {
         named!(parse -> Self, do_parse!(
             in_: syn!(In) >>
@@ -1160,6 +1254,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprArray {
         named!(parse -> Self, do_parse!(
             elems: brackets!(call!(Delimited::parse_terminated)) >>
@@ -1173,6 +1268,7 @@ pub mod parsing {
     named!(and_call -> (Delimited<Expr, tokens::Comma>, tokens::Paren),
            parens!(call!(Delimited::parse_terminated)));
 
+    #[cfg(feature = "full")]
     named!(and_method_call -> ExprMethodCall, do_parse!(
         dot: syn!(Dot) >>
         method: syn!(Ident) >>
@@ -1208,6 +1304,7 @@ pub mod parsing {
         })
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for ExprTup {
         named!(parse -> Self, do_parse!(
             elems: parens!(call!(Delimited::parse_terminated)) >>
@@ -1219,6 +1316,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprIfLet {
         named!(parse -> Self, do_parse!(
             if_: syn!(If) >>
@@ -1244,6 +1342,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprIf {
         named!(parse -> Self, do_parse!(
             if_: syn!(If) >>
@@ -1263,6 +1362,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(else_block -> (Else, ExprKind), do_parse!(
         else_: syn!(Else) >>
         expr: alt!(
@@ -1285,6 +1385,7 @@ pub mod parsing {
     ));
 
 
+    #[cfg(feature = "full")]
     impl Synom for ExprForLoop {
         named!(parse -> Self, do_parse!(
             lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
@@ -1305,6 +1406,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprLoop {
         named!(parse -> Self, do_parse!(
             lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
@@ -1319,6 +1421,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprMatch {
         named!(parse -> Self, do_parse!(
             match_: syn!(Match) >>
@@ -1355,6 +1458,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprCatch {
         named!(parse -> Self, do_parse!(
             do_: syn!(Do) >>
@@ -1368,6 +1472,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     fn arm_requires_comma(arm: &Arm) -> bool {
         if let ExprKind::Block(ExprBlock { unsafety: Unsafety::Normal, .. }) = arm.body.node {
             false
@@ -1376,6 +1481,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl Synom for Arm {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
@@ -1404,6 +1510,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> ExprKind, do_parse!(
         capture: syn!(CaptureBy) >>
         or1: syn!(Or) >>
@@ -1440,6 +1547,7 @@ pub mod parsing {
         }.into())
     ));
 
+    #[cfg(feature = "full")]
     named!(fn_arg -> FnArg, do_parse!(
         pat: syn!(Pat) >>
         ty: option!(tuple!(syn!(Colon), syn!(Ty))) >>
@@ -1457,6 +1565,7 @@ pub mod parsing {
         })
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for ExprWhile {
         named!(parse -> Self, do_parse!(
             lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
@@ -1473,6 +1582,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprWhileLet {
         named!(parse -> Self, do_parse!(
             lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
@@ -1495,6 +1605,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprContinue {
         named!(parse -> Self, do_parse!(
             cont: syn!(Continue) >>
@@ -1506,6 +1617,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(expr_break(allow_struct: bool) -> ExprKind, do_parse!(
         break_: syn!(Break) >>
         lbl: option!(syn!(Lifetime)) >>
@@ -1519,6 +1631,7 @@ pub mod parsing {
         }.into())
     ));
 
+    #[cfg(feature = "full")]
     named!(expr_ret(allow_struct: bool) -> ExprKind, do_parse!(
         return_: syn!(Return) >>
         // NOTE: return is greedy and eats blocks after it even when in a
@@ -1533,6 +1646,7 @@ pub mod parsing {
         }.into())
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for ExprStruct {
         named!(parse -> Self, do_parse!(
             path: syn!(Path) >>
@@ -1566,6 +1680,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for FieldValue {
         named!(parse -> Self, alt!(
             do_parse!(
@@ -1591,6 +1706,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprRepeat {
         named!(parse -> Self, do_parse!(
             data: brackets!(do_parse!(
@@ -1608,6 +1724,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprBlock {
         named!(parse -> Self, do_parse!(
             rules: syn!(Unsafety) >>
@@ -1619,12 +1736,14 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(expr_range(allow_struct: bool) -> ExprKind, do_parse!(
         limits: syn!(RangeLimits) >>
         hi: opt_ambiguous_expr!(allow_struct) >>
         (ExprRange { from: None, to: hi.map(Box::new), limits: limits }.into())
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for RangeLimits {
         named!(parse -> Self, alt!(
             // Must come before Dot2
@@ -1644,14 +1763,17 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(and_field -> (Ident, Dot),
            map!(tuple!(syn!(Dot), syn!(Ident)), |(a, b)| (b, a)));
 
+    #[cfg(feature = "full")]
     named!(and_tup_field -> (Lit, Dot),
            map!(tuple!(syn!(Dot), syn!(Lit)), |(a, b)| (b, a)));
 
     named!(and_index -> (Expr, tokens::Bracket), brackets!(syn!(Expr)));
 
+    #[cfg(feature = "full")]
     impl Synom for Block {
         named!(parse -> Self, do_parse!(
             stmts: braces!(call!(Block::parse_within)) >>
@@ -1662,6 +1784,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Block {
         named!(pub parse_within -> Vec<Stmt>, do_parse!(
             many0!(syn!(Semi)) >>
@@ -1677,6 +1800,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for Stmt {
         named!(parse -> Self, alt!(
             stmt_mac
@@ -1691,6 +1815,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         what: syn!(Path) >>
@@ -1717,6 +1842,7 @@ pub mod parsing {
         ))))
     ));
 
+    #[cfg(feature = "full")]
     named!(stmt_local -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         let_: syn!(Let) >>
@@ -1736,8 +1862,10 @@ pub mod parsing {
         })))
     ));
 
+    #[cfg(feature = "full")]
     named!(stmt_item -> Stmt, map!(syn!(Item), |i| Stmt::Item(Box::new(i))));
 
+    #[cfg(feature = "full")]
     named!(stmt_blockexpr -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mut e: expr_nosemi >>
@@ -1756,6 +1884,7 @@ pub mod parsing {
         })
     ));
 
+    #[cfg(feature = "full")]
     named!(stmt_expr -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mut e: syn!(Expr) >>
@@ -1766,6 +1895,7 @@ pub mod parsing {
         })
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for Pat {
         named!(parse -> Self, alt!(
             syn!(PatWild) => { Pat::Wild } // must be before pat_ident
@@ -1794,6 +1924,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatWild {
         named!(parse -> Self, map!(
             syn!(Underscore),
@@ -1801,6 +1932,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatBox {
         named!(parse -> Self, do_parse!(
             boxed: syn!(Box_) >>
@@ -1812,6 +1944,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatIdent {
         named!(parse -> Self, do_parse!(
             mode: option!(syn!(Ref)) >>
@@ -1836,6 +1969,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatTupleStruct {
         named!(parse -> Self, do_parse!(
             path: syn!(Path) >>
@@ -1847,6 +1981,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatStruct {
         named!(parse -> Self, do_parse!(
             path: syn!(Path) >>
@@ -1867,6 +2002,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for FieldPat {
         named!(parse -> Self, alt!(
             do_parse!(
@@ -1916,6 +2052,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(field_ident -> Ident, alt!(
         syn!(Ident)
         |
@@ -1932,6 +2069,7 @@ pub mod parsing {
         )
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for PatPath {
         named!(parse -> Self, map!(
             syn!(ExprPath),
@@ -1939,6 +2077,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatTuple {
         named!(parse -> Self, do_parse!(
             data: parens!(do_parse!(
@@ -1982,6 +2121,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatRef {
         named!(parse -> Self, do_parse!(
             and: syn!(And) >>
@@ -1995,6 +2135,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatLit {
         named!(parse -> Self, do_parse!(
             lit: pat_lit_expr >>
@@ -2008,6 +2149,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for PatRange {
         named!(parse -> Self, do_parse!(
             lo: pat_lit_expr >>
@@ -2021,6 +2163,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     named!(pat_lit_expr -> Expr, do_parse!(
         neg: option!(syn!(Sub)) >>
         v: alt!(
@@ -2038,6 +2181,7 @@ pub mod parsing {
         })
     ));
 
+    #[cfg(feature = "full")]
     impl Synom for PatSlice {
         named!(parse -> Self, map!(
             brackets!(do_parse!(
@@ -2080,6 +2224,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for CaptureBy {
         named!(parse -> Self, alt!(
             syn!(Move) => { CaptureBy::Value }
@@ -2092,16 +2237,24 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
+    #[cfg(feature = "full")]
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
     impl ToTokens for Expr {
+        #[cfg(feature = "full")]
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.node.to_tokens(tokens)
         }
+
+        #[cfg(not(feature = "full"))]
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.node.to_tokens(tokens)
+        }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprBox {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.box_token.to_tokens(tokens);
@@ -2109,6 +2262,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprInPlace {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match self.kind {
@@ -2126,6 +2280,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprArray {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
@@ -2143,6 +2298,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
@@ -2158,6 +2314,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprTup {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
@@ -2198,6 +2355,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprIf {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.if_token.to_tokens(tokens);
@@ -2208,6 +2366,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprIfLet {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.if_token.to_tokens(tokens);
@@ -2221,6 +2380,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprWhile {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.label.to_tokens(tokens);
@@ -2231,6 +2391,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprWhileLet {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.label.to_tokens(tokens);
@@ -2244,6 +2405,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprForLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.label.to_tokens(tokens);
@@ -2256,6 +2418,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.label.to_tokens(tokens);
@@ -2265,6 +2428,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprMatch {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.match_token.to_tokens(tokens);
@@ -2275,6 +2439,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprCatch {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.do_token.to_tokens(tokens);
@@ -2283,6 +2448,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.capture.to_tokens(tokens);
@@ -2302,6 +2468,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.unsafety.to_tokens(tokens);
@@ -2309,6 +2476,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprAssign {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.left.to_tokens(tokens);
@@ -2317,6 +2485,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprAssignOp {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.left.to_tokens(tokens);
@@ -2325,6 +2494,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprField {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
@@ -2333,6 +2503,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprTupField {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
@@ -2350,6 +2521,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.from.to_tokens(tokens);
@@ -2364,6 +2536,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprAddrOf {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
@@ -2372,6 +2545,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprBreak {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.break_token.to_tokens(tokens);
@@ -2380,6 +2554,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprContinue {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.continue_token.to_tokens(tokens);
@@ -2387,6 +2562,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprRet {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.return_token.to_tokens(tokens);
@@ -2394,6 +2570,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprStruct {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
@@ -2405,6 +2582,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprRepeat {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
@@ -2431,6 +2609,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprTry {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
@@ -2438,6 +2617,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
@@ -2448,6 +2628,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for Arm {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
@@ -2460,12 +2641,14 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatWild {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.underscore_token.to_tokens(tokens);
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.mode.to_tokens(tokens);
@@ -2475,6 +2658,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatStruct {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
@@ -2485,6 +2669,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatTupleStruct {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
@@ -2492,12 +2677,14 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatPath {
         fn to_tokens(&self, tokens: &mut Tokens) {
             ::PathTokens(&self.qself, &self.path).to_tokens(tokens);
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
@@ -2516,6 +2703,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatBox {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.box_token.to_tokens(tokens);
@@ -2523,6 +2711,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatRef {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
@@ -2531,12 +2720,14 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatLit {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatRange {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lo.to_tokens(tokens);
@@ -2545,6 +2736,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
@@ -2557,6 +2749,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for RangeLimits {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
@@ -2566,6 +2759,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if !self.is_shorthand {
@@ -2576,6 +2770,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for BindingMode {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
@@ -2590,6 +2785,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for CaptureBy {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
@@ -2601,6 +2797,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for Block {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.brace_token.surround(tokens, |tokens| {
@@ -2609,6 +2806,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for Stmt {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
@@ -2634,6 +2832,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for Local {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
