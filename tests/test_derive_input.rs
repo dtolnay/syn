@@ -1,7 +1,3 @@
-//! Test the now-deprecated `parse_macro_input` function.
-//!
-//! Deprecation warnings are suppressed to keep the output clean.
-#![allow(deprecated)]
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
@@ -43,7 +39,7 @@ fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
 fn test_unit() {
     let raw = "struct Unit;";
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "Unit".into(),
         vis: Visibility::Inherited(VisInherited {}),
         attrs: Vec::new(),
@@ -68,7 +64,7 @@ fn test_struct() {
         }
     ";
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "Item".into(),
         vis: Visibility::Public(VisPublic {
             pub_token: Default::default(),
@@ -173,7 +169,7 @@ fn test_enum() {
         }
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "Result".into(),
         vis: Visibility::Public(VisPublic {
             pub_token: Default::default(),
@@ -339,7 +335,7 @@ fn test_attr_with_path() {
         struct Dummy;
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "Dummy".into(),
         vis: Visibility::Inherited(VisInherited {}),
         attrs: vec![Attribute {
@@ -393,7 +389,7 @@ fn test_attr_with_non_mod_style_path() {
         struct S;
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Inherited(VisInherited {}),
         attrs: vec![Attribute {
@@ -435,7 +431,7 @@ fn test_attr_with_mod_style_path_with_self() {
         struct S;
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Inherited(VisInherited {}),
         attrs: vec![Attribute {
@@ -474,7 +470,7 @@ fn test_pub_restricted() {
         pub(in m) struct Z(pub(in m::n) u8);
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "Z".into(),
         vis: Visibility::Restricted(VisRestricted {
             path: Box::new("m".into()),
@@ -522,7 +518,7 @@ fn test_pub_restricted_crate() {
         pub(crate) struct S;
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Crate(VisCrate {
             pub_token: Default::default(),
@@ -549,7 +545,7 @@ fn test_pub_restricted_super() {
         pub(super) struct S;
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Restricted(VisRestricted {
             path: Box::new("super".into()),
@@ -577,7 +573,7 @@ fn test_pub_restricted_in_super() {
         pub(in super) struct S;
     "#;
 
-    let expected = MacroInput {
+    let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Restricted(VisRestricted {
             path: Box::new("super".into()),
