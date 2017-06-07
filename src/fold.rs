@@ -599,10 +599,10 @@ pub fn noop_fold_tt<F: ?Sized + Folder>(folder: &mut F, tt: TokenTree) -> TokenT
     use proc_macro2::{TokenKind, TokenTree as TokenTree2};
     match tt.0.kind {
         TokenKind::Word(sym) => {
-            let sym = folder.fold_ident(Ident::new(sym, Span(tt.0.span)));
+            // XXX: Do we want to fold over idents
             TokenTree(TokenTree2 {
-                span: sym.span.0,
-                kind: TokenKind::Word(sym.sym),
+                span: tt.0.span,
+                kind: TokenKind::Word(sym),
             })
         }
         TokenKind::Op(..) => tt,
@@ -837,6 +837,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
             }
             MethodCall(e) => {
                 MethodCall(ExprMethodCall {
+                    expr: e.expr.lift(|e| folder.fold_expr(e)),
                     method: folder.fold_ident(e.method),
                     typarams: e.typarams.lift(|t| folder.fold_ty(t)),
                     args: e.args.lift(|e| folder.fold_expr(e)),
