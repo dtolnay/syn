@@ -4,8 +4,6 @@
 //! and returns a piece of the same type.
 
 use super::*;
-#[cfg(not(feature = "full"))]
-use constant;
 
 use delimited::{Delimited, Element};
 
@@ -80,11 +78,11 @@ pub trait Folder {
     fn fold_fn_ret_ty(&mut self, ret_ty: FunctionRetTy) -> FunctionRetTy {
         noop_fold_fn_ret_ty(self, ret_ty)
     }
-    fn fold_const_expr(&mut self, expr: ConstExpr) -> ConstExpr {
-        noop_fold_const_expr(self, expr)
-    }
     fn fold_lit(&mut self, _lit: Lit) -> Lit {
         noop_fold_lit(self, _lit)
+    }
+    fn fold_expr(&mut self, expr: Expr) -> Expr {
+        noop_fold_expr(self, expr)
     }
 
     fn fold_mac(&mut self, mac: Mac) -> Mac {
@@ -98,10 +96,6 @@ pub trait Folder {
     #[cfg(feature = "full")]
     fn fold_item(&mut self, item: Item) -> Item {
         noop_fold_item(self, item)
-    }
-    #[cfg(feature = "full")]
-    fn fold_expr(&mut self, expr: Expr) -> Expr {
-        noop_fold_expr(self, expr)
     }
     #[cfg(feature = "full")]
     fn fold_foreign_item(&mut self, foreign_item: ForeignItem) -> ForeignItem {
@@ -304,7 +298,7 @@ pub fn noop_fold_ty<F: ?Sized + Folder>(folder: &mut F, ty: Ty) -> Ty {
         Array(t) => {
             Array(TyArray {
                 ty: t.ty.lift(|v| folder.fold_ty(v)),
-                amt: folder.fold_const_expr(t.amt),
+                amt: folder.fold_expr(t.amt),
                 ..t
             })
         }
@@ -432,7 +426,7 @@ pub fn noop_fold_variant<F: ?Sized + Folder>(folder: &mut F,
         ident: folder.fold_ident(variant.ident),
         attrs: variant.attrs.lift(|v| folder.fold_attribute(v)),
         data: folder.fold_variant_data(variant.data),
-        discriminant: variant.discriminant.map(|ce| folder.fold_const_expr(ce)),
+        discriminant: variant.discriminant.map(|ce| folder.fold_expr(ce)),
         ..variant
     }
 }
@@ -526,69 +520,6 @@ pub fn noop_fold_fn_ret_ty<F: ?Sized + Folder>(folder: &mut F,
         Default => Default,
         Ty(ty, t) => Ty(folder.fold_ty(ty), t),
     }
-}
-
-pub fn noop_fold_const_expr<F: ?Sized + Folder>(folder: &mut F, expr: ConstExpr) -> ConstExpr {
-    use constant::*;
-    use constant::ConstExpr::*;
-
-    match expr {
-        Call(c) => {
-            Call(ConstCall {
-                func: c.func.lift(|e| folder.fold_const_expr(e)),
-                args: c.args.lift(|v| folder.fold_const_expr(v)),
-                ..c
-            })
-        }
-        Binary(c) => {
-            Binary(ConstBinary {
-                left: c.left.lift(|e| folder.fold_const_expr(e)),
-                right: c.right.lift(|e| folder.fold_const_expr(e)),
-                ..c
-            })
-        }
-        Unary(c) => {
-            Unary(ConstUnary {
-                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
-                ..c
-            })
-        }
-        Lit(l) => Lit(folder.fold_lit(l)),
-        Cast(c) => {
-            Cast(ConstCast {
-                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
-                ty: c.ty.lift(|v| folder.fold_ty(v)),
-                ..c
-            })
-        }
-        Path(p) => Path(folder.fold_path(p)),
-        Index(c) => {
-            Index(ConstIndex {
-                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
-                index: c.index.lift(|e| folder.fold_const_expr(e)),
-                ..c
-            })
-        }
-        Paren(c) => {
-            Paren(ConstParen {
-                expr: c.expr.lift(|e| folder.fold_const_expr(e)),
-                ..c
-            })
-        }
-        Other(e) => Other(noop_fold_other_const_expr(folder, e)),
-    }
-}
-
-#[cfg(feature = "full")]
-fn noop_fold_other_const_expr<F: ?Sized + Folder>(folder: &mut F, e: Expr) -> Expr {
-    folder.fold_expr(e)
-}
-
-#[cfg(not(feature = "full"))]
-fn noop_fold_other_const_expr<F: ?Sized + Folder>(_: &mut F,
-                                                  e: constant::Other)
-                                                  -> constant::Other {
-    e
 }
 
 pub fn noop_fold_lit<F: ?Sized + Folder>(_: &mut F, _lit: Lit) -> Lit {
@@ -802,19 +733,20 @@ pub fn noop_fold_item<F: ?Sized + Folder>(folder: &mut F,
     }
 }
 
-#[cfg(feature = "full")]
 pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: Expr) -> Expr {
     use expr::*;
     use expr::ExprKind::*;
 
     Expr {
         node: match node {
+            #[cfg(feature = "full")]
             Box(e) => {
                 Box(ExprBox {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             InPlace(e) => {
                 InPlace(ExprInPlace {
                     place: e.place.lift(|e| folder.fold_expr(e)),
@@ -822,6 +754,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Array(e) => {
                 Array(ExprArray {
                     exprs: e.exprs.lift(|e| folder.fold_expr(e)),
@@ -835,6 +768,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             MethodCall(e) => {
                 MethodCall(ExprMethodCall {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
@@ -844,6 +778,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Tup(e) => {
                 Tup(ExprTup {
                     args: e.args.lift(|e| folder.fold_expr(e)),
@@ -878,6 +813,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             If(e) => {
                 If(ExprIf {
                     cond: e.cond.lift(|e| folder.fold_expr(e)),
@@ -886,6 +822,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             IfLet(e) => {
                 IfLet(ExprIfLet {
                     pat: e.pat.lift(|p| folder.fold_pat(p)),
@@ -895,6 +832,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             While(e) => {
                 While(ExprWhile {
                     cond: e.cond.lift(|e| folder.fold_expr(e)),
@@ -903,6 +841,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             WhileLet(e) => {
                 WhileLet(ExprWhileLet {
                     pat: e.pat.lift(|p| folder.fold_pat(p)),
@@ -912,6 +851,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             ForLoop(e) => {
                 ForLoop(ExprForLoop {
                     pat: e.pat.lift(|p| folder.fold_pat(p)),
@@ -921,6 +861,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Loop(e) => {
                 Loop(ExprLoop {
                     body: folder.fold_block(e.body),
@@ -928,6 +869,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Match(e) => {
                 Match(ExprMatch {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
@@ -943,12 +885,14 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Catch(e) => {
                 Catch(ExprCatch {
                     block: folder.fold_block(e.block),
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Closure(e) => {
                 Closure(ExprClosure {
                     decl: e.decl.lift(|v| folder.fold_fn_decl(v)),
@@ -956,12 +900,14 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Block(e) => {
                 Block(ExprBlock {
                     block: folder.fold_block(e.block),
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Assign(e) => {
                 Assign(ExprAssign {
                     left: e.left.lift(|e| folder.fold_expr(e)),
@@ -969,6 +915,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             AssignOp(e) => {
                 AssignOp(ExprAssignOp {
                     left: e.left.lift(|e| folder.fold_expr(e)),
@@ -976,6 +923,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Field(e) => {
                 Field(ExprField {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
@@ -983,6 +931,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             TupField(e) => {
                 TupField(ExprTupField {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
@@ -996,6 +945,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Range(e) => {
                 Range(ExprRange {
                     from: e.from.map(|v| v.lift(|e| folder.fold_expr(e))),
@@ -1009,12 +959,14 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     path: folder.fold_path(e.path),
                 })
             }
+            #[cfg(feature = "full")]
             AddrOf(e) => {
                 AddrOf(ExprAddrOf {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Break(e) => {
                 Break(ExprBreak {
                     label: e.label.map(|i| folder.fold_lifetime(i)),
@@ -1022,12 +974,14 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Continue(e) => {
                 Continue(ExprContinue {
                     label: e.label.map(|i| folder.fold_lifetime(i)),
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Ret(e) => {
                 Ret(ExprRet {
                     expr: e.expr.map(|v| v.lift(|e| folder.fold_expr(e))),
@@ -1035,6 +989,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                 })
             }
             Mac(mac) => Mac(folder.fold_mac(mac)),
+            #[cfg(feature = "full")]
             Struct(e) => {
                 Struct(ExprStruct {
                     path: folder.fold_path(e.path),
@@ -1050,6 +1005,7 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Repeat(e) => {
                 Repeat(ExprRepeat {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
@@ -1069,12 +1025,15 @@ pub fn noop_fold_expr<F: ?Sized + Folder>(folder: &mut F, Expr { node, attrs }: 
                     ..e
                 })
             }
+            #[cfg(feature = "full")]
             Try(e) => {
                 Try(ExprTry {
                     expr: e.expr.lift(|e| folder.fold_expr(e)),
                     ..e
                 })
             }
+            #[cfg(not(feature = "full"))]
+            _ => unreachable!(),
         },
         attrs: attrs.into_iter().map(|a| folder.fold_attribute(a)).collect(),
     }
