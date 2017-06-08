@@ -72,10 +72,10 @@ pub trait Visitor: Sized {
     fn visit_fn_ret_ty(&mut self, ret_ty: &FunctionRetTy) {
         walk_fn_ret_ty(self, ret_ty)
     }
-    fn visit_const_expr(&mut self, expr: &ConstExpr) {
-        walk_const_expr(self, expr)
-    }
     fn visit_lit(&mut self, _lit: &Lit) {}
+    fn visit_expr(&mut self, expr: &Expr) {
+        walk_expr(self, expr);
+    }
 
     fn visit_mac(&mut self, mac: &Mac) {
         walk_mac(self, mac);
@@ -88,10 +88,6 @@ pub trait Visitor: Sized {
     #[cfg(feature = "full")]
     fn visit_item(&mut self, item: &Item) {
         walk_item(self, item);
-    }
-    #[cfg(feature = "full")]
-    fn visit_expr(&mut self, expr: &Expr) {
-        walk_expr(self, expr);
     }
     #[cfg(feature = "full")]
     fn visit_foreign_item(&mut self, foreign_item: &ForeignItem) {
@@ -219,7 +215,7 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
         }
         Ty::Array(TyArray { ref ty, ref amt, .. }) => {
             visitor.visit_ty(ty);
-            visitor.visit_const_expr(amt);
+            visitor.visit_expr(amt);
         }
         Ty::TraitObject(TyTraitObject { ref bounds, .. })  |
         Ty::ImplTrait(TyImplTrait { ref bounds, .. }) => {
@@ -329,49 +325,6 @@ pub fn walk_field<V: Visitor>(visitor: &mut V, field: &Field) {
     walk_list!(visitor, visit_attribute, &field.attrs);
 }
 
-pub fn walk_const_expr<V: Visitor>(visitor: &mut V, len: &ConstExpr) {
-    use constant::*;
-    use constant::ConstExpr::*;
-
-    match *len {
-        Call(ConstCall { ref func, ref args, .. }) => {
-            visitor.visit_const_expr(func);
-            walk_list!(visitor, visit_const_expr, args.items());
-        }
-        Binary(ConstBinary { ref left, ref right, .. }) => {
-            visitor.visit_const_expr(left);
-            visitor.visit_const_expr(right);
-        }
-        Lit(ref lit) => {
-            visitor.visit_lit(lit);
-        }
-        Cast(ConstCast { ref expr, ref ty, .. }) => {
-            visitor.visit_const_expr(expr);
-            visitor.visit_ty(ty);
-        }
-        Path(ref path) => {
-            visitor.visit_path(path);
-        }
-        Index(ConstIndex { ref expr, ref index, .. }) => {
-            visitor.visit_const_expr(expr);
-            visitor.visit_const_expr(index);
-        }
-        Unary(ConstUnary { ref expr, .. }) |
-        Paren(ConstParen { ref expr, .. }) => {
-            visitor.visit_const_expr(expr);
-        }
-        Other(ref other) => {
-            #[cfg(feature = "full")]
-            fn walk_other<V: Visitor>(visitor: &mut V, other: &Expr) {
-                visitor.visit_expr(other);
-            }
-            #[cfg(not(feature = "full"))]
-            fn walk_other<V: Visitor>(_: &mut V, _: &super::constant::Other) {}
-            walk_other(visitor, other);
-        }
-    }
-}
-
 pub fn walk_mac<V: Visitor>(visitor: &mut V, mac: &Mac) {
     visitor.visit_path(&mac.path);
 }
@@ -464,7 +417,6 @@ pub fn walk_item<V: Visitor>(visitor: &mut V, item: &Item) {
     }
 }
 
-#[cfg(feature = "full")]
 #[cfg_attr(feature = "cargo-clippy", allow(cyclomatic_complexity))]
 pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
     use expr::*;
@@ -472,6 +424,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
 
     walk_list!(visitor, visit_attribute, &expr.attrs);
     match expr.node {
+        #[cfg(feature = "full")]
         InPlace(ExprInPlace { ref place, ref value, .. }) => {
             visitor.visit_expr(place);
             visitor.visit_expr(value);
@@ -480,11 +433,13 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             visitor.visit_expr(func);
             walk_list!(visitor, visit_expr, args.items());
         }
+        #[cfg(feature = "full")]
         MethodCall(ExprMethodCall { ref method, ref typarams, ref args, .. }) => {
             visitor.visit_ident(method);
             walk_list!(visitor, visit_ty, typarams.items());
             walk_list!(visitor, visit_expr, args.items());
         }
+        #[cfg(feature = "full")]
         Array(ExprArray { ref exprs, ..}) |
         Tup(ExprTup { args: ref exprs, .. }) => {
             walk_list!(visitor, visit_expr, exprs.items());
@@ -497,6 +452,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             visitor.visit_expr(expr);
             visitor.visit_ty(ty);
         }
+        #[cfg(feature = "full")]
         If(ExprIf { ref cond, ref if_true, ref if_false, .. }) => {
             visitor.visit_expr(cond);
             walk_list!(visitor, visit_stmt, &if_true.stmts);
@@ -504,6 +460,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_expr(alt);
             }
         }
+        #[cfg(feature = "full")]
         IfLet(ExprIfLet { ref pat, ref expr, ref if_true, ref if_false, .. }) => {
             visitor.visit_pat(pat);
             visitor.visit_expr(expr);
@@ -512,6 +469,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_expr(alt);
             }
         }
+        #[cfg(feature = "full")]
         While(ExprWhile { ref cond, ref body, ref label, .. }) => {
             visitor.visit_expr(cond);
             walk_list!(visitor, visit_stmt, &body.stmts);
@@ -519,6 +477,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_lifetime(label);
             }
         }
+        #[cfg(feature = "full")]
         WhileLet(ExprWhileLet { ref pat, ref expr, ref body, ref label, .. }) |
         ForLoop(ExprForLoop { ref pat, ref expr, ref body, ref label, .. }) => {
             visitor.visit_pat(pat);
@@ -528,12 +487,14 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_lifetime(label);
             }
         }
+        #[cfg(feature = "full")]
         Loop(ExprLoop { ref body, ref label, .. }) => {
             walk_list!(visitor, visit_stmt, &body.stmts);
             if let Some(ref label) = *label {
                 visitor.visit_lifetime(label);
             }
         }
+        #[cfg(feature = "full")]
         Match(ExprMatch { ref expr, ref arms, .. }) => {
             visitor.visit_expr(expr);
             for &Arm { ref attrs, ref pats, ref guard, ref body, .. } in arms {
@@ -545,20 +506,27 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_expr(body);
             }
         }
+        #[cfg(feature = "full")]
         Closure(ExprClosure { ref decl, ref body, .. }) => {
             visitor.visit_fn_decl(decl);
             visitor.visit_expr(body);
         }
+        #[cfg(feature = "full")]
         Catch(ExprCatch { ref block, .. }) |
         Block(ExprBlock { ref block, .. }) => {
             walk_list!(visitor, visit_stmt, &block.stmts);
         }
-        Binary(ExprBinary { ref left, ref right, .. }) |
+        Binary(ExprBinary { ref left, ref right, .. }) => {
+            visitor.visit_expr(left);
+            visitor.visit_expr(right);
+        }
+        #[cfg(feature = "full")]
         Assign(ExprAssign { ref left, ref right, .. }) |
         AssignOp(ExprAssignOp { ref left, ref right, .. }) => {
             visitor.visit_expr(left);
             visitor.visit_expr(right);
         }
+        #[cfg(feature = "full")]
         Field(ExprField { ref expr, ref field, .. }) => {
             visitor.visit_expr(expr);
             visitor.visit_ident(field);
@@ -567,6 +535,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             visitor.visit_expr(expr);
             visitor.visit_expr(index);
         }
+        #[cfg(feature = "full")]
         Range(ExprRange { ref from, ref to, .. }) => {
             if let Some(ref start) = *from {
                 visitor.visit_expr(start);
@@ -581,6 +550,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
             }
             visitor.visit_path(path);
         }
+        #[cfg(feature = "full")]
         Break(ExprBreak { ref label, ref expr, .. }) => {
             if let Some(ref label) = *label {
                 visitor.visit_lifetime(label);
@@ -589,11 +559,13 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_expr(expr);
             }
         }
+        #[cfg(feature = "full")]
         Continue(ExprContinue { ref label, .. }) => {
             if let Some(ref label) = *label {
                 visitor.visit_lifetime(label);
             }
         }
+        #[cfg(feature = "full")]
         Ret(ExprRet { ref expr, .. }) => {
             if let Some(ref expr) = *expr {
                 visitor.visit_expr(expr);
@@ -602,6 +574,7 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
         Mac(ref mac) => {
             visitor.visit_mac(mac);
         }
+        #[cfg(feature = "full")]
         Struct(ExprStruct { ref path, ref fields, ref rest, .. }) => {
             visitor.visit_path(path);
             for &FieldValue { ref ident, ref expr, .. } in fields.items() {
@@ -612,19 +585,25 @@ pub fn walk_expr<V: Visitor>(visitor: &mut V, expr: &Expr) {
                 visitor.visit_expr(base);
             }
         }
+        #[cfg(feature = "full")]
         Repeat(ExprRepeat { ref expr, ref amt, .. }) => {
             visitor.visit_expr(expr);
             visitor.visit_expr(amt);
         }
+        #[cfg(feature = "full")]
         TupField(ExprTupField { ref expr, .. }) |
         Unary(ExprUnary { ref expr, .. }) |
         Box(ExprBox { ref expr, .. }) |
         AddrOf(ExprAddrOf { ref expr, .. }) |
-        Paren(ExprParen { ref expr, .. }) |
-        Group(ExprGroup { ref expr, .. }) |
         Try(ExprTry { ref expr, .. }) => {
             visitor.visit_expr(expr);
         }
+        Paren(ExprParen { ref expr, .. }) |
+        Group(ExprGroup { ref expr, .. }) => {
+            visitor.visit_expr(expr);
+        }
+        #[cfg(not(feature = "full"))]
+        _ => unreachable!(),
     }
 }
 
