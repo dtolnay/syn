@@ -256,17 +256,20 @@ fn test_enum() {
                     attrs: Vec::new(),
                     data: VariantData::Unit,
                     eq_token: Some(Default::default()),
-                    discriminant: Some(ConstExpr::Lit(Lit {
-                        value: LitKind::Other(0isize.into()),
-                        span: Default::default(),
-                    })),
+                    discriminant: Some(Expr{
+                        node: Lit {
+                            value: LitKind::Other(0isize.into()),
+                            span: Default::default(),
+                        }.into(),
+                        attrs: Vec::new(),
+                    }),
                 },
                 Variant {
                     ident: "ProcMacroHack".into(),
                     attrs: Vec::new(),
                     data: VariantData::Unit,
                     eq_token: Some(Default::default()),
-                    discriminant: Some(ConstExpr::Other(Expr {
+                    discriminant: Some(Expr {
                         node: ExprTupField {
                             expr: Box::new(Expr {
                                 node: ExprTup {
@@ -298,7 +301,7 @@ fn test_enum() {
                             },
                         }.into(),
                         attrs: Vec::new(),
-                    })),
+                    }),
                 },
             ].into(),
             brace_token: Default::default(),
