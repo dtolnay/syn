@@ -4,10 +4,12 @@ extern crate syn;
 use syn::{Expr, ExprKind, ExprGroup, ExprBinary, Lit, LitKind, BinOp};
 
 extern crate synom;
-use synom::{tokens, Synom};
+use synom::tokens;
 
 extern crate proc_macro2;
 use proc_macro2::*;
+
+mod common;
 
 fn tt(k: TokenNode) -> TokenTree {
     TokenTree {
@@ -43,7 +45,7 @@ fn test_grouping() {
 
     assert_eq!(raw.to_string(), "1i32 +  2i32 + 3i32  * 4i32");
 
-    assert_eq!(Expr::parse_all(raw).unwrap(), expr(ExprBinary {
+    assert_eq!(common::parse::syn::<Expr>(raw), expr(ExprBinary {
         left: Box::new(lit(Literal::i32(1))),
         op: BinOp::Add(tokens::Add::default()),
         right: Box::new(expr(ExprBinary {
@@ -77,7 +79,7 @@ fn test_invalid_grouping() {
 
     assert_eq!(raw.to_string(), "1i32 +  2i32 +  3i32 * 4i32");
 
-    assert_eq!(Expr::parse_all(raw).unwrap(), expr(ExprBinary {
+    assert_eq!(common::parse::syn::<Expr>(raw.into()), expr(ExprBinary {
         left: Box::new(expr(ExprBinary {
             left: Box::new(lit(Literal::i32(1))),
             op: BinOp::Add(tokens::Add::default()),

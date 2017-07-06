@@ -90,6 +90,6 @@ fn test_struct() {
 #[test]
 fn test_literal_mangling() {
     let raw = "0_4";
-    let parsed = raw.parse::<Lit>().unwrap();
+    let parsed: Lit = syn::parse_str(raw).unwrap();
     assert_eq!(raw, quote!(#parsed).to_string());
 }

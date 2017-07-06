@@ -82,8 +82,8 @@ pub trait Visitor: Sized {
     }
 
     #[cfg(feature = "full")]
-    fn visit_crate(&mut self, _crate: &Crate) {
-        walk_crate(self, _crate);
+    fn visit_file(&mut self, file: &File) {
+        walk_file(self, file);
     }
     #[cfg(feature = "full")]
     fn visit_item(&mut self, item: &Item) {
@@ -330,9 +330,9 @@ pub fn walk_mac<V: Visitor>(visitor: &mut V, mac: &Mac) {
 }
 
 #[cfg(feature = "full")]
-pub fn walk_crate<V: Visitor>(visitor: &mut V, _crate: &Crate) {
-    walk_list!(visitor, visit_attribute, &_crate.attrs);
-    walk_list!(visitor, visit_item, &_crate.items);
+pub fn walk_file<V: Visitor>(visitor: &mut V, file: &File) {
+    walk_list!(visitor, visit_attribute, &file.attrs);
+    walk_list!(visitor, visit_item, &file.items);
 }
 
 #[cfg(feature = "full")]

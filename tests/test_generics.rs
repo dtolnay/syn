@@ -9,6 +9,8 @@ extern crate quote;
 extern crate proc_macro2;
 use proc_macro2::Term;
 
+mod common;
+
 #[test]
 fn test_split_for_impl() {
     // <'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug
@@ -96,7 +98,7 @@ fn test_split_for_impl() {
 fn test_ty_param_bound() {
     let tokens = quote!('a);
     let expected = TyParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()));
-    assert_eq!(expected, tokens.to_string().parse().unwrap());
+    assert_eq!(expected, common::parse::syn::<TyParamBound>(tokens.into()));
 
     let tokens = quote!(Debug);
     let expected = TyParamBound::Trait(
@@ -105,7 +107,7 @@ fn test_ty_param_bound() {
             trait_ref: "Debug".into(),
         },
         TraitBoundModifier::None);
-    assert_eq!(expected, tokens.to_string().parse().unwrap());
+    assert_eq!(expected, common::parse::syn::<TyParamBound>(tokens.into()));
 
     let tokens = quote!(?Sized);
     let expected = TyParamBound::Trait(
@@ -114,5 +116,5 @@ fn test_ty_param_bound() {
             trait_ref: "Sized".into(),
         },
         TraitBoundModifier::Maybe(Default::default()));
-    assert_eq!(expected, tokens.to_string().parse().unwrap());
+    assert_eq!(expected, common::parse::syn::<TyParamBound>(tokens.into()));
 }

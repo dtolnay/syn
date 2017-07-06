@@ -13,7 +13,7 @@ use delimited::{Delimited, Element};
 /// method's default implementation recursively visits the substructure of the
 /// input via the `noop_fold` methods, which perform an "identity fold", that
 /// is, they return the same structure that they are given (for example the
-/// `fold_crate` method by default calls `fold::noop_fold_crate`).
+/// `fold_file` method by default calls `fold::noop_fold_file`).
 ///
 /// If you want to ensure that your code handles every variant explicitly, you
 /// need to override each method and monitor future changes to `Folder` in case
@@ -90,8 +90,8 @@ pub trait Folder {
     }
 
     #[cfg(feature = "full")]
-    fn fold_crate(&mut self, _crate: Crate) -> Crate {
-        noop_fold_crate(self, _crate)
+    fn fold_file(&mut self, file: File) -> File {
+        noop_fold_file(self, file)
     }
     #[cfg(feature = "full")]
     fn fold_item(&mut self, item: Item) -> Item {
@@ -564,15 +564,14 @@ pub fn noop_fold_mac<F: ?Sized + Folder>(folder: &mut F, mac: Mac) -> Mac {
 }
 
 #[cfg(feature = "full")]
-pub fn noop_fold_crate<F: ?Sized + Folder>(folder: &mut F,
-                                           krate: Crate)
-                                           -> Crate {
-    Crate {
-        attrs: krate.attrs.lift(|a| folder.fold_attribute(a)),
-        items: krate.items.lift(|i| folder.fold_item(i)),
-        ..krate
+pub fn noop_fold_file<F: ?Sized + Folder>(folder: &mut F,
+                                          file: File)
+                                          -> File {
+    File {
+        attrs: file.attrs.lift(|a| folder.fold_attribute(a)),
+        items: file.items.lift(|i| folder.fold_item(i)),
+        ..file
     }
-
 }
 
 #[cfg(feature = "full")]
