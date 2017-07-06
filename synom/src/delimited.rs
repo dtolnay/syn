@@ -113,10 +113,10 @@ impl<T, D> From<Vec<T>> for Delimited<T, D>
     where D: Default,
 {
     fn from(v: Vec<T>) -> Self {
-        let last = v.len() - 1;
+        let len = v.len();
         Delimited {
             inner: v.into_iter().enumerate().map(|(i, item)| {
-                (item, if i == last {None} else {Some(D::default())})
+                (item, if i + 1 == len {None} else {Some(D::default())})
             }).collect(),
         }
     }
