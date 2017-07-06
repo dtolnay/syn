@@ -76,7 +76,7 @@ impl<T, D> Delimited<T, D> {
     }
 
     pub fn push_default(&mut self, token: T) where D: Default {
-        if self.is_empty() {
+        if self.is_empty() || self.trailing_delim() {
             self.inner.push((token, None));
         } else {
             self.push_next(token, D::default());
