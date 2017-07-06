@@ -662,6 +662,10 @@ pub mod parsing {
                 segments: segments,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("path")
+        }
     }
 
     impl Synom for PathSegment {
