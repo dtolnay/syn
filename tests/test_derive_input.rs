@@ -4,7 +4,7 @@ extern crate syn;
 extern crate proc_macro2;
 
 use syn::*;
-use proc_macro2::{TokenNode, Spacing, Delimiter, Literal};
+use proc_macro2::{TokenNode, Spacing, Delimiter, Literal, Term};
 use proc_macro2::Delimiter::{Parenthesis, Brace};
 
 fn op(c: char) -> TokenTree {
@@ -24,7 +24,7 @@ fn lit<T: Into<Literal>>(t: T) -> TokenTree {
 fn word(sym: &str) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenNode::Term(sym.into()),
+        kind: TokenNode::Term(Term::intern(sym)),
     })
 }
 
@@ -258,7 +258,7 @@ fn test_enum() {
                     eq_token: Some(Default::default()),
                     discriminant: Some(Expr{
                         node: Lit {
-                            value: LitKind::Other(0isize.into()),
+                            value: LitKind::Other(Literal::isize(0)),
                             span: Default::default(),
                         }.into(),
                         attrs: Vec::new(),
@@ -278,14 +278,14 @@ fn test_enum() {
                                     args: vec![
                                         Expr {
                                             node: ExprKind::Lit(Lit {
-                                                value: LitKind::Other(Literal::integer("0")),
+                                                value: LitKind::Other(Literal::integer(0)),
                                                 span: Default::default(),
                                             }),
                                             attrs: Vec::new(),
                                         },
                                         Expr {
                                             node: ExprKind::Lit(Lit {
-                                                value: LitKind::Other("data".into()),
+                                                value: LitKind::Other(Literal::string("data")),
                                                 span: Default::default(),
                                             }),
                                             attrs: Vec::new(),
@@ -296,7 +296,7 @@ fn test_enum() {
                             }),
                             dot_token: Default::default(),
                             field: Lit {
-                                value: LitKind::Other(Literal::integer("0")),
+                                value: LitKind::Other(Literal::integer(0)),
                                 span: Default::default(),
                             },
                         }.into(),
@@ -363,7 +363,7 @@ fn test_attr_with_path() {
                         word("foo"),
                         delimited(Parenthesis, vec![]),
                         op(','),
-                        lit("Hello, world!"),
+                        lit(Literal::string("Hello, world!")),
                     ]),
                     op(';'),
                 ]),

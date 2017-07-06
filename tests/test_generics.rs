@@ -6,6 +6,9 @@ use syn::*;
 #[macro_use]
 extern crate quote;
 
+extern crate proc_macro2;
+use proc_macro2::Term;
+
 #[test]
 fn test_split_for_impl() {
     // <'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug
@@ -15,14 +18,14 @@ fn test_split_for_impl() {
         lifetimes: vec![
             LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new("'a".into(), Span::default()),
+                lifetime: Lifetime::new(Term::intern("'a"), Span::default()),
                 bounds: Default::default(),
                 colon_token: None,
             },
             LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new("'b".into(), Span::default()),
-                bounds: vec![Lifetime::new("'a".into(), Span::default())].into(),
+                lifetime: Lifetime::new(Term::intern("'b"), Span::default()),
+                bounds: vec![Lifetime::new(Term::intern("'a"), Span::default())].into(),
                 colon_token: Some(tokens::Colon::default()),
             },
         ].into(),
@@ -37,7 +40,7 @@ fn test_split_for_impl() {
                     is_sugared_doc: false,
                 }],
                 ident: "T".into(),
-                bounds: vec![TyParamBound::Region(Lifetime::new("'a".into(), Span::default()))].into(),
+                bounds: vec![TyParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()))].into(),
                 default: Some(TyTup {
                     tys: Default::default(),
                     lone_comma: None,
@@ -92,7 +95,7 @@ fn test_split_for_impl() {
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    let expected = TyParamBound::Region(Lifetime::new("'a".into(), Span::default()));
+    let expected = TyParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()));
     assert_eq!(expected, tokens.to_string().parse().unwrap());
 
     let tokens = quote!(Debug);

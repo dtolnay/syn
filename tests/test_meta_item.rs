@@ -25,7 +25,7 @@ fn test_meta_item_name_value() {
     run_test("#[foo = 5]", MetaNameValue {
         ident: "foo".into(),
         eq_token: Default::default(),
-        lit: lit(Literal::integer("5")),
+        lit: lit(Literal::integer(5)),
     })
 }
 
@@ -35,7 +35,7 @@ fn test_meta_item_list_lit() {
         ident: "foo".into(),
         paren_token: Default::default(),
         nested: vec![
-            NestedMetaItem::Literal(lit(Literal::integer("5"))),
+            NestedMetaItem::Literal(lit(Literal::integer(5))),
         ].into(),
     })
 }
@@ -60,7 +60,7 @@ fn test_meta_item_list_name_value() {
             NestedMetaItem::MetaItem(MetaNameValue {
                 ident: "bar".into(),
                 eq_token: Default::default(),
-                lit: lit(Literal::integer("5"))
+                lit: lit(Literal::integer(5))
             }.into()),
         ].into(),
     })
@@ -76,7 +76,7 @@ fn test_meta_item_multiple() {
             NestedMetaItem::MetaItem(MetaNameValue {
                 ident: "name".into(),
                 eq_token: Default::default(),
-                lit: lit(Literal::integer("5")),
+                lit: lit(Literal::integer(5)),
             }.into()),
             NestedMetaItem::MetaItem(MetaItemList {
                 ident: "list".into(),
@@ -85,7 +85,7 @@ fn test_meta_item_multiple() {
                     NestedMetaItem::MetaItem(MetaNameValue {
                         ident: "name2".into(),
                         eq_token: Default::default(),
-                        lit: lit(Literal::integer("6")),
+                        lit: lit(Literal::integer(6)),
                     }.into())
                 ].into(),
             }.into()),
