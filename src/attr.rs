@@ -3,7 +3,7 @@ use delimited::Delimited;
 
 use std::iter;
 
-use proc_macro2::{self, Delimiter, TokenKind, OpKind};
+use proc_macro2::{self, Delimiter, TokenNode, Spacing};
 
 ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
@@ -38,11 +38,11 @@ impl Attribute {
         };
 
         if self.tts.is_empty() {
-            return Some(MetaItem::Word(name.clone()));
+            return Some(MetaItem::Term(name.clone()));
         }
 
         if self.tts.len() == 1 {
-            if let TokenKind::Sequence(Delimiter::Parenthesis, ref ts) = self.tts[0].0.kind {
+            if let TokenNode::Group(Delimiter::Parenthesis, ref ts) = self.tts[0].0.kind {
                 let tokens = ts.clone().into_iter().collect::<Vec<_>>();
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
@@ -55,8 +55,8 @@ impl Attribute {
         }
 
         if self.tts.len() == 2 {
-            if let TokenKind::Op('=', OpKind::Alone) = self.tts[0].0.kind {
-                if let TokenKind::Literal(ref lit) = self.tts[1].0.kind {
+            if let TokenNode::Op('=', Spacing::Alone) = self.tts[0].0.kind {
+                if let TokenNode::Literal(ref lit) = self.tts[1].0.kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: name.clone(),
                         eq_token: tokens::Eq([Span(self.tts[0].0.span)]),
@@ -79,7 +79,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
     assert!(!tts.is_empty());
 
     match tts[0].kind {
-        TokenKind::Literal(ref lit) => {
+        TokenNode::Literal(ref lit) => {
             let lit = Lit {
                 value: LitKind::Other(lit.clone()),
                 span: Span(tts[0].span),
@@ -87,11 +87,11 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
             Some((NestedMetaItem::Literal(lit), &tts[1..]))
         }
 
-        TokenKind::Word(sym) => {
+        TokenNode::Term(sym) => {
             let ident = Ident::new(sym, Span(tts[0].span));
             if tts.len() >= 3 {
-                if let TokenKind::Op('=', OpKind::Alone) = tts[1].kind {
-                    if let TokenKind::Literal(ref lit) = tts[2].kind {
+                if let TokenNode::Op('=', Spacing::Alone) = tts[1].kind {
+                    if let TokenNode::Literal(ref lit) = tts[2].kind {
                         let pair = MetaNameValue {
                             ident: Ident::new(sym, Span(tts[0].span)),
                             eq_token: tokens::Eq([Span(tts[1].span)]),
@@ -106,7 +106,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
             }
 
             if tts.len() >= 2 {
-                if let TokenKind::Sequence(Delimiter::Parenthesis, ref inner_tts) = tts[1].kind {
+                if let TokenNode::Group(Delimiter::Parenthesis, ref inner_tts) = tts[1].kind {
                     let inner_tts = inner_tts.clone().into_iter().collect::<Vec<_>>();
                     return match list_of_nested_meta_items_from_tokens(&inner_tts) {
                         Some(nested_meta_items) => {
@@ -123,7 +123,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
                 }
             }
 
-            Some((MetaItem::Word(ident).into(), &tts[1..]))
+            Some((MetaItem::Term(ident).into(), &tts[1..]))
         }
 
         _ => None
@@ -140,7 +140,7 @@ fn list_of_nested_meta_items_from_tokens(mut tts: &[proc_macro2::TokenTree])
         let prev_comma = if first {
             first = false;
             None
-        } else if let TokenKind::Op(',', OpKind::Alone) = tts[0].kind {
+        } else if let TokenNode::Op(',', Spacing::Alone) = tts[0].kind {
             let tok = tokens::Comma([Span(tts[0].span)]);
             tts = &tts[1..];
             if tts.is_empty() {
@@ -184,10 +184,10 @@ ast_enum_of_structs! {
     ///
     /// E.g. `#[test]`, `#[derive(..)]` or `#[feature = "foo"]`
     pub enum MetaItem {
-        /// Word meta item.
+        /// Term meta item.
         ///
         /// E.g. `test` as in `#[test]`
-        pub Word(Ident),
+        pub Term(Ident),
 
         /// List meta item.
         ///
@@ -232,7 +232,7 @@ impl MetaItem {
     /// `feature` as in `#[feature = "foo"]`.
     pub fn name(&self) -> &str {
         match *self {
-            MetaItem::Word(ref name) => name.as_ref(),
+            MetaItem::Term(ref name) => name.as_ref(),
             MetaItem::NameValue(ref pair) => pair.ident.as_ref(),
             MetaItem::List(ref list) => list.ident.as_ref(),
         }
@@ -246,7 +246,7 @@ ast_enum_of_structs! {
     pub enum NestedMetaItem {
         /// A full `MetaItem`.
         ///
-        /// E.g. `Copy` in `#[derive(Copy)]` would be a `MetaItem::Word(Ident::from("Copy"))`.
+        /// E.g. `Copy` in `#[derive(Copy)]` would be a `MetaItem::Term(Ident::from("Copy"))`.
         pub MetaItem(MetaItem),
 
         /// A Rust literal.
@@ -294,12 +294,12 @@ pub mod parsing {
     use super::*;
     use synom::{PResult, Cursor, parse_error};
     use synom::tokens::*;
-    use proc_macro2::{TokenKind, OpKind, TokenTree};
+    use proc_macro2::{TokenNode, Spacing, TokenTree};
 
     fn eq() -> TokenTree {
         TokenTree {
             span: Default::default(),
-            kind: TokenKind::Op('=', OpKind::Alone),
+            kind: TokenNode::Op('=', Spacing::Alone),
         }
     }
 
@@ -388,7 +388,7 @@ pub mod parsing {
                 if literal.starts_with("//") || literal.starts_with("/*") {
                     Ok((rest, TokenTree {
                         span: span,
-                        kind: TokenKind::Literal(lit)
+                        kind: TokenNode::Literal(lit)
                     }))
                 } else {
                     parse_error()

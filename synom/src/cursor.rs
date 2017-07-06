@@ -19,9 +19,9 @@ use std::marker::PhantomData;
 #[derive(Debug)]
 enum Entry {
     /// Mimicing types from proc-macro.
-    Sequence(Span, Delimiter, SynomBuffer),
-    Word(Span, Symbol),
-    Op(Span, char, OpKind),
+    Group(Span, Delimiter, SynomBuffer),
+    Term(Span, Term),
+    Op(Span, char, Spacing),
     Literal(Span, Literal),
     /// End entries contain a raw pointer to the entry from the containing
     /// TokenTree.
@@ -42,22 +42,22 @@ impl SynomBuffer {
     // NOTE: DO NOT MUTATE THE `Vec` RETURNED FROM THIS FUNCTION ONCE IT
     // RETURNS, THE ADDRESS OF ITS BACKING MEMORY MUST REMAIN STABLE.
     fn inner_new(stream: TokenStream, up: *const Entry) -> SynomBuffer {
-        // Build up the entries list, recording the locations of any Sequences
+        // Build up the entries list, recording the locations of any Groups
         // in the list to be processed later.
         let mut entries = Vec::new();
         let mut seqs = Vec::new();
         for tt in stream.into_iter() {
             match tt.kind {
-                TokenKind::Word(sym) => {
-                    entries.push(Entry::Word(tt.span, sym));
+                TokenNode::Term(sym) => {
+                    entries.push(Entry::Term(tt.span, sym));
                 }
-                TokenKind::Op(chr, ok) => {
+                TokenNode::Op(chr, ok) => {
                     entries.push(Entry::Op(tt.span, chr, ok));
                 }
-                TokenKind::Literal(lit) => {
+                TokenNode::Literal(lit) => {
                     entries.push(Entry::Literal(tt.span, lit));
                 }
-                TokenKind::Sequence(delim, seq_stream) => {
+                TokenNode::Group(delim, seq_stream) => {
                     // Record the index of the interesting entry, and store an
                     // `End(null)` there temporarially.
                     seqs.push((entries.len(), tt.span, delim, seq_stream));
@@ -80,10 +80,10 @@ impl SynomBuffer {
             // `End(up)`, so the next index is also valid.
             let seq_up = &entries[idx + 1] as *const Entry;
 
-            // The end entry stored at the end of this Entry::Sequence should
-            // point to the Entry which follows the Sequence in the list.
+            // The end entry stored at the end of this Entry::Group should
+            // point to the Entry which follows the Group in the list.
             let inner = Self::inner_new(seq_stream, seq_up);
-            entries[idx] = Entry::Sequence(span, delim, inner);
+            entries[idx] = Entry::Group(span, delim, inner);
         }
 
         SynomBuffer {
@@ -138,8 +138,8 @@ impl<'a> Cursor<'a> {
     pub fn empty() -> Self {
         // It's safe in this situation for us to put an `Entry` object in global
         // storage, despite it not actually being safe to send across threads
-        // (`Symbol` is a reference into a thread-local table). This is because
-        // this entry never includes a `Symbol` object.
+        // (`Term` is a reference into a thread-local table). This is because
+        // this entry never includes a `Term` object.
         //
         // This wrapper struct allows us to break the rules and put a `Sync`
         // object in global storage.
@@ -195,7 +195,7 @@ impl<'a> Cursor<'a> {
     ///
     /// WARNING: This mutates its argument.
     fn ignore_none(&mut self) {
-        if let Entry::Sequence(_, Delimiter::None, ref buf) = *self.entry() {
+        if let Entry::Group(_, Delimiter::None, ref buf) = *self.entry() {
             // NOTE: We call `Cursor::create` here to make sure that situations
             // where we should immediately exit the span after entering it are
             // handled correctly.
@@ -223,7 +223,7 @@ impl<'a> Cursor<'a> {
         }
 
         match *self.entry() {
-            Entry::Sequence(span, delim, ref buf) => {
+            Entry::Group(span, delim, ref buf) => {
                 if delim != seq_delim {
                     return None;
                 }
@@ -238,12 +238,12 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// If the cursor is pointing at a Word, return it and a cursor pointing at
+    /// If the cursor is pointing at a Term, return it and a cursor pointing at
     /// the next `TokenTree`.
-    pub fn word(mut self) -> Option<(Cursor<'a>, Span, Symbol)> {
+    pub fn word(mut self) -> Option<(Cursor<'a>, Span, Term)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Word(span, sym) => {
+            Entry::Term(span, sym) => {
                 Some((
                     unsafe { self.bump() },
                     span,
@@ -256,7 +256,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at an Op, return it and a cursor pointing
     /// at the next `TokenTree`.
-    pub fn op(mut self) -> Option<(Cursor<'a>, Span, char, OpKind)> {
+    pub fn op(mut self) -> Option<(Cursor<'a>, Span, char, Spacing)> {
         self.ignore_none();
         match *self.entry() {
             Entry::Op(span, chr, kind) => {
@@ -303,32 +303,32 @@ impl<'a> Cursor<'a> {
     /// `None`.
     ///
     /// This method does not treat `None`-delimited sequences as invisible, and
-    /// will return a `Sequence(None, ..)` if the cursor is looking at one.
+    /// will return a `Group(None, ..)` if the cursor is looking at one.
     pub fn token_tree(self) -> Option<(Cursor<'a>, TokenTree)> {
         let tree = match *self.entry() {
-            Entry::Sequence(span, delim, ref buf) => {
+            Entry::Group(span, delim, ref buf) => {
                 let stream = buf.begin().token_stream();
                 TokenTree {
                     span: span,
-                    kind: TokenKind::Sequence(delim, stream),
+                    kind: TokenNode::Group(delim, stream),
                 }
             }
             Entry::Literal(span, ref lit) => {
                 TokenTree {
                     span: span,
-                    kind: TokenKind::Literal(lit.clone()),
+                    kind: TokenNode::Literal(lit.clone()),
                 }
             }
-            Entry::Word(span, sym) => {
+            Entry::Term(span, sym) => {
                 TokenTree {
                     span: span,
-                    kind: TokenKind::Word(sym),
+                    kind: TokenNode::Term(sym),
                 }
             }
             Entry::Op(span, chr, kind) => {
                 TokenTree {
                     span: span,
-                    kind: TokenKind::Op(chr, kind),
+                    kind: TokenNode::Op(chr, kind),
                 }
             }
             Entry::End(..) => {

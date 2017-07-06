@@ -9,7 +9,7 @@ use synom::{tokens, Synom};
 extern crate proc_macro2;
 use proc_macro2::*;
 
-fn tt(k: TokenKind) -> TokenTree {
+fn tt(k: TokenNode) -> TokenTree {
     TokenTree {
         span: Span::default(),
         kind: k,
@@ -30,15 +30,15 @@ fn lit<T: Into<Literal>>(t: T) -> Expr {
 #[test]
 fn test_grouping() {
     let raw: TokenStream = vec![
-        tt(TokenKind::Literal(Literal::from(1))),
-        tt(TokenKind::Op('+', OpKind::Alone)),
-        tt(TokenKind::Sequence(Delimiter::None, vec![
-            tt(TokenKind::Literal(Literal::from(2))),
-            tt(TokenKind::Op('+', OpKind::Alone)),
-            tt(TokenKind::Literal(Literal::from(3))),
+        tt(TokenNode::Literal(Literal::from(1))),
+        tt(TokenNode::Op('+', Spacing::Alone)),
+        tt(TokenNode::Group(Delimiter::None, vec![
+            tt(TokenNode::Literal(Literal::from(2))),
+            tt(TokenNode::Op('+', Spacing::Alone)),
+            tt(TokenNode::Literal(Literal::from(3))),
         ].into_iter().collect())),
-        tt(TokenKind::Op('*', OpKind::Alone)),
-        tt(TokenKind::Literal(Literal::from(4))),
+        tt(TokenNode::Op('*', Spacing::Alone)),
+        tt(TokenNode::Literal(Literal::from(4))),
     ].into_iter().collect();
 
     assert_eq!(raw.to_string(), "1i32 +  2i32 + 3i32  * 4i32");
@@ -64,15 +64,15 @@ fn test_grouping() {
 #[test]
 fn test_invalid_grouping() {
     let raw: TokenStream = vec![
-        tt(TokenKind::Literal(Literal::from(1))),
-        tt(TokenKind::Op('+', OpKind::Alone)),
-        tt(TokenKind::Sequence(Delimiter::None, vec![
-            tt(TokenKind::Literal(Literal::from(2))),
-            tt(TokenKind::Op('+', OpKind::Alone)),
+        tt(TokenNode::Literal(Literal::from(1))),
+        tt(TokenNode::Op('+', Spacing::Alone)),
+        tt(TokenNode::Group(Delimiter::None, vec![
+            tt(TokenNode::Literal(Literal::from(2))),
+            tt(TokenNode::Op('+', Spacing::Alone)),
         ].into_iter().collect())),
-        tt(TokenKind::Literal(Literal::from(3))),
-        tt(TokenKind::Op('*', OpKind::Alone)),
-        tt(TokenKind::Literal(Literal::from(4))),
+        tt(TokenNode::Literal(Literal::from(3))),
+        tt(TokenNode::Op('*', Spacing::Alone)),
+        tt(TokenNode::Literal(Literal::from(4))),
     ].into_iter().collect();
 
     assert_eq!(raw.to_string(), "1i32 +  2i32 +  3i32 * 4i32");

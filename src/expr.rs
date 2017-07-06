@@ -620,7 +620,7 @@ pub mod parsing {
     use ty::parsing::qpath;
 
     #[cfg(feature = "full")]
-    use proc_macro2::{TokenStream, TokenKind, Delimiter};
+    use proc_macro2::{TokenStream, TokenNode, Delimiter, Term};
     use synom::{PResult, Cursor, Synom};
     #[cfg(feature = "full")]
     use synom::parse_error;
@@ -1831,7 +1831,7 @@ pub mod parsing {
                 ident: None,
                 tokens: vec![TokenTree(proc_macro2::TokenTree {
                     span: ((data.1).0).0,
-                    kind: TokenKind::Sequence(Delimiter::Brace, data.0),
+                    kind: TokenNode::Group(Delimiter::Brace, data.0),
                 })],
             },
             match semi {
@@ -2061,7 +2061,7 @@ pub mod parsing {
             ({
                 let s = lit.to_string();
                 if s.parse::<usize>().is_ok() {
-                    Ident::new(s.into(), lit.span)
+                    Ident::new(Term::intern(&s), lit.span)
                 } else {
                     return parse_error();
                 }

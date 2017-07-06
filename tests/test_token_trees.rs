@@ -6,34 +6,34 @@ extern crate syn;
 extern crate proc_macro2;
 
 use syn::{Lit, TokenTree};
-use proc_macro2::{TokenKind, OpKind, Delimiter, TokenStream};
+use proc_macro2::{TokenNode, Spacing, Delimiter, TokenStream};
 use proc_macro2::Delimiter::*;
 
 fn alone(c: char) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Op(c, OpKind::Alone),
+        kind: TokenNode::Op(c, Spacing::Alone),
     })
 }
 
 fn joint(c: char) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Op(c, OpKind::Joint),
+        kind: TokenNode::Op(c, Spacing::Joint),
     })
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Sequence(delim, tokens.into_iter().map(|t| t.0).collect()),
+        kind: TokenNode::Group(delim, tokens.into_iter().map(|t| t.0).collect()),
     })
 }
 
 fn word(sym: &str) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Word(sym.into()),
+        kind: TokenNode::Term(sym.into()),
     })
 }
 

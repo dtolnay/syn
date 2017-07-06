@@ -195,7 +195,7 @@ tokens! {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::{Delimiter, OpKind};
+    use proc_macro2::{Delimiter, Spacing};
 
     use {PResult, Cursor, parse_error};
     use span::Span;
@@ -236,8 +236,9 @@ mod parsing {
             match tokens.op() {
                 Some((rest, span, c, kind)) if c == ch => {
                     if i != s.len() - 1 {
-                        if kind != OpKind::Joint {
-                            return parse_error();
+                        match kind {
+                            Spacing::Joint => {}
+                            _ => return parse_error(),
                         }
                     }
                     *slot = Span(span);
@@ -294,7 +295,7 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{TokenTree, TokenKind, OpKind};
+    use proc_macro2::{TokenTree, TokenNode, Spacing, Term};
     use quote::Tokens;
 
     use span::Span;
@@ -309,20 +310,20 @@ mod printing {
         for (ch, span) in chars.zip(spans) {
             tokens.append(TokenTree {
                 span: span.0,
-                kind: TokenKind::Op(ch, OpKind::Joint),
+                kind: TokenNode::Op(ch, Spacing::Joint),
             });
         }
 
         tokens.append(TokenTree {
             span: span.0,
-            kind: TokenKind::Op(ch, OpKind::Alone),
+            kind: TokenNode::Op(ch, Spacing::Alone),
         });
     }
 
     pub fn sym(s: &str, span: &Span, tokens: &mut Tokens) {
         tokens.append(TokenTree {
             span: span.0,
-            kind: TokenKind::Word(s.into()),
+            kind: TokenNode::Term(Term::intern(s)),
         });
     }
 

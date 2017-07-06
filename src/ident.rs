@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::Symbol;
+use proc_macro2::Term;
 use unicode_xid::UnicodeXID;
 
 use Span;
@@ -26,12 +26,12 @@ use tokens;
 /// keywords.
 #[derive(Copy, Clone, Debug)]
 pub struct Ident {
-    pub sym: Symbol,
+    pub sym: Term,
     pub span: Span,
 }
 
 impl Ident {
-    pub fn new(sym: Symbol, span: Span) -> Self {
+    pub fn new(sym: Term, span: Span) -> Self {
         let s = sym.as_str();
 
         if s.is_empty() {
@@ -77,37 +77,37 @@ impl Ident {
 
 impl<'a> From<&'a str> for Ident {
     fn from(s: &str) -> Self {
-        Ident::new(s.into(), Span::default())
+        Ident::new(Term::intern(s), Span::default())
     }
 }
 
 impl From<tokens::Self_> for Ident {
     fn from(tok: tokens::Self_) -> Self {
-        Ident::new("self".into(), tok.0)
+        Ident::new(Term::intern("self"), tok.0)
     }
 }
 
 impl From<tokens::CapSelf> for Ident {
     fn from(tok: tokens::CapSelf) -> Self {
-        Ident::new("Self".into(), tok.0)
+        Ident::new(Term::intern("Self"), tok.0)
     }
 }
 
 impl From<tokens::Super> for Ident {
     fn from(tok: tokens::Super) -> Self {
-        Ident::new("super".into(), tok.0)
+        Ident::new(Term::intern("super"), tok.0)
     }
 }
 
 impl<'a> From<Cow<'a, str>> for Ident {
     fn from(s: Cow<'a, str>) -> Self {
-        Ident::new(s[..].into(), Span::default())
+        Ident::new(Term::intern(&s), Span::default())
     }
 }
 
 impl From<String> for Ident {
     fn from(s: String) -> Self {
-        Ident::new(s[..].into(), Span::default())
+        Ident::new(Term::intern(&s), Span::default())
     }
 }
 
@@ -193,13 +193,13 @@ pub mod parsing {
 mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
-    use proc_macro2::{TokenTree, TokenKind};
+    use proc_macro2::{TokenTree, TokenNode};
 
     impl ToTokens for Ident {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
                 span: self.span.0,
-                kind: TokenKind::Word(self.sym),
+                kind: TokenNode::Term(self.sym),
             })
         }
     }

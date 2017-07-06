@@ -4,34 +4,34 @@ extern crate syn;
 extern crate proc_macro2;
 
 use syn::*;
-use proc_macro2::{TokenKind, OpKind, Delimiter, Literal};
+use proc_macro2::{TokenNode, Spacing, Delimiter, Literal};
 use proc_macro2::Delimiter::{Parenthesis, Brace};
 
 fn op(c: char) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Op(c, OpKind::Alone),
+        kind: TokenNode::Op(c, Spacing::Alone),
     })
 }
 
 fn lit<T: Into<Literal>>(t: T) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Literal(t.into()),
+        kind: TokenNode::Literal(t.into()),
     })
 }
 
 fn word(sym: &str) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Word(sym.into()),
+        kind: TokenNode::Term(sym.into()),
     })
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
     TokenTree(proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenKind::Sequence(delim, tokens.into_iter().map(|t| t.0).collect()),
+        kind: TokenNode::Group(delim, tokens.into_iter().map(|t| t.0).collect()),
     })
 }
 
@@ -144,8 +144,8 @@ fn test_struct() {
         ident: "derive".into(),
         paren_token: Default::default(),
         nested: vec![
-            NestedMetaItem::MetaItem(MetaItem::Word("Debug".into())),
-            NestedMetaItem::MetaItem(MetaItem::Word("Clone".into())),
+            NestedMetaItem::MetaItem(MetaItem::Term("Debug".into())),
+            NestedMetaItem::MetaItem(MetaItem::Term("Clone".into())),
         ].into(),
     }.into();
 
@@ -322,7 +322,7 @@ fn test_enum() {
                 span: Default::default(),
             },
         }.into(),
-        MetaItem::Word("must_use".into()),
+        MetaItem::Term("must_use".into()),
     ];
 
     let actual_meta_items: Vec<_> = actual.attrs.into_iter().map(|attr| attr.meta_item().unwrap()).collect();

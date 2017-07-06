@@ -22,7 +22,7 @@ extra-traits = ["synom/extra-traits"]
 
 [dependencies]
 quote = { git = 'https://github.com/dtolnay/quote', optional = true }
-proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
+proc-macro2 = "0.1"
 unicode-xid = "0.1"
 synom = { version = "0.11", path = "synom" }
 

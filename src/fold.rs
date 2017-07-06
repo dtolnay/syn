@@ -527,29 +527,29 @@ pub fn noop_fold_lit<F: ?Sized + Folder>(_: &mut F, _lit: Lit) -> Lit {
 }
 
 pub fn noop_fold_tt<F: ?Sized + Folder>(folder: &mut F, tt: TokenTree) -> TokenTree {
-    use proc_macro2::{TokenKind, TokenTree as TokenTree2};
+    use proc_macro2::{TokenNode, TokenTree as TokenTree2};
     match tt.0.kind {
-        TokenKind::Word(sym) => {
+        TokenNode::Term(sym) => {
             // XXX: Do we want to fold over idents
             TokenTree(TokenTree2 {
                 span: tt.0.span,
-                kind: TokenKind::Word(sym),
+                kind: TokenNode::Term(sym),
             })
         }
-        TokenKind::Op(..) => tt,
-        TokenKind::Literal(lit) => {
+        TokenNode::Op(..) => tt,
+        TokenNode::Literal(lit) => {
             folder.fold_lit(Lit {
                 value: LitKind::Other(lit),
                 span: Span(tt.0.span),
             }).into_token_tree()
         }
-        TokenKind::Sequence(delim, stream) => {
+        TokenNode::Group(delim, stream) => {
             let stream = stream.into_iter().map(|tt| {
                 noop_fold_tt(folder, TokenTree(tt)).0
             }).collect();
             TokenTree(TokenTree2 {
                 span: tt.0.span,
-                kind: TokenKind::Sequence(delim, stream),
+                kind: TokenNode::Group(delim, stream),
             })
         }
     }

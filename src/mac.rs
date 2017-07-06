@@ -3,7 +3,7 @@ use std::fmt;
 
 use super::*;
 
-use proc_macro2::{TokenKind, Delimiter};
+use proc_macro2::{TokenNode, Delimiter};
 
 ast_struct! {
     /// Represents a macro invocation. The Path indicates which macro
@@ -33,7 +33,7 @@ impl Mac {
 impl TokenTree {
     pub fn is_braced(&self) -> bool {
         match self.0.kind {
-            TokenKind::Sequence(Delimiter::Brace, _) => true,
+            TokenNode::Group(Delimiter::Brace, _) => true,
             _ => false,
         }
     }
@@ -42,10 +42,10 @@ impl TokenTree {
 #[cfg(feature = "extra-traits")]
 impl PartialEq for TokenTree {
     fn eq(&self, other: &TokenTree) -> bool {
-        use proc_macro2::OpKind;
+        use proc_macro2::Spacing;
 
         match (&self.0.kind, &other.0.kind) {
-            (&TokenKind::Sequence(d1, ref s1), &TokenKind::Sequence(d2, ref s2)) => {
+            (&TokenNode::Group(d1, ref s1), &TokenNode::Group(d2, ref s2)) => {
                 match (d1, d2) {
                     (Delimiter::Parenthesis, Delimiter::Parenthesis) |
                     (Delimiter::Brace, Delimiter::Brace) |
@@ -68,17 +68,17 @@ impl PartialEq for TokenTree {
                 }
                 s2.next().is_none()
             }
-            (&TokenKind::Op(o1, k1), &TokenKind::Op(o2, k2)) => {
+            (&TokenNode::Op(o1, k1), &TokenNode::Op(o2, k2)) => {
                 o1 == o2 && match (k1, k2) {
-                    (OpKind::Alone, OpKind::Alone) |
-                    (OpKind::Joint, OpKind::Joint) => true,
+                    (Spacing::Alone, Spacing::Alone) |
+                    (Spacing::Joint, Spacing::Joint) => true,
                     _ => false,
                 }
             }
-            (&TokenKind::Literal(ref l1), &TokenKind::Literal(ref l2)) => {
+            (&TokenNode::Literal(ref l1), &TokenNode::Literal(ref l2)) => {
                 l1.to_string() == l2.to_string()
             }
-            (&TokenKind::Word(ref s1), &TokenKind::Word(ref s2)) => {
+            (&TokenNode::Term(ref s1), &TokenNode::Term(ref s2)) => {
                 s1.as_str() == s2.as_str()
             }
             _ => false,
@@ -92,10 +92,10 @@ impl Eq for TokenTree {}
 #[cfg(feature = "extra-traits")]
 impl ::std::hash::Hash for TokenTree {
     fn hash<H: ::std::hash::Hasher>(&self, h: &mut H) {
-        use proc_macro2::OpKind;
+        use proc_macro2::Spacing;
 
         match self.0.kind {
-            TokenKind::Sequence(delim, ref stream) => {
+            TokenNode::Group(delim, ref stream) => {
                 0u8.hash(h);
                 match delim {
                     Delimiter::Parenthesis => 0u8.hash(h),
@@ -109,16 +109,16 @@ impl ::std::hash::Hash for TokenTree {
                 }
                 0xffu8.hash(h); // terminator w/ a variant we don't normally hash
             }
-            TokenKind::Op(op, kind) => {
+            TokenNode::Op(op, kind) => {
                 1u8.hash(h);
                 op.hash(h);
                 match kind {
-                    OpKind::Alone => 0u8.hash(h),
-                    OpKind::Joint => 1u8.hash(h),
+                    Spacing::Alone => 0u8.hash(h),
+                    Spacing::Joint => 1u8.hash(h),
                 }
             }
-            TokenKind::Literal(ref lit) => (2u8, lit.to_string()).hash(h),
-            TokenKind::Word(ref word) => (3u8, word.as_str()).hash(h),
+            TokenNode::Literal(ref lit) => (2u8, lit.to_string()).hash(h),
+            TokenNode::Term(ref word) => (3u8, word.as_str()).hash(h),
         }
     }
 }
@@ -134,7 +134,7 @@ impl fmt::Debug for TokenTree {
 pub mod parsing {
     use super::*;
 
-    use proc_macro2::{TokenKind, TokenTree};
+    use proc_macro2::{TokenNode, TokenTree};
     use synom::tokens::*;
     use synom::{Synom, PResult, Cursor, parse_error};
 
@@ -159,7 +159,7 @@ pub mod parsing {
 
         pub fn parse_delimited(input: Cursor) -> PResult<Self> {
             match input.token_tree() {
-                Some((rest, token @ TokenTree { kind: TokenKind::Sequence(..), .. })) => {
+                Some((rest, token @ TokenTree { kind: TokenNode::Group(..), .. })) => {
                     Ok((rest, ::TokenTree(token)))
                 }
                 _ => parse_error(),

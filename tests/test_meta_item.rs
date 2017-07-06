@@ -17,7 +17,7 @@ fn lit<T: Into<Literal>>(t: T) -> Lit {
 
 #[test]
 fn test_meta_item_word() {
-    run_test("#[foo]", MetaItem::Word("foo".into()))
+    run_test("#[foo]", MetaItem::Term("foo".into()))
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn test_meta_item_list_word() {
         ident: "foo".into(),
         paren_token: Default::default(),
         nested: vec![
-            NestedMetaItem::MetaItem(MetaItem::Word("bar".into())),
+            NestedMetaItem::MetaItem(MetaItem::Term("bar".into())),
         ].into(),
     })
 }
@@ -72,7 +72,7 @@ fn test_meta_item_multiple() {
         ident: "foo".into(),
         paren_token: Default::default(),
         nested: vec![
-            NestedMetaItem::MetaItem(MetaItem::Word("word".into())),
+            NestedMetaItem::MetaItem(MetaItem::Term("word".into())),
             NestedMetaItem::MetaItem(MetaNameValue {
                 ident: "name".into(),
                 eq_token: Default::default(),
@@ -89,7 +89,7 @@ fn test_meta_item_multiple() {
                     }.into())
                 ].into(),
             }.into()),
-            NestedMetaItem::MetaItem(MetaItem::Word("word2".into())),
+            NestedMetaItem::MetaItem(MetaItem::Term("word2".into())),
         ].into(),
     })
 }

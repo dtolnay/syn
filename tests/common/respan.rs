@@ -7,7 +7,7 @@ use syntex_syntax::codemap::{self, Spanned};
 use syntex_syntax::fold::{self, Folder};
 use syntex_syntax::parse::token::{Lit, Token};
 use syntex_syntax::ptr::P;
-use syntex_syntax::symbol::Symbol;
+use syntex_syntax::symbol::Term;
 use syntex_syntax::tokenstream::{Delimited, TokenTree};
 use syntex_syntax::util::move_map::MoveMap;
 use syntex_syntax::util::small_vector::SmallVector;
@@ -27,12 +27,12 @@ impl Respanner {
         // so many equivalent representations of the same literal; they are
         // tested elsewhere
         match l {
-            Lit::Byte(_) => Lit::Byte(Symbol::intern("")),
-            Lit::Char(_) => Lit::Char(Symbol::intern("")),
-            Lit::Integer(_) => Lit::Integer(Symbol::intern("")),
-            Lit::Float(_) => Lit::Float(Symbol::intern("")),
-            Lit::Str_(_) => Lit::Str_(Symbol::intern("")),
-            Lit::ByteStr(_) => Lit::ByteStr(Symbol::intern("")),
+            Lit::Byte(_) => Lit::Byte(Term::intern("")),
+            Lit::Char(_) => Lit::Char(Term::intern("")),
+            Lit::Integer(_) => Lit::Integer(Term::intern("")),
+            Lit::Float(_) => Lit::Float(Term::intern("")),
+            Lit::Str_(_) => Lit::Str_(Term::intern("")),
+            Lit::ByteStr(_) => Lit::ByteStr(Term::intern("")),
             _ => l,
         }
     }
@@ -163,7 +163,7 @@ impl Folder for Respanner {
         MetaItem {
             name: name,
             node: match node {
-                MetaItemKind::Word => MetaItemKind::Word,
+                MetaItemKind::Term => MetaItemKind::Term,
                 MetaItemKind::List(nested) => {
                     MetaItemKind::List(nested.move_map(|e| self.fold_meta_list_item(e)))
                 }

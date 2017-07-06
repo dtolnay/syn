@@ -1,7 +1,7 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::{self, Literal, TokenKind};
+use proc_macro2::{self, Literal, TokenNode, Term};
 
 use {Span, TokenTree};
 
@@ -20,9 +20,9 @@ pub enum LitKind {
 impl Lit {
     pub fn into_token_tree(self) -> TokenTree {
         let kind = match self.value {
-            LitKind::Bool(true) => TokenKind::Word("true".into()),
-            LitKind::Bool(false) => TokenKind::Word("false".into()),
-            LitKind::Other(l) => TokenKind::Literal(l),
+            LitKind::Bool(true) => TokenNode::Term(Term::intern("true")),
+            LitKind::Bool(false) => TokenNode::Term(Term::intern("false")),
+            LitKind::Other(l) => TokenNode::Literal(l),
         };
         TokenTree(proc_macro2::TokenTree {
             span: self.span.0,
@@ -139,19 +139,9 @@ mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
 
-    use proc_macro2::{TokenTree, TokenKind};
-
     impl ToTokens for Lit {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            let kind = match self.value {
-                LitKind::Bool(true) => TokenKind::Word("true".into()),
-                LitKind::Bool(false) => TokenKind::Word("false".into()),
-                LitKind::Other(ref l) => TokenKind::Literal(l.clone()),
-            };
-            tokens.append(TokenTree {
-                span: self.span.0,
-                kind: kind,
-            });
+            self.clone().into_token_tree().to_tokens(tokens)
         }
     }
 }

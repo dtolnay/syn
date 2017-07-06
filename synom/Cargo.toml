@@ -14,7 +14,7 @@ publish = false # this branch contains breaking changes
 [dependencies]
 quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 unicode-xid = "0.1"
-proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2' }
+proc-macro2 = "0.1"
 
 [features]
 printing = ["quote"]
