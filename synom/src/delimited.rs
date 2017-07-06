@@ -43,6 +43,10 @@ impl<T, D> Delimited<T, D> {
         Iter { inner: self.inner.iter() }
     }
 
+    pub fn iter_mut(&mut self) -> IterMut<T, D> {
+        IterMut { inner: self.inner.iter_mut() }
+    }
+
     pub fn items(&self) -> Items<T, D> {
         Items { inner: self.inner.iter() }
     }
@@ -167,6 +171,23 @@ impl<'a, T, D> Iterator for Iter<'a, T, D> {
             match pair.1 {
                 Some(ref delimited) => Element::Delimited(&pair.0, delimited),
                 None => Element::End(&pair.0),
+            }
+        })
+    }
+}
+
+pub struct IterMut<'a, T: 'a, D: 'a> {
+    inner: slice::IterMut<'a, (T, Option<D>)>,
+}
+
+impl<'a, T, D> Iterator for IterMut<'a, T, D> {
+    type Item = Element<&'a mut T, &'a mut D>;
+
+    fn next(&mut self) -> Option<Element<&'a mut T, &'a mut D>> {
+        self.inner.next().map(|pair| {
+            match pair.1 {
+                Some(ref mut delimited) => Element::Delimited(&mut pair.0, delimited),
+                None => Element::End(&mut pair.0),
             }
         })
     }
