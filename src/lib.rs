@@ -170,7 +170,7 @@ fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
         Err(err) => err,
     };
     match T::description() {
-        Some(s) => Err(ParseError::new(format!("parsing {}: {}", s, err))),
+        Some(s) => Err(ParseError::new(format!("failed to parse {}: {}", s, err))),
         None => Err(err),
     }
 }
