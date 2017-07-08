@@ -39,6 +39,42 @@ impl<T, D> Delimited<T, D> {
         }
     }
 
+    pub fn first(&self) -> Option<Element<&T, &D>> {
+        self.inner.first().map(|&(ref t, ref d)| {
+            match *d {
+                Some(ref d) => Element::Delimited(t, d),
+                None => Element::End(t),
+            }
+        })
+    }
+
+    pub fn first_mut(&mut self) -> Option<Element<&mut T, &mut D>> {
+        self.inner.first_mut().map(|&mut (ref mut t, ref mut d)| {
+            match *d {
+                Some(ref mut d) => Element::Delimited(t, d),
+                None => Element::End(t),
+            }
+        })
+    }
+
+    pub fn last(&self) -> Option<Element<&T, &D>> {
+        self.inner.last().map(|&(ref t, ref d)| {
+            match *d {
+                Some(ref d) => Element::Delimited(t, d),
+                None => Element::End(t),
+            }
+        })
+    }
+
+    pub fn last_mut(&mut self) -> Option<Element<&mut T, &mut D>> {
+        self.inner.last_mut().map(|&mut (ref mut t, ref mut d)| {
+            match *d {
+                Some(ref mut d) => Element::Delimited(t, d),
+                None => Element::End(t),
+            }
+        })
+    }
+
     pub fn iter(&self) -> Iter<T, D> {
         Iter { inner: self.inner.iter() }
     }
