@@ -135,6 +135,18 @@ impl<T, D> FromIterator<Element<T, D>> for Delimited<T, D> {
     }
 }
 
+impl<T, D> FromIterator<T> for Delimited<T, D>
+    where D: Default,
+{
+    fn from_iter<I: IntoIterator<Item = T>>(i: I) -> Self {
+        let mut ret = Delimited::new();
+        for element in i {
+            ret.push_default(element);
+        }
+        ret
+    }
+}
+
 impl<'a, T, D> IntoIterator for &'a Delimited<T, D> {
     type Item = Element<&'a T, &'a D>;
     type IntoIter = Iter<'a, T, D>;
