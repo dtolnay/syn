@@ -25,6 +25,7 @@ mod common;
 #[test]
 fn test_round_trip() {
     common::check_min_stack();
+    common::clone_rust();
     let abort_after = common::abort_after();
     if abort_after == 0 {
         panic!("Skipping all round_trip tests");

@@ -74,6 +74,7 @@ fn test_rustc_precedence() {
     use std::io::Read;
 
     common::check_min_stack();
+    common::clone_rust();
     let abort_after = common::abort_after();
     if abort_after == 0 {
         panic!("Skipping all precedence tests");
