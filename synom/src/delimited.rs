@@ -135,6 +135,13 @@ impl<T, D> Delimited<T, D> {
     pub fn trailing_delim(&self) -> bool {
         self.inner[self.inner.len() - 1].1.is_some()
     }
+
+    /// Returns true if either this `Delimited` is empty, or it has a trailing
+    /// delimiter. This is useful within `ToTokens` implementations for `syn`.
+    #[doc(hidden)]
+    pub fn empty_or_trailing(&self) -> bool {
+        self.is_empty() || self.trailing_delim()
+    }
 }
 
 impl<T, D> From<Vec<(T, Option<D>)>> for Delimited<T, D> {

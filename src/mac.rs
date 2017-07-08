@@ -177,6 +177,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
             tokens.append_all(&self.tokens);
         }
     }
