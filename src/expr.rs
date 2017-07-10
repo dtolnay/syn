@@ -346,6 +346,14 @@ ast_enum_of_structs! {
             pub catch_token: tokens::Catch,
             pub block: Block,
         }),
+
+        /// A yield expression.
+        ///
+        /// E.g. `yield expr`
+        pub Yield(ExprYield #full {
+            pub yield_token: tokens::Yield,
+            pub expr: Option<Box<Expr>>,
+        }),
     }
 }
 
@@ -1164,6 +1172,8 @@ pub mod parsing {
         |
         syn!(ExprCatch) => { ExprKind::Catch }
         |
+        syn!(ExprYield) => { ExprKind::Yield }
+        |
         call!(expr_closure, allow_struct)
         |
         cond_reduce!(allow_block, map!(syn!(ExprBlock), ExprKind::Block))
@@ -1207,6 +1217,8 @@ pub mod parsing {
         syn!(ExprMatch) => { ExprKind::Match }
         |
         syn!(ExprCatch) => { ExprKind::Catch }
+        |
+        syn!(ExprYield) => { ExprKind::Yield }
         |
         syn!(ExprBlock) => { ExprKind::Block }
     ), Expr::from));
@@ -1469,6 +1481,18 @@ pub mod parsing {
                 do_token: do_,
                 catch_token: catch_,
             }.into())
+        ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for ExprYield {
+        named!(parse -> Self, do_parse!(
+            yield_: syn!(Yield) >>
+            expr: option!(syn!(Expr)) >>
+            (ExprYield {
+                yield_token: yield_,
+                expr: expr.map(Box::new),
+            })
         ));
     }
 
@@ -2445,6 +2469,14 @@ mod printing {
             self.do_token.to_tokens(tokens);
             self.catch_token.to_tokens(tokens);
             self.block.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for ExprYield {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.yield_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
         }
     }
 
