@@ -1,3 +1,0 @@
-[submodule "tests/rust"]
-	path = tests/rust
-	url = https://github.com/rust-lang/rust

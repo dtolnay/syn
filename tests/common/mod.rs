@@ -3,6 +3,8 @@
 extern crate walkdir;
 
 use std::env;
+use std::path::Path;
+use std::process::Command;
 use std::u32;
 
 use self::walkdir::DirEntry;
@@ -86,3 +88,29 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 }
 
+pub fn clone_rust() {
+    if Path::new("tests/rust").is_dir() {
+        return
+    }
+
+    println!("cloning rust-lang/rust");
+    let result = Command::new("git")
+                    .arg("clone")
+                    .arg("https://github.com/rust-lang/rust")
+                    .arg("tests/rust")
+                    .status()
+                    .unwrap();
+    println!("result: {}", result);
+    assert!(result.success());
+
+    println!("reset to known-good rev");
+    let result = Command::new("git")
+                    .arg("reset")
+                    .arg("--hard")
+                    .arg("ddc5d7bd4b9ea3e8a8ccf82cb443e950be311d61")
+                    .current_dir("tests/rust")
+                    .status()
+                    .unwrap();
+    println!("result: {}", result);
+    assert!(result.success());
+}
