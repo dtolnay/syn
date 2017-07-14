@@ -212,8 +212,10 @@ mod printing {
             tokens.append_all(&self.attrs);
             self.ident.to_tokens(tokens);
             self.data.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            self.discriminant.to_tokens(tokens);
+            if let Some(ref disc) = self.discriminant {
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+                disc.to_tokens(tokens);
+            }
         }
     }
 
@@ -239,8 +241,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
             self.vis.to_tokens(tokens);
-            self.ident.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
+            if let Some(ref ident) = self.ident {
+                ident.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+            }
             self.ty.to_tokens(tokens);
         }
     }
@@ -264,6 +268,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.pub_token.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
+                // XXX: If we have a path which is not "self" or "super",
+                // automatically add the "in" token.
                 self.in_token.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             });

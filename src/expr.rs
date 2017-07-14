@@ -527,7 +527,7 @@ ast_enum_of_structs! {
             pub hi: Box<Expr>,
             pub limits: RangeLimits,
         }),
-        /// `[a, b, ..i, y, z]` is represented as:
+        /// `[a, b, i.., y, z]` is represented as:
         pub Slice(PatSlice {
             pub front: Delimited<Pat, tokens::Comma>,
             pub middle: Option<Box<Pat>>,
@@ -619,6 +619,16 @@ ast_enum! {
     pub enum InPlaceKind {
         Arrow(tokens::LArrow),
         In(tokens::In),
+    }
+}
+
+#[cfg(any(feature = "parsing", feature = "printing"))]
+#[cfg(feature = "full")]
+fn arm_requires_comma(arm: &Arm) -> bool {
+    if let ExprKind::Block(ExprBlock { unsafety: Unsafety::Normal, .. }) = arm.body.node {
+        false
+    } else {
+        true
     }
 }
 
@@ -1497,15 +1507,6 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn arm_requires_comma(arm: &Arm) -> bool {
-        if let ExprKind::Block(ExprBlock { unsafety: Unsafety::Normal, .. }) = arm.body.node {
-            false
-        } else {
-            true
-        }
-    }
-
-    #[cfg(feature = "full")]
     impl Synom for Arm {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
@@ -2265,6 +2266,19 @@ mod printing {
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
+    /// If the given expression is a bare `ExprStruct`, wraps it in parenthesis
+    /// before appending it to `Tokens`.
+    #[cfg(feature = "full")]
+    fn wrap_bare_struct(tokens: &mut Tokens, e: &Expr) {
+        if let ExprKind::Struct(_) = e.node {
+            tokens::Paren::default().surround(tokens, |tokens| {
+                e.to_tokens(tokens);
+            });
+        } else {
+            e.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for Expr {
         #[cfg(feature = "full")]
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -2298,7 +2312,15 @@ mod printing {
                 InPlaceKind::In(ref _in) => {
                     _in.to_tokens(tokens);
                     self.place.to_tokens(tokens);
-                    self.value.to_tokens(tokens);
+                    // NOTE: The second operand must be in a block, add one if
+                    // it is not present.
+                    if let ExprKind::Block(_) = self.value.node {
+                        self.value.to_tokens(tokens);
+                    } else {
+                        tokens::Brace::default().surround(tokens, |tokens| {
+                            self.value.to_tokens(tokens);
+                        })
+                    }
                 }
             }
         }
@@ -2328,10 +2350,12 @@ mod printing {
             self.expr.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.method.to_tokens(tokens);
-            self.colon2_token.to_tokens(tokens);
-            self.lt_token.to_tokens(tokens);
-            self.typarams.to_tokens(tokens);
-            self.gt_token.to_tokens(tokens);
+            if !self.typarams.is_empty() {
+                TokensOrDefault(&self.colon2_token).to_tokens(tokens);
+                TokensOrDefault(&self.lt_token).to_tokens(tokens);
+                self.typarams.to_tokens(tokens);
+                TokensOrDefault(&self.gt_token).to_tokens(tokens);
+            }
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
             });
@@ -2343,6 +2367,15 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
+                // If we only have one argument, we need a trailing comma to
+                // distinguish ExprTup from ExprParen.
+                if self.args.len() == 1 && !self.args.trailing_delim() {
+                    tokens::Comma::default().to_tokens(tokens);
+                }
+                // XXX: Not sure how to handle this, but we never parse it yet.
+                // Is this for an expression like (0,)? Can't we use the
+                // trailing delimiter on Delimited for that? (,) isn't a valid
+                // expression as far as I know.
                 self.lone_comma.to_tokens(tokens);
             })
         }
@@ -2380,13 +2413,37 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
+    fn maybe_wrap_else(tokens: &mut Tokens,
+                       else_token: &Option<tokens::Else>,
+                       if_false: &Option<Box<Expr>>)
+    {
+        if let Some(ref if_false) = *if_false {
+            TokensOrDefault(&else_token).to_tokens(tokens);
+
+            // If we are not one of the valid expressions to exist in an else
+            // clause, wrap ourselves in a block.
+            match if_false.node {
+                ExprKind::If(_) |
+                ExprKind::IfLet(_) |
+                ExprKind::Block(_) => {
+                    if_false.to_tokens(tokens);
+                }
+                _ => {
+                    tokens::Brace::default().surround(tokens, |tokens| {
+                        if_false.to_tokens(tokens);
+                    });
+                }
+            }
+        }
+    }
+
+    #[cfg(feature = "full")]
     impl ToTokens for ExprIf {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.if_token.to_tokens(tokens);
-            self.cond.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.cond);
             self.if_true.to_tokens(tokens);
-            self.else_token.to_tokens(tokens);
-            self.if_false.to_tokens(tokens);
+            maybe_wrap_else(tokens, &self.else_token, &self.if_false);
         }
     }
 
@@ -2397,20 +2454,21 @@ mod printing {
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.expr);
             self.if_true.to_tokens(tokens);
-            self.else_token.to_tokens(tokens);
-            self.if_false.to_tokens(tokens);
+            maybe_wrap_else(tokens, &self.else_token, &self.if_false);
         }
     }
 
     #[cfg(feature = "full")]
     impl ToTokens for ExprWhile {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.label.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
+            if self.label.is_some() {
+                self.label.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+            }
             self.while_token.to_tokens(tokens);
-            self.cond.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.cond);
             self.body.to_tokens(tokens);
         }
     }
@@ -2418,13 +2476,15 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprWhileLet {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.label.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
+            if self.label.is_some() {
+                self.label.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+            }
             self.while_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.expr);
             self.body.to_tokens(tokens);
         }
     }
@@ -2432,12 +2492,14 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprForLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.label.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
+            if self.label.is_some() {
+                self.label.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+            }
             self.for_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.expr);
             self.body.to_tokens(tokens);
         }
     }
@@ -2445,8 +2507,10 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.label.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
+            if self.label.is_some() {
+                self.label.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+            }
             self.loop_token.to_tokens(tokens);
             self.body.to_tokens(tokens);
         }
@@ -2456,9 +2520,17 @@ mod printing {
     impl ToTokens for ExprMatch {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.match_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.expr);
             self.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(&self.arms);
+                for (i,  arm) in self.arms.iter().enumerate() {
+                    arm.to_tokens(tokens);
+                    // Ensure that we have a comma after a non-block arm, except
+                    // for the last one.
+                    let is_last = i == self.arms.len() - 1;
+                    if !is_last && arm_requires_comma(arm) && arm.comma.is_none() {
+                        tokens::Comma::default().to_tokens(tokens);
+                    }
+                }
             });
         }
     }
@@ -2531,6 +2603,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
+            // XXX: I don't think we can do anything if someone shoves a
+            // nonsense Lit in here.
             self.field.to_tokens(tokens);
         }
     }
@@ -2608,8 +2682,10 @@ mod printing {
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
-                self.dot2_token.to_tokens(tokens);
-                self.rest.to_tokens(tokens);
+                if self.rest.is_some() {
+                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
+                    self.rest.to_tokens(tokens);
+                }
             })
         }
     }
@@ -2653,8 +2729,10 @@ mod printing {
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
+            // XXX: Override self.is_shorthand if expr is not an IdentExpr with
+            // the ident self.ident?
             if !self.is_shorthand {
-                self.colon_token.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.expr.to_tokens(tokens);
             }
         }
@@ -2665,8 +2743,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
             self.pats.to_tokens(tokens);
-            self.if_token.to_tokens(tokens);
-            self.guard.to_tokens(tokens);
+            if self.guard.is_some() {
+                TokensOrDefault(&self.if_token).to_tokens(tokens);
+                self.guard.to_tokens(tokens);
+            }
             self.rocket_token.to_tokens(tokens);
             self.body.to_tokens(tokens);
             self.comma.to_tokens(tokens);
@@ -2685,8 +2765,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.mode.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.at_token.to_tokens(tokens);
-            self.subpat.to_tokens(tokens);
+            if self.subpat.is_some() {
+                TokensOrDefault(&self.at_token).to_tokens(tokens);
+                self.subpat.to_tokens(tokens);
+            }
         }
     }
 
@@ -2696,6 +2778,10 @@ mod printing {
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
+                // NOTE: We need a comma before the dot2 token if it is present.
+                if !self.fields.empty_or_trailing() && self.dot2_token.is_some() {
+                    tokens::Comma::default().to_tokens(tokens);
+                }
                 self.dot2_token.to_tokens(tokens);
             });
         }
@@ -2722,13 +2808,17 @@ mod printing {
             self.paren_token.surround(tokens, |tokens| {
                 for (i, token) in self.pats.iter().enumerate() {
                     if Some(i) == self.dots_pos {
-                        self.dot2_token.to_tokens(tokens);
-                        self.comma_token.to_tokens(tokens);
+                        TokensOrDefault(&self.dot2_token).to_tokens(tokens);
+                        TokensOrDefault(&self.comma_token).to_tokens(tokens);
                     }
                     token.to_tokens(tokens);
                 }
 
                 if Some(self.pats.len()) == self.dots_pos {
+                    // Ensure there is a comma before the .. token.
+                    if !self.pats.empty_or_trailing() {
+                        tokens::Comma::default().to_tokens(tokens);
+                    }
                     self.dot2_token.to_tokens(tokens);
                 }
             });
@@ -2771,12 +2861,34 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            // XXX: This is a mess, and it will be so easy to screw it up. How
+            // do we make this correct itself better?
             self.bracket_token.surround(tokens, |tokens| {
                 self.front.to_tokens(tokens);
-                self.middle.to_tokens(tokens);
-                self.dot2_token.to_tokens(tokens);
-                self.comma_token.to_tokens(tokens);
-                self.back.to_tokens(tokens);
+
+                // If we need a comma before the middle or standalone .. token,
+                // then make sure it's present.
+                if !self.front.empty_or_trailing() &&
+                    (self.middle.is_some() || self.dot2_token.is_some())
+                {
+                    tokens::Comma::default().to_tokens(tokens);
+                }
+
+                // If we have an identifier, we always need a .. token.
+                if self.middle.is_some() {
+                    self.middle.to_tokens(tokens);
+                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
+                } else if self.dot2_token.is_some() {
+                    self.dot2_token.to_tokens(tokens);
+                }
+
+                // Make sure we have a comma before the back half.
+                if !self.back.is_empty() {
+                    TokensOrDefault(&self.comma_token).to_tokens(tokens);
+                    self.back.to_tokens(tokens);
+                } else {
+                    self.comma_token.to_tokens(tokens);
+                }
             })
         }
     }
@@ -2794,9 +2906,10 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            // XXX: Override is_shorthand if it was wrong?
             if !self.is_shorthand {
                 self.ident.to_tokens(tokens);
-                self.colon_token.to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.pat.to_tokens(tokens);
         }
@@ -2870,10 +2983,14 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.ty.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            self.init.to_tokens(tokens);
+            if self.ty.is_some() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.ty.to_tokens(tokens);
+            }
+            if self.init.is_some() {
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+                self.init.to_tokens(tokens);
+            }
             self.semi_token.to_tokens(tokens);
         }
     }

@@ -1366,8 +1366,9 @@ mod printing {
                             tokens.append_all(self.attrs.inner());
                             tokens.append_all(items);
                         });
+                    } else {
+                        TokensOrDefault(&item.semi).to_tokens(tokens);
                     }
-                    item.semi.to_tokens(tokens);
                 }
                 ItemKind::ForeignMod(ref item) => {
                     item.abi.to_tokens(tokens);
@@ -1408,12 +1409,13 @@ mod printing {
                         VariantData::Tuple(..) => {
                             item.data.to_tokens(tokens);
                             item.generics.where_clause.to_tokens(tokens);
+                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
                         }
                         VariantData::Unit => {
                             item.generics.where_clause.to_tokens(tokens);
+                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
                         }
                     }
-                    item.semi_token.to_tokens(tokens);
                 }
                 ItemKind::Union(ref item) => {
                     item.vis.to_tokens(tokens);
@@ -1421,6 +1423,8 @@ mod printing {
                     item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     item.generics.where_clause.to_tokens(tokens);
+                    // XXX: Should we handle / complain when using a
+                    // non-VariantData::Struct Variant in Union?
                     item.data.to_tokens(tokens);
                 }
                 ItemKind::Trait(ref item) => {
@@ -1429,8 +1433,10 @@ mod printing {
                     item.trait_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.supertraits.to_tokens(tokens);
+                    if !item.supertraits.is_empty() {
+                        TokensOrDefault(&item.colon_token).to_tokens(tokens);
+                        item.supertraits.to_tokens(tokens);
+                    }
                     item.generics.where_clause.to_tokens(tokens);
                     item.brace_token.surround(tokens, |tokens| {
                         tokens.append_all(&item.items);
@@ -1475,8 +1481,10 @@ mod printing {
     impl ToTokens for PathSimple {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
-            self.as_token.to_tokens(tokens);
-            self.rename.to_tokens(tokens);
+            if self.rename.is_some() {
+                TokensOrDefault(&self.as_token).to_tokens(tokens);
+                self.rename.to_tokens(tokens);
+            }
         }
     }
 
@@ -1501,8 +1509,10 @@ mod printing {
     impl ToTokens for PathListItem {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.name.to_tokens(tokens);
-            self.as_token.to_tokens(tokens);
-            self.rename.to_tokens(tokens);
+            if self.rename.is_some() {
+                TokensOrDefault(&self.as_token).to_tokens(tokens);
+                self.rename.to_tokens(tokens);
+            }
         }
     }
 
@@ -1531,15 +1541,17 @@ mod printing {
                             });
                         }
                         None => {
-                            item.semi_token.to_tokens(tokens);
+                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
                         }
                     }
                 }
                 TraitItemKind::Type(ref item) => {
                     item.type_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.bounds.to_tokens(tokens);
+                    if !item.bounds.is_empty() {
+                        TokensOrDefault(&item.colon_token).to_tokens(tokens);
+                        item.bounds.to_tokens(tokens);
+                    }
                     if let Some((ref eq_token, ref default)) = item.default {
                         eq_token.to_tokens(tokens);
                         default.to_tokens(tokens);
@@ -1638,7 +1650,13 @@ mod printing {
             self.0.generics.to_tokens(tokens);
             self.0.paren_token.surround(tokens, |tokens| {
                 self.0.inputs.to_tokens(tokens);
-                self.0.dot_tokens.to_tokens(tokens);
+
+                if self.0.variadic {
+                    if !self.0.inputs.empty_or_trailing() {
+                        tokens::Comma::default().to_tokens(tokens);
+                    }
+                    TokensOrDefault(&self.0.dot_tokens).to_tokens(tokens);
+                }
             });
             self.0.output.to_tokens(tokens);
             self.0.generics.where_clause.to_tokens(tokens);

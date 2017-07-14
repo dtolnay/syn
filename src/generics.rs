@@ -357,54 +357,85 @@ mod printing {
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
+    /// Returns true if the generics object has no lifetimes or ty_params.
+    fn empty_normal_generics(generics: &Generics) -> bool {
+        generics.lifetimes.is_empty() && generics.ty_params.is_empty()
+    }
+
+    /// We need a comma between the lifetimes list and the ty_params list if
+    /// there are more than 0 lifetimes, the lifetimes list didn't have a
+    /// trailing delimiter, and there are more than 0 type parameters. This is a
+    /// helper method for adding that comma.
+    fn maybe_add_lifetime_params_comma(tokens: &mut Tokens, generics: &Generics) {
+        // We may need to require a trailing comma if we have any ty_params.
+        if !generics.lifetimes.empty_or_trailing() && !generics.ty_params.is_empty() {
+            tokens::Comma::default().to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.lt_token.to_tokens(tokens);
+            if empty_normal_generics(self) {
+                return;
+            }
+
+            TokensOrDefault(&self.lt_token).to_tokens(tokens);
             self.lifetimes.to_tokens(tokens);
+            maybe_add_lifetime_params_comma(tokens, self);
             self.ty_params.to_tokens(tokens);
-            self.gt_token.to_tokens(tokens);
+            TokensOrDefault(&self.gt_token).to_tokens(tokens);
         }
     }
 
     impl<'a> ToTokens for ImplGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.0.lt_token.to_tokens(tokens);
+            if empty_normal_generics(&self.0) {
+                return;
+            }
+
+            TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
             self.0.lifetimes.to_tokens(tokens);
+            maybe_add_lifetime_params_comma(tokens, &self.0);
             for param in self.0.ty_params.iter() {
                  // Leave off the type parameter defaults
                 let item = param.item();
                 tokens.append_all(item.attrs.outer());
                 item.ident.to_tokens(tokens);
-                item.colon_token.to_tokens(tokens);
-                item.bounds.to_tokens(tokens);
+                if !item.bounds.is_empty() {
+                    TokensOrDefault(&item.colon_token).to_tokens(tokens);
+                    item.bounds.to_tokens(tokens);
+                }
                 param.delimiter().to_tokens(tokens);
             }
-            self.0.gt_token.to_tokens(tokens);
+            TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
     }
 
     impl<'a> ToTokens for TyGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.0.lt_token.to_tokens(tokens);
+            if empty_normal_generics(&self.0) {
+                return;
+            }
+
+            TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
             // Leave off the lifetime bounds and attributes
             for param in self.0.lifetimes.iter() {
                 param.item().lifetime.to_tokens(tokens);
                 param.delimiter().to_tokens(tokens);
             }
+            maybe_add_lifetime_params_comma(tokens, &self.0);
             // Leave off the type parameter defaults
             for param in self.0.ty_params.iter() {
                 param.item().ident.to_tokens(tokens);
                 param.delimiter().to_tokens(tokens);
             }
-            self.0.gt_token.to_tokens(tokens);
+            TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
     }
 
     impl<'a> ToTokens for Turbofish<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            let has_lifetimes = !self.0.lifetimes.is_empty();
-            let has_ty_params = !self.0.ty_params.is_empty();
-            if has_lifetimes || has_ty_params {
+            if !empty_normal_generics(&self.0) {
                 tokens::Colon2::default().to_tokens(tokens);
                 TyGenerics(self.0).to_tokens(tokens);
             }
@@ -424,8 +455,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.lifetime.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.bounds.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
         }
     }
 
@@ -433,10 +466,14 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.ident.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.bounds.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            self.default.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
+            if self.default.is_some() {
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+                self.default.to_tokens(tokens);
+            }
         }
     }
 
@@ -463,8 +500,10 @@ mod printing {
 
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.where_token.to_tokens(tokens);
-            self.predicates.to_tokens(tokens);
+            if !self.predicates.is_empty() {
+                TokensOrDefault(&self.where_token).to_tokens(tokens);
+                self.predicates.to_tokens(tokens);
+            }
         }
     }
 
@@ -480,8 +519,10 @@ mod printing {
     impl ToTokens for WhereRegionPredicate {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lifetime.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.bounds.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
         }
     }
 

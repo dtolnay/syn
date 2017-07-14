@@ -258,7 +258,8 @@ ast_struct! {
     pub struct QSelf {
         pub lt_token: tokens::Lt,
         pub ty: Box<Ty>,
-        pub position: Option<(tokens::As, usize)>,
+        pub position: usize,
+        pub as_token: Option<tokens::As>,
         pub gt_token: tokens::Gt,
     }
 }
@@ -547,7 +548,7 @@ pub mod parsing {
             colon2: syn!(Colon2) >>
             rest: call!(Delimited::parse_separated_nonempty) >>
             ({
-                let (pos, path) = match path {
+                let (pos, as_, path) = match path {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
                         if !path.segments.is_empty() && !path.segments.trailing_delim() {
@@ -556,10 +557,10 @@ pub mod parsing {
                         for item in rest {
                             path.segments.push(item);
                         }
-                        (Some((as_, pos)), path)
+                        (pos, Some(as_), path)
                     }
                     None => {
-                        (None, Path {
+                        (0, None, Path {
                             leading_colon: Some(colon2),
                             segments: rest,
                         })
@@ -569,6 +570,7 @@ pub mod parsing {
                     lt_token: lt,
                     ty: Box::new(this),
                     position: pos,
+                    as_token: as_,
                     gt_token: gt,
                 }), path)
             })
@@ -835,8 +837,12 @@ mod printing {
     impl ToTokens for TyPtr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.star_token.to_tokens(tokens);
-            self.const_token.to_tokens(tokens);
-            self.ty.mutability.to_tokens(tokens);
+            match self.ty.mutability {
+                Mutability::Mutable(ref tok) => tok.to_tokens(tokens),
+                Mutability::Immutable => {
+                    TokensOrDefault(&self.const_token).to_tokens(tokens);
+                }
+            }
             self.ty.ty.to_tokens(tokens);
         }
     }
@@ -866,6 +872,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.tys.to_tokens(tokens);
+                // XXX: I don't think (,) is a thing.
                 self.lone_comma.to_tokens(tokens);
             })
         }
@@ -885,9 +892,16 @@ mod printing {
             };
             qself.lt_token.to_tokens(tokens);
             qself.ty.to_tokens(tokens);
+
+            // XXX: Gross.
+            let pos = if qself.position > 0 && qself.position >= self.1.segments.len() {
+                self.1.segments.len() - 1
+            } else {
+                qself.position
+            };
             let mut segments = self.1.segments.iter();
-            if let Some((ref as_token, pos)) = qself.position {
-                as_token.to_tokens(tokens);
+            if pos > 0 {
+                TokensOrDefault(&qself.as_token).to_tokens(tokens);
                 self.1.leading_colon.to_tokens(tokens);
                 for (i, segment) in (&mut segments).take(pos).enumerate() {
                     if i + 1 == pos {
@@ -984,7 +998,21 @@ mod printing {
             self.turbofish.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
             self.lifetimes.to_tokens(tokens);
+            if !self.lifetimes.empty_or_trailing() && !self.types.is_empty() {
+                tokens::Comma::default().to_tokens(tokens);
+            }
             self.types.to_tokens(tokens);
+            if (
+                // If we have no trailing delimiter after a non-empty types list, or
+                !self.types.empty_or_trailing() ||
+                // If we have no trailing delimiter after a non-empty lifetimes
+                // list before an empty types list, and
+                (self.types.is_empty() && !self.lifetimes.empty_or_trailing())) &&
+                // We have some bindings, then we need a comma.
+                !self.bindings.is_empty()
+            {
+                tokens::Comma::default().to_tokens(tokens);
+            }
             self.bindings.to_tokens(tokens);
             self.gt_token.to_tokens(tokens);
         }
@@ -1034,6 +1062,9 @@ mod printing {
             self.fn_token.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
+                if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
+                    tokens::Comma::default().to_tokens(tokens);
+                }
                 self.variadic.to_tokens(tokens);
             });
             self.output.to_tokens(tokens);
