@@ -379,11 +379,11 @@ mod printing {
                 return;
             }
 
-            self.lt_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&self.lt_token).to_tokens(tokens);
             self.lifetimes.to_tokens(tokens);
             maybe_add_lifetime_params_comma(tokens, self);
             self.ty_params.to_tokens(tokens);
-            self.gt_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&self.gt_token).to_tokens(tokens);
         }
     }
 
@@ -393,7 +393,7 @@ mod printing {
                 return;
             }
 
-            self.0.lt_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
             self.0.lifetimes.to_tokens(tokens);
             maybe_add_lifetime_params_comma(tokens, &self.0);
             for param in self.0.ty_params.iter() {
@@ -402,12 +402,12 @@ mod printing {
                 tokens.append_all(item.attrs.outer());
                 item.ident.to_tokens(tokens);
                 if !item.bounds.is_empty() {
-                    item.colon_token.unwrap_or_default().to_tokens(tokens);
+                    TokensOrDefault(&item.colon_token).to_tokens(tokens);
                     item.bounds.to_tokens(tokens);
                 }
                 param.delimiter().to_tokens(tokens);
             }
-            self.0.gt_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
     }
 
@@ -417,7 +417,7 @@ mod printing {
                 return;
             }
 
-            self.0.lt_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
             // Leave off the lifetime bounds and attributes
             for param in self.0.lifetimes.iter() {
                 param.item().lifetime.to_tokens(tokens);
@@ -429,7 +429,7 @@ mod printing {
                 param.item().ident.to_tokens(tokens);
                 param.delimiter().to_tokens(tokens);
             }
-            self.0.gt_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
     }
 
@@ -456,7 +456,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.lifetime.to_tokens(tokens);
             if !self.bounds.is_empty() {
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
             }
         }
@@ -467,11 +467,11 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.ident.to_tokens(tokens);
             if !self.bounds.is_empty() {
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
             }
             if self.default.is_some() {
-                self.eq_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
                 self.default.to_tokens(tokens);
             }
         }
@@ -501,7 +501,7 @@ mod printing {
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if !self.predicates.is_empty() {
-                self.where_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.where_token).to_tokens(tokens);
                 self.predicates.to_tokens(tokens);
             }
         }
@@ -520,7 +520,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lifetime.to_tokens(tokens);
             if !self.bounds.is_empty() {
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
             }
         }

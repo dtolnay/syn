@@ -275,3 +275,18 @@ pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
     file.shebang = shebang;
     Ok(file)
 }
+
+#[cfg(feature = "printing")]
+struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
+
+#[cfg(feature = "printing")]
+impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
+    where T: quote::ToTokens + Default,
+{
+    fn to_tokens(&self, tokens: &mut quote::Tokens) {
+        match *self.0 {
+            Some(ref t) => t.to_tokens(tokens),
+            None => T::default().to_tokens(tokens),
+        }
+    }
+}

@@ -840,7 +840,7 @@ mod printing {
             match self.ty.mutability {
                 Mutability::Mutable(ref tok) => tok.to_tokens(tokens),
                 Mutability::Immutable => {
-                    self.const_token.unwrap_or_default().to_tokens(tokens);
+                    TokensOrDefault(&self.const_token).to_tokens(tokens);
                 }
             }
             self.ty.ty.to_tokens(tokens);
@@ -901,7 +901,7 @@ mod printing {
             };
             let mut segments = self.1.segments.iter();
             if pos > 0 {
-                qself.as_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&qself.as_token).to_tokens(tokens);
                 self.1.leading_colon.to_tokens(tokens);
                 for (i, segment) in (&mut segments).take(pos).enumerate() {
                     if i + 1 == pos {

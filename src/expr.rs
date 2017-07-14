@@ -2351,10 +2351,10 @@ mod printing {
             self.dot_token.to_tokens(tokens);
             self.method.to_tokens(tokens);
             if !self.typarams.is_empty() {
-                self.colon2_token.unwrap_or_default().to_tokens(tokens);
-                self.lt_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon2_token).to_tokens(tokens);
+                TokensOrDefault(&self.lt_token).to_tokens(tokens);
                 self.typarams.to_tokens(tokens);
-                self.gt_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.gt_token).to_tokens(tokens);
             }
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
@@ -2418,7 +2418,7 @@ mod printing {
                        if_false: &Option<Box<Expr>>)
     {
         if let Some(ref if_false) = *if_false {
-            else_token.unwrap_or_default().to_tokens(tokens);
+            TokensOrDefault(&else_token).to_tokens(tokens);
 
             // If we are not one of the valid expressions to exist in an else
             // clause, wrap ourselves in a block.
@@ -2465,7 +2465,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.while_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
@@ -2478,7 +2478,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.while_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
@@ -2494,7 +2494,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.for_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
@@ -2509,7 +2509,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.loop_token.to_tokens(tokens);
             self.body.to_tokens(tokens);
@@ -2683,7 +2683,7 @@ mod printing {
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
                 if self.rest.is_some() {
-                    self.dot2_token.unwrap_or_default().to_tokens(tokens);
+                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
                     self.rest.to_tokens(tokens);
                 }
             })
@@ -2732,8 +2732,7 @@ mod printing {
             // XXX: Override self.is_shorthand if expr is not an IdentExpr with
             // the ident self.ident?
             if !self.is_shorthand {
-                self.colon_token.unwrap_or_default()
-                    .to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.expr.to_tokens(tokens);
             }
         }
@@ -2745,7 +2744,7 @@ mod printing {
             tokens.append_all(&self.attrs);
             self.pats.to_tokens(tokens);
             if self.guard.is_some() {
-                self.if_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.if_token).to_tokens(tokens);
                 self.guard.to_tokens(tokens);
             }
             self.rocket_token.to_tokens(tokens);
@@ -2767,7 +2766,7 @@ mod printing {
             self.mode.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             if self.subpat.is_some() {
-                self.at_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.at_token).to_tokens(tokens);
                 self.subpat.to_tokens(tokens);
             }
         }
@@ -2809,8 +2808,8 @@ mod printing {
             self.paren_token.surround(tokens, |tokens| {
                 for (i, token) in self.pats.iter().enumerate() {
                     if Some(i) == self.dots_pos {
-                        self.dot2_token.unwrap_or_default().to_tokens(tokens);
-                        self.comma_token.unwrap_or_default().to_tokens(tokens);
+                        TokensOrDefault(&self.dot2_token).to_tokens(tokens);
+                        TokensOrDefault(&self.comma_token).to_tokens(tokens);
                     }
                     token.to_tokens(tokens);
                 }
@@ -2878,14 +2877,14 @@ mod printing {
                 // If we have an identifier, we always need a .. token.
                 if self.middle.is_some() {
                     self.middle.to_tokens(tokens);
-                    self.dot2_token.unwrap_or_default().to_tokens(tokens);
+                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
                 } else if self.dot2_token.is_some() {
                     self.dot2_token.to_tokens(tokens);
                 }
 
                 // Make sure we have a comma before the back half.
                 if !self.back.is_empty() {
-                    self.comma_token.unwrap_or_default().to_tokens(tokens);
+                    TokensOrDefault(&self.comma_token).to_tokens(tokens);
                     self.back.to_tokens(tokens);
                 } else {
                     self.comma_token.to_tokens(tokens);
@@ -2910,7 +2909,7 @@ mod printing {
             // XXX: Override is_shorthand if it was wrong?
             if !self.is_shorthand {
                 self.ident.to_tokens(tokens);
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.pat.to_tokens(tokens);
         }
@@ -2985,11 +2984,11 @@ mod printing {
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             if self.ty.is_some() {
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.ty.to_tokens(tokens);
             }
             if self.init.is_some() {
-                self.eq_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
                 self.init.to_tokens(tokens);
             }
             self.semi_token.to_tokens(tokens);

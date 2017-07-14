@@ -213,7 +213,7 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.data.to_tokens(tokens);
             if let Some(ref disc) = self.discriminant {
-                self.eq_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
                 disc.to_tokens(tokens);
             }
         }
@@ -243,7 +243,7 @@ mod printing {
             self.vis.to_tokens(tokens);
             if let Some(ref ident) = self.ident {
                 ident.to_tokens(tokens);
-                self.colon_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.ty.to_tokens(tokens);
         }

@@ -1367,7 +1367,7 @@ mod printing {
                             tokens.append_all(items);
                         });
                     } else {
-                        item.semi.unwrap_or_default().to_tokens(tokens);
+                        TokensOrDefault(&item.semi).to_tokens(tokens);
                     }
                 }
                 ItemKind::ForeignMod(ref item) => {
@@ -1409,11 +1409,11 @@ mod printing {
                         VariantData::Tuple(..) => {
                             item.data.to_tokens(tokens);
                             item.generics.where_clause.to_tokens(tokens);
-                            item.semi_token.unwrap_or_default().to_tokens(tokens);
+                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
                         }
                         VariantData::Unit => {
                             item.generics.where_clause.to_tokens(tokens);
-                            item.semi_token.unwrap_or_default().to_tokens(tokens);
+                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
                         }
                     }
                 }
@@ -1434,7 +1434,7 @@ mod printing {
                     item.ident.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
                     if !item.supertraits.is_empty() {
-                        item.colon_token.unwrap_or_default().to_tokens(tokens);
+                        TokensOrDefault(&item.colon_token).to_tokens(tokens);
                         item.supertraits.to_tokens(tokens);
                     }
                     item.generics.where_clause.to_tokens(tokens);
@@ -1482,7 +1482,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
             if self.rename.is_some() {
-                self.as_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.as_token).to_tokens(tokens);
                 self.rename.to_tokens(tokens);
             }
         }
@@ -1510,7 +1510,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.name.to_tokens(tokens);
             if self.rename.is_some() {
-                self.as_token.unwrap_or_default().to_tokens(tokens);
+                TokensOrDefault(&self.as_token).to_tokens(tokens);
                 self.rename.to_tokens(tokens);
             }
         }
@@ -1541,7 +1541,7 @@ mod printing {
                             });
                         }
                         None => {
-                            item.semi_token.unwrap_or_default().to_tokens(tokens);
+                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
                         }
                     }
                 }
@@ -1549,7 +1549,7 @@ mod printing {
                     item.type_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
                     if !item.bounds.is_empty() {
-                        item.colon_token.unwrap_or_default().to_tokens(tokens);
+                        TokensOrDefault(&item.colon_token).to_tokens(tokens);
                         item.bounds.to_tokens(tokens);
                     }
                     if let Some((ref eq_token, ref default)) = item.default {
@@ -1655,7 +1655,7 @@ mod printing {
                     if !self.0.inputs.empty_or_trailing() {
                         tokens::Comma::default().to_tokens(tokens);
                     }
-                    self.0.dot_tokens.unwrap_or_default().to_tokens(tokens);
+                    TokensOrDefault(&self.0.dot_tokens).to_tokens(tokens);
                 }
             });
             self.0.output.to_tokens(tokens);
