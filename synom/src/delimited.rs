@@ -168,12 +168,7 @@ impl<T, D> From<Vec<T>> for Delimited<T, D>
 impl<T, D> FromIterator<Element<T, D>> for Delimited<T, D> {
     fn from_iter<I: IntoIterator<Item = Element<T, D>>>(i: I) -> Self {
         let mut ret = Delimited::new();
-        for element in i {
-            match element {
-                Element::Delimited(a, b) => ret.inner.push((a, Some(b))),
-                Element::End(a) => ret.inner.push((a, None)),
-            }
-        }
+        ret.extend(i);
         ret
     }
 }
@@ -183,10 +178,29 @@ impl<T, D> FromIterator<T> for Delimited<T, D>
 {
     fn from_iter<I: IntoIterator<Item = T>>(i: I) -> Self {
         let mut ret = Delimited::new();
-        for element in i {
-            ret.push_default(element);
-        }
+        ret.extend(i);
         ret
+    }
+}
+
+impl<T, D> Extend<Element<T, D>> for Delimited<T, D> {
+    fn extend<I: IntoIterator<Item = Element<T, D>>>(&mut self, i: I) {
+        for element in i {
+            match element {
+                Element::Delimited(a, b) => self.inner.push((a, Some(b))),
+                Element::End(a) => self.inner.push((a, None)),
+            }
+        }
+    }
+}
+
+impl<T, D> Extend<T> for Delimited<T, D>
+    where D: Default,
+{
+    fn extend<I: IntoIterator<Item = T>>(&mut self, i: I) {
+        for element in i {
+            self.push_default(element);
+        }
     }
 }
 
