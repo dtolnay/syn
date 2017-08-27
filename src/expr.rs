@@ -1814,11 +1814,18 @@ pub mod parsing {
         named!(pub parse_within -> Vec<Stmt>, do_parse!(
             many0!(syn!(Semi)) >>
             mut standalone: many0!(terminated!(syn!(Stmt), many0!(syn!(Semi)))) >>
-            last: option!(syn!(Expr)) >>
+            last: option!(do_parse!(
+                attrs: many0!(call!(Attribute::parse_outer)) >>
+                mut e: syn!(Expr) >>
+                ({
+                    e.attrs = attrs;
+                    Stmt::Expr(Box::new(e))
+                })
+            )) >>
             (match last {
                 None => standalone,
                 Some(last) => {
-                    standalone.push(Stmt::Expr(Box::new(last)));
+                    standalone.push(last);
                     standalone
                 }
             })
