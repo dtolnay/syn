@@ -226,7 +226,7 @@ ast_enum_of_structs! {
         /// `foo::bar::*`
         pub Glob(PathGlob {
             pub path: Path,
-            pub colon2_token: tokens::Colon2,
+            pub colon2_token: Option<tokens::Colon2>,
             pub star_token: tokens::Star,
         }),
 
@@ -560,13 +560,32 @@ pub mod parsing {
 
     impl Synom for PathGlob {
         named!(parse -> Self, do_parse!(
-            path: syn!(Path) >>
-            colon2: syn!(Colon2) >>
+            path: option!(do_parse!(
+                path: syn!(Path) >>
+                colon2: syn!(Colon2) >>
+                (path, colon2)
+            )) >>
             star: syn!(Star) >>
-            (PathGlob {
-                path: path,
-                colon2_token: colon2,
-                star_token: star,
+            ({
+                match path {
+                    Some((path, colon2)) => {
+                        PathGlob {
+                            path: path,
+                            colon2_token: Some(colon2),
+                            star_token: star,
+                        }
+                    }
+                    None => {
+                        PathGlob {
+                            path: Path {
+                                leading_colon: None,
+                                segments: Default::default(),
+                            },
+                            colon2_token: None,
+                            star_token: star,
+                        }
+                    }
+                }
             })
         ));
     }
@@ -1490,8 +1509,10 @@ mod printing {
 
     impl ToTokens for PathGlob {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.path.to_tokens(tokens);
-            self.colon2_token.to_tokens(tokens);
+            if self.path.segments.len() > 0 {
+                self.path.to_tokens(tokens);
+                TokensOrDefault(&self.colon2_token).to_tokens(tokens);
+            }
             self.star_token.to_tokens(tokens);
         }
     }
