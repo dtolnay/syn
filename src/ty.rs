@@ -304,11 +304,20 @@ ast_struct! {
     ///
     /// E.g. `bar: usize` as in `fn foo(bar: usize)`
     pub struct BareFnArg {
-        pub name: Option<(Ident, tokens::Colon)>,
+        pub name: Option<(BareFnArgName, tokens::Colon)>,
         pub ty: Ty,
     }
 }
 
+ast_enum! {
+    /// Names of arguments in the `BareFnArg` structure
+    pub enum BareFnArgName {
+        /// Argument with the provided name
+        Named(Ident),
+        /// Argument matched with `_`
+        Wild(tokens::Underscore),
+    }
+}
 
 ast_enum! {
     pub enum FunctionRetTy {
@@ -376,6 +385,8 @@ pub mod parsing {
         call!(ty_poly_trait_ref, allow_plus)
         |
         syn!(TyImplTrait) => { Ty::ImplTrait }
+        |
+        syn!(TyInfer) => { Ty::Infer }
     ));
 
     impl Synom for TySlice {
@@ -477,6 +488,13 @@ pub mod parsing {
         named!(parse -> Self, map!(
             syn!(Bang),
             |b| TyNever { bang_token: b }
+        ));
+    }
+
+    impl Synom for TyInfer {
+        named!(parse -> Self, map!(
+            syn!(Underscore),
+            |u| TyInfer { underscore_token: u }
         ));
     }
 
@@ -774,7 +792,7 @@ pub mod parsing {
     impl Synom for BareFnArg {
         named!(parse -> Self, do_parse!(
             name: option!(do_parse!(
-            name: syn!(Ident) >>
+                name: syn!(BareFnArgName) >>
                 not!(syn!(Colon2)) >>
                 colon: syn!(Colon) >>
                 (name, colon)
@@ -784,6 +802,14 @@ pub mod parsing {
                 name: name,
                 ty: ty,
             })
+        ));
+    }
+
+    impl Synom for BareFnArgName {
+        named!(parse -> Self, alt!(
+            map!(syn!(Ident), BareFnArgName::Named)
+            |
+            map!(syn!(Underscore), BareFnArgName::Wild)
         ));
     }
 
@@ -1078,6 +1104,15 @@ mod printing {
                 colon.to_tokens(tokens);
             }
             self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for BareFnArgName {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                BareFnArgName::Named(ref t) => t.to_tokens(tokens),
+                BareFnArgName::Wild(ref t) => t.to_tokens(tokens),
+            }
         }
     }
 

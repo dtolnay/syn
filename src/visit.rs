@@ -201,7 +201,9 @@ pub fn walk_ty<V: Visitor>(visitor: &mut V, ty: &Ty) {
             }
             for argument in ty.inputs.items() {
                 if let Some((ref name, _)) = argument.name {
-                    visitor.visit_ident(name);
+                    if let BareFnArgName::Named(ref name) = *name {
+                        visitor.visit_ident(name);
+                    }
                 }
                 visitor.visit_ty(&argument.ty)
             }
