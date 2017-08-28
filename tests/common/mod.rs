@@ -67,23 +67,42 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         }
     }
 
+    // TODO: support `macro` definitions
+    if path_string.starts_with("tests/rust/src/test/run-pass/hygiene") {
+        return false;
+    }
+
     match path_string.as_ref() {
         // TODO better support for attributes
+        //
+        //      let a = A { #[a] b: c };
         "tests/rust/src/librustc_data_structures/blake2b.rs" |
         // TODO better support for attributes
+        //
+        //      enum A { B = #[a] 2 }
         "tests/rust/src/test/incremental/hashes/enum_defs.rs" |
         // TODO better support for attributes
+        //
+        //      { #![foo] }
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
-        // not actually a test case
-        "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" |
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
         // TODO weird glob import
+        //
+        //      use ::*;
         "tests/rust/src/test/run-pass/import-glob-crate.rs" |
         // TODO better support for attributes
+        //
+        //      impl Foo { #![a] }
         "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
         // TODO better support for attributes
-        "tests/rust/src/test/run-pass/item-attributes.rs" => false,
+        "tests/rust/src/test/run-pass/item-attributes.rs" |
+        // TODO support lifetimes before traits
+        //
+        //      Box<'foo + Bar>
+        "tests/rust/src/test/run-pass/trait-object-lifetime-first.rs" |
+        // not actually a test case
+        "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
     }
 }
@@ -107,7 +126,7 @@ pub fn clone_rust() {
     let result = Command::new("git")
                     .arg("reset")
                     .arg("--hard")
-                    .arg("ddc5d7bd4b9ea3e8a8ccf82cb443e950be311d61")
+                    .arg("eb8f2586ebd842dec49d3d7f50e49a985ab31493")
                     .current_dir("tests/rust")
                     .status()
                     .unwrap();

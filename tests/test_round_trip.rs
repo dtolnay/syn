@@ -3,8 +3,6 @@
 #[macro_use]
 extern crate quote;
 extern crate syn;
-extern crate synom;
-extern crate syntex_pos;
 extern crate syntex_syntax;
 extern crate walkdir;
 
