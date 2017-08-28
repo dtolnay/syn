@@ -161,6 +161,7 @@ ast_enum_of_structs! {
         ///
         /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
         pub Impl(ItemImpl {
+            pub defaultness: Defaultness,
             pub unsafety: Unsafety,
             pub impl_token: tokens::Impl,
             pub generics: Generics,
@@ -1134,6 +1135,7 @@ pub mod parsing {
 
     named!(item_impl -> Item, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
+        defaultness: syn!(Defaultness) >>
         unsafety: syn!(Unsafety) >>
         impl_: syn!(Impl) >>
         generics: syn!(Generics) >>
@@ -1153,6 +1155,7 @@ pub mod parsing {
         (Item {
             attrs: attrs,
             node: ItemImpl {
+                defaultness: defaultness,
                 unsafety: unsafety,
                 impl_token: impl_,
                 generics: Generics {
@@ -1470,6 +1473,7 @@ mod printing {
                     item.brace_token.surround(tokens, |_tokens| {});
                 }
                 ItemKind::Impl(ref item) => {
+                    item.defaultness.to_tokens(tokens);
                     item.unsafety.to_tokens(tokens);
                     item.impl_token.to_tokens(tokens);
                     item.generics.to_tokens(tokens);
