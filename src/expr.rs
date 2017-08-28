@@ -624,11 +624,20 @@ ast_enum! {
 
 #[cfg(any(feature = "parsing", feature = "printing"))]
 #[cfg(feature = "full")]
-fn arm_requires_comma(arm: &Arm) -> bool {
-    if let ExprKind::Block(ExprBlock { unsafety: Unsafety::Normal, .. }) = arm.body.node {
-        false
-    } else {
-        true
+fn arm_expr_requires_comma(expr: &Expr) -> bool {
+    // see https://github.com/rust-lang/rust/blob/eb8f2586e
+    //                       /src/libsyntax/parse/classify.rs#L17-L37
+    match expr.node {
+        ExprKind::Block(..) |
+        ExprKind::If(..) |
+        ExprKind::IfLet(..) |
+        ExprKind::Match(..) |
+        ExprKind::While(..) |
+        ExprKind::WhileLet(..) |
+        ExprKind::Loop(..) |
+        ExprKind::ForLoop(..) |
+        ExprKind::Catch(..) => false,
+        _ => true,
     }
 }
 
@@ -1448,33 +1457,14 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             match_: syn!(Match) >>
             obj: expr_no_struct >>
-            res: braces!(do_parse!(
-                mut arms: many0!(do_parse!(
-                    arm: syn!(Arm) >>
-                        cond!(arm_requires_comma(&arm), syn!(Comma)) >>
-                        cond!(!arm_requires_comma(&arm), option!(syn!(Comma))) >>
-                        (arm)
-                )) >>
-                last_arm: option!(syn!(Arm)) >>
-                ({
-                    arms.extend(last_arm);
-                    arms
-                })
-            )) >>
+            res: braces!(many0!(syn!(Arm))) >>
             ({
-                let (mut arms, brace) = res;
+                let (arms, brace) = res;
                 ExprMatch {
                     expr: Box::new(obj),
                     match_token: match_,
                     brace_token: brace,
-                    arms: {
-                        for arm in &mut arms {
-                            if arm_requires_comma(arm) {
-                                arm.comma = Some(tokens::Comma::default());
-                            }
-                        }
-                        arms
-                    },
+                    arms: arms,
                 }
             })
         ));
@@ -1513,15 +1503,15 @@ pub mod parsing {
             pats: call!(Delimited::parse_separated_nonempty) >>
             guard: option!(tuple!(syn!(If), syn!(Expr))) >>
             rocket: syn!(Rocket) >>
-            body: alt!(
-                map!(syn!(Block), |blk| {
-                    ExprKind::Block(ExprBlock {
-                        unsafety: Unsafety::Normal,
-                        block: blk,
-                    }).into()
-                })
-                |
-                syn!(Expr)
+            body: do_parse!(
+                expr: alt!(expr_nosemi | syn!(Expr)) >>
+                comma1: cond!(arm_expr_requires_comma(&expr), alt!(
+                    map!(input_end!(), |_| None)
+                    |
+                    map!(syn!(Comma), Some)
+                )) >>
+                comma2: cond!(!arm_expr_requires_comma(&expr), option!(syn!(Comma))) >>
+                (expr, comma1.and_then(|x| x).or(comma2.and_then(|x| x)))
             ) >>
             (Arm {
                 rocket_token: rocket,
@@ -1529,8 +1519,8 @@ pub mod parsing {
                 attrs: attrs,
                 pats: pats,
                 guard: guard.map(|p| Box::new(p.1)),
-                body: Box::new(body),
-                comma: None,
+                body: Box::new(body.0),
+                comma: body.1,
             })
         ));
     }
@@ -2534,7 +2524,7 @@ mod printing {
                     // Ensure that we have a comma after a non-block arm, except
                     // for the last one.
                     let is_last = i == self.arms.len() - 1;
-                    if !is_last && arm_requires_comma(arm) && arm.comma.is_none() {
+                    if !is_last && arm_expr_requires_comma(&arm.body) && arm.comma.is_none() {
                         tokens::Comma::default().to_tokens(tokens);
                     }
                 }
