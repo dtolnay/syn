@@ -280,7 +280,14 @@ pub fn noop_fold_ty<F: ?Sized + Folder>(folder: &mut F, ty: Ty) -> Ty {
                     }),
                     inputs: ty.inputs.lift(|v| {
                         BareFnArg {
-                            name: v.name.map(|n| (folder.fold_ident(n.0), n.1)),
+                            name: v.name.map(|n| {
+                                (match n.0 {
+                                    BareFnArgName::Named(n) => {
+                                        BareFnArgName::Named(folder.fold_ident(n))
+                                    }
+                                    other => other,
+                                }, n.1)
+                            }),
                             ty: folder.fold_ty(v.ty),
                         }
                     }),
