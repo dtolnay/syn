@@ -28,9 +28,20 @@ macro_rules! tokens {
 macro_rules! op {
     (pub struct $name:ident($($contents:tt)*) => $s:expr) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub $($contents)*);
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                let mut t = f.debug_tuple(stringify!($name));
+                for span in &self.0 {
+                    t.field(span);
+                }
+                t.finish()
+            }
+        }
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
