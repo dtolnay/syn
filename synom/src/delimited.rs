@@ -324,6 +324,13 @@ impl<T, D> Element<T, D> {
             Element::End(_) => None,
         }
     }
+
+    pub fn into_tuple(self) -> (T, Option<D>) {
+        match self {
+            Element::Delimited(t, d) => (t, Some(d)),
+            Element::End(t) => (t, None),
+        }
+    }
 }
 
 #[cfg(feature = "parsing")]

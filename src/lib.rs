@@ -175,6 +175,40 @@ fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
     }
 }
 
+/// Parse a `quote::Tokens` of Rust code into the chosen syn data type.
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate syn;
+/// #
+/// # #[macro_use]
+/// # extern crate error_chain;
+/// # #[macro_use]
+/// # extern crate quote;
+///
+/// use syn::Expr;
+/// #
+/// # error_chain! {
+/// #     foreign_links {
+/// #         Syn(syn::ParseError);
+/// #     }
+/// # }
+///
+/// fn run() -> Result<()> {
+///     let code = quote!(assert_eq!(u8::max_value(), 255));
+///     let expr = syn::parse_tokens::<Expr>(code)?;
+///     println!("{:#?}", expr);
+///     Ok(())
+/// }
+/// #
+/// # fn main() { run().unwrap() }
+/// ```
+#[cfg(feature = "parsing")]
+pub fn parse_tokens<T: Synom>(tokens: quote::Tokens) -> Result<T, ParseError> {
+    _parse(tokens.into())
+}
+
 /// Parse a string of Rust code into the chosen syn data type.
 ///
 /// # Examples
