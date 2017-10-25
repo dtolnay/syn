@@ -13,7 +13,7 @@ publish = false # this branch contains breaking changes
 [features]
 default = ["parsing", "printing", "clone-impls"]
 full = []
-parsing = ["synom/parsing"]
+parsing = ["quote", "synom/parsing"]
 printing = ["quote", "synom/printing"]
 visit = []
 fold = []
