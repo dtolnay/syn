@@ -31,7 +31,7 @@ pub use expr::{Expr, ExprKind, ExprBox, ExprInPlace, ExprArray, ExprCall,
                ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
                ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
-               ExprGroup};
+               ExprGroup, ExprYield};
 
 #[cfg(feature = "full")]
 pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
@@ -83,11 +83,11 @@ mod op;
 pub use op::{BinOp, UnOp};
 
 mod ty;
-pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
-             Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
-             PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety, TySlice, TyArray,
-             TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath, TyTraitObject,
-             TyImplTrait, TyParen, TyInfer, TyGroup};
+pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName, BareFnTy,
+             FunctionRetTy, MutTy, Mutability, ParenthesizedParameterData, Path,
+             PathParameters, PathSegment, PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety,
+             TySlice, TyArray, TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath,
+             TyTraitObject, TyImplTrait, TyParen, TyInfer, TyGroup};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 
