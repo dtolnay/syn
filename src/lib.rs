@@ -96,9 +96,15 @@ pub use synom::tokens;
 pub use synom::delimited;
 
 #[cfg(feature = "visit")]
+#[path = "gen/visit.rs"]
 pub mod visit;
 
+#[cfg(feature = "visit")]
+#[path = "gen/visit_mut.rs"]
+pub mod visit_mut;
+
 #[cfg(feature = "fold")]
+#[path = "gen/fold.rs"]
 pub mod fold;
 
 ////////////////////////////////////////////////////////////////////////////////

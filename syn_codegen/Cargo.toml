@@ -1,0 +1,12 @@
+[package]
+name = "syn_codegen"
+version = "0.1.0"
+authors = ["Nika Layzell <nika@thelayzells.com>"]
+
+publish = false # this is an internal crate which should never be published
+
+[dependencies]
+syn = { path = "..", features = ["full", "extra-traits"] }
+synom = { path = "../synom" }
+quote = { git = 'https://github.com/dtolnay/quote' }
+inflections = "1.1"
