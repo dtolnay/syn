@@ -32,6 +32,18 @@ impl<T, U> FoldHelper for Delimited<T, U> {
     }
 }
 
+
+#[cfg(feature = "full")]
+macro_rules! full {
+    ($e:expr) => { $e }
+}
+
+#[cfg(not(feature = "full"))]
+macro_rules! full {
+    ($e:expr) => { unreachable!() }
+}
+
+
 /// AST->AST fold.
 ///
 /// Each method of the Folder trait is a hook to be potentially overridden. Each
@@ -448,7 +460,7 @@ pub fn walk_arm<V: Folder + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         if_token: _i . if_token,
-        guard: _i . guard,
+        guard: (_i . guard).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         rocket_token: _i . rocket_token,
         body: Box::new(_visitor.fold_expr(* _i . body)),
         comma: _i . comma,
@@ -503,9 +515,9 @@ pub fn walk_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
 
 pub fn walk_bare_fn_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnTy) -> BareFnTy {
     BareFnTy {
-        lifetimes: _i . lifetimes,
+        lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
-        abi: _i . abi,
+        abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         fn_token: _i . fn_token,
         paren_token: _i . paren_token,
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_bare_fn_arg(it) }),
@@ -834,7 +846,7 @@ pub fn walk_expr_box<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBox) -> ExprB
 pub fn walk_expr_break<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBreak) -> ExprBreak {
     ExprBreak {
         label: _i . label,
-        expr: _i . expr,
+        expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         break_token: _i . break_token,
     }
 }
@@ -911,7 +923,7 @@ pub fn walk_expr_if<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf 
     ExprIf {
         cond: Box::new(_visitor.fold_expr(* _i . cond)),
         if_true: _visitor.fold_block(_i . if_true),
-        if_false: _i . if_false,
+        if_false: (_i . if_false).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         if_token: _i . if_token,
         else_token: _i . else_token,
     }
@@ -922,7 +934,7 @@ pub fn walk_expr_if_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> 
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         if_true: _visitor.fold_block(_i . if_true),
-        if_false: _i . if_false,
+        if_false: (_i . if_false).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         if_token: _i . if_token,
         let_token: _i . let_token,
         eq_token: _i . eq_token,
@@ -951,17 +963,17 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
     match _i {
         Box(_binding_0, ) => {
             Box (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_box(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_box(_binding_0)),
             )
         }
         InPlace(_binding_0, ) => {
             InPlace (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_in_place(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_in_place(_binding_0)),
             )
         }
         Array(_binding_0, ) => {
             Array (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_array(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_array(_binding_0)),
             )
         }
         Call(_binding_0, ) => {
@@ -971,12 +983,12 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         MethodCall(_binding_0, ) => {
             MethodCall (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_method_call(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_method_call(_binding_0)),
             )
         }
         Tup(_binding_0, ) => {
             Tup (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_tup(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_tup(_binding_0)),
             )
         }
         Binary(_binding_0, ) => {
@@ -1006,67 +1018,67 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         If(_binding_0, ) => {
             If (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_if(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_if(_binding_0)),
             )
         }
         IfLet(_binding_0, ) => {
             IfLet (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_if_let(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_if_let(_binding_0)),
             )
         }
         While(_binding_0, ) => {
             While (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_while(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_while(_binding_0)),
             )
         }
         WhileLet(_binding_0, ) => {
             WhileLet (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_while_let(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_while_let(_binding_0)),
             )
         }
         ForLoop(_binding_0, ) => {
             ForLoop (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_for_loop(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_for_loop(_binding_0)),
             )
         }
         Loop(_binding_0, ) => {
             Loop (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_loop(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_loop(_binding_0)),
             )
         }
         Match(_binding_0, ) => {
             Match (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_match(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_match(_binding_0)),
             )
         }
         Closure(_binding_0, ) => {
             Closure (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_closure(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_closure(_binding_0)),
             )
         }
         Block(_binding_0, ) => {
             Block (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_block(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_block(_binding_0)),
             )
         }
         Assign(_binding_0, ) => {
             Assign (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_assign(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_assign(_binding_0)),
             )
         }
         AssignOp(_binding_0, ) => {
             AssignOp (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_assign_op(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_assign_op(_binding_0)),
             )
         }
         Field(_binding_0, ) => {
             Field (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_field(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_field(_binding_0)),
             )
         }
         TupField(_binding_0, ) => {
             TupField (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_tup_field(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_tup_field(_binding_0)),
             )
         }
         Index(_binding_0, ) => {
@@ -1076,7 +1088,7 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         Range(_binding_0, ) => {
             Range (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_range(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_range(_binding_0)),
             )
         }
         Path(_binding_0, ) => {
@@ -1086,22 +1098,22 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         AddrOf(_binding_0, ) => {
             AddrOf (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_addr_of(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_addr_of(_binding_0)),
             )
         }
         Break(_binding_0, ) => {
             Break (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_break(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_break(_binding_0)),
             )
         }
         Continue(_binding_0, ) => {
             Continue (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_continue(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_continue(_binding_0)),
             )
         }
         Ret(_binding_0, ) => {
             Ret (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_ret(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_ret(_binding_0)),
             )
         }
         Mac(_binding_0, ) => {
@@ -1111,12 +1123,12 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         Struct(_binding_0, ) => {
             Struct (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_struct(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_struct(_binding_0)),
             )
         }
         Repeat(_binding_0, ) => {
             Repeat (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_repeat(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_repeat(_binding_0)),
             )
         }
         Paren(_binding_0, ) => {
@@ -1131,17 +1143,17 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         Try(_binding_0, ) => {
             Try (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_try(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_try(_binding_0)),
             )
         }
         Catch(_binding_0, ) => {
             Catch (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_catch(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_catch(_binding_0)),
             )
         }
         Yield(_binding_0, ) => {
             Yield (
-                { #[cfg(feature = "full")] { _visitor.fold_expr_yield(_binding_0) } #[cfg(not(feature = "full"))] unreachable!() },
+                full!(_visitor.fold_expr_yield(_binding_0)),
             )
         }
     }
@@ -1188,15 +1200,15 @@ pub fn walk_expr_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprParen) -> E
 
 pub fn walk_expr_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprPath) -> ExprPath {
     ExprPath {
-        qself: _i . qself,
+        qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_range<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRange) -> ExprRange {
     ExprRange {
-        from: _i . from,
-        to: _i . to,
+        from: (_i . from).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
+        to: (_i . to).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         limits: _visitor.fold_range_limits(_i . limits),
     }
 }
@@ -1212,7 +1224,7 @@ pub fn walk_expr_repeat<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRepeat) ->
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_ret<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRet) -> ExprRet {
     ExprRet {
-        expr: _i . expr,
+        expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         return_token: _i . return_token,
     }
 }
@@ -1221,7 +1233,7 @@ pub fn walk_expr_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprStruct) ->
     ExprStruct {
         path: _visitor.fold_path(_i . path),
         fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field_value(it) }),
-        rest: _i . rest,
+        rest: (_i . rest).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         dot2_token: _i . dot2_token,
         brace_token: _i . brace_token,
     }
@@ -1291,7 +1303,7 @@ pub fn walk_expr_while_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhileLe
 pub fn walk_expr_yield<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprYield) -> ExprYield {
     ExprYield {
         yield_token: _i . yield_token,
-        expr: _i . expr,
+        expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
     }
 }
 
@@ -1589,7 +1601,7 @@ pub fn walk_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn 
         vis: _visitor.fold_visibility(_i . vis),
         constness: _visitor.fold_constness(_i . constness),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
-        abi: _i . abi,
+        abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
         ident: _i . ident,
         block: Box::new(_visitor.fold_block(* _i . block)),
@@ -1794,8 +1806,8 @@ pub fn walk_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
         eq_token: _i . eq_token,
         semi_token: _i . semi_token,
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
-        ty: _i . ty,
-        init: _i . init,
+        ty: (_i . ty).map(|it| { Box::new(_visitor.fold_ty(* it)) }),
+        init: (_i . init).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
     }
 }
@@ -1863,7 +1875,7 @@ pub fn walk_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> M
     MethodSig {
         constness: _visitor.fold_constness(_i . constness),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
-        abi: _i . abi,
+        abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         ident: _i . ident,
         decl: _visitor.fold_fn_decl(_i . decl),
     }
@@ -1989,7 +2001,7 @@ pub fn walk_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> Pat
     PatIdent {
         mode: _visitor.fold_binding_mode(_i . mode),
         ident: _i . ident,
-        subpat: _i . subpat,
+        subpat: (_i . subpat).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
         at_token: _i . at_token,
     }
 }
@@ -2002,7 +2014,7 @@ pub fn walk_pat_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: PatLit) -> PatLit 
 # [ cfg ( feature = "full" ) ]
 pub fn walk_pat_path<V: Folder + ?Sized>(_visitor: &mut V, _i: PatPath) -> PatPath {
     PatPath {
-        qself: _i . qself,
+        qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
@@ -2026,7 +2038,7 @@ pub fn walk_pat_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef 
 pub fn walk_pat_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: PatSlice) -> PatSlice {
     PatSlice {
         front: FoldHelper::lift(_i . front, |it| { _visitor.fold_pat(it) }),
-        middle: _i . middle,
+        middle: (_i . middle).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
         back: FoldHelper::lift(_i . back, |it| { _visitor.fold_pat(it) }),
         dot2_token: _i . dot2_token,
         comma_token: _i . comma_token,
@@ -2132,7 +2144,7 @@ pub fn walk_path_simple<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSimple) ->
 
 pub fn walk_poly_trait_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PolyTraitRef) -> PolyTraitRef {
     PolyTraitRef {
-        bound_lifetimes: _i . bound_lifetimes,
+        bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         trait_ref: _visitor.fold_path(_i . trait_ref),
     }
 }
@@ -2254,7 +2266,7 @@ pub fn walk_trait_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemK
 pub fn walk_trait_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMethod) -> TraitItemMethod {
     TraitItemMethod {
         sig: _visitor.fold_method_sig(_i . sig),
-        default: _i . default,
+        default: (_i . default).map(|it| { _visitor.fold_block(it) }),
         semi_token: _i . semi_token,
     }
 }
@@ -2394,7 +2406,7 @@ pub fn walk_ty_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParam) -> TyPar
         colon_token: _i . colon_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
         eq_token: _i . eq_token,
-        default: _i . default,
+        default: (_i . default).map(|it| { _visitor.fold_ty(it) }),
     }
 }
 
@@ -2424,7 +2436,7 @@ pub fn walk_ty_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParen) -> TyPar
 
 pub fn walk_ty_path<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPath) -> TyPath {
     TyPath {
-        qself: _i . qself,
+        qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
@@ -2512,7 +2524,7 @@ pub fn walk_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Varian
         ident: _i . ident,
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         data: _visitor.fold_variant_data(_i . data),
-        discriminant: _i . discriminant,
+        discriminant: (_i . discriminant).map(|it| { _visitor.fold_expr(it) }),
         eq_token: _i . eq_token,
     }
 }
@@ -2613,7 +2625,7 @@ pub fn walk_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> 
 
 pub fn walk_where_bound_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereBoundPredicate) -> WhereBoundPredicate {
     WhereBoundPredicate {
-        bound_lifetimes: _i . bound_lifetimes,
+        bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         bounded_ty: _visitor.fold_ty(_i . bounded_ty),
         colon_token: _i . colon_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),

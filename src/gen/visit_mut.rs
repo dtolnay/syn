@@ -8,6 +8,18 @@
 
 use super::*;
 
+
+#[cfg(feature = "full")]
+macro_rules! full {
+    ($e:expr) => { $e }
+}
+
+#[cfg(not(feature = "full"))]
+macro_rules! full {
+    ($e:expr) => { unreachable!() }
+}
+
+
 /// Each method of the VisitorMut trait is a hook to be potentially
 /// overridden.  Each method's default implementation recursively visits
 /// the substructure of the input via the corresponding `walk` method;
@@ -408,7 +420,7 @@ pub fn walk_arm<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Arm) {
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute(&mut it) };
     for mut el in (_i . pats).iter_mut() { let mut it = el.item_mut(); _visitor.visit_pat(&mut it) };
     // Skipped field _i . if_token;
-    // Skipped field _i . guard;
+    if let Some(ref mut it) = _i . guard { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . rocket_token;
     _visitor.visit_expr(&mut _i . body);
     // Skipped field _i . comma;
@@ -451,9 +463,9 @@ pub fn walk_bare_fn_arg_name<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
 }
 
 pub fn walk_bare_fn_ty<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut BareFnTy) {
-    // Skipped field _i . lifetimes;
+    if let Some(ref mut it) = _i . lifetimes { _visitor.visit_bound_lifetimes(&mut * it) };
     _visitor.visit_unsafety(&mut _i . unsafety);
-    // Skipped field _i . abi;
+    if let Some(ref mut it) = _i . abi { _visitor.visit_abi(&mut * it) };
     // Skipped field _i . fn_token;
     // Skipped field _i . paren_token;
     for mut el in (_i . inputs).iter_mut() { let mut it = el.item_mut(); _visitor.visit_bare_fn_arg(&mut it) };
@@ -684,7 +696,7 @@ pub fn walk_expr_box<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBox)
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_break<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBreak) {
     // Skipped field _i . label;
-    // Skipped field _i . expr;
+    if let Some(ref mut it) = _i . expr { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . break_token;
 }
 
@@ -743,7 +755,7 @@ pub fn walk_expr_group<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprGr
 pub fn walk_expr_if<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIf) {
     _visitor.visit_expr(&mut _i . cond);
     _visitor.visit_block(&mut _i . if_true);
-    // Skipped field _i . if_false;
+    if let Some(ref mut it) = _i . if_false { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . if_token;
     // Skipped field _i . else_token;
 }
@@ -752,7 +764,7 @@ pub fn walk_expr_if_let<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprI
     _visitor.visit_pat(&mut _i . pat);
     _visitor.visit_expr(&mut _i . expr);
     _visitor.visit_block(&mut _i . if_true);
-    // Skipped field _i . if_false;
+    if let Some(ref mut it) = _i . if_false { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . if_token;
     // Skipped field _i . let_token;
     // Skipped field _i . eq_token;
@@ -775,22 +787,22 @@ pub fn walk_expr_kind<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprKin
     use ::ExprKind::*;
     match *_i {
         Box(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_box(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_box(&mut * _binding_0));
         }
         InPlace(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_in_place(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_in_place(&mut * _binding_0));
         }
         Array(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_array(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_array(&mut * _binding_0));
         }
         Call(ref mut _binding_0, ) => {
             _visitor.visit_expr_call(&mut * _binding_0);
         }
         MethodCall(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_method_call(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_method_call(&mut * _binding_0));
         }
         Tup(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_tup(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_tup(&mut * _binding_0));
         }
         Binary(ref mut _binding_0, ) => {
             _visitor.visit_expr_binary(&mut * _binding_0);
@@ -808,73 +820,73 @@ pub fn walk_expr_kind<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprKin
             _visitor.visit_expr_type(&mut * _binding_0);
         }
         If(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_if(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_if(&mut * _binding_0));
         }
         IfLet(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_if_let(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_if_let(&mut * _binding_0));
         }
         While(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_while(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_while(&mut * _binding_0));
         }
         WhileLet(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_while_let(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_while_let(&mut * _binding_0));
         }
         ForLoop(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_for_loop(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_for_loop(&mut * _binding_0));
         }
         Loop(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_loop(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_loop(&mut * _binding_0));
         }
         Match(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_match(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_match(&mut * _binding_0));
         }
         Closure(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_closure(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_closure(&mut * _binding_0));
         }
         Block(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_block(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_block(&mut * _binding_0));
         }
         Assign(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_assign(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_assign(&mut * _binding_0));
         }
         AssignOp(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_assign_op(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_assign_op(&mut * _binding_0));
         }
         Field(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_field(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_field(&mut * _binding_0));
         }
         TupField(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_tup_field(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_tup_field(&mut * _binding_0));
         }
         Index(ref mut _binding_0, ) => {
             _visitor.visit_expr_index(&mut * _binding_0);
         }
         Range(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_range(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_range(&mut * _binding_0));
         }
         Path(ref mut _binding_0, ) => {
             _visitor.visit_expr_path(&mut * _binding_0);
         }
         AddrOf(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_addr_of(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_addr_of(&mut * _binding_0));
         }
         Break(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_break(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_break(&mut * _binding_0));
         }
         Continue(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_continue(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_continue(&mut * _binding_0));
         }
         Ret(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_ret(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_ret(&mut * _binding_0));
         }
         Mac(ref mut _binding_0, ) => {
             _visitor.visit_mac(&mut * _binding_0);
         }
         Struct(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_struct(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_struct(&mut * _binding_0));
         }
         Repeat(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_repeat(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_repeat(&mut * _binding_0));
         }
         Paren(ref mut _binding_0, ) => {
             _visitor.visit_expr_paren(&mut * _binding_0);
@@ -883,13 +895,13 @@ pub fn walk_expr_kind<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprKin
             _visitor.visit_expr_group(&mut * _binding_0);
         }
         Try(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_try(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_try(&mut * _binding_0));
         }
         Catch(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_catch(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_catch(&mut * _binding_0));
         }
         Yield(ref mut _binding_0, ) => {
-            { #[cfg(feature = "full")] { _visitor.visit_expr_yield(&mut * _binding_0) } #[cfg(not(feature = "full"))] unreachable!() };
+            full!(_visitor.visit_expr_yield(&mut * _binding_0));
         }
     }
 }
@@ -926,13 +938,13 @@ pub fn walk_expr_paren<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprPa
 }
 
 pub fn walk_expr_path<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprPath) {
-    // Skipped field _i . qself;
+    if let Some(ref mut it) = _i . qself { _visitor.visit_qself(&mut * it) };
     _visitor.visit_path(&mut _i . path);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_range<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprRange) {
-    // Skipped field _i . from;
-    // Skipped field _i . to;
+    if let Some(ref mut it) = _i . from { _visitor.visit_expr(&mut * it) };
+    if let Some(ref mut it) = _i . to { _visitor.visit_expr(&mut * it) };
     _visitor.visit_range_limits(&mut _i . limits);
 }
 # [ cfg ( feature = "full" ) ]
@@ -944,14 +956,14 @@ pub fn walk_expr_repeat<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprR
 }
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_ret<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprRet) {
-    // Skipped field _i . expr;
+    if let Some(ref mut it) = _i . expr { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . return_token;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_struct<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprStruct) {
     _visitor.visit_path(&mut _i . path);
     for mut el in (_i . fields).iter_mut() { let mut it = el.item_mut(); _visitor.visit_field_value(&mut it) };
-    // Skipped field _i . rest;
+    if let Some(ref mut it) = _i . rest { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . dot2_token;
     // Skipped field _i . brace_token;
 }
@@ -1005,7 +1017,7 @@ pub fn walk_expr_while_let<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
 # [ cfg ( feature = "full" ) ]
 pub fn walk_expr_yield<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprYield) {
     // Skipped field _i . yield_token;
-    // Skipped field _i . expr;
+    if let Some(ref mut it) = _i . expr { _visitor.visit_expr(&mut * it) };
 }
 
 pub fn walk_field<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Field) {
@@ -1237,7 +1249,7 @@ pub fn walk_item_fn<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemFn) {
     _visitor.visit_visibility(&mut _i . vis);
     _visitor.visit_constness(&mut _i . constness);
     _visitor.visit_unsafety(&mut _i . unsafety);
-    // Skipped field _i . abi;
+    if let Some(ref mut it) = _i . abi { _visitor.visit_abi(&mut * it) };
     _visitor.visit_fn_decl(&mut _i . decl);
     // Skipped field _i . ident;
     _visitor.visit_block(&mut _i . block);
@@ -1390,8 +1402,8 @@ pub fn walk_local<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
     // Skipped field _i . eq_token;
     // Skipped field _i . semi_token;
     _visitor.visit_pat(&mut _i . pat);
-    // Skipped field _i . ty;
-    // Skipped field _i . init;
+    if let Some(ref mut it) = _i . ty { _visitor.visit_ty(&mut * it) };
+    if let Some(ref mut it) = _i . init { _visitor.visit_expr(&mut * it) };
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute(&mut it) };
 }
 
@@ -1443,7 +1455,7 @@ pub fn walk_meta_name_value<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut M
 pub fn walk_method_sig<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MethodSig) {
     _visitor.visit_constness(&mut _i . constness);
     _visitor.visit_unsafety(&mut _i . unsafety);
-    // Skipped field _i . abi;
+    if let Some(ref mut it) = _i . abi { _visitor.visit_abi(&mut * it) };
     // Skipped field _i . ident;
     _visitor.visit_fn_decl(&mut _i . decl);
 }
@@ -1531,7 +1543,7 @@ pub fn walk_pat_box<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatBox) {
 pub fn walk_pat_ident<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatIdent) {
     _visitor.visit_binding_mode(&mut _i . mode);
     // Skipped field _i . ident;
-    // Skipped field _i . subpat;
+    if let Some(ref mut it) = _i . subpat { _visitor.visit_pat(&mut * it) };
     // Skipped field _i . at_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -1540,7 +1552,7 @@ pub fn walk_pat_lit<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatLit) {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn walk_pat_path<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatPath) {
-    // Skipped field _i . qself;
+    if let Some(ref mut it) = _i . qself { _visitor.visit_qself(&mut * it) };
     _visitor.visit_path(&mut _i . path);
 }
 # [ cfg ( feature = "full" ) ]
@@ -1558,7 +1570,7 @@ pub fn walk_pat_ref<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatRef) {
 # [ cfg ( feature = "full" ) ]
 pub fn walk_pat_slice<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatSlice) {
     for mut el in (_i . front).iter_mut() { let mut it = el.item_mut(); _visitor.visit_pat(&mut it) };
-    // Skipped field _i . middle;
+    if let Some(ref mut it) = _i . middle { _visitor.visit_pat(&mut * it) };
     for mut el in (_i . back).iter_mut() { let mut it = el.item_mut(); _visitor.visit_pat(&mut it) };
     // Skipped field _i . dot2_token;
     // Skipped field _i . comma_token;
@@ -1638,7 +1650,7 @@ pub fn walk_path_simple<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PathS
 }
 
 pub fn walk_poly_trait_ref<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PolyTraitRef) {
-    // Skipped field _i . bound_lifetimes;
+    if let Some(ref mut it) = _i . bound_lifetimes { _visitor.visit_bound_lifetimes(&mut * it) };
     _visitor.visit_path(&mut _i . trait_ref);
 }
 
@@ -1728,7 +1740,7 @@ pub fn walk_trait_item_kind<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut T
 # [ cfg ( feature = "full" ) ]
 pub fn walk_trait_item_method<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemMethod) {
     _visitor.visit_method_sig(&mut _i . sig);
-    // Skipped field _i . default;
+    if let Some(ref mut it) = _i . default { _visitor.visit_block(&mut * it) };
     // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -1824,7 +1836,7 @@ pub fn walk_ty_param<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TyParam)
     // Skipped field _i . colon_token;
     for mut el in (_i . bounds).iter_mut() { let mut it = el.item_mut(); _visitor.visit_ty_param_bound(&mut it) };
     // Skipped field _i . eq_token;
-    // Skipped field _i . default;
+    if let Some(ref mut it) = _i . default { _visitor.visit_ty(&mut * it) };
 }
 
 pub fn walk_ty_param_bound<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TyParamBound) {
@@ -1846,7 +1858,7 @@ pub fn walk_ty_paren<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TyParen)
 }
 
 pub fn walk_ty_path<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TyPath) {
-    // Skipped field _i . qself;
+    if let Some(ref mut it) = _i . qself { _visitor.visit_qself(&mut * it) };
     _visitor.visit_path(&mut _i . path);
 }
 
@@ -1912,7 +1924,7 @@ pub fn walk_variant<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Variant) 
     // Skipped field _i . ident;
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute(&mut it) };
     _visitor.visit_variant_data(&mut _i . data);
-    // Skipped field _i . discriminant;
+    if let Some(ref mut it) = _i . discriminant { _visitor.visit_expr(&mut * it) };
     // Skipped field _i . eq_token;
 }
 
@@ -1985,7 +1997,7 @@ pub fn walk_visibility<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Visibi
 }
 
 pub fn walk_where_bound_predicate<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut WhereBoundPredicate) {
-    // Skipped field _i . bound_lifetimes;
+    if let Some(ref mut it) = _i . bound_lifetimes { _visitor.visit_bound_lifetimes(&mut * it) };
     _visitor.visit_ty(&mut _i . bounded_ty);
     // Skipped field _i . colon_token;
     for mut el in (_i . bounds).iter_mut() { let mut it = el.item_mut(); _visitor.visit_ty_param_bound(&mut it) };
