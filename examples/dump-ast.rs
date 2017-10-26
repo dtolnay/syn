@@ -1,4 +1,3 @@
-#![cfg(all(feature = "full", feature = "extra-traits"))]
 extern crate syn;
 
 use std::env;
