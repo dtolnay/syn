@@ -6,7 +6,7 @@ extern crate proc_macro;
 extern crate proc_macro2;
 extern crate unicode_xid;
 
-#[cfg(feature = "printing")]
+#[cfg(any(feature = "printing", feature = "parsing"))]
 extern crate quote;
 
 #[cfg_attr(feature = "parsing", macro_use)]
@@ -31,7 +31,7 @@ pub use expr::{Expr, ExprKind, ExprBox, ExprInPlace, ExprArray, ExprCall,
                ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
                ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
-               ExprGroup};
+               ExprGroup, ExprYield};
 
 #[cfg(feature = "full")]
 pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
@@ -83,11 +83,11 @@ mod op;
 pub use op::{BinOp, UnOp};
 
 mod ty;
-pub use ty::{Abi, AngleBracketedParameterData, BareFnArg, BareFnTy, FunctionRetTy, MutTy,
-             Mutability, ParenthesizedParameterData, Path, PathParameters, PathSegment,
-             PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety, TySlice, TyArray,
-             TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath, TyTraitObject,
-             TyImplTrait, TyParen, TyInfer, TyGroup};
+pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName, BareFnTy,
+             FunctionRetTy, MutTy, Mutability, ParenthesizedParameterData, Path,
+             PathParameters, PathSegment, PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety,
+             TySlice, TyArray, TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath,
+             TyTraitObject, TyImplTrait, TyParen, TyInfer, TyGroup};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 
@@ -95,11 +95,17 @@ pub use synom::span::Span;
 pub use synom::tokens;
 pub use synom::delimited;
 
-#[cfg(feature = "visit")]
-pub mod visit;
+mod gen {
+    #[cfg(feature = "visit")]
+    pub mod visit;
 
-#[cfg(feature = "fold")]
-pub mod fold;
+    #[cfg(feature = "visit_mut")]
+    pub mod visit_mut;
+
+    #[cfg(feature = "fold")]
+    pub mod fold;
+}
+pub use gen::*;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -173,6 +179,40 @@ fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
         Some(s) => Err(ParseError::new(format!("failed to parse {}: {}", s, err))),
         None => Err(err),
     }
+}
+
+/// Parse a `quote::Tokens` of Rust code into the chosen syn data type.
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate syn;
+/// #
+/// # #[macro_use]
+/// # extern crate error_chain;
+/// # #[macro_use]
+/// # extern crate quote;
+///
+/// use syn::Expr;
+/// #
+/// # error_chain! {
+/// #     foreign_links {
+/// #         Syn(syn::ParseError);
+/// #     }
+/// # }
+///
+/// fn run() -> Result<()> {
+///     let code = quote!(assert_eq!(u8::max_value(), 255));
+///     let expr = syn::parse_tokens::<Expr>(code)?;
+///     println!("{:#?}", expr);
+///     Ok(())
+/// }
+/// #
+/// # fn main() { run().unwrap() }
+/// ```
+#[cfg(feature = "parsing")]
+pub fn parse_tokens<T: Synom>(tokens: quote::Tokens) -> Result<T, ParseError> {
+    _parse(tokens.into())
 }
 
 /// Parse a string of Rust code into the chosen syn data type.

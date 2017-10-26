@@ -15,22 +15,22 @@ ast_struct! {
 }
 
 #[cfg(feature = "printing")]
-ast_struct! {
-    /// Returned by `Generics::split_for_impl`.
-    pub struct ImplGenerics<'a>(&'a Generics);
-}
+#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+/// Returned by `Generics::split_for_impl`.
+pub struct ImplGenerics<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
-ast_struct! {
-    /// Returned by `Generics::split_for_impl`.
-    pub struct TyGenerics<'a>(&'a Generics);
-}
+#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+/// Returned by `Generics::split_for_impl`.
+pub struct TyGenerics<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
-ast_struct! {
-    /// Returned by `TyGenerics::as_turbofish`.
-    pub struct Turbofish<'a>(&'a Generics);
-}
+#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+/// Returned by `TyGenerics::as_turbofish`.
+pub struct Turbofish<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
 impl Generics {
