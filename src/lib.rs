@@ -95,17 +95,17 @@ pub use synom::span::Span;
 pub use synom::tokens;
 pub use synom::delimited;
 
-#[cfg(feature = "visit")]
-#[path = "gen/visit.rs"]
-pub mod visit;
+mod gen {
+    #[cfg(feature = "visit")]
+    pub mod visit;
 
-#[cfg(feature = "visit")]
-#[path = "gen/visit_mut.rs"]
-pub mod visit_mut;
+    #[cfg(feature = "visit_mut")]
+    pub mod visit_mut;
 
-#[cfg(feature = "fold")]
-#[path = "gen/fold.rs"]
-pub mod fold;
+    #[cfg(feature = "fold")]
+    pub mod fold;
+}
+pub use gen::*;
 
 ////////////////////////////////////////////////////////////////////////////////
 

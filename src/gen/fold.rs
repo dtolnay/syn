@@ -7,7 +7,7 @@
 // Unreachable code is generated sometimes without the full feature.
 #![allow(unreachable_code)]
 
-use super::*;
+use *;
 use synom::delimited::Delimited;
 
 trait FoldHelper {
@@ -58,357 +58,357 @@ macro_rules! full {
 /// new default implementation gets introduced.)
 pub trait Folder {
 
-fn fold_abi(&mut self, i: Abi) -> Abi { walk_abi(self, i) }
+fn fold_abi(&mut self, i: Abi) -> Abi { fold_abi(self, i) }
 
-fn fold_abi_kind(&mut self, i: AbiKind) -> AbiKind { walk_abi_kind(self, i) }
+fn fold_abi_kind(&mut self, i: AbiKind) -> AbiKind { fold_abi_kind(self, i) }
 
-fn fold_angle_bracketed_parameter_data(&mut self, i: AngleBracketedParameterData) -> AngleBracketedParameterData { walk_angle_bracketed_parameter_data(self, i) }
+fn fold_angle_bracketed_parameter_data(&mut self, i: AngleBracketedParameterData) -> AngleBracketedParameterData { fold_angle_bracketed_parameter_data(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_arg_captured(&mut self, i: ArgCaptured) -> ArgCaptured { walk_arg_captured(self, i) }
+fn fold_arg_captured(&mut self, i: ArgCaptured) -> ArgCaptured { fold_arg_captured(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_arg_self(&mut self, i: ArgSelf) -> ArgSelf { walk_arg_self(self, i) }
+fn fold_arg_self(&mut self, i: ArgSelf) -> ArgSelf { fold_arg_self(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_arg_self_ref(&mut self, i: ArgSelfRef) -> ArgSelfRef { walk_arg_self_ref(self, i) }
+fn fold_arg_self_ref(&mut self, i: ArgSelfRef) -> ArgSelfRef { fold_arg_self_ref(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_arm(&mut self, i: Arm) -> Arm { walk_arm(self, i) }
+fn fold_arm(&mut self, i: Arm) -> Arm { fold_arm(self, i) }
 
-fn fold_attr_style(&mut self, i: AttrStyle) -> AttrStyle { walk_attr_style(self, i) }
+fn fold_attr_style(&mut self, i: AttrStyle) -> AttrStyle { fold_attr_style(self, i) }
 
-fn fold_attribute(&mut self, i: Attribute) -> Attribute { walk_attribute(self, i) }
+fn fold_attribute(&mut self, i: Attribute) -> Attribute { fold_attribute(self, i) }
 
-fn fold_bare_fn_arg(&mut self, i: BareFnArg) -> BareFnArg { walk_bare_fn_arg(self, i) }
+fn fold_bare_fn_arg(&mut self, i: BareFnArg) -> BareFnArg { fold_bare_fn_arg(self, i) }
 
-fn fold_bare_fn_arg_name(&mut self, i: BareFnArgName) -> BareFnArgName { walk_bare_fn_arg_name(self, i) }
+fn fold_bare_fn_arg_name(&mut self, i: BareFnArgName) -> BareFnArgName { fold_bare_fn_arg_name(self, i) }
 
-fn fold_bare_fn_ty(&mut self, i: BareFnTy) -> BareFnTy { walk_bare_fn_ty(self, i) }
+fn fold_bare_fn_ty(&mut self, i: BareFnTy) -> BareFnTy { fold_bare_fn_ty(self, i) }
 
-fn fold_bin_op(&mut self, i: BinOp) -> BinOp { walk_bin_op(self, i) }
+fn fold_bin_op(&mut self, i: BinOp) -> BinOp { fold_bin_op(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_binding_mode(&mut self, i: BindingMode) -> BindingMode { walk_binding_mode(self, i) }
+fn fold_binding_mode(&mut self, i: BindingMode) -> BindingMode { fold_binding_mode(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_block(&mut self, i: Block) -> Block { walk_block(self, i) }
+fn fold_block(&mut self, i: Block) -> Block { fold_block(self, i) }
 
-fn fold_body(&mut self, i: Body) -> Body { walk_body(self, i) }
+fn fold_body(&mut self, i: Body) -> Body { fold_body(self, i) }
 
-fn fold_body_enum(&mut self, i: BodyEnum) -> BodyEnum { walk_body_enum(self, i) }
+fn fold_body_enum(&mut self, i: BodyEnum) -> BodyEnum { fold_body_enum(self, i) }
 
-fn fold_body_struct(&mut self, i: BodyStruct) -> BodyStruct { walk_body_struct(self, i) }
+fn fold_body_struct(&mut self, i: BodyStruct) -> BodyStruct { fold_body_struct(self, i) }
 
-fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { walk_bound_lifetimes(self, i) }
+fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { fold_bound_lifetimes(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_capture_by(&mut self, i: CaptureBy) -> CaptureBy { walk_capture_by(self, i) }
+fn fold_capture_by(&mut self, i: CaptureBy) -> CaptureBy { fold_capture_by(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_constness(&mut self, i: Constness) -> Constness { walk_constness(self, i) }
+fn fold_constness(&mut self, i: Constness) -> Constness { fold_constness(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_defaultness(&mut self, i: Defaultness) -> Defaultness { walk_defaultness(self, i) }
+fn fold_defaultness(&mut self, i: Defaultness) -> Defaultness { fold_defaultness(self, i) }
 
-fn fold_derive_input(&mut self, i: DeriveInput) -> DeriveInput { walk_derive_input(self, i) }
+fn fold_derive_input(&mut self, i: DeriveInput) -> DeriveInput { fold_derive_input(self, i) }
 
-fn fold_expr(&mut self, i: Expr) -> Expr { walk_expr(self, i) }
+fn fold_expr(&mut self, i: Expr) -> Expr { fold_expr(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_addr_of(&mut self, i: ExprAddrOf) -> ExprAddrOf { walk_expr_addr_of(self, i) }
+fn fold_expr_addr_of(&mut self, i: ExprAddrOf) -> ExprAddrOf { fold_expr_addr_of(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_array(&mut self, i: ExprArray) -> ExprArray { walk_expr_array(self, i) }
+fn fold_expr_array(&mut self, i: ExprArray) -> ExprArray { fold_expr_array(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_assign(&mut self, i: ExprAssign) -> ExprAssign { walk_expr_assign(self, i) }
+fn fold_expr_assign(&mut self, i: ExprAssign) -> ExprAssign { fold_expr_assign(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_assign_op(&mut self, i: ExprAssignOp) -> ExprAssignOp { walk_expr_assign_op(self, i) }
+fn fold_expr_assign_op(&mut self, i: ExprAssignOp) -> ExprAssignOp { fold_expr_assign_op(self, i) }
 
-fn fold_expr_binary(&mut self, i: ExprBinary) -> ExprBinary { walk_expr_binary(self, i) }
+fn fold_expr_binary(&mut self, i: ExprBinary) -> ExprBinary { fold_expr_binary(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_block(&mut self, i: ExprBlock) -> ExprBlock { walk_expr_block(self, i) }
+fn fold_expr_block(&mut self, i: ExprBlock) -> ExprBlock { fold_expr_block(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_box(&mut self, i: ExprBox) -> ExprBox { walk_expr_box(self, i) }
+fn fold_expr_box(&mut self, i: ExprBox) -> ExprBox { fold_expr_box(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_break(&mut self, i: ExprBreak) -> ExprBreak { walk_expr_break(self, i) }
+fn fold_expr_break(&mut self, i: ExprBreak) -> ExprBreak { fold_expr_break(self, i) }
 
-fn fold_expr_call(&mut self, i: ExprCall) -> ExprCall { walk_expr_call(self, i) }
+fn fold_expr_call(&mut self, i: ExprCall) -> ExprCall { fold_expr_call(self, i) }
 
-fn fold_expr_cast(&mut self, i: ExprCast) -> ExprCast { walk_expr_cast(self, i) }
+fn fold_expr_cast(&mut self, i: ExprCast) -> ExprCast { fold_expr_cast(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_catch(&mut self, i: ExprCatch) -> ExprCatch { walk_expr_catch(self, i) }
+fn fold_expr_catch(&mut self, i: ExprCatch) -> ExprCatch { fold_expr_catch(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_closure(&mut self, i: ExprClosure) -> ExprClosure { walk_expr_closure(self, i) }
+fn fold_expr_closure(&mut self, i: ExprClosure) -> ExprClosure { fold_expr_closure(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_continue(&mut self, i: ExprContinue) -> ExprContinue { walk_expr_continue(self, i) }
+fn fold_expr_continue(&mut self, i: ExprContinue) -> ExprContinue { fold_expr_continue(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_field(&mut self, i: ExprField) -> ExprField { walk_expr_field(self, i) }
+fn fold_expr_field(&mut self, i: ExprField) -> ExprField { fold_expr_field(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_for_loop(&mut self, i: ExprForLoop) -> ExprForLoop { walk_expr_for_loop(self, i) }
+fn fold_expr_for_loop(&mut self, i: ExprForLoop) -> ExprForLoop { fold_expr_for_loop(self, i) }
 
-fn fold_expr_group(&mut self, i: ExprGroup) -> ExprGroup { walk_expr_group(self, i) }
+fn fold_expr_group(&mut self, i: ExprGroup) -> ExprGroup { fold_expr_group(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_if(&mut self, i: ExprIf) -> ExprIf { walk_expr_if(self, i) }
+fn fold_expr_if(&mut self, i: ExprIf) -> ExprIf { fold_expr_if(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_if_let(&mut self, i: ExprIfLet) -> ExprIfLet { walk_expr_if_let(self, i) }
+fn fold_expr_if_let(&mut self, i: ExprIfLet) -> ExprIfLet { fold_expr_if_let(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_in_place(&mut self, i: ExprInPlace) -> ExprInPlace { walk_expr_in_place(self, i) }
+fn fold_expr_in_place(&mut self, i: ExprInPlace) -> ExprInPlace { fold_expr_in_place(self, i) }
 
-fn fold_expr_index(&mut self, i: ExprIndex) -> ExprIndex { walk_expr_index(self, i) }
+fn fold_expr_index(&mut self, i: ExprIndex) -> ExprIndex { fold_expr_index(self, i) }
 
-fn fold_expr_kind(&mut self, i: ExprKind) -> ExprKind { walk_expr_kind(self, i) }
+fn fold_expr_kind(&mut self, i: ExprKind) -> ExprKind { fold_expr_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_loop(&mut self, i: ExprLoop) -> ExprLoop { walk_expr_loop(self, i) }
+fn fold_expr_loop(&mut self, i: ExprLoop) -> ExprLoop { fold_expr_loop(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_match(&mut self, i: ExprMatch) -> ExprMatch { walk_expr_match(self, i) }
+fn fold_expr_match(&mut self, i: ExprMatch) -> ExprMatch { fold_expr_match(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_method_call(&mut self, i: ExprMethodCall) -> ExprMethodCall { walk_expr_method_call(self, i) }
+fn fold_expr_method_call(&mut self, i: ExprMethodCall) -> ExprMethodCall { fold_expr_method_call(self, i) }
 
-fn fold_expr_paren(&mut self, i: ExprParen) -> ExprParen { walk_expr_paren(self, i) }
+fn fold_expr_paren(&mut self, i: ExprParen) -> ExprParen { fold_expr_paren(self, i) }
 
-fn fold_expr_path(&mut self, i: ExprPath) -> ExprPath { walk_expr_path(self, i) }
+fn fold_expr_path(&mut self, i: ExprPath) -> ExprPath { fold_expr_path(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_range(&mut self, i: ExprRange) -> ExprRange { walk_expr_range(self, i) }
+fn fold_expr_range(&mut self, i: ExprRange) -> ExprRange { fold_expr_range(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_repeat(&mut self, i: ExprRepeat) -> ExprRepeat { walk_expr_repeat(self, i) }
+fn fold_expr_repeat(&mut self, i: ExprRepeat) -> ExprRepeat { fold_expr_repeat(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_ret(&mut self, i: ExprRet) -> ExprRet { walk_expr_ret(self, i) }
+fn fold_expr_ret(&mut self, i: ExprRet) -> ExprRet { fold_expr_ret(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct { walk_expr_struct(self, i) }
+fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct { fold_expr_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_try(&mut self, i: ExprTry) -> ExprTry { walk_expr_try(self, i) }
+fn fold_expr_try(&mut self, i: ExprTry) -> ExprTry { fold_expr_try(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_tup(&mut self, i: ExprTup) -> ExprTup { walk_expr_tup(self, i) }
+fn fold_expr_tup(&mut self, i: ExprTup) -> ExprTup { fold_expr_tup(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_tup_field(&mut self, i: ExprTupField) -> ExprTupField { walk_expr_tup_field(self, i) }
+fn fold_expr_tup_field(&mut self, i: ExprTupField) -> ExprTupField { fold_expr_tup_field(self, i) }
 
-fn fold_expr_type(&mut self, i: ExprType) -> ExprType { walk_expr_type(self, i) }
+fn fold_expr_type(&mut self, i: ExprType) -> ExprType { fold_expr_type(self, i) }
 
-fn fold_expr_unary(&mut self, i: ExprUnary) -> ExprUnary { walk_expr_unary(self, i) }
+fn fold_expr_unary(&mut self, i: ExprUnary) -> ExprUnary { fold_expr_unary(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_while(&mut self, i: ExprWhile) -> ExprWhile { walk_expr_while(self, i) }
+fn fold_expr_while(&mut self, i: ExprWhile) -> ExprWhile { fold_expr_while(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_while_let(&mut self, i: ExprWhileLet) -> ExprWhileLet { walk_expr_while_let(self, i) }
+fn fold_expr_while_let(&mut self, i: ExprWhileLet) -> ExprWhileLet { fold_expr_while_let(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_yield(&mut self, i: ExprYield) -> ExprYield { walk_expr_yield(self, i) }
+fn fold_expr_yield(&mut self, i: ExprYield) -> ExprYield { fold_expr_yield(self, i) }
 
-fn fold_field(&mut self, i: Field) -> Field { walk_field(self, i) }
+fn fold_field(&mut self, i: Field) -> Field { fold_field(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_field_pat(&mut self, i: FieldPat) -> FieldPat { walk_field_pat(self, i) }
+fn fold_field_pat(&mut self, i: FieldPat) -> FieldPat { fold_field_pat(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_field_value(&mut self, i: FieldValue) -> FieldValue { walk_field_value(self, i) }
+fn fold_field_value(&mut self, i: FieldValue) -> FieldValue { fold_field_value(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_file(&mut self, i: File) -> File { walk_file(self, i) }
+fn fold_file(&mut self, i: File) -> File { fold_file(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_fn_arg(&mut self, i: FnArg) -> FnArg { walk_fn_arg(self, i) }
+fn fold_fn_arg(&mut self, i: FnArg) -> FnArg { fold_fn_arg(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_fn_decl(&mut self, i: FnDecl) -> FnDecl { walk_fn_decl(self, i) }
+fn fold_fn_decl(&mut self, i: FnDecl) -> FnDecl { fold_fn_decl(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_foreign_item(&mut self, i: ForeignItem) -> ForeignItem { walk_foreign_item(self, i) }
+fn fold_foreign_item(&mut self, i: ForeignItem) -> ForeignItem { fold_foreign_item(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_foreign_item_fn(&mut self, i: ForeignItemFn) -> ForeignItemFn { walk_foreign_item_fn(self, i) }
+fn fold_foreign_item_fn(&mut self, i: ForeignItemFn) -> ForeignItemFn { fold_foreign_item_fn(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_foreign_item_kind(&mut self, i: ForeignItemKind) -> ForeignItemKind { walk_foreign_item_kind(self, i) }
+fn fold_foreign_item_kind(&mut self, i: ForeignItemKind) -> ForeignItemKind { fold_foreign_item_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStatic { walk_foreign_item_static(self, i) }
+fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStatic { fold_foreign_item_static(self, i) }
 
-fn fold_function_ret_ty(&mut self, i: FunctionRetTy) -> FunctionRetTy { walk_function_ret_ty(self, i) }
+fn fold_function_ret_ty(&mut self, i: FunctionRetTy) -> FunctionRetTy { fold_function_ret_ty(self, i) }
 
-fn fold_generics(&mut self, i: Generics) -> Generics { walk_generics(self, i) }
+fn fold_generics(&mut self, i: Generics) -> Generics { fold_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem { walk_impl_item(self, i) }
+fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem { fold_impl_item(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_item_const(&mut self, i: ImplItemConst) -> ImplItemConst { walk_impl_item_const(self, i) }
+fn fold_impl_item_const(&mut self, i: ImplItemConst) -> ImplItemConst { fold_impl_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_item_kind(&mut self, i: ImplItemKind) -> ImplItemKind { walk_impl_item_kind(self, i) }
+fn fold_impl_item_kind(&mut self, i: ImplItemKind) -> ImplItemKind { fold_impl_item_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_item_method(&mut self, i: ImplItemMethod) -> ImplItemMethod { walk_impl_item_method(self, i) }
+fn fold_impl_item_method(&mut self, i: ImplItemMethod) -> ImplItemMethod { fold_impl_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType { walk_impl_item_type(self, i) }
+fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType { fold_impl_item_type(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_polarity(&mut self, i: ImplPolarity) -> ImplPolarity { walk_impl_polarity(self, i) }
+fn fold_impl_polarity(&mut self, i: ImplPolarity) -> ImplPolarity { fold_impl_polarity(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_in_place_kind(&mut self, i: InPlaceKind) -> InPlaceKind { walk_in_place_kind(self, i) }
+fn fold_in_place_kind(&mut self, i: InPlaceKind) -> InPlaceKind { fold_in_place_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item(&mut self, i: Item) -> Item { walk_item(self, i) }
+fn fold_item(&mut self, i: Item) -> Item { fold_item(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_const(&mut self, i: ItemConst) -> ItemConst { walk_item_const(self, i) }
+fn fold_item_const(&mut self, i: ItemConst) -> ItemConst { fold_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_default_impl(&mut self, i: ItemDefaultImpl) -> ItemDefaultImpl { walk_item_default_impl(self, i) }
+fn fold_item_default_impl(&mut self, i: ItemDefaultImpl) -> ItemDefaultImpl { fold_item_default_impl(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_enum(&mut self, i: ItemEnum) -> ItemEnum { walk_item_enum(self, i) }
+fn fold_item_enum(&mut self, i: ItemEnum) -> ItemEnum { fold_item_enum(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_extern_crate(&mut self, i: ItemExternCrate) -> ItemExternCrate { walk_item_extern_crate(self, i) }
+fn fold_item_extern_crate(&mut self, i: ItemExternCrate) -> ItemExternCrate { fold_item_extern_crate(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_fn(&mut self, i: ItemFn) -> ItemFn { walk_item_fn(self, i) }
+fn fold_item_fn(&mut self, i: ItemFn) -> ItemFn { fold_item_fn(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_foreign_mod(&mut self, i: ItemForeignMod) -> ItemForeignMod { walk_item_foreign_mod(self, i) }
+fn fold_item_foreign_mod(&mut self, i: ItemForeignMod) -> ItemForeignMod { fold_item_foreign_mod(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_impl(&mut self, i: ItemImpl) -> ItemImpl { walk_item_impl(self, i) }
+fn fold_item_impl(&mut self, i: ItemImpl) -> ItemImpl { fold_item_impl(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_kind(&mut self, i: ItemKind) -> ItemKind { walk_item_kind(self, i) }
+fn fold_item_kind(&mut self, i: ItemKind) -> ItemKind { fold_item_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_mod(&mut self, i: ItemMod) -> ItemMod { walk_item_mod(self, i) }
+fn fold_item_mod(&mut self, i: ItemMod) -> ItemMod { fold_item_mod(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_static(&mut self, i: ItemStatic) -> ItemStatic { walk_item_static(self, i) }
+fn fold_item_static(&mut self, i: ItemStatic) -> ItemStatic { fold_item_static(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_struct(&mut self, i: ItemStruct) -> ItemStruct { walk_item_struct(self, i) }
+fn fold_item_struct(&mut self, i: ItemStruct) -> ItemStruct { fold_item_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_trait(&mut self, i: ItemTrait) -> ItemTrait { walk_item_trait(self, i) }
+fn fold_item_trait(&mut self, i: ItemTrait) -> ItemTrait { fold_item_trait(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_ty(&mut self, i: ItemTy) -> ItemTy { walk_item_ty(self, i) }
+fn fold_item_ty(&mut self, i: ItemTy) -> ItemTy { fold_item_ty(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_union(&mut self, i: ItemUnion) -> ItemUnion { walk_item_union(self, i) }
+fn fold_item_union(&mut self, i: ItemUnion) -> ItemUnion { fold_item_union(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_use(&mut self, i: ItemUse) -> ItemUse { walk_item_use(self, i) }
+fn fold_item_use(&mut self, i: ItemUse) -> ItemUse { fold_item_use(self, i) }
 
-fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef { walk_lifetime_def(self, i) }
+fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef { fold_lifetime_def(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_local(&mut self, i: Local) -> Local { walk_local(self, i) }
+fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
 
-fn fold_mac(&mut self, i: Mac) -> Mac { walk_mac(self, i) }
+fn fold_mac(&mut self, i: Mac) -> Mac { fold_mac(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_mac_stmt_style(&mut self, i: MacStmtStyle) -> MacStmtStyle { walk_mac_stmt_style(self, i) }
+fn fold_mac_stmt_style(&mut self, i: MacStmtStyle) -> MacStmtStyle { fold_mac_stmt_style(self, i) }
 
-fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { walk_meta_item(self, i) }
+fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { fold_meta_item(self, i) }
 
-fn fold_meta_item_list(&mut self, i: MetaItemList) -> MetaItemList { walk_meta_item_list(self, i) }
+fn fold_meta_item_list(&mut self, i: MetaItemList) -> MetaItemList { fold_meta_item_list(self, i) }
 
-fn fold_meta_name_value(&mut self, i: MetaNameValue) -> MetaNameValue { walk_meta_name_value(self, i) }
+fn fold_meta_name_value(&mut self, i: MetaNameValue) -> MetaNameValue { fold_meta_name_value(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig { walk_method_sig(self, i) }
+fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig { fold_method_sig(self, i) }
 
-fn fold_mut_ty(&mut self, i: MutTy) -> MutTy { walk_mut_ty(self, i) }
+fn fold_mut_ty(&mut self, i: MutTy) -> MutTy { fold_mut_ty(self, i) }
 
-fn fold_mutability(&mut self, i: Mutability) -> Mutability { walk_mutability(self, i) }
+fn fold_mutability(&mut self, i: Mutability) -> Mutability { fold_mutability(self, i) }
 
-fn fold_nested_meta_item(&mut self, i: NestedMetaItem) -> NestedMetaItem { walk_nested_meta_item(self, i) }
+fn fold_nested_meta_item(&mut self, i: NestedMetaItem) -> NestedMetaItem { fold_nested_meta_item(self, i) }
 
-fn fold_parenthesized_parameter_data(&mut self, i: ParenthesizedParameterData) -> ParenthesizedParameterData { walk_parenthesized_parameter_data(self, i) }
+fn fold_parenthesized_parameter_data(&mut self, i: ParenthesizedParameterData) -> ParenthesizedParameterData { fold_parenthesized_parameter_data(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat(&mut self, i: Pat) -> Pat { walk_pat(self, i) }
+fn fold_pat(&mut self, i: Pat) -> Pat { fold_pat(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_box(&mut self, i: PatBox) -> PatBox { walk_pat_box(self, i) }
+fn fold_pat_box(&mut self, i: PatBox) -> PatBox { fold_pat_box(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_ident(&mut self, i: PatIdent) -> PatIdent { walk_pat_ident(self, i) }
+fn fold_pat_ident(&mut self, i: PatIdent) -> PatIdent { fold_pat_ident(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_lit(&mut self, i: PatLit) -> PatLit { walk_pat_lit(self, i) }
+fn fold_pat_lit(&mut self, i: PatLit) -> PatLit { fold_pat_lit(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_path(&mut self, i: PatPath) -> PatPath { walk_pat_path(self, i) }
+fn fold_pat_path(&mut self, i: PatPath) -> PatPath { fold_pat_path(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_range(&mut self, i: PatRange) -> PatRange { walk_pat_range(self, i) }
+fn fold_pat_range(&mut self, i: PatRange) -> PatRange { fold_pat_range(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_ref(&mut self, i: PatRef) -> PatRef { walk_pat_ref(self, i) }
+fn fold_pat_ref(&mut self, i: PatRef) -> PatRef { fold_pat_ref(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_slice(&mut self, i: PatSlice) -> PatSlice { walk_pat_slice(self, i) }
+fn fold_pat_slice(&mut self, i: PatSlice) -> PatSlice { fold_pat_slice(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_struct(&mut self, i: PatStruct) -> PatStruct { walk_pat_struct(self, i) }
+fn fold_pat_struct(&mut self, i: PatStruct) -> PatStruct { fold_pat_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_tuple(&mut self, i: PatTuple) -> PatTuple { walk_pat_tuple(self, i) }
+fn fold_pat_tuple(&mut self, i: PatTuple) -> PatTuple { fold_pat_tuple(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_tuple_struct(&mut self, i: PatTupleStruct) -> PatTupleStruct { walk_pat_tuple_struct(self, i) }
+fn fold_pat_tuple_struct(&mut self, i: PatTupleStruct) -> PatTupleStruct { fold_pat_tuple_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_pat_wild(&mut self, i: PatWild) -> PatWild { walk_pat_wild(self, i) }
+fn fold_pat_wild(&mut self, i: PatWild) -> PatWild { fold_pat_wild(self, i) }
 
-fn fold_path(&mut self, i: Path) -> Path { walk_path(self, i) }
+fn fold_path(&mut self, i: Path) -> Path { fold_path(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_path_glob(&mut self, i: PathGlob) -> PathGlob { walk_path_glob(self, i) }
+fn fold_path_glob(&mut self, i: PathGlob) -> PathGlob { fold_path_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_path_list(&mut self, i: PathList) -> PathList { walk_path_list(self, i) }
+fn fold_path_list(&mut self, i: PathList) -> PathList { fold_path_list(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_path_list_item(&mut self, i: PathListItem) -> PathListItem { walk_path_list_item(self, i) }
+fn fold_path_list_item(&mut self, i: PathListItem) -> PathListItem { fold_path_list_item(self, i) }
 
-fn fold_path_parameters(&mut self, i: PathParameters) -> PathParameters { walk_path_parameters(self, i) }
+fn fold_path_parameters(&mut self, i: PathParameters) -> PathParameters { fold_path_parameters(self, i) }
 
-fn fold_path_segment(&mut self, i: PathSegment) -> PathSegment { walk_path_segment(self, i) }
+fn fold_path_segment(&mut self, i: PathSegment) -> PathSegment { fold_path_segment(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_path_simple(&mut self, i: PathSimple) -> PathSimple { walk_path_simple(self, i) }
+fn fold_path_simple(&mut self, i: PathSimple) -> PathSimple { fold_path_simple(self, i) }
 
-fn fold_poly_trait_ref(&mut self, i: PolyTraitRef) -> PolyTraitRef { walk_poly_trait_ref(self, i) }
+fn fold_poly_trait_ref(&mut self, i: PolyTraitRef) -> PolyTraitRef { fold_poly_trait_ref(self, i) }
 
-fn fold_qself(&mut self, i: QSelf) -> QSelf { walk_qself(self, i) }
+fn fold_qself(&mut self, i: QSelf) -> QSelf { fold_qself(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_range_limits(&mut self, i: RangeLimits) -> RangeLimits { walk_range_limits(self, i) }
+fn fold_range_limits(&mut self, i: RangeLimits) -> RangeLimits { fold_range_limits(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_stmt(&mut self, i: Stmt) -> Stmt { walk_stmt(self, i) }
+fn fold_stmt(&mut self, i: Stmt) -> Stmt { fold_stmt(self, i) }
 
-fn fold_trait_bound_modifier(&mut self, i: TraitBoundModifier) -> TraitBoundModifier { walk_trait_bound_modifier(self, i) }
+fn fold_trait_bound_modifier(&mut self, i: TraitBoundModifier) -> TraitBoundModifier { fold_trait_bound_modifier(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item(&mut self, i: TraitItem) -> TraitItem { walk_trait_item(self, i) }
+fn fold_trait_item(&mut self, i: TraitItem) -> TraitItem { fold_trait_item(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item_const(&mut self, i: TraitItemConst) -> TraitItemConst { walk_trait_item_const(self, i) }
+fn fold_trait_item_const(&mut self, i: TraitItemConst) -> TraitItemConst { fold_trait_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item_kind(&mut self, i: TraitItemKind) -> TraitItemKind { walk_trait_item_kind(self, i) }
+fn fold_trait_item_kind(&mut self, i: TraitItemKind) -> TraitItemKind { fold_trait_item_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item_method(&mut self, i: TraitItemMethod) -> TraitItemMethod { walk_trait_item_method(self, i) }
+fn fold_trait_item_method(&mut self, i: TraitItemMethod) -> TraitItemMethod { fold_trait_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item_type(&mut self, i: TraitItemType) -> TraitItemType { walk_trait_item_type(self, i) }
+fn fold_trait_item_type(&mut self, i: TraitItemType) -> TraitItemType { fold_trait_item_type(self, i) }
 
-fn fold_ty(&mut self, i: Ty) -> Ty { walk_ty(self, i) }
+fn fold_ty(&mut self, i: Ty) -> Ty { fold_ty(self, i) }
 
-fn fold_ty_array(&mut self, i: TyArray) -> TyArray { walk_ty_array(self, i) }
+fn fold_ty_array(&mut self, i: TyArray) -> TyArray { fold_ty_array(self, i) }
 
-fn fold_ty_bare_fn(&mut self, i: TyBareFn) -> TyBareFn { walk_ty_bare_fn(self, i) }
+fn fold_ty_bare_fn(&mut self, i: TyBareFn) -> TyBareFn { fold_ty_bare_fn(self, i) }
 
-fn fold_ty_group(&mut self, i: TyGroup) -> TyGroup { walk_ty_group(self, i) }
+fn fold_ty_group(&mut self, i: TyGroup) -> TyGroup { fold_ty_group(self, i) }
 
-fn fold_ty_impl_trait(&mut self, i: TyImplTrait) -> TyImplTrait { walk_ty_impl_trait(self, i) }
+fn fold_ty_impl_trait(&mut self, i: TyImplTrait) -> TyImplTrait { fold_ty_impl_trait(self, i) }
 
-fn fold_ty_infer(&mut self, i: TyInfer) -> TyInfer { walk_ty_infer(self, i) }
+fn fold_ty_infer(&mut self, i: TyInfer) -> TyInfer { fold_ty_infer(self, i) }
 
-fn fold_ty_never(&mut self, i: TyNever) -> TyNever { walk_ty_never(self, i) }
+fn fold_ty_never(&mut self, i: TyNever) -> TyNever { fold_ty_never(self, i) }
 
-fn fold_ty_param(&mut self, i: TyParam) -> TyParam { walk_ty_param(self, i) }
+fn fold_ty_param(&mut self, i: TyParam) -> TyParam { fold_ty_param(self, i) }
 
-fn fold_ty_param_bound(&mut self, i: TyParamBound) -> TyParamBound { walk_ty_param_bound(self, i) }
+fn fold_ty_param_bound(&mut self, i: TyParamBound) -> TyParamBound { fold_ty_param_bound(self, i) }
 
-fn fold_ty_paren(&mut self, i: TyParen) -> TyParen { walk_ty_paren(self, i) }
+fn fold_ty_paren(&mut self, i: TyParen) -> TyParen { fold_ty_paren(self, i) }
 
-fn fold_ty_path(&mut self, i: TyPath) -> TyPath { walk_ty_path(self, i) }
+fn fold_ty_path(&mut self, i: TyPath) -> TyPath { fold_ty_path(self, i) }
 
-fn fold_ty_ptr(&mut self, i: TyPtr) -> TyPtr { walk_ty_ptr(self, i) }
+fn fold_ty_ptr(&mut self, i: TyPtr) -> TyPtr { fold_ty_ptr(self, i) }
 
-fn fold_ty_rptr(&mut self, i: TyRptr) -> TyRptr { walk_ty_rptr(self, i) }
+fn fold_ty_rptr(&mut self, i: TyRptr) -> TyRptr { fold_ty_rptr(self, i) }
 
-fn fold_ty_slice(&mut self, i: TySlice) -> TySlice { walk_ty_slice(self, i) }
+fn fold_ty_slice(&mut self, i: TySlice) -> TySlice { fold_ty_slice(self, i) }
 
-fn fold_ty_trait_object(&mut self, i: TyTraitObject) -> TyTraitObject { walk_ty_trait_object(self, i) }
+fn fold_ty_trait_object(&mut self, i: TyTraitObject) -> TyTraitObject { fold_ty_trait_object(self, i) }
 
-fn fold_ty_tup(&mut self, i: TyTup) -> TyTup { walk_ty_tup(self, i) }
+fn fold_ty_tup(&mut self, i: TyTup) -> TyTup { fold_ty_tup(self, i) }
 
-fn fold_type_binding(&mut self, i: TypeBinding) -> TypeBinding { walk_type_binding(self, i) }
+fn fold_type_binding(&mut self, i: TypeBinding) -> TypeBinding { fold_type_binding(self, i) }
 
-fn fold_un_op(&mut self, i: UnOp) -> UnOp { walk_un_op(self, i) }
+fn fold_un_op(&mut self, i: UnOp) -> UnOp { fold_un_op(self, i) }
 
-fn fold_unsafety(&mut self, i: Unsafety) -> Unsafety { walk_unsafety(self, i) }
+fn fold_unsafety(&mut self, i: Unsafety) -> Unsafety { fold_unsafety(self, i) }
 
-fn fold_variant(&mut self, i: Variant) -> Variant { walk_variant(self, i) }
+fn fold_variant(&mut self, i: Variant) -> Variant { fold_variant(self, i) }
 
-fn fold_variant_data(&mut self, i: VariantData) -> VariantData { walk_variant_data(self, i) }
+fn fold_variant_data(&mut self, i: VariantData) -> VariantData { fold_variant_data(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_view_path(&mut self, i: ViewPath) -> ViewPath { walk_view_path(self, i) }
+fn fold_view_path(&mut self, i: ViewPath) -> ViewPath { fold_view_path(self, i) }
 
-fn fold_vis_crate(&mut self, i: VisCrate) -> VisCrate { walk_vis_crate(self, i) }
+fn fold_vis_crate(&mut self, i: VisCrate) -> VisCrate { fold_vis_crate(self, i) }
 
-fn fold_vis_inherited(&mut self, i: VisInherited) -> VisInherited { walk_vis_inherited(self, i) }
+fn fold_vis_inherited(&mut self, i: VisInherited) -> VisInherited { fold_vis_inherited(self, i) }
 
-fn fold_vis_public(&mut self, i: VisPublic) -> VisPublic { walk_vis_public(self, i) }
+fn fold_vis_public(&mut self, i: VisPublic) -> VisPublic { fold_vis_public(self, i) }
 
-fn fold_vis_restricted(&mut self, i: VisRestricted) -> VisRestricted { walk_vis_restricted(self, i) }
+fn fold_vis_restricted(&mut self, i: VisRestricted) -> VisRestricted { fold_vis_restricted(self, i) }
 
-fn fold_visibility(&mut self, i: Visibility) -> Visibility { walk_visibility(self, i) }
+fn fold_visibility(&mut self, i: Visibility) -> Visibility { fold_visibility(self, i) }
 
-fn fold_where_bound_predicate(&mut self, i: WhereBoundPredicate) -> WhereBoundPredicate { walk_where_bound_predicate(self, i) }
+fn fold_where_bound_predicate(&mut self, i: WhereBoundPredicate) -> WhereBoundPredicate { fold_where_bound_predicate(self, i) }
 
-fn fold_where_clause(&mut self, i: WhereClause) -> WhereClause { walk_where_clause(self, i) }
+fn fold_where_clause(&mut self, i: WhereClause) -> WhereClause { fold_where_clause(self, i) }
 
-fn fold_where_eq_predicate(&mut self, i: WhereEqPredicate) -> WhereEqPredicate { walk_where_eq_predicate(self, i) }
+fn fold_where_eq_predicate(&mut self, i: WhereEqPredicate) -> WhereEqPredicate { fold_where_eq_predicate(self, i) }
 
-fn fold_where_predicate(&mut self, i: WherePredicate) -> WherePredicate { walk_where_predicate(self, i) }
+fn fold_where_predicate(&mut self, i: WherePredicate) -> WherePredicate { fold_where_predicate(self, i) }
 
-fn fold_where_region_predicate(&mut self, i: WhereRegionPredicate) -> WhereRegionPredicate { walk_where_region_predicate(self, i) }
+fn fold_where_region_predicate(&mut self, i: WhereRegionPredicate) -> WhereRegionPredicate { fold_where_region_predicate(self, i) }
 
 }
 
 
-pub fn walk_abi<V: Folder + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
+pub fn fold_abi<V: Folder + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
     Abi {
         extern_token: _i . extern_token,
         kind: _visitor.fold_abi_kind(_i . kind),
     }
 }
 
-pub fn walk_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKind {
+pub fn fold_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKind {
     use ::AbiKind::*;
     match _i {
         Named(_binding_0, ) => {
@@ -420,7 +420,7 @@ pub fn walk_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKi
     }
 }
 
-pub fn walk_angle_bracketed_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: AngleBracketedParameterData) -> AngleBracketedParameterData {
+pub fn fold_angle_bracketed_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: AngleBracketedParameterData) -> AngleBracketedParameterData {
     AngleBracketedParameterData {
         turbofish: _i . turbofish,
         lt_token: _i . lt_token,
@@ -431,7 +431,7 @@ pub fn walk_angle_bracketed_parameter_data<V: Folder + ?Sized>(_visitor: &mut V,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_arg_captured<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgCaptured) -> ArgCaptured {
+pub fn fold_arg_captured<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgCaptured) -> ArgCaptured {
     ArgCaptured {
         pat: _visitor.fold_pat(_i . pat),
         colon_token: _i . colon_token,
@@ -439,14 +439,14 @@ pub fn walk_arg_captured<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgCaptured) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_arg_self<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelf) -> ArgSelf {
+pub fn fold_arg_self<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelf) -> ArgSelf {
     ArgSelf {
         mutbl: _visitor.fold_mutability(_i . mutbl),
         self_token: _i . self_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_arg_self_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -> ArgSelfRef {
+pub fn fold_arg_self_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -> ArgSelfRef {
     ArgSelfRef {
         and_token: _i . and_token,
         self_token: _i . self_token,
@@ -455,7 +455,7 @@ pub fn walk_arg_self_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_arm<V: Folder + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
+pub fn fold_arm<V: Folder + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
     Arm {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
@@ -467,7 +467,7 @@ pub fn walk_arm<V: Folder + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
     }
 }
 
-pub fn walk_attr_style<V: Folder + ?Sized>(_visitor: &mut V, _i: AttrStyle) -> AttrStyle {
+pub fn fold_attr_style<V: Folder + ?Sized>(_visitor: &mut V, _i: AttrStyle) -> AttrStyle {
     use ::AttrStyle::*;
     match _i {
         Outer => { Outer }
@@ -479,7 +479,7 @@ pub fn walk_attr_style<V: Folder + ?Sized>(_visitor: &mut V, _i: AttrStyle) -> A
     }
 }
 
-pub fn walk_attribute<V: Folder + ?Sized>(_visitor: &mut V, _i: Attribute) -> Attribute {
+pub fn fold_attribute<V: Folder + ?Sized>(_visitor: &mut V, _i: Attribute) -> Attribute {
     Attribute {
         style: _visitor.fold_attr_style(_i . style),
         pound_token: _i . pound_token,
@@ -490,14 +490,14 @@ pub fn walk_attribute<V: Folder + ?Sized>(_visitor: &mut V, _i: Attribute) -> At
     }
 }
 
-pub fn walk_bare_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg) -> BareFnArg {
+pub fn fold_bare_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg) -> BareFnArg {
     BareFnArg {
         name: _i . name,
         ty: _visitor.fold_ty(_i . ty),
     }
 }
 
-pub fn walk_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArgName) -> BareFnArgName {
+pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArgName) -> BareFnArgName {
     use ::BareFnArgName::*;
     match _i {
         Named(_binding_0, ) => {
@@ -513,7 +513,7 @@ pub fn walk_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
     }
 }
 
-pub fn walk_bare_fn_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnTy) -> BareFnTy {
+pub fn fold_bare_fn_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnTy) -> BareFnTy {
     BareFnTy {
         lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
@@ -526,7 +526,7 @@ pub fn walk_bare_fn_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnTy) -> Ba
     }
 }
 
-pub fn walk_bin_op<V: Folder + ?Sized>(_visitor: &mut V, _i: BinOp) -> BinOp {
+pub fn fold_bin_op<V: Folder + ?Sized>(_visitor: &mut V, _i: BinOp) -> BinOp {
     use ::BinOp::*;
     match _i {
         Add(_binding_0, ) => {
@@ -672,7 +672,7 @@ pub fn walk_bin_op<V: Folder + ?Sized>(_visitor: &mut V, _i: BinOp) -> BinOp {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_binding_mode<V: Folder + ?Sized>(_visitor: &mut V, _i: BindingMode) -> BindingMode {
+pub fn fold_binding_mode<V: Folder + ?Sized>(_visitor: &mut V, _i: BindingMode) -> BindingMode {
     use ::BindingMode::*;
     match _i {
         ByRef(_binding_0, _binding_1, ) => {
@@ -689,14 +689,14 @@ pub fn walk_binding_mode<V: Folder + ?Sized>(_visitor: &mut V, _i: BindingMode) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_block<V: Folder + ?Sized>(_visitor: &mut V, _i: Block) -> Block {
+pub fn fold_block<V: Folder + ?Sized>(_visitor: &mut V, _i: Block) -> Block {
     Block {
         brace_token: _i . brace_token,
         stmts: FoldHelper::lift(_i . stmts, |it| { _visitor.fold_stmt(it) }),
     }
 }
 
-pub fn walk_body<V: Folder + ?Sized>(_visitor: &mut V, _i: Body) -> Body {
+pub fn fold_body<V: Folder + ?Sized>(_visitor: &mut V, _i: Body) -> Body {
     use ::Body::*;
     match _i {
         Enum(_binding_0, ) => {
@@ -712,7 +712,7 @@ pub fn walk_body<V: Folder + ?Sized>(_visitor: &mut V, _i: Body) -> Body {
     }
 }
 
-pub fn walk_body_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyEnum) -> BodyEnum {
+pub fn fold_body_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyEnum) -> BodyEnum {
     BodyEnum {
         enum_token: _i . enum_token,
         brace_token: _i . brace_token,
@@ -720,7 +720,7 @@ pub fn walk_body_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyEnum) -> Bod
     }
 }
 
-pub fn walk_body_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyStruct) -> BodyStruct {
+pub fn fold_body_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyStruct) -> BodyStruct {
     BodyStruct {
         data: _visitor.fold_variant_data(_i . data),
         struct_token: _i . struct_token,
@@ -728,7 +728,7 @@ pub fn walk_body_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyStruct) ->
     }
 }
 
-pub fn walk_bound_lifetimes<V: Folder + ?Sized>(_visitor: &mut V, _i: BoundLifetimes) -> BoundLifetimes {
+pub fn fold_bound_lifetimes<V: Folder + ?Sized>(_visitor: &mut V, _i: BoundLifetimes) -> BoundLifetimes {
     BoundLifetimes {
         for_token: _i . for_token,
         lt_token: _i . lt_token,
@@ -737,7 +737,7 @@ pub fn walk_bound_lifetimes<V: Folder + ?Sized>(_visitor: &mut V, _i: BoundLifet
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_capture_by<V: Folder + ?Sized>(_visitor: &mut V, _i: CaptureBy) -> CaptureBy {
+pub fn fold_capture_by<V: Folder + ?Sized>(_visitor: &mut V, _i: CaptureBy) -> CaptureBy {
     use ::CaptureBy::*;
     match _i {
         Value(_binding_0, ) => {
@@ -749,7 +749,7 @@ pub fn walk_capture_by<V: Folder + ?Sized>(_visitor: &mut V, _i: CaptureBy) -> C
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_constness<V: Folder + ?Sized>(_visitor: &mut V, _i: Constness) -> Constness {
+pub fn fold_constness<V: Folder + ?Sized>(_visitor: &mut V, _i: Constness) -> Constness {
     use ::Constness::*;
     match _i {
         Const(_binding_0, ) => {
@@ -761,7 +761,7 @@ pub fn walk_constness<V: Folder + ?Sized>(_visitor: &mut V, _i: Constness) -> Co
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_defaultness<V: Folder + ?Sized>(_visitor: &mut V, _i: Defaultness) -> Defaultness {
+pub fn fold_defaultness<V: Folder + ?Sized>(_visitor: &mut V, _i: Defaultness) -> Defaultness {
     use ::Defaultness::*;
     match _i {
         Default(_binding_0, ) => {
@@ -773,7 +773,7 @@ pub fn walk_defaultness<V: Folder + ?Sized>(_visitor: &mut V, _i: Defaultness) -
     }
 }
 
-pub fn walk_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) -> DeriveInput {
+pub fn fold_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) -> DeriveInput {
     DeriveInput {
         ident: _i . ident,
         vis: _visitor.fold_visibility(_i . vis),
@@ -783,14 +783,14 @@ pub fn walk_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) 
     }
 }
 
-pub fn walk_expr<V: Folder + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
+pub fn fold_expr<V: Folder + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
     Expr {
         node: _visitor.fold_expr_kind(_i . node),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_addr_of<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAddrOf) -> ExprAddrOf {
+pub fn fold_expr_addr_of<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAddrOf) -> ExprAddrOf {
     ExprAddrOf {
         and_token: _i . and_token,
         mutbl: _visitor.fold_mutability(_i . mutbl),
@@ -798,14 +798,14 @@ pub fn walk_expr_addr_of<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAddrOf) -
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_array<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprArray) -> ExprArray {
+pub fn fold_expr_array<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprArray) -> ExprArray {
     ExprArray {
         exprs: FoldHelper::lift(_i . exprs, |it| { _visitor.fold_expr(it) }),
         bracket_token: _i . bracket_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_assign<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAssign) -> ExprAssign {
+pub fn fold_expr_assign<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAssign) -> ExprAssign {
     ExprAssign {
         left: Box::new(_visitor.fold_expr(* _i . left)),
         right: Box::new(_visitor.fold_expr(* _i . right)),
@@ -813,7 +813,7 @@ pub fn walk_expr_assign<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAssign) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_assign_op<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAssignOp) -> ExprAssignOp {
+pub fn fold_expr_assign_op<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAssignOp) -> ExprAssignOp {
     ExprAssignOp {
         op: _visitor.fold_bin_op(_i . op),
         left: Box::new(_visitor.fold_expr(* _i . left)),
@@ -821,7 +821,7 @@ pub fn walk_expr_assign_op<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAssignO
     }
 }
 
-pub fn walk_expr_binary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBinary) -> ExprBinary {
+pub fn fold_expr_binary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBinary) -> ExprBinary {
     ExprBinary {
         op: _visitor.fold_bin_op(_i . op),
         left: Box::new(_visitor.fold_expr(* _i . left)),
@@ -829,21 +829,21 @@ pub fn walk_expr_binary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBinary) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_block<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBlock) -> ExprBlock {
+pub fn fold_expr_block<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBlock) -> ExprBlock {
     ExprBlock {
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         block: _visitor.fold_block(_i . block),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_box<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBox) -> ExprBox {
+pub fn fold_expr_box<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBox) -> ExprBox {
     ExprBox {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         box_token: _i . box_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_break<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBreak) -> ExprBreak {
+pub fn fold_expr_break<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBreak) -> ExprBreak {
     ExprBreak {
         label: _i . label,
         expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
@@ -851,7 +851,7 @@ pub fn walk_expr_break<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBreak) -> E
     }
 }
 
-pub fn walk_expr_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCall) -> ExprCall {
+pub fn fold_expr_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCall) -> ExprCall {
     ExprCall {
         func: Box::new(_visitor.fold_expr(* _i . func)),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
@@ -859,7 +859,7 @@ pub fn walk_expr_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCall) -> Exp
     }
 }
 
-pub fn walk_expr_cast<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCast) -> ExprCast {
+pub fn fold_expr_cast<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCast) -> ExprCast {
     ExprCast {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         as_token: _i . as_token,
@@ -867,7 +867,7 @@ pub fn walk_expr_cast<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCast) -> Exp
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_catch<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> ExprCatch {
+pub fn fold_expr_catch<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> ExprCatch {
     ExprCatch {
         do_token: _i . do_token,
         catch_token: _i . catch_token,
@@ -875,7 +875,7 @@ pub fn walk_expr_catch<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> E
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_closure<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprClosure) -> ExprClosure {
+pub fn fold_expr_closure<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprClosure) -> ExprClosure {
     ExprClosure {
         capture: _visitor.fold_capture_by(_i . capture),
         decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
@@ -885,14 +885,14 @@ pub fn walk_expr_closure<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprClosure) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_continue<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprContinue) -> ExprContinue {
+pub fn fold_expr_continue<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprContinue) -> ExprContinue {
     ExprContinue {
         label: _i . label,
         continue_token: _i . continue_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprField) -> ExprField {
+pub fn fold_expr_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprField) -> ExprField {
     ExprField {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         field: _i . field,
@@ -900,7 +900,7 @@ pub fn walk_expr_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprField) -> E
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop) -> ExprForLoop {
+pub fn fold_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop) -> ExprForLoop {
     ExprForLoop {
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
@@ -912,14 +912,14 @@ pub fn walk_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop)
     }
 }
 
-pub fn walk_expr_group<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprGroup) -> ExprGroup {
+pub fn fold_expr_group<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprGroup) -> ExprGroup {
     ExprGroup {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         group_token: _i . group_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_if<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf {
+pub fn fold_expr_if<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf {
     ExprIf {
         cond: Box::new(_visitor.fold_expr(* _i . cond)),
         if_true: _visitor.fold_block(_i . if_true),
@@ -929,7 +929,7 @@ pub fn walk_expr_if<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_if_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> ExprIfLet {
+pub fn fold_expr_if_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> ExprIfLet {
     ExprIfLet {
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
@@ -942,7 +942,7 @@ pub fn walk_expr_if_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_in_place<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprInPlace) -> ExprInPlace {
+pub fn fold_expr_in_place<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprInPlace) -> ExprInPlace {
     ExprInPlace {
         place: Box::new(_visitor.fold_expr(* _i . place)),
         kind: _visitor.fold_in_place_kind(_i . kind),
@@ -950,7 +950,7 @@ pub fn walk_expr_in_place<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprInPlace)
     }
 }
 
-pub fn walk_expr_index<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIndex) -> ExprIndex {
+pub fn fold_expr_index<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIndex) -> ExprIndex {
     ExprIndex {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         index: Box::new(_visitor.fold_expr(* _i . index)),
@@ -958,7 +958,7 @@ pub fn walk_expr_index<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIndex) -> E
     }
 }
 
-pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> ExprKind {
+pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> ExprKind {
     use ::ExprKind::*;
     match _i {
         Box(_binding_0, ) => {
@@ -1159,7 +1159,7 @@ pub fn walk_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> ExprLoop {
+pub fn fold_expr_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> ExprLoop {
     ExprLoop {
         body: _visitor.fold_block(_i . body),
         label: _i . label,
@@ -1168,7 +1168,7 @@ pub fn walk_expr_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> Exp
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_match<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> ExprMatch {
+pub fn fold_expr_match<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> ExprMatch {
     ExprMatch {
         match_token: _i . match_token,
         brace_token: _i . brace_token,
@@ -1177,7 +1177,7 @@ pub fn walk_expr_match<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> E
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMethodCall) -> ExprMethodCall {
+pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMethodCall) -> ExprMethodCall {
     ExprMethodCall {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         method: _i . method,
@@ -1191,21 +1191,21 @@ pub fn walk_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMetho
     }
 }
 
-pub fn walk_expr_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprParen) -> ExprParen {
+pub fn fold_expr_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprParen) -> ExprParen {
     ExprParen {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         paren_token: _i . paren_token,
     }
 }
 
-pub fn walk_expr_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprPath) -> ExprPath {
+pub fn fold_expr_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprPath) -> ExprPath {
     ExprPath {
         qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_range<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRange) -> ExprRange {
+pub fn fold_expr_range<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRange) -> ExprRange {
     ExprRange {
         from: (_i . from).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         to: (_i . to).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
@@ -1213,7 +1213,7 @@ pub fn walk_expr_range<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRange) -> E
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_repeat<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRepeat) -> ExprRepeat {
+pub fn fold_expr_repeat<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRepeat) -> ExprRepeat {
     ExprRepeat {
         bracket_token: _i . bracket_token,
         semi_token: _i . semi_token,
@@ -1222,14 +1222,14 @@ pub fn walk_expr_repeat<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRepeat) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_ret<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRet) -> ExprRet {
+pub fn fold_expr_ret<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRet) -> ExprRet {
     ExprRet {
         expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         return_token: _i . return_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprStruct) -> ExprStruct {
+pub fn fold_expr_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprStruct) -> ExprStruct {
     ExprStruct {
         path: _visitor.fold_path(_i . path),
         fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field_value(it) }),
@@ -1239,14 +1239,14 @@ pub fn walk_expr_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprStruct) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_try<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTry) -> ExprTry {
+pub fn fold_expr_try<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTry) -> ExprTry {
     ExprTry {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         question_token: _i . question_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTup) -> ExprTup {
+pub fn fold_expr_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTup) -> ExprTup {
     ExprTup {
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
         paren_token: _i . paren_token,
@@ -1254,7 +1254,7 @@ pub fn walk_expr_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTup) -> ExprT
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_tup_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupField) -> ExprTupField {
+pub fn fold_expr_tup_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupField) -> ExprTupField {
     ExprTupField {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         field: _i . field,
@@ -1262,7 +1262,7 @@ pub fn walk_expr_tup_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupFiel
     }
 }
 
-pub fn walk_expr_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprType) -> ExprType {
+pub fn fold_expr_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprType) -> ExprType {
     ExprType {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         colon_token: _i . colon_token,
@@ -1270,14 +1270,14 @@ pub fn walk_expr_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprType) -> Exp
     }
 }
 
-pub fn walk_expr_unary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprUnary) -> ExprUnary {
+pub fn fold_expr_unary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprUnary) -> ExprUnary {
     ExprUnary {
         op: _visitor.fold_un_op(_i . op),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_while<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> ExprWhile {
+pub fn fold_expr_while<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> ExprWhile {
     ExprWhile {
         cond: Box::new(_visitor.fold_expr(* _i . cond)),
         body: _visitor.fold_block(_i . body),
@@ -1287,7 +1287,7 @@ pub fn walk_expr_while<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> E
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_while_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhileLet) -> ExprWhileLet {
+pub fn fold_expr_while_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhileLet) -> ExprWhileLet {
     ExprWhileLet {
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
@@ -1300,14 +1300,14 @@ pub fn walk_expr_while_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhileLe
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_expr_yield<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprYield) -> ExprYield {
+pub fn fold_expr_yield<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprYield) -> ExprYield {
     ExprYield {
         yield_token: _i . yield_token,
         expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
     }
 }
 
-pub fn walk_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
+pub fn fold_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
     Field {
         ident: _i . ident,
         vis: _visitor.fold_visibility(_i . vis),
@@ -1317,7 +1317,7 @@ pub fn walk_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> FieldPat {
+pub fn fold_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> FieldPat {
     FieldPat {
         ident: _i . ident,
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
@@ -1327,7 +1327,7 @@ pub fn walk_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> Fie
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) -> FieldValue {
+pub fn fold_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) -> FieldValue {
     FieldValue {
         ident: _i . ident,
         expr: _visitor.fold_expr(_i . expr),
@@ -1337,7 +1337,7 @@ pub fn walk_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_file<V: Folder + ?Sized>(_visitor: &mut V, _i: File) -> File {
+pub fn fold_file<V: Folder + ?Sized>(_visitor: &mut V, _i: File) -> File {
     File {
         shebang: _i . shebang,
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
@@ -1345,7 +1345,7 @@ pub fn walk_file<V: Folder + ?Sized>(_visitor: &mut V, _i: File) -> File {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
+pub fn fold_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
     use ::FnArg::*;
     match _i {
         SelfRef(_binding_0, ) => {
@@ -1371,7 +1371,7 @@ pub fn walk_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl {
+pub fn fold_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl {
     FnDecl {
         fn_token: _i . fn_token,
         paren_token: _i . paren_token,
@@ -1383,7 +1383,7 @@ pub fn walk_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_foreign_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItem) -> ForeignItem {
+pub fn fold_foreign_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItem) -> ForeignItem {
     ForeignItem {
         ident: _i . ident,
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
@@ -1393,13 +1393,13 @@ pub fn walk_foreign_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItem) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_foreign_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemFn) -> ForeignItemFn {
+pub fn fold_foreign_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemFn) -> ForeignItemFn {
     ForeignItemFn {
         decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_foreign_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemKind) -> ForeignItemKind {
+pub fn fold_foreign_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemKind) -> ForeignItemKind {
     use ::ForeignItemKind::*;
     match _i {
         Fn(_binding_0, ) => {
@@ -1415,7 +1415,7 @@ pub fn walk_foreign_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignI
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemStatic) -> ForeignItemStatic {
+pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemStatic) -> ForeignItemStatic {
     ForeignItemStatic {
         static_token: _i . static_token,
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
@@ -1424,7 +1424,7 @@ pub fn walk_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: Foreig
     }
 }
 
-pub fn walk_function_ret_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: FunctionRetTy) -> FunctionRetTy {
+pub fn fold_function_ret_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: FunctionRetTy) -> FunctionRetTy {
     use ::FunctionRetTy::*;
     match _i {
         Default => { Default }
@@ -1437,7 +1437,7 @@ pub fn walk_function_ret_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: FunctionRe
     }
 }
 
-pub fn walk_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Generics {
+pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Generics {
     Generics {
         lt_token: _i . lt_token,
         gt_token: _i . gt_token,
@@ -1447,14 +1447,14 @@ pub fn walk_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
+pub fn fold_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
     ImplItem {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         node: _visitor.fold_impl_item_kind(_i . node),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemConst) -> ImplItemConst {
+pub fn fold_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemConst) -> ImplItemConst {
     ImplItemConst {
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
@@ -1468,7 +1468,7 @@ pub fn walk_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemCo
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_impl_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemKind) -> ImplItemKind {
+pub fn fold_impl_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemKind) -> ImplItemKind {
     use ::ImplItemKind::*;
     match _i {
         Const(_binding_0, ) => {
@@ -1494,7 +1494,7 @@ pub fn walk_impl_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemKin
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_impl_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemMethod) -> ImplItemMethod {
+pub fn fold_impl_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemMethod) -> ImplItemMethod {
     ImplItemMethod {
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
@@ -1503,7 +1503,7 @@ pub fn walk_impl_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemM
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemType) -> ImplItemType {
+pub fn fold_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemType) -> ImplItemType {
     ImplItemType {
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
@@ -1515,7 +1515,7 @@ pub fn walk_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemTyp
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_impl_polarity<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplPolarity) -> ImplPolarity {
+pub fn fold_impl_polarity<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplPolarity) -> ImplPolarity {
     use ::ImplPolarity::*;
     match _i {
         Positive => { Positive }
@@ -1527,7 +1527,7 @@ pub fn walk_impl_polarity<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplPolarity
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_in_place_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: InPlaceKind) -> InPlaceKind {
+pub fn fold_in_place_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: InPlaceKind) -> InPlaceKind {
     use ::InPlaceKind::*;
     match _i {
         Arrow(_binding_0, ) => {
@@ -1543,14 +1543,14 @@ pub fn walk_in_place_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: InPlaceKind)
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
+pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
     Item {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         node: _visitor.fold_item_kind(_i . node),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> ItemConst {
+pub fn fold_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> ItemConst {
     ItemConst {
         vis: _visitor.fold_visibility(_i . vis),
         const_token: _i . const_token,
@@ -1563,7 +1563,7 @@ pub fn walk_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> I
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_default_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemDefaultImpl) -> ItemDefaultImpl {
+pub fn fold_item_default_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemDefaultImpl) -> ItemDefaultImpl {
     ItemDefaultImpl {
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         impl_token: _i . impl_token,
@@ -1574,7 +1574,7 @@ pub fn walk_item_default_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemDefa
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> ItemEnum {
+pub fn fold_item_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> ItemEnum {
     ItemEnum {
         vis: _visitor.fold_visibility(_i . vis),
         enum_token: _i . enum_token,
@@ -1585,7 +1585,7 @@ pub fn walk_item_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> Ite
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_extern_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemExternCrate) -> ItemExternCrate {
+pub fn fold_item_extern_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemExternCrate) -> ItemExternCrate {
     ItemExternCrate {
         vis: _visitor.fold_visibility(_i . vis),
         extern_token: _i . extern_token,
@@ -1596,7 +1596,7 @@ pub fn walk_item_extern_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemExte
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn {
+pub fn fold_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn {
     ItemFn {
         vis: _visitor.fold_visibility(_i . vis),
         constness: _visitor.fold_constness(_i . constness),
@@ -1608,7 +1608,7 @@ pub fn walk_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_foreign_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemForeignMod) -> ItemForeignMod {
+pub fn fold_item_foreign_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemForeignMod) -> ItemForeignMod {
     ItemForeignMod {
         abi: _visitor.fold_abi(_i . abi),
         brace_token: _i . brace_token,
@@ -1616,7 +1616,7 @@ pub fn walk_item_foreign_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemForei
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> ItemImpl {
+pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> ItemImpl {
     ItemImpl {
         defaultness: _visitor.fold_defaultness(_i . defaultness),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
@@ -1629,7 +1629,7 @@ pub fn walk_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemKind) -> ItemKind {
+pub fn fold_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemKind) -> ItemKind {
     use ::ItemKind::*;
     match _i {
         ExternCrate(_binding_0, ) => {
@@ -1710,7 +1710,7 @@ pub fn walk_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemKind) -> Ite
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemMod {
+pub fn fold_item_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemMod {
     ItemMod {
         vis: _visitor.fold_visibility(_i . vis),
         mod_token: _i . mod_token,
@@ -1720,7 +1720,7 @@ pub fn walk_item_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemM
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStatic) -> ItemStatic {
+pub fn fold_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStatic) -> ItemStatic {
     ItemStatic {
         vis: _visitor.fold_visibility(_i . vis),
         static_token: _i . static_token,
@@ -1734,7 +1734,7 @@ pub fn walk_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStatic) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStruct) -> ItemStruct {
+pub fn fold_item_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStruct) -> ItemStruct {
     ItemStruct {
         vis: _visitor.fold_visibility(_i . vis),
         struct_token: _i . struct_token,
@@ -1745,7 +1745,7 @@ pub fn walk_item_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStruct) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> ItemTrait {
+pub fn fold_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> ItemTrait {
     ItemTrait {
         vis: _visitor.fold_visibility(_i . vis),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
@@ -1759,7 +1759,7 @@ pub fn walk_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> I
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTy) -> ItemTy {
+pub fn fold_item_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTy) -> ItemTy {
     ItemTy {
         vis: _visitor.fold_visibility(_i . vis),
         type_token: _i . type_token,
@@ -1771,7 +1771,7 @@ pub fn walk_item_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTy) -> ItemTy 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_union<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUnion) -> ItemUnion {
+pub fn fold_item_union<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUnion) -> ItemUnion {
     ItemUnion {
         vis: _visitor.fold_visibility(_i . vis),
         union_token: _i . union_token,
@@ -1781,7 +1781,7 @@ pub fn walk_item_union<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUnion) -> I
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemUse {
+pub fn fold_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemUse {
     ItemUse {
         vis: _visitor.fold_visibility(_i . vis),
         use_token: _i . use_token,
@@ -1790,7 +1790,7 @@ pub fn walk_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemU
     }
 }
 
-pub fn walk_lifetime_def<V: Folder + ?Sized>(_visitor: &mut V, _i: LifetimeDef) -> LifetimeDef {
+pub fn fold_lifetime_def<V: Folder + ?Sized>(_visitor: &mut V, _i: LifetimeDef) -> LifetimeDef {
     LifetimeDef {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         lifetime: _i . lifetime,
@@ -1799,7 +1799,7 @@ pub fn walk_lifetime_def<V: Folder + ?Sized>(_visitor: &mut V, _i: LifetimeDef) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
+pub fn fold_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
     Local {
         let_token: _i . let_token,
         colon_token: _i . colon_token,
@@ -1812,7 +1812,7 @@ pub fn walk_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
     }
 }
 
-pub fn walk_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: Mac) -> Mac {
+pub fn fold_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: Mac) -> Mac {
     Mac {
         path: _visitor.fold_path(_i . path),
         bang_token: _i . bang_token,
@@ -1821,7 +1821,7 @@ pub fn walk_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: Mac) -> Mac {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_mac_stmt_style<V: Folder + ?Sized>(_visitor: &mut V, _i: MacStmtStyle) -> MacStmtStyle {
+pub fn fold_mac_stmt_style<V: Folder + ?Sized>(_visitor: &mut V, _i: MacStmtStyle) -> MacStmtStyle {
     use ::MacStmtStyle::*;
     match _i {
         Semicolon(_binding_0, ) => {
@@ -1834,7 +1834,7 @@ pub fn walk_mac_stmt_style<V: Folder + ?Sized>(_visitor: &mut V, _i: MacStmtStyl
     }
 }
 
-pub fn walk_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> MetaItem {
+pub fn fold_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> MetaItem {
     use ::MetaItem::*;
     match _i {
         Term(_binding_0, ) => {
@@ -1855,7 +1855,7 @@ pub fn walk_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> Met
     }
 }
 
-pub fn walk_meta_item_list<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItemList) -> MetaItemList {
+pub fn fold_meta_item_list<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItemList) -> MetaItemList {
     MetaItemList {
         ident: _i . ident,
         paren_token: _i . paren_token,
@@ -1863,7 +1863,7 @@ pub fn walk_meta_item_list<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItemLis
     }
 }
 
-pub fn walk_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameValue) -> MetaNameValue {
+pub fn fold_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameValue) -> MetaNameValue {
     MetaNameValue {
         ident: _i . ident,
         eq_token: _i . eq_token,
@@ -1871,7 +1871,7 @@ pub fn walk_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameVa
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> MethodSig {
+pub fn fold_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> MethodSig {
     MethodSig {
         constness: _visitor.fold_constness(_i . constness),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
@@ -1881,14 +1881,14 @@ pub fn walk_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> M
     }
 }
 
-pub fn walk_mut_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: MutTy) -> MutTy {
+pub fn fold_mut_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: MutTy) -> MutTy {
     MutTy {
         ty: _visitor.fold_ty(_i . ty),
         mutability: _visitor.fold_mutability(_i . mutability),
     }
 }
 
-pub fn walk_mutability<V: Folder + ?Sized>(_visitor: &mut V, _i: Mutability) -> Mutability {
+pub fn fold_mutability<V: Folder + ?Sized>(_visitor: &mut V, _i: Mutability) -> Mutability {
     use ::Mutability::*;
     match _i {
         Mutable(_binding_0, ) => {
@@ -1900,7 +1900,7 @@ pub fn walk_mutability<V: Folder + ?Sized>(_visitor: &mut V, _i: Mutability) -> 
     }
 }
 
-pub fn walk_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMetaItem) -> NestedMetaItem {
+pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMetaItem) -> NestedMetaItem {
     use ::NestedMetaItem::*;
     match _i {
         MetaItem(_binding_0, ) => {
@@ -1916,7 +1916,7 @@ pub fn walk_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMet
     }
 }
 
-pub fn walk_parenthesized_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: ParenthesizedParameterData) -> ParenthesizedParameterData {
+pub fn fold_parenthesized_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: ParenthesizedParameterData) -> ParenthesizedParameterData {
     ParenthesizedParameterData {
         paren_token: _i . paren_token,
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_ty(it) }),
@@ -1924,7 +1924,7 @@ pub fn walk_parenthesized_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
+pub fn fold_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
     use ::Pat::*;
     match _i {
         Wild(_binding_0, ) => {
@@ -1990,14 +1990,14 @@ pub fn walk_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_box<V: Folder + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox {
+pub fn fold_pat_box<V: Folder + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox {
     PatBox {
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         box_token: _i . box_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> PatIdent {
+pub fn fold_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> PatIdent {
     PatIdent {
         mode: _visitor.fold_binding_mode(_i . mode),
         ident: _i . ident,
@@ -2006,20 +2006,20 @@ pub fn walk_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> Pat
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: PatLit) -> PatLit {
+pub fn fold_pat_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: PatLit) -> PatLit {
     PatLit {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_path<V: Folder + ?Sized>(_visitor: &mut V, _i: PatPath) -> PatPath {
+pub fn fold_pat_path<V: Folder + ?Sized>(_visitor: &mut V, _i: PatPath) -> PatPath {
     PatPath {
         qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_range<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRange) -> PatRange {
+pub fn fold_pat_range<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRange) -> PatRange {
     PatRange {
         lo: Box::new(_visitor.fold_expr(* _i . lo)),
         hi: Box::new(_visitor.fold_expr(* _i . hi)),
@@ -2027,7 +2027,7 @@ pub fn walk_pat_range<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRange) -> Pat
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef {
+pub fn fold_pat_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef {
     PatRef {
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         mutbl: _visitor.fold_mutability(_i . mutbl),
@@ -2035,7 +2035,7 @@ pub fn walk_pat_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: PatSlice) -> PatSlice {
+pub fn fold_pat_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: PatSlice) -> PatSlice {
     PatSlice {
         front: FoldHelper::lift(_i . front, |it| { _visitor.fold_pat(it) }),
         middle: (_i . middle).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
@@ -2046,7 +2046,7 @@ pub fn walk_pat_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: PatSlice) -> Pat
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatStruct) -> PatStruct {
+pub fn fold_pat_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatStruct) -> PatStruct {
     PatStruct {
         path: _visitor.fold_path(_i . path),
         fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field_pat(it) }),
@@ -2055,7 +2055,7 @@ pub fn walk_pat_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatStruct) -> P
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTuple) -> PatTuple {
+pub fn fold_pat_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTuple) -> PatTuple {
     PatTuple {
         pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         dots_pos: _i . dots_pos,
@@ -2065,27 +2065,27 @@ pub fn walk_pat_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTuple) -> Pat
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_tuple_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTupleStruct) -> PatTupleStruct {
+pub fn fold_pat_tuple_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTupleStruct) -> PatTupleStruct {
     PatTupleStruct {
         path: _visitor.fold_path(_i . path),
         pat: _visitor.fold_pat_tuple(_i . pat),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_pat_wild<V: Folder + ?Sized>(_visitor: &mut V, _i: PatWild) -> PatWild {
+pub fn fold_pat_wild<V: Folder + ?Sized>(_visitor: &mut V, _i: PatWild) -> PatWild {
     PatWild {
         underscore_token: _i . underscore_token,
     }
 }
 
-pub fn walk_path<V: Folder + ?Sized>(_visitor: &mut V, _i: Path) -> Path {
+pub fn fold_path<V: Folder + ?Sized>(_visitor: &mut V, _i: Path) -> Path {
     Path {
         leading_colon: _i . leading_colon,
         segments: FoldHelper::lift(_i . segments, |it| { _visitor.fold_path_segment(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_path_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: PathGlob) -> PathGlob {
+pub fn fold_path_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: PathGlob) -> PathGlob {
     PathGlob {
         path: _visitor.fold_path(_i . path),
         colon2_token: _i . colon2_token,
@@ -2093,7 +2093,7 @@ pub fn walk_path_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: PathGlob) -> Pat
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_path_list<V: Folder + ?Sized>(_visitor: &mut V, _i: PathList) -> PathList {
+pub fn fold_path_list<V: Folder + ?Sized>(_visitor: &mut V, _i: PathList) -> PathList {
     PathList {
         path: _visitor.fold_path(_i . path),
         colon2_token: _i . colon2_token,
@@ -2102,7 +2102,7 @@ pub fn walk_path_list<V: Folder + ?Sized>(_visitor: &mut V, _i: PathList) -> Pat
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_path_list_item<V: Folder + ?Sized>(_visitor: &mut V, _i: PathListItem) -> PathListItem {
+pub fn fold_path_list_item<V: Folder + ?Sized>(_visitor: &mut V, _i: PathListItem) -> PathListItem {
     PathListItem {
         name: _i . name,
         rename: _i . rename,
@@ -2110,7 +2110,7 @@ pub fn walk_path_list_item<V: Folder + ?Sized>(_visitor: &mut V, _i: PathListIte
     }
 }
 
-pub fn walk_path_parameters<V: Folder + ?Sized>(_visitor: &mut V, _i: PathParameters) -> PathParameters {
+pub fn fold_path_parameters<V: Folder + ?Sized>(_visitor: &mut V, _i: PathParameters) -> PathParameters {
     use ::PathParameters::*;
     match _i {
         None => { None }
@@ -2127,14 +2127,14 @@ pub fn walk_path_parameters<V: Folder + ?Sized>(_visitor: &mut V, _i: PathParame
     }
 }
 
-pub fn walk_path_segment<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSegment) -> PathSegment {
+pub fn fold_path_segment<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSegment) -> PathSegment {
     PathSegment {
         ident: _i . ident,
         parameters: _visitor.fold_path_parameters(_i . parameters),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_path_simple<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSimple) -> PathSimple {
+pub fn fold_path_simple<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSimple) -> PathSimple {
     PathSimple {
         path: _visitor.fold_path(_i . path),
         as_token: _i . as_token,
@@ -2142,14 +2142,14 @@ pub fn walk_path_simple<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSimple) ->
     }
 }
 
-pub fn walk_poly_trait_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PolyTraitRef) -> PolyTraitRef {
+pub fn fold_poly_trait_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PolyTraitRef) -> PolyTraitRef {
     PolyTraitRef {
         bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         trait_ref: _visitor.fold_path(_i . trait_ref),
     }
 }
 
-pub fn walk_qself<V: Folder + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
+pub fn fold_qself<V: Folder + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
     QSelf {
         lt_token: _i . lt_token,
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
@@ -2159,7 +2159,7 @@ pub fn walk_qself<V: Folder + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_range_limits<V: Folder + ?Sized>(_visitor: &mut V, _i: RangeLimits) -> RangeLimits {
+pub fn fold_range_limits<V: Folder + ?Sized>(_visitor: &mut V, _i: RangeLimits) -> RangeLimits {
     use ::RangeLimits::*;
     match _i {
         HalfOpen(_binding_0, ) => {
@@ -2175,7 +2175,7 @@ pub fn walk_range_limits<V: Folder + ?Sized>(_visitor: &mut V, _i: RangeLimits) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
+pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
     use ::Stmt::*;
     match _i {
         Local(_binding_0, ) => {
@@ -2207,7 +2207,7 @@ pub fn walk_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
     }
 }
 
-pub fn walk_trait_bound_modifier<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitBoundModifier) -> TraitBoundModifier {
+pub fn fold_trait_bound_modifier<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitBoundModifier) -> TraitBoundModifier {
     use ::TraitBoundModifier::*;
     match _i {
         None => { None }
@@ -2219,14 +2219,14 @@ pub fn walk_trait_bound_modifier<V: Folder + ?Sized>(_visitor: &mut V, _i: Trait
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_trait_item<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem) -> TraitItem {
+pub fn fold_trait_item<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem) -> TraitItem {
     TraitItem {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         node: _visitor.fold_trait_item_kind(_i . node),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemConst) -> TraitItemConst {
+pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemConst) -> TraitItemConst {
     TraitItemConst {
         const_token: _i . const_token,
         ident: _i . ident,
@@ -2237,7 +2237,7 @@ pub fn walk_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_trait_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemKind) -> TraitItemKind {
+pub fn fold_trait_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemKind) -> TraitItemKind {
     use ::TraitItemKind::*;
     match _i {
         Const(_binding_0, ) => {
@@ -2263,7 +2263,7 @@ pub fn walk_trait_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemK
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_trait_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMethod) -> TraitItemMethod {
+pub fn fold_trait_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMethod) -> TraitItemMethod {
     TraitItemMethod {
         sig: _visitor.fold_method_sig(_i . sig),
         default: (_i . default).map(|it| { _visitor.fold_block(it) }),
@@ -2271,7 +2271,7 @@ pub fn walk_trait_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitIte
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemType) -> TraitItemType {
+pub fn fold_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemType) -> TraitItemType {
     TraitItemType {
         type_token: _i . type_token,
         ident: _i . ident,
@@ -2282,7 +2282,7 @@ pub fn walk_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemT
     }
 }
 
-pub fn walk_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: Ty) -> Ty {
+pub fn fold_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: Ty) -> Ty {
     use ::Ty::*;
     match _i {
         Slice(_binding_0, ) => {
@@ -2358,7 +2358,7 @@ pub fn walk_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: Ty) -> Ty {
     }
 }
 
-pub fn walk_ty_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TyArray) -> TyArray {
+pub fn fold_ty_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TyArray) -> TyArray {
     TyArray {
         bracket_token: _i . bracket_token,
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
@@ -2367,39 +2367,39 @@ pub fn walk_ty_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TyArray) -> TyArr
     }
 }
 
-pub fn walk_ty_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TyBareFn) -> TyBareFn {
+pub fn fold_ty_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TyBareFn) -> TyBareFn {
     TyBareFn {
         ty: Box::new(_visitor.fold_bare_fn_ty(* _i . ty)),
     }
 }
 
-pub fn walk_ty_group<V: Folder + ?Sized>(_visitor: &mut V, _i: TyGroup) -> TyGroup {
+pub fn fold_ty_group<V: Folder + ?Sized>(_visitor: &mut V, _i: TyGroup) -> TyGroup {
     TyGroup {
         group_token: _i . group_token,
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
     }
 }
 
-pub fn walk_ty_impl_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: TyImplTrait) -> TyImplTrait {
+pub fn fold_ty_impl_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: TyImplTrait) -> TyImplTrait {
     TyImplTrait {
         impl_token: _i . impl_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
     }
 }
 
-pub fn walk_ty_infer<V: Folder + ?Sized>(_visitor: &mut V, _i: TyInfer) -> TyInfer {
+pub fn fold_ty_infer<V: Folder + ?Sized>(_visitor: &mut V, _i: TyInfer) -> TyInfer {
     TyInfer {
         underscore_token: _i . underscore_token,
     }
 }
 
-pub fn walk_ty_never<V: Folder + ?Sized>(_visitor: &mut V, _i: TyNever) -> TyNever {
+pub fn fold_ty_never<V: Folder + ?Sized>(_visitor: &mut V, _i: TyNever) -> TyNever {
     TyNever {
         bang_token: _i . bang_token,
     }
 }
 
-pub fn walk_ty_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParam) -> TyParam {
+pub fn fold_ty_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParam) -> TyParam {
     TyParam {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ident: _i . ident,
@@ -2410,7 +2410,7 @@ pub fn walk_ty_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParam) -> TyPar
     }
 }
 
-pub fn walk_ty_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParamBound) -> TyParamBound {
+pub fn fold_ty_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParamBound) -> TyParamBound {
     use ::TyParamBound::*;
     match _i {
         Trait(_binding_0, _binding_1, ) => {
@@ -2427,21 +2427,21 @@ pub fn walk_ty_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParamBoun
     }
 }
 
-pub fn walk_ty_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParen) -> TyParen {
+pub fn fold_ty_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParen) -> TyParen {
     TyParen {
         paren_token: _i . paren_token,
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
     }
 }
 
-pub fn walk_ty_path<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPath) -> TyPath {
+pub fn fold_ty_path<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPath) -> TyPath {
     TyPath {
         qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
 
-pub fn walk_ty_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPtr) -> TyPtr {
+pub fn fold_ty_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPtr) -> TyPtr {
     TyPtr {
         star_token: _i . star_token,
         const_token: _i . const_token,
@@ -2449,7 +2449,7 @@ pub fn walk_ty_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPtr) -> TyPtr {
     }
 }
 
-pub fn walk_ty_rptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyRptr) -> TyRptr {
+pub fn fold_ty_rptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyRptr) -> TyRptr {
     TyRptr {
         and_token: _i . and_token,
         lifetime: _i . lifetime,
@@ -2457,20 +2457,20 @@ pub fn walk_ty_rptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyRptr) -> TyRptr 
     }
 }
 
-pub fn walk_ty_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TySlice) -> TySlice {
+pub fn fold_ty_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TySlice) -> TySlice {
     TySlice {
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
         bracket_token: _i . bracket_token,
     }
 }
 
-pub fn walk_ty_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTraitObject) -> TyTraitObject {
+pub fn fold_ty_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTraitObject) -> TyTraitObject {
     TyTraitObject {
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
     }
 }
 
-pub fn walk_ty_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTup) -> TyTup {
+pub fn fold_ty_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTup) -> TyTup {
     TyTup {
         paren_token: _i . paren_token,
         tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_ty(it) }),
@@ -2478,7 +2478,7 @@ pub fn walk_ty_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTup) -> TyTup {
     }
 }
 
-pub fn walk_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) -> TypeBinding {
+pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) -> TypeBinding {
     TypeBinding {
         ident: _i . ident,
         eq_token: _i . eq_token,
@@ -2486,7 +2486,7 @@ pub fn walk_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) 
     }
 }
 
-pub fn walk_un_op<V: Folder + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {
+pub fn fold_un_op<V: Folder + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {
     use ::UnOp::*;
     match _i {
         Deref(_binding_0, ) => {
@@ -2507,7 +2507,7 @@ pub fn walk_un_op<V: Folder + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {
     }
 }
 
-pub fn walk_unsafety<V: Folder + ?Sized>(_visitor: &mut V, _i: Unsafety) -> Unsafety {
+pub fn fold_unsafety<V: Folder + ?Sized>(_visitor: &mut V, _i: Unsafety) -> Unsafety {
     use ::Unsafety::*;
     match _i {
         Unsafe(_binding_0, ) => {
@@ -2519,7 +2519,7 @@ pub fn walk_unsafety<V: Folder + ?Sized>(_visitor: &mut V, _i: Unsafety) -> Unsa
     }
 }
 
-pub fn walk_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Variant {
+pub fn fold_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Variant {
     Variant {
         ident: _i . ident,
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
@@ -2529,7 +2529,7 @@ pub fn walk_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Varian
     }
 }
 
-pub fn walk_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) -> VariantData {
+pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) -> VariantData {
     use ::VariantData::*;
     match _i {
         Struct(_binding_0, _binding_1, ) => {
@@ -2548,7 +2548,7 @@ pub fn walk_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) 
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn walk_view_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ViewPath) -> ViewPath {
+pub fn fold_view_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ViewPath) -> ViewPath {
     use ::ViewPath::*;
     match _i {
         Simple(_binding_0, ) => {
@@ -2569,7 +2569,7 @@ pub fn walk_view_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ViewPath) -> Vie
     }
 }
 
-pub fn walk_vis_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: VisCrate) -> VisCrate {
+pub fn fold_vis_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: VisCrate) -> VisCrate {
     VisCrate {
         pub_token: _i . pub_token,
         paren_token: _i . paren_token,
@@ -2577,18 +2577,18 @@ pub fn walk_vis_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: VisCrate) -> Vis
     }
 }
 
-pub fn walk_vis_inherited<V: Folder + ?Sized>(_visitor: &mut V, _i: VisInherited) -> VisInherited {
+pub fn fold_vis_inherited<V: Folder + ?Sized>(_visitor: &mut V, _i: VisInherited) -> VisInherited {
     VisInherited {
     }
 }
 
-pub fn walk_vis_public<V: Folder + ?Sized>(_visitor: &mut V, _i: VisPublic) -> VisPublic {
+pub fn fold_vis_public<V: Folder + ?Sized>(_visitor: &mut V, _i: VisPublic) -> VisPublic {
     VisPublic {
         pub_token: _i . pub_token,
     }
 }
 
-pub fn walk_vis_restricted<V: Folder + ?Sized>(_visitor: &mut V, _i: VisRestricted) -> VisRestricted {
+pub fn fold_vis_restricted<V: Folder + ?Sized>(_visitor: &mut V, _i: VisRestricted) -> VisRestricted {
     VisRestricted {
         pub_token: _i . pub_token,
         paren_token: _i . paren_token,
@@ -2597,7 +2597,7 @@ pub fn walk_vis_restricted<V: Folder + ?Sized>(_visitor: &mut V, _i: VisRestrict
     }
 }
 
-pub fn walk_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> Visibility {
+pub fn fold_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> Visibility {
     use ::Visibility::*;
     match _i {
         Public(_binding_0, ) => {
@@ -2623,7 +2623,7 @@ pub fn walk_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> 
     }
 }
 
-pub fn walk_where_bound_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereBoundPredicate) -> WhereBoundPredicate {
+pub fn fold_where_bound_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereBoundPredicate) -> WhereBoundPredicate {
     WhereBoundPredicate {
         bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         bounded_ty: _visitor.fold_ty(_i . bounded_ty),
@@ -2632,14 +2632,14 @@ pub fn walk_where_bound_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: Wher
     }
 }
 
-pub fn walk_where_clause<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereClause) -> WhereClause {
+pub fn fold_where_clause<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereClause) -> WhereClause {
     WhereClause {
         where_token: _i . where_token,
         predicates: FoldHelper::lift(_i . predicates, |it| { _visitor.fold_where_predicate(it) }),
     }
 }
 
-pub fn walk_where_eq_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereEqPredicate) -> WhereEqPredicate {
+pub fn fold_where_eq_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereEqPredicate) -> WhereEqPredicate {
     WhereEqPredicate {
         lhs_ty: _visitor.fold_ty(_i . lhs_ty),
         eq_token: _i . eq_token,
@@ -2647,7 +2647,7 @@ pub fn walk_where_eq_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereEq
     }
 }
 
-pub fn walk_where_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WherePredicate) -> WherePredicate {
+pub fn fold_where_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WherePredicate) -> WherePredicate {
     use ::WherePredicate::*;
     match _i {
         BoundPredicate(_binding_0, ) => {
@@ -2668,7 +2668,7 @@ pub fn walk_where_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WherePredi
     }
 }
 
-pub fn walk_where_region_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereRegionPredicate) -> WhereRegionPredicate {
+pub fn fold_where_region_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereRegionPredicate) -> WhereRegionPredicate {
     WhereRegionPredicate {
         lifetime: _i . lifetime,
         colon_token: _i . colon_token,

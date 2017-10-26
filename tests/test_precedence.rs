@@ -297,7 +297,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
     fn paren(folder: &mut BracketsFolder, node: ExprKind) -> ExprKind {
         ExprKind::Paren(ExprParen {
-            expr: Box::new(walk_expr(folder, Expr {
+            expr: Box::new(fold_expr(folder, Expr {
                 node: node,
                 attrs: vec![],
             })),
@@ -314,7 +314,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                 ExprKind::If(..) |
                 ExprKind::Block(..) |
                 ExprKind::IfLet(..) => {
-                    return walk_expr(self, expr);
+                    return fold_expr(self, expr);
                 }
                 node => paren(self, node),
             };
@@ -329,10 +329,10 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
                 Stmt::Expr(e) => {
-                    Stmt::Expr(Box::new(walk_expr(self, *e)))
+                    Stmt::Expr(Box::new(fold_expr(self, *e)))
                 }
                 Stmt::Semi(e, semi) => {
-                    Stmt::Semi(Box::new(walk_expr(self, *e)), semi)
+                    Stmt::Semi(Box::new(fold_expr(self, *e)), semi)
                 }
                 s => s,
             }

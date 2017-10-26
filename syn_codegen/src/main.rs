@@ -334,7 +334,7 @@ mod codegen {
                     name = name,
                 ),
                 Kind::VisitMut => format!(
-                    "_visitor.visit_{under_name}(&mut {name})",
+                    "_visitor.visit_{under_name}_mut(&mut {name})",
                     under_name = under_name(type_name),
                     name = name,
                 ),
@@ -519,7 +519,7 @@ mod codegen {
         state.visit_trait.push_str(&format!(
             "{features}\n\
              fn visit_{under_name}(&mut self, i: &{ty}) {{ \
-               walk_{under_name}(self, i) \
+               visit_{under_name}(self, i) \
              }}\n",
             features = s.features,
             under_name = under_name,
@@ -527,8 +527,8 @@ mod codegen {
         ));
         state.visit_mut_trait.push_str(&format!(
             "{features}\n\
-             fn visit_{under_name}(&mut self, i: &mut {ty}) {{ \
-               walk_{under_name}(self, i) \
+             fn visit_{under_name}_mut(&mut self, i: &mut {ty}) {{ \
+               visit_{under_name}_mut(self, i) \
              }}\n",
             features = s.features,
             under_name = under_name,
@@ -537,7 +537,7 @@ mod codegen {
         state.fold_trait.push_str(&format!(
             "{features}\n\
              fn fold_{under_name}(&mut self, i: {ty}) -> {ty} {{ \
-               walk_{under_name}(self, i) \
+               fold_{under_name}(self, i) \
              }}\n",
             features = s.features,
             under_name = under_name,
@@ -546,7 +546,7 @@ mod codegen {
 
         state.visit_impl.push_str(&format!(
             "{features}\n\
-             pub fn walk_{under_name}<V: Visitor + ?Sized>(\
+             pub fn visit_{under_name}<V: Visitor + ?Sized>(\
                _visitor: &mut V, _i: &{ty}) {{\n",
             features = s.features,
             under_name = under_name,
@@ -554,7 +554,7 @@ mod codegen {
         ));
         state.visit_mut_impl.push_str(&format!(
             "{features}\n\
-             pub fn walk_{under_name}<V: VisitorMut + ?Sized>(\
+             pub fn visit_{under_name}_mut<V: VisitorMut + ?Sized>(\
                _visitor: &mut V, _i: &mut {ty}) {{\n",
             features = s.features,
             under_name = under_name,
@@ -562,7 +562,7 @@ mod codegen {
         ));
         state.fold_impl.push_str(&format!(
             "{features}\n\
-             pub fn walk_{under_name}<V: Folder + ?Sized>(\
+             pub fn fold_{under_name}<V: Folder + ?Sized>(\
                _visitor: &mut V, _i: {ty}) -> {ty} {{\n",
             features = s.features,
             under_name = under_name,
@@ -747,7 +747,7 @@ macro_rules! full {
 // Unreachable code is generated sometimes without the full feature.
 #![allow(unreachable_code)]
 
-use super::*;
+use *;
 use synom::delimited::Delimited;
 
 trait FoldHelper {{
@@ -805,7 +805,7 @@ pub trait Folder {{
 //! call `visit::walk_*` to apply the default traversal algorithm, or prevent
 //! deeper traversal by doing nothing.
 
-use super::*;
+use *;
 
 {full_macro}
 
@@ -837,7 +837,7 @@ pub trait Visitor {{
 //! call `visit::walk_*` to apply the default traversal algorithm, or prevent
 //! deeper traversal by doing nothing.
 
-use super::*;
+use *;
 
 {full_macro}
 
