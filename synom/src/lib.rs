@@ -488,6 +488,8 @@ macro_rules! peek {
 ///                 variant: variant,
 ///             }
 ///         )
+///         |
+///         _ => reject!()
 ///     ) >>
 ///     (item)
 /// ));
@@ -503,7 +505,6 @@ macro_rules! switch {
                 $(
                     $p => $subrule!(i, $($args2)*),
                 )*
-                _ => $crate::parse_error(),
             }
         }
     };
@@ -520,7 +521,7 @@ macro_rules! switch {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::{Ident, Ty};
+/// use syn::Ident;
 /// use synom::tokens::*;
 ///
 /// #[derive(Debug)]
@@ -536,21 +537,21 @@ macro_rules! switch {
 ///
 /// // Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
 /// named!(unit_type -> UnitType, do_parse!(
-///     which: alt!(
-///         syn!(Struct) => { |_| 0 }
+///     is_struct: alt!(
+///         syn!(Struct) => { |_| true }
 ///         |
-///         syn!(Enum) => { |_| 1 }
+///         syn!(Enum) => { |_| false }
 ///     ) >>
 ///     id: syn!(Ident) >>
-///     item: switch!(value!(which),
-///         0 => map!(
+///     item: switch!(value!(is_struct),
+///         true => map!(
 ///             syn!(Semi),
 ///             move |_| UnitType::Struct {
 ///                 name: id,
 ///             }
 ///         )
 ///         |
-///         1 => map!(
+///         false => map!(
 ///             braces!(syn!(Ident)),
 ///             move |(variant, _)| UnitType::Enum {
 ///                 name: id,
@@ -568,6 +569,36 @@ macro_rules! value {
     ($i:expr, $res:expr) => {
         ::std::result::Result::Ok(($i, $res))
     };
+}
+
+/// Unconditionally fail to parse anything. This may be useful in ignoring some
+/// arms of a `switch!` parser.
+///
+/// - **Syntax:** `reject!()`
+/// - **Output:** never succeeds
+///
+/// ```rust
+/// extern crate syn;
+/// #[macro_use] extern crate synom;
+///
+/// use syn::Item;
+///
+/// // Parse any item, except for a module.
+/// named!(almost_any_item -> Item,
+///     switch!(syn!(Item),
+///         Item::Mod(_) => reject!()
+///         |
+///         ok => value!(ok)
+///     )
+/// );
+///
+/// # fn main() {}
+/// ```
+#[macro_export]
+macro_rules! reject {
+    ($i:expr,) => {
+        $crate::parse_error()
+    }
 }
 
 /// Run a series of parsers and produce all of the results in a tuple.

@@ -57,8 +57,7 @@ pub mod parsing {
             which: alt!(
                 syn!(Struct) => { Ok }
                 |
-                // weird hack to get around exhaustiveness check below
-                syn!(Enum) => { |e| Err((e, 1)) }
+                syn!(Enum) => { Err }
             ) >>
             id: syn!(Ident) >>
             generics: syn!(Generics) >>
@@ -78,7 +77,7 @@ pub mod parsing {
                     }),
                 })
                 |
-                Err((e, 1)) => map!(enum_body, move |(wh, body, brace)| DeriveInput {
+                Err(e) => map!(enum_body, move |(wh, body, brace)| DeriveInput {
                     ident: id,
                     vis: vis,
                     attrs: attrs,
