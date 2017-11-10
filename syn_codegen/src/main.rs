@@ -16,7 +16,7 @@ extern crate syn;
 extern crate inflections;
 
 use quote::{Tokens, ToTokens};
-use syn::{ItemKind, Attribute, DeriveInput, Ident};
+use syn::{Item, Attribute, DeriveInput, Ident};
 
 use std::io::{self, Read, Write};
 use std::fs::File;
@@ -90,17 +90,17 @@ fn load_file<P: AsRef<Path>>(
 
     // Collect all of the interesting AstItems declared in this file or submodules.
     'items: for item in &file.items {
-        match item.node {
-            ItemKind::Mod(ref module) => {
+        match *item {
+            Item::Mod(ref item) => {
                 // Don't inspect inline modules.
-                if module.content.is_some() {
+                if item.content.is_some() {
                     continue;
                 }
 
                 // We don't want to try to load the generated rust files and
                 // parse them, so we ignore them here.
                 for name in IGNORED_MODS {
-                    if module.ident.as_ref() == *name {
+                    if item.ident.as_ref() == *name {
                         continue 'items;
                     }
                 }
@@ -111,26 +111,26 @@ fn load_file<P: AsRef<Path>>(
 
                 // Look up the submodule file, and recursively parse it.
                 // XXX: Only handles same-directory .rs file submodules.
-                let path = parent.join(&format!("{}.rs", module.ident.as_ref()));
+                let path = parent.join(&format!("{}.rs", item.ident.as_ref()));
                 load_file(path, features, lookup)?;
             }
-            ItemKind::Mac(ref mac) => {
+            Item::Mac(ref item) => {
                 // Lookip any #[cfg()] attributes directly on the macro
                 // invocation, and add them to the feature set.
                 let features = get_features(&item.attrs, features.clone());
 
                 // Try to parse the AstItem declaration out of the item.
-                let found = if path_eq(&mac.path, &"ast_struct".into()) {
+                let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
                     syn::parse_tokens::<parsing::AstStruct>(
-                        mac.tokens[0].clone().into_tokens()
+                        item.mac.tokens[0].clone().into_tokens()
                     ).map_err(|_| io::ErrorKind::Other)?.0
-                } else if path_eq(&mac.path, &"ast_enum".into()) {
+                } else if path_eq(&item.mac.path, &"ast_enum".into()) {
                     syn::parse_tokens::<parsing::AstEnum>(
-                        mac.tokens[0].clone().into_tokens()
+                        item.mac.tokens[0].clone().into_tokens()
                     ).map_err(|_| io::ErrorKind::Other)?.0
-                } else if path_eq(&mac.path, &"ast_enum_of_structs".into()) {
+                } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
                     syn::parse_tokens::<parsing::AstEnumOfStructs>(
-                        mac.tokens[0].clone().into_tokens()
+                        item.mac.tokens[0].clone().into_tokens()
                     ).map_err(|_| io::ErrorKind::Other)?.0
                 } else {
                     continue
