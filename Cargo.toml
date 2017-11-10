@@ -35,5 +35,4 @@ synom = { version = "0.11", path = "synom" }
 [dev-dependencies]
 syntex_pos = "0.59"
 syntex_syntax = "0.59"
-tempdir = "0.3.5"
 walkdir = "1.0.1"
