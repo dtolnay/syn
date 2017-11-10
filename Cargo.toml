@@ -10,6 +10,11 @@ categories = ["development-tools::procedural-macro-helpers"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 publish = false # this branch contains breaking changes
 
+[[example]]
+name = "dump-ast"
+path = "examples/dump-ast.rs"
+required-features = ["extra-traits", "parsing", "printing", "full"]
+
 [features]
 default = ["parsing", "printing", "clone-impls"]
 full = []

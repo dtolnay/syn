@@ -1,8 +1,10 @@
 use std::iter::FromIterator;
 use std::slice;
 use std::vec;
+#[cfg(feature = "extra-traits")]
+use std::fmt::{self, Debug};
 
-#[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash, Debug))]
+#[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Delimited<T, D> {
     inner: Vec<(T, Option<D>)>
@@ -141,6 +143,13 @@ impl<T, D> Delimited<T, D> {
     #[doc(hidden)]
     pub fn empty_or_trailing(&self) -> bool {
         self.is_empty() || self.trailing_delim()
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl<T: Debug, D: Debug> Debug for Delimited<T, D> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.inner.fmt(f)
     }
 }
 
