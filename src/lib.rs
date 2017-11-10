@@ -189,17 +189,11 @@ fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 /// extern crate syn;
 /// #
 /// # #[macro_use]
-/// # extern crate error_chain;
-/// # #[macro_use]
 /// # extern crate quote;
+/// #
+/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 ///
 /// use syn::Expr;
-/// #
-/// # error_chain! {
-/// #     foreign_links {
-/// #         Syn(syn::ParseError);
-/// #     }
-/// # }
 ///
 /// fn run() -> Result<()> {
 ///     let code = quote!(assert_eq!(u8::max_value(), 255));
@@ -222,16 +216,10 @@ pub fn parse_tokens<T: Synom>(tokens: quote::Tokens) -> Result<T, ParseError> {
 /// ```rust
 /// extern crate syn;
 /// #
-/// # #[macro_use]
-/// # extern crate error_chain;
+/// #
+/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 ///
 /// use syn::Expr;
-/// #
-/// # error_chain! {
-/// #     foreign_links {
-/// #         Syn(syn::ParseError);
-/// #     }
-/// # }
 ///
 /// fn run() -> Result<()> {
 ///     let code = "assert_eq!(u8::max_value(), 255)";
@@ -263,18 +251,11 @@ pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
 /// ```rust,no_run
 /// extern crate syn;
 /// #
-/// # #[macro_use]
-/// # extern crate error_chain;
+/// #
+/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 ///
 /// use std::fs::File;
 /// use std::io::Read;
-/// #
-/// # error_chain! {
-/// #     foreign_links {
-/// #         Io(std::io::Error);
-/// #         Syn(syn::ParseError);
-/// #     }
-/// # }
 ///
 /// fn run() -> Result<()> {
 ///     let mut file = File::open("path/to/code.rs")?;

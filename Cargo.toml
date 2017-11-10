@@ -33,7 +33,6 @@ unicode-xid = "0.1"
 synom = { version = "0.11", path = "synom" }
 
 [dev-dependencies]
-error-chain = "0.10"
 syntex_pos = "0.59"
 syntex_syntax = "0.59"
 tempdir = "0.3.5"
