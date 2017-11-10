@@ -454,50 +454,46 @@ pub mod parsing {
     use synom::tokens::*;
     use synom::tokens;
 
-    impl Synom for Item {
-        named!(parse -> Self, alt!(
-            item_extern_crate
-            |
-            item_use
-            |
-            item_static
-            |
-            item_const
-            |
-            item_fn
-            |
-            item_mod
-            |
-            item_foreign_mod
-            |
-            item_ty
-            |
-            item_struct_or_enum
-            |
-            item_union
-            |
-            item_trait
-            |
-            item_default_impl
-            |
-            item_impl
-            |
-            item_mac
-        ));
+    impl_synom!(Item "item" alt!(
+        syn!(ItemExternCrate) => { Item::ExternCrate }
+        |
+        syn!(ItemUse) => { Item::Use }
+        |
+        syn!(ItemStatic) => { Item::Static }
+        |
+        syn!(ItemConst) => { Item::Const }
+        |
+        syn!(ItemFn) => { Item::Fn }
+        |
+        syn!(ItemMod) => { Item::Mod }
+        |
+        syn!(ItemForeignMod) => { Item::ForeignMod }
+        |
+        syn!(ItemTy) => { Item::Ty }
+        |
+        syn!(ItemStruct) => { Item::Struct }
+        |
+        syn!(ItemEnum) => { Item::Enum }
+        |
+        syn!(ItemUnion) => { Item::Union }
+        |
+        syn!(ItemTrait) => { Item::Trait }
+        |
+        syn!(ItemDefaultImpl) => { Item::DefaultImpl }
+        |
+        syn!(ItemImpl) => { Item::Impl }
+        |
+        syn!(ItemMac) => { Item::Mac }
+    ));
 
-        fn description() -> Option<&'static str> {
-            Some("item")
-        }
-    }
-
-    named!(item_mac -> Item, do_parse!(
+    impl_synom!(ItemMac "macro item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         what: syn!(Path) >>
         bang: syn!(Bang) >>
         ident: option!(syn!(Ident)) >>
         body: call!(::TokenTree::parse_delimited) >>
         cond!(!body.is_braced(), syn!(Semi)) >>
-        (Item::Mac(ItemMac {
+        (ItemMac {
             attrs: attrs,
             mac: Mac {
                 path: what,
@@ -505,10 +501,10 @@ pub mod parsing {
                 ident: ident,
                 tokens: vec![body],
             },
-        }))
+        })
     ));
 
-    named!(item_extern_crate -> Item, do_parse!(
+    impl_synom!(ItemExternCrate "extern crate item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         extern_: syn!(Extern) >>
@@ -516,7 +512,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         rename: option!(tuple!(syn!(As), syn!(Ident))) >>
         semi: syn!(Semi) >>
-        (Item::ExternCrate(ItemExternCrate {
+        (ItemExternCrate {
             attrs: attrs,
             vis: vis,
             extern_token: extern_,
@@ -524,22 +520,22 @@ pub mod parsing {
             ident: ident,
             rename: rename,
             semi_token: semi,
-        }))
+        })
     ));
 
-    named!(item_use -> Item, do_parse!(
+    impl_synom!(ItemUse "use item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         use_: syn!(Use) >>
         what: syn!(ViewPath) >>
         semi: syn!(Semi) >>
-        (Item::Use(ItemUse {
+        (ItemUse {
             attrs: attrs,
             vis: vis,
             use_token: use_,
             path: Box::new(what),
             semi_token: semi,
-        }))
+        })
     ));
 
     impl Synom for ViewPath {
@@ -642,7 +638,7 @@ pub mod parsing {
         ));
     }
 
-    named!(item_static -> Item, do_parse!(
+    impl_synom!(ItemStatic "static item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         static_: syn!(Static) >>
@@ -653,7 +649,7 @@ pub mod parsing {
         eq: syn!(Eq) >>
         value: syn!(Expr) >>
         semi: syn!(Semi) >>
-        (Item::Static(ItemStatic {
+        (ItemStatic {
             attrs: attrs,
             vis: vis,
             static_token: static_,
@@ -664,10 +660,10 @@ pub mod parsing {
             eq_token: eq,
             expr: Box::new(value),
             semi_token: semi,
-        }))
+        })
     ));
 
-    named!(item_const -> Item, do_parse!(
+    impl_synom!(ItemConst "const item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         const_: syn!(Const) >>
@@ -677,7 +673,7 @@ pub mod parsing {
         eq: syn!(Eq) >>
         value: syn!(Expr) >>
         semi: syn!(Semi) >>
-        (Item::Const(ItemConst {
+        (ItemConst {
             attrs: attrs,
             vis: vis,
             const_token: const_,
@@ -687,10 +683,10 @@ pub mod parsing {
             eq_token: eq,
             expr: Box::new(value),
             semi_token: semi,
-        }))
+        })
     ));
 
-    named!(item_fn -> Item, do_parse!(
+    impl_synom!(ItemFn "fn item" do_parse!(
         outer_attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         constness: syn!(Constness) >>
@@ -706,7 +702,7 @@ pub mod parsing {
             many0!(call!(Attribute::parse_inner)),
             call!(Block::parse_within)
         )) >>
-        (Item::Fn(ItemFn {
+        (ItemFn {
             attrs: {
                 let mut attrs = outer_attrs;
                 attrs.extend((inner_attrs_stmts.0).0);
@@ -733,7 +729,7 @@ pub mod parsing {
                 brace_token: inner_attrs_stmts.1,
                 stmts: (inner_attrs_stmts.0).1,
             }),
-        }))
+        })
     ));
 
     impl Synom for FnArg {
@@ -777,7 +773,7 @@ pub mod parsing {
         ));
     }
 
-    named!(item_mod -> Item, do_parse!(
+    impl_synom!(ItemMod "mod item" do_parse!(
         outer_attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         mod_: syn!(Mod) >>
@@ -800,7 +796,7 @@ pub mod parsing {
                 None,
             )}
         ) >>
-        (Item::Mod(ItemMod {
+        (ItemMod {
             attrs: {
                 let mut attrs = outer_attrs;
                 attrs.extend(content_semi.0);
@@ -811,19 +807,19 @@ pub mod parsing {
             ident: ident,
             content: content_semi.1,
             semi: content_semi.2,
-        }))
+        })
     ));
 
-    named!(item_foreign_mod -> Item, do_parse!(
+    impl_synom!(ItemForeignMod "foreign mod item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         abi: syn!(Abi) >>
         items: braces!(many0!(syn!(ForeignItem))) >>
-        (Item::ForeignMod(ItemForeignMod {
+        (ItemForeignMod {
             attrs: attrs,
             abi: abi,
             brace_token: items.1,
             items: items.0,
-        }))
+        })
     ));
 
     impl Synom for ForeignItem {
@@ -898,7 +894,7 @@ pub mod parsing {
         })
     ));
 
-    named!(item_ty -> Item, do_parse!(
+    impl_synom!(ItemTy "type item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         type_: syn!(Type) >>
@@ -908,7 +904,7 @@ pub mod parsing {
         eq: syn!(Eq) >>
         ty: syn!(Ty) >>
         semi: syn!(Semi) >>
-        (Item::Ty(ItemTy {
+        (ItemTy {
             attrs: attrs,
             vis: vis,
             type_token: type_,
@@ -920,12 +916,24 @@ pub mod parsing {
             eq_token: eq,
             ty: Box::new(ty),
             semi_token: semi,
-        }))
+        })
     ));
 
-    named!(item_struct_or_enum -> Item, map!(syn!(DeriveInput), Into::into));
+    impl_synom!(ItemStruct "struct item" switch!(
+        map!(syn!(DeriveInput), Into::into),
+        Item::Struct(item) => value!(item)
+        |
+        _ => reject!()
+    ));
 
-    named!(item_union -> Item, do_parse!(
+    impl_synom!(ItemEnum "enum item" switch!(
+        map!(syn!(DeriveInput), Into::into),
+        Item::Enum(item) => value!(item)
+        |
+        _ => reject!()
+    ));
+
+    impl_synom!(ItemUnion "union item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         union_: syn!(Union) >>
@@ -934,7 +942,7 @@ pub mod parsing {
         where_clause: syn!(WhereClause) >>
         fields: braces!(call!(Delimited::parse_terminated_with,
                               Field::parse_struct)) >>
-        (Item::Union(ItemUnion {
+        (ItemUnion {
             attrs: attrs,
             vis: vis,
             union_token: union_,
@@ -944,10 +952,10 @@ pub mod parsing {
                 .. generics
             },
             data: VariantData::Struct(fields.0, fields.1),
-        }))
+        })
     ));
 
-    named!(item_trait -> Item, do_parse!(
+    impl_synom!(ItemTrait "trait item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         unsafety: syn!(Unsafety) >>
@@ -960,7 +968,7 @@ pub mod parsing {
         ) >>
         where_clause: syn!(WhereClause) >>
         body: braces!(many0!(syn!(TraitItem))) >>
-        (Item::Trait(ItemTrait {
+        (ItemTrait {
             attrs: attrs,
             vis: vis,
             unsafety: unsafety,
@@ -974,10 +982,10 @@ pub mod parsing {
             supertraits: bounds.unwrap_or_default(),
             brace_token: body.1,
             items: body.0,
-        }))
+        })
     ));
 
-    named!(item_default_impl -> Item, do_parse!(
+    impl_synom!(ItemDefaultImpl "default impl item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         unsafety: syn!(Unsafety) >>
         impl_: syn!(Impl) >>
@@ -985,7 +993,7 @@ pub mod parsing {
         for_: syn!(For) >>
         dot2: syn!(Dot2) >>
         braces: braces!(epsilon!()) >>
-        (Item::DefaultImpl(ItemDefaultImpl {
+        (ItemDefaultImpl {
             attrs: attrs,
             unsafety: unsafety,
             impl_token: impl_,
@@ -993,7 +1001,7 @@ pub mod parsing {
             for_token: for_,
             dot2_token: dot2,
             brace_token: braces.1,
-        }))
+        })
     ));
 
     impl Synom for TraitItem {
@@ -1120,7 +1128,7 @@ pub mod parsing {
         })
     ));
 
-    named!(item_impl -> Item, do_parse!(
+    impl_synom!(ItemImpl "impl item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         defaultness: syn!(Defaultness) >>
         unsafety: syn!(Unsafety) >>
@@ -1139,7 +1147,7 @@ pub mod parsing {
         self_ty: syn!(Ty) >>
         where_clause: syn!(WhereClause) >>
         body: braces!(many0!(syn!(ImplItem))) >>
-        (Item::Impl(ItemImpl {
+        (ItemImpl {
             attrs: attrs,
             defaultness: defaultness,
             unsafety: unsafety,
@@ -1152,7 +1160,7 @@ pub mod parsing {
             self_ty: Box::new(self_ty),
             brace_token: body.1,
             items: body.0,
-        }))
+        })
     ));
 
     impl Synom for ImplItem {
