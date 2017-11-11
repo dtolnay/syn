@@ -328,7 +328,7 @@ fn fold_trait_item(&mut self, i: TraitItem) -> TraitItem { fold_trait_item(self,
 # [ cfg ( feature = "full" ) ]
 fn fold_trait_item_const(&mut self, i: TraitItemConst) -> TraitItemConst { fold_trait_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item_kind(&mut self, i: TraitItemKind) -> TraitItemKind { fold_trait_item_kind(self, i) }
+fn fold_trait_item_mac(&mut self, i: TraitItemMac) -> TraitItemMac { fold_trait_item_mac(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_trait_item_method(&mut self, i: TraitItemMethod) -> TraitItemMethod { fold_trait_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -2234,25 +2234,7 @@ pub fn fold_trait_bound_modifier<V: Folder + ?Sized>(_visitor: &mut V, _i: Trait
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_trait_item<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem) -> TraitItem {
-    TraitItem {
-        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        node: _visitor.fold_trait_item_kind(_i . node),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemConst) -> TraitItemConst {
-    TraitItemConst {
-        const_token: _i . const_token,
-        ident: _i . ident,
-        colon_token: _i . colon_token,
-        ty: _visitor.fold_ty(_i . ty),
-        default: _i . default,
-        semi_token: _i . semi_token,
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_trait_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemKind) -> TraitItemKind {
-    use ::TraitItemKind::*;
+    use ::TraitItem::*;
     match _i {
         Const(_binding_0, ) => {
             Const (
@@ -2271,14 +2253,34 @@ pub fn fold_trait_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemK
         }
         Macro(_binding_0, ) => {
             Macro (
-                _visitor.fold_mac(_binding_0),
+                _visitor.fold_trait_item_mac(_binding_0),
             )
         }
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemConst) -> TraitItemConst {
+    TraitItemConst {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        const_token: _i . const_token,
+        ident: _i . ident,
+        colon_token: _i . colon_token,
+        ty: _visitor.fold_ty(_i . ty),
+        default: _i . default,
+        semi_token: _i . semi_token,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_trait_item_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMac) -> TraitItemMac {
+    TraitItemMac {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        mac: _visitor.fold_mac(_i . mac),
+    }
+}
+# [ cfg ( feature = "full" ) ]
 pub fn fold_trait_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMethod) -> TraitItemMethod {
     TraitItemMethod {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         sig: _visitor.fold_method_sig(_i . sig),
         default: (_i . default).map(|it| { _visitor.fold_block(it) }),
         semi_token: _i . semi_token,
@@ -2287,6 +2289,7 @@ pub fn fold_trait_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitIte
 # [ cfg ( feature = "full" ) ]
 pub fn fold_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemType) -> TraitItemType {
     TraitItemType {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         type_token: _i . type_token,
         ident: _i . ident,
         colon_token: _i . colon_token,

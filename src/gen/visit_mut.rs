@@ -301,7 +301,7 @@ fn visit_trait_item_mut(&mut self, i: &mut TraitItem) { visit_trait_item_mut(sel
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_const_mut(&mut self, i: &mut TraitItemConst) { visit_trait_item_const_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_trait_item_kind_mut(&mut self, i: &mut TraitItemKind) { visit_trait_item_kind_mut(self, i) }
+fn visit_trait_item_mac_mut(&mut self, i: &mut TraitItemMac) { visit_trait_item_mac_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_method_mut(&mut self, i: &mut TraitItemMethod) { visit_trait_item_method_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1721,21 +1721,7 @@ pub fn visit_trait_bound_modifier_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItem) {
-    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
-    _visitor.visit_trait_item_kind_mut(&mut _i . node);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_trait_item_const_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemConst) {
-    // Skipped field _i . const_token;
-    // Skipped field _i . ident;
-    // Skipped field _i . colon_token;
-    _visitor.visit_ty_mut(&mut _i . ty);
-    // Skipped field _i . default;
-    // Skipped field _i . semi_token;
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_trait_item_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemKind) {
-    use ::TraitItemKind::*;
+    use ::TraitItem::*;
     match *_i {
         Const(ref mut _binding_0, ) => {
             _visitor.visit_trait_item_const_mut(&mut * _binding_0);
@@ -1747,18 +1733,35 @@ pub fn visit_trait_item_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
             _visitor.visit_trait_item_type_mut(&mut * _binding_0);
         }
         Macro(ref mut _binding_0, ) => {
-            _visitor.visit_mac_mut(&mut * _binding_0);
+            _visitor.visit_trait_item_mac_mut(&mut * _binding_0);
         }
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn visit_trait_item_const_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemConst) {
+    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
+    // Skipped field _i . const_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . colon_token;
+    _visitor.visit_ty_mut(&mut _i . ty);
+    // Skipped field _i . default;
+    // Skipped field _i . semi_token;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_trait_item_mac_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemMac) {
+    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
+    _visitor.visit_mac_mut(&mut _i . mac);
+}
+# [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item_method_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemMethod) {
+    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
     _visitor.visit_method_sig_mut(&mut _i . sig);
     if let Some(ref mut it) = _i . default { _visitor.visit_block_mut(&mut * it) };
     // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemType) {
+    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
     // Skipped field _i . colon_token;

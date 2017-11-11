@@ -54,11 +54,11 @@ mod item;
 #[cfg(feature = "full")]
 pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ItemForeignMod,
                ImplItem, ImplItemKind, ImplPolarity, Item, MethodSig, PathListItem,
-               TraitItem, TraitItemKind, ViewPath, ItemExternCrate, ItemUse,
+               TraitItem, ViewPath, ItemExternCrate, ItemUse,
                ItemStatic, ItemConst, ItemFn, ItemMac, ItemMod, ItemTy, ItemEnum,
                ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
                PathSimple, PathGlob, PathList, ForeignItemFn, ForeignItemStatic,
-               TraitItemConst, TraitItemMethod, TraitItemType,
+               TraitItemConst, TraitItemMac, TraitItemMethod, TraitItemType,
                ImplItemConst, ImplItemMethod, ImplItemType, ArgSelfRef,
                ArgSelf, ArgCaptured};
 
