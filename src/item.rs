@@ -349,16 +349,10 @@ ast_enum! {
     }
 }
 
-ast_struct! {
-    pub struct ImplItem {
-        pub attrs: Vec<Attribute>,
-        pub node: ImplItemKind,
-    }
-}
-
 ast_enum_of_structs! {
-    pub enum ImplItemKind {
+    pub enum ImplItem {
         pub Const(ImplItemConst {
+            pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub defaultness: Defaultness,
             pub const_token: tokens::Const,
@@ -370,12 +364,14 @@ ast_enum_of_structs! {
             pub semi_token: tokens::Semi,
         }),
         pub Method(ImplItemMethod {
+            pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub defaultness: Defaultness,
             pub sig: MethodSig,
             pub block: Block,
         }),
         pub Type(ImplItemType {
+            pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub defaultness: Defaultness,
             pub type_token: tokens::Type,
@@ -384,10 +380,11 @@ ast_enum_of_structs! {
             pub ty: Ty,
             pub semi_token: tokens::Semi,
         }),
-        pub Macro(Macro),
+        pub Macro(ImplItemMacro {
+            pub attrs: Vec<Attribute>,
+            pub mac: Macro,
+        }),
     }
-
-    do_not_generate_to_tokens
 }
 
 ast_struct! {
@@ -1144,19 +1141,17 @@ pub mod parsing {
         })
     ));
 
-    impl Synom for ImplItem {
-        named!(parse -> Self, alt!(
-            impl_item_const
-            |
-            impl_item_method
-            |
-            impl_item_type
-            |
-            impl_item_mac
-        ));
-    }
+    impl_synom!(ImplItem "item in impl block" alt!(
+        syn!(ImplItemConst) => { ImplItem::Const }
+        |
+        syn!(ImplItemMethod) => { ImplItem::Method }
+        |
+        syn!(ImplItemType) => { ImplItem::Type }
+        |
+        syn!(ImplItemMacro) => { ImplItem::Macro }
+    ));
 
-    named!(impl_item_const -> ImplItem, do_parse!(
+    impl_synom!(ImplItemConst "const item in impl block" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         defaultness: syn!(Defaultness) >>
@@ -1167,23 +1162,21 @@ pub mod parsing {
         eq: syn!(Eq) >>
         value: syn!(Expr) >>
         semi: syn!(Semi) >>
-        (ImplItem {
+        (ImplItemConst {
             attrs: attrs,
-            node: ImplItemConst {
-                vis: vis,
-                defaultness: defaultness,
-                const_token: const_,
-                ident: ident,
-                colon_token: colon,
-                ty: ty,
-                eq_token: eq,
-                expr: value,
-                semi_token: semi,
-            }.into(),
+            vis: vis,
+            defaultness: defaultness,
+            const_token: const_,
+            ident: ident,
+            colon_token: colon,
+            ty: ty,
+            eq_token: eq,
+            expr: value,
+            semi_token: semi,
         })
     ));
 
-    named!(impl_item_method -> ImplItem, do_parse!(
+    impl_synom!(ImplItemMethod "method in impl block" do_parse!(
         outer_attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         defaultness: syn!(Defaultness) >>
@@ -1200,42 +1193,40 @@ pub mod parsing {
             many0!(call!(Attribute::parse_inner)),
             call!(Block::parse_within)
         )) >>
-        (ImplItem {
+        (ImplItemMethod {
             attrs: {
                 let mut attrs = outer_attrs;
                 attrs.extend((inner_attrs_stmts.0).0);
                 attrs
             },
-            node: ImplItemMethod {
-                vis: vis,
-                defaultness: defaultness,
-                sig: MethodSig {
-                    constness: constness,
-                    unsafety: unsafety,
-                    abi: abi,
-                    ident: ident,
-                    decl: FnDecl {
-                        fn_token: fn_,
-                        paren_token: inputs.1,
-                        inputs: inputs.0,
-                        output: ret,
-                        variadic: false,
-                        generics: Generics {
-                            where_clause: where_clause,
-                            .. generics
-                        },
-                        dot_tokens: None,
+            vis: vis,
+            defaultness: defaultness,
+            sig: MethodSig {
+                constness: constness,
+                unsafety: unsafety,
+                abi: abi,
+                ident: ident,
+                decl: FnDecl {
+                    fn_token: fn_,
+                    paren_token: inputs.1,
+                    inputs: inputs.0,
+                    output: ret,
+                    variadic: false,
+                    generics: Generics {
+                        where_clause: where_clause,
+                        .. generics
                     },
+                    dot_tokens: None,
                 },
-                block: Block {
-                    brace_token: inner_attrs_stmts.1,
-                    stmts: (inner_attrs_stmts.0).1,
-                },
-            }.into(),
+            },
+            block: Block {
+                brace_token: inner_attrs_stmts.1,
+                stmts: (inner_attrs_stmts.0).1,
+            },
         })
     ));
 
-    named!(impl_item_type -> ImplItem, do_parse!(
+    impl_synom!(ImplItemType "type in impl block" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         defaultness: syn!(Defaultness) >>
@@ -1244,27 +1235,25 @@ pub mod parsing {
         eq: syn!(Eq) >>
         ty: syn!(Ty) >>
         semi: syn!(Semi) >>
-        (ImplItem {
+        (ImplItemType {
             attrs: attrs,
-            node: ImplItemType {
-                vis: vis,
-                defaultness: defaultness,
-                type_token: type_,
-                ident: ident,
-                eq_token: eq,
-                ty: ty,
-                semi_token: semi,
-            }.into(),
+            vis: vis,
+            defaultness: defaultness,
+            type_token: type_,
+            ident: ident,
+            eq_token: eq,
+            ty: ty,
+            semi_token: semi,
         })
     ));
 
-    named!(impl_item_mac -> ImplItem, do_parse!(
+    impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mac: syn!(Macro) >>
         cond!(!mac.is_braced(), syn!(Semi)) >>
-        (ImplItem {
+        (ImplItemMacro {
             attrs: attrs,
-            node: ImplItemKind::Macro(mac),
+            mac: mac,
         })
     ));
 
@@ -1584,46 +1573,54 @@ mod printing {
         }
     }
 
-    impl ToTokens for ImplItem {
+    impl ToTokens for ImplItemConst {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            match self.node {
-                ImplItemKind::Const(ref item) => {
-                    item.vis.to_tokens(tokens);
-                    item.defaultness.to_tokens(tokens);
-                    item.const_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.expr.to_tokens(tokens);
-                    item.semi_token.to_tokens(tokens);
-                }
-                ImplItemKind::Method(ref item) => {
-                    item.vis.to_tokens(tokens);
-                    item.defaultness.to_tokens(tokens);
-                    item.sig.to_tokens(tokens);
-                    item.block.brace_token.surround(tokens, |tokens| {
-                        tokens.append_all(self.attrs.inner());
-                        tokens.append_all(&item.block.stmts);
-                    });
-                }
-                ImplItemKind::Type(ref item) => {
-                    item.vis.to_tokens(tokens);
-                    item.defaultness.to_tokens(tokens);
-                    item.type_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                    item.semi_token.to_tokens(tokens);
-                }
-                ImplItemKind::Macro(ref mac) => {
-                    mac.to_tokens(tokens);
-                    if !mac.is_braced() {
-                        // FIXME needs a span
-                        tokens::Semi::default().to_tokens(tokens);
-                    }
-                }
+            self.vis.to_tokens(tokens);
+            self.defaultness.to_tokens(tokens);
+            self.const_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ImplItemMethod {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.defaultness.to_tokens(tokens);
+            self.sig.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.block.stmts);
+            });
+        }
+    }
+
+    impl ToTokens for ImplItemType {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.defaultness.to_tokens(tokens);
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ImplItemMacro {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.mac.to_tokens(tokens);
+            if !self.mac.is_braced() {
+                // FIXME needs a span
+                tokens::Semi::default().to_tokens(tokens);
             }
         }
     }

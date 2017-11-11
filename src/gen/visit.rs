@@ -181,7 +181,7 @@ fn visit_impl_item(&mut self, i: &ImplItem) { visit_impl_item(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item_const(&mut self, i: &ImplItemConst) { visit_impl_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_impl_item_kind(&mut self, i: &ImplItemKind) { visit_impl_item_kind(self, i) }
+fn visit_impl_item_macro(&mut self, i: &ImplItemMacro) { visit_impl_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item_method(&mut self, i: &ImplItemMethod) { visit_impl_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1127,24 +1127,7 @@ pub fn visit_generics<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Generics) {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItem) {
-    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
-    _visitor.visit_impl_item_kind(&_i . node);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_impl_item_const<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItemConst) {
-    _visitor.visit_visibility(&_i . vis);
-    _visitor.visit_defaultness(&_i . defaultness);
-    // Skipped field _i . const_token;
-    // Skipped field _i . ident;
-    // Skipped field _i . colon_token;
-    _visitor.visit_ty(&_i . ty);
-    // Skipped field _i . eq_token;
-    _visitor.visit_expr(&_i . expr);
-    // Skipped field _i . semi_token;
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_impl_item_kind<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItemKind) {
-    use ::ImplItemKind::*;
+    use ::ImplItem::*;
     match *_i {
         Const(ref _binding_0, ) => {
             _visitor.visit_impl_item_const(&* _binding_0);
@@ -1156,12 +1139,31 @@ pub fn visit_impl_item_kind<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItem
             _visitor.visit_impl_item_type(&* _binding_0);
         }
         Macro(ref _binding_0, ) => {
-            _visitor.visit_macro(&* _binding_0);
+            _visitor.visit_impl_item_macro(&* _binding_0);
         }
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn visit_impl_item_const<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItemConst) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
+    _visitor.visit_visibility(&_i . vis);
+    _visitor.visit_defaultness(&_i . defaultness);
+    // Skipped field _i . const_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . colon_token;
+    _visitor.visit_ty(&_i . ty);
+    // Skipped field _i . eq_token;
+    _visitor.visit_expr(&_i . expr);
+    // Skipped field _i . semi_token;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_impl_item_macro<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItemMacro) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
+    _visitor.visit_macro(&_i . mac);
+}
+# [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item_method<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItemMethod) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
     _visitor.visit_visibility(&_i . vis);
     _visitor.visit_defaultness(&_i . defaultness);
     _visitor.visit_method_sig(&_i . sig);
@@ -1169,6 +1171,7 @@ pub fn visit_impl_item_method<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplIt
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item_type<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItemType) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
     _visitor.visit_visibility(&_i . vis);
     _visitor.visit_defaultness(&_i . defaultness);
     // Skipped field _i . type_token;

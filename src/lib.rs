@@ -53,13 +53,13 @@ pub use ident::Ident;
 mod item;
 #[cfg(feature = "full")]
 pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItem, ItemForeignMod,
-               ImplItem, ImplItemKind, ImplPolarity, Item, MethodSig, PathListItem,
+               ImplItem, ImplPolarity, Item, MethodSig, PathListItem,
                TraitItem, ViewPath, ItemExternCrate, ItemUse,
                ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMod, ItemTy, ItemEnum,
                ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
                PathSimple, PathGlob, PathList, ForeignItemFn, ForeignItemStatic,
                TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
-               ImplItemConst, ImplItemMethod, ImplItemType, ArgSelfRef,
+               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, ArgSelfRef,
                ArgSelf, ArgCaptured};
 
 #[cfg(feature = "full")]
