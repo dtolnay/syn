@@ -9,7 +9,7 @@ ast_struct! {
     /// Represents a macro invocation. The Path indicates which macro
     /// is being invoked, and the vector of token-trees contains the source
     /// of the macro invocation.
-    pub struct Mac {
+    pub struct Macro {
         pub path: Path,
         pub bang_token: tokens::Bang,
         /// The `example` in `macro_rules! example { ... }`.
@@ -21,7 +21,7 @@ ast_struct! {
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct TokenTree(pub proc_macro2::TokenTree);
 
-impl Mac {
+impl Macro {
     pub fn is_braced(&self) -> bool {
         match self.tokens.last() {
             Some(t) => t.is_braced(),
@@ -138,12 +138,12 @@ pub mod parsing {
     use synom::tokens::*;
     use synom::{Synom, PResult, Cursor, parse_error};
 
-    impl Synom for Mac {
+    impl Synom for Macro {
         named!(parse -> Self, do_parse!(
             what: syn!(Path) >>
             bang: syn!(Bang) >>
             body: call!(::TokenTree::parse_delimited) >>
-            (Mac {
+            (Macro {
                 path: what,
                 bang_token: bang,
                 ident: None,
@@ -173,7 +173,7 @@ mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
 
-    impl ToTokens for Mac {
+    impl ToTokens for Macro {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);

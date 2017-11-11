@@ -209,7 +209,7 @@ fn visit_item_foreign_mod(&mut self, i: &ItemForeignMod) { visit_item_foreign_mo
 # [ cfg ( feature = "full" ) ]
 fn visit_item_impl(&mut self, i: &ItemImpl) { visit_item_impl(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_item_mac(&mut self, i: &ItemMac) { visit_item_mac(self, i) }
+fn visit_item_macro(&mut self, i: &ItemMacro) { visit_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_mod(&mut self, i: &ItemMod) { visit_item_mod(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -228,10 +228,10 @@ fn visit_item_use(&mut self, i: &ItemUse) { visit_item_use(self, i) }
 fn visit_lifetime_def(&mut self, i: &LifetimeDef) { visit_lifetime_def(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_local(&mut self, i: &Local) { visit_local(self, i) }
-
-fn visit_mac(&mut self, i: &Mac) { visit_mac(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_mac_stmt_style(&mut self, i: &MacStmtStyle) { visit_mac_stmt_style(self, i) }
+
+fn visit_macro(&mut self, i: &Macro) { visit_macro(self, i) }
 
 fn visit_meta_item(&mut self, i: &MetaItem) { visit_meta_item(self, i) }
 
@@ -301,7 +301,7 @@ fn visit_trait_item(&mut self, i: &TraitItem) { visit_trait_item(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_const(&mut self, i: &TraitItemConst) { visit_trait_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_trait_item_mac(&mut self, i: &TraitItemMac) { visit_trait_item_mac(self, i) }
+fn visit_trait_item_macro(&mut self, i: &TraitItemMacro) { visit_trait_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_method(&mut self, i: &TraitItemMethod) { visit_trait_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -879,8 +879,8 @@ pub fn visit_expr_kind<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ExprKind) {
         Ret(ref _binding_0, ) => {
             full!(_visitor.visit_expr_ret(&* _binding_0));
         }
-        Mac(ref _binding_0, ) => {
-            _visitor.visit_mac(&* _binding_0);
+        Macro(ref _binding_0, ) => {
+            _visitor.visit_macro(&* _binding_0);
         }
         Struct(ref _binding_0, ) => {
             full!(_visitor.visit_expr_struct(&* _binding_0));
@@ -1158,7 +1158,7 @@ pub fn visit_impl_item_kind<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ImplItem
             _visitor.visit_impl_item_type(&* _binding_0);
         }
         Macro(ref _binding_0, ) => {
-            _visitor.visit_mac(&* _binding_0);
+            _visitor.visit_macro(&* _binding_0);
         }
     }
 }
@@ -1247,8 +1247,8 @@ pub fn visit_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Item) {
         Impl(ref _binding_0, ) => {
             _visitor.visit_item_impl(&* _binding_0);
         }
-        Mac(ref _binding_0, ) => {
-            _visitor.visit_item_mac(&* _binding_0);
+        Macro(ref _binding_0, ) => {
+            _visitor.visit_item_macro(&* _binding_0);
         }
     }
 }
@@ -1325,9 +1325,9 @@ pub fn visit_item_impl<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ItemImpl) {
     for it in (_i . items).iter() { _visitor.visit_impl_item(&it) };
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_item_mac<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ItemMac) {
+pub fn visit_item_macro<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ItemMacro) {
     for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
-    _visitor.visit_mac(&_i . mac);
+    _visitor.visit_macro(&_i . mac);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_mod<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ItemMod) {
@@ -1420,13 +1420,6 @@ pub fn visit_local<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Local) {
     if let Some(ref it) = _i . init { _visitor.visit_expr(&* it) };
     for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
 }
-
-pub fn visit_mac<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Mac) {
-    _visitor.visit_path(&_i . path);
-    // Skipped field _i . bang_token;
-    // Skipped field _i . ident;
-    // Skipped field _i . tokens;
-}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_mac_stmt_style<V: Visitor + ?Sized>(_visitor: &mut V, _i: &MacStmtStyle) {
     use ::MacStmtStyle::*;
@@ -1437,6 +1430,13 @@ pub fn visit_mac_stmt_style<V: Visitor + ?Sized>(_visitor: &mut V, _i: &MacStmtS
         Braces => { }
         NoBraces => { }
     }
+}
+
+pub fn visit_macro<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Macro) {
+    _visitor.visit_path(&_i . path);
+    // Skipped field _i . bang_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . tokens;
 }
 
 pub fn visit_meta_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &MetaItem) {
@@ -1543,8 +1543,8 @@ pub fn visit_pat<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Pat) {
         Slice(ref _binding_0, ) => {
             _visitor.visit_pat_slice(&* _binding_0);
         }
-        Mac(ref _binding_0, ) => {
-            _visitor.visit_mac(&* _binding_0);
+        Macro(ref _binding_0, ) => {
+            _visitor.visit_macro(&* _binding_0);
         }
     }
 }
@@ -1704,7 +1704,7 @@ pub fn visit_stmt<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Stmt) {
             _visitor.visit_expr(&* _binding_0);
             // Skipped field * _binding_1;
         }
-        Mac(ref _binding_0, ) => {
+        Macro(ref _binding_0, ) => {
             // Skipped field * _binding_0;
         }
     }
@@ -1733,7 +1733,7 @@ pub fn visit_trait_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TraitItem) {
             _visitor.visit_trait_item_type(&* _binding_0);
         }
         Macro(ref _binding_0, ) => {
-            _visitor.visit_trait_item_mac(&* _binding_0);
+            _visitor.visit_trait_item_macro(&* _binding_0);
         }
     }
 }
@@ -1748,9 +1748,9 @@ pub fn visit_trait_item_const<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TraitI
     // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_trait_item_mac<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TraitItemMac) {
+pub fn visit_trait_item_macro<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TraitItemMacro) {
     for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
-    _visitor.visit_mac(&_i . mac);
+    _visitor.visit_macro(&_i . mac);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item_method<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TraitItemMethod) {
@@ -1812,8 +1812,8 @@ pub fn visit_ty<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Ty) {
         Infer(ref _binding_0, ) => {
             _visitor.visit_ty_infer(&* _binding_0);
         }
-        Mac(ref _binding_0, ) => {
-            _visitor.visit_mac(&* _binding_0);
+        Macro(ref _binding_0, ) => {
+            _visitor.visit_macro(&* _binding_0);
         }
     }
 }

@@ -236,7 +236,7 @@ fn fold_item_foreign_mod(&mut self, i: ItemForeignMod) -> ItemForeignMod { fold_
 # [ cfg ( feature = "full" ) ]
 fn fold_item_impl(&mut self, i: ItemImpl) -> ItemImpl { fold_item_impl(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_mac(&mut self, i: ItemMac) -> ItemMac { fold_item_mac(self, i) }
+fn fold_item_macro(&mut self, i: ItemMacro) -> ItemMacro { fold_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_mod(&mut self, i: ItemMod) -> ItemMod { fold_item_mod(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -255,10 +255,10 @@ fn fold_item_use(&mut self, i: ItemUse) -> ItemUse { fold_item_use(self, i) }
 fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef { fold_lifetime_def(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
-
-fn fold_mac(&mut self, i: Mac) -> Mac { fold_mac(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_mac_stmt_style(&mut self, i: MacStmtStyle) -> MacStmtStyle { fold_mac_stmt_style(self, i) }
+
+fn fold_macro(&mut self, i: Macro) -> Macro { fold_macro(self, i) }
 
 fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { fold_meta_item(self, i) }
 
@@ -328,7 +328,7 @@ fn fold_trait_item(&mut self, i: TraitItem) -> TraitItem { fold_trait_item(self,
 # [ cfg ( feature = "full" ) ]
 fn fold_trait_item_const(&mut self, i: TraitItemConst) -> TraitItemConst { fold_trait_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_trait_item_mac(&mut self, i: TraitItemMac) -> TraitItemMac { fold_trait_item_mac(self, i) }
+fn fold_trait_item_macro(&mut self, i: TraitItemMacro) -> TraitItemMacro { fold_trait_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_trait_item_method(&mut self, i: TraitItemMethod) -> TraitItemMethod { fold_trait_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1116,9 +1116,9 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
                 full!(_visitor.fold_expr_ret(_binding_0)),
             )
         }
-        Mac(_binding_0, ) => {
-            Mac (
-                _visitor.fold_mac(_binding_0),
+        Macro(_binding_0, ) => {
+            Macro (
+                _visitor.fold_macro(_binding_0),
             )
         }
         Struct(_binding_0, ) => {
@@ -1488,7 +1488,7 @@ pub fn fold_impl_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemKin
         }
         Macro(_binding_0, ) => {
             Macro (
-                _visitor.fold_mac(_binding_0),
+                _visitor.fold_macro(_binding_0),
             )
         }
     }
@@ -1616,9 +1616,9 @@ pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
                 _visitor.fold_item_impl(_binding_0),
             )
         }
-        Mac(_binding_0, ) => {
-            Mac (
-                _visitor.fold_item_mac(_binding_0),
+        Macro(_binding_0, ) => {
+            Macro (
+                _visitor.fold_item_macro(_binding_0),
             )
         }
     }
@@ -1710,10 +1710,10 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_item_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMac) -> ItemMac {
-    ItemMac {
+pub fn fold_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro) -> ItemMacro {
+    ItemMacro {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        mac: _visitor.fold_mac(_i . mac),
+        mac: _visitor.fold_macro(_i . mac),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1825,15 +1825,6 @@ pub fn fold_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
     }
 }
-
-pub fn fold_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: Mac) -> Mac {
-    Mac {
-        path: _visitor.fold_path(_i . path),
-        bang_token: _i . bang_token,
-        ident: _i . ident,
-        tokens: _i . tokens,
-    }
-}
 # [ cfg ( feature = "full" ) ]
 pub fn fold_mac_stmt_style<V: Folder + ?Sized>(_visitor: &mut V, _i: MacStmtStyle) -> MacStmtStyle {
     use ::MacStmtStyle::*;
@@ -1845,6 +1836,15 @@ pub fn fold_mac_stmt_style<V: Folder + ?Sized>(_visitor: &mut V, _i: MacStmtStyl
         }
         Braces => { Braces }
         NoBraces => { NoBraces }
+    }
+}
+
+pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
+    Macro {
+        path: _visitor.fold_path(_i . path),
+        bang_token: _i . bang_token,
+        ident: _i . ident,
+        tokens: _i . tokens,
     }
 }
 
@@ -1996,9 +1996,9 @@ pub fn fold_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
                 _visitor.fold_pat_slice(_binding_0),
             )
         }
-        Mac(_binding_0, ) => {
-            Mac (
-                _visitor.fold_mac(_binding_0),
+        Macro(_binding_0, ) => {
+            Macro (
+                _visitor.fold_macro(_binding_0),
             )
         }
     }
@@ -2213,8 +2213,8 @@ pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
                 _binding_1,
             )
         }
-        Mac(_binding_0, ) => {
-            Mac (
+        Macro(_binding_0, ) => {
+            Macro (
                 _binding_0,
             )
         }
@@ -2253,7 +2253,7 @@ pub fn fold_trait_item<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem) -> T
         }
         Macro(_binding_0, ) => {
             Macro (
-                _visitor.fold_trait_item_mac(_binding_0),
+                _visitor.fold_trait_item_macro(_binding_0),
             )
         }
     }
@@ -2271,10 +2271,10 @@ pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_trait_item_mac<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMac) -> TraitItemMac {
-    TraitItemMac {
+pub fn fold_trait_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemMacro) -> TraitItemMacro {
+    TraitItemMacro {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        mac: _visitor.fold_mac(_i . mac),
+        mac: _visitor.fold_macro(_i . mac),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2367,9 +2367,9 @@ pub fn fold_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: Ty) -> Ty {
                 _visitor.fold_ty_infer(_binding_0),
             )
         }
-        Mac(_binding_0, ) => {
-            Mac (
-                _visitor.fold_mac(_binding_0),
+        Macro(_binding_0, ) => {
+            Macro (
+                _visitor.fold_macro(_binding_0),
             )
         }
     }

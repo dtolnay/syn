@@ -77,7 +77,7 @@ ast_enum_of_structs! {
             pub underscore_token: tokens::Underscore
         }),
         /// A macro in the type position.
-        pub Mac(Mac),
+        pub Macro(Macro),
     }
 }
 
@@ -362,7 +362,7 @@ pub mod parsing {
         syn!(TyParen) => { Ty::Paren }
         |
         // must be before path
-        syn!(Mac) => { Ty::Mac }
+        syn!(Macro) => { Ty::Macro }
         |
         // must be before ty_poly_trait_ref
         call!(ty_path, allow_plus)

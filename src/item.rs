@@ -182,9 +182,9 @@ ast_enum_of_structs! {
         /// A macro invocation (which includes macro definition).
         ///
         /// E.g. `macro_rules! foo { .. }` or `foo!(..)`
-        pub Mac(ItemMac {
+        pub Macro(ItemMacro {
             pub attrs: Vec<Attribute>,
-            pub mac: Mac,
+            pub mac: Macro,
         }),
     }
 
@@ -334,9 +334,9 @@ ast_enum_of_structs! {
             pub default: Option<(tokens::Eq, Ty)>,
             pub semi_token: tokens::Semi,
         }),
-        pub Macro(TraitItemMac {
+        pub Macro(TraitItemMacro {
             pub attrs: Vec<Attribute>,
-            pub mac: Mac,
+            pub mac: Macro,
         }),
     }
 
@@ -388,7 +388,7 @@ ast_enum_of_structs! {
             pub ty: Ty,
             pub semi_token: tokens::Semi,
         }),
-        pub Macro(Mac),
+        pub Macro(Macro),
     }
 
     do_not_generate_to_tokens
@@ -482,19 +482,19 @@ pub mod parsing {
         |
         syn!(ItemImpl) => { Item::Impl }
         |
-        syn!(ItemMac) => { Item::Mac }
+        syn!(ItemMacro) => { Item::Macro }
     ));
 
-    impl_synom!(ItemMac "macro item" do_parse!(
+    impl_synom!(ItemMacro "macro item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         what: syn!(Path) >>
         bang: syn!(Bang) >>
         ident: option!(syn!(Ident)) >>
         body: call!(::TokenTree::parse_delimited) >>
         cond!(!body.is_braced(), syn!(Semi)) >>
-        (ItemMac {
+        (ItemMacro {
             attrs: attrs,
-            mac: Mac {
+            mac: Macro {
                 path: what,
                 bang_token: bang,
                 ident: ident,
@@ -1010,7 +1010,7 @@ pub mod parsing {
         |
         syn!(TraitItemType) => { TraitItem::Type }
         |
-        syn!(TraitItemMac) => { TraitItem::Macro }
+        syn!(TraitItemMacro) => { TraitItem::Macro }
     ));
 
     impl_synom!(TraitItemConst "const trait item" do_parse!(
@@ -1109,11 +1109,11 @@ pub mod parsing {
         })
     ));
 
-    impl_synom!(TraitItemMac "trait item macro" do_parse!(
+    impl_synom!(TraitItemMacro "trait item macro" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
-        mac: syn!(Mac) >>
+        mac: syn!(Macro) >>
         cond!(!mac.is_braced(), syn!(Semi)) >>
-        (TraitItemMac {
+        (TraitItemMacro {
             attrs: attrs,
             mac: mac,
         })
@@ -1270,7 +1270,7 @@ pub mod parsing {
 
     named!(impl_item_mac -> ImplItem, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
-        mac: syn!(Mac) >>
+        mac: syn!(Macro) >>
         cond!(!mac.is_braced(), syn!(Semi)) >>
         (ImplItem {
             attrs: attrs,
@@ -1485,7 +1485,7 @@ mod printing {
                         tokens.append_all(&item.items);
                     });
                 }
-                Item::Mac(ref item) => {
+                Item::Macro(ref item) => {
                     tokens.append_all(item.attrs.outer());
                     item.mac.path.to_tokens(tokens);
                     item.mac.bang_token.to_tokens(tokens);

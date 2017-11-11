@@ -114,7 +114,7 @@ fn load_file<P: AsRef<Path>>(
                 let path = parent.join(&format!("{}.rs", item.ident.as_ref()));
                 load_file(path, features, lookup)?;
             }
-            Item::Mac(ref item) => {
+            Item::Macro(ref item) => {
                 // Lookip any #[cfg()] attributes directly on the macro
                 // invocation, and add them to the feature set.
                 let features = get_features(&item.attrs, features.clone());
