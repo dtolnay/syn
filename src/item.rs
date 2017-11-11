@@ -304,20 +304,14 @@ ast_enum_of_structs! {
     do_not_generate_to_tokens
 }
 
-ast_struct! {
+ast_enum_of_structs! {
     /// Represents an item declaration within a trait declaration,
     /// possibly including a default implementation. A trait item is
     /// either required (meaning it doesn't have an implementation, just a
     /// signature) or provided (meaning it has a default implementation).
-    pub struct TraitItem {
-        pub attrs: Vec<Attribute>,
-        pub node: TraitItemKind,
-    }
-}
-
-ast_enum_of_structs! {
-    pub enum TraitItemKind {
+    pub enum TraitItem {
         pub Const(TraitItemConst {
+            pub attrs: Vec<Attribute>,
             pub const_token: tokens::Const,
             pub ident: Ident,
             pub colon_token: tokens::Colon,
@@ -326,11 +320,13 @@ ast_enum_of_structs! {
             pub semi_token: tokens::Semi,
         }),
         pub Method(TraitItemMethod {
+            pub attrs: Vec<Attribute>,
             pub sig: MethodSig,
             pub default: Option<Block>,
             pub semi_token: Option<tokens::Semi>,
         }),
         pub Type(TraitItemType {
+            pub attrs: Vec<Attribute>,
             pub type_token: tokens::Type,
             pub ident: Ident,
             pub colon_token: Option<tokens::Colon>,
@@ -338,7 +334,10 @@ ast_enum_of_structs! {
             pub default: Option<(tokens::Eq, Ty)>,
             pub semi_token: tokens::Semi,
         }),
-        pub Macro(Mac),
+        pub Macro(TraitItemMac {
+            pub attrs: Vec<Attribute>,
+            pub mac: Mac,
+        }),
     }
 
     do_not_generate_to_tokens
@@ -1004,19 +1003,17 @@ pub mod parsing {
         })
     ));
 
-    impl Synom for TraitItem {
-        named!(parse -> Self, alt!(
-            trait_item_const
-            |
-            trait_item_method
-            |
-            trait_item_type
-            |
-            trait_item_mac
-        ));
-    }
+    impl_synom!(TraitItem "trait item" alt!(
+        syn!(TraitItemConst) => { TraitItem::Const }
+        |
+        syn!(TraitItemMethod) => { TraitItem::Method }
+        |
+        syn!(TraitItemType) => { TraitItem::Type }
+        |
+        syn!(TraitItemMac) => { TraitItem::Macro }
+    ));
 
-    named!(trait_item_const -> TraitItem, do_parse!(
+    impl_synom!(TraitItemConst "const trait item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         const_: syn!(Const) >>
         ident: syn!(Ident) >>
@@ -1024,20 +1021,18 @@ pub mod parsing {
         ty: syn!(Ty) >>
         default: option!(tuple!(syn!(Eq), syn!(Expr))) >>
         semi: syn!(Semi) >>
-        (TraitItem {
+        (TraitItemConst {
             attrs: attrs,
-            node: TraitItemConst {
-                const_token: const_,
-                ident: ident,
-                colon_token: colon,
-                ty: ty,
-                default: default,
-                semi_token: semi,
-            }.into(),
+            const_token: const_,
+            ident: ident,
+            colon_token: colon,
+            ty: ty,
+            default: default,
+            semi_token: semi,
         })
     ));
 
-    named!(trait_item_method -> TraitItem, do_parse!(
+    impl_synom!(TraitItemMethod "method trait item" do_parse!(
         outer_attrs: many0!(call!(Attribute::parse_outer)) >>
         constness: syn!(Constness) >>
         unsafety: syn!(Unsafety) >>
@@ -1058,44 +1053,42 @@ pub mod parsing {
                 Some(((inner_attrs, stmts), b)) => (inner_attrs, Some((stmts, b))),
                 None => (Vec::new(), None),
             };
-            TraitItem {
+            TraitItemMethod {
                 attrs: {
                     let mut attrs = outer_attrs;
                     attrs.extend(inner_attrs);
                     attrs
                 },
-                node: TraitItemMethod {
-                    sig: MethodSig {
-                        constness: constness,
-                        unsafety: unsafety,
-                        abi: abi,
-                        ident: ident,
-                        decl: FnDecl {
-                            inputs: inputs.0,
-                            output: ret,
-                            variadic: false,
-                            fn_token: fn_,
-                            paren_token: inputs.1,
-                            dot_tokens: None,
-                            generics: Generics {
-                                where_clause: where_clause,
-                                .. generics
-                            },
+                sig: MethodSig {
+                    constness: constness,
+                    unsafety: unsafety,
+                    abi: abi,
+                    ident: ident,
+                    decl: FnDecl {
+                        inputs: inputs.0,
+                        output: ret,
+                        variadic: false,
+                        fn_token: fn_,
+                        paren_token: inputs.1,
+                        dot_tokens: None,
+                        generics: Generics {
+                            where_clause: where_clause,
+                            .. generics
                         },
                     },
-                    default: stmts.map(|stmts| {
-                        Block {
-                            stmts: stmts.0,
-                            brace_token: stmts.1,
-                        }
-                    }),
-                    semi_token: semi,
-                }.into(),
+                },
+                default: stmts.map(|stmts| {
+                    Block {
+                        stmts: stmts.0,
+                        brace_token: stmts.1,
+                    }
+                }),
+                semi_token: semi,
             }
         })
     ));
 
-    named!(trait_item_type -> TraitItem, do_parse!(
+    impl_synom!(TraitItemType "trait item type" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         type_: syn!(Type) >>
         ident: syn!(Ident) >>
@@ -1105,26 +1098,24 @@ pub mod parsing {
         ) >>
         default: option!(tuple!(syn!(Eq), syn!(Ty))) >>
         semi: syn!(Semi) >>
-        (TraitItem {
+        (TraitItemType {
             attrs: attrs,
-            node: TraitItemType {
-                type_token: type_,
-                ident: ident,
-                colon_token: colon,
-                bounds: bounds.unwrap_or_default(),
-                default: default,
-                semi_token: semi,
-            }.into(),
+            type_token: type_,
+            ident: ident,
+            colon_token: colon,
+            bounds: bounds.unwrap_or_default(),
+            default: default,
+            semi_token: semi,
         })
     ));
 
-    named!(trait_item_mac -> TraitItem, do_parse!(
+    impl_synom!(TraitItemMac "trait item macro" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mac: syn!(Mac) >>
         cond!(!mac.is_braced(), syn!(Semi)) >>
-        (TraitItem {
+        (TraitItemMac {
             attrs: attrs,
-            node: TraitItemKind::Macro(mac),
+            mac: mac,
         })
     ));
 
@@ -1550,9 +1541,9 @@ mod printing {
 
     impl ToTokens for TraitItem {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append_all(self.attrs.outer());
-            match self.node {
-                TraitItemKind::Const(ref item) => {
+            match *self {
+                TraitItem::Const(ref item) => {
+                    tokens.append_all(item.attrs.outer());
                     item.const_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
                     item.colon_token.to_tokens(tokens);
@@ -1563,12 +1554,13 @@ mod printing {
                     }
                     item.semi_token.to_tokens(tokens);
                 }
-                TraitItemKind::Method(ref item) => {
+                TraitItem::Method(ref item) => {
+                    tokens.append_all(item.attrs.outer());
                     item.sig.to_tokens(tokens);
                     match item.default {
                         Some(ref block) => {
                             block.brace_token.surround(tokens, |tokens| {
-                                tokens.append_all(self.attrs.inner());
+                                tokens.append_all(item.attrs.inner());
                                 tokens.append_all(&block.stmts);
                             });
                         }
@@ -1577,7 +1569,8 @@ mod printing {
                         }
                     }
                 }
-                TraitItemKind::Type(ref item) => {
+                TraitItem::Type(ref item) => {
+                    tokens.append_all(item.attrs.outer());
                     item.type_token.to_tokens(tokens);
                     item.ident.to_tokens(tokens);
                     if !item.bounds.is_empty() {
@@ -1590,9 +1583,10 @@ mod printing {
                     }
                     item.semi_token.to_tokens(tokens);
                 }
-                TraitItemKind::Macro(ref mac) => {
-                    mac.to_tokens(tokens);
-                    if !mac.is_braced() {
+                TraitItem::Macro(ref item) => {
+                    tokens.append_all(item.attrs.outer());
+                    item.mac.to_tokens(tokens);
+                    if !item.mac.is_braced() {
                         tokens::Semi::default().to_tokens(tokens);
                     }
                 }
