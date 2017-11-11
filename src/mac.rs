@@ -12,8 +12,6 @@ ast_struct! {
     pub struct Macro {
         pub path: Path,
         pub bang_token: tokens::Bang,
-        /// The `example` in `macro_rules! example { ... }`.
-        pub ident: Option<Ident>,
         pub tokens: Vec<TokenTree>,
     }
 }
@@ -146,7 +144,6 @@ pub mod parsing {
             (Macro {
                 path: what,
                 bang_token: bang,
-                ident: None,
                 tokens: vec![body],
             })
         ));
@@ -177,7 +174,6 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
-            self.ident.to_tokens(tokens);
             tokens.append_all(&self.tokens);
         }
     }

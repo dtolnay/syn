@@ -184,6 +184,8 @@ ast_enum_of_structs! {
         /// E.g. `macro_rules! foo { .. }` or `foo!(..)`
         pub Macro(ItemMacro {
             pub attrs: Vec<Attribute>,
+            /// The `example` in `macro_rules! example { ... }`.
+            pub ident: Option<Ident>,
             pub mac: Macro,
         }),
     }
@@ -483,10 +485,10 @@ pub mod parsing {
         cond!(!body.is_braced(), syn!(Semi)) >>
         (ItemMacro {
             attrs: attrs,
+            ident: ident,
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                ident: ident,
                 tokens: vec![body],
             },
         })
@@ -1504,7 +1506,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.mac.path.to_tokens(tokens);
             self.mac.bang_token.to_tokens(tokens);
-            self.mac.ident.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
             tokens.append_all(&self.mac.tokens);
             if !self.mac.is_braced() {
                 tokens::Semi::default().to_tokens(tokens);

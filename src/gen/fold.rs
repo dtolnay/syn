@@ -1712,6 +1712,7 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
 pub fn fold_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro) -> ItemMacro {
     ItemMacro {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        ident: _i . ident,
         mac: _visitor.fold_macro(_i . mac),
     }
 }
@@ -1842,7 +1843,6 @@ pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
     Macro {
         path: _visitor.fold_path(_i . path),
         bang_token: _i . bang_token,
-        ident: _i . ident,
         tokens: _i . tokens,
     }
 }
