@@ -209,7 +209,7 @@ fn visit_item_foreign_mod_mut(&mut self, i: &mut ItemForeignMod) { visit_item_fo
 # [ cfg ( feature = "full" ) ]
 fn visit_item_impl_mut(&mut self, i: &mut ItemImpl) { visit_item_impl_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_item_mac_mut(&mut self, i: &mut ItemMac) { visit_item_mac_mut(self, i) }
+fn visit_item_macro_mut(&mut self, i: &mut ItemMacro) { visit_item_macro_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_mod_mut(&mut self, i: &mut ItemMod) { visit_item_mod_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -228,10 +228,10 @@ fn visit_item_use_mut(&mut self, i: &mut ItemUse) { visit_item_use_mut(self, i) 
 fn visit_lifetime_def_mut(&mut self, i: &mut LifetimeDef) { visit_lifetime_def_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_local_mut(&mut self, i: &mut Local) { visit_local_mut(self, i) }
-
-fn visit_mac_mut(&mut self, i: &mut Mac) { visit_mac_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_mac_stmt_style_mut(&mut self, i: &mut MacStmtStyle) { visit_mac_stmt_style_mut(self, i) }
+
+fn visit_macro_mut(&mut self, i: &mut Macro) { visit_macro_mut(self, i) }
 
 fn visit_meta_item_mut(&mut self, i: &mut MetaItem) { visit_meta_item_mut(self, i) }
 
@@ -301,7 +301,7 @@ fn visit_trait_item_mut(&mut self, i: &mut TraitItem) { visit_trait_item_mut(sel
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_const_mut(&mut self, i: &mut TraitItemConst) { visit_trait_item_const_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_trait_item_mac_mut(&mut self, i: &mut TraitItemMac) { visit_trait_item_mac_mut(self, i) }
+fn visit_trait_item_macro_mut(&mut self, i: &mut TraitItemMacro) { visit_trait_item_macro_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_method_mut(&mut self, i: &mut TraitItemMethod) { visit_trait_item_method_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -879,8 +879,8 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
         Ret(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_ret_mut(&mut * _binding_0));
         }
-        Mac(ref mut _binding_0, ) => {
-            _visitor.visit_mac_mut(&mut * _binding_0);
+        Macro(ref mut _binding_0, ) => {
+            _visitor.visit_macro_mut(&mut * _binding_0);
         }
         Struct(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_struct_mut(&mut * _binding_0));
@@ -1158,7 +1158,7 @@ pub fn visit_impl_item_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
             _visitor.visit_impl_item_type_mut(&mut * _binding_0);
         }
         Macro(ref mut _binding_0, ) => {
-            _visitor.visit_mac_mut(&mut * _binding_0);
+            _visitor.visit_macro_mut(&mut * _binding_0);
         }
     }
 }
@@ -1247,8 +1247,8 @@ pub fn visit_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Item) {
         Impl(ref mut _binding_0, ) => {
             _visitor.visit_item_impl_mut(&mut * _binding_0);
         }
-        Mac(ref mut _binding_0, ) => {
-            _visitor.visit_item_mac_mut(&mut * _binding_0);
+        Macro(ref mut _binding_0, ) => {
+            _visitor.visit_item_macro_mut(&mut * _binding_0);
         }
     }
 }
@@ -1325,9 +1325,9 @@ pub fn visit_item_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut It
     for mut it in (_i . items).iter_mut() { _visitor.visit_impl_item_mut(&mut it) };
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_item_mac_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMac) {
+pub fn visit_item_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMacro) {
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
-    _visitor.visit_mac_mut(&mut _i . mac);
+    _visitor.visit_macro_mut(&mut _i . mac);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_mod_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMod) {
@@ -1420,13 +1420,6 @@ pub fn visit_local_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Local)
     if let Some(ref mut it) = _i . init { _visitor.visit_expr_mut(&mut * it) };
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
 }
-
-pub fn visit_mac_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Mac) {
-    _visitor.visit_path_mut(&mut _i . path);
-    // Skipped field _i . bang_token;
-    // Skipped field _i . ident;
-    // Skipped field _i . tokens;
-}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_mac_stmt_style_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MacStmtStyle) {
     use ::MacStmtStyle::*;
@@ -1437,6 +1430,13 @@ pub fn visit_mac_stmt_style_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
         Braces => { }
         NoBraces => { }
     }
+}
+
+pub fn visit_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Macro) {
+    _visitor.visit_path_mut(&mut _i . path);
+    // Skipped field _i . bang_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . tokens;
 }
 
 pub fn visit_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MetaItem) {
@@ -1543,8 +1543,8 @@ pub fn visit_pat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
         Slice(ref mut _binding_0, ) => {
             _visitor.visit_pat_slice_mut(&mut * _binding_0);
         }
-        Mac(ref mut _binding_0, ) => {
-            _visitor.visit_mac_mut(&mut * _binding_0);
+        Macro(ref mut _binding_0, ) => {
+            _visitor.visit_macro_mut(&mut * _binding_0);
         }
     }
 }
@@ -1704,7 +1704,7 @@ pub fn visit_stmt_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Stmt) {
             _visitor.visit_expr_mut(&mut * _binding_0);
             // Skipped field * _binding_1;
         }
-        Mac(ref mut _binding_0, ) => {
+        Macro(ref mut _binding_0, ) => {
             // Skipped field * _binding_0;
         }
     }
@@ -1733,7 +1733,7 @@ pub fn visit_trait_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut T
             _visitor.visit_trait_item_type_mut(&mut * _binding_0);
         }
         Macro(ref mut _binding_0, ) => {
-            _visitor.visit_trait_item_mac_mut(&mut * _binding_0);
+            _visitor.visit_trait_item_macro_mut(&mut * _binding_0);
         }
     }
 }
@@ -1748,9 +1748,9 @@ pub fn visit_trait_item_const_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
     // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_trait_item_mac_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemMac) {
+pub fn visit_trait_item_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemMacro) {
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
-    _visitor.visit_mac_mut(&mut _i . mac);
+    _visitor.visit_macro_mut(&mut _i . mac);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item_method_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemMethod) {
@@ -1812,8 +1812,8 @@ pub fn visit_ty_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ty) {
         Infer(ref mut _binding_0, ) => {
             _visitor.visit_ty_infer_mut(&mut * _binding_0);
         }
-        Mac(ref mut _binding_0, ) => {
-            _visitor.visit_mac_mut(&mut * _binding_0);
+        Macro(ref mut _binding_0, ) => {
+            _visitor.visit_macro_mut(&mut * _binding_0);
         }
     }
 }

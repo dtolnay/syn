@@ -55,10 +55,10 @@ mod item;
 pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ItemForeignMod,
                ImplItem, ImplItemKind, ImplPolarity, Item, MethodSig, PathListItem,
                TraitItem, ViewPath, ItemExternCrate, ItemUse,
-               ItemStatic, ItemConst, ItemFn, ItemMac, ItemMod, ItemTy, ItemEnum,
+               ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMod, ItemTy, ItemEnum,
                ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
                PathSimple, PathGlob, PathList, ForeignItemFn, ForeignItemStatic,
-               TraitItemConst, TraitItemMac, TraitItemMethod, TraitItemType,
+               TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
                ImplItemConst, ImplItemMethod, ImplItemType, ArgSelfRef,
                ArgSelf, ArgCaptured};
 
@@ -74,7 +74,7 @@ mod lit;
 pub use lit::{Lit, LitKind};
 
 mod mac;
-pub use mac::{Mac, TokenTree};
+pub use mac::{Macro, TokenTree};
 
 mod derive;
 pub use derive::{Body, DeriveInput, BodyEnum, BodyStruct};

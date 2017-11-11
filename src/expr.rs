@@ -291,7 +291,7 @@ ast_enum_of_structs! {
         }),
 
         /// A macro invocation; pre-expansion
-        pub Mac(Mac),
+        pub Macro(Macro),
 
         /// A struct literal expression.
         ///
@@ -407,7 +407,7 @@ ast_enum! {
         Semi(Box<Expr>, tokens::Semi),
 
         /// Macro invocation.
-        Mac(Box<(Mac, MacStmtStyle, Vec<Attribute>)>),
+        Macro(Box<(Macro, MacStmtStyle, Vec<Attribute>)>),
     }
 }
 
@@ -537,7 +537,7 @@ ast_enum_of_structs! {
             pub bracket_token: tokens::Bracket,
         }),
         /// A macro pattern; pre-expansion
-        pub Mac(Mac),
+        pub Macro(Macro),
     }
 }
 
@@ -1160,7 +1160,7 @@ pub mod parsing {
         |
         syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
         |
-        syn!(Mac) => { ExprKind::Mac } // must be before expr_path
+        syn!(Macro) => { ExprKind::Macro } // must be before expr_path
         |
         call!(expr_break, allow_struct) // must be before expr_path
         |
@@ -1213,7 +1213,7 @@ pub mod parsing {
         |
         syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
         |
-        syn!(Mac) => { ExprKind::Mac } // must be before expr_path
+        syn!(Macro) => { ExprKind::Macro } // must be before expr_path
         |
         syn!(ExprPath) => { ExprKind::Path }
     ));
@@ -1846,8 +1846,8 @@ pub mod parsing {
     // expression statements
         data: braces!(syn!(TokenStream)) >>
         semi: option!(syn!(Semi)) >>
-        (Stmt::Mac(Box::new((
-            Mac {
+        (Stmt::Macro(Box::new((
+            Macro {
                 path: what,
                 bang_token: bang,
                 ident: None,
@@ -1930,7 +1930,7 @@ pub mod parsing {
             |
             syn!(PatStruct) => { Pat::Struct } // must be before pat_ident
             |
-            syn!(Mac) => { Pat::Mac } // must be before pat_ident
+            syn!(Macro) => { Pat::Macro } // must be before pat_ident
             |
             syn!(PatLit) => { Pat::Lit } // must be before pat_ident
             |
@@ -2959,7 +2959,7 @@ mod printing {
                     expr.to_tokens(tokens);
                     semi.to_tokens(tokens);
                 }
-                Stmt::Mac(ref mac) => {
+                Stmt::Macro(ref mac) => {
                     let (ref mac, ref style, ref attrs) = **mac;
                     tokens.append_all(attrs.outer());
                     mac.to_tokens(tokens);
