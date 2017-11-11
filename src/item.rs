@@ -275,33 +275,29 @@ ast_enum! {
     }
 }
 
-ast_struct! {
-    pub struct ForeignItem {
-        pub ident: Ident,
-        pub attrs: Vec<Attribute>,
-        pub node: ForeignItemKind,
-        pub vis: Visibility,
-        pub semi_token: tokens::Semi,
-    }
-}
-
 ast_enum_of_structs! {
     /// An item within an `extern` block
-    pub enum ForeignItemKind {
+    pub enum ForeignItem {
         /// A foreign function
         pub Fn(ForeignItemFn {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub ident: Ident,
             pub decl: Box<FnDecl>,
+            pub semi_token: tokens::Semi,
         }),
         /// A foreign static item (`static ext: u8`)
         pub Static(ForeignItemStatic {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
             pub static_token: tokens::Static,
-            pub ty: Box<Ty>,
-            pub colon_token: tokens::Colon,
             pub mutbl: Mutability,
+            pub ident: Ident,
+            pub colon_token: tokens::Colon,
+            pub ty: Box<Ty>,
+            pub semi_token: tokens::Semi,
         }),
     }
-
-    do_not_generate_to_tokens
 }
 
 ast_enum_of_structs! {
@@ -821,15 +817,13 @@ pub mod parsing {
         })
     ));
 
-    impl Synom for ForeignItem {
-        named!(parse -> Self, alt!(
-            foreign_fn
-            |
-            foreign_static
-        ));
-    }
+    impl_synom!(ForeignItem "foreign item" alt!(
+        syn!(ForeignItemFn) => { ForeignItem::Fn }
+        |
+        syn!(ForeignItemStatic) => { ForeignItem::Static }
+    ));
 
-    named!(foreign_fn -> ForeignItem, do_parse!(
+    impl_synom!(ForeignItemFn "foreign function" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         fn_: syn!(Fn_) >>
@@ -847,30 +841,28 @@ pub mod parsing {
         ({
             let ((inputs, variadic), parens) = inputs;
             let variadic = variadic.and_then(|v| v);
-            ForeignItem {
+            ForeignItemFn {
                 ident: ident,
                 attrs: attrs,
                 semi_token: semi,
-                node: ForeignItemFn {
-                    decl: Box::new(FnDecl {
-                        fn_token: fn_,
-                        paren_token: parens,
-                        inputs: inputs,
-                        variadic: variadic.is_some(),
-                        dot_tokens: variadic,
-                        output: ret,
-                        generics: Generics {
-                            where_clause: where_clause,
-                            .. generics
-                        },
-                    }),
-                }.into(),
+                decl: Box::new(FnDecl {
+                    fn_token: fn_,
+                    paren_token: parens,
+                    inputs: inputs,
+                    variadic: variadic.is_some(),
+                    dot_tokens: variadic,
+                    output: ret,
+                    generics: Generics {
+                        where_clause: where_clause,
+                        .. generics
+                    },
+                }),
                 vis: vis,
             }
         })
     ));
 
-    named!(foreign_static -> ForeignItem, do_parse!(
+    impl_synom!(ForeignItemStatic "foreign static" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         static_: syn!(Static) >>
@@ -879,16 +871,14 @@ pub mod parsing {
         colon: syn!(Colon) >>
         ty: syn!(Ty) >>
         semi: syn!(Semi) >>
-        (ForeignItem {
+        (ForeignItemStatic {
             ident: ident,
             attrs: attrs,
             semi_token: semi,
-            node: ForeignItemStatic {
-                ty: Box::new(ty),
-                mutbl: mutability,
-                static_token: static_,
-                colon_token: colon,
-            }.into(),
+            ty: Box::new(ty),
+            mutbl: mutability,
+            static_token: static_,
+            colon_token: colon,
             vis: vis,
         })
     ));
@@ -1638,22 +1628,24 @@ mod printing {
         }
     }
 
-    impl ToTokens for ForeignItem {
+    impl ToTokens for ForeignItemFn {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            match self.node {
-                ForeignItemKind::Fn(ref item) => {
-                    NamedDecl(&item.decl, self.ident).to_tokens(tokens)
-                }
-                ForeignItemKind::Static(ref item) => {
-                    item.static_token.to_tokens(tokens);
-                    item.mutbl.to_tokens(tokens);
-                    self.ident.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                }
-            }
+            NamedDecl(&self.decl, self.ident).to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ForeignItemStatic {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.static_token.to_tokens(tokens);
+            self.mutbl.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }

@@ -52,7 +52,7 @@ pub use ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItemKind, ForeignItem, ItemForeignMod,
+pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItem, ItemForeignMod,
                ImplItem, ImplItemKind, ImplPolarity, Item, MethodSig, PathListItem,
                TraitItem, ViewPath, ItemExternCrate, ItemUse,
                ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMod, ItemTy, ItemEnum,

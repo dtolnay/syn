@@ -171,8 +171,6 @@ fn visit_foreign_item(&mut self, i: &ForeignItem) { visit_foreign_item(self, i) 
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_fn(&mut self, i: &ForeignItemFn) { visit_foreign_item_fn(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_foreign_item_kind(&mut self, i: &ForeignItemKind) { visit_foreign_item_kind(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_static(&mut self, i: &ForeignItemStatic) { visit_foreign_item_static(self, i) }
 
 fn visit_function_ret_ty(&mut self, i: &FunctionRetTy) { visit_function_ret_ty(self, i) }
@@ -1079,19 +1077,7 @@ pub fn visit_fn_decl<V: Visitor + ?Sized>(_visitor: &mut V, _i: &FnDecl) {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_foreign_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignItem) {
-    // Skipped field _i . ident;
-    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
-    _visitor.visit_foreign_item_kind(&_i . node);
-    _visitor.visit_visibility(&_i . vis);
-    // Skipped field _i . semi_token;
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_foreign_item_fn<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignItemFn) {
-    _visitor.visit_fn_decl(&_i . decl);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_foreign_item_kind<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignItemKind) {
-    use ::ForeignItemKind::*;
+    use ::ForeignItem::*;
     match *_i {
         Fn(ref _binding_0, ) => {
             _visitor.visit_foreign_item_fn(&* _binding_0);
@@ -1102,11 +1088,23 @@ pub fn visit_foreign_item_kind<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Forei
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn visit_foreign_item_fn<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignItemFn) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
+    _visitor.visit_visibility(&_i . vis);
+    // Skipped field _i . ident;
+    _visitor.visit_fn_decl(&_i . decl);
+    // Skipped field _i . semi_token;
+}
+# [ cfg ( feature = "full" ) ]
 pub fn visit_foreign_item_static<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignItemStatic) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
+    _visitor.visit_visibility(&_i . vis);
     // Skipped field _i . static_token;
-    _visitor.visit_ty(&_i . ty);
-    // Skipped field _i . colon_token;
     _visitor.visit_mutability(&_i . mutbl);
+    // Skipped field _i . ident;
+    // Skipped field _i . colon_token;
+    _visitor.visit_ty(&_i . ty);
+    // Skipped field _i . semi_token;
 }
 
 pub fn visit_function_ret_ty<V: Visitor + ?Sized>(_visitor: &mut V, _i: &FunctionRetTy) {
