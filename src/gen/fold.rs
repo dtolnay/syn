@@ -198,8 +198,6 @@ fn fold_foreign_item(&mut self, i: ForeignItem) -> ForeignItem { fold_foreign_it
 # [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_fn(&mut self, i: ForeignItemFn) -> ForeignItemFn { fold_foreign_item_fn(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_foreign_item_kind(&mut self, i: ForeignItemKind) -> ForeignItemKind { fold_foreign_item_kind(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStatic { fold_foreign_item_static(self, i) }
 
 fn fold_function_ret_ty(&mut self, i: FunctionRetTy) -> FunctionRetTy { fold_function_ret_ty(self, i) }
@@ -210,7 +208,7 @@ fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem { fold_impl_item(self, i) 
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_item_const(&mut self, i: ImplItemConst) -> ImplItemConst { fold_impl_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_impl_item_kind(&mut self, i: ImplItemKind) -> ImplItemKind { fold_impl_item_kind(self, i) }
+fn fold_impl_item_macro(&mut self, i: ImplItemMacro) -> ImplItemMacro { fold_impl_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_item_method(&mut self, i: ImplItemMethod) -> ImplItemMethod { fold_impl_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1384,23 +1382,7 @@ pub fn fold_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_foreign_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItem) -> ForeignItem {
-    ForeignItem {
-        ident: _i . ident,
-        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        node: _visitor.fold_foreign_item_kind(_i . node),
-        vis: _visitor.fold_visibility(_i . vis),
-        semi_token: _i . semi_token,
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_foreign_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemFn) -> ForeignItemFn {
-    ForeignItemFn {
-        decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_foreign_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemKind) -> ForeignItemKind {
-    use ::ForeignItemKind::*;
+    use ::ForeignItem::*;
     match _i {
         Fn(_binding_0, ) => {
             Fn (
@@ -1415,12 +1397,26 @@ pub fn fold_foreign_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignI
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn fold_foreign_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemFn) -> ForeignItemFn {
+    ForeignItemFn {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        vis: _visitor.fold_visibility(_i . vis),
+        ident: _i . ident,
+        decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
+        semi_token: _i . semi_token,
+    }
+}
+# [ cfg ( feature = "full" ) ]
 pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemStatic) -> ForeignItemStatic {
     ForeignItemStatic {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        vis: _visitor.fold_visibility(_i . vis),
         static_token: _i . static_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
-        colon_token: _i . colon_token,
         mutbl: _visitor.fold_mutability(_i . mutbl),
+        ident: _i . ident,
+        colon_token: _i . colon_token,
+        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        semi_token: _i . semi_token,
     }
 }
 
@@ -1448,28 +1444,7 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
-    ImplItem {
-        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        node: _visitor.fold_impl_item_kind(_i . node),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemConst) -> ImplItemConst {
-    ImplItemConst {
-        vis: _visitor.fold_visibility(_i . vis),
-        defaultness: _visitor.fold_defaultness(_i . defaultness),
-        const_token: _i . const_token,
-        ident: _i . ident,
-        colon_token: _i . colon_token,
-        ty: _visitor.fold_ty(_i . ty),
-        eq_token: _i . eq_token,
-        expr: _visitor.fold_expr(_i . expr),
-        semi_token: _i . semi_token,
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_impl_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemKind) -> ImplItemKind {
-    use ::ImplItemKind::*;
+    use ::ImplItem::*;
     match _i {
         Const(_binding_0, ) => {
             Const (
@@ -1488,14 +1463,37 @@ pub fn fold_impl_item_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemKin
         }
         Macro(_binding_0, ) => {
             Macro (
-                _visitor.fold_macro(_binding_0),
+                _visitor.fold_impl_item_macro(_binding_0),
             )
         }
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn fold_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemConst) -> ImplItemConst {
+    ImplItemConst {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        vis: _visitor.fold_visibility(_i . vis),
+        defaultness: _visitor.fold_defaultness(_i . defaultness),
+        const_token: _i . const_token,
+        ident: _i . ident,
+        colon_token: _i . colon_token,
+        ty: _visitor.fold_ty(_i . ty),
+        eq_token: _i . eq_token,
+        expr: _visitor.fold_expr(_i . expr),
+        semi_token: _i . semi_token,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_impl_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemMacro) -> ImplItemMacro {
+    ImplItemMacro {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        mac: _visitor.fold_macro(_i . mac),
+    }
+}
+# [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemMethod) -> ImplItemMethod {
     ImplItemMethod {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
         sig: _visitor.fold_method_sig(_i . sig),
@@ -1505,6 +1503,7 @@ pub fn fold_impl_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemM
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemType) -> ImplItemType {
     ImplItemType {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
         type_token: _i . type_token,
