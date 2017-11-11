@@ -187,8 +187,6 @@ ast_enum_of_structs! {
             pub mac: Macro,
         }),
     }
-
-    do_not_generate_to_tokens
 }
 
 impl From<DeriveInput> for Item {
@@ -335,8 +333,6 @@ ast_enum_of_structs! {
             pub mac: Macro,
         }),
     }
-
-    do_not_generate_to_tokens
 }
 
 ast_enum! {
@@ -1289,191 +1285,229 @@ mod printing {
     use data::VariantData;
     use quote::{Tokens, ToTokens};
 
-    impl ToTokens for Item {
+    impl ToTokens for ItemExternCrate {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Item::ExternCrate(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.extern_token.to_tokens(tokens);
-                    item.crate_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    if let Some((ref as_token, ref rename)) = item.rename {
-                        as_token.to_tokens(tokens);
-                        rename.to_tokens(tokens);
-                    }
-                    item.semi_token.to_tokens(tokens);
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.extern_token.to_tokens(tokens);
+            self.crate_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            if let Some((ref as_token, ref rename)) = self.rename {
+                as_token.to_tokens(tokens);
+                rename.to_tokens(tokens);
+            }
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemUse {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.use_token.to_tokens(tokens);
+            self.path.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemStatic {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.static_token.to_tokens(tokens);
+            self.mutbl.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemConst {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.const_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemFn {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.constness.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
+            self.abi.to_tokens(tokens);
+            NamedDecl(&self.decl, self.ident).to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.block.stmts);
+            });
+        }
+    }
+
+    impl ToTokens for ItemMod {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.mod_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            if let Some((ref brace, ref items)) = self.content {
+                brace.surround(tokens, |tokens| {
+                    tokens.append_all(self.attrs.inner());
+                    tokens.append_all(items);
+                });
+            } else {
+                TokensOrDefault(&self.semi).to_tokens(tokens);
+            }
+        }
+    }
+
+    impl ToTokens for ItemForeignMod {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.abi.to_tokens(tokens);
+            self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(&self.items);
+            });
+        }
+    }
+
+    impl ToTokens for ItemTy {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemEnum {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.enum_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            self.brace_token.surround(tokens, |tokens| {
+                self.variants.to_tokens(tokens);
+            });
+        }
+    }
+
+    impl ToTokens for ItemStruct {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.struct_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            match self.data {
+                VariantData::Struct(..) => {
+                    self.generics.where_clause.to_tokens(tokens);
+                    self.data.to_tokens(tokens);
                 }
-                Item::Use(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.use_token.to_tokens(tokens);
-                    item.path.to_tokens(tokens);
-                    item.semi_token.to_tokens(tokens);
+                VariantData::Tuple(..) => {
+                    self.data.to_tokens(tokens);
+                    self.generics.where_clause.to_tokens(tokens);
+                    TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }
-                Item::Static(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.static_token.to_tokens(tokens);
-                    item.mutbl.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.expr.to_tokens(tokens);
-                    item.semi_token.to_tokens(tokens);
+                VariantData::Unit => {
+                    self.generics.where_clause.to_tokens(tokens);
+                    TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }
-                Item::Const(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.const_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.expr.to_tokens(tokens);
-                    item.semi_token.to_tokens(tokens);
-                }
-                Item::Fn(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.constness.to_tokens(tokens);
-                    item.unsafety.to_tokens(tokens);
-                    item.abi.to_tokens(tokens);
-                    NamedDecl(&item.decl, item.ident).to_tokens(tokens);
-                    item.block.brace_token.surround(tokens, |tokens| {
-                        tokens.append_all(item.attrs.inner());
-                        tokens.append_all(&item.block.stmts);
-                    });
-                }
-                Item::Mod(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.mod_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    if let Some((ref brace, ref items)) = item.content {
-                        brace.surround(tokens, |tokens| {
-                            tokens.append_all(item.attrs.inner());
-                            tokens.append_all(items);
-                        });
-                    } else {
-                        TokensOrDefault(&item.semi).to_tokens(tokens);
-                    }
-                }
-                Item::ForeignMod(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.abi.to_tokens(tokens);
-                    item.brace_token.surround(tokens, |tokens| {
-                        tokens.append_all(&item.items);
-                    });
-                }
-                Item::Ty(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.type_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.generics.to_tokens(tokens);
-                    item.generics.where_clause.to_tokens(tokens);
-                    item.eq_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                    item.semi_token.to_tokens(tokens);
-                }
-                Item::Enum(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.enum_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.generics.to_tokens(tokens);
-                    item.generics.where_clause.to_tokens(tokens);
-                    item.brace_token.surround(tokens, |tokens| {
-                        item.variants.to_tokens(tokens);
-                    });
-                }
-                Item::Struct(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.struct_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.generics.to_tokens(tokens);
-                    match item.data {
-                        VariantData::Struct(..) => {
-                            item.generics.where_clause.to_tokens(tokens);
-                            item.data.to_tokens(tokens);
-                        }
-                        VariantData::Tuple(..) => {
-                            item.data.to_tokens(tokens);
-                            item.generics.where_clause.to_tokens(tokens);
-                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
-                        }
-                        VariantData::Unit => {
-                            item.generics.where_clause.to_tokens(tokens);
-                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
-                        }
-                    }
-                }
-                Item::Union(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.union_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.generics.to_tokens(tokens);
-                    item.generics.where_clause.to_tokens(tokens);
-                    // XXX: Should we handle / complain when using a
-                    // non-VariantData::Struct Variant in Union?
-                    item.data.to_tokens(tokens);
-                }
-                Item::Trait(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.vis.to_tokens(tokens);
-                    item.unsafety.to_tokens(tokens);
-                    item.trait_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.generics.to_tokens(tokens);
-                    if !item.supertraits.is_empty() {
-                        TokensOrDefault(&item.colon_token).to_tokens(tokens);
-                        item.supertraits.to_tokens(tokens);
-                    }
-                    item.generics.where_clause.to_tokens(tokens);
-                    item.brace_token.surround(tokens, |tokens| {
-                        tokens.append_all(&item.items);
-                    });
-                }
-                Item::DefaultImpl(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.unsafety.to_tokens(tokens);
-                    item.impl_token.to_tokens(tokens);
-                    item.path.to_tokens(tokens);
-                    item.for_token.to_tokens(tokens);
-                    item.dot2_token.to_tokens(tokens);
-                    item.brace_token.surround(tokens, |_tokens| {});
-                }
-                Item::Impl(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.defaultness.to_tokens(tokens);
-                    item.unsafety.to_tokens(tokens);
-                    item.impl_token.to_tokens(tokens);
-                    item.generics.to_tokens(tokens);
-                    if let Some((ref polarity, ref path, ref for_token)) = item.trait_ {
-                        polarity.to_tokens(tokens);
-                        path.to_tokens(tokens);
-                        for_token.to_tokens(tokens);
-                    }
-                    item.self_ty.to_tokens(tokens);
-                    item.generics.where_clause.to_tokens(tokens);
-                    item.brace_token.surround(tokens, |tokens| {
-                        tokens.append_all(&item.items);
-                    });
-                }
-                Item::Macro(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.mac.path.to_tokens(tokens);
-                    item.mac.bang_token.to_tokens(tokens);
-                    item.mac.ident.to_tokens(tokens);
-                    tokens.append_all(&item.mac.tokens);
-                    if !item.mac.is_braced() {
-                        tokens::Semi::default().to_tokens(tokens);
-                    }
-                }
+            }
+        }
+    }
+
+    impl ToTokens for ItemUnion {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.union_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            // XXX: Should we handle / complain when using a
+            // non-VariantData::Struct Variant in Union?
+            self.data.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemTrait {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
+            self.trait_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            if !self.supertraits.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.supertraits.to_tokens(tokens);
+            }
+            self.generics.where_clause.to_tokens(tokens);
+            self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(&self.items);
+            });
+        }
+    }
+
+    impl ToTokens for ItemDefaultImpl {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.unsafety.to_tokens(tokens);
+            self.impl_token.to_tokens(tokens);
+            self.path.to_tokens(tokens);
+            self.for_token.to_tokens(tokens);
+            self.dot2_token.to_tokens(tokens);
+            self.brace_token.surround(tokens, |_tokens| {});
+        }
+    }
+
+    impl ToTokens for ItemImpl {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.defaultness.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
+            self.impl_token.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            if let Some((ref polarity, ref path, ref for_token)) = self.trait_ {
+                polarity.to_tokens(tokens);
+                path.to_tokens(tokens);
+                for_token.to_tokens(tokens);
+            }
+            self.self_ty.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(&self.items);
+            });
+        }
+    }
+
+    impl ToTokens for ItemMacro {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.mac.path.to_tokens(tokens);
+            self.mac.bang_token.to_tokens(tokens);
+            self.mac.ident.to_tokens(tokens);
+            tokens.append_all(&self.mac.tokens);
+            if !self.mac.is_braced() {
+                tokens::Semi::default().to_tokens(tokens);
             }
         }
     }
@@ -1518,57 +1552,62 @@ mod printing {
         }
     }
 
-    impl ToTokens for TraitItem {
+    impl ToTokens for TraitItemConst {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                TraitItem::Const(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.const_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    item.colon_token.to_tokens(tokens);
-                    item.ty.to_tokens(tokens);
-                    if let Some((ref eq_token, ref default)) = item.default {
-                        eq_token.to_tokens(tokens);
-                        default.to_tokens(tokens);
-                    }
-                    item.semi_token.to_tokens(tokens);
+            tokens.append_all(self.attrs.outer());
+            self.const_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            if let Some((ref eq_token, ref default)) = self.default {
+                eq_token.to_tokens(tokens);
+                default.to_tokens(tokens);
+            }
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TraitItemMethod {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.sig.to_tokens(tokens);
+            match self.default {
+                Some(ref block) => {
+                    block.brace_token.surround(tokens, |tokens| {
+                        tokens.append_all(self.attrs.inner());
+                        tokens.append_all(&block.stmts);
+                    });
                 }
-                TraitItem::Method(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.sig.to_tokens(tokens);
-                    match item.default {
-                        Some(ref block) => {
-                            block.brace_token.surround(tokens, |tokens| {
-                                tokens.append_all(item.attrs.inner());
-                                tokens.append_all(&block.stmts);
-                            });
-                        }
-                        None => {
-                            TokensOrDefault(&item.semi_token).to_tokens(tokens);
-                        }
-                    }
+                None => {
+                    TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }
-                TraitItem::Type(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.type_token.to_tokens(tokens);
-                    item.ident.to_tokens(tokens);
-                    if !item.bounds.is_empty() {
-                        TokensOrDefault(&item.colon_token).to_tokens(tokens);
-                        item.bounds.to_tokens(tokens);
-                    }
-                    if let Some((ref eq_token, ref default)) = item.default {
-                        eq_token.to_tokens(tokens);
-                        default.to_tokens(tokens);
-                    }
-                    item.semi_token.to_tokens(tokens);
-                }
-                TraitItem::Macro(ref item) => {
-                    tokens.append_all(item.attrs.outer());
-                    item.mac.to_tokens(tokens);
-                    if !item.mac.is_braced() {
-                        tokens::Semi::default().to_tokens(tokens);
-                    }
-                }
+            }
+        }
+    }
+
+    impl ToTokens for TraitItemType {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
+            if let Some((ref eq_token, ref default)) = self.default {
+                eq_token.to_tokens(tokens);
+                default.to_tokens(tokens);
+            }
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TraitItemMacro {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.mac.to_tokens(tokens);
+            if !self.mac.is_braced() {
+                tokens::Semi::default().to_tokens(tokens);
             }
         }
     }
