@@ -830,9 +830,9 @@ macro_rules! input_end {
 
 // Not a public API
 #[doc(hidden)]
-pub fn input_end(input: Cursor) -> PResult<'static, &'static str> {
+pub fn input_end(input: Cursor) -> PResult<'static, ()> {
     if input.eof() {
-        Ok((Cursor::empty(), ""))
+        Ok((Cursor::empty(), ()))
     } else {
         parse_error()
     }
