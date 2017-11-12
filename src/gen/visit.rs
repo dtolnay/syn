@@ -172,6 +172,8 @@ fn visit_foreign_item(&mut self, i: &ForeignItem) { visit_foreign_item(self, i) 
 fn visit_foreign_item_fn(&mut self, i: &ForeignItemFn) { visit_foreign_item_fn(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_static(&mut self, i: &ForeignItemStatic) { visit_foreign_item_static(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_foreign_item_type(&mut self, i: &ForeignItemType) { visit_foreign_item_type(self, i) }
 
 fn visit_generics(&mut self, i: &Generics) { visit_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1085,6 +1087,9 @@ pub fn visit_foreign_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignIte
         Static(ref _binding_0, ) => {
             _visitor.visit_foreign_item_static(&* _binding_0);
         }
+        Type(ref _binding_0, ) => {
+            _visitor.visit_foreign_item_type(&* _binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1104,6 +1109,14 @@ pub fn visit_foreign_item_static<V: Visitor + ?Sized>(_visitor: &mut V, _i: &For
     // Skipped field _i . ident;
     // Skipped field _i . colon_token;
     _visitor.visit_type(&_i . ty);
+    // Skipped field _i . semi_token;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_foreign_item_type<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ForeignItemType) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
+    _visitor.visit_visibility(&_i . vis);
+    // Skipped field _i . type_token;
+    // Skipped field _i . ident;
     // Skipped field _i . semi_token;
 }
 

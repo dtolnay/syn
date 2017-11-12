@@ -297,6 +297,14 @@ ast_enum_of_structs! {
             pub ty: Box<Type>,
             pub semi_token: Token![;],
         }),
+        /// A foreign type
+        pub Type(ForeignItemType {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub type_token: Token![type],
+            pub ident: Ident,
+            pub semi_token: Token![;],
+        }),
     }
 }
 
@@ -814,6 +822,8 @@ pub mod parsing {
         syn!(ForeignItemFn) => { ForeignItem::Fn }
         |
         syn!(ForeignItemStatic) => { ForeignItem::Static }
+        |
+        syn!(ForeignItemType) => { ForeignItem::Type }
     ));
 
     impl_synom!(ForeignItemFn "foreign function" do_parse!(
@@ -873,6 +883,21 @@ pub mod parsing {
             static_token: static_,
             colon_token: colon,
             vis: vis,
+        })
+    ));
+
+    impl_synom!(ForeignItemType "foreign type" do_parse!(
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        type_: keyword!(type) >>
+        ident: syn!(Ident) >>
+        semi: punct!(;) >>
+        (ForeignItemType {
+            attrs: attrs,
+            vis: vis,
+            type_token: type_,
+            ident: ident,
+            semi_token: semi,
         })
     ));
 
@@ -1682,6 +1707,16 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ForeignItemType {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
