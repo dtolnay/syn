@@ -345,7 +345,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             pat
         }
 
-        fn fold_ty(&mut self, ty: Ty) -> Ty {
+        fn fold_type(&mut self, ty: Type) -> Type {
             ty
         }
     }

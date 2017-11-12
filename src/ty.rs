@@ -3,77 +3,77 @@ use super::*;
 
 ast_enum_of_structs! {
     /// The different kinds of types recognized by the compiler
-    pub enum Ty {
+    pub enum Type {
         /// A variable-length array (`[T]`)
-        pub Slice(TySlice {
-            pub ty: Box<Ty>,
+        pub Slice(TypeSlice {
+            pub ty: Box<Type>,
             pub bracket_token: tokens::Bracket,
         }),
         /// A fixed length array (`[T; n]`)
-        pub Array(TyArray {
+        pub Array(TypeArray {
             pub bracket_token: tokens::Bracket,
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
             pub semi_token: Token![;],
             pub amt: Expr,
         }),
         /// A raw pointer (`*const T` or `*mut T`)
-        pub Ptr(TyPtr {
+        pub Ptr(TypePtr {
             pub star_token: Token![*],
             pub const_token: Option<Token![const]>,
-            pub ty: Box<MutTy>,
+            pub ty: Box<MutType>,
         }),
         /// A reference (`&'a T` or `&'a mut T`)
-        pub Rptr(TyRptr {
+        pub Rptr(TypeRptr {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
-            pub ty: Box<MutTy>,
+            pub ty: Box<MutType>,
         }),
         /// A bare function (e.g. `fn(usize) -> bool`)
-        pub BareFn(TyBareFn {
-            pub ty: Box<BareFnTy>,
+        pub BareFn(TypeBareFn {
+            pub ty: Box<BareFnType>,
         }),
         /// The never type (`!`)
-        pub Never(TyNever {
+        pub Never(TypeNever {
             pub bang_token: Token![!],
         }),
         /// A tuple (`(A, B, C, D, ...)`)
-        pub Tup(TyTup {
+        pub Tup(TypeTup {
             pub paren_token: tokens::Paren,
-            pub tys: Delimited<Ty, Token![,]>,
+            pub tys: Delimited<Type, Token![,]>,
             pub lone_comma: Option<Token![,]>,
         }),
         /// A path (`module::module::...::Type`), optionally
         /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
         ///
         /// Type parameters are stored in the Path itself
-        pub Path(TyPath {
+        pub Path(TypePath {
             pub qself: Option<QSelf>,
             pub path: Path,
         }),
         /// A trait object type `Bound1 + Bound2 + Bound3`
         /// where `Bound` is a trait or a lifetime.
-        pub TraitObject(TyTraitObject {
-            pub bounds: Delimited<TyParamBound, Token![+]>,
+        pub TraitObject(TypeTraitObject {
+            pub bounds: Delimited<TypeParamBound, Token![+]>,
         }),
         /// An `impl Bound1 + Bound2 + Bound3` type
         /// where `Bound` is a trait or a lifetime.
-        pub ImplTrait(TyImplTrait {
+        pub ImplTrait(TypeImplTrait {
             pub impl_token: Token![impl],
-            pub bounds: Delimited<TyParamBound, Token![+]>,
+            pub bounds: Delimited<TypeParamBound, Token![+]>,
         }),
         /// No-op; kept solely so that we can pretty-print faithfully
-        pub Paren(TyParen {
+        pub Paren(TypeParen {
             pub paren_token: tokens::Paren,
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
         }),
         /// No-op: kept solely so that we can pretty-print faithfully
-        pub Group(TyGroup {
+        pub Group(TypeGroup {
             pub group_token: tokens::Group,
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
         }),
-        /// TyKind::Infer means the type should be inferred instead of it having been
+        /// TypeKind::Infer means the type should be inferred instead of it having been
         /// specified. This can appear anywhere in a type.
-        pub Infer(TyInfer {
+        pub Infer(TypeInfer {
             pub underscore_token: Token![_],
         }),
         /// A macro in the type position.
@@ -82,8 +82,8 @@ ast_enum_of_structs! {
 }
 
 ast_struct! {
-    pub struct MutTy {
-        pub ty: Ty,
+    pub struct MutType {
+        pub ty: Type,
         pub mutability: Mutability,
     }
 }
@@ -201,7 +201,7 @@ ast_struct! {
         /// The lifetime parameters for this path segment.
         pub lifetimes: Delimited<Lifetime, Token![,]>,
         /// The type parameters for this path segment, if present.
-        pub types: Delimited<Ty, Token![,]>,
+        pub types: Delimited<Type, Token![,]>,
         /// Bindings (equality constraints) on associated types, if present.
         ///
         /// E.g., `Foo<A=Bar>`.
@@ -215,7 +215,7 @@ ast_struct! {
     pub struct TypeBinding {
         pub ident: Ident,
         pub eq_token: Token![=],
-        pub ty: Ty,
+        pub ty: Type,
     }
 }
 
@@ -225,7 +225,7 @@ ast_struct! {
     pub struct ParenthesizedParameterData {
         pub paren_token: tokens::Paren,
         /// `(A, B)`
-        pub inputs: Delimited<Ty, Token![,]>,
+        pub inputs: Delimited<Type, Token![,]>,
         /// `C`
         pub output: ReturnType,
     }
@@ -257,7 +257,7 @@ ast_struct! {
     /// ```
     pub struct QSelf {
         pub lt_token: Token![<],
-        pub ty: Box<Ty>,
+        pub ty: Box<Type>,
         pub position: usize,
         pub as_token: Option<Token![as]>,
         pub gt_token: Token![>],
@@ -265,7 +265,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    pub struct BareFnTy {
+    pub struct BareFnType {
         pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Unsafety,
         pub abi: Option<Abi>,
@@ -305,7 +305,7 @@ ast_struct! {
     /// E.g. `bar: usize` as in `fn foo(bar: usize)`
     pub struct BareFnArg {
         pub name: Option<(BareFnArgName, Token![:])>,
-        pub ty: Ty,
+        pub ty: Type,
     }
 }
 
@@ -328,7 +328,7 @@ ast_enum! {
         /// type would be inserted.
         Default,
         /// Everything else
-        Ty(Ty, Token![->]),
+        Type(Type, Token![->]),
     }
 }
 
@@ -337,7 +337,7 @@ pub mod parsing {
     use super::*;
     use synom::Synom;
 
-    impl Synom for Ty {
+    impl Synom for Type {
         named!(parse -> Self, call!(ambig_ty, true));
 
         fn description() -> Option<&'static str> {
@@ -345,7 +345,7 @@ pub mod parsing {
         }
     }
 
-    impl Ty {
+    impl Type {
         /// In some positions, types may not contain the `+` character, to
         /// disambiguate them. For example in the expression `1 as T`, T may not
         /// contain a `+` character.
@@ -354,60 +354,60 @@ pub mod parsing {
         named!(pub without_plus -> Self, call!(ambig_ty, false));
     }
 
-    named!(ambig_ty(allow_plus: bool) -> Ty, alt!(
-        syn!(TyGroup) => { Ty::Group }
+    named!(ambig_ty(allow_plus: bool) -> Type, alt!(
+        syn!(TypeGroup) => { Type::Group }
         |
         // must be before mac
-        syn!(TyParen) => { Ty::Paren }
+        syn!(TypeParen) => { Type::Paren }
         |
         // must be before path
-        syn!(Macro) => { Ty::Macro }
+        syn!(Macro) => { Type::Macro }
         |
         // must be before ty_poly_trait_ref
         call!(ty_path, allow_plus)
         |
-        syn!(TySlice) => { Ty::Slice }
+        syn!(TypeSlice) => { Type::Slice }
         |
-        syn!(TyArray) => { Ty::Array }
+        syn!(TypeArray) => { Type::Array }
         |
-        syn!(TyPtr) => { Ty::Ptr }
+        syn!(TypePtr) => { Type::Ptr }
         |
-        syn!(TyRptr) => { Ty::Rptr }
+        syn!(TypeRptr) => { Type::Rptr }
         |
-        syn!(TyBareFn) => { Ty::BareFn }
+        syn!(TypeBareFn) => { Type::BareFn }
         |
-        syn!(TyNever) => { Ty::Never }
+        syn!(TypeNever) => { Type::Never }
         |
-        syn!(TyTup) => { Ty::Tup }
+        syn!(TypeTup) => { Type::Tup }
         |
         // Don't try parsing poly_trait_ref if we aren't allowing it
         call!(ty_poly_trait_ref, allow_plus)
         |
-        syn!(TyImplTrait) => { Ty::ImplTrait }
+        syn!(TypeImplTrait) => { Type::ImplTrait }
         |
-        syn!(TyInfer) => { Ty::Infer }
+        syn!(TypeInfer) => { Type::Infer }
     ));
 
-    impl Synom for TySlice {
+    impl Synom for TypeSlice {
         named!(parse -> Self, map!(
-            brackets!(syn!(Ty)),
-            |(ty, b)| TySlice {
+            brackets!(syn!(Type)),
+            |(ty, b)| TypeSlice {
                 ty: Box::new(ty),
                 bracket_token: b,
             }
         ));
     }
 
-    impl Synom for TyArray {
+    impl Synom for TypeArray {
         named!(parse -> Self, map!(
             brackets!(do_parse!(
-                elem: syn!(Ty) >>
+                elem: syn!(Type) >>
                     semi: punct!(;) >>
                     len: syn!(Expr) >>
                     (elem, semi, len)
             )),
             |((elem, semi, len), brackets)| {
-                TyArray {
+                TypeArray {
                     ty: Box::new(elem),
                     amt: len,
                     bracket_token: brackets,
@@ -417,7 +417,7 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TyPtr {
+    impl Synom for TypePtr {
         named!(parse -> Self, do_parse!(
             star: punct!(*) >>
             mutability: alt!(
@@ -425,11 +425,11 @@ pub mod parsing {
                 |
                 keyword!(mut) => { |m| (Mutability::Mutable(m), None) }
             ) >>
-            target: call!(Ty::without_plus) >>
-            (TyPtr {
+            target: call!(Type::without_plus) >>
+            (TypePtr {
                 const_token: mutability.1,
                 star_token: star,
-                ty: Box::new(MutTy {
+                ty: Box::new(MutType {
                     ty: target,
                     mutability: mutability.0,
                 }),
@@ -437,16 +437,16 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TyRptr {
+    impl Synom for TypeRptr {
         named!(parse -> Self, do_parse!(
             amp: punct!(&) >>
             life: option!(syn!(Lifetime)) >>
             mutability: syn!(Mutability) >>
             // & binds tighter than +, so we don't allow + here.
-            target: call!(Ty::without_plus) >>
-            (TyRptr {
+            target: call!(Type::without_plus) >>
+            (TypeRptr {
                 lifetime: life,
-                ty: Box::new(MutTy {
+                ty: Box::new(MutType {
                     ty: target,
                     mutability: mutability,
                 }),
@@ -455,7 +455,7 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TyBareFn {
+    impl Synom for TypeBareFn {
         named!(parse -> Self, do_parse!(
             lifetimes: option!(syn!(BoundLifetimes)) >>
             unsafety: syn!(Unsafety) >>
@@ -468,8 +468,8 @@ pub mod parsing {
                 (inputs, variadic)
             )) >>
             output: syn!(ReturnType) >>
-            (TyBareFn {
-                ty: Box::new(BareFnTy {
+            (TypeBareFn {
+                ty: Box::new(BareFnType {
                     unsafety: unsafety,
                     abi: abi,
                     lifetimes: lifetimes,
@@ -483,24 +483,24 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TyNever {
+    impl Synom for TypeNever {
         named!(parse -> Self, map!(
             punct!(!),
-            |b| TyNever { bang_token: b }
+            |b| TypeNever { bang_token: b }
         ));
     }
 
-    impl Synom for TyInfer {
+    impl Synom for TypeInfer {
         named!(parse -> Self, map!(
             punct!(_),
-            |u| TyInfer { underscore_token: u }
+            |u| TypeInfer { underscore_token: u }
         ));
     }
 
-    impl Synom for TyTup {
+    impl Synom for TypeTup {
         named!(parse -> Self, do_parse!(
             data: parens!(call!(Delimited::parse_terminated)) >>
-            (TyTup {
+            (TypeTup {
                 tys: data.0,
                 paren_token: data.1,
                 lone_comma: None, // TODO: does this just not parse?
@@ -508,7 +508,7 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_path(allow_plus: bool) -> Ty, do_parse!(
+    named!(ty_path(allow_plus: bool) -> Type, do_parse!(
         qpath: qpath >>
         parenthesized: cond!(
             qpath.1.segments.get(qpath.1.segments.len() - 1).item().parameters.is_empty(),
@@ -518,7 +518,7 @@ pub mod parsing {
         bounds: alt!(
             cond_reduce!(
                 allow_plus,
-                many0!(tuple!(punct!(+), syn!(TyParamBound)))
+                many0!(tuple!(punct!(+), syn!(TypeParamBound)))
             )
             |
             value!(vec![])
@@ -531,9 +531,9 @@ pub mod parsing {
                 path.segments.get_mut(len - 1).item_mut().parameters = parenthesized;
             }
             if bounds.is_empty() {
-                TyPath { qself: qself, path: path }.into()
+                TypePath { qself: qself, path: path }.into()
             } else {
-                let path = TyParamBound::Trait(
+                let path = TypeParamBound::Trait(
                     PolyTraitRef {
                         bound_lifetimes: None,
                         trait_ref: path,
@@ -545,7 +545,7 @@ pub mod parsing {
                 for (_tok, bound) in bounds {
                     new_bounds.push_default(bound);
                 }
-                TyTraitObject { bounds: new_bounds }.into()
+                TypeTraitObject { bounds: new_bounds }.into()
             }
         })
     ));
@@ -555,7 +555,7 @@ pub mod parsing {
         |
         do_parse!(
             lt: punct!(<) >>
-            this: syn!(Ty) >>
+            this: syn!(Type) >>
             path: option!(do_parse!(
                 as_: keyword!(as) >>
                 path: syn!(Path) >>
@@ -612,8 +612,8 @@ pub mod parsing {
         named!(parse -> Self, alt!(
             do_parse!(
                 arrow: punct!(->) >>
-                ty: syn!(Ty) >>
-                (ReturnType::Ty(ty, arrow))
+                ty: syn!(Type) >>
+                (ReturnType::Type(ty, arrow))
             )
             |
             epsilon!() => { |_| ReturnType::Default }
@@ -621,43 +621,43 @@ pub mod parsing {
     }
 
     // Only allow multiple trait references if allow_plus is true.
-    named!(ty_poly_trait_ref(allow_plus: bool) -> Ty, alt!(
+    named!(ty_poly_trait_ref(allow_plus: bool) -> Type, alt!(
         cond_reduce!(allow_plus, call!(Delimited::parse_separated_nonempty)) => {
-            |x| TyTraitObject { bounds: x }.into()
+            |x| TypeTraitObject { bounds: x }.into()
         }
         |
-        syn!(TyParamBound) => {
-            |x| TyTraitObject { bounds: vec![x].into() }.into()
+        syn!(TypeParamBound) => {
+            |x| TypeTraitObject { bounds: vec![x].into() }.into()
         }
     ));
 
-    impl Synom for TyImplTrait {
+    impl Synom for TypeImplTrait {
         named!(parse -> Self, do_parse!(
             impl_: keyword!(impl) >>
             // NOTE: rust-lang/rust#34511 includes discussion about whether or
             // not + should be allowed in ImplTrait directly without ().
             elem: call!(Delimited::parse_separated_nonempty) >>
-            (TyImplTrait {
+            (TypeImplTrait {
                 impl_token: impl_,
                 bounds: elem,
             })
         ));
     }
 
-    impl Synom for TyGroup {
+    impl Synom for TypeGroup {
         named!(parse -> Self, do_parse!(
-            data: grouped!(syn!(Ty)) >>
-            (TyGroup {
+            data: grouped!(syn!(Type)) >>
+            (TypeGroup {
                 group_token: data.1,
                 ty: Box::new(data.0),
             })
         ));
     }
 
-    impl Synom for TyParen {
+    impl Synom for TypeParen {
         named!(parse -> Self, do_parse!(
-            data: parens!(syn!(Ty)) >>
-            (TyParen {
+            data: parens!(syn!(Type)) >>
+            (TypeParen {
                 paren_token: data.1,
                 ty: Box::new(data.0),
             })
@@ -726,7 +726,7 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_no_eq_after -> Ty, terminated!(syn!(Ty), not!(punct!(=))));
+    named!(ty_no_eq_after -> Type, terminated!(syn!(Type), not!(punct!(=))));
 
     impl Path {
         named!(pub parse_mod_style -> Self, do_parse!(
@@ -756,7 +756,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             id: syn!(Ident) >>
             eq: punct!(=) >>
-            ty: syn!(Ty) >>
+            ty: syn!(Type) >>
             (TypeBinding {
                 ident: id,
                 eq_token: eq,
@@ -796,7 +796,7 @@ pub mod parsing {
                 colon: punct!(:) >>
                 (name, colon)
             )) >>
-            ty: syn!(Ty) >>
+            ty: syn!(Type) >>
             (BareFnArg {
                 name: name,
                 ty: ty,
@@ -841,7 +841,7 @@ mod printing {
     use super::*;
     use quote::{Tokens, ToTokens};
 
-    impl ToTokens for TySlice {
+    impl ToTokens for TypeSlice {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
                 self.ty.to_tokens(tokens);
@@ -849,7 +849,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyArray {
+    impl ToTokens for TypeArray {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
                 self.ty.to_tokens(tokens);
@@ -859,7 +859,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyPtr {
+    impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.star_token.to_tokens(tokens);
             match self.ty.mutability {
@@ -872,7 +872,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyRptr {
+    impl ToTokens for TypeRptr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
             self.lifetime.to_tokens(tokens);
@@ -881,19 +881,19 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyBareFn {
+    impl ToTokens for TypeBareFn {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ty.to_tokens(tokens)
         }
     }
 
-    impl ToTokens for TyNever {
+    impl ToTokens for TypeNever {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bang_token.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for TyTup {
+    impl ToTokens for TypeTup {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.tys.to_tokens(tokens);
@@ -903,7 +903,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyPath {
+    impl ToTokens for TypePath {
         fn to_tokens(&self, tokens: &mut Tokens) {
             PathTokens(&self.qself, &self.path).to_tokens(tokens);
         }
@@ -947,20 +947,20 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyTraitObject {
+    impl ToTokens for TypeTraitObject {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bounds.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for TyImplTrait {
+    impl ToTokens for TypeImplTrait {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.impl_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for TyGroup {
+    impl ToTokens for TypeGroup {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.group_token.surround(tokens, |tokens| {
                 self.ty.to_tokens(tokens);
@@ -968,7 +968,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyParen {
+    impl ToTokens for TypeParen {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.ty.to_tokens(tokens);
@@ -976,7 +976,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyInfer {
+    impl ToTokens for TypeInfer {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.underscore_token.to_tokens(tokens);
         }
@@ -1064,7 +1064,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 ReturnType::Default => {}
-                ReturnType::Ty(ref ty, ref arrow) => {
+                ReturnType::Type(ref ty, ref arrow) => {
                     arrow.to_tokens(tokens);
                     ty.to_tokens(tokens);
                 }
@@ -1079,7 +1079,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for BareFnTy {
+    impl ToTokens for BareFnType {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lifetimes.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);

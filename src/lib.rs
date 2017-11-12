@@ -40,11 +40,11 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
                PatLit, PatRange, PatSlice, InPlaceKind};
 
 mod generics;
-pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TyParam, TyParamBound,
+pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TypeParam, TypeParamBound,
                    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
                    WhereRegionPredicate, BoundLifetimes};
 #[cfg(feature = "printing")]
-pub use generics::{ImplGenerics, Turbofish, TyGenerics};
+pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 mod ident;
 pub use ident::Ident;
@@ -55,7 +55,7 @@ mod item;
 pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItem, ItemForeignMod,
                ImplItem, ImplPolarity, Item, MethodSig, PathListItem,
                TraitItem, ViewPath, ItemExternCrate, ItemUse,
-               ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMod, ItemTy, ItemEnum,
+               ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMod, ItemType, ItemEnum,
                ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
                PathSimple, PathGlob, PathList, ForeignItemFn, ForeignItemStatic,
                TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
@@ -83,11 +83,11 @@ mod op;
 pub use op::{BinOp, UnOp};
 
 mod ty;
-pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName, BareFnTy,
-             ReturnType, MutTy, Mutability, ParenthesizedParameterData, Path,
-             PathParameters, PathSegment, PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety,
-             TySlice, TyArray, TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath,
-             TyTraitObject, TyImplTrait, TyParen, TyInfer, TyGroup};
+pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName, BareFnType,
+             ReturnType, MutType, Mutability, ParenthesizedParameterData, Path,
+             PathParameters, PathSegment, PolyTraitRef, QSelf, Type, TypeBinding, Unsafety,
+             TypeSlice, TypeArray, TypePtr, TypeRptr, TypeBareFn, TypeNever, TypeTup, TypePath,
+             TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer, TypeGroup};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 

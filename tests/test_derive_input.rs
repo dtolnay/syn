@@ -95,7 +95,7 @@ fn test_struct() {
                         pub_token: Default::default(),
                     }),
                     attrs: Vec::new(),
-                    ty: TyPath {
+                    ty: TypePath {
                         qself: None,
                         path: "Ident".into(),
                     }.into(),
@@ -107,7 +107,7 @@ fn test_struct() {
                         pub_token: Default::default(),
                     }),
                     attrs: Vec::new(),
-                    ty: TyPath {
+                    ty: TypePath {
                         qself: None,
                         path: Path {
                             leading_colon: None,
@@ -119,7 +119,7 @@ fn test_struct() {
                                             turbofish: None,
                                             lt_token: Default::default(),
                                             lifetimes: Default::default(),
-                                            types: vec![Ty::from(TyPath {
+                                            types: vec![Type::from(TypePath {
                                                 qself: None,
                                                 path: "Attribute".into(),
                                             })].into(),
@@ -200,7 +200,7 @@ fn test_enum() {
             lt_token: Some(Default::default()),
             gt_token: Some(Default::default()),
             ty_params: vec![
-                TyParam {
+                TypeParam {
                     attrs: Vec::new(),
                     ident: "T".into(),
                     bounds: Default::default(),
@@ -208,7 +208,7 @@ fn test_enum() {
                     colon_token: None,
                     eq_token: None,
                 },
-                TyParam {
+                TypeParam {
                     attrs: Vec::new(),
                     ident: "E".into(),
                     bounds: Default::default(),
@@ -231,7 +231,7 @@ fn test_enum() {
                             ident: None,
                             vis: Visibility::Inherited(VisInherited {}),
                             attrs: Vec::new(),
-                            ty: TyPath { qself: None, path: "T".into() }.into(),
+                            ty: TypePath { qself: None, path: "T".into() }.into(),
                         },
                     ].into(), Default::default()),
                     discriminant: None,
@@ -246,7 +246,7 @@ fn test_enum() {
                             colon_token: None,
                             vis: Visibility::Inherited(VisInherited {}),
                             attrs: Vec::new(),
-                            ty: TyPath { qself: None, path: "E".into() }.into(),
+                            ty: TypePath { qself: None, path: "E".into() }.into(),
                         },
                     ].into(), Default::default()),
                     discriminant: None,
@@ -500,7 +500,7 @@ fn test_pub_restricted() {
                 }),
                 colon_token: None,
                 attrs: vec![],
-                ty: TyPath {
+                ty: TypePath {
                     qself: None,
                     path: "u8".into(),
                 }.into(),

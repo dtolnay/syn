@@ -36,7 +36,7 @@ ast_enum_of_structs! {
             pub mutbl: Mutability,
             pub ident: Ident,
             pub colon_token: Token![:],
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
             pub semi_token: Token![;],
@@ -50,7 +50,7 @@ ast_enum_of_structs! {
             pub const_token: Token![const],
             pub ident: Ident,
             pub colon_token: Token![:],
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
             pub semi_token: Token![;],
@@ -91,14 +91,14 @@ ast_enum_of_structs! {
         /// A type alias (`type` or `pub type`).
         ///
         /// E.g. `type Foo = Bar<u8>;`
-        pub Ty(ItemTy {
+        pub Type(ItemType {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub type_token: Token![type],
             pub ident: Ident,
             pub generics: Generics,
             pub eq_token: Token![=],
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
             pub semi_token: Token![;],
         }),
         /// An enum definition (`enum` or `pub enum`).
@@ -147,7 +147,7 @@ ast_enum_of_structs! {
             pub ident: Ident,
             pub generics: Generics,
             pub colon_token: Option<Token![:]>,
-            pub supertraits: Delimited<TyParamBound, Token![+]>,
+            pub supertraits: Delimited<TypeParamBound, Token![+]>,
             pub brace_token: tokens::Brace,
             pub items: Vec<TraitItem>,
         }),
@@ -175,7 +175,7 @@ ast_enum_of_structs! {
             /// Trait this impl implements.
             pub trait_: Option<(ImplPolarity, Path, Token![for])>,
             /// The Self type of the impl.
-            pub self_ty: Box<Ty>,
+            pub self_ty: Box<Type>,
             pub brace_token: tokens::Brace,
             pub items: Vec<ImplItem>,
         }),
@@ -294,7 +294,7 @@ ast_enum_of_structs! {
             pub mutbl: Mutability,
             pub ident: Ident,
             pub colon_token: Token![:],
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
             pub semi_token: Token![;],
         }),
     }
@@ -311,7 +311,7 @@ ast_enum_of_structs! {
             pub const_token: Token![const],
             pub ident: Ident,
             pub colon_token: Token![:],
-            pub ty: Ty,
+            pub ty: Type,
             pub default: Option<(Token![=], Expr)>,
             pub semi_token: Token![;],
         }),
@@ -326,8 +326,8 @@ ast_enum_of_structs! {
             pub type_token: Token![type],
             pub ident: Ident,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<TyParamBound, Token![+]>,
-            pub default: Option<(Token![=], Ty)>,
+            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub default: Option<(Token![=], Type)>,
             pub semi_token: Token![;],
         }),
         pub Macro(TraitItemMacro {
@@ -356,7 +356,7 @@ ast_enum_of_structs! {
             pub const_token: Token![const],
             pub ident: Ident,
             pub colon_token: Token![:],
-            pub ty: Ty,
+            pub ty: Type,
             pub eq_token: Token![=],
             pub expr: Expr,
             pub semi_token: Token![;],
@@ -375,7 +375,7 @@ ast_enum_of_structs! {
             pub type_token: Token![type],
             pub ident: Ident,
             pub eq_token: Token![=],
-            pub ty: Ty,
+            pub ty: Type,
             pub semi_token: Token![;],
         }),
         pub Macro(ImplItemMacro {
@@ -430,9 +430,9 @@ ast_enum_of_structs! {
         pub Captured(ArgCaptured {
             pub pat: Pat,
             pub colon_token: Token![:],
-            pub ty: Ty,
+            pub ty: Type,
         }),
-        pub Ignored(Ty),
+        pub Ignored(Type),
     }
 }
 
@@ -457,7 +457,7 @@ pub mod parsing {
         |
         syn!(ItemForeignMod) => { Item::ForeignMod }
         |
-        syn!(ItemTy) => { Item::Ty }
+        syn!(ItemType) => { Item::Type }
         |
         syn!(ItemStruct) => { Item::Struct }
         |
@@ -633,7 +633,7 @@ pub mod parsing {
         mutability: syn!(Mutability) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         eq: punct!(=) >>
         value: syn!(Expr) >>
         semi: punct!(;) >>
@@ -657,7 +657,7 @@ pub mod parsing {
         const_: keyword!(const) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         eq: punct!(=) >>
         value: syn!(Expr) >>
         semi: punct!(;) >>
@@ -749,7 +749,7 @@ pub mod parsing {
             do_parse!(
                 pat: syn!(Pat) >>
                 colon: punct!(:) >>
-                ty: syn!(Ty) >>
+                ty: syn!(Type) >>
                 (ArgCaptured {
                     pat: pat,
                     ty: ty,
@@ -757,7 +757,7 @@ pub mod parsing {
                 }.into())
             )
             |
-            syn!(Ty) => { FnArg::Ignored }
+            syn!(Type) => { FnArg::Ignored }
         ));
     }
 
@@ -862,7 +862,7 @@ pub mod parsing {
         mutability: syn!(Mutability) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         semi: punct!(;) >>
         (ForeignItemStatic {
             ident: ident,
@@ -876,7 +876,7 @@ pub mod parsing {
         })
     ));
 
-    impl_synom!(ItemTy "type item" do_parse!(
+    impl_synom!(ItemType "type item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         type_: keyword!(type) >>
@@ -884,9 +884,9 @@ pub mod parsing {
         generics: syn!(Generics) >>
         where_clause: syn!(WhereClause) >>
         eq: punct!(=) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         semi: punct!(;) >>
-        (ItemTy {
+        (ItemType {
             attrs: attrs,
             vis: vis,
             type_token: type_,
@@ -1001,7 +1001,7 @@ pub mod parsing {
         const_: keyword!(const) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         default: option!(tuple!(punct!(=), syn!(Expr))) >>
         semi: punct!(;) >>
         (TraitItemConst {
@@ -1079,7 +1079,7 @@ pub mod parsing {
         bounds: cond!(colon.is_some(),
             call!(Delimited::parse_separated_nonempty)
         ) >>
-        default: option!(tuple!(punct!(=), syn!(Ty))) >>
+        default: option!(tuple!(punct!(=), syn!(Type))) >>
         semi: punct!(;) >>
         (TraitItemType {
             attrs: attrs,
@@ -1118,7 +1118,7 @@ pub mod parsing {
             |
             epsilon!() => { |_| None }
         ) >>
-        self_ty: syn!(Ty) >>
+        self_ty: syn!(Type) >>
         where_clause: syn!(WhereClause) >>
         body: braces!(many0!(syn!(ImplItem))) >>
         (ItemImpl {
@@ -1154,7 +1154,7 @@ pub mod parsing {
         const_: keyword!(const) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         eq: punct!(=) >>
         value: syn!(Expr) >>
         semi: punct!(;) >>
@@ -1229,7 +1229,7 @@ pub mod parsing {
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
         eq: punct!(=) >>
-        ty: syn!(Ty) >>
+        ty: syn!(Type) >>
         semi: punct!(;) >>
         (ImplItemType {
             attrs: attrs,
@@ -1381,7 +1381,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for ItemTy {
+    impl ToTokens for ItemType {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);

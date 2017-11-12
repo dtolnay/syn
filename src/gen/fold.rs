@@ -80,7 +80,7 @@ fn fold_bare_fn_arg(&mut self, i: BareFnArg) -> BareFnArg { fold_bare_fn_arg(sel
 
 fn fold_bare_fn_arg_name(&mut self, i: BareFnArgName) -> BareFnArgName { fold_bare_fn_arg_name(self, i) }
 
-fn fold_bare_fn_ty(&mut self, i: BareFnTy) -> BareFnTy { fold_bare_fn_ty(self, i) }
+fn fold_bare_fn_type(&mut self, i: BareFnType) -> BareFnType { fold_bare_fn_type(self, i) }
 
 fn fold_bin_op(&mut self, i: BinOp) -> BinOp { fold_bin_op(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -242,7 +242,7 @@ fn fold_item_struct(&mut self, i: ItemStruct) -> ItemStruct { fold_item_struct(s
 # [ cfg ( feature = "full" ) ]
 fn fold_item_trait(&mut self, i: ItemTrait) -> ItemTrait { fold_item_trait(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_ty(&mut self, i: ItemTy) -> ItemTy { fold_item_ty(self, i) }
+fn fold_item_type(&mut self, i: ItemType) -> ItemType { fold_item_type(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_union(&mut self, i: ItemUnion) -> ItemUnion { fold_item_union(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -264,7 +264,7 @@ fn fold_meta_name_value(&mut self, i: MetaNameValue) -> MetaNameValue { fold_met
 # [ cfg ( feature = "full" ) ]
 fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig { fold_method_sig(self, i) }
 
-fn fold_mut_ty(&mut self, i: MutTy) -> MutTy { fold_mut_ty(self, i) }
+fn fold_mut_type(&mut self, i: MutType) -> MutType { fold_mut_type(self, i) }
 
 fn fold_mutability(&mut self, i: Mutability) -> Mutability { fold_mutability(self, i) }
 
@@ -332,39 +332,39 @@ fn fold_trait_item_method(&mut self, i: TraitItemMethod) -> TraitItemMethod { fo
 # [ cfg ( feature = "full" ) ]
 fn fold_trait_item_type(&mut self, i: TraitItemType) -> TraitItemType { fold_trait_item_type(self, i) }
 
-fn fold_ty(&mut self, i: Ty) -> Ty { fold_ty(self, i) }
+fn fold_type(&mut self, i: Type) -> Type { fold_type(self, i) }
 
-fn fold_ty_array(&mut self, i: TyArray) -> TyArray { fold_ty_array(self, i) }
+fn fold_type_array(&mut self, i: TypeArray) -> TypeArray { fold_type_array(self, i) }
 
-fn fold_ty_bare_fn(&mut self, i: TyBareFn) -> TyBareFn { fold_ty_bare_fn(self, i) }
-
-fn fold_ty_group(&mut self, i: TyGroup) -> TyGroup { fold_ty_group(self, i) }
-
-fn fold_ty_impl_trait(&mut self, i: TyImplTrait) -> TyImplTrait { fold_ty_impl_trait(self, i) }
-
-fn fold_ty_infer(&mut self, i: TyInfer) -> TyInfer { fold_ty_infer(self, i) }
-
-fn fold_ty_never(&mut self, i: TyNever) -> TyNever { fold_ty_never(self, i) }
-
-fn fold_ty_param(&mut self, i: TyParam) -> TyParam { fold_ty_param(self, i) }
-
-fn fold_ty_param_bound(&mut self, i: TyParamBound) -> TyParamBound { fold_ty_param_bound(self, i) }
-
-fn fold_ty_paren(&mut self, i: TyParen) -> TyParen { fold_ty_paren(self, i) }
-
-fn fold_ty_path(&mut self, i: TyPath) -> TyPath { fold_ty_path(self, i) }
-
-fn fold_ty_ptr(&mut self, i: TyPtr) -> TyPtr { fold_ty_ptr(self, i) }
-
-fn fold_ty_rptr(&mut self, i: TyRptr) -> TyRptr { fold_ty_rptr(self, i) }
-
-fn fold_ty_slice(&mut self, i: TySlice) -> TySlice { fold_ty_slice(self, i) }
-
-fn fold_ty_trait_object(&mut self, i: TyTraitObject) -> TyTraitObject { fold_ty_trait_object(self, i) }
-
-fn fold_ty_tup(&mut self, i: TyTup) -> TyTup { fold_ty_tup(self, i) }
+fn fold_type_bare_fn(&mut self, i: TypeBareFn) -> TypeBareFn { fold_type_bare_fn(self, i) }
 
 fn fold_type_binding(&mut self, i: TypeBinding) -> TypeBinding { fold_type_binding(self, i) }
+
+fn fold_type_group(&mut self, i: TypeGroup) -> TypeGroup { fold_type_group(self, i) }
+
+fn fold_type_impl_trait(&mut self, i: TypeImplTrait) -> TypeImplTrait { fold_type_impl_trait(self, i) }
+
+fn fold_type_infer(&mut self, i: TypeInfer) -> TypeInfer { fold_type_infer(self, i) }
+
+fn fold_type_never(&mut self, i: TypeNever) -> TypeNever { fold_type_never(self, i) }
+
+fn fold_type_param(&mut self, i: TypeParam) -> TypeParam { fold_type_param(self, i) }
+
+fn fold_type_param_bound(&mut self, i: TypeParamBound) -> TypeParamBound { fold_type_param_bound(self, i) }
+
+fn fold_type_paren(&mut self, i: TypeParen) -> TypeParen { fold_type_paren(self, i) }
+
+fn fold_type_path(&mut self, i: TypePath) -> TypePath { fold_type_path(self, i) }
+
+fn fold_type_ptr(&mut self, i: TypePtr) -> TypePtr { fold_type_ptr(self, i) }
+
+fn fold_type_rptr(&mut self, i: TypeRptr) -> TypeRptr { fold_type_rptr(self, i) }
+
+fn fold_type_slice(&mut self, i: TypeSlice) -> TypeSlice { fold_type_slice(self, i) }
+
+fn fold_type_trait_object(&mut self, i: TypeTraitObject) -> TypeTraitObject { fold_type_trait_object(self, i) }
+
+fn fold_type_tup(&mut self, i: TypeTup) -> TypeTup { fold_type_tup(self, i) }
 
 fn fold_un_op(&mut self, i: UnOp) -> UnOp { fold_un_op(self, i) }
 
@@ -423,7 +423,7 @@ pub fn fold_angle_bracketed_parameter_data<V: Folder + ?Sized>(_visitor: &mut V,
         turbofish: _i . turbofish,
         lt_token: _i . lt_token,
         lifetimes: _i . lifetimes,
-        types: FoldHelper::lift(_i . types, |it| { _visitor.fold_ty(it) }),
+        types: FoldHelper::lift(_i . types, |it| { _visitor.fold_type(it) }),
         bindings: FoldHelper::lift(_i . bindings, |it| { _visitor.fold_type_binding(it) }),
         gt_token: _i . gt_token,
     }
@@ -433,7 +433,7 @@ pub fn fold_arg_captured<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgCaptured) 
     ArgCaptured {
         pat: _visitor.fold_pat(_i . pat),
         colon_token: _i . colon_token,
-        ty: _visitor.fold_ty(_i . ty),
+        ty: _visitor.fold_type(_i . ty),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -491,7 +491,7 @@ pub fn fold_attribute<V: Folder + ?Sized>(_visitor: &mut V, _i: Attribute) -> At
 pub fn fold_bare_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg) -> BareFnArg {
     BareFnArg {
         name: _i . name,
-        ty: _visitor.fold_ty(_i . ty),
+        ty: _visitor.fold_type(_i . ty),
     }
 }
 
@@ -511,8 +511,8 @@ pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
     }
 }
 
-pub fn fold_bare_fn_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnTy) -> BareFnTy {
-    BareFnTy {
+pub fn fold_bare_fn_type<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnType) -> BareFnType {
+    BareFnType {
         lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
@@ -861,7 +861,7 @@ pub fn fold_expr_cast<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCast) -> Exp
     ExprCast {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         as_token: _i . as_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1179,7 +1179,7 @@ pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMetho
     ExprMethodCall {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         method: _i . method,
-        typarams: FoldHelper::lift(_i . typarams, |it| { _visitor.fold_ty(it) }),
+        typarams: FoldHelper::lift(_i . typarams, |it| { _visitor.fold_type(it) }),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
         paren_token: _i . paren_token,
         dot_token: _i . dot_token,
@@ -1264,7 +1264,7 @@ pub fn fold_expr_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprType) -> Exp
     ExprType {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         colon_token: _i . colon_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
     }
 }
 
@@ -1310,7 +1310,7 @@ pub fn fold_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
         ident: _i . ident,
         vis: _visitor.fold_visibility(_i . vis),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        ty: _visitor.fold_ty(_i . ty),
+        ty: _visitor.fold_type(_i . ty),
         colon_token: _i . colon_token,
     }
 }
@@ -1363,7 +1363,7 @@ pub fn fold_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
         }
         Ignored(_binding_0, ) => {
             Ignored (
-                _visitor.fold_ty(_binding_0),
+                _visitor.fold_type(_binding_0),
             )
         }
     }
@@ -1415,7 +1415,7 @@ pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: Foreig
         mutbl: _visitor.fold_mutability(_i . mutbl),
         ident: _i . ident,
         colon_token: _i . colon_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         semi_token: _i . semi_token,
     }
 }
@@ -1425,7 +1425,7 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
         lt_token: _i . lt_token,
         gt_token: _i . gt_token,
         lifetimes: FoldHelper::lift(_i . lifetimes, |it| { _visitor.fold_lifetime_def(it) }),
-        ty_params: FoldHelper::lift(_i . ty_params, |it| { _visitor.fold_ty_param(it) }),
+        ty_params: FoldHelper::lift(_i . ty_params, |it| { _visitor.fold_type_param(it) }),
         where_clause: _visitor.fold_where_clause(_i . where_clause),
     }
 }
@@ -1464,7 +1464,7 @@ pub fn fold_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemCo
         const_token: _i . const_token,
         ident: _i . ident,
         colon_token: _i . colon_token,
-        ty: _visitor.fold_ty(_i . ty),
+        ty: _visitor.fold_type(_i . ty),
         eq_token: _i . eq_token,
         expr: _visitor.fold_expr(_i . expr),
         semi_token: _i . semi_token,
@@ -1496,7 +1496,7 @@ pub fn fold_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemTyp
         type_token: _i . type_token,
         ident: _i . ident,
         eq_token: _i . eq_token,
-        ty: _visitor.fold_ty(_i . ty),
+        ty: _visitor.fold_type(_i . ty),
         semi_token: _i . semi_token,
     }
 }
@@ -1567,9 +1567,9 @@ pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
                 _visitor.fold_item_foreign_mod(_binding_0),
             )
         }
-        Ty(_binding_0, ) => {
-            Ty (
-                _visitor.fold_item_ty(_binding_0),
+        Type(_binding_0, ) => {
+            Type (
+                _visitor.fold_item_type(_binding_0),
             )
         }
         Enum(_binding_0, ) => {
@@ -1617,7 +1617,7 @@ pub fn fold_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> I
         const_token: _i . const_token,
         ident: _i . ident,
         colon_token: _i . colon_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         eq_token: _i . eq_token,
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         semi_token: _i . semi_token,
@@ -1690,7 +1690,7 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
         impl_token: _i . impl_token,
         generics: _visitor.fold_generics(_i . generics),
         trait_: _i . trait_,
-        self_ty: Box::new(_visitor.fold_ty(* _i . self_ty)),
+        self_ty: Box::new(_visitor.fold_type(* _i . self_ty)),
         brace_token: _i . brace_token,
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_impl_item(it) }),
     }
@@ -1723,7 +1723,7 @@ pub fn fold_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStatic) ->
         mutbl: _visitor.fold_mutability(_i . mutbl),
         ident: _i . ident,
         colon_token: _i . colon_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         eq_token: _i . eq_token,
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         semi_token: _i . semi_token,
@@ -1751,21 +1751,21 @@ pub fn fold_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> I
         ident: _i . ident,
         generics: _visitor.fold_generics(_i . generics),
         colon_token: _i . colon_token,
-        supertraits: FoldHelper::lift(_i . supertraits, |it| { _visitor.fold_ty_param_bound(it) }),
+        supertraits: FoldHelper::lift(_i . supertraits, |it| { _visitor.fold_type_param_bound(it) }),
         brace_token: _i . brace_token,
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_trait_item(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_item_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTy) -> ItemTy {
-    ItemTy {
+pub fn fold_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemType) -> ItemType {
+    ItemType {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         type_token: _i . type_token,
         ident: _i . ident,
         generics: _visitor.fold_generics(_i . generics),
         eq_token: _i . eq_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         semi_token: _i . semi_token,
     }
 }
@@ -1807,7 +1807,7 @@ pub fn fold_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
         eq_token: _i . eq_token,
         semi_token: _i . semi_token,
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
-        ty: (_i . ty).map(|it| { Box::new(_visitor.fold_ty(* it)) }),
+        ty: (_i . ty).map(|it| { Box::new(_visitor.fold_type(* it)) }),
         init: (_i . init).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
     }
@@ -1881,9 +1881,9 @@ pub fn fold_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> M
     }
 }
 
-pub fn fold_mut_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: MutTy) -> MutTy {
-    MutTy {
-        ty: _visitor.fold_ty(_i . ty),
+pub fn fold_mut_type<V: Folder + ?Sized>(_visitor: &mut V, _i: MutType) -> MutType {
+    MutType {
+        ty: _visitor.fold_type(_i . ty),
         mutability: _visitor.fold_mutability(_i . mutability),
     }
 }
@@ -1919,7 +1919,7 @@ pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMet
 pub fn fold_parenthesized_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: ParenthesizedParameterData) -> ParenthesizedParameterData {
     ParenthesizedParameterData {
         paren_token: _i . paren_token,
-        inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_ty(it) }),
+        inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_type(it) }),
         output: _visitor.fold_return_type(_i . output),
     }
 }
@@ -2152,7 +2152,7 @@ pub fn fold_poly_trait_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PolyTraitRe
 pub fn fold_qself<V: Folder + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
     QSelf {
         lt_token: _i . lt_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         position: _i . position,
         as_token: _i . as_token,
         gt_token: _i . gt_token,
@@ -2179,9 +2179,9 @@ pub fn fold_return_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ReturnType) ->
     use ::ReturnType::*;
     match _i {
         Default => { Default }
-        Ty(_binding_0, _binding_1, ) => {
-            Ty (
-                _visitor.fold_ty(_binding_0),
+        Type(_binding_0, _binding_1, ) => {
+            Type (
+                _visitor.fold_type(_binding_0),
                 _binding_1,
             )
         }
@@ -2264,7 +2264,7 @@ pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem
         const_token: _i . const_token,
         ident: _i . ident,
         colon_token: _i . colon_token,
-        ty: _visitor.fold_ty(_i . ty),
+        ty: _visitor.fold_type(_i . ty),
         default: _i . default,
         semi_token: _i . semi_token,
     }
@@ -2292,78 +2292,78 @@ pub fn fold_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemT
         type_token: _i . type_token,
         ident: _i . ident,
         colon_token: _i . colon_token,
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
         default: _i . default,
         semi_token: _i . semi_token,
     }
 }
 
-pub fn fold_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: Ty) -> Ty {
-    use ::Ty::*;
+pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
+    use ::Type::*;
     match _i {
         Slice(_binding_0, ) => {
             Slice (
-                _visitor.fold_ty_slice(_binding_0),
+                _visitor.fold_type_slice(_binding_0),
             )
         }
         Array(_binding_0, ) => {
             Array (
-                _visitor.fold_ty_array(_binding_0),
+                _visitor.fold_type_array(_binding_0),
             )
         }
         Ptr(_binding_0, ) => {
             Ptr (
-                _visitor.fold_ty_ptr(_binding_0),
+                _visitor.fold_type_ptr(_binding_0),
             )
         }
         Rptr(_binding_0, ) => {
             Rptr (
-                _visitor.fold_ty_rptr(_binding_0),
+                _visitor.fold_type_rptr(_binding_0),
             )
         }
         BareFn(_binding_0, ) => {
             BareFn (
-                _visitor.fold_ty_bare_fn(_binding_0),
+                _visitor.fold_type_bare_fn(_binding_0),
             )
         }
         Never(_binding_0, ) => {
             Never (
-                _visitor.fold_ty_never(_binding_0),
+                _visitor.fold_type_never(_binding_0),
             )
         }
         Tup(_binding_0, ) => {
             Tup (
-                _visitor.fold_ty_tup(_binding_0),
+                _visitor.fold_type_tup(_binding_0),
             )
         }
         Path(_binding_0, ) => {
             Path (
-                _visitor.fold_ty_path(_binding_0),
+                _visitor.fold_type_path(_binding_0),
             )
         }
         TraitObject(_binding_0, ) => {
             TraitObject (
-                _visitor.fold_ty_trait_object(_binding_0),
+                _visitor.fold_type_trait_object(_binding_0),
             )
         }
         ImplTrait(_binding_0, ) => {
             ImplTrait (
-                _visitor.fold_ty_impl_trait(_binding_0),
+                _visitor.fold_type_impl_trait(_binding_0),
             )
         }
         Paren(_binding_0, ) => {
             Paren (
-                _visitor.fold_ty_paren(_binding_0),
+                _visitor.fold_type_paren(_binding_0),
             )
         }
         Group(_binding_0, ) => {
             Group (
-                _visitor.fold_ty_group(_binding_0),
+                _visitor.fold_type_group(_binding_0),
             )
         }
         Infer(_binding_0, ) => {
             Infer (
-                _visitor.fold_ty_infer(_binding_0),
+                _visitor.fold_type_infer(_binding_0),
             )
         }
         Macro(_binding_0, ) => {
@@ -2374,60 +2374,68 @@ pub fn fold_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: Ty) -> Ty {
     }
 }
 
-pub fn fold_ty_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TyArray) -> TyArray {
-    TyArray {
+pub fn fold_type_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeArray) -> TypeArray {
+    TypeArray {
         bracket_token: _i . bracket_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         semi_token: _i . semi_token,
         amt: _visitor.fold_expr(_i . amt),
     }
 }
 
-pub fn fold_ty_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TyBareFn) -> TyBareFn {
-    TyBareFn {
-        ty: Box::new(_visitor.fold_bare_fn_ty(* _i . ty)),
+pub fn fold_type_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBareFn) -> TypeBareFn {
+    TypeBareFn {
+        ty: Box::new(_visitor.fold_bare_fn_type(* _i . ty)),
     }
 }
 
-pub fn fold_ty_group<V: Folder + ?Sized>(_visitor: &mut V, _i: TyGroup) -> TyGroup {
-    TyGroup {
+pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) -> TypeBinding {
+    TypeBinding {
+        ident: _i . ident,
+        eq_token: _i . eq_token,
+        ty: _visitor.fold_type(_i . ty),
+    }
+}
+
+pub fn fold_type_group<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeGroup) -> TypeGroup {
+    TypeGroup {
         group_token: _i . group_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
     }
 }
 
-pub fn fold_ty_impl_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: TyImplTrait) -> TyImplTrait {
-    TyImplTrait {
+pub fn fold_type_impl_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeImplTrait) -> TypeImplTrait {
+    TypeImplTrait {
         impl_token: _i . impl_token,
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
     }
 }
 
-pub fn fold_ty_infer<V: Folder + ?Sized>(_visitor: &mut V, _i: TyInfer) -> TyInfer {
-    TyInfer {
+pub fn fold_type_infer<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeInfer) -> TypeInfer {
+    TypeInfer {
         underscore_token: _i . underscore_token,
     }
 }
 
-pub fn fold_ty_never<V: Folder + ?Sized>(_visitor: &mut V, _i: TyNever) -> TyNever {
-    TyNever {
+pub fn fold_type_never<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeNever) -> TypeNever {
+    TypeNever {
         bang_token: _i . bang_token,
     }
 }
 
-pub fn fold_ty_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParam) -> TyParam {
-    TyParam {
+pub fn fold_type_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam) -> TypeParam {
+    TypeParam {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ident: _i . ident,
         colon_token: _i . colon_token,
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
         eq_token: _i . eq_token,
-        default: (_i . default).map(|it| { _visitor.fold_ty(it) }),
+        default: (_i . default).map(|it| { _visitor.fold_type(it) }),
     }
 }
 
-pub fn fold_ty_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParamBound) -> TyParamBound {
-    use ::TyParamBound::*;
+pub fn fold_type_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParamBound) -> TypeParamBound {
+    use ::TypeParamBound::*;
     match _i {
         Trait(_binding_0, _binding_1, ) => {
             Trait (
@@ -2443,62 +2451,54 @@ pub fn fold_ty_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParamBoun
     }
 }
 
-pub fn fold_ty_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TyParen) -> TyParen {
-    TyParen {
+pub fn fold_type_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParen) -> TypeParen {
+    TypeParen {
         paren_token: _i . paren_token,
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
     }
 }
 
-pub fn fold_ty_path<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPath) -> TyPath {
-    TyPath {
+pub fn fold_type_path<V: Folder + ?Sized>(_visitor: &mut V, _i: TypePath) -> TypePath {
+    TypePath {
         qself: (_i . qself).map(|it| { _visitor.fold_qself(it) }),
         path: _visitor.fold_path(_i . path),
     }
 }
 
-pub fn fold_ty_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyPtr) -> TyPtr {
-    TyPtr {
+pub fn fold_type_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypePtr) -> TypePtr {
+    TypePtr {
         star_token: _i . star_token,
         const_token: _i . const_token,
-        ty: Box::new(_visitor.fold_mut_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_mut_type(* _i . ty)),
     }
 }
 
-pub fn fold_ty_rptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TyRptr) -> TyRptr {
-    TyRptr {
+pub fn fold_type_rptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeRptr) -> TypeRptr {
+    TypeRptr {
         and_token: _i . and_token,
         lifetime: _i . lifetime,
-        ty: Box::new(_visitor.fold_mut_ty(* _i . ty)),
+        ty: Box::new(_visitor.fold_mut_type(* _i . ty)),
     }
 }
 
-pub fn fold_ty_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TySlice) -> TySlice {
-    TySlice {
-        ty: Box::new(_visitor.fold_ty(* _i . ty)),
+pub fn fold_type_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeSlice) -> TypeSlice {
+    TypeSlice {
+        ty: Box::new(_visitor.fold_type(* _i . ty)),
         bracket_token: _i . bracket_token,
     }
 }
 
-pub fn fold_ty_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTraitObject) -> TyTraitObject {
-    TyTraitObject {
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
+pub fn fold_type_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTraitObject) -> TypeTraitObject {
+    TypeTraitObject {
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
     }
 }
 
-pub fn fold_ty_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: TyTup) -> TyTup {
-    TyTup {
+pub fn fold_type_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTup) -> TypeTup {
+    TypeTup {
         paren_token: _i . paren_token,
-        tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_ty(it) }),
+        tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_type(it) }),
         lone_comma: _i . lone_comma,
-    }
-}
-
-pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) -> TypeBinding {
-    TypeBinding {
-        ident: _i . ident,
-        eq_token: _i . eq_token,
-        ty: _visitor.fold_ty(_i . ty),
     }
 }
 
@@ -2642,9 +2642,9 @@ pub fn fold_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> 
 pub fn fold_where_bound_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereBoundPredicate) -> WhereBoundPredicate {
     WhereBoundPredicate {
         bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
-        bounded_ty: _visitor.fold_ty(_i . bounded_ty),
+        bounded_ty: _visitor.fold_type(_i . bounded_ty),
         colon_token: _i . colon_token,
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_ty_param_bound(it) }),
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
     }
 }
 
@@ -2657,9 +2657,9 @@ pub fn fold_where_clause<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereClause) 
 
 pub fn fold_where_eq_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereEqPredicate) -> WhereEqPredicate {
     WhereEqPredicate {
-        lhs_ty: _visitor.fold_ty(_i . lhs_ty),
+        lhs_ty: _visitor.fold_type(_i . lhs_ty),
         eq_token: _i . eq_token,
-        rhs_ty: _visitor.fold_ty(_i . rhs_ty),
+        rhs_ty: _visitor.fold_type(_i . rhs_ty),
     }
 }
 

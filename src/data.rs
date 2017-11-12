@@ -70,7 +70,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
 
         /// Type of the field.
-        pub ty: Ty,
+        pub ty: Type,
 
         pub colon_token: Option<Token![:]>,
     }
@@ -116,7 +116,7 @@ pub mod parsing {
             vis: syn!(Visibility) >>
             id: syn!(Ident) >>
             colon: punct!(:) >>
-            ty: syn!(Ty) >>
+            ty: syn!(Type) >>
             (Field {
                 ident: Some(id),
                 vis: vis,
@@ -129,7 +129,7 @@ pub mod parsing {
         named!(pub parse_tuple -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             vis: syn!(Visibility) >>
-            ty: syn!(Ty) >>
+            ty: syn!(Type) >>
             (Field {
                 ident: None,
                 colon_token: None,
