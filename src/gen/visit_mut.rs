@@ -1328,6 +1328,7 @@ pub fn visit_item_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut It
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMacro) {
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
+    // Skipped field _i . ident;
     _visitor.visit_macro_mut(&mut _i . mac);
 }
 # [ cfg ( feature = "full" ) ]
@@ -1436,7 +1437,6 @@ pub fn visit_mac_stmt_style_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
 pub fn visit_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Macro) {
     _visitor.visit_path_mut(&mut _i . path);
     // Skipped field _i . bang_token;
-    // Skipped field _i . ident;
     // Skipped field _i . tokens;
 }
 

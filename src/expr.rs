@@ -1850,7 +1850,6 @@ pub mod parsing {
             Macro {
                 path: what,
                 bang_token: bang,
-                ident: None,
                 tokens: vec![TokenTree(proc_macro2::TokenTree {
                     span: ((data.1).0).0,
                     kind: TokenNode::Group(Delimiter::Brace, data.0),
