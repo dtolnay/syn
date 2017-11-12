@@ -173,8 +173,6 @@ fn visit_foreign_item_fn_mut(&mut self, i: &mut ForeignItemFn) { visit_foreign_i
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_static_mut(&mut self, i: &mut ForeignItemStatic) { visit_foreign_item_static_mut(self, i) }
 
-fn visit_function_ret_ty_mut(&mut self, i: &mut FunctionRetTy) { visit_function_ret_ty_mut(self, i) }
-
 fn visit_generics_mut(&mut self, i: &mut Generics) { visit_generics_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item_mut(&mut self, i: &mut ImplItem) { visit_impl_item_mut(self, i) }
@@ -290,6 +288,8 @@ fn visit_poly_trait_ref_mut(&mut self, i: &mut PolyTraitRef) { visit_poly_trait_
 fn visit_qself_mut(&mut self, i: &mut QSelf) { visit_qself_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_range_limits_mut(&mut self, i: &mut RangeLimits) { visit_range_limits_mut(self, i) }
+
+fn visit_return_type_mut(&mut self, i: &mut ReturnType) { visit_return_type_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_stmt_mut(&mut self, i: &mut Stmt) { visit_stmt_mut(self, i) }
 
@@ -468,7 +468,7 @@ pub fn visit_bare_fn_ty_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut B
     // Skipped field _i . paren_token;
     for mut el in (_i . inputs).iter_mut() { let mut it = el.item_mut(); _visitor.visit_bare_fn_arg_mut(&mut it) };
     // Skipped field _i . variadic;
-    _visitor.visit_function_ret_ty_mut(&mut _i . output);
+    _visitor.visit_return_type_mut(&mut _i . output);
 }
 
 pub fn visit_bin_op_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut BinOp) {
@@ -1070,7 +1070,7 @@ pub fn visit_fn_decl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FnDe
     // Skipped field _i . fn_token;
     // Skipped field _i . paren_token;
     for mut el in (_i . inputs).iter_mut() { let mut it = el.item_mut(); _visitor.visit_fn_arg_mut(&mut it) };
-    _visitor.visit_function_ret_ty_mut(&mut _i . output);
+    _visitor.visit_return_type_mut(&mut _i . output);
     _visitor.visit_generics_mut(&mut _i . generics);
     // Skipped field _i . variadic;
     // Skipped field _i . dot_tokens;
@@ -1105,17 +1105,6 @@ pub fn visit_foreign_item_static_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _
     // Skipped field _i . colon_token;
     _visitor.visit_ty_mut(&mut _i . ty);
     // Skipped field _i . semi_token;
-}
-
-pub fn visit_function_ret_ty_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FunctionRetTy) {
-    use ::FunctionRetTy::*;
-    match *_i {
-        Default => { }
-        Ty(ref mut _binding_0, ref mut _binding_1, ) => {
-            _visitor.visit_ty_mut(&mut * _binding_0);
-            // Skipped field * _binding_1;
-        }
-    }
 }
 
 pub fn visit_generics_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Generics) {
@@ -1505,7 +1494,7 @@ pub fn visit_nested_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 pub fn visit_parenthesized_parameter_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ParenthesizedParameterData) {
     // Skipped field _i . paren_token;
     for mut el in (_i . inputs).iter_mut() { let mut it = el.item_mut(); _visitor.visit_ty_mut(&mut it) };
-    _visitor.visit_function_ret_ty_mut(&mut _i . output);
+    _visitor.visit_return_type_mut(&mut _i . output);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
@@ -1685,6 +1674,17 @@ pub fn visit_range_limits_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
         }
         Closed(ref mut _binding_0, ) => {
             // Skipped field * _binding_0;
+        }
+    }
+}
+
+pub fn visit_return_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ReturnType) {
+    use ::ReturnType::*;
+    match *_i {
+        Default => { }
+        Ty(ref mut _binding_0, ref mut _binding_1, ) => {
+            _visitor.visit_ty_mut(&mut * _binding_0);
+            // Skipped field * _binding_1;
         }
     }
 }

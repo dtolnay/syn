@@ -173,8 +173,6 @@ fn visit_foreign_item_fn(&mut self, i: &ForeignItemFn) { visit_foreign_item_fn(s
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_static(&mut self, i: &ForeignItemStatic) { visit_foreign_item_static(self, i) }
 
-fn visit_function_ret_ty(&mut self, i: &FunctionRetTy) { visit_function_ret_ty(self, i) }
-
 fn visit_generics(&mut self, i: &Generics) { visit_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item(&mut self, i: &ImplItem) { visit_impl_item(self, i) }
@@ -290,6 +288,8 @@ fn visit_poly_trait_ref(&mut self, i: &PolyTraitRef) { visit_poly_trait_ref(self
 fn visit_qself(&mut self, i: &QSelf) { visit_qself(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_range_limits(&mut self, i: &RangeLimits) { visit_range_limits(self, i) }
+
+fn visit_return_type(&mut self, i: &ReturnType) { visit_return_type(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_stmt(&mut self, i: &Stmt) { visit_stmt(self, i) }
 
@@ -468,7 +468,7 @@ pub fn visit_bare_fn_ty<V: Visitor + ?Sized>(_visitor: &mut V, _i: &BareFnTy) {
     // Skipped field _i . paren_token;
     for el in (_i . inputs).iter() { let it = el.item(); _visitor.visit_bare_fn_arg(&it) };
     // Skipped field _i . variadic;
-    _visitor.visit_function_ret_ty(&_i . output);
+    _visitor.visit_return_type(&_i . output);
 }
 
 pub fn visit_bin_op<V: Visitor + ?Sized>(_visitor: &mut V, _i: &BinOp) {
@@ -1070,7 +1070,7 @@ pub fn visit_fn_decl<V: Visitor + ?Sized>(_visitor: &mut V, _i: &FnDecl) {
     // Skipped field _i . fn_token;
     // Skipped field _i . paren_token;
     for el in (_i . inputs).iter() { let it = el.item(); _visitor.visit_fn_arg(&it) };
-    _visitor.visit_function_ret_ty(&_i . output);
+    _visitor.visit_return_type(&_i . output);
     _visitor.visit_generics(&_i . generics);
     // Skipped field _i . variadic;
     // Skipped field _i . dot_tokens;
@@ -1105,17 +1105,6 @@ pub fn visit_foreign_item_static<V: Visitor + ?Sized>(_visitor: &mut V, _i: &For
     // Skipped field _i . colon_token;
     _visitor.visit_ty(&_i . ty);
     // Skipped field _i . semi_token;
-}
-
-pub fn visit_function_ret_ty<V: Visitor + ?Sized>(_visitor: &mut V, _i: &FunctionRetTy) {
-    use ::FunctionRetTy::*;
-    match *_i {
-        Default => { }
-        Ty(ref _binding_0, ref _binding_1, ) => {
-            _visitor.visit_ty(&* _binding_0);
-            // Skipped field * _binding_1;
-        }
-    }
 }
 
 pub fn visit_generics<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Generics) {
@@ -1505,7 +1494,7 @@ pub fn visit_nested_meta_item<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Nested
 pub fn visit_parenthesized_parameter_data<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ParenthesizedParameterData) {
     // Skipped field _i . paren_token;
     for el in (_i . inputs).iter() { let it = el.item(); _visitor.visit_ty(&it) };
-    _visitor.visit_function_ret_ty(&_i . output);
+    _visitor.visit_return_type(&_i . output);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Pat) {
@@ -1685,6 +1674,17 @@ pub fn visit_range_limits<V: Visitor + ?Sized>(_visitor: &mut V, _i: &RangeLimit
         }
         Closed(ref _binding_0, ) => {
             // Skipped field * _binding_0;
+        }
+    }
+}
+
+pub fn visit_return_type<V: Visitor + ?Sized>(_visitor: &mut V, _i: &ReturnType) {
+    use ::ReturnType::*;
+    match *_i {
+        Default => { }
+        Ty(ref _binding_0, ref _binding_1, ) => {
+            _visitor.visit_ty(&* _binding_0);
+            // Skipped field * _binding_1;
         }
     }
 }

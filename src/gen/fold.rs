@@ -200,8 +200,6 @@ fn fold_foreign_item_fn(&mut self, i: ForeignItemFn) -> ForeignItemFn { fold_for
 # [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStatic { fold_foreign_item_static(self, i) }
 
-fn fold_function_ret_ty(&mut self, i: FunctionRetTy) -> FunctionRetTy { fold_function_ret_ty(self, i) }
-
 fn fold_generics(&mut self, i: Generics) -> Generics { fold_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem { fold_impl_item(self, i) }
@@ -317,6 +315,8 @@ fn fold_poly_trait_ref(&mut self, i: PolyTraitRef) -> PolyTraitRef { fold_poly_t
 fn fold_qself(&mut self, i: QSelf) -> QSelf { fold_qself(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_range_limits(&mut self, i: RangeLimits) -> RangeLimits { fold_range_limits(self, i) }
+
+fn fold_return_type(&mut self, i: ReturnType) -> ReturnType { fold_return_type(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_stmt(&mut self, i: Stmt) -> Stmt { fold_stmt(self, i) }
 
@@ -520,7 +520,7 @@ pub fn fold_bare_fn_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnTy) -> Ba
         paren_token: _i . paren_token,
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_bare_fn_arg(it) }),
         variadic: _i . variadic,
-        output: _visitor.fold_function_ret_ty(_i . output),
+        output: _visitor.fold_return_type(_i . output),
     }
 }
 
@@ -1374,7 +1374,7 @@ pub fn fold_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl 
         fn_token: _i . fn_token,
         paren_token: _i . paren_token,
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_fn_arg(it) }),
-        output: _visitor.fold_function_ret_ty(_i . output),
+        output: _visitor.fold_return_type(_i . output),
         generics: _visitor.fold_generics(_i . generics),
         variadic: _i . variadic,
         dot_tokens: _i . dot_tokens,
@@ -1417,19 +1417,6 @@ pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: Foreig
         colon_token: _i . colon_token,
         ty: Box::new(_visitor.fold_ty(* _i . ty)),
         semi_token: _i . semi_token,
-    }
-}
-
-pub fn fold_function_ret_ty<V: Folder + ?Sized>(_visitor: &mut V, _i: FunctionRetTy) -> FunctionRetTy {
-    use ::FunctionRetTy::*;
-    match _i {
-        Default => { Default }
-        Ty(_binding_0, _binding_1, ) => {
-            Ty (
-                _visitor.fold_ty(_binding_0),
-                _binding_1,
-            )
-        }
     }
 }
 
@@ -1933,7 +1920,7 @@ pub fn fold_parenthesized_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _
     ParenthesizedParameterData {
         paren_token: _i . paren_token,
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_ty(it) }),
-        output: _visitor.fold_function_ret_ty(_i . output),
+        output: _visitor.fold_return_type(_i . output),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2183,6 +2170,19 @@ pub fn fold_range_limits<V: Folder + ?Sized>(_visitor: &mut V, _i: RangeLimits) 
         Closed(_binding_0, ) => {
             Closed (
                 _binding_0,
+            )
+        }
+    }
+}
+
+pub fn fold_return_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ReturnType) -> ReturnType {
+    use ::ReturnType::*;
+    match _i {
+        Default => { Default }
+        Ty(_binding_0, _binding_1, ) => {
+            Ty (
+                _visitor.fold_ty(_binding_0),
+                _binding_1,
             )
         }
     }
