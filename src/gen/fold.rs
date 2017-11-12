@@ -199,6 +199,8 @@ fn fold_foreign_item(&mut self, i: ForeignItem) -> ForeignItem { fold_foreign_it
 fn fold_foreign_item_fn(&mut self, i: ForeignItemFn) -> ForeignItemFn { fold_foreign_item_fn(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStatic { fold_foreign_item_static(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_foreign_item_type(&mut self, i: ForeignItemType) -> ForeignItemType { fold_foreign_item_type(self, i) }
 
 fn fold_generics(&mut self, i: Generics) -> Generics { fold_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1394,6 +1396,11 @@ pub fn fold_foreign_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItem) 
                 _visitor.fold_foreign_item_static(_binding_0),
             )
         }
+        Type(_binding_0, ) => {
+            Type (
+                _visitor.fold_foreign_item_type(_binding_0),
+            )
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1416,6 +1423,16 @@ pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: Foreig
         ident: _i . ident,
         colon_token: _i . colon_token,
         ty: Box::new(_visitor.fold_type(* _i . ty)),
+        semi_token: _i . semi_token,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_foreign_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItemType) -> ForeignItemType {
+    ForeignItemType {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        vis: _visitor.fold_visibility(_i . vis),
+        type_token: _i . type_token,
+        ident: _i . ident,
         semi_token: _i . semi_token,
     }
 }
