@@ -116,9 +116,8 @@ impl Synom for TokenStream {
 /// # #[macro_use] extern crate synom;
 /// # use syn::Ty;
 /// # use synom::delimited::Delimited;
-/// # use synom::tokens::Comma;
 /// // One or more Rust types separated by commas.
-/// named!(pub comma_separated_types -> Delimited<Ty, Comma>,
+/// named!(pub comma_separated_types -> Delimited<Ty, Token![,]>,
 ///     call!(Delimited::parse_separated_nonempty)
 /// );
 /// # fn main() {}
@@ -288,11 +287,10 @@ macro_rules! cond_reduce {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
-/// use synom::tokens::Pound;
 ///
 /// // An expression terminated by ##.
 /// named!(expr_pound_pound -> Expr,
-///     terminated!(syn!(Expr), tuple!(syn!(Pound), syn!(Pound)))
+///     terminated!(syn!(Expr), tuple!(punct!(#), punct!(#)))
 /// );
 ///
 /// # fn main() {}
@@ -452,7 +450,6 @@ macro_rules! peek {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::{Ident, Ty};
-/// use synom::tokens::*;
 ///
 /// #[derive(Debug)]
 /// enum UnitType {
@@ -468,14 +465,14 @@ macro_rules! peek {
 /// // Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
 /// named!(unit_type -> UnitType, do_parse!(
 ///     which: alt!(
-///         syn!(Struct) => { |_| 0 }
+///         keyword!(struct) => { |_| 0 }
 ///         |
-///         syn!(Enum) => { |_| 1 }
+///         keyword!(enum) => { |_| 1 }
 ///     ) >>
 ///     id: syn!(Ident) >>
 ///     item: switch!(value!(which),
 ///         0 => map!(
-///             syn!(Semi),
+///             punct!(;),
 ///             move |_| UnitType::Struct {
 ///                 name: id,
 ///             }
@@ -522,7 +519,6 @@ macro_rules! switch {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Ident;
-/// use synom::tokens::*;
 ///
 /// #[derive(Debug)]
 /// enum UnitType {
@@ -538,14 +534,14 @@ macro_rules! switch {
 /// // Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
 /// named!(unit_type -> UnitType, do_parse!(
 ///     is_struct: alt!(
-///         syn!(Struct) => { |_| true }
+///         keyword!(struct) => { |_| true }
 ///         |
-///         syn!(Enum) => { |_| false }
+///         keyword!(enum) => { |_| false }
 ///     ) >>
 ///     id: syn!(Ident) >>
 ///     item: switch!(value!(is_struct),
 ///         true => map!(
-///             syn!(Semi),
+///             punct!(;),
 ///             move |_| UnitType::Struct {
 ///                 name: id,
 ///             }
@@ -684,13 +680,12 @@ macro_rules! tuple_parser {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Ident;
-/// use synom::tokens::Bang;
 ///
 /// named!(ident_or_bang -> Ident,
 ///     alt!(
 ///         syn!(Ident)
 ///         |
-///         syn!(Bang) => { |_| "BANG".into() }
+///         punct!(!) => { |_| "BANG".into() }
 ///     )
 /// );
 ///
@@ -758,13 +753,13 @@ macro_rules! alt {
 /// extern crate proc_macro2;
 ///
 /// use syn::{Ident, TokenTree};
-/// use synom::tokens::{Bang, Paren};
+/// use synom::tokens::Paren;
 /// use proc_macro2::TokenStream;
 ///
 /// // Parse a macro invocation like `stringify!($args)`.
 /// named!(simple_mac -> (Ident, (TokenStream, Paren)), do_parse!(
 ///     name: syn!(Ident) >>
-///     syn!(Bang) >>
+///     punct!(!) >>
 ///     body: parens!(syn!(TokenStream)) >>
 ///     (name, body)
 /// ));

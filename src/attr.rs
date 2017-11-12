@@ -9,7 +9,7 @@ ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
     pub struct Attribute {
         pub style: AttrStyle,
-        pub pound_token: tokens::Pound,
+        pub pound_token: Token![#],
         pub bracket_token: tokens::Bracket,
 
         /// The path of the attribute.
@@ -59,7 +59,7 @@ impl Attribute {
                 if let TokenNode::Literal(ref lit) = self.tts[1].0.kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: name.clone(),
-                        eq_token: tokens::Eq([Span(self.tts[0].0.span)]),
+                        eq_token: Token![=]([Span(self.tts[0].0.span)]),
                         lit: Lit {
                             value: LitKind::Other(lit.clone()),
                             span: Span(self.tts[1].0.span),
@@ -94,7 +94,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
                     if let TokenNode::Literal(ref lit) = tts[2].kind {
                         let pair = MetaNameValue {
                             ident: Ident::new(sym, Span(tts[0].span)),
-                            eq_token: tokens::Eq([Span(tts[1].span)]),
+                            eq_token: Token![=]([Span(tts[1].span)]),
                             lit: Lit {
                                 value: LitKind::Other(lit.clone()),
                                 span: Span(tts[2].span),
@@ -131,7 +131,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
 }
 
 fn list_of_nested_meta_items_from_tokens(mut tts: &[proc_macro2::TokenTree])
-    -> Option<Delimited<NestedMetaItem, tokens::Comma>>
+    -> Option<Delimited<NestedMetaItem, Token![,]>>
 {
     let mut delimited = Delimited::new();
     let mut first = true;
@@ -141,7 +141,7 @@ fn list_of_nested_meta_items_from_tokens(mut tts: &[proc_macro2::TokenTree])
             first = false;
             None
         } else if let TokenNode::Op(',', Spacing::Alone) = tts[0].kind {
-            let tok = tokens::Comma([Span(tts[0].span)]);
+            let tok = Token![,]([Span(tts[0].span)]);
             tts = &tts[1..];
             if tts.is_empty() {
                 break
@@ -175,7 +175,7 @@ ast_enum! {
         Outer,
 
         /// Attribute of the form `#![...]`.
-        Inner(tokens::Bang),
+        Inner(Token![!]),
     }
 }
 
@@ -203,7 +203,7 @@ ast_enum_of_structs! {
             /// Arguments to this attribute
             ///
             /// E.g. `..` in `#[derive(..)]`
-            pub nested: Delimited<NestedMetaItem, tokens::Comma>,
+            pub nested: Delimited<NestedMetaItem, Token![,]>,
         }),
 
         /// Name-value meta item.
@@ -215,7 +215,7 @@ ast_enum_of_structs! {
             /// E.g. `feature` in `#[feature = "foo"]`
             pub ident: Ident,
 
-            pub eq_token: tokens::Eq,
+            pub eq_token: Token![=],
 
             /// Arguments to this attribute
             ///
@@ -293,7 +293,6 @@ impl<'a, T> FilterAttrs<'a> for T
 pub mod parsing {
     use super::*;
     use synom::{PResult, Cursor, parse_error};
-    use synom::tokens::*;
     use proc_macro2::{TokenNode, Spacing, TokenTree};
 
     fn eq() -> TokenTree {
@@ -307,8 +306,8 @@ pub mod parsing {
         #[cfg(feature = "full")]
         named!(pub parse_inner -> Self, alt!(
             do_parse!(
-                pound: syn!(Pound) >>
-                bang: syn!(Bang) >>
+                pound: punct!(#) >>
+                bang: punct!(!) >>
                 path_and_tts: brackets!(tuple!(
                     call!(::Path::parse_mod_style),
                     call!(::TokenTree::parse_list)
@@ -330,14 +329,14 @@ pub mod parsing {
             map!(
                 lit_doc_comment,
                 |lit| Attribute {
-                    style: AttrStyle::Inner(tokens::Bang::default()),
+                    style: AttrStyle::Inner(<Token![!]>::default()),
                     path: "doc".into(),
                     tts: vec![
                         ::TokenTree(eq()),
                         ::TokenTree(lit),
                     ],
                     is_sugared_doc: true,
-                    pound_token: tokens::Pound::default(),
+                    pound_token: <Token![#]>::default(),
                     bracket_token: tokens::Bracket::default(),
                 }
             )
@@ -345,7 +344,7 @@ pub mod parsing {
 
         named!(pub parse_outer -> Self, alt!(
             do_parse!(
-                pound: syn!(Pound) >>
+                pound: punct!(#) >>
                 path_and_tts: brackets!(tuple!(
                     call!(::Path::parse_mod_style),
                     call!(::TokenTree::parse_list)
@@ -374,7 +373,7 @@ pub mod parsing {
                         ::TokenTree(lit),
                     ],
                     is_sugared_doc: true,
-                    pound_token: tokens::Pound::default(),
+                    pound_token: <Token![#]>::default(),
                     bracket_token: tokens::Bracket::default(),
                 }
             )

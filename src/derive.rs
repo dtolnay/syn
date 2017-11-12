@@ -27,16 +27,16 @@ ast_enum_of_structs! {
     pub enum Body {
         /// It's an enum.
         pub Enum(BodyEnum {
-            pub enum_token: tokens::Enum,
+            pub enum_token: Token![enum],
             pub brace_token: tokens::Brace,
-            pub variants: Delimited<Variant, tokens::Comma>,
+            pub variants: Delimited<Variant, Token![,]>,
         }),
 
         /// It's a struct.
         pub Struct(BodyStruct {
             pub data: VariantData,
-            pub struct_token: tokens::Struct,
-            pub semi_token: Option<tokens::Semi>,
+            pub struct_token: Token![struct],
+            pub semi_token: Option<Token![;]>,
         }),
     }
 
@@ -48,16 +48,15 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use synom::tokens::*;
 
     impl Synom for DeriveInput {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             vis: syn!(Visibility) >>
             which: alt!(
-                syn!(Struct) => { Ok }
+                keyword!(struct) => { Ok }
                 |
-                syn!(Enum) => { Err }
+                keyword!(enum) => { Err }
             ) >>
             id: syn!(Ident) >>
             generics: syn!(Generics) >>
@@ -101,7 +100,7 @@ pub mod parsing {
     }
 
 
-    named!(struct_body -> (WhereClause, VariantData, Option<tokens::Semi>), alt!(
+    named!(struct_body -> (WhereClause, VariantData, Option<Token![;]>), alt!(
         do_parse!(
             wh: syn!(WhereClause) >>
             body: struct_like_body >>
@@ -111,18 +110,18 @@ pub mod parsing {
         do_parse!(
             body: tuple_like_body >>
             wh: syn!(WhereClause) >>
-            semi: syn!(Semi) >>
+            semi: punct!(;) >>
             (wh, VariantData::Tuple(body.0, body.1), Some(semi))
         )
         |
         do_parse!(
             wh: syn!(WhereClause) >>
-            semi: syn!(Semi) >>
+            semi: punct!(;) >>
             (wh, VariantData::Unit, Some(semi))
         )
     ));
 
-    named!(enum_body -> (WhereClause, Delimited<Variant, tokens::Comma>, tokens::Brace), do_parse!(
+    named!(enum_body -> (WhereClause, Delimited<Variant, Token![,]>, tokens::Brace), do_parse!(
         wh: syn!(WhereClause) >>
         data: braces!(Delimited::parse_terminated) >>
         (wh, data.0, data.1)
@@ -140,7 +139,7 @@ pub mod parsing {
                 epsilon!() => { |_| VariantData::Unit }
             ) >>
             disr: option!(do_parse!(
-                eq: syn!(Eq) >>
+                eq: punct!(=) >>
                 disr: syn!(Expr) >>
                 (eq, disr)
             )) >>
@@ -148,16 +147,16 @@ pub mod parsing {
                 ident: id,
                 attrs: attrs,
                 data: data,
-                eq_token: disr.as_ref().map(|p| tokens::Eq((p.0).0)),
+                eq_token: disr.as_ref().map(|p| Token![=]((p.0).0)),
                 discriminant: disr.map(|p| p.1),
             })
         ));
     }
 
-    named!(struct_like_body -> (Delimited<Field, tokens::Comma>, tokens::Brace),
+    named!(struct_like_body -> (Delimited<Field, Token![,]>, tokens::Brace),
            braces!(call!(Delimited::parse_terminated_with, Field::parse_struct)));
 
-    named!(tuple_like_body -> (Delimited<Field, tokens::Comma>, tokens::Paren),
+    named!(tuple_like_body -> (Delimited<Field, Token![,]>, tokens::Paren),
            parens!(call!(Delimited::parse_terminated_with, Field::parse_tuple)));
 }
 

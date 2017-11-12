@@ -3,8 +3,9 @@
 extern crate syn;
 use syn::{Expr, ExprKind, ExprGroup, ExprBinary, Lit, LitKind, BinOp};
 
+#[macro_use]
 extern crate synom;
-use synom::tokens;
+use synom::tokens::Group;
 
 extern crate proc_macro2;
 use proc_macro2::*;
@@ -47,17 +48,17 @@ fn test_grouping() {
 
     assert_eq!(common::parse::syn::<Expr>(raw), expr(ExprBinary {
         left: Box::new(lit(Literal::i32(1))),
-        op: BinOp::Add(tokens::Add::default()),
+        op: BinOp::Add(<Token![+]>::default()),
         right: Box::new(expr(ExprBinary {
             left: Box::new(expr(ExprGroup {
-                group_token: tokens::Group::default(),
+                group_token: Group::default(),
                 expr: Box::new(expr(ExprBinary {
                     left: Box::new(lit(Literal::i32(2))),
-                    op: BinOp::Add(tokens::Add::default()),
+                    op: BinOp::Add(<Token![+]>::default()),
                     right: Box::new(lit(Literal::i32(3))),
                 })),
             })),
-            op: BinOp::Mul(tokens::Star::default()),
+            op: BinOp::Mul(<Token![*]>::default()),
             right: Box::new(lit(Literal::i32(4))),
         })),
     }));
@@ -82,13 +83,13 @@ fn test_invalid_grouping() {
     assert_eq!(common::parse::syn::<Expr>(raw.into()), expr(ExprBinary {
         left: Box::new(expr(ExprBinary {
             left: Box::new(lit(Literal::i32(1))),
-            op: BinOp::Add(tokens::Add::default()),
+            op: BinOp::Add(<Token![+]>::default()),
             right: Box::new(lit(Literal::i32(2))),
         })),
-        op: BinOp::Add(tokens::Add::default()),
+        op: BinOp::Add(<Token![+]>::default()),
         right: Box::new(expr(ExprBinary {
             left: Box::new(lit(Literal::i32(3))),
-            op: BinOp::Mul(tokens::Star::default()),
+            op: BinOp::Mul(<Token![*]>::default()),
             right: Box::new(lit(Literal::i32(4))),
         })),
     }));

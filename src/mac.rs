@@ -11,7 +11,7 @@ ast_struct! {
     /// of the macro invocation.
     pub struct Macro {
         pub path: Path,
-        pub bang_token: tokens::Bang,
+        pub bang_token: Token![!],
         pub tokens: Vec<TokenTree>,
     }
 }
@@ -133,13 +133,12 @@ pub mod parsing {
     use super::*;
 
     use proc_macro2::{TokenNode, TokenTree};
-    use synom::tokens::*;
     use synom::{Synom, PResult, Cursor, parse_error};
 
     impl Synom for Macro {
         named!(parse -> Self, do_parse!(
             what: syn!(Path) >>
-            bang: syn!(Bang) >>
+            bang: punct!(!) >>
             body: call!(::TokenTree::parse_delimited) >>
             (Macro {
                 path: what,

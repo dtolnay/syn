@@ -16,7 +16,7 @@ ast_struct! {
         /// Explicit discriminant, e.g. `Foo = 1`
         pub discriminant: Option<Expr>,
 
-        pub eq_token: Option<tokens::Eq>,
+        pub eq_token: Option<Token![=]>,
     }
 }
 
@@ -24,10 +24,10 @@ ast_enum! {
     /// Data stored within an enum variant or struct.
     pub enum VariantData {
         /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-        Struct(Delimited<Field, tokens::Comma>, tokens::Brace),
+        Struct(Delimited<Field, Token![,]>, tokens::Brace),
 
         /// Tuple variant, e.g. `Some(T)`.
-        Tuple(Delimited<Field, tokens::Comma>, tokens::Paren),
+        Tuple(Delimited<Field, Token![,]>, tokens::Paren),
 
         /// Unit variant, e.g. `None`.
         Unit,
@@ -72,7 +72,7 @@ ast_struct! {
         /// Type of the field.
         pub ty: Ty,
 
-        pub colon_token: Option<tokens::Colon>,
+        pub colon_token: Option<Token![:]>,
     }
 }
 
@@ -81,21 +81,21 @@ ast_enum_of_structs! {
     pub enum Visibility {
         /// Public, i.e. `pub`.
         pub Public(VisPublic {
-            pub pub_token: tokens::Pub,
+            pub pub_token: Token![pub],
         }),
 
         /// Crate-visible, i.e. `pub(crate)`.
         pub Crate(VisCrate {
-            pub pub_token: tokens::Pub,
+            pub pub_token: Token![pub],
             pub paren_token: tokens::Paren,
-            pub crate_token: tokens::Crate,
+            pub crate_token: Token![crate],
         }),
 
         /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
         pub Restricted(VisRestricted {
-            pub pub_token: tokens::Pub,
+            pub pub_token: Token![pub],
             pub paren_token: tokens::Paren,
-            pub in_token: Option<tokens::In>,
+            pub in_token: Option<Token![in]>,
             pub path: Box<Path>,
         }),
 
@@ -109,15 +109,13 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use synom::tokens;
-    use synom::tokens::*;
 
     impl Field {
         named!(pub parse_struct -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             vis: syn!(Visibility) >>
             id: syn!(Ident) >>
-            colon: syn!(Colon) >>
+            colon: punct!(:) >>
             ty: syn!(Ty) >>
             (Field {
                 ident: Some(id),
@@ -145,8 +143,8 @@ pub mod parsing {
     impl Synom for Visibility {
         named!(parse -> Self, alt!(
             do_parse!(
-                pub_token: syn!(Pub) >>
-                other: parens!(syn!(tokens::Crate)) >>
+                pub_token: keyword!(pub) >>
+                other: parens!(keyword!(crate)) >>
                 (Visibility::Crate(VisCrate {
                     crate_token: other.0,
                     paren_token: other.1,
@@ -155,8 +153,8 @@ pub mod parsing {
             )
             |
             do_parse!(
-                pub_token: syn!(Pub) >>
-                other: parens!(syn!(Self_)) >>
+                pub_token: keyword!(pub) >>
+                other: parens!(keyword!(self)) >>
                 (Visibility::Restricted(VisRestricted {
                     path: Box::new(other.0.into()),
                     in_token: None,
@@ -166,8 +164,8 @@ pub mod parsing {
             )
             |
             do_parse!(
-                pub_token: syn!(Pub) >>
-                other: parens!(syn!(Super)) >>
+                pub_token: keyword!(pub) >>
+                other: parens!(keyword!(super)) >>
                 (Visibility::Restricted(VisRestricted {
                     path: Box::new(other.0.into()),
                     in_token: None,
@@ -177,9 +175,9 @@ pub mod parsing {
             )
             |
             do_parse!(
-                pub_token: syn!(Pub) >>
+                pub_token: keyword!(pub) >>
                 other: parens!(do_parse!(
-                    in_tok: syn!(In) >>
+                    in_tok: keyword!(in) >>
                     restricted: call!(Path::parse_mod_style) >>
                     (in_tok, restricted)
                 )) >>
@@ -191,7 +189,7 @@ pub mod parsing {
                 }))
             )
             |
-            syn!(Pub) => { |tok| {
+            keyword!(pub) => { |tok| {
                 Visibility::Public(VisPublic {
                     pub_token: tok,
                 })

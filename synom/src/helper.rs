@@ -9,7 +9,7 @@
 ///
 /// use syn::tokens::Bang;
 ///
-/// named!(maybe_bang -> Option<Bang>, option!(syn!(Bang)));
+/// named!(maybe_bang -> Option<Bang>, option!(punct!(!)));
 ///
 /// # fn main() {}
 /// ```
@@ -48,10 +48,10 @@ macro_rules! option {
 ///
 /// named!(bound_lifetimes -> (Vec<Lifetime>, Ty), tuple!(
 ///     opt_vec!(do_parse!(
-///         syn!(For) >>
-///         syn!(Lt) >>
+///         keyword!(for) >>
+///         punct!(<) >>
 ///         lifetimes: call!(Delimited::<Lifetime, Comma>::parse_terminated) >>
-///         syn!(Gt) >>
+///         punct!(>) >>
 ///         (lifetimes.into_vec())
 ///     )),
 ///     syn!(Ty)
@@ -83,10 +83,9 @@ macro_rules! opt_vec {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Mutability;
-/// use synom::tokens::Mut;
 ///
 /// named!(mutability -> Mutability, alt!(
-///     syn!(Mut) => { Mutability::Mutable }
+///     keyword!(mut) => { Mutability::Mutable }
 ///     |
 ///     epsilon!() => { |_| Mutability::Immutable }
 /// ));
@@ -116,7 +115,7 @@ macro_rules! epsilon {
 ///
 /// named!(expr_with_arrow_call -> Expr, do_parse!(
 ///     mut e: syn!(Expr) >>
-///     many0!(tap!(arg: tuple!(syn!(RArrow), syn!(Expr)) => {
+///     many0!(tap!(arg: tuple!(punct!(->), syn!(Expr)) => {
 ///         e = Expr {
 ///             node: ExprCall {
 ///                 func: Box::new(e),
@@ -165,11 +164,10 @@ macro_rules! tap {
 /// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
-/// use synom::tokens::Dot;
 ///
 /// named!(expression -> Expr, syn!(Expr));
 ///
-/// named!(expression_dot -> (Expr, Dot), tuple!(syn!(Expr), syn!(Dot)));
+/// named!(expression_dot -> (Expr, Token![.]), tuple!(syn!(Expr), punct!(.)));
 ///
 /// # fn main() {}
 /// ```

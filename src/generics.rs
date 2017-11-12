@@ -6,10 +6,10 @@ ast_struct! {
     /// of a function, enum, trait, etc.
     #[derive(Default)]
     pub struct Generics {
-        pub lt_token: Option<tokens::Lt>,
-        pub gt_token: Option<tokens::Gt>,
-        pub lifetimes: Delimited<LifetimeDef, tokens::Comma>,
-        pub ty_params: Delimited<TyParam, tokens::Comma>,
+        pub lt_token: Option<Token![<]>,
+        pub gt_token: Option<Token![>]>,
+        pub lifetimes: Delimited<LifetimeDef, Token![,]>,
+        pub ty_params: Delimited<TyParam, Token![,]>,
         pub where_clause: WhereClause,
     }
 }
@@ -70,10 +70,10 @@ ast_struct! {
     /// A set of bound lifetimes, e.g. `for<'a, 'b, 'c>`
     #[derive(Default)]
     pub struct BoundLifetimes {
-        pub for_token: tokens::For,
-        pub lt_token: tokens::Lt,
-        pub lifetimes: Delimited<LifetimeDef, tokens::Comma>,
-        pub gt_token: tokens::Gt,
+        pub for_token: Token![for],
+        pub lt_token: Token![<],
+        pub lifetimes: Delimited<LifetimeDef, Token![,]>,
+        pub gt_token: Token![>],
     }
 }
 
@@ -82,8 +82,8 @@ ast_struct! {
     pub struct LifetimeDef {
         pub attrs: Vec<Attribute>,
         pub lifetime: Lifetime,
-        pub colon_token: Option<tokens::Colon>,
-        pub bounds: Delimited<Lifetime, tokens::Add>,
+        pub colon_token: Option<Token![:]>,
+        pub bounds: Delimited<Lifetime, Token![+]>,
     }
 }
 
@@ -103,9 +103,9 @@ ast_struct! {
     pub struct TyParam {
         pub attrs: Vec<Attribute>,
         pub ident: Ident,
-        pub colon_token: Option<tokens::Colon>,
-        pub bounds: Delimited<TyParamBound, tokens::Add>,
-        pub eq_token: Option<tokens::Eq>,
+        pub colon_token: Option<Token![:]>,
+        pub bounds: Delimited<TyParamBound, Token![+]>,
+        pub eq_token: Option<Token![=]>,
         pub default: Option<Ty>,
     }
 }
@@ -140,7 +140,7 @@ ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
-        Maybe(tokens::Question),
+        Maybe(Token![?]),
     }
 }
 
@@ -148,8 +148,8 @@ ast_struct! {
     /// A `where` clause in a definition
     #[derive(Default)]
     pub struct WhereClause {
-        pub where_token: Option<tokens::Where>,
-        pub predicates: Delimited<WherePredicate, tokens::Comma>,
+        pub where_token: Option<Token![where]>,
+        pub predicates: Delimited<WherePredicate, Token![,]>,
     }
 }
 
@@ -168,22 +168,22 @@ ast_enum_of_structs! {
             pub bound_lifetimes: Option<BoundLifetimes>,
             /// The type being bounded
             pub bounded_ty: Ty,
-            pub colon_token: tokens::Colon,
+            pub colon_token: Token![:],
             /// Trait and lifetime bounds (`Clone+Send+'static`)
-            pub bounds: Delimited<TyParamBound, tokens::Add>,
+            pub bounds: Delimited<TyParamBound, Token![+]>,
         }),
 
         /// A lifetime predicate, e.g. `'a: 'b+'c`
         pub RegionPredicate(WhereRegionPredicate {
             pub lifetime: Lifetime,
-            pub colon_token: Option<tokens::Colon>,
-            pub bounds: Delimited<Lifetime, tokens::Add>,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Delimited<Lifetime, Token![+]>,
         }),
 
         /// An equality predicate (unsupported)
         pub EqPredicate(WhereEqPredicate {
             pub lhs_ty: Ty,
-            pub eq_token: tokens::Eq,
+            pub eq_token: Token![=],
             pub rhs_ty: Ty,
         }),
     }
@@ -194,19 +194,18 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use synom::tokens::*;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(
             alt!(
                 do_parse!(
-                    lt: syn!(Lt) >>
+                    lt: punct!(<) >>
                     lifetimes: call!(Delimited::parse_terminated) >>
                     ty_params: cond!(
                         lifetimes.is_empty() || lifetimes.trailing_delim(),
                         call!(Delimited::parse_terminated)
                     ) >>
-                    gt: syn!(Gt) >>
+                    gt: punct!(>) >>
                     (lifetimes, ty_params, Some(lt), Some(gt))
                 )
                 |
@@ -226,7 +225,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             life: syn!(Lifetime) >>
-            colon: option!(syn!(Colon)) >>
+            colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
                 call!(Delimited::parse_separated_nonempty)
@@ -235,17 +234,17 @@ pub mod parsing {
                 attrs: attrs,
                 lifetime: life,
                 bounds: bounds.unwrap_or_default(),
-                colon_token: colon.map(|_| tokens::Colon::default()),
+                colon_token: colon.map(|_| <Token![:]>::default()),
             })
         ));
     }
 
     impl Synom for BoundLifetimes {
         named!(parse -> Self, do_parse!(
-            for_: syn!(For) >>
-            lt: syn!(Lt) >>
+            for_: keyword!(for) >>
+            lt: punct!(<) >>
             lifetimes: call!(Delimited::parse_terminated) >>
-            gt: syn!(Gt) >>
+            gt: punct!(>) >>
             (BoundLifetimes {
                 for_token: for_,
                 lt_token: lt,
@@ -259,13 +258,13 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             id: syn!(Ident) >>
-            colon: option!(syn!(Colon)) >>
+            colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
                 call!(Delimited::parse_separated_nonempty)
             ) >>
             default: option!(do_parse!(
-                eq: syn!(Eq) >>
+                eq: punct!(=) >>
                 ty: syn!(Ty) >>
                 (eq, ty)
             )) >>
@@ -274,7 +273,7 @@ pub mod parsing {
                 ident: id,
                 bounds: bounds.unwrap_or_default(),
                 colon_token: colon,
-                eq_token: default.as_ref().map(|d| tokens::Eq((d.0).0)),
+                eq_token: default.as_ref().map(|d| Token![=]((d.0).0)),
                 default: default.map(|d| d.1),
             })
         ));
@@ -283,7 +282,7 @@ pub mod parsing {
     impl Synom for TyParamBound {
         named!(parse -> Self, alt!(
             do_parse!(
-                question: syn!(Question) >>
+                question: punct!(?) >>
                 poly: syn!(PolyTraitRef) >>
                 (TyParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
             )
@@ -303,7 +302,7 @@ pub mod parsing {
     impl Synom for WhereClause {
         named!(parse -> Self, alt!(
             do_parse!(
-                where_: syn!(Where) >>
+                where_: keyword!(where) >>
                 predicates: call!(Delimited::parse_terminated) >>
                 (WhereClause {
                     predicates: predicates,
@@ -323,7 +322,7 @@ pub mod parsing {
         named!(parse -> Self, alt!(
             do_parse!(
                 ident: syn!(Lifetime) >>
-                colon: option!(syn!(Colon)) >>
+                colon: option!(punct!(:)) >>
                 bounds: cond!(
                     colon.is_some(),
                     call!(Delimited::parse_separated)
@@ -338,7 +337,7 @@ pub mod parsing {
             do_parse!(
                 bound_lifetimes: option!(syn!(BoundLifetimes)) >>
                 bounded_ty: syn!(Ty) >>
-                colon: syn!(Colon) >>
+                colon: punct!(:) >>
                 bounds: call!(Delimited::parse_separated_nonempty) >>
                 (WherePredicate::BoundPredicate(WhereBoundPredicate {
                     bound_lifetimes: bound_lifetimes,
@@ -369,7 +368,7 @@ mod printing {
     fn maybe_add_lifetime_params_comma(tokens: &mut Tokens, generics: &Generics) {
         // We may need to require a trailing comma if we have any ty_params.
         if !generics.lifetimes.empty_or_trailing() && !generics.ty_params.is_empty() {
-            tokens::Comma::default().to_tokens(tokens);
+            <Token![,]>::default().to_tokens(tokens);
         }
     }
 
@@ -436,7 +435,7 @@ mod printing {
     impl<'a> ToTokens for Turbofish<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if !empty_normal_generics(&self.0) {
-                tokens::Colon2::default().to_tokens(tokens);
+                <Token![::]>::default().to_tokens(tokens);
                 TyGenerics(self.0).to_tokens(tokens);
             }
         }
