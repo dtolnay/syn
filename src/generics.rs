@@ -9,7 +9,7 @@ ast_struct! {
         pub lt_token: Option<Token![<]>,
         pub gt_token: Option<Token![>]>,
         pub lifetimes: Delimited<LifetimeDef, Token![,]>,
-        pub ty_params: Delimited<TyParam, Token![,]>,
+        pub ty_params: Delimited<TypeParam, Token![,]>,
         pub where_clause: WhereClause,
     }
 }
@@ -24,12 +24,12 @@ pub struct ImplGenerics<'a>(&'a Generics);
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 /// Returned by `Generics::split_for_impl`.
-pub struct TyGenerics<'a>(&'a Generics);
+pub struct TypeGenerics<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
-/// Returned by `TyGenerics::as_turbofish`.
+/// Returned by `TypeGenerics::as_turbofish`.
 pub struct Turbofish<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
@@ -53,13 +53,13 @@ impl Generics {
     /// # ;
     /// # }
     /// ```
-    pub fn split_for_impl(&self) -> (ImplGenerics, TyGenerics, &WhereClause) {
-        (ImplGenerics(self), TyGenerics(self), &self.where_clause)
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, &WhereClause) {
+        (ImplGenerics(self), TypeGenerics(self), &self.where_clause)
     }
 }
 
 #[cfg(feature = "printing")]
-impl<'a> TyGenerics<'a> {
+impl<'a> TypeGenerics<'a> {
     /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
     pub fn as_turbofish(&self) -> Turbofish {
         Turbofish(self.0)
@@ -100,19 +100,19 @@ impl LifetimeDef {
 
 ast_struct! {
     /// A generic type parameter, e.g. `T: Into<String>`.
-    pub struct TyParam {
+    pub struct TypeParam {
         pub attrs: Vec<Attribute>,
         pub ident: Ident,
         pub colon_token: Option<Token![:]>,
-        pub bounds: Delimited<TyParamBound, Token![+]>,
+        pub bounds: Delimited<TypeParamBound, Token![+]>,
         pub eq_token: Option<Token![=]>,
-        pub default: Option<Ty>,
+        pub default: Option<Type>,
     }
 }
 
-impl From<Ident> for TyParam {
+impl From<Ident> for TypeParam {
     fn from(ident: Ident) -> Self {
-        TyParam {
+        TypeParam {
             attrs: vec![],
             ident: ident,
             colon_token: None,
@@ -128,7 +128,7 @@ ast_enum! {
     /// `typeck::collect::compute_bounds` matches these against
     /// the "special" built-in traits (see `middle::lang_items`) and
     /// detects Copy, Send and Sync.
-    pub enum TyParamBound {
+    pub enum TypeParamBound {
         Trait(PolyTraitRef, TraitBoundModifier),
         Region(Lifetime),
     }
@@ -167,10 +167,10 @@ ast_enum_of_structs! {
             /// Any lifetimes from a `for` binding
             pub bound_lifetimes: Option<BoundLifetimes>,
             /// The type being bounded
-            pub bounded_ty: Ty,
+            pub bounded_ty: Type,
             pub colon_token: Token![:],
             /// Trait and lifetime bounds (`Clone+Send+'static`)
-            pub bounds: Delimited<TyParamBound, Token![+]>,
+            pub bounds: Delimited<TypeParamBound, Token![+]>,
         }),
 
         /// A lifetime predicate, e.g. `'a: 'b+'c`
@@ -182,9 +182,9 @@ ast_enum_of_structs! {
 
         /// An equality predicate (unsupported)
         pub EqPredicate(WhereEqPredicate {
-            pub lhs_ty: Ty,
+            pub lhs_ty: Type,
             pub eq_token: Token![=],
-            pub rhs_ty: Ty,
+            pub rhs_ty: Type,
         }),
     }
 }
@@ -254,7 +254,7 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TyParam {
+    impl Synom for TypeParam {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             id: syn!(Ident) >>
@@ -265,10 +265,10 @@ pub mod parsing {
             ) >>
             default: option!(do_parse!(
                 eq: punct!(=) >>
-                ty: syn!(Ty) >>
+                ty: syn!(Type) >>
                 (eq, ty)
             )) >>
-            (TyParam {
+            (TypeParam {
                 attrs: attrs,
                 ident: id,
                 bounds: bounds.unwrap_or_default(),
@@ -279,18 +279,18 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TyParamBound {
+    impl Synom for TypeParamBound {
         named!(parse -> Self, alt!(
             do_parse!(
                 question: punct!(?) >>
                 poly: syn!(PolyTraitRef) >>
-                (TyParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
+                (TypeParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
             )
             |
-            syn!(Lifetime) => { TyParamBound::Region }
+            syn!(Lifetime) => { TypeParamBound::Region }
             |
             syn!(PolyTraitRef) => {
-                |poly| TyParamBound::Trait(poly, TraitBoundModifier::None)
+                |poly| TypeParamBound::Trait(poly, TraitBoundModifier::None)
             }
         ));
 
@@ -336,7 +336,7 @@ pub mod parsing {
             |
             do_parse!(
                 bound_lifetimes: option!(syn!(BoundLifetimes)) >>
-                bounded_ty: syn!(Ty) >>
+                bounded_ty: syn!(Type) >>
                 colon: punct!(:) >>
                 bounds: call!(Delimited::parse_separated_nonempty) >>
                 (WherePredicate::BoundPredicate(WhereBoundPredicate {
@@ -410,7 +410,7 @@ mod printing {
         }
     }
 
-    impl<'a> ToTokens for TyGenerics<'a> {
+    impl<'a> ToTokens for TypeGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if empty_normal_generics(&self.0) {
                 return;
@@ -436,7 +436,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             if !empty_normal_generics(&self.0) {
                 <Token![::]>::default().to_tokens(tokens);
-                TyGenerics(self.0).to_tokens(tokens);
+                TypeGenerics(self.0).to_tokens(tokens);
             }
         }
     }
@@ -461,7 +461,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyParam {
+    impl ToTokens for TypeParam {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.ident.to_tokens(tokens);
@@ -476,11 +476,11 @@ mod printing {
         }
     }
 
-    impl ToTokens for TyParamBound {
+    impl ToTokens for TypeParamBound {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                TyParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
-                TyParamBound::Trait(ref trait_ref, ref modifier) => {
+                TypeParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
+                TypeParamBound::Trait(ref trait_ref, ref modifier) => {
                     modifier.to_tokens(tokens);
                     trait_ref.to_tokens(tokens);
                 }

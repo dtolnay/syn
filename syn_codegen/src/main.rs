@@ -285,9 +285,9 @@ mod codegen {
         name.as_ref().to_snake_case().into()
     }
 
-    fn last_segment(ty: &Ty) -> Option<&PathSegment> {
+    fn last_segment(ty: &Type) -> Option<&PathSegment> {
         match *ty {
-            Ty::Path(ref typath) => {
+            Type::Path(ref typath) => {
                 if typath.qself.is_some() {
                     return None;
                 }
@@ -308,7 +308,7 @@ mod codegen {
         Fold,
     }
 
-    fn first_param(params: &PathParameters) -> &Ty {
+    fn first_param(params: &PathParameters) -> &Type {
         let data = match *params {
             PathParameters::AngleBracketed(ref data) => data,
             _ => panic!("Expected at least 1 type parameter here"),
@@ -493,7 +493,7 @@ mod codegen {
         None
     }
 
-    fn visit(ty: &Ty, lookup: &Lookup, kind: Kind, name: &Tokens) -> String {
+    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Tokens) -> String {
         if let Some(seg) = last_segment(ty) {
             let mut eos_full = false;
             if let Some(res) = option_visit(seg, lookup, kind, name, &mut eos_full) {

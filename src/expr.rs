@@ -52,7 +52,7 @@ ast_enum_of_structs! {
         /// A method call (`x.foo::<Bar, Baz>(a, b, c, d)`)
         ///
         /// The `Ident` is the identifier for the method name.
-        /// The vector of `Ty`s are the ascripted type parameters for the method
+        /// The vector of `Type`s are the ascripted type parameters for the method
         /// (within the angle brackets).
         ///
         /// Thus, `x.foo::<Bar, Baz>(a, b, c, d)` is represented as
@@ -60,7 +60,7 @@ ast_enum_of_structs! {
         pub MethodCall(ExprMethodCall #full {
             pub expr: Box<Expr>,
             pub method: Ident,
-            pub typarams: Delimited<Ty, Token![,]>,
+            pub typarams: Delimited<Type, Token![,]>,
             pub args: Delimited<Expr, Token![,]>,
             pub paren_token: tokens::Paren,
             pub dot_token: Token![.],
@@ -96,14 +96,14 @@ ast_enum_of_structs! {
         pub Cast(ExprCast {
             pub expr: Box<Expr>,
             pub as_token: Token![as],
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
         }),
 
         /// A type ascription, e.g. `foo: f64`.
         pub Type(ExprType {
             pub expr: Box<Expr>,
             pub colon_token: Token![:],
-            pub ty: Box<Ty>,
+            pub ty: Box<Type>,
         }),
 
         /// An `if` block, with an optional else block
@@ -440,7 +440,7 @@ ast_struct! {
         pub semi_token: Token![;],
 
         pub pat: Box<Pat>,
-        pub ty: Option<Box<Ty>>,
+        pub ty: Option<Box<Type>>,
 
         /// Initializer expression to set the value, if any
         pub init: Option<Box<Expr>>,
@@ -974,7 +974,7 @@ pub mod parsing {
                 as_: keyword!(as) >>
                 // We can't accept `A + B` in cast expressions, as it's
                 // ambiguous with the + expression.
-                ty: call!(Ty::without_plus) >>
+                ty: call!(Type::without_plus) >>
                 ({
                     e = ExprCast {
                         expr: Box::new(e.into()),
@@ -988,7 +988,7 @@ pub mod parsing {
                 colon: punct!(:) >>
                 // We can't accept `A + B` in cast expressions, as it's
                 // ambiguous with the + expression.
-                ty: call!(Ty::without_plus) >>
+                ty: call!(Type::without_plus) >>
                 ({
                     e = ExprType {
                         expr: Box::new(e.into()),
@@ -1533,9 +1533,9 @@ pub mod parsing {
         ret_and_body: alt!(
             do_parse!(
                 arrow: punct!(->) >>
-                ty: syn!(Ty) >>
+                ty: syn!(Type) >>
                 body: syn!(Block) >>
-                (ReturnType::Ty(ty, arrow),
+                (ReturnType::Type(ty, arrow),
                  ExprKind::Block(ExprBlock {
                     unsafety: Unsafety::Normal,
                     block: body,
@@ -1564,10 +1564,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(fn_arg -> FnArg, do_parse!(
         pat: syn!(Pat) >>
-        ty: option!(tuple!(punct!(:), syn!(Ty))) >>
+        ty: option!(tuple!(punct!(:), syn!(Type))) >>
         ({
             let (colon, ty) = ty.unwrap_or_else(|| {
-                (<Token![:]>::default(), TyInfer {
+                (<Token![:]>::default(), TypeInfer {
                     underscore_token: <Token![_]>::default(),
                 }.into())
             });
@@ -1867,7 +1867,7 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         let_: keyword!(let) >>
         pat: syn!(Pat) >>
-        ty: option!(tuple!(punct!(:), syn!(Ty))) >>
+        ty: option!(tuple!(punct!(:), syn!(Type))) >>
         init: option!(tuple!(punct!(=), syn!(Expr))) >>
         semi: punct!(;) >>
         (Stmt::Local(Box::new(Local {
@@ -2554,7 +2554,7 @@ mod printing {
             self.or1_token.to_tokens(tokens);
             for item in self.decl.inputs.iter() {
                 match **item.item() {
-                    FnArg::Captured(ArgCaptured { ref pat, ty: Ty::Infer(_), .. }) => {
+                    FnArg::Captured(ArgCaptured { ref pat, ty: Type::Infer(_), .. }) => {
                         pat.to_tokens(tokens);
                     }
                     _ => item.item().to_tokens(tokens),

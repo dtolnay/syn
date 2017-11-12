@@ -114,10 +114,10 @@ impl Synom for TokenStream {
 /// ```rust
 /// # extern crate syn;
 /// # #[macro_use] extern crate synom;
-/// # use syn::Ty;
+/// # use syn::Type;
 /// # use synom::delimited::Delimited;
 /// // One or more Rust types separated by commas.
-/// named!(pub comma_separated_types -> Delimited<Ty, Token![,]>,
+/// named!(pub comma_separated_types -> Delimited<Type, Token![,]>,
 ///     call!(Delimited::parse_separated_nonempty)
 /// );
 /// # fn main() {}
@@ -449,7 +449,7 @@ macro_rules! peek {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::{Ident, Ty};
+/// use syn::{Ident, Type};
 ///
 /// #[derive(Debug)]
 /// enum UnitType {
@@ -606,9 +606,9 @@ macro_rules! reject {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::Ty;
+/// use syn::Type;
 ///
-/// named!(two_types -> (Ty, Ty), tuple!(syn!(Ty), syn!(Ty)));
+/// named!(two_types -> (Type, Type), tuple!(syn!(Type), syn!(Type)));
 ///
 /// # fn main() {}
 /// ```

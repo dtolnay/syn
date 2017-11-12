@@ -42,11 +42,11 @@ macro_rules! option {
 /// extern crate syn;
 /// #[macro_use] extern crate synom;
 ///
-/// use syn::{Lifetime, Ty};
+/// use syn::{Lifetime, Type};
 /// use syn::delimited::Delimited;
 /// use syn::tokens::*;
 ///
-/// named!(bound_lifetimes -> (Vec<Lifetime>, Ty), tuple!(
+/// named!(bound_lifetimes -> (Vec<Lifetime>, Type), tuple!(
 ///     opt_vec!(do_parse!(
 ///         keyword!(for) >>
 ///         punct!(<) >>
@@ -54,7 +54,7 @@ macro_rules! option {
 ///         punct!(>) >>
 ///         (lifetimes.into_vec())
 ///     )),
-///     syn!(Ty)
+///     syn!(Type)
 /// ));
 ///
 /// # fn main() {}
