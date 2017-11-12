@@ -84,7 +84,7 @@ pub use op::{BinOp, UnOp};
 
 mod ty;
 pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName, BareFnTy,
-             FunctionRetTy, MutTy, Mutability, ParenthesizedParameterData, Path,
+             ReturnType, MutTy, Mutability, ParenthesizedParameterData, Path,
              PathParameters, PathSegment, PolyTraitRef, QSelf, Ty, TypeBinding, Unsafety,
              TySlice, TyArray, TyPtr, TyRptr, TyBareFn, TyNever, TyTup, TyPath,
              TyTraitObject, TyImplTrait, TyParen, TyInfer, TyGroup};

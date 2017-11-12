@@ -405,7 +405,7 @@ ast_struct! {
         pub fn_token: tokens::Fn_,
         pub paren_token: tokens::Paren,
         pub inputs: Delimited<FnArg, tokens::Comma>,
-        pub output: FunctionRetTy,
+        pub output: ReturnType,
         pub generics: Generics,
         pub variadic: bool,
         pub dot_tokens: Option<tokens::Dot3>,
@@ -686,7 +686,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(Delimited::parse_terminated) >>
-        ret: syn!(FunctionRetTy) >>
+        ret: syn!(ReturnType) >>
         where_clause: syn!(WhereClause) >>
         inner_attrs_stmts: braces!(tuple!(
             many0!(call!(Attribute::parse_inner)),
@@ -830,7 +830,7 @@ pub mod parsing {
                             option!(syn!(Dot3))) >>
             (args, variadic)
         )) >>
-        ret: syn!(FunctionRetTy) >>
+        ret: syn!(ReturnType) >>
         where_clause: syn!(WhereClause) >>
         semi: syn!(Semi) >>
         ({
@@ -1026,7 +1026,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(call!(Delimited::parse_terminated)) >>
-        ret: syn!(FunctionRetTy) >>
+        ret: syn!(ReturnType) >>
         where_clause: syn!(WhereClause) >>
         body: option!(braces!(
             tuple!(many0!(call!(Attribute::parse_inner)),
@@ -1185,7 +1185,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(call!(Delimited::parse_terminated)) >>
-        ret: syn!(FunctionRetTy) >>
+        ret: syn!(ReturnType) >>
         where_clause: syn!(WhereClause) >>
         inner_attrs_stmts: braces!(tuple!(
             many0!(call!(Attribute::parse_inner)),

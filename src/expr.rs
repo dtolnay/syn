@@ -1536,14 +1536,14 @@ pub mod parsing {
                 arrow: syn!(RArrow) >>
                 ty: syn!(Ty) >>
                 body: syn!(Block) >>
-                (FunctionRetTy::Ty(ty, arrow),
+                (ReturnType::Ty(ty, arrow),
                  ExprKind::Block(ExprBlock {
                     unsafety: Unsafety::Normal,
                     block: body,
                 }).into())
             )
             |
-            map!(ambiguous_expr!(allow_struct), |e| (FunctionRetTy::Default, e))
+            map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
         ) >>
         (ExprClosure {
             capture: capture,

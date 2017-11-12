@@ -227,7 +227,7 @@ ast_struct! {
         /// `(A, B)`
         pub inputs: Delimited<Ty, tokens::Comma>,
         /// `C`
-        pub output: FunctionRetTy,
+        pub output: ReturnType,
     }
 }
 
@@ -273,7 +273,7 @@ ast_struct! {
         pub paren_token: tokens::Paren,
         pub inputs: Delimited<BareFnArg, tokens::Comma>,
         pub variadic: Option<tokens::Dot3>,
-        pub output: FunctionRetTy,
+        pub output: ReturnType,
     }
 }
 
@@ -320,7 +320,7 @@ ast_enum! {
 }
 
 ast_enum! {
-    pub enum FunctionRetTy {
+    pub enum ReturnType {
         /// Return type is not specified.
         ///
         /// Functions default to `()` and
@@ -468,7 +468,7 @@ pub mod parsing {
                                                 syn!(Dot3))) >>
                 (inputs, variadic)
             )) >>
-            output: syn!(FunctionRetTy) >>
+            output: syn!(ReturnType) >>
             (TyBareFn {
                 ty: Box::new(BareFnTy {
                     unsafety: unsafety,
@@ -600,7 +600,7 @@ pub mod parsing {
     impl Synom for ParenthesizedParameterData {
         named!(parse -> Self, do_parse!(
             data: parens!(call!(Delimited::parse_terminated)) >>
-            output: syn!(FunctionRetTy) >>
+            output: syn!(ReturnType) >>
             (ParenthesizedParameterData {
                 paren_token: data.1,
                 inputs: data.0,
@@ -609,15 +609,15 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for FunctionRetTy {
+    impl Synom for ReturnType {
         named!(parse -> Self, alt!(
             do_parse!(
                 arrow: syn!(RArrow) >>
                 ty: syn!(Ty) >>
-                (FunctionRetTy::Ty(ty, arrow))
+                (ReturnType::Ty(ty, arrow))
             )
             |
-            epsilon!() => { |_| FunctionRetTy::Default }
+            epsilon!() => { |_| ReturnType::Default }
         ));
     }
 
@@ -1061,11 +1061,11 @@ mod printing {
         }
     }
 
-    impl ToTokens for FunctionRetTy {
+    impl ToTokens for ReturnType {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                FunctionRetTy::Default => {}
-                FunctionRetTy::Ty(ref ty, ref arrow) => {
+                ReturnType::Default => {}
+                ReturnType::Ty(ref ty, ref arrow) => {
                     arrow.to_tokens(tokens);
                     ty.to_tokens(tokens);
                 }
