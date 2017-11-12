@@ -13,18 +13,18 @@ ast_enum_of_structs! {
         pub Array(TyArray {
             pub bracket_token: tokens::Bracket,
             pub ty: Box<Ty>,
-            pub semi_token: tokens::Semi,
+            pub semi_token: Token![;],
             pub amt: Expr,
         }),
         /// A raw pointer (`*const T` or `*mut T`)
         pub Ptr(TyPtr {
-            pub star_token: tokens::Star,
-            pub const_token: Option<tokens::Const>,
+            pub star_token: Token![*],
+            pub const_token: Option<Token![const]>,
             pub ty: Box<MutTy>,
         }),
         /// A reference (`&'a T` or `&'a mut T`)
         pub Rptr(TyRptr {
-            pub and_token: tokens::And,
+            pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
             pub ty: Box<MutTy>,
         }),
@@ -34,13 +34,13 @@ ast_enum_of_structs! {
         }),
         /// The never type (`!`)
         pub Never(TyNever {
-            pub bang_token: tokens::Bang,
+            pub bang_token: Token![!],
         }),
         /// A tuple (`(A, B, C, D, ...)`)
         pub Tup(TyTup {
             pub paren_token: tokens::Paren,
-            pub tys: Delimited<Ty, tokens::Comma>,
-            pub lone_comma: Option<tokens::Comma>,
+            pub tys: Delimited<Ty, Token![,]>,
+            pub lone_comma: Option<Token![,]>,
         }),
         /// A path (`module::module::...::Type`), optionally
         /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
@@ -53,13 +53,13 @@ ast_enum_of_structs! {
         /// A trait object type `Bound1 + Bound2 + Bound3`
         /// where `Bound` is a trait or a lifetime.
         pub TraitObject(TyTraitObject {
-            pub bounds: Delimited<TyParamBound, tokens::Add>,
+            pub bounds: Delimited<TyParamBound, Token![+]>,
         }),
         /// An `impl Bound1 + Bound2 + Bound3` type
         /// where `Bound` is a trait or a lifetime.
         pub ImplTrait(TyImplTrait {
-            pub impl_token: tokens::Impl,
-            pub bounds: Delimited<TyParamBound, tokens::Add>,
+            pub impl_token: Token![impl],
+            pub bounds: Delimited<TyParamBound, Token![+]>,
         }),
         /// No-op; kept solely so that we can pretty-print faithfully
         pub Paren(TyParen {
@@ -74,7 +74,7 @@ ast_enum_of_structs! {
         /// TyKind::Infer means the type should be inferred instead of it having been
         /// specified. This can appear anywhere in a type.
         pub Infer(TyInfer {
-            pub underscore_token: tokens::Underscore
+            pub underscore_token: Token![_],
         }),
         /// A macro in the type position.
         pub Macro(Macro),
@@ -91,7 +91,7 @@ ast_struct! {
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Mutability {
-        Mutable(tokens::Mut),
+        Mutable(Token![mut]),
         Immutable,
     }
 }
@@ -106,9 +106,9 @@ ast_struct! {
     pub struct Path {
         /// A `::foo` path, is relative to the crate root rather than current
         /// module (like paths in an import).
-        pub leading_colon: Option<tokens::Colon2>,
+        pub leading_colon: Option<Token![::]>,
         /// The segments in the path: the things separated by `::`.
-        pub segments: Delimited<PathSegment, tokens::Colon2>,
+        pub segments: Delimited<PathSegment, Token![::]>,
     }
 }
 
@@ -196,17 +196,17 @@ impl PathParameters {
 ast_struct! {
     /// A path like `Foo<'a, T>`
     pub struct AngleBracketedParameterData {
-        pub turbofish: Option<tokens::Colon2>,
-        pub lt_token: tokens::Lt,
+        pub turbofish: Option<Token![::]>,
+        pub lt_token: Token![<],
         /// The lifetime parameters for this path segment.
-        pub lifetimes: Delimited<Lifetime, tokens::Comma>,
+        pub lifetimes: Delimited<Lifetime, Token![,]>,
         /// The type parameters for this path segment, if present.
-        pub types: Delimited<Ty, tokens::Comma>,
+        pub types: Delimited<Ty, Token![,]>,
         /// Bindings (equality constraints) on associated types, if present.
         ///
         /// E.g., `Foo<A=Bar>`.
-        pub bindings: Delimited<TypeBinding, tokens::Comma>,
-        pub gt_token: tokens::Gt,
+        pub bindings: Delimited<TypeBinding, Token![,]>,
+        pub gt_token: Token![>],
     }
 }
 
@@ -214,7 +214,7 @@ ast_struct! {
     /// Bind a type to an associated type: `A=Foo`.
     pub struct TypeBinding {
         pub ident: Ident,
-        pub eq_token: tokens::Eq,
+        pub eq_token: Token![=],
         pub ty: Ty,
     }
 }
@@ -225,7 +225,7 @@ ast_struct! {
     pub struct ParenthesizedParameterData {
         pub paren_token: tokens::Paren,
         /// `(A, B)`
-        pub inputs: Delimited<Ty, tokens::Comma>,
+        pub inputs: Delimited<Ty, Token![,]>,
         /// `C`
         pub output: ReturnType,
     }
@@ -256,11 +256,11 @@ ast_struct! {
     ///  ty       position = 0
     /// ```
     pub struct QSelf {
-        pub lt_token: tokens::Lt,
+        pub lt_token: Token![<],
         pub ty: Box<Ty>,
         pub position: usize,
-        pub as_token: Option<tokens::As>,
-        pub gt_token: tokens::Gt,
+        pub as_token: Option<Token![as]>,
+        pub gt_token: Token![>],
     }
 }
 
@@ -269,10 +269,10 @@ ast_struct! {
         pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Unsafety,
         pub abi: Option<Abi>,
-        pub fn_token: tokens::Fn_,
+        pub fn_token: Token![fn],
         pub paren_token: tokens::Paren,
-        pub inputs: Delimited<BareFnArg, tokens::Comma>,
-        pub variadic: Option<tokens::Dot3>,
+        pub inputs: Delimited<BareFnArg, Token![,]>,
+        pub variadic: Option<Token![...]>,
         pub output: ReturnType,
     }
 }
@@ -280,14 +280,14 @@ ast_struct! {
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum Unsafety {
-        Unsafe(tokens::Unsafe),
+        Unsafe(Token![unsafe]),
         Normal,
     }
 }
 
 ast_struct! {
     pub struct Abi {
-        pub extern_token: tokens::Extern,
+        pub extern_token: Token![extern],
         pub kind: AbiKind,
     }
 }
@@ -304,7 +304,7 @@ ast_struct! {
     ///
     /// E.g. `bar: usize` as in `fn foo(bar: usize)`
     pub struct BareFnArg {
-        pub name: Option<(BareFnArgName, tokens::Colon)>,
+        pub name: Option<(BareFnArgName, Token![:])>,
         pub ty: Ty,
     }
 }
@@ -315,7 +315,7 @@ ast_enum! {
         /// Argument with the provided name
         Named(Ident),
         /// Argument matched with `_`
-        Wild(tokens::Underscore),
+        Wild(Token![_]),
     }
 }
 
@@ -328,7 +328,7 @@ ast_enum! {
         /// type would be inserted.
         Default,
         /// Everything else
-        Ty(Ty, tokens::RArrow),
+        Ty(Ty, Token![->]),
     }
 }
 
@@ -336,7 +336,6 @@ ast_enum! {
 pub mod parsing {
     use super::*;
     use synom::Synom;
-    use synom::tokens::*;
 
     impl Synom for Ty {
         named!(parse -> Self, call!(ambig_ty, true));
@@ -403,7 +402,7 @@ pub mod parsing {
         named!(parse -> Self, map!(
             brackets!(do_parse!(
                 elem: syn!(Ty) >>
-                    semi: syn!(Semi) >>
+                    semi: punct!(;) >>
                     len: syn!(Expr) >>
                     (elem, semi, len)
             )),
@@ -420,11 +419,11 @@ pub mod parsing {
 
     impl Synom for TyPtr {
         named!(parse -> Self, do_parse!(
-            star: syn!(Star) >>
+            star: punct!(*) >>
             mutability: alt!(
-                syn!(Const) => { |c| (Mutability::Immutable, Some(c)) }
+                keyword!(const) => { |c| (Mutability::Immutable, Some(c)) }
                 |
-                syn!(Mut) => { |m| (Mutability::Mutable(m), None) }
+                keyword!(mut) => { |m| (Mutability::Mutable(m), None) }
             ) >>
             target: call!(Ty::without_plus) >>
             (TyPtr {
@@ -440,7 +439,7 @@ pub mod parsing {
 
     impl Synom for TyRptr {
         named!(parse -> Self, do_parse!(
-            amp: syn!(And) >>
+            amp: punct!(&) >>
             life: option!(syn!(Lifetime)) >>
             mutability: syn!(Mutability) >>
             // & binds tighter than +, so we don't allow + here.
@@ -461,11 +460,11 @@ pub mod parsing {
             lifetimes: option!(syn!(BoundLifetimes)) >>
             unsafety: syn!(Unsafety) >>
             abi: option!(syn!(Abi)) >>
-            fn_: syn!(Fn_) >>
+            fn_: keyword!(fn) >>
             parens: parens!(do_parse!(
                 inputs: call!(Delimited::parse_terminated) >>
                 variadic: option!(cond_reduce!(inputs.is_empty() || inputs.trailing_delim(),
-                                                syn!(Dot3))) >>
+                                                punct!(...))) >>
                 (inputs, variadic)
             )) >>
             output: syn!(ReturnType) >>
@@ -486,14 +485,14 @@ pub mod parsing {
 
     impl Synom for TyNever {
         named!(parse -> Self, map!(
-            syn!(Bang),
+            punct!(!),
             |b| TyNever { bang_token: b }
         ));
     }
 
     impl Synom for TyInfer {
         named!(parse -> Self, map!(
-            syn!(Underscore),
+            punct!(_),
             |u| TyInfer { underscore_token: u }
         ));
     }
@@ -519,7 +518,7 @@ pub mod parsing {
         bounds: alt!(
             cond_reduce!(
                 allow_plus,
-                many0!(tuple!(syn!(Add), syn!(TyParamBound)))
+                many0!(tuple!(punct!(+), syn!(TyParamBound)))
             )
             |
             value!(vec![])
@@ -555,15 +554,15 @@ pub mod parsing {
         map!(syn!(Path), |p| (None, p))
         |
         do_parse!(
-            lt: syn!(Lt) >>
+            lt: punct!(<) >>
             this: syn!(Ty) >>
             path: option!(do_parse!(
-                as_: syn!(As) >>
+                as_: keyword!(as) >>
                 path: syn!(Path) >>
                 (as_, path)
             )) >>
-            gt: syn!(Gt) >>
-            colon2: syn!(Colon2) >>
+            gt: punct!(>) >>
+            colon2: punct!(::) >>
             rest: call!(Delimited::parse_separated_nonempty) >>
             ({
                 let (pos, as_, path) = match path {
@@ -594,7 +593,7 @@ pub mod parsing {
             })
         )
         |
-        map!(syn!(Self_), |s| (None, s.into()))
+        map!(keyword!(self), |s| (None, s.into()))
     ));
 
     impl Synom for ParenthesizedParameterData {
@@ -612,7 +611,7 @@ pub mod parsing {
     impl Synom for ReturnType {
         named!(parse -> Self, alt!(
             do_parse!(
-                arrow: syn!(RArrow) >>
+                arrow: punct!(->) >>
                 ty: syn!(Ty) >>
                 (ReturnType::Ty(ty, arrow))
             )
@@ -634,7 +633,7 @@ pub mod parsing {
 
     impl Synom for TyImplTrait {
         named!(parse -> Self, do_parse!(
-            impl_: syn!(Impl) >>
+            impl_: keyword!(impl) >>
             // NOTE: rust-lang/rust#34511 includes discussion about whether or
             // not + should be allowed in ImplTrait directly without ().
             elem: call!(Delimited::parse_separated_nonempty) >>
@@ -667,7 +666,7 @@ pub mod parsing {
 
     impl Synom for Mutability {
         named!(parse -> Self, alt!(
-            syn!(Mut) => { Mutability::Mutable }
+            keyword!(mut) => { Mutability::Mutable }
             |
             epsilon!() => { |_| Mutability::Immutable }
         ));
@@ -675,7 +674,7 @@ pub mod parsing {
 
     impl Synom for Path {
         named!(parse -> Self, do_parse!(
-            colon: option!(syn!(Colon2)) >>
+            colon: option!(punct!(::)) >>
             segments: call!(Delimited::parse_separated_nonempty) >>
             (Path {
                 leading_colon: colon,
@@ -692,8 +691,8 @@ pub mod parsing {
         named!(parse -> Self, alt!(
             do_parse!(
                 ident: syn!(Ident) >>
-                turbofish: option!(syn!(Colon2)) >>
-                lt: syn!(Lt) >>
+                turbofish: option!(punct!(::)) >>
+                lt: punct!(<) >>
                 lifetimes: call!(Delimited::parse_terminated) >>
                 types: cond!(
                     lifetimes.is_empty() || lifetimes.trailing_delim(),
@@ -707,7 +706,7 @@ pub mod parsing {
                     },
                     call!(Delimited::parse_terminated)
                 ) >>
-                gt: syn!(Gt) >>
+                gt: punct!(>) >>
                 (PathSegment {
                     ident: ident,
                     parameters: PathParameters::AngleBracketed(
@@ -727,11 +726,11 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_no_eq_after -> Ty, terminated!(syn!(Ty), not!(syn!(Eq))));
+    named!(ty_no_eq_after -> Ty, terminated!(syn!(Ty), not!(punct!(=))));
 
     impl Path {
         named!(pub parse_mod_style -> Self, do_parse!(
-            colon: option!(syn!(Colon2)) >>
+            colon: option!(punct!(::)) >>
             segments: call!(Delimited::parse_separated_nonempty_with,
                             mod_style_path_segment) >>
             (Path {
@@ -745,18 +744,18 @@ pub mod parsing {
         map!(syn!(Ident), Into::into)
         |
         alt!(
-            syn!(Super) => { Into::into }
+            keyword!(super) => { Into::into }
             |
-            syn!(Self_) => { Into::into }
+            keyword!(self) => { Into::into }
             |
-            syn!(CapSelf) => { Into::into }
+            keyword!(Self) => { Into::into }
         )
     ));
 
     impl Synom for TypeBinding {
         named!(parse -> Self, do_parse!(
             id: syn!(Ident) >>
-            eq: syn!(Eq) >>
+            eq: punct!(=) >>
             ty: syn!(Ty) >>
             (TypeBinding {
                 ident: id,
@@ -793,8 +792,8 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             name: option!(do_parse!(
                 name: syn!(BareFnArgName) >>
-                not!(syn!(Colon2)) >>
-                colon: syn!(Colon) >>
+                not!(punct!(::)) >>
+                colon: punct!(:) >>
                 (name, colon)
             )) >>
             ty: syn!(Ty) >>
@@ -809,13 +808,13 @@ pub mod parsing {
         named!(parse -> Self, alt!(
             map!(syn!(Ident), BareFnArgName::Named)
             |
-            map!(syn!(Underscore), BareFnArgName::Wild)
+            map!(punct!(_), BareFnArgName::Wild)
         ));
     }
 
     impl Synom for Unsafety {
         named!(parse -> Self, alt!(
-            syn!(Unsafe) => { Unsafety::Unsafe }
+            keyword!(unsafe) => { Unsafety::Unsafe }
             |
             epsilon!() => { |_| Unsafety::Normal }
         ));
@@ -823,7 +822,7 @@ pub mod parsing {
 
     impl Synom for Abi {
         named!(parse -> Self, do_parse!(
-            extern_: syn!(Extern) >>
+            extern_: keyword!(extern) >>
             // TODO: this parses all literals, not just strings
             name: option!(syn!(Lit)) >>
             (Abi {
@@ -1025,7 +1024,7 @@ mod printing {
             self.lt_token.to_tokens(tokens);
             self.lifetimes.to_tokens(tokens);
             if !self.lifetimes.empty_or_trailing() && !self.types.is_empty() {
-                tokens::Comma::default().to_tokens(tokens);
+                <Token![,]>::default().to_tokens(tokens);
             }
             self.types.to_tokens(tokens);
             if (
@@ -1037,7 +1036,7 @@ mod printing {
                 // We have some bindings, then we need a comma.
                 !self.bindings.is_empty()
             {
-                tokens::Comma::default().to_tokens(tokens);
+                <Token![,]>::default().to_tokens(tokens);
             }
             self.bindings.to_tokens(tokens);
             self.gt_token.to_tokens(tokens);
@@ -1089,7 +1088,7 @@ mod printing {
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
                 if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
-                    tokens::Comma::default().to_tokens(tokens);
+                    <Token![,]>::default().to_tokens(tokens);
                 }
                 self.variadic.to_tokens(tokens);
             });

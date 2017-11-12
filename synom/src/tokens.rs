@@ -164,19 +164,19 @@ tokens! {
     }
     syms: {
         (pub struct As                      => "as"),
-        (pub struct Box_                    => "box"),
+        (pub struct Box                     => "box"),
         (pub struct Break                   => "break"),
         (pub struct CapSelf                 => "Self"),
         (pub struct Catch                   => "catch"),
         (pub struct Const                   => "const"),
         (pub struct Continue                => "continue"),
         (pub struct Crate                   => "crate"),
-        (pub struct Default_                => "default"),
+        (pub struct Default                 => "default"),
         (pub struct Do                      => "do"),
         (pub struct Else                    => "else"),
         (pub struct Enum                    => "enum"),
         (pub struct Extern                  => "extern"),
-        (pub struct Fn_                     => "fn"),
+        (pub struct Fn                      => "fn"),
         (pub struct For                     => "for"),
         (pub struct If                      => "if"),
         (pub struct Impl                    => "impl"),
@@ -203,6 +203,186 @@ tokens! {
         (pub struct While                   => "while"),
         (pub struct Yield                   => "yield"),
     }
+}
+
+// Unfortunate duplication due to a rustdoc bug.
+// https://github.com/rust-lang/rust/issues/45939
+#[macro_export]
+macro_rules! Token {
+    (+)        => { $crate::tokens::Add };
+    (+=)       => { $crate::tokens::AddEq };
+    (&)        => { $crate::tokens::And };
+    (&&)       => { $crate::tokens::AndAnd };
+    (&=)       => { $crate::tokens::AndEq };
+    (@)        => { $crate::tokens::At };
+    (!)        => { $crate::tokens::Bang };
+    (^)        => { $crate::tokens::Caret };
+    (^=)       => { $crate::tokens::CaretEq };
+    (:)        => { $crate::tokens::Colon };
+    (::)       => { $crate::tokens::Colon2 };
+    (,)        => { $crate::tokens::Comma };
+    (/)        => { $crate::tokens::Div };
+    (/=)       => { $crate::tokens::DivEq };
+    (.)        => { $crate::tokens::Dot };
+    (..)       => { $crate::tokens::Dot2 };
+    (...)      => { $crate::tokens::Dot3 };
+    (=)        => { $crate::tokens::Eq };
+    (==)       => { $crate::tokens::EqEq };
+    (>=)       => { $crate::tokens::Ge };
+    (>)        => { $crate::tokens::Gt };
+    (<=)       => { $crate::tokens::Le };
+    (<)        => { $crate::tokens::Lt };
+    (*=)       => { $crate::tokens::MulEq };
+    (!=)       => { $crate::tokens::Ne };
+    (|)        => { $crate::tokens::Or };
+    (|=)       => { $crate::tokens::OrEq };
+    (||)       => { $crate::tokens::OrOr };
+    (#)        => { $crate::tokens::Pound };
+    (?)        => { $crate::tokens::Question };
+    (->)       => { $crate::tokens::RArrow };
+    (<-)       => { $crate::tokens::LArrow };
+    (%)        => { $crate::tokens::Rem };
+    (%=)       => { $crate::tokens::RemEq };
+    (=>)       => { $crate::tokens::Rocket };
+    (;)        => { $crate::tokens::Semi };
+    (<<)       => { $crate::tokens::Shl };
+    (<<=)      => { $crate::tokens::ShlEq };
+    (>>)       => { $crate::tokens::Shr };
+    (>>=)      => { $crate::tokens::ShrEq };
+    (*)        => { $crate::tokens::Star };
+    (-)        => { $crate::tokens::Sub };
+    (-=)       => { $crate::tokens::SubEq };
+    (_)        => { $crate::tokens::Underscore };
+    (as)       => { $crate::tokens::As };
+    (box)      => { $crate::tokens::Box };
+    (break)    => { $crate::tokens::Break };
+    (Self)     => { $crate::tokens::CapSelf };
+    (catch)    => { $crate::tokens::Catch };
+    (const)    => { $crate::tokens::Const };
+    (continue) => { $crate::tokens::Continue };
+    (crate)    => { $crate::tokens::Crate };
+    (default)  => { $crate::tokens::Default };
+    (do)       => { $crate::tokens::Do };
+    (else)     => { $crate::tokens::Else };
+    (enum)     => { $crate::tokens::Enum };
+    (extern)   => { $crate::tokens::Extern };
+    (fn)       => { $crate::tokens::Fn };
+    (for)      => { $crate::tokens::For };
+    (if)       => { $crate::tokens::If };
+    (impl)     => { $crate::tokens::Impl };
+    (in)       => { $crate::tokens::In };
+    (let)      => { $crate::tokens::Let };
+    (loop)     => { $crate::tokens::Loop };
+    (match)    => { $crate::tokens::Match };
+    (mod)      => { $crate::tokens::Mod };
+    (move)     => { $crate::tokens::Move };
+    (mut)      => { $crate::tokens::Mut };
+    (pub)      => { $crate::tokens::Pub };
+    (ref)      => { $crate::tokens::Ref };
+    (return)   => { $crate::tokens::Return };
+    (self)     => { $crate::tokens::Self_ };
+    (static)   => { $crate::tokens::Static };
+    (struct)   => { $crate::tokens::Struct };
+    (super)    => { $crate::tokens::Super };
+    (trait)    => { $crate::tokens::Trait };
+    (type)     => { $crate::tokens::Type };
+    (union)    => { $crate::tokens::Union };
+    (unsafe)   => { $crate::tokens::Unsafe };
+    (use)      => { $crate::tokens::Use };
+    (where)    => { $crate::tokens::Where };
+    (while)    => { $crate::tokens::While };
+    (yield)    => { $crate::tokens::Yield };
+}
+
+#[macro_export]
+macro_rules! punct {
+    ($i:expr, +)   => { call!($i, <$crate::tokens::Add as $crate::Synom>::parse) };
+    ($i:expr, +=)  => { call!($i, <$crate::tokens::AddEq as $crate::Synom>::parse) };
+    ($i:expr, &)   => { call!($i, <$crate::tokens::And as $crate::Synom>::parse) };
+    ($i:expr, &&)  => { call!($i, <$crate::tokens::AndAnd as $crate::Synom>::parse) };
+    ($i:expr, &=)  => { call!($i, <$crate::tokens::AndEq as $crate::Synom>::parse) };
+    ($i:expr, @)   => { call!($i, <$crate::tokens::At as $crate::Synom>::parse) };
+    ($i:expr, !)   => { call!($i, <$crate::tokens::Bang as $crate::Synom>::parse) };
+    ($i:expr, ^)   => { call!($i, <$crate::tokens::Caret as $crate::Synom>::parse) };
+    ($i:expr, ^=)  => { call!($i, <$crate::tokens::CaretEq as $crate::Synom>::parse) };
+    ($i:expr, :)   => { call!($i, <$crate::tokens::Colon as $crate::Synom>::parse) };
+    ($i:expr, ::)  => { call!($i, <$crate::tokens::Colon2 as $crate::Synom>::parse) };
+    ($i:expr, ,)   => { call!($i, <$crate::tokens::Comma as $crate::Synom>::parse) };
+    ($i:expr, /)   => { call!($i, <$crate::tokens::Div as $crate::Synom>::parse) };
+    ($i:expr, /=)  => { call!($i, <$crate::tokens::DivEq as $crate::Synom>::parse) };
+    ($i:expr, .)   => { call!($i, <$crate::tokens::Dot as $crate::Synom>::parse) };
+    ($i:expr, ..)  => { call!($i, <$crate::tokens::Dot2 as $crate::Synom>::parse) };
+    ($i:expr, ...) => { call!($i, <$crate::tokens::Dot3 as $crate::Synom>::parse) };
+    ($i:expr, =)   => { call!($i, <$crate::tokens::Eq as $crate::Synom>::parse) };
+    ($i:expr, ==)  => { call!($i, <$crate::tokens::EqEq as $crate::Synom>::parse) };
+    ($i:expr, >=)  => { call!($i, <$crate::tokens::Ge as $crate::Synom>::parse) };
+    ($i:expr, >)   => { call!($i, <$crate::tokens::Gt as $crate::Synom>::parse) };
+    ($i:expr, <=)  => { call!($i, <$crate::tokens::Le as $crate::Synom>::parse) };
+    ($i:expr, <)   => { call!($i, <$crate::tokens::Lt as $crate::Synom>::parse) };
+    ($i:expr, *=)  => { call!($i, <$crate::tokens::MulEq as $crate::Synom>::parse) };
+    ($i:expr, !=)  => { call!($i, <$crate::tokens::Ne as $crate::Synom>::parse) };
+    ($i:expr, |)   => { call!($i, <$crate::tokens::Or as $crate::Synom>::parse) };
+    ($i:expr, |=)  => { call!($i, <$crate::tokens::OrEq as $crate::Synom>::parse) };
+    ($i:expr, ||)  => { call!($i, <$crate::tokens::OrOr as $crate::Synom>::parse) };
+    ($i:expr, #)   => { call!($i, <$crate::tokens::Pound as $crate::Synom>::parse) };
+    ($i:expr, ?)   => { call!($i, <$crate::tokens::Question as $crate::Synom>::parse) };
+    ($i:expr, ->)  => { call!($i, <$crate::tokens::RArrow as $crate::Synom>::parse) };
+    ($i:expr, <-)  => { call!($i, <$crate::tokens::LArrow as $crate::Synom>::parse) };
+    ($i:expr, %)   => { call!($i, <$crate::tokens::Rem as $crate::Synom>::parse) };
+    ($i:expr, %=)  => { call!($i, <$crate::tokens::RemEq as $crate::Synom>::parse) };
+    ($i:expr, =>)  => { call!($i, <$crate::tokens::Rocket as $crate::Synom>::parse) };
+    ($i:expr, ;)   => { call!($i, <$crate::tokens::Semi as $crate::Synom>::parse) };
+    ($i:expr, <<)  => { call!($i, <$crate::tokens::Shl as $crate::Synom>::parse) };
+    ($i:expr, <<=) => { call!($i, <$crate::tokens::ShlEq as $crate::Synom>::parse) };
+    ($i:expr, >>)  => { call!($i, <$crate::tokens::Shr as $crate::Synom>::parse) };
+    ($i:expr, >>=) => { call!($i, <$crate::tokens::ShrEq as $crate::Synom>::parse) };
+    ($i:expr, *)   => { call!($i, <$crate::tokens::Star as $crate::Synom>::parse) };
+    ($i:expr, -)   => { call!($i, <$crate::tokens::Sub as $crate::Synom>::parse) };
+    ($i:expr, -=)  => { call!($i, <$crate::tokens::SubEq as $crate::Synom>::parse) };
+    ($i:expr, _)   => { call!($i, <$crate::tokens::Underscore as $crate::Synom>::parse) };
+}
+
+#[macro_export]
+macro_rules! keyword {
+    ($i:expr, as)       => { call!($i, <$crate::tokens::As as $crate::Synom>::parse) };
+    ($i:expr, box)      => { call!($i, <$crate::tokens::Box as $crate::Synom>::parse) };
+    ($i:expr, break)    => { call!($i, <$crate::tokens::Break as $crate::Synom>::parse) };
+    ($i:expr, Self)     => { call!($i, <$crate::tokens::CapSelf as $crate::Synom>::parse) };
+    ($i:expr, catch)    => { call!($i, <$crate::tokens::Catch as $crate::Synom>::parse) };
+    ($i:expr, const)    => { call!($i, <$crate::tokens::Const as $crate::Synom>::parse) };
+    ($i:expr, continue) => { call!($i, <$crate::tokens::Continue as $crate::Synom>::parse) };
+    ($i:expr, crate)    => { call!($i, <$crate::tokens::Crate as $crate::Synom>::parse) };
+    ($i:expr, default)  => { call!($i, <$crate::tokens::Default as $crate::Synom>::parse) };
+    ($i:expr, do)       => { call!($i, <$crate::tokens::Do as $crate::Synom>::parse) };
+    ($i:expr, else)     => { call!($i, <$crate::tokens::Else as $crate::Synom>::parse) };
+    ($i:expr, enum)     => { call!($i, <$crate::tokens::Enum as $crate::Synom>::parse) };
+    ($i:expr, extern)   => { call!($i, <$crate::tokens::Extern as $crate::Synom>::parse) };
+    ($i:expr, fn)       => { call!($i, <$crate::tokens::Fn as $crate::Synom>::parse) };
+    ($i:expr, for)      => { call!($i, <$crate::tokens::For as $crate::Synom>::parse) };
+    ($i:expr, if)       => { call!($i, <$crate::tokens::If as $crate::Synom>::parse) };
+    ($i:expr, impl)     => { call!($i, <$crate::tokens::Impl as $crate::Synom>::parse) };
+    ($i:expr, in)       => { call!($i, <$crate::tokens::In as $crate::Synom>::parse) };
+    ($i:expr, let)      => { call!($i, <$crate::tokens::Let as $crate::Synom>::parse) };
+    ($i:expr, loop)     => { call!($i, <$crate::tokens::Loop as $crate::Synom>::parse) };
+    ($i:expr, match)    => { call!($i, <$crate::tokens::Match as $crate::Synom>::parse) };
+    ($i:expr, mod)      => { call!($i, <$crate::tokens::Mod as $crate::Synom>::parse) };
+    ($i:expr, move)     => { call!($i, <$crate::tokens::Move as $crate::Synom>::parse) };
+    ($i:expr, mut)      => { call!($i, <$crate::tokens::Mut as $crate::Synom>::parse) };
+    ($i:expr, pub)      => { call!($i, <$crate::tokens::Pub as $crate::Synom>::parse) };
+    ($i:expr, ref)      => { call!($i, <$crate::tokens::Ref as $crate::Synom>::parse) };
+    ($i:expr, return)   => { call!($i, <$crate::tokens::Return as $crate::Synom>::parse) };
+    ($i:expr, self)     => { call!($i, <$crate::tokens::Self_ as $crate::Synom>::parse) };
+    ($i:expr, static)   => { call!($i, <$crate::tokens::Static as $crate::Synom>::parse) };
+    ($i:expr, struct)   => { call!($i, <$crate::tokens::Struct as $crate::Synom>::parse) };
+    ($i:expr, super)    => { call!($i, <$crate::tokens::Super as $crate::Synom>::parse) };
+    ($i:expr, trait)    => { call!($i, <$crate::tokens::Trait as $crate::Synom>::parse) };
+    ($i:expr, type)     => { call!($i, <$crate::tokens::Type as $crate::Synom>::parse) };
+    ($i:expr, union)    => { call!($i, <$crate::tokens::Union as $crate::Synom>::parse) };
+    ($i:expr, unsafe)   => { call!($i, <$crate::tokens::Unsafe as $crate::Synom>::parse) };
+    ($i:expr, use)      => { call!($i, <$crate::tokens::Use as $crate::Synom>::parse) };
+    ($i:expr, where)    => { call!($i, <$crate::tokens::Where as $crate::Synom>::parse) };
+    ($i:expr, while)    => { call!($i, <$crate::tokens::While as $crate::Synom>::parse) };
+    ($i:expr, yield)    => { call!($i, <$crate::tokens::Yield as $crate::Synom>::parse) };
 }
 
 #[cfg(feature = "parsing")]

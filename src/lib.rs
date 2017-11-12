@@ -9,7 +9,7 @@ extern crate unicode_xid;
 #[cfg(any(feature = "printing", feature = "parsing"))]
 extern crate quote;
 
-#[cfg_attr(feature = "parsing", macro_use)]
+#[macro_use]
 extern crate synom;
 
 #[macro_use]

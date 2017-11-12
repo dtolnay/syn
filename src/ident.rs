@@ -7,7 +7,6 @@ use proc_macro2::Term;
 use unicode_xid::UnicodeXID;
 
 use Span;
-use tokens;
 
 /// A word of Rust code, such as a keyword or variable name.
 ///
@@ -18,7 +17,7 @@ use tokens;
 ///
 /// - The empty string is not an identifier. Use `Option<Ident>`.
 /// - An underscore by itself is not an identifier. Use
-///   `syn::tokens::Underscore` instead.
+///   `Token![_]` instead.
 /// - A lifetime is not an identifier. Use `syn::Lifetime` instead.
 ///
 /// An identifier constructed with `Ident::new` is permitted to be a Rust
@@ -148,20 +147,20 @@ impl<'a> From<&'a str> for Ident {
     }
 }
 
-impl From<tokens::Self_> for Ident {
-    fn from(tok: tokens::Self_) -> Self {
+impl From<Token![self]> for Ident {
+    fn from(tok: Token![self]) -> Self {
         Ident::new(Term::intern("self"), tok.0)
     }
 }
 
-impl From<tokens::CapSelf> for Ident {
-    fn from(tok: tokens::CapSelf) -> Self {
+impl From<Token![Self]> for Ident {
+    fn from(tok: Token![Self]) -> Self {
         Ident::new(Term::intern("Self"), tok.0)
     }
 }
 
-impl From<tokens::Super> for Ident {
-    fn from(tok: tokens::Super) -> Self {
+impl From<Token![super]> for Ident {
+    fn from(tok: Token![super]) -> Self {
         Ident::new(Term::intern("super"), tok.0)
     }
 }

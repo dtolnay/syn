@@ -26,7 +26,7 @@ ast_enum_of_structs! {
         /// A `box x` expression.
         pub Box(ExprBox #full {
             pub expr: Box<Expr>,
-            pub box_token: tokens::Box_,
+            pub box_token: Token![box],
         }),
 
         /// E.g. 'place <- val' or `in place { val }`.
@@ -38,14 +38,14 @@ ast_enum_of_structs! {
 
         /// An array, e.g. `[a, b, c, d]`.
         pub Array(ExprArray #full {
-            pub exprs: Delimited<Expr, tokens::Comma>,
+            pub exprs: Delimited<Expr, Token![,]>,
             pub bracket_token: tokens::Bracket,
         }),
 
         /// A function call.
         pub Call(ExprCall {
             pub func: Box<Expr>,
-            pub args: Delimited<Expr, tokens::Comma>,
+            pub args: Delimited<Expr, Token![,]>,
             pub paren_token: tokens::Paren,
         }),
 
@@ -60,20 +60,20 @@ ast_enum_of_structs! {
         pub MethodCall(ExprMethodCall #full {
             pub expr: Box<Expr>,
             pub method: Ident,
-            pub typarams: Delimited<Ty, tokens::Comma>,
-            pub args: Delimited<Expr, tokens::Comma>,
+            pub typarams: Delimited<Ty, Token![,]>,
+            pub args: Delimited<Expr, Token![,]>,
             pub paren_token: tokens::Paren,
-            pub dot_token: tokens::Dot,
-            pub lt_token: Option<tokens::Lt>,
-            pub colon2_token: Option<tokens::Colon2>,
-            pub gt_token: Option<tokens::Gt>,
+            pub dot_token: Token![.],
+            pub lt_token: Option<Token![<]>,
+            pub colon2_token: Option<Token![::]>,
+            pub gt_token: Option<Token![>]>,
         }),
 
         /// A tuple, e.g. `(a, b, c, d)`.
         pub Tup(ExprTup #full {
-            pub args: Delimited<Expr, tokens::Comma>,
+            pub args: Delimited<Expr, Token![,]>,
             pub paren_token: tokens::Paren,
-            pub lone_comma: Option<tokens::Comma>,
+            pub lone_comma: Option<Token![,]>,
         }),
 
         /// A binary operation, e.g. `a + b`, `a * b`.
@@ -95,14 +95,14 @@ ast_enum_of_structs! {
         /// A cast, e.g. `foo as f64`.
         pub Cast(ExprCast {
             pub expr: Box<Expr>,
-            pub as_token: tokens::As,
+            pub as_token: Token![as],
             pub ty: Box<Ty>,
         }),
 
         /// A type ascription, e.g. `foo: f64`.
         pub Type(ExprType {
             pub expr: Box<Expr>,
-            pub colon_token: tokens::Colon,
+            pub colon_token: Token![:],
             pub ty: Box<Ty>,
         }),
 
@@ -113,8 +113,8 @@ ast_enum_of_structs! {
             pub cond: Box<Expr>,
             pub if_true: Block,
             pub if_false: Option<Box<Expr>>,
-            pub if_token: tokens::If,
-            pub else_token: Option<tokens::Else>,
+            pub if_token: Token![if],
+            pub else_token: Option<Token![else]>,
         }),
 
         /// An `if let` expression with an optional else block
@@ -127,10 +127,10 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
             pub if_true: Block,
             pub if_false: Option<Box<Expr>>,
-            pub if_token: tokens::If,
-            pub let_token: tokens::Let,
-            pub eq_token: tokens::Eq,
-            pub else_token: Option<tokens::Else>,
+            pub if_token: Token![if],
+            pub let_token: Token![let],
+            pub eq_token: Token![=],
+            pub else_token: Option<Token![else]>,
         }),
 
         /// A while loop, with an optional label
@@ -140,8 +140,8 @@ ast_enum_of_structs! {
             pub cond: Box<Expr>,
             pub body: Block,
             pub label: Option<Lifetime>,
-            pub colon_token: Option<tokens::Colon>,
-            pub while_token: tokens::While,
+            pub colon_token: Option<Token![:]>,
+            pub while_token: Token![while],
         }),
 
         /// A while-let loop, with an optional label.
@@ -154,10 +154,10 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
             pub body: Block,
             pub label: Option<Lifetime>,
-            pub colon_token: Option<tokens::Colon>,
-            pub while_token: tokens::While,
-            pub let_token: tokens::Let,
-            pub eq_token: tokens::Eq,
+            pub colon_token: Option<Token![:]>,
+            pub while_token: Token![while],
+            pub let_token: Token![let],
+            pub eq_token: Token![=],
         }),
 
         /// A for loop, with an optional label.
@@ -170,9 +170,9 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
             pub body: Block,
             pub label: Option<Lifetime>,
-            pub for_token: tokens::For,
-            pub colon_token: Option<tokens::Colon>,
-            pub in_token: tokens::In,
+            pub for_token: Token![for],
+            pub colon_token: Option<Token![:]>,
+            pub in_token: Token![in],
         }),
 
         /// Conditionless loop with an optional label.
@@ -181,13 +181,13 @@ ast_enum_of_structs! {
         pub Loop(ExprLoop #full {
             pub body: Block,
             pub label: Option<Lifetime>,
-            pub loop_token: tokens::Loop,
-            pub colon_token: Option<tokens::Colon>,
+            pub loop_token: Token![loop],
+            pub colon_token: Option<Token![:]>,
         }),
 
         /// A `match` block.
         pub Match(ExprMatch #full {
-            pub match_token: tokens::Match,
+            pub match_token: Token![match],
             pub brace_token: tokens::Brace,
             pub expr: Box<Expr>,
             pub arms: Vec<Arm>,
@@ -198,8 +198,8 @@ ast_enum_of_structs! {
             pub capture: CaptureBy,
             pub decl: Box<FnDecl>,
             pub body: Box<Expr>,
-            pub or1_token: tokens::Or,
-            pub or2_token: tokens::Or,
+            pub or1_token: Token![|],
+            pub or2_token: Token![|],
         }),
 
         /// A block (`{ ... }` or `unsafe { ... }`)
@@ -212,7 +212,7 @@ ast_enum_of_structs! {
         pub Assign(ExprAssign #full {
             pub left: Box<Expr>,
             pub right: Box<Expr>,
-            pub eq_token: tokens::Eq,
+            pub eq_token: Token![=],
         }),
 
         /// An assignment with an operator
@@ -228,7 +228,7 @@ ast_enum_of_structs! {
         pub Field(ExprField #full {
             pub expr: Box<Expr>,
             pub field: Ident,
-            pub dot_token: tokens::Dot,
+            pub dot_token: Token![.],
         }),
 
         /// Access of an unnamed field of a struct or tuple-struct
@@ -237,7 +237,7 @@ ast_enum_of_structs! {
         pub TupField(ExprTupField #full {
             pub expr: Box<Expr>,
             pub field: Lit,
-            pub dot_token: tokens::Dot,
+            pub dot_token: Token![.],
         }),
 
         /// An indexing operation (`foo[2]`)
@@ -266,7 +266,7 @@ ast_enum_of_structs! {
 
         /// A referencing operation (`&a` or `&mut a`)
         pub AddrOf(ExprAddrOf #full {
-            pub and_token: tokens::And,
+            pub and_token: Token![&],
             pub mutbl: Mutability,
             pub expr: Box<Expr>,
         }),
@@ -275,19 +275,19 @@ ast_enum_of_structs! {
         pub Break(ExprBreak #full {
             pub label: Option<Lifetime>,
             pub expr: Option<Box<Expr>>,
-            pub break_token: tokens::Break,
+            pub break_token: Token![break],
         }),
 
         /// A `continue`, with an optional label
         pub Continue(ExprContinue #full {
             pub label: Option<Lifetime>,
-            pub continue_token: tokens::Continue,
+            pub continue_token: Token![continue],
         }),
 
         /// A `return`, with an optional value to be returned
         pub Ret(ExprRet #full {
             pub expr: Option<Box<Expr>>,
-            pub return_token: tokens::Return,
+            pub return_token: Token![return],
         }),
 
         /// A macro invocation; pre-expansion
@@ -299,9 +299,9 @@ ast_enum_of_structs! {
         /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
         pub Struct(ExprStruct #full {
             pub path: Path,
-            pub fields: Delimited<FieldValue, tokens::Comma>,
+            pub fields: Delimited<FieldValue, Token![,]>,
             pub rest: Option<Box<Expr>>,
-            pub dot2_token: Option<tokens::Dot2>,
+            pub dot2_token: Option<Token![..]>,
             pub brace_token: tokens::Brace,
         }),
 
@@ -311,7 +311,7 @@ ast_enum_of_structs! {
         /// to be repeated; the second is the number of times to repeat it.
         pub Repeat(ExprRepeat #full {
             pub bracket_token: tokens::Bracket,
-            pub semi_token: tokens::Semi,
+            pub semi_token: Token![;],
             pub expr: Box<Expr>,
             pub amt: Box<Expr>,
         }),
@@ -335,15 +335,15 @@ ast_enum_of_structs! {
         /// `expr?`
         pub Try(ExprTry #full {
             pub expr: Box<Expr>,
-            pub question_token: tokens::Question,
+            pub question_token: Token![?],
         }),
 
         /// A catch expression.
         ///
         /// E.g. `do catch { block }`
         pub Catch(ExprCatch #full {
-            pub do_token: tokens::Do,
-            pub catch_token: tokens::Catch,
+            pub do_token: Token![do],
+            pub catch_token: Token![catch],
             pub block: Block,
         }),
 
@@ -351,7 +351,7 @@ ast_enum_of_structs! {
         ///
         /// E.g. `yield expr`
         pub Yield(ExprYield #full {
-            pub yield_token: tokens::Yield,
+            pub yield_token: Token![yield],
             pub expr: Option<Box<Expr>>,
         }),
     }
@@ -374,7 +374,7 @@ ast_struct! {
         /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
 
-        pub colon_token: Option<tokens::Colon>,
+        pub colon_token: Option<Token![:]>,
     }
 }
 
@@ -404,7 +404,7 @@ ast_enum! {
         Expr(Box<Expr>),
 
         /// Expression with trailing semicolon;
-        Semi(Box<Expr>, tokens::Semi),
+        Semi(Box<Expr>, Token![;]),
 
         /// Macro invocation.
         Macro(Box<(Macro, MacStmtStyle, Vec<Attribute>)>),
@@ -418,7 +418,7 @@ ast_enum! {
     pub enum MacStmtStyle {
         /// The macro statement had a trailing semicolon, e.g. `foo! { ... };`
         /// `foo!(...);`, `foo![...];`
-        Semicolon(tokens::Semi),
+        Semicolon(Token![;]),
 
         /// The macro statement had braces; e.g. foo! { ... }
         Braces,
@@ -434,10 +434,10 @@ ast_enum! {
 ast_struct! {
     /// Local represents a `let` statement, e.g., `let <pat>:<ty> = <expr>;`
     pub struct Local {
-        pub let_token: tokens::Let,
-        pub colon_token: Option<tokens::Colon>,
-        pub eq_token: Option<tokens::Eq>,
-        pub semi_token: tokens::Semi,
+        pub let_token: Token![let],
+        pub colon_token: Option<Token![:]>,
+        pub eq_token: Option<Token![=]>,
+        pub semi_token: Token![;],
 
         pub pat: Box<Pat>,
         pub ty: Option<Box<Ty>>,
@@ -456,7 +456,7 @@ ast_enum_of_structs! {
     pub enum Pat {
         /// Represents a wildcard pattern (`_`)
         pub Wild(PatWild {
-            pub underscore_token: tokens::Underscore,
+            pub underscore_token: Token![_],
         }),
 
         /// A `Pat::Ident` may either be a new bound variable (`ref mut binding @ OPT_SUBPATTERN`),
@@ -467,16 +467,16 @@ ast_enum_of_structs! {
             pub mode: BindingMode,
             pub ident: Ident,
             pub subpat: Option<Box<Pat>>,
-            pub at_token: Option<tokens::At>,
+            pub at_token: Option<Token![@]>,
         }),
 
         /// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.
         /// The `bool` is `true` in the presence of a `..`.
         pub Struct(PatStruct {
             pub path: Path,
-            pub fields: Delimited<FieldPat, tokens::Comma>,
+            pub fields: Delimited<FieldPat, Token![,]>,
             pub brace_token: tokens::Brace,
-            pub dot2_token: Option<tokens::Dot2>,
+            pub dot2_token: Option<Token![..]>,
         }),
 
         /// A tuple struct/variant pattern `Variant(x, y, .., z)`.
@@ -500,22 +500,22 @@ ast_enum_of_structs! {
         /// If the `..` pattern fragment is present, then `Option<usize>` denotes its position.
         /// 0 <= position <= subpats.len()
         pub Tuple(PatTuple {
-            pub pats: Delimited<Pat, tokens::Comma>,
+            pub pats: Delimited<Pat, Token![,]>,
             pub dots_pos: Option<usize>,
             pub paren_token: tokens::Paren,
-            pub dot2_token: Option<tokens::Dot2>,
-            pub comma_token: Option<tokens::Comma>,
+            pub dot2_token: Option<Token![..]>,
+            pub comma_token: Option<Token![,]>,
         }),
         /// A `box` pattern
         pub Box(PatBox {
             pub pat: Box<Pat>,
-            pub box_token: tokens::Box_,
+            pub box_token: Token![box],
         }),
         /// A reference pattern, e.g. `&mut (a, b)`
         pub Ref(PatRef {
             pub pat: Box<Pat>,
             pub mutbl: Mutability,
-            pub and_token: tokens::And,
+            pub and_token: Token![&],
         }),
         /// A literal
         pub Lit(PatLit {
@@ -529,11 +529,11 @@ ast_enum_of_structs! {
         }),
         /// `[a, b, i.., y, z]` is represented as:
         pub Slice(PatSlice {
-            pub front: Delimited<Pat, tokens::Comma>,
+            pub front: Delimited<Pat, Token![,]>,
             pub middle: Option<Box<Pat>>,
-            pub back: Delimited<Pat, tokens::Comma>,
-            pub dot2_token: Option<tokens::Dot2>,
-            pub comma_token: Option<tokens::Comma>,
+            pub back: Delimited<Pat, Token![,]>,
+            pub dot2_token: Option<Token![..]>,
+            pub comma_token: Option<Token![,]>,
             pub bracket_token: tokens::Bracket,
         }),
         /// A macro pattern; pre-expansion
@@ -555,12 +555,12 @@ ast_struct! {
     /// ```
     pub struct Arm {
         pub attrs: Vec<Attribute>,
-        pub pats: Delimited<Pat, tokens::Or>,
-        pub if_token: Option<tokens::If>,
+        pub pats: Delimited<Pat, Token![|]>,
+        pub if_token: Option<Token![if]>,
         pub guard: Option<Box<Expr>>,
-        pub rocket_token: tokens::Rocket,
+        pub rocket_token: Token![=>],
         pub body: Box<Expr>,
-        pub comma: Option<tokens::Comma>,
+        pub comma: Option<Token![,]>,
     }
 }
 
@@ -569,7 +569,7 @@ ast_enum! {
     /// A capture clause
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum CaptureBy {
-        Value(tokens::Move),
+        Value(Token![move]),
         Ref,
     }
 }
@@ -580,9 +580,9 @@ ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum RangeLimits {
         /// Inclusive at the beginning, exclusive at the end
-        HalfOpen(tokens::Dot2),
+        HalfOpen(Token![..]),
         /// Inclusive at the beginning and end
-        Closed(tokens::Dot3),
+        Closed(Token![...]),
     }
 }
 
@@ -599,7 +599,7 @@ ast_struct! {
         /// The pattern the field is destructured to
         pub pat: Box<Pat>,
         pub is_shorthand: bool,
-        pub colon_token: Option<tokens::Colon>,
+        pub colon_token: Option<Token![:]>,
         pub attrs: Vec<Attribute>,
     }
 }
@@ -608,7 +608,7 @@ ast_struct! {
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BindingMode {
-        ByRef(tokens::Ref, Mutability),
+        ByRef(Token![ref], Mutability),
         ByValue(Mutability),
     }
 }
@@ -617,8 +617,8 @@ ast_enum! {
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum InPlaceKind {
-        Arrow(tokens::LArrow),
-        In(tokens::In),
+        Arrow(Token![<-]),
+        In(Token![in]),
     }
 }
 
@@ -651,7 +651,6 @@ pub mod parsing {
     use synom::{PResult, Cursor, Synom};
     #[cfg(feature = "full")]
     use synom::parse_error;
-    use synom::tokens::*;
 
     /// When we're parsing expressions which occur before blocks, like in
     /// an if statement's condition, we cannot parse a struct literal.
@@ -765,7 +764,7 @@ pub mod parsing {
         mut e: call!(placement_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
-                eq: syn!(Eq) >>
+                eq: punct!(=) >>
                 // Recurse into self to parse right-associative operator.
                 rhs: call!(assign_expr, allow_struct, true) >>
                 ({
@@ -808,7 +807,7 @@ pub mod parsing {
         mut e: call!(range_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
-                arrow: syn!(LArrow) >>
+                arrow: punct!(<-) >>
                 // Recurse into self to parse right-associative operator.
                 rhs: call!(placement_expr, allow_struct, true) >>
                 ({
@@ -861,12 +860,12 @@ pub mod parsing {
     /// ```ignore
     /// <and> || <and> ...
     /// ```
-    binop!(or_expr, and_expr, map!(syn!(OrOr), BinOp::Or));
+    binop!(or_expr, and_expr, map!(punct!(||), BinOp::Or));
 
     /// ```ignore
     /// <compare> && <compare> ...
     /// ```
-    binop!(and_expr, compare_expr, map!(syn!(AndAnd), BinOp::And));
+    binop!(and_expr, compare_expr, map!(punct!(&&), BinOp::And));
 
     /// ```ignore
     /// <bitor> == <bitor> ...
@@ -880,33 +879,33 @@ pub mod parsing {
     /// NOTE: This operator appears to be parsed as left-associative, but errors
     /// if it is used in a non-associative manner.
     binop!(compare_expr, bitor_expr, alt!(
-        syn!(EqEq) => { BinOp::Eq }
+        punct!(==) => { BinOp::Eq }
         |
-        syn!(Ne) => { BinOp::Ne }
+        punct!(!=) => { BinOp::Ne }
         |
         // must be above Lt
-        syn!(Le) => { BinOp::Le }
+        punct!(<=) => { BinOp::Le }
         |
         // must be above Gt
-        syn!(Ge) => { BinOp::Ge }
+        punct!(>=) => { BinOp::Ge }
         |
         do_parse!(
             // Make sure that we don't eat the < part of a <- operator
-            not!(syn!(LArrow)) >>
-            t: syn!(Lt) >>
+            not!(punct!(<-)) >>
+            t: punct!(<) >>
             (BinOp::Lt(t))
         )
         |
-        syn!(Gt) => { BinOp::Gt }
+        punct!(>) => { BinOp::Gt }
     ));
 
     /// ```ignore
     /// <bitxor> | <bitxor> ...
     /// ```
     binop!(bitor_expr, bitxor_expr, do_parse!(
-        not!(syn!(OrOr)) >>
-        not!(syn!(OrEq)) >>
-        t: syn!(Or) >>
+        not!(punct!(||)) >>
+        not!(punct!(|=)) >>
+        t: punct!(|) >>
         (BinOp::BitOr(t))
     ));
 
@@ -915,8 +914,8 @@ pub mod parsing {
     /// ```
     binop!(bitxor_expr, bitand_expr, do_parse!(
         // NOTE: Make sure we aren't looking at ^=.
-        not!(syn!(CaretEq)) >>
-        t: syn!(Caret) >>
+        not!(punct!(^=)) >>
+        t: punct!(^) >>
         (BinOp::BitXor(t))
     ));
 
@@ -925,9 +924,9 @@ pub mod parsing {
     /// ```
     binop!(bitand_expr, shift_expr, do_parse!(
         // NOTE: Make sure we aren't looking at && or &=.
-        not!(syn!(AndAnd)) >>
-        not!(syn!(AndEq)) >>
-        t: syn!(And) >>
+        not!(punct!(&&)) >>
+        not!(punct!(&=)) >>
+        t: punct!(&) >>
         (BinOp::BitAnd(t))
     ));
 
@@ -936,9 +935,9 @@ pub mod parsing {
     /// <arith> >> <arith> ...
     /// ```
     binop!(shift_expr, arith_expr, alt!(
-        syn!(Shl) => { BinOp::Shl }
+        punct!(<<) => { BinOp::Shl }
         |
-        syn!(Shr) => { BinOp::Shr }
+        punct!(>>) => { BinOp::Shr }
     ));
 
     /// ```ignore
@@ -946,9 +945,9 @@ pub mod parsing {
     /// <term> - <term> ...
     /// ```
     binop!(arith_expr, term_expr, alt!(
-        syn!(Add) => { BinOp::Add }
+        punct!(+) => { BinOp::Add }
         |
-        syn!(Sub) => { BinOp::Sub }
+        punct!(-) => { BinOp::Sub }
     ));
 
     /// ```ignore
@@ -957,11 +956,11 @@ pub mod parsing {
     /// <cast> % <cast> ...
     /// ```
     binop!(term_expr, cast_expr, alt!(
-        syn!(Star) => { BinOp::Mul }
+        punct!(*) => { BinOp::Mul }
         |
-        syn!(Div) => { BinOp::Div }
+        punct!(/) => { BinOp::Div }
         |
-        syn!(Rem) => { BinOp::Rem }
+        punct!(%) => { BinOp::Rem }
     ));
 
     /// ```ignore
@@ -972,7 +971,7 @@ pub mod parsing {
         mut e: call!(unary_expr, allow_struct, allow_block) >>
         many0!(alt!(
             do_parse!(
-                as_: syn!(As) >>
+                as_: keyword!(as) >>
                 // We can't accept `A + B` in cast expressions, as it's
                 // ambiguous with the + expression.
                 ty: call!(Ty::without_plus) >>
@@ -986,7 +985,7 @@ pub mod parsing {
             )
             |
             do_parse!(
-                colon: syn!(Colon) >>
+                colon: punct!(:) >>
                 // We can't accept `A + B` in cast expressions, as it's
                 // ambiguous with the + expression.
                 ty: call!(Ty::without_plus) >>
@@ -1020,7 +1019,7 @@ pub mod parsing {
         )
         |
         do_parse!(
-            and: syn!(And) >>
+            and: punct!(&) >>
             mutability: syn!(Mutability) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprAddrOf {
@@ -1031,7 +1030,7 @@ pub mod parsing {
         )
         |
         do_parse!(
-            box_: syn!(Box_) >>
+            box_: keyword!(box) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprBox {
                 box_token: box_,
@@ -1111,7 +1110,7 @@ pub mod parsing {
                 }.into();
             })
             |
-            tap!(question: syn!(Question) => {
+            tap!(question: punct!(?) => {
                 e = ExprTry {
                     expr: Box::new(e.into()),
                     question_token: question,
@@ -1265,7 +1264,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprInPlace {
         named!(parse -> Self, do_parse!(
-            in_: syn!(In) >>
+            in_: keyword!(in) >>
             place: expr_no_struct >>
             value: braces!(call!(Block::parse_within)) >>
             (ExprInPlace {
@@ -1296,18 +1295,18 @@ pub mod parsing {
         ));
     }
 
-    named!(and_call -> (Delimited<Expr, tokens::Comma>, tokens::Paren),
+    named!(and_call -> (Delimited<Expr, Token![,]>, tokens::Paren),
            parens!(call!(Delimited::parse_terminated)));
 
     #[cfg(feature = "full")]
     named!(and_method_call -> ExprMethodCall, do_parse!(
-        dot: syn!(Dot) >>
+        dot: punct!(.) >>
         method: syn!(Ident) >>
         typarams: option!(do_parse!(
-            colon2: syn!(Colon2) >>
-            lt: syn!(Lt) >>
+            colon2: punct!(::) >>
+            lt: punct!(<) >>
             tys: call!(Delimited::parse_terminated) >>
-            gt: syn!(Gt) >>
+            gt: punct!(>) >>
             (colon2, lt, tys, gt)
         )) >>
         args: parens!(call!(Delimited::parse_terminated)) >>
@@ -1350,10 +1349,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprIfLet {
         named!(parse -> Self, do_parse!(
-            if_: syn!(If) >>
-            let_: syn!(Let) >>
+            if_: keyword!(if) >>
+            let_: keyword!(let) >>
             pat: syn!(Pat) >>
-            eq: syn!(Eq) >>
+            eq: punct!(=) >>
             cond: expr_no_struct >>
             then_block: braces!(call!(Block::parse_within)) >>
             else_block: option!(else_block) >>
@@ -1367,7 +1366,7 @@ pub mod parsing {
                     brace_token: then_block.1,
                 },
                 if_token: if_,
-                else_token: else_block.as_ref().map(|p| Else((p.0).0)),
+                else_token: else_block.as_ref().map(|p| Token![else]((p.0).0)),
                 if_false: else_block.map(|p| Box::new(p.1.into())),
             })
         ));
@@ -1376,7 +1375,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprIf {
         named!(parse -> Self, do_parse!(
-            if_: syn!(If) >>
+            if_: keyword!(if) >>
             cond: expr_no_struct >>
             then_block: braces!(call!(Block::parse_within)) >>
             else_block: option!(else_block) >>
@@ -1387,15 +1386,15 @@ pub mod parsing {
                     brace_token: then_block.1,
                 },
                 if_token: if_,
-                else_token: else_block.as_ref().map(|p| Else((p.0).0)),
+                else_token: else_block.as_ref().map(|p| Token![else]((p.0).0)),
                 if_false: else_block.map(|p| Box::new(p.1.into())),
             })
         ));
     }
 
     #[cfg(feature = "full")]
-    named!(else_block -> (Else, ExprKind), do_parse!(
-        else_: syn!(Else) >>
+    named!(else_block -> (Token![else], ExprKind), do_parse!(
+        else_: keyword!(else) >>
         expr: alt!(
             syn!(ExprIf) => { ExprKind::If }
             |
@@ -1419,10 +1418,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprForLoop {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
-            for_: syn!(For) >>
+            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            for_: keyword!(for) >>
             pat: syn!(Pat) >>
-            in_: syn!(In) >>
+            in_: keyword!(in) >>
             expr: expr_no_struct >>
             loop_block: syn!(Block) >>
             (ExprForLoop {
@@ -1431,7 +1430,7 @@ pub mod parsing {
                 pat: Box::new(pat),
                 expr: Box::new(expr),
                 body: loop_block,
-                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 label: lbl.map(|p| p.0),
             })
         ));
@@ -1440,13 +1439,13 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprLoop {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
-            loop_: syn!(Loop) >>
+            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            loop_: keyword!(loop) >>
             loop_block: syn!(Block) >>
             (ExprLoop {
                 loop_token: loop_,
                 body: loop_block,
-                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 label: lbl.map(|p| p.0),
             })
         ));
@@ -1455,7 +1454,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprMatch {
         named!(parse -> Self, do_parse!(
-            match_: syn!(Match) >>
+            match_: keyword!(match) >>
             obj: expr_no_struct >>
             res: braces!(many0!(syn!(Arm))) >>
             ({
@@ -1473,8 +1472,8 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprCatch {
         named!(parse -> Self, do_parse!(
-            do_: syn!(Do) >>
-            catch_: syn!(Catch) >>
+            do_: keyword!(do) >>
+            catch_: keyword!(catch) >>
             catch_block: syn!(Block) >>
             (ExprCatch {
                 block: catch_block,
@@ -1487,7 +1486,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprYield {
         named!(parse -> Self, do_parse!(
-            yield_: syn!(Yield) >>
+            yield_: keyword!(yield) >>
             expr: option!(syn!(Expr)) >>
             (ExprYield {
                 yield_token: yield_,
@@ -1501,21 +1500,21 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             attrs: many0!(call!(Attribute::parse_outer)) >>
             pats: call!(Delimited::parse_separated_nonempty) >>
-            guard: option!(tuple!(syn!(If), syn!(Expr))) >>
-            rocket: syn!(Rocket) >>
+            guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
+            rocket: punct!(=>) >>
             body: do_parse!(
                 expr: alt!(expr_nosemi | syn!(Expr)) >>
                 comma1: cond!(arm_expr_requires_comma(&expr), alt!(
                     map!(input_end!(), |_| None)
                     |
-                    map!(syn!(Comma), Some)
+                    map!(punct!(,), Some)
                 )) >>
-                comma2: cond!(!arm_expr_requires_comma(&expr), option!(syn!(Comma))) >>
+                comma2: cond!(!arm_expr_requires_comma(&expr), option!(punct!(,))) >>
                 (expr, comma1.and_then(|x| x).or(comma2.and_then(|x| x)))
             ) >>
             (Arm {
                 rocket_token: rocket,
-                if_token: guard.as_ref().map(|p| If((p.0).0)),
+                if_token: guard.as_ref().map(|p| Token![if]((p.0).0)),
                 attrs: attrs,
                 pats: pats,
                 guard: guard.map(|p| Box::new(p.1)),
@@ -1528,12 +1527,12 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> ExprKind, do_parse!(
         capture: syn!(CaptureBy) >>
-        or1: syn!(Or) >>
+        or1: punct!(|) >>
         inputs: call!(Delimited::parse_terminated_with, fn_arg) >>
-        or2: syn!(Or) >>
+        or2: punct!(|) >>
         ret_and_body: alt!(
             do_parse!(
-                arrow: syn!(RArrow) >>
+                arrow: punct!(->) >>
                 ty: syn!(Ty) >>
                 body: syn!(Block) >>
                 (ReturnType::Ty(ty, arrow),
@@ -1554,7 +1553,7 @@ pub mod parsing {
                 output: ret_and_body.0,
                 variadic: false,
                 dot_tokens: None,
-                fn_token: tokens::Fn_::default(),
+                fn_token: <Token![fn]>::default(),
                 generics: Generics::default(),
                 paren_token: tokens::Paren::default(),
             }),
@@ -1565,11 +1564,11 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(fn_arg -> FnArg, do_parse!(
         pat: syn!(Pat) >>
-        ty: option!(tuple!(syn!(Colon), syn!(Ty))) >>
+        ty: option!(tuple!(punct!(:), syn!(Ty))) >>
         ({
             let (colon, ty) = ty.unwrap_or_else(|| {
-                (Colon::default(), TyInfer {
-                    underscore_token: Underscore::default(),
+                (<Token![:]>::default(), TyInfer {
+                    underscore_token: <Token![_]>::default(),
                 }.into())
             });
             ArgCaptured {
@@ -1583,13 +1582,13 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhile {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
-            while_: syn!(While) >>
+            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            while_: keyword!(while) >>
             cond: expr_no_struct >>
             while_block: syn!(Block) >>
             (ExprWhile {
                 while_token: while_,
-                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 cond: Box::new(cond),
                 body: while_block,
                 label: lbl.map(|p| p.0),
@@ -1600,18 +1599,18 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhileLet {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), syn!(Colon))) >>
-            while_: syn!(While) >>
-            let_: syn!(Let) >>
+            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            while_: keyword!(while) >>
+            let_: keyword!(let) >>
             pat: syn!(Pat) >>
-            eq: syn!(Eq) >>
+            eq: punct!(=) >>
             value: expr_no_struct >>
             while_block: syn!(Block) >>
             (ExprWhileLet {
                 eq_token: eq,
                 let_token: let_,
                 while_token: while_,
-                colon_token: lbl.as_ref().map(|p| Colon((p.1).0)),
+                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 pat: Box::new(pat),
                 expr: Box::new(value),
                 body: while_block,
@@ -1623,7 +1622,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprContinue {
         named!(parse -> Self, do_parse!(
-            cont: syn!(Continue) >>
+            cont: keyword!(continue) >>
             lbl: option!(syn!(Lifetime)) >>
             (ExprContinue {
                 continue_token: cont,
@@ -1634,7 +1633,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_break(allow_struct: bool) -> ExprKind, do_parse!(
-        break_: syn!(Break) >>
+        break_: keyword!(break) >>
         lbl: option!(syn!(Lifetime)) >>
         // We can't allow blocks after a `break` expression when we wouldn't
         // allow structs, as this expression is ambiguous.
@@ -1648,7 +1647,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_ret(allow_struct: bool) -> ExprKind, do_parse!(
-        return_: syn!(Return) >>
+        return_: keyword!(return) >>
         // NOTE: return is greedy and eats blocks after it even when in a
         // position where structs are not allowed, such as in if statement
         // conditions. For example:
@@ -1670,7 +1669,7 @@ pub mod parsing {
                 base: option!(
                     cond!(fields.is_empty() || fields.trailing_delim(),
                         do_parse!(
-                            dots: syn!(Dot2) >>
+                            dots: punct!(..) >>
                             base: syn!(Expr) >>
                             (dots, base)
                         )
@@ -1700,7 +1699,7 @@ pub mod parsing {
         named!(parse -> Self, alt!(
             do_parse!(
                 ident: field_ident >>
-                colon: syn!(Colon) >>
+                colon: punct!(:) >>
                 value: syn!(Expr) >>
                 (FieldValue {
                     ident: ident,
@@ -1726,7 +1725,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             data: brackets!(do_parse!(
                 value: syn!(Expr) >>
-                semi: syn!(Semi) >>
+                semi: punct!(;) >>
                 times: syn!(Expr) >>
                 (value, semi, times)
             )) >>
@@ -1762,9 +1761,9 @@ pub mod parsing {
     impl Synom for RangeLimits {
         named!(parse -> Self, alt!(
             // Must come before Dot2
-            syn!(Dot3) => { RangeLimits::Closed }
+            punct!(...) => { RangeLimits::Closed }
             |
-            syn!(Dot2) => { RangeLimits::HalfOpen }
+            punct!(..) => { RangeLimits::HalfOpen }
         ));
     }
 
@@ -1779,12 +1778,12 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named!(and_field -> (Ident, Dot),
-           map!(tuple!(syn!(Dot), syn!(Ident)), |(a, b)| (b, a)));
+    named!(and_field -> (Ident, Token![.]),
+           map!(tuple!(punct!(.), syn!(Ident)), |(a, b)| (b, a)));
 
     #[cfg(feature = "full")]
-    named!(and_tup_field -> (Lit, Dot),
-           map!(tuple!(syn!(Dot), syn!(Lit)), |(a, b)| (b, a)));
+    named!(and_tup_field -> (Lit, Token![.]),
+           map!(tuple!(punct!(.), syn!(Lit)), |(a, b)| (b, a)));
 
     named!(and_index -> (Expr, tokens::Bracket), brackets!(syn!(Expr)));
 
@@ -1802,8 +1801,8 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Block {
         named!(pub parse_within -> Vec<Stmt>, do_parse!(
-            many0!(syn!(Semi)) >>
-            mut standalone: many0!(terminated!(syn!(Stmt), many0!(syn!(Semi)))) >>
+            many0!(punct!(;)) >>
+            mut standalone: many0!(terminated!(syn!(Stmt), many0!(punct!(;)))) >>
             last: option!(do_parse!(
                 attrs: many0!(call!(Attribute::parse_outer)) >>
                 mut e: syn!(Expr) >>
@@ -1841,11 +1840,11 @@ pub mod parsing {
     named!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         what: syn!(Path) >>
-        bang: syn!(Bang) >>
+        bang: punct!(!) >>
     // Only parse braces here; paren and bracket will get parsed as
     // expression statements
         data: braces!(syn!(TokenStream)) >>
-        semi: option!(syn!(Semi)) >>
+        semi: option!(punct!(;)) >>
         (Stmt::Macro(Box::new((
             Macro {
                 path: what,
@@ -1866,16 +1865,16 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(stmt_local -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
-        let_: syn!(Let) >>
+        let_: keyword!(let) >>
         pat: syn!(Pat) >>
-        ty: option!(tuple!(syn!(Colon), syn!(Ty))) >>
-        init: option!(tuple!(syn!(Eq), syn!(Expr))) >>
-        semi: syn!(Semi) >>
+        ty: option!(tuple!(punct!(:), syn!(Ty))) >>
+        init: option!(tuple!(punct!(=), syn!(Expr))) >>
+        semi: punct!(;) >>
         (Stmt::Local(Box::new(Local {
             let_token: let_,
             semi_token: semi,
-            colon_token: ty.as_ref().map(|p| Colon((p.0).0)),
-            eq_token: init.as_ref().map(|p| Eq((p.0).0)),
+            colon_token: ty.as_ref().map(|p| Token![:]((p.0).0)),
+            eq_token: init.as_ref().map(|p| Token![=]((p.0).0)),
             pat: Box::new(pat),
             ty: ty.map(|p| Box::new(p.1)),
             init: init.map(|p| Box::new(p.1)),
@@ -1892,9 +1891,9 @@ pub mod parsing {
         mut e: expr_nosemi >>
         // If the next token is a `.` or a `?` it is special-cased to parse as
         // an expression instead of a blockexpression.
-        not!(syn!(Dot)) >>
-        not!(syn!(Question)) >>
-        semi: option!(syn!(Semi)) >>
+        not!(punct!(.)) >>
+        not!(punct!(?)) >>
+        semi: option!(punct!(;)) >>
         ({
             e.attrs = attrs;
             if let Some(semi) = semi {
@@ -1909,7 +1908,7 @@ pub mod parsing {
     named!(stmt_expr -> Stmt, do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
         mut e: syn!(Expr) >>
-        semi: syn!(Semi) >>
+        semi: punct!(;) >>
         ({
             e.attrs = attrs;
             Stmt::Semi(Box::new(e), semi)
@@ -1948,7 +1947,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for PatWild {
         named!(parse -> Self, map!(
-            syn!(Underscore),
+            punct!(_),
             |u| PatWild { underscore_token: u }
         ));
     }
@@ -1956,7 +1955,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for PatBox {
         named!(parse -> Self, do_parse!(
-            boxed: syn!(Box_) >>
+            boxed: keyword!(box) >>
             pat: syn!(Pat) >>
             (PatBox {
                 pat: Box::new(pat),
@@ -1968,23 +1967,23 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for PatIdent {
         named!(parse -> Self, do_parse!(
-            mode: option!(syn!(Ref)) >>
+            mode: option!(keyword!(ref)) >>
             mutability: syn!(Mutability) >>
             name: alt!(
                 syn!(Ident)
                 |
-                syn!(Self_) => { Into::into }
+                keyword!(self) => { Into::into }
             ) >>
-            not!(syn!(Lt)) >>
-            not!(syn!(Colon2)) >>
-            subpat: option!(tuple!(syn!(At), syn!(Pat))) >>
+            not!(punct!(<)) >>
+            not!(punct!(::)) >>
+            subpat: option!(tuple!(punct!(@), syn!(Pat))) >>
             (PatIdent {
                 mode: match mode {
                     Some(mode) => BindingMode::ByRef(mode, mutability),
                     None => BindingMode::ByValue(mutability),
                 },
                 ident: name,
-                at_token: subpat.as_ref().map(|p| At((p.0).0)),
+                at_token: subpat.as_ref().map(|p| Token![@]((p.0).0)),
                 subpat: subpat.map(|p| Box::new(p.1)),
             })
         ));
@@ -2010,7 +2009,7 @@ pub mod parsing {
                 fields: call!(Delimited::parse_terminated) >>
                 base: option!(
                     cond!(fields.is_empty() || fields.trailing_delim(),
-                          syn!(Dot2))
+                          punct!(..))
                 ) >>
                 (fields, base)
             )) >>
@@ -2028,7 +2027,7 @@ pub mod parsing {
         named!(parse -> Self, alt!(
             do_parse!(
                 ident: field_ident >>
-                colon: syn!(Colon) >>
+                colon: punct!(:) >>
                 pat: syn!(Pat) >>
                 (FieldPat {
                     ident: ident,
@@ -2040,8 +2039,8 @@ pub mod parsing {
             )
             |
             do_parse!(
-                boxed: option!(syn!(Box_)) >>
-                mode: option!(syn!(Ref)) >>
+                boxed: option!(keyword!(box)) >>
+                mode: option!(keyword!(ref)) >>
                 mutability: syn!(Mutability) >>
                 ident: syn!(Ident) >>
                 ({
@@ -2106,8 +2105,8 @@ pub mod parsing {
                 dotdot: map!(cond!(
                     elems.is_empty() || elems.trailing_delim(),
                     option!(do_parse!(
-                        dots: syn!(Dot2) >>
-                        trailing: option!(syn!(Comma)) >>
+                        dots: punct!(..) >>
+                        trailing: option!(punct!(,)) >>
                         (dots, trailing)
                     ))
                 ), |x| x.and_then(|x| x)) >>
@@ -2145,7 +2144,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for PatRef {
         named!(parse -> Self, do_parse!(
-            and: syn!(And) >>
+            and: punct!(&) >>
             mutability: syn!(Mutability) >>
             pat: syn!(Pat) >>
             (PatRef {
@@ -2186,7 +2185,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(pat_lit_expr -> Expr, do_parse!(
-        neg: option!(syn!(Sub)) >>
+        neg: option!(punct!(-)) >>
         v: alt!(
             syn!(Lit) => { ExprKind::Lit }
             |
@@ -2194,7 +2193,7 @@ pub mod parsing {
         ) >>
         (if neg.is_some() {
             ExprKind::Unary(ExprUnary {
-                op: UnOp::Neg(tokens::Sub::default()),
+                op: UnOp::Neg(<Token![-]>::default()),
                 expr: Box::new(v.into())
             }).into()
         } else {
@@ -2208,8 +2207,8 @@ pub mod parsing {
             brackets!(do_parse!(
                 before: call!(Delimited::parse_terminated) >>
                 middle: option!(do_parse!(
-                    dots: syn!(Dot2) >>
-                    trailing: option!(syn!(Comma)) >>
+                    dots: punct!(..) >>
+                    trailing: option!(punct!(,)) >>
                     (dots, trailing)
                 )) >>
                 after: cond!(
@@ -2222,13 +2221,13 @@ pub mod parsing {
                 (before, middle, after)
             )),
             |((before, middle, after), brackets)| {
-                let mut before: Delimited<Pat, tokens::Comma> = before;
-                let after: Option<Delimited<Pat, tokens::Comma>> = after;
-                let middle: Option<(Dot2, Option<Comma>)> = middle;
+                let mut before: Delimited<Pat, Token![,]> = before;
+                let after: Option<Delimited<Pat, Token![,]>> = after;
+                let middle: Option<(Token![..], Option<Token![,]>)> = middle;
                 PatSlice {
-                    dot2_token: middle.as_ref().map(|m| Dot2((m.0).0)),
+                    dot2_token: middle.as_ref().map(|m| Token![..]((m.0).0)),
                     comma_token: middle.as_ref().and_then(|m| {
-                        m.1.as_ref().map(|m| Comma(m.0))
+                        m.1.as_ref().map(|m| Token![,](m.0))
                     }),
                     bracket_token: brackets,
                     middle: middle.and_then(|_| {
@@ -2248,7 +2247,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for CaptureBy {
         named!(parse -> Self, alt!(
-            syn!(Move) => { CaptureBy::Value }
+            keyword!(move) => { CaptureBy::Value }
             |
             epsilon!() => { |_| CaptureBy::Ref }
         ));
@@ -2366,7 +2365,7 @@ mod printing {
                 // If we only have one argument, we need a trailing comma to
                 // distinguish ExprTup from ExprParen.
                 if self.args.len() == 1 && !self.args.trailing_delim() {
-                    tokens::Comma::default().to_tokens(tokens);
+                    <Token![,]>::default().to_tokens(tokens);
                 }
                 // XXX: Not sure how to handle this, but we never parse it yet.
                 // Is this for an expression like (0,)? Can't we use the
@@ -2410,7 +2409,7 @@ mod printing {
 
     #[cfg(feature = "full")]
     fn maybe_wrap_else(tokens: &mut Tokens,
-                       else_token: &Option<tokens::Else>,
+                       else_token: &Option<Token![else]>,
                        if_false: &Option<Box<Expr>>)
     {
         if let Some(ref if_false) = *if_false {
@@ -2524,7 +2523,7 @@ mod printing {
                     // for the last one.
                     let is_last = i == self.arms.len() - 1;
                     if !is_last && arm_expr_requires_comma(&arm.body) && arm.comma.is_none() {
-                        tokens::Comma::default().to_tokens(tokens);
+                        <Token![,]>::default().to_tokens(tokens);
                     }
                 }
             });
@@ -2776,7 +2775,7 @@ mod printing {
                 self.fields.to_tokens(tokens);
                 // NOTE: We need a comma before the dot2 token if it is present.
                 if !self.fields.empty_or_trailing() && self.dot2_token.is_some() {
-                    tokens::Comma::default().to_tokens(tokens);
+                    <Token![,]>::default().to_tokens(tokens);
                 }
                 self.dot2_token.to_tokens(tokens);
             });
@@ -2813,7 +2812,7 @@ mod printing {
                 if Some(self.pats.len()) == self.dots_pos {
                     // Ensure there is a comma before the .. token.
                     if !self.pats.empty_or_trailing() {
-                        tokens::Comma::default().to_tokens(tokens);
+                        <Token![,]>::default().to_tokens(tokens);
                     }
                     self.dot2_token.to_tokens(tokens);
                 }
@@ -2867,7 +2866,7 @@ mod printing {
                 if !self.front.empty_or_trailing() &&
                     (self.middle.is_some() || self.dot2_token.is_some())
                 {
-                    tokens::Comma::default().to_tokens(tokens);
+                    <Token![,]>::default().to_tokens(tokens);
                 }
 
                 // If we have an identifier, we always need a .. token.

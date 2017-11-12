@@ -1,64 +1,62 @@
-use tokens;
-
 ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOp {
         /// The `+` operator (addition)
-        Add(tokens::Add),
+        Add(Token![+]),
         /// The `-` operator (subtraction)
-        Sub(tokens::Sub),
+        Sub(Token![-]),
         /// The `*` operator (multiplication)
-        Mul(tokens::Star),
+        Mul(Token![*]),
         /// The `/` operator (division)
-        Div(tokens::Div),
+        Div(Token![/]),
         /// The `%` operator (modulus)
-        Rem(tokens::Rem),
+        Rem(Token![%]),
         /// The `&&` operator (logical and)
-        And(tokens::AndAnd),
+        And(Token![&&]),
         /// The `||` operator (logical or)
-        Or(tokens::OrOr),
+        Or(Token![||]),
         /// The `^` operator (bitwise xor)
-        BitXor(tokens::Caret),
+        BitXor(Token![^]),
         /// The `&` operator (bitwise and)
-        BitAnd(tokens::And),
+        BitAnd(Token![&]),
         /// The `|` operator (bitwise or)
-        BitOr(tokens::Or),
+        BitOr(Token![|]),
         /// The `<<` operator (shift left)
-        Shl(tokens::Shl),
+        Shl(Token![<<]),
         /// The `>>` operator (shift right)
-        Shr(tokens::Shr),
+        Shr(Token![>>]),
         /// The `==` operator (equality)
-        Eq(tokens::EqEq),
+        Eq(Token![==]),
         /// The `<` operator (less than)
-        Lt(tokens::Lt),
+        Lt(Token![<]),
         /// The `<=` operator (less than or equal to)
-        Le(tokens::Le),
+        Le(Token![<=]),
         /// The `!=` operator (not equal to)
-        Ne(tokens::Ne),
+        Ne(Token![!=]),
         /// The `>=` operator (greater than or equal to)
-        Ge(tokens::Ge),
+        Ge(Token![>=]),
         /// The `>` operator (greater than)
-        Gt(tokens::Gt),
+        Gt(Token![>]),
         /// The `+=` operator
-        AddEq(tokens::AddEq),
+        AddEq(Token![+=]),
         /// The `-=` operator
-        SubEq(tokens::SubEq),
+        SubEq(Token![-=]),
         /// The `*=` operator
-        MulEq(tokens::MulEq),
+        MulEq(Token![*=]),
         /// The `/=` operator
-        DivEq(tokens::DivEq),
+        DivEq(Token![/=]),
         /// The `%=` operator
-        RemEq(tokens::RemEq),
+        RemEq(Token![%=]),
         /// The `^=` operator
-        BitXorEq(tokens::CaretEq),
+        BitXorEq(Token![^=]),
         /// The `&=` operator
-        BitAndEq(tokens::AndEq),
+        BitAndEq(Token![&=]),
         /// The `|=` operator
-        BitOrEq(tokens::OrEq),
+        BitOrEq(Token![|=]),
         /// The `<<=` operator
-        ShlEq(tokens::ShlEq),
+        ShlEq(Token![<<=]),
         /// The `>>=` operator
-        ShrEq(tokens::ShrEq),
+        ShrEq(Token![>>=]),
     }
 }
 
@@ -66,11 +64,11 @@ ast_enum! {
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum UnOp {
         /// The `*` operator for dereferencing
-        Deref(tokens::Star),
+        Deref(Token![*]),
         /// The `!` operator for logical inversion
-        Not(tokens::Bang),
+        Not(Token![!]),
         /// The `-` operator for negation
-        Neg(tokens::Sub),
+        Neg(Token![-]),
     }
 }
 
@@ -78,78 +76,77 @@ ast_enum! {
 pub mod parsing {
     use super::*;
     use synom::Synom;
-    use synom::tokens::*;
 
     impl BinOp {
         named!(pub parse_binop -> Self, alt!(
-            syn!(AndAnd) => { BinOp::And }
+            punct!(&&) => { BinOp::And }
             |
-            syn!(OrOr) => { BinOp::Or }
+            punct!(||) => { BinOp::Or }
             |
-            syn!(Shl) => { BinOp::Shl }
+            punct!(<<) => { BinOp::Shl }
             |
-            syn!(Shr) => { BinOp::Shr }
+            punct!(>>) => { BinOp::Shr }
             |
-            syn!(EqEq) => { BinOp::Eq }
+            punct!(==) => { BinOp::Eq }
             |
-            syn!(Le) => { BinOp::Le }
+            punct!(<=) => { BinOp::Le }
             |
-            syn!(Ne) => { BinOp::Ne }
+            punct!(!=) => { BinOp::Ne }
             |
-            syn!(Ge) => { BinOp::Ge }
+            punct!(>=) => { BinOp::Ge }
             |
-            syn!(Add) => { BinOp::Add }
+            punct!(+) => { BinOp::Add }
             |
-            syn!(Sub) => { BinOp::Sub }
+            punct!(-) => { BinOp::Sub }
             |
-            syn!(Star) => { BinOp::Mul }
+            punct!(*) => { BinOp::Mul }
             |
-            syn!(Div) => { BinOp::Div }
+            punct!(/) => { BinOp::Div }
             |
-            syn!(Rem) => { BinOp::Rem }
+            punct!(%) => { BinOp::Rem }
             |
-            syn!(Caret) => { BinOp::BitXor }
+            punct!(^) => { BinOp::BitXor }
             |
-            syn!(And) => { BinOp::BitAnd }
+            punct!(&) => { BinOp::BitAnd }
             |
-            syn!(Or) => { BinOp::BitOr }
+            punct!(|) => { BinOp::BitOr }
             |
-            syn!(Lt) => { BinOp::Lt }
+            punct!(<) => { BinOp::Lt }
             |
-            syn!(Gt) => { BinOp::Gt }
+            punct!(>) => { BinOp::Gt }
         ));
 
         #[cfg(feature = "full")]
         named!(pub parse_assign_op -> Self, alt!(
-            syn!(AddEq) => { BinOp::AddEq }
+            punct!(+=) => { BinOp::AddEq }
             |
-            syn!(SubEq) => { BinOp::SubEq }
+            punct!(-=) => { BinOp::SubEq }
             |
-            syn!(MulEq) => { BinOp::MulEq }
+            punct!(*=) => { BinOp::MulEq }
             |
-            syn!(DivEq) => { BinOp::DivEq }
+            punct!(/=) => { BinOp::DivEq }
             |
-            syn!(RemEq) => { BinOp::RemEq }
+            punct!(%=) => { BinOp::RemEq }
             |
-            syn!(CaretEq) => { BinOp::BitXorEq }
+            punct!(^=) => { BinOp::BitXorEq }
             |
-            syn!(AndEq) => { BinOp::BitAndEq }
+            punct!(&=) => { BinOp::BitAndEq }
             |
-            syn!(OrEq) => { BinOp::BitOrEq }
+            punct!(|=) => { BinOp::BitOrEq }
             |
-            syn!(ShlEq) => { BinOp::ShlEq }
+            punct!(<<=) => { BinOp::ShlEq }
             |
-            syn!(ShrEq) => { BinOp::ShrEq }
+            punct!(>>=) => { BinOp::ShrEq }
         ));
     }
 
     impl Synom for UnOp {
         named!(parse -> Self, alt!(
-            syn!(Star) => { UnOp::Deref }
+            punct!(*) => { UnOp::Deref }
             |
-            syn!(Bang) => { UnOp::Not }
+            punct!(!) => { UnOp::Not }
             |
-            syn!(Sub) => { UnOp::Neg }
+            punct!(-) => { UnOp::Neg }
         ));
     }
 }

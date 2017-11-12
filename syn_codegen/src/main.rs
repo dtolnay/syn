@@ -152,7 +152,6 @@ mod parsing {
     use super::AstItem;
 
     use synom::*;
-    use synom::tokens::*;
     use syn::*;
     use syn::TokenTree;
     use quote::Tokens;
@@ -160,7 +159,7 @@ mod parsing {
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
     named!(full -> (Tokens, bool), map!(option!(do_parse!(
-        syn!(Pound) >>
+        punct!(#) >>
         id: syn!(Ident) >>
         cond_reduce!(id.as_ref() == "full", epsilon!()) >>
         (())
@@ -189,8 +188,8 @@ mod parsing {
     impl Synom for AstStruct {
         named!(parse -> Self, map!(braces!(do_parse!(
             many0!(call!(Attribute::parse_outer)) >>
-            syn!(Pub) >>
-            syn!(Struct) >>
+            keyword!(pub) >>
+            keyword!(struct) >>
             res: call!(ast_struct_inner) >>
             (res)
         )), |x| AstStruct(vec![x.0])));
@@ -216,14 +215,14 @@ mod parsing {
     }
     named!(eos_variant -> EosVariant, do_parse!(
         many0!(call!(Attribute::parse_outer)) >>
-        syn!(Pub) >>
+        keyword!(pub) >>
         variant: syn!(Ident) >>
         member: map!(parens!(alt!(
             call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.item.ident.clone()), Some(x)) }
             |
             syn!(Path) => { |x| (x, None) }
         )), |x| x.0) >>
-        syn!(Comma) >>
+        punct!(,) >>
         (EosVariant {
             name: variant,
             member: member.0,
@@ -236,8 +235,8 @@ mod parsing {
     impl Synom for AstEnumOfStructs {
         named!(parse -> Self, map!(braces!(do_parse!(
             many0!(call!(Attribute::parse_outer)) >>
-            syn!(Pub) >>
-            syn!(Enum) >>
+            keyword!(pub) >>
+            keyword!(enum) >>
             id: syn!(Ident) >>
             body: braces!(many0!(call!(eos_variant))) >>
             option!(syn!(Ident)) >> // do_not_generate_to_tokens
