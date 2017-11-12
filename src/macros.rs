@@ -78,6 +78,7 @@ macro_rules! ast_enum_of_structs {
             }
         )*
 
+        #[cfg(feature = "printing")]
         generate_to_tokens! {
             $($remaining)*
             enum $name { $($variant [$($rest)*],)* }
@@ -85,11 +86,11 @@ macro_rules! ast_enum_of_structs {
     )
 }
 
+#[cfg(feature = "printing")]
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
     (enum $name:ident { $($variant:ident [$($rest:tt)*],)* }) => (
-        #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
                 match *self {
@@ -103,14 +104,14 @@ macro_rules! generate_to_tokens {
     );
 }
 
-#[cfg(feature = "full")]
+#[cfg(all(feature = "printing", feature = "full"))]
 macro_rules! to_tokens_call {
     ($e:ident, $tokens:ident, $($rest:tt)*) => {
         $e.to_tokens($tokens)
     };
 }
 
-#[cfg(not(feature = "full"))]
+#[cfg(all(feature = "printing", not(feature = "full")))]
 macro_rules! to_tokens_call {
     // If the variant is marked as #full, don't auto-generate to-tokens for it.
     ($e:ident, $tokens:ident, #full $($rest:tt)*) => {
