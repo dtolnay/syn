@@ -1,22 +1,22 @@
-extern crate syntex_syntax;
-extern crate syntex_pos;
+extern crate syntax;
+extern crate syntax_pos;
 
 use std::rc::Rc;
-use self::syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
-                         ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
-                         NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
-                         Visibility};
-use self::syntex_syntax::codemap::{self, Spanned};
-use self::syntex_syntax::fold::{self, Folder};
-use self::syntex_syntax::parse::token::{Lit, Token};
-use self::syntex_syntax::ptr::P;
-use self::syntex_syntax::symbol::Symbol;
-use self::syntex_syntax::tokenstream::{Delimited, TokenTree};
-use self::syntex_syntax::util::move_map::MoveMap;
-use self::syntex_syntax::util::small_vector::SmallVector;
+use self::syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
+                        ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
+                        NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
+                        Visibility};
+use self::syntax::codemap::{self, Spanned};
+use self::syntax::fold::{self, Folder};
+use self::syntax::parse::token::{Lit, Token};
+use self::syntax::ptr::P;
+use self::syntax::symbol::Symbol;
+use self::syntax::tokenstream::{Delimited, TokenTree};
+use self::syntax::util::move_map::MoveMap;
+use self::syntax::util::small_vector::SmallVector;
 
-use self::syntex_pos::{Span, DUMMY_SP};
-use self::syntex_syntax::ast;
+use self::syntax_pos::{Span, DUMMY_SP};
+use self::syntax::ast;
 
 struct Respanner;
 

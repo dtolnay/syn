@@ -1,14 +1,16 @@
 #![cfg(feature = "full")]
 
+#![feature(rustc_private)]
+
 #[macro_use]
 extern crate quote;
 extern crate syn;
-extern crate syntex_syntax;
+extern crate syntax;
 extern crate walkdir;
 
-use syntex_syntax::ast;
-use syntex_syntax::parse::{self, ParseSess, PResult};
-use syntex_syntax::codemap::FilePathMapping;
+use syntax::ast;
+use syntax::parse::{self, ParseSess, PResult};
+use syntax::codemap::FilePathMapping;
 use walkdir::{WalkDir, WalkDirIterator};
 
 use std::fs::File;
@@ -61,22 +63,22 @@ fn test_round_trip() {
 
         let equal = panic::catch_unwind(|| {
             let sess = ParseSess::new(FilePathMapping::empty());
-            let before = match syntex_parse(content, &sess) {
+            let before = match libsyntax_parse(content, &sess) {
                 Ok(before) => before,
                 Err(mut diagnostic) => {
                     diagnostic.cancel();
                     if diagnostic.message().starts_with("file not found for module") {
                         errorf!("ignore\n");
                     } else {
-                        errorf!("ignore - syntex failed to parse original content: {}\n", diagnostic.message());
+                        errorf!("ignore - libsyntax failed to parse original content: {}\n", diagnostic.message());
                     }
                     return true;
                 }
             };
-            let after = match syntex_parse(back, &sess) {
+            let after = match libsyntax_parse(back, &sess) {
                 Ok(after) => after,
                 Err(mut diagnostic) => {
-                    errorf!("syntex failed to parse");
+                    errorf!("libsyntax failed to parse");
                     diagnostic.emit();
                     return false;
                 }
@@ -94,7 +96,7 @@ fn test_round_trip() {
             }
         });
         match equal {
-            Err(_) => errorf!("ignoring syntex panic\n"),
+            Err(_) => errorf!("ignoring libsyntax panic\n"),
             Ok(true) => {}
             Ok(false) => {
                 failed += 1;
@@ -110,7 +112,7 @@ fn test_round_trip() {
     }
 }
 
-fn syntex_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
+fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = "test_round_trip".to_string();
     parse::parse_crate_from_source_str(name, content, sess)
         .map(common::respan::respan_crate)

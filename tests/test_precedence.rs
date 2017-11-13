@@ -2,12 +2,12 @@
 
 //! The tests in this module do the following:
 //!
-//! 1. Parse a given expression in both `syn` and `syntex`.
+//! 1. Parse a given expression in both `syn` and `libsyntax`.
 //! 2. Fold over the expression adding brackets around each subexpression (with
-//!    some complications - see the `syn_brackets` and `syntex_brackets`
+//!    some complications - see the `syn_brackets` and `libsyntax_brackets`
 //!    methods).
 //! 3. Serialize the `syn` expression back into a string, and re-parse it with
-//!    `syntex`.
+//!    `libsyntax`.
 //! 4. Respan all of the expressions, replacing the spans with the default spans.
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
@@ -15,11 +15,11 @@
 extern crate quote;
 extern crate syn;
 extern crate synom;
-extern crate syntex_syntax;
+extern crate syntax;
 extern crate walkdir;
 
-use syntex_syntax::ast;
-use syntex_syntax::ptr::P;
+use syntax::ast;
+use syntax::ptr::P;
 
 use common::{respan, parse};
 
@@ -90,7 +90,7 @@ fn test_rustc_precedence() {
             continue;
         }
 
-        // Our version of `syntex_syntax` can't parse this tests
+        // Our version of `libsyntax` can't parse this tests
         if path.to_str().unwrap().ends_with("optional_comma_in_match_arm.rs") {
             continue
         }
@@ -138,53 +138,53 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (u32, u32) {
     for expr in exprs {
         let raw = quote!(#expr).to_string();
 
-        let syntex_ast = if let Some(e) = syntex_parse_and_rewrite(&raw) {
+        let libsyntax_ast = if let Some(e) = libsyntax_parse_and_rewrite(&raw) {
             e
         } else {
             failed += 1;
-            errorf!("\nFAIL - syntex failed to parse raw\n");
+            errorf!("\nFAIL - libsyntax failed to parse raw\n");
             continue;
         };
 
         let syn_expr = syn_brackets(expr);
-        let syn_ast = if let Some(e) = parse::syntex_expr(&quote!(#syn_expr).to_string()) {
+        let syn_ast = if let Some(e) = parse::libsyntax_expr(&quote!(#syn_expr).to_string()) {
             e
         } else {
             failed += 1;
-            errorf!("\nFAIL - syntex failed to parse bracketed\n");
+            errorf!("\nFAIL - libsyntax failed to parse bracketed\n");
             continue;
         };
 
         let syn_ast = respan::respan_expr(syn_ast);
-        let syntex_ast = respan::respan_expr(syntex_ast);
+        let libsyntax_ast = respan::respan_expr(libsyntax_ast);
 
-        if syn_ast == syntex_ast {
+        if syn_ast == libsyntax_ast {
             passed += 1;
         } else {
             failed += 1;
-            errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, syntex_ast);
+            errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, libsyntax_ast);
         }
     }
 
     (passed, failed)
 }
 
-fn syntex_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
-    parse::syntex_expr(input).and_then(|e| syntex_brackets(e))
+fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
+    parse::libsyntax_expr(input).and_then(|e| libsyntax_brackets(e))
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to
 /// reveal the precidence of the parsed expressions, and produce a stringified form
 /// of the resulting expression.
 ///
-/// This method operates on syntex objects.
-fn syntex_brackets(syntex_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
-    use syntex_syntax::ast::{Expr, ExprKind, Mac, Stmt, StmtKind, Pat, Ty, Field};
-    use syntex_syntax::fold::{self, Folder};
-    use syntex_syntax::util::ThinVec;
-    use syntex_syntax::util::small_vector::SmallVector;
-    use syntex_syntax::ext::quote::rt::DUMMY_SP;
-    use syntex_syntax::codemap;
+/// This method operates on libsyntax objects.
+fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
+    use syntax::ast::{Expr, ExprKind, Mac, Stmt, StmtKind, Pat, Ty, Field};
+    use syntax::fold::{self, Folder};
+    use syntax::util::ThinVec;
+    use syntax::util::small_vector::SmallVector;
+    use syntax::ext::quote::rt::DUMMY_SP;
+    use syntax::codemap;
 
     fn expr(node: ExprKind) -> P<Expr> {
         P(Expr {
@@ -268,7 +268,7 @@ fn syntex_brackets(syntex_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         }
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {
-            // By default when folding over macros, syntex panics. This is
+            // By default when folding over macros, libsyntax panics. This is
             // because it's usually not what you want, you want to run after
             // macro expansion. We do want to do that (syn doesn't do macro
             // expansion), so we implement fold_mac to just return the macro
@@ -280,7 +280,7 @@ fn syntex_brackets(syntex_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     let mut folder = BracketsFolder {
         failed: false,
     };
-    let e = folder.fold_expr(syntex_expr);
+    let e = folder.fold_expr(libsyntax_expr);
     if folder.failed {
         None
     } else {
