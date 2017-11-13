@@ -360,7 +360,7 @@ fn fold_type_path(&mut self, i: TypePath) -> TypePath { fold_type_path(self, i) 
 
 fn fold_type_ptr(&mut self, i: TypePtr) -> TypePtr { fold_type_ptr(self, i) }
 
-fn fold_type_rptr(&mut self, i: TypeRptr) -> TypeRptr { fold_type_rptr(self, i) }
+fn fold_type_reference(&mut self, i: TypeReference) -> TypeReference { fold_type_reference(self, i) }
 
 fn fold_type_slice(&mut self, i: TypeSlice) -> TypeSlice { fold_type_slice(self, i) }
 
@@ -2333,9 +2333,9 @@ pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
                 _visitor.fold_type_ptr(_binding_0),
             )
         }
-        Rptr(_binding_0, ) => {
-            Rptr (
-                _visitor.fold_type_rptr(_binding_0),
+        Reference(_binding_0, ) => {
+            Reference (
+                _visitor.fold_type_reference(_binding_0),
             )
         }
         BareFn(_binding_0, ) => {
@@ -2490,8 +2490,8 @@ pub fn fold_type_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypePtr) -> TypeP
     }
 }
 
-pub fn fold_type_rptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeRptr) -> TypeRptr {
-    TypeRptr {
+pub fn fold_type_reference<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeReference) -> TypeReference {
+    TypeReference {
         and_token: _i . and_token,
         lifetime: _i . lifetime,
         ty: Box::new(_visitor.fold_mut_type(* _i . ty)),
