@@ -23,7 +23,7 @@ ast_enum_of_structs! {
             pub ty: Box<MutType>,
         }),
         /// A reference (`&'a T` or `&'a mut T`)
-        pub Rptr(TypeRptr {
+        pub Reference(TypeReference {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
             pub ty: Box<MutType>,
@@ -372,7 +372,7 @@ pub mod parsing {
         |
         syn!(TypePtr) => { Type::Ptr }
         |
-        syn!(TypeRptr) => { Type::Rptr }
+        syn!(TypeReference) => { Type::Reference }
         |
         syn!(TypeBareFn) => { Type::BareFn }
         |
@@ -437,14 +437,14 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TypeRptr {
+    impl Synom for TypeReference {
         named!(parse -> Self, do_parse!(
             amp: punct!(&) >>
             life: option!(syn!(Lifetime)) >>
             mutability: syn!(Mutability) >>
             // & binds tighter than +, so we don't allow + here.
             target: call!(Type::without_plus) >>
-            (TypeRptr {
+            (TypeReference {
                 lifetime: life,
                 ty: Box::new(MutType {
                     ty: target,
@@ -872,7 +872,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TypeRptr {
+    impl ToTokens for TypeReference {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
             self.lifetime.to_tokens(tokens);

@@ -333,7 +333,7 @@ fn visit_type_path(&mut self, i: &TypePath) { visit_type_path(self, i) }
 
 fn visit_type_ptr(&mut self, i: &TypePtr) { visit_type_ptr(self, i) }
 
-fn visit_type_rptr(&mut self, i: &TypeRptr) { visit_type_rptr(self, i) }
+fn visit_type_reference(&mut self, i: &TypeReference) { visit_type_reference(self, i) }
 
 fn visit_type_slice(&mut self, i: &TypeSlice) { visit_type_slice(self, i) }
 
@@ -1796,8 +1796,8 @@ pub fn visit_type<V: Visitor + ?Sized>(_visitor: &mut V, _i: &Type) {
         Ptr(ref _binding_0, ) => {
             _visitor.visit_type_ptr(&* _binding_0);
         }
-        Rptr(ref _binding_0, ) => {
-            _visitor.visit_type_rptr(&* _binding_0);
+        Reference(ref _binding_0, ) => {
+            _visitor.visit_type_reference(&* _binding_0);
         }
         BareFn(ref _binding_0, ) => {
             _visitor.visit_type_bare_fn(&* _binding_0);
@@ -1905,7 +1905,7 @@ pub fn visit_type_ptr<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TypePtr) {
     _visitor.visit_mut_type(&_i . ty);
 }
 
-pub fn visit_type_rptr<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TypeRptr) {
+pub fn visit_type_reference<V: Visitor + ?Sized>(_visitor: &mut V, _i: &TypeReference) {
     // Skipped field _i . and_token;
     // Skipped field _i . lifetime;
     _visitor.visit_mut_type(&_i . ty);
