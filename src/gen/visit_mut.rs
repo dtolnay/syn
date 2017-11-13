@@ -175,6 +175,8 @@ fn visit_foreign_item_static_mut(&mut self, i: &mut ForeignItemStatic) { visit_f
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type_mut(&mut self, i: &mut ForeignItemType) { visit_foreign_item_type_mut(self, i) }
 
+fn visit_generic_param_mut(&mut self, i: &mut GenericParam) { visit_generic_param_mut(self, i) }
+
 fn visit_generics_mut(&mut self, i: &mut Generics) { visit_generics_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item_mut(&mut self, i: &mut ImplItem) { visit_impl_item_mut(self, i) }
@@ -1120,11 +1122,22 @@ pub fn visit_foreign_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
     // Skipped field _i . semi_token;
 }
 
+pub fn visit_generic_param_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut GenericParam) {
+    use ::GenericParam::*;
+    match *_i {
+        Lifetime(ref mut _binding_0, ) => {
+            _visitor.visit_lifetime_def_mut(&mut * _binding_0);
+        }
+        Type(ref mut _binding_0, ) => {
+            _visitor.visit_type_param_mut(&mut * _binding_0);
+        }
+    }
+}
+
 pub fn visit_generics_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Generics) {
     // Skipped field _i . lt_token;
+    for mut el in (_i . params).iter_mut() { let mut it = el.item_mut(); _visitor.visit_generic_param_mut(&mut it) };
     // Skipped field _i . gt_token;
-    for mut el in (_i . lifetimes).iter_mut() { let mut it = el.item_mut(); _visitor.visit_lifetime_def_mut(&mut it) };
-    for mut el in (_i . ty_params).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_param_mut(&mut it) };
     _visitor.visit_where_clause_mut(&mut _i . where_clause);
 }
 # [ cfg ( feature = "full" ) ]

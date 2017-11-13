@@ -196,27 +196,26 @@ fn test_enum() {
             },
         ],
         generics: Generics {
-            lifetimes: Default::default(),
             lt_token: Some(Default::default()),
-            gt_token: Some(Default::default()),
-            ty_params: vec![
-                TypeParam {
+            params: vec![
+                GenericParam::Type(TypeParam {
                     attrs: Vec::new(),
                     ident: "T".into(),
                     bounds: Default::default(),
                     default: None,
                     colon_token: None,
                     eq_token: None,
-                },
-                TypeParam {
+                }),
+                GenericParam::Type(TypeParam {
                     attrs: Vec::new(),
                     ident: "E".into(),
                     bounds: Default::default(),
                     colon_token: None,
                     eq_token: None,
                     default: None,
-                },
+                }),
             ].into(),
+            gt_token: Some(Default::default()),
             where_clause: WhereClause::default(),
         },
         body: Body::Enum(BodyEnum {
