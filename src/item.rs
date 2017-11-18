@@ -143,6 +143,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub unsafety: Unsafety,
+            pub auto_token: Option<Token![auto]>,
             pub trait_token: Token![trait],
             pub ident: Ident,
             pub generics: Generics,
@@ -966,6 +967,7 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         unsafety: syn!(Unsafety) >>
+        auto_: option!(keyword!(auto)) >>
         trait_: keyword!(trait) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
@@ -979,6 +981,7 @@ pub mod parsing {
             attrs: attrs,
             vis: vis,
             unsafety: unsafety,
+            auto_token: auto_,
             trait_token: trait_,
             ident: ident,
             generics: Generics {
@@ -1478,6 +1481,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
+            self.auto_token.to_tokens(tokens);
             self.trait_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
