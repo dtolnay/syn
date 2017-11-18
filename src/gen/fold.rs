@@ -1764,6 +1764,7 @@ pub fn fold_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> I
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
+        auto_token: _i . auto_token,
         trait_token: _i . trait_token,
         ident: _i . ident,
         generics: _visitor.fold_generics(_i . generics),

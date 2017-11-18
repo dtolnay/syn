@@ -1370,6 +1370,7 @@ pub fn visit_item_trait_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut I
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
     _visitor.visit_visibility_mut(&mut _i . vis);
     _visitor.visit_unsafety_mut(&mut _i . unsafety);
+    // Skipped field _i . auto_token;
     // Skipped field _i . trait_token;
     // Skipped field _i . ident;
     _visitor.visit_generics_mut(&mut _i . generics);

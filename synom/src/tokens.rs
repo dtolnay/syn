@@ -164,6 +164,7 @@ tokens! {
     }
     syms: {
         (pub struct As                      => "as"),
+        (pub struct Auto                    => "auto"),
         (pub struct Box                     => "box"),
         (pub struct Break                   => "break"),
         (pub struct CapSelf                 => "Self"),
@@ -254,6 +255,7 @@ macro_rules! Token {
     (-=)       => { $crate::tokens::SubEq };
     (_)        => { $crate::tokens::Underscore };
     (as)       => { $crate::tokens::As };
+    (auto)     => { $crate::tokens::Auto };
     (box)      => { $crate::tokens::Box };
     (break)    => { $crate::tokens::Break };
     (Self)     => { $crate::tokens::CapSelf };
@@ -345,6 +347,7 @@ macro_rules! punct {
 #[macro_export]
 macro_rules! keyword {
     ($i:expr, as)       => { call!($i, <$crate::tokens::As as $crate::Synom>::parse) };
+    ($i:expr, auto)     => { call!($i, <$crate::tokens::Auto as $crate::Synom>::parse) };
     ($i:expr, box)      => { call!($i, <$crate::tokens::Box as $crate::Synom>::parse) };
     ($i:expr, break)    => { call!($i, <$crate::tokens::Break as $crate::Synom>::parse) };
     ($i:expr, Self)     => { call!($i, <$crate::tokens::CapSelf as $crate::Synom>::parse) };
