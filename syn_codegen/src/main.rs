@@ -517,7 +517,7 @@ mod codegen {
 
         state.visit_trait.push_str(&format!(
             "{features}\n\
-             fn visit_{under_name}(&mut self, i: &{ty}) {{ \
+             fn visit_{under_name}(&mut self, i: &'ast {ty}) {{ \
                visit_{under_name}(self, i) \
              }}\n",
             features = s.features,
@@ -545,8 +545,8 @@ mod codegen {
 
         state.visit_impl.push_str(&format!(
             "{features}\n\
-             pub fn visit_{under_name}<V: Visitor + ?Sized>(\
-               _visitor: &mut V, _i: &{ty}) {{\n",
+             pub fn visit_{under_name}<'ast, V: Visitor<'ast> + ?Sized>(\
+               _visitor: &mut V, _i: &'ast {ty}) {{\n",
             features = s.features,
             under_name = under_name,
             ty = s.item.ident,
@@ -817,7 +817,7 @@ use *;
 /// explicitly, you need to override each method.  (And you also need
 /// to monitor future changes to `Visitor` in case a new method with a
 /// new default implementation gets introduced.)
-pub trait Visitor {{
+pub trait Visitor<'ast> {{
 {visit_trait}
 }}
 
