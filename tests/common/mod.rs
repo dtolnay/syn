@@ -110,7 +110,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
 
 pub fn clone_rust() {
     if Path::new("tests/rust").is_dir() {
-        return
+        println!("found rust repo in tests/rust");
+        return;
     }
 
     println!("cloning rust-lang/rust");
