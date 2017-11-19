@@ -1,3 +1,4 @@
 target
 Cargo.lock
-tests/rust
+tests/rust/*
+!tests/rust/clone.sh
