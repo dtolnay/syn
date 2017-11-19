@@ -3,9 +3,9 @@
 extern crate walkdir;
 extern crate syntax;
 
+use std;
 use std::env;
 use std::process::Command;
-use std::u32;
 
 use self::walkdir::DirEntry;
 
@@ -30,13 +30,11 @@ pub fn check_min_stack() {
 }
 
 /// Read the `ABORT_AFTER_FAILURE` environment variable, and parse it.
-pub fn abort_after() -> u32 {
-    if let Ok(s) = env::var("ABORT_AFTER_FAILURE") {
-        if let Ok(n) = s.parse::<u32>() {
-            return n;
-        }
+pub fn abort_after() -> usize {
+    match env::var("ABORT_AFTER_FAILURE") {
+        Ok(s) => s.parse().expect("failed to parse ABORT_AFTER_FAILURE"),
+        Err(_) => std::usize::MAX,
     }
-    u32::MAX
 }
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {

@@ -34,7 +34,7 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
             None
         }
         Err(_) => {
-            errorf!("libsyntax paniced\n");
+            errorf!("libsyntax panicked\n");
             None
         }
     }

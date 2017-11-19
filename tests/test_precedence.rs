@@ -15,13 +15,20 @@
 
 #[macro_use]
 extern crate quote;
+extern crate rayon;
 extern crate syn;
 extern crate synom;
 extern crate syntax;
 extern crate walkdir;
 
+use rayon::iter::{ParallelIterator, IntoParallelIterator};
 use syntax::ast;
 use syntax::ptr::P;
+use walkdir::{WalkDir, WalkDirIterator, DirEntry};
+
+use std::fs::File;
+use std::io::Read;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use common::{respan, parse};
 
@@ -69,10 +76,6 @@ fn test_simple_precedence() {
 /// Test expressions from rustc, like in `test_round_trip`.
 #[test]
 fn test_rustc_precedence() {
-    use walkdir::{WalkDir, WalkDirIterator};
-    use std::fs::File;
-    use std::io::Read;
-
     common::check_min_stack();
     common::clone_rust();
     let abort_after = common::abort_after();
@@ -80,21 +83,26 @@ fn test_rustc_precedence() {
         panic!("Skipping all precedence tests");
     }
 
-    let mut passed = 0;
-    let mut failed = 0;
+    let passed = AtomicUsize::new(0);
+    let failed = AtomicUsize::new(0);
 
-    let walk = WalkDir::new("tests/rust").sort_by(|a, b| a.cmp(b));
-    for entry in walk.into_iter().filter_entry(common::base_dir_filter) {
-        let entry = entry.unwrap();
-
+    WalkDir::new("tests/rust")
+        .sort_by(|a, b| a.cmp(b))
+        .into_iter()
+        .filter_entry(common::base_dir_filter)
+        .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
+        .unwrap()
+        .into_par_iter()
+        .for_each(|entry|
+    {
         let path = entry.path();
         if path.is_dir() {
-            continue;
+            return;
         }
 
         // Our version of `libsyntax` can't parse this tests
         if path.to_str().unwrap().ends_with("optional_comma_in_match_arm.rs") {
-            continue
+            return;
         }
 
         let mut file = File::open(path).unwrap();
@@ -108,32 +116,32 @@ fn test_rustc_precedence() {
             }
             Err(msg) => {
                 errorf!("syn failed to parse\n{:?}\n", msg);
-                failed += 1;
                 (0, 1)
             }
         };
 
-        passed += l_passed;
-        failed += l_failed;
-
         errorf!("=== {}: {} passed | {} failed\n", path.display(), l_passed, l_failed);
 
-        if failed >= abort_after {
-            errorf!("Aborting Immediately due to ABORT_AFTER_FAILURE\n");
-            break;
+        passed.fetch_add(l_passed, Ordering::SeqCst);
+        let prev_failed = failed.fetch_add(l_failed, Ordering::SeqCst);
+
+        if prev_failed + l_failed >= abort_after {
+            panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
         }
-    }
+    });
+
+    let passed = passed.load(Ordering::SeqCst);
+    let failed = failed.load(Ordering::SeqCst);
 
     errorf!("\n===== Precedence Test Results =====\n");
     errorf!("{} passed | {} failed\n", passed, failed);
-
 
     if failed > 0 {
         panic!("{} failures", failed);
     }
 }
 
-fn test_expressions(exprs: Vec<syn::Expr>) -> (u32, u32) {
+fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
