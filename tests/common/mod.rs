@@ -8,8 +8,6 @@ use std::path::Path;
 use std::process::Command;
 use std::u32;
 
-use self::syntax::ast;
-
 use self::walkdir::DirEntry;
 
 macro_rules! errorf {

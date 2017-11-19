@@ -1,7 +1,6 @@
 extern crate syntax;
 extern crate syntax_pos;
 
-use std::rc::Rc;
 use self::syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
                         ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
                         NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
@@ -11,7 +10,6 @@ use self::syntax::fold::{self, Folder};
 use self::syntax::parse::token::{Lit, Token};
 use self::syntax::ptr::P;
 use self::syntax::symbol::Symbol;
-use self::syntax::tokenstream::{Delimited, TokenTree};
 use self::syntax::util::move_map::MoveMap;
 use self::syntax::util::small_vector::SmallVector;
 
