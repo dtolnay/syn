@@ -33,4 +33,5 @@ unicode-xid = "0.1"
 synom = { version = "0.11", path = "synom" }
 
 [dev-dependencies]
+rayon = "0.9"
 walkdir = "1.0.1"

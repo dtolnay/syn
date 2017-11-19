@@ -4,18 +4,21 @@
 
 #[macro_use]
 extern crate quote;
+extern crate rayon;
 extern crate syn;
 extern crate syntax;
 extern crate walkdir;
 
+use rayon::iter::{ParallelIterator, IntoParallelIterator};
 use syntax::ast;
 use syntax::parse::{self, ParseSess, PResult};
 use syntax::codemap::FilePathMapping;
-use walkdir::{WalkDir, WalkDirIterator};
+use walkdir::{WalkDir, WalkDirIterator, DirEntry};
 
 use std::fs::File;
 use std::io::Read;
 use std::panic;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
 #[allow(dead_code)]
@@ -31,17 +34,21 @@ fn test_round_trip() {
         panic!("Skipping all round_trip tests");
     }
 
-    let mut failed = 0;
+    let failed = AtomicUsize::new(0);
 
-    let walk = WalkDir::new("tests/rust").sort_by(|a, b| a.cmp(b));
-    for entry in walk.into_iter().filter_entry(common::base_dir_filter) {
-        let entry = entry.unwrap();
-
+    WalkDir::new("tests/rust")
+        .sort_by(|a, b| a.cmp(b))
+        .into_iter()
+        .filter_entry(common::base_dir_filter)
+        .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
+        .unwrap()
+        .into_par_iter()
+        .for_each(|entry|
+    {
         let path = entry.path();
         if path.is_dir() {
-            continue;
+            return;
         }
-        errorf!("=== {}: ", path.display());
 
         let mut file = File::open(path).unwrap();
         let mut content = String::new();
@@ -51,12 +58,14 @@ fn test_round_trip() {
         let (krate, elapsed) = match syn::parse_file(&content) {
             Ok(krate) => (krate, start.elapsed()),
             Err(msg) => {
-                errorf!("syn failed to parse\n{:?}\n", msg);
-                failed += 1;
-                if failed >= abort_after {
+                errorf!("=== {}: syn failed to parse\n{:?}\n",
+                        path.display(),
+                        msg);
+                let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
+                if prev_failed + 1 >= abort_after {
                     panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
                 }
-                continue;
+                return;
             }
         };
         let back = quote!(#krate).to_string();
@@ -68,9 +77,11 @@ fn test_round_trip() {
                 Err(mut diagnostic) => {
                     diagnostic.cancel();
                     if diagnostic.message().starts_with("file not found for module") {
-                        errorf!("ignore\n");
+                        errorf!("=== {}: ignore\n", path.display());
                     } else {
-                        errorf!("ignore - libsyntax failed to parse original content: {}\n", diagnostic.message());
+                        errorf!("=== {}: ignore - libsyntax failed to parse original content: {}\n",
+                                path.display(),
+                                diagnostic.message());
                     }
                     return true;
                 }
@@ -78,35 +89,38 @@ fn test_round_trip() {
             let after = match libsyntax_parse(back, &sess) {
                 Ok(after) => after,
                 Err(mut diagnostic) => {
-                    errorf!("libsyntax failed to parse");
+                    errorf!("=== {}: libsyntax failed to parse", path.display());
                     diagnostic.emit();
                     return false;
                 }
             };
 
             if before == after {
-                errorf!("pass in {}ms\n",
+                errorf!("=== {}: pass in {}ms\n",
+                        path.display(),
                         elapsed.as_secs() * 1000 + elapsed.subsec_nanos() as u64 / 1_000_000);
                 true
             } else {
-                errorf!("FAIL\nbefore: {}\nafter: {}\n",
+                errorf!("=== {}: FAIL\nbefore: {}\nafter: {}\n",
+                        path.display(),
                         format!("{:?}", before).replace("\n", ""),
                         format!("{:?}", after).replace("\n", ""));
                 false
             }
         });
         match equal {
-            Err(_) => errorf!("ignoring libsyntax panic\n"),
+            Err(_) => errorf!("=== {}: ignoring libsyntax panic\n", path.display()),
             Ok(true) => {}
             Ok(false) => {
-                failed += 1;
-                if failed >= abort_after {
+                let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
+                if prev_failed + 1 >= abort_after {
                     panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
                 }
             },
         }
-    }
+    });
 
+    let failed = failed.load(Ordering::SeqCst);
     if failed > 0 {
         panic!("{} failures", failed);
     }
