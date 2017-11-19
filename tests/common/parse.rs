@@ -1,18 +1,18 @@
 extern crate proc_macro2;
 extern crate syn;
 extern crate synom;
-extern crate syntex_syntax;
+extern crate syntax;
 
-use self::syntex_syntax::ast;
-use self::syntex_syntax::ptr::P;
-use self::syntex_syntax::parse::{self, ParseSess};
-use self::syntex_syntax::codemap::FilePathMapping;
+use self::syntax::ast;
+use self::syntax::ptr::P;
+use self::syntax::parse::{self, ParseSess};
+use self::syntax::codemap::FilePathMapping;
 
 use std::panic;
 
 use self::synom::{Synom, SynomBuffer};
 
-pub fn syntex_expr(input: &str) -> Option<P<ast::Expr>> {
+pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
         let sess = ParseSess::new(FilePathMapping::empty());
         sess.span_diagnostic.set_continue_after_error(false);
@@ -34,7 +34,7 @@ pub fn syntex_expr(input: &str) -> Option<P<ast::Expr>> {
             None
         }
         Err(_) => {
-            errorf!("syntex paniced\n");
+            errorf!("libsyntax paniced\n");
             None
         }
     }

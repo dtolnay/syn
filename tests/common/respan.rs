@@ -1,22 +1,22 @@
-extern crate syntex_syntax;
-extern crate syntex_pos;
+extern crate syntax;
+extern crate syntax_pos;
 
 use std::rc::Rc;
-use self::syntex_syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
-                         ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
-                         NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
-                         Visibility};
-use self::syntex_syntax::codemap::{self, Spanned};
-use self::syntex_syntax::fold::{self, Folder};
-use self::syntex_syntax::parse::token::{Lit, Token};
-use self::syntex_syntax::ptr::P;
-use self::syntex_syntax::symbol::Symbol;
-use self::syntex_syntax::tokenstream::{Delimited, TokenTree};
-use self::syntex_syntax::util::move_map::MoveMap;
-use self::syntex_syntax::util::small_vector::SmallVector;
+use self::syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
+                        ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
+                        NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
+                        Visibility, Item, WhereClause};
+use self::syntax::codemap::{self, Spanned};
+use self::syntax::fold::{self, Folder};
+use self::syntax::parse::token::{Lit, Token};
+use self::syntax::ptr::P;
+use self::syntax::symbol::Symbol;
+use self::syntax::tokenstream::{Delimited, TokenTree};
+use self::syntax::util::move_map::MoveMap;
+use self::syntax::util::small_vector::SmallVector;
 
-use self::syntex_pos::{Span, DUMMY_SP};
-use self::syntex_syntax::ast;
+use self::syntax_pos::{Span, DUMMY_SP};
+use self::syntax::ast;
 
 struct Respanner;
 
@@ -44,6 +44,14 @@ impl Respanner {
 impl Folder for Respanner {
     fn new_span(&mut self, _: Span) -> Span {
         DUMMY_SP
+    }
+
+    fn fold_item(&mut self, i: P<Item>) -> SmallVector<P<Item>> {
+        let i = i.map(|mut i| {
+            i.tokens = None;
+            i
+        });
+        fold::noop_fold_item(i, self)
     }
 
     fn fold_item_kind(&mut self, i: ItemKind) -> ItemKind {
@@ -122,38 +130,38 @@ impl Folder for Respanner {
         }
     }
 
-    fn fold_trait_item(&mut self, i: TraitItem) -> SmallVector<TraitItem> {
+    fn fold_trait_item(&mut self, mut i: TraitItem) -> SmallVector<TraitItem> {
+        i.tokens = None;
         let noop = fold::noop_fold_trait_item(i, self).expect_one("");
         SmallVector::one(TraitItem {
-                                node: match noop.node {
-                                    TraitItemKind::Method(sig, body) => {
+            node: match noop.node {
+                TraitItemKind::Method(sig, body) => {
                     TraitItemKind::Method(MethodSig {
-                                                constness: self.fold_spanned(sig.constness),
-                                                ..sig
-                                            },
-                                            body)
+                        constness: self.fold_spanned(sig.constness),
+                        ..sig
+                    }, body)
                 }
-                                    node => node,
-                                },
-                                ..noop
-                            })
+                node => node,
+            },
+            ..noop
+        })
     }
 
-    fn fold_impl_item(&mut self, i: ImplItem) -> SmallVector<ImplItem> {
+    fn fold_impl_item(&mut self, mut i: ImplItem) -> SmallVector<ImplItem> {
+        i.tokens = None;
         let noop = fold::noop_fold_impl_item(i, self).expect_one("");
         SmallVector::one(ImplItem {
-                                node: match noop.node {
-                                    ImplItemKind::Method(sig, body) => {
+            node: match noop.node {
+                ImplItemKind::Method(sig, body) => {
                     ImplItemKind::Method(MethodSig {
-                                                constness: self.fold_spanned(sig.constness),
-                                                ..sig
-                                            },
-                                            body)
+                        constness: self.fold_spanned(sig.constness),
+                        ..sig
+                    }, body)
                 }
-                                    node => node,
-                                },
-                                ..noop
-                            })
+                node => node,
+            },
+            ..noop
+        })
     }
 
     fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
@@ -192,48 +200,31 @@ impl Folder for Respanner {
         }
     }
 
+    // This folder is disabled by default.
     fn fold_mac(&mut self, mac: Mac) -> Mac {
         fold::noop_fold_mac(mac, self)
     }
 
-    fn fold_tt(&mut self, tt: TokenTree) -> TokenTree {
-        match tt {
-            TokenTree::Token(span, ref tok) => {
-                TokenTree::Token(self.new_span(span), self.fold_token(tok.clone()))
-            }
-            TokenTree::Delimited(span, ref delimed) => {
-                TokenTree::Delimited(self.new_span(span),
-                                        Delimited {
-                                            delim: delimed.delim,
-                                            tts: self.fold_tts(delimed.tts.clone().into()).into(),
-                                        })
-            }
-        }
-    }
-
     fn fold_token(&mut self, t: Token) -> Token {
-        match t {
+        fold::noop_fold_token(match t {
             // default fold_token does not fold literals
             Token::Literal(lit, repr) => Token::Literal(self.fold_lit(lit), repr),
-            Token::Ident(id) => Token::Ident(self.fold_ident(id)),
-            Token::Lifetime(id) => Token::Lifetime(self.fold_ident(id)),
-            Token::Interpolated(nt) => {
-                let nt = match Rc::try_unwrap(nt) {
-                    Ok(nt) => nt,
-                    Err(nt) => (*nt).clone(),
-                };
-                Token::Interpolated(Rc::new(self.fold_interpolated(nt)))
-            }
-            Token::SubstNt(ident) => Token::SubstNt(self.fold_ident(ident)),
             _ => t,
-        }
+        }, self)
     }
 
     fn fold_vis(&mut self, vis: Visibility) -> Visibility {
-        match vis {
-            Visibility::Crate(span) => Visibility::Crate(self.new_span(span)),
-            _ => fold::noop_fold_vis(vis, self),
-        }
+        fold::noop_fold_vis(match vis {
+            Visibility::Crate(span, sugar) =>
+                Visibility::Crate(self.new_span(span), sugar),
+            _ => vis,
+        }, self)
+    }
+
+    // noop_fold_where_clause doesn't modify the span.
+    fn fold_where_clause(&mut self, mut clause: WhereClause) -> WhereClause {
+        clause.span = self.new_span(clause.span);
+        fold::noop_fold_where_clause(clause, self)
     }
 }
 
