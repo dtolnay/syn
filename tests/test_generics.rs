@@ -1,5 +1,7 @@
 #![cfg(feature = "extra-traits")]
 
+#![feature(rustc_private)]
+
 extern crate syn;
 use syn::*;
 

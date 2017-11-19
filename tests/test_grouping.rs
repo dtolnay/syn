@@ -1,5 +1,7 @@
 #![cfg(all(feature = "extra-traits", feature = "full"))]
 
+#![feature(rustc_private)]
+
 extern crate syn;
 use syn::{Expr, ExprKind, ExprGroup, ExprBinary, Lit, LitKind, BinOp};
 

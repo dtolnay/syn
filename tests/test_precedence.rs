@@ -1,5 +1,7 @@
 #![cfg(all(feature = "full", feature = "fold"))]
 
+#![feature(rustc_private)]
+
 //! The tests in this module do the following:
 //!
 //! 1. Parse a given expression in both `syn` and `libsyntax`.
