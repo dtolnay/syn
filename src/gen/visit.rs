@@ -175,6 +175,8 @@ fn visit_foreign_item_static(&mut self, i: &'ast ForeignItemStatic) { visit_fore
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type(&mut self, i: &'ast ForeignItemType) { visit_foreign_item_type(self, i) }
 
+fn visit_generic_param(&mut self, i: &'ast GenericParam) { visit_generic_param(self, i) }
+
 fn visit_generics(&mut self, i: &'ast Generics) { visit_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item(&mut self, i: &'ast ImplItem) { visit_impl_item(self, i) }
@@ -1120,11 +1122,22 @@ pub fn visit_foreign_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
     // Skipped field _i . semi_token;
 }
 
+pub fn visit_generic_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericParam) {
+    use ::GenericParam::*;
+    match *_i {
+        Lifetime(ref _binding_0, ) => {
+            _visitor.visit_lifetime_def(&* _binding_0);
+        }
+        Type(ref _binding_0, ) => {
+            _visitor.visit_type_param(&* _binding_0);
+        }
+    }
+}
+
 pub fn visit_generics<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Generics) {
     // Skipped field _i . lt_token;
+    for el in (_i . params).iter() { let it = el.item(); _visitor.visit_generic_param(&it) };
     // Skipped field _i . gt_token;
-    for el in (_i . lifetimes).iter() { let it = el.item(); _visitor.visit_lifetime_def(&it) };
-    for el in (_i . ty_params).iter() { let it = el.item(); _visitor.visit_type_param(&it) };
     _visitor.visit_where_clause(&_i . where_clause);
 }
 # [ cfg ( feature = "full" ) ]

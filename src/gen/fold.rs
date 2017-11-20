@@ -202,6 +202,8 @@ fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStati
 # [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_type(&mut self, i: ForeignItemType) -> ForeignItemType { fold_foreign_item_type(self, i) }
 
+fn fold_generic_param(&mut self, i: GenericParam) -> GenericParam { fold_generic_param(self, i) }
+
 fn fold_generics(&mut self, i: Generics) -> Generics { fold_generics(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem { fold_impl_item(self, i) }
@@ -1437,12 +1439,27 @@ pub fn fold_foreign_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignI
     }
 }
 
+pub fn fold_generic_param<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericParam) -> GenericParam {
+    use ::GenericParam::*;
+    match _i {
+        Lifetime(_binding_0, ) => {
+            Lifetime (
+                _visitor.fold_lifetime_def(_binding_0),
+            )
+        }
+        Type(_binding_0, ) => {
+            Type (
+                _visitor.fold_type_param(_binding_0),
+            )
+        }
+    }
+}
+
 pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Generics {
     Generics {
         lt_token: _i . lt_token,
+        params: FoldHelper::lift(_i . params, |it| { _visitor.fold_generic_param(it) }),
         gt_token: _i . gt_token,
-        lifetimes: FoldHelper::lift(_i . lifetimes, |it| { _visitor.fold_lifetime_def(it) }),
-        ty_params: FoldHelper::lift(_i . ty_params, |it| { _visitor.fold_type_param(it) }),
         where_clause: _visitor.fold_where_clause(_i . where_clause),
     }
 }

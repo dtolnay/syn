@@ -7,10 +7,30 @@ ast_struct! {
     #[derive(Default)]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
+        pub params: Delimited<GenericParam, Token![,]>,
         pub gt_token: Option<Token![>]>,
-        pub lifetimes: Delimited<LifetimeDef, Token![,]>,
-        pub ty_params: Delimited<TypeParam, Token![,]>,
         pub where_clause: WhereClause,
+    }
+}
+
+ast_enum_of_structs! {
+    pub enum GenericParam {
+        /// A lifetime definition, e.g. `'a: 'b+'c+'d`
+        pub Lifetime(LifetimeDef {
+            pub attrs: Vec<Attribute>,
+            pub lifetime: Lifetime,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Delimited<Lifetime, Token![+]>,
+        }),
+        /// A generic type parameter, e.g. `T: Into<String>`.
+        pub Type(TypeParam {
+            pub attrs: Vec<Attribute>,
+            pub ident: Ident,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub eq_token: Option<Token![=]>,
+            pub default: Option<Type>,
+        }),
     }
 }
 
@@ -77,16 +97,6 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// A lifetime definition, e.g. `'a: 'b+'c+'d`
-    pub struct LifetimeDef {
-        pub attrs: Vec<Attribute>,
-        pub lifetime: Lifetime,
-        pub colon_token: Option<Token![:]>,
-        pub bounds: Delimited<Lifetime, Token![+]>,
-    }
-}
-
 impl LifetimeDef {
     pub fn new(lifetime: Lifetime) -> Self {
         LifetimeDef {
@@ -95,18 +105,6 @@ impl LifetimeDef {
             colon_token: None,
             bounds: Delimited::new(),
         }
-    }
-}
-
-ast_struct! {
-    /// A generic type parameter, e.g. `T: Into<String>`.
-    pub struct TypeParam {
-        pub attrs: Vec<Attribute>,
-        pub ident: Ident,
-        pub colon_token: Option<Token![:]>,
-        pub bounds: Delimited<TypeParamBound, Token![+]>,
-        pub eq_token: Option<Token![=]>,
-        pub default: Option<Type>,
     }
 }
 
@@ -194,16 +192,17 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
+    use synom::delimited::Element;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(
             alt!(
                 do_parse!(
                     lt: punct!(<) >>
-                    lifetimes: call!(Delimited::parse_terminated) >>
+                    lifetimes: call!(Delimited::<LifetimeDef, Token![,]>::parse_terminated) >>
                     ty_params: cond!(
-                        lifetimes.is_empty() || lifetimes.trailing_delim(),
-                        call!(Delimited::parse_terminated)
+                        lifetimes.empty_or_trailing(),
+                        call!(Delimited::<TypeParam, Token![,]>::parse_terminated)
                     ) >>
                     gt: punct!(>) >>
                     (lifetimes, ty_params, Some(lt), Some(gt))
@@ -212,11 +211,18 @@ pub mod parsing {
                 epsilon!() => { |_| (Delimited::new(), None, None, None) }
             ),
             |(lifetimes, ty_params, lt, gt)| Generics {
-                lifetimes: lifetimes,
-                ty_params: ty_params.unwrap_or_default(),
-                where_clause: WhereClause::default(),
-                gt_token: gt,
                 lt_token: lt,
+                params: lifetimes.into_iter()
+                    .map(Element::into_tuple)
+                    .map(|(lifetime, comma)| (GenericParam::Lifetime(lifetime), comma))
+                    .chain(ty_params.unwrap_or_default()
+                        .into_iter()
+                        .map(Element::into_tuple)
+                        .map(|(ty_param, comma)| (GenericParam::Type(ty_param), comma)))
+                    .collect::<Vec<_>>()
+                    .into(),
+                gt_token: gt,
+                where_clause: WhereClause::default(),
             }
         ));
     }
@@ -358,18 +364,7 @@ mod printing {
 
     /// Returns true if the generics object has no lifetimes or ty_params.
     fn empty_normal_generics(generics: &Generics) -> bool {
-        generics.lifetimes.is_empty() && generics.ty_params.is_empty()
-    }
-
-    /// We need a comma between the lifetimes list and the ty_params list if
-    /// there are more than 0 lifetimes, the lifetimes list didn't have a
-    /// trailing delimiter, and there are more than 0 type parameters. This is a
-    /// helper method for adding that comma.
-    fn maybe_add_lifetime_params_comma(tokens: &mut Tokens, generics: &Generics) {
-        // We may need to require a trailing comma if we have any ty_params.
-        if !generics.lifetimes.empty_or_trailing() && !generics.ty_params.is_empty() {
-            <Token![,]>::default().to_tokens(tokens);
-        }
+        generics.params.is_empty()
     }
 
     impl ToTokens for Generics {
@@ -379,9 +374,7 @@ mod printing {
             }
 
             TokensOrDefault(&self.lt_token).to_tokens(tokens);
-            self.lifetimes.to_tokens(tokens);
-            maybe_add_lifetime_params_comma(tokens, self);
-            self.ty_params.to_tokens(tokens);
+            self.params.to_tokens(tokens);
             TokensOrDefault(&self.gt_token).to_tokens(tokens);
         }
     }
@@ -393,16 +386,20 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            self.0.lifetimes.to_tokens(tokens);
-            maybe_add_lifetime_params_comma(tokens, &self.0);
-            for param in self.0.ty_params.iter() {
-                 // Leave off the type parameter defaults
-                let item = param.item();
-                tokens.append_all(item.attrs.outer());
-                item.ident.to_tokens(tokens);
-                if !item.bounds.is_empty() {
-                    TokensOrDefault(&item.colon_token).to_tokens(tokens);
-                    item.bounds.to_tokens(tokens);
+            for param in self.0.params.iter() {
+                match **param.item() {
+                    GenericParam::Lifetime(ref param) => {
+                        param.to_tokens(tokens);
+                    }
+                    GenericParam::Type(ref param) => {
+                        // Leave off the type parameter defaults
+                        tokens.append_all(param.attrs.outer());
+                        param.ident.to_tokens(tokens);
+                        if !param.bounds.is_empty() {
+                            TokensOrDefault(&param.colon_token).to_tokens(tokens);
+                            param.bounds.to_tokens(tokens);
+                        }
+                    }
                 }
                 param.delimiter().to_tokens(tokens);
             }
@@ -417,15 +414,17 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            // Leave off the lifetime bounds and attributes
-            for param in self.0.lifetimes.iter() {
-                param.item().lifetime.to_tokens(tokens);
-                param.delimiter().to_tokens(tokens);
-            }
-            maybe_add_lifetime_params_comma(tokens, &self.0);
-            // Leave off the type parameter defaults
-            for param in self.0.ty_params.iter() {
-                param.item().ident.to_tokens(tokens);
+            for param in self.0.params.iter() {
+                match **param.item() {
+                    GenericParam::Lifetime(ref param) => {
+                        // Leave off the lifetime bounds and attributes
+                        param.lifetime.to_tokens(tokens);
+                    }
+                    GenericParam::Type(ref param) => {
+                        // Leave off the type parameter defaults
+                        param.ident.to_tokens(tokens);
+                    }
+                }
                 param.delimiter().to_tokens(tokens);
             }
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);

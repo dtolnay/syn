@@ -40,7 +40,7 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
                PatLit, PatRange, PatSlice, InPlaceKind};
 
 mod generics;
-pub use generics::{Generics, LifetimeDef, TraitBoundModifier, TypeParam, TypeParamBound,
+pub use generics::{Generics, GenericParam, LifetimeDef, TraitBoundModifier, TypeParam, TypeParamBound,
                    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
                    WhereRegionPredicate, BoundLifetimes};
 #[cfg(feature = "printing")]

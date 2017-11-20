@@ -16,25 +16,23 @@ mod common;
 #[test]
 fn test_split_for_impl() {
     // <'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug
-    let mut generics = Generics {
+    let generics = Generics {
         gt_token: Some(Default::default()),
         lt_token: Some(Default::default()),
-        lifetimes: vec![
-            LifetimeDef {
+        params: vec![
+            GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'a"), Span::default()),
                 bounds: Default::default(),
                 colon_token: None,
-            },
-            LifetimeDef {
+            }),
+            GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'b"), Span::default()),
                 bounds: vec![Lifetime::new(Term::intern("'a"), Span::default())].into(),
                 colon_token: Some(tokens::Colon::default()),
-            },
-        ].into(),
-        ty_params: vec![
-            TypeParam {
+            }),
+            GenericParam::Type(TypeParam {
                 attrs: vec![Attribute {
                     bracket_token: Default::default(),
                     pound_token: Default::default(),
@@ -52,7 +50,7 @@ fn test_split_for_impl() {
                 }.into()),
                 colon_token: Some(Default::default()),
                 eq_token: Default::default(),
-            },
+            }),
         ].into(),
         where_clause: WhereClause {
             where_token: Some(Default::default()),
@@ -77,7 +75,6 @@ fn test_split_for_impl() {
             ].into(),
         },
     };
-    generics.lifetimes.push_trailing(Default::default());
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     let tokens = quote! {
