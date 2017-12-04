@@ -45,6 +45,7 @@ fn test_simple_precedence() {
         "{ for i in r { } *some_ptr += 1; }",
         "{ loop { break 5; } }",
         "{ if true { () }.mthd() }",
+        "{ for i in unsafe { 20 } { } }",
     ];
 
     let mut failed = 0;
