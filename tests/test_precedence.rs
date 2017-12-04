@@ -322,6 +322,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                 ExprKind::Group(_) => unreachable!(),
                 ExprKind::Paren(p) => paren(self, p.expr.node),
                 ExprKind::If(..) |
+                ExprKind::Unsafe(..) |
                 ExprKind::Block(..) |
                 ExprKind::IfLet(..) => {
                     return fold_expr(self, expr);

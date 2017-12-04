@@ -31,7 +31,7 @@ pub use expr::{Expr, ExprKind, ExprBox, ExprInPlace, ExprArray, ExprCall,
                ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
                ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
                ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
-               ExprGroup, ExprYield};
+               ExprGroup, ExprYield, ExprUnsafe};
 
 #[cfg(feature = "full")]
 pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,

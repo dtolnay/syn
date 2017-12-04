@@ -202,9 +202,14 @@ ast_enum_of_structs! {
             pub or2_token: Token![|],
         }),
 
-        /// A block (`{ ... }` or `unsafe { ... }`)
+        /// An unsafe block (`unsafe { ... }`)
+        pub Unsafe(ExprUnsafe #full {
+            pub unsafe_token: Token![unsafe],
+            pub block: Block,
+        }),
+
+        /// A block (`{ ... }`)
         pub Block(ExprBlock #full {
-            pub unsafety: Unsafety,
             pub block: Block,
         }),
 
@@ -628,6 +633,7 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
     // see https://github.com/rust-lang/rust/blob/eb8f2586e
     //                       /src/libsyntax/parse/classify.rs#L17-L37
     match expr.node {
+        ExprKind::Unsafe(..) |
         ExprKind::Block(..) |
         ExprKind::If(..) |
         ExprKind::IfLet(..) |
@@ -1192,6 +1198,8 @@ pub mod parsing {
         |
         syn!(ExprYield) => { ExprKind::Yield }
         |
+        syn!(ExprUnsafe) => { ExprKind::Unsafe }
+        |
         call!(expr_closure, allow_struct)
         |
         cond_reduce!(allow_block, map!(syn!(ExprBlock), ExprKind::Block))
@@ -1238,6 +1246,8 @@ pub mod parsing {
         |
         syn!(ExprYield) => { ExprKind::Yield }
         |
+        syn!(ExprUnsafe) => { ExprKind::Unsafe }
+        |
         syn!(ExprBlock) => { ExprKind::Block }
     ), Expr::from));
 
@@ -1272,7 +1282,6 @@ pub mod parsing {
                 kind: InPlaceKind::In(in_),
                 value: Box::new(Expr {
                     node: ExprBlock {
-                        unsafety: Unsafety::Normal,
                         block: Block {
                             stmts: value.0,
                             brace_token: value.1,
@@ -1403,7 +1412,6 @@ pub mod parsing {
             do_parse!(
                 else_block: braces!(call!(Block::parse_within)) >>
                 (ExprKind::Block(ExprBlock {
-                    unsafety: Unsafety::Normal,
                     block: Block {
                         stmts: else_block.0,
                         brace_token: else_block.1,
@@ -1537,7 +1545,6 @@ pub mod parsing {
                 body: syn!(Block) >>
                 (ReturnType::Type(ty, arrow),
                  ExprKind::Block(ExprBlock {
-                    unsafety: Unsafety::Normal,
                     block: body,
                 }).into())
             )
@@ -1739,12 +1746,22 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
+    impl Synom for ExprUnsafe {
+        named!(parse -> Self, do_parse!(
+            unsafe_: keyword!(unsafe) >>
+            b: syn!(Block) >>
+            (ExprUnsafe {
+                unsafe_token: unsafe_,
+                block: b,
+            })
+        ));
+    }
+
+    #[cfg(feature = "full")]
     impl Synom for ExprBlock {
         named!(parse -> Self, do_parse!(
-            rules: syn!(Unsafety) >>
             b: syn!(Block) >>
             (ExprBlock {
-                unsafety: rules,
                 block: b,
             })
         ));
@@ -2568,9 +2585,16 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
+    impl ToTokens for ExprUnsafe {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.unsafe_token.to_tokens(tokens);
+            self.block.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
     impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.unsafety.to_tokens(tokens);
             self.block.to_tokens(tokens);
         }
     }
