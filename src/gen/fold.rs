@@ -204,6 +204,8 @@ fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStati
 # [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_type(&mut self, i: ForeignItemType) -> ForeignItemType { fold_foreign_item_type(self, i) }
 
+fn fold_generic_arg(&mut self, i: GenericArg) -> GenericArg { fold_generic_arg(self, i) }
+
 fn fold_generic_param(&mut self, i: GenericParam) -> GenericParam { fold_generic_param(self, i) }
 
 fn fold_generics(&mut self, i: Generics) -> Generics { fold_generics(self, i) }
@@ -428,9 +430,7 @@ pub fn fold_angle_bracketed_parameter_data<V: Folder + ?Sized>(_visitor: &mut V,
     AngleBracketedParameterData {
         turbofish: _i . turbofish,
         lt_token: _i . lt_token,
-        lifetimes: _i . lifetimes,
-        types: FoldHelper::lift(_i . types, |it| { _visitor.fold_type(it) }),
-        bindings: FoldHelper::lift(_i . bindings, |it| { _visitor.fold_type_binding(it) }),
+        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_generic_arg(it) }),
         gt_token: _i . gt_token,
     }
 }
@@ -1449,6 +1449,27 @@ pub fn fold_foreign_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignI
         type_token: _i . type_token,
         ident: _i . ident,
         semi_token: _i . semi_token,
+    }
+}
+
+pub fn fold_generic_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericArg) -> GenericArg {
+    use ::GenericArg::*;
+    match _i {
+        Lifetime(_binding_0, ) => {
+            Lifetime (
+                _binding_0,
+            )
+        }
+        Type(_binding_0, ) => {
+            Type (
+                _visitor.fold_type(_binding_0),
+            )
+        }
+        TypeBinding(_binding_0, ) => {
+            TypeBinding (
+                _visitor.fold_type_binding(_binding_0),
+            )
+        }
     }
 }
 

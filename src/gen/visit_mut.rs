@@ -177,6 +177,8 @@ fn visit_foreign_item_static_mut(&mut self, i: &mut ForeignItemStatic) { visit_f
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type_mut(&mut self, i: &mut ForeignItemType) { visit_foreign_item_type_mut(self, i) }
 
+fn visit_generic_arg_mut(&mut self, i: &mut GenericArg) { visit_generic_arg_mut(self, i) }
+
 fn visit_generic_param_mut(&mut self, i: &mut GenericParam) { visit_generic_param_mut(self, i) }
 
 fn visit_generics_mut(&mut self, i: &mut Generics) { visit_generics_mut(self, i) }
@@ -396,9 +398,7 @@ pub fn visit_abi_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Abi
 pub fn visit_angle_bracketed_parameter_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut AngleBracketedParameterData) {
     // Skipped field _i . turbofish;
     // Skipped field _i . lt_token;
-    // Skipped field _i . lifetimes;
-    for mut el in (_i . types).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_mut(&mut it) };
-    for mut el in (_i . bindings).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_binding_mut(&mut it) };
+    for mut el in (_i . args).iter_mut() { let mut it = el.item_mut(); _visitor.visit_generic_arg_mut(&mut it) };
     // Skipped field _i . gt_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -1129,6 +1129,21 @@ pub fn visit_foreign_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
     // Skipped field _i . semi_token;
+}
+
+pub fn visit_generic_arg_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut GenericArg) {
+    use ::GenericArg::*;
+    match *_i {
+        Lifetime(ref mut _binding_0, ) => {
+            // Skipped field * _binding_0;
+        }
+        Type(ref mut _binding_0, ) => {
+            _visitor.visit_type_mut(&mut * _binding_0);
+        }
+        TypeBinding(ref mut _binding_0, ) => {
+            _visitor.visit_type_binding_mut(&mut * _binding_0);
+        }
+    }
 }
 
 pub fn visit_generic_param_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut GenericParam) {

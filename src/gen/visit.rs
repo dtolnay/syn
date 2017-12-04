@@ -177,6 +177,8 @@ fn visit_foreign_item_static(&mut self, i: &'ast ForeignItemStatic) { visit_fore
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type(&mut self, i: &'ast ForeignItemType) { visit_foreign_item_type(self, i) }
 
+fn visit_generic_arg(&mut self, i: &'ast GenericArg) { visit_generic_arg(self, i) }
+
 fn visit_generic_param(&mut self, i: &'ast GenericParam) { visit_generic_param(self, i) }
 
 fn visit_generics(&mut self, i: &'ast Generics) { visit_generics(self, i) }
@@ -396,9 +398,7 @@ pub fn visit_abi_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 pub fn visit_angle_bracketed_parameter_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AngleBracketedParameterData) {
     // Skipped field _i . turbofish;
     // Skipped field _i . lt_token;
-    // Skipped field _i . lifetimes;
-    for el in (_i . types).iter() { let it = el.item(); _visitor.visit_type(&it) };
-    for el in (_i . bindings).iter() { let it = el.item(); _visitor.visit_type_binding(&it) };
+    for el in (_i . args).iter() { let it = el.item(); _visitor.visit_generic_arg(&it) };
     // Skipped field _i . gt_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -1129,6 +1129,21 @@ pub fn visit_foreign_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
     // Skipped field _i . semi_token;
+}
+
+pub fn visit_generic_arg<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericArg) {
+    use ::GenericArg::*;
+    match *_i {
+        Lifetime(ref _binding_0, ) => {
+            // Skipped field * _binding_0;
+        }
+        Type(ref _binding_0, ) => {
+            _visitor.visit_type(&* _binding_0);
+        }
+        TypeBinding(ref _binding_0, ) => {
+            _visitor.visit_type_binding(&* _binding_0);
+        }
+    }
 }
 
 pub fn visit_generic_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericParam) {

@@ -314,7 +314,10 @@ mod codegen {
             _ => panic!("Expected at least 1 type parameter here"),
         };
 
-        data.types.first().expect("Expected at least 1 type parameter here").item()
+        match *data.args.first().expect("Expected at least 1 type parameter here").item() {
+            &GenericArg::Type(ref ty) => ty,
+            _ => panic!("Expected at least 1 type parmeter here"),
+        }
     }
 
     fn simple_visit(

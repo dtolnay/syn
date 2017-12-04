@@ -87,7 +87,7 @@ pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName
              ReturnType, MutType, Mutability, ParenthesizedParameterData, Path,
              PathParameters, PathSegment, PolyTraitRef, QSelf, Type, TypeBinding, Unsafety,
              TypeSlice, TypeArray, TypePtr, TypeReference, TypeBareFn, TypeNever, TypeTup, TypePath,
-             TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer, TypeGroup};
+             TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer, TypeGroup, GenericArg};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 

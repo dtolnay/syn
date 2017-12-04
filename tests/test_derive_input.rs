@@ -118,12 +118,12 @@ fn test_struct() {
                                         AngleBracketedParameterData {
                                             turbofish: None,
                                             lt_token: Default::default(),
-                                            lifetimes: Default::default(),
-                                            types: vec![Type::from(TypePath {
-                                                qself: None,
-                                                path: "Attribute".into(),
-                                            })].into(),
-                                            bindings: Default::default(),
+                                            args: vec![
+                                                GenericArg::Type(Type::from(TypePath {
+                                                    qself: None,
+                                                    path: "Attribute".into(),
+                                                })),
+                                            ].into(),
                                             gt_token: Default::default(),
                                         },
                                     ),

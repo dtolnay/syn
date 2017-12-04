@@ -184,12 +184,23 @@ impl PathParameters {
     pub fn is_empty(&self) -> bool {
         match *self {
             PathParameters::None => true,
-            PathParameters::AngleBracketed(ref bracketed) => {
-                bracketed.lifetimes.is_empty() && bracketed.types.is_empty() &&
-                bracketed.bindings.is_empty()
-            }
+            PathParameters::AngleBracketed(ref bracketed) => bracketed.args.is_empty(),
             PathParameters::Parenthesized(_) => false,
         }
+    }
+}
+
+ast_enum! {
+    /// A individual generic argument, like `'a`, `T`, or `Item=T`.
+    pub enum GenericArg {
+        /// The lifetime parameters for this path segment.
+        Lifetime(Lifetime),
+        /// The type parameters for this path segment, if present.
+        Type(Type),
+        /// Bindings (equality constraints) on associated types, if present.
+        ///
+        /// E.g., `Foo<A=Bar>`.
+        TypeBinding(TypeBinding),
     }
 }
 
@@ -198,14 +209,7 @@ ast_struct! {
     pub struct AngleBracketedParameterData {
         pub turbofish: Option<Token![::]>,
         pub lt_token: Token![<],
-        /// The lifetime parameters for this path segment.
-        pub lifetimes: Delimited<Lifetime, Token![,]>,
-        /// The type parameters for this path segment, if present.
-        pub types: Delimited<Type, Token![,]>,
-        /// Bindings (equality constraints) on associated types, if present.
-        ///
-        /// E.g., `Foo<A=Bar>`.
-        pub bindings: Delimited<TypeBinding, Token![,]>,
+        pub args: Delimited<GenericArg, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -687,38 +691,39 @@ pub mod parsing {
         }
     }
 
+    impl Synom for GenericArg {
+        named!(parse -> Self, alt!(
+            call!(ty_no_eq_after) => { GenericArg::Type }
+            |
+            syn!(Lifetime) => { GenericArg::Lifetime }
+            |
+            syn!(TypeBinding) => { GenericArg::TypeBinding }
+        ));
+    }
+
+    impl Synom for AngleBracketedParameterData {
+        named!(parse -> Self, do_parse!(
+            turbofish: option!(punct!(::)) >>
+            lt: punct!(<) >>
+            args: call!(Delimited::parse_terminated) >>
+            gt: punct!(>) >>
+            (AngleBracketedParameterData {
+                turbofish: turbofish,
+                lt_token: lt,
+                args: args,
+                gt_token: gt,
+            })
+        ));
+    }
+
     impl Synom for PathSegment {
         named!(parse -> Self, alt!(
             do_parse!(
                 ident: syn!(Ident) >>
-                turbofish: option!(punct!(::)) >>
-                lt: punct!(<) >>
-                lifetimes: call!(Delimited::parse_terminated) >>
-                types: cond!(
-                    lifetimes.is_empty() || lifetimes.trailing_delim(),
-                    call!(Delimited::parse_terminated_with,
-                            ty_no_eq_after)
-                ) >>
-                bindings: cond!(
-                    match types {
-                        Some(ref t) => t.is_empty() || t.trailing_delim(),
-                        None => lifetimes.is_empty() || lifetimes.trailing_delim(),
-                    },
-                    call!(Delimited::parse_terminated)
-                ) >>
-                gt: punct!(>) >>
+                parameters: syn!(AngleBracketedParameterData) >>
                 (PathSegment {
                     ident: ident,
-                    parameters: PathParameters::AngleBracketed(
-                        AngleBracketedParameterData {
-                            turbofish: turbofish,
-                            lt_token: lt,
-                            lifetimes: lifetimes,
-                            types: types.unwrap_or_default(),
-                            bindings: bindings.unwrap_or_default(),
-                            gt_token: gt,
-                        }
-                    ),
+                    parameters: PathParameters::AngleBracketed(parameters),
                 })
             )
             |
@@ -1018,27 +1023,21 @@ mod printing {
         }
     }
 
+    impl ToTokens for GenericArg {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                GenericArg::Lifetime(ref lt) => lt.to_tokens(tokens),
+                GenericArg::Type(ref ty) => ty.to_tokens(tokens),
+                GenericArg::TypeBinding(ref tb) => tb.to_tokens(tokens),
+            }
+        }
+    }
+
     impl ToTokens for AngleBracketedParameterData {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.turbofish.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
-            self.lifetimes.to_tokens(tokens);
-            if !self.lifetimes.empty_or_trailing() && !self.types.is_empty() {
-                <Token![,]>::default().to_tokens(tokens);
-            }
-            self.types.to_tokens(tokens);
-            if (
-                // If we have no trailing delimiter after a non-empty types list, or
-                !self.types.empty_or_trailing() ||
-                // If we have no trailing delimiter after a non-empty lifetimes
-                // list before an empty types list, and
-                (self.types.is_empty() && !self.lifetimes.empty_or_trailing())) &&
-                // We have some bindings, then we need a comma.
-                !self.bindings.is_empty()
-            {
-                <Token![,]>::default().to_tokens(tokens);
-            }
-            self.bindings.to_tokens(tokens);
+            self.args.to_tokens(tokens);
             self.gt_token.to_tokens(tokens);
         }
     }
