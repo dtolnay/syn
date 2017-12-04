@@ -301,7 +301,7 @@ pub mod parsing {
         ));
 
         fn description() -> Option<&'static str> {
-            Some("type parameter buond")
+            Some("type parameter bound")
         }
     }
 
