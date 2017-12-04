@@ -35,7 +35,7 @@ fn visit_abi_mut(&mut self, i: &mut Abi) { visit_abi_mut(self, i) }
 
 fn visit_abi_kind_mut(&mut self, i: &mut AbiKind) { visit_abi_kind_mut(self, i) }
 
-fn visit_angle_bracketed_parameter_data_mut(&mut self, i: &mut AngleBracketedParameterData) { visit_angle_bracketed_parameter_data_mut(self, i) }
+fn visit_angle_bracketed_generic_arguments_mut(&mut self, i: &mut AngleBracketedGenericArguments) { visit_angle_bracketed_generic_arguments_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_arg_captured_mut(&mut self, i: &mut ArgCaptured) { visit_arg_captured_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -177,7 +177,7 @@ fn visit_foreign_item_static_mut(&mut self, i: &mut ForeignItemStatic) { visit_f
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type_mut(&mut self, i: &mut ForeignItemType) { visit_foreign_item_type_mut(self, i) }
 
-fn visit_generic_arg_mut(&mut self, i: &mut GenericArg) { visit_generic_arg_mut(self, i) }
+fn visit_generic_argument_mut(&mut self, i: &mut GenericArgument) { visit_generic_argument_mut(self, i) }
 
 fn visit_generic_param_mut(&mut self, i: &mut GenericParam) { visit_generic_param_mut(self, i) }
 
@@ -251,7 +251,7 @@ fn visit_mutability_mut(&mut self, i: &mut Mutability) { visit_mutability_mut(se
 
 fn visit_nested_meta_item_mut(&mut self, i: &mut NestedMetaItem) { visit_nested_meta_item_mut(self, i) }
 
-fn visit_parenthesized_parameter_data_mut(&mut self, i: &mut ParenthesizedParameterData) { visit_parenthesized_parameter_data_mut(self, i) }
+fn visit_parenthesized_generic_arguments_mut(&mut self, i: &mut ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_pat_mut(&mut self, i: &mut Pat) { visit_pat_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -278,14 +278,14 @@ fn visit_pat_tuple_struct_mut(&mut self, i: &mut PatTupleStruct) { visit_pat_tup
 fn visit_pat_wild_mut(&mut self, i: &mut PatWild) { visit_pat_wild_mut(self, i) }
 
 fn visit_path_mut(&mut self, i: &mut Path) { visit_path_mut(self, i) }
+
+fn visit_path_arguments_mut(&mut self, i: &mut PathArguments) { visit_path_arguments_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_path_glob_mut(&mut self, i: &mut PathGlob) { visit_path_glob_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_path_list_mut(&mut self, i: &mut PathList) { visit_path_list_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_path_list_item_mut(&mut self, i: &mut PathListItem) { visit_path_list_item_mut(self, i) }
-
-fn visit_path_parameters_mut(&mut self, i: &mut PathParameters) { visit_path_parameters_mut(self, i) }
 
 fn visit_path_segment_mut(&mut self, i: &mut PathSegment) { visit_path_segment_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -395,10 +395,10 @@ pub fn visit_abi_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Abi
     }
 }
 
-pub fn visit_angle_bracketed_parameter_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut AngleBracketedParameterData) {
+pub fn visit_angle_bracketed_generic_arguments_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut AngleBracketedGenericArguments) {
     // Skipped field _i . turbofish;
     // Skipped field _i . lt_token;
-    for mut el in (_i . args).iter_mut() { let mut it = el.item_mut(); _visitor.visit_generic_arg_mut(&mut it) };
+    for mut el in (_i . args).iter_mut() { let mut it = el.item_mut(); _visitor.visit_generic_argument_mut(&mut it) };
     // Skipped field _i . gt_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -1131,8 +1131,8 @@ pub fn visit_foreign_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
     // Skipped field _i . semi_token;
 }
 
-pub fn visit_generic_arg_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut GenericArg) {
-    use ::GenericArg::*;
+pub fn visit_generic_argument_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut GenericArgument) {
+    use ::GenericArgument::*;
     match *_i {
         Lifetime(ref mut _binding_0, ) => {
             // Skipped field * _binding_0;
@@ -1542,7 +1542,7 @@ pub fn visit_nested_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
     }
 }
 
-pub fn visit_parenthesized_parameter_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ParenthesizedParameterData) {
+pub fn visit_parenthesized_generic_arguments_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ParenthesizedGenericArguments) {
     // Skipped field _i . paren_token;
     for mut el in (_i . inputs).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_mut(&mut it) };
     _visitor.visit_return_type_mut(&mut _i . output);
@@ -1660,6 +1660,19 @@ pub fn visit_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Path) {
     // Skipped field _i . leading_colon;
     for mut el in (_i . segments).iter_mut() { let mut it = el.item_mut(); _visitor.visit_path_segment_mut(&mut it) };
 }
+
+pub fn visit_path_arguments_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PathArguments) {
+    use ::PathArguments::*;
+    match *_i {
+        None => { }
+        AngleBracketed(ref mut _binding_0, ) => {
+            _visitor.visit_angle_bracketed_generic_arguments_mut(&mut * _binding_0);
+        }
+        Parenthesized(ref mut _binding_0, ) => {
+            _visitor.visit_parenthesized_generic_arguments_mut(&mut * _binding_0);
+        }
+    }
+}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_path_glob_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PathGlob) {
     _visitor.visit_path_mut(&mut _i . path);
@@ -1680,22 +1693,9 @@ pub fn visit_path_list_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
     // Skipped field _i . as_token;
 }
 
-pub fn visit_path_parameters_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PathParameters) {
-    use ::PathParameters::*;
-    match *_i {
-        None => { }
-        AngleBracketed(ref mut _binding_0, ) => {
-            _visitor.visit_angle_bracketed_parameter_data_mut(&mut * _binding_0);
-        }
-        Parenthesized(ref mut _binding_0, ) => {
-            _visitor.visit_parenthesized_parameter_data_mut(&mut * _binding_0);
-        }
-    }
-}
-
 pub fn visit_path_segment_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PathSegment) {
     // Skipped field _i . ident;
-    _visitor.visit_path_parameters_mut(&mut _i . parameters);
+    _visitor.visit_path_arguments_mut(&mut _i . arguments);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_path_simple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PathSimple) {

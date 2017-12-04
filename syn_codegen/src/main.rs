@@ -308,15 +308,15 @@ mod codegen {
         Fold,
     }
 
-    fn first_param(params: &PathParameters) -> &Type {
+    fn first_arg(params: &PathArguments) -> &Type {
         let data = match *params {
-            PathParameters::AngleBracketed(ref data) => data,
-            _ => panic!("Expected at least 1 type parameter here"),
+            PathArguments::AngleBracketed(ref data) => data,
+            _ => panic!("Expected at least 1 type argument here"),
         };
 
-        match *data.args.first().expect("Expected at least 1 type parameter here").item() {
-            &GenericArg::Type(ref ty) => ty,
-            _ => panic!("Expected at least 1 type parmeter here"),
+        match *data.args.first().expect("Expected at least 1 type argument here").item() {
+            &GenericArgument::Type(ref ty) => ty,
+            _ => panic!("Expected at least 1 type argument here"),
         }
     }
 
@@ -363,7 +363,7 @@ mod codegen {
         }
 
         if seg.ident == "Box" {
-            let ty = first_param(&seg.parameters);
+            let ty = first_arg(&seg.arguments);
             if let Some(seg) = last_segment(ty) {
                 if kind == Kind::Fold {
                     let name = quote!(*#name);
@@ -398,7 +398,7 @@ mod codegen {
 
         if seg.ident == "Vec" || seg.ident == "Delimited" {
             let is_vec = seg.ident == "Vec";
-            let ty = first_param(&seg.parameters);
+            let ty = first_arg(&seg.arguments);
             if let Some(seg) = last_segment(ty) {
                 if let Some(val) = box_visit(seg, lookup, kind, &quote!(it), eos_full) {
                     return Some(match kind {
@@ -465,7 +465,7 @@ mod codegen {
         }
 
         if seg.ident == "Option" {
-            let ty = first_param(&seg.parameters);
+            let ty = first_arg(&seg.arguments);
             if let Some(seg) = last_segment(ty) {
                 let it = match kind {
                     Kind::Fold => quote!(it),

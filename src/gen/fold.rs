@@ -62,7 +62,7 @@ fn fold_abi(&mut self, i: Abi) -> Abi { fold_abi(self, i) }
 
 fn fold_abi_kind(&mut self, i: AbiKind) -> AbiKind { fold_abi_kind(self, i) }
 
-fn fold_angle_bracketed_parameter_data(&mut self, i: AngleBracketedParameterData) -> AngleBracketedParameterData { fold_angle_bracketed_parameter_data(self, i) }
+fn fold_angle_bracketed_generic_arguments(&mut self, i: AngleBracketedGenericArguments) -> AngleBracketedGenericArguments { fold_angle_bracketed_generic_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_arg_captured(&mut self, i: ArgCaptured) -> ArgCaptured { fold_arg_captured(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -204,7 +204,7 @@ fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStati
 # [ cfg ( feature = "full" ) ]
 fn fold_foreign_item_type(&mut self, i: ForeignItemType) -> ForeignItemType { fold_foreign_item_type(self, i) }
 
-fn fold_generic_arg(&mut self, i: GenericArg) -> GenericArg { fold_generic_arg(self, i) }
+fn fold_generic_argument(&mut self, i: GenericArgument) -> GenericArgument { fold_generic_argument(self, i) }
 
 fn fold_generic_param(&mut self, i: GenericParam) -> GenericParam { fold_generic_param(self, i) }
 
@@ -278,7 +278,7 @@ fn fold_mutability(&mut self, i: Mutability) -> Mutability { fold_mutability(sel
 
 fn fold_nested_meta_item(&mut self, i: NestedMetaItem) -> NestedMetaItem { fold_nested_meta_item(self, i) }
 
-fn fold_parenthesized_parameter_data(&mut self, i: ParenthesizedParameterData) -> ParenthesizedParameterData { fold_parenthesized_parameter_data(self, i) }
+fn fold_parenthesized_generic_arguments(&mut self, i: ParenthesizedGenericArguments) -> ParenthesizedGenericArguments { fold_parenthesized_generic_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_pat(&mut self, i: Pat) -> Pat { fold_pat(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -305,14 +305,14 @@ fn fold_pat_tuple_struct(&mut self, i: PatTupleStruct) -> PatTupleStruct { fold_
 fn fold_pat_wild(&mut self, i: PatWild) -> PatWild { fold_pat_wild(self, i) }
 
 fn fold_path(&mut self, i: Path) -> Path { fold_path(self, i) }
+
+fn fold_path_arguments(&mut self, i: PathArguments) -> PathArguments { fold_path_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_path_glob(&mut self, i: PathGlob) -> PathGlob { fold_path_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_path_list(&mut self, i: PathList) -> PathList { fold_path_list(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_path_list_item(&mut self, i: PathListItem) -> PathListItem { fold_path_list_item(self, i) }
-
-fn fold_path_parameters(&mut self, i: PathParameters) -> PathParameters { fold_path_parameters(self, i) }
 
 fn fold_path_segment(&mut self, i: PathSegment) -> PathSegment { fold_path_segment(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -426,11 +426,11 @@ pub fn fold_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKi
     }
 }
 
-pub fn fold_angle_bracketed_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: AngleBracketedParameterData) -> AngleBracketedParameterData {
-    AngleBracketedParameterData {
+pub fn fold_angle_bracketed_generic_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: AngleBracketedGenericArguments) -> AngleBracketedGenericArguments {
+    AngleBracketedGenericArguments {
         turbofish: _i . turbofish,
         lt_token: _i . lt_token,
-        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_generic_arg(it) }),
+        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_generic_argument(it) }),
         gt_token: _i . gt_token,
     }
 }
@@ -1452,8 +1452,8 @@ pub fn fold_foreign_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignI
     }
 }
 
-pub fn fold_generic_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericArg) -> GenericArg {
-    use ::GenericArg::*;
+pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericArgument) -> GenericArgument {
+    use ::GenericArgument::*;
     match _i {
         Lifetime(_binding_0, ) => {
             Lifetime (
@@ -1985,8 +1985,8 @@ pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMet
     }
 }
 
-pub fn fold_parenthesized_parameter_data<V: Folder + ?Sized>(_visitor: &mut V, _i: ParenthesizedParameterData) -> ParenthesizedParameterData {
-    ParenthesizedParameterData {
+pub fn fold_parenthesized_generic_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: ParenthesizedGenericArguments) -> ParenthesizedGenericArguments {
+    ParenthesizedGenericArguments {
         paren_token: _i . paren_token,
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_type(it) }),
         output: _visitor.fold_return_type(_i . output),
@@ -2153,6 +2153,23 @@ pub fn fold_path<V: Folder + ?Sized>(_visitor: &mut V, _i: Path) -> Path {
         segments: FoldHelper::lift(_i . segments, |it| { _visitor.fold_path_segment(it) }),
     }
 }
+
+pub fn fold_path_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: PathArguments) -> PathArguments {
+    use ::PathArguments::*;
+    match _i {
+        None => { None }
+        AngleBracketed(_binding_0, ) => {
+            AngleBracketed (
+                _visitor.fold_angle_bracketed_generic_arguments(_binding_0),
+            )
+        }
+        Parenthesized(_binding_0, ) => {
+            Parenthesized (
+                _visitor.fold_parenthesized_generic_arguments(_binding_0),
+            )
+        }
+    }
+}
 # [ cfg ( feature = "full" ) ]
 pub fn fold_path_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: PathGlob) -> PathGlob {
     PathGlob {
@@ -2179,27 +2196,10 @@ pub fn fold_path_list_item<V: Folder + ?Sized>(_visitor: &mut V, _i: PathListIte
     }
 }
 
-pub fn fold_path_parameters<V: Folder + ?Sized>(_visitor: &mut V, _i: PathParameters) -> PathParameters {
-    use ::PathParameters::*;
-    match _i {
-        None => { None }
-        AngleBracketed(_binding_0, ) => {
-            AngleBracketed (
-                _visitor.fold_angle_bracketed_parameter_data(_binding_0),
-            )
-        }
-        Parenthesized(_binding_0, ) => {
-            Parenthesized (
-                _visitor.fold_parenthesized_parameter_data(_binding_0),
-            )
-        }
-    }
-}
-
 pub fn fold_path_segment<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSegment) -> PathSegment {
     PathSegment {
         ident: _i . ident,
-        parameters: _visitor.fold_path_parameters(_i . parameters),
+        arguments: _visitor.fold_path_arguments(_i . arguments),
     }
 }
 # [ cfg ( feature = "full" ) ]
