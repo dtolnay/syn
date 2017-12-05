@@ -1156,7 +1156,7 @@ pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
             _visitor.visit_type_binding(&* _binding_0);
         }
         Const(ref _binding_0, ) => {
-            full!(_visitor.visit_expr_block(&* _binding_0));
+            _visitor.visit_expr(&* _binding_0);
         }
     }
 }

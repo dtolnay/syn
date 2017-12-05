@@ -205,7 +205,7 @@ ast_enum! {
         ///
         /// NOTE: Identity expressions are represented as Type arguments, as
         /// they are indistinguishable syntactically.
-        Const(ExprBlock),
+        Const(Expr),
     }
 }
 
@@ -716,7 +716,9 @@ pub mod parsing {
             |
             syn!(TypeBinding) => { GenericArgument::TypeBinding }
             |
-            syn!(ExprBlock) => { GenericArgument::Const }
+            syn!(Lit) => { |l| GenericArgument::Const(ExprKind::Lit(l).into()) }
+            |
+            syn!(ExprBlock) => { |b| GenericArgument::Const(ExprKind::Block(b).into()) }
         ));
     }
 
@@ -1048,10 +1050,21 @@ mod printing {
                 GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
                 GenericArgument::TypeBinding(ref tb) => tb.to_tokens(tokens),
-                #[cfg(not(feature = "full"))]
-                GenericArgument::Const(_) => unreachable!(),
-                #[cfg(feature = "full")]
-                GenericArgument::Const(ref eb) => eb.to_tokens(tokens),
+                GenericArgument::Const(ref e) => match e.node {
+                    ExprKind::Lit(_) => e.to_tokens(tokens),
+
+                    // NOTE: We should probably support parsing blocks with only
+                    // expressions in them without the full feature for const
+                    // generics.
+                    #[cfg(feature = "full")]
+                    ExprKind::Block(_) => e.to_tokens(tokens),
+
+                    // ERROR CORRECTION: Add braces to make sure that the
+                    // generated code is valid.
+                    _ => tokens::Brace::default().surround(tokens, |tokens| {
+                        e.to_tokens(tokens);
+                    }),
+                }
             }
         }
     }
