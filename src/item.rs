@@ -334,6 +334,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub type_token: Token![type],
             pub ident: Ident,
+            pub generics: Generics,
             pub colon_token: Option<Token![:]>,
             pub bounds: Delimited<TypeParamBound, Token![+]>,
             pub default: Option<(Token![=], Type)>,
@@ -383,6 +384,7 @@ ast_enum_of_structs! {
             pub defaultness: Defaultness,
             pub type_token: Token![type],
             pub ident: Ident,
+            pub generics: Generics,
             pub eq_token: Token![=],
             pub ty: Type,
             pub semi_token: Token![;],
@@ -1103,6 +1105,7 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
+        generics: syn!(Generics) >>
         colon: option!(punct!(:)) >>
         bounds: cond!(colon.is_some(),
             call!(Delimited::parse_separated_nonempty)
@@ -1113,6 +1116,7 @@ pub mod parsing {
             attrs: attrs,
             type_token: type_,
             ident: ident,
+            generics: generics,
             colon_token: colon,
             bounds: bounds.unwrap_or_default(),
             default: default,
@@ -1256,6 +1260,7 @@ pub mod parsing {
         defaultness: syn!(Defaultness) >>
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
+        generics: syn!(Generics) >>
         eq: punct!(=) >>
         ty: syn!(Type) >>
         semi: punct!(;) >>
@@ -1265,6 +1270,7 @@ pub mod parsing {
             defaultness: defaultness,
             type_token: type_,
             ident: ident,
+            generics: generics,
             eq_token: eq,
             ty: ty,
             semi_token: semi,
@@ -1619,6 +1625,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             if !self.bounds.is_empty() {
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
@@ -1676,6 +1683,7 @@ mod printing {
             self.defaultness.to_tokens(tokens);
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);

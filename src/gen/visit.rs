@@ -1233,6 +1233,7 @@ pub fn visit_impl_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
     _visitor.visit_defaultness(&_i . defaultness);
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
+    _visitor.visit_generics(&_i . generics);
     // Skipped field _i . eq_token;
     _visitor.visit_type(&_i . ty);
     // Skipped field _i . semi_token;
@@ -1834,6 +1835,7 @@ pub fn visit_trait_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, 
     for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
+    _visitor.visit_generics(&_i . generics);
     // Skipped field _i . colon_token;
     for el in (_i . bounds).iter() { let it = el.item(); _visitor.visit_type_param_bound(&it) };
     // Skipped field _i . default;

@@ -1233,6 +1233,7 @@ pub fn visit_impl_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
     _visitor.visit_defaultness_mut(&mut _i . defaultness);
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
+    _visitor.visit_generics_mut(&mut _i . generics);
     // Skipped field _i . eq_token;
     _visitor.visit_type_mut(&mut _i . ty);
     // Skipped field _i . semi_token;
@@ -1834,6 +1835,7 @@ pub fn visit_trait_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
     // Skipped field _i . type_token;
     // Skipped field _i . ident;
+    _visitor.visit_generics_mut(&mut _i . generics);
     // Skipped field _i . colon_token;
     for mut el in (_i . bounds).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_param_bound_mut(&mut it) };
     // Skipped field _i . default;
