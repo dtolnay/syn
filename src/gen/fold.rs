@@ -97,6 +97,8 @@ fn fold_body_struct(&mut self, i: BodyStruct) -> BodyStruct { fold_body_struct(s
 fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { fold_bound_lifetimes(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_capture_by(&mut self, i: CaptureBy) -> CaptureBy { fold_capture_by(self, i) }
+
+fn fold_const_param(&mut self, i: ConstParam) -> ConstParam { fold_const_param(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_constness(&mut self, i: Constness) -> Constness { fold_constness(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -750,6 +752,18 @@ pub fn fold_capture_by<V: Folder + ?Sized>(_visitor: &mut V, _i: CaptureBy) -> C
             )
         }
         Ref => { Ref }
+    }
+}
+
+pub fn fold_const_param<V: Folder + ?Sized>(_visitor: &mut V, _i: ConstParam) -> ConstParam {
+    ConstParam {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        const_token: _i . const_token,
+        ident: _i . ident,
+        colon_token: _i . colon_token,
+        ty: _visitor.fold_type(_i . ty),
+        eq_token: _i . eq_token,
+        default: (_i . default).map(|it| { _visitor.fold_expr(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1489,6 +1503,11 @@ pub fn fold_generic_param<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericParam
         Type(_binding_0, ) => {
             Type (
                 _visitor.fold_type_param(_binding_0),
+            )
+        }
+        Const(_binding_0, ) => {
+            Const (
+                _visitor.fold_const_param(_binding_0),
             )
         }
     }

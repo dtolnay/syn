@@ -70,6 +70,8 @@ fn visit_body_struct_mut(&mut self, i: &mut BodyStruct) { visit_body_struct_mut(
 fn visit_bound_lifetimes_mut(&mut self, i: &mut BoundLifetimes) { visit_bound_lifetimes_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_capture_by_mut(&mut self, i: &mut CaptureBy) { visit_capture_by_mut(self, i) }
+
+fn visit_const_param_mut(&mut self, i: &mut ConstParam) { visit_const_param_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_constness_mut(&mut self, i: &mut Constness) { visit_constness_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -625,6 +627,16 @@ pub fn visit_capture_by_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut C
         Ref => { }
     }
 }
+
+pub fn visit_const_param_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ConstParam) {
+    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
+    // Skipped field _i . const_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . colon_token;
+    _visitor.visit_type_mut(&mut _i . ty);
+    // Skipped field _i . eq_token;
+    if let Some(ref mut it) = _i . default { _visitor.visit_expr_mut(&mut * it) };
+}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_constness_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Constness) {
     use ::Constness::*;
@@ -1157,6 +1169,9 @@ pub fn visit_generic_param_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mu
         }
         Type(ref mut _binding_0, ) => {
             _visitor.visit_type_param_mut(&mut * _binding_0);
+        }
+        Const(ref mut _binding_0, ) => {
+            _visitor.visit_const_param_mut(&mut * _binding_0);
         }
     }
 }
