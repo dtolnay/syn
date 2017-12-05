@@ -151,12 +151,30 @@ macro_rules! named {
     };
 }
 
+#[cfg(feature = "verbose-trace")]
+#[macro_export]
+macro_rules! call {
+    ($i:expr, $fun:expr $(, $args:expr)*) => {
+        {
+            let i = $i;
+            eprintln!(concat!(" -> ", stringify!($fun), " @ {:?}"), i);
+            let r = $fun(i $(, $args)*);
+            match r {
+                Ok((i, _)) => eprintln!(concat!("OK  ", stringify!($fun), " @ {:?}"), i),
+                Err(_) => eprintln!(concat!("ERR ", stringify!($fun), " @ {:?}"), i),
+            }
+            r
+        }
+    };
+}
+
 /// Invoke the given parser function with the passed in arguments.
 ///
 /// - **Syntax:** `call!(FUNCTION, ARGS...)`
 ///
 ///   where the signature of the function is `fn(&[U], ARGS...) -> IPResult<&[U], T>`
 /// - **Output:** `T`, the result of invoking the function `FUNCTION`
+#[cfg(not(feature = "verbose-trace"))]
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {

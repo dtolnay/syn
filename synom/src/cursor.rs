@@ -347,11 +347,10 @@ impl<'a> Cursor<'a> {
 // pretty useless.
 impl<'a> fmt::Debug for Cursor<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("Cursor")
-            .field("ptr", &self.ptr)
-            .field("scope", &self.scope)
-            // Dummy `entry` field to show data behind the `ptr` ptr.
-            .field("entry", self.entry())
+        // Print what the cursor is currently looking at.
+        // This will look like Cursor("some remaining tokens here")
+        f.debug_tuple("Cursor")
+            .field(&self.token_stream().to_string())
             .finish()
     }
 }

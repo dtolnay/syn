@@ -22,6 +22,10 @@ default = []
 clone-impls = []
 extra-traits = []
 
+# NOTE: This feature is very verbose - it will cause every call!() expression to
+# be logged to stderr. It exists mostly as a debugging tool.
+verbose-trace = []
+
 [dev-dependencies.syn]
 version = "0.11"
 path = ".."
