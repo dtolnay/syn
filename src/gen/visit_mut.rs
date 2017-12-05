@@ -1143,6 +1143,9 @@ pub fn visit_generic_argument_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
         TypeBinding(ref mut _binding_0, ) => {
             _visitor.visit_type_binding_mut(&mut * _binding_0);
         }
+        Const(ref mut _binding_0, ) => {
+            full!(_visitor.visit_expr_block_mut(&mut * _binding_0));
+        }
     }
 }
 

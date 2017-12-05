@@ -201,6 +201,11 @@ ast_enum! {
         ///
         /// E.g., `Foo<A=Bar>`.
         TypeBinding(TypeBinding),
+        /// Const expression. Must be inside of a block.
+        ///
+        /// NOTE: Identity expressions are represented as Type arguments, as
+        /// they are indistinguishable syntactically.
+        Const(ExprBlock),
     }
 }
 
@@ -691,6 +696,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg(not(feature = "full"))]
     impl Synom for GenericArgument {
         named!(parse -> Self, alt!(
             call!(ty_no_eq_after) => { GenericArgument::Type }
@@ -698,6 +704,19 @@ pub mod parsing {
             syn!(Lifetime) => { GenericArgument::Lifetime }
             |
             syn!(TypeBinding) => { GenericArgument::TypeBinding }
+        ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for GenericArgument {
+        named!(parse -> Self, alt!(
+            call!(ty_no_eq_after) => { GenericArgument::Type }
+            |
+            syn!(Lifetime) => { GenericArgument::Lifetime }
+            |
+            syn!(TypeBinding) => { GenericArgument::TypeBinding }
+            |
+            syn!(ExprBlock) => { GenericArgument::Const }
         ));
     }
 
@@ -1029,6 +1048,10 @@ mod printing {
                 GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
                 GenericArgument::TypeBinding(ref tb) => tb.to_tokens(tokens),
+                #[cfg(not(feature = "full"))]
+                GenericArgument::Const(_) => unreachable!(),
+                #[cfg(feature = "full")]
+                GenericArgument::Const(ref eb) => eb.to_tokens(tokens),
             }
         }
     }
