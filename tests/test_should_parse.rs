@@ -31,3 +31,10 @@ should_parse!(trailing_plus_type, {
     type A = Box<Foo+'a+>;
     type A = Box<'a+Foo+>;
 });
+
+should_parse!(generic_associated_type_where, {
+    trait Foo {
+        type Item<T> where T: Sized;
+        fn foo<T>(&self, t: T) -> Self::Item<T>;
+    }
+});

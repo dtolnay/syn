@@ -2388,6 +2388,7 @@ pub fn fold_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemT
         generics: _visitor.fold_generics(_i . generics),
         colon_token: _i . colon_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
+        where_clause: _visitor.fold_where_clause(_i . where_clause),
         default: _i . default,
         semi_token: _i . semi_token,
     }
