@@ -337,7 +337,6 @@ ast_enum_of_structs! {
             pub generics: Generics,
             pub colon_token: Option<Token![:]>,
             pub bounds: Delimited<TypeParamBound, Token![+]>,
-            pub where_clause: WhereClause,
             pub default: Option<(Token![=], Type)>,
             pub semi_token: Token![;],
         }),
@@ -1118,10 +1117,12 @@ pub mod parsing {
             attrs: attrs,
             type_token: type_,
             ident: ident,
-            generics: generics,
+            generics: Generics {
+                where_clause: where_clause,
+                .. generics
+            },
             colon_token: colon,
             bounds: bounds.unwrap_or_default(),
-            where_clause: where_clause,
             default: default,
             semi_token: semi,
         })
@@ -1633,7 +1634,7 @@ mod printing {
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
             }
-            self.where_clause.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             if let Some((ref eq_token, ref default)) = self.default {
                 eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
