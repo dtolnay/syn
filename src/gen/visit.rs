@@ -149,6 +149,8 @@ fn visit_expr_type(&mut self, i: &'ast ExprType) { visit_expr_type(self, i) }
 
 fn visit_expr_unary(&mut self, i: &'ast ExprUnary) { visit_expr_unary(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn visit_expr_unsafe(&mut self, i: &'ast ExprUnsafe) { visit_expr_unsafe(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn visit_expr_while(&mut self, i: &'ast ExprWhile) { visit_expr_while(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_while_let(&mut self, i: &'ast ExprWhileLet) { visit_expr_while_let(self, i) }
@@ -687,7 +689,6 @@ pub fn visit_expr_binary<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_block<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprBlock) {
-    _visitor.visit_unsafety(&_i . unsafety);
     _visitor.visit_block(&_i . block);
 }
 # [ cfg ( feature = "full" ) ]
@@ -845,6 +846,9 @@ pub fn visit_expr_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         Closure(ref _binding_0, ) => {
             full!(_visitor.visit_expr_closure(&* _binding_0));
         }
+        Unsafe(ref _binding_0, ) => {
+            full!(_visitor.visit_expr_unsafe(&* _binding_0));
+        }
         Block(ref _binding_0, ) => {
             full!(_visitor.visit_expr_block(&* _binding_0));
         }
@@ -996,6 +1000,11 @@ pub fn visit_expr_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 pub fn visit_expr_unary<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprUnary) {
     _visitor.visit_un_op(&_i . op);
     _visitor.visit_expr(&_i . expr);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_unsafe<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprUnsafe) {
+    // Skipped field _i . unsafe_token;
+    _visitor.visit_block(&_i . block);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhile) {

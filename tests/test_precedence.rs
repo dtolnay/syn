@@ -45,6 +45,7 @@ fn test_simple_precedence() {
         "{ for i in r { } *some_ptr += 1; }",
         "{ loop { break 5; } }",
         "{ if true { () }.mthd() }",
+        "{ for i in unsafe { 20 } { } }",
     ];
 
     let mut failed = 0;
@@ -322,6 +323,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                 ExprKind::Group(_) => unreachable!(),
                 ExprKind::Paren(p) => paren(self, p.expr.node),
                 ExprKind::If(..) |
+                ExprKind::Unsafe(..) |
                 ExprKind::Block(..) |
                 ExprKind::IfLet(..) => {
                     return fold_expr(self, expr);

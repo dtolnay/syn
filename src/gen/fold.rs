@@ -176,6 +176,8 @@ fn fold_expr_type(&mut self, i: ExprType) -> ExprType { fold_expr_type(self, i) 
 
 fn fold_expr_unary(&mut self, i: ExprUnary) -> ExprUnary { fold_expr_unary(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn fold_expr_unsafe(&mut self, i: ExprUnsafe) -> ExprUnsafe { fold_expr_unsafe(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn fold_expr_while(&mut self, i: ExprWhile) -> ExprWhile { fold_expr_while(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_while_let(&mut self, i: ExprWhileLet) -> ExprWhileLet { fold_expr_while_let(self, i) }
@@ -833,7 +835,6 @@ pub fn fold_expr_binary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBinary) ->
 # [ cfg ( feature = "full" ) ]
 pub fn fold_expr_block<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBlock) -> ExprBlock {
     ExprBlock {
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
         block: _visitor.fold_block(_i . block),
     }
 }
@@ -1058,6 +1059,11 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
                 full!(_visitor.fold_expr_closure(_binding_0)),
             )
         }
+        Unsafe(_binding_0, ) => {
+            Unsafe (
+                full!(_visitor.fold_expr_unsafe(_binding_0)),
+            )
+        }
         Block(_binding_0, ) => {
             Block (
                 full!(_visitor.fold_expr_block(_binding_0)),
@@ -1276,6 +1282,13 @@ pub fn fold_expr_unary<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprUnary) -> E
     ExprUnary {
         op: _visitor.fold_un_op(_i . op),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_expr_unsafe<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprUnsafe) -> ExprUnsafe {
+    ExprUnsafe {
+        unsafe_token: _i . unsafe_token,
+        block: _visitor.fold_block(_i . block),
     }
 }
 # [ cfg ( feature = "full" ) ]
