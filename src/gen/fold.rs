@@ -1486,7 +1486,7 @@ pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericAr
         }
         Const(_binding_0, ) => {
             Const (
-                full!(_visitor.fold_expr_block(_binding_0)),
+                _visitor.fold_expr(_binding_0),
             )
         }
     }
