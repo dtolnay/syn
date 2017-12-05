@@ -25,3 +25,9 @@ should_parse!(const_generics_use, {
     type Z = Foo<X>;
     type W = Foo<{ X + 10 }>;
 });
+
+should_parse!(trailing_plus_type, {
+    type A = Box<Foo+>;
+    type A = Box<Foo+'a+>;
+    type A = Box<'a+Foo+>;
+});

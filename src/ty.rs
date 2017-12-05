@@ -527,10 +527,10 @@ pub mod parsing {
         bounds: alt!(
             cond_reduce!(
                 allow_plus,
-                many0!(tuple!(punct!(+), syn!(TypeParamBound)))
+                option!(tuple!(punct!(+), call!(Delimited::<TypeParamBound, Token![+]>::parse_terminated)))
             )
             |
-            value!(vec![])
+            value!(None)
         ) >>
         ({
             let (qself, mut path) = qpath;
@@ -539,9 +539,7 @@ pub mod parsing {
                 let len = path.segments.len();
                 path.segments.get_mut(len - 1).item_mut().arguments = parenthesized;
             }
-            if bounds.is_empty() {
-                TypePath { qself: qself, path: path }.into()
-            } else {
+            if let Some((plus, rest)) = bounds {
                 let path = TypeParamBound::Trait(
                     PolyTraitRef {
                         bound_lifetimes: None,
@@ -549,12 +547,13 @@ pub mod parsing {
                     },
                     TraitBoundModifier::None,
                 );
+
                 let mut new_bounds = Delimited::new();
-                new_bounds.push_first(path);
-                for (_tok, bound) in bounds {
-                    new_bounds.push_default(bound);
-                }
+                new_bounds.push(delimited::Element::Delimited(path, plus));
+                new_bounds.extend(rest);
                 TypeTraitObject { bounds: new_bounds }.into()
+            } else {
+                TypePath { qself: qself, path: path }.into()
             }
         })
     ));
@@ -631,7 +630,7 @@ pub mod parsing {
 
     // Only allow multiple trait references if allow_plus is true.
     named!(ty_poly_trait_ref(allow_plus: bool) -> Type, alt!(
-        cond_reduce!(allow_plus, call!(Delimited::parse_separated_nonempty)) => {
+        cond_reduce!(allow_plus, call!(Delimited::parse_terminated_nonempty)) => {
             |x| TypeTraitObject { bounds: x }.into()
         }
         |
@@ -645,7 +644,7 @@ pub mod parsing {
             impl_: keyword!(impl) >>
             // NOTE: rust-lang/rust#34511 includes discussion about whether or
             // not + should be allowed in ImplTrait directly without ().
-            elem: call!(Delimited::parse_separated_nonempty) >>
+            elem: call!(Delimited::parse_terminated_nonempty) >>
             (TypeImplTrait {
                 impl_token: impl_,
                 bounds: elem,
