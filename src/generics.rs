@@ -323,14 +323,20 @@ pub mod parsing {
             colon: punct!(:) >>
             ty: syn!(Type) >>
             eq_def: option!(tuple!(punct!(=), syn!(Expr))) >>
-            (ConstParam {
-                attrs: attrs,
-                const_token: const_,
-                ident: ident,
-                colon_token: colon,
-                ty: ty,
-                eq_token: eq_def.as_ref().map(|&(eq, _)| eq),
-                default: eq_def.map(|(_, def)| def),
+            ({
+                let (eq_token, default) = match eq_def {
+                    Some((eq_token, default)) => (Some(eq_token), Some(default)),
+                    None => (None, None),
+                };
+                ConstParam {
+                    attrs: attrs,
+                    const_token: const_,
+                    ident: ident,
+                    colon_token: colon,
+                    ty: ty,
+                    eq_token: eq_token,
+                    default: default,
+                }
             })
         ));
     }
@@ -546,7 +552,7 @@ mod printing {
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             if self.default.is_some() {
-                self.eq_token.unwrap_or(Default::default()).to_tokens(tokens);
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
                 self.default.to_tokens(tokens);
             }
         }
