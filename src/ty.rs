@@ -45,7 +45,7 @@ ast_enum_of_structs! {
         /// A path (`module::module::...::Type`), optionally
         /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
         ///
-        /// Type parameters are stored in the Path itself
+        /// Type arguments are stored in the Path itself
         pub Path(TypePath {
             pub qself: Option<QSelf>,
             pub path: Path,
@@ -141,12 +141,12 @@ ast_struct! {
     pub struct PathSegment {
         /// The identifier portion of this path segment.
         pub ident: Ident,
-        /// Type/lifetime parameters attached to this path. They come in
+        /// Type/lifetime arguments attached to this path. They come in
         /// two flavors: `Path<A,B,C>` and `Path(A,B) -> C`. Note that
         /// this is more than just simple syntactic sugar; the use of
         /// parens affects the region binding rules, so we preserve the
         /// distinction.
-        pub parameters: PathParameters,
+        pub arguments: PathArguments,
     }
 }
 
@@ -156,56 +156,65 @@ impl<T> From<T> for PathSegment
     fn from(ident: T) -> Self {
         PathSegment {
             ident: ident.into(),
-            parameters: PathParameters::None,
+            arguments: PathArguments::None,
         }
     }
 }
 
 ast_enum! {
-    /// Parameters of a path segment.
+    /// Arguments of a path segment.
     ///
     /// E.g. `<A, B>` as in `Foo<A, B>` or `(A, B)` as in `Foo(A, B)`
-    pub enum PathParameters {
+    pub enum PathArguments {
         None,
         /// The `<'a, A, B, C>` in `foo::bar::baz::<'a, A, B, C>`
-        AngleBracketed(AngleBracketedParameterData),
+        AngleBracketed(AngleBracketedGenericArguments),
         /// The `(A, B)` and `C` in `Foo(A, B) -> C`
-        Parenthesized(ParenthesizedParameterData),
+        Parenthesized(ParenthesizedGenericArguments),
     }
 }
 
-impl Default for PathParameters {
+impl Default for PathArguments {
     fn default() -> Self {
-        PathParameters::None
+        PathArguments::None
     }
 }
 
-impl PathParameters {
+impl PathArguments {
     pub fn is_empty(&self) -> bool {
         match *self {
-            PathParameters::None => true,
-            PathParameters::AngleBracketed(ref bracketed) => {
-                bracketed.lifetimes.is_empty() && bracketed.types.is_empty() &&
-                bracketed.bindings.is_empty()
-            }
-            PathParameters::Parenthesized(_) => false,
+            PathArguments::None => true,
+            PathArguments::AngleBracketed(ref bracketed) => bracketed.args.is_empty(),
+            PathArguments::Parenthesized(_) => false,
         }
+    }
+}
+
+ast_enum! {
+    /// A individual generic argument, like `'a`, `T`, or `Item=T`.
+    pub enum GenericArgument {
+        /// The lifetime parameters for this path segment.
+        Lifetime(Lifetime),
+        /// The type parameters for this path segment, if present.
+        Type(Type),
+        /// Bindings (equality constraints) on associated types, if present.
+        ///
+        /// E.g., `Foo<A=Bar>`.
+        TypeBinding(TypeBinding),
+        /// Const expression. Must be inside of a block.
+        ///
+        /// NOTE: Identity expressions are represented as Type arguments, as
+        /// they are indistinguishable syntactically.
+        Const(ExprBlock),
     }
 }
 
 ast_struct! {
     /// A path like `Foo<'a, T>`
-    pub struct AngleBracketedParameterData {
+    pub struct AngleBracketedGenericArguments {
         pub turbofish: Option<Token![::]>,
         pub lt_token: Token![<],
-        /// The lifetime parameters for this path segment.
-        pub lifetimes: Delimited<Lifetime, Token![,]>,
-        /// The type parameters for this path segment, if present.
-        pub types: Delimited<Type, Token![,]>,
-        /// Bindings (equality constraints) on associated types, if present.
-        ///
-        /// E.g., `Foo<A=Bar>`.
-        pub bindings: Delimited<TypeBinding, Token![,]>,
+        pub args: Delimited<GenericArgument, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -222,7 +231,7 @@ ast_struct! {
 
 ast_struct! {
     /// A path like `Foo(A,B) -> C`
-    pub struct ParenthesizedParameterData {
+    pub struct ParenthesizedGenericArguments {
         pub paren_token: tokens::Paren,
         /// `(A, B)`
         pub inputs: Delimited<Type, Token![,]>,
@@ -511,8 +520,8 @@ pub mod parsing {
     named!(ty_path(allow_plus: bool) -> Type, do_parse!(
         qpath: qpath >>
         parenthesized: cond!(
-            qpath.1.segments.get(qpath.1.segments.len() - 1).item().parameters.is_empty(),
-            option!(syn!(ParenthesizedParameterData))
+            qpath.1.segments.get(qpath.1.segments.len() - 1).item().arguments.is_empty(),
+            option!(syn!(ParenthesizedGenericArguments))
         ) >>
         // Only allow parsing additional bounds if allow_plus is true.
         bounds: alt!(
@@ -526,9 +535,9 @@ pub mod parsing {
         ({
             let (qself, mut path) = qpath;
             if let Some(Some(parenthesized)) = parenthesized {
-                let parenthesized = PathParameters::Parenthesized(parenthesized);
+                let parenthesized = PathArguments::Parenthesized(parenthesized);
                 let len = path.segments.len();
-                path.segments.get_mut(len - 1).item_mut().parameters = parenthesized;
+                path.segments.get_mut(len - 1).item_mut().arguments = parenthesized;
             }
             if bounds.is_empty() {
                 TypePath { qself: qself, path: path }.into()
@@ -596,11 +605,11 @@ pub mod parsing {
         map!(keyword!(self), |s| (None, s.into()))
     ));
 
-    impl Synom for ParenthesizedParameterData {
+    impl Synom for ParenthesizedGenericArguments {
         named!(parse -> Self, do_parse!(
             data: parens!(call!(Delimited::parse_terminated)) >>
             output: syn!(ReturnType) >>
-            (ParenthesizedParameterData {
+            (ParenthesizedGenericArguments {
                 paren_token: data.1,
                 inputs: data.0,
                 output: output,
@@ -687,38 +696,53 @@ pub mod parsing {
         }
     }
 
+    #[cfg(not(feature = "full"))]
+    impl Synom for GenericArgument {
+        named!(parse -> Self, alt!(
+            call!(ty_no_eq_after) => { GenericArgument::Type }
+            |
+            syn!(Lifetime) => { GenericArgument::Lifetime }
+            |
+            syn!(TypeBinding) => { GenericArgument::TypeBinding }
+        ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for GenericArgument {
+        named!(parse -> Self, alt!(
+            call!(ty_no_eq_after) => { GenericArgument::Type }
+            |
+            syn!(Lifetime) => { GenericArgument::Lifetime }
+            |
+            syn!(TypeBinding) => { GenericArgument::TypeBinding }
+            |
+            syn!(ExprBlock) => { GenericArgument::Const }
+        ));
+    }
+
+    impl Synom for AngleBracketedGenericArguments {
+        named!(parse -> Self, do_parse!(
+            turbofish: option!(punct!(::)) >>
+            lt: punct!(<) >>
+            args: call!(Delimited::parse_terminated) >>
+            gt: punct!(>) >>
+            (AngleBracketedGenericArguments {
+                turbofish: turbofish,
+                lt_token: lt,
+                args: args,
+                gt_token: gt,
+            })
+        ));
+    }
+
     impl Synom for PathSegment {
         named!(parse -> Self, alt!(
             do_parse!(
                 ident: syn!(Ident) >>
-                turbofish: option!(punct!(::)) >>
-                lt: punct!(<) >>
-                lifetimes: call!(Delimited::parse_terminated) >>
-                types: cond!(
-                    lifetimes.is_empty() || lifetimes.trailing_delim(),
-                    call!(Delimited::parse_terminated_with,
-                            ty_no_eq_after)
-                ) >>
-                bindings: cond!(
-                    match types {
-                        Some(ref t) => t.is_empty() || t.trailing_delim(),
-                        None => lifetimes.is_empty() || lifetimes.trailing_delim(),
-                    },
-                    call!(Delimited::parse_terminated)
-                ) >>
-                gt: punct!(>) >>
+                arguments: syn!(AngleBracketedGenericArguments) >>
                 (PathSegment {
                     ident: ident,
-                    parameters: PathParameters::AngleBracketed(
-                        AngleBracketedParameterData {
-                            turbofish: turbofish,
-                            lt_token: lt,
-                            lifetimes: lifetimes,
-                            types: types.unwrap_or_default(),
-                            bindings: bindings.unwrap_or_default(),
-                            gt_token: gt,
-                        }
-                    ),
+                    arguments: PathArguments::AngleBracketed(arguments),
                 })
             )
             |
@@ -770,15 +794,15 @@ pub mod parsing {
             bound_lifetimes: option!(syn!(BoundLifetimes)) >>
             trait_ref: syn!(Path) >>
             parenthesized: option!(cond_reduce!(
-                trait_ref.segments.get(trait_ref.segments.len() - 1).item().parameters.is_empty(),
-                syn!(ParenthesizedParameterData)
+                trait_ref.segments.get(trait_ref.segments.len() - 1).item().arguments.is_empty(),
+                syn!(ParenthesizedGenericArguments)
             )) >>
             ({
                 let mut trait_ref = trait_ref;
                 if let Some(parenthesized) = parenthesized {
-                    let parenthesized = PathParameters::Parenthesized(parenthesized);
+                    let parenthesized = PathArguments::Parenthesized(parenthesized);
                     let len = trait_ref.segments.len();
-                    trait_ref.segments.get_mut(len - 1).item_mut().parameters = parenthesized;
+                    trait_ref.segments.get_mut(len - 1).item_mut().arguments = parenthesized;
                 }
                 PolyTraitRef {
                     bound_lifetimes: bound_lifetimes,
@@ -1000,45 +1024,43 @@ mod printing {
     impl ToTokens for PathSegment {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
-            self.parameters.to_tokens(tokens);
+            self.arguments.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for PathParameters {
+    impl ToTokens for PathArguments {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                PathParameters::None => {}
-                PathParameters::AngleBracketed(ref parameters) => {
-                    parameters.to_tokens(tokens);
+                PathArguments::None => {}
+                PathArguments::AngleBracketed(ref arguments) => {
+                    arguments.to_tokens(tokens);
                 }
-                PathParameters::Parenthesized(ref parameters) => {
-                    parameters.to_tokens(tokens);
+                PathArguments::Parenthesized(ref arguments) => {
+                    arguments.to_tokens(tokens);
                 }
             }
         }
     }
 
-    impl ToTokens for AngleBracketedParameterData {
+    impl ToTokens for GenericArgument {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
+                GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
+                GenericArgument::TypeBinding(ref tb) => tb.to_tokens(tokens),
+                #[cfg(not(feature = "full"))]
+                GenericArgument::Const(_) => unreachable!(),
+                #[cfg(feature = "full")]
+                GenericArgument::Const(ref eb) => eb.to_tokens(tokens),
+            }
+        }
+    }
+
+    impl ToTokens for AngleBracketedGenericArguments {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.turbofish.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
-            self.lifetimes.to_tokens(tokens);
-            if !self.lifetimes.empty_or_trailing() && !self.types.is_empty() {
-                <Token![,]>::default().to_tokens(tokens);
-            }
-            self.types.to_tokens(tokens);
-            if (
-                // If we have no trailing delimiter after a non-empty types list, or
-                !self.types.empty_or_trailing() ||
-                // If we have no trailing delimiter after a non-empty lifetimes
-                // list before an empty types list, and
-                (self.types.is_empty() && !self.lifetimes.empty_or_trailing())) &&
-                // We have some bindings, then we need a comma.
-                !self.bindings.is_empty()
-            {
-                <Token![,]>::default().to_tokens(tokens);
-            }
-            self.bindings.to_tokens(tokens);
+            self.args.to_tokens(tokens);
             self.gt_token.to_tokens(tokens);
         }
     }
@@ -1051,7 +1073,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for ParenthesizedParameterData {
+    impl ToTokens for ParenthesizedGenericArguments {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);

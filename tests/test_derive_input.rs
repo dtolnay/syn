@@ -114,16 +114,16 @@ fn test_struct() {
                             segments: vec![
                                 PathSegment {
                                     ident: "Vec".into(),
-                                    parameters: PathParameters::AngleBracketed(
-                                        AngleBracketedParameterData {
+                                    arguments: PathArguments::AngleBracketed(
+                                        AngleBracketedGenericArguments {
                                             turbofish: None,
                                             lt_token: Default::default(),
-                                            lifetimes: Default::default(),
-                                            types: vec![Type::from(TypePath {
-                                                qself: None,
-                                                path: "Attribute".into(),
-                                            })].into(),
-                                            bindings: Default::default(),
+                                            args: vec![
+                                                GenericArgument::Type(Type::from(TypePath {
+                                                    qself: None,
+                                                    path: "Attribute".into(),
+                                                })),
+                                            ].into(),
                                             gt_token: Default::default(),
                                         },
                                     ),

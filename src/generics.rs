@@ -31,6 +31,16 @@ ast_enum_of_structs! {
             pub eq_token: Option<Token![=]>,
             pub default: Option<Type>,
         }),
+        /// A generic const parameter, e.g. `const LENGTH: usize`.
+        pub Const(ConstParam {
+            pub attrs: Vec<Attribute>,
+            pub const_token: Token![const],
+            pub ident: Ident,
+            pub colon_token: Token![:],
+            pub ty: Type,
+            pub eq_token: Option<Token![=]>,
+            pub default: Option<Expr>,
+        }),
     }
 }
 
@@ -301,8 +311,34 @@ pub mod parsing {
         ));
 
         fn description() -> Option<&'static str> {
-            Some("type parameter buond")
+            Some("type parameter bound")
         }
+    }
+
+    impl Synom for ConstParam {
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(call!(Attribute::parse_outer)) >>
+            const_: keyword!(const) >>
+            ident: syn!(Ident) >>
+            colon: punct!(:) >>
+            ty: syn!(Type) >>
+            eq_def: option!(tuple!(punct!(=), syn!(Expr))) >>
+            ({
+                let (eq_token, default) = match eq_def {
+                    Some((eq_token, default)) => (Some(eq_token), Some(default)),
+                    None => (None, None),
+                };
+                ConstParam {
+                    attrs: attrs,
+                    const_token: const_,
+                    ident: ident,
+                    colon_token: colon,
+                    ty: ty,
+                    eq_token: eq_token,
+                    default: default,
+                }
+            })
+        ));
     }
 
     impl Synom for WhereClause {
@@ -400,6 +436,14 @@ mod printing {
                             param.bounds.to_tokens(tokens);
                         }
                     }
+                    GenericParam::Const(ref param) => {
+                        // Leave off the const parameter defaults
+                        tokens.append_all(param.attrs.outer());
+                        param.const_token.to_tokens(tokens);
+                        param.ident.to_tokens(tokens);
+                        param.colon_token.to_tokens(tokens);
+                        param.ty.to_tokens(tokens);
+                    }
                 }
                 param.delimiter().to_tokens(tokens);
             }
@@ -422,6 +466,10 @@ mod printing {
                     }
                     GenericParam::Type(ref param) => {
                         // Leave off the type parameter defaults
+                        param.ident.to_tokens(tokens);
+                    }
+                    GenericParam::Const(ref param) => {
+                        // Leave off the const parameter defaults
                         param.ident.to_tokens(tokens);
                     }
                 }
@@ -492,6 +540,20 @@ mod printing {
             match *self {
                 TraitBoundModifier::None => {}
                 TraitBoundModifier::Maybe(ref t) => t.to_tokens(tokens),
+            }
+        }
+    }
+
+    impl ToTokens for ConstParam {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.const_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+            if self.default.is_some() {
+                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+                self.default.to_tokens(tokens);
             }
         }
     }

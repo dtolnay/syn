@@ -42,7 +42,7 @@ pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
 mod generics;
 pub use generics::{Generics, GenericParam, LifetimeDef, TraitBoundModifier, TypeParam, TypeParamBound,
                    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
-                   WhereRegionPredicate, BoundLifetimes};
+                   WhereRegionPredicate, BoundLifetimes, ConstParam};
 #[cfg(feature = "printing")]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
@@ -83,11 +83,13 @@ mod op;
 pub use op::{BinOp, UnOp};
 
 mod ty;
-pub use ty::{Abi, AbiKind, AngleBracketedParameterData, BareFnArg, BareFnArgName, BareFnType,
-             ReturnType, MutType, Mutability, ParenthesizedParameterData, Path,
-             PathParameters, PathSegment, PolyTraitRef, QSelf, Type, TypeBinding, Unsafety,
-             TypeSlice, TypeArray, TypePtr, TypeReference, TypeBareFn, TypeNever, TypeTup, TypePath,
-             TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer, TypeGroup};
+pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg,
+             BareFnArgName, BareFnType, ReturnType, MutType, Mutability,
+             ParenthesizedGenericArguments, Path, PathArguments, PathSegment,
+             PolyTraitRef, QSelf, Type, TypeBinding, Unsafety, TypeSlice,
+             TypeArray, TypePtr, TypeReference, TypeBareFn, TypeNever, TypeTup,
+             TypePath, TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer,
+             TypeGroup, GenericArgument};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 

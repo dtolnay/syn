@@ -35,7 +35,7 @@ fn visit_abi(&mut self, i: &'ast Abi) { visit_abi(self, i) }
 
 fn visit_abi_kind(&mut self, i: &'ast AbiKind) { visit_abi_kind(self, i) }
 
-fn visit_angle_bracketed_parameter_data(&mut self, i: &'ast AngleBracketedParameterData) { visit_angle_bracketed_parameter_data(self, i) }
+fn visit_angle_bracketed_generic_arguments(&mut self, i: &'ast AngleBracketedGenericArguments) { visit_angle_bracketed_generic_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_arg_captured(&mut self, i: &'ast ArgCaptured) { visit_arg_captured(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -70,6 +70,8 @@ fn visit_body_struct(&mut self, i: &'ast BodyStruct) { visit_body_struct(self, i
 fn visit_bound_lifetimes(&mut self, i: &'ast BoundLifetimes) { visit_bound_lifetimes(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_capture_by(&mut self, i: &'ast CaptureBy) { visit_capture_by(self, i) }
+
+fn visit_const_param(&mut self, i: &'ast ConstParam) { visit_const_param(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_constness(&mut self, i: &'ast Constness) { visit_constness(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -177,6 +179,8 @@ fn visit_foreign_item_static(&mut self, i: &'ast ForeignItemStatic) { visit_fore
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type(&mut self, i: &'ast ForeignItemType) { visit_foreign_item_type(self, i) }
 
+fn visit_generic_argument(&mut self, i: &'ast GenericArgument) { visit_generic_argument(self, i) }
+
 fn visit_generic_param(&mut self, i: &'ast GenericParam) { visit_generic_param(self, i) }
 
 fn visit_generics(&mut self, i: &'ast Generics) { visit_generics(self, i) }
@@ -249,7 +253,7 @@ fn visit_mutability(&mut self, i: &'ast Mutability) { visit_mutability(self, i) 
 
 fn visit_nested_meta_item(&mut self, i: &'ast NestedMetaItem) { visit_nested_meta_item(self, i) }
 
-fn visit_parenthesized_parameter_data(&mut self, i: &'ast ParenthesizedParameterData) { visit_parenthesized_parameter_data(self, i) }
+fn visit_parenthesized_generic_arguments(&mut self, i: &'ast ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_pat(&mut self, i: &'ast Pat) { visit_pat(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -276,14 +280,14 @@ fn visit_pat_tuple_struct(&mut self, i: &'ast PatTupleStruct) { visit_pat_tuple_
 fn visit_pat_wild(&mut self, i: &'ast PatWild) { visit_pat_wild(self, i) }
 
 fn visit_path(&mut self, i: &'ast Path) { visit_path(self, i) }
+
+fn visit_path_arguments(&mut self, i: &'ast PathArguments) { visit_path_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_path_glob(&mut self, i: &'ast PathGlob) { visit_path_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_path_list(&mut self, i: &'ast PathList) { visit_path_list(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_path_list_item(&mut self, i: &'ast PathListItem) { visit_path_list_item(self, i) }
-
-fn visit_path_parameters(&mut self, i: &'ast PathParameters) { visit_path_parameters(self, i) }
 
 fn visit_path_segment(&mut self, i: &'ast PathSegment) { visit_path_segment(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -393,12 +397,10 @@ pub fn visit_abi_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     }
 }
 
-pub fn visit_angle_bracketed_parameter_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AngleBracketedParameterData) {
+pub fn visit_angle_bracketed_generic_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AngleBracketedGenericArguments) {
     // Skipped field _i . turbofish;
     // Skipped field _i . lt_token;
-    // Skipped field _i . lifetimes;
-    for el in (_i . types).iter() { let it = el.item(); _visitor.visit_type(&it) };
-    for el in (_i . bindings).iter() { let it = el.item(); _visitor.visit_type_binding(&it) };
+    for el in (_i . args).iter() { let it = el.item(); _visitor.visit_generic_argument(&it) };
     // Skipped field _i . gt_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -624,6 +626,16 @@ pub fn visit_capture_by<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
         }
         Ref => { }
     }
+}
+
+pub fn visit_const_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ConstParam) {
+    for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
+    // Skipped field _i . const_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . colon_token;
+    _visitor.visit_type(&_i . ty);
+    // Skipped field _i . eq_token;
+    if let Some(ref it) = _i . default { _visitor.visit_expr(&* it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_constness<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Constness) {
@@ -1131,6 +1143,24 @@ pub fn visit_foreign_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
     // Skipped field _i . semi_token;
 }
 
+pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericArgument) {
+    use ::GenericArgument::*;
+    match *_i {
+        Lifetime(ref _binding_0, ) => {
+            // Skipped field * _binding_0;
+        }
+        Type(ref _binding_0, ) => {
+            _visitor.visit_type(&* _binding_0);
+        }
+        TypeBinding(ref _binding_0, ) => {
+            _visitor.visit_type_binding(&* _binding_0);
+        }
+        Const(ref _binding_0, ) => {
+            full!(_visitor.visit_expr_block(&* _binding_0));
+        }
+    }
+}
+
 pub fn visit_generic_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericParam) {
     use ::GenericParam::*;
     match *_i {
@@ -1139,6 +1169,9 @@ pub fn visit_generic_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
         }
         Type(ref _binding_0, ) => {
             _visitor.visit_type_param(&* _binding_0);
+        }
+        Const(ref _binding_0, ) => {
+            _visitor.visit_const_param(&* _binding_0);
         }
     }
 }
@@ -1527,7 +1560,7 @@ pub fn visit_nested_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
     }
 }
 
-pub fn visit_parenthesized_parameter_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ParenthesizedParameterData) {
+pub fn visit_parenthesized_generic_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ParenthesizedGenericArguments) {
     // Skipped field _i . paren_token;
     for el in (_i . inputs).iter() { let it = el.item(); _visitor.visit_type(&it) };
     _visitor.visit_return_type(&_i . output);
@@ -1645,6 +1678,19 @@ pub fn visit_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast P
     // Skipped field _i . leading_colon;
     for el in (_i . segments).iter() { let it = el.item(); _visitor.visit_path_segment(&it) };
 }
+
+pub fn visit_path_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathArguments) {
+    use ::PathArguments::*;
+    match *_i {
+        None => { }
+        AngleBracketed(ref _binding_0, ) => {
+            _visitor.visit_angle_bracketed_generic_arguments(&* _binding_0);
+        }
+        Parenthesized(ref _binding_0, ) => {
+            _visitor.visit_parenthesized_generic_arguments(&* _binding_0);
+        }
+    }
+}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_path_glob<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathGlob) {
     _visitor.visit_path(&_i . path);
@@ -1665,22 +1711,9 @@ pub fn visit_path_list_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
     // Skipped field _i . as_token;
 }
 
-pub fn visit_path_parameters<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathParameters) {
-    use ::PathParameters::*;
-    match *_i {
-        None => { }
-        AngleBracketed(ref _binding_0, ) => {
-            _visitor.visit_angle_bracketed_parameter_data(&* _binding_0);
-        }
-        Parenthesized(ref _binding_0, ) => {
-            _visitor.visit_parenthesized_parameter_data(&* _binding_0);
-        }
-    }
-}
-
 pub fn visit_path_segment<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathSegment) {
     // Skipped field _i . ident;
-    _visitor.visit_path_parameters(&_i . parameters);
+    _visitor.visit_path_arguments(&_i . arguments);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_path_simple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathSimple) {
