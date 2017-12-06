@@ -1838,7 +1838,6 @@ pub fn visit_trait_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
     _visitor.visit_generics_mut(&mut _i . generics);
     // Skipped field _i . colon_token;
     for mut el in (_i . bounds).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_param_bound_mut(&mut it) };
-    _visitor.visit_where_clause_mut(&mut _i . where_clause);
     // Skipped field _i . default;
     // Skipped field _i . semi_token;
 }
