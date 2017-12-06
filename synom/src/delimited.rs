@@ -365,6 +365,11 @@ mod parsing {
         {
             Self::parse_terminated_with(input, T::parse)
         }
+
+        pub fn parse_terminated_nonempty(input: Cursor) -> PResult<Self>
+        {
+            Self::parse_terminated_nonempty_with(input, T::parse)
+        }
     }
 
     impl<T, D> Delimited<T, D>
@@ -387,6 +392,17 @@ mod parsing {
             -> PResult<Self>
         {
             Self::parse(input, parse, true)
+        }
+
+        pub fn parse_terminated_nonempty_with(
+                input: Cursor,
+                parse: fn(Cursor) -> PResult<T>)
+            -> PResult<Self>
+        {
+            match Self::parse(input, parse, true) {
+                Ok((_, ref b)) if b.is_empty() => parse_error(),
+                other => other,
+            }
         }
 
         fn parse(mut input: Cursor,
