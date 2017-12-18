@@ -252,7 +252,7 @@ ast_enum_of_structs! {
             pub bracket_token: tokens::Bracket,
         }),
 
-        /// A range (`1..2`, `1..`, `..2`, `1...2`, `1...`, `...2`)
+        /// A range (`1..2`, `1..`, `..2`, `1..=2`, `..=2`)
         pub Range(ExprRange #full {
             pub from: Option<Box<Expr>>,
             pub to: Option<Box<Expr>>,
@@ -526,7 +526,7 @@ ast_enum_of_structs! {
         pub Lit(PatLit {
             pub expr: Box<Expr>,
         }),
-        /// A range pattern, e.g. `1...2`
+        /// A range pattern, e.g. `1..=2`
         pub Range(PatRange {
             pub lo: Box<Expr>,
             pub hi: Box<Expr>,
@@ -550,11 +550,11 @@ ast_enum_of_structs! {
 ast_struct! {
     /// An arm of a 'match'.
     ///
-    /// E.g. `0...10 => { println!("match!") }` as in
+    /// E.g. `0..=10 => { println!("match!") }` as in
     ///
     /// ```rust,ignore
     /// match n {
-    ///     0...10 => { println!("match!") },
+    ///     0..=10 => { println!("match!") },
     ///     // ..
     /// }
     /// ```
@@ -587,7 +587,7 @@ ast_enum! {
         /// Inclusive at the beginning, exclusive at the end
         HalfOpen(Token![..]),
         /// Inclusive at the beginning and end
-        Closed(Token![...]),
+        Closed(Token![..=]),
     }
 }
 
@@ -1778,7 +1778,10 @@ pub mod parsing {
     impl Synom for RangeLimits {
         named!(parse -> Self, alt!(
             // Must come before Dot2
-            punct!(...) => { RangeLimits::Closed }
+            punct!(..=) => { RangeLimits::Closed }
+            |
+            // Must come before Dot2
+            punct!(...) => { |dot3: Token![...]| RangeLimits::Closed(Token![..=](dot3.0)) }
             |
             punct!(..) => { RangeLimits::HalfOpen }
         ));

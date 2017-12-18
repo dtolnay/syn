@@ -128,6 +128,7 @@ tokens! {
         (pub struct Dot([Span; 1])          => "."),
         (pub struct Dot2([Span; 2])         => ".."),
         (pub struct Dot3([Span; 3])         => "..."),
+        (pub struct DotDotEq([Span; 3])     => "..="),
         (pub struct Eq([Span; 1])           => "="),
         (pub struct EqEq([Span; 2])         => "=="),
         (pub struct Ge([Span; 2])           => ">="),
@@ -227,6 +228,7 @@ macro_rules! Token {
     (.)        => { $crate::tokens::Dot };
     (..)       => { $crate::tokens::Dot2 };
     (...)      => { $crate::tokens::Dot3 };
+    (..=)      => { $crate::tokens::DotDotEq };
     (=)        => { $crate::tokens::Eq };
     (==)       => { $crate::tokens::EqEq };
     (>=)       => { $crate::tokens::Ge };
@@ -315,6 +317,7 @@ macro_rules! punct {
     ($i:expr, .)   => { call!($i, <$crate::tokens::Dot as $crate::Synom>::parse) };
     ($i:expr, ..)  => { call!($i, <$crate::tokens::Dot2 as $crate::Synom>::parse) };
     ($i:expr, ...) => { call!($i, <$crate::tokens::Dot3 as $crate::Synom>::parse) };
+    ($i:expr, ..=) => { call!($i, <$crate::tokens::DotDotEq as $crate::Synom>::parse) };
     ($i:expr, =)   => { call!($i, <$crate::tokens::Eq as $crate::Synom>::parse) };
     ($i:expr, ==)  => { call!($i, <$crate::tokens::EqEq as $crate::Synom>::parse) };
     ($i:expr, >=)  => { call!($i, <$crate::tokens::Ge as $crate::Synom>::parse) };
