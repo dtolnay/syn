@@ -20,6 +20,7 @@ use walkdir::{WalkDir, WalkDirIterator, DirEntry};
 use std::fs::File;
 use std::io::Read;
 use std::panic;
+use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
@@ -65,7 +66,7 @@ fn test_round_trip() {
                         msg);
                 let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
                 if prev_failed + 1 >= abort_after {
-                    panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+                    process::exit(1);
                 }
                 return;
             }
@@ -116,7 +117,7 @@ fn test_round_trip() {
             Ok(false) => {
                 let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
                 if prev_failed + 1 >= abort_after {
-                    panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+                    process::exit(1);
                 }
             },
         }

@@ -28,6 +28,7 @@ use walkdir::{WalkDir, WalkDirIterator, DirEntry};
 
 use std::fs::File;
 use std::io::Read;
+use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use common::{respan, parse};
@@ -127,7 +128,7 @@ fn test_rustc_precedence() {
         let prev_failed = failed.fetch_add(l_failed, Ordering::SeqCst);
 
         if prev_failed + l_failed >= abort_after {
-            panic!("Aborting Immediately due to ABORT_AFTER_FAILURE");
+            process::exit(1);
         }
     });
 
