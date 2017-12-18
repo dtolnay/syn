@@ -2,11 +2,13 @@ extern crate proc_macro2;
 extern crate syn;
 extern crate synom;
 extern crate syntax;
+extern crate syntax_pos;
 
 use self::syntax::ast;
 use self::syntax::ptr::P;
 use self::syntax::parse::{self, ParseSess};
 use self::syntax::codemap::FilePathMapping;
+use self::syntax_pos::FileName;
 
 use std::panic;
 
@@ -17,7 +19,7 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
         let sess = ParseSess::new(FilePathMapping::empty());
         sess.span_diagnostic.set_continue_after_error(false);
         let e = parse::parse_expr_from_source_str(
-            "test_precedence".to_string(),
+            FileName::Custom("test_precedence".to_string()),
             input.to_string(),
             &sess,
         );

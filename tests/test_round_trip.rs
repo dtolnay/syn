@@ -7,12 +7,14 @@ extern crate quote;
 extern crate rayon;
 extern crate syn;
 extern crate syntax;
+extern crate syntax_pos;
 extern crate walkdir;
 
 use rayon::iter::{ParallelIterator, IntoParallelIterator};
 use syntax::ast;
 use syntax::parse::{self, ParseSess, PResult};
 use syntax::codemap::FilePathMapping;
+use syntax_pos::FileName;
 use walkdir::{WalkDir, WalkDirIterator, DirEntry};
 
 use std::fs::File;
@@ -127,7 +129,7 @@ fn test_round_trip() {
 }
 
 fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
-    let name = "test_round_trip".to_string();
+    let name = FileName::Custom("test_round_trip".to_string());
     parse::parse_crate_from_source_str(name, content, sess)
         .map(common::respan::respan_crate)
 }
