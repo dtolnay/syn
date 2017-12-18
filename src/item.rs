@@ -189,6 +189,15 @@ ast_enum_of_structs! {
             pub ident: Option<Ident>,
             pub mac: Macro,
         }),
+        /// FIXME will need to revisit what this looks like in the AST.
+        pub Macro2(ItemMacro2 {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub macro_token: Token![macro],
+            pub ident: Ident,
+            pub args: TokenTree,
+            pub body: TokenTree,
+        }),
     }
 }
 
@@ -483,6 +492,8 @@ pub mod parsing {
         syn!(ItemImpl) => { Item::Impl }
         |
         syn!(ItemMacro) => { Item::Macro }
+        |
+        syn!(ItemMacro2) => { Item::Macro2 }
     ));
 
     impl_synom!(ItemMacro "macro item" do_parse!(
@@ -490,7 +501,7 @@ pub mod parsing {
         what: syn!(Path) >>
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
-        body: call!(::TokenTree::parse_delimited) >>
+        body: call!(TokenTree::parse_delimited) >>
         cond!(!body.is_braced(), punct!(;)) >>
         (ItemMacro {
             attrs: attrs,
@@ -500,6 +511,24 @@ pub mod parsing {
                 bang_token: bang,
                 tokens: vec![body],
             },
+        })
+    ));
+
+    // TODO: figure out the actual grammar; is body required to be braced?
+    impl_synom!(ItemMacro2 "macro2 item" do_parse!(
+        attrs: many0!(call!(Attribute::parse_outer)) >>
+        vis: syn!(Visibility) >>
+        macro_: keyword!(macro) >>
+        ident: syn!(Ident) >>
+        args: call!(TokenTree::parse_delimited) >>
+        body: call!(TokenTree::parse_delimited) >>
+        (ItemMacro2 {
+            attrs: attrs,
+            vis: vis,
+            macro_token: macro_,
+            ident: ident,
+            args: args,
+            body: body,
         })
     ));
 
@@ -1548,6 +1577,17 @@ mod printing {
             if !self.mac.is_braced() {
                 <Token![;]>::default().to_tokens(tokens);
             }
+        }
+    }
+
+    impl ToTokens for ItemMacro2 {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.macro_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.args.to_tokens(tokens);
+            self.body.to_tokens(tokens);
         }
     }
 

@@ -185,6 +185,7 @@ tokens! {
         (pub struct In                      => "in"),
         (pub struct Let                     => "let"),
         (pub struct Loop                    => "loop"),
+        (pub struct Macro                   => "macro"),
         (pub struct Match                   => "match"),
         (pub struct Mod                     => "mod"),
         (pub struct Move                    => "move"),
@@ -277,6 +278,7 @@ macro_rules! Token {
     (in)       => { $crate::tokens::In };
     (let)      => { $crate::tokens::Let };
     (loop)     => { $crate::tokens::Loop };
+    (macro)    => { $crate::tokens::Macro };
     (match)    => { $crate::tokens::Match };
     (mod)      => { $crate::tokens::Mod };
     (move)     => { $crate::tokens::Move };
@@ -370,6 +372,7 @@ macro_rules! keyword {
     ($i:expr, in)       => { call!($i, <$crate::tokens::In as $crate::Synom>::parse) };
     ($i:expr, let)      => { call!($i, <$crate::tokens::Let as $crate::Synom>::parse) };
     ($i:expr, loop)     => { call!($i, <$crate::tokens::Loop as $crate::Synom>::parse) };
+    ($i:expr, macro)    => { call!($i, <$crate::tokens::Macro as $crate::Synom>::parse) };
     ($i:expr, match)    => { call!($i, <$crate::tokens::Match as $crate::Synom>::parse) };
     ($i:expr, mod)      => { call!($i, <$crate::tokens::Mod as $crate::Synom>::parse) };
     ($i:expr, move)     => { call!($i, <$crate::tokens::Move as $crate::Synom>::parse) };

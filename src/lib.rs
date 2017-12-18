@@ -55,7 +55,7 @@ mod item;
 pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItem, ItemForeignMod,
                ImplItem, ImplPolarity, Item, MethodSig, PathListItem,
                TraitItem, ViewPath, ItemExternCrate, ItemUse,
-               ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMod, ItemType, ItemEnum,
+               ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMacro2, ItemMod, ItemType, ItemEnum,
                ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
                PathSimple, PathGlob, PathList, ForeignItemFn, ForeignItemStatic, ForeignItemType,
                TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,

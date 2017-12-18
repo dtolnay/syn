@@ -244,6 +244,8 @@ fn fold_item_impl(&mut self, i: ItemImpl) -> ItemImpl { fold_item_impl(self, i) 
 # [ cfg ( feature = "full" ) ]
 fn fold_item_macro(&mut self, i: ItemMacro) -> ItemMacro { fold_item_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn fold_item_macro2(&mut self, i: ItemMacro2) -> ItemMacro2 { fold_item_macro2(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn fold_item_mod(&mut self, i: ItemMod) -> ItemMod { fold_item_mod(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_static(&mut self, i: ItemStatic) -> ItemStatic { fold_item_static(self, i) }
@@ -1700,6 +1702,11 @@ pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
                 _visitor.fold_item_macro(_binding_0),
             )
         }
+        Macro2(_binding_0, ) => {
+            Macro2 (
+                _visitor.fold_item_macro2(_binding_0),
+            )
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1794,6 +1801,17 @@ pub fn fold_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro) -> I
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ident: _i . ident,
         mac: _visitor.fold_macro(_i . mac),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_item_macro2<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro2) -> ItemMacro2 {
+    ItemMacro2 {
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        vis: _visitor.fold_visibility(_i . vis),
+        macro_token: _i . macro_token,
+        ident: _i . ident,
+        args: _i . args,
+        body: _i . body,
     }
 }
 # [ cfg ( feature = "full" ) ]

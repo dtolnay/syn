@@ -217,6 +217,8 @@ fn visit_item_impl_mut(&mut self, i: &mut ItemImpl) { visit_item_impl_mut(self, 
 # [ cfg ( feature = "full" ) ]
 fn visit_item_macro_mut(&mut self, i: &mut ItemMacro) { visit_item_macro_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn visit_item_macro2_mut(&mut self, i: &mut ItemMacro2) { visit_item_macro2_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn visit_item_mod_mut(&mut self, i: &mut ItemMod) { visit_item_mod_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_static_mut(&mut self, i: &mut ItemStatic) { visit_item_static_mut(self, i) }
@@ -1309,6 +1311,9 @@ pub fn visit_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Item) {
         Macro(ref mut _binding_0, ) => {
             _visitor.visit_item_macro_mut(&mut * _binding_0);
         }
+        Macro2(ref mut _binding_0, ) => {
+            _visitor.visit_item_macro2_mut(&mut * _binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1388,6 +1393,15 @@ pub fn visit_item_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut I
     for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
     // Skipped field _i . ident;
     _visitor.visit_macro_mut(&mut _i . mac);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_item_macro2_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMacro2) {
+    for mut it in (_i . attrs).iter_mut() { _visitor.visit_attribute_mut(&mut it) };
+    _visitor.visit_visibility_mut(&mut _i . vis);
+    // Skipped field _i . macro_token;
+    // Skipped field _i . ident;
+    // Skipped field _i . args;
+    // Skipped field _i . body;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_mod_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMod) {
