@@ -225,7 +225,7 @@ macro_rules! map {
     };
 }
 
-// Somehow this helps with type inference in `map!`.
+// Somehow this helps with type inference in `map!` and `alt!`.
 //
 // Not public API.
 #[doc(hidden)]
@@ -725,7 +725,7 @@ macro_rules! alt {
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr } | $($rest:tt)+) => {
         match $subrule!($i, $($args)*) {
             ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, $gen(o))),
+                ::std::result::Result::Ok((i, $crate::invoke($gen, o))),
             ::std::result::Result::Err(_) => alt!($i, $($rest)*),
         }
     };
@@ -741,7 +741,7 @@ macro_rules! alt {
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr }) => {
         match $subrule!($i, $($args)*) {
             ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, $gen(o))),
+                ::std::result::Result::Ok((i, $crate::invoke($gen, o))),
             ::std::result::Result::Err(err) =>
                 ::std::result::Result::Err(err),
         }

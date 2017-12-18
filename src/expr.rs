@@ -1781,7 +1781,7 @@ pub mod parsing {
             punct!(..=) => { RangeLimits::Closed }
             |
             // Must come before Dot2
-            punct!(...) => { |dot3: Token![...]| RangeLimits::Closed(Token![..=](dot3.0)) }
+            punct!(...) => { |dot3| RangeLimits::Closed(Token![..=](dot3.0)) }
             |
             punct!(..) => { RangeLimits::HalfOpen }
         ));
