@@ -35,6 +35,11 @@ const IGNORED_MODS: &[&str] = &[
     "visit_mut",
 ];
 
+const TERMINAL_TYPES: &[&str] = &[
+    "Ident",
+    "Span",
+];
+
 fn path_eq(a: &syn::Path, b: &syn::Path) -> bool {
     if a.global() != b.global() || a.segments.len() != b.segments.len() {
         return false;
@@ -685,7 +690,10 @@ mod codegen {
                             (*el.item(), quote!(_i.#id))
                         }).collect()
                     }
-                    VariantData::Unit => vec![]
+                    VariantData::Unit => {
+                        state.fold_impl.push_str("    _i\n");
+                        vec![]
+                    }
                 };
 
                 for (field, ref_toks) in fields {
@@ -721,6 +729,28 @@ mod codegen {
 fn main() {
     let mut lookup = BTreeMap::new();
     load_file(SYN_CRATE_ROOT, quote!(), &mut lookup).unwrap();
+
+    // Load in any terminal types
+    for &tt in TERMINAL_TYPES {
+        use syn::*;
+        lookup.insert(Ident::from(tt), AstItem {
+            item: DeriveInput {
+                ident: Ident::from(tt),
+                vis: Visibility::Public(VisPublic {
+                    pub_token: Default::default(),
+                }),
+                attrs: vec![],
+                generics: Default::default(),
+                body: Body::Struct(BodyStruct {
+                    data: VariantData::Unit,
+                    struct_token: Default::default(),
+                    semi_token: None,
+                }),
+            },
+            features: Default::default(),
+            eos_full: false,
+        });
+    }
 
     let mut state = Default::default();
     for s in lookup.values() {
