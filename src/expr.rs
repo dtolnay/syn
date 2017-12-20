@@ -2653,7 +2653,10 @@ mod printing {
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.from.to_tokens(tokens);
-            self.limits.to_tokens(tokens);
+            match self.limits {
+                RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
+                RangeLimits::Closed(ref t) => t.to_tokens(tokens),
+            }
             self.to.to_tokens(tokens);
         }
     }
@@ -2875,7 +2878,10 @@ mod printing {
     impl ToTokens for PatRange {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lo.to_tokens(tokens);
-            self.limits.to_tokens(tokens);
+            match self.limits {
+                RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
+                RangeLimits::Closed(ref t) => Token![...](t.0).to_tokens(tokens),
+            }
             self.hi.to_tokens(tokens);
         }
     }
@@ -2912,16 +2918,6 @@ mod printing {
                     self.comma_token.to_tokens(tokens);
                 }
             })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl ToTokens for RangeLimits {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
-                RangeLimits::Closed(ref t) => t.to_tokens(tokens),
-            }
         }
     }
 
