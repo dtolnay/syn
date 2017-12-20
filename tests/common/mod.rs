@@ -100,6 +100,20 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         //      Box<'foo + Bar>
         "tests/rust/src/test/run-pass/trait-object-lifetime-first.rs" |
+        // TODO feature(crate_in_paths)
+        //
+        //      use crate as root;
+        //      pub(in crate::m) struct S;
+        //      ::crate::f();
+        "tests/rust/src/test/run-pass/rfc-2126-crate-paths/crate-path-absolute.rs" |
+        // TODO feature(use_nested_groups)
+        //
+        //      use a::{B, D::{self, *, g::H}};
+        "tests/rust/src/test/run-pass/use-nested-groups.rs" |
+        // TODO where-clause with parens
+        //
+        //      where U: (FnOnce(T) -> V) + 'static
+        "tests/rust/src/test/ui/e0119/auxiliary/complex_impl_support.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
