@@ -211,6 +211,8 @@ fn fold_generic_argument(&mut self, i: GenericArgument) -> GenericArgument { fol
 fn fold_generic_param(&mut self, i: GenericParam) -> GenericParam { fold_generic_param(self, i) }
 
 fn fold_generics(&mut self, i: Generics) -> Generics { fold_generics(self, i) }
+
+fn fold_ident(&mut self, i: Ident) -> Ident { fold_ident(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem { fold_impl_item(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -329,6 +331,8 @@ fn fold_qself(&mut self, i: QSelf) -> QSelf { fold_qself(self, i) }
 fn fold_range_limits(&mut self, i: RangeLimits) -> RangeLimits { fold_range_limits(self, i) }
 
 fn fold_return_type(&mut self, i: ReturnType) -> ReturnType { fold_return_type(self, i) }
+
+fn fold_span(&mut self, i: Span) -> Span { fold_span(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_stmt(&mut self, i: Stmt) -> Stmt { fold_stmt(self, i) }
 
@@ -510,7 +514,7 @@ pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
     match _i {
         Named(_binding_0, ) => {
             Named (
-                _binding_0,
+                _visitor.fold_ident(_binding_0),
             )
         }
         Wild(_binding_0, ) => {
@@ -761,7 +765,7 @@ pub fn fold_const_param<V: Folder + ?Sized>(_visitor: &mut V, _i: ConstParam) ->
     ConstParam {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         const_token: _i . const_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: _visitor.fold_type(_i . ty),
         eq_token: _i . eq_token,
@@ -795,7 +799,7 @@ pub fn fold_defaultness<V: Folder + ?Sized>(_visitor: &mut V, _i: Defaultness) -
 
 pub fn fold_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) -> DeriveInput {
     DeriveInput {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         vis: _visitor.fold_visibility(_i . vis),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         generics: _visitor.fold_generics(_i . generics),
@@ -914,7 +918,7 @@ pub fn fold_expr_continue<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprContinue
 pub fn fold_expr_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprField) -> ExprField {
     ExprField {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        field: _i . field,
+        field: _visitor.fold_ident(_i . field),
         dot_token: _i . dot_token,
     }
 }
@@ -1204,7 +1208,7 @@ pub fn fold_expr_match<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> E
 pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMethodCall) -> ExprMethodCall {
     ExprMethodCall {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        method: _i . method,
+        method: _visitor.fold_ident(_i . method),
         typarams: FoldHelper::lift(_i . typarams, |it| { _visitor.fold_type(it) }),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
         paren_token: _i . paren_token,
@@ -1340,7 +1344,7 @@ pub fn fold_expr_yield<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprYield) -> E
 
 pub fn fold_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
     Field {
-        ident: _i . ident,
+        ident: (_i . ident).map(|it| { _visitor.fold_ident(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ty: _visitor.fold_type(_i . ty),
@@ -1350,7 +1354,7 @@ pub fn fold_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
 # [ cfg ( feature = "full" ) ]
 pub fn fold_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> FieldPat {
     FieldPat {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         is_shorthand: _i . is_shorthand,
         colon_token: _i . colon_token,
@@ -1360,7 +1364,7 @@ pub fn fold_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> Fie
 # [ cfg ( feature = "full" ) ]
 pub fn fold_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) -> FieldValue {
     FieldValue {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         expr: _visitor.fold_expr(_i . expr),
         is_shorthand: _i . is_shorthand,
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
@@ -1439,7 +1443,7 @@ pub fn fold_foreign_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignIte
     ForeignItemFn {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
         semi_token: _i . semi_token,
     }
@@ -1451,7 +1455,7 @@ pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: Foreig
         vis: _visitor.fold_visibility(_i . vis),
         static_token: _i . static_token,
         mutbl: _visitor.fold_mutability(_i . mutbl),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: Box::new(_visitor.fold_type(* _i . ty)),
         semi_token: _i . semi_token,
@@ -1463,7 +1467,7 @@ pub fn fold_foreign_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignI
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         type_token: _i . type_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         semi_token: _i . semi_token,
     }
 }
@@ -1523,6 +1527,10 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
         where_clause: _visitor.fold_where_clause(_i . where_clause),
     }
 }
+
+pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
+    _i
+}
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
     use ::ImplItem::*;
@@ -1556,7 +1564,7 @@ pub fn fold_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemCo
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
         const_token: _i . const_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: _visitor.fold_type(_i . ty),
         eq_token: _i . eq_token,
@@ -1588,7 +1596,7 @@ pub fn fold_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemTyp
         vis: _visitor.fold_visibility(_i . vis),
         defaultness: _visitor.fold_defaultness(_i . defaultness),
         type_token: _i . type_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         eq_token: _i . eq_token,
         ty: _visitor.fold_type(_i . ty),
@@ -1715,7 +1723,7 @@ pub fn fold_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> I
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         const_token: _i . const_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: Box::new(_visitor.fold_type(* _i . ty)),
         eq_token: _i . eq_token,
@@ -1741,7 +1749,7 @@ pub fn fold_item_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> Ite
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         enum_token: _i . enum_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         brace_token: _i . brace_token,
         variants: FoldHelper::lift(_i . variants, |it| { _visitor.fold_variant(it) }),
@@ -1754,7 +1762,7 @@ pub fn fold_item_extern_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemExte
         vis: _visitor.fold_visibility(_i . vis),
         extern_token: _i . extern_token,
         crate_token: _i . crate_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         rename: _i . rename,
         semi_token: _i . semi_token,
     }
@@ -1768,7 +1776,7 @@ pub fn fold_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn 
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         block: Box::new(_visitor.fold_block(* _i . block)),
     }
 }
@@ -1799,7 +1807,7 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
 pub fn fold_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro) -> ItemMacro {
     ItemMacro {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        ident: _i . ident,
+        ident: (_i . ident).map(|it| { _visitor.fold_ident(it) }),
         mac: _visitor.fold_macro(_i . mac),
     }
 }
@@ -1809,7 +1817,7 @@ pub fn fold_item_macro2<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro2) ->
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         macro_token: _i . macro_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         args: _i . args,
         body: _i . body,
     }
@@ -1820,7 +1828,7 @@ pub fn fold_item_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemM
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         mod_token: _i . mod_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         content: _i . content,
         semi: _i . semi,
     }
@@ -1832,7 +1840,7 @@ pub fn fold_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStatic) ->
         vis: _visitor.fold_visibility(_i . vis),
         static_token: _i . static_token,
         mutbl: _visitor.fold_mutability(_i . mutbl),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: Box::new(_visitor.fold_type(* _i . ty)),
         eq_token: _i . eq_token,
@@ -1846,7 +1854,7 @@ pub fn fold_item_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStruct) ->
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         struct_token: _i . struct_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         data: _visitor.fold_variant_data(_i . data),
         semi_token: _i . semi_token,
@@ -1860,7 +1868,7 @@ pub fn fold_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> I
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         auto_token: _i . auto_token,
         trait_token: _i . trait_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         colon_token: _i . colon_token,
         supertraits: FoldHelper::lift(_i . supertraits, |it| { _visitor.fold_type_param_bound(it) }),
@@ -1874,7 +1882,7 @@ pub fn fold_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemType) -> Ite
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         type_token: _i . type_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         eq_token: _i . eq_token,
         ty: Box::new(_visitor.fold_type(* _i . ty)),
@@ -1887,7 +1895,7 @@ pub fn fold_item_union<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUnion) -> I
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         union_token: _i . union_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         data: _visitor.fold_variant_data(_i . data),
     }
@@ -1951,7 +1959,7 @@ pub fn fold_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> Met
     match _i {
         Term(_binding_0, ) => {
             Term (
-                _binding_0,
+                _visitor.fold_ident(_binding_0),
             )
         }
         List(_binding_0, ) => {
@@ -1969,7 +1977,7 @@ pub fn fold_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> Met
 
 pub fn fold_meta_item_list<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItemList) -> MetaItemList {
     MetaItemList {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         paren_token: _i . paren_token,
         nested: FoldHelper::lift(_i . nested, |it| { _visitor.fold_nested_meta_item(it) }),
     }
@@ -1977,7 +1985,7 @@ pub fn fold_meta_item_list<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItemLis
 
 pub fn fold_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameValue) -> MetaNameValue {
     MetaNameValue {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         eq_token: _i . eq_token,
         lit: _i . lit,
     }
@@ -1988,7 +1996,7 @@ pub fn fold_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> M
         constness: _visitor.fold_constness(_i . constness),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         decl: _visitor.fold_fn_decl(_i . decl),
     }
 }
@@ -2112,7 +2120,7 @@ pub fn fold_pat_box<V: Folder + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox 
 pub fn fold_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> PatIdent {
     PatIdent {
         mode: _visitor.fold_binding_mode(_i . mode),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         subpat: (_i . subpat).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
         at_token: _i . at_token,
     }
@@ -2233,15 +2241,15 @@ pub fn fold_path_list<V: Folder + ?Sized>(_visitor: &mut V, _i: PathList) -> Pat
 # [ cfg ( feature = "full" ) ]
 pub fn fold_path_list_item<V: Folder + ?Sized>(_visitor: &mut V, _i: PathListItem) -> PathListItem {
     PathListItem {
-        name: _i . name,
-        rename: _i . rename,
+        name: _visitor.fold_ident(_i . name),
+        rename: (_i . rename).map(|it| { _visitor.fold_ident(it) }),
         as_token: _i . as_token,
     }
 }
 
 pub fn fold_path_segment<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSegment) -> PathSegment {
     PathSegment {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         arguments: _visitor.fold_path_arguments(_i . arguments),
     }
 }
@@ -2250,7 +2258,7 @@ pub fn fold_path_simple<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSimple) ->
     PathSimple {
         path: _visitor.fold_path(_i . path),
         as_token: _i . as_token,
-        rename: _i . rename,
+        rename: (_i . rename).map(|it| { _visitor.fold_ident(it) }),
     }
 }
 
@@ -2298,6 +2306,10 @@ pub fn fold_return_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ReturnType) ->
             )
         }
     }
+}
+
+pub fn fold_span<V: Folder + ?Sized>(_visitor: &mut V, _i: Span) -> Span {
+    _i
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
@@ -2374,7 +2386,7 @@ pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem
     TraitItemConst {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         const_token: _i . const_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: _visitor.fold_type(_i . ty),
         default: _i . default,
@@ -2402,7 +2414,7 @@ pub fn fold_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemT
     TraitItemType {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         type_token: _i . type_token,
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         colon_token: _i . colon_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
@@ -2504,7 +2516,7 @@ pub fn fold_type_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBareFn) -
 
 pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) -> TypeBinding {
     TypeBinding {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         eq_token: _i . eq_token,
         ty: _visitor.fold_type(_i . ty),
     }
@@ -2539,7 +2551,7 @@ pub fn fold_type_never<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeNever) -> T
 pub fn fold_type_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam) -> TypeParam {
     TypeParam {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
         eq_token: _i . eq_token,
@@ -2650,7 +2662,7 @@ pub fn fold_unsafety<V: Folder + ?Sized>(_visitor: &mut V, _i: Unsafety) -> Unsa
 
 pub fn fold_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Variant {
     Variant {
-        ident: _i . ident,
+        ident: _visitor.fold_ident(_i . ident),
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         data: _visitor.fold_variant_data(_i . data),
         discriminant: (_i . discriminant).map(|it| { _visitor.fold_expr(it) }),
