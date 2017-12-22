@@ -117,6 +117,8 @@ pub use synom::ParseError;
 #[cfg(feature = "parsing")]
 use synom::{Synom, SynomBuffer};
 
+use synom::span::FromSpan;
+
 /// Parse tokens of source code into the chosen syn data type.
 ///
 /// This is preferred over parsing a string because tokens are able to preserve
@@ -311,5 +313,34 @@ impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
             Some(ref t) => t.to_tokens(tokens),
             None => T::default().to_tokens(tokens),
         }
+    }
+}
+
+pub trait SpanExt : Copy {
+    /// Creates `T` from `self`.
+    fn as_token<T: FromSpan>(self) -> T;
+
+    fn new_ident<S: AsRef<str>>(self, sym: S) -> Ident;
+}
+
+impl SpanExt for Span {
+    /// Creates `T` from `self`.
+    fn as_token<T: FromSpan>(self) -> T {
+        FromSpan::from_span(self)
+    }
+
+    fn new_ident<S: AsRef<str>>(self, sym: S) -> Ident {
+        Ident::new(proc_macro2::Term::intern(sym.as_ref()), self)
+    }
+}
+
+impl SpanExt for proc_macro2::Span {
+    /// Creates `T` from `self`.
+    fn as_token<T: FromSpan>(self) -> T {
+        Span(self).as_token()
+    }
+
+    fn new_ident<S: AsRef<str>>(self, sym: S) -> Ident {
+        Span(self).new_ident(sym)
     }
 }

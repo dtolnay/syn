@@ -5,7 +5,7 @@
 //! of these tokens and all implment the `ToTokens` and `Synom` traits when the
 //! corresponding feature is activated.
 
-use span::Span;
+use span::{FromSpan, Span};
 
 macro_rules! tokens {
     (
@@ -31,6 +31,7 @@ macro_rules! op {
         #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub $($contents)*);
+        from_span!($name);
 
         #[cfg(feature = "extra-traits")]
         impl ::std::fmt::Debug for $name {
@@ -65,6 +66,7 @@ macro_rules! sym {
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub Span);
+        from_span!($name);
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
@@ -88,6 +90,7 @@ macro_rules! delim {
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub Span);
+        from_span!($name);
 
         impl $name {
             #[cfg(feature = "printing")]
@@ -104,6 +107,17 @@ macro_rules! delim {
                 where F: FnOnce($crate::Cursor) -> $crate::PResult<R>
             {
                 parsing::delim($s, tokens, $name, f)
+            }
+        }
+    }
+}
+
+macro_rules! from_span {
+    ($name:ident) => {
+        impl FromSpan for $name {
+            fn from_span(span: Span) -> Self {
+                let arr = FromSpan::from_span(span);
+                $name(arr)
             }
         }
     }
