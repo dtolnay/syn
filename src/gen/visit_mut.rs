@@ -1999,6 +1999,7 @@ pub fn visit_type_slice_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut T
 }
 
 pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTraitObject) {
+    // Skipped field _i . dyn_token;
     for mut el in (_i . bounds).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_param_bound_mut(&mut it) };
 }
 

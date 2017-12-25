@@ -2615,6 +2615,7 @@ pub fn fold_type_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeSlice) -> T
 
 pub fn fold_type_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTraitObject) -> TypeTraitObject {
     TypeTraitObject {
+        dyn_token: _i . dyn_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
     }
 }

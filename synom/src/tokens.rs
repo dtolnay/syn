@@ -175,6 +175,7 @@ tokens! {
         (pub struct Crate                   => "crate"),
         (pub struct Default                 => "default"),
         (pub struct Do                      => "do"),
+        (pub struct Dyn                     => "dyn"),
         (pub struct Else                    => "else"),
         (pub struct Enum                    => "enum"),
         (pub struct Extern                  => "extern"),
@@ -268,6 +269,7 @@ macro_rules! Token {
     (crate)    => { $crate::tokens::Crate };
     (default)  => { $crate::tokens::Default };
     (do)       => { $crate::tokens::Do };
+    (dyn)      => { $crate::tokens::Dyn };
     (else)     => { $crate::tokens::Else };
     (enum)     => { $crate::tokens::Enum };
     (extern)   => { $crate::tokens::Extern };
@@ -362,6 +364,7 @@ macro_rules! keyword {
     ($i:expr, crate)    => { call!($i, <$crate::tokens::Crate as $crate::Synom>::parse) };
     ($i:expr, default)  => { call!($i, <$crate::tokens::Default as $crate::Synom>::parse) };
     ($i:expr, do)       => { call!($i, <$crate::tokens::Do as $crate::Synom>::parse) };
+    ($i:expr, dyn)      => { call!($i, <$crate::tokens::Dyn as $crate::Synom>::parse) };
     ($i:expr, else)     => { call!($i, <$crate::tokens::Else as $crate::Synom>::parse) };
     ($i:expr, enum)     => { call!($i, <$crate::tokens::Enum as $crate::Synom>::parse) };
     ($i:expr, extern)   => { call!($i, <$crate::tokens::Extern as $crate::Synom>::parse) };

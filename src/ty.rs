@@ -53,6 +53,7 @@ ast_enum_of_structs! {
         /// A trait object type `Bound1 + Bound2 + Bound3`
         /// where `Bound` is a trait or a lifetime.
         pub TraitObject(TypeTraitObject {
+            pub dyn_token: Option<Token![dyn]>,
             pub bounds: Delimited<TypeParamBound, Token![+]>,
         }),
         /// An `impl Bound1 + Bound2 + Bound3` type
@@ -551,7 +552,7 @@ pub mod parsing {
                 let mut new_bounds = Delimited::new();
                 new_bounds.push(delimited::Element::Delimited(path, plus));
                 new_bounds.extend(rest);
-                TypeTraitObject { bounds: new_bounds }.into()
+                TypeTraitObject { dyn_token: None, bounds: new_bounds }.into()
             } else {
                 TypePath { qself: qself, path: path }.into()
             }
@@ -629,14 +630,17 @@ pub mod parsing {
     }
 
     // Only allow multiple trait references if allow_plus is true.
-    named!(ty_poly_trait_ref(allow_plus: bool) -> Type, alt!(
-        cond_reduce!(allow_plus, call!(Delimited::parse_terminated_nonempty)) => {
-            |x| TypeTraitObject { bounds: x }.into()
-        }
-        |
-        syn!(TypeParamBound) => {
-            |x| TypeTraitObject { bounds: vec![x].into() }.into()
-        }
+    named!(ty_poly_trait_ref(allow_plus: bool) -> Type, do_parse!(
+        dyn_token: option!(keyword!(dyn)) >>
+        bounds: alt!(
+            cond_reduce!(allow_plus, call!(Delimited::parse_terminated_nonempty))
+            |
+            syn!(TypeParamBound) => { |x| vec![x].into() }
+        ) >>
+        (TypeTraitObject {
+            dyn_token: dyn_token,
+            bounds: bounds,
+        }.into())
     ));
 
     impl Synom for TypeImplTrait {
@@ -683,7 +687,8 @@ pub mod parsing {
     impl Synom for Path {
         named!(parse -> Self, do_parse!(
             colon: option!(punct!(::)) >>
-            segments: call!(Delimited::parse_separated_nonempty) >>
+            segments: call!(Delimited::<PathSegment, Token![::]>::parse_separated_nonempty) >>
+            cond_reduce!(segments.first().map_or(true, |seg| seg.item().ident != "dyn"), epsilon!()) >>
             (Path {
                 leading_colon: colon,
                 segments: segments,
@@ -974,6 +979,7 @@ mod printing {
 
     impl ToTokens for TypeTraitObject {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            self.dyn_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
         }
     }
