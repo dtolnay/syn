@@ -17,7 +17,6 @@
 extern crate quote;
 extern crate rayon;
 extern crate syn;
-extern crate synom;
 extern crate syntax;
 extern crate walkdir;
 
@@ -369,9 +368,9 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
 /// Walk through a crate collecting all expressions we can find in it.
 fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
-    use synom::delimited::Delimited;
     use syn::*;
     use syn::fold::*;
+    use syn::delimited::Delimited;
 
     struct CollectExprsFolder(Vec<Expr>);
     impl Folder for CollectExprsFolder {

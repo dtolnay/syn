@@ -1,121 +1,17 @@
-//! Adapted from [`nom`](https://github.com/Geal/nom) by removing the
-//! `IPResult::Incomplete` variant which:
-//!
-//! - we don't need,
-//! - is an unintuitive footgun when working with non-streaming use cases, and
-//! - more than doubles compilation time.
-//!
-//! ## Whitespace handling strategy
-//!
-//! As (sy)nom is a parser combinator library, the parsers provided here and
-//! that you implement yourself are all made up of successively more primitive
-//! parsers, eventually culminating in a small number of fundamental parsers
-//! that are implemented in Rust. Among these are `punct!` and `keyword!`.
-//!
-//! All synom fundamental parsers (those not combined out of other parsers)
-//! should be written to skip over leading whitespace in their input. This way,
-//! as long as every parser eventually boils down to some combination of
-//! fundamental parsers, we get correct whitespace handling at all levels for
-//! free.
-//!
-//! For our use case, this strategy is a huge improvement in usability,
-//! correctness, and compile time over nom's `ws!` strategy.
-
-extern crate proc_macro;
-extern crate proc_macro2;
-
-#[cfg(feature = "printing")]
-extern crate quote;
-
-#[doc(hidden)]
-pub use proc_macro2::{TokenTree, TokenStream};
-
-use std::convert::From;
-use std::error::Error;
-use std::fmt;
-
-#[cfg(feature = "parsing")]
-#[doc(hidden)]
-pub mod helper;
-
-pub mod delimited;
-pub mod tokens;
-pub mod span;
-pub mod cursor;
-
-pub use cursor::{SynomBuffer, Cursor};
-
-/// The result of a parser
-pub type PResult<'a, O> = Result<(Cursor<'a>, O), ParseError>;
-
-/// An error with a default error message.
-///
-/// NOTE: We should provide better error messages in the future.
-pub fn parse_error<O>() -> PResult<'static, O> {
-    Err(ParseError(None))
-}
-
-pub trait Synom: Sized {
-    fn parse(input: Cursor) -> PResult<Self>;
-
-    fn description() -> Option<&'static str> {
-        None
-    }
-}
-
-#[derive(Debug)]
-pub struct ParseError(Option<String>);
-
-impl Error for ParseError {
-    fn description(&self) -> &str {
-        match self.0 {
-            Some(ref desc) => desc,
-            None => "failed to parse",
-        }
-    }
-}
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <str as fmt::Display>::fmt(self.description(), f)
-    }
-}
-
-impl From<proc_macro2::LexError> for ParseError {
-    fn from(_: proc_macro2::LexError) -> ParseError {
-        ParseError(Some("error while lexing input string".to_owned()))
-    }
-}
-
-impl From<proc_macro::LexError> for ParseError {
-    fn from(_: proc_macro::LexError) -> ParseError {
-        ParseError(Some("error while lexing input string".to_owned()))
-    }
-}
-
-impl ParseError {
-    // For syn use only. Not public API.
-    #[doc(hidden)]
-    pub fn new<T: Into<String>>(msg: T) -> Self {
-        ParseError(Some(msg.into()))
-    }
-}
-
-impl Synom for TokenStream {
-    fn parse(input: Cursor) -> PResult<Self> {
-        Ok((Cursor::empty(), input.token_stream()))
-    }
-}
+use cursor::Cursor;
+use error::{PResult, parse_error};
 
 /// Define a function from a parser combination.
 ///
 /// - **Syntax:** `named!(NAME -> TYPE, PARSER)` or `named!(pub NAME -> TYPE, PARSER)`
 ///
 /// ```rust
+/// # #[macro_use]
 /// # extern crate syn;
-/// # #[macro_use] extern crate synom;
+/// #
 /// # use syn::Type;
-/// # use synom::delimited::Delimited;
+/// # use syn::delimited::Delimited;
+/// #
 /// // One or more Rust types separated by commas.
 /// named!(pub comma_separated_types -> Delimited<Type, Token![,]>,
 ///     call!(Delimited::parse_separated_nonempty)
@@ -125,13 +21,13 @@ impl Synom for TokenStream {
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: $crate::Cursor) -> $crate::PResult<$o> {
+        fn $name(i: $crate::synom::Cursor) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: $crate::Cursor) -> $crate::PResult<$o> {
+        pub fn $name(i: $crate::synom::Cursor) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
@@ -139,19 +35,19 @@ macro_rules! named {
     // These two variants are for defining named parsers which have custom
     // arguments, and are called with `call!()`
     ($name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: $crate::Cursor, $($params)*) -> $crate::PResult<$o> {
+        fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: $crate::Cursor, $($params)*) -> $crate::PResult<$o> {
+        pub fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 }
 
-#[cfg(feature = "verbose-trace")]
+#[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {
@@ -174,7 +70,7 @@ macro_rules! call {
 ///
 ///   where the signature of the function is `fn(&[U], ARGS...) -> IPResult<&[U], T>`
 /// - **Output:** `T`, the result of invoking the function `FUNCTION`
-#[cfg(not(feature = "verbose-trace"))]
+#[cfg(any(not(feature = "verbose-trace"), feature = "all-features"))]
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {
@@ -188,8 +84,8 @@ macro_rules! call {
 /// - **Output:** the return type of function FN applied to THING
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::{Expr, ExprIf};
 ///
@@ -216,7 +112,7 @@ macro_rules! map {
             ::std::result::Result::Err(err) =>
                 ::std::result::Result::Err(err),
             ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, $crate::invoke($g, o))),
+                ::std::result::Result::Ok((i, $crate::parsers::invoke($g, o))),
         }
     };
 
@@ -301,8 +197,8 @@ macro_rules! cond_reduce {
 /// - **Output:** `THING`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
 ///
@@ -349,8 +245,8 @@ macro_rules! terminated {
 /// - `call!(Delimited::parse_terminated)` - zero or more, allows trailing separator
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Item;
 ///
@@ -392,7 +288,7 @@ macro_rules! many0 {
     }};
 
     ($i:expr, $f:expr) => {
-        $crate::many0($i, $f)
+        $crate::parsers::many0($i, $f)
     };
 }
 
@@ -432,8 +328,8 @@ pub fn many0<'a, T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<V
 /// - **Output:** `THING`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::{Expr, Ident};
 ///
@@ -464,8 +360,8 @@ macro_rules! peek {
 /// - **Output:** `T`, the return type of `THEN1` and `THEN2` and ...
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::{Ident, Type};
 ///
@@ -533,8 +429,8 @@ macro_rules! switch {
 /// - **Output:** `VALUE`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Ident;
 ///
@@ -592,8 +488,8 @@ macro_rules! value {
 /// - **Output:** never succeeds
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Item;
 ///
@@ -622,8 +518,8 @@ macro_rules! reject {
 /// - **Output:** `(A, B, C, ...)`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Type;
 ///
@@ -695,8 +591,8 @@ macro_rules! tuple_parser {
 /// - **Output:** `T`, the return type of `THING1` and `FUNC(THING2)` and ...
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Ident;
 ///
@@ -726,7 +622,7 @@ macro_rules! alt {
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr } | $($rest:tt)+) => {
         match $subrule!($i, $($args)*) {
             ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, $crate::invoke($gen, o))),
+                ::std::result::Result::Ok((i, $crate::parsers::invoke($gen, o))),
             ::std::result::Result::Err(_) => alt!($i, $($rest)*),
         }
     };
@@ -742,7 +638,7 @@ macro_rules! alt {
     ($i:expr, $subrule:ident!( $($args:tt)* ) => { $gen:expr }) => {
         match $subrule!($i, $($args)*) {
             ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, $crate::invoke($gen, o))),
+                ::std::result::Result::Ok((i, $crate::parsers::invoke($gen, o))),
             ::std::result::Result::Err(err) =>
                 ::std::result::Result::Err(err),
         }
@@ -767,12 +663,12 @@ macro_rules! alt {
 /// - **Output:** `RESULT`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 /// extern crate proc_macro2;
 ///
 /// use syn::{Ident, TokenTree};
-/// use synom::tokens::Paren;
+/// use syn::tokens::Paren;
 /// use proc_macro2::TokenStream;
 ///
 /// // Parse a macro invocation like `stringify!($args)`.
@@ -838,7 +734,7 @@ macro_rules! do_parse {
 #[macro_export]
 macro_rules! input_end {
     ($i:expr,) => {
-        $crate::input_end($i)
+        $crate::parsers::input_end($i)
     };
 }
 

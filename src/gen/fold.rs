@@ -9,7 +9,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
 use *;
-use synom::delimited::Delimited;
+use delimited::Delimited;
 
 trait FoldHelper {
     type Item;

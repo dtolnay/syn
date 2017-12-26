@@ -133,7 +133,9 @@ pub mod parsing {
     use super::*;
 
     use proc_macro2::{TokenNode, TokenTree};
-    use synom::{Synom, PResult, Cursor, parse_error};
+    use synom::Synom;
+    use cursor::Cursor;
+    use {PResult, parse_error};
 
     impl Synom for Macro {
         named!(parse -> Self, do_parse!(

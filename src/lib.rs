@@ -15,10 +15,19 @@ extern crate unicode_xid;
 extern crate quote;
 
 #[macro_use]
-extern crate synom;
+#[doc(hidden)]
+pub mod parsers;
 
 #[macro_use]
 mod macros;
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[macro_use]
+pub mod helper;
+
+#[macro_use]
+pub mod tokens;
 
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem, MetaItemList,
@@ -98,9 +107,12 @@ pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg,
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 
-pub use synom::span::Span;
-pub use synom::tokens;
-pub use synom::delimited;
+mod cursor;
+pub mod synom;
+pub mod delimited;
+
+mod span;
+pub use span::Span;
 
 mod gen {
     #[cfg(feature = "visit")]
@@ -117,10 +129,18 @@ pub use gen::*;
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
-pub use synom::ParseError;
+use synom::Synom;
+#[cfg(feature = "parsing")]
+use cursor::SynomBuffer;
 
 #[cfg(feature = "parsing")]
-use synom::{Synom, SynomBuffer};
+mod error;
+#[cfg(feature = "parsing")]
+pub use error::{PResult, ParseError};
+
+// Not public API.
+#[doc(hidden)]
+pub use error::parse_error;
 
 /// Parse tokens of source code into the chosen syn data type.
 ///

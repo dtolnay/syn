@@ -18,19 +18,20 @@ required-features = ["extra-traits", "parsing", "printing", "full"]
 [features]
 default = ["parsing", "printing", "clone-impls"]
 full = []
-parsing = ["quote", "synom/parsing"]
-printing = ["quote", "synom/printing"]
+parsing = ["quote"]
+printing = ["quote"]
 visit = []
 visit_mut = []
 fold = []
-clone-impls = ["synom/clone-impls"]
-extra-traits = ["synom/extra-traits"]
+clone-impls = []
+extra-traits = []
+verbose-trace = []
+all-features = []
 
 [dependencies]
 quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 proc-macro2 = "0.1"
 unicode-xid = "0.1"
-synom = { version = "0.11", path = "synom" }
 
 [dev-dependencies]
 rayon = "0.9"

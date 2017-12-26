@@ -37,7 +37,6 @@ script:
           cargo build --no-default-features --features 'full parsing printing' &&
           cargo build --no-default-features --features 'visit fold parsing printing' &&
           cargo build --no-default-features --features 'full visit fold parsing printing' &&
-          (cd synom && cargo test)
           ;;
         test)
           cargo test --all-features --release
@@ -45,7 +44,6 @@ script:
         clippy)
           cargo install clippy --debug --force || exit
           cargo clippy --features 'full visit fold' -- -Dclippy
-          (cd synom && cargo clippy -- -Dclippy)
           ;;
         codegen)
           (cd syn_codegen && cargo run) &&

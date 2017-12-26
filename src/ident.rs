@@ -226,7 +226,9 @@ impl Hash for Ident {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::{Synom, PResult, Cursor, parse_error};
+    use synom::Synom;
+    use cursor::Cursor;
+    use {PResult, parse_error};
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {

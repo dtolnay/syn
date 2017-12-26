@@ -13,7 +13,6 @@
 #![cfg_attr(feature = "cargo-clippy", allow(redundant_closure))]
 
 extern crate syn;
-#[macro_use] extern crate synom;
 #[macro_use] extern crate quote;
 #[macro_use] extern crate failure;
 extern crate inflections;
@@ -162,7 +161,7 @@ fn load_file<P: AsRef<Path>>(
 mod parsing {
     use super::AstItem;
 
-    use synom::*;
+    use syn::synom::*;
     use syn::*;
     use syn::TokenTree;
     use quote::Tokens;
@@ -837,7 +836,7 @@ macro_rules! full {
 #![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
 
 use *;
-use synom::delimited::Delimited;
+use delimited::Delimited;
 
 trait FoldHelper {{
     type Item;

@@ -2,12 +2,10 @@
 
 #![feature(rustc_private)]
 
+#[macro_use]
 extern crate syn;
 use syn::{Expr, ExprKind, ExprGroup, ExprBinary, Lit, LitKind, BinOp};
-
-#[macro_use]
-extern crate synom;
-use synom::tokens::Group;
+use syn::tokens::Group;
 
 extern crate proc_macro2;
 use proc_macro2::*;

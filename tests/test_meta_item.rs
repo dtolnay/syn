@@ -1,12 +1,11 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
-extern crate synom;
 extern crate proc_macro2;
 
-use synom::SynomBuffer;
-use proc_macro2::{Literal, TokenStream};
 use syn::*;
+use syn::synom::SynomBuffer;
+use proc_macro2::{Literal, TokenStream};
 
 fn lit<T: Into<Literal>>(t: T) -> Lit {
     Lit {

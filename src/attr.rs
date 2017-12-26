@@ -292,7 +292,8 @@ impl<'a, T> FilterAttrs<'a> for T
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::{PResult, Cursor, parse_error};
+    use cursor::Cursor;
+    use {PResult, parse_error};
     use proc_macro2::{TokenNode, Spacing, TokenTree};
 
     fn eq() -> TokenTree {

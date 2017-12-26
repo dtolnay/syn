@@ -354,7 +354,9 @@ impl<T, D> Element<T, D> {
 #[cfg(feature = "parsing")]
 mod parsing {
     use super::Delimited;
-    use {PResult, Cursor, Synom, parse_error};
+    use synom::Synom;
+    use cursor::Cursor;
+    use {PResult, parse_error};
 
     impl<T, D> Delimited<T, D>
         where T: Synom,

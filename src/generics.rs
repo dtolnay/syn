@@ -202,7 +202,7 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use synom::delimited::Element;
+    use delimited::Element;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(

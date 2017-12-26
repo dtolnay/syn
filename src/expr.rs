@@ -660,9 +660,11 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     use proc_macro2::{TokenStream, TokenNode, Delimiter, Term};
-    use synom::{PResult, Cursor, Synom};
+    use synom::Synom;
+    use cursor::Cursor;
     #[cfg(feature = "full")]
-    use synom::parse_error;
+    use parse_error;
+    use PResult;
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.

@@ -1,6 +1,5 @@
 extern crate proc_macro2;
 extern crate syn;
-extern crate synom;
 extern crate syntax;
 extern crate syntax_pos;
 
@@ -12,7 +11,7 @@ use self::syntax_pos::FileName;
 
 use std::panic;
 
-use self::synom::{Synom, SynomBuffer};
+use self::syn::synom::{Synom, SynomBuffer};
 
 pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {

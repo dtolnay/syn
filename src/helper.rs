@@ -4,8 +4,8 @@
 /// - **Output:** `Option<THING>`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::tokens::Bang;
 ///
@@ -39,8 +39,8 @@ macro_rules! option {
 /// - **Output:** `THING`, which must be `Vec<T>`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::{Lifetime, Type};
 /// use syn::delimited::Delimited;
@@ -79,8 +79,8 @@ macro_rules! opt_vec {
 /// - **Output:** `()`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Mutability;
 ///
@@ -107,8 +107,8 @@ macro_rules! epsilon {
 /// - **Output:** `()`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::{Expr, ExprCall};
 /// use syn::tokens::RArrow;
@@ -160,8 +160,8 @@ macro_rules! tap {
 /// - **Output:** `TYPE`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
 ///
@@ -174,7 +174,7 @@ macro_rules! tap {
 #[macro_export]
 macro_rules! syn {
     ($i:expr, $t:ty) => {
-        call!($i, <$t as $crate::Synom>::parse)
+        call!($i, <$t as $crate::synom::Synom>::parse)
     };
 }
 
@@ -188,11 +188,11 @@ macro_rules! syn {
 /// - **Output:** `(SUBPARSER_RET, Paren)`
 ///
 /// ```rust
+/// #[macro_use]
 /// extern crate syn;
-/// #[macro_use] extern crate synom;
 ///
 /// use syn::Expr;
-/// use synom::tokens::Paren;
+/// use syn::tokens::Paren;
 ///
 /// named!(expr_paren -> (Expr, Paren), parens!(syn!(Expr)));
 ///
