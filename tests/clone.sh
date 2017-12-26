@@ -6,6 +6,8 @@ REV=ebddfcb0b19471d2277e05cfbc2ad8caa81637b7
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
+mkdir -p rust
+cd rust
 
 git init
 

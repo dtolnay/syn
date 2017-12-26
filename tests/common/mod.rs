@@ -116,7 +116,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
 }
 
 pub fn clone_rust() {
-    let result = Command::new("tests/rust/clone.sh").status().unwrap();
+    let result = Command::new("tests/clone.sh").status().unwrap();
     println!("result: {}", result);
     assert!(result.success());
 }
