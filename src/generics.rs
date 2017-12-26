@@ -308,6 +308,10 @@ pub mod parsing {
             syn!(PolyTraitRef) => {
                 |poly| TypeParamBound::Trait(poly, TraitBoundModifier::None)
             }
+            |
+            parens!(syn!(PolyTraitRef)) => {
+                |poly| TypeParamBound::Trait(poly.0, TraitBoundModifier::None)
+            }
         ));
 
         fn description() -> Option<&'static str> {

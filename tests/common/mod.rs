@@ -105,10 +105,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         //      use a::{B, D::{self, *, g::H}};
         "tests/rust/src/test/run-pass/use-nested-groups.rs" |
-        // TODO where-clause with parens
-        //
-        //      where U: (FnOnce(T) -> V) + 'static
-        "tests/rust/src/test/ui/e0119/auxiliary/complex_impl_support.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
