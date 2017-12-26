@@ -552,11 +552,17 @@ ast_struct! {
     ///
     /// E.g. `0..=10 => { println!("match!") }` as in
     ///
-    /// ```rust,ignore
+    /// ```rust
+    /// # #![feature(dotdoteq_in_patterns)]
+    /// #
+    /// # fn main() {
+    /// #     let n = 0;
     /// match n {
-    ///     0..=10 => { println!("match!") },
+    ///     0..=10 => { println!("match!") }
     ///     // ..
+    ///     # _ => {}
     /// }
+    /// # }
     /// ```
     pub struct Arm {
         pub attrs: Vec<Attribute>,
@@ -658,28 +664,28 @@ pub mod parsing {
     #[cfg(feature = "full")]
     use synom::parse_error;
 
-    /// When we're parsing expressions which occur before blocks, like in
-    /// an if statement's condition, we cannot parse a struct literal.
-    ///
-    /// Struct literals are ambiguous in certain positions
-    /// https://github.com/rust-lang/rfcs/pull/92
+    // When we're parsing expressions which occur before blocks, like in an if
+    // statement's condition, we cannot parse a struct literal.
+    //
+    // Struct literals are ambiguous in certain positions
+    // https://github.com/rust-lang/rfcs/pull/92
     macro_rules! ambiguous_expr {
         ($i:expr, $allow_struct:ident) => {
             ambiguous_expr($i, $allow_struct, true)
         };
     }
 
-    /// When we are parsing an optional suffix expression, we cannot allow
-    /// blocks if structs are not allowed.
-    ///
-    /// Example:
-    /// ```ignore
-    /// if break { } { }
-    /// // is ambiguous between:
-    /// if (break { }) { }
-    /// // - or -
-    /// if (break) { } { }
-    /// ```
+    // When we are parsing an optional suffix expression, we cannot allow blocks
+    // if structs are not allowed.
+    //
+    // Example:
+    //
+    //     if break {} {}
+    //
+    // is ambiguous between:
+    //
+    //     if (break {}) {}
+    //     if (break) {} {}
     #[cfg(feature = "full")]
     macro_rules! opt_ambiguous_expr {
         ($i:expr, $allow_struct:ident) => {
@@ -698,7 +704,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(expr_no_struct -> Expr, ambiguous_expr!(false));
 
-    /// Parse an arbitrary expression.
+    // Parse an arbitrary expression.
     #[cfg(feature = "full")]
     fn ambiguous_expr(i: Cursor,
                       allow_struct: bool,
@@ -725,7 +731,7 @@ pub mod parsing {
         )
     }
 
-    /// Parse a left-associative binary operator.
+    // Parse a left-associative binary operator.
     macro_rules! binop {
         (
             $name: ident,
@@ -750,21 +756,19 @@ pub mod parsing {
         }
     }
 
-    /// ```ignore
-    /// <placement> = <placement> ..
-    /// <placement> += <placement> ..
-    /// <placement> -= <placement> ..
-    /// <placement> *= <placement> ..
-    /// <placement> /= <placement> ..
-    /// <placement> %= <placement> ..
-    /// <placement> ^= <placement> ..
-    /// <placement> &= <placement> ..
-    /// <placement> |= <placement> ..
-    /// <placement> <<= <placement> ..
-    /// <placement> >>= <placement> ..
-    /// ```
-    ///
-    /// NOTE: This operator is right-associative.
+    // <placement> = <placement> ..
+    // <placement> += <placement> ..
+    // <placement> -= <placement> ..
+    // <placement> *= <placement> ..
+    // <placement> /= <placement> ..
+    // <placement> %= <placement> ..
+    // <placement> ^= <placement> ..
+    // <placement> &= <placement> ..
+    // <placement> |= <placement> ..
+    // <placement> <<= <placement> ..
+    // <placement> >>= <placement> ..
+    //
+    // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
     named!(assign_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(placement_expr, allow_struct, allow_block) >>
@@ -800,14 +804,12 @@ pub mod parsing {
         (e)
     ));
 
-    /// ```ignore
-    /// <range> <- <range> ..
-    /// ```
-    ///
-    /// NOTE: The `in place { expr }` version of this syntax is parsed in
-    /// `atom_expr`, not here.
-    ///
-    /// NOTE: This operator is right-associative.
+    // <range> <- <range> ..
+    //
+    // NOTE: The `in place { expr }` version of this syntax is parsed in
+    // `atom_expr`, not here.
+    //
+    // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
     named!(placement_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(range_expr, allow_struct, allow_block) >>
@@ -831,19 +833,17 @@ pub mod parsing {
         (e)
     ));
 
-    /// ```ignore
-    /// <or> ... <or> ..
-    /// <or> .. <or> ..
-    /// <or> ..
-    /// ```
-    ///
-    /// NOTE: This is currently parsed oddly - I'm not sure of what the exact
-    /// rules are for parsing these expressions are, but this is not correct.
-    /// For example, `a .. b .. c` is not a legal expression. It should not
-    /// be parsed as either `(a .. b) .. c` or `a .. (b .. c)` apparently.
-    ///
-    /// NOTE: The form of ranges which don't include a preceding expression are
-    /// parsed by `atom_expr`, rather than by this function.
+    // <or> ... <or> ..
+    // <or> .. <or> ..
+    // <or> ..
+    //
+    // NOTE: This is currently parsed oddly - I'm not sure of what the exact
+    // rules are for parsing these expressions are, but this is not correct.
+    // For example, `a .. b .. c` is not a legal expression. It should not
+    // be parsed as either `(a .. b) .. c` or `a .. (b .. c)` apparently.
+    //
+    // NOTE: The form of ranges which don't include a preceding expression are
+    // parsed by `atom_expr`, rather than by this function.
     #[cfg(feature = "full")]
     named!(range_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(or_expr, allow_struct, allow_block) >>
@@ -863,27 +863,21 @@ pub mod parsing {
         (e)
     ));
 
-    /// ```ignore
-    /// <and> || <and> ...
-    /// ```
+    // <and> || <and> ...
     binop!(or_expr, and_expr, map!(punct!(||), BinOp::Or));
 
-    /// ```ignore
-    /// <compare> && <compare> ...
-    /// ```
+    // <compare> && <compare> ...
     binop!(and_expr, compare_expr, map!(punct!(&&), BinOp::And));
 
-    /// ```ignore
-    /// <bitor> == <bitor> ...
-    /// <bitor> != <bitor> ...
-    /// <bitor> >= <bitor> ...
-    /// <bitor> <= <bitor> ...
-    /// <bitor> > <bitor> ...
-    /// <bitor> < <bitor> ...
-    /// ```
-    ///
-    /// NOTE: This operator appears to be parsed as left-associative, but errors
-    /// if it is used in a non-associative manner.
+    // <bitor> == <bitor> ...
+    // <bitor> != <bitor> ...
+    // <bitor> >= <bitor> ...
+    // <bitor> <= <bitor> ...
+    // <bitor> > <bitor> ...
+    // <bitor> < <bitor> ...
+    //
+    // NOTE: This operator appears to be parsed as left-associative, but errors
+    // if it is used in a non-associative manner.
     binop!(compare_expr, bitor_expr, alt!(
         punct!(==) => { BinOp::Eq }
         |
@@ -905,9 +899,7 @@ pub mod parsing {
         punct!(>) => { BinOp::Gt }
     ));
 
-    /// ```ignore
-    /// <bitxor> | <bitxor> ...
-    /// ```
+    // <bitxor> | <bitxor> ...
     binop!(bitor_expr, bitxor_expr, do_parse!(
         not!(punct!(||)) >>
         not!(punct!(|=)) >>
@@ -915,9 +907,7 @@ pub mod parsing {
         (BinOp::BitOr(t))
     ));
 
-    /// ```ignore
-    /// <bitand> ^ <bitand> ...
-    /// ```
+    // <bitand> ^ <bitand> ...
     binop!(bitxor_expr, bitand_expr, do_parse!(
         // NOTE: Make sure we aren't looking at ^=.
         not!(punct!(^=)) >>
@@ -925,9 +915,7 @@ pub mod parsing {
         (BinOp::BitXor(t))
     ));
 
-    /// ```ignore
-    /// <shift> & <shift> ...
-    /// ```
+    // <shift> & <shift> ...
     binop!(bitand_expr, shift_expr, do_parse!(
         // NOTE: Make sure we aren't looking at && or &=.
         not!(punct!(&&)) >>
@@ -936,31 +924,25 @@ pub mod parsing {
         (BinOp::BitAnd(t))
     ));
 
-    /// ```ignore
-    /// <arith> << <arith> ...
-    /// <arith> >> <arith> ...
-    /// ```
+    // <arith> << <arith> ...
+    // <arith> >> <arith> ...
     binop!(shift_expr, arith_expr, alt!(
         punct!(<<) => { BinOp::Shl }
         |
         punct!(>>) => { BinOp::Shr }
     ));
 
-    /// ```ignore
-    /// <term> + <term> ...
-    /// <term> - <term> ...
-    /// ```
+    // <term> + <term> ...
+    // <term> - <term> ...
     binop!(arith_expr, term_expr, alt!(
         punct!(+) => { BinOp::Add }
         |
         punct!(-) => { BinOp::Sub }
     ));
 
-    /// ```ignore
-    /// <cast> * <cast> ...
-    /// <cast> / <cast> ...
-    /// <cast> % <cast> ...
-    /// ```
+    // <cast> * <cast> ...
+    // <cast> / <cast> ...
+    // <cast> % <cast> ...
     binop!(term_expr, cast_expr, alt!(
         punct!(*) => { BinOp::Mul }
         |
@@ -969,10 +951,8 @@ pub mod parsing {
         punct!(%) => { BinOp::Rem }
     ));
 
-    /// ```ignore
-    /// <unary> as <ty>
-    /// <unary> : <ty>
-    /// ```
+    // <unary> as <ty>
+    // <unary> : <ty>
     named!(cast_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(unary_expr, allow_struct, allow_block) >>
         many0!(alt!(
@@ -1007,12 +987,10 @@ pub mod parsing {
         (e)
     ));
 
-    /// ```
-    /// <UnOp> <trailer>
-    /// & <trailer>
-    /// &mut <trailer>
-    /// box <trailer>
-    /// ```
+    // <UnOp> <trailer>
+    // & <trailer>
+    // &mut <trailer>
+    // box <trailer>
     #[cfg(feature = "full")]
     named!(unary_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
         do_parse!(
@@ -1062,14 +1040,12 @@ pub mod parsing {
         call!(trailer_expr, allow_struct, allow_block)
     ));
 
-    /// ```ignore
-    /// <atom> (..<args>) ...
-    /// <atom> . <ident> (..<args>) ...
-    /// <atom> . <ident> ...
-    /// <atom> . <lit> ...
-    /// <atom> [ <expr> ] ...
-    /// <atom> ? ...
-    /// ```
+    // <atom> (..<args>) ...
+    // <atom> . <ident> (..<args>) ...
+    // <atom> . <ident> ...
+    // <atom> . <lit> ...
+    // <atom> [ <expr> ] ...
+    // <atom> ? ...
     #[cfg(feature = "full")]
     named!(trailer_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
         mut e: call!(atom_expr, allow_struct, allow_block) >>
@@ -1152,8 +1128,8 @@ pub mod parsing {
         (e)
     ));
 
-    /// Parse all atomic expressions which don't have to worry about precidence
-    /// interactions, as they are fully contained.
+    // Parse all atomic expressions which don't have to worry about precidence
+    // interactions, as they are fully contained.
     #[cfg(feature = "full")]
     named!(atom_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
         syn!(ExprGroup) => { ExprKind::Group } // must be placed first
@@ -1659,7 +1635,7 @@ pub mod parsing {
         // position where structs are not allowed, such as in if statement
         // conditions. For example:
         //
-        // if return { println!("A") } { } // Prints "A"
+        // if return { println!("A") } {} // Prints "A"
         ret_value: option!(ambiguous_expr!(allow_struct)) >>
         (ExprRet {
             expr: ret_value.map(Box::new),
@@ -2281,8 +2257,8 @@ mod printing {
     use attr::FilterAttrs;
     use quote::{Tokens, ToTokens};
 
-    /// If the given expression is a bare `ExprStruct`, wraps it in parenthesis
-    /// before appending it to `Tokens`.
+    // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
+    // before appending it to `Tokens`.
     #[cfg(feature = "full")]
     fn wrap_bare_struct(tokens: &mut Tokens, e: &Expr) {
         if let ExprKind::Struct(_) = e.node {

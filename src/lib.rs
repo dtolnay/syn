@@ -126,7 +126,7 @@ use synom::{Synom, SynomBuffer};
 ///
 /// # Examples
 ///
-/// ```rust,ignore
+/// ```rust
 /// extern crate proc_macro;
 /// use proc_macro::TokenStream;
 ///
@@ -137,7 +137,9 @@ use synom::{Synom, SynomBuffer};
 ///
 /// use syn::DeriveInput;
 ///
+/// # const IGNORE_TOKENS: &str = stringify! {
 /// #[proc_macro_derive(MyMacro)]
+/// # };
 /// pub fn my_macro(input: TokenStream) -> TokenStream {
 ///     // Parse the tokens into a syntax tree
 ///     let ast: DeriveInput = syn::parse(input).unwrap();
@@ -147,9 +149,11 @@ use synom::{Synom, SynomBuffer};
 ///         /* ... */
 ///     };
 ///
-///     // Parse back to a token stream and return it
-///     expanded.parse().unwrap()
+///     // Convert into a token stream and return it
+///     expanded.into()
 /// }
+/// #
+/// # fn main() {}
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>

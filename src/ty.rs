@@ -256,13 +256,13 @@ ast_struct! {
     /// separately. `position` represents the index of the associated
     /// item qualified with this Self type.
     ///
-    /// ```rust,ignore
+    /// ```text
     /// <Vec<T> as a::b::Trait>::AssociatedItem
-    ///  ^~~~~     ~~~~~~~~~~~~~~^
+    ///  ^~~~~~    ~~~~~~~~~~~~~~^
     ///  ty        position = 3
     ///
     /// <Vec<T>>::AssociatedItem
-    ///  ^~~~~    ^
+    ///  ^~~~~~   ^
     ///  ty       position = 0
     /// ```
     pub struct QSelf {
