@@ -379,7 +379,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
             self.0.push(expr);
 
             Expr {
-                node: ExprKind::Tup(ExprTup {
+                node: ExprKind::Tuple(ExprTuple {
                     args: Delimited::new(),
                     paren_token: tokens::Paren::default(),
                     lone_comma: None

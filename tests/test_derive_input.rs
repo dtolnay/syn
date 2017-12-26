@@ -271,7 +271,7 @@ fn test_enum() {
                     discriminant: Some(Expr {
                         node: ExprTupField {
                             expr: Box::new(Expr {
-                                node: ExprTup {
+                                node: ExprTuple {
                                     lone_comma: None,
                                     paren_token: Default::default(),
                                     args: vec![

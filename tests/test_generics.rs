@@ -43,7 +43,7 @@ fn test_split_for_impl() {
                 }],
                 ident: "T".into(),
                 bounds: vec![TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()))].into(),
-                default: Some(TypeTup {
+                default: Some(TypeTuple {
                     tys: Default::default(),
                     lone_comma: None,
                     paren_token: Default::default(),
