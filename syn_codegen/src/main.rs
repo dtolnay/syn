@@ -1,5 +1,5 @@
-//! This crate automatically generates the definition of the Visitor,
-//! VisitorMut, and Folder traits in `syn` based on the `syn` source. It
+//! This crate automatically generates the definition of the `Visitor`,
+//! `VisitorMut`, and `Folder` traits in `syn` based on the `syn` source. It
 //! discovers structs and enums declared with the `ast_*` macros and generates
 //! the functions for those types.
 //!
@@ -9,6 +9,8 @@
 //! 2. This code cannot discover submodules which are located in subdirectories
 //!    - only submodules located in the same directory.
 //! 3. The path to `syn` is hardcoded.
+
+#![cfg_attr(feature = "cargo-clippy", allow(redundant_closure))]
 
 extern crate syn;
 #[macro_use] extern crate synom;
@@ -82,11 +84,11 @@ type Lookup<'a> = BTreeMap<Ident, AstItem>;
 
 fn load_file<P: AsRef<Path>>(
     name: P,
-    features: Tokens,
+    features: &Tokens,
     lookup: &mut Lookup,
 ) -> Result<(), Error> {
     let name = name.as_ref();
-    let parent = name.parent().ok_or(err_msg("no parent path"))?;
+    let parent = name.parent().ok_or_else(|| err_msg("no parent path"))?;
 
     let mut f = File::open(name)?;
     let mut src = String::new();
@@ -121,7 +123,7 @@ fn load_file<P: AsRef<Path>>(
                 // Look up the submodule file, and recursively parse it.
                 // XXX: Only handles same-directory .rs file submodules.
                 let path = parent.join(&format!("{}.rs", item.ident.as_ref()));
-                load_file(path, features, lookup)?;
+                load_file(path, &features, lookup)?;
             }
             Item::Macro(ref item) => {
                 // Lookip any #[cfg()] attributes directly on the macro
@@ -148,7 +150,7 @@ fn load_file<P: AsRef<Path>>(
                 // Record our features on the parsed AstItems.
                 for mut item in found {
                     features.to_tokens(&mut item.features);
-                    lookup.insert(item.item.ident.clone(), item);
+                    lookup.insert(item.item.ident, item);
                 }
             }
             _ => {}
@@ -171,7 +173,7 @@ mod parsing {
         punct!(#) >>
         id: syn!(Ident) >>
         cond_reduce!(id.as_ref() == "full", epsilon!()) >>
-        (())
+        ()
     )), |s| if s.is_some() {
         (quote!(#[cfg(feature = "full")]), true)
     } else {
@@ -227,7 +229,7 @@ mod parsing {
         keyword!(pub) >>
         variant: syn!(Ident) >>
         member: map!(parens!(alt!(
-            call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.item.ident.clone()), Some(x)) }
+            call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.item.ident), Some(x)) }
             |
             syn!(Path) => { |x| (x, None) }
         )), |x| x.0) >>
@@ -323,8 +325,8 @@ mod codegen {
             _ => panic!("Expected at least 1 type argument here"),
         };
 
-        match *data.args.first().expect("Expected at least 1 type argument here").item() {
-            &GenericArgument::Type(ref ty) => ty,
+        match **data.args.first().expect("Expected at least 1 type argument here").item() {
+            GenericArgument::Type(ref ty) => ty,
             _ => panic!("Expected at least 1 type argument here"),
         }
     }
@@ -336,7 +338,7 @@ mod codegen {
         name: &Tokens,
         eos_full: &mut bool,
     ) -> Option<String> {
-        if let Some(ref s) = lookup.get(type_name) {
+        if let Some(s) = lookup.get(type_name) {
             *eos_full = s.eos_full;
             Some(match kind {
                 Kind::Visit => format!(
@@ -594,7 +596,7 @@ mod codegen {
                 for variant in &e.variants {
                     let fields: Vec<(&Field, Tokens)> = match variant.item().data {
                         VariantData::Struct(..) => {
-                            panic!("Doesn't support enum struct variants");
+                            panic!("Doesn't support enum struct variants")
                         }
                         VariantData::Tuple(ref fields, ..) => {
                             let binding = format!("        {}(", variant.item().ident);
@@ -732,7 +734,7 @@ mod codegen {
 
 fn main() {
     let mut lookup = BTreeMap::new();
-    load_file(SYN_CRATE_ROOT, quote!(), &mut lookup).unwrap();
+    load_file(SYN_CRATE_ROOT, &quote!(), &mut lookup).unwrap();
 
     // Load in any terminal types
     for &tt in TERMINAL_TYPES {
