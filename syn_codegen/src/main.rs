@@ -23,6 +23,7 @@ use syn::{Item, Attribute, DeriveInput, Ident};
 use failure::{Error, err_msg};
 
 use std::io::{Read, Write};
+use std::fmt::{self, Debug};
 use std::fs::File;
 use std::path::Path;
 use std::collections::BTreeMap;
@@ -69,8 +70,7 @@ pub struct AstItem {
     eos_full: bool,
 }
 
-use std::fmt;
-impl fmt::Debug for AstItem {
+impl Debug for AstItem {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("AstItem")
             .field("item", &self.item)
@@ -280,6 +280,7 @@ mod codegen {
     use super::{AstItem, Lookup};
     use syn::*;
     use quote::{Tokens, ToTokens};
+    use std::fmt::{self, Display};
 
     #[derive(Default)]
     pub struct State {
@@ -319,6 +320,50 @@ mod codegen {
         Fold,
     }
 
+    enum Operand {
+        Borrowed(Tokens),
+        Owned(Tokens),
+    }
+
+    impl Operand {
+        fn tokens(&self) -> &Tokens {
+            match *self {
+                Operand::Borrowed(ref n) => n,
+                Operand::Owned(ref n) => n,
+            }
+        }
+
+        fn ref_tokens(&self) -> Tokens {
+            match *self {
+                Operand::Borrowed(ref n) => n.clone(),
+                Operand::Owned(ref n) => quote!(&#n),
+            }
+        }
+
+        fn ref_mut_tokens(&self) -> Tokens {
+            match *self {
+                Operand::Borrowed(ref n) => n.clone(),
+                Operand::Owned(ref n) => quote!(&mut #n),
+            }
+        }
+
+        fn owned_tokens(&self) -> Tokens {
+            match *self {
+                Operand::Borrowed(ref n) => quote!(*#n),
+                Operand::Owned(ref n) => n.clone(),
+            }
+        }
+    }
+
+    impl Display for Operand {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                Operand::Borrowed(ref n) => Display::fmt(n, formatter),
+                Operand::Owned(ref n) => Display::fmt(n, formatter),
+            }
+        }
+    }
+
     fn first_arg(params: &PathArguments) -> &Type {
         let data = match *params {
             PathArguments::AngleBracketed(ref data) => data,
@@ -335,26 +380,26 @@ mod codegen {
         type_name: &Ident,
         lookup: &Lookup,
         kind: Kind,
-        name: &Tokens,
+        name: &Operand,
         eos_full: &mut bool,
     ) -> Option<String> {
         if let Some(s) = lookup.get(type_name) {
             *eos_full = s.eos_full;
             Some(match kind {
                 Kind::Visit => format!(
-                    "_visitor.visit_{under_name}(&{name})",
+                    "_visitor.visit_{under_name}({name})",
                     under_name = under_name(type_name),
-                    name = name,
+                    name = name.ref_tokens(),
                 ),
                 Kind::VisitMut => format!(
-                    "_visitor.visit_{under_name}_mut(&mut {name})",
+                    "_visitor.visit_{under_name}_mut({name})",
                     under_name = under_name(type_name),
-                    name = name,
+                    name = name.ref_mut_tokens(),
                 ),
                 Kind::Fold => format!(
                     "_visitor.fold_{under_name}({name})",
                     under_name = under_name(type_name),
-                    name = name,
+                    name = name.owned_tokens(),
                 )
             })
         } else {
@@ -366,7 +411,7 @@ mod codegen {
         seg: &PathSegment,
         lookup: &Lookup,
         kind: Kind,
-        name: &Tokens,
+        name: &Operand,
         eos_full: &mut bool,
     ) -> Option<String> {
         if let Some(res) = simple_visit(&seg.ident, lookup, kind, name, eos_full) {
@@ -377,12 +422,12 @@ mod codegen {
             let ty = first_arg(&seg.arguments);
             if let Some(seg) = last_segment(ty) {
                 if kind == Kind::Fold {
-                    let name = quote!(*#name);
+                    let name = name.tokens();
                     if let Some(val) = simple_visit(
                         &seg.ident,
                         lookup,
                         kind,
-                        &name,
+                        &Operand::Owned(quote!(*#name)),
                         eos_full,
                     ) {
                         return Some(format!("Box::new({})", val));
@@ -400,7 +445,7 @@ mod codegen {
         seg: &PathSegment,
         lookup: &Lookup,
         kind: Kind,
-        name: &Tokens,
+        name: &Operand,
         eos_full: &mut bool,
     ) -> Option<String> {
         if let Some(res) = box_visit(seg, lookup, kind, name, eos_full) {
@@ -411,22 +456,26 @@ mod codegen {
             let is_vec = seg.ident == "Vec";
             let ty = first_arg(&seg.arguments);
             if let Some(seg) = last_segment(ty) {
-                if let Some(val) = box_visit(seg, lookup, kind, &quote!(it), eos_full) {
+                let operand = match kind {
+                    Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
+                    Kind::Fold => Operand::Owned(quote!(it)),
+                };
+                if let Some(val) = box_visit(seg, lookup, kind, &operand, eos_full) {
                     return Some(match kind {
                         Kind::Visit => {
                             if is_vec {
                                 format!(
-                                    "for it in ({name}).iter() {{ {val} }}",
-                                    name = name,
+                                    "for it in {name} {{ {val} }}",
+                                    name = name.ref_tokens(),
                                     val = val,
                                 )
                             } else {
                                 format!(
-                                    "for el in ({name}).iter() {{ \
+                                    "for el in {name} {{ \
                                        let it = el.item(); \
                                        {val} \
                                     }}",
-                                    name = name,
+                                    name = name.ref_tokens(),
                                     val = val,
                                 )
                             }
@@ -434,17 +483,17 @@ mod codegen {
                         Kind::VisitMut => {
                             if is_vec {
                                 format!(
-                                    "for mut it in ({name}).iter_mut() {{ {val} }}",
-                                    name = name,
+                                    "for mut it in {name} {{ {val} }}",
+                                    name = name.ref_mut_tokens(),
                                     val = val,
                                 )
                             } else {
                                 format!(
-                                    "for mut el in ({name}).iter_mut() {{ \
+                                    "for mut el in {name} {{ \
                                        let mut it = el.item_mut(); \
                                        {val} \
                                      }}",
-                                    name = name,
+                                    name = name.ref_mut_tokens(),
                                     val = val,
                                 )
                             }
@@ -452,7 +501,7 @@ mod codegen {
                         Kind::Fold => {
                             format!(
                                 "FoldHelper::lift({name}, |it| {{ {val} }})",
-                                name = name,
+                                name = name.owned_tokens(),
                                 val = val,
                             )
                         }
@@ -468,7 +517,7 @@ mod codegen {
         seg: &PathSegment,
         lookup: &Lookup,
         kind: Kind,
-        name: &Tokens,
+        name: &Operand,
         eos_full: &mut bool,
     ) -> Option<String> {
         if let Some(res) = vec_visit(seg, lookup, kind, name, eos_full) {
@@ -479,24 +528,24 @@ mod codegen {
             let ty = first_arg(&seg.arguments);
             if let Some(seg) = last_segment(ty) {
                 let it = match kind {
-                    Kind::Fold => quote!(it),
-                    _ => quote!(*it),
+                    Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
+                    Kind::Fold => Operand::Owned(quote!(it)),
                 };
                 if let Some(val) = vec_visit(seg, lookup, kind, &it, eos_full) {
                     return Some(match kind {
                         Kind::Visit => format!(
                             "if let Some(ref it) = {name} {{ {val} }}",
-                            name = name,
+                            name = name.owned_tokens(),
                             val = val,
                         ),
                         Kind::VisitMut => format!(
                             "if let Some(ref mut it) = {name} {{ {val} }}",
-                            name = name,
+                            name = name.owned_tokens(),
                             val = val,
                         ),
                         Kind::Fold => format!(
                             "({name}).map(|it| {{ {val} }})",
-                            name = name,
+                            name = name.owned_tokens(),
                             val = val,
                         ),
                     });
@@ -507,7 +556,7 @@ mod codegen {
         None
     }
 
-    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Tokens) -> String {
+    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> String {
         if let Some(seg) = last_segment(ty) {
             let mut eos_full = false;
             if let Some(res) = option_visit(seg, lookup, kind, name, &mut eos_full) {
@@ -521,7 +570,7 @@ mod codegen {
         }
 
         if kind == Kind::Fold {
-            return name.to_string();
+            return name.owned_tokens().to_string();
         }
         return format!("// Skipped field {}", name);
     }
@@ -658,15 +707,15 @@ mod codegen {
                     for (field, binding) in fields {
                         state.visit_impl.push_str(&format!(
                             "            {};\n",
-                            visit(&field.ty, lookup, Kind::Visit, &quote!(*#binding)),
+                            visit(&field.ty, lookup, Kind::Visit, &Operand::Borrowed(binding.clone())),
                         ));
                         state.visit_mut_impl.push_str(&format!(
                             "            {};\n",
-                            visit(&field.ty, lookup, Kind::VisitMut, &quote!(*#binding)),
+                            visit(&field.ty, lookup, Kind::VisitMut, &Operand::Borrowed(binding.clone())),
                         ));
                         state.fold_impl.push_str(&format!(
                             "                {},\n",
-                            visit(&field.ty, lookup, Kind::Fold, &binding),
+                            visit(&field.ty, lookup, Kind::Fold, &Operand::Owned(binding)),
                         ));
                     }
                     state.fold_impl.push_str("            )\n");
@@ -703,6 +752,7 @@ mod codegen {
                 };
 
                 for (field, ref_toks) in fields {
+                    let ref_toks = Operand::Owned(ref_toks);
                     state.visit_impl.push_str(&format!(
                         "    {};\n", visit(&field.ty, lookup, Kind::Visit, &ref_toks)
                     ));
@@ -784,6 +834,7 @@ macro_rules! full {
 
 // Unreachable code is generated sometimes without the full feature.
 #![allow(unreachable_code)]
+#![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
 
 use *;
 use synom::delimited::Delimited;
@@ -843,6 +894,8 @@ pub trait Folder {{
 //! call `visit::walk_*` to apply the default traversal algorithm, or prevent
 //! deeper traversal by doing nothing.
 
+#![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
+
 use *;
 
 {full_macro}
@@ -874,6 +927,8 @@ pub trait Visitor<'ast> {{
 //! happens with its node, it can do its own traversal of the node's children,
 //! call `visit::walk_*` to apply the default traversal algorithm, or prevent
 //! deeper traversal by doing nothing.
+
+#![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
 
