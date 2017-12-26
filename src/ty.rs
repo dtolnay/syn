@@ -755,6 +755,8 @@ pub mod parsing {
             keyword!(self) => { Into::into }
             |
             keyword!(Self) => { Into::into }
+            |
+            keyword!(crate) => { Into::into }
         )
     ));
 

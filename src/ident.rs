@@ -165,6 +165,12 @@ impl From<Token![super]> for Ident {
     }
 }
 
+impl From<Token![crate]> for Ident {
+    fn from(tok: Token![crate]) -> Self {
+        Ident::new(Term::intern("crate"), tok.0)
+    }
+}
+
 impl<'a> From<Cow<'a, str>> for Ident {
     fn from(s: Cow<'a, str>) -> Self {
         Ident::new(Term::intern(&s), Span::default())
