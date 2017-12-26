@@ -91,7 +91,12 @@ fn load_file<P: AsRef<Path>>(
     f.read_to_string(&mut src)?;
 
     // Parse the file
-    let file = syn::parse_file(&src).map_err(|_| io::ErrorKind::Other)?;
+    let file = syn::parse_file(&src).map_err(|_| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("failed to parse {}", name.display()),
+        )
+    })?;
 
     // Collect all of the interesting AstItems declared in this file or submodules.
     'items: for item in &file.items {
