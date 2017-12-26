@@ -9,4 +9,5 @@ publish = false # this is an internal crate which should never be published
 syn = { path = "..", features = ["full", "extra-traits"] }
 synom = { path = "../synom" }
 quote = { git = 'https://github.com/dtolnay/quote' }
+failure = "0.1"
 inflections = "1.1"

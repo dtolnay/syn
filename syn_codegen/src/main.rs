@@ -13,12 +13,14 @@
 extern crate syn;
 #[macro_use] extern crate synom;
 #[macro_use] extern crate quote;
+#[macro_use] extern crate failure;
 extern crate inflections;
 
 use quote::{Tokens, ToTokens};
 use syn::{Item, Attribute, DeriveInput, Ident};
+use failure::{Error, err_msg};
 
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 use std::fs::File;
 use std::path::Path;
 use std::collections::BTreeMap;
@@ -82,9 +84,9 @@ fn load_file<P: AsRef<Path>>(
     name: P,
     features: Tokens,
     lookup: &mut Lookup,
-) -> Result<(), io::Error> {
+) -> Result<(), Error> {
     let name = name.as_ref();
-    let parent = name.parent().ok_or(io::ErrorKind::Other)?;
+    let parent = name.parent().ok_or(err_msg("no parent path"))?;
 
     let mut f = File::open(name)?;
     let mut src = String::new();
@@ -92,10 +94,7 @@ fn load_file<P: AsRef<Path>>(
 
     // Parse the file
     let file = syn::parse_file(&src).map_err(|_| {
-        io::Error::new(
-            io::ErrorKind::Other,
-            format!("failed to parse {}", name.display()),
-        )
+        format_err!("failed to parse {}", name.display())
     })?;
 
     // Collect all of the interesting AstItems declared in this file or submodules.
@@ -133,15 +132,15 @@ fn load_file<P: AsRef<Path>>(
                 let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
                     syn::parse_tokens::<parsing::AstStruct>(
                         item.mac.tokens[0].clone().into_tokens()
-                    ).map_err(|_| io::ErrorKind::Other)?.0
+                    ).map_err(|_| err_msg("failed to parse ast_struct"))?.0
                 } else if path_eq(&item.mac.path, &"ast_enum".into()) {
                     syn::parse_tokens::<parsing::AstEnum>(
                         item.mac.tokens[0].clone().into_tokens()
-                    ).map_err(|_| io::ErrorKind::Other)?.0
+                    ).map_err(|_| err_msg("failed to parse ast_enum"))?.0
                 } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
                     syn::parse_tokens::<parsing::AstEnumOfStructs>(
                         item.mac.tokens[0].clone().into_tokens()
-                    ).map_err(|_| io::ErrorKind::Other)?.0
+                    ).map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?.0
                 } else {
                     continue
                 };
