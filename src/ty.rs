@@ -37,7 +37,7 @@ ast_enum_of_structs! {
             pub bang_token: Token![!],
         }),
         /// A tuple (`(A, B, C, D, ...)`)
-        pub Tup(TypeTup {
+        pub Tuple(TypeTuple {
             pub paren_token: tokens::Paren,
             pub tys: Delimited<Type, Token![,]>,
             pub lone_comma: Option<Token![,]>,
@@ -367,7 +367,7 @@ pub mod parsing {
     named!(ambig_ty(allow_plus: bool) -> Type, alt!(
         syn!(TypeGroup) => { Type::Group }
         |
-        // must be before TypeTup
+        // must be before TypeTuple
         syn!(TypeParen) => { Type::Paren }
         |
         // must be before TypePath
@@ -388,7 +388,7 @@ pub mod parsing {
         |
         syn!(TypeNever) => { Type::Never }
         |
-        syn!(TypeTup) => { Type::Tup }
+        syn!(TypeTuple) => { Type::Tuple }
         |
         // Don't try parsing more than one trait bound if we aren't allowing it
         call!(TypeTraitObject::parse, allow_plus) => { Type::TraitObject }
@@ -507,10 +507,10 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for TypeTup {
+    impl Synom for TypeTuple {
         named!(parse -> Self, do_parse!(
             data: parens!(call!(Delimited::parse_terminated)) >>
-            (TypeTup {
+            (TypeTuple {
                 tys: data.0,
                 paren_token: data.1,
                 lone_comma: None, // TODO: does this just not parse?
@@ -899,7 +899,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TypeTup {
+    impl ToTokens for TypeTuple {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.tys.to_tokens(tokens);

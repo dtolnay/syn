@@ -170,9 +170,9 @@ fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct { fold_expr_struct(s
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_try(&mut self, i: ExprTry) -> ExprTry { fold_expr_try(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_tup(&mut self, i: ExprTup) -> ExprTup { fold_expr_tup(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn fold_expr_tup_field(&mut self, i: ExprTupField) -> ExprTupField { fold_expr_tup_field(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_expr_tuple(&mut self, i: ExprTuple) -> ExprTuple { fold_expr_tuple(self, i) }
 
 fn fold_expr_type(&mut self, i: ExprType) -> ExprType { fold_expr_type(self, i) }
 
@@ -372,7 +372,7 @@ fn fold_type_slice(&mut self, i: TypeSlice) -> TypeSlice { fold_type_slice(self,
 
 fn fold_type_trait_object(&mut self, i: TypeTraitObject) -> TypeTraitObject { fold_type_trait_object(self, i) }
 
-fn fold_type_tup(&mut self, i: TypeTup) -> TypeTup { fold_type_tup(self, i) }
+fn fold_type_tuple(&mut self, i: TypeTuple) -> TypeTuple { fold_type_tuple(self, i) }
 
 fn fold_un_op(&mut self, i: UnOp) -> UnOp { fold_un_op(self, i) }
 
@@ -1007,9 +1007,9 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
                 full!(_visitor.fold_expr_method_call(_binding_0)),
             )
         }
-        Tup(_binding_0, ) => {
-            Tup (
-                full!(_visitor.fold_expr_tup(_binding_0)),
+        Tuple(_binding_0, ) => {
+            Tuple (
+                full!(_visitor.fold_expr_tuple(_binding_0)),
             )
         }
         Binary(_binding_0, ) => {
@@ -1272,19 +1272,19 @@ pub fn fold_expr_try<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTry) -> ExprT
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_expr_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTup) -> ExprTup {
-    ExprTup {
-        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
-        paren_token: _i . paren_token,
-        lone_comma: _i . lone_comma,
-    }
-}
-# [ cfg ( feature = "full" ) ]
 pub fn fold_expr_tup_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupField) -> ExprTupField {
     ExprTupField {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         field: _i . field,
         dot_token: _i . dot_token,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_expr_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTuple) -> ExprTuple {
+    ExprTuple {
+        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
+        paren_token: _i . paren_token,
+        lone_comma: _i . lone_comma,
     }
 }
 
@@ -2423,9 +2423,9 @@ pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
                 _visitor.fold_type_never(_binding_0),
             )
         }
-        Tup(_binding_0, ) => {
-            Tup (
-                _visitor.fold_type_tup(_binding_0),
+        Tuple(_binding_0, ) => {
+            Tuple (
+                _visitor.fold_type_tuple(_binding_0),
             )
         }
         Path(_binding_0, ) => {
@@ -2587,8 +2587,8 @@ pub fn fold_type_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTrai
     }
 }
 
-pub fn fold_type_tup<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTup) -> TypeTup {
-    TypeTup {
+pub fn fold_type_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTuple) -> TypeTuple {
+    TypeTuple {
         paren_token: _i . paren_token,
         tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_type(it) }),
         lone_comma: _i . lone_comma,

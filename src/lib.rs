@@ -25,7 +25,7 @@ pub use data::{Field, Variant, VariantData, Visibility, VisRestricted, VisCrate,
 
 mod expr;
 pub use expr::{Expr, ExprKind, ExprBox, ExprInPlace, ExprArray, ExprCall,
-               ExprMethodCall, ExprTup, ExprBinary, ExprUnary, ExprCast,
+               ExprMethodCall, ExprTuple, ExprBinary, ExprUnary, ExprCast,
                ExprType, ExprIf, ExprIfLet, ExprWhile, ExprWhileLet,
                ExprForLoop, ExprLoop, ExprMatch, ExprClosure, ExprBlock,
                ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
@@ -87,7 +87,7 @@ pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg,
              BareFnArgName, BareFnType, ReturnType, MutType, Mutability,
              ParenthesizedGenericArguments, Path, PathArguments, PathSegment,
              PolyTraitRef, QSelf, Type, TypeBinding, Unsafety, TypeSlice,
-             TypeArray, TypePtr, TypeReference, TypeBareFn, TypeNever, TypeTup,
+             TypeArray, TypePtr, TypeReference, TypeBareFn, TypeNever, TypeTuple,
              TypePath, TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer,
              TypeGroup, GenericArgument};
 #[cfg(feature = "printing")]

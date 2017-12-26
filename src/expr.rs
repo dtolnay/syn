@@ -70,7 +70,7 @@ ast_enum_of_structs! {
         }),
 
         /// A tuple, e.g. `(a, b, c, d)`.
-        pub Tup(ExprTup #full {
+        pub Tuple(ExprTuple #full {
             pub args: Delimited<Expr, Token![,]>,
             pub paren_token: tokens::Paren,
             pub lone_comma: Option<Token![,]>,
@@ -1154,7 +1154,7 @@ pub mod parsing {
         |
         syn!(ExprArray) => { ExprKind::Array }
         |
-        syn!(ExprTup) => { ExprKind::Tup }
+        syn!(ExprTuple) => { ExprKind::Tuple }
         |
         syn!(ExprIf) => { ExprKind::If }
         |
@@ -1320,10 +1320,10 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    impl Synom for ExprTup {
+    impl Synom for ExprTuple {
         named!(parse -> Self, do_parse!(
             elems: parens!(call!(Delimited::parse_terminated)) >>
-            (ExprTup {
+            (ExprTuple {
                 args: elems.0,
                 paren_token: elems.1,
                 lone_comma: None, // TODO: parse this
@@ -2354,12 +2354,12 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprTup {
+    impl ToTokens for ExprTuple {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
-                // distinguish ExprTup from ExprParen.
+                // distinguish ExprTuple from ExprParen.
                 if self.args.len() == 1 && !self.args.trailing_delim() {
                     <Token![,]>::default().to_tokens(tokens);
                 }

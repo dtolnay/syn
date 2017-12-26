@@ -143,9 +143,9 @@ fn visit_expr_struct_mut(&mut self, i: &mut ExprStruct) { visit_expr_struct_mut(
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_try_mut(&mut self, i: &mut ExprTry) { visit_expr_try_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_expr_tup_mut(&mut self, i: &mut ExprTup) { visit_expr_tup_mut(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_expr_tup_field_mut(&mut self, i: &mut ExprTupField) { visit_expr_tup_field_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_expr_tuple_mut(&mut self, i: &mut ExprTuple) { visit_expr_tuple_mut(self, i) }
 
 fn visit_expr_type_mut(&mut self, i: &mut ExprType) { visit_expr_type_mut(self, i) }
 
@@ -345,7 +345,7 @@ fn visit_type_slice_mut(&mut self, i: &mut TypeSlice) { visit_type_slice_mut(sel
 
 fn visit_type_trait_object_mut(&mut self, i: &mut TypeTraitObject) { visit_type_trait_object_mut(self, i) }
 
-fn visit_type_tup_mut(&mut self, i: &mut TypeTup) { visit_type_tup_mut(self, i) }
+fn visit_type_tuple_mut(&mut self, i: &mut TypeTuple) { visit_type_tuple_mut(self, i) }
 
 fn visit_un_op_mut(&mut self, i: &mut UnOp) { visit_un_op_mut(self, i) }
 
@@ -820,8 +820,8 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
         MethodCall(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_method_call_mut(&mut * _binding_0));
         }
-        Tup(ref mut _binding_0, ) => {
-            full!(_visitor.visit_expr_tup_mut(&mut * _binding_0));
+        Tuple(ref mut _binding_0, ) => {
+            full!(_visitor.visit_expr_tuple_mut(&mut * _binding_0));
         }
         Binary(ref mut _binding_0, ) => {
             _visitor.visit_expr_binary_mut(&mut * _binding_0);
@@ -995,16 +995,16 @@ pub fn visit_expr_try_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
     // Skipped field _i . question_token;
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_expr_tup_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTup) {
-    for mut el in (_i . args).iter_mut() { let mut it = el.item_mut(); _visitor.visit_expr_mut(&mut it) };
-    // Skipped field _i . paren_token;
-    // Skipped field _i . lone_comma;
-}
-# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_tup_field_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTupField) {
     _visitor.visit_expr_mut(&mut _i . expr);
     // Skipped field _i . field;
     // Skipped field _i . dot_token;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTuple) {
+    for mut el in (_i . args).iter_mut() { let mut it = el.item_mut(); _visitor.visit_expr_mut(&mut it) };
+    // Skipped field _i . paren_token;
+    // Skipped field _i . lone_comma;
 }
 
 pub fn visit_expr_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprType) {
@@ -1862,8 +1862,8 @@ pub fn visit_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
         Never(ref mut _binding_0, ) => {
             _visitor.visit_type_never_mut(&mut * _binding_0);
         }
-        Tup(ref mut _binding_0, ) => {
-            _visitor.visit_type_tup_mut(&mut * _binding_0);
+        Tuple(ref mut _binding_0, ) => {
+            _visitor.visit_type_tuple_mut(&mut * _binding_0);
         }
         Path(ref mut _binding_0, ) => {
             _visitor.visit_type_path_mut(&mut * _binding_0);
@@ -1978,7 +1978,7 @@ pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
     for mut el in (_i . bounds).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_param_bound_mut(&mut it) };
 }
 
-pub fn visit_type_tup_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTup) {
+pub fn visit_type_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTuple) {
     // Skipped field _i . paren_token;
     for mut el in (_i . tys).iter_mut() { let mut it = el.item_mut(); _visitor.visit_type_mut(&mut it) };
     // Skipped field _i . lone_comma;
