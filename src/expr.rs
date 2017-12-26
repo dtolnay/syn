@@ -1233,7 +1233,7 @@ pub mod parsing {
             (ExprGroup {
                 expr: Box::new(e.0),
                 group_token: e.1,
-            }.into())
+            })
         ));
     }
 
@@ -1243,7 +1243,7 @@ pub mod parsing {
             (ExprParen {
                 expr: Box::new(e.0),
                 paren_token: e.1,
-            }.into())
+            })
         ));
     }
 
@@ -1463,7 +1463,7 @@ pub mod parsing {
                 block: catch_block,
                 do_token: do_,
                 catch_token: catch_,
-            }.into())
+            })
         ));
     }
 
@@ -1494,7 +1494,7 @@ pub mod parsing {
                     map!(punct!(,), Some)
                 )) >>
                 comma2: cond!(!arm_expr_requires_comma(&expr), option!(punct!(,))) >>
-                (expr, comma1.and_then(|x| x).or(comma2.and_then(|x| x)))
+                (expr, comma1.and_then(|x| x).or_else(|| comma2.and_then(|x| x)))
             ) >>
             (Arm {
                 rocket_token: rocket,
@@ -1694,7 +1694,7 @@ pub mod parsing {
             )
             |
             map!(syn!(Ident), |name| FieldValue {
-                ident: name.clone(),
+                ident: name,
                 expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
                 is_shorthand: true,
                 attrs: Vec::new(),
@@ -2046,7 +2046,7 @@ pub mod parsing {
                         } else {
                             BindingMode::ByValue(mutability)
                         },
-                        ident: ident.clone(),
+                        ident: ident,
                         subpat: None,
                         at_token: None,
                     }.into();
@@ -2409,7 +2409,7 @@ mod printing {
                        if_false: &Option<Box<Expr>>)
     {
         if let Some(ref if_false) = *if_false {
-            TokensOrDefault(&else_token).to_tokens(tokens);
+            TokensOrDefault(else_token).to_tokens(tokens);
 
             // If we are not one of the valid expressions to exist in an else
             // clause, wrap ourselves in a block.

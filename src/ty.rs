@@ -1026,6 +1026,7 @@ mod printing {
     }
 
     impl ToTokens for GenericArgument {
+        #[cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),

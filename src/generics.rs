@@ -421,7 +421,7 @@ mod printing {
 
     impl<'a> ToTokens for ImplGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(&self.0) {
+            if empty_normal_generics(self.0) {
                 return;
             }
 
@@ -457,7 +457,7 @@ mod printing {
 
     impl<'a> ToTokens for TypeGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(&self.0) {
+            if empty_normal_generics(self.0) {
                 return;
             }
 
@@ -485,7 +485,7 @@ mod printing {
 
     impl<'a> ToTokens for Turbofish<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !empty_normal_generics(&self.0) {
+            if !empty_normal_generics(self.0) {
                 <Token![::]>::default().to_tokens(tokens);
                 TypeGenerics(self.0).to_tokens(tokens);
             }

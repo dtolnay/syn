@@ -38,7 +38,7 @@ impl Attribute {
         };
 
         if self.tts.is_empty() {
-            return Some(MetaItem::Term(name.clone()));
+            return Some(MetaItem::Term(*name));
         }
 
         if self.tts.len() == 1 {
@@ -47,7 +47,7 @@ impl Attribute {
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
                         paren_token: tokens::Paren(Span(self.tts[0].0.span)),
-                        ident: name.clone(),
+                        ident: *name,
                         nested: nested_meta_items,
                     }));
                 }
@@ -58,7 +58,7 @@ impl Attribute {
             if let TokenNode::Op('=', Spacing::Alone) = self.tts[0].0.kind {
                 if let TokenNode::Literal(ref lit) = self.tts[1].0.kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
-                        ident: name.clone(),
+                        ident: *name,
                         eq_token: Token![=]([Span(self.tts[0].0.span)]),
                         lit: Lit {
                             value: LitKind::Other(lit.clone()),

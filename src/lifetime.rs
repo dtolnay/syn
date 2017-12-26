@@ -47,7 +47,7 @@ impl Lifetime {
         }
 
         if !xid_ok(&s[1..]) {
-            panic!("{:?} is not a valid lifetime name");
+            panic!("{:?} is not a valid lifetime name", s);
         }
 
         Lifetime {

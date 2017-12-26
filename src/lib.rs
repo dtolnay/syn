@@ -1,6 +1,11 @@
 #![doc(html_root_url = "https://dtolnay.github.io/syn")]
 
-#![cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
+#![cfg_attr(feature = "cargo-clippy", allow(
+    const_static_lifetime,
+    doc_markdown,
+    large_enum_variant,
+    redundant_closure,
+))]
 
 extern crate proc_macro;
 extern crate proc_macro2;

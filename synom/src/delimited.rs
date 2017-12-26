@@ -217,8 +217,17 @@ impl<'a, T, D> IntoIterator for &'a Delimited<T, D> {
     type Item = Element<&'a T, &'a D>;
     type IntoIter = Iter<'a, T, D>;
 
-    fn into_iter(self) -> Iter<'a, T, D> {
+    fn into_iter(self) -> Self::IntoIter {
         <Delimited<T, D>>::iter(self)
+    }
+}
+
+impl<'a, T, D> IntoIterator for &'a mut Delimited<T, D> {
+    type Item = Element<&'a mut T, &'a mut D>;
+    type IntoIter = IterMut<'a, T, D>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        <Delimited<T, D>>::iter_mut(self)
     }
 }
 
@@ -226,7 +235,7 @@ impl<T, D> IntoIterator for Delimited<T, D> {
     type Item = Element<T, D>;
     type IntoIter = IntoIter<T, D>;
 
-    fn into_iter(self) -> IntoIter<T, D> {
+    fn into_iter(self) -> Self::IntoIter {
         IntoIter { inner: self.inner.into_iter() }
     }
 }

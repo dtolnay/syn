@@ -47,7 +47,7 @@ impl PartialEq for TokenTree {
                 match (d1, d2) {
                     (Delimiter::Parenthesis, Delimiter::Parenthesis) |
                     (Delimiter::Brace, Delimiter::Brace) |
-                    (Delimiter::Bracket, Delimiter::Bracket) => {}
+                    (Delimiter::Bracket, Delimiter::Bracket) |
                     (Delimiter::None, Delimiter::None) => {}
                     _ => return false,
                 }
@@ -102,7 +102,7 @@ impl ::std::hash::Hash for TokenTree {
                     Delimiter::None => 3u8.hash(h),
                 }
 
-                for item in stream.clone().into_iter() {
+                for item in stream.clone() {
                     TokenTree(item).hash(h);
                 }
                 0xffu8.hash(h); // terminator w/ a variant we don't normally hash
