@@ -245,7 +245,7 @@ ast_struct! {
     pub struct PolyTraitRef {
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
         pub bound_lifetimes: Option<BoundLifetimes>,
-        /// The `Foo<&'a T>` in `<'a> Foo<&'a T>`
+        /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
         pub trait_ref: Path,
     }
 }
@@ -367,14 +367,14 @@ pub mod parsing {
     named!(ambig_ty(allow_plus: bool) -> Type, alt!(
         syn!(TypeGroup) => { Type::Group }
         |
-        // must be before mac
+        // must be before TypeTup
         syn!(TypeParen) => { Type::Paren }
         |
-        // must be before path
+        // must be before TypePath
         syn!(Macro) => { Type::Macro }
         |
-        // must be before ty_poly_trait_ref
-        call!(ty_path, allow_plus)
+        // must be before TypeTraitObject
+        call!(TypePath::parse, allow_plus) => { Type::Path }
         |
         syn!(TypeSlice) => { Type::Slice }
         |
@@ -390,8 +390,8 @@ pub mod parsing {
         |
         syn!(TypeTup) => { Type::Tup }
         |
-        // Don't try parsing poly_trait_ref if we aren't allowing it
-        call!(ty_poly_trait_ref, allow_plus)
+        // Don't try parsing more than one trait bound if we aren't allowing it
+        call!(TypeTraitObject::parse, allow_plus) => { Type::TraitObject }
         |
         syn!(TypeImplTrait) => { Type::ImplTrait }
         |
@@ -518,46 +518,24 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_path(allow_plus: bool) -> Type, do_parse!(
-        qpath: qpath >>
-        parenthesized: cond!(
-            qpath.1.segments.get(qpath.1.segments.len() - 1).item().arguments.is_empty(),
-            option!(syn!(ParenthesizedGenericArguments))
-        ) >>
-        // Only allow parsing additional bounds if allow_plus is true.
-        bounds: alt!(
-            cond_reduce!(
-                allow_plus,
-                option!(tuple!(punct!(+), call!(Delimited::<TypeParamBound, Token![+]>::parse_terminated)))
-            )
-            |
-            value!(None)
-        ) >>
-        ({
-            let (qself, mut path) = qpath;
-            if let Some(Some(parenthesized)) = parenthesized {
-                let parenthesized = PathArguments::Parenthesized(parenthesized);
-                let len = path.segments.len();
-                path.segments.get_mut(len - 1).item_mut().arguments = parenthesized;
-            }
-            if let Some((plus, rest)) = bounds {
-                let path = TypeParamBound::Trait(
-                    PolyTraitRef {
-                        bound_lifetimes: None,
-                        trait_ref: path,
-                    },
-                    TraitBoundModifier::None,
-                );
-
-                let mut new_bounds = Delimited::new();
-                new_bounds.push(delimited::Element::Delimited(path, plus));
-                new_bounds.extend(rest);
-                TypeTraitObject { dyn_token: None, bounds: new_bounds }.into()
-            } else {
-                TypePath { qself: qself, path: path }.into()
-            }
-        })
-    ));
+    impl TypePath {
+        named!(parse(allow_plus: bool) -> Self, do_parse!(
+            qpath: qpath >>
+            parenthesized: cond!(
+                qpath.1.segments.last().unwrap().item().arguments.is_empty(),
+                option!(syn!(ParenthesizedGenericArguments))
+            ) >>
+            cond!(allow_plus, not!(peek!(punct!(+)))) >>
+            ({
+                let (qself, mut path) = qpath;
+                if let Some(Some(parenthesized)) = parenthesized {
+                    let parenthesized = PathArguments::Parenthesized(parenthesized);
+                    path.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
+                }
+                TypePath { qself: qself, path: path }
+            })
+        ));
+    }
 
     named!(pub qpath -> (Option<QSelf>, Path), alt!(
         map!(syn!(Path), |p| (None, p))
@@ -565,11 +543,7 @@ pub mod parsing {
         do_parse!(
             lt: punct!(<) >>
             this: syn!(Type) >>
-            path: option!(do_parse!(
-                as_: keyword!(as) >>
-                path: syn!(Path) >>
-                (as_, path)
-            )) >>
+            path: option!(tuple!(keyword!(as), syn!(Path))) >>
             gt: punct!(>) >>
             colon2: punct!(::) >>
             rest: call!(Delimited::parse_separated_nonempty) >>
@@ -629,19 +603,21 @@ pub mod parsing {
         ));
     }
 
-    // Only allow multiple trait references if allow_plus is true.
-    named!(ty_poly_trait_ref(allow_plus: bool) -> Type, do_parse!(
-        dyn_token: option!(keyword!(dyn)) >>
-        bounds: alt!(
-            cond_reduce!(allow_plus, call!(Delimited::parse_terminated_nonempty))
-            |
-            syn!(TypeParamBound) => { |x| vec![x].into() }
-        ) >>
-        (TypeTraitObject {
-            dyn_token: dyn_token,
-            bounds: bounds,
-        }.into())
-    ));
+    impl TypeTraitObject {
+        // Only allow multiple trait references if allow_plus is true.
+        named!(parse(allow_plus: bool) -> Self, do_parse!(
+            dyn_token: option!(keyword!(dyn)) >>
+            bounds: alt!(
+                cond_reduce!(allow_plus, call!(Delimited::parse_terminated_nonempty))
+                |
+                syn!(TypeParamBound) => { |x| vec![x].into() }
+            ) >>
+            (TypeTraitObject {
+                dyn_token: dyn_token,
+                bounds: bounds,
+            })
+        ));
+    }
 
     impl Synom for TypeImplTrait {
         named!(parse -> Self, do_parse!(
