@@ -66,11 +66,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         }
     }
 
-    // TODO: support `macro` definitions
-    if path_string.starts_with("tests/rust/src/test/run-pass/hygiene") {
-        return false;
-    }
-
     match path_string.as_ref() {
         // TODO better support for attributes
         //
