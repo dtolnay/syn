@@ -286,16 +286,8 @@ fn visit_pat_wild(&mut self, i: &'ast PatWild) { visit_pat_wild(self, i) }
 fn visit_path(&mut self, i: &'ast Path) { visit_path(self, i) }
 
 fn visit_path_arguments(&mut self, i: &'ast PathArguments) { visit_path_arguments(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_path_glob(&mut self, i: &'ast PathGlob) { visit_path_glob(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_path_list(&mut self, i: &'ast PathList) { visit_path_list(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_path_list_item(&mut self, i: &'ast PathListItem) { visit_path_list_item(self, i) }
 
 fn visit_path_segment(&mut self, i: &'ast PathSegment) { visit_path_segment(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_path_simple(&mut self, i: &'ast PathSimple) { visit_path_simple(self, i) }
 
 fn visit_poly_trait_ref(&mut self, i: &'ast PolyTraitRef) { visit_poly_trait_ref(self, i) }
 
@@ -358,12 +350,18 @@ fn visit_type_tup(&mut self, i: &'ast TypeTup) { visit_type_tup(self, i) }
 fn visit_un_op(&mut self, i: &'ast UnOp) { visit_un_op(self, i) }
 
 fn visit_unsafety(&mut self, i: &'ast Unsafety) { visit_unsafety(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_use_glob(&mut self, i: &'ast UseGlob) { visit_use_glob(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_use_list(&mut self, i: &'ast UseList) { visit_use_list(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_use_path(&mut self, i: &'ast UsePath) { visit_use_path(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_use_tree(&mut self, i: &'ast UseTree) { visit_use_tree(self, i) }
 
 fn visit_variant(&mut self, i: &'ast Variant) { visit_variant(self, i) }
 
 fn visit_variant_data(&mut self, i: &'ast VariantData) { visit_variant_data(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_view_path(&mut self, i: &'ast ViewPath) { visit_view_path(self, i) }
 
 fn visit_vis_crate(&mut self, i: &'ast VisCrate) { visit_vis_crate(self, i) }
 
@@ -1481,7 +1479,9 @@ pub fn visit_item_use<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     for it in (_i . attrs).iter() { _visitor.visit_attribute(&it) };
     _visitor.visit_visibility(&_i . vis);
     // Skipped field _i . use_token;
-    _visitor.visit_view_path(&_i . path);
+    // Skipped field _i . leading_colon;
+    for el in (_i . prefix).iter() { let it = el.item(); _visitor.visit_ident(&it) };
+    _visitor.visit_use_tree(&_i . tree);
     // Skipped field _i . semi_token;
 }
 
@@ -1713,35 +1713,10 @@ pub fn visit_path_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
         }
     }
 }
-# [ cfg ( feature = "full" ) ]
-pub fn visit_path_glob<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathGlob) {
-    _visitor.visit_path(&_i . path);
-    // Skipped field _i . colon2_token;
-    // Skipped field _i . star_token;
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_path_list<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathList) {
-    _visitor.visit_path(&_i . path);
-    // Skipped field _i . colon2_token;
-    // Skipped field _i . brace_token;
-    for el in (_i . items).iter() { let it = el.item(); _visitor.visit_path_list_item(&it) };
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_path_list_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathListItem) {
-    _visitor.visit_ident(&_i . name);
-    if let Some(ref it) = _i . rename { _visitor.visit_ident(&* it) };
-    // Skipped field _i . as_token;
-}
 
 pub fn visit_path_segment<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathSegment) {
     _visitor.visit_ident(&_i . ident);
     _visitor.visit_path_arguments(&_i . arguments);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_path_simple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathSimple) {
-    _visitor.visit_path(&_i . path);
-    // Skipped field _i . as_token;
-    if let Some(ref it) = _i . rename { _visitor.visit_ident(&* it) };
 }
 
 pub fn visit_poly_trait_ref<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PolyTraitRef) {
@@ -2033,6 +2008,35 @@ pub fn visit_unsafety<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         Normal => { }
     }
 }
+# [ cfg ( feature = "full" ) ]
+pub fn visit_use_glob<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseGlob) {
+    // Skipped field _i . star_token;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_use_list<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseList) {
+    // Skipped field _i . brace_token;
+    for el in (_i . items).iter() { let it = el.item(); _visitor.visit_use_tree(&it) };
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_use_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UsePath) {
+    _visitor.visit_ident(&_i . ident);
+    // Skipped field _i . rename;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_use_tree<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseTree) {
+    use ::UseTree::*;
+    match *_i {
+        Path(ref _binding_0, ) => {
+            _visitor.visit_use_path(&* _binding_0);
+        }
+        Glob(ref _binding_0, ) => {
+            _visitor.visit_use_glob(&* _binding_0);
+        }
+        List(ref _binding_0, ) => {
+            _visitor.visit_use_list(&* _binding_0);
+        }
+    }
+}
 
 pub fn visit_variant<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Variant) {
     _visitor.visit_ident(&_i . ident);
@@ -2054,21 +2058,6 @@ pub fn visit_variant_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
             // Skipped field * _binding_1;
         }
         Unit => { }
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_view_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ViewPath) {
-    use ::ViewPath::*;
-    match *_i {
-        Simple(ref _binding_0, ) => {
-            _visitor.visit_path_simple(&* _binding_0);
-        }
-        Glob(ref _binding_0, ) => {
-            _visitor.visit_path_glob(&* _binding_0);
-        }
-        List(ref _binding_0, ) => {
-            _visitor.visit_path_list(&* _binding_0);
-        }
     }
 }
 

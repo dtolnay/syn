@@ -313,16 +313,8 @@ fn fold_pat_wild(&mut self, i: PatWild) -> PatWild { fold_pat_wild(self, i) }
 fn fold_path(&mut self, i: Path) -> Path { fold_path(self, i) }
 
 fn fold_path_arguments(&mut self, i: PathArguments) -> PathArguments { fold_path_arguments(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_path_glob(&mut self, i: PathGlob) -> PathGlob { fold_path_glob(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_path_list(&mut self, i: PathList) -> PathList { fold_path_list(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_path_list_item(&mut self, i: PathListItem) -> PathListItem { fold_path_list_item(self, i) }
 
 fn fold_path_segment(&mut self, i: PathSegment) -> PathSegment { fold_path_segment(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_path_simple(&mut self, i: PathSimple) -> PathSimple { fold_path_simple(self, i) }
 
 fn fold_poly_trait_ref(&mut self, i: PolyTraitRef) -> PolyTraitRef { fold_poly_trait_ref(self, i) }
 
@@ -385,12 +377,18 @@ fn fold_type_tup(&mut self, i: TypeTup) -> TypeTup { fold_type_tup(self, i) }
 fn fold_un_op(&mut self, i: UnOp) -> UnOp { fold_un_op(self, i) }
 
 fn fold_unsafety(&mut self, i: Unsafety) -> Unsafety { fold_unsafety(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_use_glob(&mut self, i: UseGlob) -> UseGlob { fold_use_glob(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_use_list(&mut self, i: UseList) -> UseList { fold_use_list(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_use_path(&mut self, i: UsePath) -> UsePath { fold_use_path(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_use_tree(&mut self, i: UseTree) -> UseTree { fold_use_tree(self, i) }
 
 fn fold_variant(&mut self, i: Variant) -> Variant { fold_variant(self, i) }
 
 fn fold_variant_data(&mut self, i: VariantData) -> VariantData { fold_variant_data(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_view_path(&mut self, i: ViewPath) -> ViewPath { fold_view_path(self, i) }
 
 fn fold_vis_crate(&mut self, i: VisCrate) -> VisCrate { fold_vis_crate(self, i) }
 
@@ -1906,7 +1904,9 @@ pub fn fold_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemU
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         use_token: _i . use_token,
-        path: Box::new(_visitor.fold_view_path(* _i . path)),
+        leading_colon: _i . leading_colon,
+        prefix: FoldHelper::lift(_i . prefix, |it| { _visitor.fold_ident(it) }),
+        tree: _visitor.fold_use_tree(_i . tree),
         semi_token: _i . semi_token,
     }
 }
@@ -2221,44 +2221,11 @@ pub fn fold_path_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: PathArgumen
         }
     }
 }
-# [ cfg ( feature = "full" ) ]
-pub fn fold_path_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: PathGlob) -> PathGlob {
-    PathGlob {
-        path: _visitor.fold_path(_i . path),
-        colon2_token: _i . colon2_token,
-        star_token: _i . star_token,
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_path_list<V: Folder + ?Sized>(_visitor: &mut V, _i: PathList) -> PathList {
-    PathList {
-        path: _visitor.fold_path(_i . path),
-        colon2_token: _i . colon2_token,
-        brace_token: _i . brace_token,
-        items: FoldHelper::lift(_i . items, |it| { _visitor.fold_path_list_item(it) }),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_path_list_item<V: Folder + ?Sized>(_visitor: &mut V, _i: PathListItem) -> PathListItem {
-    PathListItem {
-        name: _visitor.fold_ident(_i . name),
-        rename: (_i . rename).map(|it| { _visitor.fold_ident(it) }),
-        as_token: _i . as_token,
-    }
-}
 
 pub fn fold_path_segment<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSegment) -> PathSegment {
     PathSegment {
         ident: _visitor.fold_ident(_i . ident),
         arguments: _visitor.fold_path_arguments(_i . arguments),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_path_simple<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSimple) -> PathSimple {
-    PathSimple {
-        path: _visitor.fold_path(_i . path),
-        as_token: _i . as_token,
-        rename: (_i . rename).map(|it| { _visitor.fold_ident(it) }),
     }
 }
 
@@ -2660,6 +2627,47 @@ pub fn fold_unsafety<V: Folder + ?Sized>(_visitor: &mut V, _i: Unsafety) -> Unsa
         Normal => { Normal }
     }
 }
+# [ cfg ( feature = "full" ) ]
+pub fn fold_use_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: UseGlob) -> UseGlob {
+    UseGlob {
+        star_token: _i . star_token,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_use_list<V: Folder + ?Sized>(_visitor: &mut V, _i: UseList) -> UseList {
+    UseList {
+        brace_token: _i . brace_token,
+        items: FoldHelper::lift(_i . items, |it| { _visitor.fold_use_tree(it) }),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_use_path<V: Folder + ?Sized>(_visitor: &mut V, _i: UsePath) -> UsePath {
+    UsePath {
+        ident: _visitor.fold_ident(_i . ident),
+        rename: _i . rename,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_use_tree<V: Folder + ?Sized>(_visitor: &mut V, _i: UseTree) -> UseTree {
+    use ::UseTree::*;
+    match _i {
+        Path(_binding_0, ) => {
+            Path (
+                _visitor.fold_use_path(_binding_0),
+            )
+        }
+        Glob(_binding_0, ) => {
+            Glob (
+                _visitor.fold_use_glob(_binding_0),
+            )
+        }
+        List(_binding_0, ) => {
+            List (
+                _visitor.fold_use_list(_binding_0),
+            )
+        }
+    }
+}
 
 pub fn fold_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Variant {
     Variant {
@@ -2687,27 +2695,6 @@ pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) 
             )
         }
         Unit => { Unit }
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_view_path<V: Folder + ?Sized>(_visitor: &mut V, _i: ViewPath) -> ViewPath {
-    use ::ViewPath::*;
-    match _i {
-        Simple(_binding_0, ) => {
-            Simple (
-                _visitor.fold_path_simple(_binding_0),
-            )
-        }
-        Glob(_binding_0, ) => {
-            Glob (
-                _visitor.fold_path_glob(_binding_0),
-            )
-        }
-        List(_binding_0, ) => {
-            List (
-                _visitor.fold_path_list(_binding_0),
-            )
-        }
     }
 }
 

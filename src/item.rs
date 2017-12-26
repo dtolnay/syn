@@ -23,7 +23,9 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub use_token: Token![use],
-            pub path: Box<ViewPath>,
+            pub leading_colon: Option<Token![::]>,
+            pub prefix: Delimited<Ident, Token![::]>,
+            pub tree: UseTree,
             pub semi_token: Token![;],
         }),
         /// A static item (`static` or `pub static`).
@@ -231,41 +233,22 @@ impl From<DeriveInput> for Item {
 }
 
 ast_enum_of_structs! {
-    pub enum ViewPath {
-        /// `foo::bar::baz as quux`
-        ///
-        /// or just
-        ///
-        /// `foo::bar::baz` (with `as baz` implicitly on the right)
-        pub Simple(PathSimple {
-            pub path: Path,
-            pub as_token: Option<Token![as]>,
-            pub rename: Option<Ident>,
+    /// Things that can appear directly inside of a module.
+    pub enum UseTree {
+        /// `use prefix::Ty` or `use prefix::Ty as Renamed`
+        pub Path(UsePath {
+            pub ident: Ident,
+            pub rename: Option<(Token![as], Ident)>,
         }),
-
-        /// `foo::bar::*`
-        pub Glob(PathGlob {
-            pub path: Path,
-            pub colon2_token: Option<Token![::]>,
+        /// `use prefix::*`
+        pub Glob(UseGlob {
             pub star_token: Token![*],
         }),
-
-        /// `foo::bar::{a, b, c}`
-        pub List(PathList {
-            pub path: Path,
-            pub colon2_token: Token![::],
+        /// `use prefix::{a, b, c}`
+        pub List(UseList {
             pub brace_token: tokens::Brace,
-            pub items: Delimited<PathListItem, Token![,]>,
+            pub items: Delimited<UseTree, Token![,]>,
         }),
-    }
-}
-
-ast_struct! {
-    pub struct PathListItem {
-        pub name: Ident,
-        /// renamed in list, e.g. `use foo::{bar as baz};`
-        pub rename: Option<Ident>,
-        pub as_token: Option<Token![as]>,
     }
 }
 
@@ -555,116 +538,88 @@ pub mod parsing {
         attrs: many0!(call!(Attribute::parse_outer)) >>
         vis: syn!(Visibility) >>
         use_: keyword!(use) >>
-        what: syn!(ViewPath) >>
+        leading_colon: option!(punct!(::)) >>
+        mut prefix: call!(Delimited::parse_terminated_with, use_prefix) >>
+        tree: switch!(value!(leading_colon.is_none() && prefix.is_empty()),
+            true => syn!(UseTree)
+            |
+            false => switch!(value!(prefix.empty_or_trailing()),
+                true => syn!(UseTree)
+                |
+                false => alt!(
+                    tuple!(keyword!(as), syn!(Ident)) => {
+                        |rename| UseTree::Path(UsePath {
+                            ident: prefix.pop().unwrap().into_item(),
+                            rename: Some(rename),
+                        })
+                    }
+                    |
+                    epsilon!() => {
+                        |_| UseTree::Path(UsePath {
+                            ident: prefix.pop().unwrap().into_item(),
+                            rename: None,
+                        })
+                    }
+                )
+            )
+        ) >>
         semi: punct!(;) >>
         (ItemUse {
             attrs: attrs,
             vis: vis,
             use_token: use_,
-            path: Box::new(what),
+            leading_colon: leading_colon,
+            prefix: prefix,
+            tree: tree,
             semi_token: semi,
         })
     ));
 
-    impl Synom for ViewPath {
-        named!(parse -> Self, alt!(
-            syn!(PathGlob) => { ViewPath::Glob }
+    named!(use_prefix -> Ident, alt!(
+        syn!(Ident)
+        |
+        keyword!(self) => { Into::into }
+        |
+        keyword!(super) => { Into::into }
+        |
+        keyword!(crate) => { Into::into }
+    ));
+
+    impl_synom!(UseTree "use tree" alt!(
+        syn!(UsePath) => { UseTree::Path }
+        |
+        syn!(UseGlob) => { UseTree::Glob }
+        |
+        syn!(UseList) => { UseTree::List }
+    ));
+
+    impl_synom!(UsePath "use path" do_parse!(
+        ident: alt!(
+            syn!(Ident)
             |
-            syn!(PathList) => { ViewPath::List }
-            |
-            syn!(PathSimple) => { ViewPath::Simple } // must be last
-        ));
-    }
+            keyword!(self) => { Into::into }
+        ) >>
+        rename: option!(tuple!(keyword!(as), syn!(Ident))) >>
+        (UsePath {
+            ident: ident,
+            rename: rename,
+        })
+    ));
 
-    impl Synom for PathSimple {
-        named!(parse -> Self, do_parse!(
-            path: syn!(Path) >>
-            rename: option!(tuple!(keyword!(as), syn!(Ident))) >>
-            (PathSimple {
-                path: path,
-                as_token: rename.as_ref().map(|p| Token![as]((p.0).0)),
-                rename: rename.map(|p| p.1),
-            })
-        ));
-    }
+    impl_synom!(UseGlob "use glob" do_parse!(
+        star: punct!(*) >>
+        (UseGlob {
+            star_token: star,
+        })
+    ));
 
-    impl Synom for PathGlob {
-        named!(parse -> Self, do_parse!(
-            path: option!(do_parse!(
-                path: syn!(Path) >>
-                colon2: punct!(::) >>
-                (path, colon2)
-            )) >>
-            star: punct!(*) >>
-            ({
-                match path {
-                    Some((path, colon2)) => {
-                        PathGlob {
-                            path: path,
-                            colon2_token: Some(colon2),
-                            star_token: star,
-                        }
-                    }
-                    None => {
-                        PathGlob {
-                            path: Path {
-                                leading_colon: None,
-                                segments: Default::default(),
-                            },
-                            colon2_token: None,
-                            star_token: star,
-                        }
-                    }
-                }
-            })
-        ));
-    }
-
-    impl Synom for PathList {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                path: syn!(Path) >>
-                colon2: punct!(::) >>
-                items: braces!(call!(Delimited::parse_terminated)) >>
-                (PathList {
-                    path: path,
-                    items: items.0,
-                    brace_token: items.1,
-                    colon2_token: colon2,
-                })
-            )
-            |
-            do_parse!(
-                colon: option!(punct!(::)) >>
-                items: braces!(call!(Delimited::parse_terminated)) >>
-                (PathList {
-                    path: Path {
-                        leading_colon: None,
-                        segments: Delimited::new(),
-                    },
-                    colon2_token: colon.unwrap_or_default(),
-                    brace_token: items.1,
-                    items: items.0,
-                })
-            )
-        ));
-    }
-
-    impl Synom for PathListItem {
-        named!(parse -> Self, do_parse!(
-            name: alt!(
-                syn!(Ident)
-                |
-                map!(keyword!(self), Into::into)
-            ) >>
-            rename: option!(tuple!(keyword!(as), syn!(Ident))) >>
-            (PathListItem {
-                name: name,
-                as_token: rename.as_ref().map(|p| Token![as]((p.0).0)),
-                rename: rename.map(|p| p.1),
-            })
-        ));
-    }
+    impl_synom!(UseList "use list" do_parse!(
+        list: braces!(Delimited::parse_terminated) >>
+        (UseList {
+            brace_token: list.1,
+            items: list.0,
+        })
+    ));
 
     impl_synom!(ItemStatic "static item" do_parse!(
         attrs: many0!(call!(Attribute::parse_outer)) >>
@@ -1372,7 +1327,9 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.use_token.to_tokens(tokens);
-            self.path.to_tokens(tokens);
+            self.leading_colon.to_tokens(tokens);
+            self.prefix.to_tokens(tokens);
+            self.tree.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -1591,43 +1548,27 @@ mod printing {
         }
     }
 
-    impl ToTokens for PathSimple {
+    impl ToTokens for UsePath {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.path.to_tokens(tokens);
-            if self.rename.is_some() {
-                TokensOrDefault(&self.as_token).to_tokens(tokens);
-                self.rename.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            if let Some((ref as_token, ref rename)) = self.rename {
+                as_token.to_tokens(tokens);
+                rename.to_tokens(tokens);
             }
         }
     }
 
-    impl ToTokens for PathGlob {
+    impl ToTokens for UseGlob {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if self.path.segments.len() > 0 {
-                self.path.to_tokens(tokens);
-                TokensOrDefault(&self.colon2_token).to_tokens(tokens);
-            }
             self.star_token.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for PathList {
+    impl ToTokens for UseList {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.path.to_tokens(tokens);
-            self.colon2_token.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 self.items.to_tokens(tokens);
             });
-        }
-    }
-
-    impl ToTokens for PathListItem {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.name.to_tokens(tokens);
-            if self.rename.is_some() {
-                TokensOrDefault(&self.as_token).to_tokens(tokens);
-                self.rename.to_tokens(tokens);
-            }
         }
     }
 

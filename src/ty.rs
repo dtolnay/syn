@@ -747,17 +747,15 @@ pub mod parsing {
     }
 
     named!(mod_style_path_segment -> PathSegment, alt!(
-        map!(syn!(Ident), Into::into)
+        syn!(Ident) => { Into::into }
         |
-        alt!(
-            keyword!(super) => { Into::into }
-            |
-            keyword!(self) => { Into::into }
-            |
-            keyword!(Self) => { Into::into }
-            |
-            keyword!(crate) => { Into::into }
-        )
+        keyword!(super) => { Into::into }
+        |
+        keyword!(self) => { Into::into }
+        |
+        keyword!(Self) => { Into::into }
+        |
+        keyword!(crate) => { Into::into }
     ));
 
     impl Synom for TypeBinding {
