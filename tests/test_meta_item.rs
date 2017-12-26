@@ -102,7 +102,7 @@ fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
             assert!(rest.eof());
             e
         }
-        Err(_) => panic!("failed to parse"),
+        Err(err) => panic!(err),
     };
     assert_eq!(expected.into(), attr.meta_item().unwrap());
 }

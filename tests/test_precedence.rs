@@ -182,7 +182,7 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
 }
 
 fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
-    parse::libsyntax_expr(input).and_then(|e| libsyntax_brackets(e))
+    parse::libsyntax_expr(input).and_then(libsyntax_brackets)
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to

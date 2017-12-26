@@ -101,7 +101,7 @@ fn test_round_trip() {
             if before == after {
                 errorf!("=== {}: pass in {}ms\n",
                         path.display(),
-                        elapsed.as_secs() * 1000 + elapsed.subsec_nanos() as u64 / 1_000_000);
+                        elapsed.as_secs() * 1000 + u64::from(elapsed.subsec_nanos()) / 1_000_000);
                 true
             } else {
                 errorf!("=== {}: FAIL\nbefore: {}\nafter: {}\n",

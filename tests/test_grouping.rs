@@ -82,7 +82,7 @@ fn test_invalid_grouping() {
 
     assert_eq!(raw.to_string(), "1i32 +  2i32 +  3i32 * 4i32");
 
-    assert_eq!(common::parse::syn::<Expr>(raw.into()), expr(ExprBinary {
+    assert_eq!(common::parse::syn::<Expr>(raw), expr(ExprBinary {
         left: Box::new(expr(ExprBinary {
             left: Box::new(lit(Literal::i32(1))),
             op: BinOp::Add(<Token![+]>::default()),

@@ -27,7 +27,7 @@ pub fn check_min_stack() {
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");
     let min_stack_value: usize = min_stack_value.parse()
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");
-    assert!(min_stack_value >= 16000000);
+    assert!(min_stack_value >= 16_000_000);
 }
 
 /// Read the `ABORT_AFTER_FAILURE` environment variable, and parse it.
