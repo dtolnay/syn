@@ -1,6 +1,6 @@
 use super::*;
 
-use proc_macro2::{TokenNode, TokenTree, Delimiter};
+use proc_macro2::{TokenNode, TokenTree, TokenStream, Delimiter};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
@@ -12,7 +12,7 @@ ast_struct! {
     pub struct Macro #manual_extra_traits {
         pub path: Path,
         pub bang_token: Token![!],
-        pub tokens: Vec<TokenTree>,
+        pub tokens: TokenTree,
     }
 }
 
@@ -24,7 +24,7 @@ impl PartialEq for Macro {
     fn eq(&self, other: &Self) -> bool {
         self.path == other.path
             && self.bang_token == other.bang_token
-            && SliceTokenTreeHelper(&self.tokens) == SliceTokenTreeHelper(&other.tokens)
+            && TokenTreeHelper(&self.tokens) == TokenTreeHelper(&other.tokens)
     }
 }
 
@@ -35,16 +35,13 @@ impl Hash for Macro {
     {
         self.path.hash(state);
         self.bang_token.hash(state);
-        SliceTokenTreeHelper(&self.tokens).hash(state);
+        TokenTreeHelper(&self.tokens).hash(state);
     }
 }
 
 impl Macro {
     pub fn is_braced(&self) -> bool {
-        match self.tokens.last() {
-            Some(t) => is_braced(t),
-            None => false,
-        }
+        is_braced(&self.tokens)
     }
 }
 
@@ -140,16 +137,18 @@ impl<'a> Hash for TokenTreeHelper<'a> {
 }
 
 #[cfg(feature = "extra-traits")]
-pub struct SliceTokenTreeHelper<'a>(pub &'a [TokenTree]);
+pub struct TokenStreamHelper<'a>(pub &'a TokenStream);
 
 #[cfg(feature = "extra-traits")]
-impl<'a> PartialEq for SliceTokenTreeHelper<'a> {
+impl<'a> PartialEq for TokenStreamHelper<'a> {
     fn eq(&self, other: &Self) -> bool {
-        if self.0.len() != other.0.len() {
+        let left = self.0.clone().into_iter().collect::<Vec<_>>();
+        let right = other.0.clone().into_iter().collect::<Vec<_>>();
+        if left.len() != right.len() {
             return false;
         }
-        for (a, b) in self.0.iter().zip(other.0) {
-            if TokenTreeHelper(a) != TokenTreeHelper(b) {
+        for (a, b) in left.into_iter().zip(right) {
+            if TokenTreeHelper(&a) != TokenTreeHelper(&b) {
                 return false;
             }
         }
@@ -158,11 +157,12 @@ impl<'a> PartialEq for SliceTokenTreeHelper<'a> {
 }
 
 #[cfg(feature = "extra-traits")]
-impl<'a> Hash for SliceTokenTreeHelper<'a> {
+impl<'a> Hash for TokenStreamHelper<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.len().hash(state);
-        for tt in self.0 {
-            TokenTreeHelper(tt).hash(state);
+        let tts = self.0.clone().into_iter().collect::<Vec<_>>();
+        tts.len().hash(state);
+        for tt in tts {
+            TokenTreeHelper(&tt).hash(state);
         }
     }
 }
@@ -184,13 +184,9 @@ pub mod parsing {
             (Macro {
                 path: what,
                 bang_token: bang,
-                tokens: vec![body],
+                tokens: body,
             })
         ));
-    }
-
-    pub fn parse_tt_list(input: Cursor) -> PResult<Vec<TokenTree>> {
-        Ok((Cursor::empty(), input.token_stream().into_iter().collect()))
     }
 
     pub fn parse_tt_delimited(input: Cursor) -> PResult<TokenTree> {
@@ -212,7 +208,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
-            tokens.append_all(&self.tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 }

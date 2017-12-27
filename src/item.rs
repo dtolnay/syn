@@ -527,7 +527,7 @@ pub mod parsing {
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                tokens: vec![body],
+                tokens: body,
             },
         })
     ));
@@ -1565,7 +1565,7 @@ mod printing {
             self.mac.path.to_tokens(tokens);
             self.mac.bang_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            tokens.append_all(&self.mac.tokens);
+            self.mac.tokens.to_tokens(tokens);
             if !self.mac.is_braced() {
                 <Token![;]>::default().to_tokens(tokens);
             }

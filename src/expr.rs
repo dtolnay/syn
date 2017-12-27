@@ -1847,10 +1847,10 @@ pub mod parsing {
             Macro {
                 path: what,
                 bang_token: bang,
-                tokens: vec![proc_macro2::TokenTree {
+                tokens: proc_macro2::TokenTree {
                     span: (data.1).0,
                     kind: TokenNode::Group(Delimiter::Brace, data.0),
-                }],
+                },
             },
             match semi {
                 Some(semi) => MacStmtStyle::Semicolon(semi),

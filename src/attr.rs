@@ -3,12 +3,12 @@ use delimited::Delimited;
 
 use std::iter;
 
-use proc_macro2::{Delimiter, TokenNode, TokenTree, Spacing};
+use proc_macro2::{Delimiter, TokenNode, TokenTree, TokenStream, Spacing};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "extra-traits")]
-use mac::SliceTokenTreeHelper;
+use mac::TokenStreamHelper;
 
 ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
@@ -27,7 +27,7 @@ ast_struct! {
         ///
         /// E.g. `( Copy )` in `#[derive(Copy)]`
         /// E.g. `x < 5` in `#[crate::precondition x < 5]`
-        pub tts: Vec<TokenTree>,
+        pub tts: TokenStream,
 
         pub is_sugared_doc: bool,
     }
@@ -43,7 +43,7 @@ impl PartialEq for Attribute {
             && self.pound_token == other.pound_token
             && self.bracket_token == other.bracket_token
             && self.path == other.path
-            && SliceTokenTreeHelper(&self.tts) == SliceTokenTreeHelper(&other.tts)
+            && TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
             && self.is_sugared_doc == other.is_sugared_doc
     }
 }
@@ -57,7 +57,7 @@ impl Hash for Attribute {
         self.pound_token.hash(state);
         self.bracket_token.hash(state);
         self.path.hash(state);
-        SliceTokenTreeHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tts).hash(state);
         self.is_sugared_doc.hash(state);
     }
 }
@@ -75,12 +75,14 @@ impl Attribute {
             return Some(MetaItem::Term(*name));
         }
 
-        if self.tts.len() == 1 {
-            if let TokenNode::Group(Delimiter::Parenthesis, ref ts) = self.tts[0].kind {
+        let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
+
+        if tts.len() == 1 {
+            if let TokenNode::Group(Delimiter::Parenthesis, ref ts) = tts[0].kind {
                 let tokens = ts.clone().into_iter().collect::<Vec<_>>();
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
-                        paren_token: token::Paren(self.tts[0].span),
+                        paren_token: token::Paren(tts[0].span),
                         ident: *name,
                         nested: nested_meta_items,
                     }));
@@ -88,15 +90,15 @@ impl Attribute {
             }
         }
 
-        if self.tts.len() == 2 {
-            if let TokenNode::Op('=', Spacing::Alone) = self.tts[0].kind {
-                if let TokenNode::Literal(ref lit) = self.tts[1].kind {
+        if tts.len() == 2 {
+            if let TokenNode::Op('=', Spacing::Alone) = tts[0].kind {
+                if let TokenNode::Literal(ref lit) = tts[1].kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: *name,
-                        eq_token: Token![=]([self.tts[0].span]),
+                        eq_token: Token![=]([tts[0].span]),
                         lit: Lit {
                             value: LitKind::Other(lit.clone()),
-                            span: self.tts[1].span,
+                            span: tts[1].span,
                         },
                     }));
                 }
@@ -345,7 +347,7 @@ pub mod parsing {
                 bang: punct!(!) >>
                 path_and_tts: brackets!(tuple!(
                     call!(::Path::parse_mod_style),
-                    call!(mac::parsing::parse_tt_list)
+                    syn!(TokenStream)
                 )) >>
                 ({
                     let ((path, tts), bracket) = path_and_tts;
@@ -369,7 +371,7 @@ pub mod parsing {
                     tts: vec![
                         eq(),
                         lit,
-                    ],
+                    ].into_iter().collect(),
                     is_sugared_doc: true,
                     pound_token: <Token![#]>::default(),
                     bracket_token: token::Bracket::default(),
@@ -382,7 +384,7 @@ pub mod parsing {
                 pound: punct!(#) >>
                 path_and_tts: brackets!(tuple!(
                     call!(::Path::parse_mod_style),
-                    call!(mac::parsing::parse_tt_list)
+                    syn!(TokenStream)
                 )) >>
                 ({
                     let ((path, tts), bracket) = path_and_tts;
@@ -406,7 +408,7 @@ pub mod parsing {
                     tts: vec![
                         eq(),
                         lit,
-                    ],
+                    ].into_iter().collect(),
                     is_sugared_doc: true,
                     pound_token: <Token![#]>::default(),
                     bracket_token: token::Bracket::default(),
@@ -459,7 +461,7 @@ mod printing {
             }
             self.bracket_token.surround(tokens, |tokens| {
                 self.path.to_tokens(tokens);
-                tokens.append_all(&self.tts);
+                tokens.append_all(&self.tts.clone().into_iter().collect::<Vec<_>>());
             });
         }
     }
