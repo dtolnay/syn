@@ -297,7 +297,7 @@ macro_rules! many0 {
 //
 // Not public API.
 #[doc(hidden)]
-pub fn many0<'a, T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T>> {
+pub fn many0<T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T>> {
     let mut res = Vec::new();
 
     loop {
