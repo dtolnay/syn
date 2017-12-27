@@ -16,6 +16,7 @@ extern crate syn;
 #[macro_use] extern crate quote;
 #[macro_use] extern crate failure;
 extern crate inflections;
+extern crate proc_macro2;
 
 use quote::{Tokens, ToTokens};
 use syn::{Item, Attribute, DeriveInput, Ident};
@@ -132,15 +133,15 @@ fn load_file<P: AsRef<Path>>(
                 // Try to parse the AstItem declaration out of the item.
                 let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
                     syn::parse_tokens::<parsing::AstStruct>(
-                        item.mac.tokens[0].clone().into_tokens()
+                        item.mac.tokens.clone().into_tokens()
                     ).map_err(|_| err_msg("failed to parse ast_struct"))?.0
                 } else if path_eq(&item.mac.path, &"ast_enum".into()) {
                     syn::parse_tokens::<parsing::AstEnum>(
-                        item.mac.tokens[0].clone().into_tokens()
+                        item.mac.tokens.clone().into_tokens()
                     ).map_err(|_| err_msg("failed to parse ast_enum"))?.0
                 } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
                     syn::parse_tokens::<parsing::AstEnumOfStructs>(
-                        item.mac.tokens[0].clone().into_tokens()
+                        item.mac.tokens.clone().into_tokens()
                     ).map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?.0
                 } else {
                     continue
@@ -163,8 +164,8 @@ mod parsing {
 
     use syn::synom::*;
     use syn::*;
-    use syn::TokenTree;
     use quote::Tokens;
+    use proc_macro2::TokenStream;
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
@@ -183,10 +184,10 @@ mod parsing {
     named!(ast_struct_inner -> AstItem, do_parse!(
         id: syn!(Ident) >>
         features: full >>
-        rest: call!(TokenTree::parse_list) >>
+        rest: syn!(TokenStream) >>
         (AstItem {
             item: parse_tokens::<DeriveInput>(quote! {
-                pub struct #id #(#rest)*
+                pub struct #id #rest
             })?,
             features: features.0,
             eos_full: features.1,

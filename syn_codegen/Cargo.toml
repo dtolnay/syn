@@ -10,3 +10,4 @@ syn = { path = "..", features = ["full", "extra-traits"] }
 quote = { git = 'https://github.com/dtolnay/quote' }
 failure = "0.1"
 inflections = "1.1"
+proc-macro2 = "0.1"
