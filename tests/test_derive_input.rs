@@ -4,8 +4,10 @@ extern crate syn;
 extern crate proc_macro2;
 
 use syn::*;
-use proc_macro2::{TokenNode, TokenTree, Spacing, Delimiter, Literal, Term};
+use proc_macro2::{TokenNode, TokenTree, TokenStream, Spacing, Delimiter, Literal, Term};
 use proc_macro2::Delimiter::{Parenthesis, Brace};
+
+use std::iter::FromIterator;
 
 fn op(c: char) -> TokenTree {
     proc_macro2::TokenTree {
@@ -74,13 +76,13 @@ fn test_struct() {
             pound_token: Default::default(),
             style: AttrStyle::Outer,
             path: "derive".into(),
-            tts: vec![
+            tts: TokenStream::from_iter(vec![
                 delimited(Parenthesis, vec![
                     word("Debug"),
                     op(','),
                     word("Clone"),
                 ]),
-            ],
+            ]),
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
@@ -180,10 +182,10 @@ fn test_enum() {
                 pound_token: Default::default(),
                 style: AttrStyle::Outer,
                 path: "doc".into(),
-                tts: vec![
+                tts: TokenStream::from_iter(vec![
                     op('='),
                     lit(Literal::doccomment("/// See the std::result module documentation for details.")),
-                ],
+                ]),
                 is_sugared_doc: true,
             },
             Attribute {
@@ -191,7 +193,7 @@ fn test_enum() {
                 pound_token: Default::default(),
                 style: AttrStyle::Outer,
                 path: "must_use".into(),
-                tts: vec![],
+                tts: TokenStream::empty(),
                 is_sugared_doc: false,
             },
         ],
@@ -351,7 +353,7 @@ fn test_attr_with_path() {
                     PathSegment::from("identity"),
                 ].into(),
             },
-            tts: vec![
+            tts: TokenStream::from_iter(vec![
                 word("fn"),
                 word("main"),
                 delimited(Parenthesis, vec![]),
@@ -366,7 +368,7 @@ fn test_attr_with_path() {
                     ]),
                     op(';'),
                 ]),
-            ],
+            ]),
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
@@ -404,11 +406,11 @@ fn test_attr_with_non_mod_style_path() {
                     PathSegment::from("inert"),
                 ].into(),
             },
-            tts: vec![
+            tts: TokenStream::from_iter(vec![
                 op('<'),
                 word("T"),
                 op('>'),
-            ],
+            ]),
             is_sugared_doc: false,
         }],
         generics: Generics::default(),
@@ -447,7 +449,7 @@ fn test_attr_with_mod_style_path_with_self() {
                     PathSegment::from("self"),
                 ].into(),
             },
-            tts: vec![],
+            tts: TokenStream::empty(),
             is_sugared_doc: false,
         }],
         generics: Generics::default(),

@@ -5,7 +5,7 @@ extern crate quote;
 extern crate syn;
 extern crate proc_macro2;
 
-use syn::{Lit, Macro};
+use syn::{Lit, Attribute, AttrStyle};
 use proc_macro2::{TokenNode, TokenTree, Spacing, Delimiter, TokenStream, Term};
 use proc_macro2::Delimiter::*;
 
@@ -78,21 +78,21 @@ fn test_struct() {
         ],
     )];
 
-    fn wrap(tts: Vec<TokenTree>) -> Macro {
-        Macro {
-            path: "tts".into(),
-            bang_token: Default::default(),
-            tokens: tts,
+    fn wrap(tts: TokenStream) -> Attribute {
+        Attribute {
+            style: AttrStyle::Outer,
+            pound_token: Default::default(),
+            bracket_token: Default::default(),
+            path: "test".into(),
+            tts: tts,
+            is_sugared_doc: false,
         }
     }
 
-    let result = raw.parse::<TokenStream>().unwrap()
-                    .into_iter()
-                    .collect();
-    let result = wrap(result);
-    let expected = wrap(expected);
+    let result = wrap(raw.parse().unwrap());
+    let expected = wrap(expected.into_iter().collect());
     if result != expected {
-        panic!("{:#?}\n!=\n{:#?}", result.tokens, expected.tokens);
+        panic!("{:#?}\n!=\n{:#?}", result.tts, expected.tts);
     }
 }
 

@@ -9,7 +9,7 @@ use syn::*;
 extern crate quote;
 
 extern crate proc_macro2;
-use proc_macro2::{Span, Term};
+use proc_macro2::{Span, Term, TokenStream};
 
 mod common;
 
@@ -38,7 +38,7 @@ fn test_split_for_impl() {
                     pound_token: Default::default(),
                     style: AttrStyle::Outer,
                     path: "may_dangle".into(),
-                    tts: vec![],
+                    tts: TokenStream::empty(),
                     is_sugared_doc: false,
                 }],
                 ident: "T".into(),
