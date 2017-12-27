@@ -1,7 +1,9 @@
 use super::*;
 
-use proc_macro2::{TokenNode, TokenTree, TokenStream, Delimiter};
+use proc_macro2::{TokenNode, TokenTree, Delimiter};
 
+#[cfg(feature = "extra-traits")]
+use proc_macro2::TokenStream;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
