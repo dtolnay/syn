@@ -90,7 +90,7 @@ mod lit;
 pub use lit::{Lit, LitKind};
 
 mod mac;
-pub use mac::{Macro, TokenTree};
+pub use mac::Macro;
 
 mod derive;
 pub use derive::{Body, DeriveInput, BodyEnum, BodyStruct};

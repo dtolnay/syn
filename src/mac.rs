@@ -1,45 +1,66 @@
-#[cfg(feature = "extra-traits")]
-use std::fmt;
-
 use super::*;
 
-use proc_macro2::{TokenNode, Delimiter};
+use proc_macro2::{TokenNode, TokenTree, Delimiter};
+
+#[cfg(feature = "extra-traits")]
+use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// Represents a macro invocation. The Path indicates which macro
     /// is being invoked, and the vector of token-trees contains the source
     /// of the macro invocation.
-    pub struct Macro {
+    pub struct Macro #manual_extra_traits {
         pub path: Path,
         pub bang_token: Token![!],
         pub tokens: Vec<TokenTree>,
     }
 }
 
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
-pub struct TokenTree(pub proc_macro2::TokenTree);
+#[cfg(feature = "extra-traits")]
+impl Eq for Macro {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for Macro {
+    fn eq(&self, other: &Self) -> bool {
+        self.path == other.path
+            && self.bang_token == other.bang_token
+            && SliceTokenTreeHelper(&self.tokens) == SliceTokenTreeHelper(&other.tokens)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for Macro {
+    fn hash<H>(&self, state: &mut H)
+        where H: Hasher
+    {
+        self.path.hash(state);
+        self.bang_token.hash(state);
+        SliceTokenTreeHelper(&self.tokens).hash(state);
+    }
+}
 
 impl Macro {
     pub fn is_braced(&self) -> bool {
         match self.tokens.last() {
-            Some(t) => t.is_braced(),
+            Some(t) => is_braced(t),
             None => false,
         }
     }
 }
 
-impl TokenTree {
-    pub fn is_braced(&self) -> bool {
-        match self.0.kind {
-            TokenNode::Group(Delimiter::Brace, _) => true,
-            _ => false,
-        }
+pub fn is_braced(tt: &TokenTree) -> bool {
+    match tt.kind {
+        TokenNode::Group(Delimiter::Brace, _) => true,
+        _ => false,
     }
 }
 
 #[cfg(feature = "extra-traits")]
-impl PartialEq for TokenTree {
-    fn eq(&self, other: &TokenTree) -> bool {
+pub struct TokenTreeHelper<'a>(pub &'a TokenTree);
+
+#[cfg(feature = "extra-traits")]
+impl<'a> PartialEq for TokenTreeHelper<'a> {
+    fn eq(&self, other: &Self) -> bool {
         use proc_macro2::Spacing;
 
         match (&self.0.kind, &other.0.kind) {
@@ -60,7 +81,7 @@ impl PartialEq for TokenTree {
                         Some(item) => item,
                         None => return false,
                     };
-                    if TokenTree(item1) != TokenTree(item2) {
+                    if TokenTreeHelper(&item1) != TokenTreeHelper(&item2) {
                         return false
                     }
                 }
@@ -85,11 +106,8 @@ impl PartialEq for TokenTree {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for TokenTree {}
-
-#[cfg(feature = "extra-traits")]
-impl ::std::hash::Hash for TokenTree {
-    fn hash<H: ::std::hash::Hasher>(&self, h: &mut H) {
+impl<'a> Hash for TokenTreeHelper<'a> {
+    fn hash<H: Hasher>(&self, h: &mut H) {
         use proc_macro2::Spacing;
 
         match self.0.kind {
@@ -103,7 +121,7 @@ impl ::std::hash::Hash for TokenTree {
                 }
 
                 for item in stream.clone() {
-                    TokenTree(item).hash(h);
+                    TokenTreeHelper(&item).hash(h);
                 }
                 0xffu8.hash(h); // terminator w/ a variant we don't normally hash
             }
@@ -122,9 +140,30 @@ impl ::std::hash::Hash for TokenTree {
 }
 
 #[cfg(feature = "extra-traits")]
-impl fmt::Debug for TokenTree {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.0.to_string().fmt(f)
+pub struct SliceTokenTreeHelper<'a>(pub &'a [TokenTree]);
+
+#[cfg(feature = "extra-traits")]
+impl<'a> PartialEq for SliceTokenTreeHelper<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        if self.0.len() != other.0.len() {
+            return false;
+        }
+        for (a, b) in self.0.iter().zip(other.0) {
+            if TokenTreeHelper(a) != TokenTreeHelper(b) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl<'a> Hash for SliceTokenTreeHelper<'a> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.len().hash(state);
+        for tt in self.0 {
+            TokenTreeHelper(tt).hash(state);
+        }
     }
 }
 
@@ -141,7 +180,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             what: syn!(Path) >>
             bang: punct!(!) >>
-            body: call!(::TokenTree::parse_delimited) >>
+            body: call!(parse_tt_delimited) >>
             (Macro {
                 path: what,
                 bang_token: bang,
@@ -150,18 +189,16 @@ pub mod parsing {
         ));
     }
 
-    impl ::TokenTree {
-        pub fn parse_list(input: Cursor) -> PResult<Vec<Self>> {
-            Ok((Cursor::empty(), input.token_stream().into_iter().map(::TokenTree).collect()))
-        }
+    pub fn parse_tt_list(input: Cursor) -> PResult<Vec<TokenTree>> {
+        Ok((Cursor::empty(), input.token_stream().into_iter().collect()))
+    }
 
-        pub fn parse_delimited(input: Cursor) -> PResult<Self> {
-            match input.token_tree() {
-                Some((rest, token @ TokenTree { kind: TokenNode::Group(..), .. })) => {
-                    Ok((rest, ::TokenTree(token)))
-                }
-                _ => parse_error(),
+    pub fn parse_tt_delimited(input: Cursor) -> PResult<TokenTree> {
+        match input.token_tree() {
+            Some((rest, token @ TokenTree { kind: TokenNode::Group(..), .. })) => {
+                Ok((rest, token))
             }
+            _ => parse_error(),
         }
     }
 }
@@ -176,12 +213,6 @@ mod printing {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
             tokens.append_all(&self.tokens);
-        }
-    }
-
-    impl ToTokens for TokenTree {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.0.to_tokens(tokens);
         }
     }
 }

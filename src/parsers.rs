@@ -667,7 +667,7 @@ macro_rules! alt {
 /// extern crate syn;
 /// extern crate proc_macro2;
 ///
-/// use syn::{Ident, TokenTree};
+/// use syn::Ident;
 /// use syn::token::Paren;
 /// use proc_macro2::TokenStream;
 ///

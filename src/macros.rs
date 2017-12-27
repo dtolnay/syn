@@ -20,6 +20,16 @@ macro_rules! ast_struct {
 
     (
         $(#[$attr:meta])*
+        pub struct $name:ident #manual_extra_traits $($rest:tt)*
+    ) => {
+        $(#[$attr])*
+        #[cfg_attr(feature = "extra-traits", derive(Debug))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name $($rest)*
+    };
+
+    (
+        $(#[$attr:meta])*
         pub struct $name:ident $($rest:tt)*
     ) => {
         $(#[$attr])*

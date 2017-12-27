@@ -1,9 +1,7 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::{self, Span, Literal, TokenNode, Term};
-
-use TokenTree;
+use proc_macro2::{self, Span, Literal, TokenNode, TokenTree, Term};
 
 #[derive(Clone)]
 pub struct Lit {
@@ -24,10 +22,10 @@ impl Lit {
             LitKind::Bool(false) => TokenNode::Term(Term::intern("false")),
             LitKind::Other(l) => TokenNode::Literal(l),
         };
-        TokenTree(proc_macro2::TokenTree {
+        proc_macro2::TokenTree {
             span: self.span,
             kind: kind,
-        })
+        }
     }
 }
 

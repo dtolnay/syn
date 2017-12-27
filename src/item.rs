@@ -1,5 +1,11 @@
 use super::*;
 use delimited::Delimited;
+use proc_macro2::TokenTree;
+
+#[cfg(feature = "extra-traits")]
+use mac::TokenTreeHelper;
+#[cfg(feature = "extra-traits")]
+use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module.
@@ -192,7 +198,7 @@ ast_enum_of_structs! {
             pub mac: Macro,
         }),
         /// FIXME will need to revisit what this looks like in the AST.
-        pub Macro2(ItemMacro2 {
+        pub Macro2(ItemMacro2 #manual_extra_traits {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub macro_token: Token![macro],
@@ -200,6 +206,35 @@ ast_enum_of_structs! {
             pub args: TokenTree,
             pub body: TokenTree,
         }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for ItemMacro2 {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for ItemMacro2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs
+            && self.vis == other.vis
+            && self.macro_token == other.macro_token
+            && self.ident == other.ident
+            && TokenTreeHelper(&self.args) == TokenTreeHelper(&other.args)
+            && TokenTreeHelper(&self.body) == TokenTreeHelper(&other.body)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for ItemMacro2 {
+    fn hash<H>(&self, state: &mut H)
+        where H: Hasher
+    {
+        self.attrs.hash(state);
+        self.vis.hash(state);
+        self.macro_token.hash(state);
+        self.ident.hash(state);
+        TokenTreeHelper(&self.args).hash(state);
+        TokenTreeHelper(&self.body).hash(state);
     }
 }
 
@@ -484,8 +519,8 @@ pub mod parsing {
         what: syn!(Path) >>
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
-        body: call!(TokenTree::parse_delimited) >>
-        cond!(!body.is_braced(), punct!(;)) >>
+        body: call!(mac::parsing::parse_tt_delimited) >>
+        cond!(!mac::is_braced(&body), punct!(;)) >>
         (ItemMacro {
             attrs: attrs,
             ident: ident,
@@ -503,8 +538,8 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         macro_: keyword!(macro) >>
         ident: syn!(Ident) >>
-        args: call!(TokenTree::parse_delimited) >>
-        body: call!(TokenTree::parse_delimited) >>
+        args: call!(mac::parsing::parse_tt_delimited) >>
+        body: call!(mac::parsing::parse_tt_delimited) >>
         (ItemMacro2 {
             attrs: attrs,
             vis: vis,

@@ -5,36 +5,36 @@ extern crate quote;
 extern crate syn;
 extern crate proc_macro2;
 
-use syn::{Lit, TokenTree};
-use proc_macro2::{TokenNode, Spacing, Delimiter, TokenStream, Term};
+use syn::{Lit, Macro};
+use proc_macro2::{TokenNode, TokenTree, Spacing, Delimiter, TokenStream, Term};
 use proc_macro2::Delimiter::*;
 
 fn alone(c: char) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenNode::Op(c, Spacing::Alone),
-    })
+    }
 }
 
 fn joint(c: char) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenNode::Op(c, Spacing::Joint),
-    })
+    }
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenNode::Group(delim, tokens.into_iter().map(|t| t.0).collect()),
-    })
+        kind: TokenNode::Group(delim, tokens.into_iter().collect()),
+    }
 }
 
 fn word(sym: &str) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenNode::Term(Term::intern(sym)),
-    })
+    }
 }
 
 #[test]
@@ -78,12 +78,21 @@ fn test_struct() {
         ],
     )];
 
+    fn wrap(tts: Vec<TokenTree>) -> Macro {
+        Macro {
+            path: "tts".into(),
+            bang_token: Default::default(),
+            tokens: tts,
+        }
+    }
+
     let result = raw.parse::<TokenStream>().unwrap()
                     .into_iter()
-                    .map(TokenTree)
-                    .collect::<Vec<_>>();
+                    .collect();
+    let result = wrap(result);
+    let expected = wrap(expected);
     if result != expected {
-        panic!("{:#?}\n!=\n{:#?}", result, expected);
+        panic!("{:#?}\n!=\n{:#?}", result.tokens, expected.tokens);
     }
 }
 

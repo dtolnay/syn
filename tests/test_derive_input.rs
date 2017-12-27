@@ -4,35 +4,35 @@ extern crate syn;
 extern crate proc_macro2;
 
 use syn::*;
-use proc_macro2::{TokenNode, Spacing, Delimiter, Literal, Term};
+use proc_macro2::{TokenNode, TokenTree, Spacing, Delimiter, Literal, Term};
 use proc_macro2::Delimiter::{Parenthesis, Brace};
 
 fn op(c: char) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenNode::Op(c, Spacing::Alone),
-    })
+    }
 }
 
 fn lit<T: Into<Literal>>(t: T) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenNode::Literal(t.into()),
-    })
+    }
 }
 
 fn word(sym: &str) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
         kind: TokenNode::Term(Term::intern(sym)),
-    })
+    }
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
-    TokenTree(proc_macro2::TokenTree {
+    proc_macro2::TokenTree {
         span: Default::default(),
-        kind: TokenNode::Group(delim, tokens.into_iter().map(|t| t.0).collect()),
-    })
+        kind: TokenNode::Group(delim, tokens.into_iter().collect()),
+    }
 }
 
 #[test]

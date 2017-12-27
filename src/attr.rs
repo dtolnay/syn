@@ -3,11 +3,16 @@ use delimited::Delimited;
 
 use std::iter;
 
-use proc_macro2::{self, Delimiter, TokenNode, Spacing};
+use proc_macro2::{Delimiter, TokenNode, TokenTree, Spacing};
+
+#[cfg(feature = "extra-traits")]
+use std::hash::{Hash, Hasher};
+#[cfg(feature = "extra-traits")]
+use mac::SliceTokenTreeHelper;
 
 ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
-    pub struct Attribute {
+    pub struct Attribute #manual_extra_traits {
         pub style: AttrStyle,
         pub pound_token: Token![#],
         pub bracket_token: token::Bracket,
@@ -28,6 +33,35 @@ ast_struct! {
     }
 }
 
+#[cfg(feature = "extra-traits")]
+impl Eq for Attribute {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for Attribute {
+    fn eq(&self, other: &Self) -> bool {
+        self.style == other.style
+            && self.pound_token == other.pound_token
+            && self.bracket_token == other.bracket_token
+            && self.path == other.path
+            && SliceTokenTreeHelper(&self.tts) == SliceTokenTreeHelper(&other.tts)
+            && self.is_sugared_doc == other.is_sugared_doc
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for Attribute {
+    fn hash<H>(&self, state: &mut H)
+        where H: Hasher
+    {
+        self.style.hash(state);
+        self.pound_token.hash(state);
+        self.bracket_token.hash(state);
+        self.path.hash(state);
+        SliceTokenTreeHelper(&self.tts).hash(state);
+        self.is_sugared_doc.hash(state);
+    }
+}
+
 impl Attribute {
     /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
     pub fn meta_item(&self) -> Option<MetaItem> {
@@ -42,11 +76,11 @@ impl Attribute {
         }
 
         if self.tts.len() == 1 {
-            if let TokenNode::Group(Delimiter::Parenthesis, ref ts) = self.tts[0].0.kind {
+            if let TokenNode::Group(Delimiter::Parenthesis, ref ts) = self.tts[0].kind {
                 let tokens = ts.clone().into_iter().collect::<Vec<_>>();
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
-                        paren_token: token::Paren(self.tts[0].0.span),
+                        paren_token: token::Paren(self.tts[0].span),
                         ident: *name,
                         nested: nested_meta_items,
                     }));
@@ -55,14 +89,14 @@ impl Attribute {
         }
 
         if self.tts.len() == 2 {
-            if let TokenNode::Op('=', Spacing::Alone) = self.tts[0].0.kind {
-                if let TokenNode::Literal(ref lit) = self.tts[1].0.kind {
+            if let TokenNode::Op('=', Spacing::Alone) = self.tts[0].kind {
+                if let TokenNode::Literal(ref lit) = self.tts[1].kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: *name,
-                        eq_token: Token![=]([self.tts[0].0.span]),
+                        eq_token: Token![=]([self.tts[0].span]),
                         lit: Lit {
                             value: LitKind::Other(lit.clone()),
-                            span: self.tts[1].0.span,
+                            span: self.tts[1].span,
                         },
                     }));
                 }
@@ -73,8 +107,8 @@ impl Attribute {
     }
 }
 
-fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
-    -> Option<(NestedMetaItem, &[proc_macro2::TokenTree])>
+fn nested_meta_item_from_tokens(tts: &[TokenTree])
+    -> Option<(NestedMetaItem, &[TokenTree])>
 {
     assert!(!tts.is_empty());
 
@@ -130,7 +164,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
     }
 }
 
-fn list_of_nested_meta_items_from_tokens(mut tts: &[proc_macro2::TokenTree])
+fn list_of_nested_meta_items_from_tokens(mut tts: &[TokenTree])
     -> Option<Delimited<NestedMetaItem, Token![,]>>
 {
     let mut delimited = Delimited::new();
@@ -311,7 +345,7 @@ pub mod parsing {
                 bang: punct!(!) >>
                 path_and_tts: brackets!(tuple!(
                     call!(::Path::parse_mod_style),
-                    call!(::TokenTree::parse_list)
+                    call!(mac::parsing::parse_tt_list)
                 )) >>
                 ({
                     let ((path, tts), bracket) = path_and_tts;
@@ -333,8 +367,8 @@ pub mod parsing {
                     style: AttrStyle::Inner(<Token![!]>::default()),
                     path: "doc".into(),
                     tts: vec![
-                        ::TokenTree(eq()),
-                        ::TokenTree(lit),
+                        eq(),
+                        lit,
                     ],
                     is_sugared_doc: true,
                     pound_token: <Token![#]>::default(),
@@ -348,7 +382,7 @@ pub mod parsing {
                 pound: punct!(#) >>
                 path_and_tts: brackets!(tuple!(
                     call!(::Path::parse_mod_style),
-                    call!(::TokenTree::parse_list)
+                    call!(mac::parsing::parse_tt_list)
                 )) >>
                 ({
                     let ((path, tts), bracket) = path_and_tts;
@@ -370,8 +404,8 @@ pub mod parsing {
                     style: AttrStyle::Outer,
                     path: "doc".into(),
                     tts: vec![
-                        ::TokenTree(eq()),
-                        ::TokenTree(lit),
+                        eq(),
+                        lit,
                     ],
                     is_sugared_doc: true,
                     pound_token: <Token![#]>::default(),
