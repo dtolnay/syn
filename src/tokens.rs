@@ -10,26 +10,27 @@ use proc_macro2::Span;
 macro_rules! tokens {
     (
         ops: {
-            $(($($op:tt)*),)*
+            $($op:tt pub struct $op_name:ident/$len:tt #[$op_doc:meta])*
         }
         delim: {
-            $(($($delim:tt)*),)*
+            $($delim:tt pub struct $delim_name:ident #[$delim_doc:meta])*
         }
         syms: {
-            $(($($sym:tt)*),)*
+            $($sym:tt pub struct $sym_name:ident #[$sym_doc:meta])*
         }
     ) => (
-        $(op! { $($op)* })*
-        $(delim! { $($delim)* })*
-        $(sym! { $($sym)* })*
+        $(op! { #[$op_doc] $op pub struct $op_name/$len })*
+        $(delim! { #[$delim_doc] $delim pub struct $delim_name })*
+        $(sym! { #[$sym_doc] $sym pub struct $sym_name })*
     )
 }
 
 macro_rules! op {
-    (pub struct $name:ident($($contents:tt)*) => $s:expr) => {
+    (#[$doc:meta] $s:tt pub struct $name:ident/$len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
-        pub struct $name(pub $($contents)*);
+        #[$doc]
+        pub struct $name(pub [Span; $len]);
 
         #[cfg(feature = "extra-traits")]
         impl ::std::fmt::Debug for $name {
@@ -72,9 +73,10 @@ macro_rules! op {
 }
 
 macro_rules! sym {
-    (pub struct $name:ident => $s:expr) => {
+    (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
+        #[$doc]
         pub struct $name(pub Span);
 
         #[cfg(feature = "extra-traits")]
@@ -118,9 +120,10 @@ macro_rules! sym {
 }
 
 macro_rules! delim {
-    (pub struct $name:ident => $s:expr) => {
+    (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
+        #[$doc]
         pub struct $name(pub Span);
 
         #[cfg(feature = "extra-traits")]
@@ -169,101 +172,101 @@ macro_rules! delim {
 
 tokens! {
     ops: {
-        (pub struct Add([Span; 1])          => "+"),
-        (pub struct AddEq([Span; 2])        => "+="),
-        (pub struct And([Span; 1])          => "&"),
-        (pub struct AndAnd([Span; 2])       => "&&"),
-        (pub struct AndEq([Span; 2])        => "&="),
-        (pub struct At([Span; 1])           => "@"),
-        (pub struct Bang([Span; 1])         => "!"),
-        (pub struct Caret([Span; 1])        => "^"),
-        (pub struct CaretEq([Span; 2])      => "^="),
-        (pub struct Colon([Span; 1])        => ":"),
-        (pub struct Colon2([Span; 2])       => "::"),
-        (pub struct Comma([Span; 1])        => ","),
-        (pub struct Div([Span; 1])          => "/"),
-        (pub struct DivEq([Span; 2])        => "/="),
-        (pub struct Dot([Span; 1])          => "."),
-        (pub struct Dot2([Span; 2])         => ".."),
-        (pub struct Dot3([Span; 3])         => "..."),
-        (pub struct DotDotEq([Span; 3])     => "..="),
-        (pub struct Eq([Span; 1])           => "="),
-        (pub struct EqEq([Span; 2])         => "=="),
-        (pub struct Ge([Span; 2])           => ">="),
-        (pub struct Gt([Span; 1])           => ">"),
-        (pub struct Le([Span; 2])           => "<="),
-        (pub struct Lt([Span; 1])           => "<"),
-        (pub struct MulEq([Span; 2])        => "*="),
-        (pub struct Ne([Span; 2])           => "!="),
-        (pub struct Or([Span; 1])           => "|"),
-        (pub struct OrEq([Span; 2])         => "|="),
-        (pub struct OrOr([Span; 2])         => "||"),
-        (pub struct Pound([Span; 1])        => "#"),
-        (pub struct Question([Span; 1])     => "?"),
-        (pub struct RArrow([Span; 2])       => "->"),
-        (pub struct LArrow([Span; 2])       => "<-"),
-        (pub struct Rem([Span; 1])          => "%"),
-        (pub struct RemEq([Span; 2])        => "%="),
-        (pub struct Rocket([Span; 2])       => "=>"),
-        (pub struct Semi([Span; 1])         => ";"),
-        (pub struct Shl([Span; 2])          => "<<"),
-        (pub struct ShlEq([Span; 3])        => "<<="),
-        (pub struct Shr([Span; 2])          => ">>"),
-        (pub struct ShrEq([Span; 3])        => ">>="),
-        (pub struct Star([Span; 1])         => "*"),
-        (pub struct Sub([Span; 1])          => "-"),
-        (pub struct SubEq([Span; 2])        => "-="),
-        (pub struct Underscore([Span; 1])   => "_"),
+        "+"        pub struct Add/1        /// `+`
+        "+="       pub struct AddEq/2      /// `+=`
+        "&"        pub struct And/1        /// `&`
+        "&&"       pub struct AndAnd/2     /// `&&`
+        "&="       pub struct AndEq/2      /// `&=`
+        "@"        pub struct At/1         /// `@`
+        "!"        pub struct Bang/1       /// `!`
+        "^"        pub struct Caret/1      /// `^`
+        "^-"       pub struct CaretEq/2    /// `^=`
+        ":"        pub struct Colon/1      /// `:`
+        "::"       pub struct Colon2/2     /// `::`
+        ","        pub struct Comma/1      /// `,`
+        "/"        pub struct Div/1        /// `/`
+        "/="       pub struct DivEq/2      /// `/=`
+        "."        pub struct Dot/1        /// `.`
+        ".."       pub struct Dot2/2       /// `..`
+        "..."      pub struct Dot3/3       /// `...`
+        "..="      pub struct DotDotEq/3   /// `..=`
+        "="        pub struct Eq/1         /// `=`
+        "=="       pub struct EqEq/2       /// `==`
+        ">="       pub struct Ge/2         /// `>=`
+        ">"        pub struct Gt/1         /// `>`
+        "<="       pub struct Le/2         /// `<=`
+        "<"        pub struct Lt/1         /// `<`
+        "*="       pub struct MulEq/2      /// `*=`
+        "!="       pub struct Ne/2         /// `!=`
+        "|"        pub struct Or/1         /// `|`
+        "|="       pub struct OrEq/2       /// `|=`
+        "||"       pub struct OrOr/2       /// `||`
+        "#"        pub struct Pound/1      /// `#`
+        "?"        pub struct Question/1   /// `?`
+        "->"       pub struct RArrow/2     /// `->`
+        "<-"       pub struct LArrow/2     /// `<-`
+        "%"        pub struct Rem/1        /// `%`
+        "%="       pub struct RemEq/2      /// `%=`
+        "=>"       pub struct Rocket/2     /// `=>`
+        ";"        pub struct Semi/1       /// `;`
+        "<<"       pub struct Shl/2        /// `<<`
+        "<<="      pub struct ShlEq/3      /// `<<=`
+        ">>"       pub struct Shr/2        /// `>>`
+        ">>="      pub struct ShrEq/3      /// `>>=`
+        "*"        pub struct Star/1       /// `*`
+        "-"        pub struct Sub/1        /// `-`
+        "-="       pub struct SubEq/2      /// `-=`
+        "_"        pub struct Underscore/1 /// `_`
     }
     delim: {
-        (pub struct Brace                   => "{"),
-        (pub struct Bracket                 => "["),
-        (pub struct Paren                   => "("),
-        (pub struct Group                   => " "),
+        "{"        pub struct Brace        /// `{...}`
+        "["        pub struct Bracket      /// `[...]`
+        "("        pub struct Paren        /// `(...)`
+        " "        pub struct Group        /// None-delimited group
     }
     syms: {
-        (pub struct As                      => "as"),
-        (pub struct Auto                    => "auto"),
-        (pub struct Box                     => "box"),
-        (pub struct Break                   => "break"),
-        (pub struct CapSelf                 => "Self"),
-        (pub struct Catch                   => "catch"),
-        (pub struct Const                   => "const"),
-        (pub struct Continue                => "continue"),
-        (pub struct Crate                   => "crate"),
-        (pub struct Default                 => "default"),
-        (pub struct Do                      => "do"),
-        (pub struct Dyn                     => "dyn"),
-        (pub struct Else                    => "else"),
-        (pub struct Enum                    => "enum"),
-        (pub struct Extern                  => "extern"),
-        (pub struct Fn                      => "fn"),
-        (pub struct For                     => "for"),
-        (pub struct If                      => "if"),
-        (pub struct Impl                    => "impl"),
-        (pub struct In                      => "in"),
-        (pub struct Let                     => "let"),
-        (pub struct Loop                    => "loop"),
-        (pub struct Macro                   => "macro"),
-        (pub struct Match                   => "match"),
-        (pub struct Mod                     => "mod"),
-        (pub struct Move                    => "move"),
-        (pub struct Mut                     => "mut"),
-        (pub struct Pub                     => "pub"),
-        (pub struct Ref                     => "ref"),
-        (pub struct Return                  => "return"),
-        (pub struct Self_                   => "self"),
-        (pub struct Static                  => "static"),
-        (pub struct Struct                  => "struct"),
-        (pub struct Super                   => "super"),
-        (pub struct Trait                   => "trait"),
-        (pub struct Type                    => "type"),
-        (pub struct Union                   => "union"),
-        (pub struct Unsafe                  => "unsafe"),
-        (pub struct Use                     => "use"),
-        (pub struct Where                   => "where"),
-        (pub struct While                   => "while"),
-        (pub struct Yield                   => "yield"),
+        "as"       pub struct As           /// `as`
+        "auto"     pub struct Auto         /// `auto`
+        "box"      pub struct Box          /// `box`
+        "break"    pub struct Break        /// `break`
+        "Self"     pub struct CapSelf      /// `Self`
+        "catch"    pub struct Catch        /// `catch`
+        "const"    pub struct Const        /// `const`
+        "continue" pub struct Continue     /// `continue`
+        "crate"    pub struct Crate        /// `crate`
+        "default"  pub struct Default      /// `default`
+        "do"       pub struct Do           /// `do`
+        "dyn"      pub struct Dyn          /// `dyn`
+        "else"     pub struct Else         /// `else`
+        "enum"     pub struct Enum         /// `enum`
+        "extern"   pub struct Extern       /// `extern`
+        "fn"       pub struct Fn           /// `fn`
+        "for"      pub struct For          /// `for`
+        "if"       pub struct If           /// `if`
+        "impl"     pub struct Impl         /// `impl`
+        "in"       pub struct In           /// `in`
+        "let"      pub struct Let          /// `let`
+        "loop"     pub struct Loop         /// `loop`
+        "macro"    pub struct Macro        /// `macro`
+        "match"    pub struct Match        /// `match`
+        "mod"      pub struct Mod          /// `mod`
+        "move"     pub struct Move         /// `move`
+        "mut"      pub struct Mut          /// `mut`
+        "pub"      pub struct Pub          /// `pub`
+        "ref"      pub struct Ref          /// `ref`
+        "return"   pub struct Return       /// `return`
+        "self"     pub struct Self_        /// `self`
+        "static"   pub struct Static       /// `static`
+        "struct"   pub struct Struct       /// `struct`
+        "super"    pub struct Super        /// `super`
+        "trait"    pub struct Trait        /// `trait`
+        "type"     pub struct Type         /// `type`
+        "union"    pub struct Union        /// `union`
+        "unsafe"   pub struct Unsafe       /// `unsafe`
+        "use"      pub struct Use          /// `use`
+        "where"    pub struct Where        /// `where`
+        "while"    pub struct While        /// `while`
+        "yield"    pub struct Yield        /// `yield`
     }
 }
 
