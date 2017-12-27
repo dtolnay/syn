@@ -30,7 +30,7 @@ fn test_split_for_impl() {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'b"), Span::default()),
                 bounds: vec![Lifetime::new(Term::intern("'a"), Span::default())].into(),
-                colon_token: Some(tokens::Colon::default()),
+                colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
                 attrs: vec![Attribute {

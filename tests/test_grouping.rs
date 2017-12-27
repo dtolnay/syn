@@ -5,7 +5,7 @@
 #[macro_use]
 extern crate syn;
 use syn::{Expr, ExprKind, ExprGroup, ExprBinary, Lit, LitKind, BinOp};
-use syn::tokens::Group;
+use syn::token::Group;
 
 extern crate proc_macro2;
 use proc_macro2::*;

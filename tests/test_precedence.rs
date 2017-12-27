@@ -312,7 +312,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                 node: node,
                 attrs: vec![],
             })),
-            paren_token: tokens::Paren::default(),
+            paren_token: token::Paren::default(),
         })
     }
 
@@ -380,7 +380,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
             Expr {
                 node: ExprKind::Tuple(ExprTuple {
                     args: Delimited::new(),
-                    paren_token: tokens::Paren::default(),
+                    paren_token: token::Paren::default(),
                     lone_comma: None
                 }),
                 attrs: vec![],
