@@ -24,10 +24,10 @@ ast_enum! {
     /// Data stored within an enum variant or struct.
     pub enum VariantData {
         /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-        Struct(Delimited<Field, Token![,]>, tokens::Brace),
+        Struct(Delimited<Field, Token![,]>, token::Brace),
 
         /// Tuple variant, e.g. `Some(T)`.
-        Tuple(Delimited<Field, Token![,]>, tokens::Paren),
+        Tuple(Delimited<Field, Token![,]>, token::Paren),
 
         /// Unit variant, e.g. `None`.
         Unit,
@@ -37,7 +37,7 @@ ast_enum! {
 impl VariantData {
     // TODO: expose this?
     // /// Slice containing the fields stored in the variant.
-    // pub fn fields(&self) -> &Delimited<Field, tokens::Comma> {
+    // pub fn fields(&self) -> &Delimited<Field, token::Comma> {
     //     match *self {
     //         VariantData::Struct(ref fields, _) |
     //         VariantData::Tuple(ref fields, _) => fields,
@@ -46,7 +46,7 @@ impl VariantData {
     // }
     //
     // /// Mutable slice containing the fields stored in the variant.
-    // pub fn fields_mut(&mut self) -> &mut Delimited<Field, tokens::Comma> {
+    // pub fn fields_mut(&mut self) -> &mut Delimited<Field, token::Comma> {
     //     match *self {
     //         VariantData::Struct(ref mut fields, _) |
     //         VariantData::Tuple(ref mut fields, _) => fields,
@@ -87,14 +87,14 @@ ast_enum_of_structs! {
         /// Crate-visible, i.e. `pub(crate)`.
         pub Crate(VisCrate {
             pub pub_token: Token![pub],
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub crate_token: Token![crate],
         }),
 
         /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
         pub Restricted(VisRestricted {
             pub pub_token: Token![pub],
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub in_token: Option<Token![in]>,
             pub path: Box<Path>,
         }),

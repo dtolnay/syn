@@ -28,7 +28,7 @@ mod macros;
 pub mod helper;
 
 #[macro_use]
-pub mod tokens;
+pub mod token;
 
 mod attr;
 pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem, MetaItemList,
@@ -229,7 +229,7 @@ fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 ///
 /// fn run() -> Result<()> {
 ///     let code = quote!(assert_eq!(u8::max_value(), 255));
-///     let expr = syn::parse_tokens::<Expr>(code)?;
+///     let expr = syn::parse_token::<Expr>(code)?;
 ///     println!("{:#?}", expr);
 ///     Ok(())
 /// }

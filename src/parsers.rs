@@ -668,7 +668,7 @@ macro_rules! alt {
 /// extern crate proc_macro2;
 ///
 /// use syn::{Ident, TokenTree};
-/// use syn::tokens::Paren;
+/// use syn::token::Paren;
 /// use proc_macro2::TokenStream;
 ///
 /// // Parse a macro invocation like `stringify!($args)`.

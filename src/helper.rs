@@ -7,7 +7,7 @@
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::tokens::Bang;
+/// use syn::token::Bang;
 ///
 /// named!(maybe_bang -> Option<Bang>, option!(punct!(!)));
 ///
@@ -44,7 +44,7 @@ macro_rules! option {
 ///
 /// use syn::{Lifetime, Type};
 /// use syn::delimited::Delimited;
-/// use syn::tokens::*;
+/// use syn::token::*;
 ///
 /// named!(bound_lifetimes -> (Vec<Lifetime>, Type), tuple!(
 ///     opt_vec!(do_parse!(
@@ -111,7 +111,7 @@ macro_rules! epsilon {
 /// extern crate syn;
 ///
 /// use syn::{Expr, ExprCall};
-/// use syn::tokens::RArrow;
+/// use syn::token::RArrow;
 ///
 /// named!(expr_with_arrow_call -> Expr, do_parse!(
 ///     mut e: syn!(Expr) >>
@@ -192,7 +192,7 @@ macro_rules! syn {
 /// extern crate syn;
 ///
 /// use syn::Expr;
-/// use syn::tokens::Paren;
+/// use syn::token::Paren;
 ///
 /// named!(expr_paren -> (Expr, Paren), parens!(syn!(Expr)));
 ///
@@ -201,7 +201,7 @@ macro_rules! syn {
 #[macro_export]
 macro_rules! parens {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
-        $crate::tokens::Paren::parse($i, |i| $submac!(i, $($args)*))
+        $crate::token::Paren::parse($i, |i| $submac!(i, $($args)*))
     };
 
     ($i:expr, $f:expr) => {
@@ -214,7 +214,7 @@ macro_rules! parens {
 #[macro_export]
 macro_rules! brackets {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
-        $crate::tokens::Bracket::parse($i, |i| $submac!(i, $($args)*))
+        $crate::token::Bracket::parse($i, |i| $submac!(i, $($args)*))
     };
 
     ($i:expr, $f:expr) => {
@@ -226,7 +226,7 @@ macro_rules! brackets {
 #[macro_export]
 macro_rules! braces {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
-        $crate::tokens::Brace::parse($i, |i| $submac!(i, $($args)*))
+        $crate::token::Brace::parse($i, |i| $submac!(i, $($args)*))
     };
 
     ($i:expr, $f:expr) => {
@@ -238,7 +238,7 @@ macro_rules! braces {
 #[macro_export]
 macro_rules! grouped {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
-        $crate::tokens::Group::parse($i, |i| $submac!(i, $($args)*))
+        $crate::token::Group::parse($i, |i| $submac!(i, $($args)*))
     };
 
     ($i:expr, $f:expr) => {

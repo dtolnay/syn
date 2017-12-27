@@ -109,7 +109,7 @@ impl Ident {
         }
 
         if s == "_" {
-            panic!("`_` is not a valid ident; use syn::tokens::Underscore");
+            panic!("`_` is not a valid ident; use syn::token::Underscore");
         }
 
         fn xid_ok(s: &str) -> bool {

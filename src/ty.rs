@@ -7,11 +7,11 @@ ast_enum_of_structs! {
         /// A variable-length array (`[T]`)
         pub Slice(TypeSlice {
             pub ty: Box<Type>,
-            pub bracket_token: tokens::Bracket,
+            pub bracket_token: token::Bracket,
         }),
         /// A fixed length array (`[T; n]`)
         pub Array(TypeArray {
-            pub bracket_token: tokens::Bracket,
+            pub bracket_token: token::Bracket,
             pub ty: Box<Type>,
             pub semi_token: Token![;],
             pub amt: Expr,
@@ -38,7 +38,7 @@ ast_enum_of_structs! {
         }),
         /// A tuple (`(A, B, C, D, ...)`)
         pub Tuple(TypeTuple {
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub tys: Delimited<Type, Token![,]>,
             pub lone_comma: Option<Token![,]>,
         }),
@@ -64,12 +64,12 @@ ast_enum_of_structs! {
         }),
         /// No-op; kept solely so that we can pretty-print faithfully
         pub Paren(TypeParen {
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub ty: Box<Type>,
         }),
         /// No-op: kept solely so that we can pretty-print faithfully
         pub Group(TypeGroup {
-            pub group_token: tokens::Group,
+            pub group_token: token::Group,
             pub ty: Box<Type>,
         }),
         /// TypeKind::Infer means the type should be inferred instead of it having been
@@ -233,7 +233,7 @@ ast_struct! {
 ast_struct! {
     /// A path like `Foo(A,B) -> C`
     pub struct ParenthesizedGenericArguments {
-        pub paren_token: tokens::Paren,
+        pub paren_token: token::Paren,
         /// `(A, B)`
         pub inputs: Delimited<Type, Token![,]>,
         /// `C`
@@ -280,7 +280,7 @@ ast_struct! {
         pub unsafety: Unsafety,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
-        pub paren_token: tokens::Paren,
+        pub paren_token: token::Paren,
         pub inputs: Delimited<BareFnArg, Token![,]>,
         pub variadic: Option<Token![...]>,
         pub output: ReturnType,
@@ -1043,7 +1043,7 @@ mod printing {
 
                     // ERROR CORRECTION: Add braces to make sure that the
                     // generated code is valid.
-                    _ => tokens::Brace::default().surround(tokens, |tokens| {
+                    _ => token::Brace::default().surround(tokens, |tokens| {
                         e.to_tokens(tokens);
                     }),
                 }

@@ -78,7 +78,7 @@ ast_enum_of_structs! {
             pub vis: Visibility,
             pub mod_token: Token![mod],
             pub ident: Ident,
-            pub content: Option<(tokens::Brace, Vec<Item>)>,
+            pub content: Option<(token::Brace, Vec<Item>)>,
             pub semi: Option<Token![;]>,
         }),
         /// An external module (`extern` or `pub extern`).
@@ -87,7 +87,7 @@ ast_enum_of_structs! {
         pub ForeignMod(ItemForeignMod {
             pub attrs: Vec<Attribute>,
             pub abi: Abi,
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub items: Vec<ForeignItem>,
         }),
         /// A type alias (`type` or `pub type`).
@@ -112,7 +112,7 @@ ast_enum_of_structs! {
             pub enum_token: Token![enum],
             pub ident: Ident,
             pub generics: Generics,
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub variants: Delimited<Variant, Token![,]>,
         }),
         /// A struct definition (`struct` or `pub struct`).
@@ -151,7 +151,7 @@ ast_enum_of_structs! {
             pub generics: Generics,
             pub colon_token: Option<Token![:]>,
             pub supertraits: Delimited<TypeParamBound, Token![+]>,
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub items: Vec<TraitItem>,
         }),
         /// Default trait implementation.
@@ -164,7 +164,7 @@ ast_enum_of_structs! {
             pub path: Path,
             pub for_token: Token![for],
             pub dot2_token: Token![..],
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
         }),
         /// An implementation.
         ///
@@ -179,7 +179,7 @@ ast_enum_of_structs! {
             pub trait_: Option<(ImplPolarity, Path, Token![for])>,
             /// The Self type of the impl.
             pub self_ty: Box<Type>,
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub items: Vec<ImplItem>,
         }),
         /// A macro invocation (which includes macro definition).
@@ -246,7 +246,7 @@ ast_enum_of_structs! {
         }),
         /// `use prefix::{a, b, c}`
         pub List(UseList {
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub items: Delimited<UseTree, Token![,]>,
         }),
     }
@@ -406,7 +406,7 @@ ast_struct! {
     /// E.g. `fn foo(bar: baz)`
     pub struct FnDecl {
         pub fn_token: Token![fn],
-        pub paren_token: tokens::Paren,
+        pub paren_token: token::Paren,
         pub inputs: Delimited<FnArg, Token![,]>,
         pub output: ReturnType,
         pub generics: Generics,

@@ -39,14 +39,14 @@ ast_enum_of_structs! {
         /// An array, e.g. `[a, b, c, d]`.
         pub Array(ExprArray #full {
             pub exprs: Delimited<Expr, Token![,]>,
-            pub bracket_token: tokens::Bracket,
+            pub bracket_token: token::Bracket,
         }),
 
         /// A function call.
         pub Call(ExprCall {
             pub func: Box<Expr>,
             pub args: Delimited<Expr, Token![,]>,
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
         }),
 
         /// A method call (`x.foo::<Bar, Baz>(a, b, c, d)`)
@@ -62,7 +62,7 @@ ast_enum_of_structs! {
             pub method: Ident,
             pub typarams: Delimited<Type, Token![,]>,
             pub args: Delimited<Expr, Token![,]>,
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub dot_token: Token![.],
             pub lt_token: Option<Token![<]>,
             pub colon2_token: Option<Token![::]>,
@@ -72,7 +72,7 @@ ast_enum_of_structs! {
         /// A tuple, e.g. `(a, b, c, d)`.
         pub Tuple(ExprTuple #full {
             pub args: Delimited<Expr, Token![,]>,
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub lone_comma: Option<Token![,]>,
         }),
 
@@ -188,7 +188,7 @@ ast_enum_of_structs! {
         /// A `match` block.
         pub Match(ExprMatch #full {
             pub match_token: Token![match],
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub expr: Box<Expr>,
             pub arms: Vec<Arm>,
         }),
@@ -249,7 +249,7 @@ ast_enum_of_structs! {
         pub Index(ExprIndex {
             pub expr: Box<Expr>,
             pub index: Box<Expr>,
-            pub bracket_token: tokens::Bracket,
+            pub bracket_token: token::Bracket,
         }),
 
         /// A range (`1..2`, `1..`, `..2`, `1..=2`, `..=2`)
@@ -307,7 +307,7 @@ ast_enum_of_structs! {
             pub fields: Delimited<FieldValue, Token![,]>,
             pub rest: Option<Box<Expr>>,
             pub dot2_token: Option<Token![..]>,
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
         }),
 
         /// An array literal constructed from one repeated element.
@@ -315,7 +315,7 @@ ast_enum_of_structs! {
         /// For example, `[1; 5]`. The first expression is the element
         /// to be repeated; the second is the number of times to repeat it.
         pub Repeat(ExprRepeat #full {
-            pub bracket_token: tokens::Bracket,
+            pub bracket_token: token::Bracket,
             pub semi_token: Token![;],
             pub expr: Box<Expr>,
             pub amt: Box<Expr>,
@@ -324,7 +324,7 @@ ast_enum_of_structs! {
         /// No-op: used solely so we can pretty-print faithfully
         pub Paren(ExprParen {
             pub expr: Box<Expr>,
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
         }),
 
         /// No-op: used solely so we can pretty-print faithfully
@@ -334,7 +334,7 @@ ast_enum_of_structs! {
         /// expression. They are used for macro hygiene.
         pub Group(ExprGroup {
             pub expr: Box<Expr>,
-            pub group_token: tokens::Group,
+            pub group_token: token::Group,
         }),
 
         /// `expr?`
@@ -389,7 +389,7 @@ ast_struct! {
     ///
     /// E.g. `{ .. }` as in `fn foo() { .. }`
     pub struct Block {
-        pub brace_token: tokens::Brace,
+        pub brace_token: token::Brace,
         /// Statements in a block
         pub stmts: Vec<Stmt>,
     }
@@ -480,7 +480,7 @@ ast_enum_of_structs! {
         pub Struct(PatStruct {
             pub path: Path,
             pub fields: Delimited<FieldPat, Token![,]>,
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub dot2_token: Option<Token![..]>,
         }),
 
@@ -507,7 +507,7 @@ ast_enum_of_structs! {
         pub Tuple(PatTuple {
             pub pats: Delimited<Pat, Token![,]>,
             pub dots_pos: Option<usize>,
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub dot2_token: Option<Token![..]>,
             pub comma_token: Option<Token![,]>,
         }),
@@ -539,7 +539,7 @@ ast_enum_of_structs! {
             pub back: Delimited<Pat, Token![,]>,
             pub dot2_token: Option<Token![..]>,
             pub comma_token: Option<Token![,]>,
-            pub bracket_token: tokens::Bracket,
+            pub bracket_token: token::Bracket,
         }),
         /// A macro pattern; pre-expansion
         pub Macro(Macro),
@@ -1282,7 +1282,7 @@ pub mod parsing {
         ));
     }
 
-    named!(and_call -> (Delimited<Expr, Token![,]>, tokens::Paren),
+    named!(and_call -> (Delimited<Expr, Token![,]>, token::Paren),
            parens!(call!(Delimited::parse_terminated)));
 
     #[cfg(feature = "full")]
@@ -1540,7 +1540,7 @@ pub mod parsing {
                 dot_tokens: None,
                 fn_token: <Token![fn]>::default(),
                 generics: Generics::default(),
-                paren_token: tokens::Paren::default(),
+                paren_token: token::Paren::default(),
             }),
             body: Box::new(ret_and_body.1),
         }.into())
@@ -1783,7 +1783,7 @@ pub mod parsing {
     named!(and_tup_field -> (Lit, Token![.]),
            map!(tuple!(punct!(.), syn!(Lit)), |(a, b)| (b, a)));
 
-    named!(and_index -> (Expr, tokens::Bracket), brackets!(syn!(Expr)));
+    named!(and_index -> (Expr, token::Bracket), brackets!(syn!(Expr)));
 
     #[cfg(feature = "full")]
     impl Synom for Block {
@@ -2264,7 +2264,7 @@ mod printing {
     #[cfg(feature = "full")]
     fn wrap_bare_struct(tokens: &mut Tokens, e: &Expr) {
         if let ExprKind::Struct(_) = e.node {
-            tokens::Paren::default().surround(tokens, |tokens| {
+            token::Paren::default().surround(tokens, |tokens| {
                 e.to_tokens(tokens);
             });
         } else {
@@ -2310,7 +2310,7 @@ mod printing {
                     if let ExprKind::Block(_) = self.value.node {
                         self.value.to_tokens(tokens);
                     } else {
-                        tokens::Brace::default().surround(tokens, |tokens| {
+                        token::Brace::default().surround(tokens, |tokens| {
                             self.value.to_tokens(tokens);
                         })
                     }
@@ -2422,7 +2422,7 @@ mod printing {
                     if_false.to_tokens(tokens);
                 }
                 _ => {
-                    tokens::Brace::default().surround(tokens, |tokens| {
+                    token::Brace::default().surround(tokens, |tokens| {
                         if_false.to_tokens(tokens);
                     });
                 }

@@ -28,7 +28,7 @@ ast_enum_of_structs! {
         /// It's an enum.
         pub Enum(BodyEnum {
             pub enum_token: Token![enum],
-            pub brace_token: tokens::Brace,
+            pub brace_token: token::Brace,
             pub variants: Delimited<Variant, Token![,]>,
         }),
 
@@ -121,7 +121,7 @@ pub mod parsing {
         )
     ));
 
-    named!(enum_body -> (WhereClause, Delimited<Variant, Token![,]>, tokens::Brace), do_parse!(
+    named!(enum_body -> (WhereClause, Delimited<Variant, Token![,]>, token::Brace), do_parse!(
         wh: syn!(WhereClause) >>
         data: braces!(Delimited::parse_terminated) >>
         (wh, data.0, data.1)
@@ -153,10 +153,10 @@ pub mod parsing {
         ));
     }
 
-    named!(struct_like_body -> (Delimited<Field, Token![,]>, tokens::Brace),
+    named!(struct_like_body -> (Delimited<Field, Token![,]>, token::Brace),
            braces!(call!(Delimited::parse_terminated_with, Field::parse_struct)));
 
-    named!(tuple_like_body -> (Delimited<Field, Token![,]>, tokens::Paren),
+    named!(tuple_like_body -> (Delimited<Field, Token![,]>, token::Paren),
            parens!(call!(Delimited::parse_terminated_with, Field::parse_tuple)));
 }
 

@@ -10,7 +10,7 @@ ast_struct! {
     pub struct Attribute {
         pub style: AttrStyle,
         pub pound_token: Token![#],
-        pub bracket_token: tokens::Bracket,
+        pub bracket_token: token::Bracket,
 
         /// The path of the attribute.
         ///
@@ -46,7 +46,7 @@ impl Attribute {
                 let tokens = ts.clone().into_iter().collect::<Vec<_>>();
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
-                        paren_token: tokens::Paren(self.tts[0].0.span),
+                        paren_token: token::Paren(self.tts[0].0.span),
                         ident: *name,
                         nested: nested_meta_items,
                     }));
@@ -112,7 +112,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
                         Some(nested_meta_items) => {
                             let list = MetaItemList {
                                 ident: ident,
-                                paren_token: tokens::Paren(tts[1].span),
+                                paren_token: token::Paren(tts[1].span),
                                 nested: nested_meta_items,
                             };
                             Some((MetaItem::List(list).into(), &tts[2..]))
@@ -198,7 +198,7 @@ ast_enum_of_structs! {
             /// E.g. `derive` in `#[derive(..)]`
             pub ident: Ident,
 
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
 
             /// Arguments to this attribute
             ///
@@ -338,7 +338,7 @@ pub mod parsing {
                     ],
                     is_sugared_doc: true,
                     pound_token: <Token![#]>::default(),
-                    bracket_token: tokens::Bracket::default(),
+                    bracket_token: token::Bracket::default(),
                 }
             )
         ));
@@ -375,7 +375,7 @@ pub mod parsing {
                     ],
                     is_sugared_doc: true,
                     pound_token: <Token![#]>::default(),
-                    bracket_token: tokens::Bracket::default(),
+                    bracket_token: token::Bracket::default(),
                 }
             )
         ));
