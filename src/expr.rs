@@ -1809,8 +1809,8 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Block {
         named!(pub parse_within -> Vec<Stmt>, do_parse!(
-            many0!(<Token![;]>::parse) >>
-            mut standalone: many0!(terminated!(syn!(Stmt), many0!(<Token![;]>::parse))) >>
+            many0!(punct!(;)) >>
+            mut standalone: many0!(terminated!(syn!(Stmt), many0!(punct!(;)))) >>
             last: option!(do_parse!(
                 attrs: many0!(Attribute::parse_outer) >>
                 mut e: syn!(Expr) >>
