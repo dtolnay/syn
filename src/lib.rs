@@ -4,6 +4,7 @@
     const_static_lifetime,
     doc_markdown,
     large_enum_variant,
+    match_bool,
     redundant_closure,
 ))]
 
