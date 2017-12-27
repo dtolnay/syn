@@ -14,6 +14,7 @@ extern crate unicode_xid;
 #[cfg(any(feature = "printing", feature = "parsing"))]
 extern crate quote;
 
+#[cfg(feature = "parsing")]
 #[macro_use]
 #[doc(hidden)]
 pub mod parsers;
@@ -107,7 +108,9 @@ pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg,
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 
+#[cfg(feature = "parsing")]
 mod cursor;
+#[cfg(feature = "parsing")]
 pub mod synom;
 pub mod delimited;
 
@@ -136,6 +139,7 @@ mod error;
 pub use error::{PResult, ParseError};
 
 // Not public API.
+#[cfg(feature = "parsing")]
 #[doc(hidden)]
 pub use error::parse_error;
 
