@@ -46,7 +46,7 @@ impl SynomBuffer {
         // in the list to be processed later.
         let mut entries = Vec::new();
         let mut seqs = Vec::new();
-        for tt in stream.into_iter() {
+        for tt in stream {
             match tt.kind {
                 TokenNode::Term(sym) => {
                     entries.push(Entry::Term(tt.span, sym));
