@@ -36,7 +36,7 @@ script:
           cargo build --features 'full visit fold' &&
           cargo build --no-default-features --features 'full parsing printing' &&
           cargo build --no-default-features --features 'visit fold parsing printing' &&
-          cargo build --no-default-features --features 'full visit fold parsing printing' &&
+          cargo build --no-default-features --features 'full visit fold parsing printing'
           ;;
         test)
           cargo test --all-features --release
