@@ -360,6 +360,7 @@ macro_rules! Token {
     (yield)    => { $crate::tokens::Yield };
 }
 
+#[cfg(feature = "parsing")]
 #[macro_export]
 macro_rules! punct {
     ($i:expr, +)   => { call!($i, <$crate::tokens::Add as $crate::synom::Synom>::parse) };
@@ -409,6 +410,7 @@ macro_rules! punct {
     ($i:expr, _)   => { call!($i, <$crate::tokens::Underscore as $crate::synom::Synom>::parse) };
 }
 
+#[cfg(feature = "parsing")]
 #[macro_export]
 macro_rules! keyword {
     ($i:expr, as)       => { call!($i, <$crate::tokens::As as $crate::synom::Synom>::parse) };
