@@ -4,6 +4,8 @@
 //! A Folder represents an AST->AST fold; it accepts an AST piece,
 //! and returns a piece of the same type.
 
+#![cfg_attr(rustfmt, rustfmt_skip)]
+
 // Unreachable code is generated sometimes without the full feature.
 #![allow(unreachable_code)]
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]

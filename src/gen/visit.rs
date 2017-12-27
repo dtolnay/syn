@@ -6,6 +6,8 @@
 //! call `visit::walk_*` to apply the default traversal algorithm, or prevent
 //! deeper traversal by doing nothing.
 
+#![cfg_attr(rustfmt, rustfmt_skip)]
+
 #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
 use *;
