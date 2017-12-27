@@ -5,7 +5,7 @@
 //! of these tokens and all implment the `ToTokens` and `Synom` traits when the
 //! corresponding feature is activated.
 
-use Span;
+use proc_macro2::Span;
 
 macro_rules! tokens {
     (
@@ -28,19 +28,31 @@ macro_rules! tokens {
 macro_rules! op {
     (pub struct $name:ident($($contents:tt)*) => $s:expr) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub $($contents)*);
 
         #[cfg(feature = "extra-traits")]
         impl ::std::fmt::Debug for $name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                let mut t = f.debug_tuple(stringify!($name));
-                for span in &self.0 {
-                    t.field(span);
-                }
-                t.finish()
+                f.write_str(stringify!($name))
             }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::cmp::Eq for $name {}
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::cmp::PartialEq for $name {
+            fn eq(&self, _other: &$name) -> bool {
+                true
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::hash::Hash for $name {
+            fn hash<H>(&self, _state: &mut H)
+                where H: ::std::hash::Hasher
+            {}
         }
 
         #[cfg(feature = "printing")]
@@ -62,9 +74,32 @@ macro_rules! op {
 macro_rules! sym {
     (pub struct $name:ident => $s:expr) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub Span);
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(stringify!($name))
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::cmp::Eq for $name {}
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::cmp::PartialEq for $name {
+            fn eq(&self, _other: &$name) -> bool {
+                true
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::hash::Hash for $name {
+            fn hash<H>(&self, _state: &mut H)
+                where H: ::std::hash::Hasher
+            {}
+        }
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
@@ -85,9 +120,32 @@ macro_rules! sym {
 macro_rules! delim {
     (pub struct $name:ident => $s:expr) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[derive(Default)]
         pub struct $name(pub Span);
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(stringify!($name))
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::cmp::Eq for $name {}
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::cmp::PartialEq for $name {
+            fn eq(&self, _other: &$name) -> bool {
+                true
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl ::std::hash::Hash for $name {
+            fn hash<H>(&self, _state: &mut H)
+                where H: ::std::hash::Hasher
+            {}
+        }
 
         impl $name {
             #[cfg(feature = "printing")]
@@ -399,10 +457,10 @@ macro_rules! keyword {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::{Delimiter, Spacing};
+    use proc_macro2::{Span, Delimiter, Spacing};
 
     use cursor::Cursor;
-    use {PResult, Span, parse_error};
+    use {PResult, parse_error};
 
     pub trait FromSpans: Sized {
         fn from_spans(spans: &[Span]) -> Self;
@@ -445,7 +503,7 @@ mod parsing {
                             _ => return parse_error(),
                         }
                     }
-                    *slot = Span(span);
+                    *slot = span;
                     tokens = rest;
                 }
                 _ => return parse_error()
@@ -461,7 +519,7 @@ mod parsing {
     {
         if let Some((rest, span, s)) = tokens.word() {
             if s.as_str() == sym {
-                return Ok((rest, new(Span(span))));
+                return Ok((rest, new(span)));
             }
         }
         parse_error()
@@ -487,7 +545,7 @@ mod parsing {
             match f(seqinfo.inside) {
                 Ok((remaining, ret)) => {
                     if remaining.eof() {
-                        return Ok((seqinfo.outside, (ret, new(Span(seqinfo.span)))));
+                        return Ok((seqinfo.outside, (ret, new(seqinfo.span))));
                     }
                 }
                 Err(err) => return Err(err),
@@ -499,10 +557,8 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{TokenTree, TokenNode, Spacing, Term};
+    use proc_macro2::{Span, TokenTree, TokenNode, Spacing, Term};
     use quote::Tokens;
-
-    use Span;
 
     pub fn op(s: &str, spans: &[Span], tokens: &mut Tokens) {
         assert_eq!(s.len(), spans.len());
@@ -513,20 +569,20 @@ mod printing {
         let span = spans.next_back().unwrap();
         for (ch, span) in chars.zip(spans) {
             tokens.append(TokenTree {
-                span: span.0,
+                span: *span,
                 kind: TokenNode::Op(ch, Spacing::Joint),
             });
         }
 
         tokens.append(TokenTree {
-            span: span.0,
+            span: *span,
             kind: TokenNode::Op(ch, Spacing::Alone),
         });
     }
 
     pub fn sym(s: &str, span: &Span, tokens: &mut Tokens) {
         tokens.append(TokenTree {
-            span: span.0,
+            span: *span,
             kind: TokenNode::Term(Term::intern(s)),
         });
     }
@@ -534,6 +590,6 @@ mod printing {
     pub fn delim<F>(s: &str, span: &Span, tokens: &mut Tokens, f: F)
         where F: FnOnce(&mut Tokens)
     {
-        tokens.append_delimited(s, span.0, f)
+        tokens.append_delimited(s, *span, f)
     }
 }

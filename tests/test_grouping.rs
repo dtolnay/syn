@@ -26,7 +26,7 @@ fn expr<T: Into<ExprKind>>(t: T) -> Expr {
 fn lit<T: Into<Literal>>(t: T) -> Expr {
     expr(Lit {
         value: LitKind::Other(t.into()),
-        span: syn::Span::default(),
+        span: Span::default(),
     })
 }
 

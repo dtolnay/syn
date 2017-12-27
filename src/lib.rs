@@ -111,9 +111,6 @@ mod cursor;
 pub mod synom;
 pub mod delimited;
 
-mod span;
-pub use span::Span;
-
 mod gen {
     #[cfg(feature = "visit")]
     pub mod visit;

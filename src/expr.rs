@@ -659,7 +659,7 @@ pub mod parsing {
     use ty::parsing::qpath;
 
     #[cfg(feature = "full")]
-    use proc_macro2::{TokenStream, TokenNode, Delimiter, Term};
+    use proc_macro2::{Span, TokenStream, TokenNode, Delimiter, Term};
     use synom::Synom;
     use cursor::Cursor;
     #[cfg(feature = "full")]
@@ -1848,7 +1848,7 @@ pub mod parsing {
                 path: what,
                 bang_token: bang,
                 tokens: vec![TokenTree(proc_macro2::TokenTree {
-                    span: ((data.1).0).0,
+                    span: (data.1).0,
                     kind: TokenNode::Group(Delimiter::Brace, data.0),
                 })],
             },

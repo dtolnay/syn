@@ -10,6 +10,7 @@
 
 use *;
 use delimited::Delimited;
+use proc_macro2::Span;
 
 trait FoldHelper {
     type Item;

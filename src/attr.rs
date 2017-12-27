@@ -46,7 +46,7 @@ impl Attribute {
                 let tokens = ts.clone().into_iter().collect::<Vec<_>>();
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
                     return Some(MetaItem::List(MetaItemList {
-                        paren_token: tokens::Paren(Span(self.tts[0].0.span)),
+                        paren_token: tokens::Paren(self.tts[0].0.span),
                         ident: *name,
                         nested: nested_meta_items,
                     }));
@@ -59,10 +59,10 @@ impl Attribute {
                 if let TokenNode::Literal(ref lit) = self.tts[1].0.kind {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: *name,
-                        eq_token: Token![=]([Span(self.tts[0].0.span)]),
+                        eq_token: Token![=]([self.tts[0].0.span]),
                         lit: Lit {
                             value: LitKind::Other(lit.clone()),
-                            span: Span(self.tts[1].0.span),
+                            span: self.tts[1].0.span,
                         },
                     }));
                 }
@@ -82,22 +82,22 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
         TokenNode::Literal(ref lit) => {
             let lit = Lit {
                 value: LitKind::Other(lit.clone()),
-                span: Span(tts[0].span),
+                span: tts[0].span,
             };
             Some((NestedMetaItem::Literal(lit), &tts[1..]))
         }
 
         TokenNode::Term(sym) => {
-            let ident = Ident::new(sym, Span(tts[0].span));
+            let ident = Ident::new(sym, tts[0].span);
             if tts.len() >= 3 {
                 if let TokenNode::Op('=', Spacing::Alone) = tts[1].kind {
                     if let TokenNode::Literal(ref lit) = tts[2].kind {
                         let pair = MetaNameValue {
-                            ident: Ident::new(sym, Span(tts[0].span)),
-                            eq_token: Token![=]([Span(tts[1].span)]),
+                            ident: Ident::new(sym, tts[0].span),
+                            eq_token: Token![=]([tts[1].span]),
                             lit: Lit {
                                 value: LitKind::Other(lit.clone()),
-                                span: Span(tts[2].span),
+                                span: tts[2].span,
                             },
                         };
                         return Some((MetaItem::NameValue(pair).into(), &tts[3..]));
@@ -112,7 +112,7 @@ fn nested_meta_item_from_tokens(tts: &[proc_macro2::TokenTree])
                         Some(nested_meta_items) => {
                             let list = MetaItemList {
                                 ident: ident,
-                                paren_token: tokens::Paren(Span(tts[1].span)),
+                                paren_token: tokens::Paren(tts[1].span),
                                 nested: nested_meta_items,
                             };
                             Some((MetaItem::List(list).into(), &tts[2..]))
@@ -141,7 +141,7 @@ fn list_of_nested_meta_items_from_tokens(mut tts: &[proc_macro2::TokenTree])
             first = false;
             None
         } else if let TokenNode::Op(',', Spacing::Alone) = tts[0].kind {
-            let tok = Token![,]([Span(tts[0].span)]);
+            let tok = Token![,]([tts[0].span]);
             tts = &tts[1..];
             if tts.is_empty() {
                 break

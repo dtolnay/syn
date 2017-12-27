@@ -9,7 +9,7 @@ use syn::*;
 extern crate quote;
 
 extern crate proc_macro2;
-use proc_macro2::Term;
+use proc_macro2::{Span, Term};
 
 mod common;
 

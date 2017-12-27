@@ -9,6 +9,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
 use *;
+use proc_macro2::Span;
 
 
 #[cfg(feature = "full")]

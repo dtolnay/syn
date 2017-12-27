@@ -2,10 +2,8 @@ use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::Term;
+use proc_macro2::{Span, Term};
 use unicode_xid::UnicodeXID;
-
-use Span;
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -108,7 +106,7 @@ pub mod parsing {
 
             Ok((rest, Lifetime {
                 sym: sym,
-                span: Span(span),
+                span: span,
             }))
         }
     }
@@ -123,7 +121,7 @@ mod printing {
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
-                span: self.span.0,
+                span: self.span,
                 kind: TokenNode::Term(self.sym),
             })
         }

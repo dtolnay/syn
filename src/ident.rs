@@ -6,7 +6,7 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::Term;
 use unicode_xid::UnicodeXID;
 
-use Span;
+use proc_macro2::Span;
 
 /// A word of Rust code, such as a keyword or variable name.
 ///
@@ -252,7 +252,7 @@ pub mod parsing {
             }
 
             Ok((rest, Ident {
-                span: Span(span),
+                span: span,
                 sym: sym,
             }))
         }
@@ -272,7 +272,7 @@ mod printing {
     impl ToTokens for Ident {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
-                span: self.span.0,
+                span: self.span,
                 kind: TokenNode::Term(self.sym),
             })
         }

@@ -837,6 +837,7 @@ macro_rules! full {
 
 use *;
 use delimited::Delimited;
+use proc_macro2::Span;
 
 trait FoldHelper {{
     type Item;
@@ -896,6 +897,7 @@ pub trait Folder {{
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
+use proc_macro2::Span;
 
 {full_macro}
 
@@ -930,6 +932,7 @@ pub trait Visitor<'ast> {{
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
+use proc_macro2::Span;
 
 {full_macro}
 

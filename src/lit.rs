@@ -1,9 +1,9 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::{self, Literal, TokenNode, Term};
+use proc_macro2::{self, Span, Literal, TokenNode, Term};
 
-use {Span, TokenTree};
+use TokenTree;
 
 #[derive(Clone)]
 pub struct Lit {
@@ -25,7 +25,7 @@ impl Lit {
             LitKind::Other(l) => TokenNode::Literal(l),
         };
         TokenTree(proc_macro2::TokenTree {
-            span: self.span.0,
+            span: self.span,
             kind: kind,
         })
     }
@@ -110,7 +110,7 @@ pub mod parsing {
             match input.literal() {
                 Some((rest, span, lit)) => {
                     Ok((rest, Lit {
-                        span: Span(span),
+                        span: span,
                         value: LitKind::Other(lit)
                     }))
                 }
@@ -125,7 +125,7 @@ pub mod parsing {
                         };
 
                         Ok((rest, Lit {
-                            span: Span(span),
+                            span: span,
                             value: kind
                         }))
                     }
