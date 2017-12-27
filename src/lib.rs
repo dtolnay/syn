@@ -101,6 +101,8 @@ mod cursor;
 #[cfg(feature = "parsing")]
 pub mod synom;
 pub mod delimited;
+#[cfg(feature = "parsing")]
+mod tt;
 
 mod gen {
     #[cfg(feature = "visit")]

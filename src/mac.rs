@@ -170,35 +170,19 @@ impl<'a> Hash for TokenStreamHelper<'a> {
 pub mod parsing {
     use super::*;
 
-    use proc_macro2::{TokenNode, TokenTree};
     use synom::Synom;
-    use cursor::Cursor;
-    use {parse_error, PResult};
 
     impl Synom for Macro {
         named!(parse -> Self, do_parse!(
             what: syn!(Path) >>
             bang: punct!(!) >>
-            body: call!(parse_tt_delimited) >>
+            body: call!(tt::delimited) >>
             (Macro {
                 path: what,
                 bang_token: bang,
                 tokens: body,
             })
         ));
-    }
-
-    pub fn parse_tt_delimited(input: Cursor) -> PResult<TokenTree> {
-        match input.token_tree() {
-            Some((
-                rest,
-                token @ TokenTree {
-                    kind: TokenNode::Group(..),
-                    ..
-                },
-            )) => Ok((rest, token)),
-            _ => parse_error(),
-        }
     }
 }
 

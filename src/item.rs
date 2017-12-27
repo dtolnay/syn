@@ -514,7 +514,7 @@ pub mod parsing {
         what: syn!(Path) >>
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
-        body: call!(mac::parsing::parse_tt_delimited) >>
+        body: call!(tt::delimited) >>
         cond!(!mac::is_braced(&body), punct!(;)) >>
         (ItemMacro {
             attrs: attrs,
@@ -533,8 +533,8 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         macro_: keyword!(macro) >>
         ident: syn!(Ident) >>
-        args: call!(mac::parsing::parse_tt_delimited) >>
-        body: call!(mac::parsing::parse_tt_delimited) >>
+        args: call!(tt::parenthesized) >>
+        body: call!(tt::braced) >>
         (ItemMacro2 {
             attrs: attrs,
             vis: vis,
