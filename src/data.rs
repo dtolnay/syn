@@ -112,7 +112,7 @@ pub mod parsing {
 
     impl Field {
         named!(pub parse_struct -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             id: syn!(Ident) >>
             colon: punct!(:) >>
@@ -127,7 +127,7 @@ pub mod parsing {
         ));
 
         named!(pub parse_tuple -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             ty: syn!(Type) >>
             (Field {

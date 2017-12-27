@@ -1452,7 +1452,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             match_: keyword!(match) >>
             obj: expr_no_struct >>
-            res: braces!(many0!(syn!(Arm))) >>
+            res: braces!(many0!(Arm::parse)) >>
             ({
                 let (arms, brace) = res;
                 ExprMatch {
@@ -1494,7 +1494,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for Arm {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             pats: call!(Delimited::parse_separated_nonempty) >>
             guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
             rocket: punct!(=>) >>
@@ -1809,10 +1809,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Block {
         named!(pub parse_within -> Vec<Stmt>, do_parse!(
-            many0!(punct!(;)) >>
-            mut standalone: many0!(terminated!(syn!(Stmt), many0!(punct!(;)))) >>
+            many0!(<Token![;]>::parse) >>
+            mut standalone: many0!(terminated!(syn!(Stmt), many0!(<Token![;]>::parse))) >>
             last: option!(do_parse!(
-                attrs: many0!(call!(Attribute::parse_outer)) >>
+                attrs: many0!(Attribute::parse_outer) >>
                 mut e: syn!(Expr) >>
                 ({
                     e.attrs = attrs;
@@ -1846,7 +1846,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_mac -> Stmt, do_parse!(
-        attrs: many0!(call!(Attribute::parse_outer)) >>
+        attrs: many0!(Attribute::parse_outer) >>
         what: syn!(Path) >>
         bang: punct!(!) >>
     // Only parse braces here; paren and bracket will get parsed as
@@ -1872,7 +1872,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_local -> Stmt, do_parse!(
-        attrs: many0!(call!(Attribute::parse_outer)) >>
+        attrs: many0!(Attribute::parse_outer) >>
         let_: keyword!(let) >>
         pat: syn!(Pat) >>
         ty: option!(tuple!(punct!(:), syn!(Type))) >>
@@ -1895,7 +1895,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_blockexpr -> Stmt, do_parse!(
-        attrs: many0!(call!(Attribute::parse_outer)) >>
+        attrs: many0!(Attribute::parse_outer) >>
         mut e: expr_nosemi >>
         // If the next token is a `.` or a `?` it is special-cased to parse as
         // an expression instead of a blockexpression.
@@ -1914,7 +1914,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_expr -> Stmt, do_parse!(
-        attrs: many0!(call!(Attribute::parse_outer)) >>
+        attrs: many0!(Attribute::parse_outer) >>
         mut e: syn!(Expr) >>
         semi: punct!(;) >>
         ({

@@ -50,7 +50,7 @@ pub mod parsing {
 
     impl Synom for DeriveInput {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             which: alt!(
                 keyword!(struct) => { Ok }
@@ -127,7 +127,7 @@ pub mod parsing {
 
     impl Synom for Variant {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             id: syn!(Ident) >>
             data: alt!(
                 struct_like_body => { |(d, b)| VariantData::Struct(d, b) }

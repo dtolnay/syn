@@ -199,7 +199,7 @@ mod parsing {
     pub struct AstStruct(pub Vec<AstItem>);
     impl Synom for AstStruct {
         named!(parse -> Self, map!(braces!(do_parse!(
-            many0!(call!(Attribute::parse_outer)) >>
+            many0!(Attribute::parse_outer) >>
             keyword!(pub) >>
             keyword!(struct) >>
             res: call!(ast_struct_inner) >>
@@ -226,7 +226,7 @@ mod parsing {
         inner: Option<AstItem>,
     }
     named!(eos_variant -> EosVariant, do_parse!(
-        many0!(call!(Attribute::parse_outer)) >>
+        many0!(Attribute::parse_outer) >>
         keyword!(pub) >>
         variant: syn!(Ident) >>
         member: map!(parens!(alt!(
@@ -246,11 +246,11 @@ mod parsing {
     pub struct AstEnumOfStructs(pub Vec<AstItem>);
     impl Synom for AstEnumOfStructs {
         named!(parse -> Self, map!(braces!(do_parse!(
-            many0!(call!(Attribute::parse_outer)) >>
+            many0!(Attribute::parse_outer) >>
             keyword!(pub) >>
             keyword!(enum) >>
             id: syn!(Ident) >>
-            body: braces!(many0!(call!(eos_variant))) >>
+            body: braces!(many0!(eos_variant)) >>
             option!(syn!(Ident)) >> // do_not_generate_to_tokens
             ({
                 // XXX: This is really gross - we shouldn't have to convert the
