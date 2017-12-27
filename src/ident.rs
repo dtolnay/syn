@@ -68,7 +68,7 @@ use proc_macro2::Span;
 /// If `syn` is used to parse existing Rust source code, it is often useful to
 /// convert the `Ident` to a more generic string data type at some point. The
 /// methods `as_ref()` and `to_string()` achieve this.
-/// 
+///
 /// ```rust
 /// # use syn::Ident;
 /// # let ident = Ident::from("another_identifier");
@@ -92,7 +92,6 @@ pub struct Ident {
 }
 
 impl Ident {
-
     /// Creates a new `Ident` from the structured items. This is mainly used
     /// by the parser to create `Ident`s from existing Rust source code.
     ///
@@ -196,7 +195,8 @@ impl Display for Ident {
 }
 
 impl<T: ?Sized> PartialEq<T> for Ident
-    where T: AsRef<str>
+where
+    T: AsRef<str>,
 {
     fn eq(&self, other: &T) -> bool {
         self.as_ref() == other.as_ref()
@@ -228,7 +228,7 @@ pub mod parsing {
     use super::*;
     use synom::Synom;
     use cursor::Cursor;
-    use {PResult, parse_error};
+    use {parse_error, PResult};
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {
@@ -241,20 +241,23 @@ pub mod parsing {
             }
             match sym.as_str() {
                 // From https://doc.rust-lang.org/grammar.html#keywords
-                "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
-                "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
-                "if" | "impl" | "in" | "let" | "loop" | "macro" | "match" | "mod" | "move" |
-                "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
-                "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
-                "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
-                "while" | "yield" => return parse_error(),
+                "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
+                | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
+                | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
+                | "mod" | "move" | "mut" | "offsetof" | "override" | "priv" | "proc" | "pub"
+                | "pure" | "ref" | "return" | "Self" | "self" | "sizeof" | "static" | "struct"
+                | "super" | "trait" | "true" | "type" | "typeof" | "unsafe" | "unsized" | "use"
+                | "virtual" | "where" | "while" | "yield" => return parse_error(),
                 _ => {}
             }
 
-            Ok((rest, Ident {
-                span: span,
-                sym: sym,
-            }))
+            Ok((
+                rest,
+                Ident {
+                    span: span,
+                    sym: sym,
+                },
+            ))
         }
 
         fn description() -> Option<&'static str> {
@@ -266,8 +269,8 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
-    use proc_macro2::{TokenTree, TokenNode};
+    use quote::{ToTokens, Tokens};
+    use proc_macro2::{TokenNode, TokenTree};
 
     impl ToTokens for Ident {
         fn to_tokens(&self, tokens: &mut Tokens) {

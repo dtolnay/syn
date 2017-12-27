@@ -1,15 +1,10 @@
 #![doc(html_root_url = "https://dtolnay.github.io/syn")]
+#![cfg_attr(feature = "cargo-clippy",
+            allow(const_static_lifetime, doc_markdown, large_enum_variant, match_bool,
+                  redundant_closure))]
 
-#![cfg_attr(feature = "cargo-clippy", allow(
-    const_static_lifetime,
-    doc_markdown,
-    large_enum_variant,
-    match_bool,
-    redundant_closure,
-))]
-
-extern crate proc_macro;
 extern crate proc_macro2;
+extern crate proc_macro;
 extern crate unicode_xid;
 
 #[cfg(any(feature = "printing", feature = "parsing"))]
@@ -32,33 +27,29 @@ pub mod helper;
 pub mod token;
 
 mod attr;
-pub use attr::{Attribute, AttrStyle, MetaItem, NestedMetaItem, MetaItemList,
-               MetaNameValue};
+pub use attr::{AttrStyle, Attribute, MetaItem, MetaItemList, MetaNameValue, NestedMetaItem};
 
 mod data;
-pub use data::{Field, Variant, VariantData, Visibility, VisRestricted, VisCrate,
-               VisPublic, VisInherited};
+pub use data::{Field, Variant, VariantData, VisCrate, VisInherited, VisPublic, VisRestricted,
+               Visibility};
 
 mod expr;
-pub use expr::{Expr, ExprKind, ExprBox, ExprInPlace, ExprArray, ExprCall,
-               ExprMethodCall, ExprTuple, ExprBinary, ExprUnary, ExprCast,
-               ExprType, ExprIf, ExprIfLet, ExprWhile, ExprWhileLet,
-               ExprForLoop, ExprLoop, ExprMatch, ExprClosure, ExprBlock,
-               ExprAssign, ExprAssignOp, ExprField, ExprTupField, ExprIndex,
-               ExprRange, ExprPath, ExprAddrOf, ExprBreak, ExprContinue,
-               ExprRet, ExprStruct, ExprRepeat, ExprParen, ExprTry, ExprCatch,
-               ExprGroup, ExprYield, ExprUnsafe};
+pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
+               ExprBox, ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue,
+               ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
+               ExprKind, ExprLoop, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
+               ExprRepeat, ExprRet, ExprStruct, ExprTry, ExprTupField, ExprTuple, ExprType,
+               ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield};
 
 #[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Local,
-               MacStmtStyle, Pat, RangeLimits, Stmt, PatIdent, PatWild,
-               PatStruct, PatTuple, PatTupleStruct, PatPath, PatBox, PatRef,
-               PatLit, PatRange, PatSlice, InPlaceKind};
+pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, InPlaceKind, Local,
+               MacStmtStyle, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
+               PatStruct, PatTuple, PatTupleStruct, PatWild, RangeLimits, Stmt};
 
 mod generics;
-pub use generics::{Generics, GenericParam, LifetimeDef, TraitBoundModifier, TypeParam, TypeParamBound,
-                   WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
-                   WhereRegionPredicate, BoundLifetimes, ConstParam};
+pub use generics::{BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef,
+                   TraitBoundModifier, TypeParam, TypeParamBound, WhereBoundPredicate,
+                   WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate};
 #[cfg(feature = "printing")]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
@@ -68,15 +59,13 @@ pub use ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{Constness, Defaultness, FnArg, FnDecl, ForeignItem, ItemForeignMod,
-               ImplItem, ImplPolarity, Item, MethodSig,
-               TraitItem, ItemExternCrate, ItemUse,
-               ItemStatic, ItemConst, ItemFn, ItemMacro, ItemMacro2, ItemMod, ItemType, ItemEnum,
-               ItemStruct, ItemUnion, ItemTrait, ItemDefaultImpl, ItemImpl,
-               UsePath, UseGlob, UseList, ForeignItemFn, ForeignItemStatic, ForeignItemType,
-               TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
-               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, ArgSelfRef,
-               ArgSelf, ArgCaptured, UseTree};
+pub use item::{ArgCaptured, ArgSelf, ArgSelfRef, Constness, Defaultness, FnArg, FnDecl,
+               ForeignItem, ForeignItemFn, ForeignItemStatic, ForeignItemType, ImplItem,
+               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, ImplPolarity, Item,
+               ItemConst, ItemDefaultImpl, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
+               ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait,
+               ItemType, ItemUnion, ItemUse, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
+               TraitItemMethod, TraitItemType, UseGlob, UseList, UsePath, UseTree};
 
 #[cfg(feature = "full")]
 mod file;
@@ -93,19 +82,17 @@ mod mac;
 pub use mac::Macro;
 
 mod derive;
-pub use derive::{Body, DeriveInput, BodyEnum, BodyStruct};
+pub use derive::{Body, BodyEnum, BodyStruct, DeriveInput};
 
 mod op;
 pub use op::{BinOp, UnOp};
 
 mod ty;
-pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg,
-             BareFnArgName, BareFnType, ReturnType, MutType, Mutability,
-             ParenthesizedGenericArguments, Path, PathArguments, PathSegment,
-             PolyTraitRef, QSelf, Type, TypeBinding, Unsafety, TypeSlice,
-             TypeArray, TypePtr, TypeReference, TypeBareFn, TypeNever, TypeTuple,
-             TypePath, TypeTraitObject, TypeImplTrait, TypeParen, TypeInfer,
-             TypeGroup, GenericArgument};
+pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg, BareFnArgName, BareFnType,
+             GenericArgument, MutType, Mutability, ParenthesizedGenericArguments, Path,
+             PathArguments, PathSegment, PolyTraitRef, QSelf, ReturnType, Type, TypeArray,
+             TypeBareFn, TypeBinding, TypeGroup, TypeImplTrait, TypeInfer, TypeNever, TypeParen,
+             TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, Unsafety};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 
@@ -184,14 +171,16 @@ pub use error::parse_error;
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>
-    where T: Synom,
+where
+    T: Synom,
 {
     _parse(tokens.into())
 }
 
 #[cfg(feature = "parsing")]
 fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
-    where T: Synom,
+where
+    T: Synom,
 {
     let buf = SynomBuffer::new(tokens);
     let result = T::parse(buf.begin());
@@ -335,7 +324,8 @@ struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
 
 #[cfg(feature = "printing")]
 impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
-    where T: quote::ToTokens + Default,
+where
+    T: quote::ToTokens + Default,
 {
     fn to_tokens(&self, tokens: &mut quote::Tokens) {
         match *self.0 {

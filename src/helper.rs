@@ -209,7 +209,6 @@ macro_rules! parens {
     };
 }
 
-
 /// Same as the `parens` macro, but for brackets.
 #[macro_export]
 macro_rules! brackets {

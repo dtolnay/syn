@@ -125,7 +125,8 @@ impl Path {
 pub struct PathTokens<'a>(pub &'a Option<QSelf>, pub &'a Path);
 
 impl<T> From<T> for Path
-    where T: Into<PathSegment>
+where
+    T: Into<PathSegment>,
 {
     fn from(segment: T) -> Self {
         Path {
@@ -152,7 +153,8 @@ ast_struct! {
 }
 
 impl<T> From<T> for PathSegment
-    where T: Into<Ident>
+where
+    T: Into<Ident>,
 {
     fn from(ident: T) -> Self {
         PathSegment {
@@ -228,7 +230,6 @@ ast_struct! {
         pub ty: Type,
     }
 }
-
 
 ast_struct! {
     /// A path like `Foo(A,B) -> C`
@@ -845,7 +846,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for TypeSlice {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -1046,7 +1047,7 @@ mod printing {
                     _ => token::Brace::default().surround(tokens, |tokens| {
                         e.to_tokens(tokens);
                     }),
-                }
+                },
             }
         }
     }

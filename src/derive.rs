@@ -21,7 +21,6 @@ ast_struct! {
     }
 }
 
-
 ast_enum_of_structs! {
     /// Body of a derived struct or enum.
     pub enum Body {
@@ -99,7 +98,6 @@ pub mod parsing {
         }
     }
 
-
     named!(struct_body -> (WhereClause, VariantData, Option<Token![;]>), alt!(
         do_parse!(
             wh: syn!(WhereClause) >>
@@ -165,7 +163,7 @@ mod printing {
     use super::*;
     use attr::FilterAttrs;
     use data::VariantData;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for DeriveInput {
         fn to_tokens(&self, tokens: &mut Tokens) {

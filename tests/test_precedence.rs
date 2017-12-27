@@ -1,5 +1,4 @@
 #![cfg(all(feature = "full", feature = "fold"))]
-
 #![feature(rustc_private)]
 
 //! The tests in this module do the following:
@@ -20,17 +19,17 @@ extern crate syn;
 extern crate syntax;
 extern crate walkdir;
 
-use rayon::iter::{ParallelIterator, IntoParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
 use syntax::ptr::P;
-use walkdir::{WalkDir, WalkDirIterator, DirEntry};
+use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 use std::fs::File;
 use std::io::Read;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use common::{respan, parse};
+use common::{parse, respan};
 
 #[allow(dead_code)]
 #[macro_use]
@@ -94,42 +93,49 @@ fn test_rustc_precedence() {
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
         .unwrap()
         .into_par_iter()
-        .for_each(|entry|
-    {
-        let path = entry.path();
-        if path.is_dir() {
-            return;
-        }
-
-        // Our version of `libsyntax` can't parse this tests
-        if path.to_str().unwrap().ends_with("optional_comma_in_match_arm.rs") {
-            return;
-        }
-
-        let mut file = File::open(path).unwrap();
-        let mut content = String::new();
-        file.read_to_string(&mut content).unwrap();
-
-        let (l_passed, l_failed) = match syn::parse_file(&content) {
-            Ok(file) => {
-                let exprs = collect_exprs(file);
-                test_expressions(exprs)
+        .for_each(|entry| {
+            let path = entry.path();
+            if path.is_dir() {
+                return;
             }
-            Err(msg) => {
-                errorf!("syn failed to parse\n{:?}\n", msg);
-                (0, 1)
+
+            // Our version of `libsyntax` can't parse this tests
+            if path.to_str()
+                .unwrap()
+                .ends_with("optional_comma_in_match_arm.rs")
+            {
+                return;
             }
-        };
 
-        errorf!("=== {}: {} passed | {} failed\n", path.display(), l_passed, l_failed);
+            let mut file = File::open(path).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
 
-        passed.fetch_add(l_passed, Ordering::SeqCst);
-        let prev_failed = failed.fetch_add(l_failed, Ordering::SeqCst);
+            let (l_passed, l_failed) = match syn::parse_file(&content) {
+                Ok(file) => {
+                    let exprs = collect_exprs(file);
+                    test_expressions(exprs)
+                }
+                Err(msg) => {
+                    errorf!("syn failed to parse\n{:?}\n", msg);
+                    (0, 1)
+                }
+            };
 
-        if prev_failed + l_failed >= abort_after {
-            process::exit(1);
-        }
-    });
+            errorf!(
+                "=== {}: {} passed | {} failed\n",
+                path.display(),
+                l_passed,
+                l_failed
+            );
+
+            passed.fetch_add(l_passed, Ordering::SeqCst);
+            let prev_failed = failed.fetch_add(l_failed, Ordering::SeqCst);
+
+            if prev_failed + l_failed >= abort_after {
+                process::exit(1);
+            }
+        });
 
     let passed = passed.load(Ordering::SeqCst);
     let failed = failed.load(Ordering::SeqCst);
@@ -190,7 +196,7 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 ///
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
-    use syntax::ast::{Expr, ExprKind, Mac, Stmt, StmtKind, Pat, Ty, Field};
+    use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::fold::{self, Folder};
     use syntax::util::ThinVec;
     use syntax::util::small_vector::SmallVector;
@@ -211,27 +217,17 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     };
     impl Folder for BracketsFolder {
         fn fold_expr(&mut self, e: P<Expr>) -> P<Expr> {
-            e.map(|e| {
-                Expr {
-                    node: match e.node {
-                        ExprKind::Paren(inner) => {
-                            ExprKind::Paren(inner.map(|e| {
-                                fold::noop_fold_expr(e, self)
-                            }))
-                        }
-                        ExprKind::If(..) |
-                        ExprKind::Block(..) |
-                        ExprKind::IfLet(..) => {
-                            return fold::noop_fold_expr(e, self);
-                        }
-                        node => {
-                            ExprKind::Paren(expr(node).map(|e| {
-                                fold::noop_fold_expr(e, self)
-                            }))
-                        }
-                    },
-                    ..e
-                }
+            e.map(|e| Expr {
+                node: match e.node {
+                    ExprKind::Paren(inner) => {
+                        ExprKind::Paren(inner.map(|e| fold::noop_fold_expr(e, self)))
+                    }
+                    ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {
+                        return fold::noop_fold_expr(e, self);
+                    }
+                    node => ExprKind::Paren(expr(node).map(|e| fold::noop_fold_expr(e, self))),
+                },
+                ..e
             })
         }
 
@@ -263,19 +259,12 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         fn fold_stmt(&mut self, stmt: Stmt) -> SmallVector<Stmt> {
             let node = match stmt.node {
                 // Don't wrap toplevel expressions in statements.
-                StmtKind::Expr(e) => {
-                    StmtKind::Expr(e.map(|e| fold::noop_fold_expr(e, self)))
-                }
-                StmtKind::Semi(e) => {
-                    StmtKind::Semi(e.map(|e| fold::noop_fold_expr(e, self)))
-                }
+                StmtKind::Expr(e) => StmtKind::Expr(e.map(|e| fold::noop_fold_expr(e, self))),
+                StmtKind::Semi(e) => StmtKind::Semi(e.map(|e| fold::noop_fold_expr(e, self))),
                 s => s,
             };
 
-            SmallVector::one(Stmt {
-                node: node,
-                ..stmt
-            })
+            SmallVector::one(Stmt { node: node, ..stmt })
         }
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {
@@ -288,9 +277,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         }
     }
 
-    let mut folder = BracketsFolder {
-        failed: false,
-    };
+    let mut folder = BracketsFolder { failed: false };
     let e = folder.fold_expr(libsyntax_expr);
     if folder.failed {
         None
@@ -308,10 +295,13 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
     fn paren(folder: &mut BracketsFolder, node: ExprKind) -> ExprKind {
         ExprKind::Paren(ExprParen {
-            expr: Box::new(fold_expr(folder, Expr {
-                node: node,
-                attrs: vec![],
-            })),
+            expr: Box::new(fold_expr(
+                folder,
+                Expr {
+                    node: node,
+                    attrs: vec![],
+                },
+            )),
             paren_token: token::Paren::default(),
         })
     }
@@ -322,30 +312,23 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             let kind = match expr.node {
                 ExprKind::Group(_) => unreachable!(),
                 ExprKind::Paren(p) => paren(self, p.expr.node),
-                ExprKind::If(..) |
-                ExprKind::Unsafe(..) |
-                ExprKind::Block(..) |
-                ExprKind::IfLet(..) => {
+                ExprKind::If(..)
+                | ExprKind::Unsafe(..)
+                | ExprKind::Block(..)
+                | ExprKind::IfLet(..) => {
                     return fold_expr(self, expr);
                 }
                 node => paren(self, node),
             };
 
-            Expr {
-                node: kind,
-                ..expr
-            }
+            Expr { node: kind, ..expr }
         }
 
         fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
-                Stmt::Expr(e) => {
-                    Stmt::Expr(Box::new(fold_expr(self, *e)))
-                }
-                Stmt::Semi(e, semi) => {
-                    Stmt::Semi(Box::new(fold_expr(self, *e)), semi)
-                }
+                Stmt::Expr(e) => Stmt::Expr(Box::new(fold_expr(self, *e))),
+                Stmt::Semi(e, semi) => Stmt::Semi(Box::new(fold_expr(self, *e)), semi),
                 s => s,
             }
         }
@@ -381,7 +364,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
                 node: ExprKind::Tuple(ExprTuple {
                     args: Delimited::new(),
                     paren_token: token::Paren::default(),
-                    lone_comma: None
+                    lone_comma: None,
                 }),
                 attrs: vec![],
             }

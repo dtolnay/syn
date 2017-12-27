@@ -17,9 +17,11 @@ impl Lifetime {
         let s = sym.as_str();
 
         if !s.starts_with('\'') {
-            panic!("lifetime name must start with apostrophe as in \"'a\", \
-                   got {:?}",
-                   s);
+            panic!(
+                "lifetime name must start with apostrophe as in \"'a\", \
+                 got {:?}",
+                s
+            );
         }
 
         if s == "'" {
@@ -92,7 +94,7 @@ pub mod parsing {
     use super::*;
     use synom::Synom;
     use cursor::Cursor;
-    use {PResult, parse_error};
+    use {parse_error, PResult};
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
@@ -104,10 +106,13 @@ pub mod parsing {
                 return parse_error();
             }
 
-            Ok((rest, Lifetime {
-                sym: sym,
-                span: span,
-            }))
+            Ok((
+                rest,
+                Lifetime {
+                    sym: sym,
+                    span: span,
+                },
+            ))
         }
     }
 }
@@ -115,8 +120,8 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
-    use proc_macro2::{TokenTree, TokenNode};
+    use quote::{ToTokens, Tokens};
+    use proc_macro2::{TokenNode, TokenTree};
 
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut Tokens) {

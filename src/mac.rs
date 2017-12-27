@@ -1,6 +1,6 @@
 use super::*;
 
-use proc_macro2::{TokenNode, TokenTree, Delimiter};
+use proc_macro2::{Delimiter, TokenNode, TokenTree};
 
 #[cfg(feature = "extra-traits")]
 use proc_macro2::TokenStream;
@@ -24,8 +24,7 @@ impl Eq for Macro {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for Macro {
     fn eq(&self, other: &Self) -> bool {
-        self.path == other.path
-            && self.bang_token == other.bang_token
+        self.path == other.path && self.bang_token == other.bang_token
             && TokenTreeHelper(&self.tokens) == TokenTreeHelper(&other.tokens)
     }
 }
@@ -33,7 +32,8 @@ impl PartialEq for Macro {
 #[cfg(feature = "extra-traits")]
 impl Hash for Macro {
     fn hash<H>(&self, state: &mut H)
-        where H: Hasher
+    where
+        H: Hasher,
     {
         self.path.hash(state);
         self.bang_token.hash(state);
@@ -65,10 +65,10 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
         match (&self.0.kind, &other.0.kind) {
             (&TokenNode::Group(d1, ref s1), &TokenNode::Group(d2, ref s2)) => {
                 match (d1, d2) {
-                    (Delimiter::Parenthesis, Delimiter::Parenthesis) |
-                    (Delimiter::Brace, Delimiter::Brace) |
-                    (Delimiter::Bracket, Delimiter::Bracket) |
-                    (Delimiter::None, Delimiter::None) => {}
+                    (Delimiter::Parenthesis, Delimiter::Parenthesis)
+                    | (Delimiter::Brace, Delimiter::Brace)
+                    | (Delimiter::Bracket, Delimiter::Bracket)
+                    | (Delimiter::None, Delimiter::None) => {}
                     _ => return false,
                 }
 
@@ -81,24 +81,21 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
                         None => return false,
                     };
                     if TokenTreeHelper(&item1) != TokenTreeHelper(&item2) {
-                        return false
+                        return false;
                     }
                 }
                 s2.next().is_none()
             }
             (&TokenNode::Op(o1, k1), &TokenNode::Op(o2, k2)) => {
                 o1 == o2 && match (k1, k2) {
-                    (Spacing::Alone, Spacing::Alone) |
-                    (Spacing::Joint, Spacing::Joint) => true,
+                    (Spacing::Alone, Spacing::Alone) | (Spacing::Joint, Spacing::Joint) => true,
                     _ => false,
                 }
             }
             (&TokenNode::Literal(ref l1), &TokenNode::Literal(ref l2)) => {
                 l1.to_string() == l2.to_string()
             }
-            (&TokenNode::Term(ref s1), &TokenNode::Term(ref s2)) => {
-                s1.as_str() == s2.as_str()
-            }
+            (&TokenNode::Term(ref s1), &TokenNode::Term(ref s2)) => s1.as_str() == s2.as_str(),
             _ => false,
         }
     }
@@ -176,7 +173,7 @@ pub mod parsing {
     use proc_macro2::{TokenNode, TokenTree};
     use synom::Synom;
     use cursor::Cursor;
-    use {PResult, parse_error};
+    use {parse_error, PResult};
 
     impl Synom for Macro {
         named!(parse -> Self, do_parse!(
@@ -193,9 +190,13 @@ pub mod parsing {
 
     pub fn parse_tt_delimited(input: Cursor) -> PResult<TokenTree> {
         match input.token_tree() {
-            Some((rest, token @ TokenTree { kind: TokenNode::Group(..), .. })) => {
-                Ok((rest, token))
-            }
+            Some((
+                rest,
+                token @ TokenTree {
+                    kind: TokenNode::Group(..),
+                    ..
+                },
+            )) => Ok((rest, token)),
             _ => parse_error(),
         }
     }
@@ -204,7 +205,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for Macro {
         fn to_tokens(&self, tokens: &mut Tokens) {

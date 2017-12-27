@@ -86,9 +86,7 @@ impl SynomBuffer {
             entries[idx] = Entry::Group(span, delim, inner);
         }
 
-        SynomBuffer {
-            data: entries
-        }
+        SynomBuffer { data: entries }
     }
 
     /// Create a new SynomBuffer, which contains the data from the given
@@ -99,9 +97,7 @@ impl SynomBuffer {
 
     /// Create a cursor referencing the first token in the input.
     pub fn begin(&self) -> Cursor {
-        unsafe {
-            Cursor::create(&self.data[0], &self.data[self.data.len() - 1])
-        }
+        unsafe { Cursor::create(&self.data[0], &self.data[self.data.len() - 1]) }
     }
 }
 
@@ -145,8 +141,7 @@ impl<'a> Cursor<'a> {
         // object in global storage.
         struct UnsafeSyncEntry(Entry);
         unsafe impl Sync for UnsafeSyncEntry {}
-        static EMPTY_ENTRY: UnsafeSyncEntry =
-            UnsafeSyncEntry(Entry::End(0 as *const Entry));
+        static EMPTY_ENTRY: UnsafeSyncEntry = UnsafeSyncEntry(Entry::End(0 as *const Entry));
 
         Cursor {
             ptr: &EMPTY_ENTRY.0,
@@ -234,7 +229,7 @@ impl<'a> Cursor<'a> {
                     outside: unsafe { self.bump() },
                 })
             }
-            _ => None
+            _ => None,
         }
     }
 
@@ -243,14 +238,8 @@ impl<'a> Cursor<'a> {
     pub fn word(mut self) -> Option<(Cursor<'a>, Span, Term)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Term(span, sym) => {
-                Some((
-                    unsafe { self.bump() },
-                    span,
-                    sym,
-                ))
-            }
-            _ => None
+            Entry::Term(span, sym) => Some((unsafe { self.bump() }, span, sym)),
+            _ => None,
         }
     }
 
@@ -259,15 +248,8 @@ impl<'a> Cursor<'a> {
     pub fn op(mut self) -> Option<(Cursor<'a>, Span, char, Spacing)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Op(span, chr, kind) => {
-                Some((
-                    unsafe { self.bump() },
-                    span,
-                    chr,
-                    kind,
-                ))
-            }
-            _ => None
+            Entry::Op(span, chr, kind) => Some((unsafe { self.bump() }, span, chr, kind)),
+            _ => None,
         }
     }
 
@@ -276,14 +258,8 @@ impl<'a> Cursor<'a> {
     pub fn literal(mut self) -> Option<(Cursor<'a>, Span, Literal)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Literal(span, ref lit) => {
-                Some((
-                    unsafe { self.bump() },
-                    span,
-                    lit.clone(),
-                ))
-            }
-            _ => None
+            Entry::Literal(span, ref lit) => Some((unsafe { self.bump() }, span, lit.clone())),
+            _ => None,
         }
     }
 
@@ -313,33 +289,24 @@ impl<'a> Cursor<'a> {
                     kind: TokenNode::Group(delim, stream),
                 }
             }
-            Entry::Literal(span, ref lit) => {
-                TokenTree {
-                    span: span,
-                    kind: TokenNode::Literal(lit.clone()),
-                }
-            }
-            Entry::Term(span, sym) => {
-                TokenTree {
-                    span: span,
-                    kind: TokenNode::Term(sym),
-                }
-            }
-            Entry::Op(span, chr, kind) => {
-                TokenTree {
-                    span: span,
-                    kind: TokenNode::Op(chr, kind),
-                }
-            }
+            Entry::Literal(span, ref lit) => TokenTree {
+                span: span,
+                kind: TokenNode::Literal(lit.clone()),
+            },
+            Entry::Term(span, sym) => TokenTree {
+                span: span,
+                kind: TokenNode::Term(sym),
+            },
+            Entry::Op(span, chr, kind) => TokenTree {
+                span: span,
+                kind: TokenNode::Op(chr, kind),
+            },
             Entry::End(..) => {
                 return None;
             }
         };
 
-        Some((
-            unsafe { self.bump() },
-            tree
-        ))
+        Some((unsafe { self.bump() }, tree))
     }
 }
 

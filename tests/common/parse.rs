@@ -26,14 +26,12 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
             Ok(expr) => expr,
             Err(mut diagnostic) => {
                 diagnostic.emit();;
-                return None
+                return None;
             }
         })
     }) {
         Ok(Some(e)) => Some(e),
-        Ok(None) => {
-            None
-        }
+        Ok(None) => None,
         Err(_) => {
             errorf!("libsyntax panicked\n");
             None

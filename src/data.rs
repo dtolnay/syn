@@ -203,7 +203,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -275,7 +275,6 @@ mod printing {
     }
 
     impl ToTokens for VisInherited {
-        fn to_tokens(&self, _tokens: &mut Tokens) {
-        }
+        fn to_tokens(&self, _tokens: &mut Tokens) {}
     }
 }

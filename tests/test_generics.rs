@@ -1,5 +1,4 @@
 #![cfg(feature = "extra-traits")]
-
 #![feature(rustc_private)]
 
 extern crate syn;
@@ -33,21 +32,27 @@ fn test_split_for_impl() {
                 colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
-                attrs: vec![Attribute {
-                    bracket_token: Default::default(),
-                    pound_token: Default::default(),
-                    style: AttrStyle::Outer,
-                    path: "may_dangle".into(),
-                    tts: TokenStream::empty(),
-                    is_sugared_doc: false,
-                }],
+                attrs: vec![
+                    Attribute {
+                        bracket_token: Default::default(),
+                        pound_token: Default::default(),
+                        style: AttrStyle::Outer,
+                        path: "may_dangle".into(),
+                        tts: TokenStream::empty(),
+                        is_sugared_doc: false,
+                    },
+                ],
                 ident: "T".into(),
-                bounds: vec![TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()))].into(),
-                default: Some(TypeTuple {
-                    tys: Default::default(),
-                    lone_comma: None,
-                    paren_token: Default::default(),
-                }.into()),
+                bounds: vec![
+                    TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default())),
+                ].into(),
+                default: Some(
+                    TypeTuple {
+                        tys: Default::default(),
+                        lone_comma: None,
+                        paren_token: Default::default(),
+                    }.into(),
+                ),
                 colon_token: Some(Default::default()),
                 eq_token: Default::default(),
             }),
@@ -71,7 +76,7 @@ fn test_split_for_impl() {
                             TraitBoundModifier::None,
                         ),
                     ].into(),
-                })
+                }),
             ].into(),
         },
     };
@@ -80,9 +85,11 @@ fn test_split_for_impl() {
     let tokens = quote! {
         impl #impl_generics MyTrait for Test #ty_generics #where_clause {}
     };
-    let expected = concat!("impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
-                           "MyTrait for Test < 'a , 'b , T > ",
-                           "where T : Debug { }");
+    let expected = concat!(
+        "impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
+        "MyTrait for Test < 'a , 'b , T > ",
+        "where T : Debug { }"
+    );
     assert_eq!(expected, tokens.to_string());
 
     let turbofish = ty_generics.as_turbofish();
@@ -97,7 +104,10 @@ fn test_split_for_impl() {
 fn test_ty_param_bound() {
     let tokens = quote!('a);
     let expected = TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()));
-    assert_eq!(expected, common::parse::syn::<TypeParamBound>(tokens.into()));
+    assert_eq!(
+        expected,
+        common::parse::syn::<TypeParamBound>(tokens.into())
+    );
 
     let tokens = quote!(Debug);
     let expected = TypeParamBound::Trait(
@@ -105,8 +115,12 @@ fn test_ty_param_bound() {
             bound_lifetimes: None,
             trait_ref: "Debug".into(),
         },
-        TraitBoundModifier::None);
-    assert_eq!(expected, common::parse::syn::<TypeParamBound>(tokens.into()));
+        TraitBoundModifier::None,
+    );
+    assert_eq!(
+        expected,
+        common::parse::syn::<TypeParamBound>(tokens.into())
+    );
 
     let tokens = quote!(?Sized);
     let expected = TypeParamBound::Trait(
@@ -114,6 +128,10 @@ fn test_ty_param_bound() {
             bound_lifetimes: None,
             trait_ref: "Sized".into(),
         },
-        TraitBoundModifier::Maybe(Default::default()));
-    assert_eq!(expected, common::parse::syn::<TypeParamBound>(tokens.into()));
+        TraitBoundModifier::Maybe(Default::default()),
+    );
+    assert_eq!(
+        expected,
+        common::parse::syn::<TypeParamBound>(tokens.into())
+    );
 }

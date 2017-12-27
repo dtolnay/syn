@@ -639,16 +639,16 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
     // see https://github.com/rust-lang/rust/blob/eb8f2586e
     //                       /src/libsyntax/parse/classify.rs#L17-L37
     match expr.node {
-        ExprKind::Unsafe(..) |
-        ExprKind::Block(..) |
-        ExprKind::If(..) |
-        ExprKind::IfLet(..) |
-        ExprKind::Match(..) |
-        ExprKind::While(..) |
-        ExprKind::WhileLet(..) |
-        ExprKind::Loop(..) |
-        ExprKind::ForLoop(..) |
-        ExprKind::Catch(..) => false,
+        ExprKind::Unsafe(..)
+        | ExprKind::Block(..)
+        | ExprKind::If(..)
+        | ExprKind::IfLet(..)
+        | ExprKind::Match(..)
+        | ExprKind::While(..)
+        | ExprKind::WhileLet(..)
+        | ExprKind::Loop(..)
+        | ExprKind::ForLoop(..)
+        | ExprKind::Catch(..) => false,
         _ => true,
     }
 }
@@ -659,7 +659,7 @@ pub mod parsing {
     use ty::parsing::qpath;
 
     #[cfg(feature = "full")]
-    use proc_macro2::{Span, TokenStream, TokenNode, Delimiter, Term};
+    use proc_macro2::{Delimiter, Span, Term, TokenNode, TokenStream};
     use synom::Synom;
     use cursor::Cursor;
     #[cfg(feature = "full")]
@@ -708,10 +708,7 @@ pub mod parsing {
 
     // Parse an arbitrary expression.
     #[cfg(feature = "full")]
-    fn ambiguous_expr(i: Cursor,
-                      allow_struct: bool,
-                      allow_block: bool)
-                      -> PResult<Expr> {
+    fn ambiguous_expr(i: Cursor, allow_struct: bool, allow_block: bool) -> PResult<Expr> {
         map!(
             i,
             call!(assign_expr, allow_struct, allow_block),
@@ -720,10 +717,7 @@ pub mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn ambiguous_expr(i: Cursor,
-                      allow_struct: bool,
-                      allow_block: bool)
-                      -> PResult<Expr> {
+    fn ambiguous_expr(i: Cursor, allow_struct: bool, allow_block: bool) -> PResult<Expr> {
         map!(
             i,
             // NOTE: We intentionally skip assign_expr, placement_expr, and
@@ -880,7 +874,10 @@ pub mod parsing {
     //
     // NOTE: This operator appears to be parsed as left-associative, but errors
     // if it is used in a non-associative manner.
-    binop!(compare_expr, bitor_expr, alt!(
+    binop!(
+        compare_expr,
+        bitor_expr,
+        alt!(
         punct!(==) => { BinOp::Eq }
         |
         punct!(!=) => { BinOp::Ne }
@@ -899,59 +896,74 @@ pub mod parsing {
         )
         |
         punct!(>) => { BinOp::Gt }
-    ));
+    )
+    );
 
     // <bitxor> | <bitxor> ...
-    binop!(bitor_expr, bitxor_expr, do_parse!(
-        not!(punct!(||)) >>
-        not!(punct!(|=)) >>
-        t: punct!(|) >>
-        (BinOp::BitOr(t))
-    ));
+    binop!(
+        bitor_expr,
+        bitxor_expr,
+        do_parse!(not!(punct!(||)) >> not!(punct!(|=)) >> t: punct!(|) >> (BinOp::BitOr(t)))
+    );
 
     // <bitand> ^ <bitand> ...
-    binop!(bitxor_expr, bitand_expr, do_parse!(
-        // NOTE: Make sure we aren't looking at ^=.
-        not!(punct!(^=)) >>
-        t: punct!(^) >>
-        (BinOp::BitXor(t))
-    ));
+    binop!(
+        bitxor_expr,
+        bitand_expr,
+        do_parse!(
+            // NOTE: Make sure we aren't looking at ^=.
+            not!(punct!(^=)) >> t: punct!(^) >> (BinOp::BitXor(t))
+        )
+    );
 
     // <shift> & <shift> ...
-    binop!(bitand_expr, shift_expr, do_parse!(
-        // NOTE: Make sure we aren't looking at && or &=.
-        not!(punct!(&&)) >>
-        not!(punct!(&=)) >>
-        t: punct!(&) >>
-        (BinOp::BitAnd(t))
-    ));
+    binop!(
+        bitand_expr,
+        shift_expr,
+        do_parse!(
+            // NOTE: Make sure we aren't looking at && or &=.
+            not!(punct!(&&)) >> not!(punct!(&=)) >> t: punct!(&) >> (BinOp::BitAnd(t))
+        )
+    );
 
     // <arith> << <arith> ...
     // <arith> >> <arith> ...
-    binop!(shift_expr, arith_expr, alt!(
+    binop!(
+        shift_expr,
+        arith_expr,
+        alt!(
         punct!(<<) => { BinOp::Shl }
         |
         punct!(>>) => { BinOp::Shr }
-    ));
+    )
+    );
 
     // <term> + <term> ...
     // <term> - <term> ...
-    binop!(arith_expr, term_expr, alt!(
+    binop!(
+        arith_expr,
+        term_expr,
+        alt!(
         punct!(+) => { BinOp::Add }
         |
         punct!(-) => { BinOp::Sub }
-    ));
+    )
+    );
 
     // <cast> * <cast> ...
     // <cast> / <cast> ...
     // <cast> % <cast> ...
-    binop!(term_expr, cast_expr, alt!(
+    binop!(
+        term_expr,
+        cast_expr,
+        alt!(
         punct!(*) => { BinOp::Mul }
         |
         punct!(/) => { BinOp::Div }
         |
         punct!(%) => { BinOp::Rem }
-    ));
+    )
+    );
 
     // <unary> as <ty>
     // <unary> : <ty>
@@ -1203,7 +1215,6 @@ pub mod parsing {
         syn!(ExprPath) => { ExprKind::Path }
     ));
 
-
     #[cfg(feature = "full")]
     named!(expr_nosemi -> Expr, map!(alt!(
         syn!(ExprIf) => { ExprKind::If }
@@ -1399,7 +1410,6 @@ pub mod parsing {
         ) >>
         (else_, expr)
     ));
-
 
     #[cfg(feature = "full")]
     impl Synom for ExprForLoop {
@@ -2257,7 +2267,7 @@ mod printing {
     use super::*;
     #[cfg(feature = "full")]
     use attr::FilterAttrs;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `Tokens`.
@@ -2406,19 +2416,18 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    fn maybe_wrap_else(tokens: &mut Tokens,
-                       else_token: &Option<Token![else]>,
-                       if_false: &Option<Box<Expr>>)
-    {
+    fn maybe_wrap_else(
+        tokens: &mut Tokens,
+        else_token: &Option<Token![else]>,
+        if_false: &Option<Box<Expr>>,
+    ) {
         if let Some(ref if_false) = *if_false {
             TokensOrDefault(else_token).to_tokens(tokens);
 
             // If we are not one of the valid expressions to exist in an else
             // clause, wrap ourselves in a block.
             match if_false.node {
-                ExprKind::If(_) |
-                ExprKind::IfLet(_) |
-                ExprKind::Block(_) => {
+                ExprKind::If(_) | ExprKind::IfLet(_) | ExprKind::Block(_) => {
                     if_false.to_tokens(tokens);
                 }
                 _ => {
@@ -2515,7 +2524,7 @@ mod printing {
             self.match_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.brace_token.surround(tokens, |tokens| {
-                for (i,  arm) in self.arms.iter().enumerate() {
+                for (i, arm) in self.arms.iter().enumerate() {
                     arm.to_tokens(tokens);
                     // Ensure that we have a comma after a non-block arm, except
                     // for the last one.
@@ -2552,7 +2561,11 @@ mod printing {
             self.or1_token.to_tokens(tokens);
             for item in self.decl.inputs.iter() {
                 match **item.item() {
-                    FnArg::Captured(ArgCaptured { ref pat, ty: Type::Infer(_), .. }) => {
+                    FnArg::Captured(ArgCaptured {
+                        ref pat,
+                        ty: Type::Infer(_),
+                        ..
+                    }) => {
                         pat.to_tokens(tokens);
                     }
                     _ => item.item().to_tokens(tokens),
@@ -2874,8 +2887,8 @@ mod printing {
 
                 // If we need a comma before the middle or standalone .. token,
                 // then make sure it's present.
-                if !self.front.empty_or_trailing() &&
-                    (self.middle.is_some() || self.dot2_token.is_some())
+                if !self.front.empty_or_trailing()
+                    && (self.middle.is_some() || self.dot2_token.is_some())
                 {
                     <Token![,]>::default().to_tokens(tokens);
                 }

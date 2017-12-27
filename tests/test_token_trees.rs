@@ -1,12 +1,12 @@
 #![cfg(feature = "extra-traits")]
 
+extern crate proc_macro2;
 #[macro_use]
 extern crate quote;
 extern crate syn;
-extern crate proc_macro2;
 
-use syn::{Lit, Attribute, AttrStyle};
-use proc_macro2::{TokenNode, TokenTree, Spacing, Delimiter, TokenStream, Term};
+use syn::{AttrStyle, Attribute, Lit};
+use proc_macro2::{Delimiter, Spacing, Term, TokenNode, TokenStream, TokenTree};
 use proc_macro2::Delimiter::*;
 
 fn alone(c: char) -> TokenTree {
@@ -49,34 +49,35 @@ fn test_struct() {
 
     let expected = vec![
         alone('#'),
-        delimited(Bracket, vec![
-           word("derive"),
-           delimited(Parenthesis, vec![
-               word("Debug"),
-               alone(','),
-               word("Clone"),
-           ]),
-        ]),
+        delimited(
+            Bracket,
+            vec![
+                word("derive"),
+                delimited(Parenthesis, vec![word("Debug"), alone(','), word("Clone")]),
+            ],
+        ),
         word("pub"),
         word("struct"),
         word("Item"),
-        delimited(Brace, vec![
-           word("pub"),
-           word("ident"),
-           alone(':'),
-           word("Ident"),
-           alone(','),
-
-           word("pub"),
-           word("attrs"),
-           alone(':'),
-           word("Vec"),
-           alone('<'),
-           word("Attribute"),
-           joint('>'),
-           alone(','),
-        ],
-    )];
+        delimited(
+            Brace,
+            vec![
+                word("pub"),
+                word("ident"),
+                alone(':'),
+                word("Ident"),
+                alone(','),
+                word("pub"),
+                word("attrs"),
+                alone(':'),
+                word("Vec"),
+                alone('<'),
+                word("Attribute"),
+                joint('>'),
+                alone(','),
+            ],
+        ),
+    ];
 
     fn wrap(tts: TokenStream) -> Attribute {
         Attribute {

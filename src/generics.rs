@@ -400,7 +400,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     /// Returns true if the generics object has no lifetimes or ty_params.
     fn empty_normal_generics(generics: &Generics) -> bool {

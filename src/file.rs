@@ -35,7 +35,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for File {
         fn to_tokens(&self, tokens: &mut Tokens) {

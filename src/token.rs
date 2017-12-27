@@ -462,10 +462,10 @@ macro_rules! keyword {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::{Span, Delimiter, Spacing};
+    use proc_macro2::{Delimiter, Spacing, Span};
 
     use cursor::Cursor;
-    use {PResult, parse_error};
+    use {parse_error, PResult};
 
     pub trait FromSpans: Sized {
         fn from_spans(spans: &[Span]) -> Self;
@@ -489,11 +489,9 @@ mod parsing {
         }
     }
 
-    pub fn op<'a, T, R>(s: &str,
-                        mut tokens: Cursor<'a>,
-                        new: fn(T) -> R)
-            -> PResult<'a, R>
-        where T: FromSpans,
+    pub fn op<'a, T, R>(s: &str, mut tokens: Cursor<'a>, new: fn(T) -> R) -> PResult<'a, R>
+    where
+        T: FromSpans,
     {
         let mut spans = [Span::default(); 3];
         assert!(s.len() <= spans.len());
@@ -511,17 +509,13 @@ mod parsing {
                     *slot = span;
                     tokens = rest;
                 }
-                _ => return parse_error()
+                _ => return parse_error(),
             }
         }
         Ok((tokens, new(T::from_spans(&spans))))
     }
 
-    pub fn sym<'a, T>(sym: &str,
-                      tokens: Cursor<'a>,
-                      new: fn(Span) -> T)
-        -> PResult<'a, T>
-    {
+    pub fn sym<'a, T>(sym: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
         if let Some((rest, span, s)) = tokens.word() {
             if s.as_str() == sym {
                 return Ok((rest, new(span)));
@@ -530,12 +524,14 @@ mod parsing {
         parse_error()
     }
 
-    pub fn delim<'a, F, R, T>(delim: &str,
-                              tokens: Cursor<'a>,
-                              new: fn(Span) -> T,
-                              f: F)
-        -> PResult<'a, (R, T)>
-        where F: FnOnce(Cursor) -> PResult<R>
+    pub fn delim<'a, F, R, T>(
+        delim: &str,
+        tokens: Cursor<'a>,
+        new: fn(Span) -> T,
+        f: F,
+    ) -> PResult<'a, (R, T)>
+    where
+        F: FnOnce(Cursor) -> PResult<R>,
     {
         // NOTE: We should support none-delimited sequences here.
         let delim = match delim {
@@ -562,7 +558,7 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{Span, TokenTree, TokenNode, Spacing, Term};
+    use proc_macro2::{Spacing, Span, Term, TokenNode, TokenTree};
     use quote::Tokens;
 
     pub fn op(s: &str, spans: &[Span], tokens: &mut Tokens) {
@@ -593,7 +589,8 @@ mod printing {
     }
 
     pub fn delim<F>(s: &str, span: &Span, tokens: &mut Tokens, f: F)
-        where F: FnOnce(&mut Tokens)
+    where
+        F: FnOnce(&mut Tokens),
     {
         tokens.append_delimited(s, *span, f)
     }

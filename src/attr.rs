@@ -3,7 +3,7 @@ use delimited::Delimited;
 
 use std::iter;
 
-use proc_macro2::{Delimiter, TokenNode, TokenTree, TokenStream, Spacing};
+use proc_macro2::{Delimiter, Spacing, TokenNode, TokenStream, TokenTree};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
@@ -39,10 +39,8 @@ impl Eq for Attribute {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for Attribute {
     fn eq(&self, other: &Self) -> bool {
-        self.style == other.style
-            && self.pound_token == other.pound_token
-            && self.bracket_token == other.bracket_token
-            && self.path == other.path
+        self.style == other.style && self.pound_token == other.pound_token
+            && self.bracket_token == other.bracket_token && self.path == other.path
             && TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
             && self.is_sugared_doc == other.is_sugared_doc
     }
@@ -51,7 +49,8 @@ impl PartialEq for Attribute {
 #[cfg(feature = "extra-traits")]
 impl Hash for Attribute {
     fn hash<H>(&self, state: &mut H)
-        where H: Hasher
+    where
+        H: Hasher,
     {
         self.style.hash(state);
         self.pound_token.hash(state);
@@ -109,9 +108,7 @@ impl Attribute {
     }
 }
 
-fn nested_meta_item_from_tokens(tts: &[TokenTree])
-    -> Option<(NestedMetaItem, &[TokenTree])>
-{
+fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[TokenTree])> {
     assert!(!tts.is_empty());
 
     match tts[0].kind {
@@ -154,7 +151,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree])
                             Some((MetaItem::List(list).into(), &tts[2..]))
                         }
 
-                        None => None
+                        None => None,
                     };
                 }
             }
@@ -162,13 +159,13 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree])
             Some((MetaItem::Term(ident).into(), &tts[1..]))
         }
 
-        _ => None
+        _ => None,
     }
 }
 
-fn list_of_nested_meta_items_from_tokens(mut tts: &[TokenTree])
-    -> Option<Delimited<NestedMetaItem, Token![,]>>
-{
+fn list_of_nested_meta_items_from_tokens(
+    mut tts: &[TokenTree],
+) -> Option<Delimited<NestedMetaItem, Token![,]>> {
     let mut delimited = Delimited::new();
     let mut first = true;
 
@@ -180,11 +177,11 @@ fn list_of_nested_meta_items_from_tokens(mut tts: &[TokenTree])
             let tok = Token![,]([tts[0].span]);
             tts = &tts[1..];
             if tts.is_empty() {
-                break
+                break;
             }
             Some(tok)
         } else {
-            return None
+            return None;
         };
         let (nested, rest) = match nested_meta_item_from_tokens(tts) {
             Some(pair) => pair,
@@ -199,7 +196,6 @@ fn list_of_nested_meta_items_from_tokens(mut tts: &[TokenTree])
 
     Some(delimited)
 }
-
 
 ast_enum! {
     /// Distinguishes between Attributes that decorate items and Attributes that
@@ -300,7 +296,8 @@ pub trait FilterAttrs<'a> {
 }
 
 impl<'a, T> FilterAttrs<'a> for T
-    where T: IntoIterator<Item = &'a Attribute>
+where
+    T: IntoIterator<Item = &'a Attribute>,
 {
     type Ret = iter::Filter<T::IntoIter, fn(&&Attribute) -> bool>;
 
@@ -329,8 +326,8 @@ impl<'a, T> FilterAttrs<'a> for T
 pub mod parsing {
     use super::*;
     use cursor::Cursor;
-    use {PResult, parse_error};
-    use proc_macro2::{TokenNode, Spacing, TokenTree};
+    use {parse_error, PResult};
+    use proc_macro2::{Spacing, TokenNode, TokenTree};
 
     fn eq() -> TokenTree {
         TokenTree {
@@ -422,15 +419,18 @@ pub mod parsing {
             Some((rest, span, lit)) => {
                 let literal = lit.to_string();
                 if literal.starts_with("//") || literal.starts_with("/*") {
-                    Ok((rest, TokenTree {
-                        span: span,
-                        kind: TokenNode::Literal(lit)
-                    }))
+                    Ok((
+                        rest,
+                        TokenTree {
+                            span: span,
+                            kind: TokenNode::Literal(lit),
+                        },
+                    ))
                 } else {
                     parse_error()
                 }
             }
-            _ => parse_error()
+            _ => parse_error(),
         }
     }
 }
@@ -438,7 +438,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -449,7 +449,7 @@ mod printing {
                         let value = pair.lit.value.to_string();
                         if value.starts_with('/') {
                             pair.lit.to_tokens(tokens);
-                            return
+                            return;
                         }
                     }
                 }

@@ -17,9 +17,12 @@ fn main() {
     let mut src = String::new();
     if filename != "-" {
         let mut file = File::open(&filename).expect("Unable to open source file");
-        file.read_to_string(&mut src).expect("Unable to read input file");
+        file.read_to_string(&mut src)
+            .expect("Unable to read input file");
     } else {
-        io::stdin().read_to_string(&mut src).expect("Unable to read stdin");
+        io::stdin()
+            .read_to_string(&mut src)
+            .expect("Unable to read stdin");
     }
 
     let ast = syn::parse_file(&src).expect("Unable to parse file");

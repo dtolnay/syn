@@ -1,5 +1,5 @@
 use cursor::Cursor;
-use error::{PResult, parse_error};
+use error::{parse_error, PResult};
 
 /// Define a function from a parser combination.
 ///
@@ -420,7 +420,6 @@ macro_rules! switch {
         }
     };
 }
-
 
 /// Produce the given value without parsing anything. Useful as an argument to
 /// `switch!`.

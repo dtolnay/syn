@@ -215,9 +215,7 @@ impl Eq for ItemMacro2 {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for ItemMacro2 {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs
-            && self.vis == other.vis
-            && self.macro_token == other.macro_token
+        self.attrs == other.attrs && self.vis == other.vis && self.macro_token == other.macro_token
             && self.ident == other.ident
             && TokenTreeHelper(&self.args) == TokenTreeHelper(&other.args)
             && TokenTreeHelper(&self.body) == TokenTreeHelper(&other.body)
@@ -227,7 +225,8 @@ impl PartialEq for ItemMacro2 {
 #[cfg(feature = "extra-traits")]
 impl Hash for ItemMacro2 {
     fn hash<H>(&self, state: &mut H)
-        where H: Hasher
+    where
+        H: Hasher,
     {
         self.attrs.hash(state);
         self.vis.hash(state);
@@ -241,28 +240,24 @@ impl Hash for ItemMacro2 {
 impl From<DeriveInput> for Item {
     fn from(input: DeriveInput) -> Item {
         match input.body {
-            Body::Enum(data) => {
-                Item::Enum(ItemEnum {
-                    attrs: input.attrs,
-                    vis: input.vis,
-                    enum_token: data.enum_token,
-                    ident: input.ident,
-                    generics: input.generics,
-                    brace_token: data.brace_token,
-                    variants: data.variants,
-                })
-            }
-            Body::Struct(data) => {
-                Item::Struct(ItemStruct {
-                    attrs: input.attrs,
-                    vis: input.vis,
-                    struct_token: data.struct_token,
-                    ident: input.ident,
-                    generics: input.generics,
-                    data: data.data,
-                    semi_token: data.semi_token,
-                })
-            }
+            Body::Enum(data) => Item::Enum(ItemEnum {
+                attrs: input.attrs,
+                vis: input.vis,
+                enum_token: data.enum_token,
+                ident: input.ident,
+                generics: input.generics,
+                brace_token: data.brace_token,
+                variants: data.variants,
+            }),
+            Body::Struct(data) => Item::Struct(ItemStruct {
+                attrs: input.attrs,
+                vis: input.vis,
+                struct_token: data.struct_token,
+                ident: input.ident,
+                generics: input.generics,
+                data: data.data,
+                semi_token: data.semi_token,
+            }),
         }
     }
 }
@@ -1340,7 +1335,7 @@ mod printing {
     use super::*;
     use attr::FilterAttrs;
     use data::VariantData;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for ItemExternCrate {
         fn to_tokens(&self, tokens: &mut Tokens) {

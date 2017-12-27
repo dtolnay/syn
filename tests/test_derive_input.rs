@@ -1,11 +1,11 @@
 #![cfg(feature = "extra-traits")]
 
-extern crate syn;
 extern crate proc_macro2;
+extern crate syn;
 
 use syn::*;
-use proc_macro2::{TokenNode, TokenTree, TokenStream, Spacing, Delimiter, Literal, Term};
-use proc_macro2::Delimiter::{Parenthesis, Brace};
+use proc_macro2::{Delimiter, Literal, Spacing, Term, TokenNode, TokenStream, TokenTree};
+use proc_macro2::Delimiter::{Brace, Parenthesis};
 
 use std::iter::FromIterator;
 
@@ -71,49 +71,48 @@ fn test_struct() {
         vis: Visibility::Public(VisPublic {
             pub_token: Default::default(),
         }),
-        attrs: vec![Attribute {
-            bracket_token: Default::default(),
-            pound_token: Default::default(),
-            style: AttrStyle::Outer,
-            path: "derive".into(),
-            tts: TokenStream::from_iter(vec![
-                delimited(Parenthesis, vec![
-                    word("Debug"),
-                    op(','),
-                    word("Clone"),
+        attrs: vec![
+            Attribute {
+                bracket_token: Default::default(),
+                pound_token: Default::default(),
+                style: AttrStyle::Outer,
+                path: "derive".into(),
+                tts: TokenStream::from_iter(vec![
+                    delimited(Parenthesis, vec![word("Debug"), op(','), word("Clone")]),
                 ]),
-            ]),
-            is_sugared_doc: false,
-        }],
+                is_sugared_doc: false,
+            },
+        ],
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
             semi_token: None,
             struct_token: Default::default(),
-            data: VariantData::Struct(vec![
-                Field {
-                    ident: Some("ident".into()),
-                    colon_token: Some(Default::default()),
-                    vis: Visibility::Public(VisPublic {
-                        pub_token: Default::default(),
-                    }),
-                    attrs: Vec::new(),
-                    ty: TypePath {
-                        qself: None,
-                        path: "Ident".into(),
-                    }.into(),
-                },
-                Field {
-                    ident: Some("attrs".into()),
-                    colon_token: Some(Default::default()),
-                    vis: Visibility::Public(VisPublic {
-                        pub_token: Default::default(),
-                    }),
-                    attrs: Vec::new(),
-                    ty: TypePath {
-                        qself: None,
-                        path: Path {
-                            leading_colon: None,
-                            segments: vec![
+            data: VariantData::Struct(
+                vec![
+                    Field {
+                        ident: Some("ident".into()),
+                        colon_token: Some(Default::default()),
+                        vis: Visibility::Public(VisPublic {
+                            pub_token: Default::default(),
+                        }),
+                        attrs: Vec::new(),
+                        ty: TypePath {
+                            qself: None,
+                            path: "Ident".into(),
+                        }.into(),
+                    },
+                    Field {
+                        ident: Some("attrs".into()),
+                        colon_token: Some(Default::default()),
+                        vis: Visibility::Public(VisPublic {
+                            pub_token: Default::default(),
+                        }),
+                        attrs: Vec::new(),
+                        ty: TypePath {
+                            qself: None,
+                            path: Path {
+                                leading_colon: None,
+                                segments: vec![
                                 PathSegment {
                                     ident: "Vec".into(),
                                     arguments: PathArguments::AngleBracketed(
@@ -131,10 +130,12 @@ fn test_struct() {
                                     ),
                                 }
                             ].into(),
-                        },
-                    }.into(),
-                },
-            ].into(), Default::default()),
+                            },
+                        }.into(),
+                    },
+                ].into(),
+                Default::default(),
+            ),
         }),
     };
 
@@ -184,7 +185,9 @@ fn test_enum() {
                 path: "doc".into(),
                 tts: TokenStream::from_iter(vec![
                     op('='),
-                    lit(Literal::doccomment("/// See the std::result module documentation for details.")),
+                    lit(Literal::doccomment(
+                        "/// See the std::result module documentation for details.",
+                    )),
                 ]),
                 is_sugared_doc: true,
             },
@@ -226,30 +229,42 @@ fn test_enum() {
                     ident: "Ok".into(),
                     attrs: Vec::new(),
                     eq_token: None,
-                    data: VariantData::Tuple(vec![
-                        Field {
-                            colon_token: None,
-                            ident: None,
-                            vis: Visibility::Inherited(VisInherited {}),
-                            attrs: Vec::new(),
-                            ty: TypePath { qself: None, path: "T".into() }.into(),
-                        },
-                    ].into(), Default::default()),
+                    data: VariantData::Tuple(
+                        vec![
+                            Field {
+                                colon_token: None,
+                                ident: None,
+                                vis: Visibility::Inherited(VisInherited {}),
+                                attrs: Vec::new(),
+                                ty: TypePath {
+                                    qself: None,
+                                    path: "T".into(),
+                                }.into(),
+                            },
+                        ].into(),
+                        Default::default(),
+                    ),
                     discriminant: None,
                 },
                 Variant {
                     ident: "Err".into(),
                     attrs: Vec::new(),
                     eq_token: None,
-                    data: VariantData::Tuple(vec![
-                        Field {
-                            ident: None,
-                            colon_token: None,
-                            vis: Visibility::Inherited(VisInherited {}),
-                            attrs: Vec::new(),
-                            ty: TypePath { qself: None, path: "E".into() }.into(),
-                        },
-                    ].into(), Default::default()),
+                    data: VariantData::Tuple(
+                        vec![
+                            Field {
+                                ident: None,
+                                colon_token: None,
+                                vis: Visibility::Inherited(VisInherited {}),
+                                attrs: Vec::new(),
+                                ty: TypePath {
+                                    qself: None,
+                                    path: "E".into(),
+                                }.into(),
+                            },
+                        ].into(),
+                        Default::default(),
+                    ),
                     discriminant: None,
                 },
                 Variant {
@@ -257,7 +272,7 @@ fn test_enum() {
                     attrs: Vec::new(),
                     data: VariantData::Unit,
                     eq_token: Some(Default::default()),
-                    discriminant: Some(Expr{
+                    discriminant: Some(Expr {
                         node: Lit {
                             value: LitKind::Other(Literal::isize(0)),
                             span: Default::default(),
@@ -319,21 +334,27 @@ fn test_enum() {
             ident: "doc".into(),
             eq_token: Default::default(),
             lit: Lit {
-                value: LitKind::Other(Literal::doccomment("/// See the std::result module documentation for details.")),
+                value: LitKind::Other(Literal::doccomment(
+                    "/// See the std::result module documentation for details.",
+                )),
                 span: Default::default(),
             },
         }.into(),
         MetaItem::Term("must_use".into()),
     ];
 
-    let actual_meta_items: Vec<_> = actual.attrs.into_iter().map(|attr| attr.meta_item().unwrap()).collect();
+    let actual_meta_items: Vec<_> = actual
+        .attrs
+        .into_iter()
+        .map(|attr| attr.meta_item().unwrap())
+        .collect();
 
     assert_eq!(expected_meta_items, actual_meta_items);
 }
 
 #[test]
 fn test_attr_with_path() {
-    let raw =r#"
+    let raw = r#"
         #[::attr_args::identity
             fn main() { assert_eq!(foo(), "Hello, world!"); }]
         struct Dummy;
@@ -342,35 +363,43 @@ fn test_attr_with_path() {
     let expected = DeriveInput {
         ident: "Dummy".into(),
         vis: Visibility::Inherited(VisInherited {}),
-        attrs: vec![Attribute {
-            bracket_token: Default::default(),
-            pound_token: Default::default(),
-            style: AttrStyle::Outer,
-            path: Path {
-                leading_colon: Some(Default::default()),
-                segments: vec![
-                    PathSegment::from("attr_args"),
-                    PathSegment::from("identity"),
-                ].into(),
-            },
-            tts: TokenStream::from_iter(vec![
-                word("fn"),
-                word("main"),
-                delimited(Parenthesis, vec![]),
-                delimited(Brace, vec![
-                    word("assert_eq"),
-                    op('!'),
-                    delimited(Parenthesis, vec![
-                        word("foo"),
-                        delimited(Parenthesis, vec![]),
-                        op(','),
-                        lit(Literal::string("Hello, world!")),
-                    ]),
-                    op(';'),
+        attrs: vec![
+            Attribute {
+                bracket_token: Default::default(),
+                pound_token: Default::default(),
+                style: AttrStyle::Outer,
+                path: Path {
+                    leading_colon: Some(Default::default()),
+                    segments: vec![
+                        PathSegment::from("attr_args"),
+                        PathSegment::from("identity"),
+                    ].into(),
+                },
+                tts: TokenStream::from_iter(vec![
+                    word("fn"),
+                    word("main"),
+                    delimited(Parenthesis, vec![]),
+                    delimited(
+                        Brace,
+                        vec![
+                            word("assert_eq"),
+                            op('!'),
+                            delimited(
+                                Parenthesis,
+                                vec![
+                                    word("foo"),
+                                    delimited(Parenthesis, vec![]),
+                                    op(','),
+                                    lit(Literal::string("Hello, world!")),
+                                ],
+                            ),
+                            op(';'),
+                        ],
+                    ),
                 ]),
-            ]),
-            is_sugared_doc: false,
-        }],
+                is_sugared_doc: false,
+            },
+        ],
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
             data: VariantData::Unit,
@@ -388,7 +417,7 @@ fn test_attr_with_path() {
 
 #[test]
 fn test_attr_with_non_mod_style_path() {
-    let raw =r#"
+    let raw = r#"
         #[inert <T>]
         struct S;
     "#;
@@ -396,23 +425,19 @@ fn test_attr_with_non_mod_style_path() {
     let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Inherited(VisInherited {}),
-        attrs: vec![Attribute {
-            bracket_token: Default::default(),
-            pound_token: Default::default(),
-            style: AttrStyle::Outer,
-            path: Path {
-                leading_colon: None,
-                segments: vec![
-                    PathSegment::from("inert"),
-                ].into(),
+        attrs: vec![
+            Attribute {
+                bracket_token: Default::default(),
+                pound_token: Default::default(),
+                style: AttrStyle::Outer,
+                path: Path {
+                    leading_colon: None,
+                    segments: vec![PathSegment::from("inert")].into(),
+                },
+                tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
+                is_sugared_doc: false,
             },
-            tts: TokenStream::from_iter(vec![
-                op('<'),
-                word("T"),
-                op('>'),
-            ]),
-            is_sugared_doc: false,
-        }],
+        ],
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
             data: VariantData::Unit,
@@ -430,7 +455,7 @@ fn test_attr_with_non_mod_style_path() {
 
 #[test]
 fn test_attr_with_mod_style_path_with_self() {
-    let raw =r#"
+    let raw = r#"
         #[foo::self]
         struct S;
     "#;
@@ -438,20 +463,19 @@ fn test_attr_with_mod_style_path_with_self() {
     let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Inherited(VisInherited {}),
-        attrs: vec![Attribute {
-            bracket_token: Default::default(),
-            pound_token: Default::default(),
-            style: AttrStyle::Outer,
-            path: Path {
-                leading_colon: None,
-                segments: vec![
-                    PathSegment::from("foo"),
-                    PathSegment::from("self"),
-                ].into(),
+        attrs: vec![
+            Attribute {
+                bracket_token: Default::default(),
+                pound_token: Default::default(),
+                style: AttrStyle::Outer,
+                path: Path {
+                    leading_colon: None,
+                    segments: vec![PathSegment::from("foo"), PathSegment::from("self")].into(),
+                },
+                tts: TokenStream::empty(),
+                is_sugared_doc: false,
             },
-            tts: TokenStream::empty(),
-            is_sugared_doc: false,
-        }],
+        ],
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
             data: VariantData::Unit,
@@ -470,7 +494,7 @@ fn test_attr_with_mod_style_path_with_self() {
 #[test]
 fn test_pub_restricted() {
     // Taken from tests/rust/src/test/ui/resolve/auxiliary/privacy-struct-ctor.rs
-    let raw =r#"
+    let raw = r#"
         pub(in m) struct Z(pub(in m::n) u8);
     "#;
 
@@ -485,27 +509,30 @@ fn test_pub_restricted() {
         attrs: vec![],
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
-            data: VariantData::Tuple(vec![Field {
-                ident: None,
-                vis: Visibility::Restricted(VisRestricted {
-                    path: Box::new(Path {
-                        leading_colon: None,
-                        segments: vec![
-                            PathSegment::from("m"),
-                            PathSegment::from("n"),
-                        ].into(),
-                    }),
-                    in_token: Some(Default::default()),
-                    paren_token: Default::default(),
-                    pub_token: Default::default(),
-                }),
-                colon_token: None,
-                attrs: vec![],
-                ty: TypePath {
-                    qself: None,
-                    path: "u8".into(),
-                }.into(),
-            }].into(), Default::default()),
+            data: VariantData::Tuple(
+                vec![
+                    Field {
+                        ident: None,
+                        vis: Visibility::Restricted(VisRestricted {
+                            path: Box::new(Path {
+                                leading_colon: None,
+                                segments: vec![PathSegment::from("m"), PathSegment::from("n")]
+                                    .into(),
+                            }),
+                            in_token: Some(Default::default()),
+                            paren_token: Default::default(),
+                            pub_token: Default::default(),
+                        }),
+                        colon_token: None,
+                        attrs: vec![],
+                        ty: TypePath {
+                            qself: None,
+                            path: "u8".into(),
+                        }.into(),
+                    },
+                ].into(),
+                Default::default(),
+            ),
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
         }),
@@ -518,7 +545,7 @@ fn test_pub_restricted() {
 
 #[test]
 fn test_pub_restricted_crate() {
-    let raw =r#"
+    let raw = r#"
         pub(crate) struct S;
     "#;
 
@@ -545,7 +572,7 @@ fn test_pub_restricted_crate() {
 
 #[test]
 fn test_pub_restricted_super() {
-    let raw =r#"
+    let raw = r#"
         pub(super) struct S;
     "#;
 
@@ -573,7 +600,7 @@ fn test_pub_restricted_super() {
 
 #[test]
 fn test_pub_restricted_in_super() {
-    let raw =r#"
+    let raw = r#"
         pub(in super) struct S;
     "#;
 

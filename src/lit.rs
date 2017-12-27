@@ -1,7 +1,7 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::{self, Span, Literal, TokenNode, TokenTree, Term};
+use proc_macro2::{self, Literal, Span, Term, TokenNode, TokenTree};
 
 #[derive(Clone)]
 pub struct Lit {
@@ -77,9 +77,7 @@ impl PartialEq for LitKind {
     fn eq(&self, other: &LitKind) -> bool {
         match (self, other) {
             (&LitKind::Bool(b1), &LitKind::Bool(b2)) => b1 == b2,
-            (&LitKind::Other(ref l1), &LitKind::Other(ref l2)) => {
-                l1.to_string() == l2.to_string()
-            }
+            (&LitKind::Other(ref l1), &LitKind::Other(ref l2)) => l1.to_string() == l2.to_string(),
             _ => false,
         }
     }
@@ -101,17 +99,18 @@ pub mod parsing {
     use super::*;
     use synom::Synom;
     use cursor::Cursor;
-    use {PResult, parse_error};
+    use {parse_error, PResult};
 
     impl Synom for Lit {
         fn parse(input: Cursor) -> PResult<Self> {
             match input.literal() {
-                Some((rest, span, lit)) => {
-                    Ok((rest, Lit {
+                Some((rest, span, lit)) => Ok((
+                    rest,
+                    Lit {
                         span: span,
-                        value: LitKind::Other(lit)
-                    }))
-                }
+                        value: LitKind::Other(lit),
+                    },
+                )),
                 _ => match input.word() {
                     Some((rest, span, sym)) => {
                         let kind = if sym.as_str() == "true" {
@@ -122,13 +121,16 @@ pub mod parsing {
                             return parse_error();
                         };
 
-                        Ok((rest, Lit {
-                            span: span,
-                            value: kind
-                        }))
+                        Ok((
+                            rest,
+                            Lit {
+                                span: span,
+                                value: kind,
+                            },
+                        ))
                     }
                     _ => parse_error(),
-                }
+                },
             }
         }
     }
@@ -137,7 +139,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for Lit {
         fn to_tokens(&self, tokens: &mut Tokens) {

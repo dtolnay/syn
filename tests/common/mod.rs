@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-extern crate walkdir;
 extern crate syntax;
+extern crate walkdir;
 
 use std;
 use std::env;
@@ -25,7 +25,8 @@ pub mod respan;
 pub fn check_min_stack() {
     let min_stack_value = env::var("RUST_MIN_STACK")
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");
-    let min_stack_value: usize = min_stack_value.parse()
+    let min_stack_value: usize = min_stack_value
+        .parse()
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");
     assert!(min_stack_value >= 16_000_000);
 }
@@ -53,8 +54,9 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         path_string
     };
     // TODO assert that parsing fails on the parse-fail cases
-    if path_string.starts_with("tests/rust/src/test/parse-fail") ||
-       path_string.starts_with("tests/rust/src/test/compile-fail") {
+    if path_string.starts_with("tests/rust/src/test/parse-fail")
+        || path_string.starts_with("tests/rust/src/test/compile-fail")
+    {
         return false;
     }
 

@@ -51,4 +51,3 @@ impl ParseError {
         ParseError(Some(msg.into()))
     }
 }
-

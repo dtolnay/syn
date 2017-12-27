@@ -154,7 +154,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for BinOp {
         fn to_tokens(&self, tokens: &mut Tokens) {

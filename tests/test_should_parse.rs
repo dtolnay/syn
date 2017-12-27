@@ -1,4 +1,4 @@
-//! This module contains some simple tests where we can write strings which we 
+//! This module contains some simple tests where we can write strings which we
 
 extern crate syn;
 
@@ -14,7 +14,7 @@ macro_rules! should_parse {
 
 should_parse!(generic_associated_type, {
     impl Foo {
-        type Item<'a> = &'a i32;
+        type Item = &'a i32;
         fn foo<'a>(&'a self) -> Self::Item<'a> {}
     }
 });
@@ -27,14 +27,14 @@ should_parse!(const_generics_use, {
 });
 
 should_parse!(trailing_plus_type, {
-    type A = Box<Foo+>;
-    type A = Box<Foo+'a+>;
-    type A = Box<'a+Foo+>;
+    type A = Box<Foo>;
+    type A = Box<Foo + 'a>;
+    type A = Box<'a + Foo>;
 });
 
 should_parse!(generic_associated_type_where, {
     trait Foo {
-        type Item<T> where T: Sized;
+        type Item;
         fn foo<T>(&self, t: T) -> Self::Item<T>;
     }
 });
