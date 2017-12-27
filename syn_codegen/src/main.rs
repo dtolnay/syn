@@ -172,7 +172,7 @@ mod parsing {
     named!(full -> (Tokens, bool), map!(option!(do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id.as_ref() == "full", epsilon!()) >>
+        cond_reduce!(id == "full", epsilon!()) >>
         ()
     )), |s| if s.is_some() {
         (quote!(#[cfg(feature = "full")]), true)
@@ -180,10 +180,18 @@ mod parsing {
         (quote!(), false)
     }));
 
+    named!(manual_extra_traits -> (), do_parse!(
+        punct!(#) >>
+        id: syn!(Ident) >>
+        cond_reduce!(id == "manual_extra_traits", epsilon!()) >>
+        ()
+    ));
+
     // Parses a simple AstStruct without the `pub struct` prefix.
     named!(ast_struct_inner -> AstItem, do_parse!(
         id: syn!(Ident) >>
         features: full >>
+        option!(manual_extra_traits) >>
         rest: syn!(TokenStream) >>
         (AstItem {
             item: parse_tokens::<DeriveInput>(quote! {
