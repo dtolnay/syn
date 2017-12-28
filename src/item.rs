@@ -1145,7 +1145,7 @@ pub mod parsing {
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        cond!(!mac.is_braced(), punct!(;)) >>
+        cond!(!mac::is_braced(&mac.tokens), punct!(;)) >>
         (TraitItemMacro {
             attrs: attrs,
             mac: mac,
@@ -1298,7 +1298,7 @@ pub mod parsing {
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        cond!(!mac.is_braced(), punct!(;)) >>
+        cond!(!mac::is_braced(&mac.tokens), punct!(;)) >>
         (ImplItemMacro {
             attrs: attrs,
             mac: mac,
@@ -1561,7 +1561,7 @@ mod printing {
             self.mac.bang_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.mac.tokens.to_tokens(tokens);
-            if !self.mac.is_braced() {
+            if !mac::is_braced(&self.mac.tokens) {
                 <Token![;]>::default().to_tokens(tokens);
             }
         }
@@ -1658,7 +1658,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
-            if !self.mac.is_braced() {
+            if !mac::is_braced(&self.mac.tokens) {
                 <Token![;]>::default().to_tokens(tokens);
             }
         }
@@ -1710,7 +1710,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
-            if !self.mac.is_braced() {
+            if !mac::is_braced(&self.mac.tokens) {
                 // FIXME needs a span
                 <Token![;]>::default().to_tokens(tokens);
             }

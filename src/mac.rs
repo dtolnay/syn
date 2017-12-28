@@ -41,12 +41,6 @@ impl Hash for Macro {
     }
 }
 
-impl Macro {
-    pub fn is_braced(&self) -> bool {
-        is_braced(&self.tokens)
-    }
-}
-
 pub fn is_braced(tt: &TokenTree) -> bool {
     match tt.kind {
         TokenNode::Group(Delimiter::Brace, _) => true,
