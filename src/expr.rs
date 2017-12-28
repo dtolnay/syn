@@ -2663,7 +2663,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
                 span: self.span,
-                kind: TokenNode::Literal(Literal::integer(self.index as i64)),
+                kind: TokenNode::Literal(Literal::integer(i64::from(self.index))),
             });
         }
     }
