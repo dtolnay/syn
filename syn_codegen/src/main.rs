@@ -490,14 +490,14 @@ mod codegen {
                         Kind::VisitMut => {
                             if is_vec {
                                 format!(
-                                    "for mut it in {name} {{ {val} }}",
+                                    "for it in {name} {{ {val} }}",
                                     name = name.ref_mut_tokens(),
                                     val = val,
                                 )
                             } else {
                                 format!(
                                     "for mut el in {name} {{ \
-                                     let mut it = el.item_mut(); \
+                                     let it = el.item_mut(); \
                                      {val} \
                                      }}",
                                     name = name.ref_mut_tokens(),
