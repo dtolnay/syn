@@ -1580,16 +1580,15 @@ pub mod parsing {
         pat: syn!(Pat) >>
         ty: option!(tuple!(punct!(:), syn!(Type))) >>
         ({
-            let (colon, ty) = ty.unwrap_or_else(|| {
-                (<Token![:]>::default(), TypeInfer {
-                    underscore_token: <Token![_]>::default(),
-                }.into())
-            });
-            ArgCaptured {
-                pat: pat,
-                colon_token: colon,
-                ty: ty,
-            }.into()
+            if let Some((colon, ty)) = ty {
+                FnArg::Captured(ArgCaptured {
+                    pat: pat,
+                    colon_token: colon,
+                    ty: ty,
+                })
+            } else {
+                FnArg::Inferred(pat)
+            }
         })
     ));
 

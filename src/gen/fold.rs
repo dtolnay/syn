@@ -1389,6 +1389,11 @@ pub fn fold_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
                 _visitor.fold_arg_captured(_binding_0),
             )
         }
+        Inferred(_binding_0, ) => {
+            Inferred (
+                _visitor.fold_pat(_binding_0),
+            )
+        }
         Ignored(_binding_0, ) => {
             Ignored (
                 _visitor.fold_type(_binding_0),

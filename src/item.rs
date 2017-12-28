@@ -468,6 +468,7 @@ ast_enum_of_structs! {
             pub colon_token: Token![:],
             pub ty: Type,
         }),
+        pub Inferred(Pat),
         pub Ignored(Type),
     }
 }

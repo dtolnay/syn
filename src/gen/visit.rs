@@ -1087,6 +1087,9 @@ pub fn visit_fn_arg<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
         Captured(ref _binding_0, ) => {
             _visitor.visit_arg_captured(_binding_0);
         }
+        Inferred(ref _binding_0, ) => {
+            _visitor.visit_pat(_binding_0);
+        }
         Ignored(ref _binding_0, ) => {
             _visitor.visit_type(_binding_0);
         }
