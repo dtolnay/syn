@@ -454,7 +454,7 @@ mod codegen {
         name: &Operand,
     ) -> Option<String> {
         let name = name.owned_tokens();
-        let res = visit(&elem, lookup, kind, &Owned(quote!(*#name)))?;
+        let res = visit(elem, lookup, kind, &Owned(quote!(*#name)))?;
         Some(match kind {
             Fold => format!("Box::new({})", res),
             Visit | VisitMut => res,
@@ -471,7 +471,7 @@ mod codegen {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
-        let val = visit(&elem, lookup, kind, &operand)?;
+        let val = visit(elem, lookup, kind, &operand)?;
         Some(match kind {
             Visit => {
                 format!(
@@ -505,7 +505,7 @@ mod codegen {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
-        let val = visit(&elem, lookup, kind, &operand)?;
+        let val = visit(elem, lookup, kind, &operand)?;
         Some(match kind {
             Visit => {
                 format!(
@@ -545,7 +545,7 @@ mod codegen {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
-        let val = visit(&elem, lookup, kind, &it)?;
+        let val = visit(elem, lookup, kind, &it)?;
         Some(match kind {
             Visit => format!(
                 "if let Some(ref it) = {name} {{ {val} }}",
@@ -576,7 +576,7 @@ mod codegen {
             let name = name.tokens();
             let i = Ident::from(format!("{}", i));
             let it = Owned(quote!((#name).#i));
-            let val = visit(&elem, lookup, kind, &it)
+            let val = visit(elem, lookup, kind, &it)
                 .unwrap_or_else(|| noop_visit(kind, &it));
             code.push_str(&format!("            {}", val));
             match kind {
