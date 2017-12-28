@@ -350,31 +350,34 @@ mod codegen {
         Owned(Tokens),
     }
 
+    use self::Operand::*;
+    use self::Kind::*;
+
     impl Operand {
         fn tokens(&self) -> &Tokens {
             match *self {
-                Operand::Borrowed(ref n) | Operand::Owned(ref n) => n,
+                Borrowed(ref n) | Owned(ref n) => n,
             }
         }
 
         fn ref_tokens(&self) -> Tokens {
             match *self {
-                Operand::Borrowed(ref n) => n.clone(),
-                Operand::Owned(ref n) => quote!(&#n),
+                Borrowed(ref n) => n.clone(),
+                Owned(ref n) => quote!(&#n),
             }
         }
 
         fn ref_mut_tokens(&self) -> Tokens {
             match *self {
-                Operand::Borrowed(ref n) => n.clone(),
-                Operand::Owned(ref n) => quote!(&mut #n),
+                Borrowed(ref n) => n.clone(),
+                Owned(ref n) => quote!(&mut #n),
             }
         }
 
         fn owned_tokens(&self) -> Tokens {
             match *self {
-                Operand::Borrowed(ref n) => quote!(*#n),
-                Operand::Owned(ref n) => n.clone(),
+                Borrowed(ref n) => quote!(*#n),
+                Owned(ref n) => n.clone(),
             }
         }
     }
@@ -407,17 +410,17 @@ mod codegen {
         name: &Operand,
     ) -> String {
         match kind {
-            Kind::Visit => format!(
+            Visit => format!(
                 "_visitor.visit_{under_name}({name})",
                 under_name = under_name(type_name),
                 name = name.ref_tokens(),
             ),
-            Kind::VisitMut => format!(
+            VisitMut => format!(
                 "_visitor.visit_{under_name}_mut({name})",
                 under_name = under_name(type_name),
                 name = name.ref_mut_tokens(),
             ),
-            Kind::Fold => format!(
+            Fold => format!(
                 "_visitor.fold_{under_name}({name})",
                 under_name = under_name(type_name),
                 name = name.owned_tokens(),
@@ -433,10 +436,10 @@ mod codegen {
     ) -> Option<String> {
         let ty = first_arg(&seg.arguments);
         let name = name.owned_tokens();
-        let res = visit(&ty, lookup, kind, &Operand::Owned(quote!(*#name)))?;
+        let res = visit(&ty, lookup, kind, &Owned(quote!(*#name)))?;
         Some(match kind {
-            Kind::Fold => format!("Box::new({})", res),
-            Kind::Visit | Kind::VisitMut => res,
+            Fold => format!("Box::new({})", res),
+            Visit | VisitMut => res,
         })
     }
 
@@ -449,12 +452,12 @@ mod codegen {
         let is_vec = seg.ident == "Vec";
         let ty = first_arg(&seg.arguments);
         let operand = match kind {
-            Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
-            Kind::Fold => Operand::Owned(quote!(it)),
+            Visit | VisitMut => Borrowed(quote!(it)),
+            Fold => Owned(quote!(it)),
         };
         let val = visit(&ty, lookup, kind, &operand)?;
         Some(match kind {
-            Kind::Visit => {
+            Visit => {
                 if is_vec {
                     format!(
                         "for it in {name} {{ {val} }}",
@@ -472,7 +475,7 @@ mod codegen {
                     )
                 }
             }
-            Kind::VisitMut => {
+            VisitMut => {
                 if is_vec {
                     format!(
                         "for it in {name} {{ {val} }}",
@@ -490,7 +493,7 @@ mod codegen {
                     )
                 }
             }
-            Kind::Fold => format!(
+            Fold => format!(
                 "FoldHelper::lift({name}, |it| {{ {val} }})",
                 name = name.owned_tokens(),
                 val = val,
@@ -506,22 +509,22 @@ mod codegen {
     ) -> Option<String> {
         let ty = first_arg(&seg.arguments);
         let it = match kind {
-            Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
-            Kind::Fold => Operand::Owned(quote!(it)),
+            Visit | VisitMut => Borrowed(quote!(it)),
+            Fold => Owned(quote!(it)),
         };
         let val = visit(&ty, lookup, kind, &it)?;
         Some(match kind {
-            Kind::Visit => format!(
+            Visit => format!(
                 "if let Some(ref it) = {name} {{ {val} }}",
                 name = name.owned_tokens(),
                 val = val,
             ),
-            Kind::VisitMut => format!(
+            VisitMut => format!(
                 "if let Some(ref mut it) = {name} {{ {val} }}",
                 name = name.owned_tokens(),
                 val = val,
             ),
-            Kind::Fold => format!(
+            Fold => format!(
                 "({name}).map(|it| {{ {val} }})",
                 name = name.owned_tokens(),
                 val = val,
@@ -531,8 +534,8 @@ mod codegen {
 
     fn noop_visit(kind: Kind, name: &Operand) -> String {
         match kind {
-            Kind::Fold => name.owned_tokens().to_string(),
-            Kind::Visit | Kind::VisitMut => format!("// Skipped field {}", name),
+            Fold => name.owned_tokens().to_string(),
+            Visit | VisitMut => format!("// Skipped field {}", name),
         }
     }
 
@@ -693,11 +696,11 @@ mod codegen {
                             visit(
                                 &field.ty,
                                 lookup,
-                                Kind::Visit,
-                                &Operand::Borrowed(binding.clone())
+                                Visit,
+                                &Borrowed(binding.clone())
                             ).unwrap_or_else(|| noop_visit(
-                                Kind::Visit,
-                                &Operand::Borrowed(binding.clone())
+                                Visit,
+                                &Borrowed(binding.clone())
                             )),
                         ));
                         state.visit_mut_impl.push_str(&format!(
@@ -705,19 +708,19 @@ mod codegen {
                             visit(
                                 &field.ty,
                                 lookup,
-                                Kind::VisitMut,
-                                &Operand::Borrowed(binding.clone())
+                                VisitMut,
+                                &Borrowed(binding.clone())
                             ).unwrap_or_else(|| noop_visit(
-                                Kind::VisitMut,
-                                &Operand::Borrowed(binding.clone())
+                                VisitMut,
+                                &Borrowed(binding.clone())
                             )),
                         ));
                         state.fold_impl.push_str(&format!(
                             "                {},\n",
-                            visit(&field.ty, lookup, Kind::Fold, &Operand::Owned(binding.clone()))
+                            visit(&field.ty, lookup, Fold, &Owned(binding.clone()))
                                 .unwrap_or_else(|| noop_visit(
-                                    Kind::Fold,
-                                    &Operand::Owned(binding)
+                                    Fold,
+                                    &Owned(binding)
                                 )),
                         ));
                     }
@@ -766,26 +769,26 @@ mod codegen {
                 };
 
                 for (field, ref_toks) in fields {
-                    let ref_toks = Operand::Owned(ref_toks);
+                    let ref_toks = Owned(ref_toks);
                     state.visit_impl.push_str(&format!(
                         "    {};\n",
-                        visit(&field.ty, lookup, Kind::Visit, &ref_toks)
+                        visit(&field.ty, lookup, Visit, &ref_toks)
                             .unwrap_or_else(|| noop_visit(
-                                Kind::Visit,
+                                Visit,
                                 &ref_toks,
                             ))
                     ));
                     state.visit_mut_impl.push_str(&format!(
                         "    {};\n",
-                        visit(&field.ty, lookup, Kind::VisitMut, &ref_toks)
+                        visit(&field.ty, lookup, VisitMut, &ref_toks)
                             .unwrap_or_else(|| noop_visit(
-                                Kind::VisitMut,
+                                VisitMut,
                                 &ref_toks,
                             ))
                     ));
-                    let fold = visit(&field.ty, lookup, Kind::Fold, &ref_toks)
+                    let fold = visit(&field.ty, lookup, Fold, &ref_toks)
                         .unwrap_or_else(|| noop_visit(
-                            Kind::Fold,
+                            Fold,
                             &ref_toks,
                         ));
                     if let Some(ref name) = field.ident {
