@@ -272,8 +272,6 @@ fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef { fold_lifetime_d
 fn fold_lit(&mut self, i: Lit) -> Lit { fold_lit(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_mac_stmt_style(&mut self, i: MacStmtStyle) -> MacStmtStyle { fold_mac_stmt_style(self, i) }
 
 fn fold_macro(&mut self, i: Macro) -> Macro { fold_macro(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1958,19 +1956,6 @@ pub fn fold_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
     }
 }
-# [ cfg ( feature = "full" ) ]
-pub fn fold_mac_stmt_style<V: Folder + ?Sized>(_visitor: &mut V, _i: MacStmtStyle) -> MacStmtStyle {
-    use ::MacStmtStyle::*;
-    match _i {
-        Semicolon(_binding_0, ) => {
-            Semicolon (
-                _binding_0,
-            )
-        }
-        Braces => { Braces }
-        NoBraces => { NoBraces }
-    }
-}
 
 pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
     Macro {
@@ -2343,11 +2328,6 @@ pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
             Semi (
                 Box::new(_visitor.fold_expr(* _binding_0)),
                 _binding_1,
-            )
-        }
-        Macro(_binding_0, ) => {
-            Macro (
-                _binding_0,
             )
         }
     }

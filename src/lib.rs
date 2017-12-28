@@ -43,7 +43,7 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
 
 #[cfg(feature = "full")]
 pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Index, InPlaceKind, Local,
-               MacStmtStyle, Member, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
+               Member, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
                PatStruct, PatTuple, PatTupleStruct, PatWild, RangeLimits, Stmt};
 
 mod generics;

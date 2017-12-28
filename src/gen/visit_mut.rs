@@ -246,8 +246,6 @@ fn visit_lifetime_def_mut(&mut self, i: &mut LifetimeDef) { visit_lifetime_def_m
 fn visit_lit_mut(&mut self, i: &mut Lit) { visit_lit_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_local_mut(&mut self, i: &mut Local) { visit_local_mut(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_mac_stmt_style_mut(&mut self, i: &mut MacStmtStyle) { visit_mac_stmt_style_mut(self, i) }
 
 fn visit_macro_mut(&mut self, i: &mut Macro) { visit_macro_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1524,17 +1522,6 @@ pub fn visit_local_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Local)
     if let Some(ref mut it) = _i . init { _visitor.visit_expr_mut(& mut * * it) };
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
 }
-# [ cfg ( feature = "full" ) ]
-pub fn visit_mac_stmt_style_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MacStmtStyle) {
-    use ::MacStmtStyle::*;
-    match *_i {
-        Semicolon(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
-        }
-        Braces => { }
-        NoBraces => { }
-    }
-}
 
 pub fn visit_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Macro) {
     _visitor.visit_path_mut(& mut _i . path);
@@ -1807,9 +1794,6 @@ pub fn visit_stmt_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Stmt) {
         Semi(ref mut _binding_0, ref mut _binding_1, ) => {
             _visitor.visit_expr_mut(& mut * * _binding_0);
             // Skipped field _binding_1;
-        }
-        Macro(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
         }
     }
 }

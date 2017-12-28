@@ -444,28 +444,6 @@ ast_enum! {
 
         /// Expression with trailing semicolon;
         Semi(Box<Expr>, Token![;]),
-
-        /// Macro invocation.
-        Macro(Box<(Macro, MacStmtStyle, Vec<Attribute>)>),
-    }
-}
-
-#[cfg(feature = "full")]
-ast_enum! {
-    /// How a macro was invoked.
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum MacStmtStyle {
-        /// The macro statement had a trailing semicolon, e.g. `foo! { ... };`
-        /// `foo!(...);`, `foo![...];`
-        Semicolon(Token![;]),
-
-        /// The macro statement had braces; e.g. foo! { ... }
-        Braces,
-
-        /// The macro statement had parentheses or brackets and no semicolon; e.g.
-        /// `foo!(...)`. All of these will end up being converted into macro
-        /// expressions.
-        NoBraces,
     }
 }
 
@@ -1864,8 +1842,10 @@ pub mod parsing {
     // expression statements
         data: braces!(syn!(TokenStream)) >>
         semi: option!(punct!(;)) >>
-        (Stmt::Macro(Box::new((
-            Macro {
+        (Stmt::Item(Box::new(Item::Macro(ItemMacro {
+            attrs: attrs,
+            ident: None,
+            mac: Macro {
                 path: what,
                 bang_token: bang,
                 tokens: proc_macro2::TokenTree {
@@ -1873,12 +1853,8 @@ pub mod parsing {
                     kind: TokenNode::Group(Delimiter::Brace, data.0),
                 },
             },
-            match semi {
-                Some(semi) => MacStmtStyle::Semicolon(semi),
-                None => MacStmtStyle::Braces,
-            },
-            attrs,
-        ))))
+            semi_token: semi,
+        }))))
     ));
 
     #[cfg(feature = "full")]
@@ -2993,17 +2969,6 @@ mod printing {
                 Stmt::Semi(ref expr, ref semi) => {
                     expr.to_tokens(tokens);
                     semi.to_tokens(tokens);
-                }
-                Stmt::Macro(ref mac) => {
-                    let (ref mac, ref style, ref attrs) = **mac;
-                    tokens.append_all(attrs.outer());
-                    mac.to_tokens(tokens);
-                    match *style {
-                        MacStmtStyle::Semicolon(ref s) => s.to_tokens(tokens),
-                        MacStmtStyle::Braces | MacStmtStyle::NoBraces => {
-                            // no semicolon
-                        }
-                    }
                 }
             }
         }
