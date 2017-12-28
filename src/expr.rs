@@ -200,10 +200,11 @@ ast_enum_of_structs! {
         /// A closure (for example, `move |a, b, c| a + b + c`)
         pub Closure(ExprClosure #full {
             pub capture: CaptureBy,
-            pub decl: Box<FnDecl>,
-            pub body: Box<Expr>,
             pub or1_token: Token![|],
+            pub inputs: Delimited<FnArg, Token![,]>,
             pub or2_token: Token![|],
+            pub output: ReturnType,
+            pub body: Box<Expr>,
         }),
 
         /// An unsafe block (`unsafe { ... }`)
@@ -1556,7 +1557,7 @@ pub mod parsing {
                 arrow: punct!(->) >>
                 ty: syn!(Type) >>
                 body: syn!(Block) >>
-                (ReturnType::Type(ty, arrow),
+                (ReturnType::Type(Box::new(ty), arrow),
                  ExprKind::Block(ExprBlock {
                     block: body,
                 }).into())
@@ -1567,16 +1568,9 @@ pub mod parsing {
         (ExprClosure {
             capture: capture,
             or1_token: or1,
+            inputs: inputs,
             or2_token: or2,
-            decl: Box::new(FnDecl {
-                inputs: inputs,
-                output: ret_and_body.0,
-                variadic: false,
-                dot_tokens: None,
-                fn_token: <Token![fn]>::default(),
-                generics: Generics::default(),
-                paren_token: token::Paren::default(),
-            }),
+            output: ret_and_body.0,
             body: Box::new(ret_and_body.1),
         }.into())
     ));
@@ -2587,7 +2581,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
-            for item in self.decl.inputs.iter() {
+            for item in self.inputs.iter() {
                 match **item.item() {
                     FnArg::Captured(ArgCaptured {
                         ref pat,
@@ -2601,7 +2595,7 @@ mod printing {
                 item.delimiter().to_tokens(tokens);
             }
             self.or2_token.to_tokens(tokens);
-            self.decl.output.to_tokens(tokens);
+            self.output.to_tokens(tokens);
             self.body.to_tokens(tokens);
         }
     }

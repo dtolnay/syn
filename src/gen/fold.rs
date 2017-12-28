@@ -904,10 +904,11 @@ pub fn fold_expr_catch<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> E
 pub fn fold_expr_closure<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprClosure) -> ExprClosure {
     ExprClosure {
         capture: _visitor.fold_capture_by(_i . capture),
-        decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
-        body: Box::new(_visitor.fold_expr(* _i . body)),
         or1_token: _i . or1_token,
+        inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_fn_arg(it) }),
         or2_token: _i . or2_token,
+        output: _visitor.fold_return_type(_i . output),
+        body: Box::new(_visitor.fold_expr(* _i . body)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2285,7 +2286,7 @@ pub fn fold_return_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ReturnType) ->
         Default => { Default }
         Type(_binding_0, _binding_1, ) => {
             Type (
-                _visitor.fold_type(_binding_0),
+                Box::new(_visitor.fold_type(* _binding_0)),
                 _binding_1,
             )
         }

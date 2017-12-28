@@ -339,7 +339,7 @@ ast_enum! {
         /// type would be inserted.
         Default,
         /// Everything else
-        Type(Type, Token![->]),
+        Type(Box<Type>, Token![->]),
     }
 }
 
@@ -597,7 +597,7 @@ pub mod parsing {
             do_parse!(
                 arrow: punct!(->) >>
                 ty: syn!(Type) >>
-                (ReturnType::Type(ty, arrow))
+                (ReturnType::Type(Box::new(ty), arrow))
             )
             |
             epsilon!() => { |_| ReturnType::Default }

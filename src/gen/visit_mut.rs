@@ -745,10 +745,11 @@ pub fn visit_expr_catch_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_closure_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprClosure) {
     _visitor.visit_capture_by_mut(& mut _i . capture);
-    _visitor.visit_fn_decl_mut(& mut _i . decl);
-    _visitor.visit_expr_mut(& mut _i . body);
     // Skipped field _i . or1_token;
+    for mut el in & mut _i . inputs { let it = el.item_mut(); _visitor.visit_fn_arg_mut(it) };
     // Skipped field _i . or2_token;
+    _visitor.visit_return_type_mut(& mut _i . output);
+    _visitor.visit_expr_mut(& mut _i . body);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_continue_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprContinue) {
