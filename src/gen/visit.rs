@@ -1102,7 +1102,6 @@ pub fn visit_fn_decl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_return_type(& _i . output);
     _visitor.visit_generics(& _i . generics);
     // Skipped field _i . variadic;
-    // Skipped field _i . dot_tokens;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_foreign_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ForeignItem) {

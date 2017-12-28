@@ -1409,7 +1409,6 @@ pub fn fold_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl 
         output: _visitor.fold_return_type(_i . output),
         generics: _visitor.fold_generics(_i . generics),
         variadic: _i . variadic,
-        dot_tokens: _i . dot_tokens,
     }
 }
 # [ cfg ( feature = "full" ) ]

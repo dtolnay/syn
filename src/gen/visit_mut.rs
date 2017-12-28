@@ -1102,7 +1102,6 @@ pub fn visit_fn_decl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FnDe
     _visitor.visit_return_type_mut(& mut _i . output);
     _visitor.visit_generics_mut(& mut _i . generics);
     // Skipped field _i . variadic;
-    // Skipped field _i . dot_tokens;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_foreign_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ForeignItem) {

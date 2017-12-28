@@ -443,8 +443,7 @@ ast_struct! {
         pub inputs: Delimited<FnArg, Token![,]>,
         pub output: ReturnType,
         pub generics: Generics,
-        pub variadic: bool,
-        pub dot_tokens: Option<Token![...]>,
+        pub variadic: Option<Token![...]>,
     }
 }
 
@@ -732,12 +731,11 @@ pub mod parsing {
             unsafety: unsafety,
             abi: abi,
             decl: Box::new(FnDecl {
-                dot_tokens: None,
                 fn_token: fn_,
                 paren_token: inputs.1,
                 inputs: inputs.0,
                 output: ret,
-                variadic: false,
+                variadic: None,
                 generics: Generics {
                     where_clause: where_clause,
                     .. generics
@@ -875,8 +873,7 @@ pub mod parsing {
                     fn_token: fn_,
                     paren_token: parens,
                     inputs: inputs,
-                    variadic: variadic.is_some(),
-                    dot_tokens: variadic,
+                    variadic: variadic,
                     output: ret,
                     generics: Generics {
                         where_clause: where_clause,
@@ -1100,10 +1097,9 @@ pub mod parsing {
                     decl: FnDecl {
                         inputs: inputs.0,
                         output: ret,
-                        variadic: false,
                         fn_token: fn_,
                         paren_token: inputs.1,
-                        dot_tokens: None,
+                        variadic: None,
                         generics: Generics {
                             where_clause: where_clause,
                             .. generics
@@ -1264,12 +1260,11 @@ pub mod parsing {
                     paren_token: inputs.1,
                     inputs: inputs.0,
                     output: ret,
-                    variadic: false,
                     generics: Generics {
                         where_clause: where_clause,
                         .. generics
                     },
-                    dot_tokens: None,
+                    variadic: None,
                 },
             },
             block: Block {
@@ -1775,13 +1770,10 @@ mod printing {
             self.0.generics.to_tokens(tokens);
             self.0.paren_token.surround(tokens, |tokens| {
                 self.0.inputs.to_tokens(tokens);
-
-                if self.0.variadic {
-                    if !self.0.inputs.empty_or_trailing() {
-                        <Token![,]>::default().to_tokens(tokens);
-                    }
-                    TokensOrDefault(&self.0.dot_tokens).to_tokens(tokens);
+                if self.0.variadic.is_some() && !self.0.inputs.empty_or_trailing() {
+                    <Token![,]>::default().to_tokens(tokens);
                 }
+                self.0.variadic.to_tokens(tokens);
             });
             self.0.output.to_tokens(tokens);
             self.0.generics.where_clause.to_tokens(tokens);
