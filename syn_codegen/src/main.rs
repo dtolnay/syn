@@ -21,7 +21,7 @@ extern crate quote;
 extern crate syn;
 
 use quote::{ToTokens, Tokens};
-use syn::{Attribute, DeriveInput, Ident, Item};
+use syn::{Attribute, Body, BodyStruct, DeriveInput, Ident, Item};
 use failure::{err_msg, Error};
 
 use std::io::{Read, Write};
@@ -38,7 +38,9 @@ const VISIT_MUT_SRC: &str = "../src/gen/visit_mut.rs";
 
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 
-const TERMINAL_TYPES: &[&str] = &["Ident", "Span"];
+const EXTRA_TYPES: &[&str] = &["Ident", "Lifetime", "Lit"];
+
+const TERMINAL_TYPES: &[&str] = &["Span"];
 
 fn path_eq(a: &syn::Path, b: &syn::Path) -> bool {
     if a.global() != b.global() || a.segments.len() != b.segments.len() {
@@ -92,9 +94,9 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
         syn::parse_file(&src).map_err(|_| format_err!("failed to parse {}", name.display()))?;
 
     // Collect all of the interesting AstItems declared in this file or submodules.
-    'items: for item in &file.items {
-        match *item {
-            Item::Mod(ref item) => {
+    'items: for item in file.items {
+        match item {
+            Item::Mod(item) => {
                 // Don't inspect inline modules.
                 if item.content.is_some() {
                     continue;
@@ -117,7 +119,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 let path = parent.join(&format!("{}.rs", item.ident.as_ref()));
                 load_file(path, &features, lookup)?;
             }
-            Item::Macro(ref item) => {
+            Item::Macro(item) => {
                 // Lookip any #[cfg()] attributes directly on the macro
                 // invocation, and add them to the feature set.
                 let features = get_features(&item.attrs, features.clone());
@@ -144,6 +146,26 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 for mut item in found {
                     features.to_tokens(&mut item.features);
                     lookup.insert(item.item.ident, item);
+                }
+            }
+            Item::Struct(item) => {
+                let ident = item.ident;
+                if EXTRA_TYPES.contains(&ident.as_ref()) {
+                    lookup.insert(ident, AstItem {
+                        item: DeriveInput {
+                            ident: ident,
+                            vis: item.vis,
+                            attrs: item.attrs,
+                            generics: item.generics,
+                            body: Body::Struct(BodyStruct {
+                                data: item.data,
+                                struct_token: item.struct_token,
+                                semi_token: item.semi_token,
+                            }),
+                        },
+                        features: features.clone(),
+                        eos_full: false,
+                    });
                 }
             }
             _ => {}

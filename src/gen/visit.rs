@@ -239,7 +239,11 @@ fn visit_item_union(&mut self, i: &'ast ItemUnion) { visit_item_union(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_use(&mut self, i: &'ast ItemUse) { visit_item_use(self, i) }
 
+fn visit_lifetime(&mut self, i: &'ast Lifetime) { visit_lifetime(self, i) }
+
 fn visit_lifetime_def(&mut self, i: &'ast LifetimeDef) { visit_lifetime_def(self, i) }
+
+fn visit_lit(&mut self, i: &'ast Lit) { visit_lit(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_local(&mut self, i: &'ast Local) { visit_local(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -401,7 +405,7 @@ pub fn visit_abi_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     use ::AbiKind::*;
     match *_i {
         Named(ref _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lit(_binding_0);
         }
         Default => { }
     }
@@ -428,7 +432,7 @@ pub fn visit_arg_self<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 pub fn visit_arg_self_ref<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ArgSelfRef) {
     // Skipped field _i . and_token;
     // Skipped field _i . self_token;
-    // Skipped field _i . lifetime;
+    if let Some(ref it) = _i . lifetime { _visitor.visit_lifetime(it) };
     _visitor.visit_mutability(& _i . mutbl);
 }
 # [ cfg ( feature = "full" ) ]
@@ -720,7 +724,7 @@ pub fn visit_expr_box<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_break<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprBreak) {
-    // Skipped field _i . label;
+    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
     if let Some(ref it) = _i . expr { _visitor.visit_expr(it) };
     // Skipped field _i . break_token;
 }
@@ -753,7 +757,7 @@ pub fn visit_expr_closure<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_continue<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprContinue) {
-    // Skipped field _i . label;
+    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
     // Skipped field _i . continue_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -767,7 +771,7 @@ pub fn visit_expr_for_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
     _visitor.visit_pat(& _i . pat);
     _visitor.visit_expr(& _i . expr);
     _visitor.visit_block(& _i . body);
-    // Skipped field _i . label;
+    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
     // Skipped field _i . for_token;
     // Skipped field _i . colon_token;
     // Skipped field _i . in_token;
@@ -837,7 +841,7 @@ pub fn visit_expr_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
             _visitor.visit_expr_unary(_binding_0);
         }
         Lit(ref _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lit(_binding_0);
         }
         Cast(ref _binding_0, ) => {
             _visitor.visit_expr_cast(_binding_0);
@@ -934,7 +938,7 @@ pub fn visit_expr_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprLoop) {
     _visitor.visit_block(& _i . body);
-    // Skipped field _i . label;
+    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
     // Skipped field _i . loop_token;
     // Skipped field _i . colon_token;
 }
@@ -1023,7 +1027,7 @@ pub fn visit_expr_unsafe<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
 pub fn visit_expr_while<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhile) {
     _visitor.visit_expr(& _i . cond);
     _visitor.visit_block(& _i . body);
-    // Skipped field _i . label;
+    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
     // Skipped field _i . colon_token;
     // Skipped field _i . while_token;
 }
@@ -1032,7 +1036,7 @@ pub fn visit_expr_while_let<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
     _visitor.visit_pat(& _i . pat);
     _visitor.visit_expr(& _i . expr);
     _visitor.visit_block(& _i . body);
-    // Skipped field _i . label;
+    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
     // Skipped field _i . colon_token;
     // Skipped field _i . while_token;
     // Skipped field _i . let_token;
@@ -1150,7 +1154,7 @@ pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
     use ::GenericArgument::*;
     match *_i {
         Lifetime(ref _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lifetime(_binding_0);
         }
         Type(ref _binding_0, ) => {
             _visitor.visit_type(_binding_0);
@@ -1187,6 +1191,8 @@ pub fn visit_generics<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 
 pub fn visit_ident<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {
+    // Skipped field _i . sym;
+    _visitor.visit_span(& _i . span);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItem) {
@@ -1491,11 +1497,21 @@ pub fn visit_item_use<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     // Skipped field _i . semi_token;
 }
 
+pub fn visit_lifetime<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lifetime) {
+    // Skipped field _i . sym;
+    _visitor.visit_span(& _i . span);
+}
+
 pub fn visit_lifetime_def<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LifetimeDef) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    // Skipped field _i . lifetime;
+    _visitor.visit_lifetime(& _i . lifetime);
     // Skipped field _i . colon_token;
-    // Skipped field _i . bounds;
+    for el in & _i . bounds { let it = el.item(); _visitor.visit_lifetime(it) };
+}
+
+pub fn visit_lit<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lit) {
+    // Skipped field _i . value;
+    _visitor.visit_span(& _i . span);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_local<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Local) {
@@ -1562,7 +1578,7 @@ pub fn visit_meta_item_list<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
 pub fn visit_meta_name_value<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaNameValue) {
     _visitor.visit_ident(& _i . ident);
     // Skipped field _i . eq_token;
-    // Skipped field _i . lit;
+    _visitor.visit_lit(& _i . lit);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_method_sig<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MethodSig) {
@@ -1595,7 +1611,7 @@ pub fn visit_nested_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
             _visitor.visit_meta_item(_binding_0);
         }
         Literal(ref _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lit(_binding_0);
         }
     }
 }
@@ -1960,7 +1976,7 @@ pub fn visit_type_param_bound<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
             _visitor.visit_trait_bound_modifier(_binding_1);
         }
         Region(ref _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lifetime(_binding_0);
         }
     }
 }
@@ -1983,7 +1999,7 @@ pub fn visit_type_ptr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 
 pub fn visit_type_reference<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeReference) {
     // Skipped field _i . and_token;
-    // Skipped field _i . lifetime;
+    if let Some(ref it) = _i . lifetime { _visitor.visit_lifetime(it) };
     _visitor.visit_mut_type(& _i . ty);
 }
 
@@ -2151,8 +2167,8 @@ pub fn visit_where_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, 
 }
 
 pub fn visit_where_region_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WhereRegionPredicate) {
-    // Skipped field _i . lifetime;
+    _visitor.visit_lifetime(& _i . lifetime);
     // Skipped field _i . colon_token;
-    // Skipped field _i . bounds;
+    for el in & _i . bounds { let it = el.item(); _visitor.visit_lifetime(it) };
 }
 

@@ -239,7 +239,11 @@ fn visit_item_union_mut(&mut self, i: &mut ItemUnion) { visit_item_union_mut(sel
 # [ cfg ( feature = "full" ) ]
 fn visit_item_use_mut(&mut self, i: &mut ItemUse) { visit_item_use_mut(self, i) }
 
+fn visit_lifetime_mut(&mut self, i: &mut Lifetime) { visit_lifetime_mut(self, i) }
+
 fn visit_lifetime_def_mut(&mut self, i: &mut LifetimeDef) { visit_lifetime_def_mut(self, i) }
+
+fn visit_lit_mut(&mut self, i: &mut Lit) { visit_lit_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_local_mut(&mut self, i: &mut Local) { visit_local_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -401,7 +405,7 @@ pub fn visit_abi_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Abi
     use ::AbiKind::*;
     match *_i {
         Named(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lit_mut(_binding_0);
         }
         Default => { }
     }
@@ -428,7 +432,7 @@ pub fn visit_arg_self_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Arg
 pub fn visit_arg_self_ref_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ArgSelfRef) {
     // Skipped field _i . and_token;
     // Skipped field _i . self_token;
-    // Skipped field _i . lifetime;
+    if let Some(ref mut it) = _i . lifetime { _visitor.visit_lifetime_mut(it) };
     _visitor.visit_mutability_mut(& mut _i . mutbl);
 }
 # [ cfg ( feature = "full" ) ]
@@ -720,7 +724,7 @@ pub fn visit_expr_box_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_break_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBreak) {
-    // Skipped field _i . label;
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     if let Some(ref mut it) = _i . expr { _visitor.visit_expr_mut(it) };
     // Skipped field _i . break_token;
 }
@@ -753,7 +757,7 @@ pub fn visit_expr_closure_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_continue_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprContinue) {
-    // Skipped field _i . label;
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     // Skipped field _i . continue_token;
 }
 # [ cfg ( feature = "full" ) ]
@@ -767,7 +771,7 @@ pub fn visit_expr_for_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mu
     _visitor.visit_pat_mut(& mut _i . pat);
     _visitor.visit_expr_mut(& mut _i . expr);
     _visitor.visit_block_mut(& mut _i . body);
-    // Skipped field _i . label;
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     // Skipped field _i . for_token;
     // Skipped field _i . colon_token;
     // Skipped field _i . in_token;
@@ -837,7 +841,7 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
             _visitor.visit_expr_unary_mut(_binding_0);
         }
         Lit(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lit_mut(_binding_0);
         }
         Cast(ref mut _binding_0, ) => {
             _visitor.visit_expr_cast_mut(_binding_0);
@@ -934,7 +938,7 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprLoop) {
     _visitor.visit_block_mut(& mut _i . body);
-    // Skipped field _i . label;
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     // Skipped field _i . loop_token;
     // Skipped field _i . colon_token;
 }
@@ -1023,7 +1027,7 @@ pub fn visit_expr_unsafe_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
 pub fn visit_expr_while_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprWhile) {
     _visitor.visit_expr_mut(& mut _i . cond);
     _visitor.visit_block_mut(& mut _i . body);
-    // Skipped field _i . label;
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     // Skipped field _i . colon_token;
     // Skipped field _i . while_token;
 }
@@ -1032,7 +1036,7 @@ pub fn visit_expr_while_let_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
     _visitor.visit_pat_mut(& mut _i . pat);
     _visitor.visit_expr_mut(& mut _i . expr);
     _visitor.visit_block_mut(& mut _i . body);
-    // Skipped field _i . label;
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     // Skipped field _i . colon_token;
     // Skipped field _i . while_token;
     // Skipped field _i . let_token;
@@ -1150,7 +1154,7 @@ pub fn visit_generic_argument_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
     use ::GenericArgument::*;
     match *_i {
         Lifetime(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lifetime_mut(_binding_0);
         }
         Type(ref mut _binding_0, ) => {
             _visitor.visit_type_mut(_binding_0);
@@ -1187,6 +1191,8 @@ pub fn visit_generics_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Gen
 }
 
 pub fn visit_ident_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {
+    // Skipped field _i . sym;
+    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ImplItem) {
@@ -1491,11 +1497,21 @@ pub fn visit_item_use_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ite
     // Skipped field _i . semi_token;
 }
 
+pub fn visit_lifetime_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Lifetime) {
+    // Skipped field _i . sym;
+    _visitor.visit_span_mut(& mut _i . span);
+}
+
 pub fn visit_lifetime_def_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut LifetimeDef) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
-    // Skipped field _i . lifetime;
+    _visitor.visit_lifetime_mut(& mut _i . lifetime);
     // Skipped field _i . colon_token;
-    // Skipped field _i . bounds;
+    for mut el in & mut _i . bounds { let it = el.item_mut(); _visitor.visit_lifetime_mut(it) };
+}
+
+pub fn visit_lit_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Lit) {
+    // Skipped field _i . value;
+    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_local_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
@@ -1562,7 +1578,7 @@ pub fn visit_meta_item_list_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
 pub fn visit_meta_name_value_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MetaNameValue) {
     _visitor.visit_ident_mut(& mut _i . ident);
     // Skipped field _i . eq_token;
-    // Skipped field _i . lit;
+    _visitor.visit_lit_mut(& mut _i . lit);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_method_sig_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MethodSig) {
@@ -1595,7 +1611,7 @@ pub fn visit_nested_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
             _visitor.visit_meta_item_mut(_binding_0);
         }
         Literal(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lit_mut(_binding_0);
         }
     }
 }
@@ -1960,7 +1976,7 @@ pub fn visit_type_param_bound_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
             _visitor.visit_trait_bound_modifier_mut(_binding_1);
         }
         Region(ref mut _binding_0, ) => {
-            // Skipped field _binding_0;
+            _visitor.visit_lifetime_mut(_binding_0);
         }
     }
 }
@@ -1983,7 +1999,7 @@ pub fn visit_type_ptr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Typ
 
 pub fn visit_type_reference_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeReference) {
     // Skipped field _i . and_token;
-    // Skipped field _i . lifetime;
+    if let Some(ref mut it) = _i . lifetime { _visitor.visit_lifetime_mut(it) };
     _visitor.visit_mut_type_mut(& mut _i . ty);
 }
 
@@ -2151,8 +2167,8 @@ pub fn visit_where_predicate_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
 }
 
 pub fn visit_where_region_predicate_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut WhereRegionPredicate) {
-    // Skipped field _i . lifetime;
+    _visitor.visit_lifetime_mut(& mut _i . lifetime);
     // Skipped field _i . colon_token;
-    // Skipped field _i . bounds;
+    for mut el in & mut _i . bounds { let it = el.item_mut(); _visitor.visit_lifetime_mut(it) };
 }
 

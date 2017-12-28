@@ -265,7 +265,11 @@ fn fold_item_union(&mut self, i: ItemUnion) -> ItemUnion { fold_item_union(self,
 # [ cfg ( feature = "full" ) ]
 fn fold_item_use(&mut self, i: ItemUse) -> ItemUse { fold_item_use(self, i) }
 
+fn fold_lifetime(&mut self, i: Lifetime) -> Lifetime { fold_lifetime(self, i) }
+
 fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef { fold_lifetime_def(self, i) }
+
+fn fold_lit(&mut self, i: Lit) -> Lit { fold_lit(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -430,7 +434,7 @@ pub fn fold_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKi
     match _i {
         Named(_binding_0, ) => {
             Named (
-                _binding_0,
+                _visitor.fold_lit(_binding_0),
             )
         }
         Default => { Default }
@@ -465,7 +469,7 @@ pub fn fold_arg_self_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -
     ArgSelfRef {
         and_token: _i . and_token,
         self_token: _i . self_token,
-        lifetime: _i . lifetime,
+        lifetime: (_i . lifetime).map(|it| { _visitor.fold_lifetime(it) }),
         mutbl: _visitor.fold_mutability(_i . mutbl),
     }
 }
@@ -871,7 +875,7 @@ pub fn fold_expr_box<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBox) -> ExprB
 # [ cfg ( feature = "full" ) ]
 pub fn fold_expr_break<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprBreak) -> ExprBreak {
     ExprBreak {
-        label: _i . label,
+        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
         expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         break_token: _i . break_token,
     }
@@ -914,7 +918,7 @@ pub fn fold_expr_closure<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprClosure) 
 # [ cfg ( feature = "full" ) ]
 pub fn fold_expr_continue<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprContinue) -> ExprContinue {
     ExprContinue {
-        label: _i . label,
+        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
         continue_token: _i . continue_token,
     }
 }
@@ -932,7 +936,7 @@ pub fn fold_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop)
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         body: _visitor.fold_block(_i . body),
-        label: _i . label,
+        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
         for_token: _i . for_token,
         colon_token: _i . colon_token,
         in_token: _i . in_token,
@@ -1030,7 +1034,7 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
         }
         Lit(_binding_0, ) => {
             Lit (
-                _binding_0,
+                _visitor.fold_lit(_binding_0),
             )
         }
         Cast(_binding_0, ) => {
@@ -1189,7 +1193,7 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
 pub fn fold_expr_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> ExprLoop {
     ExprLoop {
         body: _visitor.fold_block(_i . body),
-        label: _i . label,
+        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
         loop_token: _i . loop_token,
         colon_token: _i . colon_token,
     }
@@ -1306,7 +1310,7 @@ pub fn fold_expr_while<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> E
     ExprWhile {
         cond: Box::new(_visitor.fold_expr(* _i . cond)),
         body: _visitor.fold_block(_i . body),
-        label: _i . label,
+        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
         colon_token: _i . colon_token,
         while_token: _i . while_token,
     }
@@ -1317,7 +1321,7 @@ pub fn fold_expr_while_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhileLe
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         body: _visitor.fold_block(_i . body),
-        label: _i . label,
+        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
         colon_token: _i . colon_token,
         while_token: _i . while_token,
         let_token: _i . let_token,
@@ -1471,7 +1475,7 @@ pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericAr
     match _i {
         Lifetime(_binding_0, ) => {
             Lifetime (
-                _binding_0,
+                _visitor.fold_lifetime(_binding_0),
             )
         }
         Type(_binding_0, ) => {
@@ -1523,7 +1527,10 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
 }
 
 pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
-    _i
+    Ident {
+        sym: _i . sym,
+        span: _visitor.fold_span(_i . span),
+    }
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
@@ -1916,12 +1923,26 @@ pub fn fold_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemU
     }
 }
 
+pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, _i: Lifetime) -> Lifetime {
+    Lifetime {
+        sym: _i . sym,
+        span: _visitor.fold_span(_i . span),
+    }
+}
+
 pub fn fold_lifetime_def<V: Folder + ?Sized>(_visitor: &mut V, _i: LifetimeDef) -> LifetimeDef {
     LifetimeDef {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        lifetime: _i . lifetime,
+        lifetime: _visitor.fold_lifetime(_i . lifetime),
         colon_token: _i . colon_token,
-        bounds: _i . bounds,
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_lifetime(it) }),
+    }
+}
+
+pub fn fold_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: Lit) -> Lit {
+    Lit {
+        value: _i . value,
+        span: _visitor.fold_span(_i . span),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2008,7 +2029,7 @@ pub fn fold_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameVa
     MetaNameValue {
         ident: _visitor.fold_ident(_i . ident),
         eq_token: _i . eq_token,
-        lit: _i . lit,
+        lit: _visitor.fold_lit(_i . lit),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2051,7 +2072,7 @@ pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMet
         }
         Literal(_binding_0, ) => {
             Literal (
-                _binding_0,
+                _visitor.fold_lit(_binding_0),
             )
         }
     }
@@ -2559,7 +2580,7 @@ pub fn fold_type_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam
         }
         Region(_binding_0, ) => {
             Region (
-                _binding_0,
+                _visitor.fold_lifetime(_binding_0),
             )
         }
     }
@@ -2590,7 +2611,7 @@ pub fn fold_type_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypePtr) -> TypeP
 pub fn fold_type_reference<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeReference) -> TypeReference {
     TypeReference {
         and_token: _i . and_token,
-        lifetime: _i . lifetime,
+        lifetime: (_i . lifetime).map(|it| { _visitor.fold_lifetime(it) }),
         ty: Box::new(_visitor.fold_mut_type(* _i . ty)),
     }
 }
@@ -2820,9 +2841,9 @@ pub fn fold_where_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WherePredi
 
 pub fn fold_where_region_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereRegionPredicate) -> WhereRegionPredicate {
     WhereRegionPredicate {
-        lifetime: _i . lifetime,
+        lifetime: _visitor.fold_lifetime(_i . lifetime),
         colon_token: _i . colon_token,
-        bounds: _i . bounds,
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_lifetime(it) }),
     }
 }
 
