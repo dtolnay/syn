@@ -327,11 +327,11 @@ pub mod parsing {
     use super::*;
     use cursor::Cursor;
     use {parse_error, PResult};
-    use proc_macro2::{Spacing, TokenNode, TokenTree};
+    use proc_macro2::{Spacing, Span, TokenNode, TokenTree};
 
-    fn eq() -> TokenTree {
+    fn eq(span: Span) -> TokenTree {
         TokenTree {
-            span: Default::default(),
+            span: span,
             kind: TokenNode::Op('=', Spacing::Alone),
         }
     }
@@ -362,16 +362,19 @@ pub mod parsing {
             |
             map!(
                 lit_doc_comment,
-                |lit| Attribute {
-                    style: AttrStyle::Inner(<Token![!]>::default()),
-                    path: "doc".into(),
-                    tts: vec![
-                        eq(),
-                        lit,
-                    ].into_iter().collect(),
-                    is_sugared_doc: true,
-                    pound_token: <Token![#]>::default(),
-                    bracket_token: token::Bracket::default(),
+                |lit| {
+                    let span = lit.span;
+                    Attribute {
+                        style: AttrStyle::Inner(<Token![!]>::new(span)),
+                        path: Ident::new("doc", span).into(),
+                        tts: vec![
+                            eq(span),
+                            lit,
+                        ].into_iter().collect(),
+                        is_sugared_doc: true,
+                        pound_token: <Token![#]>::new(span),
+                        bracket_token: token::Bracket(span),
+                    }
                 }
             )
         ));
@@ -399,16 +402,19 @@ pub mod parsing {
             |
             map!(
                 lit_doc_comment,
-                |lit| Attribute {
-                    style: AttrStyle::Outer,
-                    path: "doc".into(),
-                    tts: vec![
-                        eq(),
-                        lit,
-                    ].into_iter().collect(),
-                    is_sugared_doc: true,
-                    pound_token: <Token![#]>::default(),
-                    bracket_token: token::Bracket::default(),
+                |lit| {
+                    let span = lit.span;
+                    Attribute {
+                        style: AttrStyle::Outer,
+                        path: Ident::new("doc", span).into(),
+                        tts: vec![
+                            eq(span),
+                            lit,
+                        ].into_iter().collect(),
+                        is_sugared_doc: true,
+                        pound_token: <Token![#]>::new(span),
+                        bracket_token: token::Bracket(span),
+                    }
                 }
             )
         ));
