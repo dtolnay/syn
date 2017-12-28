@@ -315,7 +315,7 @@ mod codegen {
         pub fold_impl: String,
     }
 
-    fn under_name(name: &Ident) -> Ident {
+    fn under_name(name: Ident) -> Ident {
         use inflections::Inflect;
         name.as_ref().to_snake_case().into()
     }
@@ -402,33 +402,26 @@ mod codegen {
     }
 
     fn simple_visit(
-        type_name: &Ident,
-        lookup: &Lookup,
+        type_name: Ident,
         kind: Kind,
         name: &Operand,
-        eos_full: &mut bool,
-    ) -> Option<String> {
-        if let Some(s) = lookup.get(type_name) {
-            *eos_full = s.eos_full;
-            Some(match kind {
-                Kind::Visit => format!(
-                    "_visitor.visit_{under_name}({name})",
-                    under_name = under_name(type_name),
-                    name = name.ref_tokens(),
-                ),
-                Kind::VisitMut => format!(
-                    "_visitor.visit_{under_name}_mut({name})",
-                    under_name = under_name(type_name),
-                    name = name.ref_mut_tokens(),
-                ),
-                Kind::Fold => format!(
-                    "_visitor.fold_{under_name}({name})",
-                    under_name = under_name(type_name),
-                    name = name.owned_tokens(),
-                ),
-            })
-        } else {
-            None
+    ) -> String {
+        match kind {
+            Kind::Visit => format!(
+                "_visitor.visit_{under_name}({name})",
+                under_name = under_name(type_name),
+                name = name.ref_tokens(),
+            ),
+            Kind::VisitMut => format!(
+                "_visitor.visit_{under_name}_mut({name})",
+                under_name = under_name(type_name),
+                name = name.ref_mut_tokens(),
+            ),
+            Kind::Fold => format!(
+                "_visitor.fold_{under_name}({name})",
+                under_name = under_name(type_name),
+                name = name.owned_tokens(),
+            ),
         }
     }
 
@@ -437,33 +430,14 @@ mod codegen {
         lookup: &Lookup,
         kind: Kind,
         name: &Operand,
-        eos_full: &mut bool,
     ) -> Option<String> {
-        if let Some(res) = simple_visit(&seg.ident, lookup, kind, name, eos_full) {
-            return Some(res);
-        }
-
-        if seg.ident == "Box" {
-            let ty = first_arg(&seg.arguments);
-            if let Some(seg) = last_segment(ty) {
-                if kind == Kind::Fold {
-                    let name = name.tokens();
-                    if let Some(val) = simple_visit(
-                        &seg.ident,
-                        lookup,
-                        kind,
-                        &Operand::Owned(quote!(*#name)),
-                        eos_full,
-                    ) {
-                        return Some(format!("Box::new({})", val));
-                    }
-                } else {
-                    return simple_visit(&seg.ident, lookup, kind, name, eos_full);
-                }
-            }
-        }
-
-        None
+        let ty = first_arg(&seg.arguments);
+        let name = name.owned_tokens();
+        let res = visit(&ty, lookup, kind, &Operand::Owned(quote!(*#name)))?;
+        Some(match kind {
+            Kind::Fold => format!("Box::new({})", res),
+            Kind::Visit | Kind::VisitMut => res,
+        })
     }
 
     fn vec_visit(
@@ -471,69 +445,57 @@ mod codegen {
         lookup: &Lookup,
         kind: Kind,
         name: &Operand,
-        eos_full: &mut bool,
     ) -> Option<String> {
-        if let Some(res) = box_visit(seg, lookup, kind, name, eos_full) {
-            return Some(res);
-        }
-
-        if seg.ident == "Vec" || seg.ident == "Delimited" {
-            let is_vec = seg.ident == "Vec";
-            let ty = first_arg(&seg.arguments);
-            if let Some(seg) = last_segment(ty) {
-                let operand = match kind {
-                    Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
-                    Kind::Fold => Operand::Owned(quote!(it)),
-                };
-                if let Some(val) = box_visit(seg, lookup, kind, &operand, eos_full) {
-                    return Some(match kind {
-                        Kind::Visit => {
-                            if is_vec {
-                                format!(
-                                    "for it in {name} {{ {val} }}",
-                                    name = name.ref_tokens(),
-                                    val = val,
-                                )
-                            } else {
-                                format!(
-                                    "for el in {name} {{ \
-                                     let it = el.item(); \
-                                     {val} \
-                                     }}",
-                                    name = name.ref_tokens(),
-                                    val = val,
-                                )
-                            }
-                        }
-                        Kind::VisitMut => {
-                            if is_vec {
-                                format!(
-                                    "for it in {name} {{ {val} }}",
-                                    name = name.ref_mut_tokens(),
-                                    val = val,
-                                )
-                            } else {
-                                format!(
-                                    "for mut el in {name} {{ \
-                                     let it = el.item_mut(); \
-                                     {val} \
-                                     }}",
-                                    name = name.ref_mut_tokens(),
-                                    val = val,
-                                )
-                            }
-                        }
-                        Kind::Fold => format!(
-                            "FoldHelper::lift({name}, |it| {{ {val} }})",
-                            name = name.owned_tokens(),
-                            val = val,
-                        ),
-                    });
+        let is_vec = seg.ident == "Vec";
+        let ty = first_arg(&seg.arguments);
+        let operand = match kind {
+            Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
+            Kind::Fold => Operand::Owned(quote!(it)),
+        };
+        let val = visit(&ty, lookup, kind, &operand)?;
+        Some(match kind {
+            Kind::Visit => {
+                if is_vec {
+                    format!(
+                        "for it in {name} {{ {val} }}",
+                        name = name.ref_tokens(),
+                        val = val,
+                    )
+                } else {
+                    format!(
+                        "for el in {name} {{ \
+                            let it = el.item(); \
+                            {val} \
+                            }}",
+                        name = name.ref_tokens(),
+                        val = val,
+                    )
                 }
             }
-        }
-
-        None
+            Kind::VisitMut => {
+                if is_vec {
+                    format!(
+                        "for it in {name} {{ {val} }}",
+                        name = name.ref_mut_tokens(),
+                        val = val,
+                    )
+                } else {
+                    format!(
+                        "for mut el in {name} {{ \
+                            let it = el.item_mut(); \
+                            {val} \
+                            }}",
+                        name = name.ref_mut_tokens(),
+                        val = val,
+                    )
+                }
+            }
+            Kind::Fold => format!(
+                "FoldHelper::lift({name}, |it| {{ {val} }})",
+                name = name.owned_tokens(),
+                val = val,
+            ),
+        })
     }
 
     fn option_visit(
@@ -541,63 +503,64 @@ mod codegen {
         lookup: &Lookup,
         kind: Kind,
         name: &Operand,
-        eos_full: &mut bool,
     ) -> Option<String> {
-        if let Some(res) = vec_visit(seg, lookup, kind, name, eos_full) {
-            return Some(res);
-        }
-
-        if seg.ident == "Option" {
-            let ty = first_arg(&seg.arguments);
-            if let Some(seg) = last_segment(ty) {
-                let it = match kind {
-                    Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
-                    Kind::Fold => Operand::Owned(quote!(it)),
-                };
-                if let Some(val) = vec_visit(seg, lookup, kind, &it, eos_full) {
-                    return Some(match kind {
-                        Kind::Visit => format!(
-                            "if let Some(ref it) = {name} {{ {val} }}",
-                            name = name.owned_tokens(),
-                            val = val,
-                        ),
-                        Kind::VisitMut => format!(
-                            "if let Some(ref mut it) = {name} {{ {val} }}",
-                            name = name.owned_tokens(),
-                            val = val,
-                        ),
-                        Kind::Fold => format!(
-                            "({name}).map(|it| {{ {val} }})",
-                            name = name.owned_tokens(),
-                            val = val,
-                        ),
-                    });
-                }
-            }
-        }
-
-        None
+        let ty = first_arg(&seg.arguments);
+        let it = match kind {
+            Kind::Visit | Kind::VisitMut => Operand::Borrowed(quote!(it)),
+            Kind::Fold => Operand::Owned(quote!(it)),
+        };
+        let val = visit(&ty, lookup, kind, &it)?;
+        Some(match kind {
+            Kind::Visit => format!(
+                "if let Some(ref it) = {name} {{ {val} }}",
+                name = name.owned_tokens(),
+                val = val,
+            ),
+            Kind::VisitMut => format!(
+                "if let Some(ref mut it) = {name} {{ {val} }}",
+                name = name.owned_tokens(),
+                val = val,
+            ),
+            Kind::Fold => format!(
+                "({name}).map(|it| {{ {val} }})",
+                name = name.owned_tokens(),
+                val = val,
+            ),
+        })
     }
 
-    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> String {
-        if let Some(seg) = last_segment(ty) {
-            let mut eos_full = false;
-            if let Some(res) = option_visit(seg, lookup, kind, name, &mut eos_full) {
-                if eos_full {
-                    return format!("full!({res})", res = res);
+    fn noop_visit(kind: Kind, name: &Operand) -> String {
+        match kind {
+            Kind::Fold => name.owned_tokens().to_string(),
+            Kind::Visit | Kind::VisitMut => format!("// Skipped field {}", name),
+        }
+    }
+
+    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
+        let seg = last_segment(ty)?;
+        match seg.ident.as_ref() {
+            "Box" => {
+                box_visit(seg, lookup, kind, name)
+            }
+            "Vec" | "Delimited" => {
+                vec_visit(seg, lookup, kind, name)
+            }
+            "Option" => {
+                option_visit(seg, lookup, kind, name)
+            }
+            _ => {
+                let s = lookup.get(&seg.ident)?;
+                let mut res = simple_visit(seg.ident, kind, name);
+                if s.eos_full {
+                    res = format!("full!({res})", res = res);
                 }
-                return res;
+                Some(res)
             }
         }
-
-        if kind == Kind::Fold {
-            return name.owned_tokens().to_string();
-        }
-        return format!("// Skipped field {}", name);
     }
 
     pub fn generate(state: &mut State, lookup: &Lookup, s: &AstItem) {
-        let under_name = under_name(&s.item.ident);
+        let under_name = under_name(s.item.ident);
 
         state.visit_trait.push_str(&format!(
             "{features}\n\
@@ -732,7 +695,10 @@ mod codegen {
                                 lookup,
                                 Kind::Visit,
                                 &Operand::Borrowed(binding.clone())
-                            ),
+                            ).unwrap_or_else(|| noop_visit(
+                                Kind::Visit,
+                                &Operand::Borrowed(binding.clone())
+                            )),
                         ));
                         state.visit_mut_impl.push_str(&format!(
                             "            {};\n",
@@ -741,11 +707,18 @@ mod codegen {
                                 lookup,
                                 Kind::VisitMut,
                                 &Operand::Borrowed(binding.clone())
-                            ),
+                            ).unwrap_or_else(|| noop_visit(
+                                Kind::VisitMut,
+                                &Operand::Borrowed(binding.clone())
+                            )),
                         ));
                         state.fold_impl.push_str(&format!(
                             "                {},\n",
-                            visit(&field.ty, lookup, Kind::Fold, &Operand::Owned(binding)),
+                            visit(&field.ty, lookup, Kind::Fold, &Operand::Owned(binding.clone()))
+                                .unwrap_or_else(|| noop_visit(
+                                    Kind::Fold,
+                                    &Operand::Owned(binding)
+                                )),
                         ));
                     }
                     state.fold_impl.push_str("            )\n");
@@ -797,12 +770,24 @@ mod codegen {
                     state.visit_impl.push_str(&format!(
                         "    {};\n",
                         visit(&field.ty, lookup, Kind::Visit, &ref_toks)
+                            .unwrap_or_else(|| noop_visit(
+                                Kind::Visit,
+                                &ref_toks,
+                            ))
                     ));
                     state.visit_mut_impl.push_str(&format!(
                         "    {};\n",
                         visit(&field.ty, lookup, Kind::VisitMut, &ref_toks)
+                            .unwrap_or_else(|| noop_visit(
+                                Kind::VisitMut,
+                                &ref_toks,
+                            ))
                     ));
-                    let fold = visit(&field.ty, lookup, Kind::Fold, &ref_toks);
+                    let fold = visit(&field.ty, lookup, Kind::Fold, &ref_toks)
+                        .unwrap_or_else(|| noop_visit(
+                            Kind::Fold,
+                            &ref_toks,
+                        ));
                     if let Some(ref name) = field.ident {
                         state
                             .fold_impl
