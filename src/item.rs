@@ -575,27 +575,23 @@ pub mod parsing {
         use_: keyword!(use) >>
         leading_colon: option!(punct!(::)) >>
         mut prefix: call!(Delimited::parse_terminated_with, use_prefix) >>
-        tree: switch!(value!(leading_colon.is_none() && prefix.is_empty()),
+        tree: switch!(value!(prefix.empty_or_trailing()),
             true => syn!(UseTree)
             |
-            false => switch!(value!(prefix.empty_or_trailing()),
-                true => syn!(UseTree)
+            false => alt!(
+                tuple!(keyword!(as), syn!(Ident)) => {
+                    |rename| UseTree::Path(UsePath {
+                        ident: prefix.pop().unwrap().into_item(),
+                        rename: Some(rename),
+                    })
+                }
                 |
-                false => alt!(
-                    tuple!(keyword!(as), syn!(Ident)) => {
-                        |rename| UseTree::Path(UsePath {
-                            ident: prefix.pop().unwrap().into_item(),
-                            rename: Some(rename),
-                        })
-                    }
-                    |
-                    epsilon!() => {
-                        |_| UseTree::Path(UsePath {
-                            ident: prefix.pop().unwrap().into_item(),
-                            rename: None,
-                        })
-                    }
-                )
+                epsilon!() => {
+                    |_| UseTree::Path(UsePath {
+                        ident: prefix.pop().unwrap().into_item(),
+                        rename: None,
+                    })
+                }
             )
         ) >>
         semi: punct!(;) >>
