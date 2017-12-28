@@ -353,8 +353,7 @@ mod codegen {
     impl Operand {
         fn tokens(&self) -> &Tokens {
             match *self {
-                Operand::Borrowed(ref n) => n,
-                Operand::Owned(ref n) => n,
+                Operand::Borrowed(ref n) | Operand::Owned(ref n) => n,
             }
         }
 
@@ -382,10 +381,7 @@ mod codegen {
 
     impl Display for Operand {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            match *self {
-                Operand::Borrowed(ref n) => Display::fmt(n, formatter),
-                Operand::Owned(ref n) => Display::fmt(n, formatter),
-            }
+            Display::fmt(self.tokens(), formatter)
         }
     }
 
