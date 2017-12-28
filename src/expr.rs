@@ -2218,9 +2218,9 @@ pub mod parsing {
             |
             syn!(ExprPath) => { ExprKind::Path }
         ) >>
-        (if neg.is_some() {
+        (if let Some(neg) = neg {
             ExprKind::Unary(ExprUnary {
-                op: UnOp::Neg(<Token![-]>::default()),
+                op: UnOp::Neg(neg),
                 expr: Box::new(v.into())
             }).into()
         } else {
