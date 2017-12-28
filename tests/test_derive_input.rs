@@ -286,7 +286,7 @@ fn test_enum() {
                     data: VariantData::Unit,
                     eq_token: Some(Default::default()),
                     discriminant: Some(Expr {
-                        node: ExprTupField {
+                        node: ExprTupleField {
                             expr: Box::new(Expr {
                                 node: ExprTuple {
                                     lone_comma: None,
