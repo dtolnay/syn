@@ -96,9 +96,7 @@ impl Ident {
     /// by the parser to create `Ident`s from existing Rust source code.
     ///
     /// Creating new `Ident`s programmatically is easier with `Ident::from`.
-    pub fn new(sym: Term, span: Span) -> Self {
-        let s = sym.as_str();
-
+    pub fn new(s: &str, span: Span) -> Self {
         if s.is_empty() {
             panic!("ident is not allowed to be empty; use Option<Ident>");
         }
@@ -134,7 +132,7 @@ impl Ident {
         }
 
         Ident {
-            sym: sym,
+            sym: Term::intern(s),
             span: span,
         }
     }
@@ -142,43 +140,43 @@ impl Ident {
 
 impl<'a> From<&'a str> for Ident {
     fn from(s: &str) -> Self {
-        Ident::new(Term::intern(s), Span::default())
+        Ident::new(s, Span::default())
     }
 }
 
 impl From<Token![self]> for Ident {
     fn from(tok: Token![self]) -> Self {
-        Ident::new(Term::intern("self"), tok.0)
+        Ident::new("self", tok.0)
     }
 }
 
 impl From<Token![Self]> for Ident {
     fn from(tok: Token![Self]) -> Self {
-        Ident::new(Term::intern("Self"), tok.0)
+        Ident::new("Self", tok.0)
     }
 }
 
 impl From<Token![super]> for Ident {
     fn from(tok: Token![super]) -> Self {
-        Ident::new(Term::intern("super"), tok.0)
+        Ident::new("super", tok.0)
     }
 }
 
 impl From<Token![crate]> for Ident {
     fn from(tok: Token![crate]) -> Self {
-        Ident::new(Term::intern("crate"), tok.0)
+        Ident::new("crate", tok.0)
     }
 }
 
 impl<'a> From<Cow<'a, str>> for Ident {
     fn from(s: Cow<'a, str>) -> Self {
-        Ident::new(Term::intern(&s), Span::default())
+        Ident::new(&s, Span::default())
     }
 }
 
 impl From<String> for Ident {
     fn from(s: String) -> Self {
-        Ident::new(Term::intern(&s), Span::default())
+        Ident::new(&s, Span::default())
     }
 }
 

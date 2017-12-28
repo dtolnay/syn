@@ -121,12 +121,12 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
         }
 
         TokenNode::Term(sym) => {
-            let ident = Ident::new(sym, tts[0].span);
+            let ident = Ident::new(sym.as_str(), tts[0].span);
             if tts.len() >= 3 {
                 if let TokenNode::Op('=', Spacing::Alone) = tts[1].kind {
                     if let TokenNode::Literal(ref lit) = tts[2].kind {
                         let pair = MetaNameValue {
-                            ident: Ident::new(sym, tts[0].span),
+                            ident: Ident::new(sym.as_str(), tts[0].span),
                             eq_token: Token![=]([tts[1].span]),
                             lit: Lit {
                                 value: LitKind::Other(lit.clone()),
