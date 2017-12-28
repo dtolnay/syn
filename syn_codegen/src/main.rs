@@ -79,7 +79,7 @@ impl Debug for AstItem {
 }
 
 // NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
-type Lookup<'a> = BTreeMap<Ident, AstItem>;
+type Lookup = BTreeMap<Ident, AstItem>;
 
 fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) -> Result<(), Error> {
     let name = name.as_ref();
