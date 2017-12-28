@@ -1183,7 +1183,7 @@ pub fn visit_generics_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Gen
     // Skipped field _i . lt_token;
     for mut el in & mut _i . params { let it = el.item_mut(); _visitor.visit_generic_param_mut(it) };
     // Skipped field _i . gt_token;
-    _visitor.visit_where_clause_mut(& mut _i . where_clause);
+    if let Some(ref mut it) = _i . where_clause { _visitor.visit_where_clause_mut(it) };
 }
 
 pub fn visit_ident_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {

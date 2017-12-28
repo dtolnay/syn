@@ -98,29 +98,29 @@ pub mod parsing {
         }
     }
 
-    named!(struct_body -> (WhereClause, VariantData, Option<Token![;]>), alt!(
+    named!(struct_body -> (Option<WhereClause>, VariantData, Option<Token![;]>), alt!(
         do_parse!(
-            wh: syn!(WhereClause) >>
+            wh: option!(syn!(WhereClause)) >>
             body: struct_like_body >>
             (wh, VariantData::Struct(body.0, body.1), None)
         )
         |
         do_parse!(
             body: tuple_like_body >>
-            wh: syn!(WhereClause) >>
+            wh: option!(syn!(WhereClause)) >>
             semi: punct!(;) >>
             (wh, VariantData::Tuple(body.0, body.1), Some(semi))
         )
         |
         do_parse!(
-            wh: syn!(WhereClause) >>
+            wh: option!(syn!(WhereClause)) >>
             semi: punct!(;) >>
             (wh, VariantData::Unit, Some(semi))
         )
     ));
 
-    named!(enum_body -> (WhereClause, Delimited<Variant, Token![,]>, token::Brace), do_parse!(
-        wh: syn!(WhereClause) >>
+    named!(enum_body -> (Option<WhereClause>, Delimited<Variant, Token![,]>, token::Brace), do_parse!(
+        wh: option!(syn!(WhereClause)) >>
         data: braces!(Delimited::parse_terminated) >>
         (wh, data.0, data.1)
     ));

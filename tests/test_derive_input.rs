@@ -221,7 +221,7 @@ fn test_enum() {
                 }),
             ].into(),
             gt_token: Some(Default::default()),
-            where_clause: WhereClause::default(),
+            where_clause: None,
         },
         body: Body::Enum(BodyEnum {
             variants: vec![

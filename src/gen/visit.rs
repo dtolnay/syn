@@ -1183,7 +1183,7 @@ pub fn visit_generics<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     // Skipped field _i . lt_token;
     for el in & _i . params { let it = el.item(); _visitor.visit_generic_param(it) };
     // Skipped field _i . gt_token;
-    _visitor.visit_where_clause(& _i . where_clause);
+    if let Some(ref it) = _i . where_clause { _visitor.visit_where_clause(it) };
 }
 
 pub fn visit_ident<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {

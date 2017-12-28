@@ -715,7 +715,7 @@ pub mod parsing {
         generics: syn!(Generics) >>
         inputs: parens!(Delimited::parse_terminated) >>
         ret: syn!(ReturnType) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
             many0!(Attribute::parse_inner),
             call!(Block::parse_within)
@@ -860,7 +860,7 @@ pub mod parsing {
             (args, variadic)
         )) >>
         ret: syn!(ReturnType) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         semi: punct!(;) >>
         ({
             let ((inputs, variadic), parens) = inputs;
@@ -927,7 +927,7 @@ pub mod parsing {
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         eq: punct!(=) >>
         ty: syn!(Type) >>
         semi: punct!(;) >>
@@ -966,7 +966,7 @@ pub mod parsing {
         union_: keyword!(union) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         fields: braces!(call!(Delimited::parse_terminated_with,
                               Field::parse_struct)) >>
         (ItemUnion {
@@ -994,7 +994,7 @@ pub mod parsing {
         bounds: cond!(colon.is_some(),
             call!(Delimited::parse_separated_nonempty)
         ) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         body: braces!(many0!(TraitItem::parse)) >>
         (ItemTrait {
             attrs: attrs,
@@ -1072,7 +1072,7 @@ pub mod parsing {
         generics: syn!(Generics) >>
         inputs: parens!(call!(Delimited::parse_terminated)) >>
         ret: syn!(ReturnType) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         body: option!(braces!(
             tuple!(many0!(Attribute::parse_inner),
                    call!(Block::parse_within))
@@ -1126,7 +1126,7 @@ pub mod parsing {
         bounds: cond!(colon.is_some(),
             call!(Delimited::parse_separated_nonempty)
         ) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         default: option!(tuple!(punct!(=), syn!(Type))) >>
         semi: punct!(;) >>
         (TraitItemType {
@@ -1172,7 +1172,7 @@ pub mod parsing {
             epsilon!() => { |_| None }
         ) >>
         self_ty: syn!(Type) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         body: braces!(many0!(ImplItem::parse)) >>
         (ItemImpl {
             attrs: attrs,
@@ -1237,7 +1237,7 @@ pub mod parsing {
         generics: syn!(Generics) >>
         inputs: parens!(call!(Delimited::parse_terminated)) >>
         ret: syn!(ReturnType) >>
-        where_clause: syn!(WhereClause) >>
+        where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
             many0!(Attribute::parse_inner),
             call!(Block::parse_within)

@@ -9,7 +9,7 @@ ast_struct! {
         pub lt_token: Option<Token![<]>,
         pub params: Delimited<GenericParam, Token![,]>,
         pub gt_token: Option<Token![>]>,
-        pub where_clause: WhereClause,
+        pub where_clause: Option<WhereClause>,
     }
 }
 
@@ -83,8 +83,8 @@ impl Generics {
     /// # ;
     /// # }
     /// ```
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, &WhereClause) {
-        (ImplGenerics(self), TypeGenerics(self), &self.where_clause)
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        (ImplGenerics(self), TypeGenerics(self), self.where_clause.as_ref())
     }
 }
 
@@ -154,16 +154,9 @@ ast_enum! {
 
 ast_struct! {
     /// A `where` clause in a definition
-    #[derive(Default)]
     pub struct WhereClause {
-        pub where_token: Option<Token![where]>,
+        pub where_token: Token![where],
         pub predicates: Delimited<WherePredicate, Token![,]>,
-    }
-}
-
-impl WhereClause {
-    pub fn none() -> Self {
-        WhereClause::default()
     }
 }
 
@@ -232,7 +225,7 @@ pub mod parsing {
                     .collect::<Vec<_>>()
                     .into(),
                 gt_token: gt,
-                where_clause: WhereClause::default(),
+                where_clause: None,
             }
         ));
     }
@@ -346,17 +339,13 @@ pub mod parsing {
     }
 
     impl Synom for WhereClause {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                where_: keyword!(where) >>
-                predicates: call!(Delimited::parse_terminated) >>
-                (WhereClause {
-                    predicates: predicates,
-                    where_token: Some(where_),
-                })
-            )
-            |
-            epsilon!() => { |_| WhereClause::default() }
+        named!(parse -> Self, do_parse!(
+            where_: keyword!(where) >>
+            predicates: call!(Delimited::parse_terminated) >>
+            (WhereClause {
+                predicates: predicates,
+                where_token: where_,
+            })
         ));
 
         fn description() -> Option<&'static str> {
@@ -564,10 +553,8 @@ mod printing {
 
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !self.predicates.is_empty() {
-                TokensOrDefault(&self.where_token).to_tokens(tokens);
-                self.predicates.to_tokens(tokens);
-            }
+            self.where_token.to_tokens(tokens);
+            self.predicates.to_tokens(tokens);
         }
     }
 

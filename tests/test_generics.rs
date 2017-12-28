@@ -56,8 +56,8 @@ fn test_split_for_impl() {
                 eq_token: Default::default(),
             }),
         ].into(),
-        where_clause: WhereClause {
-            where_token: Some(Default::default()),
+        where_clause: Some(WhereClause {
+            where_token: Default::default(),
             predicates: vec![
                 WherePredicate::BoundPredicate(WhereBoundPredicate {
                     bound_lifetimes: None,
@@ -77,7 +77,7 @@ fn test_split_for_impl() {
                     ].into(),
                 }),
             ].into(),
-        },
+        }),
     };
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();

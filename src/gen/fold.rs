@@ -1518,7 +1518,7 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
         lt_token: _i . lt_token,
         params: FoldHelper::lift(_i . params, |it| { _visitor.fold_generic_param(it) }),
         gt_token: _i . gt_token,
-        where_clause: _visitor.fold_where_clause(_i . where_clause),
+        where_clause: (_i . where_clause).map(|it| { _visitor.fold_where_clause(it) }),
     }
 }
 
