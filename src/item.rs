@@ -196,6 +196,7 @@ ast_enum_of_structs! {
             /// The `example` in `macro_rules! example { ... }`.
             pub ident: Option<Ident>,
             pub mac: Macro,
+            pub semi_token: Option<Token![;]>,
         }),
         /// FIXME will need to revisit what this looks like in the AST.
         pub Macro2(ItemMacro2 #manual_extra_traits {
@@ -365,6 +366,7 @@ ast_enum_of_structs! {
         pub Macro(TraitItemMacro {
             pub attrs: Vec<Attribute>,
             pub mac: Macro,
+            pub semi_token: Option<Token![;]>,
         }),
     }
 }
@@ -414,6 +416,7 @@ ast_enum_of_structs! {
         pub Macro(ImplItemMacro {
             pub attrs: Vec<Attribute>,
             pub mac: Macro,
+            pub semi_token: Option<Token![;]>,
         }),
     }
 }
@@ -474,6 +477,7 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
+    use proc_macro2::{TokenNode, Delimiter};
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }
@@ -515,7 +519,7 @@ pub mod parsing {
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
         body: call!(tt::delimited) >>
-        cond!(!mac::is_braced(&body), punct!(;)) >>
+        semi: cond!(!is_braced(&body), punct!(;)) >>
         (ItemMacro {
             attrs: attrs,
             ident: ident,
@@ -524,6 +528,7 @@ pub mod parsing {
                 bang_token: bang,
                 tokens: body,
             },
+            semi_token: semi,
         })
     ));
 
@@ -1145,10 +1150,11 @@ pub mod parsing {
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        cond!(!mac::is_braced(&mac.tokens), punct!(;)) >>
+        semi: cond!(!is_braced(&mac.tokens), punct!(;)) >>
         (TraitItemMacro {
             attrs: attrs,
             mac: mac,
+            semi_token: semi,
         })
     ));
 
@@ -1298,10 +1304,11 @@ pub mod parsing {
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        cond!(!mac::is_braced(&mac.tokens), punct!(;)) >>
+        semi: cond!(!is_braced(&mac.tokens), punct!(;)) >>
         (ImplItemMacro {
             attrs: attrs,
             mac: mac,
+            semi_token: semi,
         })
     ));
 
@@ -1327,6 +1334,13 @@ pub mod parsing {
             |
             epsilon!() => { |_| Defaultness::Final }
         ));
+    }
+
+    fn is_braced(tt: &TokenTree) -> bool {
+        match tt.kind {
+            TokenNode::Group(Delimiter::Brace, _) => true,
+            _ => false,
+        }
     }
 }
 
@@ -1561,9 +1575,7 @@ mod printing {
             self.mac.bang_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.mac.tokens.to_tokens(tokens);
-            if !mac::is_braced(&self.mac.tokens) {
-                <Token![;]>::default().to_tokens(tokens);
-            }
+            self.semi_token.to_tokens(tokens);
         }
     }
 
@@ -1658,9 +1670,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
-            if !mac::is_braced(&self.mac.tokens) {
-                <Token![;]>::default().to_tokens(tokens);
-            }
+            self.semi_token.to_tokens(tokens);
         }
     }
 
@@ -1710,10 +1720,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
-            if !mac::is_braced(&self.mac.tokens) {
-                // FIXME needs a span
-                <Token![;]>::default().to_tokens(tokens);
-            }
+            self.semi_token.to_tokens(tokens);
         }
     }
 

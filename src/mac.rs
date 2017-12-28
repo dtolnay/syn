@@ -1,9 +1,9 @@
 use super::*;
 
-use proc_macro2::{Delimiter, TokenNode, TokenTree};
+use proc_macro2::TokenTree;
 
 #[cfg(feature = "extra-traits")]
-use proc_macro2::TokenStream;
+use proc_macro2::{TokenStream, TokenNode, Delimiter};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
@@ -38,13 +38,6 @@ impl Hash for Macro {
         self.path.hash(state);
         self.bang_token.hash(state);
         TokenTreeHelper(&self.tokens).hash(state);
-    }
-}
-
-pub fn is_braced(tt: &TokenTree) -> bool {
-    match tt.kind {
-        TokenNode::Group(Delimiter::Brace, _) => true,
-        _ => false,
     }
 }
 

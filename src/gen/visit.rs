@@ -1221,6 +1221,7 @@ pub fn visit_impl_item_const<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, 
 pub fn visit_impl_item_macro<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItemMacro) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_macro(& _i . mac);
+    // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item_method<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItemMethod) {
@@ -1400,6 +1401,7 @@ pub fn visit_item_macro<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     if let Some(ref it) = _i . ident { _visitor.visit_ident(it) };
     _visitor.visit_macro(& _i . mac);
+    // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_macro2<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemMacro2) {
@@ -1835,6 +1837,7 @@ pub fn visit_trait_item_const<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 pub fn visit_trait_item_macro<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitItemMacro) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_macro(& _i . mac);
+    // Skipped field _i . semi_token;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item_method<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitItemMethod) {

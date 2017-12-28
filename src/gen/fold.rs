@@ -1567,6 +1567,7 @@ pub fn fold_impl_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemMa
     ImplItemMacro {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         mac: _visitor.fold_macro(_i . mac),
+        semi_token: _i . semi_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1806,6 +1807,7 @@ pub fn fold_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro) -> I
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ident: (_i . ident).map(|it| { _visitor.fold_ident(it) }),
         mac: _visitor.fold_macro(_i . mac),
+        semi_token: _i . semi_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2380,6 +2382,7 @@ pub fn fold_trait_item_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem
     TraitItemMacro {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         mac: _visitor.fold_macro(_i . mac),
+        semi_token: _i . semi_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
