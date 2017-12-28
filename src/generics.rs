@@ -250,7 +250,7 @@ pub mod parsing {
                 attrs: attrs,
                 lifetime: life,
                 bounds: bounds.unwrap_or_default(),
-                colon_token: colon.map(|_| <Token![:]>::default()),
+                colon_token: colon,
             })
         ));
     }
