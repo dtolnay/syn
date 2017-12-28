@@ -509,7 +509,10 @@ pub fn fold_attribute<V: Folder + ?Sized>(_visitor: &mut V, _i: Attribute) -> At
 
 pub fn fold_bare_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg) -> BareFnArg {
     BareFnArg {
-        name: _i . name,
+        name: (_i . name).map(|it| { (
+            _visitor.fold_bare_fn_arg_name(( it ) . 0),
+            ( it ) . 1,
+        ) }),
         ty: _visitor.fold_type(_i . ty),
     }
 }
@@ -1770,7 +1773,10 @@ pub fn fold_item_extern_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemExte
         extern_token: _i . extern_token,
         crate_token: _i . crate_token,
         ident: _visitor.fold_ident(_i . ident),
-        rename: _i . rename,
+        rename: (_i . rename).map(|it| { (
+            ( it ) . 0,
+            _visitor.fold_ident(( it ) . 1),
+        ) }),
         semi_token: _i . semi_token,
     }
 }
@@ -1804,7 +1810,11 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         impl_token: _i . impl_token,
         generics: _visitor.fold_generics(_i . generics),
-        trait_: _i . trait_,
+        trait_: (_i . trait_).map(|it| { (
+            _visitor.fold_impl_polarity(( it ) . 0),
+            _visitor.fold_path(( it ) . 1),
+            ( it ) . 2,
+        ) }),
         self_ty: Box::new(_visitor.fold_type(* _i . self_ty)),
         brace_token: _i . brace_token,
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_impl_item(it) }),
@@ -1837,7 +1847,10 @@ pub fn fold_item_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemM
         vis: _visitor.fold_visibility(_i . vis),
         mod_token: _i . mod_token,
         ident: _visitor.fold_ident(_i . ident),
-        content: _i . content,
+        content: (_i . content).map(|it| { (
+            ( it ) . 0,
+            FoldHelper::lift(( it ) . 1, |it| { _visitor.fold_item(it) }),
+        ) }),
         semi: _i . semi,
     }
 }
@@ -2378,7 +2391,10 @@ pub fn fold_trait_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem
         ident: _visitor.fold_ident(_i . ident),
         colon_token: _i . colon_token,
         ty: _visitor.fold_type(_i . ty),
-        default: _i . default,
+        default: (_i . default).map(|it| { (
+            ( it ) . 0,
+            _visitor.fold_expr(( it ) . 1),
+        ) }),
         semi_token: _i . semi_token,
     }
 }
@@ -2408,7 +2424,10 @@ pub fn fold_trait_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItemT
         generics: _visitor.fold_generics(_i . generics),
         colon_token: _i . colon_token,
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
-        default: _i . default,
+        default: (_i . default).map(|it| { (
+            ( it ) . 0,
+            _visitor.fold_type(( it ) . 1),
+        ) }),
         semi_token: _i . semi_token,
     }
 }
@@ -2666,7 +2685,10 @@ pub fn fold_use_list<V: Folder + ?Sized>(_visitor: &mut V, _i: UseList) -> UseLi
 pub fn fold_use_path<V: Folder + ?Sized>(_visitor: &mut V, _i: UsePath) -> UsePath {
     UsePath {
         ident: _visitor.fold_ident(_i . ident),
-        rename: _i . rename,
+        rename: (_i . rename).map(|it| { (
+            ( it ) . 0,
+            _visitor.fold_ident(( it ) . 1),
+        ) }),
     }
 }
 # [ cfg ( feature = "full" ) ]

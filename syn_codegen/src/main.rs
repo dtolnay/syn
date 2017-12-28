@@ -18,6 +18,7 @@ extern crate inflections;
 extern crate proc_macro2;
 #[macro_use]
 extern crate quote;
+#[macro_use]
 extern crate syn;
 
 use quote::{ToTokens, Tokens};
@@ -302,6 +303,7 @@ mod parsing {
 mod codegen {
     use super::{AstItem, Lookup};
     use syn::*;
+    use syn::delimited::Delimited;
     use quote::{ToTokens, Tokens};
     use std::fmt::{self, Display};
 
@@ -325,6 +327,7 @@ mod codegen {
         Vec(&'a Type),
         Delimited(&'a Type),
         Option(&'a Type),
+        Tuple(&'a Delimited<Type, Token![,]>),
         Simple(&'a AstItem),
         Pass,
     }
@@ -346,6 +349,9 @@ mod codegen {
                         }
                     }
                 }
+            }
+            Type::Tuple(TypeTuple { ref tys, .. }) => {
+                RelevantType::Tuple(tys)
             }
             _ => RelevantType::Pass,
         }
@@ -559,6 +565,40 @@ mod codegen {
         })
     }
 
+    fn tuple_visit(
+        elems: &Delimited<Type, Token![,]>,
+        lookup: &Lookup,
+        kind: Kind,
+        name: &Operand,
+    ) -> Option<String> {
+        let mut code = String::new();
+        for (i, elem) in elems.items().enumerate() {
+            let name = name.tokens();
+            let i = Ident::from(format!("{}", i));
+            let it = Owned(quote!((#name).#i));
+            let val = visit(&elem, lookup, kind, &it)
+                .unwrap_or_else(|| noop_visit(kind, &it));
+            code.push_str(&format!("            {}", val));
+            match kind {
+                Fold => code.push(','),
+                Visit | VisitMut => code.push(';'),
+            }
+            code.push('\n');
+        }
+        if code.is_empty() {
+            None
+        } else {
+            Some(match kind {
+                Fold => {
+                    format!("(\n{}        )", code)
+                }
+                Visit | VisitMut => {
+                    format!("\n{}        ", code)
+                }
+            })
+        }
+    }
+
     fn noop_visit(kind: Kind, name: &Operand) -> String {
         match kind {
             Fold => name.owned_tokens().to_string(),
@@ -579,6 +619,9 @@ mod codegen {
             }
             RelevantType::Option(elem) => {
                 option_visit(elem, lookup, kind, name)
+            }
+            RelevantType::Tuple(elems) => {
+                tuple_visit(elems, lookup, kind, name)
             }
             RelevantType::Simple(item) => {
                 let mut res = simple_visit(item, kind, name);
