@@ -548,7 +548,7 @@ mod parsing {
             _ => panic!("unknown delimiter: {}", delim),
         };
 
-        if let Some(seqinfo) = tokens.seq(delim) {
+        if let Some(seqinfo) = tokens.group(delim) {
             match f(seqinfo.inside) {
                 Ok((remaining, ret)) => {
                     if remaining.eof() {

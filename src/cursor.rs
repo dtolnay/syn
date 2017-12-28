@@ -2,7 +2,7 @@
 //!
 //! It does this by copying the data into a stably-addressed structured buffer,
 //! and holding raw pointers into that buffer to allow walking through delimited
-//! sequences cheaply.
+//! groups cheaply.
 //!
 //! This module is heavily commented as it contains the only unsafe code in
 //! `syn`, and caution should be made when editing it. It provides a safe
@@ -102,7 +102,7 @@ impl SynomBuffer {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct SeqInfo<'a> {
+pub struct Group<'a> {
     pub span: Span,
     pub inside: Cursor<'a>,
     pub outside: Cursor<'a>,
@@ -157,7 +157,7 @@ impl<'a> Cursor<'a> {
         // NOTE: If we're looking at a `End(..)`, we want to advance the cursor
         // past it, unless `ptr == scope`, which means that we're at the edge of
         // our cursor's scope. We should only have `ptr != scope` at the exit
-        // from None-delimited sequences entered with `ignore_none`.
+        // from None-delimited groups entered with `ignore_none`.
         while let Entry::End(exit) = *ptr {
             if ptr == scope {
                 break;
@@ -184,9 +184,9 @@ impl<'a> Cursor<'a> {
         Cursor::create(self.ptr.offset(1), self.scope)
     }
 
-    /// If the cursor is looking at a `None`-delimited sequence, move it to look
-    /// at the first token inside instead. If the sequence is empty, this will
-    /// move the cursor past the `None`-delimited sequence.
+    /// If the cursor is looking at a `None`-delimited group, move it to look at
+    /// the first token inside instead. If the group is empty, this will move
+    /// the cursor past the `None`-delimited group.
     ///
     /// WARNING: This mutates its argument.
     fn ignore_none(&mut self) {
@@ -207,30 +207,27 @@ impl<'a> Cursor<'a> {
         self.ptr == self.scope
     }
 
-    /// If the cursor is pointing at a Seq with the given `Delimiter`, return a
-    /// cursor into that sequence, and one pointing to the next `TokenTree`.
-    pub fn seq(mut self, seq_delim: Delimiter) -> Option<SeqInfo<'a>> {
-        // If we're not trying to enter a none-delimited sequence, we want to
+    /// If the cursor is pointing at a Group with the given `Delimiter`, return
+    /// a cursor into that group, and one pointing to the next `TokenTree`.
+    pub fn group(mut self, delim: Delimiter) -> Option<Group<'a>> {
+        // If we're not trying to enter a none-delimited group, we want to
         // ignore them. We have to make sure to _not_ ignore them when we want
         // to enter them, of course. For obvious reasons.
-        if seq_delim != Delimiter::None {
+        if delim != Delimiter::None {
             self.ignore_none();
         }
 
-        match *self.entry() {
-            Entry::Group(span, delim, ref buf) => {
-                if delim != seq_delim {
-                    return None;
-                }
-
-                Some(SeqInfo {
+        if let Entry::Group(span, group_delim, ref buf) = *self.entry() {
+            if group_delim == delim {
+                return Some(Group {
                     span: span,
                     inside: buf.begin(),
                     outside: unsafe { self.bump() },
-                })
+                });
             }
-            _ => None,
         }
+
+        None
     }
 
     /// If the cursor is pointing at a Term, return it and a cursor pointing at
@@ -275,10 +272,10 @@ impl<'a> Cursor<'a> {
     }
 
     /// If the cursor is looking at a `TokenTree`, returns it along with a
-    /// cursor pointing to the next token in the sequence, otherwise returns
+    /// cursor pointing to the next token in the group, otherwise returns
     /// `None`.
     ///
-    /// This method does not treat `None`-delimited sequences as invisible, and
+    /// This method does not treat `None`-delimited groups as invisible, and
     /// will return a `Group(None, ..)` if the cursor is looking at one.
     pub fn token_tree(self) -> Option<(Cursor<'a>, TokenTree)> {
         let tree = match *self.entry() {
