@@ -1,5 +1,3 @@
-use proc_macro;
-use proc_macro2;
 use std::error::Error;
 use cursor::Cursor;
 use std::fmt::{self, Display};
@@ -29,18 +27,6 @@ impl Error for ParseError {
 impl Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         <str as fmt::Display>::fmt(self.description(), f)
-    }
-}
-
-impl From<proc_macro2::LexError> for ParseError {
-    fn from(_: proc_macro2::LexError) -> ParseError {
-        ParseError(Some("error while lexing input string".to_owned()))
-    }
-}
-
-impl From<proc_macro::LexError> for ParseError {
-    fn from(_: proc_macro::LexError) -> ParseError {
-        ParseError(Some("error while lexing input string".to_owned()))
     }
 }
 

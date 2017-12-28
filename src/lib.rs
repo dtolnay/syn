@@ -256,7 +256,10 @@ pub fn parse_tokens<T: Synom>(tokens: quote::Tokens) -> Result<T, ParseError> {
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
-    _parse(s.parse()?)
+    match s.parse() {
+        Ok(tts) => _parse(tts),
+        Err(_) => Err(ParseError::new("error while lexing input string")),
+    }
 }
 
 // FIXME the name parse_file makes it sound like you might pass in a path to a
