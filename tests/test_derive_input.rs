@@ -286,8 +286,8 @@ fn test_enum() {
                     data: VariantData::Unit,
                     eq_token: Some(Default::default()),
                     discriminant: Some(Expr {
-                        node: ExprTupleField {
-                            expr: Box::new(Expr {
+                        node: ExprField {
+                            base: Box::new(Expr {
                                 node: ExprTuple {
                                     lone_comma: None,
                                     paren_token: Default::default(),
@@ -311,10 +311,10 @@ fn test_enum() {
                                 attrs: Vec::new(),
                             }),
                             dot_token: Default::default(),
-                            field: Lit {
-                                value: LitKind::Other(Literal::integer(0)),
+                            member: Member::Unnamed(Index {
+                                index: 0,
                                 span: Default::default(),
-                            },
+                            }),
                         }.into(),
                         attrs: Vec::new(),
                     }),

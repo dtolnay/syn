@@ -219,7 +219,7 @@ impl Ord for Ident {
 
 impl Hash for Ident {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.as_ref().hash(h)
+        self.as_ref().hash(h);
     }
 }
 

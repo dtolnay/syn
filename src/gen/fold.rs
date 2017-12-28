@@ -174,8 +174,6 @@ fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct { fold_expr_struct(s
 fn fold_expr_try(&mut self, i: ExprTry) -> ExprTry { fold_expr_try(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_tuple(&mut self, i: ExprTuple) -> ExprTuple { fold_expr_tuple(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_expr_tuple_field(&mut self, i: ExprTupleField) -> ExprTupleField { fold_expr_tuple_field(self, i) }
 
 fn fold_expr_type(&mut self, i: ExprType) -> ExprType { fold_expr_type(self, i) }
 
@@ -231,6 +229,8 @@ fn fold_impl_polarity(&mut self, i: ImplPolarity) -> ImplPolarity { fold_impl_po
 # [ cfg ( feature = "full" ) ]
 fn fold_in_place_kind(&mut self, i: InPlaceKind) -> InPlaceKind { fold_in_place_kind(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn fold_index(&mut self, i: Index) -> Index { fold_index(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn fold_item(&mut self, i: Item) -> Item { fold_item(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_const(&mut self, i: ItemConst) -> ItemConst { fold_item_const(self, i) }
@@ -272,6 +272,8 @@ fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
 fn fold_mac_stmt_style(&mut self, i: MacStmtStyle) -> MacStmtStyle { fold_mac_stmt_style(self, i) }
 
 fn fold_macro(&mut self, i: Macro) -> Macro { fold_macro(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_member(&mut self, i: Member) -> Member { fold_member(self, i) }
 
 fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { fold_meta_item(self, i) }
 
@@ -918,9 +920,9 @@ pub fn fold_expr_continue<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprContinue
 # [ cfg ( feature = "full" ) ]
 pub fn fold_expr_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprField) -> ExprField {
     ExprField {
-        expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        field: _visitor.fold_ident(_i . field),
+        base: Box::new(_visitor.fold_expr(* _i . base)),
         dot_token: _i . dot_token,
+        member: _visitor.fold_member(_i . member),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1105,11 +1107,6 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
                 full!(_visitor.fold_expr_field(_binding_0)),
             )
         }
-        TupleField(_binding_0, ) => {
-            TupleField (
-                full!(_visitor.fold_expr_tuple_field(_binding_0)),
-            )
-        }
         Index(_binding_0, ) => {
             Index (
                 _visitor.fold_expr_index(_binding_0),
@@ -1282,14 +1279,6 @@ pub fn fold_expr_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTuple) -> E
         lone_comma: _i . lone_comma,
     }
 }
-# [ cfg ( feature = "full" ) ]
-pub fn fold_expr_tuple_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupleField) -> ExprTupleField {
-    ExprTupleField {
-        expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        field: _i . field,
-        dot_token: _i . dot_token,
-    }
-}
 
 pub fn fold_expr_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprType) -> ExprType {
     ExprType {
@@ -1355,7 +1344,7 @@ pub fn fold_field<V: Folder + ?Sized>(_visitor: &mut V, _i: Field) -> Field {
 # [ cfg ( feature = "full" ) ]
 pub fn fold_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> FieldPat {
     FieldPat {
-        ident: _visitor.fold_ident(_i . ident),
+        member: _visitor.fold_member(_i . member),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         is_shorthand: _i . is_shorthand,
         colon_token: _i . colon_token,
@@ -1365,11 +1354,11 @@ pub fn fold_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> Fie
 # [ cfg ( feature = "full" ) ]
 pub fn fold_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) -> FieldValue {
     FieldValue {
-        ident: _visitor.fold_ident(_i . ident),
+        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        member: _visitor.fold_member(_i . member),
+        colon_token: _i . colon_token,
         expr: _visitor.fold_expr(_i . expr),
         is_shorthand: _i . is_shorthand,
-        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        colon_token: _i . colon_token,
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1630,6 +1619,13 @@ pub fn fold_in_place_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: InPlaceKind)
                 _binding_0,
             )
         }
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_index<V: Folder + ?Sized>(_visitor: &mut V, _i: Index) -> Index {
+    Index {
+        index: _i . index,
+        span: _visitor.fold_span(_i . span),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1954,6 +1950,22 @@ pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
         path: _visitor.fold_path(_i . path),
         bang_token: _i . bang_token,
         tokens: _i . tokens,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_member<V: Folder + ?Sized>(_visitor: &mut V, _i: Member) -> Member {
+    use ::Member::*;
+    match _i {
+        Named(_binding_0, ) => {
+            Named (
+                _visitor.fold_ident(_binding_0),
+            )
+        }
+        Unnamed(_binding_0, ) => {
+            Unnamed (
+                _visitor.fold_index(_binding_0),
+            )
+        }
     }
 }
 

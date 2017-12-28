@@ -1,5 +1,9 @@
 use super::*;
 use delimited::Delimited;
+#[cfg(feature = "full")]
+use proc_macro2::Span;
+#[cfg(feature = "full")]
+use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// An expression.
@@ -229,20 +233,12 @@ ast_enum_of_structs! {
             pub right: Box<Expr>,
         }),
 
-        /// Access of a named struct field (`obj.foo`)
+        /// Access of a named struct field (`obj.foo`) or unnamed tuple struct
+        /// field (`obj.0`).
         pub Field(ExprField #full {
-            pub expr: Box<Expr>,
-            pub field: Ident,
+            pub base: Box<Expr>,
             pub dot_token: Token![.],
-        }),
-
-        /// Access of an unnamed field of a struct or tuple-struct
-        ///
-        /// For example, `foo.0`.
-        pub TupleField(ExprTupleField #full {
-            pub expr: Box<Expr>,
-            pub field: Lit,
-            pub dot_token: Token![.],
+            pub member: Member,
         }),
 
         /// An indexing operation (`foo[2]`)
@@ -363,11 +359,54 @@ ast_enum_of_structs! {
 }
 
 #[cfg(feature = "full")]
+ast_enum! {
+    /// A struct or tuple struct field accessed in a struct literal or field
+    /// expression.
+    pub enum Member {
+        /// A named field like `self.x`.
+        Named(Ident),
+        /// An unnamed field like `self.0`.
+        Unnamed(Index),
+    }
+}
+
+#[cfg(feature = "full")]
+ast_struct! {
+    /// The index of an unnamed tuple struct field.
+    pub struct Index #manual_extra_traits {
+        pub index: u32,
+        pub span: Span,
+    }
+}
+
+#[cfg(feature = "full")]
+impl Eq for Index {}
+
+#[cfg(feature = "full")]
+impl PartialEq for Index {
+    fn eq(&self, other: &Self) -> bool {
+        self.index == other.index
+    }
+}
+
+#[cfg(feature = "full")]
+impl Hash for Index {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.index.hash(state);
+    }
+}
+
+#[cfg(feature = "full")]
 ast_struct! {
     /// A field-value pair in a struct literal.
     pub struct FieldValue {
-        /// Name of the field.
-        pub ident: Ident,
+        /// Attributes tagged on the field.
+        pub attrs: Vec<Attribute>,
+
+        /// Name or index of the field.
+        pub member: Member,
+
+        pub colon_token: Option<Token![:]>,
 
         /// Value of the field.
         pub expr: Expr,
@@ -375,11 +414,6 @@ ast_struct! {
         /// Whether this is a shorthand field, e.g. `Struct { x }`
         /// instead of `Struct { x: x }`.
         pub is_shorthand: bool,
-
-        /// Attributes tagged on the field.
-        pub attrs: Vec<Attribute>,
-
-        pub colon_token: Option<Token![:]>,
     }
 }
 
@@ -606,7 +640,7 @@ ast_struct! {
     /// except `is_shorthand` is true
     pub struct FieldPat {
         /// The identifier for the field
-        pub ident: Ident,
+        pub member: Member,
         /// The pattern the field is destructured to
         pub pat: Box<Pat>,
         pub is_shorthand: bool,
@@ -659,7 +693,7 @@ pub mod parsing {
     use ty::parsing::qpath;
 
     #[cfg(feature = "full")]
-    use proc_macro2::{Delimiter, Span, Term, TokenNode, TokenStream};
+    use proc_macro2::{Delimiter, Span, TokenNode, TokenStream};
     use synom::Synom;
     use cursor::Cursor;
     #[cfg(feature = "full")]
@@ -1080,20 +1114,11 @@ pub mod parsing {
             })
             |
             tap!(field: and_field => {
-                let (field, token) = field;
+                let (token, member) = field;
                 e = ExprField {
-                    expr: Box::new(e.into()),
-                    field: field,
+                    base: Box::new(e.into()),
                     dot_token: token,
-                }.into();
-            })
-            |
-            tap!(field: and_tup_field => {
-                let (field, token) = field;
-                e = ExprTupleField {
-                    expr: Box::new(e.into()),
-                    field: field,
-                    dot_token: token,
+                    member: member,
                 }.into();
             })
             |
@@ -1693,11 +1718,11 @@ pub mod parsing {
     impl Synom for FieldValue {
         named!(parse -> Self, alt!(
             do_parse!(
-                ident: field_ident >>
+                member: syn!(Member) >>
                 colon: punct!(:) >>
                 value: syn!(Expr) >>
                 (FieldValue {
-                    ident: ident,
+                    member: member,
                     expr: value,
                     is_shorthand: false,
                     attrs: Vec::new(),
@@ -1706,7 +1731,7 @@ pub mod parsing {
             )
             |
             map!(syn!(Ident), |name| FieldValue {
-                ident: name,
+                member: Member::Named(name),
                 expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
                 is_shorthand: true,
                 attrs: Vec::new(),
@@ -1786,12 +1811,7 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named!(and_field -> (Ident, Token![.]),
-           map!(tuple!(punct!(.), syn!(Ident)), |(a, b)| (b, a)));
-
-    #[cfg(feature = "full")]
-    named!(and_tup_field -> (Lit, Token![.]),
-           map!(tuple!(punct!(.), syn!(Lit)), |(a, b)| (b, a)));
+    named!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
 
     named!(and_index -> (Expr, token::Bracket), brackets!(syn!(Expr)));
 
@@ -2034,11 +2054,11 @@ pub mod parsing {
     impl Synom for FieldPat {
         named!(parse -> Self, alt!(
             do_parse!(
-                ident: field_ident >>
+                member: syn!(Member) >>
                 colon: punct!(:) >>
                 pat: syn!(Pat) >>
                 (FieldPat {
-                    ident: ident,
+                    member: member,
                     pat: Box::new(pat),
                     is_shorthand: false,
                     attrs: Vec::new(),
@@ -2069,7 +2089,7 @@ pub mod parsing {
                         }.into();
                     }
                     FieldPat {
-                        ident: ident,
+                        member: Member::Named(ident),
                         pat: Box::new(pat),
                         is_shorthand: true,
                         attrs: Vec::new(),
@@ -2081,21 +2101,27 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named!(field_ident -> Ident, alt!(
-        syn!(Ident)
-        |
-        do_parse!(
+    impl Synom for Member {
+        named!(parse -> Self, alt!(
+            syn!(Ident) => { Member::Named }
+            |
+            syn!(Index) => { Member::Unnamed }
+        ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for Index {
+        named!(parse -> Self, do_parse!(
             lit: syn!(Lit) >>
             ({
-                let s = lit.to_string();
-                if s.parse::<usize>().is_ok() {
-                    Ident::new(Term::intern(&s), lit.span)
+                if let Ok(i) = lit.value.to_string().parse() {
+                    Index { index: i, span: lit.span }
                 } else {
                     return parse_error();
                 }
             })
-        )
-    ));
+        ));
+    }
 
     #[cfg(feature = "full")]
     impl Synom for PatPath {
@@ -2268,6 +2294,8 @@ mod printing {
     #[cfg(feature = "full")]
     use attr::FilterAttrs;
     use quote::{ToTokens, Tokens};
+    #[cfg(feature = "full")]
+    use proc_macro2::{TokenTree, TokenNode, Literal};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `Tokens`.
@@ -2614,20 +2642,29 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprField {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.expr.to_tokens(tokens);
+            self.base.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
-            // XXX: I don't think we can do anything if someone shoves a
-            // nonsense Lit in here.
-            self.field.to_tokens(tokens);
+            self.member.to_tokens(tokens);
         }
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprTupleField {
+    impl ToTokens for Member {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.expr.to_tokens(tokens);
-            self.dot_token.to_tokens(tokens);
-            self.field.to_tokens(tokens);
+            match *self {
+                Member::Named(ident) => ident.to_tokens(tokens),
+                Member::Unnamed(ref index) => index.to_tokens(tokens),
+            }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for Index {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append(TokenTree {
+                span: self.span,
+                kind: TokenNode::Literal(Literal::integer(self.index as i64)),
+            });
         }
     }
 
@@ -2744,7 +2781,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.ident.to_tokens(tokens);
+            self.member.to_tokens(tokens);
             // XXX: Override self.is_shorthand if expr is not an IdentExpr with
             // the ident self.ident?
             if !self.is_shorthand {
@@ -2917,7 +2954,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             // XXX: Override is_shorthand if it was wrong?
             if !self.is_shorthand {
-                self.ident.to_tokens(tokens);
+                self.member.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.pat.to_tokens(tokens);
