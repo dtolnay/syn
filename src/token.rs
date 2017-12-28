@@ -32,6 +32,12 @@ macro_rules! op {
         #[$doc]
         pub struct $name(pub [Span; $len]);
 
+        impl $name {
+            pub fn new(span: Span) -> Self {
+                $name([span; $len])
+            }
+        }
+
         #[cfg(feature = "extra-traits")]
         impl ::std::fmt::Debug for $name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {

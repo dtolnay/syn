@@ -1105,10 +1105,13 @@ mod printing {
             self.fn_token.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
-                if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
-                    <Token![,]>::default().to_tokens(tokens);
+                if let Some(variadic) = self.variadic {
+                    if !self.inputs.empty_or_trailing() {
+                        let span = variadic.0[0];
+                        <Token![,]>::new(span).to_tokens(tokens);
+                    }
+                    variadic.to_tokens(tokens);
                 }
-                self.variadic.to_tokens(tokens);
             });
             self.output.to_tokens(tokens);
         }
