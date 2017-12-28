@@ -226,7 +226,8 @@ pub mod parsing {
     use super::*;
     use synom::Synom;
     use cursor::Cursor;
-    use {parse_error, PResult};
+    use parse_error;
+    use synom::PResult;
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {

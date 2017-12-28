@@ -361,7 +361,8 @@ mod parsing {
     use super::Delimited;
     use synom::Synom;
     use cursor::Cursor;
-    use {parse_error, PResult};
+    use parse_error;
+    use synom::PResult;
 
     impl<T, D> Delimited<T, D>
     where

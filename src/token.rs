@@ -71,7 +71,7 @@ macro_rules! op {
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
-            fn parse(tokens: $crate::synom::Cursor) -> $crate::PResult<$name> {
+            fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
                 parsing::op($s, tokens, $name)
             }
         }
@@ -118,7 +118,7 @@ macro_rules! sym {
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
-            fn parse(tokens: $crate::synom::Cursor) -> $crate::PResult<$name> {
+            fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
                 parsing::sym($s, tokens, $name)
             }
         }
@@ -167,8 +167,8 @@ macro_rules! delim {
             }
 
             #[cfg(feature = "parsing")]
-            pub fn parse<F, R>(tokens: $crate::synom::Cursor, f: F) -> $crate::PResult<(R, $name)>
-                where F: FnOnce($crate::synom::Cursor) -> $crate::PResult<R>
+            pub fn parse<F, R>(tokens: $crate::synom::Cursor, f: F) -> $crate::synom::PResult<(R, $name)>
+                where F: FnOnce($crate::synom::Cursor) -> $crate::synom::PResult<R>
             {
                 parsing::delim($s, tokens, $name, f)
             }
@@ -471,7 +471,8 @@ mod parsing {
     use proc_macro2::{Delimiter, Spacing, Span};
 
     use cursor::Cursor;
-    use {parse_error, PResult};
+    use parse_error;
+    use synom::PResult;
 
     pub trait FromSpans: Sized {
         fn from_spans(spans: &[Span]) -> Self;

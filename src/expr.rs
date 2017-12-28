@@ -698,7 +698,7 @@ pub mod parsing {
     use cursor::Cursor;
     #[cfg(feature = "full")]
     use parse_error;
-    use PResult;
+    use synom::PResult;
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.

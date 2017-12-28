@@ -1,6 +1,7 @@
 use proc_macro2::{TokenNode, TokenTree};
 use cursor::Cursor;
-use {parse_error, PResult};
+use parse_error;
+use synom::PResult;
 
 #[cfg(feature = "full")]
 use proc_macro2::Delimiter;

@@ -126,7 +126,7 @@ use cursor::SynomBuffer;
 #[cfg(feature = "parsing")]
 mod error;
 #[cfg(feature = "parsing")]
-pub use error::{PResult, ParseError};
+use error::ParseError;
 
 // Not public API.
 #[cfg(feature = "parsing")]

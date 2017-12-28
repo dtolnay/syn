@@ -326,7 +326,8 @@ where
 pub mod parsing {
     use super::*;
     use cursor::Cursor;
-    use {parse_error, PResult};
+    use parse_error;
+    use synom::PResult;
     use proc_macro2::{Spacing, Span, TokenNode, TokenTree};
 
     fn eq(span: Span) -> TokenTree {

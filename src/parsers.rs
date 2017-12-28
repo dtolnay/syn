@@ -1,5 +1,6 @@
 use cursor::Cursor;
-use error::{parse_error, PResult};
+use parse_error;
+use synom::PResult;
 
 /// Define a function from a parser combination.
 ///
@@ -21,13 +22,13 @@ use error::{parse_error, PResult};
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: $crate::synom::Cursor) -> $crate::PResult<$o> {
+        fn $name(i: $crate::synom::Cursor) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: $crate::synom::Cursor) -> $crate::PResult<$o> {
+        pub fn $name(i: $crate::synom::Cursor) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
@@ -35,13 +36,13 @@ macro_rules! named {
     // These two variants are for defining named parsers which have custom
     // arguments, and are called with `call!()`
     ($name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::PResult<$o> {
+        fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::PResult<$o> {
+        pub fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
