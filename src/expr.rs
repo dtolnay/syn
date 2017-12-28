@@ -239,7 +239,7 @@ ast_enum_of_structs! {
         /// Access of an unnamed field of a struct or tuple-struct
         ///
         /// For example, `foo.0`.
-        pub TupField(ExprTupField #full {
+        pub TupleField(ExprTupleField #full {
             pub expr: Box<Expr>,
             pub field: Lit,
             pub dot_token: Token![.],
@@ -1090,7 +1090,7 @@ pub mod parsing {
             |
             tap!(field: and_tup_field => {
                 let (field, token) = field;
-                e = ExprTupField {
+                e = ExprTupleField {
                     expr: Box::new(e.into()),
                     field: field,
                     dot_token: token,
@@ -2623,7 +2623,7 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprTupField {
+    impl ToTokens for ExprTupleField {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.expr.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);

@@ -173,9 +173,9 @@ fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct { fold_expr_struct(s
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_try(&mut self, i: ExprTry) -> ExprTry { fold_expr_try(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_tup_field(&mut self, i: ExprTupField) -> ExprTupField { fold_expr_tup_field(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn fold_expr_tuple(&mut self, i: ExprTuple) -> ExprTuple { fold_expr_tuple(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_expr_tuple_field(&mut self, i: ExprTupleField) -> ExprTupleField { fold_expr_tuple_field(self, i) }
 
 fn fold_expr_type(&mut self, i: ExprType) -> ExprType { fold_expr_type(self, i) }
 
@@ -1105,9 +1105,9 @@ pub fn fold_expr_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprKind) -> Exp
                 full!(_visitor.fold_expr_field(_binding_0)),
             )
         }
-        TupField(_binding_0, ) => {
-            TupField (
-                full!(_visitor.fold_expr_tup_field(_binding_0)),
+        TupleField(_binding_0, ) => {
+            TupleField (
+                full!(_visitor.fold_expr_tuple_field(_binding_0)),
             )
         }
         Index(_binding_0, ) => {
@@ -1275,19 +1275,19 @@ pub fn fold_expr_try<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTry) -> ExprT
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_expr_tup_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupField) -> ExprTupField {
-    ExprTupField {
-        expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        field: _i . field,
-        dot_token: _i . dot_token,
-    }
-}
-# [ cfg ( feature = "full" ) ]
 pub fn fold_expr_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTuple) -> ExprTuple {
     ExprTuple {
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
         paren_token: _i . paren_token,
         lone_comma: _i . lone_comma,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_expr_tuple_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTupleField) -> ExprTupleField {
+    ExprTupleField {
+        expr: Box::new(_visitor.fold_expr(* _i . expr)),
+        field: _i . field,
+        dot_token: _i . dot_token,
     }
 }
 

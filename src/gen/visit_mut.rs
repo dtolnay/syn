@@ -147,9 +147,9 @@ fn visit_expr_struct_mut(&mut self, i: &mut ExprStruct) { visit_expr_struct_mut(
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_try_mut(&mut self, i: &mut ExprTry) { visit_expr_try_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_expr_tup_field_mut(&mut self, i: &mut ExprTupField) { visit_expr_tup_field_mut(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_expr_tuple_mut(&mut self, i: &mut ExprTuple) { visit_expr_tuple_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_expr_tuple_field_mut(&mut self, i: &mut ExprTupleField) { visit_expr_tuple_field_mut(self, i) }
 
 fn visit_expr_type_mut(&mut self, i: &mut ExprType) { visit_expr_type_mut(self, i) }
 
@@ -881,8 +881,8 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
         Field(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_field_mut(_binding_0));
         }
-        TupField(ref mut _binding_0, ) => {
-            full!(_visitor.visit_expr_tup_field_mut(_binding_0));
+        TupleField(ref mut _binding_0, ) => {
+            full!(_visitor.visit_expr_tuple_field_mut(_binding_0));
         }
         Index(ref mut _binding_0, ) => {
             _visitor.visit_expr_index_mut(_binding_0);
@@ -999,16 +999,16 @@ pub fn visit_expr_try_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
     // Skipped field _i . question_token;
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_expr_tup_field_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTupField) {
-    _visitor.visit_expr_mut(& mut _i . expr);
-    // Skipped field _i . field;
-    // Skipped field _i . dot_token;
-}
-# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTuple) {
     for mut el in & mut _i . args { let mut it = el.item_mut(); _visitor.visit_expr_mut(it) };
     // Skipped field _i . paren_token;
     // Skipped field _i . lone_comma;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_tuple_field_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTupleField) {
+    _visitor.visit_expr_mut(& mut _i . expr);
+    // Skipped field _i . field;
+    // Skipped field _i . dot_token;
 }
 
 pub fn visit_expr_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprType) {

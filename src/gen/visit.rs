@@ -147,9 +147,9 @@ fn visit_expr_struct(&mut self, i: &'ast ExprStruct) { visit_expr_struct(self, i
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_try(&mut self, i: &'ast ExprTry) { visit_expr_try(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_expr_tup_field(&mut self, i: &'ast ExprTupField) { visit_expr_tup_field(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_expr_tuple(&mut self, i: &'ast ExprTuple) { visit_expr_tuple(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_expr_tuple_field(&mut self, i: &'ast ExprTupleField) { visit_expr_tuple_field(self, i) }
 
 fn visit_expr_type(&mut self, i: &'ast ExprType) { visit_expr_type(self, i) }
 
@@ -881,8 +881,8 @@ pub fn visit_expr_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         Field(ref _binding_0, ) => {
             full!(_visitor.visit_expr_field(_binding_0));
         }
-        TupField(ref _binding_0, ) => {
-            full!(_visitor.visit_expr_tup_field(_binding_0));
+        TupleField(ref _binding_0, ) => {
+            full!(_visitor.visit_expr_tuple_field(_binding_0));
         }
         Index(ref _binding_0, ) => {
             _visitor.visit_expr_index(_binding_0);
@@ -999,16 +999,16 @@ pub fn visit_expr_try<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     // Skipped field _i . question_token;
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_expr_tup_field<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprTupField) {
-    _visitor.visit_expr(& _i . expr);
-    // Skipped field _i . field;
-    // Skipped field _i . dot_token;
-}
-# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprTuple) {
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
     // Skipped field _i . paren_token;
     // Skipped field _i . lone_comma;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_tuple_field<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprTupleField) {
+    _visitor.visit_expr(& _i . expr);
+    // Skipped field _i . field;
+    // Skipped field _i . dot_token;
 }
 
 pub fn visit_expr_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprType) {

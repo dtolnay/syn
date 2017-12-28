@@ -38,7 +38,7 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
                ExprBox, ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue,
                ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
                ExprKind, ExprLoop, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
-               ExprRepeat, ExprRet, ExprStruct, ExprTry, ExprTupField, ExprTuple, ExprType,
+               ExprRepeat, ExprRet, ExprStruct, ExprTry, ExprTupleField, ExprTuple, ExprType,
                ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield};
 
 #[cfg(feature = "full")]
