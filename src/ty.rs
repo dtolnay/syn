@@ -40,7 +40,6 @@ ast_enum_of_structs! {
         pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
             pub tys: Delimited<Type, Token![,]>,
-            pub lone_comma: Option<Token![,]>,
         }),
         /// A path (`module::module::...::Type`), optionally
         /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
@@ -514,7 +513,6 @@ pub mod parsing {
             (TypeTuple {
                 tys: data.0,
                 paren_token: data.1,
-                lone_comma: None, // TODO: does this just not parse?
             })
         ));
     }
@@ -904,8 +902,6 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
                 self.tys.to_tokens(tokens);
-                // XXX: I don't think (,) is a thing.
-                self.lone_comma.to_tokens(tokens);
             })
         }
     }

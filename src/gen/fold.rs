@@ -1277,7 +1277,6 @@ pub fn fold_expr_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTuple) -> E
     ExprTuple {
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
         paren_token: _i . paren_token,
-        lone_comma: _i . lone_comma,
     }
 }
 
@@ -2615,7 +2614,6 @@ pub fn fold_type_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTuple) -> T
     TypeTuple {
         paren_token: _i . paren_token,
         tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_type(it) }),
-        lone_comma: _i . lone_comma,
     }
 }
 

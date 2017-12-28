@@ -364,7 +364,6 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
                 node: ExprKind::Tuple(ExprTuple {
                     args: Delimited::new(),
                     paren_token: token::Paren::default(),
-                    lone_comma: None,
                 }),
                 attrs: vec![],
             }

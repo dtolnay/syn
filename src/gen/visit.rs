@@ -1002,7 +1002,6 @@ pub fn visit_expr_try<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 pub fn visit_expr_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprTuple) {
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
     // Skipped field _i . paren_token;
-    // Skipped field _i . lone_comma;
 }
 
 pub fn visit_expr_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprType) {
@@ -2002,7 +2001,6 @@ pub fn visit_type_trait_object<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
 pub fn visit_type_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeTuple) {
     // Skipped field _i . paren_token;
     for el in & _i . tys { let it = el.item(); _visitor.visit_type(it) };
-    // Skipped field _i . lone_comma;
 }
 
 pub fn visit_un_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UnOp) {

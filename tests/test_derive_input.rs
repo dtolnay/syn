@@ -289,7 +289,6 @@ fn test_enum() {
                         node: ExprField {
                             base: Box::new(Expr {
                                 node: ExprTuple {
-                                    lone_comma: None,
                                     paren_token: Default::default(),
                                     args: vec![
                                         Expr {

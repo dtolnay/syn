@@ -49,7 +49,6 @@ fn test_split_for_impl() {
                 default: Some(
                     TypeTuple {
                         tys: Default::default(),
-                        lone_comma: None,
                         paren_token: Default::default(),
                     }.into(),
                 ),

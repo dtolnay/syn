@@ -77,7 +77,6 @@ ast_enum_of_structs! {
         pub Tuple(ExprTuple #full {
             pub args: Delimited<Expr, Token![,]>,
             pub paren_token: token::Paren,
-            pub lone_comma: Option<Token![,]>,
         }),
 
         /// A binary operation, e.g. `a + b`, `a * b`.
@@ -1365,7 +1364,6 @@ pub mod parsing {
             (ExprTuple {
                 args: elems.0,
                 paren_token: elems.1,
-                lone_comma: None, // TODO: parse this
             })
         ));
     }
@@ -2396,11 +2394,6 @@ mod printing {
                 if self.args.len() == 1 && !self.args.trailing_delim() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
-                // XXX: Not sure how to handle this, but we never parse it yet.
-                // Is this for an expression like (0,)? Can't we use the
-                // trailing delimiter on Delimited for that? (,) isn't a valid
-                // expression as far as I know.
-                self.lone_comma.to_tokens(tokens);
             })
         }
     }
