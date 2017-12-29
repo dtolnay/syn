@@ -1752,8 +1752,8 @@ pub fn visit_pat_slice_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pa
     tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
     for mut el in & mut _i . front { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
     if let Some(ref mut it) = _i . middle { _visitor.visit_pat_mut(& mut * * it) };
-    if let Some(ref mut it) = _i . comma_token { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . dot2_token { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . comma_token { tokens_helper(_visitor, &mut (it).0) };
     for mut el in & mut _i . back { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1766,10 +1766,10 @@ pub fn visit_pat_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut P
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatTuple) {
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    for mut el in & mut _i . pats { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
-    if let Some(ref mut it) = _i . comma_token { tokens_helper(_visitor, &mut (it).0) };
-    // Skipped field _i . dots_pos;
+    for mut el in & mut _i . front { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
     if let Some(ref mut it) = _i . dot2_token { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . comma_token { tokens_helper(_visitor, &mut (it).0) };
+    for mut el in & mut _i . back { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_tuple_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatTupleStruct) {

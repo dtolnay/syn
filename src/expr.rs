@@ -610,10 +610,10 @@ ast_enum_of_structs! {
         /// 0 <= position <= subpats.len()
         pub Tuple(PatTuple {
             pub paren_token: token::Paren,
-            pub pats: Delimited<Pat, Token![,]>,
-            pub comma_token: Option<Token![,]>,
-            pub dots_pos: Option<usize>,
+            pub front: Delimited<Pat, Token![,]>,
             pub dot2_token: Option<Token![..]>,
+            pub comma_token: Option<Token![,]>,
+            pub back: Delimited<Pat, Token![,]>,
         }),
         /// A `box` pattern
         pub Box(PatBox {
@@ -641,8 +641,8 @@ ast_enum_of_structs! {
             pub bracket_token: token::Bracket,
             pub front: Delimited<Pat, Token![,]>,
             pub middle: Option<Box<Pat>>,
-            pub comma_token: Option<Token![,]>,
             pub dot2_token: Option<Token![..]>,
+            pub comma_token: Option<Token![,]>,
             pub back: Delimited<Pat, Token![,]>,
         }),
         /// A macro pattern; pre-expansion
@@ -2243,41 +2243,34 @@ pub mod parsing {
     impl Synom for PatTuple {
         named!(parse -> Self, do_parse!(
             data: parens!(do_parse!(
-                elems: call!(Delimited::parse_terminated) >>
+                front: call!(Delimited::parse_terminated) >>
                 dotdot: map!(cond!(
-                    elems.is_empty() || elems.trailing_delim(),
+                    front.is_empty() || front.trailing_delim(),
                     option!(do_parse!(
                         dots: punct!(..) >>
                         trailing: option!(punct!(,)) >>
                         (dots, trailing)
                     ))
-                ), |x| x.and_then(|x| x)) >>
-                rest: cond!(match dotdot {
+                ), Option::unwrap_or_default) >>
+                back: cond!(match dotdot {
                                 Some((_, Some(_))) => true,
                                 _ => false,
                             },
                             call!(Delimited::parse_terminated)) >>
-                (elems, dotdot, rest)
+                (front, dotdot, back)
             )) >>
             ({
-                let ((mut elems, dotdot, rest), parens) = data;
+                let ((front, dotdot, back), parens) = data;
                 let (dotdot, trailing) = match dotdot {
                     Some((a, b)) => (Some(a), Some(b)),
                     None => (None, None),
                 };
                 PatTuple {
                     paren_token: parens,
-                    dots_pos: dotdot.as_ref().map(|_| elems.len()),
+                    front: front,
                     dot2_token: dotdot,
-                    comma_token: trailing.and_then(|b| b),
-                    pats: {
-                        if let Some(rest) = rest {
-                            for elem in rest {
-                                elems.push(elem);
-                            }
-                        }
-                        elems
-                    },
+                    comma_token: trailing.unwrap_or_default(),
+                    back: back.unwrap_or_default(),
                 }
             })
         ));
@@ -3009,21 +3002,20 @@ mod printing {
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
-                for (i, token) in self.pats.iter().enumerate() {
-                    if Some(i) == self.dots_pos {
-                        TokensOrDefault(&self.dot2_token).to_tokens(tokens);
-                        TokensOrDefault(&self.comma_token).to_tokens(tokens);
-                    }
-                    token.to_tokens(tokens);
-                }
-
-                if Some(self.pats.len()) == self.dots_pos {
-                    // Ensure there is a comma before the .. token.
-                    if !self.pats.empty_or_trailing() {
+                self.front.to_tokens(tokens);
+                if let Some(ref dot2_token) = self.dot2_token {
+                    if !self.front.empty_or_trailing() {
+                        // Ensure there is a comma before the .. token.
                         <Token![,]>::default().to_tokens(tokens);
                     }
-                    self.dot2_token.to_tokens(tokens);
+                    dot2_token.to_tokens(tokens);
+                    self.comma_token.to_tokens(tokens);
+                    if self.comma_token.is_none() && !self.back.is_empty() {
+                        // Ensure there is a comma after the .. token.
+                        <Token![,]>::default().to_tokens(tokens);
+                    }
                 }
+                self.back.to_tokens(tokens);
             });
         }
     }

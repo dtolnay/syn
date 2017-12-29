@@ -2229,8 +2229,8 @@ pub fn fold_pat_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: PatSlice) -> Pat
         bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
         front: FoldHelper::lift(_i . front, |it| { _visitor.fold_pat(it) }),
         middle: (_i . middle).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
-        comma_token: (_i . comma_token).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
         dot2_token: (_i . dot2_token).map(|it| { Token ! [ .. ](tokens_helper(_visitor, &(it).0)) }),
+        comma_token: (_i . comma_token).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
         back: FoldHelper::lift(_i . back, |it| { _visitor.fold_pat(it) }),
     }
 }
@@ -2247,10 +2247,10 @@ pub fn fold_pat_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatStruct) -> P
 pub fn fold_pat_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTuple) -> PatTuple {
     PatTuple {
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
-        comma_token: (_i . comma_token).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
-        dots_pos: _i . dots_pos,
+        front: FoldHelper::lift(_i . front, |it| { _visitor.fold_pat(it) }),
         dot2_token: (_i . dot2_token).map(|it| { Token ! [ .. ](tokens_helper(_visitor, &(it).0)) }),
+        comma_token: (_i . comma_token).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
+        back: FoldHelper::lift(_i . back, |it| { _visitor.fold_pat(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]

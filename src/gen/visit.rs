@@ -1752,8 +1752,8 @@ pub fn visit_pat_slice<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     tokens_helper(_visitor, &(& _i . bracket_token).0);
     for el in & _i . front { let it = el.item(); _visitor.visit_pat(it) };
     if let Some(ref it) = _i . middle { _visitor.visit_pat(& * * it) };
-    if let Some(ref it) = _i . comma_token { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . dot2_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . comma_token { tokens_helper(_visitor, &(it).0) };
     for el in & _i . back { let it = el.item(); _visitor.visit_pat(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1766,10 +1766,10 @@ pub fn visit_pat_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatTuple) {
     tokens_helper(_visitor, &(& _i . paren_token).0);
-    for el in & _i . pats { let it = el.item(); _visitor.visit_pat(it) };
-    if let Some(ref it) = _i . comma_token { tokens_helper(_visitor, &(it).0) };
-    // Skipped field _i . dots_pos;
+    for el in & _i . front { let it = el.item(); _visitor.visit_pat(it) };
     if let Some(ref it) = _i . dot2_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . comma_token { tokens_helper(_visitor, &(it).0) };
+    for el in & _i . back { let it = el.item(); _visitor.visit_pat(it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_tuple_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatTupleStruct) {
