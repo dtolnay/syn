@@ -979,7 +979,7 @@ pub fn visit_expr_match_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_method_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprMethodCall) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
-    _visitor.visit_expr_mut(& mut * _i . expr);
+    _visitor.visit_expr_mut(& mut * _i . receiver);
     tokens_helper(_visitor, &mut (& mut _i . dot_token).0);
     _visitor.visit_ident_mut(& mut _i . method);
     if let Some(ref mut it) = _i . colon2_token { tokens_helper(_visitor, &mut (it).0) };

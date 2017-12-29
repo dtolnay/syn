@@ -45,7 +45,7 @@ ast_enum_of_structs! {
         /// (within the angle brackets).
         pub MethodCall(ExprMethodCall #full {
             pub attrs: Vec<Attribute>,
-            pub expr: Box<Expr>,
+            pub receiver: Box<Expr>,
             pub dot_token: Token![.],
             pub method: Ident,
             pub colon2_token: Option<Token![::]>,
@@ -1172,7 +1172,7 @@ pub mod parsing {
             |
             tap!(more: and_method_call => {
                 let mut call = more;
-                call.expr = Box::new(e.into());
+                call.receiver = Box::new(e.into());
                 e = call.into();
             })
             |
@@ -1404,7 +1404,7 @@ pub mod parsing {
             ExprMethodCall {
                 attrs: Vec::new(),
                 // this expr will get overwritten after being returned
-                expr: Box::new(Expr::Lit(ExprLit {
+                receiver: Box::new(Expr::Lit(ExprLit {
                     attrs: Vec::new(),
                     lit: Lit {
                         span: Span::default(),
@@ -2449,7 +2449,7 @@ mod printing {
     impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            self.expr.to_tokens(tokens);
+            self.receiver.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.method.to_tokens(tokens);
             if !self.typarams.is_empty() {

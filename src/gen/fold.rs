@@ -1218,7 +1218,7 @@ pub fn fold_expr_match<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> E
 pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMethodCall) -> ExprMethodCall {
     ExprMethodCall {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        expr: Box::new(_visitor.fold_expr(* _i . expr)),
+        receiver: Box::new(_visitor.fold_expr(* _i . receiver)),
         dot_token: Token ! [ . ](tokens_helper(_visitor, &(_i . dot_token).0)),
         method: _visitor.fold_ident(_i . method),
         colon2_token: (_i . colon2_token).map(|it| { Token ! [ :: ](tokens_helper(_visitor, &(it).0)) }),
