@@ -400,6 +400,16 @@ fn fold_where_region_predicate(&mut self, i: WhereRegionPredicate) -> WhereRegio
 
 }
 
+pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Ident) -> Ident {
+    _i.span = _visitor.fold_span(_i.span);
+    _i
+}
+
+pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Lifetime) -> Lifetime {
+    _i.span = _visitor.fold_span(_i.span);
+    _i
+}
+
 
 pub fn fold_abi<V: Folder + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
     Abi {
@@ -1568,13 +1578,6 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
         where_clause: (_i . where_clause).map(|it| { _visitor.fold_where_clause(it) }),
     }
 }
-
-pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
-    Ident {
-        sym: _i . sym,
-        span: _visitor.fold_span(_i . span),
-    }
-}
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
     use ::ImplItem::*;
@@ -1957,13 +1960,6 @@ pub fn fold_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemU
         prefix: FoldHelper::lift(_i . prefix, |it| { _visitor.fold_ident(it) }),
         tree: _visitor.fold_use_tree(_i . tree),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
-    }
-}
-
-pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, _i: Lifetime) -> Lifetime {
-    Lifetime {
-        sym: _i . sym,
-        span: _visitor.fold_span(_i . span),
     }
 }
 

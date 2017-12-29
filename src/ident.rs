@@ -87,7 +87,7 @@ use proc_macro2::Span;
 /// ```
 #[derive(Copy, Clone, Debug)]
 pub struct Ident {
-    pub sym: Term,
+    sym: Term,
     pub span: Span,
 }
 

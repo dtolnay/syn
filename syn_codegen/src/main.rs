@@ -714,6 +714,7 @@ mod codegen {
             under_name = under_name,
             ty = s.ast.ident,
         ));
+        let before_fold_impl_len = state.fold_impl.len();
         state.fold_impl.push_str(&format!(
             "{features}\n\
              pub fn fold_{under_name}<V: Folder + ?Sized>(\
@@ -916,6 +917,12 @@ mod codegen {
         state.visit_impl.push_str("}\n");
         state.visit_mut_impl.push_str("}\n");
         state.fold_impl.push_str("}\n");
+
+        if s.ast.ident == "Ident" || s.ast.ident == "Lifetime" {
+            // Discard the generated impl. These have private fields and are
+            // handwritten.
+            state.fold_impl.truncate(before_fold_impl_len);
+        }
     }
 }
 
@@ -1001,6 +1008,16 @@ use gen::helper::fold::*;
 /// new default implementation gets introduced.)
 pub trait Folder {{
 {fold_trait}
+}}
+
+pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Ident) -> Ident {{
+    _i.span = _visitor.fold_span(_i.span);
+    _i
+}}
+
+pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Lifetime) -> Lifetime {{
+    _i.span = _visitor.fold_span(_i.span);
+    _i
 }}
 
 {fold_impl}
