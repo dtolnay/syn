@@ -235,6 +235,8 @@ fn visit_item_union(&mut self, i: &'ast ItemUnion) { visit_item_union(self, i) }
 fn visit_item_use(&mut self, i: &'ast ItemUse) { visit_item_use(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_verbatim(&mut self, i: &'ast ItemVerbatim) { visit_item_verbatim(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_label(&mut self, i: &'ast Label) { visit_label(self, i) }
 
 fn visit_lifetime(&mut self, i: &'ast Lifetime) { visit_lifetime(self, i) }
 
@@ -846,8 +848,7 @@ pub fn visit_expr_field<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_for_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprForLoop) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
-    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . label { _visitor.visit_label(it) };
     tokens_helper(_visitor, &(& _i . for_token).0);
     _visitor.visit_pat(& * _i . pat);
     tokens_helper(_visitor, &(& _i . in_token).0);
@@ -907,8 +908,7 @@ pub fn visit_expr_lit<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprLoop) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
-    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . label { _visitor.visit_label(it) };
     tokens_helper(_visitor, &(& _i . loop_token).0);
     _visitor.visit_block(& _i . body);
 }
@@ -1015,8 +1015,7 @@ pub fn visit_expr_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhile) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
-    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . label { _visitor.visit_label(it) };
     tokens_helper(_visitor, &(& _i . while_token).0);
     _visitor.visit_expr(& * _i . cond);
     _visitor.visit_block(& _i . body);
@@ -1024,8 +1023,7 @@ pub fn visit_expr_while<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while_let<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhileLet) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
-    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . label { _visitor.visit_label(it) };
     tokens_helper(_visitor, &(& _i . while_token).0);
     tokens_helper(_visitor, &(& _i . let_token).0);
     _visitor.visit_pat(& * _i . pat);
@@ -1493,6 +1491,11 @@ pub fn visit_item_use<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemVerbatim) {
     // Skipped field _i . tts;
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_label<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Label) {
+    _visitor.visit_lifetime(& _i . name);
+    tokens_helper(_visitor, &(& _i . colon_token).0);
 }
 
 pub fn visit_lifetime<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lifetime) {

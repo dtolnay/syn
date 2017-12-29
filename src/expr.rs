@@ -132,8 +132,7 @@ ast_enum_of_structs! {
         /// E.g., `'label: while expr { block }`
         pub While(ExprWhile #full {
             pub attrs: Vec<Attribute>,
-            pub label: Option<Lifetime>,
-            pub colon_token: Option<Token![:]>,
+            pub label: Option<Label>,
             pub while_token: Token![while],
             pub cond: Box<Expr>,
             pub body: Block,
@@ -146,8 +145,7 @@ ast_enum_of_structs! {
         /// This is desugared to a combination of `loop` and `match` expressions.
         pub WhileLet(ExprWhileLet #full {
             pub attrs: Vec<Attribute>,
-            pub label: Option<Lifetime>,
-            pub colon_token: Option<Token![:]>,
+            pub label: Option<Label>,
             pub while_token: Token![while],
             pub let_token: Token![let],
             pub pat: Box<Pat>,
@@ -163,8 +161,7 @@ ast_enum_of_structs! {
         /// This is desugared to a combination of `loop` and `match` expressions.
         pub ForLoop(ExprForLoop #full {
             pub attrs: Vec<Attribute>,
-            pub label: Option<Lifetime>,
-            pub colon_token: Option<Token![:]>,
+            pub label: Option<Label>,
             pub for_token: Token![for],
             pub pat: Box<Pat>,
             pub in_token: Token![in],
@@ -177,8 +174,7 @@ ast_enum_of_structs! {
         /// E.g. `'label: loop { block }`
         pub Loop(ExprLoop #full {
             pub attrs: Vec<Attribute>,
-            pub label: Option<Lifetime>,
-            pub colon_token: Option<Token![:]>,
+            pub label: Option<Label>,
             pub loop_token: Token![loop],
             pub body: Block,
         }),
@@ -542,6 +538,14 @@ ast_struct! {
 
         /// Value of the field.
         pub expr: Expr,
+    }
+}
+
+#[cfg(feature = "full")]
+ast_struct! {
+    pub struct Label {
+        pub name: Lifetime,
+        pub colon_token: Token![:],
     }
 }
 
@@ -1576,7 +1580,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprForLoop {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            label: option!(syn!(Label)) >>
             for_: keyword!(for) >>
             pat: syn!(Pat) >>
             in_: keyword!(in) >>
@@ -1589,8 +1593,7 @@ pub mod parsing {
                 pat: Box::new(pat),
                 expr: Box::new(expr),
                 body: loop_block,
-                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
-                label: lbl.map(|p| p.0),
+                label: label,
             })
         ));
     }
@@ -1598,15 +1601,14 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprLoop {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            label: option!(syn!(Label)) >>
             loop_: keyword!(loop) >>
             loop_block: syn!(Block) >>
             (ExprLoop {
                 attrs: Vec::new(),
                 loop_token: loop_,
                 body: loop_block,
-                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
-                label: lbl.map(|p| p.0),
+                label: label,
             })
         ));
     }
@@ -1738,17 +1740,16 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhile {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             cond: expr_no_struct >>
             while_block: syn!(Block) >>
             (ExprWhile {
                 attrs: Vec::new(),
                 while_token: while_,
-                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 cond: Box::new(cond),
                 body: while_block,
-                label: lbl.map(|p| p.0),
+                label: label,
             })
         ));
     }
@@ -1756,7 +1757,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhileLet {
         named!(parse -> Self, do_parse!(
-            lbl: option!(tuple!(syn!(Lifetime), punct!(:))) >>
+            label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             let_: keyword!(let) >>
             pat: syn!(Pat) >>
@@ -1768,11 +1769,22 @@ pub mod parsing {
                 eq_token: eq,
                 let_token: let_,
                 while_token: while_,
-                colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 pat: Box::new(pat),
                 expr: Box::new(value),
                 body: while_block,
-                label: lbl.map(|p| p.0),
+                label: label,
+            })
+        ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for Label {
+        named!(parse -> Self, do_parse!(
+            name: syn!(Lifetime) >>
+            colon: punct!(:) >>
+            (Label {
+                name: name,
+                colon_token: colon,
             })
         ));
     }
@@ -1781,11 +1793,11 @@ pub mod parsing {
     impl Synom for ExprContinue {
         named!(parse -> Self, do_parse!(
             cont: keyword!(continue) >>
-            lbl: option!(syn!(Lifetime)) >>
+            label: option!(syn!(Lifetime)) >>
             (ExprContinue {
                 attrs: Vec::new(),
                 continue_token: cont,
-                label: lbl,
+                label: label,
             })
         ));
     }
@@ -1793,13 +1805,13 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(expr_break(allow_struct: bool) -> Expr, do_parse!(
         break_: keyword!(break) >>
-        lbl: option!(syn!(Lifetime)) >>
+        label: option!(syn!(Lifetime)) >>
         // We can't allow blocks after a `break` expression when we wouldn't
         // allow structs, as this expression is ambiguous.
         val: opt_ambiguous_expr!(allow_struct) >>
         (ExprBreak {
             attrs: Vec::new(),
-            label: lbl,
+            label: label,
             expr: val.map(Box::new),
             break_token: break_,
         }.into())
@@ -2636,10 +2648,7 @@ mod printing {
     impl ToTokens for ExprWhile {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            if self.label.is_some() {
-                self.label.to_tokens(tokens);
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-            }
+            self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
             self.body.to_tokens(tokens);
@@ -2650,10 +2659,7 @@ mod printing {
     impl ToTokens for ExprWhileLet {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            if self.label.is_some() {
-                self.label.to_tokens(tokens);
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-            }
+            self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
@@ -2667,10 +2673,7 @@ mod printing {
     impl ToTokens for ExprForLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            if self.label.is_some() {
-                self.label.to_tokens(tokens);
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-            }
+            self.label.to_tokens(tokens);
             self.for_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
@@ -2683,10 +2686,7 @@ mod printing {
     impl ToTokens for ExprLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            if self.label.is_some() {
-                self.label.to_tokens(tokens);
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-            }
+            self.label.to_tokens(tokens);
             self.loop_token.to_tokens(tokens);
             self.body.to_tokens(tokens);
         }
@@ -2958,6 +2958,14 @@ mod printing {
     impl ToTokens for ExprVerbatim {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.tts.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for Label {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.name.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
         }
     }
 

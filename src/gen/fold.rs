@@ -239,6 +239,8 @@ fn fold_item_union(&mut self, i: ItemUnion) -> ItemUnion { fold_item_union(self,
 fn fold_item_use(&mut self, i: ItemUse) -> ItemUse { fold_item_use(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_verbatim(&mut self, i: ItemVerbatim) -> ItemVerbatim { fold_item_verbatim(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_label(&mut self, i: Label) -> Label { fold_label(self, i) }
 
 fn fold_lifetime(&mut self, i: Lifetime) -> Lifetime { fold_lifetime(self, i) }
 
@@ -1065,8 +1067,7 @@ pub fn fold_expr_field<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprField) -> E
 pub fn fold_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop) -> ExprForLoop {
     ExprForLoop {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
-        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
+        label: (_i . label).map(|it| { _visitor.fold_label(it) }),
         for_token: Token ! [ for ](tokens_helper(_visitor, &(_i . for_token).0)),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         in_token: Token ! [ in ](tokens_helper(_visitor, &(_i . in_token).0)),
@@ -1140,8 +1141,7 @@ pub fn fold_expr_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLit) -> ExprL
 pub fn fold_expr_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> ExprLoop {
     ExprLoop {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
-        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
+        label: (_i . label).map(|it| { _visitor.fold_label(it) }),
         loop_token: Token ! [ loop ](tokens_helper(_visitor, &(_i . loop_token).0)),
         body: _visitor.fold_block(_i . body),
     }
@@ -1280,8 +1280,7 @@ pub fn fold_expr_verbatim<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprVerbatim
 pub fn fold_expr_while<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> ExprWhile {
     ExprWhile {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
-        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
+        label: (_i . label).map(|it| { _visitor.fold_label(it) }),
         while_token: Token ! [ while ](tokens_helper(_visitor, &(_i . while_token).0)),
         cond: Box::new(_visitor.fold_expr(* _i . cond)),
         body: _visitor.fold_block(_i . body),
@@ -1291,8 +1290,7 @@ pub fn fold_expr_while<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> E
 pub fn fold_expr_while_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprWhileLet) -> ExprWhileLet {
     ExprWhileLet {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
-        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
+        label: (_i . label).map(|it| { _visitor.fold_label(it) }),
         while_token: Token ! [ while ](tokens_helper(_visitor, &(_i . while_token).0)),
         let_token: Token ! [ let ](tokens_helper(_visitor, &(_i . let_token).0)),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
@@ -1899,6 +1897,13 @@ pub fn fold_item_use<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemU
 pub fn fold_item_verbatim<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemVerbatim) -> ItemVerbatim {
     ItemVerbatim {
         tts: _i . tts,
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_label<V: Folder + ?Sized>(_visitor: &mut V, _i: Label) -> Label {
+    Label {
+        name: _visitor.fold_lifetime(_i . name),
+        colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
     }
 }
 

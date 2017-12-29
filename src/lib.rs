@@ -41,7 +41,7 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
                ExprUnary, ExprUnsafe, ExprVerbatim, ExprWhile, ExprWhileLet, ExprYield, Index, Member};
 
 #[cfg(feature = "full")]
-pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Local,
+pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local,
                MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatRef, PatSlice,
                PatStruct, PatTuple, PatTupleStruct, PatVerbatim, PatWild, RangeLimits, Stmt};
 
