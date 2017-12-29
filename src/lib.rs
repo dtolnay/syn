@@ -87,7 +87,7 @@ mod op;
 pub use op::{BinOp, UnOp};
 
 mod ty;
-pub use ty::{Abi, AbiKind, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
+pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
              GenericArgument, ParenthesizedGenericArguments, Path,
              PathArguments, PathSegment, PolyTraitRef, QSelf, ReturnType, Type, TypeArray,
              TypeBareFn, TypeBinding, TypeGroup, TypeImplTrait, TypeInfer, TypeNever, TypeParen,

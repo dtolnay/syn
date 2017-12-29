@@ -38,8 +38,6 @@ pub trait Visitor<'ast> {
 
 fn visit_abi(&mut self, i: &'ast Abi) { visit_abi(self, i) }
 
-fn visit_abi_kind(&mut self, i: &'ast AbiKind) { visit_abi_kind(self, i) }
-
 fn visit_angle_bracketed_generic_arguments(&mut self, i: &'ast AngleBracketedGenericArguments) { visit_angle_bracketed_generic_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_arg_captured(&mut self, i: &'ast ArgCaptured) { visit_arg_captured(self, i) }
@@ -381,17 +379,7 @@ fn visit_where_region_predicate(&mut self, i: &'ast WhereRegionPredicate) { visi
 
 pub fn visit_abi<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Abi) {
     tokens_helper(_visitor, &(& _i . extern_token).0);
-    _visitor.visit_abi_kind(& _i . kind);
-}
-
-pub fn visit_abi_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AbiKind) {
-    use ::AbiKind::*;
-    match *_i {
-        Named(ref _binding_0, ) => {
-            _visitor.visit_lit(_binding_0);
-        }
-        Default => { }
-    }
+    if let Some(ref it) = _i . name { _visitor.visit_lit(it) };
 }
 
 pub fn visit_angle_bracketed_generic_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AngleBracketedGenericArguments) {

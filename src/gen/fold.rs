@@ -42,8 +42,6 @@ pub trait Folder {
 
 fn fold_abi(&mut self, i: Abi) -> Abi { fold_abi(self, i) }
 
-fn fold_abi_kind(&mut self, i: AbiKind) -> AbiKind { fold_abi_kind(self, i) }
-
 fn fold_angle_bracketed_generic_arguments(&mut self, i: AngleBracketedGenericArguments) -> AngleBracketedGenericArguments { fold_angle_bracketed_generic_arguments(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_arg_captured(&mut self, i: ArgCaptured) -> ArgCaptured { fold_arg_captured(self, i) }
@@ -396,19 +394,7 @@ pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Lifetime) -> 
 pub fn fold_abi<V: Folder + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
     Abi {
         extern_token: Token ! [ extern ](tokens_helper(_visitor, &(_i . extern_token).0)),
-        kind: _visitor.fold_abi_kind(_i . kind),
-    }
-}
-
-pub fn fold_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKind {
-    use ::AbiKind::*;
-    match _i {
-        Named(_binding_0, ) => {
-            Named (
-                _visitor.fold_lit(_binding_0),
-            )
-        }
-        Default => { Default }
+        name: (_i . name).map(|it| { _visitor.fold_lit(it) }),
     }
 }
 

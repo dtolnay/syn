@@ -38,8 +38,6 @@ pub trait VisitorMut {
 
 fn visit_abi_mut(&mut self, i: &mut Abi) { visit_abi_mut(self, i) }
 
-fn visit_abi_kind_mut(&mut self, i: &mut AbiKind) { visit_abi_kind_mut(self, i) }
-
 fn visit_angle_bracketed_generic_arguments_mut(&mut self, i: &mut AngleBracketedGenericArguments) { visit_angle_bracketed_generic_arguments_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_arg_captured_mut(&mut self, i: &mut ArgCaptured) { visit_arg_captured_mut(self, i) }
@@ -381,17 +379,7 @@ fn visit_where_region_predicate_mut(&mut self, i: &mut WhereRegionPredicate) { v
 
 pub fn visit_abi_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Abi) {
     tokens_helper(_visitor, &mut (& mut _i . extern_token).0);
-    _visitor.visit_abi_kind_mut(& mut _i . kind);
-}
-
-pub fn visit_abi_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut AbiKind) {
-    use ::AbiKind::*;
-    match *_i {
-        Named(ref mut _binding_0, ) => {
-            _visitor.visit_lit_mut(_binding_0);
-        }
-        Default => { }
-    }
+    if let Some(ref mut it) = _i . name { _visitor.visit_lit_mut(it) };
 }
 
 pub fn visit_angle_bracketed_generic_arguments_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut AngleBracketedGenericArguments) {

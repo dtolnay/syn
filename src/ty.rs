@@ -271,14 +271,7 @@ ast_struct! {
 ast_struct! {
     pub struct Abi {
         pub extern_token: Token![extern],
-        pub kind: AbiKind,
-    }
-}
-
-ast_enum! {
-    pub enum AbiKind {
-        Named(Lit),
-        Default,
+        pub name: Option<Lit>,
     }
 }
 
@@ -783,10 +776,7 @@ pub mod parsing {
             name: option!(syn!(Lit)) >>
             (Abi {
                 extern_token: extern_,
-                kind: match name {
-                    Some(name) => AbiKind::Named(name),
-                    None => AbiKind::Default,
-                },
+                name: name,
             })
         ));
     }
@@ -1072,10 +1062,7 @@ mod printing {
     impl ToTokens for Abi {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.extern_token.to_tokens(tokens);
-            match self.kind {
-                AbiKind::Named(ref named) => named.to_tokens(tokens),
-                AbiKind::Default => {}
-            }
+            self.name.to_tokens(tokens);
         }
     }
 }
