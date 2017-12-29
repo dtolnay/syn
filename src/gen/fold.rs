@@ -2695,8 +2695,10 @@ pub fn fold_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Varian
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ident: _visitor.fold_ident(_i . ident),
         data: _visitor.fold_variant_data(_i . data),
-        eq_token: (_i . eq_token).map(|it| { Token ! [ = ](tokens_helper(_visitor, &(it).0)) }),
-        discriminant: (_i . discriminant).map(|it| { _visitor.fold_expr(it) }),
+        discriminant: (_i . discriminant).map(|it| { (
+            Token ! [ = ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            _visitor.fold_expr(( it ) . 1),
+        ) }),
     }
 }
 

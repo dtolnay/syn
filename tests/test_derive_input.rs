@@ -228,7 +228,6 @@ fn test_enum() {
                 Variant {
                     ident: "Ok".into(),
                     attrs: Vec::new(),
-                    eq_token: None,
                     data: VariantData::Tuple(
                         vec![
                             Field {
@@ -249,7 +248,6 @@ fn test_enum() {
                 Variant {
                     ident: "Err".into(),
                     attrs: Vec::new(),
-                    eq_token: None,
                     data: VariantData::Tuple(
                         vec![
                             Field {
@@ -271,52 +269,56 @@ fn test_enum() {
                     ident: "Surprise".into(),
                     attrs: Vec::new(),
                     data: VariantData::Unit,
-                    eq_token: Some(Default::default()),
-                    discriminant: Some(Expr {
-                        node: Lit {
-                            value: LitKind::Other(Literal::isize(0)),
-                            span: Default::default(),
-                        }.into(),
-                        attrs: Vec::new(),
-                    }),
+                    discriminant: Some((
+                        Default::default(),
+                        Expr {
+                            node: Lit {
+                                value: LitKind::Other(Literal::isize(0)),
+                                span: Default::default(),
+                            }.into(),
+                            attrs: Vec::new(),
+                        },
+                    )),
                 },
                 Variant {
                     ident: "ProcMacroHack".into(),
                     attrs: Vec::new(),
                     data: VariantData::Unit,
-                    eq_token: Some(Default::default()),
-                    discriminant: Some(Expr {
-                        node: ExprField {
-                            base: Box::new(Expr {
-                                node: ExprTuple {
-                                    paren_token: Default::default(),
-                                    args: vec![
-                                        Expr {
-                                            node: ExprKind::Lit(Lit {
-                                                value: LitKind::Other(Literal::integer(0)),
-                                                span: Default::default(),
-                                            }),
-                                            attrs: Vec::new(),
-                                        },
-                                        Expr {
-                                            node: ExprKind::Lit(Lit {
-                                                value: LitKind::Other(Literal::string("data")),
-                                                span: Default::default(),
-                                            }),
-                                            attrs: Vec::new(),
-                                        },
-                                    ].into(),
-                                }.into(),
-                                attrs: Vec::new(),
-                            }),
-                            dot_token: Default::default(),
-                            member: Member::Unnamed(Index {
-                                index: 0,
-                                span: Default::default(),
-                            }),
-                        }.into(),
-                        attrs: Vec::new(),
-                    }),
+                    discriminant: Some((
+                        Default::default(),
+                        Expr {
+                            node: ExprField {
+                                base: Box::new(Expr {
+                                    node: ExprTuple {
+                                        paren_token: Default::default(),
+                                        args: vec![
+                                            Expr {
+                                                node: ExprKind::Lit(Lit {
+                                                    value: LitKind::Other(Literal::integer(0)),
+                                                    span: Default::default(),
+                                                }),
+                                                attrs: Vec::new(),
+                                            },
+                                            Expr {
+                                                node: ExprKind::Lit(Lit {
+                                                    value: LitKind::Other(Literal::string("data")),
+                                                    span: Default::default(),
+                                                }),
+                                                attrs: Vec::new(),
+                                            },
+                                        ].into(),
+                                    }.into(),
+                                    attrs: Vec::new(),
+                                }),
+                                dot_token: Default::default(),
+                                member: Member::Unnamed(Index {
+                                    index: 0,
+                                    span: Default::default(),
+                                }),
+                            }.into(),
+                            attrs: Vec::new(),
+                        },
+                    )),
                 },
             ].into(),
             brace_token: Default::default(),

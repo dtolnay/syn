@@ -13,10 +13,8 @@ ast_struct! {
         /// Type of variant.
         pub data: VariantData,
 
-        pub eq_token: Option<Token![=]>,
-
         /// Explicit discriminant, e.g. `Foo = 1`
-        pub discriminant: Option<Expr>,
+        pub discriminant: Option<(Token![=], Expr)>,
     }
 }
 
@@ -210,8 +208,8 @@ mod printing {
             tokens.append_all(&self.attrs);
             self.ident.to_tokens(tokens);
             self.data.to_tokens(tokens);
-            if let Some(ref disc) = self.discriminant {
-                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+            if let Some((ref eq_token, ref disc)) = self.discriminant {
+                eq_token.to_tokens(tokens);
                 disc.to_tokens(tokens);
             }
         }

@@ -2081,8 +2081,10 @@ pub fn visit_variant_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Vari
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_ident_mut(& mut _i . ident);
     _visitor.visit_variant_data_mut(& mut _i . data);
-    if let Some(ref mut it) = _i . eq_token { tokens_helper(_visitor, &mut (it).0) };
-    if let Some(ref mut it) = _i . discriminant { _visitor.visit_expr_mut(it) };
+    if let Some(ref mut it) = _i . discriminant { 
+            tokens_helper(_visitor, &mut (& mut ( it ) . 0).0);
+            _visitor.visit_expr_mut(& mut ( it ) . 1);
+         };
 }
 
 pub fn visit_variant_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut VariantData) {

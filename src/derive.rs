@@ -136,17 +136,12 @@ pub mod parsing {
                 |
                 epsilon!() => { |_| VariantData::Unit }
             ) >>
-            disr: option!(do_parse!(
-                eq: punct!(=) >>
-                disr: syn!(Expr) >>
-                (eq, disr)
-            )) >>
+            disr: option!(tuple!(punct!(=), syn!(Expr))) >>
             (Variant {
                 ident: id,
                 attrs: attrs,
                 data: data,
-                eq_token: disr.as_ref().map(|p| Token![=]((p.0).0)),
-                discriminant: disr.map(|p| p.1),
+                discriminant: disr,
             })
         ));
     }
