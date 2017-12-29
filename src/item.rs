@@ -1,9 +1,9 @@
 use super::*;
 use delimited::Delimited;
-use proc_macro2::TokenTree;
+use proc_macro2::{TokenTree, TokenStream};
 
 #[cfg(feature = "extra-traits")]
-use mac::TokenTreeHelper;
+use mac::{TokenTreeHelper, TokenStreamHelper};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
@@ -207,6 +207,9 @@ ast_enum_of_structs! {
             pub args: TokenTree,
             pub body: TokenTree,
         }),
+        pub Verbatim(ItemVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
     }
 }
 
@@ -235,6 +238,26 @@ impl Hash for ItemMacro2 {
         self.ident.hash(state);
         TokenTreeHelper(&self.args).hash(state);
         TokenTreeHelper(&self.body).hash(state);
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for ItemVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for ItemVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for ItemVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -313,6 +336,29 @@ ast_enum_of_structs! {
             pub ident: Ident,
             pub semi_token: Token![;],
         }),
+        pub Verbatim(ForeignItemVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for ForeignItemVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for ForeignItemVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for ForeignItemVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -352,6 +398,29 @@ ast_enum_of_structs! {
             pub mac: Macro,
             pub semi_token: Option<Token![;]>,
         }),
+        pub Verbatim(TraitItemVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for TraitItemVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for TraitItemVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for TraitItemVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -392,6 +461,29 @@ ast_enum_of_structs! {
             pub mac: Macro,
             pub semi_token: Option<Token![;]>,
         }),
+        pub Verbatim(ImplItemVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for ImplItemVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for ImplItemVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for ImplItemVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -1532,6 +1624,12 @@ mod printing {
         }
     }
 
+    impl ToTokens for ItemVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for UsePath {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
@@ -1616,6 +1714,12 @@ mod printing {
         }
     }
 
+    impl ToTokens for TraitItemVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for ImplItemConst {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
@@ -1666,6 +1770,12 @@ mod printing {
         }
     }
 
+    impl ToTokens for ImplItemVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for ForeignItemFn {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
@@ -1695,6 +1805,12 @@ mod printing {
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ForeignItemVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
         }
     }
 

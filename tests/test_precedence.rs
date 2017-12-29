@@ -292,10 +292,9 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::*;
     use syn::fold::*;
-    use std::mem;
 
     fn paren(folder: &mut BracketsFolder, mut node: Expr) -> Expr {
-        let attrs = mem::replace(node.attrs_mut(), Vec::new());
+        let attrs = node.replace_attrs(Vec::new());
         Expr::Paren(ExprParen {
             attrs: attrs,
             expr: Box::new(fold_expr(

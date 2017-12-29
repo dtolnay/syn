@@ -145,6 +145,8 @@ fn visit_expr_type_mut(&mut self, i: &mut ExprType) { visit_expr_type_mut(self, 
 fn visit_expr_unary_mut(&mut self, i: &mut ExprUnary) { visit_expr_unary_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_unsafe_mut(&mut self, i: &mut ExprUnsafe) { visit_expr_unsafe_mut(self, i) }
+
+fn visit_expr_verbatim_mut(&mut self, i: &mut ExprVerbatim) { visit_expr_verbatim_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_while_mut(&mut self, i: &mut ExprWhile) { visit_expr_while_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -171,6 +173,8 @@ fn visit_foreign_item_fn_mut(&mut self, i: &mut ForeignItemFn) { visit_foreign_i
 fn visit_foreign_item_static_mut(&mut self, i: &mut ForeignItemStatic) { visit_foreign_item_static_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type_mut(&mut self, i: &mut ForeignItemType) { visit_foreign_item_type_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_foreign_item_verbatim_mut(&mut self, i: &mut ForeignItemVerbatim) { visit_foreign_item_verbatim_mut(self, i) }
 
 fn visit_generic_argument_mut(&mut self, i: &mut GenericArgument) { visit_generic_argument_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -191,6 +195,8 @@ fn visit_impl_item_macro_mut(&mut self, i: &mut ImplItemMacro) { visit_impl_item
 fn visit_impl_item_method_mut(&mut self, i: &mut ImplItemMethod) { visit_impl_item_method_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item_type_mut(&mut self, i: &mut ImplItemType) { visit_impl_item_type_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_impl_item_verbatim_mut(&mut self, i: &mut ImplItemVerbatim) { visit_impl_item_verbatim_mut(self, i) }
 
 fn visit_index_mut(&mut self, i: &mut Index) { visit_index_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -227,6 +233,8 @@ fn visit_item_type_mut(&mut self, i: &mut ItemType) { visit_item_type_mut(self, 
 fn visit_item_union_mut(&mut self, i: &mut ItemUnion) { visit_item_union_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_use_mut(&mut self, i: &mut ItemUse) { visit_item_use_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_item_verbatim_mut(&mut self, i: &mut ItemVerbatim) { visit_item_verbatim_mut(self, i) }
 
 fn visit_lifetime_mut(&mut self, i: &mut Lifetime) { visit_lifetime_mut(self, i) }
 
@@ -276,6 +284,8 @@ fn visit_pat_tuple_mut(&mut self, i: &mut PatTuple) { visit_pat_tuple_mut(self, 
 # [ cfg ( feature = "full" ) ]
 fn visit_pat_tuple_struct_mut(&mut self, i: &mut PatTupleStruct) { visit_pat_tuple_struct_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn visit_pat_verbatim_mut(&mut self, i: &mut PatVerbatim) { visit_pat_verbatim_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn visit_pat_wild_mut(&mut self, i: &mut PatWild) { visit_pat_wild_mut(self, i) }
 
 fn visit_path_mut(&mut self, i: &mut Path) { visit_path_mut(self, i) }
@@ -307,6 +317,8 @@ fn visit_trait_item_macro_mut(&mut self, i: &mut TraitItemMacro) { visit_trait_i
 fn visit_trait_item_method_mut(&mut self, i: &mut TraitItemMethod) { visit_trait_item_method_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_type_mut(&mut self, i: &mut TraitItemType) { visit_trait_item_type_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_trait_item_verbatim_mut(&mut self, i: &mut TraitItemVerbatim) { visit_trait_item_verbatim_mut(self, i) }
 
 fn visit_type_mut(&mut self, i: &mut Type) { visit_type_mut(self, i) }
 
@@ -341,6 +353,8 @@ fn visit_type_slice_mut(&mut self, i: &mut TypeSlice) { visit_type_slice_mut(sel
 fn visit_type_trait_object_mut(&mut self, i: &mut TypeTraitObject) { visit_type_trait_object_mut(self, i) }
 
 fn visit_type_tuple_mut(&mut self, i: &mut TypeTuple) { visit_type_tuple_mut(self, i) }
+
+fn visit_type_verbatim_mut(&mut self, i: &mut TypeVerbatim) { visit_type_verbatim_mut(self, i) }
 
 fn visit_un_op_mut(&mut self, i: &mut UnOp) { visit_un_op_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -720,6 +734,9 @@ pub fn visit_expr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
         Yield(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_yield_mut(_binding_0));
         }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_expr_verbatim_mut(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -983,6 +1000,10 @@ pub fn visit_expr_unsafe_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
     tokens_helper(_visitor, &mut (& mut _i . unsafe_token).0);
     _visitor.visit_block_mut(& mut _i . block);
 }
+
+pub fn visit_expr_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprVerbatim) {
+    // Skipped field _i . tts;
+}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprWhile) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
@@ -1081,6 +1102,9 @@ pub fn visit_foreign_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
         Type(ref mut _binding_0, ) => {
             _visitor.visit_foreign_item_type_mut(_binding_0);
         }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_foreign_item_verbatim_mut(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1109,6 +1133,10 @@ pub fn visit_foreign_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
     tokens_helper(_visitor, &mut (& mut _i . type_token).0);
     _visitor.visit_ident_mut(& mut _i . ident);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_foreign_item_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ForeignItemVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_generic_argument_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut GenericArgument) {
@@ -1183,6 +1211,9 @@ pub fn visit_impl_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Im
         Macro(ref mut _binding_0, ) => {
             _visitor.visit_impl_item_macro_mut(_binding_0);
         }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_impl_item_verbatim_mut(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1223,6 +1254,10 @@ pub fn visit_impl_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
     tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
     _visitor.visit_type_mut(& mut _i . ty);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_impl_item_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ImplItemVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_index_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Index) {
@@ -1280,6 +1315,9 @@ pub fn visit_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Item) {
         }
         Macro2(ref mut _binding_0, ) => {
             _visitor.visit_item_macro2_mut(_binding_0);
+        }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_item_verbatim_mut(_binding_0);
         }
     }
 }
@@ -1457,6 +1495,10 @@ pub fn visit_item_use_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ite
     _visitor.visit_use_tree_mut(& mut _i . tree);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
 }
+# [ cfg ( feature = "full" ) ]
+pub fn visit_item_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemVerbatim) {
+    // Skipped field _i . tts;
+}
 
 pub fn visit_lifetime_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Lifetime) {
     // Skipped field _i . sym;
@@ -1603,6 +1645,9 @@ pub fn visit_pat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
         Macro(ref mut _binding_0, ) => {
             _visitor.visit_macro_mut(_binding_0);
         }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_pat_verbatim_mut(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1667,6 +1712,10 @@ pub fn visit_pat_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pa
 pub fn visit_pat_tuple_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatTupleStruct) {
     _visitor.visit_path_mut(& mut _i . path);
     _visitor.visit_pat_tuple_mut(& mut _i . pat);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_pat_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatVerbatim) {
+    // Skipped field _i . tts;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_wild_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatWild) {
@@ -1779,6 +1828,9 @@ pub fn visit_trait_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut T
         Macro(ref mut _binding_0, ) => {
             _visitor.visit_trait_item_macro_mut(_binding_0);
         }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_trait_item_verbatim_mut(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1820,6 +1872,10 @@ pub fn visit_trait_item_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
             _visitor.visit_type_mut(& mut ( it ) . 1);
          };
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_trait_item_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TraitItemVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
@@ -1866,6 +1922,9 @@ pub fn visit_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
         }
         Macro(ref mut _binding_0, ) => {
             _visitor.visit_macro_mut(_binding_0);
+        }
+        Verbatim(ref mut _binding_0, ) => {
+            _visitor.visit_type_verbatim_mut(_binding_0);
         }
     }
 }
@@ -1971,6 +2030,10 @@ pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
 pub fn visit_type_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTuple) {
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . elems { let it = el.item_mut(); _visitor.visit_type_mut(it) };
+}
+
+pub fn visit_type_verbatim_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_un_op_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut UnOp) {

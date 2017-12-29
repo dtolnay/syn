@@ -145,6 +145,8 @@ fn visit_expr_type(&mut self, i: &'ast ExprType) { visit_expr_type(self, i) }
 fn visit_expr_unary(&mut self, i: &'ast ExprUnary) { visit_expr_unary(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_unsafe(&mut self, i: &'ast ExprUnsafe) { visit_expr_unsafe(self, i) }
+
+fn visit_expr_verbatim(&mut self, i: &'ast ExprVerbatim) { visit_expr_verbatim(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_while(&mut self, i: &'ast ExprWhile) { visit_expr_while(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -171,6 +173,8 @@ fn visit_foreign_item_fn(&mut self, i: &'ast ForeignItemFn) { visit_foreign_item
 fn visit_foreign_item_static(&mut self, i: &'ast ForeignItemStatic) { visit_foreign_item_static(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_foreign_item_type(&mut self, i: &'ast ForeignItemType) { visit_foreign_item_type(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_foreign_item_verbatim(&mut self, i: &'ast ForeignItemVerbatim) { visit_foreign_item_verbatim(self, i) }
 
 fn visit_generic_argument(&mut self, i: &'ast GenericArgument) { visit_generic_argument(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -191,6 +195,8 @@ fn visit_impl_item_macro(&mut self, i: &'ast ImplItemMacro) { visit_impl_item_ma
 fn visit_impl_item_method(&mut self, i: &'ast ImplItemMethod) { visit_impl_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_item_type(&mut self, i: &'ast ImplItemType) { visit_impl_item_type(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_impl_item_verbatim(&mut self, i: &'ast ImplItemVerbatim) { visit_impl_item_verbatim(self, i) }
 
 fn visit_index(&mut self, i: &'ast Index) { visit_index(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -227,6 +233,8 @@ fn visit_item_type(&mut self, i: &'ast ItemType) { visit_item_type(self, i) }
 fn visit_item_union(&mut self, i: &'ast ItemUnion) { visit_item_union(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_use(&mut self, i: &'ast ItemUse) { visit_item_use(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_item_verbatim(&mut self, i: &'ast ItemVerbatim) { visit_item_verbatim(self, i) }
 
 fn visit_lifetime(&mut self, i: &'ast Lifetime) { visit_lifetime(self, i) }
 
@@ -276,6 +284,8 @@ fn visit_pat_tuple(&mut self, i: &'ast PatTuple) { visit_pat_tuple(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_pat_tuple_struct(&mut self, i: &'ast PatTupleStruct) { visit_pat_tuple_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn visit_pat_verbatim(&mut self, i: &'ast PatVerbatim) { visit_pat_verbatim(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn visit_pat_wild(&mut self, i: &'ast PatWild) { visit_pat_wild(self, i) }
 
 fn visit_path(&mut self, i: &'ast Path) { visit_path(self, i) }
@@ -307,6 +317,8 @@ fn visit_trait_item_macro(&mut self, i: &'ast TraitItemMacro) { visit_trait_item
 fn visit_trait_item_method(&mut self, i: &'ast TraitItemMethod) { visit_trait_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_trait_item_type(&mut self, i: &'ast TraitItemType) { visit_trait_item_type(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_trait_item_verbatim(&mut self, i: &'ast TraitItemVerbatim) { visit_trait_item_verbatim(self, i) }
 
 fn visit_type(&mut self, i: &'ast Type) { visit_type(self, i) }
 
@@ -341,6 +353,8 @@ fn visit_type_slice(&mut self, i: &'ast TypeSlice) { visit_type_slice(self, i) }
 fn visit_type_trait_object(&mut self, i: &'ast TypeTraitObject) { visit_type_trait_object(self, i) }
 
 fn visit_type_tuple(&mut self, i: &'ast TypeTuple) { visit_type_tuple(self, i) }
+
+fn visit_type_verbatim(&mut self, i: &'ast TypeVerbatim) { visit_type_verbatim(self, i) }
 
 fn visit_un_op(&mut self, i: &'ast UnOp) { visit_un_op(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -720,6 +734,9 @@ pub fn visit_expr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast E
         Yield(ref _binding_0, ) => {
             full!(_visitor.visit_expr_yield(_binding_0));
         }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_expr_verbatim(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -983,6 +1000,10 @@ pub fn visit_expr_unsafe<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     tokens_helper(_visitor, &(& _i . unsafe_token).0);
     _visitor.visit_block(& _i . block);
 }
+
+pub fn visit_expr_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprVerbatim) {
+    // Skipped field _i . tts;
+}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhile) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
@@ -1081,6 +1102,9 @@ pub fn visit_foreign_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
         Type(ref _binding_0, ) => {
             _visitor.visit_foreign_item_type(_binding_0);
         }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_foreign_item_verbatim(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1109,6 +1133,10 @@ pub fn visit_foreign_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
     tokens_helper(_visitor, &(& _i . type_token).0);
     _visitor.visit_ident(& _i . ident);
     tokens_helper(_visitor, &(& _i . semi_token).0);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_foreign_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ForeignItemVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericArgument) {
@@ -1183,6 +1211,9 @@ pub fn visit_impl_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         Macro(ref _binding_0, ) => {
             _visitor.visit_impl_item_macro(_binding_0);
         }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_impl_item_verbatim(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1223,6 +1254,10 @@ pub fn visit_impl_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
     tokens_helper(_visitor, &(& _i . eq_token).0);
     _visitor.visit_type(& _i . ty);
     tokens_helper(_visitor, &(& _i . semi_token).0);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_impl_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItemVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_index<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Index) {
@@ -1280,6 +1315,9 @@ pub fn visit_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast I
         }
         Macro2(ref _binding_0, ) => {
             _visitor.visit_item_macro2(_binding_0);
+        }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_item_verbatim(_binding_0);
         }
     }
 }
@@ -1457,6 +1495,10 @@ pub fn visit_item_use<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     _visitor.visit_use_tree(& _i . tree);
     tokens_helper(_visitor, &(& _i . semi_token).0);
 }
+# [ cfg ( feature = "full" ) ]
+pub fn visit_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemVerbatim) {
+    // Skipped field _i . tts;
+}
 
 pub fn visit_lifetime<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lifetime) {
     // Skipped field _i . sym;
@@ -1603,6 +1645,9 @@ pub fn visit_pat<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pa
         Macro(ref _binding_0, ) => {
             _visitor.visit_macro(_binding_0);
         }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_pat_verbatim(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1667,6 +1712,10 @@ pub fn visit_pat_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 pub fn visit_pat_tuple_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatTupleStruct) {
     _visitor.visit_path(& _i . path);
     _visitor.visit_pat_tuple(& _i . pat);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_pat_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatVerbatim) {
+    // Skipped field _i . tts;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_wild<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatWild) {
@@ -1779,6 +1828,9 @@ pub fn visit_trait_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
         Macro(ref _binding_0, ) => {
             _visitor.visit_trait_item_macro(_binding_0);
         }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_trait_item_verbatim(_binding_0);
+        }
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1820,6 +1872,10 @@ pub fn visit_trait_item_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, 
             _visitor.visit_type(& ( it ) . 1);
          };
     tokens_helper(_visitor, &(& _i . semi_token).0);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_trait_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitItemVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Type) {
@@ -1866,6 +1922,9 @@ pub fn visit_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast T
         }
         Macro(ref _binding_0, ) => {
             _visitor.visit_macro(_binding_0);
+        }
+        Verbatim(ref _binding_0, ) => {
+            _visitor.visit_type_verbatim(_binding_0);
         }
     }
 }
@@ -1971,6 +2030,10 @@ pub fn visit_type_trait_object<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
 pub fn visit_type_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeTuple) {
     tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . elems { let it = el.item(); _visitor.visit_type(it) };
+}
+
+pub fn visit_type_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeVerbatim) {
+    // Skipped field _i . tts;
 }
 
 pub fn visit_un_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UnOp) {

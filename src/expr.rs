@@ -1,8 +1,12 @@
 use super::*;
 use delimited::Delimited;
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
+#[cfg(feature = "extra-traits")]
+use mac::TokenStreamHelper;
+#[cfg(feature = "full")]
+use std::mem;
 
 ast_enum_of_structs! {
     /// An expression.
@@ -370,6 +374,30 @@ ast_enum_of_structs! {
             pub yield_token: Token![yield],
             pub expr: Option<Box<Expr>>,
         }),
+
+        pub Verbatim(ExprVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for ExprVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for ExprVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for ExprVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -377,7 +405,7 @@ impl Expr {
     // Not public API.
     #[doc(hidden)]
     #[cfg(feature = "full")]
-    pub fn attrs_mut(&mut self) -> &mut Vec<Attribute> {
+    pub fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match *self {
             Expr::Box(ExprBox { ref mut attrs, .. }) |
             Expr::InPlace(ExprInPlace { ref mut attrs, .. }) |
@@ -417,7 +445,13 @@ impl Expr {
             Expr::Group(ExprGroup { ref mut attrs, .. }) |
             Expr::Try(ExprTry { ref mut attrs, .. }) |
             Expr::Catch(ExprCatch { ref mut attrs, .. }) |
-            Expr::Yield(ExprYield { ref mut attrs, .. }) => attrs,
+            Expr::Yield(ExprYield { ref mut attrs, .. }) => {
+                mem::replace(attrs, new)
+            }
+            Expr::Verbatim(_) => {
+                // TODO
+                Vec::new()
+            }
         }
     }
 }
@@ -648,6 +682,29 @@ ast_enum_of_structs! {
         }),
         /// A macro pattern; pre-expansion
         pub Macro(Macro),
+        pub Verbatim(PatVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for PatVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for PatVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for PatVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -1929,7 +1986,7 @@ pub mod parsing {
                 attrs: many0!(Attribute::parse_outer) >>
                 mut e: syn!(Expr) >>
                 ({
-                    *e.attrs_mut() = attrs;
+                    e.replace_attrs(attrs);
                     Stmt::Expr(Box::new(e))
                 })
             )) >>
@@ -2015,7 +2072,7 @@ pub mod parsing {
         not!(punct!(?)) >>
         semi: option!(punct!(;)) >>
         ({
-            *e.attrs_mut() = attrs;
+            e.replace_attrs(attrs);
             if let Some(semi) = semi {
                 Stmt::Semi(Box::new(e), semi)
             } else {
@@ -2030,7 +2087,7 @@ pub mod parsing {
         mut e: syn!(Expr) >>
         semi: punct!(;) >>
         ({
-            *e.attrs_mut() = attrs;
+            e.replace_attrs(attrs);
             Stmt::Semi(Box::new(e), semi)
         })
     ));
@@ -2891,6 +2948,12 @@ mod printing {
         }
     }
 
+    impl ToTokens for ExprVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
+        }
+    }
+
     #[cfg(feature = "full")]
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -3057,6 +3120,13 @@ mod printing {
                     self.comma_token.to_tokens(tokens);
                 }
             })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for PatVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
         }
     }
 

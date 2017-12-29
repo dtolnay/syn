@@ -1,5 +1,10 @@
 use delimited::Delimited;
 use super::*;
+use proc_macro2::TokenStream;
+#[cfg(feature = "extra-traits")]
+use std::hash::{Hash, Hasher};
+#[cfg(feature = "extra-traits")]
+use mac::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// The different kinds of types recognized by the compiler
@@ -87,6 +92,29 @@ ast_enum_of_structs! {
         }),
         /// A macro in the type position.
         pub Macro(Macro),
+        pub Verbatim(TypeVerbatim #manual_extra_traits {
+            pub tts: TokenStream,
+        }),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for TypeVerbatim {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for TypeVerbatim {
+    fn eq(&self, other: &Self) -> bool {
+        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for TypeVerbatim {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        TokenStreamHelper(&self.tts).hash(state);
     }
 }
 
@@ -938,6 +966,12 @@ mod printing {
     impl ToTokens for TypeInfer {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.underscore_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TypeVerbatim {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.tts.to_tokens(tokens);
         }
     }
 

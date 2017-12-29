@@ -38,12 +38,12 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
                ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
                ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
                ExprRepeat, ExprReturn, ExprStruct, ExprTry, ExprTuple, ExprType,
-               ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield, Index, Member};
+               ExprUnary, ExprUnsafe, ExprVerbatim, ExprWhile, ExprWhileLet, ExprYield, Index, Member};
 
 #[cfg(feature = "full")]
 pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Local,
                MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
-               PatStruct, PatTuple, PatTupleStruct, PatWild, RangeLimits, Stmt};
+               PatStruct, PatTuple, PatTupleStruct, PatVerbatim, PatWild, RangeLimits, Stmt};
 
 mod generics;
 pub use generics::{BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef,
@@ -59,12 +59,12 @@ pub use ident::Ident;
 mod item;
 #[cfg(feature = "full")]
 pub use item::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl,
-               ForeignItem, ForeignItemFn, ForeignItemStatic, ForeignItemType, ImplItem,
-               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, Item,
+               ForeignItem, ForeignItemFn, ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem,
+               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
                ItemConst, ItemDefaultImpl, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
                ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait,
-               ItemType, ItemUnion, ItemUse, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
-               TraitItemMethod, TraitItemType, UseGlob, UseList, UsePath, UseTree};
+               ItemType, ItemUnion, ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
+               TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseList, UsePath, UseTree};
 
 #[cfg(feature = "full")]
 mod file;
@@ -91,7 +91,7 @@ pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
              GenericArgument, ParenthesizedGenericArguments, Path,
              PathArguments, PathSegment, PolyTraitRef, QSelf, ReturnType, Type, TypeArray,
              TypeBareFn, TypeBinding, TypeGroup, TypeImplTrait, TypeInfer, TypeNever, TypeParen,
-             TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple};
+             TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;
 
