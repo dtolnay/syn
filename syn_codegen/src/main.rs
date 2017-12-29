@@ -329,6 +329,7 @@ mod codegen {
         Option(&'a Type),
         Tuple(&'a Delimited<Type, Token![,]>),
         Simple(&'a AstItem),
+        Token(&'a Macro),
         Pass,
     }
 
@@ -352,6 +353,9 @@ mod codegen {
             }
             Type::Tuple(TypeTuple { ref tys, .. }) => {
                 RelevantType::Tuple(tys)
+            }
+            Type::Macro(ref mac) if mac.path.segments.last().unwrap().into_item().ident == "Token" => {
+                RelevantType::Token(mac)
             }
             _ => RelevantType::Pass,
         }
@@ -599,6 +603,24 @@ mod codegen {
         }
     }
 
+    fn token_visit(mac: &Macro, kind: Kind, name: &Operand) -> String {
+        match kind {
+            Fold => format!(
+                "{mac}(tokens_helper(_visitor, &({name}).0))",
+                mac = mac.into_tokens(),
+                name = name.owned_tokens(),
+            ),
+            Visit => format!(
+                "tokens_helper(_visitor, &({name}).0)",
+                name = name.ref_tokens(),
+            ),
+            VisitMut => format!(
+                "tokens_helper(_visitor, &mut ({name}).0)",
+                name = name.ref_mut_tokens(),
+            ),
+        }
+    }
+
     fn noop_visit(kind: Kind, name: &Operand) -> String {
         match kind {
             Fold => name.owned_tokens().to_string(),
@@ -630,6 +652,9 @@ mod codegen {
                 } else {
                     res
                 })
+            }
+            RelevantType::Token(mac) => {
+                Some(token_visit(mac, kind, name))
             }
             RelevantType::Pass => {
                 None
@@ -997,6 +1022,7 @@ pub trait Folder {{
 
 use *;
 use proc_macro2::Span;
+use gen::helper::visit::*;
 
 {full_macro}
 
@@ -1037,6 +1063,7 @@ pub trait Visitor<'ast> {{
 
 use *;
 use proc_macro2::Span;
+use gen::helper::visit_mut::*;
 
 {full_macro}
 
