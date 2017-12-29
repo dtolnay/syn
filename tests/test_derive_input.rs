@@ -291,7 +291,7 @@ fn test_enum() {
                             base: Box::new(Expr::Tuple(ExprTuple {
                                 attrs: Vec::new(),
                                 paren_token: Default::default(),
-                                args: vec![
+                                elems: vec![
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
                                         lit: Lit {

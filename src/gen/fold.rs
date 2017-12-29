@@ -1006,7 +1006,7 @@ pub fn fold_expr_array<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprArray) -> E
     ExprArray {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
-        exprs: FoldHelper::lift(_i . exprs, |it| { _visitor.fold_expr(it) }),
+        elems: FoldHelper::lift(_i . elems, |it| { _visitor.fold_expr(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1296,7 +1296,7 @@ pub fn fold_expr_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTuple) -> E
     ExprTuple {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
+        elems: FoldHelper::lift(_i . elems, |it| { _visitor.fold_expr(it) }),
     }
 }
 

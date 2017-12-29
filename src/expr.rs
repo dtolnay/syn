@@ -27,7 +27,7 @@ ast_enum_of_structs! {
         pub Array(ExprArray #full {
             pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
-            pub exprs: Delimited<Expr, Token![,]>,
+            pub elems: Delimited<Expr, Token![,]>,
         }),
 
         /// A function call.
@@ -60,7 +60,7 @@ ast_enum_of_structs! {
         pub Tuple(ExprTuple #full {
             pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
-            pub args: Delimited<Expr, Token![,]>,
+            pub elems: Delimited<Expr, Token![,]>,
         }),
 
         /// A binary operation, e.g. `a + b`, `a * b`.
@@ -1353,7 +1353,7 @@ pub mod parsing {
             elems: brackets!(call!(Delimited::parse_terminated)) >>
             (ExprArray {
                 attrs: Vec::new(),
-                exprs: elems.0,
+                elems: elems.0,
                 bracket_token: elems.1,
             })
         ));
@@ -1408,7 +1408,7 @@ pub mod parsing {
             elems: parens!(call!(Delimited::parse_terminated)) >>
             (ExprTuple {
                 attrs: Vec::new(),
-                args: elems.0,
+                elems: elems.0,
                 paren_token: elems.1,
             })
         ));
@@ -2408,7 +2408,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
-                self.exprs.to_tokens(tokens);
+                self.elems.to_tokens(tokens);
             })
         }
     }
@@ -2447,10 +2447,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.paren_token.surround(tokens, |tokens| {
-                self.args.to_tokens(tokens);
+                self.elems.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
                 // distinguish ExprTuple from ExprParen.
-                if self.args.len() == 1 && !self.args.trailing_delim() {
+                if self.elems.len() == 1 && !self.elems.trailing_delim() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
             })

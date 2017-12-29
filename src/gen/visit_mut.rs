@@ -813,7 +813,7 @@ pub fn visit_expr_addr_of_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 pub fn visit_expr_array_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprArray) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
-    for mut el in & mut _i . exprs { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
+    for mut el in & mut _i . elems { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_assign_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAssign) {
@@ -1041,7 +1041,7 @@ pub fn visit_expr_try_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
 pub fn visit_expr_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTuple) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
+    for mut el in & mut _i . elems { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
 }
 
 pub fn visit_expr_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprType) {

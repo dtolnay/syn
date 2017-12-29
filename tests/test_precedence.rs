@@ -360,7 +360,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
 
             Expr::Tuple(ExprTuple {
                 attrs: vec![],
-                args: Delimited::new(),
+                elems: Delimited::new(),
                 paren_token: token::Paren::default(),
             })
         }
