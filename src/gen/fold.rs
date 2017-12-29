@@ -10,6 +10,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
 use *;
+use token::{Brace, Bracket, Paren, Group};
 use proc_macro2::Span;
 use gen::helper::fold::*;
 
@@ -478,7 +479,7 @@ pub fn fold_attribute<V: Folder + ?Sized>(_visitor: &mut V, _i: Attribute) -> At
     Attribute {
         style: _visitor.fold_attr_style(_i . style),
         pound_token: Token ! [ # ](tokens_helper(_visitor, &(_i . pound_token).0)),
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
         path: _visitor.fold_path(_i . path),
         tts: _i . tts,
         is_sugared_doc: _i . is_sugared_doc,
@@ -517,7 +518,7 @@ pub fn fold_bare_fn_type<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnType) -
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         fn_token: Token ! [ fn ](tokens_helper(_visitor, &(_i . fn_token).0)),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_bare_fn_arg(it) }),
         variadic: (_i . variadic).map(|it| { Token ! [ ... ](tokens_helper(_visitor, &(it).0)) }),
         output: _visitor.fold_return_type(_i . output),
@@ -689,7 +690,7 @@ pub fn fold_binding_mode<V: Folder + ?Sized>(_visitor: &mut V, _i: BindingMode) 
 # [ cfg ( feature = "full" ) ]
 pub fn fold_block<V: Folder + ?Sized>(_visitor: &mut V, _i: Block) -> Block {
     Block {
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         stmts: FoldHelper::lift(_i . stmts, |it| { _visitor.fold_stmt(it) }),
     }
 }
@@ -713,7 +714,7 @@ pub fn fold_body<V: Folder + ?Sized>(_visitor: &mut V, _i: Body) -> Body {
 pub fn fold_body_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyEnum) -> BodyEnum {
     BodyEnum {
         enum_token: Token ! [ enum ](tokens_helper(_visitor, &(_i . enum_token).0)),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         variants: FoldHelper::lift(_i . variants, |it| { _visitor.fold_variant(it) }),
     }
 }
@@ -811,7 +812,7 @@ pub fn fold_expr_addr_of<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAddrOf) -
 pub fn fold_expr_array<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprArray) -> ExprArray {
     ExprArray {
         exprs: FoldHelper::lift(_i . exprs, |it| { _visitor.fold_expr(it) }),
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -864,7 +865,7 @@ pub fn fold_expr_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCall) -> Exp
     ExprCall {
         func: Box::new(_visitor.fold_expr(* _i . func)),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
     }
 }
 
@@ -925,7 +926,7 @@ pub fn fold_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop)
 pub fn fold_expr_group<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprGroup) -> ExprGroup {
     ExprGroup {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        group_token: _i . group_token,
+        group_token: Group(tokens_helper(_visitor, &(_i . group_token).0)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -964,7 +965,7 @@ pub fn fold_expr_index<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIndex) -> E
     ExprIndex {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         index: Box::new(_visitor.fold_expr(* _i . index)),
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
     }
 }
 
@@ -1181,7 +1182,7 @@ pub fn fold_expr_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> Exp
 pub fn fold_expr_match<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> ExprMatch {
     ExprMatch {
         match_token: Token ! [ match ](tokens_helper(_visitor, &(_i . match_token).0)),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         arms: FoldHelper::lift(_i . arms, |it| { _visitor.fold_arm(it) }),
     }
@@ -1193,7 +1194,7 @@ pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMetho
         method: _visitor.fold_ident(_i . method),
         typarams: FoldHelper::lift(_i . typarams, |it| { _visitor.fold_type(it) }),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         dot_token: Token ! [ . ](tokens_helper(_visitor, &(_i . dot_token).0)),
         lt_token: (_i . lt_token).map(|it| { Token ! [ < ](tokens_helper(_visitor, &(it).0)) }),
         colon2_token: (_i . colon2_token).map(|it| { Token ! [ :: ](tokens_helper(_visitor, &(it).0)) }),
@@ -1204,7 +1205,7 @@ pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMetho
 pub fn fold_expr_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprParen) -> ExprParen {
     ExprParen {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
     }
 }
 
@@ -1225,7 +1226,7 @@ pub fn fold_expr_range<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRange) -> E
 # [ cfg ( feature = "full" ) ]
 pub fn fold_expr_repeat<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRepeat) -> ExprRepeat {
     ExprRepeat {
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         amt: Box::new(_visitor.fold_expr(* _i . amt)),
@@ -1245,7 +1246,7 @@ pub fn fold_expr_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprStruct) ->
         fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field_value(it) }),
         rest: (_i . rest).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
         dot2_token: (_i . dot2_token).map(|it| { Token ! [ .. ](tokens_helper(_visitor, &(it).0)) }),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1259,7 +1260,7 @@ pub fn fold_expr_try<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTry) -> ExprT
 pub fn fold_expr_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprTuple) -> ExprTuple {
     ExprTuple {
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
     }
 }
 
@@ -1387,7 +1388,7 @@ pub fn fold_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
 pub fn fold_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl {
     FnDecl {
         fn_token: Token ! [ fn ](tokens_helper(_visitor, &(_i . fn_token).0)),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_fn_arg(it) }),
         output: _visitor.fold_return_type(_i . output),
         generics: _visitor.fold_generics(_i . generics),
@@ -1728,7 +1729,7 @@ pub fn fold_item_default_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemDefa
         path: _visitor.fold_path(_i . path),
         for_token: Token ! [ for ](tokens_helper(_visitor, &(_i . for_token).0)),
         dot2_token: Token ! [ .. ](tokens_helper(_visitor, &(_i . dot2_token).0)),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1739,7 +1740,7 @@ pub fn fold_item_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> Ite
         enum_token: Token ! [ enum ](tokens_helper(_visitor, &(_i . enum_token).0)),
         ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         variants: FoldHelper::lift(_i . variants, |it| { _visitor.fold_variant(it) }),
     }
 }
@@ -1776,7 +1777,7 @@ pub fn fold_item_foreign_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemForei
     ItemForeignMod {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         abi: _visitor.fold_abi(_i . abi),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_foreign_item(it) }),
     }
 }
@@ -1794,7 +1795,7 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
             Token ! [ for ](tokens_helper(_visitor, &(( it ) . 2).0)),
         ) }),
         self_ty: Box::new(_visitor.fold_type(* _i . self_ty)),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_impl_item(it) }),
     }
 }
@@ -1826,7 +1827,7 @@ pub fn fold_item_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemM
         mod_token: Token ! [ mod ](tokens_helper(_visitor, &(_i . mod_token).0)),
         ident: _visitor.fold_ident(_i . ident),
         content: (_i . content).map(|it| { (
-            ( it ) . 0,
+            Brace(tokens_helper(_visitor, &(( it ) . 0).0)),
             FoldHelper::lift(( it ) . 1, |it| { _visitor.fold_item(it) }),
         ) }),
         semi: (_i . semi).map(|it| { Token ! [ ; ](tokens_helper(_visitor, &(it).0)) }),
@@ -1871,7 +1872,7 @@ pub fn fold_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> I
         generics: _visitor.fold_generics(_i . generics),
         colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
         supertraits: FoldHelper::lift(_i . supertraits, |it| { _visitor.fold_type_param_bound(it) }),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_trait_item(it) }),
     }
 }
@@ -1996,7 +1997,7 @@ pub fn fold_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> Met
 pub fn fold_meta_item_list<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItemList) -> MetaItemList {
     MetaItemList {
         ident: _visitor.fold_ident(_i . ident),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         nested: FoldHelper::lift(_i . nested, |it| { _visitor.fold_nested_meta_item(it) }),
     }
 }
@@ -2056,7 +2057,7 @@ pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMet
 
 pub fn fold_parenthesized_generic_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: ParenthesizedGenericArguments) -> ParenthesizedGenericArguments {
     ParenthesizedGenericArguments {
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_type(it) }),
         output: _visitor.fold_return_type(_i . output),
     }
@@ -2180,7 +2181,7 @@ pub fn fold_pat_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: PatSlice) -> Pat
         back: FoldHelper::lift(_i . back, |it| { _visitor.fold_pat(it) }),
         dot2_token: (_i . dot2_token).map(|it| { Token ! [ .. ](tokens_helper(_visitor, &(it).0)) }),
         comma_token: (_i . comma_token).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2188,7 +2189,7 @@ pub fn fold_pat_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: PatStruct) -> P
     PatStruct {
         path: _visitor.fold_path(_i . path),
         fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field_pat(it) }),
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         dot2_token: (_i . dot2_token).map(|it| { Token ! [ .. ](tokens_helper(_visitor, &(it).0)) }),
     }
 }
@@ -2197,7 +2198,7 @@ pub fn fold_pat_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: PatTuple) -> Pat
     PatTuple {
         pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         dots_pos: _i . dots_pos,
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         dot2_token: (_i . dot2_token).map(|it| { Token ! [ .. ](tokens_helper(_visitor, &(it).0)) }),
         comma_token: (_i . comma_token).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
     }
@@ -2488,7 +2489,7 @@ pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
 
 pub fn fold_type_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeArray) -> TypeArray {
     TypeArray {
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
         ty: Box::new(_visitor.fold_type(* _i . ty)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
         amt: _visitor.fold_expr(_i . amt),
@@ -2511,7 +2512,7 @@ pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) 
 
 pub fn fold_type_group<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeGroup) -> TypeGroup {
     TypeGroup {
-        group_token: _i . group_token,
+        group_token: Group(tokens_helper(_visitor, &(_i . group_token).0)),
         ty: Box::new(_visitor.fold_type(* _i . ty)),
     }
 }
@@ -2565,7 +2566,7 @@ pub fn fold_type_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam
 
 pub fn fold_type_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParen) -> TypeParen {
     TypeParen {
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         ty: Box::new(_visitor.fold_type(* _i . ty)),
     }
 }
@@ -2596,7 +2597,7 @@ pub fn fold_type_reference<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeReferen
 pub fn fold_type_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeSlice) -> TypeSlice {
     TypeSlice {
         ty: Box::new(_visitor.fold_type(* _i . ty)),
-        bracket_token: _i . bracket_token,
+        bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
     }
 }
 
@@ -2609,7 +2610,7 @@ pub fn fold_type_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTrai
 
 pub fn fold_type_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTuple) -> TypeTuple {
     TypeTuple {
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_type(it) }),
     }
 }
@@ -2655,7 +2656,7 @@ pub fn fold_use_glob<V: Folder + ?Sized>(_visitor: &mut V, _i: UseGlob) -> UseGl
 # [ cfg ( feature = "full" ) ]
 pub fn fold_use_list<V: Folder + ?Sized>(_visitor: &mut V, _i: UseList) -> UseList {
     UseList {
-        brace_token: _i . brace_token,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_use_tree(it) }),
     }
 }
@@ -2707,13 +2708,13 @@ pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) 
         Struct(_binding_0, _binding_1, ) => {
             Struct (
                 FoldHelper::lift(_binding_0, |it| { _visitor.fold_field(it) }),
-                _binding_1,
+                Brace(tokens_helper(_visitor, &(_binding_1).0)),
             )
         }
         Tuple(_binding_0, _binding_1, ) => {
             Tuple (
                 FoldHelper::lift(_binding_0, |it| { _visitor.fold_field(it) }),
-                _binding_1,
+                Paren(tokens_helper(_visitor, &(_binding_1).0)),
             )
         }
         Unit => { Unit }
@@ -2723,7 +2724,7 @@ pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) 
 pub fn fold_vis_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: VisCrate) -> VisCrate {
     VisCrate {
         pub_token: Token ! [ pub ](tokens_helper(_visitor, &(_i . pub_token).0)),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         crate_token: Token ! [ crate ](tokens_helper(_visitor, &(_i . crate_token).0)),
     }
 }
@@ -2742,7 +2743,7 @@ pub fn fold_vis_public<V: Folder + ?Sized>(_visitor: &mut V, _i: VisPublic) -> V
 pub fn fold_vis_restricted<V: Folder + ?Sized>(_visitor: &mut V, _i: VisRestricted) -> VisRestricted {
     VisRestricted {
         pub_token: Token ! [ pub ](tokens_helper(_visitor, &(_i . pub_token).0)),
-        paren_token: _i . paren_token,
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         in_token: (_i . in_token).map(|it| { Token ! [ in ](tokens_helper(_visitor, &(it).0)) }),
         path: Box::new(_visitor.fold_path(* _i . path)),
     }

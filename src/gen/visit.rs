@@ -458,7 +458,7 @@ pub fn visit_attr_style<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 pub fn visit_attribute<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Attribute) {
     _visitor.visit_attr_style(& _i . style);
     tokens_helper(_visitor, &(& _i . pound_token).0);
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
     _visitor.visit_path(& _i . path);
     // Skipped field _i . tts;
     // Skipped field _i . is_sugared_doc;
@@ -489,7 +489,7 @@ pub fn visit_bare_fn_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
     _visitor.visit_unsafety(& _i . unsafety);
     if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
     tokens_helper(_visitor, &(& _i . fn_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . inputs { let it = el.item(); _visitor.visit_bare_fn_arg(it) };
     if let Some(ref it) = _i . variadic { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_return_type(& _i . output);
@@ -599,7 +599,7 @@ pub fn visit_binding_mode<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_block<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Block) {
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for it in & _i . stmts { _visitor.visit_stmt(it) };
 }
 
@@ -617,7 +617,7 @@ pub fn visit_body<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast B
 
 pub fn visit_body_enum<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BodyEnum) {
     tokens_helper(_visitor, &(& _i . enum_token).0);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for el in & _i . variants { let it = el.item(); _visitor.visit_variant(it) };
 }
 
@@ -695,7 +695,7 @@ pub fn visit_expr_addr_of<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_array<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprArray) {
     for el in & _i . exprs { let it = el.item(); _visitor.visit_expr(it) };
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_assign<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprAssign) {
@@ -734,7 +734,7 @@ pub fn visit_expr_break<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 pub fn visit_expr_call<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprCall) {
     _visitor.visit_expr(& * _i . func);
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
 }
 
 pub fn visit_expr_cast<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprCast) {
@@ -781,7 +781,7 @@ pub fn visit_expr_for_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
 
 pub fn visit_expr_group<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprGroup) {
     _visitor.visit_expr(& * _i . expr);
-    // Skipped field _i . group_token;
+    tokens_helper(_visitor, &(& _i . group_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_if<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprIf) {
@@ -812,7 +812,7 @@ pub fn visit_expr_in_place<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
 pub fn visit_expr_index<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprIndex) {
     _visitor.visit_expr(& * _i . expr);
     _visitor.visit_expr(& * _i . index);
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
 }
 
 pub fn visit_expr_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprKind) {
@@ -947,7 +947,7 @@ pub fn visit_expr_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_match<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprMatch) {
     tokens_helper(_visitor, &(& _i . match_token).0);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     _visitor.visit_expr(& * _i . expr);
     for it in & _i . arms { _visitor.visit_arm(it) };
 }
@@ -957,7 +957,7 @@ pub fn visit_expr_method_call<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
     _visitor.visit_ident(& _i . method);
     for el in & _i . typarams { let it = el.item(); _visitor.visit_type(it) };
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     tokens_helper(_visitor, &(& _i . dot_token).0);
     if let Some(ref it) = _i . lt_token { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . colon2_token { tokens_helper(_visitor, &(it).0) };
@@ -966,7 +966,7 @@ pub fn visit_expr_method_call<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 
 pub fn visit_expr_paren<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprParen) {
     _visitor.visit_expr(& * _i . expr);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
 }
 
 pub fn visit_expr_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprPath) {
@@ -981,7 +981,7 @@ pub fn visit_expr_range<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_repeat<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprRepeat) {
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
     tokens_helper(_visitor, &(& _i . semi_token).0);
     _visitor.visit_expr(& * _i . expr);
     _visitor.visit_expr(& * _i . amt);
@@ -997,7 +997,7 @@ pub fn visit_expr_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     for el in & _i . fields { let it = el.item(); _visitor.visit_field_value(it) };
     if let Some(ref it) = _i . rest { _visitor.visit_expr(& * * it) };
     if let Some(ref it) = _i . dot2_token { tokens_helper(_visitor, &(it).0) };
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_try<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprTry) {
@@ -1007,7 +1007,7 @@ pub fn visit_expr_try<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprTuple) {
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
 }
 
 pub fn visit_expr_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprType) {
@@ -1103,7 +1103,7 @@ pub fn visit_fn_arg<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
 # [ cfg ( feature = "full" ) ]
 pub fn visit_fn_decl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FnDecl) {
     tokens_helper(_visitor, &(& _i . fn_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . inputs { let it = el.item(); _visitor.visit_fn_arg(it) };
     _visitor.visit_return_type(& _i . output);
     _visitor.visit_generics(& _i . generics);
@@ -1354,7 +1354,7 @@ pub fn visit_item_default_impl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
     _visitor.visit_path(& _i . path);
     tokens_helper(_visitor, &(& _i . for_token).0);
     tokens_helper(_visitor, &(& _i . dot2_token).0);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_enum<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemEnum) {
@@ -1363,7 +1363,7 @@ pub fn visit_item_enum<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     tokens_helper(_visitor, &(& _i . enum_token).0);
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_generics(& _i . generics);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for el in & _i . variants { let it = el.item(); _visitor.visit_variant(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1394,7 +1394,7 @@ pub fn visit_item_fn<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 pub fn visit_item_foreign_mod<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemForeignMod) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_abi(& _i . abi);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for it in & _i . items { _visitor.visit_foreign_item(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1410,7 +1410,7 @@ pub fn visit_item_impl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
             tokens_helper(_visitor, &(& ( it ) . 2).0);
          };
     _visitor.visit_type(& * _i . self_ty);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for it in & _i . items { _visitor.visit_impl_item(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1436,7 +1436,7 @@ pub fn visit_item_mod<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     tokens_helper(_visitor, &(& _i . mod_token).0);
     _visitor.visit_ident(& _i . ident);
     if let Some(ref it) = _i . content { 
-            // Skipped field ( it ) . 0;
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
             for it in & ( it ) . 1 { _visitor.visit_item(it) };
          };
     if let Some(ref it) = _i . semi { tokens_helper(_visitor, &(it).0) };
@@ -1475,7 +1475,7 @@ pub fn visit_item_trait<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
     _visitor.visit_generics(& _i . generics);
     if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
     for el in & _i . supertraits { let it = el.item(); _visitor.visit_type_param_bound(it) };
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for it in & _i . items { _visitor.visit_trait_item(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1572,7 +1572,7 @@ pub fn visit_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 
 pub fn visit_meta_item_list<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaItemList) {
     _visitor.visit_ident(& _i . ident);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . nested { let it = el.item(); _visitor.visit_nested_meta_item(it) };
 }
 
@@ -1618,7 +1618,7 @@ pub fn visit_nested_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 }
 
 pub fn visit_parenthesized_generic_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ParenthesizedGenericArguments) {
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . inputs { let it = el.item(); _visitor.visit_type(it) };
     _visitor.visit_return_type(& _i . output);
 }
@@ -1704,20 +1704,20 @@ pub fn visit_pat_slice<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     for el in & _i . back { let it = el.item(); _visitor.visit_pat(it) };
     if let Some(ref it) = _i . dot2_token { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . comma_token { tokens_helper(_visitor, &(it).0) };
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatStruct) {
     _visitor.visit_path(& _i . path);
     for el in & _i . fields { let it = el.item(); _visitor.visit_field_pat(it) };
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     if let Some(ref it) = _i . dot2_token { tokens_helper(_visitor, &(it).0) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatTuple) {
     for el in & _i . pats { let it = el.item(); _visitor.visit_pat(it) };
     // Skipped field _i . dots_pos;
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     if let Some(ref it) = _i . dot2_token { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . comma_token { tokens_helper(_visitor, &(it).0) };
 }
@@ -1929,7 +1929,7 @@ pub fn visit_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast T
 }
 
 pub fn visit_type_array<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeArray) {
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
     _visitor.visit_type(& * _i . ty);
     tokens_helper(_visitor, &(& _i . semi_token).0);
     _visitor.visit_expr(& _i . amt);
@@ -1946,7 +1946,7 @@ pub fn visit_type_binding<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 }
 
 pub fn visit_type_group<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeGroup) {
-    // Skipped field _i . group_token;
+    tokens_helper(_visitor, &(& _i . group_token).0);
     _visitor.visit_type(& * _i . ty);
 }
 
@@ -1986,7 +1986,7 @@ pub fn visit_type_param_bound<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 }
 
 pub fn visit_type_paren<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeParen) {
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     _visitor.visit_type(& * _i . ty);
 }
 
@@ -2009,7 +2009,7 @@ pub fn visit_type_reference<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
 
 pub fn visit_type_slice<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeSlice) {
     _visitor.visit_type(& * _i . ty);
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &(& _i . bracket_token).0);
 }
 
 pub fn visit_type_trait_object<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeTraitObject) {
@@ -2018,7 +2018,7 @@ pub fn visit_type_trait_object<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V
 }
 
 pub fn visit_type_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeTuple) {
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . tys { let it = el.item(); _visitor.visit_type(it) };
 }
 
@@ -2052,7 +2052,7 @@ pub fn visit_use_glob<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_use_list<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseList) {
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &(& _i . brace_token).0);
     for el in & _i . items { let it = el.item(); _visitor.visit_use_tree(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -2092,11 +2092,11 @@ pub fn visit_variant_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
     match *_i {
         Struct(ref _binding_0, ref _binding_1, ) => {
             for el in _binding_0 { let it = el.item(); _visitor.visit_field(it) };
-            // Skipped field _binding_1;
+            tokens_helper(_visitor, &(_binding_1).0);
         }
         Tuple(ref _binding_0, ref _binding_1, ) => {
             for el in _binding_0 { let it = el.item(); _visitor.visit_field(it) };
-            // Skipped field _binding_1;
+            tokens_helper(_visitor, &(_binding_1).0);
         }
         Unit => { }
     }
@@ -2104,7 +2104,7 @@ pub fn visit_variant_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 
 pub fn visit_vis_crate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VisCrate) {
     tokens_helper(_visitor, &(& _i . pub_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     tokens_helper(_visitor, &(& _i . crate_token).0);
 }
 
@@ -2117,7 +2117,7 @@ pub fn visit_vis_public<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 
 pub fn visit_vis_restricted<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VisRestricted) {
     tokens_helper(_visitor, &(& _i . pub_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &(& _i . paren_token).0);
     if let Some(ref it) = _i . in_token { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_path(& * _i . path);
 }

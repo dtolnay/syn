@@ -329,7 +329,7 @@ mod codegen {
         Option(&'a Type),
         Tuple(&'a Delimited<Type, Token![,]>),
         Simple(&'a AstItem),
-        Token(&'a Macro),
+        Token(Tokens),
         Pass,
     }
 
@@ -342,6 +342,9 @@ mod codegen {
                     "Vec" => RelevantType::Vec(first_arg(&last.arguments)),
                     "Delimited" => RelevantType::Delimited(first_arg(&last.arguments)),
                     "Option" => RelevantType::Option(first_arg(&last.arguments)),
+                    "Brace" | "Bracket" | "Paren" | "Group" => {
+                        RelevantType::Token(last.ident.into_tokens())
+                    }
                     _ => {
                         if let Some(item) = lookup.get(&last.ident) {
                             RelevantType::Simple(item)
@@ -355,7 +358,7 @@ mod codegen {
                 RelevantType::Tuple(tys)
             }
             Type::Macro(ref mac) if mac.path.segments.last().unwrap().into_item().ident == "Token" => {
-                RelevantType::Token(mac)
+                RelevantType::Token(mac.into_tokens())
             }
             _ => RelevantType::Pass,
         }
@@ -603,11 +606,11 @@ mod codegen {
         }
     }
 
-    fn token_visit(mac: &Macro, kind: Kind, name: &Operand) -> String {
+    fn token_visit(ty: Tokens, kind: Kind, name: &Operand) -> String {
         match kind {
             Fold => format!(
-                "{mac}(tokens_helper(_visitor, &({name}).0))",
-                mac = mac.into_tokens(),
+                "{ty}(tokens_helper(_visitor, &({name}).0))",
+                ty = ty,
                 name = name.owned_tokens(),
             ),
             Visit => format!(
@@ -653,8 +656,8 @@ mod codegen {
                     res
                 })
             }
-            RelevantType::Token(mac) => {
-                Some(token_visit(mac, kind, name))
+            RelevantType::Token(ty) => {
+                Some(token_visit(ty, kind, name))
             }
             RelevantType::Pass => {
                 None
@@ -977,6 +980,7 @@ macro_rules! full {
 #![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
 
 use *;
+use token::{{Brace, Bracket, Paren, Group}};
 use proc_macro2::Span;
 use gen::helper::fold::*;
 

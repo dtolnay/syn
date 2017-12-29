@@ -458,7 +458,7 @@ pub fn visit_attr_style_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut A
 pub fn visit_attribute_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Attribute) {
     _visitor.visit_attr_style_mut(& mut _i . style);
     tokens_helper(_visitor, &mut (& mut _i . pound_token).0);
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
     _visitor.visit_path_mut(& mut _i . path);
     // Skipped field _i . tts;
     // Skipped field _i . is_sugared_doc;
@@ -489,7 +489,7 @@ pub fn visit_bare_fn_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
     _visitor.visit_unsafety_mut(& mut _i . unsafety);
     if let Some(ref mut it) = _i . abi { _visitor.visit_abi_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . fn_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . inputs { let it = el.item_mut(); _visitor.visit_bare_fn_arg_mut(it) };
     if let Some(ref mut it) = _i . variadic { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_return_type_mut(& mut _i . output);
@@ -599,7 +599,7 @@ pub fn visit_binding_mode_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_block_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Block) {
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for it in & mut _i . stmts { _visitor.visit_stmt_mut(it) };
 }
 
@@ -617,7 +617,7 @@ pub fn visit_body_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Body) {
 
 pub fn visit_body_enum_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut BodyEnum) {
     tokens_helper(_visitor, &mut (& mut _i . enum_token).0);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for mut el in & mut _i . variants { let it = el.item_mut(); _visitor.visit_variant_mut(it) };
 }
 
@@ -695,7 +695,7 @@ pub fn visit_expr_addr_of_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_array_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprArray) {
     for mut el in & mut _i . exprs { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_assign_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAssign) {
@@ -734,7 +734,7 @@ pub fn visit_expr_break_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
 pub fn visit_expr_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCall) {
     _visitor.visit_expr_mut(& mut * _i . func);
     for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
 }
 
 pub fn visit_expr_cast_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCast) {
@@ -781,7 +781,7 @@ pub fn visit_expr_for_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mu
 
 pub fn visit_expr_group_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprGroup) {
     _visitor.visit_expr_mut(& mut * _i . expr);
-    // Skipped field _i . group_token;
+    tokens_helper(_visitor, &mut (& mut _i . group_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_if_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIf) {
@@ -812,7 +812,7 @@ pub fn visit_expr_in_place_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mu
 pub fn visit_expr_index_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIndex) {
     _visitor.visit_expr_mut(& mut * _i . expr);
     _visitor.visit_expr_mut(& mut * _i . index);
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
 }
 
 pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprKind) {
@@ -947,7 +947,7 @@ pub fn visit_expr_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_match_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprMatch) {
     tokens_helper(_visitor, &mut (& mut _i . match_token).0);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     for it in & mut _i . arms { _visitor.visit_arm_mut(it) };
 }
@@ -957,7 +957,7 @@ pub fn visit_expr_method_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
     _visitor.visit_ident_mut(& mut _i . method);
     for mut el in & mut _i . typarams { let it = el.item_mut(); _visitor.visit_type_mut(it) };
     for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     tokens_helper(_visitor, &mut (& mut _i . dot_token).0);
     if let Some(ref mut it) = _i . lt_token { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . colon2_token { tokens_helper(_visitor, &mut (it).0) };
@@ -966,7 +966,7 @@ pub fn visit_expr_method_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 
 pub fn visit_expr_paren_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprParen) {
     _visitor.visit_expr_mut(& mut * _i . expr);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
 }
 
 pub fn visit_expr_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprPath) {
@@ -981,7 +981,7 @@ pub fn visit_expr_range_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_repeat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprRepeat) {
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     _visitor.visit_expr_mut(& mut * _i . amt);
@@ -997,7 +997,7 @@ pub fn visit_expr_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
     for mut el in & mut _i . fields { let it = el.item_mut(); _visitor.visit_field_value_mut(it) };
     if let Some(ref mut it) = _i . rest { _visitor.visit_expr_mut(& mut * * it) };
     if let Some(ref mut it) = _i . dot2_token { tokens_helper(_visitor, &mut (it).0) };
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_try_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTry) {
@@ -1007,7 +1007,7 @@ pub fn visit_expr_try_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTuple) {
     for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
 }
 
 pub fn visit_expr_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprType) {
@@ -1103,7 +1103,7 @@ pub fn visit_fn_arg_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FnArg
 # [ cfg ( feature = "full" ) ]
 pub fn visit_fn_decl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FnDecl) {
     tokens_helper(_visitor, &mut (& mut _i . fn_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . inputs { let it = el.item_mut(); _visitor.visit_fn_arg_mut(it) };
     _visitor.visit_return_type_mut(& mut _i . output);
     _visitor.visit_generics_mut(& mut _i . generics);
@@ -1354,7 +1354,7 @@ pub fn visit_item_default_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
     _visitor.visit_path_mut(& mut _i . path);
     tokens_helper(_visitor, &mut (& mut _i . for_token).0);
     tokens_helper(_visitor, &mut (& mut _i . dot2_token).0);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_enum_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemEnum) {
@@ -1363,7 +1363,7 @@ pub fn visit_item_enum_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut It
     tokens_helper(_visitor, &mut (& mut _i . enum_token).0);
     _visitor.visit_ident_mut(& mut _i . ident);
     _visitor.visit_generics_mut(& mut _i . generics);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for mut el in & mut _i . variants { let it = el.item_mut(); _visitor.visit_variant_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1394,7 +1394,7 @@ pub fn visit_item_fn_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Item
 pub fn visit_item_foreign_mod_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemForeignMod) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_abi_mut(& mut _i . abi);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for it in & mut _i . items { _visitor.visit_foreign_item_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1410,7 +1410,7 @@ pub fn visit_item_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut It
             tokens_helper(_visitor, &mut (& mut ( it ) . 2).0);
          };
     _visitor.visit_type_mut(& mut * _i . self_ty);
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for it in & mut _i . items { _visitor.visit_impl_item_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1436,7 +1436,7 @@ pub fn visit_item_mod_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ite
     tokens_helper(_visitor, &mut (& mut _i . mod_token).0);
     _visitor.visit_ident_mut(& mut _i . ident);
     if let Some(ref mut it) = _i . content { 
-            // Skipped field ( it ) . 0;
+            tokens_helper(_visitor, &mut (& mut ( it ) . 0).0);
             for it in & mut ( it ) . 1 { _visitor.visit_item_mut(it) };
          };
     if let Some(ref mut it) = _i . semi { tokens_helper(_visitor, &mut (it).0) };
@@ -1475,7 +1475,7 @@ pub fn visit_item_trait_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut I
     _visitor.visit_generics_mut(& mut _i . generics);
     if let Some(ref mut it) = _i . colon_token { tokens_helper(_visitor, &mut (it).0) };
     for mut el in & mut _i . supertraits { let it = el.item_mut(); _visitor.visit_type_param_bound_mut(it) };
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for it in & mut _i . items { _visitor.visit_trait_item_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1572,7 +1572,7 @@ pub fn visit_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Me
 
 pub fn visit_meta_item_list_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MetaItemList) {
     _visitor.visit_ident_mut(& mut _i . ident);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . nested { let it = el.item_mut(); _visitor.visit_nested_meta_item_mut(it) };
 }
 
@@ -1618,7 +1618,7 @@ pub fn visit_nested_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 }
 
 pub fn visit_parenthesized_generic_arguments_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ParenthesizedGenericArguments) {
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . inputs { let it = el.item_mut(); _visitor.visit_type_mut(it) };
     _visitor.visit_return_type_mut(& mut _i . output);
 }
@@ -1704,20 +1704,20 @@ pub fn visit_pat_slice_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pa
     for mut el in & mut _i . back { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
     if let Some(ref mut it) = _i . dot2_token { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . comma_token { tokens_helper(_visitor, &mut (it).0) };
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatStruct) {
     _visitor.visit_path_mut(& mut _i . path);
     for mut el in & mut _i . fields { let it = el.item_mut(); _visitor.visit_field_pat_mut(it) };
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     if let Some(ref mut it) = _i . dot2_token { tokens_helper(_visitor, &mut (it).0) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatTuple) {
     for mut el in & mut _i . pats { let it = el.item_mut(); _visitor.visit_pat_mut(it) };
     // Skipped field _i . dots_pos;
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     if let Some(ref mut it) = _i . dot2_token { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . comma_token { tokens_helper(_visitor, &mut (it).0) };
 }
@@ -1929,7 +1929,7 @@ pub fn visit_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
 }
 
 pub fn visit_type_array_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeArray) {
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
     _visitor.visit_type_mut(& mut * _i . ty);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
     _visitor.visit_expr_mut(& mut _i . amt);
@@ -1946,7 +1946,7 @@ pub fn visit_type_binding_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 }
 
 pub fn visit_type_group_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeGroup) {
-    // Skipped field _i . group_token;
+    tokens_helper(_visitor, &mut (& mut _i . group_token).0);
     _visitor.visit_type_mut(& mut * _i . ty);
 }
 
@@ -1986,7 +1986,7 @@ pub fn visit_type_param_bound_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 }
 
 pub fn visit_type_paren_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeParen) {
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     _visitor.visit_type_mut(& mut * _i . ty);
 }
 
@@ -2009,7 +2009,7 @@ pub fn visit_type_reference_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
 
 pub fn visit_type_slice_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeSlice) {
     _visitor.visit_type_mut(& mut * _i . ty);
-    // Skipped field _i . bracket_token;
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
 }
 
 pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTraitObject) {
@@ -2018,7 +2018,7 @@ pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
 }
 
 pub fn visit_type_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTuple) {
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . tys { let it = el.item_mut(); _visitor.visit_type_mut(it) };
 }
 
@@ -2052,7 +2052,7 @@ pub fn visit_use_glob_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Use
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_use_list_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut UseList) {
-    // Skipped field _i . brace_token;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for mut el in & mut _i . items { let it = el.item_mut(); _visitor.visit_use_tree_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -2092,11 +2092,11 @@ pub fn visit_variant_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
     match *_i {
         Struct(ref mut _binding_0, ref mut _binding_1, ) => {
             for mut el in _binding_0 { let it = el.item_mut(); _visitor.visit_field_mut(it) };
-            // Skipped field _binding_1;
+            tokens_helper(_visitor, &mut (_binding_1).0);
         }
         Tuple(ref mut _binding_0, ref mut _binding_1, ) => {
             for mut el in _binding_0 { let it = el.item_mut(); _visitor.visit_field_mut(it) };
-            // Skipped field _binding_1;
+            tokens_helper(_visitor, &mut (_binding_1).0);
         }
         Unit => { }
     }
@@ -2104,7 +2104,7 @@ pub fn visit_variant_data_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 
 pub fn visit_vis_crate_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut VisCrate) {
     tokens_helper(_visitor, &mut (& mut _i . pub_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     tokens_helper(_visitor, &mut (& mut _i . crate_token).0);
 }
 
@@ -2117,7 +2117,7 @@ pub fn visit_vis_public_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut V
 
 pub fn visit_vis_restricted_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut VisRestricted) {
     tokens_helper(_visitor, &mut (& mut _i . pub_token).0);
-    // Skipped field _i . paren_token;
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     if let Some(ref mut it) = _i . in_token { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_path_mut(& mut * _i . path);
 }
