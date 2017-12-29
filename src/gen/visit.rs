@@ -57,6 +57,8 @@ fn visit_bare_fn_arg(&mut self, i: &'ast BareFnArg) { visit_bare_fn_arg(self, i)
 fn visit_bare_fn_arg_name(&mut self, i: &'ast BareFnArgName) { visit_bare_fn_arg_name(self, i) }
 
 fn visit_bin_op(&mut self, i: &'ast BinOp) { visit_bin_op(self, i) }
+
+fn visit_binding(&mut self, i: &'ast Binding) { visit_binding(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_block(&mut self, i: &'ast Block) { visit_block(self, i) }
 
@@ -328,8 +330,6 @@ fn visit_type_array(&mut self, i: &'ast TypeArray) { visit_type_array(self, i) }
 
 fn visit_type_bare_fn(&mut self, i: &'ast TypeBareFn) { visit_type_bare_fn(self, i) }
 
-fn visit_type_binding(&mut self, i: &'ast TypeBinding) { visit_type_binding(self, i) }
-
 fn visit_type_group(&mut self, i: &'ast TypeGroup) { visit_type_group(self, i) }
 
 fn visit_type_impl_trait(&mut self, i: &'ast TypeImplTrait) { visit_type_impl_trait(self, i) }
@@ -562,6 +562,12 @@ pub fn visit_bin_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
+}
+
+pub fn visit_binding<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Binding) {
+    _visitor.visit_ident(& _i . ident);
+    tokens_helper(_visitor, &(& _i . eq_token).0);
+    _visitor.visit_type(& _i . ty);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_block<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Block) {
@@ -1152,8 +1158,8 @@ pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
         Type(ref _binding_0, ) => {
             _visitor.visit_type(_binding_0);
         }
-        TypeBinding(ref _binding_0, ) => {
-            _visitor.visit_type_binding(_binding_0);
+        Binding(ref _binding_0, ) => {
+            _visitor.visit_binding(_binding_0);
         }
         Const(ref _binding_0, ) => {
             _visitor.visit_expr(_binding_0);
@@ -1953,12 +1959,6 @@ pub fn visit_type_bare_fn<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
     for el in & _i . inputs { let it = el.item(); _visitor.visit_bare_fn_arg(it) };
     if let Some(ref it) = _i . variadic { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_return_type(& _i . output);
-}
-
-pub fn visit_type_binding<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeBinding) {
-    _visitor.visit_ident(& _i . ident);
-    tokens_helper(_visitor, &(& _i . eq_token).0);
-    _visitor.visit_type(& _i . ty);
 }
 
 pub fn visit_type_group<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeGroup) {

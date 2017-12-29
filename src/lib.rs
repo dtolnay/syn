@@ -88,9 +88,9 @@ pub use op::{BinOp, UnOp};
 
 mod ty;
 pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
-             GenericArgument, ParenthesizedGenericArguments, Path,
+             Binding, GenericArgument, ParenthesizedGenericArguments, Path,
              PathArguments, PathSegment, PolyTraitRef, QSelf, ReturnType, Type, TypeArray,
-             TypeBareFn, TypeBinding, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
+             TypeBareFn, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
              TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;

@@ -61,6 +61,8 @@ fn fold_bare_fn_arg(&mut self, i: BareFnArg) -> BareFnArg { fold_bare_fn_arg(sel
 fn fold_bare_fn_arg_name(&mut self, i: BareFnArgName) -> BareFnArgName { fold_bare_fn_arg_name(self, i) }
 
 fn fold_bin_op(&mut self, i: BinOp) -> BinOp { fold_bin_op(self, i) }
+
+fn fold_binding(&mut self, i: Binding) -> Binding { fold_binding(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_block(&mut self, i: Block) -> Block { fold_block(self, i) }
 
@@ -331,8 +333,6 @@ fn fold_type(&mut self, i: Type) -> Type { fold_type(self, i) }
 fn fold_type_array(&mut self, i: TypeArray) -> TypeArray { fold_type_array(self, i) }
 
 fn fold_type_bare_fn(&mut self, i: TypeBareFn) -> TypeBareFn { fold_type_bare_fn(self, i) }
-
-fn fold_type_binding(&mut self, i: TypeBinding) -> TypeBinding { fold_type_binding(self, i) }
 
 fn fold_type_group(&mut self, i: TypeGroup) -> TypeGroup { fold_type_group(self, i) }
 
@@ -653,6 +653,14 @@ pub fn fold_bin_op<V: Folder + ?Sized>(_visitor: &mut V, _i: BinOp) -> BinOp {
                 Token ! [ >>= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
+    }
+}
+
+pub fn fold_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: Binding) -> Binding {
+    Binding {
+        ident: _visitor.fold_ident(_i . ident),
+        eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
+        ty: _visitor.fold_type(_i . ty),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1460,9 +1468,9 @@ pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericAr
                 _visitor.fold_type(_binding_0),
             )
         }
-        TypeBinding(_binding_0, ) => {
-            TypeBinding (
-                _visitor.fold_type_binding(_binding_0),
+        Binding(_binding_0, ) => {
+            Binding (
+                _visitor.fold_binding(_binding_0),
             )
         }
         Const(_binding_0, ) => {
@@ -2523,14 +2531,6 @@ pub fn fold_type_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBareFn) -
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_bare_fn_arg(it) }),
         variadic: (_i . variadic).map(|it| { Token ! [ ... ](tokens_helper(_visitor, &(it).0)) }),
         output: _visitor.fold_return_type(_i . output),
-    }
-}
-
-pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) -> TypeBinding {
-    TypeBinding {
-        ident: _visitor.fold_ident(_i . ident),
-        eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
-        ty: _visitor.fold_type(_i . ty),
     }
 }
 

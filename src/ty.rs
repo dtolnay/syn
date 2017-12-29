@@ -226,7 +226,7 @@ ast_enum! {
         /// Bindings (equality constraints) on associated types, if present.
         ///
         /// E.g., `Foo<A=Bar>`.
-        TypeBinding(TypeBinding),
+        Binding(Binding),
         /// Const expression. Must be inside of a block.
         ///
         /// NOTE: Identity expressions are represented as Type arguments, as
@@ -247,7 +247,7 @@ ast_struct! {
 
 ast_struct! {
     /// Bind a type to an associated type: `A=Foo`.
-    pub struct TypeBinding {
+    pub struct Binding {
         pub ident: Ident,
         pub eq_token: Token![=],
         pub ty: Type,
@@ -668,7 +668,7 @@ pub mod parsing {
             |
             syn!(Lifetime) => { GenericArgument::Lifetime }
             |
-            syn!(TypeBinding) => { GenericArgument::TypeBinding }
+            syn!(Binding) => { GenericArgument::Binding }
         ));
     }
 
@@ -679,7 +679,7 @@ pub mod parsing {
             |
             syn!(Lifetime) => { GenericArgument::Lifetime }
             |
-            syn!(TypeBinding) => { GenericArgument::TypeBinding }
+            syn!(Binding) => { GenericArgument::Binding }
             |
             syn!(ExprLit) => { |l| GenericArgument::Const(Expr::Lit(l).into()) }
             |
@@ -743,12 +743,12 @@ pub mod parsing {
         keyword!(crate) => { Into::into }
     ));
 
-    impl Synom for TypeBinding {
+    impl Synom for Binding {
         named!(parse -> Self, do_parse!(
             id: syn!(Ident) >>
             eq: punct!(=) >>
             ty: syn!(Type) >>
-            (TypeBinding {
+            (Binding {
                 ident: id,
                 eq_token: eq,
                 ty: ty,
@@ -1021,7 +1021,7 @@ mod printing {
             match *self {
                 GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
-                GenericArgument::TypeBinding(ref tb) => tb.to_tokens(tokens),
+                GenericArgument::Binding(ref tb) => tb.to_tokens(tokens),
                 GenericArgument::Const(ref e) => match *e {
                     Expr::Lit(_) => e.to_tokens(tokens),
 
@@ -1050,7 +1050,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for TypeBinding {
+    impl ToTokens for Binding {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
