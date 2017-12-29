@@ -14,7 +14,7 @@ ast_struct! {
     pub struct Macro #manual_extra_traits {
         pub path: Path,
         pub bang_token: Token![!],
-        pub tokens: TokenTree,
+        pub tt: TokenTree,
     }
 }
 
@@ -25,7 +25,7 @@ impl Eq for Macro {}
 impl PartialEq for Macro {
     fn eq(&self, other: &Self) -> bool {
         self.path == other.path && self.bang_token == other.bang_token
-            && TokenTreeHelper(&self.tokens) == TokenTreeHelper(&other.tokens)
+            && TokenTreeHelper(&self.tt) == TokenTreeHelper(&other.tt)
     }
 }
 
@@ -37,7 +37,7 @@ impl Hash for Macro {
     {
         self.path.hash(state);
         self.bang_token.hash(state);
-        TokenTreeHelper(&self.tokens).hash(state);
+        TokenTreeHelper(&self.tt).hash(state);
     }
 }
 
@@ -167,7 +167,7 @@ pub mod parsing {
             (Macro {
                 path: what,
                 bang_token: bang,
-                tokens: body,
+                tt: body,
             })
         ));
     }
@@ -182,7 +182,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
-            self.tokens.to_tokens(tokens);
+            self.tt.to_tokens(tokens);
         }
     }
 }

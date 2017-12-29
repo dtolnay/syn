@@ -1946,7 +1946,7 @@ pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
     Macro {
         path: _visitor.fold_path(_i . path),
         bang_token: Token ! [ ! ](tokens_helper(_visitor, &(_i . bang_token).0)),
-        tokens: _i . tokens,
+        tt: _i . tt,
     }
 }
 

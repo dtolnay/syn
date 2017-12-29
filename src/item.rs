@@ -592,7 +592,7 @@ pub mod parsing {
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                tokens: body,
+                tt: body,
             },
             semi_token: semi,
         })
@@ -1209,7 +1209,7 @@ pub mod parsing {
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        semi: cond!(!is_braced(&mac.tokens), punct!(;)) >>
+        semi: cond!(!is_braced(&mac.tt), punct!(;)) >>
         (TraitItemMacro {
             attrs: attrs,
             mac: mac,
@@ -1362,7 +1362,7 @@ pub mod parsing {
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        semi: cond!(!is_braced(&mac.tokens), punct!(;)) >>
+        semi: cond!(!is_braced(&mac.tt), punct!(;)) >>
         (ImplItemMacro {
             attrs: attrs,
             mac: mac,
@@ -1608,7 +1608,7 @@ mod printing {
             self.mac.path.to_tokens(tokens);
             self.mac.bang_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.mac.tokens.to_tokens(tokens);
+            self.mac.tt.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }

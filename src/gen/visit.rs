@@ -1535,7 +1535,7 @@ pub fn visit_local<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 pub fn visit_macro<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Macro) {
     _visitor.visit_path(& _i . path);
     tokens_helper(_visitor, &(& _i . bang_token).0);
-    // Skipped field _i . tokens;
+    // Skipped field _i . tt;
 }
 
 pub fn visit_member<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Member) {

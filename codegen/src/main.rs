@@ -127,16 +127,16 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 
                 // Try to parse the AstItem declaration out of the item.
                 let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
-                    syn::parse_tokens::<parsing::AstStruct>(item.mac.tokens.clone().into_tokens())
+                    syn::parse_tokens::<parsing::AstStruct>(item.mac.tt.clone().into_tokens())
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum".into()) {
-                    syn::parse_tokens::<parsing::AstEnum>(item.mac.tokens.clone().into_tokens())
+                    syn::parse_tokens::<parsing::AstEnum>(item.mac.tt.clone().into_tokens())
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
                     syn::parse_tokens::<parsing::AstEnumOfStructs>(
-                        item.mac.tokens.clone().into_tokens(),
+                        item.mac.tt.clone().into_tokens(),
                     ).map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
                 } else {

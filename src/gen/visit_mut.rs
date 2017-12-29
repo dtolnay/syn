@@ -1535,7 +1535,7 @@ pub fn visit_local_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Local)
 pub fn visit_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Macro) {
     _visitor.visit_path_mut(& mut _i . path);
     tokens_helper(_visitor, &mut (& mut _i . bang_token).0);
-    // Skipped field _i . tokens;
+    // Skipped field _i . tt;
 }
 
 pub fn visit_member_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Member) {

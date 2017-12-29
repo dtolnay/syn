@@ -2032,7 +2032,7 @@ pub mod parsing {
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                tokens: proc_macro2::TokenTree {
+                tt: proc_macro2::TokenTree {
                     span: (data.1).0,
                     kind: TokenNode::Group(Delimiter::Brace, data.0),
                 },
