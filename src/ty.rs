@@ -20,13 +20,15 @@ ast_enum_of_structs! {
         pub Ptr(TypePtr {
             pub star_token: Token![*],
             pub const_token: Option<Token![const]>,
-            pub elem: Box<MutType>,
+            pub mutability: Option<Token![mut]>,
+            pub elem: Box<Type>,
         }),
         /// A reference (`&'a T` or `&'a mut T`)
         pub Reference(TypeReference {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
-            pub elem: Box<MutType>,
+            pub mutability: Option<Token![mut]>,
+            pub elem: Box<Type>,
         }),
         /// A bare function (e.g. `fn(usize) -> bool`)
         pub BareFn(TypeBareFn {
@@ -78,13 +80,6 @@ ast_enum_of_structs! {
         }),
         /// A macro in the type position.
         pub Macro(Macro),
-    }
-}
-
-ast_struct! {
-    pub struct MutType {
-        pub mutability: Option<Token![mut]>,
-        pub ty: Type,
     }
 }
 
@@ -423,10 +418,8 @@ pub mod parsing {
             (TypePtr {
                 const_token: mutability.1,
                 star_token: star,
-                elem: Box::new(MutType {
-                    ty: target,
-                    mutability: mutability.0,
-                }),
+                mutability: mutability.0,
+                elem: Box::new(target),
             })
         ));
     }
@@ -440,10 +433,8 @@ pub mod parsing {
             target: call!(Type::without_plus) >>
             (TypeReference {
                 lifetime: life,
-                elem: Box::new(MutType {
-                    ty: target,
-                    mutability: mutability,
-                }),
+                mutability: mutability,
+                elem: Box::new(target),
                 and_token: amp,
             })
         ));
@@ -835,13 +826,13 @@ mod printing {
     impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.star_token.to_tokens(tokens);
-            match self.elem.mutability {
+            match self.mutability {
                 Some(ref tok) => tok.to_tokens(tokens),
                 None => {
                     TokensOrDefault(&self.const_token).to_tokens(tokens);
                 }
             }
-            self.elem.ty.to_tokens(tokens);
+            self.elem.to_tokens(tokens);
         }
     }
 
@@ -849,8 +840,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
             self.lifetime.to_tokens(tokens);
-            self.elem.mutability.to_tokens(tokens);
-            self.elem.ty.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
+            self.elem.to_tokens(tokens);
         }
     }
 

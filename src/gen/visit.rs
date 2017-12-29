@@ -254,8 +254,6 @@ fn visit_method_sig(&mut self, i: &'ast MethodSig) { visit_method_sig(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_method_turbofish(&mut self, i: &'ast MethodTurbofish) { visit_method_turbofish(self, i) }
 
-fn visit_mut_type(&mut self, i: &'ast MutType) { visit_mut_type(self, i) }
-
 fn visit_nested_meta_item(&mut self, i: &'ast NestedMetaItem) { visit_nested_meta_item(self, i) }
 
 fn visit_parenthesized_generic_arguments(&mut self, i: &'ast ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments(self, i) }
@@ -1573,11 +1571,6 @@ pub fn visit_method_turbofish<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
     tokens_helper(_visitor, &(& _i . gt_token).0);
 }
 
-pub fn visit_mut_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MutType) {
-    if let Some(ref it) = _i . mutability { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_type(& _i . ty);
-}
-
 pub fn visit_nested_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast NestedMetaItem) {
     use ::NestedMetaItem::*;
     match *_i {
@@ -1972,13 +1965,15 @@ pub fn visit_type_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 pub fn visit_type_ptr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypePtr) {
     tokens_helper(_visitor, &(& _i . star_token).0);
     if let Some(ref it) = _i . const_token { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_mut_type(& * _i . elem);
+    if let Some(ref it) = _i . mutability { tokens_helper(_visitor, &(it).0) };
+    _visitor.visit_type(& * _i . elem);
 }
 
 pub fn visit_type_reference<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeReference) {
     tokens_helper(_visitor, &(& _i . and_token).0);
     if let Some(ref it) = _i . lifetime { _visitor.visit_lifetime(it) };
-    _visitor.visit_mut_type(& * _i . elem);
+    if let Some(ref it) = _i . mutability { tokens_helper(_visitor, &(it).0) };
+    _visitor.visit_type(& * _i . elem);
 }
 
 pub fn visit_type_slice<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeSlice) {

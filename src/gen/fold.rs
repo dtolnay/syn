@@ -258,8 +258,6 @@ fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig { fold_method_sig(self,
 # [ cfg ( feature = "full" ) ]
 fn fold_method_turbofish(&mut self, i: MethodTurbofish) -> MethodTurbofish { fold_method_turbofish(self, i) }
 
-fn fold_mut_type(&mut self, i: MutType) -> MutType { fold_mut_type(self, i) }
-
 fn fold_nested_meta_item(&mut self, i: NestedMetaItem) -> NestedMetaItem { fold_nested_meta_item(self, i) }
 
 fn fold_parenthesized_generic_arguments(&mut self, i: ParenthesizedGenericArguments) -> ParenthesizedGenericArguments { fold_parenthesized_generic_arguments(self, i) }
@@ -1991,13 +1989,6 @@ pub fn fold_method_turbofish<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodTur
     }
 }
 
-pub fn fold_mut_type<V: Folder + ?Sized>(_visitor: &mut V, _i: MutType) -> MutType {
-    MutType {
-        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
-        ty: _visitor.fold_type(_i . ty),
-    }
-}
-
 pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMetaItem) -> NestedMetaItem {
     use ::NestedMetaItem::*;
     match _i {
@@ -2542,7 +2533,8 @@ pub fn fold_type_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypePtr) -> TypeP
     TypePtr {
         star_token: Token ! [ * ](tokens_helper(_visitor, &(_i . star_token).0)),
         const_token: (_i . const_token).map(|it| { Token ! [ const ](tokens_helper(_visitor, &(it).0)) }),
-        elem: Box::new(_visitor.fold_mut_type(* _i . elem)),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
+        elem: Box::new(_visitor.fold_type(* _i . elem)),
     }
 }
 
@@ -2550,7 +2542,8 @@ pub fn fold_type_reference<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeReferen
     TypeReference {
         and_token: Token ! [ & ](tokens_helper(_visitor, &(_i . and_token).0)),
         lifetime: (_i . lifetime).map(|it| { _visitor.fold_lifetime(it) }),
-        elem: Box::new(_visitor.fold_mut_type(* _i . elem)),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
+        elem: Box::new(_visitor.fold_type(* _i . elem)),
     }
 }
 

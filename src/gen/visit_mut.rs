@@ -254,8 +254,6 @@ fn visit_method_sig_mut(&mut self, i: &mut MethodSig) { visit_method_sig_mut(sel
 # [ cfg ( feature = "full" ) ]
 fn visit_method_turbofish_mut(&mut self, i: &mut MethodTurbofish) { visit_method_turbofish_mut(self, i) }
 
-fn visit_mut_type_mut(&mut self, i: &mut MutType) { visit_mut_type_mut(self, i) }
-
 fn visit_nested_meta_item_mut(&mut self, i: &mut NestedMetaItem) { visit_nested_meta_item_mut(self, i) }
 
 fn visit_parenthesized_generic_arguments_mut(&mut self, i: &mut ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments_mut(self, i) }
@@ -1573,11 +1571,6 @@ pub fn visit_method_turbofish_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
     tokens_helper(_visitor, &mut (& mut _i . gt_token).0);
 }
 
-pub fn visit_mut_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MutType) {
-    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_type_mut(& mut _i . ty);
-}
-
 pub fn visit_nested_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut NestedMetaItem) {
     use ::NestedMetaItem::*;
     match *_i {
@@ -1972,13 +1965,15 @@ pub fn visit_type_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ty
 pub fn visit_type_ptr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypePtr) {
     tokens_helper(_visitor, &mut (& mut _i . star_token).0);
     if let Some(ref mut it) = _i . const_token { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_mut_type_mut(& mut * _i . elem);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
+    _visitor.visit_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_reference_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeReference) {
     tokens_helper(_visitor, &mut (& mut _i . and_token).0);
     if let Some(ref mut it) = _i . lifetime { _visitor.visit_lifetime_mut(it) };
-    _visitor.visit_mut_type_mut(& mut * _i . elem);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
+    _visitor.visit_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_slice_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeSlice) {
