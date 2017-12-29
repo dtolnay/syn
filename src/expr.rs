@@ -296,7 +296,7 @@ ast_enum_of_structs! {
         }),
 
         /// A `return`, with an optional value to be returned
-        pub Ret(ExprRet #full {
+        pub Return(ExprReturn #full {
             pub attrs: Vec<Attribute>,
             pub return_token: Token![return],
             pub expr: Option<Box<Expr>>,
@@ -414,7 +414,7 @@ impl Expr {
             Expr::AddrOf(ExprAddrOf { ref mut attrs, .. }) |
             Expr::Break(ExprBreak { ref mut attrs, .. }) |
             Expr::Continue(ExprContinue { ref mut attrs, .. }) |
-            Expr::Ret(ExprRet { ref mut attrs, .. }) |
+            Expr::Return(ExprReturn { ref mut attrs, .. }) |
             Expr::Macro(ExprMacro { ref mut attrs, .. }) |
             Expr::Struct(ExprStruct { ref mut attrs, .. }) |
             Expr::Repeat(ExprRepeat { ref mut attrs, .. }) |
@@ -1759,7 +1759,7 @@ pub mod parsing {
         //
         // if return { println!("A") } {} // Prints "A"
         ret_value: option!(ambiguous_expr!(allow_struct)) >>
-        (ExprRet {
+        (ExprReturn {
             attrs: Vec::new(),
             expr: ret_value.map(Box::new),
             return_token: return_,
@@ -2850,7 +2850,7 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprRet {
+    impl ToTokens for ExprReturn {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.return_token.to_tokens(tokens);

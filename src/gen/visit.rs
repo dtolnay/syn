@@ -144,7 +144,7 @@ fn visit_expr_range(&mut self, i: &'ast ExprRange) { visit_expr_range(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_repeat(&mut self, i: &'ast ExprRepeat) { visit_expr_repeat(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_expr_ret(&mut self, i: &'ast ExprRet) { visit_expr_ret(self, i) }
+fn visit_expr_return(&mut self, i: &'ast ExprReturn) { visit_expr_return(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_struct(&mut self, i: &'ast ExprStruct) { visit_expr_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -775,8 +775,8 @@ pub fn visit_expr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast E
         Continue(ref _binding_0, ) => {
             full!(_visitor.visit_expr_continue(_binding_0));
         }
-        Ret(ref _binding_0, ) => {
-            full!(_visitor.visit_expr_ret(_binding_0));
+        Return(ref _binding_0, ) => {
+            full!(_visitor.visit_expr_return(_binding_0));
         }
         Macro(ref _binding_0, ) => {
             full!(_visitor.visit_expr_macro(_binding_0));
@@ -1019,7 +1019,7 @@ pub fn visit_expr_repeat<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     _visitor.visit_expr(& * _i . amt);
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_expr_ret<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprRet) {
+pub fn visit_expr_return<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprReturn) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . return_token).0);
     if let Some(ref it) = _i . expr { _visitor.visit_expr(& * * it) };

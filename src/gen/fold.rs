@@ -148,7 +148,7 @@ fn fold_expr_range(&mut self, i: ExprRange) -> ExprRange { fold_expr_range(self,
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_repeat(&mut self, i: ExprRepeat) -> ExprRepeat { fold_expr_repeat(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_expr_ret(&mut self, i: ExprRet) -> ExprRet { fold_expr_ret(self, i) }
+fn fold_expr_return(&mut self, i: ExprReturn) -> ExprReturn { fold_expr_return(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct { fold_expr_struct(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -947,9 +947,9 @@ pub fn fold_expr<V: Folder + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
                 full!(_visitor.fold_expr_continue(_binding_0)),
             )
         }
-        Ret(_binding_0, ) => {
-            Ret (
-                full!(_visitor.fold_expr_ret(_binding_0)),
+        Return(_binding_0, ) => {
+            Return (
+                full!(_visitor.fold_expr_return(_binding_0)),
             )
         }
         Macro(_binding_0, ) => {
@@ -1267,8 +1267,8 @@ pub fn fold_expr_repeat<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRepeat) ->
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_expr_ret<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprRet) -> ExprRet {
-    ExprRet {
+pub fn fold_expr_return<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprReturn) -> ExprReturn {
+    ExprReturn {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         return_token: Token ! [ return ](tokens_helper(_visitor, &(_i . return_token).0)),
         expr: (_i . expr).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
