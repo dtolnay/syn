@@ -116,14 +116,12 @@ macro_rules! epsilon {
 /// named!(expr_with_arrow_call -> Expr, do_parse!(
 ///     mut e: syn!(Expr) >>
 ///     many0!(tap!(arg: tuple!(punct!(->), syn!(Expr)) => {
-///         e = Expr {
-///             node: ExprCall {
-///                 func: Box::new(e),
-///                 args: vec![arg.1].into(),
-///                 paren_token: Default::default(),
-///             }.into(),
+///         e = Expr::Call(ExprCall {
 ///             attrs: Vec::new(),
-///         };
+///             func: Box::new(e),
+///             args: vec![arg.1].into(),
+///             paren_token: Default::default(),
+///         });
 ///     })) >>
 ///     (e)
 /// ));

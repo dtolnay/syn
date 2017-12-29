@@ -5,36 +5,19 @@ use proc_macro2::Span;
 #[cfg(feature = "full")]
 use std::hash::{Hash, Hasher};
 
-ast_struct! {
-    /// An expression.
-    pub struct Expr {
-        /// Attributes tagged on the expression.
-        pub attrs: Vec<Attribute>,
-
-        /// Type of the expression.
-        pub node: ExprKind,
-    }
-}
-
-impl From<ExprKind> for Expr {
-    fn from(node: ExprKind) -> Expr {
-        Expr {
-            node: node,
-            attrs: Vec::new(),
-        }
-    }
-}
-
 ast_enum_of_structs! {
-    pub enum ExprKind {
+    /// An expression.
+    pub enum Expr {
         /// A `box x` expression.
         pub Box(ExprBox #full {
+            pub attrs: Vec<Attribute>,
             pub box_token: Token![box],
             pub expr: Box<Expr>,
         }),
 
         /// E.g. 'place <- val' or `in place { val }`.
         pub InPlace(ExprInPlace #full {
+            pub attrs: Vec<Attribute>,
             pub place: Box<Expr>,
             pub kind: InPlaceKind,
             pub value: Box<Expr>,
@@ -42,12 +25,14 @@ ast_enum_of_structs! {
 
         /// An array, e.g. `[a, b, c, d]`.
         pub Array(ExprArray #full {
+            pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
             pub exprs: Delimited<Expr, Token![,]>,
         }),
 
         /// A function call.
         pub Call(ExprCall {
+            pub attrs: Vec<Attribute>,
             pub func: Box<Expr>,
             pub paren_token: token::Paren,
             pub args: Delimited<Expr, Token![,]>,
@@ -58,10 +43,8 @@ ast_enum_of_structs! {
         /// The `Ident` is the identifier for the method name.
         /// The vector of `Type`s are the ascripted type parameters for the method
         /// (within the angle brackets).
-        ///
-        /// Thus, `x.foo::<Bar, Baz>(a, b, c, d)` is represented as
-        /// `ExprKind::MethodCall(foo, [Bar, Baz], [x, a, b, c, d])`.
         pub MethodCall(ExprMethodCall #full {
+            pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub dot_token: Token![.],
             pub method: Ident,
@@ -75,12 +58,14 @@ ast_enum_of_structs! {
 
         /// A tuple, e.g. `(a, b, c, d)`.
         pub Tuple(ExprTuple #full {
+            pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
             pub args: Delimited<Expr, Token![,]>,
         }),
 
         /// A binary operation, e.g. `a + b`, `a * b`.
         pub Binary(ExprBinary {
+            pub attrs: Vec<Attribute>,
             pub left: Box<Expr>,
             pub op: BinOp,
             pub right: Box<Expr>,
@@ -88,15 +73,20 @@ ast_enum_of_structs! {
 
         /// A unary operation, e.g. `!x`, `*x`.
         pub Unary(ExprUnary {
+            pub attrs: Vec<Attribute>,
             pub op: UnOp,
             pub expr: Box<Expr>,
         }),
 
         /// A literal, e.g. `1`, `"foo"`.
-        pub Lit(Lit),
+        pub Lit(ExprLit {
+            pub attrs: Vec<Attribute>,
+            pub lit: Lit,
+        }),
 
         /// A cast, e.g. `foo as f64`.
         pub Cast(ExprCast {
+            pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub as_token: Token![as],
             pub ty: Box<Type>,
@@ -104,6 +94,7 @@ ast_enum_of_structs! {
 
         /// A type ascription, e.g. `foo: f64`.
         pub Type(ExprType {
+            pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub colon_token: Token![:],
             pub ty: Box<Type>,
@@ -113,6 +104,7 @@ ast_enum_of_structs! {
         ///
         /// E.g., `if expr { block } else { expr }`
         pub If(ExprIf #full {
+            pub attrs: Vec<Attribute>,
             pub if_token: Token![if],
             pub cond: Box<Expr>,
             pub if_true: Block,
@@ -126,6 +118,7 @@ ast_enum_of_structs! {
         ///
         /// This is desugared to a `match` expression.
         pub IfLet(ExprIfLet #full {
+            pub attrs: Vec<Attribute>,
             pub if_token: Token![if],
             pub let_token: Token![let],
             pub pat: Box<Pat>,
@@ -140,6 +133,7 @@ ast_enum_of_structs! {
         ///
         /// E.g., `'label: while expr { block }`
         pub While(ExprWhile #full {
+            pub attrs: Vec<Attribute>,
             pub label: Option<Lifetime>,
             pub colon_token: Option<Token![:]>,
             pub while_token: Token![while],
@@ -153,6 +147,7 @@ ast_enum_of_structs! {
         ///
         /// This is desugared to a combination of `loop` and `match` expressions.
         pub WhileLet(ExprWhileLet #full {
+            pub attrs: Vec<Attribute>,
             pub label: Option<Lifetime>,
             pub colon_token: Option<Token![:]>,
             pub while_token: Token![while],
@@ -169,6 +164,7 @@ ast_enum_of_structs! {
         ///
         /// This is desugared to a combination of `loop` and `match` expressions.
         pub ForLoop(ExprForLoop #full {
+            pub attrs: Vec<Attribute>,
             pub label: Option<Lifetime>,
             pub colon_token: Option<Token![:]>,
             pub for_token: Token![for],
@@ -182,6 +178,7 @@ ast_enum_of_structs! {
         ///
         /// E.g. `'label: loop { block }`
         pub Loop(ExprLoop #full {
+            pub attrs: Vec<Attribute>,
             pub label: Option<Lifetime>,
             pub colon_token: Option<Token![:]>,
             pub loop_token: Token![loop],
@@ -190,6 +187,7 @@ ast_enum_of_structs! {
 
         /// A `match` block.
         pub Match(ExprMatch #full {
+            pub attrs: Vec<Attribute>,
             pub match_token: Token![match],
             pub expr: Box<Expr>,
             pub brace_token: token::Brace,
@@ -198,6 +196,7 @@ ast_enum_of_structs! {
 
         /// A closure (for example, `move |a, b, c| a + b + c`)
         pub Closure(ExprClosure #full {
+            pub attrs: Vec<Attribute>,
             pub capture: CaptureBy,
             pub or1_token: Token![|],
             pub inputs: Delimited<FnArg, Token![,]>,
@@ -208,17 +207,20 @@ ast_enum_of_structs! {
 
         /// An unsafe block (`unsafe { ... }`)
         pub Unsafe(ExprUnsafe #full {
+            pub attrs: Vec<Attribute>,
             pub unsafe_token: Token![unsafe],
             pub block: Block,
         }),
 
         /// A block (`{ ... }`)
         pub Block(ExprBlock #full {
+            pub attrs: Vec<Attribute>,
             pub block: Block,
         }),
 
         /// An assignment (`a = foo()`)
         pub Assign(ExprAssign #full {
+            pub attrs: Vec<Attribute>,
             pub left: Box<Expr>,
             pub eq_token: Token![=],
             pub right: Box<Expr>,
@@ -228,6 +230,7 @@ ast_enum_of_structs! {
         ///
         /// For example, `a += 1`.
         pub AssignOp(ExprAssignOp #full {
+            pub attrs: Vec<Attribute>,
             pub left: Box<Expr>,
             pub op: BinOp,
             pub right: Box<Expr>,
@@ -236,6 +239,7 @@ ast_enum_of_structs! {
         /// Access of a named struct field (`obj.foo`) or unnamed tuple struct
         /// field (`obj.0`).
         pub Field(ExprField #full {
+            pub attrs: Vec<Attribute>,
             pub base: Box<Expr>,
             pub dot_token: Token![.],
             pub member: Member,
@@ -243,6 +247,7 @@ ast_enum_of_structs! {
 
         /// An indexing operation (`foo[2]`)
         pub Index(ExprIndex {
+            pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub bracket_token: token::Bracket,
             pub index: Box<Expr>,
@@ -250,6 +255,7 @@ ast_enum_of_structs! {
 
         /// A range (`1..2`, `1..`, `..2`, `1..=2`, `..=2`)
         pub Range(ExprRange #full {
+            pub attrs: Vec<Attribute>,
             pub from: Option<Box<Expr>>,
             pub limits: RangeLimits,
             pub to: Option<Box<Expr>>,
@@ -261,12 +267,14 @@ ast_enum_of_structs! {
         /// Optionally "qualified",
         /// E.g. `<Vec<T> as SomeTrait>::SomeType`.
         pub Path(ExprPath {
+            pub attrs: Vec<Attribute>,
             pub qself: Option<QSelf>,
             pub path: Path,
         }),
 
         /// A referencing operation (`&a` or `&mut a`)
         pub AddrOf(ExprAddrOf #full {
+            pub attrs: Vec<Attribute>,
             pub and_token: Token![&],
             pub mutbl: Mutability,
             pub expr: Box<Expr>,
@@ -274,6 +282,7 @@ ast_enum_of_structs! {
 
         /// A `break`, with an optional label to break, and an optional expression
         pub Break(ExprBreak #full {
+            pub attrs: Vec<Attribute>,
             pub break_token: Token![break],
             pub label: Option<Lifetime>,
             pub expr: Option<Box<Expr>>,
@@ -281,24 +290,30 @@ ast_enum_of_structs! {
 
         /// A `continue`, with an optional label
         pub Continue(ExprContinue #full {
+            pub attrs: Vec<Attribute>,
             pub continue_token: Token![continue],
             pub label: Option<Lifetime>,
         }),
 
         /// A `return`, with an optional value to be returned
         pub Ret(ExprRet #full {
+            pub attrs: Vec<Attribute>,
             pub return_token: Token![return],
             pub expr: Option<Box<Expr>>,
         }),
 
         /// A macro invocation; pre-expansion
-        pub Macro(Macro),
+        pub Macro(ExprMacro #full {
+            pub attrs: Vec<Attribute>,
+            pub mac: Macro,
+        }),
 
         /// A struct literal expression.
         ///
         /// For example, `Foo {x: 1, y: 2}`, or
         /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
         pub Struct(ExprStruct #full {
+            pub attrs: Vec<Attribute>,
             pub path: Path,
             pub brace_token: token::Brace,
             pub fields: Delimited<FieldValue, Token![,]>,
@@ -311,6 +326,7 @@ ast_enum_of_structs! {
         /// For example, `[1; 5]`. The first expression is the element
         /// to be repeated; the second is the number of times to repeat it.
         pub Repeat(ExprRepeat #full {
+            pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
             pub expr: Box<Expr>,
             pub semi_token: Token![;],
@@ -319,6 +335,7 @@ ast_enum_of_structs! {
 
         /// No-op: used solely so we can pretty-print faithfully
         pub Paren(ExprParen {
+            pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
             pub expr: Box<Expr>,
         }),
@@ -329,12 +346,14 @@ ast_enum_of_structs! {
         /// `TokenStream` which affects the precidence of the resulting
         /// expression. They are used for macro hygiene.
         pub Group(ExprGroup {
+            pub attrs: Vec<Attribute>,
             pub group_token: token::Group,
             pub expr: Box<Expr>,
         }),
 
         /// `expr?`
         pub Try(ExprTry #full {
+            pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub question_token: Token![?],
         }),
@@ -343,6 +362,7 @@ ast_enum_of_structs! {
         ///
         /// E.g. `do catch { block }`
         pub Catch(ExprCatch #full {
+            pub attrs: Vec<Attribute>,
             pub do_token: Token![do],
             pub catch_token: Token![catch],
             pub block: Block,
@@ -352,9 +372,58 @@ ast_enum_of_structs! {
         ///
         /// E.g. `yield expr`
         pub Yield(ExprYield #full {
+            pub attrs: Vec<Attribute>,
             pub yield_token: Token![yield],
             pub expr: Option<Box<Expr>>,
         }),
+    }
+}
+
+impl Expr {
+    // Not public API.
+    #[doc(hidden)]
+    pub fn attrs_mut(&mut self) -> &mut Vec<Attribute> {
+        match *self {
+            Expr::Box(ExprBox { ref mut attrs, .. }) |
+            Expr::InPlace(ExprInPlace { ref mut attrs, .. }) |
+            Expr::Array(ExprArray { ref mut attrs, .. }) |
+            Expr::Call(ExprCall { ref mut attrs, .. }) |
+            Expr::MethodCall(ExprMethodCall { ref mut attrs, .. }) |
+            Expr::Tuple(ExprTuple { ref mut attrs, .. }) |
+            Expr::Binary(ExprBinary { ref mut attrs, .. }) |
+            Expr::Unary(ExprUnary { ref mut attrs, .. }) |
+            Expr::Lit(ExprLit { ref mut attrs, .. }) |
+            Expr::Cast(ExprCast { ref mut attrs, .. }) |
+            Expr::Type(ExprType { ref mut attrs, .. }) |
+            Expr::If(ExprIf { ref mut attrs, .. }) |
+            Expr::IfLet(ExprIfLet { ref mut attrs, .. }) |
+            Expr::While(ExprWhile { ref mut attrs, .. }) |
+            Expr::WhileLet(ExprWhileLet { ref mut attrs, .. }) |
+            Expr::ForLoop(ExprForLoop { ref mut attrs, .. }) |
+            Expr::Loop(ExprLoop { ref mut attrs, .. }) |
+            Expr::Match(ExprMatch { ref mut attrs, .. }) |
+            Expr::Closure(ExprClosure { ref mut attrs, .. }) |
+            Expr::Unsafe(ExprUnsafe { ref mut attrs, .. }) |
+            Expr::Block(ExprBlock { ref mut attrs, .. }) |
+            Expr::Assign(ExprAssign { ref mut attrs, .. }) |
+            Expr::AssignOp(ExprAssignOp { ref mut attrs, .. }) |
+            Expr::Field(ExprField { ref mut attrs, .. }) |
+            Expr::Index(ExprIndex { ref mut attrs, .. }) |
+            Expr::Range(ExprRange { ref mut attrs, .. }) |
+            Expr::Path(ExprPath { ref mut attrs, .. }) |
+            Expr::AddrOf(ExprAddrOf { ref mut attrs, .. }) |
+            Expr::Break(ExprBreak { ref mut attrs, .. }) |
+            Expr::Continue(ExprContinue { ref mut attrs, .. }) |
+            Expr::Ret(ExprRet { ref mut attrs, .. }) |
+            Expr::Macro(ExprMacro { ref mut attrs, .. }) |
+            Expr::Struct(ExprStruct { ref mut attrs, .. }) |
+            Expr::Repeat(ExprRepeat { ref mut attrs, .. }) |
+            Expr::Paren(ExprParen { ref mut attrs, .. }) |
+            Expr::Group(ExprGroup { ref mut attrs, .. }) |
+            Expr::Try(ExprTry { ref mut attrs, .. }) |
+            Expr::Catch(ExprCatch { ref mut attrs, .. }) |
+            Expr::Yield(ExprYield { ref mut attrs, .. }) => attrs,
+        }
     }
 }
 
@@ -648,17 +717,17 @@ ast_enum! {
 fn arm_expr_requires_comma(expr: &Expr) -> bool {
     // see https://github.com/rust-lang/rust/blob/eb8f2586e
     //                       /src/libsyntax/parse/classify.rs#L17-L37
-    match expr.node {
-        ExprKind::Unsafe(..)
-        | ExprKind::Block(..)
-        | ExprKind::If(..)
-        | ExprKind::IfLet(..)
-        | ExprKind::Match(..)
-        | ExprKind::While(..)
-        | ExprKind::WhileLet(..)
-        | ExprKind::Loop(..)
-        | ExprKind::ForLoop(..)
-        | ExprKind::Catch(..) => false,
+    match *expr {
+        Expr::Unsafe(..)
+        | Expr::Block(..)
+        | Expr::If(..)
+        | Expr::IfLet(..)
+        | Expr::Match(..)
+        | Expr::While(..)
+        | Expr::WhileLet(..)
+        | Expr::Loop(..)
+        | Expr::ForLoop(..)
+        | Expr::Catch(..) => false,
         _ => true,
     }
 }
@@ -719,22 +788,14 @@ pub mod parsing {
     // Parse an arbitrary expression.
     #[cfg(feature = "full")]
     fn ambiguous_expr(i: Cursor, allow_struct: bool, allow_block: bool) -> PResult<Expr> {
-        map!(
-            i,
-            call!(assign_expr, allow_struct, allow_block),
-            ExprKind::into
-        )
+        call!(i, assign_expr, allow_struct, allow_block)
     }
 
     #[cfg(not(feature = "full"))]
     fn ambiguous_expr(i: Cursor, allow_struct: bool, allow_block: bool) -> PResult<Expr> {
-        map!(
-            i,
-            // NOTE: We intentionally skip assign_expr, placement_expr, and
-            // range_expr, as they are not parsed in non-full mode.
-            call!(or_expr, allow_struct, allow_block),
-            ExprKind::into
-        )
+        // NOTE: We intentionally skip assign_expr, placement_expr, and
+        // range_expr, as they are not parsed in non-full mode.
+        call!(i, or_expr, allow_struct, allow_block)
     }
 
     // Parse a left-associative binary operator.
@@ -744,13 +805,14 @@ pub mod parsing {
             $next: ident,
             $submac: ident!( $($args:tt)* )
         ) => {
-            named!($name(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+            named!($name(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
                 mut e: call!($next, allow_struct, allow_block) >>
                 many0!(do_parse!(
                     op: $submac!($($args)*) >>
                     rhs: call!($next, allow_struct, true) >>
                     ({
                         e = ExprBinary {
+                            attrs: Vec::new(),
                             left: Box::new(e.into()),
                             op: op,
                             right: Box::new(rhs.into()),
@@ -776,7 +838,7 @@ pub mod parsing {
     //
     // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
-    named!(assign_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+    named!(assign_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(placement_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
@@ -785,6 +847,7 @@ pub mod parsing {
                 rhs: call!(assign_expr, allow_struct, true) >>
                 ({
                     e = ExprAssign {
+                        attrs: Vec::new(),
                         left: Box::new(e.into()),
                         eq_token: eq,
                         right: Box::new(rhs.into()),
@@ -798,6 +861,7 @@ pub mod parsing {
                 rhs: call!(assign_expr, allow_struct, true) >>
                 ({
                     e = ExprAssignOp {
+                        attrs: Vec::new(),
                         left: Box::new(e.into()),
                         op: op,
                         right: Box::new(rhs.into()),
@@ -817,7 +881,7 @@ pub mod parsing {
     //
     // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
-    named!(placement_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+    named!(placement_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(range_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
@@ -826,6 +890,7 @@ pub mod parsing {
                 rhs: call!(placement_expr, allow_struct, true) >>
                 ({
                     e = ExprInPlace {
+                        attrs: Vec::new(),
                         // op: BinOp::Place(larrow),
                         place: Box::new(e.into()),
                         kind: InPlaceKind::Arrow(arrow),
@@ -851,7 +916,7 @@ pub mod parsing {
     // NOTE: The form of ranges which don't include a preceding expression are
     // parsed by `atom_expr`, rather than by this function.
     #[cfg(feature = "full")]
-    named!(range_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+    named!(range_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(or_expr, allow_struct, allow_block) >>
         many0!(do_parse!(
             limits: syn!(RangeLimits) >>
@@ -860,6 +925,7 @@ pub mod parsing {
             hi: option!(call!(or_expr, allow_struct, allow_struct)) >>
             ({
                 e = ExprRange {
+                    attrs: Vec::new(),
                     from: Some(Box::new(e.into())),
                     limits: limits,
                     to: hi.map(|e| Box::new(e.into())),
@@ -977,7 +1043,7 @@ pub mod parsing {
 
     // <unary> as <ty>
     // <unary> : <ty>
-    named!(cast_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+    named!(cast_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(unary_expr, allow_struct, allow_block) >>
         many0!(alt!(
             do_parse!(
@@ -987,6 +1053,7 @@ pub mod parsing {
                 ty: call!(Type::without_plus) >>
                 ({
                     e = ExprCast {
+                        attrs: Vec::new(),
                         expr: Box::new(e.into()),
                         as_token: as_,
                         ty: Box::new(ty),
@@ -1001,6 +1068,7 @@ pub mod parsing {
                 ty: call!(Type::without_plus) >>
                 ({
                     e = ExprType {
+                        attrs: Vec::new(),
                         expr: Box::new(e.into()),
                         colon_token: colon,
                         ty: Box::new(ty),
@@ -1016,11 +1084,12 @@ pub mod parsing {
     // &mut <trailer>
     // box <trailer>
     #[cfg(feature = "full")]
-    named!(unary_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
+    named!(unary_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
         do_parse!(
             op: syn!(UnOp) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprUnary {
+                attrs: Vec::new(),
                 op: op,
                 expr: Box::new(expr.into()),
             }.into())
@@ -1031,6 +1100,7 @@ pub mod parsing {
             mutability: syn!(Mutability) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprAddrOf {
+                attrs: Vec::new(),
                 and_token: and,
                 mutbl: mutability,
                 expr: Box::new(expr.into()),
@@ -1041,6 +1111,7 @@ pub mod parsing {
             box_: keyword!(box) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprBox {
+                attrs: Vec::new(),
                 box_token: box_,
                 expr: Box::new(expr.into()),
             }.into())
@@ -1051,11 +1122,12 @@ pub mod parsing {
 
     // XXX: This duplication is ugly
     #[cfg(not(feature = "full"))]
-    named!(unary_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
+    named!(unary_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
         do_parse!(
             op: syn!(UnOp) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprUnary {
+                attrs: Vec::new(),
                 op: op,
                 expr: Box::new(expr.into()),
             }.into())
@@ -1071,12 +1143,13 @@ pub mod parsing {
     // <atom> [ <expr> ] ...
     // <atom> ? ...
     #[cfg(feature = "full")]
-    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
             tap!(args: and_call => {
                 let (args, paren) = args;
                 e = ExprCall {
+                    attrs: Vec::new(),
                     func: Box::new(e.into()),
                     args: args,
                     paren_token: paren,
@@ -1092,6 +1165,7 @@ pub mod parsing {
             tap!(field: and_field => {
                 let (token, member) = field;
                 e = ExprField {
+                    attrs: Vec::new(),
                     base: Box::new(e.into()),
                     dot_token: token,
                     member: member,
@@ -1101,6 +1175,7 @@ pub mod parsing {
             tap!(i: and_index => {
                 let (i, token) = i;
                 e = ExprIndex {
+                    attrs: Vec::new(),
                     expr: Box::new(e.into()),
                     bracket_token: token,
                     index: Box::new(i),
@@ -1109,6 +1184,7 @@ pub mod parsing {
             |
             tap!(question: punct!(?) => {
                 e = ExprTry {
+                    attrs: Vec::new(),
                     expr: Box::new(e.into()),
                     question_token: question,
                 }.into();
@@ -1119,12 +1195,13 @@ pub mod parsing {
 
     // XXX: Duplication == ugly
     #[cfg(not(feature = "full"))]
-    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> ExprKind, do_parse!(
+    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
             tap!(args: and_call => {
                 let (args, paren) = args;
                 e = ExprCall {
+                    attrs: Vec::new(),
                     func: Box::new(e.into()),
                     args: args,
                     paren_token: paren,
@@ -1134,6 +1211,7 @@ pub mod parsing {
             tap!(i: and_index => {
                 let (i, token) = i;
                 e = ExprIndex {
+                    attrs: Vec::new(),
                     expr: Box::new(e.into()),
                     bracket_token: token,
                     index: Box::new(i),
@@ -1146,105 +1224,125 @@ pub mod parsing {
     // Parse all atomic expressions which don't have to worry about precidence
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
-    named!(atom_expr(allow_struct: bool, allow_block: bool) -> ExprKind, alt!(
-        syn!(ExprGroup) => { ExprKind::Group } // must be placed first
+    named!(atom_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
+        syn!(ExprGroup) => { Expr::Group } // must be placed first
         |
-        syn!(Lit) => { ExprKind::Lit } // must be before expr_struct
+        syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
         |
         // must be before expr_path
-        cond_reduce!(allow_struct, map!(syn!(ExprStruct), ExprKind::Struct))
+        cond_reduce!(allow_struct, map!(syn!(ExprStruct), Expr::Struct))
         |
-        syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
+        syn!(ExprParen) => { Expr::Paren } // must be before expr_tup
         |
-        syn!(Macro) => { ExprKind::Macro } // must be before expr_path
+        syn!(ExprMacro) => { Expr::Macro } // must be before expr_path
         |
         call!(expr_break, allow_struct) // must be before expr_path
         |
-        syn!(ExprContinue) => { ExprKind::Continue } // must be before expr_path
+        syn!(ExprContinue) => { Expr::Continue } // must be before expr_path
         |
         call!(expr_ret, allow_struct) // must be before expr_path
         |
         // NOTE: The `in place { expr }` form. `place <- expr` is parsed above.
-        syn!(ExprInPlace) => { ExprKind::InPlace }
+        syn!(ExprInPlace) => { Expr::InPlace }
         |
-        syn!(ExprArray) => { ExprKind::Array }
+        syn!(ExprArray) => { Expr::Array }
         |
-        syn!(ExprTuple) => { ExprKind::Tuple }
+        syn!(ExprTuple) => { Expr::Tuple }
         |
-        syn!(ExprIf) => { ExprKind::If }
+        syn!(ExprIf) => { Expr::If }
         |
-        syn!(ExprIfLet) => { ExprKind::IfLet }
+        syn!(ExprIfLet) => { Expr::IfLet }
         |
-        syn!(ExprWhile) => { ExprKind::While }
+        syn!(ExprWhile) => { Expr::While }
         |
-        syn!(ExprWhileLet) => { ExprKind::WhileLet }
+        syn!(ExprWhileLet) => { Expr::WhileLet }
         |
-        syn!(ExprForLoop) => { ExprKind::ForLoop }
+        syn!(ExprForLoop) => { Expr::ForLoop }
         |
-        syn!(ExprLoop) => { ExprKind::Loop }
+        syn!(ExprLoop) => { Expr::Loop }
         |
-        syn!(ExprMatch) => { ExprKind::Match }
+        syn!(ExprMatch) => { Expr::Match }
         |
-        syn!(ExprCatch) => { ExprKind::Catch }
+        syn!(ExprCatch) => { Expr::Catch }
         |
-        syn!(ExprYield) => { ExprKind::Yield }
+        syn!(ExprYield) => { Expr::Yield }
         |
-        syn!(ExprUnsafe) => { ExprKind::Unsafe }
+        syn!(ExprUnsafe) => { Expr::Unsafe }
         |
         call!(expr_closure, allow_struct)
         |
-        cond_reduce!(allow_block, map!(syn!(ExprBlock), ExprKind::Block))
+        cond_reduce!(allow_block, map!(syn!(ExprBlock), Expr::Block))
         |
         // NOTE: This is the prefix-form of range
         call!(expr_range, allow_struct)
         |
-        syn!(ExprPath) => { ExprKind::Path }
+        syn!(ExprPath) => { Expr::Path }
         |
-        syn!(ExprRepeat) => { ExprKind::Repeat }
+        syn!(ExprRepeat) => { Expr::Repeat }
     ));
 
     #[cfg(not(feature = "full"))]
-    named!(atom_expr(_allow_struct: bool, _allow_block: bool) -> ExprKind, alt!(
-        syn!(ExprGroup) => { ExprKind::Group } // must be placed first
+    named!(atom_expr(_allow_struct: bool, _allow_block: bool) -> Expr, alt!(
+        syn!(ExprGroup) => { Expr::Group } // must be placed first
         |
-        syn!(Lit) => { ExprKind::Lit } // must be before expr_struct
+        syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
         |
-        syn!(ExprParen) => { ExprKind::Paren } // must be before expr_tup
+        syn!(ExprParen) => { Expr::Paren } // must be before expr_tup
         |
-        syn!(Macro) => { ExprKind::Macro } // must be before expr_path
-        |
-        syn!(ExprPath) => { ExprKind::Path }
+        syn!(ExprPath) => { Expr::Path }
     ));
 
     #[cfg(feature = "full")]
     named!(expr_nosemi -> Expr, map!(alt!(
-        syn!(ExprIf) => { ExprKind::If }
+        syn!(ExprIf) => { Expr::If }
         |
-        syn!(ExprIfLet) => { ExprKind::IfLet }
+        syn!(ExprIfLet) => { Expr::IfLet }
         |
-        syn!(ExprWhile) => { ExprKind::While }
+        syn!(ExprWhile) => { Expr::While }
         |
-        syn!(ExprWhileLet) => { ExprKind::WhileLet }
+        syn!(ExprWhileLet) => { Expr::WhileLet }
         |
-        syn!(ExprForLoop) => { ExprKind::ForLoop }
+        syn!(ExprForLoop) => { Expr::ForLoop }
         |
-        syn!(ExprLoop) => { ExprKind::Loop }
+        syn!(ExprLoop) => { Expr::Loop }
         |
-        syn!(ExprMatch) => { ExprKind::Match }
+        syn!(ExprMatch) => { Expr::Match }
         |
-        syn!(ExprCatch) => { ExprKind::Catch }
+        syn!(ExprCatch) => { Expr::Catch }
         |
-        syn!(ExprYield) => { ExprKind::Yield }
+        syn!(ExprYield) => { Expr::Yield }
         |
-        syn!(ExprUnsafe) => { ExprKind::Unsafe }
+        syn!(ExprUnsafe) => { Expr::Unsafe }
         |
-        syn!(ExprBlock) => { ExprKind::Block }
+        syn!(ExprBlock) => { Expr::Block }
     ), Expr::from));
+
+    impl Synom for ExprLit {
+        named!(parse -> Self, do_parse!(
+            lit: syn!(Lit) >>
+            (ExprLit {
+                attrs: Vec::new(),
+                lit: lit,
+            })
+        ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for ExprMacro {
+        named!(parse -> Self, do_parse!(
+            mac: syn!(Macro) >>
+            (ExprMacro {
+                attrs: Vec::new(),
+                mac: mac,
+            })
+        ));
+    }
 
     impl Synom for ExprGroup {
         named!(parse -> Self, do_parse!(
             e: grouped!(syn!(Expr)) >>
             (ExprGroup {
+                attrs: Vec::new(),
                 expr: Box::new(e.0),
                 group_token: e.1,
             })
@@ -1255,6 +1353,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             e: parens!(syn!(Expr)) >>
             (ExprParen {
+                attrs: Vec::new(),
                 expr: Box::new(e.0),
                 paren_token: e.1,
             })
@@ -1268,17 +1367,16 @@ pub mod parsing {
             place: expr_no_struct >>
             value: braces!(call!(Block::parse_within)) >>
             (ExprInPlace {
+                attrs: Vec::new(),
                 place: Box::new(place),
                 kind: InPlaceKind::In(in_),
-                value: Box::new(Expr {
-                    node: ExprBlock {
-                        block: Block {
-                            stmts: value.0,
-                            brace_token: value.1,
-                        },
-                    }.into(),
+                value: Box::new(ExprBlock {
                     attrs: Vec::new(),
-                }),
+                    block: Block {
+                        stmts: value.0,
+                        brace_token: value.1,
+                    },
+                }.into()),
             })
         ));
     }
@@ -1288,6 +1386,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             elems: brackets!(call!(Delimited::parse_terminated)) >>
             (ExprArray {
+                attrs: Vec::new(),
                 exprs: elems.0,
                 bracket_token: elems.1,
             })
@@ -1315,10 +1414,14 @@ pub mod parsing {
                 None => (None, None, None, None),
             };
             ExprMethodCall {
+                attrs: Vec::new(),
                 // this expr will get overwritten after being returned
-                expr: Box::new(ExprKind::Lit(Lit {
-                    span: Span::default(),
-                    value: LitKind::Bool(false),
+                expr: Box::new(Expr::Lit(ExprLit {
+                    attrs: Vec::new(),
+                    lit: Lit {
+                        span: Span::default(),
+                        value: LitKind::Bool(false),
+                    },
                 }).into()),
 
                 method: method,
@@ -1338,6 +1441,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             elems: parens!(call!(Delimited::parse_terminated)) >>
             (ExprTuple {
+                attrs: Vec::new(),
                 args: elems.0,
                 paren_token: elems.1,
             })
@@ -1355,6 +1459,7 @@ pub mod parsing {
             then_block: braces!(call!(Block::parse_within)) >>
             else_block: option!(else_block) >>
             (ExprIfLet {
+                attrs: Vec::new(),
                 pat: Box::new(pat),
                 let_token: let_,
                 eq_token: eq,
@@ -1378,6 +1483,7 @@ pub mod parsing {
             then_block: braces!(call!(Block::parse_within)) >>
             else_block: option!(else_block) >>
             (ExprIf {
+                attrs: Vec::new(),
                 cond: Box::new(cond),
                 if_true: Block {
                     stmts: then_block.0,
@@ -1391,16 +1497,17 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named!(else_block -> (Token![else], ExprKind), do_parse!(
+    named!(else_block -> (Token![else], Expr), do_parse!(
         else_: keyword!(else) >>
         expr: alt!(
-            syn!(ExprIf) => { ExprKind::If }
+            syn!(ExprIf) => { Expr::If }
             |
-            syn!(ExprIfLet) => { ExprKind::IfLet }
+            syn!(ExprIfLet) => { Expr::IfLet }
             |
             do_parse!(
                 else_block: braces!(call!(Block::parse_within)) >>
-                (ExprKind::Block(ExprBlock {
+                (Expr::Block(ExprBlock {
+                    attrs: Vec::new(),
                     block: Block {
                         stmts: else_block.0,
                         brace_token: else_block.1,
@@ -1421,6 +1528,7 @@ pub mod parsing {
             expr: expr_no_struct >>
             loop_block: syn!(Block) >>
             (ExprForLoop {
+                attrs: Vec::new(),
                 for_token: for_,
                 in_token: in_,
                 pat: Box::new(pat),
@@ -1439,6 +1547,7 @@ pub mod parsing {
             loop_: keyword!(loop) >>
             loop_block: syn!(Block) >>
             (ExprLoop {
+                attrs: Vec::new(),
                 loop_token: loop_,
                 body: loop_block,
                 colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
@@ -1456,6 +1565,7 @@ pub mod parsing {
             ({
                 let (arms, brace) = res;
                 ExprMatch {
+                    attrs: Vec::new(),
                     expr: Box::new(obj),
                     match_token: match_,
                     brace_token: brace,
@@ -1472,6 +1582,7 @@ pub mod parsing {
             catch_: keyword!(catch) >>
             catch_block: syn!(Block) >>
             (ExprCatch {
+                attrs: Vec::new(),
                 block: catch_block,
                 do_token: do_,
                 catch_token: catch_,
@@ -1485,6 +1596,7 @@ pub mod parsing {
             yield_: keyword!(yield) >>
             expr: option!(syn!(Expr)) >>
             (ExprYield {
+                attrs: Vec::new(),
                 yield_token: yield_,
                 expr: expr.map(Box::new),
             })
@@ -1521,7 +1633,7 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named!(expr_closure(allow_struct: bool) -> ExprKind, do_parse!(
+    named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
         capture: syn!(CaptureBy) >>
         or1: punct!(|) >>
         inputs: call!(Delimited::parse_terminated_with, fn_arg) >>
@@ -1532,7 +1644,8 @@ pub mod parsing {
                 ty: syn!(Type) >>
                 body: syn!(Block) >>
                 (ReturnType::Type(arrow, Box::new(ty)),
-                 ExprKind::Block(ExprBlock {
+                 Expr::Block(ExprBlock {
+                     attrs: Vec::new(),
                     block: body,
                 }).into())
             )
@@ -1540,6 +1653,7 @@ pub mod parsing {
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
         ) >>
         (ExprClosure {
+            attrs: Vec::new(),
             capture: capture,
             or1_token: or1,
             inputs: inputs,
@@ -1574,6 +1688,7 @@ pub mod parsing {
             cond: expr_no_struct >>
             while_block: syn!(Block) >>
             (ExprWhile {
+                attrs: Vec::new(),
                 while_token: while_,
                 colon_token: lbl.as_ref().map(|p| Token![:]((p.1).0)),
                 cond: Box::new(cond),
@@ -1594,6 +1709,7 @@ pub mod parsing {
             value: expr_no_struct >>
             while_block: syn!(Block) >>
             (ExprWhileLet {
+                attrs: Vec::new(),
                 eq_token: eq,
                 let_token: let_,
                 while_token: while_,
@@ -1612,6 +1728,7 @@ pub mod parsing {
             cont: keyword!(continue) >>
             lbl: option!(syn!(Lifetime)) >>
             (ExprContinue {
+                attrs: Vec::new(),
                 continue_token: cont,
                 label: lbl,
             })
@@ -1619,13 +1736,14 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named!(expr_break(allow_struct: bool) -> ExprKind, do_parse!(
+    named!(expr_break(allow_struct: bool) -> Expr, do_parse!(
         break_: keyword!(break) >>
         lbl: option!(syn!(Lifetime)) >>
         // We can't allow blocks after a `break` expression when we wouldn't
         // allow structs, as this expression is ambiguous.
         val: opt_ambiguous_expr!(allow_struct) >>
         (ExprBreak {
+            attrs: Vec::new(),
             label: lbl,
             expr: val.map(Box::new),
             break_token: break_,
@@ -1633,7 +1751,7 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(expr_ret(allow_struct: bool) -> ExprKind, do_parse!(
+    named!(expr_ret(allow_struct: bool) -> Expr, do_parse!(
         return_: keyword!(return) >>
         // NOTE: return is greedy and eats blocks after it even when in a
         // position where structs are not allowed, such as in if statement
@@ -1642,6 +1760,7 @@ pub mod parsing {
         // if return { println!("A") } {} // Prints "A"
         ret_value: option!(ambiguous_expr!(allow_struct)) >>
         (ExprRet {
+            attrs: Vec::new(),
             expr: ret_value.map(Box::new),
             return_token: return_,
         }.into())
@@ -1671,6 +1790,7 @@ pub mod parsing {
                     None => (None, None),
                 };
                 ExprStruct {
+                    attrs: Vec::new(),
                     brace_token: brace,
                     path: path,
                     fields: fields,
@@ -1699,7 +1819,11 @@ pub mod parsing {
             |
             map!(syn!(Ident), |name| FieldValue {
                 member: Member::Named(name),
-                expr: ExprKind::Path(ExprPath { qself: None, path: name.into() }).into(),
+                expr: Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself: None,
+                    path: name.into(),
+                }).into(),
                 is_shorthand: true,
                 attrs: Vec::new(),
                 colon_token: None,
@@ -1717,6 +1841,7 @@ pub mod parsing {
                 (value, semi, times)
             )) >>
             (ExprRepeat {
+                attrs: Vec::new(),
                 expr: Box::new((data.0).0),
                 amt: Box::new((data.0).2),
                 bracket_token: data.1,
@@ -1731,6 +1856,7 @@ pub mod parsing {
             unsafe_: keyword!(unsafe) >>
             b: syn!(Block) >>
             (ExprUnsafe {
+                attrs: Vec::new(),
                 unsafe_token: unsafe_,
                 block: b,
             })
@@ -1742,16 +1868,22 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             b: syn!(Block) >>
             (ExprBlock {
+                attrs: Vec::new(),
                 block: b,
             })
         ));
     }
 
     #[cfg(feature = "full")]
-    named!(expr_range(allow_struct: bool) -> ExprKind, do_parse!(
+    named!(expr_range(allow_struct: bool) -> Expr, do_parse!(
         limits: syn!(RangeLimits) >>
         hi: opt_ambiguous_expr!(allow_struct) >>
-        (ExprRange { from: None, to: hi.map(Box::new), limits: limits }.into())
+        (ExprRange {
+            attrs: Vec::new(),
+            from: None,
+            to: hi.map(Box::new),
+            limits: limits,
+        }.into())
     ));
 
     #[cfg(feature = "full")]
@@ -1771,6 +1903,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             pair: qpath >>
             (ExprPath {
+                attrs: Vec::new(),
                 qself: pair.0,
                 path: pair.1,
             })
@@ -1802,7 +1935,7 @@ pub mod parsing {
                 attrs: many0!(Attribute::parse_outer) >>
                 mut e: syn!(Expr) >>
                 ({
-                    e.attrs = attrs;
+                    *e.attrs_mut() = attrs;
                     Stmt::Expr(Box::new(e))
                 })
             )) >>
@@ -1888,7 +2021,7 @@ pub mod parsing {
         not!(punct!(?)) >>
         semi: option!(punct!(;)) >>
         ({
-            e.attrs = attrs;
+            *e.attrs_mut() = attrs;
             if let Some(semi) = semi {
                 Stmt::Semi(Box::new(e), semi)
             } else {
@@ -1903,7 +2036,7 @@ pub mod parsing {
         mut e: syn!(Expr) >>
         semi: punct!(;) >>
         ({
-            e.attrs = attrs;
+            *e.attrs_mut() = attrs;
             Stmt::Semi(Box::new(e), semi)
         })
     ));
@@ -2158,7 +2291,7 @@ pub mod parsing {
     impl Synom for PatLit {
         named!(parse -> Self, do_parse!(
             lit: pat_lit_expr >>
-            (if let ExprKind::Path(_) = lit.node {
+            (if let Expr::Path(_) = lit {
                 return parse_error(); // these need to be parsed by pat_path
             } else {
                 PatLit {
@@ -2186,12 +2319,13 @@ pub mod parsing {
     named!(pat_lit_expr -> Expr, do_parse!(
         neg: option!(punct!(-)) >>
         v: alt!(
-            syn!(Lit) => { ExprKind::Lit }
+            syn!(ExprLit) => { Expr::Lit }
             |
-            syn!(ExprPath) => { ExprKind::Path }
+            syn!(ExprPath) => { Expr::Path }
         ) >>
         (if let Some(neg) = neg {
-            ExprKind::Unary(ExprUnary {
+            Expr::Unary(ExprUnary {
+                attrs: Vec::new(),
                 op: UnOp::Neg(neg),
                 expr: Box::new(v.into())
             }).into()
@@ -2266,7 +2400,7 @@ mod printing {
     // before appending it to `Tokens`.
     #[cfg(feature = "full")]
     fn wrap_bare_struct(tokens: &mut Tokens, e: &Expr) {
-        if let ExprKind::Struct(_) = e.node {
+        if let Expr::Struct(_) = *e {
             token::Paren::default().surround(tokens, |tokens| {
                 e.to_tokens(tokens);
             });
@@ -2275,22 +2409,19 @@ mod printing {
         }
     }
 
-    impl ToTokens for Expr {
-        #[cfg(feature = "full")]
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append_all(self.attrs.outer());
-            self.node.to_tokens(tokens)
-        }
+    #[cfg(feature = "full")]
+    fn attrs_to_tokens(attrs: &[Attribute], tokens: &mut Tokens) {
+        tokens.append_all(attrs.outer());
+    }
 
-        #[cfg(not(feature = "full"))]
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.node.to_tokens(tokens)
-        }
+    #[cfg(not(feature = "full"))]
+    fn attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut Tokens) {
     }
 
     #[cfg(feature = "full")]
     impl ToTokens for ExprBox {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.box_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
@@ -2299,6 +2430,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprInPlace {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             match self.kind {
                 InPlaceKind::Arrow(ref arrow) => {
                     self.place.to_tokens(tokens);
@@ -2310,7 +2442,7 @@ mod printing {
                     self.place.to_tokens(tokens);
                     // NOTE: The second operand must be in a block, add one if
                     // it is not present.
-                    if let ExprKind::Block(_) = self.value.node {
+                    if let Expr::Block(_) = *self.value {
                         self.value.to_tokens(tokens);
                     } else {
                         token::Brace::default().surround(tokens, |tokens| {
@@ -2325,6 +2457,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprArray {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
                 self.exprs.to_tokens(tokens);
             })
@@ -2333,6 +2466,7 @@ mod printing {
 
     impl ToTokens for ExprCall {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.func.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
@@ -2343,6 +2477,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.expr.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.method.to_tokens(tokens);
@@ -2361,6 +2496,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprTuple {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
@@ -2374,6 +2510,7 @@ mod printing {
 
     impl ToTokens for ExprBinary {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.left.to_tokens(tokens);
             self.op.to_tokens(tokens);
             self.right.to_tokens(tokens);
@@ -2382,13 +2519,22 @@ mod printing {
 
     impl ToTokens for ExprUnary {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.op.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
     }
 
+    impl ToTokens for ExprLit {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
+            self.lit.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for ExprCast {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.as_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -2397,6 +2543,7 @@ mod printing {
 
     impl ToTokens for ExprType {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -2414,8 +2561,8 @@ mod printing {
 
             // If we are not one of the valid expressions to exist in an else
             // clause, wrap ourselves in a block.
-            match if_false.node {
-                ExprKind::If(_) | ExprKind::IfLet(_) | ExprKind::Block(_) => {
+            match **if_false {
+                Expr::If(_) | Expr::IfLet(_) | Expr::Block(_) => {
                     if_false.to_tokens(tokens);
                 }
                 _ => {
@@ -2430,6 +2577,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprIf {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.if_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
             self.if_true.to_tokens(tokens);
@@ -2440,6 +2588,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprIfLet {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.if_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
@@ -2453,6 +2602,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprWhile {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
@@ -2466,6 +2616,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprWhileLet {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
@@ -2482,6 +2633,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprForLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
@@ -2497,6 +2649,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprLoop {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             if self.label.is_some() {
                 self.label.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
@@ -2509,6 +2662,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprMatch {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.match_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.brace_token.surround(tokens, |tokens| {
@@ -2528,6 +2682,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprCatch {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.do_token.to_tokens(tokens);
             self.catch_token.to_tokens(tokens);
             self.block.to_tokens(tokens);
@@ -2537,6 +2692,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprYield {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.yield_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
@@ -2545,6 +2701,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
             for item in self.inputs.iter() {
@@ -2569,6 +2726,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprUnsafe {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.unsafe_token.to_tokens(tokens);
             self.block.to_tokens(tokens);
         }
@@ -2577,6 +2735,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.block.to_tokens(tokens);
         }
     }
@@ -2584,6 +2743,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprAssign {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.left.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.right.to_tokens(tokens);
@@ -2593,6 +2753,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprAssignOp {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.left.to_tokens(tokens);
             self.op.to_tokens(tokens);
             self.right.to_tokens(tokens);
@@ -2602,6 +2763,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprField {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.base.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.member.to_tokens(tokens);
@@ -2630,6 +2792,7 @@ mod printing {
 
     impl ToTokens for ExprIndex {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.bracket_token.surround(tokens, |tokens| {
                 self.index.to_tokens(tokens);
@@ -2640,6 +2803,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.from.to_tokens(tokens);
             match self.limits {
                 RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
@@ -2651,6 +2815,7 @@ mod printing {
 
     impl ToTokens for ExprPath {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             ::PathTokens(&self.qself, &self.path).to_tokens(tokens)
         }
     }
@@ -2658,6 +2823,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprAddrOf {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.and_token.to_tokens(tokens);
             self.mutbl.to_tokens(tokens);
             self.expr.to_tokens(tokens);
@@ -2667,6 +2833,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprBreak {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.break_token.to_tokens(tokens);
             self.label.to_tokens(tokens);
             self.expr.to_tokens(tokens);
@@ -2676,6 +2843,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprContinue {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.continue_token.to_tokens(tokens);
             self.label.to_tokens(tokens);
         }
@@ -2684,14 +2852,24 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprRet {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.return_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
     }
 
     #[cfg(feature = "full")]
+    impl ToTokens for ExprMacro {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
+            self.mac.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
     impl ToTokens for ExprStruct {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
@@ -2706,6 +2884,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprRepeat {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
                 self.expr.to_tokens(tokens);
                 self.semi_token.to_tokens(tokens);
@@ -2716,6 +2895,7 @@ mod printing {
 
     impl ToTokens for ExprGroup {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.group_token.surround(tokens, |tokens| {
                 self.expr.to_tokens(tokens);
             });
@@ -2724,6 +2904,7 @@ mod printing {
 
     impl ToTokens for ExprParen {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            attrs_to_tokens(&self.attrs, tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.expr.to_tokens(tokens);
             });
@@ -2733,6 +2914,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprTry {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.expr.to_tokens(tokens);
             self.question_token.to_tokens(tokens);
         }

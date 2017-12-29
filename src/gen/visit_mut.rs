@@ -126,9 +126,11 @@ fn visit_expr_in_place_mut(&mut self, i: &mut ExprInPlace) { visit_expr_in_place
 
 fn visit_expr_index_mut(&mut self, i: &mut ExprIndex) { visit_expr_index_mut(self, i) }
 
-fn visit_expr_kind_mut(&mut self, i: &mut ExprKind) { visit_expr_kind_mut(self, i) }
+fn visit_expr_lit_mut(&mut self, i: &mut ExprLit) { visit_expr_lit_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_loop_mut(&mut self, i: &mut ExprLoop) { visit_expr_loop_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_expr_macro_mut(&mut self, i: &mut ExprMacro) { visit_expr_macro_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_match_mut(&mut self, i: &mut ExprMatch) { visit_expr_match_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -681,140 +683,7 @@ pub fn visit_derive_input_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 }
 
 pub fn visit_expr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
-    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
-    _visitor.visit_expr_kind_mut(& mut _i . node);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_addr_of_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAddrOf) {
-    tokens_helper(_visitor, &mut (& mut _i . and_token).0);
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
-    _visitor.visit_expr_mut(& mut * _i . expr);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_array_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprArray) {
-    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
-    for mut el in & mut _i . exprs { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_assign_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAssign) {
-    _visitor.visit_expr_mut(& mut * _i . left);
-    tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
-    _visitor.visit_expr_mut(& mut * _i . right);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_assign_op_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAssignOp) {
-    _visitor.visit_expr_mut(& mut * _i . left);
-    _visitor.visit_bin_op_mut(& mut _i . op);
-    _visitor.visit_expr_mut(& mut * _i . right);
-}
-
-pub fn visit_expr_binary_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBinary) {
-    _visitor.visit_expr_mut(& mut * _i . left);
-    _visitor.visit_bin_op_mut(& mut _i . op);
-    _visitor.visit_expr_mut(& mut * _i . right);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_block_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBlock) {
-    _visitor.visit_block_mut(& mut _i . block);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_box_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBox) {
-    tokens_helper(_visitor, &mut (& mut _i . box_token).0);
-    _visitor.visit_expr_mut(& mut * _i . expr);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_break_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBreak) {
-    tokens_helper(_visitor, &mut (& mut _i . break_token).0);
-    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
-    if let Some(ref mut it) = _i . expr { _visitor.visit_expr_mut(& mut * * it) };
-}
-
-pub fn visit_expr_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCall) {
-    _visitor.visit_expr_mut(& mut * _i . func);
-    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
-}
-
-pub fn visit_expr_cast_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCast) {
-    _visitor.visit_expr_mut(& mut * _i . expr);
-    tokens_helper(_visitor, &mut (& mut _i . as_token).0);
-    _visitor.visit_type_mut(& mut * _i . ty);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_catch_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCatch) {
-    tokens_helper(_visitor, &mut (& mut _i . do_token).0);
-    tokens_helper(_visitor, &mut (& mut _i . catch_token).0);
-    _visitor.visit_block_mut(& mut _i . block);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_closure_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprClosure) {
-    _visitor.visit_capture_by_mut(& mut _i . capture);
-    tokens_helper(_visitor, &mut (& mut _i . or1_token).0);
-    for mut el in & mut _i . inputs { let it = el.item_mut(); _visitor.visit_fn_arg_mut(it) };
-    tokens_helper(_visitor, &mut (& mut _i . or2_token).0);
-    _visitor.visit_return_type_mut(& mut _i . output);
-    _visitor.visit_expr_mut(& mut * _i . body);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_continue_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprContinue) {
-    tokens_helper(_visitor, &mut (& mut _i . continue_token).0);
-    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_field_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprField) {
-    _visitor.visit_expr_mut(& mut * _i . base);
-    tokens_helper(_visitor, &mut (& mut _i . dot_token).0);
-    _visitor.visit_member_mut(& mut _i . member);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_for_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprForLoop) {
-    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
-    if let Some(ref mut it) = _i . colon_token { tokens_helper(_visitor, &mut (it).0) };
-    tokens_helper(_visitor, &mut (& mut _i . for_token).0);
-    _visitor.visit_pat_mut(& mut * _i . pat);
-    tokens_helper(_visitor, &mut (& mut _i . in_token).0);
-    _visitor.visit_expr_mut(& mut * _i . expr);
-    _visitor.visit_block_mut(& mut _i . body);
-}
-
-pub fn visit_expr_group_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprGroup) {
-    tokens_helper(_visitor, &mut (& mut _i . group_token).0);
-    _visitor.visit_expr_mut(& mut * _i . expr);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_if_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIf) {
-    tokens_helper(_visitor, &mut (& mut _i . if_token).0);
-    _visitor.visit_expr_mut(& mut * _i . cond);
-    _visitor.visit_block_mut(& mut _i . if_true);
-    if let Some(ref mut it) = _i . else_token { tokens_helper(_visitor, &mut (it).0) };
-    if let Some(ref mut it) = _i . if_false { _visitor.visit_expr_mut(& mut * * it) };
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_if_let_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIfLet) {
-    tokens_helper(_visitor, &mut (& mut _i . if_token).0);
-    tokens_helper(_visitor, &mut (& mut _i . let_token).0);
-    _visitor.visit_pat_mut(& mut * _i . pat);
-    tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
-    _visitor.visit_expr_mut(& mut * _i . expr);
-    _visitor.visit_block_mut(& mut _i . if_true);
-    if let Some(ref mut it) = _i . else_token { tokens_helper(_visitor, &mut (it).0) };
-    if let Some(ref mut it) = _i . if_false { _visitor.visit_expr_mut(& mut * * it) };
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_expr_in_place_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprInPlace) {
-    _visitor.visit_expr_mut(& mut * _i . place);
-    _visitor.visit_in_place_kind_mut(& mut _i . kind);
-    _visitor.visit_expr_mut(& mut * _i . value);
-}
-
-pub fn visit_expr_index_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIndex) {
-    _visitor.visit_expr_mut(& mut * _i . expr);
-    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
-    _visitor.visit_expr_mut(& mut * _i . index);
-}
-
-pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprKind) {
-    use ::ExprKind::*;
+    use ::Expr::*;
     match *_i {
         Box(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_box_mut(_binding_0));
@@ -841,7 +710,7 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
             _visitor.visit_expr_unary_mut(_binding_0);
         }
         Lit(ref mut _binding_0, ) => {
-            _visitor.visit_lit_mut(_binding_0);
+            _visitor.visit_expr_lit_mut(_binding_0);
         }
         Cast(ref mut _binding_0, ) => {
             _visitor.visit_expr_cast_mut(_binding_0);
@@ -910,7 +779,7 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
             full!(_visitor.visit_expr_ret_mut(_binding_0));
         }
         Macro(ref mut _binding_0, ) => {
-            _visitor.visit_macro_mut(_binding_0);
+            full!(_visitor.visit_expr_macro_mut(_binding_0));
         }
         Struct(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_struct_mut(_binding_0));
@@ -936,14 +805,174 @@ pub fn visit_expr_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
     }
 }
 # [ cfg ( feature = "full" ) ]
+pub fn visit_expr_addr_of_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAddrOf) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . and_token).0);
+    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    _visitor.visit_expr_mut(& mut * _i . expr);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_array_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprArray) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
+    for mut el in & mut _i . exprs { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_assign_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAssign) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . left);
+    tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
+    _visitor.visit_expr_mut(& mut * _i . right);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_assign_op_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAssignOp) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . left);
+    _visitor.visit_bin_op_mut(& mut _i . op);
+    _visitor.visit_expr_mut(& mut * _i . right);
+}
+
+pub fn visit_expr_binary_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBinary) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . left);
+    _visitor.visit_bin_op_mut(& mut _i . op);
+    _visitor.visit_expr_mut(& mut * _i . right);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_block_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBlock) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_block_mut(& mut _i . block);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_box_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBox) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . box_token).0);
+    _visitor.visit_expr_mut(& mut * _i . expr);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_break_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBreak) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . break_token).0);
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
+    if let Some(ref mut it) = _i . expr { _visitor.visit_expr_mut(& mut * * it) };
+}
+
+pub fn visit_expr_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCall) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . func);
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
+    for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
+}
+
+pub fn visit_expr_cast_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCast) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . expr);
+    tokens_helper(_visitor, &mut (& mut _i . as_token).0);
+    _visitor.visit_type_mut(& mut * _i . ty);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_catch_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCatch) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . do_token).0);
+    tokens_helper(_visitor, &mut (& mut _i . catch_token).0);
+    _visitor.visit_block_mut(& mut _i . block);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_closure_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprClosure) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_capture_by_mut(& mut _i . capture);
+    tokens_helper(_visitor, &mut (& mut _i . or1_token).0);
+    for mut el in & mut _i . inputs { let it = el.item_mut(); _visitor.visit_fn_arg_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . or2_token).0);
+    _visitor.visit_return_type_mut(& mut _i . output);
+    _visitor.visit_expr_mut(& mut * _i . body);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_continue_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprContinue) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . continue_token).0);
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_field_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprField) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . base);
+    tokens_helper(_visitor, &mut (& mut _i . dot_token).0);
+    _visitor.visit_member_mut(& mut _i . member);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_for_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprForLoop) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
+    if let Some(ref mut it) = _i . colon_token { tokens_helper(_visitor, &mut (it).0) };
+    tokens_helper(_visitor, &mut (& mut _i . for_token).0);
+    _visitor.visit_pat_mut(& mut * _i . pat);
+    tokens_helper(_visitor, &mut (& mut _i . in_token).0);
+    _visitor.visit_expr_mut(& mut * _i . expr);
+    _visitor.visit_block_mut(& mut _i . body);
+}
+
+pub fn visit_expr_group_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprGroup) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . group_token).0);
+    _visitor.visit_expr_mut(& mut * _i . expr);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_if_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIf) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . if_token).0);
+    _visitor.visit_expr_mut(& mut * _i . cond);
+    _visitor.visit_block_mut(& mut _i . if_true);
+    if let Some(ref mut it) = _i . else_token { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . if_false { _visitor.visit_expr_mut(& mut * * it) };
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_if_let_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIfLet) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    tokens_helper(_visitor, &mut (& mut _i . if_token).0);
+    tokens_helper(_visitor, &mut (& mut _i . let_token).0);
+    _visitor.visit_pat_mut(& mut * _i . pat);
+    tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
+    _visitor.visit_expr_mut(& mut * _i . expr);
+    _visitor.visit_block_mut(& mut _i . if_true);
+    if let Some(ref mut it) = _i . else_token { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . if_false { _visitor.visit_expr_mut(& mut * * it) };
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_expr_in_place_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprInPlace) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . place);
+    _visitor.visit_in_place_kind_mut(& mut _i . kind);
+    _visitor.visit_expr_mut(& mut * _i . value);
+}
+
+pub fn visit_expr_index_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIndex) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_expr_mut(& mut * _i . expr);
+    tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
+    _visitor.visit_expr_mut(& mut * _i . index);
+}
+
+pub fn visit_expr_lit_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprLit) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_lit_mut(& mut _i . lit);
+}
+# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_loop_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprLoop) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     if let Some(ref mut it) = _i . colon_token { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . loop_token).0);
     _visitor.visit_block_mut(& mut _i . body);
 }
 # [ cfg ( feature = "full" ) ]
+pub fn visit_expr_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprMacro) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
+    _visitor.visit_macro_mut(& mut _i . mac);
+}
+# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_match_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprMatch) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . match_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
@@ -951,6 +980,7 @@ pub fn visit_expr_match_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_method_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprMethodCall) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . dot_token).0);
     _visitor.visit_ident_mut(& mut _i . method);
@@ -963,22 +993,26 @@ pub fn visit_expr_method_call_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 }
 
 pub fn visit_expr_paren_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprParen) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
 }
 
 pub fn visit_expr_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprPath) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . qself { _visitor.visit_qself_mut(it) };
     _visitor.visit_path_mut(& mut _i . path);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_range_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprRange) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . from { _visitor.visit_expr_mut(& mut * * it) };
     _visitor.visit_range_limits_mut(& mut _i . limits);
     if let Some(ref mut it) = _i . to { _visitor.visit_expr_mut(& mut * * it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_repeat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprRepeat) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
@@ -986,11 +1020,13 @@ pub fn visit_expr_repeat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_ret_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprRet) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . return_token).0);
     if let Some(ref mut it) = _i . expr { _visitor.visit_expr_mut(& mut * * it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprStruct) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_path_mut(& mut _i . path);
     tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     for mut el in & mut _i . fields { let it = el.item_mut(); _visitor.visit_field_value_mut(it) };
@@ -999,32 +1035,38 @@ pub fn visit_expr_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_try_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTry) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . question_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTuple) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . args { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
 }
 
 pub fn visit_expr_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprType) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . colon_token).0);
     _visitor.visit_type_mut(& mut * _i . ty);
 }
 
 pub fn visit_expr_unary_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprUnary) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_un_op_mut(& mut _i . op);
     _visitor.visit_expr_mut(& mut * _i . expr);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_unsafe_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprUnsafe) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . unsafe_token).0);
     _visitor.visit_block_mut(& mut _i . block);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprWhile) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     if let Some(ref mut it) = _i . colon_token { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . while_token).0);
@@ -1033,6 +1075,7 @@ pub fn visit_expr_while_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_while_let_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprWhileLet) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
     if let Some(ref mut it) = _i . colon_token { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . while_token).0);
@@ -1044,6 +1087,7 @@ pub fn visit_expr_while_let_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &m
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_yield_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprYield) {
+    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . yield_token).0);
     if let Some(ref mut it) = _i . expr { _visitor.visit_expr_mut(& mut * * it) };
 }

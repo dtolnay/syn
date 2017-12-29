@@ -36,7 +36,7 @@ mod expr;
 pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
                ExprBox, ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue,
                ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
-               ExprKind, ExprLoop, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
+               ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
                ExprRepeat, ExprRet, ExprStruct, ExprTry, ExprTuple, ExprType,
                ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield};
 

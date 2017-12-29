@@ -292,15 +292,15 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::*;
     use syn::fold::*;
+    use std::mem;
 
-    fn paren(folder: &mut BracketsFolder, node: ExprKind) -> ExprKind {
-        ExprKind::Paren(ExprParen {
+    fn paren(folder: &mut BracketsFolder, mut node: Expr) -> Expr {
+        let attrs = mem::replace(node.attrs_mut(), Vec::new());
+        Expr::Paren(ExprParen {
+            attrs: attrs,
             expr: Box::new(fold_expr(
                 folder,
-                Expr {
-                    node: node,
-                    attrs: vec![],
-                },
+                node,
             )),
             paren_token: token::Paren::default(),
         })
@@ -309,19 +309,17 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     struct BracketsFolder;
     impl Folder for BracketsFolder {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
-            let kind = match expr.node {
-                ExprKind::Group(_) => unreachable!(),
-                ExprKind::Paren(p) => paren(self, p.expr.node),
-                ExprKind::If(..)
-                | ExprKind::Unsafe(..)
-                | ExprKind::Block(..)
-                | ExprKind::IfLet(..) => {
+            match expr {
+                Expr::Group(_) => unreachable!(),
+                Expr::Paren(p) => paren(self, *p.expr),
+                Expr::If(..)
+                | Expr::Unsafe(..)
+                | Expr::Block(..)
+                | Expr::IfLet(..) => {
                     return fold_expr(self, expr);
                 }
                 node => paren(self, node),
-            };
-
-            Expr { node: kind, ..expr }
+            }
         }
 
         fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
@@ -360,13 +358,11 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             self.0.push(expr);
 
-            Expr {
-                node: ExprKind::Tuple(ExprTuple {
-                    args: Delimited::new(),
-                    paren_token: token::Paren::default(),
-                }),
+            Expr::Tuple(ExprTuple {
                 attrs: vec![],
-            }
+                args: Delimited::new(),
+                paren_token: token::Paren::default(),
+            })
         }
     }
 

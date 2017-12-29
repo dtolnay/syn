@@ -271,13 +271,13 @@ fn test_enum() {
                     data: VariantData::Unit,
                     discriminant: Some((
                         Default::default(),
-                        Expr {
-                            node: Lit {
+                        Expr::Lit(ExprLit {
+                            attrs: Vec::new(),
+                            lit: Lit {
                                 value: LitKind::Other(Literal::isize(0)),
                                 span: Default::default(),
-                            }.into(),
-                            attrs: Vec::new(),
-                        },
+                            },
+                        }),
                     )),
                 },
                 Variant {
@@ -286,38 +286,34 @@ fn test_enum() {
                     data: VariantData::Unit,
                     discriminant: Some((
                         Default::default(),
-                        Expr {
-                            node: ExprField {
-                                base: Box::new(Expr {
-                                    node: ExprTuple {
-                                        paren_token: Default::default(),
-                                        args: vec![
-                                            Expr {
-                                                node: ExprKind::Lit(Lit {
-                                                    value: LitKind::Other(Literal::integer(0)),
-                                                    span: Default::default(),
-                                                }),
-                                                attrs: Vec::new(),
-                                            },
-                                            Expr {
-                                                node: ExprKind::Lit(Lit {
-                                                    value: LitKind::Other(Literal::string("data")),
-                                                    span: Default::default(),
-                                                }),
-                                                attrs: Vec::new(),
-                                            },
-                                        ].into(),
-                                    }.into(),
-                                    attrs: Vec::new(),
-                                }),
-                                dot_token: Default::default(),
-                                member: Member::Unnamed(Index {
-                                    index: 0,
-                                    span: Default::default(),
-                                }),
-                            }.into(),
+                        Expr::Field(ExprField {
                             attrs: Vec::new(),
-                        },
+                            base: Box::new(Expr::Tuple(ExprTuple {
+                                attrs: Vec::new(),
+                                paren_token: Default::default(),
+                                args: vec![
+                                    Expr::Lit(ExprLit {
+                                        attrs: Vec::new(),
+                                        lit: Lit {
+                                            value: LitKind::Other(Literal::integer(0)),
+                                            span: Default::default(),
+                                        },
+                                    }),
+                                    Expr::Lit(ExprLit {
+                                        attrs: Vec::new(),
+                                        lit: Lit {
+                                            value: LitKind::Other(Literal::string("data")),
+                                            span: Default::default(),
+                                        },
+                                    }),
+                                ].into(),
+                            })),
+                            dot_token: Default::default(),
+                            member: Member::Unnamed(Index {
+                                index: 0,
+                                span: Default::default(),
+                            }),
+                        }),
                     )),
                 },
             ].into(),

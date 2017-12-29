@@ -3,7 +3,7 @@
 
 #[macro_use]
 extern crate syn;
-use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprKind, Lit, LitKind};
+use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprLit, Lit, LitKind};
 use syn::token::Group;
 
 extern crate proc_macro2;
@@ -18,14 +18,17 @@ fn tt(k: TokenNode) -> TokenTree {
     }
 }
 
-fn expr<T: Into<ExprKind>>(t: T) -> Expr {
-    t.into().into()
+fn expr<T: Into<Expr>>(t: T) -> Expr {
+    t.into()
 }
 
 fn lit<T: Into<Literal>>(t: T) -> Expr {
-    expr(Lit {
-        value: LitKind::Other(t.into()),
-        span: Span::default(),
+    Expr::Lit(ExprLit {
+        attrs: Vec::new(),
+        lit: Lit {
+            value: LitKind::Other(t.into()),
+            span: Span::default(),
+        },
     })
 }
 
@@ -53,12 +56,16 @@ fn test_grouping() {
     assert_eq!(
         common::parse::syn::<Expr>(raw),
         expr(ExprBinary {
+            attrs: Vec::new(),
             left: Box::new(lit(Literal::i32(1))),
             op: BinOp::Add(<Token![+]>::default()),
             right: Box::new(expr(ExprBinary {
+                attrs: Vec::new(),
                 left: Box::new(expr(ExprGroup {
+                    attrs: Vec::new(),
                     group_token: Group::default(),
                     expr: Box::new(expr(ExprBinary {
+                        attrs: Vec::new(),
                         left: Box::new(lit(Literal::i32(2))),
                         op: BinOp::Add(<Token![+]>::default()),
                         right: Box::new(lit(Literal::i32(3))),
@@ -95,13 +102,16 @@ fn test_invalid_grouping() {
     assert_eq!(
         common::parse::syn::<Expr>(raw),
         expr(ExprBinary {
+            attrs: Vec::new(),
             left: Box::new(expr(ExprBinary {
+                attrs: Vec::new(),
                 left: Box::new(lit(Literal::i32(1))),
                 op: BinOp::Add(<Token![+]>::default()),
                 right: Box::new(lit(Literal::i32(2))),
             })),
             op: BinOp::Add(<Token![+]>::default()),
             right: Box::new(expr(ExprBinary {
+                attrs: Vec::new(),
                 left: Box::new(lit(Literal::i32(3))),
                 op: BinOp::Mul(<Token![*]>::default()),
                 right: Box::new(lit(Literal::i32(4))),

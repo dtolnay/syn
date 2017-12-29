@@ -695,9 +695,9 @@ pub mod parsing {
             |
             syn!(TypeBinding) => { GenericArgument::TypeBinding }
             |
-            syn!(Lit) => { |l| GenericArgument::Const(ExprKind::Lit(l).into()) }
+            syn!(ExprLit) => { |l| GenericArgument::Const(Expr::Lit(l).into()) }
             |
-            syn!(ExprBlock) => { |b| GenericArgument::Const(ExprKind::Block(b).into()) }
+            syn!(ExprBlock) => { |b| GenericArgument::Const(Expr::Block(b).into()) }
         ));
     }
 
@@ -1029,14 +1029,14 @@ mod printing {
                 GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
                 GenericArgument::TypeBinding(ref tb) => tb.to_tokens(tokens),
-                GenericArgument::Const(ref e) => match e.node {
-                    ExprKind::Lit(_) => e.to_tokens(tokens),
+                GenericArgument::Const(ref e) => match *e {
+                    Expr::Lit(_) => e.to_tokens(tokens),
 
                     // NOTE: We should probably support parsing blocks with only
                     // expressions in them without the full feature for const
                     // generics.
                     #[cfg(feature = "full")]
-                    ExprKind::Block(_) => e.to_tokens(tokens),
+                    Expr::Block(_) => e.to_tokens(tokens),
 
                     // ERROR CORRECTION: Add braces to make sure that the
                     // generated code is valid.
