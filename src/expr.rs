@@ -48,10 +48,7 @@ ast_enum_of_structs! {
             pub receiver: Box<Expr>,
             pub dot_token: Token![.],
             pub method: Ident,
-            pub colon2_token: Option<Token![::]>,
-            pub lt_token: Option<Token![<]>,
-            pub typarams: Delimited<Type, Token![,]>,
-            pub gt_token: Option<Token![>]>,
+            pub turbofish: Option<MethodTurbofish>,
             pub paren_token: token::Paren,
             pub args: Delimited<Expr, Token![,]>,
         }),
@@ -468,6 +465,30 @@ impl Hash for Index {
 
 #[cfg(feature = "full")]
 ast_struct! {
+    pub struct MethodTurbofish {
+        pub colon2_token: Token![::],
+        pub lt_token: Token![<],
+        pub args: Delimited<GenericMethodArgument, Token![,]>,
+        pub gt_token: Token![>],
+    }
+}
+
+#[cfg(feature = "full")]
+ast_enum! {
+    /// A individual generic argument like `T`.
+    pub enum GenericMethodArgument {
+        /// The type parameters for this path segment, if present.
+        Type(Type),
+        /// Const expression. Must be inside of a block.
+        ///
+        /// NOTE: Identity expressions are represented as Type arguments, as
+        /// they are indistinguishable syntactically.
+        Const(Expr),
+    }
+}
+
+#[cfg(feature = "full")]
+ast_struct! {
     /// A field-value pair in a struct literal.
     pub struct FieldValue {
         /// Attributes tagged on the field.
@@ -727,7 +748,7 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use ty::parsing::qpath;
+    use ty::parsing::{qpath, ty_no_eq_after};
 
     #[cfg(feature = "full")]
     use proc_macro2::{Delimiter, Span, TokenNode, TokenStream};
@@ -1388,19 +1409,14 @@ pub mod parsing {
     named!(and_method_call -> ExprMethodCall, do_parse!(
         dot: punct!(.) >>
         method: syn!(Ident) >>
-        typarams: option!(do_parse!(
-            colon2: punct!(::) >>
-            lt: punct!(<) >>
-            tys: call!(Delimited::parse_terminated) >>
-            gt: punct!(>) >>
-            (colon2, lt, tys, gt)
+        turbofish: option!(tuple!(
+            punct!(::),
+            punct!(<),
+            call!(Delimited::parse_terminated),
+            punct!(>)
         )) >>
         args: parens!(call!(Delimited::parse_terminated)) >>
         ({
-            let (colon2, lt, tys, gt) = match typarams {
-                Some((a, b, c, d)) => (Some(a), Some(b), Some(c), Some(d)),
-                None => (None, None, None, None),
-            };
             ExprMethodCall {
                 attrs: Vec::new(),
                 // this expr will get overwritten after being returned
@@ -1413,16 +1429,24 @@ pub mod parsing {
                 }).into()),
 
                 method: method,
+                turbofish: turbofish.map(|fish| MethodTurbofish {
+                    colon2_token: fish.0,
+                    lt_token: fish.1,
+                    args: fish.2,
+                    gt_token: fish.3,
+                }),
                 args: args.0,
                 paren_token: args.1,
                 dot_token: dot,
-                lt_token: lt,
-                gt_token: gt,
-                colon2_token: colon2,
-                typarams: tys.unwrap_or_default(),
             }
         })
     ));
+
+    #[cfg(feature = "full")]
+    impl Synom for GenericMethodArgument {
+        // TODO parse const generics as well
+        named!(parse -> Self, map!(ty_no_eq_after, GenericMethodArgument::Type));
+    }
 
     #[cfg(feature = "full")]
     impl Synom for ExprTuple {
@@ -2452,15 +2476,30 @@ mod printing {
             self.receiver.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.method.to_tokens(tokens);
-            if !self.typarams.is_empty() {
-                TokensOrDefault(&self.colon2_token).to_tokens(tokens);
-                TokensOrDefault(&self.lt_token).to_tokens(tokens);
-                self.typarams.to_tokens(tokens);
-                TokensOrDefault(&self.gt_token).to_tokens(tokens);
-            }
+            self.turbofish.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
             });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for MethodTurbofish {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.colon2_token.to_tokens(tokens);
+            self.lt_token.to_tokens(tokens);
+            self.args.to_tokens(tokens);
+            self.gt_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for GenericMethodArgument {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            match *self {
+                GenericMethodArgument::Type(ref t) => t.to_tokens(tokens),
+                GenericMethodArgument::Const(ref c) => c.to_tokens(tokens),
+            }
         }
     }
 

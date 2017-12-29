@@ -117,7 +117,7 @@ fn test_struct() {
                                     ident: "Vec".into(),
                                     arguments: PathArguments::AngleBracketed(
                                         AngleBracketedGenericArguments {
-                                            turbofish: None,
+                                            colon2_token: None,
                                             lt_token: Default::default(),
                                             args: vec![
                                                 GenericArgument::Type(Type::from(TypePath {

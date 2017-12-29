@@ -731,7 +731,7 @@ pub mod parsing {
         ));
     }
 
-    named!(ty_no_eq_after -> Type, terminated!(syn!(Type), not!(punct!(=))));
+    named!(pub ty_no_eq_after -> Type, terminated!(syn!(Type), not!(punct!(=))));
 
     impl Path {
         named!(pub parse_mod_style -> Self, do_parse!(

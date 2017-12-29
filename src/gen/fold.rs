@@ -189,6 +189,8 @@ fn fold_foreign_item_static(&mut self, i: ForeignItemStatic) -> ForeignItemStati
 fn fold_foreign_item_type(&mut self, i: ForeignItemType) -> ForeignItemType { fold_foreign_item_type(self, i) }
 
 fn fold_generic_argument(&mut self, i: GenericArgument) -> GenericArgument { fold_generic_argument(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_generic_method_argument(&mut self, i: GenericMethodArgument) -> GenericMethodArgument { fold_generic_method_argument(self, i) }
 
 fn fold_generic_param(&mut self, i: GenericParam) -> GenericParam { fold_generic_param(self, i) }
 
@@ -263,6 +265,8 @@ fn fold_meta_item_list(&mut self, i: MetaItemList) -> MetaItemList { fold_meta_i
 fn fold_meta_name_value(&mut self, i: MetaNameValue) -> MetaNameValue { fold_meta_name_value(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig { fold_method_sig(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_method_turbofish(&mut self, i: MethodTurbofish) -> MethodTurbofish { fold_method_turbofish(self, i) }
 
 fn fold_mut_type(&mut self, i: MutType) -> MutType { fold_mut_type(self, i) }
 
@@ -1221,10 +1225,7 @@ pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMetho
         receiver: Box::new(_visitor.fold_expr(* _i . receiver)),
         dot_token: Token ! [ . ](tokens_helper(_visitor, &(_i . dot_token).0)),
         method: _visitor.fold_ident(_i . method),
-        colon2_token: (_i . colon2_token).map(|it| { Token ! [ :: ](tokens_helper(_visitor, &(it).0)) }),
-        lt_token: (_i . lt_token).map(|it| { Token ! [ < ](tokens_helper(_visitor, &(it).0)) }),
-        typarams: FoldHelper::lift(_i . typarams, |it| { _visitor.fold_type(it) }),
-        gt_token: (_i . gt_token).map(|it| { Token ! [ > ](tokens_helper(_visitor, &(it).0)) }),
+        turbofish: (_i . turbofish).map(|it| { _visitor.fold_method_turbofish(it) }),
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
     }
@@ -1508,6 +1509,22 @@ pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericAr
         TypeBinding(_binding_0, ) => {
             TypeBinding (
                 _visitor.fold_type_binding(_binding_0),
+            )
+        }
+        Const(_binding_0, ) => {
+            Const (
+                _visitor.fold_expr(_binding_0),
+            )
+        }
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_generic_method_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericMethodArgument) -> GenericMethodArgument {
+    use ::GenericMethodArgument::*;
+    match _i {
+        Type(_binding_0, ) => {
+            Type (
+                _visitor.fold_type(_binding_0),
             )
         }
         Const(_binding_0, ) => {
@@ -2043,6 +2060,15 @@ pub fn fold_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> M
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         ident: _visitor.fold_ident(_i . ident),
         decl: _visitor.fold_fn_decl(_i . decl),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_method_turbofish<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodTurbofish) -> MethodTurbofish {
+    MethodTurbofish {
+        colon2_token: Token ! [ :: ](tokens_helper(_visitor, &(_i . colon2_token).0)),
+        lt_token: Token ! [ < ](tokens_helper(_visitor, &(_i . lt_token).0)),
+        args: FoldHelper::lift(_i . args, |it| { _visitor.fold_generic_method_argument(it) }),
+        gt_token: Token ! [ > ](tokens_helper(_visitor, &(_i . gt_token).0)),
     }
 }
 

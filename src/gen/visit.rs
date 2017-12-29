@@ -185,6 +185,8 @@ fn visit_foreign_item_static(&mut self, i: &'ast ForeignItemStatic) { visit_fore
 fn visit_foreign_item_type(&mut self, i: &'ast ForeignItemType) { visit_foreign_item_type(self, i) }
 
 fn visit_generic_argument(&mut self, i: &'ast GenericArgument) { visit_generic_argument(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_generic_method_argument(&mut self, i: &'ast GenericMethodArgument) { visit_generic_method_argument(self, i) }
 
 fn visit_generic_param(&mut self, i: &'ast GenericParam) { visit_generic_param(self, i) }
 
@@ -259,6 +261,8 @@ fn visit_meta_item_list(&mut self, i: &'ast MetaItemList) { visit_meta_item_list
 fn visit_meta_name_value(&mut self, i: &'ast MetaNameValue) { visit_meta_name_value(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_method_sig(&mut self, i: &'ast MethodSig) { visit_method_sig(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_method_turbofish(&mut self, i: &'ast MethodTurbofish) { visit_method_turbofish(self, i) }
 
 fn visit_mut_type(&mut self, i: &'ast MutType) { visit_mut_type(self, i) }
 
@@ -982,10 +986,7 @@ pub fn visit_expr_method_call<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
     _visitor.visit_expr(& * _i . receiver);
     tokens_helper(_visitor, &(& _i . dot_token).0);
     _visitor.visit_ident(& _i . method);
-    if let Some(ref it) = _i . colon2_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . lt_token { tokens_helper(_visitor, &(it).0) };
-    for el in & _i . typarams { let it = el.item(); _visitor.visit_type(it) };
-    if let Some(ref it) = _i . gt_token { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . turbofish { _visitor.visit_method_turbofish(it) };
     tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
 }
@@ -1203,6 +1204,18 @@ pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
         }
         TypeBinding(ref _binding_0, ) => {
             _visitor.visit_type_binding(_binding_0);
+        }
+        Const(ref _binding_0, ) => {
+            _visitor.visit_expr(_binding_0);
+        }
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_generic_method_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericMethodArgument) {
+    use ::GenericMethodArgument::*;
+    match *_i {
+        Type(ref _binding_0, ) => {
+            _visitor.visit_type(_binding_0);
         }
         Const(ref _binding_0, ) => {
             _visitor.visit_expr(_binding_0);
@@ -1616,6 +1629,13 @@ pub fn visit_method_sig<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
     if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_fn_decl(& _i . decl);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_method_turbofish<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MethodTurbofish) {
+    tokens_helper(_visitor, &(& _i . colon2_token).0);
+    tokens_helper(_visitor, &(& _i . lt_token).0);
+    for el in & _i . args { let it = el.item(); _visitor.visit_generic_method_argument(it) };
+    tokens_helper(_visitor, &(& _i . gt_token).0);
 }
 
 pub fn visit_mut_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MutType) {
