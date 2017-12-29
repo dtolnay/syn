@@ -502,14 +502,12 @@ ast_struct! {
         /// Name or index of the field.
         pub member: Member,
 
+        /// The colon in `Struct { x: x }`. If written in shorthand like
+        /// `Struct { x }`, there is no colon.
         pub colon_token: Option<Token![:]>,
 
         /// Value of the field.
         pub expr: Expr,
-
-        /// Whether this is a shorthand field, e.g. `Struct { x }`
-        /// instead of `Struct { x: x }`.
-        pub is_shorthand: bool,
     }
 }
 
@@ -708,8 +706,8 @@ ast_struct! {
     /// A single field in a struct pattern
     ///
     /// Patterns like the fields of Foo `{ x, ref y, ref mut z }`
-    /// are treated the same as `x: x, y: ref y, z: ref mut z`,
-    /// except `is_shorthand` is true
+    /// are treated the same as `x: x, y: ref y, z: ref mut z` but
+    /// there is no colon token.
     pub struct FieldPat {
         pub attrs: Vec<Attribute>,
         /// The identifier for the field
@@ -717,7 +715,6 @@ ast_struct! {
         pub colon_token: Option<Token![:]>,
         /// The pattern the field is destructured to
         pub pat: Box<Pat>,
-        pub is_shorthand: bool,
     }
 }
 
@@ -1828,7 +1825,6 @@ pub mod parsing {
                 (FieldValue {
                     member: member,
                     expr: value,
-                    is_shorthand: false,
                     attrs: Vec::new(),
                     colon_token: Some(colon),
                 })
@@ -1841,7 +1837,6 @@ pub mod parsing {
                     qself: None,
                     path: name.into(),
                 }).into(),
-                is_shorthand: true,
                 attrs: Vec::new(),
                 colon_token: None,
             })
@@ -2175,7 +2170,6 @@ pub mod parsing {
                 (FieldPat {
                     member: member,
                     pat: Box::new(pat),
-                    is_shorthand: false,
                     attrs: Vec::new(),
                     colon_token: Some(colon),
                 })
@@ -2206,7 +2200,6 @@ pub mod parsing {
                     FieldPat {
                         member: Member::Named(ident),
                         pat: Box::new(pat),
-                        is_shorthand: true,
                         attrs: Vec::new(),
                         colon_token: None,
                     }
@@ -2941,10 +2934,8 @@ mod printing {
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.member.to_tokens(tokens);
-            // XXX: Override self.is_shorthand if expr is not an IdentExpr with
-            // the ident self.ident?
-            if !self.is_shorthand {
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+            if let Some(ref colon_token) = self.colon_token {
+                colon_token.to_tokens(tokens);
                 self.expr.to_tokens(tokens);
             }
         }
@@ -3111,10 +3102,9 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            // XXX: Override is_shorthand if it was wrong?
-            if !self.is_shorthand {
+            if let Some(ref colon_token) = self.colon_token {
                 self.member.to_tokens(tokens);
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                colon_token.to_tokens(tokens);
             }
             self.pat.to_tokens(tokens);
         }

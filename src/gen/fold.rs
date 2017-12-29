@@ -1389,7 +1389,6 @@ pub fn fold_field_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldPat) -> Fie
         member: _visitor.fold_member(_i . member),
         colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
-        is_shorthand: _i . is_shorthand,
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1399,7 +1398,6 @@ pub fn fold_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) ->
         member: _visitor.fold_member(_i . member),
         colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
         expr: _visitor.fold_expr(_i . expr),
-        is_shorthand: _i . is_shorthand,
     }
 }
 # [ cfg ( feature = "full" ) ]

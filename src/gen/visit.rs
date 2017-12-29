@@ -1108,7 +1108,6 @@ pub fn visit_field_pat<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     _visitor.visit_member(& _i . member);
     if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_pat(& * _i . pat);
-    // Skipped field _i . is_shorthand;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_field_value<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FieldValue) {
@@ -1116,7 +1115,6 @@ pub fn visit_field_value<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     _visitor.visit_member(& _i . member);
     if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_expr(& _i . expr);
-    // Skipped field _i . is_shorthand;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_file<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast File) {
