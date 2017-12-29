@@ -1147,9 +1147,11 @@ pub fn fold_expr_if<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf 
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         if_token: Token ! [ if ](tokens_helper(_visitor, &(_i . if_token).0)),
         cond: Box::new(_visitor.fold_expr(* _i . cond)),
-        if_true: _visitor.fold_block(_i . if_true),
-        else_token: (_i . else_token).map(|it| { Token ! [ else ](tokens_helper(_visitor, &(it).0)) }),
-        if_false: (_i . if_false).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
+        then_branch: _visitor.fold_block(_i . then_branch),
+        else_branch: (_i . else_branch).map(|it| { (
+            Token ! [ else ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            Box::new(_visitor.fold_expr(* ( it ) . 1)),
+        ) }),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -1161,9 +1163,11 @@ pub fn fold_expr_if_let<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> 
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
-        if_true: _visitor.fold_block(_i . if_true),
-        else_token: (_i . else_token).map(|it| { Token ! [ else ](tokens_helper(_visitor, &(it).0)) }),
-        if_false: (_i . if_false).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
+        then_branch: _visitor.fold_block(_i . then_branch),
+        else_branch: (_i . else_branch).map(|it| { (
+            Token ! [ else ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            Box::new(_visitor.fold_expr(* ( it ) . 1)),
+        ) }),
     }
 }
 # [ cfg ( feature = "full" ) ]

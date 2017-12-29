@@ -924,9 +924,11 @@ pub fn visit_expr_if<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . if_token).0);
     _visitor.visit_expr(& * _i . cond);
-    _visitor.visit_block(& _i . if_true);
-    if let Some(ref it) = _i . else_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . if_false { _visitor.visit_expr(& * * it) };
+    _visitor.visit_block(& _i . then_branch);
+    if let Some(ref it) = _i . else_branch { 
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
+            _visitor.visit_expr(& * ( it ) . 1);
+         };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_if_let<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprIfLet) {
@@ -936,9 +938,11 @@ pub fn visit_expr_if_let<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     _visitor.visit_pat(& * _i . pat);
     tokens_helper(_visitor, &(& _i . eq_token).0);
     _visitor.visit_expr(& * _i . expr);
-    _visitor.visit_block(& _i . if_true);
-    if let Some(ref it) = _i . else_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . if_false { _visitor.visit_expr(& * * it) };
+    _visitor.visit_block(& _i . then_branch);
+    if let Some(ref it) = _i . else_branch { 
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
+            _visitor.visit_expr(& * ( it ) . 1);
+         };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_in_place<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprInPlace) {

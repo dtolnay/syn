@@ -104,9 +104,8 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub if_token: Token![if],
             pub cond: Box<Expr>,
-            pub if_true: Block,
-            pub else_token: Option<Token![else]>,
-            pub if_false: Option<Box<Expr>>,
+            pub then_branch: Block,
+            pub else_branch: Option<(Token![else], Box<Expr>)>,
         }),
 
         /// An `if let` expression with an optional else block
@@ -121,9 +120,8 @@ ast_enum_of_structs! {
             pub pat: Box<Pat>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
-            pub if_true: Block,
-            pub else_token: Option<Token![else]>,
-            pub if_false: Option<Box<Expr>>,
+            pub then_branch: Block,
+            pub else_branch: Option<(Token![else], Box<Expr>)>,
         }),
 
         /// A while loop, with an optional label
@@ -748,7 +746,9 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use ty::parsing::{qpath, ty_no_eq_after};
+    use ty::parsing::qpath;
+    #[cfg(feature = "full")]
+    use ty::parsing::ty_no_eq_after;
 
     #[cfg(feature = "full")]
     use proc_macro2::{Delimiter, Span, TokenNode, TokenStream};
@@ -1476,13 +1476,12 @@ pub mod parsing {
                 let_token: let_,
                 eq_token: eq,
                 expr: Box::new(cond),
-                if_true: Block {
+                then_branch: Block {
                     stmts: then_block.0,
                     brace_token: then_block.1,
                 },
                 if_token: if_,
-                else_token: else_block.as_ref().map(|p| Token![else]((p.0).0)),
-                if_false: else_block.map(|p| Box::new(p.1.into())),
+                else_branch: else_block,
             })
         ));
     }
@@ -1497,19 +1496,18 @@ pub mod parsing {
             (ExprIf {
                 attrs: Vec::new(),
                 cond: Box::new(cond),
-                if_true: Block {
+                then_branch: Block {
                     stmts: then_block.0,
                     brace_token: then_block.1,
                 },
                 if_token: if_,
-                else_token: else_block.as_ref().map(|p| Token![else]((p.0).0)),
-                if_false: else_block.map(|p| Box::new(p.1.into())),
+                else_branch: else_block,
             })
         ));
     }
 
     #[cfg(feature = "full")]
-    named!(else_block -> (Token![else], Expr), do_parse!(
+    named!(else_block -> (Token![else], Box<Expr>), do_parse!(
         else_: keyword!(else) >>
         expr: alt!(
             syn!(ExprIf) => { Expr::If }
@@ -1527,7 +1525,7 @@ pub mod parsing {
                 }))
             )
         ) >>
-        (else_, expr)
+        (else_, Box::new(expr))
     ));
 
     #[cfg(feature = "full")]
@@ -2564,21 +2562,20 @@ mod printing {
     #[cfg(feature = "full")]
     fn maybe_wrap_else(
         tokens: &mut Tokens,
-        else_token: &Option<Token![else]>,
-        if_false: &Option<Box<Expr>>,
+        else_: &Option<(Token![else], Box<Expr>)>,
     ) {
-        if let Some(ref if_false) = *if_false {
-            TokensOrDefault(else_token).to_tokens(tokens);
+        if let Some((ref else_token, ref else_)) = *else_ {
+            else_token.to_tokens(tokens);
 
             // If we are not one of the valid expressions to exist in an else
             // clause, wrap ourselves in a block.
-            match **if_false {
+            match **else_ {
                 Expr::If(_) | Expr::IfLet(_) | Expr::Block(_) => {
-                    if_false.to_tokens(tokens);
+                    else_.to_tokens(tokens);
                 }
                 _ => {
                     token::Brace::default().surround(tokens, |tokens| {
-                        if_false.to_tokens(tokens);
+                        else_.to_tokens(tokens);
                     });
                 }
             }
@@ -2591,8 +2588,8 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.if_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
-            self.if_true.to_tokens(tokens);
-            maybe_wrap_else(tokens, &self.else_token, &self.if_false);
+            self.then_branch.to_tokens(tokens);
+            maybe_wrap_else(tokens, &self.else_branch);
         }
     }
 
@@ -2605,8 +2602,8 @@ mod printing {
             self.pat.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
-            self.if_true.to_tokens(tokens);
-            maybe_wrap_else(tokens, &self.else_token, &self.if_false);
+            self.then_branch.to_tokens(tokens);
+            maybe_wrap_else(tokens, &self.else_branch);
         }
     }
 
