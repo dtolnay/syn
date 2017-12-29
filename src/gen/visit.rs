@@ -115,7 +115,7 @@ fn visit_expr_continue(&mut self, i: &'ast ExprContinue) { visit_expr_continue(s
 fn visit_expr_field(&mut self, i: &'ast ExprField) { visit_expr_field(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_for_loop(&mut self, i: &'ast ExprForLoop) { visit_expr_for_loop(self, i) }
-
+# [ cfg ( feature = "full" ) ]
 fn visit_expr_group(&mut self, i: &'ast ExprGroup) { visit_expr_group(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_if(&mut self, i: &'ast ExprIf) { visit_expr_if(self, i) }
@@ -135,7 +135,7 @@ fn visit_expr_macro(&mut self, i: &'ast ExprMacro) { visit_expr_macro(self, i) }
 fn visit_expr_match(&mut self, i: &'ast ExprMatch) { visit_expr_match(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_method_call(&mut self, i: &'ast ExprMethodCall) { visit_expr_method_call(self, i) }
-
+# [ cfg ( feature = "full" ) ]
 fn visit_expr_paren(&mut self, i: &'ast ExprParen) { visit_expr_paren(self, i) }
 
 fn visit_expr_path(&mut self, i: &'ast ExprPath) { visit_expr_path(self, i) }
@@ -788,10 +788,10 @@ pub fn visit_expr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast E
             full!(_visitor.visit_expr_repeat(_binding_0));
         }
         Paren(ref _binding_0, ) => {
-            _visitor.visit_expr_paren(_binding_0);
+            full!(_visitor.visit_expr_paren(_binding_0));
         }
         Group(ref _binding_0, ) => {
-            _visitor.visit_expr_group(_binding_0);
+            full!(_visitor.visit_expr_group(_binding_0));
         }
         Try(ref _binding_0, ) => {
             full!(_visitor.visit_expr_try(_binding_0));
@@ -911,7 +911,7 @@ pub fn visit_expr_for_loop<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
     _visitor.visit_expr(& * _i . expr);
     _visitor.visit_block(& _i . body);
 }
-
+# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_group<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprGroup) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . group_token).0);
@@ -991,7 +991,7 @@ pub fn visit_expr_method_call<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
     tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . args { let it = el.item(); _visitor.visit_expr(it) };
 }
-
+# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_paren<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprParen) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . paren_token).0);

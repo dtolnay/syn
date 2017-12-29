@@ -119,7 +119,7 @@ fn fold_expr_continue(&mut self, i: ExprContinue) -> ExprContinue { fold_expr_co
 fn fold_expr_field(&mut self, i: ExprField) -> ExprField { fold_expr_field(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_for_loop(&mut self, i: ExprForLoop) -> ExprForLoop { fold_expr_for_loop(self, i) }
-
+# [ cfg ( feature = "full" ) ]
 fn fold_expr_group(&mut self, i: ExprGroup) -> ExprGroup { fold_expr_group(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_if(&mut self, i: ExprIf) -> ExprIf { fold_expr_if(self, i) }
@@ -139,7 +139,7 @@ fn fold_expr_macro(&mut self, i: ExprMacro) -> ExprMacro { fold_expr_macro(self,
 fn fold_expr_match(&mut self, i: ExprMatch) -> ExprMatch { fold_expr_match(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_expr_method_call(&mut self, i: ExprMethodCall) -> ExprMethodCall { fold_expr_method_call(self, i) }
-
+# [ cfg ( feature = "full" ) ]
 fn fold_expr_paren(&mut self, i: ExprParen) -> ExprParen { fold_expr_paren(self, i) }
 
 fn fold_expr_path(&mut self, i: ExprPath) -> ExprPath { fold_expr_path(self, i) }
@@ -969,12 +969,12 @@ pub fn fold_expr<V: Folder + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         }
         Paren(_binding_0, ) => {
             Paren (
-                _visitor.fold_expr_paren(_binding_0),
+                full!(_visitor.fold_expr_paren(_binding_0)),
             )
         }
         Group(_binding_0, ) => {
             Group (
-                _visitor.fold_expr_group(_binding_0),
+                full!(_visitor.fold_expr_group(_binding_0)),
             )
         }
         Try(_binding_0, ) => {
@@ -1131,7 +1131,7 @@ pub fn fold_expr_for_loop<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprForLoop)
         body: _visitor.fold_block(_i . body),
     }
 }
-
+# [ cfg ( feature = "full" ) ]
 pub fn fold_expr_group<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprGroup) -> ExprGroup {
     ExprGroup {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
@@ -1231,7 +1231,7 @@ pub fn fold_expr_method_call<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprMetho
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
     }
 }
-
+# [ cfg ( feature = "full" ) ]
 pub fn fold_expr_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprParen) -> ExprParen {
     ExprParen {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),

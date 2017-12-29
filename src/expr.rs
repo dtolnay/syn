@@ -334,7 +334,7 @@ ast_enum_of_structs! {
         }),
 
         /// No-op: used solely so we can pretty-print faithfully
-        pub Paren(ExprParen {
+        pub Paren(ExprParen #full {
             pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
             pub expr: Box<Expr>,
@@ -345,7 +345,7 @@ ast_enum_of_structs! {
         /// A `group` represents a `None`-delimited span in the input
         /// `TokenStream` which affects the precidence of the resulting
         /// expression. They are used for macro hygiene.
-        pub Group(ExprGroup {
+        pub Group(ExprGroup #full {
             pub attrs: Vec<Attribute>,
             pub group_token: token::Group,
             pub expr: Box<Expr>,
@@ -1283,11 +1283,7 @@ pub mod parsing {
 
     #[cfg(not(feature = "full"))]
     named!(atom_expr(_allow_struct: bool, _allow_block: bool) -> Expr, alt!(
-        syn!(ExprGroup) => { Expr::Group } // must be placed first
-        |
-        syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
-        |
-        syn!(ExprParen) => { Expr::Paren } // must be before expr_tup
+        syn!(ExprLit) => { Expr::Lit }
         |
         syn!(ExprPath) => { Expr::Path }
     ));
@@ -1338,6 +1334,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprGroup {
         named!(parse -> Self, do_parse!(
             e: grouped!(syn!(Expr)) >>
@@ -1349,6 +1346,7 @@ pub mod parsing {
         ));
     }
 
+    #[cfg(feature = "full")]
     impl Synom for ExprParen {
         named!(parse -> Self, do_parse!(
             e: parens!(syn!(Expr)) >>
@@ -2893,6 +2891,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprGroup {
         fn to_tokens(&self, tokens: &mut Tokens) {
             attrs_to_tokens(&self.attrs, tokens);
@@ -2902,6 +2901,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprParen {
         fn to_tokens(&self, tokens: &mut Tokens) {
             attrs_to_tokens(&self.attrs, tokens);
