@@ -62,8 +62,6 @@ fn visit_bare_fn_type(&mut self, i: &'ast BareFnType) { visit_bare_fn_type(self,
 
 fn visit_bin_op(&mut self, i: &'ast BinOp) { visit_bin_op(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_binding_mode(&mut self, i: &'ast BindingMode) { visit_binding_mode(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_block(&mut self, i: &'ast Block) { visit_block(self, i) }
 
 fn visit_body(&mut self, i: &'ast Body) { visit_body(self, i) }
@@ -73,8 +71,6 @@ fn visit_body_enum(&mut self, i: &'ast BodyEnum) { visit_body_enum(self, i) }
 fn visit_body_struct(&mut self, i: &'ast BodyStruct) { visit_body_struct(self, i) }
 
 fn visit_bound_lifetimes(&mut self, i: &'ast BoundLifetimes) { visit_bound_lifetimes(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn visit_capture_by(&mut self, i: &'ast CaptureBy) { visit_capture_by(self, i) }
 
 fn visit_const_param(&mut self, i: &'ast ConstParam) { visit_const_param(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -587,19 +583,6 @@ pub fn visit_bin_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_binding_mode<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BindingMode) {
-    use ::BindingMode::*;
-    match *_i {
-        ByRef(ref _binding_0, ref _binding_1, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-            _visitor.visit_mutability(_binding_1);
-        }
-        ByValue(ref _binding_0, ) => {
-            _visitor.visit_mutability(_binding_0);
-        }
-    }
-}
-# [ cfg ( feature = "full" ) ]
 pub fn visit_block<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Block) {
     tokens_helper(_visitor, &(& _i . brace_token).0);
     for it in & _i . stmts { _visitor.visit_stmt(it) };
@@ -634,16 +617,6 @@ pub fn visit_bound_lifetimes<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, 
     tokens_helper(_visitor, &(& _i . lt_token).0);
     for el in & _i . lifetimes { let it = el.item(); _visitor.visit_lifetime_def(it) };
     tokens_helper(_visitor, &(& _i . gt_token).0);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_capture_by<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast CaptureBy) {
-    use ::CaptureBy::*;
-    match *_i {
-        Value(ref _binding_0, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-        }
-        Ref => { }
-    }
 }
 
 pub fn visit_const_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ConstParam) {
@@ -882,7 +855,7 @@ pub fn visit_expr_catch<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( feature = "full" ) ]
 pub fn visit_expr_closure<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprClosure) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    _visitor.visit_capture_by(& _i . capture);
+    if let Some(ref it) = _i . capture { tokens_helper(_visitor, &(it).0) };
     tokens_helper(_visitor, &(& _i . or1_token).0);
     for el in & _i . inputs { let it = el.item(); _visitor.visit_fn_arg(it) };
     tokens_helper(_visitor, &(& _i . or2_token).0);
@@ -1721,7 +1694,8 @@ pub fn visit_pat_box<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_ident<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatIdent) {
-    _visitor.visit_binding_mode(& _i . mode);
+    if let Some(ref it) = _i . mode { tokens_helper(_visitor, &(it).0) };
+    _visitor.visit_mutability(& _i . mutability);
     _visitor.visit_ident(& _i . ident);
     if let Some(ref it) = _i . at_token { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . subpat { _visitor.visit_pat(& * * it) };

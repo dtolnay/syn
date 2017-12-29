@@ -191,7 +191,7 @@ ast_enum_of_structs! {
         /// A closure (for example, `move |a, b, c| a + b + c`)
         pub Closure(ExprClosure #full {
             pub attrs: Vec<Attribute>,
-            pub capture: CaptureBy,
+            pub capture: Option<Token![move]>,
             pub or1_token: Token![|],
             pub inputs: Delimited<FnArg, Token![,]>,
             pub or2_token: Token![|],
@@ -573,7 +573,8 @@ ast_enum_of_structs! {
         /// field must be `None`). Disambiguation cannot be done with parser alone, so it happens
         /// during name resolution.
         pub Ident(PatIdent {
-            pub mode: BindingMode,
+            pub mode: Option<Token![ref]>,
+            pub mutability: Mutability,
             pub ident: Ident,
             pub at_token: Option<Token![@]>,
             pub subpat: Option<Box<Pat>>,
@@ -681,16 +682,6 @@ ast_struct! {
 
 #[cfg(feature = "full")]
 ast_enum! {
-    /// A capture clause
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum CaptureBy {
-        Value(Token![move]),
-        Ref,
-    }
-}
-
-#[cfg(feature = "full")]
-ast_enum! {
     /// Limit types of a range (inclusive or exclusive)
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum RangeLimits {
@@ -715,15 +706,6 @@ ast_struct! {
         pub colon_token: Option<Token![:]>,
         /// The pattern the field is destructured to
         pub pat: Box<Pat>,
-    }
-}
-
-#[cfg(feature = "full")]
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum BindingMode {
-        ByRef(Token![ref], Mutability),
-        ByValue(Mutability),
     }
 }
 
@@ -1648,7 +1630,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
-        capture: syn!(CaptureBy) >>
+        capture: option!(keyword!(move)) >>
         or1: punct!(|) >>
         inputs: call!(Delimited::parse_terminated_with, fn_arg) >>
         or2: punct!(|) >>
@@ -2116,10 +2098,8 @@ pub mod parsing {
             not!(punct!(::)) >>
             subpat: option!(tuple!(punct!(@), syn!(Pat))) >>
             (PatIdent {
-                mode: match mode {
-                    Some(mode) => BindingMode::ByRef(mode, mutability),
-                    None => BindingMode::ByValue(mutability),
-                },
+                mode: mode,
+                mutability: mutability,
                 ident: name,
                 at_token: subpat.as_ref().map(|p| Token![@]((p.0).0)),
                 subpat: subpat.map(|p| Box::new(p.1)),
@@ -2182,11 +2162,8 @@ pub mod parsing {
                 ident: syn!(Ident) >>
                 ({
                     let mut pat: Pat = PatIdent {
-                        mode: if let Some(mode) = mode {
-                            BindingMode::ByRef(mode, mutability)
-                        } else {
-                            BindingMode::ByValue(mutability)
-                        },
+                        mode: mode,
+                        mutability: mutability,
                         ident: ident,
                         subpat: None,
                         at_token: None,
@@ -2377,15 +2354,6 @@ pub mod parsing {
                     back: after.unwrap_or_default(),
                 }
             }
-        ));
-    }
-
-    #[cfg(feature = "full")]
-    impl Synom for CaptureBy {
-        named!(parse -> Self, alt!(
-            keyword!(move) => { CaptureBy::Value }
-            |
-            epsilon!() => { |_| CaptureBy::Ref }
         ));
     }
 }
@@ -2960,6 +2928,7 @@ mod printing {
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.mode.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             if self.subpat.is_some() {
                 TokensOrDefault(&self.at_token).to_tokens(tokens);
@@ -3099,33 +3068,6 @@ mod printing {
                 colon_token.to_tokens(tokens);
             }
             self.pat.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl ToTokens for BindingMode {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                BindingMode::ByRef(ref t, ref m) => {
-                    t.to_tokens(tokens);
-                    m.to_tokens(tokens);
-                }
-                BindingMode::ByValue(ref m) => {
-                    m.to_tokens(tokens);
-                }
-            }
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl ToTokens for CaptureBy {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                CaptureBy::Value(ref t) => t.to_tokens(tokens),
-                CaptureBy::Ref => {
-                    // nothing
-                }
-            }
         }
     }
 

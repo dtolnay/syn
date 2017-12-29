@@ -66,8 +66,6 @@ fn fold_bare_fn_type(&mut self, i: BareFnType) -> BareFnType { fold_bare_fn_type
 
 fn fold_bin_op(&mut self, i: BinOp) -> BinOp { fold_bin_op(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_binding_mode(&mut self, i: BindingMode) -> BindingMode { fold_binding_mode(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn fold_block(&mut self, i: Block) -> Block { fold_block(self, i) }
 
 fn fold_body(&mut self, i: Body) -> Body { fold_body(self, i) }
@@ -77,8 +75,6 @@ fn fold_body_enum(&mut self, i: BodyEnum) -> BodyEnum { fold_body_enum(self, i) 
 fn fold_body_struct(&mut self, i: BodyStruct) -> BodyStruct { fold_body_struct(self, i) }
 
 fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { fold_bound_lifetimes(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_capture_by(&mut self, i: CaptureBy) -> CaptureBy { fold_capture_by(self, i) }
 
 fn fold_const_param(&mut self, i: ConstParam) -> ConstParam { fold_const_param(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -683,23 +679,6 @@ pub fn fold_bin_op<V: Folder + ?Sized>(_visitor: &mut V, _i: BinOp) -> BinOp {
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_binding_mode<V: Folder + ?Sized>(_visitor: &mut V, _i: BindingMode) -> BindingMode {
-    use ::BindingMode::*;
-    match _i {
-        ByRef(_binding_0, _binding_1, ) => {
-            ByRef (
-                Token ! [ ref ](tokens_helper(_visitor, &(_binding_0).0)),
-                _visitor.fold_mutability(_binding_1),
-            )
-        }
-        ByValue(_binding_0, ) => {
-            ByValue (
-                _visitor.fold_mutability(_binding_0),
-            )
-        }
-    }
-}
-# [ cfg ( feature = "full" ) ]
 pub fn fold_block<V: Folder + ?Sized>(_visitor: &mut V, _i: Block) -> Block {
     Block {
         brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
@@ -745,18 +724,6 @@ pub fn fold_bound_lifetimes<V: Folder + ?Sized>(_visitor: &mut V, _i: BoundLifet
         lt_token: Token ! [ < ](tokens_helper(_visitor, &(_i . lt_token).0)),
         lifetimes: FoldHelper::lift(_i . lifetimes, |it| { _visitor.fold_lifetime_def(it) }),
         gt_token: Token ! [ > ](tokens_helper(_visitor, &(_i . gt_token).0)),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_capture_by<V: Folder + ?Sized>(_visitor: &mut V, _i: CaptureBy) -> CaptureBy {
-    use ::CaptureBy::*;
-    match _i {
-        Value(_binding_0, ) => {
-            Value (
-                Token ! [ move ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-        Ref => { Ref }
     }
 }
 
@@ -1105,7 +1072,7 @@ pub fn fold_expr_catch<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> E
 pub fn fold_expr_closure<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprClosure) -> ExprClosure {
     ExprClosure {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        capture: _visitor.fold_capture_by(_i . capture),
+        capture: (_i . capture).map(|it| { Token ! [ move ](tokens_helper(_visitor, &(it).0)) }),
         or1_token: Token ! [ | ](tokens_helper(_visitor, &(_i . or1_token).0)),
         inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_fn_arg(it) }),
         or2_token: Token ! [ | ](tokens_helper(_visitor, &(_i . or2_token).0)),
@@ -2188,7 +2155,8 @@ pub fn fold_pat_box<V: Folder + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox 
 # [ cfg ( feature = "full" ) ]
 pub fn fold_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> PatIdent {
     PatIdent {
-        mode: _visitor.fold_binding_mode(_i . mode),
+        mode: (_i . mode).map(|it| { Token ! [ ref ](tokens_helper(_visitor, &(it).0)) }),
+        mutability: _visitor.fold_mutability(_i . mutability),
         ident: _visitor.fold_ident(_i . ident),
         at_token: (_i . at_token).map(|it| { Token ! [ @ ](tokens_helper(_visitor, &(it).0)) }),
         subpat: (_i . subpat).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
