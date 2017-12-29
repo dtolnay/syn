@@ -382,6 +382,7 @@ ast_enum_of_structs! {
 impl Expr {
     // Not public API.
     #[doc(hidden)]
+    #[cfg(feature = "full")]
     pub fn attrs_mut(&mut self) -> &mut Vec<Attribute> {
         match *self {
             Expr::Box(ExprBox { ref mut attrs, .. }) |
