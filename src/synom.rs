@@ -39,4 +39,8 @@ impl Synom for TokenStream {
     fn parse(input: Cursor) -> PResult<Self> {
         Ok((Cursor::empty(), input.token_stream()))
     }
+
+    fn description() -> Option<&'static str> {
+        Some("arbitrary token stream")
+    }
 }

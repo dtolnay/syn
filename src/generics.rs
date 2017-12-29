@@ -228,6 +228,10 @@ pub mod parsing {
                 where_clause: None,
             }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("generic parameters in declaration")
+        }
     }
 
     impl Synom for LifetimeDef {
@@ -246,6 +250,10 @@ pub mod parsing {
                 colon_token: colon,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("lifetime definition")
+        }
     }
 
     impl Synom for BoundLifetimes {
@@ -261,6 +269,10 @@ pub mod parsing {
                 lifetimes: lifetimes,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("bound lifetimes")
+        }
     }
 
     impl Synom for TypeParam {
@@ -286,6 +298,10 @@ pub mod parsing {
                 default: default.map(|d| d.1),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("type parameter")
+        }
     }
 
     impl Synom for TypeParamBound {
@@ -336,6 +352,10 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("generic `const` parameter")
+        }
     }
 
     impl Synom for WhereClause {
@@ -382,6 +402,10 @@ pub mod parsing {
                 }))
             )
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("predicate in where clause")
+        }
     }
 }
 

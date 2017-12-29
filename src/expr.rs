@@ -1445,6 +1445,10 @@ pub mod parsing {
                 bracket_token: elems.1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("array")
+        }
     }
 
     named!(and_call -> (Delimited<Expr, Token![,]>, token::Paren),
@@ -1503,6 +1507,10 @@ pub mod parsing {
                 paren_token: elems.1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("tuple")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1529,6 +1537,10 @@ pub mod parsing {
                 else_branch: else_block,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`if let` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1549,6 +1561,10 @@ pub mod parsing {
                 else_branch: else_block,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`if` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1592,6 +1608,10 @@ pub mod parsing {
                 label: label,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`for` loop")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1607,6 +1627,10 @@ pub mod parsing {
                 label: label,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`loop`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1626,6 +1650,10 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`match` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1641,6 +1669,10 @@ pub mod parsing {
                 catch_token: catch_,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`catch` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1654,6 +1686,10 @@ pub mod parsing {
                 expr: expr.map(Box::new),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`yield` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1685,6 +1721,10 @@ pub mod parsing {
                 comma: body.1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`match` arm")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1750,6 +1790,10 @@ pub mod parsing {
                 label: label,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`while` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1785,6 +1829,10 @@ pub mod parsing {
                 colon_token: colon,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`while let` expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1798,6 +1846,10 @@ pub mod parsing {
                 label: label,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`continue`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1860,6 +1912,10 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("struct literal expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1888,6 +1944,10 @@ pub mod parsing {
                 colon_token: None,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("field-value pair: `field: value`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1907,6 +1967,10 @@ pub mod parsing {
                 semi_token: (data.0).1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("repeated array literal: `[val; N]`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1920,6 +1984,10 @@ pub mod parsing {
                 block: b,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("unsafe block: `unsafe { .. }`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1931,6 +1999,10 @@ pub mod parsing {
                 block: b,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("block: `{ .. }`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1956,6 +2028,10 @@ pub mod parsing {
             |
             punct!(..) => { RangeLimits::HalfOpen }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("range limit: `..`, `...` or `..=`")
+        }
     }
 
     impl Synom for ExprPath {
@@ -1967,6 +2043,10 @@ pub mod parsing {
                 path: pair.1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("path: `a::b::c`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1983,6 +2063,10 @@ pub mod parsing {
                 brace_token: stmts.1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("block: `{ .. }`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2025,6 +2109,10 @@ pub mod parsing {
             |
             stmt_expr
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("statement")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2127,6 +2215,10 @@ pub mod parsing {
             |
             syn!(PatSlice) => { Pat::Slice }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2135,6 +2227,10 @@ pub mod parsing {
             punct!(_),
             |u| PatWild { underscore_token: u }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("wild pattern: `_`")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2147,6 +2243,10 @@ pub mod parsing {
                 box_token: boxed,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("box pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2169,6 +2269,10 @@ pub mod parsing {
                 subpat: subpat.map(|(at, pat)| (at, Box::new(pat))),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("pattern identifier binding")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2181,6 +2285,10 @@ pub mod parsing {
                 pat: tuple,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("tuple struct pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2199,6 +2307,10 @@ pub mod parsing {
                 dot2_token: (data.0).1.and_then(|m| m),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("struct pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2243,6 +2355,10 @@ pub mod parsing {
                 })
             )
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("field pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2252,6 +2368,10 @@ pub mod parsing {
             |
             syn!(Index) => { Member::Unnamed }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("field member")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2266,6 +2386,10 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("field index")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2274,6 +2398,10 @@ pub mod parsing {
             syn!(ExprPath),
             |p| PatPath { qself: p.qself, path: p.path }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("path pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2306,6 +2434,10 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("tuple pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2320,6 +2452,10 @@ pub mod parsing {
                 and_token: and,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("reference pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2334,6 +2470,10 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("literal pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2348,6 +2488,10 @@ pub mod parsing {
                 limits: limits,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("range pattern")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2410,11 +2554,19 @@ pub mod parsing {
                 }
             }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("slice pattern")
+        }
     }
 
     #[cfg(feature = "full")]
     impl Synom for PatMacro {
         named!(parse -> Self, map!(syn!(Macro), |mac| PatMacro { mac: mac }));
+
+        fn description() -> Option<&'static str> {
+            Some("macro pattern")
+        }
     }
 }
 

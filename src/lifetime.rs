@@ -115,6 +115,10 @@ pub mod parsing {
                 },
             ))
         }
+
+        fn description() -> Option<&'static str> {
+            Some("lifetime")
+        }
     }
 }
 

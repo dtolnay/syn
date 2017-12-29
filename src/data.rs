@@ -195,6 +195,10 @@ pub mod parsing {
             |
             epsilon!() => { |_| Visibility::Inherited }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("visibility qualifier, e.g. `pub`")
+        }
     }
 }
 

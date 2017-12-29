@@ -144,6 +144,10 @@ pub mod parsing {
                 discriminant: disr,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("enum variant")
+        }
     }
 
     named!(struct_like_body -> (Delimited<Field, Token![,]>, token::Brace),

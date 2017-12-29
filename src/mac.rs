@@ -185,6 +185,10 @@ pub mod parsing {
                 tts: body.1,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("macro invocation")
+        }
     }
 }
 

@@ -74,6 +74,10 @@ macro_rules! op {
             fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
                 parsing::op($s, tokens, $name)
             }
+
+            fn description() -> Option<&'static str> {
+                Some(concat!("`", $s, "`"))
+            }
         }
     }
 }
