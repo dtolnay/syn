@@ -61,7 +61,7 @@ mod item;
 pub use item::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl,
                ForeignItem, ForeignItemFn, ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem,
                ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
-               ItemConst, ItemDefaultImpl, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
+               ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
                ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait,
                ItemType, ItemUnion, ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
                TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseList, UsePath, UseTree};

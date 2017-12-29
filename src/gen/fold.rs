@@ -210,8 +210,6 @@ fn fold_item(&mut self, i: Item) -> Item { fold_item(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_const(&mut self, i: ItemConst) -> ItemConst { fold_item_const(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_item_default_impl(&mut self, i: ItemDefaultImpl) -> ItemDefaultImpl { fold_item_default_impl(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn fold_item_enum(&mut self, i: ItemEnum) -> ItemEnum { fold_item_enum(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item_extern_crate(&mut self, i: ItemExternCrate) -> ItemExternCrate { fold_item_extern_crate(self, i) }
@@ -1681,11 +1679,6 @@ pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
                 _visitor.fold_item_trait(_binding_0),
             )
         }
-        DefaultImpl(_binding_0, ) => {
-            DefaultImpl (
-                _visitor.fold_item_default_impl(_binding_0),
-            )
-        }
         Impl(_binding_0, ) => {
             Impl (
                 _visitor.fold_item_impl(_binding_0),
@@ -1720,18 +1713,6 @@ pub fn fold_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> I
         eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_item_default_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemDefaultImpl) -> ItemDefaultImpl {
-    ItemDefaultImpl {
-        attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
-        impl_token: Token ! [ impl ](tokens_helper(_visitor, &(_i . impl_token).0)),
-        path: _visitor.fold_path(_i . path),
-        for_token: Token ! [ for ](tokens_helper(_visitor, &(_i . for_token).0)),
-        dot2_token: Token ! [ .. ](tokens_helper(_visitor, &(_i . dot2_token).0)),
-        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
     }
 }
 # [ cfg ( feature = "full" ) ]

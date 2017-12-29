@@ -206,8 +206,6 @@ fn visit_item_mut(&mut self, i: &mut Item) { visit_item_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_const_mut(&mut self, i: &mut ItemConst) { visit_item_const_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_item_default_impl_mut(&mut self, i: &mut ItemDefaultImpl) { visit_item_default_impl_mut(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_item_enum_mut(&mut self, i: &mut ItemEnum) { visit_item_enum_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_extern_crate_mut(&mut self, i: &mut ItemExternCrate) { visit_item_extern_crate_mut(self, i) }
@@ -1314,9 +1312,6 @@ pub fn visit_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Item) {
         Trait(ref mut _binding_0, ) => {
             _visitor.visit_item_trait_mut(_binding_0);
         }
-        DefaultImpl(ref mut _binding_0, ) => {
-            _visitor.visit_item_default_impl_mut(_binding_0);
-        }
         Impl(ref mut _binding_0, ) => {
             _visitor.visit_item_impl_mut(_binding_0);
         }
@@ -1342,16 +1337,6 @@ pub fn visit_item_const_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut I
     tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_item_default_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemDefaultImpl) {
-    for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
-    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
-    tokens_helper(_visitor, &mut (& mut _i . impl_token).0);
-    _visitor.visit_path_mut(& mut _i . path);
-    tokens_helper(_visitor, &mut (& mut _i . for_token).0);
-    tokens_helper(_visitor, &mut (& mut _i . dot2_token).0);
-    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_enum_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemEnum) {

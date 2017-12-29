@@ -160,18 +160,6 @@ ast_enum_of_structs! {
             pub brace_token: token::Brace,
             pub items: Vec<TraitItem>,
         }),
-        /// Default trait implementation.
-        ///
-        /// E.g. `impl Trait for .. {}` or `impl<T> Trait<T> for .. {}`
-        pub DefaultImpl(ItemDefaultImpl {
-            pub attrs: Vec<Attribute>,
-            pub unsafety: Option<Token![unsafe]>,
-            pub impl_token: Token![impl],
-            pub path: Path,
-            pub for_token: Token![for],
-            pub dot2_token: Token![..],
-            pub brace_token: token::Brace,
-        }),
         /// An implementation.
         ///
         /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
@@ -542,7 +530,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::Synom;
+    use synom::{Synom, Cursor, PResult};
     use proc_macro2::{TokenNode, Delimiter};
 
     impl_synom!(Item "item" alt!(
@@ -570,7 +558,7 @@ pub mod parsing {
         |
         syn!(ItemTrait) => { Item::Trait }
         |
-        syn!(ItemDefaultImpl) => { Item::DefaultImpl }
+        call!(deprecated_default_impl) => { Item::Verbatim }
         |
         syn!(ItemImpl) => { Item::Impl }
         |
@@ -1076,22 +1064,26 @@ pub mod parsing {
         })
     ));
 
-    impl_synom!(ItemDefaultImpl "default impl item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
-        unsafety: option!(keyword!(unsafe)) >>
-        impl_: keyword!(impl) >>
-        path: syn!(Path) >>
-        for_: keyword!(for) >>
-        dot2: punct!(..) >>
-        braces: braces!(epsilon!()) >>
-        (ItemDefaultImpl {
-            attrs: attrs,
-            unsafety: unsafety,
-            impl_token: impl_,
-            path: path,
-            for_token: for_,
-            dot2_token: dot2,
-            brace_token: braces.1,
+    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
+        Ok((cursor, cursor))
+    }
+
+    named!(deprecated_default_impl -> ItemVerbatim, do_parse!(
+        begin: call!(grab_cursor) >>
+        many0!(Attribute::parse_outer) >>
+        option!(keyword!(unsafe)) >>
+        keyword!(impl) >>
+        syn!(Path) >>
+        keyword!(for) >>
+        punct!(..) >>
+        braces!(epsilon!()) >>
+        end: call!(grab_cursor) >>
+        ({
+            let mut tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let len = tts.len() - end.token_stream().into_iter().count();
+            ItemVerbatim {
+                tts: tts.into_iter().take(len).collect(),
+            }
         })
     ));
 
@@ -1567,18 +1559,6 @@ mod printing {
             self.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(&self.items);
             });
-        }
-    }
-
-    impl ToTokens for ItemDefaultImpl {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append_all(self.attrs.outer());
-            self.unsafety.to_tokens(tokens);
-            self.impl_token.to_tokens(tokens);
-            self.path.to_tokens(tokens);
-            self.for_token.to_tokens(tokens);
-            self.dot2_token.to_tokens(tokens);
-            self.brace_token.surround(tokens, |_tokens| {});
         }
     }
 
