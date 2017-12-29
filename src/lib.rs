@@ -113,6 +113,9 @@ mod gen {
 
     #[cfg(feature = "fold")]
     pub mod fold;
+
+    #[path = "../gen_helper.rs"]
+    mod helper;
 }
 pub use gen::*;
 
