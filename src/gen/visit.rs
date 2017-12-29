@@ -428,8 +428,10 @@ pub fn visit_arg_self_ref<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 pub fn visit_arm<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Arm) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     for el in & _i . pats { let it = el.item(); _visitor.visit_pat(it) };
-    if let Some(ref it) = _i . if_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . guard { _visitor.visit_expr(& * * it) };
+    if let Some(ref it) = _i . guard { 
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
+            _visitor.visit_expr(& * ( it ) . 1);
+         };
     tokens_helper(_visitor, &(& _i . rocket_token).0);
     _visitor.visit_expr(& * _i . body);
     if let Some(ref it) = _i . comma { tokens_helper(_visitor, &(it).0) };
@@ -1519,10 +1521,14 @@ pub fn visit_local<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . let_token).0);
     _visitor.visit_pat(& * _i . pat);
-    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . ty { _visitor.visit_type(& * * it) };
-    if let Some(ref it) = _i . eq_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . init { _visitor.visit_expr(& * * it) };
+    if let Some(ref it) = _i . ty { 
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
+            _visitor.visit_type(& * ( it ) . 1);
+         };
+    if let Some(ref it) = _i . init { 
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
+            _visitor.visit_expr(& * ( it ) . 1);
+         };
     tokens_helper(_visitor, &(& _i . semi_token).0);
 }
 
@@ -1658,8 +1664,10 @@ pub fn visit_pat_ident<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     if let Some(ref it) = _i . by_ref { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . mutability { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_ident(& _i . ident);
-    if let Some(ref it) = _i . at_token { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . subpat { _visitor.visit_pat(& * * it) };
+    if let Some(ref it) = _i . subpat { 
+            tokens_helper(_visitor, &(& ( it ) . 0).0);
+            _visitor.visit_pat(& * ( it ) . 1);
+         };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_lit<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatLit) {

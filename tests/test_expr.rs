@@ -94,7 +94,7 @@ fn test_catch_expr() {
 
     assert_let!(Item::Fn(ItemFn { ref block, .. }) = actual.items[1]; {
         assert_let!(Stmt::Local(ref local) = block.stmts[0]; {
-            assert_let!(Local { init: Some(ref init_expr), .. } = **local; {
+            assert_let!(Local { init: Some((_, ref init_expr)), .. } = **local; {
                 assert_let!(Expr::Catch(..) = **init_expr);
             });
         });

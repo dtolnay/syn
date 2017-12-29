@@ -453,8 +453,10 @@ pub fn fold_arm<V: Folder + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
     Arm {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
-        if_token: (_i . if_token).map(|it| { Token ! [ if ](tokens_helper(_visitor, &(it).0)) }),
-        guard: (_i . guard).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
+        guard: (_i . guard).map(|it| { (
+            Token ! [ if ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            Box::new(_visitor.fold_expr(* ( it ) . 1)),
+        ) }),
         rocket_token: Token ! [ => ](tokens_helper(_visitor, &(_i . rocket_token).0)),
         body: Box::new(_visitor.fold_expr(* _i . body)),
         comma: (_i . comma).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
@@ -1928,10 +1930,14 @@ pub fn fold_local<V: Folder + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         let_token: Token ! [ let ](tokens_helper(_visitor, &(_i . let_token).0)),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
-        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
-        ty: (_i . ty).map(|it| { Box::new(_visitor.fold_type(* it)) }),
-        eq_token: (_i . eq_token).map(|it| { Token ! [ = ](tokens_helper(_visitor, &(it).0)) }),
-        init: (_i . init).map(|it| { Box::new(_visitor.fold_expr(* it)) }),
+        ty: (_i . ty).map(|it| { (
+            Token ! [ : ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            Box::new(_visitor.fold_type(* ( it ) . 1)),
+        ) }),
+        init: (_i . init).map(|it| { (
+            Token ! [ = ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            Box::new(_visitor.fold_expr(* ( it ) . 1)),
+        ) }),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
     }
 }
@@ -2123,8 +2129,10 @@ pub fn fold_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> Pat
         by_ref: (_i . by_ref).map(|it| { Token ! [ ref ](tokens_helper(_visitor, &(it).0)) }),
         mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         ident: _visitor.fold_ident(_i . ident),
-        at_token: (_i . at_token).map(|it| { Token ! [ @ ](tokens_helper(_visitor, &(it).0)) }),
-        subpat: (_i . subpat).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
+        subpat: (_i . subpat).map(|it| { (
+            Token ! [ @ ](tokens_helper(_visitor, &(( it ) . 0).0)),
+            Box::new(_visitor.fold_pat(* ( it ) . 1)),
+        ) }),
     }
 }
 # [ cfg ( feature = "full" ) ]

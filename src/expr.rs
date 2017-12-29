@@ -586,11 +586,9 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
         pub pat: Box<Pat>,
-        pub colon_token: Option<Token![:]>,
-        pub ty: Option<Box<Type>>,
-        pub eq_token: Option<Token![=]>,
+        pub ty: Option<(Token![:], Box<Type>)>,
         /// Initializer expression to set the value, if any
-        pub init: Option<Box<Expr>>,
+        pub init: Option<(Token![=], Box<Expr>)>,
         pub semi_token: Token![;],
     }
 }
@@ -614,8 +612,7 @@ ast_enum_of_structs! {
             pub by_ref: Option<Token![ref]>,
             pub mutability: Option<Token![mut]>,
             pub ident: Ident,
-            pub at_token: Option<Token![@]>,
-            pub subpat: Option<Box<Pat>>,
+            pub subpat: Option<(Token![@], Box<Pat>)>,
         }),
 
         /// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.
@@ -735,8 +732,7 @@ ast_struct! {
     pub struct Arm {
         pub attrs: Vec<Attribute>,
         pub pats: Delimited<Pat, Token![|]>,
-        pub if_token: Option<Token![if]>,
-        pub guard: Option<Box<Expr>>,
+        pub guard: Option<(Token![if], Box<Expr>)>,
         pub rocket_token: Token![=>],
         pub body: Box<Expr>,
         pub comma: Option<Token![,]>,
@@ -1679,10 +1675,9 @@ pub mod parsing {
             ) >>
             (Arm {
                 rocket_token: rocket,
-                if_token: guard.as_ref().map(|p| Token![if]((p.0).0)),
                 attrs: attrs,
                 pats: pats,
-                guard: guard.map(|p| Box::new(p.1)),
+                guard: guard.map(|(if_, guard)| (if_, Box::new(guard))),
                 body: Box::new(body.0),
                 comma: body.1,
             })
@@ -2062,14 +2057,12 @@ pub mod parsing {
         init: option!(tuple!(punct!(=), syn!(Expr))) >>
         semi: punct!(;) >>
         (Stmt::Local(Box::new(Local {
-            let_token: let_,
-            semi_token: semi,
-            colon_token: ty.as_ref().map(|p| Token![:]((p.0).0)),
-            eq_token: init.as_ref().map(|p| Token![=]((p.0).0)),
-            pat: Box::new(pat),
-            ty: ty.map(|p| Box::new(p.1)),
-            init: init.map(|p| Box::new(p.1)),
             attrs: attrs,
+            let_token: let_,
+            pat: Box::new(pat),
+            ty: ty.map(|(colon, ty)| (colon, Box::new(ty))),
+            init: init.map(|(eq, expr)| (eq, Box::new(expr))),
+            semi_token: semi,
         })))
     ));
 
@@ -2172,8 +2165,7 @@ pub mod parsing {
                 by_ref: by_ref,
                 mutability: mutability,
                 ident: name,
-                at_token: subpat.as_ref().map(|p| Token![@]((p.0).0)),
-                subpat: subpat.map(|p| Box::new(p.1)),
+                subpat: subpat.map(|(at, pat)| (at, Box::new(pat))),
             })
         ));
     }
@@ -2237,7 +2229,6 @@ pub mod parsing {
                         mutability: mutability,
                         ident: ident,
                         subpat: None,
-                        at_token: None,
                     }.into();
                     if let Some(boxed) = boxed {
                         pat = PatBox {
@@ -2985,9 +2976,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
             self.pats.to_tokens(tokens);
-            if self.guard.is_some() {
-                TokensOrDefault(&self.if_token).to_tokens(tokens);
-                self.guard.to_tokens(tokens);
+            if let Some((ref if_token, ref guard)) = self.guard {
+                if_token.to_tokens(tokens);
+                guard.to_tokens(tokens);
             }
             self.rocket_token.to_tokens(tokens);
             self.body.to_tokens(tokens);
@@ -3008,9 +2999,9 @@ mod printing {
             self.by_ref.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            if self.subpat.is_some() {
-                TokensOrDefault(&self.at_token).to_tokens(tokens);
-                self.subpat.to_tokens(tokens);
+            if let Some((ref at_token, ref subpat)) = self.subpat {
+                at_token.to_tokens(tokens);
+                subpat.to_tokens(tokens);
             }
         }
     }
@@ -3193,13 +3184,13 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-            if self.ty.is_some() {
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-                self.ty.to_tokens(tokens);
+            if let Some((ref colon_token, ref ty)) = self.ty {
+                colon_token.to_tokens(tokens);
+                ty.to_tokens(tokens);
             }
-            if self.init.is_some() {
-                TokensOrDefault(&self.eq_token).to_tokens(tokens);
-                self.init.to_tokens(tokens);
+            if let Some((ref eq_token, ref init)) = self.init {
+                eq_token.to_tokens(tokens);
+                init.to_tokens(tokens);
             }
             self.semi_token.to_tokens(tokens);
         }
