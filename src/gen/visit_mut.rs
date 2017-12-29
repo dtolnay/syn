@@ -204,8 +204,6 @@ fn visit_impl_item_type_mut(&mut self, i: &mut ImplItemType) { visit_impl_item_t
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_polarity_mut(&mut self, i: &mut ImplPolarity) { visit_impl_polarity_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_in_place_kind_mut(&mut self, i: &mut InPlaceKind) { visit_in_place_kind_mut(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_index_mut(&mut self, i: &mut Index) { visit_index_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item_mut(&mut self, i: &mut Item) { visit_item_mut(self, i) }
@@ -942,7 +940,7 @@ pub fn visit_expr_if_let_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
 pub fn visit_expr_in_place_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprInPlace) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_expr_mut(& mut * _i . place);
-    _visitor.visit_in_place_kind_mut(& mut _i . kind);
+    tokens_helper(_visitor, &mut (& mut _i . arrow_token).0);
     _visitor.visit_expr_mut(& mut * _i . value);
 }
 
@@ -1301,18 +1299,6 @@ pub fn visit_impl_polarity_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mu
     match *_i {
         Positive => { }
         Negative(ref mut _binding_0, ) => {
-            tokens_helper(_visitor, &mut (_binding_0).0);
-        }
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_in_place_kind_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut InPlaceKind) {
-    use ::InPlaceKind::*;
-    match *_i {
-        Arrow(ref mut _binding_0, ) => {
-            tokens_helper(_visitor, &mut (_binding_0).0);
-        }
-        In(ref mut _binding_0, ) => {
             tokens_helper(_visitor, &mut (_binding_0).0);
         }
     }

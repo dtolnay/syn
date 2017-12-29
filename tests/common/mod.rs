@@ -101,6 +101,10 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         //      use a::{B, D::{self, *, g::H}};
         "tests/rust/src/test/run-pass/use-nested-groups.rs" |
+        // Deprecated placement syntax
+        "tests/rust/src/test/run-pass/new-box-syntax.rs" |
+        // Deprecated placement syntax
+        "tests/rust/src/test/run-pass/placement-in-syntax.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,

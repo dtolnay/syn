@@ -15,11 +15,11 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
         }),
 
-        /// E.g. 'place <- val' or `in place { val }`.
+        /// E.g. 'place <- value'.
         pub InPlace(ExprInPlace #full {
             pub attrs: Vec<Attribute>,
             pub place: Box<Expr>,
-            pub kind: InPlaceKind,
+            pub arrow_token: Token![<-],
             pub value: Box<Expr>,
         }),
 
@@ -704,15 +704,6 @@ ast_enum! {
     }
 }
 
-#[cfg(feature = "full")]
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum InPlaceKind {
-        Arrow(Token![<-]),
-        In(Token![in]),
-    }
-}
-
 #[cfg(any(feature = "parsing", feature = "printing"))]
 #[cfg(feature = "full")]
 fn arm_expr_requires_comma(expr: &Expr) -> bool {
@@ -894,7 +885,7 @@ pub mod parsing {
                         attrs: Vec::new(),
                         // op: BinOp::Place(larrow),
                         place: Box::new(e.into()),
-                        kind: InPlaceKind::Arrow(arrow),
+                        arrow_token: arrow,
                         value: Box::new(rhs.into()),
                     }.into();
                 })
@@ -1243,9 +1234,6 @@ pub mod parsing {
         |
         call!(expr_ret, allow_struct) // must be before expr_path
         |
-        // NOTE: The `in place { expr }` form. `place <- expr` is parsed above.
-        syn!(ExprInPlace) => { Expr::InPlace }
-        |
         syn!(ExprArray) => { Expr::Array }
         |
         syn!(ExprTuple) => { Expr::Tuple }
@@ -1355,27 +1343,6 @@ pub mod parsing {
                 attrs: Vec::new(),
                 expr: Box::new(e.0),
                 paren_token: e.1,
-            })
-        ));
-    }
-
-    #[cfg(feature = "full")]
-    impl Synom for ExprInPlace {
-        named!(parse -> Self, do_parse!(
-            in_: keyword!(in) >>
-            place: expr_no_struct >>
-            value: braces!(call!(Block::parse_within)) >>
-            (ExprInPlace {
-                attrs: Vec::new(),
-                place: Box::new(place),
-                kind: InPlaceKind::In(in_),
-                value: Box::new(ExprBlock {
-                    attrs: Vec::new(),
-                    block: Block {
-                        stmts: value.0,
-                        brace_token: value.1,
-                    },
-                }.into()),
             })
         ));
     }
@@ -2430,26 +2397,9 @@ mod printing {
     impl ToTokens for ExprInPlace {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
-            match self.kind {
-                InPlaceKind::Arrow(ref arrow) => {
-                    self.place.to_tokens(tokens);
-                    arrow.to_tokens(tokens);
-                    self.value.to_tokens(tokens);
-                }
-                InPlaceKind::In(ref _in) => {
-                    _in.to_tokens(tokens);
-                    self.place.to_tokens(tokens);
-                    // NOTE: The second operand must be in a block, add one if
-                    // it is not present.
-                    if let Expr::Block(_) = *self.value {
-                        self.value.to_tokens(tokens);
-                    } else {
-                        token::Brace::default().surround(tokens, |tokens| {
-                            self.value.to_tokens(tokens);
-                        })
-                    }
-                }
-            }
+            self.place.to_tokens(tokens);
+            self.arrow_token.to_tokens(tokens);
+            self.value.to_tokens(tokens);
         }
     }
 

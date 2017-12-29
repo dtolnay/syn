@@ -41,7 +41,7 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
                ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield};
 
 #[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Index, InPlaceKind, Local,
+pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, Index, Local,
                Member, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
                PatStruct, PatTuple, PatTupleStruct, PatWild, RangeLimits, Stmt};
 

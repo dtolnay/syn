@@ -208,8 +208,6 @@ fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType { fold_impl_i
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_polarity(&mut self, i: ImplPolarity) -> ImplPolarity { fold_impl_polarity(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_in_place_kind(&mut self, i: InPlaceKind) -> InPlaceKind { fold_in_place_kind(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn fold_index(&mut self, i: Index) -> Index { fold_index(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item(&mut self, i: Item) -> Item { fold_item(self, i) }
@@ -1169,7 +1167,7 @@ pub fn fold_expr_in_place<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprInPlace)
     ExprInPlace {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         place: Box::new(_visitor.fold_expr(* _i . place)),
-        kind: _visitor.fold_in_place_kind(_i . kind),
+        arrow_token: Token ! [ <- ](tokens_helper(_visitor, &(_i . arrow_token).0)),
         value: Box::new(_visitor.fold_expr(* _i . value)),
     }
 }
@@ -1637,22 +1635,6 @@ pub fn fold_impl_polarity<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplPolarity
         Negative(_binding_0, ) => {
             Negative (
                 Token ! [ ! ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_in_place_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: InPlaceKind) -> InPlaceKind {
-    use ::InPlaceKind::*;
-    match _i {
-        Arrow(_binding_0, ) => {
-            Arrow (
-                Token ! [ <- ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-        In(_binding_0, ) => {
-            In (
-                Token ! [ in ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
     }

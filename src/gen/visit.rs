@@ -204,8 +204,6 @@ fn visit_impl_item_type(&mut self, i: &'ast ImplItemType) { visit_impl_item_type
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_polarity(&mut self, i: &'ast ImplPolarity) { visit_impl_polarity(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_in_place_kind(&mut self, i: &'ast InPlaceKind) { visit_in_place_kind(self, i) }
-# [ cfg ( feature = "full" ) ]
 fn visit_index(&mut self, i: &'ast Index) { visit_index(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item(&mut self, i: &'ast Item) { visit_item(self, i) }
@@ -942,7 +940,7 @@ pub fn visit_expr_if_let<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
 pub fn visit_expr_in_place<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprInPlace) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_expr(& * _i . place);
-    _visitor.visit_in_place_kind(& _i . kind);
+    tokens_helper(_visitor, &(& _i . arrow_token).0);
     _visitor.visit_expr(& * _i . value);
 }
 
@@ -1301,18 +1299,6 @@ pub fn visit_impl_polarity<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
     match *_i {
         Positive => { }
         Negative(ref _binding_0, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-        }
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn visit_in_place_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast InPlaceKind) {
-    use ::InPlaceKind::*;
-    match *_i {
-        Arrow(ref _binding_0, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-        }
-        In(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
