@@ -46,7 +46,7 @@ script:
           cargo clippy --features 'full fold visit visit_mut' -- -Dclippy
           ;;
         codegen)
-          (cd syn_codegen && cargo run) &&
+          (cd codegen && cargo run) &&
           git diff --exit-code
           ;;
         *)
