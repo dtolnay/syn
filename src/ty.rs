@@ -32,7 +32,14 @@ ast_enum_of_structs! {
         }),
         /// A bare function (e.g. `fn(usize) -> bool`)
         pub BareFn(TypeBareFn {
-            pub ty: Box<BareFnType>,
+            pub unsafety: Option<Token![unsafe]>,
+            pub abi: Option<Abi>,
+            pub fn_token: Token![fn],
+            pub lifetimes: Option<BoundLifetimes>,
+            pub paren_token: token::Paren,
+            pub inputs: Delimited<BareFnArg, Token![,]>,
+            pub variadic: Option<Token![...]>,
+            pub output: ReturnType,
         }),
         /// The never type (`!`)
         pub Never(TypeNever {
@@ -262,19 +269,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    pub struct BareFnType {
-        pub unsafety: Option<Token![unsafe]>,
-        pub abi: Option<Abi>,
-        pub fn_token: Token![fn],
-        pub lifetimes: Option<BoundLifetimes>,
-        pub paren_token: token::Paren,
-        pub inputs: Delimited<BareFnArg, Token![,]>,
-        pub variadic: Option<Token![...]>,
-        pub output: ReturnType,
-    }
-}
-
-ast_struct! {
     pub struct Abi {
         pub extern_token: Token![extern],
         pub kind: AbiKind,
@@ -454,16 +448,14 @@ pub mod parsing {
             )) >>
             output: syn!(ReturnType) >>
             (TypeBareFn {
-                ty: Box::new(BareFnType {
-                    unsafety: unsafety,
-                    abi: abi,
-                    lifetimes: lifetimes,
-                    output: output,
-                    variadic: (parens.0).1,
-                    fn_token: fn_,
-                    paren_token: parens.1,
-                    inputs: (parens.0).0,
-                }),
+                unsafety: unsafety,
+                abi: abi,
+                lifetimes: lifetimes,
+                output: output,
+                variadic: (parens.0).1,
+                fn_token: fn_,
+                paren_token: parens.1,
+                inputs: (parens.0).0,
             })
         ));
     }
@@ -847,7 +839,21 @@ mod printing {
 
     impl ToTokens for TypeBareFn {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.ty.to_tokens(tokens)
+            self.lifetimes.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
+            self.abi.to_tokens(tokens);
+            self.fn_token.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.inputs.to_tokens(tokens);
+                if let Some(ref variadic) = self.variadic {
+                    if !self.inputs.empty_or_trailing() {
+                        let span = variadic.0[0];
+                        <Token![,]>::new(span).to_tokens(tokens);
+                    }
+                    variadic.to_tokens(tokens);
+                }
+            });
+            self.output.to_tokens(tokens);
         }
     }
 
@@ -1041,26 +1047,6 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bound_lifetimes.to_tokens(tokens);
             self.trait_ref.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for BareFnType {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.lifetimes.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
-            self.abi.to_tokens(tokens);
-            self.fn_token.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.inputs.to_tokens(tokens);
-                if let Some(ref variadic) = self.variadic {
-                    if !self.inputs.empty_or_trailing() {
-                        let span = variadic.0[0];
-                        <Token![,]>::new(span).to_tokens(tokens);
-                    }
-                    variadic.to_tokens(tokens);
-                }
-            });
-            self.output.to_tokens(tokens);
         }
     }
 

@@ -62,8 +62,6 @@ fn fold_bare_fn_arg(&mut self, i: BareFnArg) -> BareFnArg { fold_bare_fn_arg(sel
 
 fn fold_bare_fn_arg_name(&mut self, i: BareFnArgName) -> BareFnArgName { fold_bare_fn_arg_name(self, i) }
 
-fn fold_bare_fn_type(&mut self, i: BareFnType) -> BareFnType { fold_bare_fn_type(self, i) }
-
 fn fold_bin_op(&mut self, i: BinOp) -> BinOp { fold_bin_op(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_block(&mut self, i: Block) -> Block { fold_block(self, i) }
@@ -505,19 +503,6 @@ pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
                 Token ! [ _ ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-    }
-}
-
-pub fn fold_bare_fn_type<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnType) -> BareFnType {
-    BareFnType {
-        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
-        abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
-        fn_token: Token ! [ fn ](tokens_helper(_visitor, &(_i . fn_token).0)),
-        lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
-        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_bare_fn_arg(it) }),
-        variadic: (_i . variadic).map(|it| { Token ! [ ... ](tokens_helper(_visitor, &(it).0)) }),
-        output: _visitor.fold_return_type(_i . output),
     }
 }
 
@@ -2449,7 +2434,14 @@ pub fn fold_type_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeArray) -> T
 
 pub fn fold_type_bare_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBareFn) -> TypeBareFn {
     TypeBareFn {
-        ty: Box::new(_visitor.fold_bare_fn_type(* _i . ty)),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
+        abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
+        fn_token: Token ! [ fn ](tokens_helper(_visitor, &(_i . fn_token).0)),
+        lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
+        inputs: FoldHelper::lift(_i . inputs, |it| { _visitor.fold_bare_fn_arg(it) }),
+        variadic: (_i . variadic).map(|it| { Token ! [ ... ](tokens_helper(_visitor, &(it).0)) }),
+        output: _visitor.fold_return_type(_i . output),
     }
 }
 

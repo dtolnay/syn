@@ -58,8 +58,6 @@ fn visit_bare_fn_arg(&mut self, i: &'ast BareFnArg) { visit_bare_fn_arg(self, i)
 
 fn visit_bare_fn_arg_name(&mut self, i: &'ast BareFnArgName) { visit_bare_fn_arg_name(self, i) }
 
-fn visit_bare_fn_type(&mut self, i: &'ast BareFnType) { visit_bare_fn_type(self, i) }
-
 fn visit_bin_op(&mut self, i: &'ast BinOp) { visit_bin_op(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_block(&mut self, i: &'ast Block) { visit_block(self, i) }
@@ -468,17 +466,6 @@ pub fn visit_bare_fn_arg_name<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
-}
-
-pub fn visit_bare_fn_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BareFnType) {
-    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
-    if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
-    tokens_helper(_visitor, &(& _i . fn_token).0);
-    if let Some(ref it) = _i . lifetimes { _visitor.visit_bound_lifetimes(it) };
-    tokens_helper(_visitor, &(& _i . paren_token).0);
-    for el in & _i . inputs { let it = el.item(); _visitor.visit_bare_fn_arg(it) };
-    if let Some(ref it) = _i . variadic { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_return_type(& _i . output);
 }
 
 pub fn visit_bin_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BinOp) {
@@ -1903,7 +1890,14 @@ pub fn visit_type_array<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 }
 
 pub fn visit_type_bare_fn<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeBareFn) {
-    _visitor.visit_bare_fn_type(& * _i . ty);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
+    tokens_helper(_visitor, &(& _i . fn_token).0);
+    if let Some(ref it) = _i . lifetimes { _visitor.visit_bound_lifetimes(it) };
+    tokens_helper(_visitor, &(& _i . paren_token).0);
+    for el in & _i . inputs { let it = el.item(); _visitor.visit_bare_fn_arg(it) };
+    if let Some(ref it) = _i . variadic { tokens_helper(_visitor, &(it).0) };
+    _visitor.visit_return_type(& _i . output);
 }
 
 pub fn visit_type_binding<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeBinding) {
