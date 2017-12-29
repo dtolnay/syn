@@ -349,8 +349,6 @@ fn visit_type_trait_object_mut(&mut self, i: &mut TypeTraitObject) { visit_type_
 fn visit_type_tuple_mut(&mut self, i: &mut TypeTuple) { visit_type_tuple_mut(self, i) }
 
 fn visit_un_op_mut(&mut self, i: &mut UnOp) { visit_un_op_mut(self, i) }
-
-fn visit_unsafety_mut(&mut self, i: &mut Unsafety) { visit_unsafety_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_use_glob_mut(&mut self, i: &mut UseGlob) { visit_use_glob_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -475,7 +473,7 @@ pub fn visit_bare_fn_arg_name_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 }
 
 pub fn visit_bare_fn_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut BareFnType) {
-    _visitor.visit_unsafety_mut(& mut _i . unsafety);
+    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . abi { _visitor.visit_abi_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . fn_token).0);
     if let Some(ref mut it) = _i . lifetimes { _visitor.visit_bound_lifetimes_mut(it) };
@@ -1327,7 +1325,7 @@ pub fn visit_item_const_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut I
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_default_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemDefaultImpl) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
-    _visitor.visit_unsafety_mut(& mut _i . unsafety);
+    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . impl_token).0);
     _visitor.visit_path_mut(& mut _i . path);
     tokens_helper(_visitor, &mut (& mut _i . for_token).0);
@@ -1362,7 +1360,7 @@ pub fn visit_item_fn_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Item
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_visibility_mut(& mut _i . vis);
     if let Some(ref mut it) = _i . constness { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_unsafety_mut(& mut _i . unsafety);
+    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . abi { _visitor.visit_abi_mut(it) };
     _visitor.visit_ident_mut(& mut _i . ident);
     _visitor.visit_fn_decl_mut(& mut * _i . decl);
@@ -1379,7 +1377,7 @@ pub fn visit_item_foreign_mod_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 pub fn visit_item_impl_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemImpl) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . defaultness { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_unsafety_mut(& mut _i . unsafety);
+    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . impl_token).0);
     _visitor.visit_generics_mut(& mut _i . generics);
     if let Some(ref mut it) = _i . trait_ { 
@@ -1446,7 +1444,7 @@ pub fn visit_item_struct_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
 pub fn visit_item_trait_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ItemTrait) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_visibility_mut(& mut _i . vis);
-    _visitor.visit_unsafety_mut(& mut _i . unsafety);
+    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . auto_token { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . trait_token).0);
     _visitor.visit_ident_mut(& mut _i . ident);
@@ -1562,7 +1560,7 @@ pub fn visit_meta_name_value_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( feature = "full" ) ]
 pub fn visit_method_sig_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MethodSig) {
     if let Some(ref mut it) = _i . constness { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_unsafety_mut(& mut _i . unsafety);
+    if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . abi { _visitor.visit_abi_mut(it) };
     _visitor.visit_ident_mut(& mut _i . ident);
     _visitor.visit_fn_decl_mut(& mut _i . decl);
@@ -2010,16 +2008,6 @@ pub fn visit_un_op_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut UnOp) 
         Neg(ref mut _binding_0, ) => {
             tokens_helper(_visitor, &mut (_binding_0).0);
         }
-    }
-}
-
-pub fn visit_unsafety_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Unsafety) {
-    use ::Unsafety::*;
-    match *_i {
-        Unsafe(ref mut _binding_0, ) => {
-            tokens_helper(_visitor, &mut (_binding_0).0);
-        }
-        Normal => { }
     }
 }
 # [ cfg ( feature = "full" ) ]

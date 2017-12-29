@@ -268,7 +268,7 @@ ast_struct! {
 
 ast_struct! {
     pub struct BareFnType {
-        pub unsafety: Unsafety,
+        pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
         pub lifetimes: Option<BoundLifetimes>,
@@ -276,14 +276,6 @@ ast_struct! {
         pub inputs: Delimited<BareFnArg, Token![,]>,
         pub variadic: Option<Token![...]>,
         pub output: ReturnType,
-    }
-}
-
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum Unsafety {
-        Unsafe(Token![unsafe]),
-        Normal,
     }
 }
 
@@ -460,7 +452,7 @@ pub mod parsing {
     impl Synom for TypeBareFn {
         named!(parse -> Self, do_parse!(
             lifetimes: option!(syn!(BoundLifetimes)) >>
-            unsafety: syn!(Unsafety) >>
+            unsafety: option!(keyword!(unsafe)) >>
             abi: option!(syn!(Abi)) >>
             fn_: keyword!(fn) >>
             parens: parens!(do_parse!(
@@ -801,14 +793,6 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for Unsafety {
-        named!(parse -> Self, alt!(
-            keyword!(unsafe) => { Unsafety::Unsafe }
-            |
-            epsilon!() => { |_| Unsafety::Normal }
-        ));
-    }
-
     impl Synom for Abi {
         named!(parse -> Self, do_parse!(
             extern_: keyword!(extern) >>
@@ -1104,17 +1088,6 @@ mod printing {
             match *self {
                 BareFnArgName::Named(ref t) => t.to_tokens(tokens),
                 BareFnArgName::Wild(ref t) => t.to_tokens(tokens),
-            }
-        }
-    }
-
-    impl ToTokens for Unsafety {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Unsafety::Unsafe(ref t) => t.to_tokens(tokens),
-                Unsafety::Normal => {
-                    // nothing
-                }
             }
         }
     }

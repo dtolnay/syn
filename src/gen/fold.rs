@@ -353,8 +353,6 @@ fn fold_type_trait_object(&mut self, i: TypeTraitObject) -> TypeTraitObject { fo
 fn fold_type_tuple(&mut self, i: TypeTuple) -> TypeTuple { fold_type_tuple(self, i) }
 
 fn fold_un_op(&mut self, i: UnOp) -> UnOp { fold_un_op(self, i) }
-
-fn fold_unsafety(&mut self, i: Unsafety) -> Unsafety { fold_unsafety(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_use_glob(&mut self, i: UseGlob) -> UseGlob { fold_use_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -514,7 +512,7 @@ pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
 
 pub fn fold_bare_fn_type<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnType) -> BareFnType {
     BareFnType {
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         fn_token: Token ! [ fn ](tokens_helper(_visitor, &(_i . fn_token).0)),
         lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
@@ -1695,7 +1693,7 @@ pub fn fold_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemConst) -> I
 pub fn fold_item_default_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemDefaultImpl) -> ItemDefaultImpl {
     ItemDefaultImpl {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
         impl_token: Token ! [ impl ](tokens_helper(_visitor, &(_i . impl_token).0)),
         path: _visitor.fold_path(_i . path),
         for_token: Token ! [ for ](tokens_helper(_visitor, &(_i . for_token).0)),
@@ -1736,7 +1734,7 @@ pub fn fold_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn 
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         constness: (_i . constness).map(|it| { Token ! [ const ](tokens_helper(_visitor, &(it).0)) }),
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         ident: _visitor.fold_ident(_i . ident),
         decl: Box::new(_visitor.fold_fn_decl(* _i . decl)),
@@ -1757,7 +1755,7 @@ pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> Ite
     ItemImpl {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         defaultness: (_i . defaultness).map(|it| { Token ! [ default ](tokens_helper(_visitor, &(it).0)) }),
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
         impl_token: Token ! [ impl ](tokens_helper(_visitor, &(_i . impl_token).0)),
         generics: _visitor.fold_generics(_i . generics),
         trait_: (_i . trait_).map(|it| { (
@@ -1836,7 +1834,7 @@ pub fn fold_item_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> I
     ItemTrait {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
         auto_token: (_i . auto_token).map(|it| { Token ! [ auto ](tokens_helper(_visitor, &(it).0)) }),
         trait_token: Token ! [ trait ](tokens_helper(_visitor, &(_i . trait_token).0)),
         ident: _visitor.fold_ident(_i . ident),
@@ -1977,7 +1975,7 @@ pub fn fold_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameVa
 pub fn fold_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> MethodSig {
     MethodSig {
         constness: (_i . constness).map(|it| { Token ! [ const ](tokens_helper(_visitor, &(it).0)) }),
-        unsafety: _visitor.fold_unsafety(_i . unsafety),
+        unsafety: (_i . unsafety).map(|it| { Token ! [ unsafe ](tokens_helper(_visitor, &(it).0)) }),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         ident: _visitor.fold_ident(_i . ident),
         decl: _visitor.fold_fn_decl(_i . decl),
@@ -2595,18 +2593,6 @@ pub fn fold_un_op<V: Folder + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {
                 Token ! [ - ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-    }
-}
-
-pub fn fold_unsafety<V: Folder + ?Sized>(_visitor: &mut V, _i: Unsafety) -> Unsafety {
-    use ::Unsafety::*;
-    match _i {
-        Unsafe(_binding_0, ) => {
-            Unsafe (
-                Token ! [ unsafe ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-        Normal => { Normal }
     }
 }
 # [ cfg ( feature = "full" ) ]

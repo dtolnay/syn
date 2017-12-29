@@ -349,8 +349,6 @@ fn visit_type_trait_object(&mut self, i: &'ast TypeTraitObject) { visit_type_tra
 fn visit_type_tuple(&mut self, i: &'ast TypeTuple) { visit_type_tuple(self, i) }
 
 fn visit_un_op(&mut self, i: &'ast UnOp) { visit_un_op(self, i) }
-
-fn visit_unsafety(&mut self, i: &'ast Unsafety) { visit_unsafety(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_use_glob(&mut self, i: &'ast UseGlob) { visit_use_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -475,7 +473,7 @@ pub fn visit_bare_fn_arg_name<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 }
 
 pub fn visit_bare_fn_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BareFnType) {
-    _visitor.visit_unsafety(& _i . unsafety);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
     tokens_helper(_visitor, &(& _i . fn_token).0);
     if let Some(ref it) = _i . lifetimes { _visitor.visit_bound_lifetimes(it) };
@@ -1327,7 +1325,7 @@ pub fn visit_item_const<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_default_impl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemDefaultImpl) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
-    _visitor.visit_unsafety(& _i . unsafety);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
     tokens_helper(_visitor, &(& _i . impl_token).0);
     _visitor.visit_path(& _i . path);
     tokens_helper(_visitor, &(& _i . for_token).0);
@@ -1362,7 +1360,7 @@ pub fn visit_item_fn<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_visibility(& _i . vis);
     if let Some(ref it) = _i . constness { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_unsafety(& _i . unsafety);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_fn_decl(& * _i . decl);
@@ -1379,7 +1377,7 @@ pub fn visit_item_foreign_mod<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 pub fn visit_item_impl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemImpl) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     if let Some(ref it) = _i . defaultness { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_unsafety(& _i . unsafety);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
     tokens_helper(_visitor, &(& _i . impl_token).0);
     _visitor.visit_generics(& _i . generics);
     if let Some(ref it) = _i . trait_ { 
@@ -1446,7 +1444,7 @@ pub fn visit_item_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
 pub fn visit_item_trait<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemTrait) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_visibility(& _i . vis);
-    _visitor.visit_unsafety(& _i . unsafety);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . auto_token { tokens_helper(_visitor, &(it).0) };
     tokens_helper(_visitor, &(& _i . trait_token).0);
     _visitor.visit_ident(& _i . ident);
@@ -1562,7 +1560,7 @@ pub fn visit_meta_name_value<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, 
 # [ cfg ( feature = "full" ) ]
 pub fn visit_method_sig<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MethodSig) {
     if let Some(ref it) = _i . constness { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_unsafety(& _i . unsafety);
+    if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_fn_decl(& _i . decl);
@@ -2010,16 +2008,6 @@ pub fn visit_un_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
         Neg(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-    }
-}
-
-pub fn visit_unsafety<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Unsafety) {
-    use ::Unsafety::*;
-    match *_i {
-        Unsafe(ref _binding_0, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-        }
-        Normal => { }
     }
 }
 # [ cfg ( feature = "full" ) ]

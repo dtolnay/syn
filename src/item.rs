@@ -70,7 +70,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub constness: Option<Token![const]>,
-            pub unsafety: Unsafety,
+            pub unsafety: Option<Token![unsafe]>,
             pub abi: Option<Abi>,
             pub ident: Ident,
             pub decl: Box<FnDecl>,
@@ -150,7 +150,7 @@ ast_enum_of_structs! {
         pub Trait(ItemTrait {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub unsafety: Unsafety,
+            pub unsafety: Option<Token![unsafe]>,
             pub auto_token: Option<Token![auto]>,
             pub trait_token: Token![trait],
             pub ident: Ident,
@@ -165,7 +165,7 @@ ast_enum_of_structs! {
         /// E.g. `impl Trait for .. {}` or `impl<T> Trait<T> for .. {}`
         pub DefaultImpl(ItemDefaultImpl {
             pub attrs: Vec<Attribute>,
-            pub unsafety: Unsafety,
+            pub unsafety: Option<Token![unsafe]>,
             pub impl_token: Token![impl],
             pub path: Path,
             pub for_token: Token![for],
@@ -178,7 +178,7 @@ ast_enum_of_structs! {
         pub Impl(ItemImpl {
             pub attrs: Vec<Attribute>,
             pub defaultness: Option<Token![default]>,
-            pub unsafety: Unsafety,
+            pub unsafety: Option<Token![unsafe]>,
             pub impl_token: Token![impl],
             pub generics: Generics,
             /// Trait this impl implements.
@@ -400,7 +400,7 @@ ast_struct! {
     /// or in an implementation.
     pub struct MethodSig {
         pub constness: Option<Token![const]>,
-        pub unsafety: Unsafety,
+        pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
         pub ident: Ident,
         pub decl: FnDecl,
@@ -678,7 +678,7 @@ pub mod parsing {
         outer_attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
         constness: option!(keyword!(const)) >>
-        unsafety: syn!(Unsafety) >>
+        unsafety: option!(keyword!(unsafe)) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
@@ -955,7 +955,7 @@ pub mod parsing {
     impl_synom!(ItemTrait "trait item" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
-        unsafety: syn!(Unsafety) >>
+        unsafety: option!(keyword!(unsafe)) >>
         auto_: option!(keyword!(auto)) >>
         trait_: keyword!(trait) >>
         ident: syn!(Ident) >>
@@ -986,7 +986,7 @@ pub mod parsing {
 
     impl_synom!(ItemDefaultImpl "default impl item" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
-        unsafety: syn!(Unsafety) >>
+        unsafety: option!(keyword!(unsafe)) >>
         impl_: keyword!(impl) >>
         path: syn!(Path) >>
         for_: keyword!(for) >>
@@ -1035,7 +1035,7 @@ pub mod parsing {
     impl_synom!(TraitItemMethod "method trait item" do_parse!(
         outer_attrs: many0!(Attribute::parse_outer) >>
         constness: option!(keyword!(const)) >>
-        unsafety: syn!(Unsafety) >>
+        unsafety: option!(keyword!(unsafe)) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
@@ -1128,7 +1128,7 @@ pub mod parsing {
     impl_synom!(ItemImpl "impl item" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         defaultness: option!(keyword!(default)) >>
-        unsafety: syn!(Unsafety) >>
+        unsafety: option!(keyword!(unsafe)) >>
         impl_: keyword!(impl) >>
         generics: syn!(Generics) >>
         polarity_path: alt!(
@@ -1200,7 +1200,7 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         defaultness: option!(keyword!(default)) >>
         constness: option!(keyword!(const)) >>
-        unsafety: syn!(Unsafety) >>
+        unsafety: option!(keyword!(unsafe)) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
