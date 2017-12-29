@@ -2450,9 +2450,9 @@ pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
 pub fn fold_type_array<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeArray) -> TypeArray {
     TypeArray {
         bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
-        ty: Box::new(_visitor.fold_type(* _i . ty)),
+        elem: Box::new(_visitor.fold_type(* _i . elem)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
-        amt: _visitor.fold_expr(_i . amt),
+        len: _visitor.fold_expr(_i . len),
     }
 }
 
@@ -2473,7 +2473,7 @@ pub fn fold_type_binding<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeBinding) 
 pub fn fold_type_group<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeGroup) -> TypeGroup {
     TypeGroup {
         group_token: Group(tokens_helper(_visitor, &(_i . group_token).0)),
-        ty: Box::new(_visitor.fold_type(* _i . ty)),
+        elem: Box::new(_visitor.fold_type(* _i . elem)),
     }
 }
 
@@ -2527,7 +2527,7 @@ pub fn fold_type_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam
 pub fn fold_type_paren<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParen) -> TypeParen {
     TypeParen {
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        ty: Box::new(_visitor.fold_type(* _i . ty)),
+        elem: Box::new(_visitor.fold_type(* _i . elem)),
     }
 }
 
@@ -2542,7 +2542,7 @@ pub fn fold_type_ptr<V: Folder + ?Sized>(_visitor: &mut V, _i: TypePtr) -> TypeP
     TypePtr {
         star_token: Token ! [ * ](tokens_helper(_visitor, &(_i . star_token).0)),
         const_token: (_i . const_token).map(|it| { Token ! [ const ](tokens_helper(_visitor, &(it).0)) }),
-        ty: Box::new(_visitor.fold_mut_type(* _i . ty)),
+        elem: Box::new(_visitor.fold_mut_type(* _i . elem)),
     }
 }
 
@@ -2550,14 +2550,14 @@ pub fn fold_type_reference<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeReferen
     TypeReference {
         and_token: Token ! [ & ](tokens_helper(_visitor, &(_i . and_token).0)),
         lifetime: (_i . lifetime).map(|it| { _visitor.fold_lifetime(it) }),
-        ty: Box::new(_visitor.fold_mut_type(* _i . ty)),
+        elem: Box::new(_visitor.fold_mut_type(* _i . elem)),
     }
 }
 
 pub fn fold_type_slice<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeSlice) -> TypeSlice {
     TypeSlice {
         bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
-        ty: Box::new(_visitor.fold_type(* _i . ty)),
+        elem: Box::new(_visitor.fold_type(* _i . elem)),
     }
 }
 
@@ -2571,7 +2571,7 @@ pub fn fold_type_trait_object<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTrai
 pub fn fold_type_tuple<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeTuple) -> TypeTuple {
     TypeTuple {
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        tys: FoldHelper::lift(_i . tys, |it| { _visitor.fold_type(it) }),
+        elems: FoldHelper::lift(_i . elems, |it| { _visitor.fold_type(it) }),
     }
 }
 

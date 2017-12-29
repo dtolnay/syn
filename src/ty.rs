@@ -7,26 +7,26 @@ ast_enum_of_structs! {
         /// A variable-length array (`[T]`)
         pub Slice(TypeSlice {
             pub bracket_token: token::Bracket,
-            pub ty: Box<Type>,
+            pub elem: Box<Type>,
         }),
         /// A fixed length array (`[T; n]`)
         pub Array(TypeArray {
             pub bracket_token: token::Bracket,
-            pub ty: Box<Type>,
+            pub elem: Box<Type>,
             pub semi_token: Token![;],
-            pub amt: Expr,
+            pub len: Expr,
         }),
         /// A raw pointer (`*const T` or `*mut T`)
         pub Ptr(TypePtr {
             pub star_token: Token![*],
             pub const_token: Option<Token![const]>,
-            pub ty: Box<MutType>,
+            pub elem: Box<MutType>,
         }),
         /// A reference (`&'a T` or `&'a mut T`)
         pub Reference(TypeReference {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
-            pub ty: Box<MutType>,
+            pub elem: Box<MutType>,
         }),
         /// A bare function (e.g. `fn(usize) -> bool`)
         pub BareFn(TypeBareFn {
@@ -39,7 +39,7 @@ ast_enum_of_structs! {
         /// A tuple (`(A, B, C, D, ...)`)
         pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
-            pub tys: Delimited<Type, Token![,]>,
+            pub elems: Delimited<Type, Token![,]>,
         }),
         /// A path (`module::module::...::Type`), optionally
         /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
@@ -64,12 +64,12 @@ ast_enum_of_structs! {
         /// No-op; kept solely so that we can pretty-print faithfully
         pub Paren(TypeParen {
             pub paren_token: token::Paren,
-            pub ty: Box<Type>,
+            pub elem: Box<Type>,
         }),
         /// No-op: kept solely so that we can pretty-print faithfully
         pub Group(TypeGroup {
             pub group_token: token::Group,
-            pub ty: Box<Type>,
+            pub elem: Box<Type>,
         }),
         /// TypeKind::Infer means the type should be inferred instead of it having been
         /// specified. This can appear anywhere in a type.
@@ -386,7 +386,7 @@ pub mod parsing {
         named!(parse -> Self, map!(
             brackets!(syn!(Type)),
             |(ty, b)| TypeSlice {
-                ty: Box::new(ty),
+                elem: Box::new(ty),
                 bracket_token: b,
             }
         ));
@@ -402,8 +402,8 @@ pub mod parsing {
             )),
             |((elem, semi, len), brackets)| {
                 TypeArray {
-                    ty: Box::new(elem),
-                    amt: len,
+                    elem: Box::new(elem),
+                    len: len,
                     bracket_token: brackets,
                     semi_token: semi,
                 }
@@ -423,7 +423,7 @@ pub mod parsing {
             (TypePtr {
                 const_token: mutability.1,
                 star_token: star,
-                ty: Box::new(MutType {
+                elem: Box::new(MutType {
                     ty: target,
                     mutability: mutability.0,
                 }),
@@ -440,7 +440,7 @@ pub mod parsing {
             target: call!(Type::without_plus) >>
             (TypeReference {
                 lifetime: life,
-                ty: Box::new(MutType {
+                elem: Box::new(MutType {
                     ty: target,
                     mutability: mutability,
                 }),
@@ -495,7 +495,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             data: parens!(call!(Delimited::parse_terminated)) >>
             (TypeTuple {
-                tys: data.0,
+                elems: data.0,
                 paren_token: data.1,
             })
         ));
@@ -620,7 +620,7 @@ pub mod parsing {
             data: grouped!(syn!(Type)) >>
             (TypeGroup {
                 group_token: data.1,
-                ty: Box::new(data.0),
+                elem: Box::new(data.0),
             })
         ));
     }
@@ -630,7 +630,7 @@ pub mod parsing {
             data: parens!(syn!(Type)) >>
             (TypeParen {
                 paren_token: data.1,
-                ty: Box::new(data.0),
+                elem: Box::new(data.0),
             })
         ));
     }
@@ -817,7 +817,7 @@ mod printing {
     impl ToTokens for TypeSlice {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
-                self.ty.to_tokens(tokens);
+                self.elem.to_tokens(tokens);
             });
         }
     }
@@ -825,9 +825,9 @@ mod printing {
     impl ToTokens for TypeArray {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bracket_token.surround(tokens, |tokens| {
-                self.ty.to_tokens(tokens);
+                self.elem.to_tokens(tokens);
                 self.semi_token.to_tokens(tokens);
-                self.amt.to_tokens(tokens);
+                self.len.to_tokens(tokens);
             });
         }
     }
@@ -835,13 +835,13 @@ mod printing {
     impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.star_token.to_tokens(tokens);
-            match self.ty.mutability {
+            match self.elem.mutability {
                 Some(ref tok) => tok.to_tokens(tokens),
                 None => {
                     TokensOrDefault(&self.const_token).to_tokens(tokens);
                 }
             }
-            self.ty.ty.to_tokens(tokens);
+            self.elem.ty.to_tokens(tokens);
         }
     }
 
@@ -849,8 +849,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
             self.lifetime.to_tokens(tokens);
-            self.ty.mutability.to_tokens(tokens);
-            self.ty.ty.to_tokens(tokens);
+            self.elem.mutability.to_tokens(tokens);
+            self.elem.ty.to_tokens(tokens);
         }
     }
 
@@ -869,7 +869,7 @@ mod printing {
     impl ToTokens for TypeTuple {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
-                self.tys.to_tokens(tokens);
+                self.elems.to_tokens(tokens);
             })
         }
     }
@@ -935,7 +935,7 @@ mod printing {
     impl ToTokens for TypeGroup {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.group_token.surround(tokens, |tokens| {
-                self.ty.to_tokens(tokens);
+                self.elem.to_tokens(tokens);
             });
         }
     }
@@ -943,7 +943,7 @@ mod printing {
     impl ToTokens for TypeParen {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
-                self.ty.to_tokens(tokens);
+                self.elem.to_tokens(tokens);
             });
         }
     }

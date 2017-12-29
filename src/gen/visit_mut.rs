@@ -1904,9 +1904,9 @@ pub fn visit_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
 
 pub fn visit_type_array_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeArray) {
     tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
-    _visitor.visit_type_mut(& mut * _i . ty);
+    _visitor.visit_type_mut(& mut * _i . elem);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
-    _visitor.visit_expr_mut(& mut _i . amt);
+    _visitor.visit_expr_mut(& mut _i . len);
 }
 
 pub fn visit_type_bare_fn_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeBareFn) {
@@ -1921,7 +1921,7 @@ pub fn visit_type_binding_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 
 pub fn visit_type_group_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeGroup) {
     tokens_helper(_visitor, &mut (& mut _i . group_token).0);
-    _visitor.visit_type_mut(& mut * _i . ty);
+    _visitor.visit_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_impl_trait_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeImplTrait) {
@@ -1961,7 +1961,7 @@ pub fn visit_type_param_bound_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 
 pub fn visit_type_paren_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeParen) {
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    _visitor.visit_type_mut(& mut * _i . ty);
+    _visitor.visit_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypePath) {
@@ -1972,18 +1972,18 @@ pub fn visit_type_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ty
 pub fn visit_type_ptr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypePtr) {
     tokens_helper(_visitor, &mut (& mut _i . star_token).0);
     if let Some(ref mut it) = _i . const_token { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_mut_type_mut(& mut * _i . ty);
+    _visitor.visit_mut_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_reference_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeReference) {
     tokens_helper(_visitor, &mut (& mut _i . and_token).0);
     if let Some(ref mut it) = _i . lifetime { _visitor.visit_lifetime_mut(it) };
-    _visitor.visit_mut_type_mut(& mut * _i . ty);
+    _visitor.visit_mut_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_slice_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeSlice) {
     tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
-    _visitor.visit_type_mut(& mut * _i . ty);
+    _visitor.visit_type_mut(& mut * _i . elem);
 }
 
 pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTraitObject) {
@@ -1993,7 +1993,7 @@ pub fn visit_type_trait_object_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i:
 
 pub fn visit_type_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeTuple) {
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    for mut el in & mut _i . tys { let it = el.item_mut(); _visitor.visit_type_mut(it) };
+    for mut el in & mut _i . elems { let it = el.item_mut(); _visitor.visit_type_mut(it) };
 }
 
 pub fn visit_un_op_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut UnOp) {
