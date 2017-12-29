@@ -274,6 +274,8 @@ fn fold_pat_ident(&mut self, i: PatIdent) -> PatIdent { fold_pat_ident(self, i) 
 # [ cfg ( feature = "full" ) ]
 fn fold_pat_lit(&mut self, i: PatLit) -> PatLit { fold_pat_lit(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn fold_pat_macro(&mut self, i: PatMacro) -> PatMacro { fold_pat_macro(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn fold_pat_path(&mut self, i: PatPath) -> PatPath { fold_pat_path(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_pat_range(&mut self, i: PatRange) -> PatRange { fold_pat_range(self, i) }
@@ -337,6 +339,8 @@ fn fold_type_group(&mut self, i: TypeGroup) -> TypeGroup { fold_type_group(self,
 fn fold_type_impl_trait(&mut self, i: TypeImplTrait) -> TypeImplTrait { fold_type_impl_trait(self, i) }
 
 fn fold_type_infer(&mut self, i: TypeInfer) -> TypeInfer { fold_type_infer(self, i) }
+
+fn fold_type_macro(&mut self, i: TypeMacro) -> TypeMacro { fold_type_macro(self, i) }
 
 fn fold_type_never(&mut self, i: TypeNever) -> TypeNever { fold_type_never(self, i) }
 
@@ -2102,7 +2106,7 @@ pub fn fold_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
         }
         Macro(_binding_0, ) => {
             Macro (
-                _visitor.fold_macro(_binding_0),
+                _visitor.fold_pat_macro(_binding_0),
             )
         }
         Verbatim(_binding_0, ) => {
@@ -2133,6 +2137,12 @@ pub fn fold_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> Pat
 pub fn fold_pat_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: PatLit) -> PatLit {
     PatLit {
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_pat_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: PatMacro) -> PatMacro {
+    PatMacro {
+        mac: _visitor.fold_macro(_i . mac),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2483,7 +2493,7 @@ pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
         }
         Macro(_binding_0, ) => {
             Macro (
-                _visitor.fold_macro(_binding_0),
+                _visitor.fold_type_macro(_binding_0),
             )
         }
         Verbatim(_binding_0, ) => {
@@ -2541,6 +2551,12 @@ pub fn fold_type_impl_trait<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeImplTr
 pub fn fold_type_infer<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeInfer) -> TypeInfer {
     TypeInfer {
         underscore_token: Token ! [ _ ](tokens_helper(_visitor, &(_i . underscore_token).0)),
+    }
+}
+
+pub fn fold_type_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeMacro) -> TypeMacro {
+    TypeMacro {
+        mac: _visitor.fold_macro(_i . mac),
     }
 }
 

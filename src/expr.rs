@@ -681,7 +681,9 @@ ast_enum_of_structs! {
             pub back: Delimited<Pat, Token![,]>,
         }),
         /// A macro pattern; pre-expansion
-        pub Macro(Macro),
+        pub Macro(PatMacro {
+            pub mac: Macro,
+        }),
         pub Verbatim(PatVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -2105,7 +2107,7 @@ pub mod parsing {
             |
             syn!(PatStruct) => { Pat::Struct } // must be before pat_ident
             |
-            syn!(Macro) => { Pat::Macro } // must be before pat_ident
+            syn!(PatMacro) => { Pat::Macro } // must be before pat_ident
             |
             syn!(PatLit) => { Pat::Lit } // must be before pat_ident
             |
@@ -2412,6 +2414,11 @@ pub mod parsing {
                 }
             }
         ));
+    }
+
+    #[cfg(feature = "full")]
+    impl Synom for PatMacro {
+        named!(parse -> Self, map!(syn!(Macro), |mac| PatMacro { mac: mac }));
     }
 }
 
@@ -3120,6 +3127,13 @@ mod printing {
                     self.comma_token.to_tokens(tokens);
                 }
             })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for PatMacro {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.mac.to_tokens(tokens);
         }
     }
 

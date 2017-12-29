@@ -270,6 +270,8 @@ fn visit_pat_ident_mut(&mut self, i: &mut PatIdent) { visit_pat_ident_mut(self, 
 # [ cfg ( feature = "full" ) ]
 fn visit_pat_lit_mut(&mut self, i: &mut PatLit) { visit_pat_lit_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
+fn visit_pat_macro_mut(&mut self, i: &mut PatMacro) { visit_pat_macro_mut(self, i) }
+# [ cfg ( feature = "full" ) ]
 fn visit_pat_path_mut(&mut self, i: &mut PatPath) { visit_pat_path_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_pat_range_mut(&mut self, i: &mut PatRange) { visit_pat_range_mut(self, i) }
@@ -333,6 +335,8 @@ fn visit_type_group_mut(&mut self, i: &mut TypeGroup) { visit_type_group_mut(sel
 fn visit_type_impl_trait_mut(&mut self, i: &mut TypeImplTrait) { visit_type_impl_trait_mut(self, i) }
 
 fn visit_type_infer_mut(&mut self, i: &mut TypeInfer) { visit_type_infer_mut(self, i) }
+
+fn visit_type_macro_mut(&mut self, i: &mut TypeMacro) { visit_type_macro_mut(self, i) }
 
 fn visit_type_never_mut(&mut self, i: &mut TypeNever) { visit_type_never_mut(self, i) }
 
@@ -1643,7 +1647,7 @@ pub fn visit_pat_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
             _visitor.visit_pat_slice_mut(_binding_0);
         }
         Macro(ref mut _binding_0, ) => {
-            _visitor.visit_macro_mut(_binding_0);
+            _visitor.visit_pat_macro_mut(_binding_0);
         }
         Verbatim(ref mut _binding_0, ) => {
             _visitor.visit_pat_verbatim_mut(_binding_0);
@@ -1666,6 +1670,10 @@ pub fn visit_pat_ident_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pa
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_lit_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatLit) {
     _visitor.visit_expr_mut(& mut * _i . expr);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_pat_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatMacro) {
+    _visitor.visit_macro_mut(& mut _i . mac);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_path_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatPath) {
@@ -1921,7 +1929,7 @@ pub fn visit_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
             _visitor.visit_type_infer_mut(_binding_0);
         }
         Macro(ref mut _binding_0, ) => {
-            _visitor.visit_macro_mut(_binding_0);
+            _visitor.visit_type_macro_mut(_binding_0);
         }
         Verbatim(ref mut _binding_0, ) => {
             _visitor.visit_type_verbatim_mut(_binding_0);
@@ -1965,6 +1973,10 @@ pub fn visit_type_impl_trait_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &
 
 pub fn visit_type_infer_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeInfer) {
     tokens_helper(_visitor, &mut (& mut _i . underscore_token).0);
+}
+
+pub fn visit_type_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeMacro) {
+    _visitor.visit_macro_mut(& mut _i . mac);
 }
 
 pub fn visit_type_never_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut TypeNever) {

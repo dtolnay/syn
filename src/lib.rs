@@ -42,7 +42,7 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
 
 #[cfg(feature = "full")]
 pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Local,
-               MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
+               MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatRef, PatSlice,
                PatStruct, PatTuple, PatTupleStruct, PatVerbatim, PatWild, RangeLimits, Stmt};
 
 mod generics;
@@ -90,7 +90,7 @@ mod ty;
 pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
              GenericArgument, ParenthesizedGenericArguments, Path,
              PathArguments, PathSegment, PolyTraitRef, QSelf, ReturnType, Type, TypeArray,
-             TypeBareFn, TypeBinding, TypeGroup, TypeImplTrait, TypeInfer, TypeNever, TypeParen,
+             TypeBareFn, TypeBinding, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
              TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim};
 #[cfg(feature = "printing")]
 pub use ty::PathTokens;

@@ -359,7 +359,7 @@ mod codegen {
             Type::Tuple(TypeTuple { ref elems, .. }) => {
                 RelevantType::Tuple(elems)
             }
-            Type::Macro(ref mac) if mac.path.segments.last().unwrap().into_item().ident == "Token" => {
+            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_item().ident == "Token" => {
                 RelevantType::Token(mac.into_tokens())
             }
             _ => RelevantType::Pass,

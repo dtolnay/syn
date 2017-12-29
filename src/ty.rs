@@ -91,7 +91,9 @@ ast_enum_of_structs! {
             pub underscore_token: Token![_],
         }),
         /// A macro in the type position.
-        pub Macro(Macro),
+        pub Macro(TypeMacro {
+            pub mac: Macro,
+        }),
         pub Verbatim(TypeVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -365,7 +367,7 @@ pub mod parsing {
         syn!(TypeParen) => { Type::Paren }
         |
         // must be before TypePath
-        syn!(Macro) => { Type::Macro }
+        syn!(TypeMacro) => { Type::Macro }
         |
         // must be before TypeTraitObject
         call!(TypePath::parse, allow_plus) => { Type::Path }
@@ -503,6 +505,10 @@ pub mod parsing {
                 paren_token: data.1,
             })
         ));
+    }
+
+    impl Synom for TypeMacro {
+        named!(parse -> Self, map!(syn!(Macro), |mac| TypeMacro { mac: mac }));
     }
 
     impl TypePath {
@@ -966,6 +972,12 @@ mod printing {
     impl ToTokens for TypeInfer {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.underscore_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for TypeMacro {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.mac.to_tokens(tokens);
         }
     }
 
