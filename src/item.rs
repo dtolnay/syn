@@ -69,7 +69,7 @@ ast_enum_of_structs! {
         pub Fn(ItemFn {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub constness: Constness,
+            pub constness: Option<Token![const]>,
             pub unsafety: Unsafety,
             pub abi: Option<Abi>,
             pub ident: Ident,
@@ -177,12 +177,12 @@ ast_enum_of_structs! {
         /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
         pub Impl(ItemImpl {
             pub attrs: Vec<Attribute>,
-            pub defaultness: Defaultness,
+            pub defaultness: Option<Token![default]>,
             pub unsafety: Unsafety,
             pub impl_token: Token![impl],
             pub generics: Generics,
             /// Trait this impl implements.
-            pub trait_: Option<(ImplPolarity, Path, Token![for])>,
+            pub trait_: Option<(Option<Token![!]>, Path, Token![for])>,
             /// The Self type of the impl.
             pub self_ty: Box<Type>,
             pub brace_token: token::Brace,
@@ -283,22 +283,6 @@ ast_enum_of_structs! {
     }
 }
 
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum Constness {
-        Const(Token![const]),
-        NotConst,
-    }
-}
-
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum Defaultness {
-        Default(Token![default]),
-        Final,
-    }
-}
-
 ast_enum_of_structs! {
     /// An item within an `extern` block
     pub enum ForeignItem {
@@ -371,22 +355,12 @@ ast_enum_of_structs! {
     }
 }
 
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum ImplPolarity {
-        /// `impl Trait for Type`
-        Positive,
-        /// `impl !Trait for Type`
-        Negative(Token![!]),
-    }
-}
-
 ast_enum_of_structs! {
     pub enum ImplItem {
         pub Const(ImplItemConst {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub defaultness: Defaultness,
+            pub defaultness: Option<Token![default]>,
             pub const_token: Token![const],
             pub ident: Ident,
             pub colon_token: Token![:],
@@ -398,14 +372,14 @@ ast_enum_of_structs! {
         pub Method(ImplItemMethod {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub defaultness: Defaultness,
+            pub defaultness: Option<Token![default]>,
             pub sig: MethodSig,
             pub block: Block,
         }),
         pub Type(ImplItemType {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub defaultness: Defaultness,
+            pub defaultness: Option<Token![default]>,
             pub type_token: Token![type],
             pub ident: Ident,
             pub generics: Generics,
@@ -425,7 +399,7 @@ ast_struct! {
     /// Represents a method's signature in a trait declaration,
     /// or in an implementation.
     pub struct MethodSig {
-        pub constness: Constness,
+        pub constness: Option<Token![const]>,
         pub unsafety: Unsafety,
         pub abi: Option<Abi>,
         pub ident: Ident,
@@ -703,7 +677,7 @@ pub mod parsing {
     impl_synom!(ItemFn "fn item" do_parse!(
         outer_attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
-        constness: syn!(Constness) >>
+        constness: option!(keyword!(const)) >>
         unsafety: syn!(Unsafety) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
@@ -1060,7 +1034,7 @@ pub mod parsing {
 
     impl_synom!(TraitItemMethod "method trait item" do_parse!(
         outer_attrs: many0!(Attribute::parse_outer) >>
-        constness: syn!(Constness) >>
+        constness: option!(keyword!(const)) >>
         unsafety: syn!(Unsafety) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
@@ -1153,13 +1127,13 @@ pub mod parsing {
 
     impl_synom!(ItemImpl "impl item" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
-        defaultness: syn!(Defaultness) >>
+        defaultness: option!(keyword!(default)) >>
         unsafety: syn!(Unsafety) >>
         impl_: keyword!(impl) >>
         generics: syn!(Generics) >>
         polarity_path: alt!(
             do_parse!(
-                polarity: syn!(ImplPolarity) >>
+                polarity: option!(punct!(!)) >>
                 path: syn!(Path) >>
                 for_: keyword!(for) >>
                 (Some((polarity, path, for_)))
@@ -1199,7 +1173,7 @@ pub mod parsing {
     impl_synom!(ImplItemConst "const item in impl block" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
-        defaultness: syn!(Defaultness) >>
+        defaultness: option!(keyword!(default)) >>
         const_: keyword!(const) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
@@ -1224,8 +1198,8 @@ pub mod parsing {
     impl_synom!(ImplItemMethod "method in impl block" do_parse!(
         outer_attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
-        defaultness: syn!(Defaultness) >>
-        constness: syn!(Constness) >>
+        defaultness: option!(keyword!(default)) >>
+        constness: option!(keyword!(const)) >>
         unsafety: syn!(Unsafety) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
@@ -1273,7 +1247,7 @@ pub mod parsing {
     impl_synom!(ImplItemType "type in impl block" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
-        defaultness: syn!(Defaultness) >>
+        defaultness: option!(keyword!(default)) >>
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
@@ -1303,30 +1277,6 @@ pub mod parsing {
             semi_token: semi,
         })
     ));
-
-    impl Synom for ImplPolarity {
-        named!(parse -> Self, alt!(
-            punct!(!) => { ImplPolarity::Negative }
-            |
-            epsilon!() => { |_| ImplPolarity::Positive }
-        ));
-    }
-
-    impl Synom for Constness {
-        named!(parse -> Self, alt!(
-            keyword!(const) => { Constness::Const }
-            |
-            epsilon!() => { |_| Constness::NotConst }
-        ));
-    }
-
-    impl Synom for Defaultness {
-        named!(parse -> Self, alt!(
-            keyword!(default) => { Defaultness::Default }
-            |
-            epsilon!() => { |_| Defaultness::Final }
-        ));
-    }
 
     fn is_braced(tt: &TokenTree) -> bool {
         match tt.kind {
@@ -1797,39 +1747,6 @@ mod printing {
             self.pat.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for Constness {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Constness::Const(ref t) => t.to_tokens(tokens),
-                Constness::NotConst => {
-                    // nothing
-                }
-            }
-        }
-    }
-
-    impl ToTokens for Defaultness {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                Defaultness::Default(ref t) => t.to_tokens(tokens),
-                Defaultness::Final => {
-                    // nothing
-                }
-            }
-        }
-    }
-
-    impl ToTokens for ImplPolarity {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                ImplPolarity::Negative(ref t) => t.to_tokens(tokens),
-                ImplPolarity::Positive => {
-                    // nothing
-                }
-            }
         }
     }
 }

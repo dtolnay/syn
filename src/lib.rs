@@ -58,9 +58,9 @@ pub use ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{ArgCaptured, ArgSelf, ArgSelfRef, Constness, Defaultness, FnArg, FnDecl,
+pub use item::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl,
                ForeignItem, ForeignItemFn, ForeignItemStatic, ForeignItemType, ImplItem,
-               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, ImplPolarity, Item,
+               ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, Item,
                ItemConst, ItemDefaultImpl, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
                ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait,
                ItemType, ItemUnion, ItemUse, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,

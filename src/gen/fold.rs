@@ -77,10 +77,6 @@ fn fold_body_struct(&mut self, i: BodyStruct) -> BodyStruct { fold_body_struct(s
 fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { fold_bound_lifetimes(self, i) }
 
 fn fold_const_param(&mut self, i: ConstParam) -> ConstParam { fold_const_param(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_constness(&mut self, i: Constness) -> Constness { fold_constness(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_defaultness(&mut self, i: Defaultness) -> Defaultness { fold_defaultness(self, i) }
 
 fn fold_derive_input(&mut self, i: DeriveInput) -> DeriveInput { fold_derive_input(self, i) }
 
@@ -203,8 +199,6 @@ fn fold_impl_item_macro(&mut self, i: ImplItemMacro) -> ImplItemMacro { fold_imp
 fn fold_impl_item_method(&mut self, i: ImplItemMethod) -> ImplItemMethod { fold_impl_item_method(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType { fold_impl_item_type(self, i) }
-# [ cfg ( feature = "full" ) ]
-fn fold_impl_polarity(&mut self, i: ImplPolarity) -> ImplPolarity { fold_impl_polarity(self, i) }
 
 fn fold_index(&mut self, i: Index) -> Index { fold_index(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -734,30 +728,6 @@ pub fn fold_const_param<V: Folder + ?Sized>(_visitor: &mut V, _i: ConstParam) ->
         ty: _visitor.fold_type(_i . ty),
         eq_token: (_i . eq_token).map(|it| { Token ! [ = ](tokens_helper(_visitor, &(it).0)) }),
         default: (_i . default).map(|it| { _visitor.fold_expr(it) }),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_constness<V: Folder + ?Sized>(_visitor: &mut V, _i: Constness) -> Constness {
-    use ::Constness::*;
-    match _i {
-        Const(_binding_0, ) => {
-            Const (
-                Token ! [ const ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-        NotConst => { NotConst }
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_defaultness<V: Folder + ?Sized>(_visitor: &mut V, _i: Defaultness) -> Defaultness {
-    use ::Defaultness::*;
-    match _i {
-        Default(_binding_0, ) => {
-            Default (
-                Token ! [ default ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-        Final => { Final }
     }
 }
 
@@ -1572,7 +1542,7 @@ pub fn fold_impl_item_const<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemCo
     ImplItemConst {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
-        defaultness: _visitor.fold_defaultness(_i . defaultness),
+        defaultness: (_i . defaultness).map(|it| { Token ! [ default ](tokens_helper(_visitor, &(it).0)) }),
         const_token: Token ! [ const ](tokens_helper(_visitor, &(_i . const_token).0)),
         ident: _visitor.fold_ident(_i . ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
@@ -1595,7 +1565,7 @@ pub fn fold_impl_item_method<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemM
     ImplItemMethod {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
-        defaultness: _visitor.fold_defaultness(_i . defaultness),
+        defaultness: (_i . defaultness).map(|it| { Token ! [ default ](tokens_helper(_visitor, &(it).0)) }),
         sig: _visitor.fold_method_sig(_i . sig),
         block: _visitor.fold_block(_i . block),
     }
@@ -1605,25 +1575,13 @@ pub fn fold_impl_item_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItemTyp
     ImplItemType {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
-        defaultness: _visitor.fold_defaultness(_i . defaultness),
+        defaultness: (_i . defaultness).map(|it| { Token ! [ default ](tokens_helper(_visitor, &(it).0)) }),
         type_token: Token ! [ type ](tokens_helper(_visitor, &(_i . type_token).0)),
         ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
         ty: _visitor.fold_type(_i . ty),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
-    }
-}
-# [ cfg ( feature = "full" ) ]
-pub fn fold_impl_polarity<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplPolarity) -> ImplPolarity {
-    use ::ImplPolarity::*;
-    match _i {
-        Positive => { Positive }
-        Negative(_binding_0, ) => {
-            Negative (
-                Token ! [ ! ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
     }
 }
 
@@ -1777,7 +1735,7 @@ pub fn fold_item_fn<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn 
     ItemFn {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
-        constness: _visitor.fold_constness(_i . constness),
+        constness: (_i . constness).map(|it| { Token ! [ const ](tokens_helper(_visitor, &(it).0)) }),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         ident: _visitor.fold_ident(_i . ident),
@@ -1798,12 +1756,12 @@ pub fn fold_item_foreign_mod<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemForei
 pub fn fold_item_impl<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> ItemImpl {
     ItemImpl {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
-        defaultness: _visitor.fold_defaultness(_i . defaultness),
+        defaultness: (_i . defaultness).map(|it| { Token ! [ default ](tokens_helper(_visitor, &(it).0)) }),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         impl_token: Token ! [ impl ](tokens_helper(_visitor, &(_i . impl_token).0)),
         generics: _visitor.fold_generics(_i . generics),
         trait_: (_i . trait_).map(|it| { (
-            _visitor.fold_impl_polarity(( it ) . 0),
+            (( it ) . 0).map(|it| { Token ! [ ! ](tokens_helper(_visitor, &(it).0)) }),
             _visitor.fold_path(( it ) . 1),
             Token ! [ for ](tokens_helper(_visitor, &(( it ) . 2).0)),
         ) }),
@@ -2018,7 +1976,7 @@ pub fn fold_meta_name_value<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaNameVa
 # [ cfg ( feature = "full" ) ]
 pub fn fold_method_sig<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodSig) -> MethodSig {
     MethodSig {
-        constness: _visitor.fold_constness(_i . constness),
+        constness: (_i . constness).map(|it| { Token ! [ const ](tokens_helper(_visitor, &(it).0)) }),
         unsafety: _visitor.fold_unsafety(_i . unsafety),
         abi: (_i . abi).map(|it| { _visitor.fold_abi(it) }),
         ident: _visitor.fold_ident(_i . ident),
