@@ -364,13 +364,17 @@ pub mod parsing {
         syn!(TypeGroup) => { Type::Group }
         |
         // must be before TypeTuple
-        syn!(TypeParen) => { Type::Paren }
+        call!(TypeParen::parse, allow_plus) => { Type::Paren }
         |
         // must be before TypePath
         syn!(TypeMacro) => { Type::Macro }
         |
         // must be before TypeTraitObject
         call!(TypePath::parse, allow_plus) => { Type::Path }
+        |
+        // Don't try parsing more than one trait bound if we aren't allowing it.
+        // must be before TypeTuple
+        call!(TypeTraitObject::parse, allow_plus) => { Type::TraitObject }
         |
         syn!(TypeSlice) => { Type::Slice }
         |
@@ -385,9 +389,6 @@ pub mod parsing {
         syn!(TypeNever) => { Type::Never }
         |
         syn!(TypeTuple) => { Type::Tuple }
-        |
-        // Don't try parsing more than one trait bound if we aren't allowing it
-        call!(TypeTraitObject::parse, allow_plus) => { Type::TraitObject }
         |
         syn!(TypeImplTrait) => { Type::ImplTrait }
         |
@@ -511,6 +512,10 @@ pub mod parsing {
         named!(parse -> Self, map!(syn!(Macro), |mac| TypeMacro { mac: mac }));
     }
 
+    impl Synom for TypePath {
+        named!(parse -> Self, call!(Self::parse, false));
+    }
+
     impl TypePath {
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             qpath: qpath >>
@@ -596,7 +601,13 @@ pub mod parsing {
         ));
     }
 
+    impl Synom for TypeTraitObject {
+        named!(parse -> Self, call!(Self::parse, true));
+    }
+
     impl TypeTraitObject {
+        named!(pub without_plus -> Self, call!(Self::parse, false));
+
         // Only allow multiple trait references if allow_plus is true.
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             dyn_token: option!(keyword!(dyn)) >>
@@ -636,8 +647,13 @@ pub mod parsing {
     }
 
     impl Synom for TypeParen {
-        named!(parse -> Self, do_parse!(
+        named!(parse -> Self, call!(Self::parse, false));
+    }
+
+    impl TypeParen {
+        named!(parse(allow_plus: bool) -> Self, do_parse!(
             data: parens!(syn!(Type)) >>
+            cond!(allow_plus, not!(peek!(punct!(+)))) >>
             (TypeParen {
                 paren_token: data.1,
                 elem: Box::new(data.0),
