@@ -93,7 +93,7 @@ ast_enum_of_structs! {
         }),
 
         /// A type ascription, e.g. `foo: f64`.
-        pub Type(ExprType {
+        pub Type(ExprType #full {
             pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub colon_token: Token![:],
@@ -1035,6 +1035,7 @@ pub mod parsing {
 
     // <unary> as <ty>
     // <unary> : <ty>
+    #[cfg(feature = "full")]
     named!(cast_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(unary_expr, allow_struct, allow_block) >>
         many0!(alt!(
@@ -1067,6 +1068,27 @@ pub mod parsing {
                     }.into();
                 })
             )
+        )) >>
+        (e)
+    ));
+
+    // <unary> as <ty>
+    #[cfg(not(feature = "full"))]
+    named!(cast_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
+        mut e: call!(unary_expr, allow_struct, allow_block) >>
+        many0!(do_parse!(
+            as_: keyword!(as) >>
+            // We can't accept `A + B` in cast expressions, as it's
+            // ambiguous with the + expression.
+            ty: call!(Type::without_plus) >>
+            ({
+                e = ExprCast {
+                    attrs: Vec::new(),
+                    expr: Box::new(e.into()),
+                    as_token: as_,
+                    ty: Box::new(ty),
+                }.into();
+            })
         )) >>
         (e)
     ));
@@ -2490,6 +2512,7 @@ mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl ToTokens for ExprType {
         fn to_tokens(&self, tokens: &mut Tokens) {
             attrs_to_tokens(&self.attrs, tokens);

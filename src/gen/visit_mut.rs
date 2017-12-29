@@ -151,7 +151,7 @@ fn visit_expr_struct_mut(&mut self, i: &mut ExprStruct) { visit_expr_struct_mut(
 fn visit_expr_try_mut(&mut self, i: &mut ExprTry) { visit_expr_try_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_tuple_mut(&mut self, i: &mut ExprTuple) { visit_expr_tuple_mut(self, i) }
-
+# [ cfg ( feature = "full" ) ]
 fn visit_expr_type_mut(&mut self, i: &mut ExprType) { visit_expr_type_mut(self, i) }
 
 fn visit_expr_unary_mut(&mut self, i: &mut ExprUnary) { visit_expr_unary_mut(self, i) }
@@ -714,7 +714,7 @@ pub fn visit_expr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
             _visitor.visit_expr_cast_mut(_binding_0);
         }
         Type(ref mut _binding_0, ) => {
-            _visitor.visit_expr_type_mut(_binding_0);
+            full!(_visitor.visit_expr_type_mut(_binding_0));
         }
         If(ref mut _binding_0, ) => {
             full!(_visitor.visit_expr_if_mut(_binding_0));
@@ -1043,7 +1043,7 @@ pub fn visit_expr_tuple_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut E
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     for mut el in & mut _i . elems { let it = el.item_mut(); _visitor.visit_expr_mut(it) };
 }
-
+# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprType) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_expr_mut(& mut * _i . expr);

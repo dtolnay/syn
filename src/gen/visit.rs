@@ -151,7 +151,7 @@ fn visit_expr_struct(&mut self, i: &'ast ExprStruct) { visit_expr_struct(self, i
 fn visit_expr_try(&mut self, i: &'ast ExprTry) { visit_expr_try(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_expr_tuple(&mut self, i: &'ast ExprTuple) { visit_expr_tuple(self, i) }
-
+# [ cfg ( feature = "full" ) ]
 fn visit_expr_type(&mut self, i: &'ast ExprType) { visit_expr_type(self, i) }
 
 fn visit_expr_unary(&mut self, i: &'ast ExprUnary) { visit_expr_unary(self, i) }
@@ -714,7 +714,7 @@ pub fn visit_expr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast E
             _visitor.visit_expr_cast(_binding_0);
         }
         Type(ref _binding_0, ) => {
-            _visitor.visit_expr_type(_binding_0);
+            full!(_visitor.visit_expr_type(_binding_0));
         }
         If(ref _binding_0, ) => {
             full!(_visitor.visit_expr_if(_binding_0));
@@ -1043,7 +1043,7 @@ pub fn visit_expr_tuple<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
     tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in & _i . elems { let it = el.item(); _visitor.visit_expr(it) };
 }
-
+# [ cfg ( feature = "full" ) ]
 pub fn visit_expr_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprType) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_expr(& * _i . expr);
