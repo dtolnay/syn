@@ -374,8 +374,6 @@ fn visit_variant_data_mut(&mut self, i: &mut VariantData) { visit_variant_data_m
 
 fn visit_vis_crate_mut(&mut self, i: &mut VisCrate) { visit_vis_crate_mut(self, i) }
 
-fn visit_vis_inherited_mut(&mut self, i: &mut VisInherited) { visit_vis_inherited_mut(self, i) }
-
 fn visit_vis_public_mut(&mut self, i: &mut VisPublic) { visit_vis_public_mut(self, i) }
 
 fn visit_vis_restricted_mut(&mut self, i: &mut VisRestricted) { visit_vis_restricted_mut(self, i) }
@@ -2108,9 +2106,6 @@ pub fn visit_vis_crate_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Vi
     tokens_helper(_visitor, &mut (& mut _i . crate_token).0);
 }
 
-pub fn visit_vis_inherited_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut VisInherited) {
-}
-
 pub fn visit_vis_public_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut VisPublic) {
     tokens_helper(_visitor, &mut (& mut _i . pub_token).0);
 }
@@ -2134,9 +2129,7 @@ pub fn visit_visibility_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut V
         Restricted(ref mut _binding_0, ) => {
             _visitor.visit_vis_restricted_mut(_binding_0);
         }
-        Inherited(ref mut _binding_0, ) => {
-            _visitor.visit_vis_inherited_mut(_binding_0);
-        }
+        Inherited => { }
     }
 }
 

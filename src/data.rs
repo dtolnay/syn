@@ -100,7 +100,7 @@ ast_enum_of_structs! {
         }),
 
         /// Inherited, i.e. private.
-        pub Inherited(VisInherited {}),
+        pub Inherited,
     }
 }
 
@@ -195,7 +195,7 @@ pub mod parsing {
                 })
             } }
             |
-            epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
+            epsilon!() => { |_| Visibility::Inherited }
         ));
     }
 }
@@ -272,9 +272,5 @@ mod printing {
                 self.path.to_tokens(tokens);
             });
         }
-    }
-
-    impl ToTokens for VisInherited {
-        fn to_tokens(&self, _tokens: &mut Tokens) {}
     }
 }

@@ -59,7 +59,7 @@ macro_rules! ast_enum_of_structs {
         pub enum $name:ident {
             $(
                 $(#[$variant_attr:meta])*
-                pub $variant:ident($member:ident $($rest:tt)*),
+                pub $variant:ident $( ($member:ident $($rest:tt)*) )*,
             )*
         }
 
@@ -70,7 +70,7 @@ macro_rules! ast_enum_of_structs {
             pub enum $name {
                 $(
                     $(#[$variant_attr])*
-                    $variant($member),
+                    $variant $( ($member) )*,
                 )*
             }
         }
@@ -78,20 +78,26 @@ macro_rules! ast_enum_of_structs {
         $(
             maybe_ast_struct! {
                 $(#[$variant_attr])*
-                pub struct $member $($rest)*
+                $(
+                    pub struct $member $($rest)*
+                )*
             }
 
-            impl From<$member> for $name {
-                fn from(e: $member) -> $name {
-                    $name::$variant(e)
+            $(
+                impl From<$member> for $name {
+                    fn from(e: $member) -> $name {
+                        $name::$variant(e)
+                    }
                 }
-            }
+            )*
         )*
 
         #[cfg(feature = "printing")]
         generate_to_tokens! {
             $($remaining)*
-            enum $name { $($variant [$($rest)*],)* }
+            ()
+            tokens
+            $name { $($variant $( [$($rest)*] )*,)* }
         }
     )
 }
@@ -100,18 +106,29 @@ macro_rules! ast_enum_of_structs {
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
-    (enum $name:ident { $($variant:ident [$($rest:tt)*],)* }) => (
+    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident, $($next:tt)*}) => {
+        generate_to_tokens!(
+            ($($arms)* $name::$variant => {})
+            $tokens $name { $($next)* }
+        );
+    };
+
+    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident [$($rest:tt)*], $($next:tt)*}) => {
+        generate_to_tokens!(
+            ($($arms)* $name::$variant(ref _e) => to_tokens_call!(_e, $tokens, $($rest)*),)
+            $tokens $name { $($next)* }
+        );
+    };
+
+    (($($arms:tt)*) $tokens:ident $name:ident {}) => {
         impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+            fn to_tokens(&self, $tokens: &mut ::quote::Tokens) {
                 match *self {
-                    $(
-                        $name::$variant(ref _e) =>
-                            to_tokens_call!(_e, tokens, $($rest)*),
-                    )*
+                    $($arms)*
                 }
             }
         }
-    );
+    };
 }
 
 #[cfg(all(feature = "printing", feature = "full"))]
@@ -135,7 +152,9 @@ macro_rules! to_tokens_call {
 macro_rules! maybe_ast_struct {
     (
         $(#[$attr:meta])*
-        pub struct $name:ident
+        $(
+            pub struct $name:ident
+        )*
     ) => ();
 
     ($($rest:tt)*) => (ast_struct! { $($rest)* });

@@ -374,8 +374,6 @@ fn visit_variant_data(&mut self, i: &'ast VariantData) { visit_variant_data(self
 
 fn visit_vis_crate(&mut self, i: &'ast VisCrate) { visit_vis_crate(self, i) }
 
-fn visit_vis_inherited(&mut self, i: &'ast VisInherited) { visit_vis_inherited(self, i) }
-
 fn visit_vis_public(&mut self, i: &'ast VisPublic) { visit_vis_public(self, i) }
 
 fn visit_vis_restricted(&mut self, i: &'ast VisRestricted) { visit_vis_restricted(self, i) }
@@ -2108,9 +2106,6 @@ pub fn visit_vis_crate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     tokens_helper(_visitor, &(& _i . crate_token).0);
 }
 
-pub fn visit_vis_inherited<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VisInherited) {
-}
-
 pub fn visit_vis_public<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VisPublic) {
     tokens_helper(_visitor, &(& _i . pub_token).0);
 }
@@ -2134,9 +2129,7 @@ pub fn visit_visibility<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
         Restricted(ref _binding_0, ) => {
             _visitor.visit_vis_restricted(_binding_0);
         }
-        Inherited(ref _binding_0, ) => {
-            _visitor.visit_vis_inherited(_binding_0);
-        }
+        Inherited => { }
     }
 }
 

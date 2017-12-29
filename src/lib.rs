@@ -30,8 +30,7 @@ mod attr;
 pub use attr::{AttrStyle, Attribute, MetaItem, MetaItemList, MetaNameValue, NestedMetaItem};
 
 mod data;
-pub use data::{Field, Variant, VariantData, VisCrate, VisInherited, VisPublic, VisRestricted,
-               Visibility};
+pub use data::{Field, Variant, VariantData, VisCrate, VisPublic, VisRestricted, Visibility};
 
 mod expr;
 pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,

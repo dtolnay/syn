@@ -245,23 +245,23 @@ mod parsing {
     // A single variant of an ast_enum_of_structs!
     struct EosVariant {
         name: Ident,
-        member: Path,
+        member: Option<Path>,
         inner: Option<AstItem>,
     }
     named!(eos_variant -> EosVariant, do_parse!(
         many0!(Attribute::parse_outer) >>
         keyword!(pub) >>
         variant: syn!(Ident) >>
-        member: map!(parens!(alt!(
+        member: option!(map!(parens!(alt!(
             call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.ast.ident), Some(x)) }
             |
             syn!(Path) => { |x| (x, None) }
-        )), |x| x.0) >>
+        )), |x| x.0)) >>
         punct!(,) >>
         (EosVariant {
             name: variant,
-            member: member.0,
-            inner: member.1,
+            member: member.clone().map(|x| x.0),
+            inner: member.map(|x| x.1).unwrap_or_default(),
         })
     ));
 
@@ -281,8 +281,10 @@ mod parsing {
                 let enum_item = {
                     let variants = body.0.iter().map(|v| {
                         let name = v.name;
-                        let member = &v.member;
-                        quote!(#name(#member))
+                        match v.member {
+                            Some(ref member) => quote!(#name(#member)),
+                            None => quote!(#name),
+                        }
                     });
                     parse_tokens::<DeriveInput>(quote! {
                         pub enum #id { #(#variants),* }

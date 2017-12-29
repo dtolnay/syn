@@ -43,7 +43,7 @@ fn test_unit() {
 
     let expected = DeriveInput {
         ident: "Unit".into(),
-        vis: Visibility::Inherited(VisInherited {}),
+        vis: Visibility::Inherited,
         attrs: Vec::new(),
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
@@ -234,7 +234,7 @@ fn test_enum() {
                             Field {
                                 colon_token: None,
                                 ident: None,
-                                vis: Visibility::Inherited(VisInherited {}),
+                                vis: Visibility::Inherited,
                                 attrs: Vec::new(),
                                 ty: TypePath {
                                     qself: None,
@@ -255,7 +255,7 @@ fn test_enum() {
                             Field {
                                 ident: None,
                                 colon_token: None,
-                                vis: Visibility::Inherited(VisInherited {}),
+                                vis: Visibility::Inherited,
                                 attrs: Vec::new(),
                                 ty: TypePath {
                                     qself: None,
@@ -361,7 +361,7 @@ fn test_attr_with_path() {
 
     let expected = DeriveInput {
         ident: "Dummy".into(),
-        vis: Visibility::Inherited(VisInherited {}),
+        vis: Visibility::Inherited,
         attrs: vec![
             Attribute {
                 bracket_token: Default::default(),
@@ -423,7 +423,7 @@ fn test_attr_with_non_mod_style_path() {
 
     let expected = DeriveInput {
         ident: "S".into(),
-        vis: Visibility::Inherited(VisInherited {}),
+        vis: Visibility::Inherited,
         attrs: vec![
             Attribute {
                 bracket_token: Default::default(),
@@ -461,7 +461,7 @@ fn test_attr_with_mod_style_path_with_self() {
 
     let expected = DeriveInput {
         ident: "S".into(),
-        vis: Visibility::Inherited(VisInherited {}),
+        vis: Visibility::Inherited,
         attrs: vec![
             Attribute {
                 bracket_token: Default::default(),

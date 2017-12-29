@@ -378,8 +378,6 @@ fn fold_variant_data(&mut self, i: VariantData) -> VariantData { fold_variant_da
 
 fn fold_vis_crate(&mut self, i: VisCrate) -> VisCrate { fold_vis_crate(self, i) }
 
-fn fold_vis_inherited(&mut self, i: VisInherited) -> VisInherited { fold_vis_inherited(self, i) }
-
 fn fold_vis_public(&mut self, i: VisPublic) -> VisPublic { fold_vis_public(self, i) }
 
 fn fold_vis_restricted(&mut self, i: VisRestricted) -> VisRestricted { fold_vis_restricted(self, i) }
@@ -2729,11 +2727,6 @@ pub fn fold_vis_crate<V: Folder + ?Sized>(_visitor: &mut V, _i: VisCrate) -> Vis
     }
 }
 
-pub fn fold_vis_inherited<V: Folder + ?Sized>(_visitor: &mut V, _i: VisInherited) -> VisInherited {
-    VisInherited {
-    }
-}
-
 pub fn fold_vis_public<V: Folder + ?Sized>(_visitor: &mut V, _i: VisPublic) -> VisPublic {
     VisPublic {
         pub_token: Token ! [ pub ](tokens_helper(_visitor, &(_i . pub_token).0)),
@@ -2767,11 +2760,7 @@ pub fn fold_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> 
                 _visitor.fold_vis_restricted(_binding_0),
             )
         }
-        Inherited(_binding_0, ) => {
-            Inherited (
-                _visitor.fold_vis_inherited(_binding_0),
-            )
-        }
+        Inherited => { Inherited }
     }
 }
 
