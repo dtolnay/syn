@@ -38,11 +38,11 @@ pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary
                ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
                ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
                ExprRepeat, ExprReturn, ExprStruct, ExprTry, ExprTuple, ExprType,
-               ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield};
+               ExprUnary, ExprUnsafe, ExprWhile, ExprWhileLet, ExprYield, Index, Member};
 
 #[cfg(feature = "full")]
-pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, GenericMethodArgument, Index, Local,
-               Member, MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
+pub use expr::{Arm, BindingMode, Block, CaptureBy, FieldPat, FieldValue, GenericMethodArgument, Local,
+               MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatPath, PatRange, PatRef, PatSlice,
                PatStruct, PatTuple, PatTupleStruct, PatWild, RangeLimits, Stmt};
 
 mod generics;

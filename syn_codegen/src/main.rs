@@ -583,7 +583,7 @@ mod codegen {
         let mut code = String::new();
         for (i, elem) in elems.items().enumerate() {
             let name = name.tokens();
-            let i = Ident::from(format!("{}", i));
+            let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
             let val = visit(elem, lookup, kind, &it)
                 .unwrap_or_else(|| noop_visit(kind, &it));
@@ -861,8 +861,7 @@ mod codegen {
                             .iter()
                             .enumerate()
                             .map(|(idx, el)| {
-                                // XXX: Make sure we don't get the usize suffix!
-                                let id = Ident::from(format!("{}", idx));
+                                let id = Index::from(idx);
                                 (*el.item(), quote!(_i.#id))
                             })
                             .collect()

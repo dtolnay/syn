@@ -109,6 +109,10 @@ impl Ident {
             panic!("`_` is not a valid ident; use syn::token::Underscore");
         }
 
+        if s.bytes().all(|digit| digit >= b'0' && digit <= b'9') {
+            panic!("ident cannot be a number, use syn::Index instead");
+        }
+
         fn xid_ok(s: &str) -> bool {
             let mut chars = s.chars();
             let first = chars.next().unwrap();
@@ -123,11 +127,7 @@ impl Ident {
             true
         }
 
-        fn integer_ok(s: &str) -> bool {
-            s.bytes().all(|digit| digit >= b'0' && digit <= b'9')
-        }
-
-        if !(xid_ok(s) || integer_ok(s)) {
+        if !xid_ok(s) {
             panic!("{:?} is not a valid ident", s);
         }
 

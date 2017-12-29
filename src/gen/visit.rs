@@ -205,7 +205,7 @@ fn visit_impl_item_method(&mut self, i: &'ast ImplItemMethod) { visit_impl_item_
 fn visit_impl_item_type(&mut self, i: &'ast ImplItemType) { visit_impl_item_type(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_impl_polarity(&mut self, i: &'ast ImplPolarity) { visit_impl_polarity(self, i) }
-# [ cfg ( feature = "full" ) ]
+
 fn visit_index(&mut self, i: &'ast Index) { visit_index(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_item(&mut self, i: &'ast Item) { visit_item(self, i) }
@@ -251,7 +251,7 @@ fn visit_lit(&mut self, i: &'ast Lit) { visit_lit(self, i) }
 fn visit_local(&mut self, i: &'ast Local) { visit_local(self, i) }
 
 fn visit_macro(&mut self, i: &'ast Macro) { visit_macro(self, i) }
-# [ cfg ( feature = "full" ) ]
+
 fn visit_member(&mut self, i: &'ast Member) { visit_member(self, i) }
 
 fn visit_meta_item(&mut self, i: &'ast MetaItem) { visit_meta_item(self, i) }
@@ -1320,7 +1320,7 @@ pub fn visit_impl_polarity<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
         }
     }
 }
-# [ cfg ( feature = "full" ) ]
+
 pub fn visit_index<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Index) {
     // Skipped field _i . index;
     _visitor.visit_span(& _i . span);
@@ -1587,7 +1587,7 @@ pub fn visit_macro<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     tokens_helper(_visitor, &(& _i . bang_token).0);
     // Skipped field _i . tokens;
 }
-# [ cfg ( feature = "full" ) ]
+
 pub fn visit_member<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Member) {
     use ::Member::*;
     match *_i {

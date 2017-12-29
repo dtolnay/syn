@@ -209,7 +209,7 @@ fn fold_impl_item_method(&mut self, i: ImplItemMethod) -> ImplItemMethod { fold_
 fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType { fold_impl_item_type(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_impl_polarity(&mut self, i: ImplPolarity) -> ImplPolarity { fold_impl_polarity(self, i) }
-# [ cfg ( feature = "full" ) ]
+
 fn fold_index(&mut self, i: Index) -> Index { fold_index(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_item(&mut self, i: Item) -> Item { fold_item(self, i) }
@@ -255,7 +255,7 @@ fn fold_lit(&mut self, i: Lit) -> Lit { fold_lit(self, i) }
 fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
 
 fn fold_macro(&mut self, i: Macro) -> Macro { fold_macro(self, i) }
-# [ cfg ( feature = "full" ) ]
+
 fn fold_member(&mut self, i: Member) -> Member { fold_member(self, i) }
 
 fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { fold_meta_item(self, i) }
@@ -1660,7 +1660,7 @@ pub fn fold_impl_polarity<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplPolarity
         }
     }
 }
-# [ cfg ( feature = "full" ) ]
+
 pub fn fold_index<V: Folder + ?Sized>(_visitor: &mut V, _i: Index) -> Index {
     Index {
         index: _i . index,
@@ -2003,7 +2003,7 @@ pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
         tokens: _i . tokens,
     }
 }
-# [ cfg ( feature = "full" ) ]
+
 pub fn fold_member<V: Folder + ?Sized>(_visitor: &mut V, _i: Member) -> Member {
     use ::Member::*;
     match _i {

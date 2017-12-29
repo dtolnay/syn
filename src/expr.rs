@@ -1,8 +1,7 @@
 use super::*;
 use delimited::Delimited;
-#[cfg(feature = "full")]
 use proc_macro2::Span;
-#[cfg(feature = "full")]
+#[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
@@ -423,7 +422,6 @@ impl Expr {
     }
 }
 
-#[cfg(feature = "full")]
 ast_enum! {
     /// A struct or tuple struct field accessed in a struct literal or field
     /// expression.
@@ -435,7 +433,6 @@ ast_enum! {
     }
 }
 
-#[cfg(feature = "full")]
 ast_struct! {
     /// The index of an unnamed tuple struct field.
     pub struct Index #manual_extra_traits {
@@ -444,17 +441,27 @@ ast_struct! {
     }
 }
 
-#[cfg(feature = "full")]
+impl From<usize> for Index {
+    fn from(index: usize) -> Index {
+        assert!(index < std::u32::MAX as usize);
+        Index {
+            index: index as u32,
+            span: Span::default(),
+        }
+    }
+}
+
+#[cfg(feature = "extra-traits")]
 impl Eq for Index {}
 
-#[cfg(feature = "full")]
+#[cfg(feature = "extra-traits")]
 impl PartialEq for Index {
     fn eq(&self, other: &Self) -> bool {
         self.index == other.index
     }
 }
 
-#[cfg(feature = "full")]
+#[cfg(feature = "extra-traits")]
 impl Hash for Index {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.index.hash(state);
