@@ -214,7 +214,7 @@ ast_enum! {
 ast_struct! {
     /// A path like `Foo<'a, T>`
     pub struct AngleBracketedGenericArguments {
-        pub turbofish: Option<Token![::]>,
+        pub colon2_token: Option<Token![::]>,
         pub lt_token: Token![<],
         pub args: Delimited<GenericArgument, Token![,]>,
         pub gt_token: Token![>],
@@ -703,12 +703,12 @@ pub mod parsing {
 
     impl Synom for AngleBracketedGenericArguments {
         named!(parse -> Self, do_parse!(
-            turbofish: option!(punct!(::)) >>
+            colon2: option!(punct!(::)) >>
             lt: punct!(<) >>
             args: call!(Delimited::parse_terminated) >>
             gt: punct!(>) >>
             (AngleBracketedGenericArguments {
-                turbofish: turbofish,
+                colon2_token: colon2,
                 lt_token: lt,
                 args: args,
                 gt_token: gt,
@@ -1050,7 +1050,7 @@ mod printing {
 
     impl ToTokens for AngleBracketedGenericArguments {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.turbofish.to_tokens(tokens);
+            self.colon2_token.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
             self.args.to_tokens(tokens);
             self.gt_token.to_tokens(tokens);

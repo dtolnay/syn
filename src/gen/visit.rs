@@ -409,7 +409,7 @@ pub fn visit_abi_kind<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 
 pub fn visit_angle_bracketed_generic_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AngleBracketedGenericArguments) {
-    if let Some(ref it) = _i . turbofish { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . colon2_token { tokens_helper(_visitor, &(it).0) };
     tokens_helper(_visitor, &(& _i . lt_token).0);
     for el in & _i . args { let it = el.item(); _visitor.visit_generic_argument(it) };
     tokens_helper(_visitor, &(& _i . gt_token).0);

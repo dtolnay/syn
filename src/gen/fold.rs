@@ -418,7 +418,7 @@ pub fn fold_abi_kind<V: Folder + ?Sized>(_visitor: &mut V, _i: AbiKind) -> AbiKi
 
 pub fn fold_angle_bracketed_generic_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: AngleBracketedGenericArguments) -> AngleBracketedGenericArguments {
     AngleBracketedGenericArguments {
-        turbofish: (_i . turbofish).map(|it| { Token ! [ :: ](tokens_helper(_visitor, &(it).0)) }),
+        colon2_token: (_i . colon2_token).map(|it| { Token ! [ :: ](tokens_helper(_visitor, &(it).0)) }),
         lt_token: Token ! [ < ](tokens_helper(_visitor, &(_i . lt_token).0)),
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_generic_argument(it) }),
         gt_token: Token ! [ > ](tokens_helper(_visitor, &(_i . gt_token).0)),
