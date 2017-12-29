@@ -83,16 +83,8 @@ ast_enum_of_structs! {
 
 ast_struct! {
     pub struct MutType {
-        pub mutability: Mutability,
+        pub mutability: Option<Token![mut]>,
         pub ty: Type,
-    }
-}
-
-ast_enum! {
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum Mutability {
-        Mutable(Token![mut]),
-        Immutable,
     }
 }
 
@@ -431,9 +423,9 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             star: punct!(*) >>
             mutability: alt!(
-                keyword!(const) => { |c| (Mutability::Immutable, Some(c)) }
+                keyword!(const) => { |c| (None, Some(c)) }
                 |
-                keyword!(mut) => { |m| (Mutability::Mutable(m), None) }
+                keyword!(mut) => { |m| (Some(m), None) }
             ) >>
             target: call!(Type::without_plus) >>
             (TypePtr {
@@ -451,7 +443,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             amp: punct!(&) >>
             life: option!(syn!(Lifetime)) >>
-            mutability: syn!(Mutability) >>
+            mutability: option!(keyword!(mut)) >>
             // & binds tighter than +, so we don't allow + here.
             target: call!(Type::without_plus) >>
             (TypeReference {
@@ -648,14 +640,6 @@ pub mod parsing {
                 paren_token: data.1,
                 ty: Box::new(data.0),
             })
-        ));
-    }
-
-    impl Synom for Mutability {
-        named!(parse -> Self, alt!(
-            keyword!(mut) => { Mutability::Mutable }
-            |
-            epsilon!() => { |_| Mutability::Immutable }
         ));
     }
 
@@ -868,8 +852,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.star_token.to_tokens(tokens);
             match self.ty.mutability {
-                Mutability::Mutable(ref tok) => tok.to_tokens(tokens),
-                Mutability::Immutable => {
+                Some(ref tok) => tok.to_tokens(tokens),
+                None => {
                     TokensOrDefault(&self.const_token).to_tokens(tokens);
                 }
             }
@@ -983,14 +967,6 @@ mod printing {
     impl ToTokens for TypeInfer {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.underscore_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for Mutability {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            if let Mutability::Mutable(ref t) = *self {
-                t.to_tokens(tokens);
-            }
         }
     }
 

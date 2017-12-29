@@ -100,7 +100,7 @@ fn test_catch_expr() {
         });
 
         assert_let!(Stmt::Local(ref local) = block.stmts[2]; {
-            assert_let!(Pat::Ident(PatIdent { mode: BindingMode::ByValue(Mutability::Mutable(_)), ref ident, .. }) = *local.pat; {
+            assert_let!(Pat::Ident(PatIdent { by_ref: None, mutability: Some(_), ref ident, .. }) = *local.pat; {
                 assert_eq!(ident, "catch");
             });
         });

@@ -266,8 +266,6 @@ fn fold_method_turbofish(&mut self, i: MethodTurbofish) -> MethodTurbofish { fol
 
 fn fold_mut_type(&mut self, i: MutType) -> MutType { fold_mut_type(self, i) }
 
-fn fold_mutability(&mut self, i: Mutability) -> Mutability { fold_mutability(self, i) }
-
 fn fold_nested_meta_item(&mut self, i: NestedMetaItem) -> NestedMetaItem { fold_nested_meta_item(self, i) }
 
 fn fold_parenthesized_generic_arguments(&mut self, i: ParenthesizedGenericArguments) -> ParenthesizedGenericArguments { fold_parenthesized_generic_arguments(self, i) }
@@ -445,7 +443,7 @@ pub fn fold_arg_captured<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgCaptured) 
 # [ cfg ( feature = "full" ) ]
 pub fn fold_arg_self<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelf) -> ArgSelf {
     ArgSelf {
-        mutbl: _visitor.fold_mutability(_i . mutbl),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         self_token: Token ! [ self ](tokens_helper(_visitor, &(_i . self_token).0)),
     }
 }
@@ -454,7 +452,7 @@ pub fn fold_arg_self_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -
     ArgSelfRef {
         and_token: Token ! [ & ](tokens_helper(_visitor, &(_i . and_token).0)),
         lifetime: (_i . lifetime).map(|it| { _visitor.fold_lifetime(it) }),
-        mutbl: _visitor.fold_mutability(_i . mutbl),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         self_token: Token ! [ self ](tokens_helper(_visitor, &(_i . self_token).0)),
     }
 }
@@ -978,7 +976,7 @@ pub fn fold_expr_addr_of<V: Folder + ?Sized>(_visitor: &mut V, _i: ExprAddrOf) -
     ExprAddrOf {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         and_token: Token ! [ & ](tokens_helper(_visitor, &(_i . and_token).0)),
-        mutbl: _visitor.fold_mutability(_i . mutbl),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
     }
 }
@@ -1454,7 +1452,7 @@ pub fn fold_foreign_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: Foreig
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         static_token: Token ! [ static ](tokens_helper(_visitor, &(_i . static_token).0)),
-        mutbl: _visitor.fold_mutability(_i . mutbl),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         ident: _visitor.fold_ident(_i . ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
         ty: Box::new(_visitor.fold_type(* _i . ty)),
@@ -1854,7 +1852,7 @@ pub fn fold_item_static<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStatic) ->
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         static_token: Token ! [ static ](tokens_helper(_visitor, &(_i . static_token).0)),
-        mutbl: _visitor.fold_mutability(_i . mutbl),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         ident: _visitor.fold_ident(_i . ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
         ty: Box::new(_visitor.fold_type(* _i . ty)),
@@ -2039,20 +2037,8 @@ pub fn fold_method_turbofish<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodTur
 
 pub fn fold_mut_type<V: Folder + ?Sized>(_visitor: &mut V, _i: MutType) -> MutType {
     MutType {
-        mutability: _visitor.fold_mutability(_i . mutability),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         ty: _visitor.fold_type(_i . ty),
-    }
-}
-
-pub fn fold_mutability<V: Folder + ?Sized>(_visitor: &mut V, _i: Mutability) -> Mutability {
-    use ::Mutability::*;
-    match _i {
-        Mutable(_binding_0, ) => {
-            Mutable (
-                Token ! [ mut ](tokens_helper(_visitor, &(_binding_0).0)),
-            )
-        }
-        Immutable => { Immutable }
     }
 }
 
@@ -2155,8 +2141,8 @@ pub fn fold_pat_box<V: Folder + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox 
 # [ cfg ( feature = "full" ) ]
 pub fn fold_pat_ident<V: Folder + ?Sized>(_visitor: &mut V, _i: PatIdent) -> PatIdent {
     PatIdent {
-        mode: (_i . mode).map(|it| { Token ! [ ref ](tokens_helper(_visitor, &(it).0)) }),
-        mutability: _visitor.fold_mutability(_i . mutability),
+        by_ref: (_i . by_ref).map(|it| { Token ! [ ref ](tokens_helper(_visitor, &(it).0)) }),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         ident: _visitor.fold_ident(_i . ident),
         at_token: (_i . at_token).map(|it| { Token ! [ @ ](tokens_helper(_visitor, &(it).0)) }),
         subpat: (_i . subpat).map(|it| { Box::new(_visitor.fold_pat(* it)) }),
@@ -2187,7 +2173,7 @@ pub fn fold_pat_range<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRange) -> Pat
 pub fn fold_pat_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef {
     PatRef {
         and_token: Token ! [ & ](tokens_helper(_visitor, &(_i . and_token).0)),
-        mutbl: _visitor.fold_mutability(_i . mutbl),
+        mutability: (_i . mutability).map(|it| { Token ! [ mut ](tokens_helper(_visitor, &(it).0)) }),
         pat: Box::new(_visitor.fold_pat(* _i . pat)),
     }
 }

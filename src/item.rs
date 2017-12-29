@@ -41,7 +41,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub static_token: Token![static],
-            pub mutbl: Mutability,
+            pub mutability: Option<Token![mut]>,
             pub ident: Ident,
             pub colon_token: Token![:],
             pub ty: Box<Type>,
@@ -315,7 +315,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub static_token: Token![static],
-            pub mutbl: Mutability,
+            pub mutability: Option<Token![mut]>,
             pub ident: Ident,
             pub colon_token: Token![:],
             pub ty: Box<Type>,
@@ -455,11 +455,11 @@ ast_enum_of_structs! {
         pub SelfRef(ArgSelfRef {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
-            pub mutbl: Mutability,
+            pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
         }),
         pub SelfValue(ArgSelf {
-            pub mutbl: Mutability,
+            pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
         }),
         pub Captured(ArgCaptured {
@@ -656,7 +656,7 @@ pub mod parsing {
         attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
         static_: keyword!(static) >>
-        mutability: syn!(Mutability) >>
+        mutability: option!(keyword!(mut)) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
         ty: syn!(Type) >>
@@ -667,7 +667,7 @@ pub mod parsing {
             attrs: attrs,
             vis: vis,
             static_token: static_,
-            mutbl: mutability,
+            mutability: mutability,
             ident: ident,
             colon_token: colon,
             ty: Box::new(ty),
@@ -750,23 +750,23 @@ pub mod parsing {
             do_parse!(
                 and: punct!(&) >>
                 lt: option!(syn!(Lifetime)) >>
-                mutability: syn!(Mutability) >>
+                mutability: option!(keyword!(mut)) >>
                 self_: keyword!(self) >>
                 not!(punct!(:)) >>
                 (ArgSelfRef {
                     lifetime: lt,
-                    mutbl: mutability,
+                    mutability: mutability,
                     and_token: and,
                     self_token: self_,
                 }.into())
             )
             |
             do_parse!(
-                mutability: syn!(Mutability) >>
+                mutability: option!(keyword!(mut)) >>
                 self_: keyword!(self) >>
                 not!(punct!(:)) >>
                 (ArgSelf {
-                    mutbl: mutability,
+                    mutability: mutability,
                     self_token: self_,
                 }.into())
             )
@@ -885,7 +885,7 @@ pub mod parsing {
         attrs: many0!(Attribute::parse_outer) >>
         vis: syn!(Visibility) >>
         static_: keyword!(static) >>
-        mutability: syn!(Mutability) >>
+        mutability: option!(keyword!(mut)) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
         ty: syn!(Type) >>
@@ -895,7 +895,7 @@ pub mod parsing {
             attrs: attrs,
             semi_token: semi,
             ty: Box::new(ty),
-            mutbl: mutability,
+            mutability: mutability,
             static_token: static_,
             colon_token: colon,
             vis: vis,
@@ -1375,7 +1375,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.static_token.to_tokens(tokens);
-            self.mutbl.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -1730,7 +1730,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.static_token.to_tokens(tokens);
-            self.mutbl.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -1780,14 +1780,14 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
             self.lifetime.to_tokens(tokens);
-            self.mutbl.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for ArgSelf {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.mutbl.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
         }
     }

@@ -270,7 +270,7 @@ ast_enum_of_structs! {
         pub AddrOf(ExprAddrOf #full {
             pub attrs: Vec<Attribute>,
             pub and_token: Token![&],
-            pub mutbl: Mutability,
+            pub mutability: Option<Token![mut]>,
             pub expr: Box<Expr>,
         }),
 
@@ -573,8 +573,8 @@ ast_enum_of_structs! {
         /// field must be `None`). Disambiguation cannot be done with parser alone, so it happens
         /// during name resolution.
         pub Ident(PatIdent {
-            pub mode: Option<Token![ref]>,
-            pub mutability: Mutability,
+            pub by_ref: Option<Token![ref]>,
+            pub mutability: Option<Token![mut]>,
             pub ident: Ident,
             pub at_token: Option<Token![@]>,
             pub subpat: Option<Box<Pat>>,
@@ -624,7 +624,7 @@ ast_enum_of_structs! {
         /// A reference pattern, e.g. `&mut (a, b)`
         pub Ref(PatRef {
             pub and_token: Token![&],
-            pub mutbl: Mutability,
+            pub mutability: Option<Token![mut]>,
             pub pat: Box<Pat>,
         }),
         /// A literal
@@ -1118,12 +1118,12 @@ pub mod parsing {
         |
         do_parse!(
             and: punct!(&) >>
-            mutability: syn!(Mutability) >>
+            mutability: option!(keyword!(mut)) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprAddrOf {
                 attrs: Vec::new(),
                 and_token: and,
-                mutbl: mutability,
+                mutability: mutability,
                 expr: Box::new(expr.into()),
             }.into())
         )
@@ -2087,8 +2087,8 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for PatIdent {
         named!(parse -> Self, do_parse!(
-            mode: option!(keyword!(ref)) >>
-            mutability: syn!(Mutability) >>
+            by_ref: option!(keyword!(ref)) >>
+            mutability: option!(keyword!(mut)) >>
             name: alt!(
                 syn!(Ident)
                 |
@@ -2098,7 +2098,7 @@ pub mod parsing {
             not!(punct!(::)) >>
             subpat: option!(tuple!(punct!(@), syn!(Pat))) >>
             (PatIdent {
-                mode: mode,
+                by_ref: by_ref,
                 mutability: mutability,
                 ident: name,
                 at_token: subpat.as_ref().map(|p| Token![@]((p.0).0)),
@@ -2157,12 +2157,12 @@ pub mod parsing {
             |
             do_parse!(
                 boxed: option!(keyword!(box)) >>
-                mode: option!(keyword!(ref)) >>
-                mutability: syn!(Mutability) >>
+                by_ref: option!(keyword!(ref)) >>
+                mutability: option!(keyword!(mut)) >>
                 ident: syn!(Ident) >>
                 ({
                     let mut pat: Pat = PatIdent {
-                        mode: mode,
+                        by_ref: by_ref,
                         mutability: mutability,
                         ident: ident,
                         subpat: None,
@@ -2257,11 +2257,11 @@ pub mod parsing {
     impl Synom for PatRef {
         named!(parse -> Self, do_parse!(
             and: punct!(&) >>
-            mutability: syn!(Mutability) >>
+            mutability: option!(keyword!(mut)) >>
             pat: syn!(Pat) >>
             (PatRef {
                 pat: Box::new(pat),
-                mutbl: mutability,
+                mutability: mutability,
                 and_token: and,
             })
         ));
@@ -2794,7 +2794,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.and_token.to_tokens(tokens);
-            self.mutbl.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
     }
@@ -2927,7 +2927,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.mode.to_tokens(tokens);
+            self.by_ref.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             if self.subpat.is_some() {
@@ -3001,7 +3001,7 @@ mod printing {
     impl ToTokens for PatRef {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.and_token.to_tokens(tokens);
-            self.mutbl.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
             self.pat.to_tokens(tokens);
         }
     }

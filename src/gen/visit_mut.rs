@@ -262,8 +262,6 @@ fn visit_method_turbofish_mut(&mut self, i: &mut MethodTurbofish) { visit_method
 
 fn visit_mut_type_mut(&mut self, i: &mut MutType) { visit_mut_type_mut(self, i) }
 
-fn visit_mutability_mut(&mut self, i: &mut Mutability) { visit_mutability_mut(self, i) }
-
 fn visit_nested_meta_item_mut(&mut self, i: &mut NestedMetaItem) { visit_nested_meta_item_mut(self, i) }
 
 fn visit_parenthesized_generic_arguments_mut(&mut self, i: &mut ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments_mut(self, i) }
@@ -422,14 +420,14 @@ pub fn visit_arg_captured_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_arg_self_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ArgSelf) {
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . self_token).0);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_arg_self_ref_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ArgSelfRef) {
     tokens_helper(_visitor, &mut (& mut _i . and_token).0);
     if let Some(ref mut it) = _i . lifetime { _visitor.visit_lifetime_mut(it) };
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (& mut _i . self_token).0);
 }
 # [ cfg ( feature = "full" ) ]
@@ -783,7 +781,7 @@ pub fn visit_expr_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
 pub fn visit_expr_addr_of_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAddrOf) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . and_token).0);
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_expr_mut(& mut * _i . expr);
 }
 # [ cfg ( feature = "full" ) ]
@@ -1153,7 +1151,7 @@ pub fn visit_foreign_item_static_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_visibility_mut(& mut _i . vis);
     tokens_helper(_visitor, &mut (& mut _i . static_token).0);
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_ident_mut(& mut _i . ident);
     tokens_helper(_visitor, &mut (& mut _i . colon_token).0);
     _visitor.visit_type_mut(& mut * _i . ty);
@@ -1462,7 +1460,7 @@ pub fn visit_item_static_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_visibility_mut(& mut _i . vis);
     tokens_helper(_visitor, &mut (& mut _i . static_token).0);
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_ident_mut(& mut _i . ident);
     tokens_helper(_visitor, &mut (& mut _i . colon_token).0);
     _visitor.visit_type_mut(& mut * _i . ty);
@@ -1614,18 +1612,8 @@ pub fn visit_method_turbofish_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: 
 }
 
 pub fn visit_mut_type_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MutType) {
-    _visitor.visit_mutability_mut(& mut _i . mutability);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_type_mut(& mut _i . ty);
-}
-
-pub fn visit_mutability_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Mutability) {
-    use ::Mutability::*;
-    match *_i {
-        Mutable(ref mut _binding_0, ) => {
-            tokens_helper(_visitor, &mut (_binding_0).0);
-        }
-        Immutable => { }
-    }
 }
 
 pub fn visit_nested_meta_item_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut NestedMetaItem) {
@@ -1694,8 +1682,8 @@ pub fn visit_pat_box_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatB
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_ident_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatIdent) {
-    if let Some(ref mut it) = _i . mode { tokens_helper(_visitor, &mut (it).0) };
-    _visitor.visit_mutability_mut(& mut _i . mutability);
+    if let Some(ref mut it) = _i . by_ref { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_ident_mut(& mut _i . ident);
     if let Some(ref mut it) = _i . at_token { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . subpat { _visitor.visit_pat_mut(& mut * * it) };
@@ -1718,7 +1706,7 @@ pub fn visit_pat_range_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Pa
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat_ref_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut PatRef) {
     tokens_helper(_visitor, &mut (& mut _i . and_token).0);
-    _visitor.visit_mutability_mut(& mut _i . mutbl);
+    if let Some(ref mut it) = _i . mutability { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_pat_mut(& mut * _i . pat);
 }
 # [ cfg ( feature = "full" ) ]

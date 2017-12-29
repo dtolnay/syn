@@ -82,7 +82,10 @@ macro_rules! opt_vec {
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::Mutability;
+/// enum Mutability {
+///     Mutable(Token![mut]),
+///     Immutable,
+/// }
 ///
 /// named!(mutability -> Mutability, alt!(
 ///     keyword!(mut) => { Mutability::Mutable }
