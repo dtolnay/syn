@@ -72,8 +72,8 @@ ast_enum_of_structs! {
             pub constness: Constness,
             pub unsafety: Unsafety,
             pub abi: Option<Abi>,
-            pub decl: Box<FnDecl>,
             pub ident: Ident,
+            pub decl: Box<FnDecl>,
             pub block: Box<Block>,
         }),
         /// A module declaration (`mod` or `pub mod`).
@@ -439,11 +439,11 @@ ast_struct! {
     /// E.g. `fn foo(bar: baz)`
     pub struct FnDecl {
         pub fn_token: Token![fn],
+        pub generics: Generics,
         pub paren_token: token::Paren,
         pub inputs: Delimited<FnArg, Token![,]>,
-        pub output: ReturnType,
-        pub generics: Generics,
         pub variadic: Option<Token![...]>,
+        pub output: ReturnType,
     }
 }
 
@@ -454,9 +454,9 @@ ast_enum_of_structs! {
     pub enum FnArg {
         pub SelfRef(ArgSelfRef {
             pub and_token: Token![&],
-            pub self_token: Token![self],
             pub lifetime: Option<Lifetime>,
             pub mutbl: Mutability,
+            pub self_token: Token![self],
         }),
         pub SelfValue(ArgSelf {
             pub mutbl: Mutability,

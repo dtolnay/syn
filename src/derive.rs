@@ -4,14 +4,14 @@ use delimited::Delimited;
 ast_struct! {
     /// Struct or enum sent to a `proc_macro_derive` macro.
     pub struct DeriveInput {
-        /// Name of the struct or enum.
-        pub ident: Ident,
+        /// Attributes tagged on the whole struct or enum.
+        pub attrs: Vec<Attribute>,
 
         /// Visibility of the struct or enum.
         pub vis: Visibility,
 
-        /// Attributes tagged on the whole struct or enum.
-        pub attrs: Vec<Attribute>,
+        /// Name of the struct or enum.
+        pub ident: Ident,
 
         /// Generics required to complete the definition.
         pub generics: Generics,

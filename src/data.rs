@@ -4,19 +4,19 @@ use delimited::Delimited;
 ast_struct! {
     /// An enum variant.
     pub struct Variant {
-        /// Name of the variant.
-        pub ident: Ident,
-
         /// Attributes tagged on the variant.
         pub attrs: Vec<Attribute>,
+
+        /// Name of the variant.
+        pub ident: Ident,
 
         /// Type of variant.
         pub data: VariantData,
 
+        pub eq_token: Option<Token![=]>,
+
         /// Explicit discriminant, e.g. `Foo = 1`
         pub discriminant: Option<Expr>,
-
-        pub eq_token: Option<Token![=]>,
     }
 }
 
@@ -58,21 +58,21 @@ impl VariantData {
 ast_struct! {
     /// A field of a struct or enum variant.
     pub struct Field {
+        /// Attributes tagged on the field.
+        pub attrs: Vec<Attribute>,
+
+        /// Visibility of the field.
+        pub vis: Visibility,
+
         /// Name of the field, if any.
         ///
         /// Fields of tuple structs have no names.
         pub ident: Option<Ident>,
 
-        /// Visibility of the field.
-        pub vis: Visibility,
-
-        /// Attributes tagged on the field.
-        pub attrs: Vec<Attribute>,
+        pub colon_token: Option<Token![:]>,
 
         /// Type of the field.
         pub ty: Type,
-
-        pub colon_token: Option<Token![:]>,
     }
 }
 

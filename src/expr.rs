@@ -8,11 +8,11 @@ use std::hash::{Hash, Hasher};
 ast_struct! {
     /// An expression.
     pub struct Expr {
-        /// Type of the expression.
-        pub node: ExprKind,
-
         /// Attributes tagged on the expression.
         pub attrs: Vec<Attribute>,
+
+        /// Type of the expression.
+        pub node: ExprKind,
     }
 }
 
@@ -29,8 +29,8 @@ ast_enum_of_structs! {
     pub enum ExprKind {
         /// A `box x` expression.
         pub Box(ExprBox #full {
-            pub expr: Box<Expr>,
             pub box_token: Token![box],
+            pub expr: Box<Expr>,
         }),
 
         /// E.g. 'place <- val' or `in place { val }`.
@@ -42,15 +42,15 @@ ast_enum_of_structs! {
 
         /// An array, e.g. `[a, b, c, d]`.
         pub Array(ExprArray #full {
-            pub exprs: Delimited<Expr, Token![,]>,
             pub bracket_token: token::Bracket,
+            pub exprs: Delimited<Expr, Token![,]>,
         }),
 
         /// A function call.
         pub Call(ExprCall {
             pub func: Box<Expr>,
-            pub args: Delimited<Expr, Token![,]>,
             pub paren_token: token::Paren,
+            pub args: Delimited<Expr, Token![,]>,
         }),
 
         /// A method call (`x.foo::<Bar, Baz>(a, b, c, d)`)
@@ -63,26 +63,26 @@ ast_enum_of_structs! {
         /// `ExprKind::MethodCall(foo, [Bar, Baz], [x, a, b, c, d])`.
         pub MethodCall(ExprMethodCall #full {
             pub expr: Box<Expr>,
-            pub method: Ident,
-            pub typarams: Delimited<Type, Token![,]>,
-            pub args: Delimited<Expr, Token![,]>,
-            pub paren_token: token::Paren,
             pub dot_token: Token![.],
-            pub lt_token: Option<Token![<]>,
+            pub method: Ident,
             pub colon2_token: Option<Token![::]>,
+            pub lt_token: Option<Token![<]>,
+            pub typarams: Delimited<Type, Token![,]>,
             pub gt_token: Option<Token![>]>,
+            pub paren_token: token::Paren,
+            pub args: Delimited<Expr, Token![,]>,
         }),
 
         /// A tuple, e.g. `(a, b, c, d)`.
         pub Tuple(ExprTuple #full {
-            pub args: Delimited<Expr, Token![,]>,
             pub paren_token: token::Paren,
+            pub args: Delimited<Expr, Token![,]>,
         }),
 
         /// A binary operation, e.g. `a + b`, `a * b`.
         pub Binary(ExprBinary {
-            pub op: BinOp,
             pub left: Box<Expr>,
+            pub op: BinOp,
             pub right: Box<Expr>,
         }),
 
@@ -113,11 +113,11 @@ ast_enum_of_structs! {
         ///
         /// E.g., `if expr { block } else { expr }`
         pub If(ExprIf #full {
+            pub if_token: Token![if],
             pub cond: Box<Expr>,
             pub if_true: Block,
-            pub if_false: Option<Box<Expr>>,
-            pub if_token: Token![if],
             pub else_token: Option<Token![else]>,
+            pub if_false: Option<Box<Expr>>,
         }),
 
         /// An `if let` expression with an optional else block
@@ -126,25 +126,25 @@ ast_enum_of_structs! {
         ///
         /// This is desugared to a `match` expression.
         pub IfLet(ExprIfLet #full {
-            pub pat: Box<Pat>,
-            pub expr: Box<Expr>,
-            pub if_true: Block,
-            pub if_false: Option<Box<Expr>>,
             pub if_token: Token![if],
             pub let_token: Token![let],
+            pub pat: Box<Pat>,
             pub eq_token: Token![=],
+            pub expr: Box<Expr>,
+            pub if_true: Block,
             pub else_token: Option<Token![else]>,
+            pub if_false: Option<Box<Expr>>,
         }),
 
         /// A while loop, with an optional label
         ///
         /// E.g., `'label: while expr { block }`
         pub While(ExprWhile #full {
-            pub cond: Box<Expr>,
-            pub body: Block,
             pub label: Option<Lifetime>,
             pub colon_token: Option<Token![:]>,
             pub while_token: Token![while],
+            pub cond: Box<Expr>,
+            pub body: Block,
         }),
 
         /// A while-let loop, with an optional label.
@@ -153,14 +153,14 @@ ast_enum_of_structs! {
         ///
         /// This is desugared to a combination of `loop` and `match` expressions.
         pub WhileLet(ExprWhileLet #full {
-            pub pat: Box<Pat>,
-            pub expr: Box<Expr>,
-            pub body: Block,
             pub label: Option<Lifetime>,
             pub colon_token: Option<Token![:]>,
             pub while_token: Token![while],
             pub let_token: Token![let],
+            pub pat: Box<Pat>,
             pub eq_token: Token![=],
+            pub expr: Box<Expr>,
+            pub body: Block,
         }),
 
         /// A for loop, with an optional label.
@@ -169,30 +169,30 @@ ast_enum_of_structs! {
         ///
         /// This is desugared to a combination of `loop` and `match` expressions.
         pub ForLoop(ExprForLoop #full {
+            pub label: Option<Lifetime>,
+            pub colon_token: Option<Token![:]>,
+            pub for_token: Token![for],
             pub pat: Box<Pat>,
+            pub in_token: Token![in],
             pub expr: Box<Expr>,
             pub body: Block,
-            pub label: Option<Lifetime>,
-            pub for_token: Token![for],
-            pub colon_token: Option<Token![:]>,
-            pub in_token: Token![in],
         }),
 
         /// Conditionless loop with an optional label.
         ///
         /// E.g. `'label: loop { block }`
         pub Loop(ExprLoop #full {
-            pub body: Block,
             pub label: Option<Lifetime>,
-            pub loop_token: Token![loop],
             pub colon_token: Option<Token![:]>,
+            pub loop_token: Token![loop],
+            pub body: Block,
         }),
 
         /// A `match` block.
         pub Match(ExprMatch #full {
             pub match_token: Token![match],
-            pub brace_token: token::Brace,
             pub expr: Box<Expr>,
+            pub brace_token: token::Brace,
             pub arms: Vec<Arm>,
         }),
 
@@ -220,16 +220,16 @@ ast_enum_of_structs! {
         /// An assignment (`a = foo()`)
         pub Assign(ExprAssign #full {
             pub left: Box<Expr>,
-            pub right: Box<Expr>,
             pub eq_token: Token![=],
+            pub right: Box<Expr>,
         }),
 
         /// An assignment with an operator
         ///
         /// For example, `a += 1`.
         pub AssignOp(ExprAssignOp #full {
-            pub op: BinOp,
             pub left: Box<Expr>,
+            pub op: BinOp,
             pub right: Box<Expr>,
         }),
 
@@ -244,15 +244,15 @@ ast_enum_of_structs! {
         /// An indexing operation (`foo[2]`)
         pub Index(ExprIndex {
             pub expr: Box<Expr>,
-            pub index: Box<Expr>,
             pub bracket_token: token::Bracket,
+            pub index: Box<Expr>,
         }),
 
         /// A range (`1..2`, `1..`, `..2`, `1..=2`, `..=2`)
         pub Range(ExprRange #full {
             pub from: Option<Box<Expr>>,
-            pub to: Option<Box<Expr>>,
             pub limits: RangeLimits,
+            pub to: Option<Box<Expr>>,
         }),
 
         /// Variable reference, possibly containing `::` and/or type
@@ -274,21 +274,21 @@ ast_enum_of_structs! {
 
         /// A `break`, with an optional label to break, and an optional expression
         pub Break(ExprBreak #full {
+            pub break_token: Token![break],
             pub label: Option<Lifetime>,
             pub expr: Option<Box<Expr>>,
-            pub break_token: Token![break],
         }),
 
         /// A `continue`, with an optional label
         pub Continue(ExprContinue #full {
-            pub label: Option<Lifetime>,
             pub continue_token: Token![continue],
+            pub label: Option<Lifetime>,
         }),
 
         /// A `return`, with an optional value to be returned
         pub Ret(ExprRet #full {
-            pub expr: Option<Box<Expr>>,
             pub return_token: Token![return],
+            pub expr: Option<Box<Expr>>,
         }),
 
         /// A macro invocation; pre-expansion
@@ -300,10 +300,10 @@ ast_enum_of_structs! {
         /// `Foo {x: 1, .. base}`, where `base` is the `Option<Expr>`.
         pub Struct(ExprStruct #full {
             pub path: Path,
-            pub fields: Delimited<FieldValue, Token![,]>,
-            pub rest: Option<Box<Expr>>,
-            pub dot2_token: Option<Token![..]>,
             pub brace_token: token::Brace,
+            pub fields: Delimited<FieldValue, Token![,]>,
+            pub dot2_token: Option<Token![..]>,
+            pub rest: Option<Box<Expr>>,
         }),
 
         /// An array literal constructed from one repeated element.
@@ -312,15 +312,15 @@ ast_enum_of_structs! {
         /// to be repeated; the second is the number of times to repeat it.
         pub Repeat(ExprRepeat #full {
             pub bracket_token: token::Bracket,
-            pub semi_token: Token![;],
             pub expr: Box<Expr>,
+            pub semi_token: Token![;],
             pub amt: Box<Expr>,
         }),
 
         /// No-op: used solely so we can pretty-print faithfully
         pub Paren(ExprParen {
-            pub expr: Box<Expr>,
             pub paren_token: token::Paren,
+            pub expr: Box<Expr>,
         }),
 
         /// No-op: used solely so we can pretty-print faithfully
@@ -329,8 +329,8 @@ ast_enum_of_structs! {
         /// `TokenStream` which affects the precidence of the resulting
         /// expression. They are used for macro hygiene.
         pub Group(ExprGroup {
-            pub expr: Box<Expr>,
             pub group_token: token::Group,
+            pub expr: Box<Expr>,
         }),
 
         /// `expr?`
@@ -451,17 +451,15 @@ ast_enum! {
 ast_struct! {
     /// Local represents a `let` statement, e.g., `let <pat>:<ty> = <expr>;`
     pub struct Local {
+        pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
-        pub colon_token: Option<Token![:]>,
-        pub eq_token: Option<Token![=]>,
-        pub semi_token: Token![;],
-
         pub pat: Box<Pat>,
+        pub colon_token: Option<Token![:]>,
         pub ty: Option<Box<Type>>,
-
+        pub eq_token: Option<Token![=]>,
         /// Initializer expression to set the value, if any
         pub init: Option<Box<Expr>>,
-        pub attrs: Vec<Attribute>,
+        pub semi_token: Token![;],
     }
 }
 
@@ -483,16 +481,16 @@ ast_enum_of_structs! {
         pub Ident(PatIdent {
             pub mode: BindingMode,
             pub ident: Ident,
-            pub subpat: Option<Box<Pat>>,
             pub at_token: Option<Token![@]>,
+            pub subpat: Option<Box<Pat>>,
         }),
 
         /// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.
         /// The `bool` is `true` in the presence of a `..`.
         pub Struct(PatStruct {
             pub path: Path,
-            pub fields: Delimited<FieldPat, Token![,]>,
             pub brace_token: token::Brace,
+            pub fields: Delimited<FieldPat, Token![,]>,
             pub dot2_token: Option<Token![..]>,
         }),
 
@@ -517,22 +515,22 @@ ast_enum_of_structs! {
         /// If the `..` pattern fragment is present, then `Option<usize>` denotes its position.
         /// 0 <= position <= subpats.len()
         pub Tuple(PatTuple {
-            pub pats: Delimited<Pat, Token![,]>,
-            pub dots_pos: Option<usize>,
             pub paren_token: token::Paren,
-            pub dot2_token: Option<Token![..]>,
+            pub pats: Delimited<Pat, Token![,]>,
             pub comma_token: Option<Token![,]>,
+            pub dots_pos: Option<usize>,
+            pub dot2_token: Option<Token![..]>,
         }),
         /// A `box` pattern
         pub Box(PatBox {
-            pub pat: Box<Pat>,
             pub box_token: Token![box],
+            pub pat: Box<Pat>,
         }),
         /// A reference pattern, e.g. `&mut (a, b)`
         pub Ref(PatRef {
-            pub pat: Box<Pat>,
-            pub mutbl: Mutability,
             pub and_token: Token![&],
+            pub mutbl: Mutability,
+            pub pat: Box<Pat>,
         }),
         /// A literal
         pub Lit(PatLit {
@@ -541,17 +539,17 @@ ast_enum_of_structs! {
         /// A range pattern, e.g. `1..=2`
         pub Range(PatRange {
             pub lo: Box<Expr>,
-            pub hi: Box<Expr>,
             pub limits: RangeLimits,
+            pub hi: Box<Expr>,
         }),
         /// `[a, b, i.., y, z]` is represented as:
         pub Slice(PatSlice {
+            pub bracket_token: token::Bracket,
             pub front: Delimited<Pat, Token![,]>,
             pub middle: Option<Box<Pat>>,
-            pub back: Delimited<Pat, Token![,]>,
-            pub dot2_token: Option<Token![..]>,
             pub comma_token: Option<Token![,]>,
-            pub bracket_token: token::Bracket,
+            pub dot2_token: Option<Token![..]>,
+            pub back: Delimited<Pat, Token![,]>,
         }),
         /// A macro pattern; pre-expansion
         pub Macro(Macro),
@@ -617,13 +615,13 @@ ast_struct! {
     /// are treated the same as `x: x, y: ref y, z: ref mut z`,
     /// except `is_shorthand` is true
     pub struct FieldPat {
+        pub attrs: Vec<Attribute>,
         /// The identifier for the field
         pub member: Member,
+        pub colon_token: Option<Token![:]>,
         /// The pattern the field is destructured to
         pub pat: Box<Pat>,
         pub is_shorthand: bool,
-        pub colon_token: Option<Token![:]>,
-        pub attrs: Vec<Attribute>,
     }
 }
 
@@ -1533,7 +1531,7 @@ pub mod parsing {
                 arrow: punct!(->) >>
                 ty: syn!(Type) >>
                 body: syn!(Block) >>
-                (ReturnType::Type(Box::new(ty), arrow),
+                (ReturnType::Type(arrow, Box::new(ty)),
                  ExprKind::Block(ExprBlock {
                     block: body,
                 }).into())

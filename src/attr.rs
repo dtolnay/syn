@@ -13,8 +13,8 @@ use mac::TokenStreamHelper;
 ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
     pub struct Attribute #manual_extra_traits {
-        pub style: AttrStyle,
         pub pound_token: Token![#],
+        pub style: AttrStyle,
         pub bracket_token: token::Bracket,
 
         /// The path of the attribute.

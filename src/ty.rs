@@ -6,8 +6,8 @@ ast_enum_of_structs! {
     pub enum Type {
         /// A variable-length array (`[T]`)
         pub Slice(TypeSlice {
-            pub ty: Box<Type>,
             pub bracket_token: token::Bracket,
+            pub ty: Box<Type>,
         }),
         /// A fixed length array (`[T; n]`)
         pub Array(TypeArray {
@@ -83,8 +83,8 @@ ast_enum_of_structs! {
 
 ast_struct! {
     pub struct MutType {
-        pub ty: Type,
         pub mutability: Mutability,
+        pub ty: Type,
     }
 }
 
@@ -276,10 +276,10 @@ ast_struct! {
 
 ast_struct! {
     pub struct BareFnType {
-        pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Unsafety,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
+        pub lifetimes: Option<BoundLifetimes>,
         pub paren_token: token::Paren,
         pub inputs: Delimited<BareFnArg, Token![,]>,
         pub variadic: Option<Token![...]>,
@@ -338,7 +338,7 @@ ast_enum! {
         /// type would be inserted.
         Default,
         /// Everything else
-        Type(Box<Type>, Token![->]),
+        Type(Token![->], Box<Type>),
     }
 }
 
@@ -595,7 +595,7 @@ pub mod parsing {
             do_parse!(
                 arrow: punct!(->) >>
                 ty: syn!(Type) >>
-                (ReturnType::Type(Box::new(ty), arrow))
+                (ReturnType::Type(arrow, Box::new(ty)))
             )
             |
             epsilon!() => { |_| ReturnType::Default }
@@ -1078,7 +1078,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
                 ReturnType::Default => {}
-                ReturnType::Type(ref ty, ref arrow) => {
+                ReturnType::Type(ref arrow, ref ty) => {
                     arrow.to_tokens(tokens);
                     ty.to_tokens(tokens);
                 }
