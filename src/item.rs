@@ -1041,9 +1041,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         colon: option!(punct!(:)) >>
-        bounds: cond!(colon.is_some(),
-            call!(Delimited::parse_separated_nonempty)
-        ) >>
+        bounds: cond!(colon.is_some(), Delimited::parse_separated_nonempty) >>
         where_clause: option!(syn!(WhereClause)) >>
         body: braces!(many0!(TraitItem::parse)) >>
         (ItemTrait {
@@ -1124,7 +1122,7 @@ pub mod parsing {
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        inputs: parens!(call!(Delimited::parse_terminated)) >>
+        inputs: parens!(Delimited::parse_terminated) >>
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         body: option!(braces!(
@@ -1177,9 +1175,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         colon: option!(punct!(:)) >>
-        bounds: cond!(colon.is_some(),
-            call!(Delimited::parse_separated_nonempty)
-        ) >>
+        bounds: cond!(colon.is_some(), Delimited::parse_separated_nonempty) >>
         where_clause: option!(syn!(WhereClause)) >>
         default: option!(tuple!(punct!(=), syn!(Type))) >>
         semi: punct!(;) >>
@@ -1289,7 +1285,7 @@ pub mod parsing {
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        inputs: parens!(call!(Delimited::parse_terminated)) >>
+        inputs: parens!(Delimited::parse_terminated) >>
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(

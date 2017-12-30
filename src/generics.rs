@@ -205,7 +205,7 @@ pub mod parsing {
                     lifetimes: call!(Delimited::<LifetimeDef, Token![,]>::parse_terminated) >>
                     ty_params: cond!(
                         lifetimes.empty_or_trailing(),
-                        call!(Delimited::<TypeParam, Token![,]>::parse_terminated)
+                        Delimited::<TypeParam, Token![,]>::parse_terminated
                     ) >>
                     gt: punct!(>) >>
                     (lifetimes, ty_params, Some(lt), Some(gt))
@@ -237,7 +237,7 @@ pub mod parsing {
             colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
-                call!(Delimited::parse_separated_nonempty)
+                Delimited::parse_separated_nonempty
             ) >>
             (LifetimeDef {
                 attrs: attrs,
@@ -270,7 +270,7 @@ pub mod parsing {
             colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
-                call!(Delimited::parse_separated_nonempty)
+                Delimited::parse_separated_nonempty
             ) >>
             default: option!(do_parse!(
                 eq: punct!(=) >>
@@ -360,7 +360,7 @@ pub mod parsing {
                 colon: option!(punct!(:)) >>
                 bounds: cond!(
                     colon.is_some(),
-                    call!(Delimited::parse_separated)
+                    Delimited::parse_separated
                 ) >>
                 (WherePredicate::RegionPredicate(WhereRegionPredicate {
                     lifetime: ident,

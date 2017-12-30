@@ -500,7 +500,7 @@ pub mod parsing {
 
     impl Synom for TypeTuple {
         named!(parse -> Self, do_parse!(
-            data: parens!(call!(Delimited::parse_terminated)) >>
+            data: parens!(Delimited::parse_terminated) >>
             (TypeTuple {
                 elems: data.0,
                 paren_token: data.1,
@@ -579,7 +579,7 @@ pub mod parsing {
 
     impl Synom for ParenthesizedGenericArguments {
         named!(parse -> Self, do_parse!(
-            data: parens!(call!(Delimited::parse_terminated)) >>
+            data: parens!(Delimited::parse_terminated) >>
             output: syn!(ReturnType) >>
             (ParenthesizedGenericArguments {
                 paren_token: data.1,
@@ -612,7 +612,7 @@ pub mod parsing {
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             dyn_token: option!(keyword!(dyn)) >>
             bounds: alt!(
-                cond_reduce!(allow_plus, call!(Delimited::parse_terminated_nonempty))
+                cond_reduce!(allow_plus, Delimited::parse_terminated_nonempty)
                 |
                 syn!(TypeParamBound) => { |x| vec![x].into() }
             ) >>

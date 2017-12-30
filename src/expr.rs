@@ -1438,7 +1438,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprArray {
         named!(parse -> Self, do_parse!(
-            elems: brackets!(call!(Delimited::parse_terminated)) >>
+            elems: brackets!(Delimited::parse_terminated) >>
             (ExprArray {
                 attrs: Vec::new(),
                 elems: elems.0,
@@ -1448,7 +1448,7 @@ pub mod parsing {
     }
 
     named!(and_call -> (Delimited<Expr, Token![,]>, token::Paren),
-           parens!(call!(Delimited::parse_terminated)));
+           parens!(Delimited::parse_terminated));
 
     #[cfg(feature = "full")]
     named!(and_method_call -> ExprMethodCall, do_parse!(
@@ -1460,7 +1460,7 @@ pub mod parsing {
             call!(Delimited::parse_terminated),
             punct!(>)
         )) >>
-        args: parens!(call!(Delimited::parse_terminated)) >>
+        args: parens!(Delimited::parse_terminated) >>
         ({
             ExprMethodCall {
                 attrs: Vec::new(),
@@ -1496,7 +1496,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprTuple {
         named!(parse -> Self, do_parse!(
-            elems: parens!(call!(Delimited::parse_terminated)) >>
+            elems: parens!(Delimited::parse_terminated) >>
             (ExprTuple {
                 attrs: Vec::new(),
                 elems: elems.0,
@@ -1513,7 +1513,7 @@ pub mod parsing {
             pat: syn!(Pat) >>
             eq: punct!(=) >>
             cond: expr_no_struct >>
-            then_block: braces!(call!(Block::parse_within)) >>
+            then_block: braces!(Block::parse_within) >>
             else_block: option!(else_block) >>
             (ExprIfLet {
                 attrs: Vec::new(),
@@ -1536,7 +1536,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             if_: keyword!(if) >>
             cond: expr_no_struct >>
-            then_block: braces!(call!(Block::parse_within)) >>
+            then_block: braces!(Block::parse_within) >>
             else_block: option!(else_block) >>
             (ExprIf {
                 attrs: Vec::new(),
@@ -1560,7 +1560,7 @@ pub mod parsing {
             syn!(ExprIfLet) => { Expr::IfLet }
             |
             do_parse!(
-                else_block: braces!(call!(Block::parse_within)) >>
+                else_block: braces!(Block::parse_within) >>
                 (Expr::Block(ExprBlock {
                     attrs: Vec::new(),
                     block: Block {
@@ -1978,7 +1978,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for Block {
         named!(parse -> Self, do_parse!(
-            stmts: braces!(call!(Block::parse_within)) >>
+            stmts: braces!(Block::parse_within) >>
             (Block {
                 stmts: stmts.0,
                 brace_token: stmts.1,
@@ -2295,7 +2295,7 @@ pub mod parsing {
                                 Some((_, Some(_))) => true,
                                 _ => false,
                             },
-                            call!(Delimited::parse_terminated)) >>
+                            Delimited::parse_terminated) >>
                 (front, dotdot, back)
             )) >>
             ({
@@ -2391,7 +2391,7 @@ pub mod parsing {
                         Some((_, ref trailing)) => trailing.is_some(),
                         _ => false,
                     },
-                    call!(Delimited::parse_terminated)
+                    Delimited::parse_terminated
                 ) >>
                 (before, middle, after)
             )),
