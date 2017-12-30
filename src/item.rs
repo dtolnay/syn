@@ -905,8 +905,7 @@ pub mod parsing {
         generics: syn!(Generics) >>
         inputs: parens!(do_parse!(
             args: call!(Delimited::parse_terminated) >>
-            variadic: cond!(args.is_empty() || args.trailing_delim(),
-                            option!(punct!(...))) >>
+            variadic: option!(cond_reduce!(args.empty_or_trailing(), punct!(...))) >>
             (args, variadic)
         )) >>
         ret: syn!(ReturnType) >>
@@ -914,7 +913,6 @@ pub mod parsing {
         semi: punct!(;) >>
         ({
             let ((inputs, variadic), parens) = inputs;
-            let variadic = variadic.and_then(|v| v);
             ForeignItemFn {
                 ident: ident,
                 attrs: attrs,

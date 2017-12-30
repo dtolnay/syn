@@ -1310,7 +1310,7 @@ pub mod parsing {
         syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
         |
         // must be before expr_path
-        cond_reduce!(allow_struct, map!(syn!(ExprStruct), Expr::Struct))
+        cond_reduce!(allow_struct, syn!(ExprStruct)) => { Expr::Struct }
         |
         syn!(ExprParen) => { Expr::Paren } // must be before expr_tup
         |
@@ -1348,7 +1348,7 @@ pub mod parsing {
         |
         call!(expr_closure, allow_struct)
         |
-        cond_reduce!(allow_block, map!(syn!(ExprBlock), Expr::Block))
+        cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
         |
         // NOTE: This is the prefix-form of range
         call!(expr_range, allow_struct)
@@ -1665,13 +1665,16 @@ pub mod parsing {
             rocket: punct!(=>) >>
             body: do_parse!(
                 expr: alt!(expr_nosemi | syn!(Expr)) >>
-                comma1: cond!(arm_expr_requires_comma(&expr), alt!(
-                    map!(input_end!(), |_| None)
+                comma: switch!(value!(arm_expr_requires_comma(&expr)),
+                    true => alt!(
+                        input_end!() => { |_| None }
+                        |
+                        punct!(,) => { Some }
+                    )
                     |
-                    map!(punct!(,), Some)
-                )) >>
-                comma2: cond!(!arm_expr_requires_comma(&expr), option!(punct!(,))) >>
-                (expr, comma1.and_then(|x| x).or_else(|| comma2.and_then(|x| x)))
+                    false => option!(punct!(,))
+                ) >>
+                (expr, comma)
             ) >>
             (Arm {
                 rocket_token: rocket,
@@ -1834,15 +1837,11 @@ pub mod parsing {
             path: syn!(Path) >>
             data: braces!(do_parse!(
                 fields: call!(Delimited::parse_terminated) >>
-                base: option!(
-                    cond!(fields.is_empty() || fields.trailing_delim(),
-                        do_parse!(
-                            dots: punct!(..) >>
-                            base: syn!(Expr) >>
-                            (dots, base)
-                        )
-                    )
-                ) >>
+                base: option!(cond!(fields.empty_or_trailing(), do_parse!(
+                    dots: punct!(..) >>
+                    base: syn!(Expr) >>
+                    (dots, base)
+                ))) >>
                 (fields, base)
             )) >>
             ({
@@ -1990,7 +1989,11 @@ pub mod parsing {
     impl Block {
         named!(pub parse_within -> Vec<Stmt>, do_parse!(
             many0!(punct!(;)) >>
-            mut standalone: many0!(terminated!(syn!(Stmt), many0!(punct!(;)))) >>
+            mut standalone: many0!(do_parse!(
+                stmt: syn!(Stmt) >>
+                many0!(punct!(;)) >>
+                (stmt)
+            )) >>
             last: option!(do_parse!(
                 attrs: many0!(Attribute::parse_outer) >>
                 mut e: syn!(Expr) >>
@@ -2188,10 +2191,7 @@ pub mod parsing {
             path: syn!(Path) >>
             data: braces!(do_parse!(
                 fields: call!(Delimited::parse_terminated) >>
-                base: option!(
-                    cond!(fields.is_empty() || fields.trailing_delim(),
-                          punct!(..))
-                ) >>
+                base: option!(cond!(fields.empty_or_trailing(), punct!(..))) >>
                 (fields, base)
             )) >>
             (PatStruct {
@@ -2283,14 +2283,9 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             data: parens!(do_parse!(
                 front: call!(Delimited::parse_terminated) >>
-                dotdot: map!(cond!(
-                    front.is_empty() || front.trailing_delim(),
-                    option!(do_parse!(
-                        dots: punct!(..) >>
-                        trailing: option!(punct!(,)) >>
-                        (dots, trailing)
-                    ))
-                ), Option::unwrap_or_default) >>
+                dotdot: option!(cond_reduce!(front.empty_or_trailing(),
+                    tuple!(punct!(..), option!(punct!(,)))
+                )) >>
                 back: cond!(match dotdot {
                                 Some((_, Some(_))) => true,
                                 _ => false,
@@ -2406,10 +2401,10 @@ pub mod parsing {
                     }),
                     bracket_token: brackets,
                     middle: middle.and_then(|_| {
-                        if !before.is_empty() && !before.trailing_delim() {
-                            Some(Box::new(before.pop().unwrap().into_item()))
-                        } else {
+                        if before.empty_or_trailing() {
                             None
+                        } else {
+                            Some(Box::new(before.pop().unwrap().into_item()))
                         }
                     }),
                     front: before,

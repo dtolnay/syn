@@ -90,7 +90,7 @@ impl<T, D> Delimited<T, D> {
     }
 
     pub fn push(&mut self, token: Element<T, D>) {
-        assert!(self.is_empty() || self.trailing_delim());
+        assert!(self.empty_or_trailing());
         match token {
             Element::Delimited(t, d) => self.inner.push((t, Some(d))),
             Element::End(t) => self.inner.push((t, None)),
@@ -117,7 +117,7 @@ impl<T, D> Delimited<T, D> {
     where
         D: Default,
     {
-        if self.is_empty() || self.trailing_delim() {
+        if self.empty_or_trailing() {
             self.inner.push((token, None));
         } else {
             self.push_next(token, D::default());
@@ -140,8 +140,9 @@ impl<T, D> Delimited<T, D> {
     }
 
     /// Returns true if either this `Delimited` is empty, or it has a trailing
-    /// delimiter. This is useful within `ToTokens` implementations for `syn`.
-    #[doc(hidden)]
+    /// delimiter.
+    ///
+    /// Equivalent to `delimited.is_empty() || delimited.trailing_delim()`.
     pub fn empty_or_trailing(&self) -> bool {
         self.is_empty() || self.trailing_delim()
     }
@@ -390,6 +391,13 @@ mod parsing {
     where
         D: Synom,
     {
+        pub fn parse_separated_with(
+            input: Cursor,
+            parse: fn(Cursor) -> PResult<T>,
+        ) -> PResult<Self> {
+            Self::parse(input, parse, false)
+        }
+
         pub fn parse_separated_nonempty_with(
             input: Cursor,
             parse: fn(Cursor) -> PResult<T>,

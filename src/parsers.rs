@@ -2,21 +2,58 @@ use cursor::Cursor;
 use parse_error;
 use synom::PResult;
 
-/// Define a function from a parser combination.
+/// Define a parser function with the signature expected by syn parser
+/// combinators.
+///
+/// The function may be the `parse` function of the [`Synom`] trait, or it may
+/// be a free-standing function with an arbitrary name. When implementing the
+/// `Synom` trait, the function name is `parse` and the return type is `Self`.
+///
+/// [`Synom`]: synom/trait.Synom.html
 ///
 /// - **Syntax:** `named!(NAME -> TYPE, PARSER)` or `named!(pub NAME -> TYPE, PARSER)`
 ///
 /// ```rust
-/// # #[macro_use]
-/// # extern crate syn;
-/// #
-/// # use syn::Type;
-/// # use syn::delimited::Delimited;
-/// #
-/// // One or more Rust types separated by commas.
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Type;
+/// use syn::delimited::Delimited;
+/// use syn::synom::Synom;
+///
+/// /// Parses one or more Rust types separated by commas.
+/// ///
+/// /// Example: `String, Vec<T>, [u8; LEN + 1]`
 /// named!(pub comma_separated_types -> Delimited<Type, Token![,]>,
 ///     call!(Delimited::parse_separated_nonempty)
 /// );
+///
+/// /// The same function as a `Synom` implementation.
+/// struct CommaSeparatedTypes {
+///     types: Delimited<Type, Token![,]>,
+/// }
+///
+/// impl Synom for CommaSeparatedTypes {
+///     /// As the default behavior, we want there to be at least 1 type.
+///     named!(parse -> Self, do_parse!(
+///         types: call!(Delimited::parse_separated_nonempty) >>
+///         (CommaSeparatedTypes {
+///             types: types,
+///         })
+///     ));
+/// }
+///
+/// impl CommaSeparatedTypes {
+///     /// A separate parser that the user can invoke explicitly which allows
+///     /// for parsing 0 or more types, rather than the default 1 or more.
+///     named!(pub parse0 -> Self, do_parse!(
+///         types: call!(Delimited::parse_separated) >>
+///         (CommaSeparatedTypes {
+///             types: types,
+///         })
+///     ));
+/// }
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -51,26 +88,52 @@ macro_rules! named {
 #[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
 #[macro_export]
 macro_rules! call {
-    ($i:expr, $fun:expr $(, $args:expr)*) => {
-        {
-            let i = $i;
-            eprintln!(concat!(" -> ", stringify!($fun), " @ {:?}"), i);
-            let r = $fun(i $(, $args)*);
-            match r {
-                Ok((i, _)) => eprintln!(concat!("OK  ", stringify!($fun), " @ {:?}"), i),
-                Err(_) => eprintln!(concat!("ERR ", stringify!($fun), " @ {:?}"), i),
-            }
-            r
+    ($i:expr, $fun:expr $(, $args:expr)*) => {{
+        let i = $i;
+        eprintln!(concat!(" -> ", stringify!($fun), " @ {:?}"), i);
+        let r = $fun(i $(, $args)*);
+        match r {
+            Ok((i, _)) => eprintln!(concat!("OK  ", stringify!($fun), " @ {:?}"), i),
+            Err(_) => eprintln!(concat!("ERR ", stringify!($fun), " @ {:?}"), i),
         }
-    };
+        r
+    }};
 }
 
-/// Invoke the given parser function with the passed in arguments.
+/// Invoke the given parser function with zero or more arguments.
 ///
-/// - **Syntax:** `call!(FUNCTION, ARGS...)`
+/// - **Syntax:** `call!(FN, ARGS...)`
 ///
-///   where the signature of the function is `fn(&[U], ARGS...) -> IPResult<&[U], T>`
-/// - **Output:** `T`, the result of invoking the function `FUNCTION`
+///   where the signature of the function is `fn(Cursor, ARGS...) -> PResult<T>`
+///
+/// - **Output:** `T`, the result of invoking the function `FN`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Type;
+/// use syn::delimited::Delimited;
+/// use syn::synom::Synom;
+///
+/// /// Parses one or more Rust types separated by commas.
+/// ///
+/// /// Example: `String, Vec<T>, [u8; LEN + 1]`
+/// struct CommaSeparatedTypes {
+///     types: Delimited<Type, Token![,]>,
+/// }
+///
+/// impl Synom for CommaSeparatedTypes {
+///     named!(parse -> Self, do_parse!(
+///         types: call!(Delimited::parse_separated_nonempty) >>
+///         (CommaSeparatedTypes {
+///             types: types,
+///         })
+///     ));
+/// }
+/// #
+/// # fn main() {}
+/// ```
 #[cfg(any(not(feature = "verbose-trace"), feature = "all-features"))]
 #[macro_export]
 macro_rules! call {
@@ -90,16 +153,20 @@ macro_rules! call {
 ///
 /// use syn::{Expr, ExprIf};
 ///
+/// /// Extracts the branch condition of an `if`-expression.
 /// fn get_cond(if_: ExprIf) -> Expr {
 ///     *if_.cond
 /// }
 ///
-/// // Parses an `if` statement but returns the condition part only.
+/// /// Parses a full `if`-expression but returns the condition part only.
+/// ///
+/// /// Example: `if x > 0xFF { "big" } else { "small" }`
+/// /// The return would be the expression `x > 0xFF`.
 /// named!(if_condition -> Expr,
 ///     map!(syn!(ExprIf), get_cond)
 /// );
 ///
-/// // Or equivalently:
+/// /// Equivalent using a closure.
 /// named!(if_condition2 -> Expr,
 ///     map!(syn!(ExprIf), |if_| *if_.cond)
 /// );
@@ -130,11 +197,29 @@ pub fn invoke<T, R, F: FnOnce(T) -> R>(f: F, t: T) -> R {
     f(t)
 }
 
-/// Parses successfully if the given parser fails to parse. Does not consume any
-/// of the input.
+/// Invert the result of a parser by parsing successfully if the given parser
+/// fails to parse and vice versa.
+///
+/// Does not consume any of the input.
 ///
 /// - **Syntax:** `not!(THING)`
 /// - **Output:** `()`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::{Expr, Ident};
+///
+/// /// Parses any expression that does not begin with a `-` minus sign.
+/// named!(not_negative_expr -> Expr, do_parse!(
+///     not!(punct!(-)) >>
+///     e: syn!(Expr) >>
+///     (e)
+/// ));
+/// #
+/// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! not {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -146,12 +231,70 @@ macro_rules! not {
     };
 }
 
-/// Conditionally execute the given parser.
+/// Execute a parser only if a condition is met, otherwise return None.
 ///
 /// If you are familiar with nom, this is nom's `cond_with_error` parser.
 ///
 /// - **Syntax:** `cond!(CONDITION, THING)`
 /// - **Output:** `Some(THING)` if the condition is true, else `None`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Ident;
+/// use syn::token::{Paren, Bracket, Brace};
+/// use syn::synom::Synom;
+///
+/// /// Parses a macro call with empty input. If the macro is written with
+/// /// parentheses or brackets, a trailing semicolon is required.
+/// ///
+/// /// Example: `my_macro!{}` or `my_macro!();` or `my_macro![];`
+/// struct EmptyMacroCall {
+///     name: Ident,
+///     bang_token: Token![!],
+///     delimiter: MacroDelimiter,
+///     semi_token: Option<Token![;]>,
+/// }
+///
+/// enum MacroDelimiter {
+///     Paren(Paren),
+///     Bracket(Bracket),
+///     Brace(Brace),
+/// }
+///
+/// impl MacroDelimiter {
+///     fn requires_semi(&self) -> bool {
+///         match *self {
+///             MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => true,
+///             MacroDelimiter::Brace(_) => false,
+///         }
+///     }
+/// }
+///
+/// impl Synom for EmptyMacroCall {
+///     named!(parse -> Self, do_parse!(
+///         name: syn!(Ident) >>
+///         bang: punct!(!) >>
+///         empty_body: alt!(
+///             parens!(epsilon!()) => { |d| MacroDelimiter::Paren(d.1) }
+///             |
+///             brackets!(epsilon!()) => { |d| MacroDelimiter::Bracket(d.1) }
+///             |
+///             braces!(epsilon!()) => { |d| MacroDelimiter::Brace(d.1) }
+///         ) >>
+///         semi: cond!(empty_body.requires_semi(), punct!(;)) >>
+///         (EmptyMacroCall {
+///             name: name,
+///             bang_token: bang,
+///             delimiter: empty_body,
+///             semi_token: semi,
+///         })
+///     ));
+/// }
+/// #
+/// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! cond {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
@@ -171,12 +314,61 @@ macro_rules! cond {
     };
 }
 
-/// Fail to parse if condition is false, otherwise parse the given parser.
+/// Execute a parser only if a condition is met, otherwise fail to parse.
 ///
-/// This is typically used inside of `option!` or `alt!`.
+/// This is typically used inside of [`option!`] or [`alt!`].
+///
+/// [`option!`]: macro.option.html
+/// [`alt!`]: macro.alt.html
 ///
 /// - **Syntax:** `cond_reduce!(CONDITION, THING)`
 /// - **Output:** `THING`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Type;
+/// use syn::token::Paren;
+/// use syn::delimited::Delimited;
+/// use syn::synom::Synom;
+///
+/// /// Parses a possibly variadic function signature.
+/// ///
+/// /// Example: `fn(A) or `fn(A, B, C, ...)` or `fn(...)`
+/// /// Rejected: `fn(A, B...)`
+/// struct VariadicFn {
+///     fn_token: Token![fn],
+///     paren_token: Paren,
+///     types: Delimited<Type, Token![,]>,
+///     variadic: Option<Token![...]>,
+/// }
+///
+/// // Example of using `cond_reduce!` inside of `option!`.
+/// impl Synom for VariadicFn {
+///     named!(parse -> Self, do_parse!(
+///         fn_token: keyword!(fn) >>
+///         params: parens!(do_parse!(
+///             types: call!(Delimited::parse_terminated) >>
+///             // Allow, but do not require, an ending `...` but only if the
+///             // preceding list of types is empty or ends with a trailing comma.
+///             variadic: option!(cond_reduce!(types.empty_or_trailing(), punct!(...))) >>
+///             (types, variadic)
+///         )) >>
+///         ({
+///             let ((types, variadic), paren_token) = params;
+///             VariadicFn {
+///                 fn_token,
+///                 paren_token,
+///                 types,
+///                 variadic,
+///             }
+///         })
+///     ));
+/// }
+/// #
+/// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! cond_reduce {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
@@ -192,48 +384,6 @@ macro_rules! cond_reduce {
     };
 }
 
-/// Parse two things, returning the value of the first.
-///
-/// - **Syntax:** `terminated!(THING, AFTER)`
-/// - **Output:** `THING`
-///
-/// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
-/// use syn::Expr;
-///
-/// // An expression terminated by ##.
-/// named!(expr_pound_pound -> Expr,
-///     terminated!(syn!(Expr), tuple!(punct!(#), punct!(#)))
-/// );
-///
-/// # fn main() {}
-/// ```
-#[macro_export]
-macro_rules! terminated {
-    ($i:expr, $submac:ident!( $($args:tt)* ), $submac2:ident!( $($args2:tt)* )) => {
-        match tuple!($i, $submac!($($args)*), $submac2!($($args2)*)) {
-            ::std::result::Result::Ok((i, (o, _))) =>
-                ::std::result::Result::Ok((i, o)),
-            ::std::result::Result::Err(err) =>
-                ::std::result::Result::Err(err),
-        }
-    };
-
-    ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
-        terminated!($i, $submac!($($args)*), call!($g))
-    };
-
-    ($i:expr, $f:expr, $submac:ident!( $($args:tt)* )) => {
-        terminated!($i, call!($f), $submac!($($args)*))
-    };
-
-    ($i:expr, $f:expr, $g:expr) => {
-        terminated!($i, call!($f), call!($g))
-    };
-}
-
 /// Parse zero or more values using the given parser.
 ///
 /// - **Syntax:** `many0!(THING)`
@@ -244,16 +394,42 @@ macro_rules! terminated {
 /// - `call!(Delimited::parse_separated)` - zero or more values with separator
 /// - `call!(Delimited::parse_separated_nonempty)` - one or more values
 /// - `call!(Delimited::parse_terminated)` - zero or more, allows trailing separator
+/// - `call!(Delimited::parse_terminated_nonempty)` - one or more
 ///
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::Item;
+/// use syn::{Ident, Item};
+/// use syn::token::Brace;
+/// use syn::synom::Synom;
 ///
-/// named!(items -> Vec<Item>, many0!(syn!(Item)));
+/// /// Parses a module containing zero or more Rust items.
+/// ///
+/// /// Example: `mod m { type Result<T> = ::std::result::Result<T, MyError>; }`
+/// struct SimpleMod {
+///     mod_token: Token![mod],
+///     name: Ident,
+///     brace_token: Brace,
+///     items: Vec<Item>,
+/// }
 ///
+/// impl Synom for SimpleMod {
+///     named!(parse -> Self, do_parse!(
+///         mod_token: keyword!(mod) >>
+///         name: syn!(Ident) >>
+///         body: braces!(many0!(syn!(Item))) >>
+///         (SimpleMod {
+///             mod_token: mod_token,
+///             name: name,
+///             brace_token: body.1,
+///             items: body.0,
+///         })
+///     ));
+/// }
+/// #
 /// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! many0 {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {{
@@ -323,38 +499,6 @@ pub fn many0<T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T
     }
 }
 
-/// Parse a value without consuming it from the input data.
-///
-/// - **Syntax:** `peek!(THING)`
-/// - **Output:** `THING`
-///
-/// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
-/// use syn::{Expr, Ident};
-///
-/// // Parse an expression that begins with an identifier.
-/// named!(ident_expr -> (Ident, Expr),
-///     tuple!(peek!(syn!(Ident)), syn!(Expr))
-/// );
-///
-/// # fn main() {}
-/// ```
-#[macro_export]
-macro_rules! peek {
-    ($i:expr, $submac:ident!( $($args:tt)* )) => {
-        match $submac!($i, $($args)*) {
-            ::std::result::Result::Ok((_, o)) => ::std::result::Result::Ok(($i, o)),
-            ::std::result::Result::Err(err) => ::std::result::Result::Err(err),
-        }
-    };
-
-    ($i:expr, $f:expr) => {
-        peek!($i, call!($f))
-    };
-}
-
 /// Pattern-match the result of a parser to select which other parser to run.
 ///
 /// - **Syntax:** `switch!(TARGET, PAT1 => THEN1 | PAT2 => THEN2 | ...)`
@@ -364,48 +508,66 @@ macro_rules! peek {
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::{Ident, Type};
+/// use syn::Ident;
+/// use syn::token::Brace;
+/// use syn::synom::Synom;
 ///
-/// #[derive(Debug)]
+/// /// Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
 /// enum UnitType {
 ///     Struct {
+///         struct_token: Token![struct],
 ///         name: Ident,
+///         semi_token: Token![;],
 ///     },
 ///     Enum {
+///         enum_token: Token![enum],
 ///         name: Ident,
+///         brace_token: Brace,
 ///         variant: Ident,
 ///     },
 /// }
 ///
-/// // Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
-/// named!(unit_type -> UnitType, do_parse!(
-///     which: alt!(
-///         keyword!(struct) => { |_| 0 }
-///         |
-///         keyword!(enum) => { |_| 1 }
-///     ) >>
-///     id: syn!(Ident) >>
-///     item: switch!(value!(which),
-///         0 => map!(
-///             punct!(;),
-///             move |_| UnitType::Struct {
-///                 name: id,
-///             }
-///         )
-///         |
-///         1 => map!(
-///             braces!(syn!(Ident)),
-///             move |(variant, _)| UnitType::Enum {
-///                 name: id,
-///                 variant: variant,
-///             }
-///         )
-///         |
-///         _ => reject!()
-///     ) >>
-///     (item)
-/// ));
+/// enum StructOrEnum {
+///     Struct(Token![struct]),
+///     Enum(Token![enum]),
+/// }
 ///
+/// impl Synom for StructOrEnum {
+///     named!(parse -> Self, alt!(
+///         keyword!(struct) => { StructOrEnum::Struct }
+///         |
+///         keyword!(enum) => { StructOrEnum::Enum }
+///     ));
+/// }
+///
+/// impl Synom for UnitType {
+///     named!(parse -> Self, do_parse!(
+///         which: syn!(StructOrEnum) >>
+///         name: syn!(Ident) >>
+///         item: switch!(value!(which),
+///             StructOrEnum::Struct(struct_token) => map!(
+///                 punct!(;),
+///                 |semi_token| UnitType::Struct {
+///                     struct_token: struct_token,
+///                     name: name,
+///                     semi_token: semi_token,
+///                 }
+///             )
+///             |
+///             StructOrEnum::Enum(enum_token) => map!(
+///                 braces!(syn!(Ident)),
+///                 |(variant, brace_token)| UnitType::Enum {
+///                     enum_token: enum_token,
+///                     name: name,
+///                     brace_token: brace_token,
+///                     variant: variant,
+///                 }
+///             )
+///         ) >>
+///         (item)
+///     ));
+/// }
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -422,8 +584,14 @@ macro_rules! switch {
     };
 }
 
-/// Produce the given value without parsing anything. Useful as an argument to
-/// `switch!`.
+/// Produce the given value without parsing anything.
+///
+/// This can be needed where you have an existing parsed value but a parser
+/// macro's syntax expects you to provide a submacro, such as in the first
+/// argument of [`switch!`] or one of the branches of [`alt!`].
+///
+/// [`switch!`]: macro.switch.html
+/// [`alt!`]: macro.alt.html
 ///
 /// - **Syntax:** `value!(VALUE)`
 /// - **Output:** `VALUE`
@@ -433,45 +601,65 @@ macro_rules! switch {
 /// extern crate syn;
 ///
 /// use syn::Ident;
+/// use syn::token::Brace;
+/// use syn::synom::Synom;
 ///
-/// #[derive(Debug)]
+/// /// Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
 /// enum UnitType {
 ///     Struct {
+///         struct_token: Token![struct],
 ///         name: Ident,
+///         semi_token: Token![;],
 ///     },
 ///     Enum {
+///         enum_token: Token![enum],
 ///         name: Ident,
+///         brace_token: Brace,
 ///         variant: Ident,
 ///     },
 /// }
 ///
-/// // Parse a unit struct or enum: either `struct S;` or `enum E { V }`.
-/// named!(unit_type -> UnitType, do_parse!(
-///     is_struct: alt!(
-///         keyword!(struct) => { |_| true }
-///         |
-///         keyword!(enum) => { |_| false }
-///     ) >>
-///     id: syn!(Ident) >>
-///     item: switch!(value!(is_struct),
-///         true => map!(
-///             punct!(;),
-///             move |_| UnitType::Struct {
-///                 name: id,
-///             }
-///         )
-///         |
-///         false => map!(
-///             braces!(syn!(Ident)),
-///             move |(variant, _)| UnitType::Enum {
-///                 name: id,
-///                 variant: variant,
-///             }
-///         )
-///     ) >>
-///     (item)
-/// ));
+/// enum StructOrEnum {
+///     Struct(Token![struct]),
+///     Enum(Token![enum]),
+/// }
 ///
+/// impl Synom for StructOrEnum {
+///     named!(parse -> Self, alt!(
+///         keyword!(struct) => { StructOrEnum::Struct }
+///         |
+///         keyword!(enum) => { StructOrEnum::Enum }
+///     ));
+/// }
+///
+/// impl Synom for UnitType {
+///     named!(parse -> Self, do_parse!(
+///         which: syn!(StructOrEnum) >>
+///         name: syn!(Ident) >>
+///         item: switch!(value!(which),
+///             StructOrEnum::Struct(struct_token) => map!(
+///                 punct!(;),
+///                 |semi_token| UnitType::Struct {
+///                     struct_token: struct_token,
+///                     name: name,
+///                     semi_token: semi_token,
+///                 }
+///             )
+///             |
+///             StructOrEnum::Enum(enum_token) => map!(
+///                 braces!(syn!(Ident)),
+///                 |(variant, brace_token)| UnitType::Enum {
+///                     enum_token: enum_token,
+///                     name: name,
+///                     brace_token: brace_token,
+///                     variant: variant,
+///                 }
+///             )
+///         ) >>
+///         (item)
+///     ));
+/// }
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -481,8 +669,9 @@ macro_rules! value {
     };
 }
 
-/// Unconditionally fail to parse anything. This may be useful in ignoring some
-/// arms of a `switch!` parser.
+/// Unconditionally fail to parse anything.
+///
+/// This may be useful in rejecting some arms of a `switch!` parser.
 ///
 /// - **Syntax:** `reject!()`
 /// - **Output:** never succeeds
@@ -501,7 +690,7 @@ macro_rules! value {
 ///         ok => value!(ok)
 ///     )
 /// );
-///
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -524,7 +713,7 @@ macro_rules! reject {
 /// use syn::Type;
 ///
 /// named!(two_types -> (Type, Type), tuple!(syn!(Type), syn!(Type)));
-///
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -534,7 +723,7 @@ macro_rules! tuple {
     };
 }
 
-/// Internal parser, do not use directly.
+// Internal parser, do not use directly.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! tuple_parser {
@@ -603,7 +792,7 @@ macro_rules! tuple_parser {
 ///         punct!(!) => { |_| "BANG".into() }
 ///     )
 /// );
-///
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -653,8 +842,8 @@ macro_rules! alt {
     };
 }
 
-/// Run a series of parsers, one after another, optionally assigning the results
-/// a name. Fail if any of the parsers fails.
+/// Run a series of parsers, optionally naming each intermediate result,
+/// followed by a step to combine the intermediate results.
 ///
 /// Produces the result of evaluating the final expression in parentheses with
 /// all of the previously named results bound.
@@ -669,16 +858,33 @@ macro_rules! alt {
 ///
 /// use syn::Ident;
 /// use syn::token::Paren;
+/// use syn::synom::Synom;
 /// use proc_macro2::TokenStream;
 ///
-/// // Parse a macro invocation like `stringify!($args)`.
-/// named!(simple_mac -> (Ident, (TokenStream, Paren)), do_parse!(
-///     name: syn!(Ident) >>
-///     punct!(!) >>
-///     body: parens!(syn!(TokenStream)) >>
-///     (name, body)
-/// ));
+/// /// Parse a macro invocation that uses `(` `)` parentheses.
+/// ///
+/// /// Example: `stringify!($args)`.
+/// struct Macro {
+///     name: Ident,
+///     bang_token: Token![!],
+///     paren_token: Paren,
+///     tts: TokenStream,
+/// }
 ///
+/// impl Synom for Macro {
+///     named!(parse -> Self, do_parse!(
+///         name: syn!(Ident) >>
+///         bang: punct!(!) >>
+///         body: parens!(syn!(TokenStream)) >>
+///         (Macro {
+///             name: name,
+///             bang_token: bang,
+///             paren_token: body.1,
+///             tts: body.0,
+///         })
+///     ));
+/// }
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -731,6 +937,57 @@ macro_rules! do_parse {
     };
 }
 
+/// Parse nothing and succeed only if the end of the enclosing block has been
+/// reached.
+///
+/// The enclosing block may be the full input if we are parsing at the top
+/// level, or the surrounding parenthesis/bracket/brace if we are parsing within
+/// those.
+///
+/// - **Syntax:** `input_end!()`
+/// - **Output:** `()`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Expr;
+/// use syn::synom::Synom;
+///
+/// /// Parses any Rust expression followed either by a semicolon or by the end
+/// /// of the input.
+/// ///
+/// /// For example `many0!(syn!(TerminatedExpr))` would successfully parse the
+/// /// following input into three expressions.
+/// ///
+/// ///     1 + 1; second.two(); third!()
+/// ///
+/// /// Similarly within a block, `braced!(many0!(syn!(TerminatedExpr)))` would
+/// /// successfully parse three expressions.
+/// ///
+/// ///     { 1 + 1; second.two(); third!() }
+/// struct TerminatedExpr {
+///     expr: Expr,
+///     semi_token: Option<Token![;]>,
+/// }
+///
+/// impl Synom for TerminatedExpr {
+///     named!(parse -> Self, do_parse!(
+///         expr: syn!(Expr) >>
+///         semi: alt!(
+///             input_end!() => { |_| None }
+///             |
+///             punct!(;) => { Some }
+///         ) >>
+///         (TerminatedExpr {
+///             expr: expr,
+///             semi_token: semi,
+///         })
+///     ));
+/// }
+/// #
+/// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! input_end {
     ($i:expr,) => {
@@ -750,6 +1007,8 @@ pub fn input_end(input: Cursor) -> PResult<'static, ()> {
 
 /// Turn a failed parse into `None` and a successful parse into `Some`.
 ///
+/// A failed parse consumes none of the input.
+///
 /// - **Syntax:** `option!(THING)`
 /// - **Output:** `Option<THING>`
 ///
@@ -757,10 +1016,34 @@ pub fn input_end(input: Cursor) -> PResult<'static, ()> {
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::token::Bang;
+/// use syn::{Label, Block};
+/// use syn::synom::Synom;
 ///
-/// named!(maybe_bang -> Option<Bang>, option!(punct!(!)));
+/// /// Parses a Rust loop. Equivalent to syn::ExprLoop.
+/// ///
+/// /// Examples:
+/// ///     loop { println!("y"); }
+/// ///     'x: loop { break 'x; }
+/// struct ExprLoop {
+///     label: Option<Label>,
+///     loop_token: Token![loop],
+///     body: Block,
+/// }
 ///
+/// impl Synom for ExprLoop {
+///     named!(parse -> Self, do_parse!(
+///         // Loop may or may not have a label.
+///         label: option!(syn!(Label)) >>
+///         loop_: keyword!(loop) >>
+///         block: syn!(Block) >>
+///         (ExprLoop {
+///             label: label,
+///             loop_token: loop_,
+///             body: block,
+///         })
+///     ));
+/// }
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -779,51 +1062,16 @@ macro_rules! option {
     };
 }
 
-/// Turn a failed parse into an empty vector. The argument parser must itself
-/// return a vector.
-///
-/// This is often more convenient than `option!(...)` when the argument produces
-/// a vector.
-///
-/// - **Syntax:** `opt_vec!(THING)`
-/// - **Output:** `THING`, which must be `Vec<T>`
-///
-/// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
-/// use syn::{Lifetime, Type};
-/// use syn::delimited::Delimited;
-/// use syn::token::*;
-///
-/// named!(bound_lifetimes -> (Vec<Lifetime>, Type), tuple!(
-///     opt_vec!(do_parse!(
-///         keyword!(for) >>
-///         punct!(<) >>
-///         lifetimes: call!(Delimited::<Lifetime, Comma>::parse_terminated) >>
-///         punct!(>) >>
-///         (lifetimes.into_vec())
-///     )),
-///     syn!(Type)
-/// ));
-///
-/// # fn main() {}
-/// ```
-#[macro_export]
-macro_rules! opt_vec {
-    ($i:expr, $submac:ident!( $($args:tt)* )) => {
-        match $submac!($i, $($args)*) {
-            ::std::result::Result::Ok((i, o)) =>
-                ::std::result::Result::Ok((i, o)),
-            ::std::result::Result::Err(_) =>
-                ::std::result::Result::Ok(($i, Vec::new()))
-        }
-    };
-}
-
 /// Parses nothing and always succeeds.
 ///
-/// This can be useful as a fallthrough case in `alt!`.
+/// This can be useful as a fallthrough case in [`alt!`], as shown below. Also
+/// useful for parsing empty delimiters using [`parens!`] or [`brackets!`] or
+/// [`braces!`] by parsing for example `braces!(epsilon!())` for an empty `{}`.
+///
+/// [`alt!`]: macro.alt.html
+/// [`parens!`]: macro.parens.html
+/// [`brackets!`]: macro.brackets.html
+/// [`braces!`]: macro.braces.html
 ///
 /// - **Syntax:** `epsilon!()`
 /// - **Output:** `()`
@@ -832,18 +1080,23 @@ macro_rules! opt_vec {
 /// #[macro_use]
 /// extern crate syn;
 ///
+/// use syn::synom::Synom;
+///
 /// enum Mutability {
 ///     Mutable(Token![mut]),
 ///     Immutable,
 /// }
 ///
-/// named!(mutability -> Mutability, alt!(
-///     keyword!(mut) => { Mutability::Mutable }
-///     |
-///     epsilon!() => { |_| Mutability::Immutable }
-/// ));
-///
+/// impl Synom for Mutability {
+///     named!(parse -> Self, alt!(
+///         keyword!(mut) => { Mutability::Mutable }
+///         |
+///         epsilon!() => { |_| Mutability::Immutable }
+///     ));
+/// }
+/// #
 /// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! epsilon {
     ($i:expr,) => {
@@ -858,29 +1111,6 @@ macro_rules! epsilon {
 ///
 /// - **Syntax:** `tap!(NAME : THING => EXPR)`
 /// - **Output:** `()`
-///
-/// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
-/// use syn::{Expr, ExprCall};
-/// use syn::token::RArrow;
-///
-/// named!(expr_with_arrow_call -> Expr, do_parse!(
-///     mut e: syn!(Expr) >>
-///     many0!(tap!(arg: tuple!(punct!(->), syn!(Expr)) => {
-///         e = Expr::Call(ExprCall {
-///             attrs: Vec::new(),
-///             func: Box::new(e),
-///             args: vec![arg.1].into(),
-///             paren_token: Default::default(),
-///         });
-///     })) >>
-///     (e)
-/// ));
-///
-/// # fn main() {}
-/// ```
 #[doc(hidden)]
 #[macro_export]
 macro_rules! tap {
@@ -901,12 +1131,13 @@ macro_rules! tap {
     };
 }
 
-/// Parse a type through the `Synom` trait.
+/// Parse any type that implements the `Synom` trait.
 ///
-/// This is a convenience macro used to invoke the `Synom::parse` method for a
-/// type, you'll find this in quite a few parsers. This is also the primary way
-/// to parse punctuation.
+/// Any type implementing [`Synom`] can be used with this parser, whether the
+/// implementation is provided by Syn or is one that you write.
 ///
+/// [`Synom`]: synom/trait.Synom.html
+/// 
 /// - **Syntax:** `syn!(TYPE)`
 /// - **Output:** `TYPE`
 ///
@@ -914,29 +1145,51 @@ macro_rules! tap {
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::Expr;
+/// use syn::{Ident, Item};
+/// use syn::token::Brace;
+/// use syn::synom::Synom;
 ///
-/// named!(expression -> Expr, syn!(Expr));
+/// /// Parses a module containing zero or more Rust items.
+/// ///
+/// /// Example: `mod m { type Result<T> = ::std::result::Result<T, MyError>; }`
+/// struct SimpleMod {
+///     mod_token: Token![mod],
+///     name: Ident,
+///     brace_token: Brace,
+///     items: Vec<Item>,
+/// }
 ///
-/// named!(expression_dot -> (Expr, Token![.]), tuple!(syn!(Expr), punct!(.)));
-///
+/// impl Synom for SimpleMod {
+///     named!(parse -> Self, do_parse!(
+///         mod_token: keyword!(mod) >>
+///         name: syn!(Ident) >>
+///         body: braces!(many0!(syn!(Item))) >>
+///         (SimpleMod {
+///             mod_token: mod_token,
+///             name: name,
+///             brace_token: body.1,
+///             items: body.0,
+///         })
+///     ));
+/// }
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! syn {
     ($i:expr, $t:ty) => {
-        call!($i, <$t as $crate::synom::Synom>::parse)
+        <$t as $crate::synom::Synom>::parse($i)
     };
 }
 
-/// Parse a parenthesized-surrounded subtree.
+/// Parse inside of `(` `)` parentheses.
 ///
-/// This macro will invoke a sub-parser inside of all tokens contained in
-/// parenthesis. The sub-parser is required to consume all tokens within the
-/// parens or else this parser will return an error.
+/// This macro parses a set of balanced parentheses and invokes a sub-parser on
+/// the content inside. The sub-parser is required to consume all tokens within
+/// the parentheses in order for this parser to return successfully.
 ///
 /// - **Syntax:** `parens!(SUBPARSER)`
-/// - **Output:** `(SUBPARSER_RET, Paren)`
+/// - **Output:** `(SUBPARSER, token::Paren)`
 ///
 /// ```rust
 /// #[macro_use]
@@ -945,8 +1198,11 @@ macro_rules! syn {
 /// use syn::Expr;
 /// use syn::token::Paren;
 ///
+/// /// Parses an expression inside of parentheses.
+/// ///
+/// /// Example: `(1 + 1)`
 /// named!(expr_paren -> (Expr, Paren), parens!(syn!(Expr)));
-///
+/// #
 /// # fn main() {}
 /// ```
 #[macro_export]
@@ -960,7 +1216,29 @@ macro_rules! parens {
     };
 }
 
-/// Same as the `parens` macro, but for brackets.
+/// Parse inside of `[` `]` square brackets.
+///
+/// This macro parses a set of balanced brackets and invokes a sub-parser on the
+/// content inside. The sub-parser is required to consume all tokens within the
+/// brackets in order for this parser to return successfully.
+///
+/// - **Syntax:** `brackets!(SUBPARSER)`
+/// - **Output:** `(SUBPARSER, token::Bracket)`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Expr;
+/// use syn::token::Bracket;
+///
+/// /// Parses an expression inside of brackets.
+/// ///
+/// /// Example: `[1 + 1]`
+/// named!(expr_paren -> (Expr, Bracket), brackets!(syn!(Expr)));
+/// #
+/// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! brackets {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -972,7 +1250,29 @@ macro_rules! brackets {
     };
 }
 
-/// Same as the `parens` macro, but for braces.
+/// Parse inside of `{` `}` curly braces.
+///
+/// This macro parses a set of balanced braces and invokes a sub-parser on the
+/// content inside. The sub-parser is required to consume all tokens within the
+/// braces in order for this parser to return successfully.
+///
+/// - **Syntax:** `braces!(SUBPARSER)`
+/// - **Output:** `(SUBPARSER, token::Brace)`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Expr;
+/// use syn::token::Brace;
+///
+/// /// Parses an expression inside of braces.
+/// ///
+/// /// Example: `{1 + 1}`
+/// named!(expr_paren -> (Expr, Brace), braces!(syn!(Expr)));
+/// #
+/// # fn main() {}
+/// ```
 #[macro_export]
 macro_rules! braces {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -984,7 +1284,8 @@ macro_rules! braces {
     };
 }
 
-/// Same as the `parens` macro, but for none-delimited sequences (groups).
+// Not public API.
+#[doc(hidden)]
 #[macro_export]
 macro_rules! grouped {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {

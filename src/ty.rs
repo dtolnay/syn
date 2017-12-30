@@ -466,8 +466,7 @@ pub mod parsing {
             fn_: keyword!(fn) >>
             parens: parens!(do_parse!(
                 inputs: call!(Delimited::parse_terminated) >>
-                variadic: option!(cond_reduce!(inputs.is_empty() || inputs.trailing_delim(),
-                                                punct!(...))) >>
+                variadic: option!(cond_reduce!(inputs.empty_or_trailing(), punct!(...))) >>
                 (inputs, variadic)
             )) >>
             output: syn!(ReturnType) >>
@@ -523,7 +522,7 @@ pub mod parsing {
                 qpath.1.segments.last().unwrap().item().arguments.is_empty(),
                 option!(syn!(ParenthesizedGenericArguments))
             ) >>
-            cond!(allow_plus, not!(peek!(punct!(+)))) >>
+            cond!(allow_plus, not!(punct!(+))) >>
             ({
                 let (qself, mut path) = qpath;
                 if let Some(Some(parenthesized)) = parenthesized {
@@ -549,7 +548,7 @@ pub mod parsing {
                 let (pos, as_, path) = match path {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
-                        if !path.segments.is_empty() && !path.segments.trailing_delim() {
+                        if !path.segments.empty_or_trailing() {
                             path.segments.push_trailing(colon2);
                         }
                         for item in rest {
@@ -653,7 +652,7 @@ pub mod parsing {
     impl TypeParen {
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             data: parens!(syn!(Type)) >>
-            cond!(allow_plus, not!(peek!(punct!(+)))) >>
+            cond!(allow_plus, not!(punct!(+))) >>
             (TypeParen {
                 paren_token: data.1,
                 elem: Box::new(data.0),
@@ -733,7 +732,11 @@ pub mod parsing {
         ));
     }
 
-    named!(pub ty_no_eq_after -> Type, terminated!(syn!(Type), not!(punct!(=))));
+    named!(pub ty_no_eq_after -> Type, do_parse!(
+        ty: syn!(Type) >>
+        not!(punct!(=)) >>
+        (ty)
+    ));
 
     impl Path {
         named!(pub parse_mod_style -> Self, do_parse!(
