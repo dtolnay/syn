@@ -18,11 +18,6 @@ pub mod parsers;
 #[macro_use]
 mod macros;
 
-#[cfg(feature = "parsing")]
-#[doc(hidden)]
-#[macro_use]
-pub mod helper;
-
 #[macro_use]
 pub mod token;
 
