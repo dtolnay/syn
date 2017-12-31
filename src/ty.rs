@@ -4,7 +4,7 @@ use proc_macro2::TokenStream;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "extra-traits")]
-use mac::TokenStreamHelper;
+use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// The different kinds of types recognized by the compiler

@@ -8,7 +8,7 @@ use proc_macro2::{Delimiter, Spacing, TokenNode, TokenStream, TokenTree};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "extra-traits")]
-use mac::TokenStreamHelper;
+use tt::TokenStreamHelper;
 
 ast_struct! {
     /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true

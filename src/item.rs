@@ -4,7 +4,7 @@ use proc_macro2::{TokenStream};
 use token::{Paren, Brace};
 
 #[cfg(feature = "extra-traits")]
-use mac::TokenStreamHelper;
+use tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 

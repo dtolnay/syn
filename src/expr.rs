@@ -4,7 +4,7 @@ use proc_macro2::{Span, TokenStream};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "extra-traits")]
-use mac::TokenStreamHelper;
+use tt::TokenStreamHelper;
 #[cfg(feature = "full")]
 use std::mem;
 
@@ -691,17 +691,17 @@ ast_enum_of_structs! {
     }
 }
 
-#[cfg(feature = "extra-traits")]
+#[cfg(all(feature = "full", feature = "extra-traits"))]
 impl Eq for PatVerbatim {}
 
-#[cfg(feature = "extra-traits")]
+#[cfg(all(feature = "full", feature = "extra-traits"))]
 impl PartialEq for PatVerbatim {
     fn eq(&self, other: &Self) -> bool {
         TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
     }
 }
 
-#[cfg(feature = "extra-traits")]
+#[cfg(all(feature = "full", feature = "extra-traits"))]
 impl Hash for PatVerbatim {
     fn hash<H>(&self, state: &mut H)
     where
