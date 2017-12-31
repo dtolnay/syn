@@ -603,6 +603,18 @@ mod printing {
     where
         F: FnOnce(&mut Tokens),
     {
-        tokens.append_delimited(s, *span, f)
+        let delim = match s {
+            "(" => Delimiter::Parenthesis,
+            "[" => Delimiter::Bracket,
+            "{" => Delimiter::Brace,
+            " " => Delimiter::None,
+            _ => panic!("unknown delimiter: {}", s),
+        };
+        let mut inner = Tokens::new();
+        f(&mut inner);
+        tokens.append(TokenTree {
+            span: *span,
+            kind: TokenNode::Group(delim, inner.into()),
+        });
     }
 }
