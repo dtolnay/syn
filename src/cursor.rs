@@ -294,6 +294,18 @@ impl<'a> Cursor<'a> {
 
         Some((tree, unsafe { self.bump() }))
     }
+
+    /// Returns the `Span` of the current token, or `Span::call_site()` if this
+    /// cursor points to eof.
+    pub fn span(self) -> Span {
+        match *self.entry() {
+            Entry::Group(span, ..) => span,
+            Entry::Literal(span, ..) => span,
+            Entry::Term(span, ..) => span,
+            Entry::Op(span, ..) => span,
+            Entry::End(..) => Span::call_site(),
+        }
+    }
 }
 
 // We do a custom implementation for `Debug` as the default implementation is
