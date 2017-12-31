@@ -73,7 +73,7 @@ mod lit;
 pub use lit::{Lit, LitKind};
 
 mod mac;
-pub use mac::Macro;
+pub use mac::{Macro, MacroDelimiter};
 
 mod derive;
 pub use derive::{Body, BodyEnum, BodyStruct, DeriveInput};

@@ -252,6 +252,8 @@ fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
 
 fn fold_macro(&mut self, i: Macro) -> Macro { fold_macro(self, i) }
 
+fn fold_macro_delimiter(&mut self, i: MacroDelimiter) -> MacroDelimiter { fold_macro_delimiter(self, i) }
+
 fn fold_member(&mut self, i: Member) -> Member { fold_member(self, i) }
 
 fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { fold_meta_item(self, i) }
@@ -1798,7 +1800,9 @@ pub fn fold_item_macro2<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemMacro2) ->
         vis: _visitor.fold_visibility(_i . vis),
         macro_token: Token ! [ macro ](tokens_helper(_visitor, &(_i . macro_token).0)),
         ident: _visitor.fold_ident(_i . ident),
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         args: _i . args,
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         body: _i . body,
     }
 }
@@ -1946,7 +1950,29 @@ pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
     Macro {
         path: _visitor.fold_path(_i . path),
         bang_token: Token ! [ ! ](tokens_helper(_visitor, &(_i . bang_token).0)),
-        tt: _i . tt,
+        delimiter: _visitor.fold_macro_delimiter(_i . delimiter),
+        tts: _i . tts,
+    }
+}
+
+pub fn fold_macro_delimiter<V: Folder + ?Sized>(_visitor: &mut V, _i: MacroDelimiter) -> MacroDelimiter {
+    use ::MacroDelimiter::*;
+    match _i {
+        Paren(_binding_0, ) => {
+            Paren (
+                Paren(tokens_helper(_visitor, &(_binding_0).0)),
+            )
+        }
+        Brace(_binding_0, ) => {
+            Brace (
+                Brace(tokens_helper(_visitor, &(_binding_0).0)),
+            )
+        }
+        Bracket(_binding_0, ) => {
+            Bracket (
+                Bracket(tokens_helper(_visitor, &(_binding_0).0)),
+            )
+        }
     }
 }
 

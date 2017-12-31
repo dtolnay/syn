@@ -127,16 +127,16 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 
                 // Try to parse the AstItem declaration out of the item.
                 let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
-                    syn::parse_tokens::<parsing::AstStruct>(item.mac.tt.clone().into_tokens())
+                    syn::parse_tokens::<parsing::AstStruct>(item.mac.tts.clone().into_tokens())
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum".into()) {
-                    syn::parse_tokens::<parsing::AstEnum>(item.mac.tt.clone().into_tokens())
+                    syn::parse_tokens::<parsing::AstEnum>(item.mac.tts.clone().into_tokens())
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
                     syn::parse_tokens::<parsing::AstEnumOfStructs>(
-                        item.mac.tt.clone().into_tokens(),
+                        item.mac.tts.clone().into_tokens(),
                     ).map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
                 } else {
@@ -221,21 +221,21 @@ mod parsing {
     // ast_struct! parsing
     pub struct AstStruct(pub Vec<AstItem>);
     impl Synom for AstStruct {
-        named!(parse -> Self, map!(braces!(do_parse!(
+        named!(parse -> Self, do_parse!(
             many0!(Attribute::parse_outer) >>
             keyword!(pub) >>
             keyword!(struct) >>
             res: call!(ast_struct_inner) >>
-            (res)
-        )), |x| AstStruct(vec![x.0])));
+            (AstStruct(vec![res]))
+        ));
     }
 
     // ast_enum! parsing
     pub struct AstEnum(pub Vec<AstItem>);
     impl Synom for AstEnum {
-        named!(parse -> Self, map!(braces!(syn!(DeriveInput)), |x| {
+        named!(parse -> Self, map!(syn!(DeriveInput), |x| {
             AstEnum(vec![AstItem {
-                ast: x.0,
+                ast: x,
                 features: quote!(),
                 eos_full: false,
             }])
@@ -268,7 +268,7 @@ mod parsing {
     // ast_enum_of_structs! parsing
     pub struct AstEnumOfStructs(pub Vec<AstItem>);
     impl Synom for AstEnumOfStructs {
-        named!(parse -> Self, map!(braces!(do_parse!(
+        named!(parse -> Self, do_parse!(
             many0!(Attribute::parse_outer) >>
             keyword!(pub) >>
             keyword!(enum) >>
@@ -298,7 +298,7 @@ mod parsing {
                 items.extend(body.0.into_iter().filter_map(|v| v.inner));
                 AstEnumOfStructs(items)
             })
-        )), |x| x.0));
+        ));
     }
 }
 

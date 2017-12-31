@@ -796,7 +796,7 @@ pub mod parsing {
     use ty::parsing::ty_no_eq_after;
 
     #[cfg(feature = "full")]
-    use proc_macro2::{Delimiter, Span, TokenNode, TokenStream};
+    use proc_macro2::{Span, TokenStream};
     use synom::Synom;
     use cursor::Cursor;
     #[cfg(feature = "full")]
@@ -2042,10 +2042,8 @@ pub mod parsing {
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                tt: proc_macro2::TokenTree {
-                    span: (data.1).0,
-                    kind: TokenNode::Group(Delimiter::Brace, data.0),
-                },
+                delimiter: MacroDelimiter::Brace(data.1),
+                tts: data.0,
             },
             semi_token: semi,
         }))))

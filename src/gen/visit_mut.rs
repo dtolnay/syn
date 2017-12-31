@@ -248,6 +248,8 @@ fn visit_local_mut(&mut self, i: &mut Local) { visit_local_mut(self, i) }
 
 fn visit_macro_mut(&mut self, i: &mut Macro) { visit_macro_mut(self, i) }
 
+fn visit_macro_delimiter_mut(&mut self, i: &mut MacroDelimiter) { visit_macro_delimiter_mut(self, i) }
+
 fn visit_member_mut(&mut self, i: &mut Member) { visit_member_mut(self, i) }
 
 fn visit_meta_item_mut(&mut self, i: &mut MetaItem) { visit_meta_item_mut(self, i) }
@@ -1408,7 +1410,9 @@ pub fn visit_item_macro2_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut 
     _visitor.visit_visibility_mut(& mut _i . vis);
     tokens_helper(_visitor, &mut (& mut _i . macro_token).0);
     _visitor.visit_ident_mut(& mut _i . ident);
+    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     // Skipped field _i . args;
+    tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
     // Skipped field _i . body;
 }
 # [ cfg ( feature = "full" ) ]
@@ -1535,7 +1539,23 @@ pub fn visit_local_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Local)
 pub fn visit_macro_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Macro) {
     _visitor.visit_path_mut(& mut _i . path);
     tokens_helper(_visitor, &mut (& mut _i . bang_token).0);
-    // Skipped field _i . tt;
+    _visitor.visit_macro_delimiter_mut(& mut _i . delimiter);
+    // Skipped field _i . tts;
+}
+
+pub fn visit_macro_delimiter_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut MacroDelimiter) {
+    use ::MacroDelimiter::*;
+    match *_i {
+        Paren(ref mut _binding_0, ) => {
+            tokens_helper(_visitor, &mut (_binding_0).0);
+        }
+        Brace(ref mut _binding_0, ) => {
+            tokens_helper(_visitor, &mut (_binding_0).0);
+        }
+        Bracket(ref mut _binding_0, ) => {
+            tokens_helper(_visitor, &mut (_binding_0).0);
+        }
+    }
 }
 
 pub fn visit_member_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Member) {

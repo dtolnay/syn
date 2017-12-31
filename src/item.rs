@@ -1,9 +1,10 @@
 use super::*;
 use delimited::Delimited;
-use proc_macro2::{TokenTree, TokenStream};
+use proc_macro2::{TokenStream};
+use token::{Paren, Brace};
 
 #[cfg(feature = "extra-traits")]
-use mac::{TokenTreeHelper, TokenStreamHelper};
+use mac::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
@@ -186,14 +187,15 @@ ast_enum_of_structs! {
             pub mac: Macro,
             pub semi_token: Option<Token![;]>,
         }),
-        /// FIXME will need to revisit what this looks like in the AST.
         pub Macro2(ItemMacro2 #manual_extra_traits {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub macro_token: Token![macro],
             pub ident: Ident,
-            pub args: TokenTree,
-            pub body: TokenTree,
+            pub paren_token: Paren,
+            pub args: TokenStream,
+            pub brace_token: Brace,
+            pub body: TokenStream,
         }),
         pub Verbatim(ItemVerbatim #manual_extra_traits {
             pub tts: TokenStream,
@@ -208,9 +210,10 @@ impl Eq for ItemMacro2 {}
 impl PartialEq for ItemMacro2 {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis && self.macro_token == other.macro_token
-            && self.ident == other.ident
-            && TokenTreeHelper(&self.args) == TokenTreeHelper(&other.args)
-            && TokenTreeHelper(&self.body) == TokenTreeHelper(&other.body)
+            && self.ident == other.ident && self.paren_token == other.paren_token
+            && TokenStreamHelper(&self.args) == TokenStreamHelper(&other.args)
+            && self.brace_token == other.brace_token
+            && TokenStreamHelper(&self.body) == TokenStreamHelper(&other.body)
     }
 }
 
@@ -224,8 +227,10 @@ impl Hash for ItemMacro2 {
         self.vis.hash(state);
         self.macro_token.hash(state);
         self.ident.hash(state);
-        TokenTreeHelper(&self.args).hash(state);
-        TokenTreeHelper(&self.body).hash(state);
+        self.paren_token.hash(state);
+        TokenStreamHelper(&self.args).hash(state);
+        self.brace_token.hash(state);
+        TokenStreamHelper(&self.body).hash(state);
     }
 }
 
@@ -531,7 +536,6 @@ pub mod parsing {
     use super::*;
 
     use synom::{Synom, Cursor, PResult};
-    use proc_macro2::{TokenNode, Delimiter};
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }
@@ -573,14 +577,15 @@ pub mod parsing {
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
         body: call!(tt::delimited) >>
-        semi: cond!(!is_braced(&body), punct!(;)) >>
+        semi: cond!(!is_brace(&body.0), punct!(;)) >>
         (ItemMacro {
             attrs: attrs,
             ident: ident,
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                tt: body,
+                delimiter: body.0,
+                tts: body.1,
             },
             semi_token: semi,
         })
@@ -599,8 +604,10 @@ pub mod parsing {
             vis: vis,
             macro_token: macro_,
             ident: ident,
-            args: args,
-            body: body,
+            paren_token: args.0,
+            args: args.1,
+            brace_token: body.0,
+            body: body.1,
         })
     ));
 
@@ -1195,7 +1202,7 @@ pub mod parsing {
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        semi: cond!(!is_braced(&mac.tt), punct!(;)) >>
+        semi: cond!(!is_brace(&mac.delimiter), punct!(;)) >>
         (TraitItemMacro {
             attrs: attrs,
             mac: mac,
@@ -1348,7 +1355,7 @@ pub mod parsing {
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        semi: cond!(!is_braced(&mac.tt), punct!(;)) >>
+        semi: cond!(!is_brace(&mac.delimiter), punct!(;)) >>
         (ImplItemMacro {
             attrs: attrs,
             mac: mac,
@@ -1356,10 +1363,10 @@ pub mod parsing {
         })
     ));
 
-    fn is_braced(tt: &TokenTree) -> bool {
-        match tt.kind {
-            TokenNode::Group(Delimiter::Brace, _) => true,
-            _ => false,
+    fn is_brace(delimiter: &MacroDelimiter) -> bool {
+        match *delimiter {
+            MacroDelimiter::Brace(_) => true,
+            MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => false,
         }
     }
 }
@@ -1582,7 +1589,17 @@ mod printing {
             self.mac.path.to_tokens(tokens);
             self.mac.bang_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.mac.tt.to_tokens(tokens);
+            match self.mac.delimiter {
+                MacroDelimiter::Paren(ref paren) => {
+                    paren.surround(tokens, |tokens| self.mac.tts.to_tokens(tokens));
+                }
+                MacroDelimiter::Brace(ref brace) => {
+                    brace.surround(tokens, |tokens| self.mac.tts.to_tokens(tokens));
+                }
+                MacroDelimiter::Bracket(ref bracket) => {
+                    bracket.surround(tokens, |tokens| self.mac.tts.to_tokens(tokens));
+                }
+            }
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -1593,8 +1610,12 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.macro_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.args.to_tokens(tokens);
-            self.body.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.args.to_tokens(tokens);
+            });
+            self.brace_token.surround(tokens, |tokens| {
+                self.body.to_tokens(tokens);
+            });
         }
     }
 
