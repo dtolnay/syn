@@ -727,11 +727,6 @@ mod codegen {
         // XXX:  This part is a disaster - I'm not sure how to make it cleaner though :'(
         match s.ast.body {
             Body::Enum(ref e) => {
-                let use_decl = format!("    use ::{}::*;\n", s.ast.ident);
-                state.visit_impl.push_str(&use_decl);
-                state.visit_mut_impl.push_str(&use_decl);
-                state.fold_impl.push_str(&use_decl);
-
                 state.visit_impl.push_str("    match *_i {\n");
                 state.visit_mut_impl.push_str("    match *_i {\n");
                 state.fold_impl.push_str("    match _i {\n");
@@ -739,7 +734,7 @@ mod codegen {
                     let fields: Vec<(&Field, Tokens)> = match variant.item().data {
                         VariantData::Struct(..) => panic!("Doesn't support enum struct variants"),
                         VariantData::Tuple(ref fields, ..) => {
-                            let binding = format!("        {}(", variant.item().ident);
+                            let binding = format!("        {}::{}(", s.ast.ident, variant.item().ident);
                             state.visit_impl.push_str(&binding);
                             state.visit_mut_impl.push_str(&binding);
                             state.fold_impl.push_str(&binding);
@@ -776,12 +771,13 @@ mod codegen {
                         VariantData::Unit => {
                             state
                                 .visit_impl
-                                .push_str(&format!("        {} => {{ }}\n", variant.item().ident,));
+                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.item().ident));
                             state
                                 .visit_mut_impl
-                                .push_str(&format!("        {} => {{ }}\n", variant.item().ident,));
+                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.item().ident));
                             state.fold_impl.push_str(&format!(
-                                "        {0} => {{ {0} }}\n",
+                                "        {0}::{1} => {{ {0}::{1} }}\n",
+                                s.ast.ident,
                                 variant.item().ident
                             ));
                             continue;
@@ -795,7 +791,7 @@ mod codegen {
                     }
                     state
                         .fold_impl
-                        .push_str(&format!("            {} (\n", variant.item().ident,));
+                        .push_str(&format!("            {}::{} (\n", s.ast.ident, variant.item().ident,));
                     for (field, binding) in fields {
                         state.visit_impl.push_str(&format!(
                             "            {};\n",

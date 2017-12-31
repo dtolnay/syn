@@ -466,11 +466,10 @@ pub fn fold_arm<V: Folder + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
 }
 
 pub fn fold_attr_style<V: Folder + ?Sized>(_visitor: &mut V, _i: AttrStyle) -> AttrStyle {
-    use ::AttrStyle::*;
     match _i {
-        Outer => { Outer }
-        Inner(_binding_0, ) => {
-            Inner (
+        AttrStyle::Outer => { AttrStyle::Outer }
+        AttrStyle::Inner(_binding_0, ) => {
+            AttrStyle::Inner (
                 Token ! [ ! ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -499,15 +498,14 @@ pub fn fold_bare_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg) -> 
 }
 
 pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArgName) -> BareFnArgName {
-    use ::BareFnArgName::*;
     match _i {
-        Named(_binding_0, ) => {
-            Named (
+        BareFnArgName::Named(_binding_0, ) => {
+            BareFnArgName::Named (
                 _visitor.fold_ident(_binding_0),
             )
         }
-        Wild(_binding_0, ) => {
-            Wild (
+        BareFnArgName::Wild(_binding_0, ) => {
+            BareFnArgName::Wild (
                 Token ! [ _ ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -515,145 +513,144 @@ pub fn fold_bare_fn_arg_name<V: Folder + ?Sized>(_visitor: &mut V, _i: BareFnArg
 }
 
 pub fn fold_bin_op<V: Folder + ?Sized>(_visitor: &mut V, _i: BinOp) -> BinOp {
-    use ::BinOp::*;
     match _i {
-        Add(_binding_0, ) => {
-            Add (
+        BinOp::Add(_binding_0, ) => {
+            BinOp::Add (
                 Token ! [ + ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Sub(_binding_0, ) => {
-            Sub (
+        BinOp::Sub(_binding_0, ) => {
+            BinOp::Sub (
                 Token ! [ - ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Mul(_binding_0, ) => {
-            Mul (
+        BinOp::Mul(_binding_0, ) => {
+            BinOp::Mul (
                 Token ! [ * ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Div(_binding_0, ) => {
-            Div (
+        BinOp::Div(_binding_0, ) => {
+            BinOp::Div (
                 Token ! [ / ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Rem(_binding_0, ) => {
-            Rem (
+        BinOp::Rem(_binding_0, ) => {
+            BinOp::Rem (
                 Token ! [ % ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        And(_binding_0, ) => {
-            And (
+        BinOp::And(_binding_0, ) => {
+            BinOp::And (
                 Token ! [ && ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Or(_binding_0, ) => {
-            Or (
+        BinOp::Or(_binding_0, ) => {
+            BinOp::Or (
                 Token ! [ || ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        BitXor(_binding_0, ) => {
-            BitXor (
+        BinOp::BitXor(_binding_0, ) => {
+            BinOp::BitXor (
                 Token ! [ ^ ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        BitAnd(_binding_0, ) => {
-            BitAnd (
+        BinOp::BitAnd(_binding_0, ) => {
+            BinOp::BitAnd (
                 Token ! [ & ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        BitOr(_binding_0, ) => {
-            BitOr (
+        BinOp::BitOr(_binding_0, ) => {
+            BinOp::BitOr (
                 Token ! [ | ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Shl(_binding_0, ) => {
-            Shl (
+        BinOp::Shl(_binding_0, ) => {
+            BinOp::Shl (
                 Token ! [ << ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Shr(_binding_0, ) => {
-            Shr (
+        BinOp::Shr(_binding_0, ) => {
+            BinOp::Shr (
                 Token ! [ >> ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Eq(_binding_0, ) => {
-            Eq (
+        BinOp::Eq(_binding_0, ) => {
+            BinOp::Eq (
                 Token ! [ == ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Lt(_binding_0, ) => {
-            Lt (
+        BinOp::Lt(_binding_0, ) => {
+            BinOp::Lt (
                 Token ! [ < ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Le(_binding_0, ) => {
-            Le (
+        BinOp::Le(_binding_0, ) => {
+            BinOp::Le (
                 Token ! [ <= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Ne(_binding_0, ) => {
-            Ne (
+        BinOp::Ne(_binding_0, ) => {
+            BinOp::Ne (
                 Token ! [ != ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Ge(_binding_0, ) => {
-            Ge (
+        BinOp::Ge(_binding_0, ) => {
+            BinOp::Ge (
                 Token ! [ >= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Gt(_binding_0, ) => {
-            Gt (
+        BinOp::Gt(_binding_0, ) => {
+            BinOp::Gt (
                 Token ! [ > ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        AddEq(_binding_0, ) => {
-            AddEq (
+        BinOp::AddEq(_binding_0, ) => {
+            BinOp::AddEq (
                 Token ! [ += ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        SubEq(_binding_0, ) => {
-            SubEq (
+        BinOp::SubEq(_binding_0, ) => {
+            BinOp::SubEq (
                 Token ! [ -= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        MulEq(_binding_0, ) => {
-            MulEq (
+        BinOp::MulEq(_binding_0, ) => {
+            BinOp::MulEq (
                 Token ! [ *= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        DivEq(_binding_0, ) => {
-            DivEq (
+        BinOp::DivEq(_binding_0, ) => {
+            BinOp::DivEq (
                 Token ! [ /= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        RemEq(_binding_0, ) => {
-            RemEq (
+        BinOp::RemEq(_binding_0, ) => {
+            BinOp::RemEq (
                 Token ! [ %= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        BitXorEq(_binding_0, ) => {
-            BitXorEq (
+        BinOp::BitXorEq(_binding_0, ) => {
+            BinOp::BitXorEq (
                 Token ! [ ^= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        BitAndEq(_binding_0, ) => {
-            BitAndEq (
+        BinOp::BitAndEq(_binding_0, ) => {
+            BinOp::BitAndEq (
                 Token ! [ &= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        BitOrEq(_binding_0, ) => {
-            BitOrEq (
+        BinOp::BitOrEq(_binding_0, ) => {
+            BinOp::BitOrEq (
                 Token ! [ |= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        ShlEq(_binding_0, ) => {
-            ShlEq (
+        BinOp::ShlEq(_binding_0, ) => {
+            BinOp::ShlEq (
                 Token ! [ <<= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        ShrEq(_binding_0, ) => {
-            ShrEq (
+        BinOp::ShrEq(_binding_0, ) => {
+            BinOp::ShrEq (
                 Token ! [ >>= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -676,15 +673,14 @@ pub fn fold_block<V: Folder + ?Sized>(_visitor: &mut V, _i: Block) -> Block {
 }
 
 pub fn fold_body<V: Folder + ?Sized>(_visitor: &mut V, _i: Body) -> Body {
-    use ::Body::*;
     match _i {
-        Enum(_binding_0, ) => {
-            Enum (
+        Body::Enum(_binding_0, ) => {
+            Body::Enum (
                 _visitor.fold_body_enum(_binding_0),
             )
         }
-        Struct(_binding_0, ) => {
-            Struct (
+        Body::Struct(_binding_0, ) => {
+            Body::Struct (
                 _visitor.fold_body_struct(_binding_0),
             )
         }
@@ -739,205 +735,204 @@ pub fn fold_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) 
 }
 
 pub fn fold_expr<V: Folder + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
-    use ::Expr::*;
     match _i {
-        Box(_binding_0, ) => {
-            Box (
+        Expr::Box(_binding_0, ) => {
+            Expr::Box (
                 full!(_visitor.fold_expr_box(_binding_0)),
             )
         }
-        InPlace(_binding_0, ) => {
-            InPlace (
+        Expr::InPlace(_binding_0, ) => {
+            Expr::InPlace (
                 full!(_visitor.fold_expr_in_place(_binding_0)),
             )
         }
-        Array(_binding_0, ) => {
-            Array (
+        Expr::Array(_binding_0, ) => {
+            Expr::Array (
                 full!(_visitor.fold_expr_array(_binding_0)),
             )
         }
-        Call(_binding_0, ) => {
-            Call (
+        Expr::Call(_binding_0, ) => {
+            Expr::Call (
                 _visitor.fold_expr_call(_binding_0),
             )
         }
-        MethodCall(_binding_0, ) => {
-            MethodCall (
+        Expr::MethodCall(_binding_0, ) => {
+            Expr::MethodCall (
                 full!(_visitor.fold_expr_method_call(_binding_0)),
             )
         }
-        Tuple(_binding_0, ) => {
-            Tuple (
+        Expr::Tuple(_binding_0, ) => {
+            Expr::Tuple (
                 full!(_visitor.fold_expr_tuple(_binding_0)),
             )
         }
-        Binary(_binding_0, ) => {
-            Binary (
+        Expr::Binary(_binding_0, ) => {
+            Expr::Binary (
                 _visitor.fold_expr_binary(_binding_0),
             )
         }
-        Unary(_binding_0, ) => {
-            Unary (
+        Expr::Unary(_binding_0, ) => {
+            Expr::Unary (
                 _visitor.fold_expr_unary(_binding_0),
             )
         }
-        Lit(_binding_0, ) => {
-            Lit (
+        Expr::Lit(_binding_0, ) => {
+            Expr::Lit (
                 _visitor.fold_expr_lit(_binding_0),
             )
         }
-        Cast(_binding_0, ) => {
-            Cast (
+        Expr::Cast(_binding_0, ) => {
+            Expr::Cast (
                 _visitor.fold_expr_cast(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        Expr::Type(_binding_0, ) => {
+            Expr::Type (
                 full!(_visitor.fold_expr_type(_binding_0)),
             )
         }
-        If(_binding_0, ) => {
-            If (
+        Expr::If(_binding_0, ) => {
+            Expr::If (
                 full!(_visitor.fold_expr_if(_binding_0)),
             )
         }
-        IfLet(_binding_0, ) => {
-            IfLet (
+        Expr::IfLet(_binding_0, ) => {
+            Expr::IfLet (
                 full!(_visitor.fold_expr_if_let(_binding_0)),
             )
         }
-        While(_binding_0, ) => {
-            While (
+        Expr::While(_binding_0, ) => {
+            Expr::While (
                 full!(_visitor.fold_expr_while(_binding_0)),
             )
         }
-        WhileLet(_binding_0, ) => {
-            WhileLet (
+        Expr::WhileLet(_binding_0, ) => {
+            Expr::WhileLet (
                 full!(_visitor.fold_expr_while_let(_binding_0)),
             )
         }
-        ForLoop(_binding_0, ) => {
-            ForLoop (
+        Expr::ForLoop(_binding_0, ) => {
+            Expr::ForLoop (
                 full!(_visitor.fold_expr_for_loop(_binding_0)),
             )
         }
-        Loop(_binding_0, ) => {
-            Loop (
+        Expr::Loop(_binding_0, ) => {
+            Expr::Loop (
                 full!(_visitor.fold_expr_loop(_binding_0)),
             )
         }
-        Match(_binding_0, ) => {
-            Match (
+        Expr::Match(_binding_0, ) => {
+            Expr::Match (
                 full!(_visitor.fold_expr_match(_binding_0)),
             )
         }
-        Closure(_binding_0, ) => {
-            Closure (
+        Expr::Closure(_binding_0, ) => {
+            Expr::Closure (
                 full!(_visitor.fold_expr_closure(_binding_0)),
             )
         }
-        Unsafe(_binding_0, ) => {
-            Unsafe (
+        Expr::Unsafe(_binding_0, ) => {
+            Expr::Unsafe (
                 full!(_visitor.fold_expr_unsafe(_binding_0)),
             )
         }
-        Block(_binding_0, ) => {
-            Block (
+        Expr::Block(_binding_0, ) => {
+            Expr::Block (
                 full!(_visitor.fold_expr_block(_binding_0)),
             )
         }
-        Assign(_binding_0, ) => {
-            Assign (
+        Expr::Assign(_binding_0, ) => {
+            Expr::Assign (
                 full!(_visitor.fold_expr_assign(_binding_0)),
             )
         }
-        AssignOp(_binding_0, ) => {
-            AssignOp (
+        Expr::AssignOp(_binding_0, ) => {
+            Expr::AssignOp (
                 full!(_visitor.fold_expr_assign_op(_binding_0)),
             )
         }
-        Field(_binding_0, ) => {
-            Field (
+        Expr::Field(_binding_0, ) => {
+            Expr::Field (
                 full!(_visitor.fold_expr_field(_binding_0)),
             )
         }
-        Index(_binding_0, ) => {
-            Index (
+        Expr::Index(_binding_0, ) => {
+            Expr::Index (
                 _visitor.fold_expr_index(_binding_0),
             )
         }
-        Range(_binding_0, ) => {
-            Range (
+        Expr::Range(_binding_0, ) => {
+            Expr::Range (
                 full!(_visitor.fold_expr_range(_binding_0)),
             )
         }
-        Path(_binding_0, ) => {
-            Path (
+        Expr::Path(_binding_0, ) => {
+            Expr::Path (
                 _visitor.fold_expr_path(_binding_0),
             )
         }
-        AddrOf(_binding_0, ) => {
-            AddrOf (
+        Expr::AddrOf(_binding_0, ) => {
+            Expr::AddrOf (
                 full!(_visitor.fold_expr_addr_of(_binding_0)),
             )
         }
-        Break(_binding_0, ) => {
-            Break (
+        Expr::Break(_binding_0, ) => {
+            Expr::Break (
                 full!(_visitor.fold_expr_break(_binding_0)),
             )
         }
-        Continue(_binding_0, ) => {
-            Continue (
+        Expr::Continue(_binding_0, ) => {
+            Expr::Continue (
                 full!(_visitor.fold_expr_continue(_binding_0)),
             )
         }
-        Return(_binding_0, ) => {
-            Return (
+        Expr::Return(_binding_0, ) => {
+            Expr::Return (
                 full!(_visitor.fold_expr_return(_binding_0)),
             )
         }
-        Macro(_binding_0, ) => {
-            Macro (
+        Expr::Macro(_binding_0, ) => {
+            Expr::Macro (
                 full!(_visitor.fold_expr_macro(_binding_0)),
             )
         }
-        Struct(_binding_0, ) => {
-            Struct (
+        Expr::Struct(_binding_0, ) => {
+            Expr::Struct (
                 full!(_visitor.fold_expr_struct(_binding_0)),
             )
         }
-        Repeat(_binding_0, ) => {
-            Repeat (
+        Expr::Repeat(_binding_0, ) => {
+            Expr::Repeat (
                 full!(_visitor.fold_expr_repeat(_binding_0)),
             )
         }
-        Paren(_binding_0, ) => {
-            Paren (
+        Expr::Paren(_binding_0, ) => {
+            Expr::Paren (
                 full!(_visitor.fold_expr_paren(_binding_0)),
             )
         }
-        Group(_binding_0, ) => {
-            Group (
+        Expr::Group(_binding_0, ) => {
+            Expr::Group (
                 full!(_visitor.fold_expr_group(_binding_0)),
             )
         }
-        Try(_binding_0, ) => {
-            Try (
+        Expr::Try(_binding_0, ) => {
+            Expr::Try (
                 full!(_visitor.fold_expr_try(_binding_0)),
             )
         }
-        Catch(_binding_0, ) => {
-            Catch (
+        Expr::Catch(_binding_0, ) => {
+            Expr::Catch (
                 full!(_visitor.fold_expr_catch(_binding_0)),
             )
         }
-        Yield(_binding_0, ) => {
-            Yield (
+        Expr::Yield(_binding_0, ) => {
+            Expr::Yield (
                 full!(_visitor.fold_expr_yield(_binding_0)),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        Expr::Verbatim(_binding_0, ) => {
+            Expr::Verbatim (
                 _visitor.fold_expr_verbatim(_binding_0),
             )
         }
@@ -1349,30 +1344,29 @@ pub fn fold_file<V: Folder + ?Sized>(_visitor: &mut V, _i: File) -> File {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_fn_arg<V: Folder + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
-    use ::FnArg::*;
     match _i {
-        SelfRef(_binding_0, ) => {
-            SelfRef (
+        FnArg::SelfRef(_binding_0, ) => {
+            FnArg::SelfRef (
                 _visitor.fold_arg_self_ref(_binding_0),
             )
         }
-        SelfValue(_binding_0, ) => {
-            SelfValue (
+        FnArg::SelfValue(_binding_0, ) => {
+            FnArg::SelfValue (
                 _visitor.fold_arg_self(_binding_0),
             )
         }
-        Captured(_binding_0, ) => {
-            Captured (
+        FnArg::Captured(_binding_0, ) => {
+            FnArg::Captured (
                 _visitor.fold_arg_captured(_binding_0),
             )
         }
-        Inferred(_binding_0, ) => {
-            Inferred (
+        FnArg::Inferred(_binding_0, ) => {
+            FnArg::Inferred (
                 _visitor.fold_pat(_binding_0),
             )
         }
-        Ignored(_binding_0, ) => {
-            Ignored (
+        FnArg::Ignored(_binding_0, ) => {
+            FnArg::Ignored (
                 _visitor.fold_type(_binding_0),
             )
         }
@@ -1391,25 +1385,24 @@ pub fn fold_fn_decl<V: Folder + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_foreign_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ForeignItem) -> ForeignItem {
-    use ::ForeignItem::*;
     match _i {
-        Fn(_binding_0, ) => {
-            Fn (
+        ForeignItem::Fn(_binding_0, ) => {
+            ForeignItem::Fn (
                 _visitor.fold_foreign_item_fn(_binding_0),
             )
         }
-        Static(_binding_0, ) => {
-            Static (
+        ForeignItem::Static(_binding_0, ) => {
+            ForeignItem::Static (
                 _visitor.fold_foreign_item_static(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        ForeignItem::Type(_binding_0, ) => {
+            ForeignItem::Type (
                 _visitor.fold_foreign_item_type(_binding_0),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        ForeignItem::Verbatim(_binding_0, ) => {
+            ForeignItem::Verbatim (
                 _visitor.fold_foreign_item_verbatim(_binding_0),
             )
         }
@@ -1456,25 +1449,24 @@ pub fn fold_foreign_item_verbatim<V: Folder + ?Sized>(_visitor: &mut V, _i: Fore
 }
 
 pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericArgument) -> GenericArgument {
-    use ::GenericArgument::*;
     match _i {
-        Lifetime(_binding_0, ) => {
-            Lifetime (
+        GenericArgument::Lifetime(_binding_0, ) => {
+            GenericArgument::Lifetime (
                 _visitor.fold_lifetime(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        GenericArgument::Type(_binding_0, ) => {
+            GenericArgument::Type (
                 _visitor.fold_type(_binding_0),
             )
         }
-        Binding(_binding_0, ) => {
-            Binding (
+        GenericArgument::Binding(_binding_0, ) => {
+            GenericArgument::Binding (
                 _visitor.fold_binding(_binding_0),
             )
         }
-        Const(_binding_0, ) => {
-            Const (
+        GenericArgument::Const(_binding_0, ) => {
+            GenericArgument::Const (
                 _visitor.fold_expr(_binding_0),
             )
         }
@@ -1482,15 +1474,14 @@ pub fn fold_generic_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericAr
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_generic_method_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericMethodArgument) -> GenericMethodArgument {
-    use ::GenericMethodArgument::*;
     match _i {
-        Type(_binding_0, ) => {
-            Type (
+        GenericMethodArgument::Type(_binding_0, ) => {
+            GenericMethodArgument::Type (
                 _visitor.fold_type(_binding_0),
             )
         }
-        Const(_binding_0, ) => {
-            Const (
+        GenericMethodArgument::Const(_binding_0, ) => {
+            GenericMethodArgument::Const (
                 _visitor.fold_expr(_binding_0),
             )
         }
@@ -1498,20 +1489,19 @@ pub fn fold_generic_method_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: Ge
 }
 
 pub fn fold_generic_param<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericParam) -> GenericParam {
-    use ::GenericParam::*;
     match _i {
-        Lifetime(_binding_0, ) => {
-            Lifetime (
+        GenericParam::Lifetime(_binding_0, ) => {
+            GenericParam::Lifetime (
                 _visitor.fold_lifetime_def(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        GenericParam::Type(_binding_0, ) => {
+            GenericParam::Type (
                 _visitor.fold_type_param(_binding_0),
             )
         }
-        Const(_binding_0, ) => {
-            Const (
+        GenericParam::Const(_binding_0, ) => {
+            GenericParam::Const (
                 _visitor.fold_const_param(_binding_0),
             )
         }
@@ -1528,30 +1518,29 @@ pub fn fold_generics<V: Folder + ?Sized>(_visitor: &mut V, _i: Generics) -> Gene
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Folder + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
-    use ::ImplItem::*;
     match _i {
-        Const(_binding_0, ) => {
-            Const (
+        ImplItem::Const(_binding_0, ) => {
+            ImplItem::Const (
                 _visitor.fold_impl_item_const(_binding_0),
             )
         }
-        Method(_binding_0, ) => {
-            Method (
+        ImplItem::Method(_binding_0, ) => {
+            ImplItem::Method (
                 _visitor.fold_impl_item_method(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        ImplItem::Type(_binding_0, ) => {
+            ImplItem::Type (
                 _visitor.fold_impl_item_type(_binding_0),
             )
         }
-        Macro(_binding_0, ) => {
-            Macro (
+        ImplItem::Macro(_binding_0, ) => {
+            ImplItem::Macro (
                 _visitor.fold_impl_item_macro(_binding_0),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        ImplItem::Verbatim(_binding_0, ) => {
+            ImplItem::Verbatim (
                 _visitor.fold_impl_item_verbatim(_binding_0),
             )
         }
@@ -1619,85 +1608,84 @@ pub fn fold_index<V: Folder + ?Sized>(_visitor: &mut V, _i: Index) -> Index {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
-    use ::Item::*;
     match _i {
-        ExternCrate(_binding_0, ) => {
-            ExternCrate (
+        Item::ExternCrate(_binding_0, ) => {
+            Item::ExternCrate (
                 _visitor.fold_item_extern_crate(_binding_0),
             )
         }
-        Use(_binding_0, ) => {
-            Use (
+        Item::Use(_binding_0, ) => {
+            Item::Use (
                 _visitor.fold_item_use(_binding_0),
             )
         }
-        Static(_binding_0, ) => {
-            Static (
+        Item::Static(_binding_0, ) => {
+            Item::Static (
                 _visitor.fold_item_static(_binding_0),
             )
         }
-        Const(_binding_0, ) => {
-            Const (
+        Item::Const(_binding_0, ) => {
+            Item::Const (
                 _visitor.fold_item_const(_binding_0),
             )
         }
-        Fn(_binding_0, ) => {
-            Fn (
+        Item::Fn(_binding_0, ) => {
+            Item::Fn (
                 _visitor.fold_item_fn(_binding_0),
             )
         }
-        Mod(_binding_0, ) => {
-            Mod (
+        Item::Mod(_binding_0, ) => {
+            Item::Mod (
                 _visitor.fold_item_mod(_binding_0),
             )
         }
-        ForeignMod(_binding_0, ) => {
-            ForeignMod (
+        Item::ForeignMod(_binding_0, ) => {
+            Item::ForeignMod (
                 _visitor.fold_item_foreign_mod(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        Item::Type(_binding_0, ) => {
+            Item::Type (
                 _visitor.fold_item_type(_binding_0),
             )
         }
-        Enum(_binding_0, ) => {
-            Enum (
+        Item::Enum(_binding_0, ) => {
+            Item::Enum (
                 _visitor.fold_item_enum(_binding_0),
             )
         }
-        Struct(_binding_0, ) => {
-            Struct (
+        Item::Struct(_binding_0, ) => {
+            Item::Struct (
                 _visitor.fold_item_struct(_binding_0),
             )
         }
-        Union(_binding_0, ) => {
-            Union (
+        Item::Union(_binding_0, ) => {
+            Item::Union (
                 _visitor.fold_item_union(_binding_0),
             )
         }
-        Trait(_binding_0, ) => {
-            Trait (
+        Item::Trait(_binding_0, ) => {
+            Item::Trait (
                 _visitor.fold_item_trait(_binding_0),
             )
         }
-        Impl(_binding_0, ) => {
-            Impl (
+        Item::Impl(_binding_0, ) => {
+            Item::Impl (
                 _visitor.fold_item_impl(_binding_0),
             )
         }
-        Macro(_binding_0, ) => {
-            Macro (
+        Item::Macro(_binding_0, ) => {
+            Item::Macro (
                 _visitor.fold_item_macro(_binding_0),
             )
         }
-        Macro2(_binding_0, ) => {
-            Macro2 (
+        Item::Macro2(_binding_0, ) => {
+            Item::Macro2 (
                 _visitor.fold_item_macro2(_binding_0),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        Item::Verbatim(_binding_0, ) => {
+            Item::Verbatim (
                 _visitor.fold_item_verbatim(_binding_0),
             )
         }
@@ -1956,20 +1944,19 @@ pub fn fold_macro<V: Folder + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
 }
 
 pub fn fold_macro_delimiter<V: Folder + ?Sized>(_visitor: &mut V, _i: MacroDelimiter) -> MacroDelimiter {
-    use ::MacroDelimiter::*;
     match _i {
-        Paren(_binding_0, ) => {
-            Paren (
+        MacroDelimiter::Paren(_binding_0, ) => {
+            MacroDelimiter::Paren (
                 Paren(tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Brace(_binding_0, ) => {
-            Brace (
+        MacroDelimiter::Brace(_binding_0, ) => {
+            MacroDelimiter::Brace (
                 Brace(tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Bracket(_binding_0, ) => {
-            Bracket (
+        MacroDelimiter::Bracket(_binding_0, ) => {
+            MacroDelimiter::Bracket (
                 Bracket(tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -1977,15 +1964,14 @@ pub fn fold_macro_delimiter<V: Folder + ?Sized>(_visitor: &mut V, _i: MacroDelim
 }
 
 pub fn fold_member<V: Folder + ?Sized>(_visitor: &mut V, _i: Member) -> Member {
-    use ::Member::*;
     match _i {
-        Named(_binding_0, ) => {
-            Named (
+        Member::Named(_binding_0, ) => {
+            Member::Named (
                 _visitor.fold_ident(_binding_0),
             )
         }
-        Unnamed(_binding_0, ) => {
-            Unnamed (
+        Member::Unnamed(_binding_0, ) => {
+            Member::Unnamed (
                 _visitor.fold_index(_binding_0),
             )
         }
@@ -1993,20 +1979,19 @@ pub fn fold_member<V: Folder + ?Sized>(_visitor: &mut V, _i: Member) -> Member {
 }
 
 pub fn fold_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: MetaItem) -> MetaItem {
-    use ::MetaItem::*;
     match _i {
-        Term(_binding_0, ) => {
-            Term (
+        MetaItem::Term(_binding_0, ) => {
+            MetaItem::Term (
                 _visitor.fold_ident(_binding_0),
             )
         }
-        List(_binding_0, ) => {
-            List (
+        MetaItem::List(_binding_0, ) => {
+            MetaItem::List (
                 _visitor.fold_meta_item_list(_binding_0),
             )
         }
-        NameValue(_binding_0, ) => {
-            NameValue (
+        MetaItem::NameValue(_binding_0, ) => {
+            MetaItem::NameValue (
                 _visitor.fold_meta_name_value(_binding_0),
             )
         }
@@ -2049,15 +2034,14 @@ pub fn fold_method_turbofish<V: Folder + ?Sized>(_visitor: &mut V, _i: MethodTur
 }
 
 pub fn fold_nested_meta_item<V: Folder + ?Sized>(_visitor: &mut V, _i: NestedMetaItem) -> NestedMetaItem {
-    use ::NestedMetaItem::*;
     match _i {
-        MetaItem(_binding_0, ) => {
-            MetaItem (
+        NestedMetaItem::MetaItem(_binding_0, ) => {
+            NestedMetaItem::MetaItem (
                 _visitor.fold_meta_item(_binding_0),
             )
         }
-        Literal(_binding_0, ) => {
-            Literal (
+        NestedMetaItem::Literal(_binding_0, ) => {
+            NestedMetaItem::Literal (
                 _visitor.fold_lit(_binding_0),
             )
         }
@@ -2073,70 +2057,69 @@ pub fn fold_parenthesized_generic_arguments<V: Folder + ?Sized>(_visitor: &mut V
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_pat<V: Folder + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
-    use ::Pat::*;
     match _i {
-        Wild(_binding_0, ) => {
-            Wild (
+        Pat::Wild(_binding_0, ) => {
+            Pat::Wild (
                 _visitor.fold_pat_wild(_binding_0),
             )
         }
-        Ident(_binding_0, ) => {
-            Ident (
+        Pat::Ident(_binding_0, ) => {
+            Pat::Ident (
                 _visitor.fold_pat_ident(_binding_0),
             )
         }
-        Struct(_binding_0, ) => {
-            Struct (
+        Pat::Struct(_binding_0, ) => {
+            Pat::Struct (
                 _visitor.fold_pat_struct(_binding_0),
             )
         }
-        TupleStruct(_binding_0, ) => {
-            TupleStruct (
+        Pat::TupleStruct(_binding_0, ) => {
+            Pat::TupleStruct (
                 _visitor.fold_pat_tuple_struct(_binding_0),
             )
         }
-        Path(_binding_0, ) => {
-            Path (
+        Pat::Path(_binding_0, ) => {
+            Pat::Path (
                 _visitor.fold_pat_path(_binding_0),
             )
         }
-        Tuple(_binding_0, ) => {
-            Tuple (
+        Pat::Tuple(_binding_0, ) => {
+            Pat::Tuple (
                 _visitor.fold_pat_tuple(_binding_0),
             )
         }
-        Box(_binding_0, ) => {
-            Box (
+        Pat::Box(_binding_0, ) => {
+            Pat::Box (
                 _visitor.fold_pat_box(_binding_0),
             )
         }
-        Ref(_binding_0, ) => {
-            Ref (
+        Pat::Ref(_binding_0, ) => {
+            Pat::Ref (
                 _visitor.fold_pat_ref(_binding_0),
             )
         }
-        Lit(_binding_0, ) => {
-            Lit (
+        Pat::Lit(_binding_0, ) => {
+            Pat::Lit (
                 _visitor.fold_pat_lit(_binding_0),
             )
         }
-        Range(_binding_0, ) => {
-            Range (
+        Pat::Range(_binding_0, ) => {
+            Pat::Range (
                 _visitor.fold_pat_range(_binding_0),
             )
         }
-        Slice(_binding_0, ) => {
-            Slice (
+        Pat::Slice(_binding_0, ) => {
+            Pat::Slice (
                 _visitor.fold_pat_slice(_binding_0),
             )
         }
-        Macro(_binding_0, ) => {
-            Macro (
+        Pat::Macro(_binding_0, ) => {
+            Pat::Macro (
                 _visitor.fold_pat_macro(_binding_0),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        Pat::Verbatim(_binding_0, ) => {
+            Pat::Verbatim (
                 _visitor.fold_pat_verbatim(_binding_0),
             )
         }
@@ -2254,16 +2237,15 @@ pub fn fold_path<V: Folder + ?Sized>(_visitor: &mut V, _i: Path) -> Path {
 }
 
 pub fn fold_path_arguments<V: Folder + ?Sized>(_visitor: &mut V, _i: PathArguments) -> PathArguments {
-    use ::PathArguments::*;
     match _i {
-        None => { None }
-        AngleBracketed(_binding_0, ) => {
-            AngleBracketed (
+        PathArguments::None => { PathArguments::None }
+        PathArguments::AngleBracketed(_binding_0, ) => {
+            PathArguments::AngleBracketed (
                 _visitor.fold_angle_bracketed_generic_arguments(_binding_0),
             )
         }
-        Parenthesized(_binding_0, ) => {
-            Parenthesized (
+        PathArguments::Parenthesized(_binding_0, ) => {
+            PathArguments::Parenthesized (
                 _visitor.fold_parenthesized_generic_arguments(_binding_0),
             )
         }
@@ -2295,15 +2277,14 @@ pub fn fold_qself<V: Folder + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_range_limits<V: Folder + ?Sized>(_visitor: &mut V, _i: RangeLimits) -> RangeLimits {
-    use ::RangeLimits::*;
     match _i {
-        HalfOpen(_binding_0, ) => {
-            HalfOpen (
+        RangeLimits::HalfOpen(_binding_0, ) => {
+            RangeLimits::HalfOpen (
                 Token ! [ .. ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Closed(_binding_0, ) => {
-            Closed (
+        RangeLimits::Closed(_binding_0, ) => {
+            RangeLimits::Closed (
                 Token ! [ ..= ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -2311,11 +2292,10 @@ pub fn fold_range_limits<V: Folder + ?Sized>(_visitor: &mut V, _i: RangeLimits) 
 }
 
 pub fn fold_return_type<V: Folder + ?Sized>(_visitor: &mut V, _i: ReturnType) -> ReturnType {
-    use ::ReturnType::*;
     match _i {
-        Default => { Default }
-        Type(_binding_0, _binding_1, ) => {
-            Type (
+        ReturnType::Default => { ReturnType::Default }
+        ReturnType::Type(_binding_0, _binding_1, ) => {
+            ReturnType::Type (
                 Token ! [ -> ](tokens_helper(_visitor, &(_binding_0).0)),
                 Box::new(_visitor.fold_type(* _binding_1)),
             )
@@ -2328,25 +2308,24 @@ pub fn fold_span<V: Folder + ?Sized>(_visitor: &mut V, _i: Span) -> Span {
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
-    use ::Stmt::*;
     match _i {
-        Local(_binding_0, ) => {
-            Local (
+        Stmt::Local(_binding_0, ) => {
+            Stmt::Local (
                 Box::new(_visitor.fold_local(* _binding_0)),
             )
         }
-        Item(_binding_0, ) => {
-            Item (
+        Stmt::Item(_binding_0, ) => {
+            Stmt::Item (
                 Box::new(_visitor.fold_item(* _binding_0)),
             )
         }
-        Expr(_binding_0, ) => {
-            Expr (
+        Stmt::Expr(_binding_0, ) => {
+            Stmt::Expr (
                 Box::new(_visitor.fold_expr(* _binding_0)),
             )
         }
-        Semi(_binding_0, _binding_1, ) => {
-            Semi (
+        Stmt::Semi(_binding_0, _binding_1, ) => {
+            Stmt::Semi (
                 Box::new(_visitor.fold_expr(* _binding_0)),
                 Token ! [ ; ](tokens_helper(_visitor, &(_binding_1).0)),
             )
@@ -2355,11 +2334,10 @@ pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
 }
 
 pub fn fold_trait_bound_modifier<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitBoundModifier) -> TraitBoundModifier {
-    use ::TraitBoundModifier::*;
     match _i {
-        None => { None }
-        Maybe(_binding_0, ) => {
-            Maybe (
+        TraitBoundModifier::None => { TraitBoundModifier::None }
+        TraitBoundModifier::Maybe(_binding_0, ) => {
+            TraitBoundModifier::Maybe (
                 Token ! [ ? ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -2367,30 +2345,29 @@ pub fn fold_trait_bound_modifier<V: Folder + ?Sized>(_visitor: &mut V, _i: Trait
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_trait_item<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitItem) -> TraitItem {
-    use ::TraitItem::*;
     match _i {
-        Const(_binding_0, ) => {
-            Const (
+        TraitItem::Const(_binding_0, ) => {
+            TraitItem::Const (
                 _visitor.fold_trait_item_const(_binding_0),
             )
         }
-        Method(_binding_0, ) => {
-            Method (
+        TraitItem::Method(_binding_0, ) => {
+            TraitItem::Method (
                 _visitor.fold_trait_item_method(_binding_0),
             )
         }
-        Type(_binding_0, ) => {
-            Type (
+        TraitItem::Type(_binding_0, ) => {
+            TraitItem::Type (
                 _visitor.fold_trait_item_type(_binding_0),
             )
         }
-        Macro(_binding_0, ) => {
-            Macro (
+        TraitItem::Macro(_binding_0, ) => {
+            TraitItem::Macro (
                 _visitor.fold_trait_item_macro(_binding_0),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        TraitItem::Verbatim(_binding_0, ) => {
+            TraitItem::Verbatim (
                 _visitor.fold_trait_item_verbatim(_binding_0),
             )
         }
@@ -2452,80 +2429,79 @@ pub fn fold_trait_item_verbatim<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitI
 }
 
 pub fn fold_type<V: Folder + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
-    use ::Type::*;
     match _i {
-        Slice(_binding_0, ) => {
-            Slice (
+        Type::Slice(_binding_0, ) => {
+            Type::Slice (
                 _visitor.fold_type_slice(_binding_0),
             )
         }
-        Array(_binding_0, ) => {
-            Array (
+        Type::Array(_binding_0, ) => {
+            Type::Array (
                 _visitor.fold_type_array(_binding_0),
             )
         }
-        Ptr(_binding_0, ) => {
-            Ptr (
+        Type::Ptr(_binding_0, ) => {
+            Type::Ptr (
                 _visitor.fold_type_ptr(_binding_0),
             )
         }
-        Reference(_binding_0, ) => {
-            Reference (
+        Type::Reference(_binding_0, ) => {
+            Type::Reference (
                 _visitor.fold_type_reference(_binding_0),
             )
         }
-        BareFn(_binding_0, ) => {
-            BareFn (
+        Type::BareFn(_binding_0, ) => {
+            Type::BareFn (
                 _visitor.fold_type_bare_fn(_binding_0),
             )
         }
-        Never(_binding_0, ) => {
-            Never (
+        Type::Never(_binding_0, ) => {
+            Type::Never (
                 _visitor.fold_type_never(_binding_0),
             )
         }
-        Tuple(_binding_0, ) => {
-            Tuple (
+        Type::Tuple(_binding_0, ) => {
+            Type::Tuple (
                 _visitor.fold_type_tuple(_binding_0),
             )
         }
-        Path(_binding_0, ) => {
-            Path (
+        Type::Path(_binding_0, ) => {
+            Type::Path (
                 _visitor.fold_type_path(_binding_0),
             )
         }
-        TraitObject(_binding_0, ) => {
-            TraitObject (
+        Type::TraitObject(_binding_0, ) => {
+            Type::TraitObject (
                 _visitor.fold_type_trait_object(_binding_0),
             )
         }
-        ImplTrait(_binding_0, ) => {
-            ImplTrait (
+        Type::ImplTrait(_binding_0, ) => {
+            Type::ImplTrait (
                 _visitor.fold_type_impl_trait(_binding_0),
             )
         }
-        Paren(_binding_0, ) => {
-            Paren (
+        Type::Paren(_binding_0, ) => {
+            Type::Paren (
                 _visitor.fold_type_paren(_binding_0),
             )
         }
-        Group(_binding_0, ) => {
-            Group (
+        Type::Group(_binding_0, ) => {
+            Type::Group (
                 _visitor.fold_type_group(_binding_0),
             )
         }
-        Infer(_binding_0, ) => {
-            Infer (
+        Type::Infer(_binding_0, ) => {
+            Type::Infer (
                 _visitor.fold_type_infer(_binding_0),
             )
         }
-        Macro(_binding_0, ) => {
-            Macro (
+        Type::Macro(_binding_0, ) => {
+            Type::Macro (
                 _visitor.fold_type_macro(_binding_0),
             )
         }
-        Verbatim(_binding_0, ) => {
-            Verbatim (
+        Type::Verbatim(_binding_0, ) => {
+            Type::Verbatim (
                 _visitor.fold_type_verbatim(_binding_0),
             )
         }
@@ -2598,16 +2574,15 @@ pub fn fold_type_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam) -> T
 }
 
 pub fn fold_type_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParamBound) -> TypeParamBound {
-    use ::TypeParamBound::*;
     match _i {
-        Trait(_binding_0, _binding_1, ) => {
-            Trait (
+        TypeParamBound::Trait(_binding_0, _binding_1, ) => {
+            TypeParamBound::Trait (
                 _visitor.fold_poly_trait_ref(_binding_0),
                 _visitor.fold_trait_bound_modifier(_binding_1),
             )
         }
-        Region(_binding_0, ) => {
-            Region (
+        TypeParamBound::Region(_binding_0, ) => {
+            TypeParamBound::Region (
                 _visitor.fold_lifetime(_binding_0),
             )
         }
@@ -2674,20 +2649,19 @@ pub fn fold_type_verbatim<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeVerbatim
 }
 
 pub fn fold_un_op<V: Folder + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {
-    use ::UnOp::*;
     match _i {
-        Deref(_binding_0, ) => {
-            Deref (
+        UnOp::Deref(_binding_0, ) => {
+            UnOp::Deref (
                 Token ! [ * ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Not(_binding_0, ) => {
-            Not (
+        UnOp::Not(_binding_0, ) => {
+            UnOp::Not (
                 Token ! [ ! ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
-        Neg(_binding_0, ) => {
-            Neg (
+        UnOp::Neg(_binding_0, ) => {
+            UnOp::Neg (
                 Token ! [ - ](tokens_helper(_visitor, &(_binding_0).0)),
             )
         }
@@ -2718,20 +2692,19 @@ pub fn fold_use_path<V: Folder + ?Sized>(_visitor: &mut V, _i: UsePath) -> UsePa
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_use_tree<V: Folder + ?Sized>(_visitor: &mut V, _i: UseTree) -> UseTree {
-    use ::UseTree::*;
     match _i {
-        Path(_binding_0, ) => {
-            Path (
+        UseTree::Path(_binding_0, ) => {
+            UseTree::Path (
                 _visitor.fold_use_path(_binding_0),
             )
         }
-        Glob(_binding_0, ) => {
-            Glob (
+        UseTree::Glob(_binding_0, ) => {
+            UseTree::Glob (
                 _visitor.fold_use_glob(_binding_0),
             )
         }
-        List(_binding_0, ) => {
-            List (
+        UseTree::List(_binding_0, ) => {
+            UseTree::List (
                 _visitor.fold_use_list(_binding_0),
             )
         }
@@ -2751,21 +2724,20 @@ pub fn fold_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Varian
 }
 
 pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) -> VariantData {
-    use ::VariantData::*;
     match _i {
-        Struct(_binding_0, _binding_1, ) => {
-            Struct (
+        VariantData::Struct(_binding_0, _binding_1, ) => {
+            VariantData::Struct (
                 FoldHelper::lift(_binding_0, |it| { _visitor.fold_field(it) }),
                 Brace(tokens_helper(_visitor, &(_binding_1).0)),
             )
         }
-        Tuple(_binding_0, _binding_1, ) => {
-            Tuple (
+        VariantData::Tuple(_binding_0, _binding_1, ) => {
+            VariantData::Tuple (
                 FoldHelper::lift(_binding_0, |it| { _visitor.fold_field(it) }),
                 Paren(tokens_helper(_visitor, &(_binding_1).0)),
             )
         }
-        Unit => { Unit }
+        VariantData::Unit => { VariantData::Unit }
     }
 }
 
@@ -2793,24 +2765,23 @@ pub fn fold_vis_restricted<V: Folder + ?Sized>(_visitor: &mut V, _i: VisRestrict
 }
 
 pub fn fold_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> Visibility {
-    use ::Visibility::*;
     match _i {
-        Public(_binding_0, ) => {
-            Public (
+        Visibility::Public(_binding_0, ) => {
+            Visibility::Public (
                 _visitor.fold_vis_public(_binding_0),
             )
         }
-        Crate(_binding_0, ) => {
-            Crate (
+        Visibility::Crate(_binding_0, ) => {
+            Visibility::Crate (
                 _visitor.fold_vis_crate(_binding_0),
             )
         }
-        Restricted(_binding_0, ) => {
-            Restricted (
+        Visibility::Restricted(_binding_0, ) => {
+            Visibility::Restricted (
                 _visitor.fold_vis_restricted(_binding_0),
             )
         }
-        Inherited => { Inherited }
+        Visibility::Inherited => { Visibility::Inherited }
     }
 }
 
@@ -2839,20 +2810,19 @@ pub fn fold_where_eq_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereEq
 }
 
 pub fn fold_where_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WherePredicate) -> WherePredicate {
-    use ::WherePredicate::*;
     match _i {
-        BoundPredicate(_binding_0, ) => {
-            BoundPredicate (
+        WherePredicate::BoundPredicate(_binding_0, ) => {
+            WherePredicate::BoundPredicate (
                 _visitor.fold_where_bound_predicate(_binding_0),
             )
         }
-        RegionPredicate(_binding_0, ) => {
-            RegionPredicate (
+        WherePredicate::RegionPredicate(_binding_0, ) => {
+            WherePredicate::RegionPredicate (
                 _visitor.fold_where_region_predicate(_binding_0),
             )
         }
-        EqPredicate(_binding_0, ) => {
-            EqPredicate (
+        WherePredicate::EqPredicate(_binding_0, ) => {
+            WherePredicate::EqPredicate (
                 _visitor.fold_where_eq_predicate(_binding_0),
             )
         }

@@ -440,10 +440,9 @@ pub fn visit_arm<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ar
 }
 
 pub fn visit_attr_style<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AttrStyle) {
-    use ::AttrStyle::*;
     match *_i {
-        Outer => { }
-        Inner(ref _binding_0, ) => {
+        AttrStyle::Outer => { }
+        AttrStyle::Inner(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
@@ -467,102 +466,100 @@ pub fn visit_bare_fn_arg<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
 }
 
 pub fn visit_bare_fn_arg_name<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BareFnArgName) {
-    use ::BareFnArgName::*;
     match *_i {
-        Named(ref _binding_0, ) => {
+        BareFnArgName::Named(ref _binding_0, ) => {
             _visitor.visit_ident(_binding_0);
         }
-        Wild(ref _binding_0, ) => {
+        BareFnArgName::Wild(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
 }
 
 pub fn visit_bin_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BinOp) {
-    use ::BinOp::*;
     match *_i {
-        Add(ref _binding_0, ) => {
+        BinOp::Add(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Sub(ref _binding_0, ) => {
+        BinOp::Sub(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Mul(ref _binding_0, ) => {
+        BinOp::Mul(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Div(ref _binding_0, ) => {
+        BinOp::Div(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Rem(ref _binding_0, ) => {
+        BinOp::Rem(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        And(ref _binding_0, ) => {
+        BinOp::And(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Or(ref _binding_0, ) => {
+        BinOp::Or(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        BitXor(ref _binding_0, ) => {
+        BinOp::BitXor(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        BitAnd(ref _binding_0, ) => {
+        BinOp::BitAnd(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        BitOr(ref _binding_0, ) => {
+        BinOp::BitOr(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Shl(ref _binding_0, ) => {
+        BinOp::Shl(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Shr(ref _binding_0, ) => {
+        BinOp::Shr(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Eq(ref _binding_0, ) => {
+        BinOp::Eq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Lt(ref _binding_0, ) => {
+        BinOp::Lt(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Le(ref _binding_0, ) => {
+        BinOp::Le(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Ne(ref _binding_0, ) => {
+        BinOp::Ne(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Ge(ref _binding_0, ) => {
+        BinOp::Ge(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Gt(ref _binding_0, ) => {
+        BinOp::Gt(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        AddEq(ref _binding_0, ) => {
+        BinOp::AddEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        SubEq(ref _binding_0, ) => {
+        BinOp::SubEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        MulEq(ref _binding_0, ) => {
+        BinOp::MulEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        DivEq(ref _binding_0, ) => {
+        BinOp::DivEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        RemEq(ref _binding_0, ) => {
+        BinOp::RemEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        BitXorEq(ref _binding_0, ) => {
+        BinOp::BitXorEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        BitAndEq(ref _binding_0, ) => {
+        BinOp::BitAndEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        BitOrEq(ref _binding_0, ) => {
+        BinOp::BitOrEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        ShlEq(ref _binding_0, ) => {
+        BinOp::ShlEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        ShrEq(ref _binding_0, ) => {
+        BinOp::ShrEq(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
@@ -580,12 +577,11 @@ pub fn visit_block<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 
 pub fn visit_body<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Body) {
-    use ::Body::*;
     match *_i {
-        Enum(ref _binding_0, ) => {
+        Body::Enum(ref _binding_0, ) => {
             _visitor.visit_body_enum(_binding_0);
         }
-        Struct(ref _binding_0, ) => {
+        Body::Struct(ref _binding_0, ) => {
             _visitor.visit_body_struct(_binding_0);
         }
     }
@@ -629,126 +625,125 @@ pub fn visit_derive_input<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
 }
 
 pub fn visit_expr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Expr) {
-    use ::Expr::*;
     match *_i {
-        Box(ref _binding_0, ) => {
+        Expr::Box(ref _binding_0, ) => {
             full!(_visitor.visit_expr_box(_binding_0));
         }
-        InPlace(ref _binding_0, ) => {
+        Expr::InPlace(ref _binding_0, ) => {
             full!(_visitor.visit_expr_in_place(_binding_0));
         }
-        Array(ref _binding_0, ) => {
+        Expr::Array(ref _binding_0, ) => {
             full!(_visitor.visit_expr_array(_binding_0));
         }
-        Call(ref _binding_0, ) => {
+        Expr::Call(ref _binding_0, ) => {
             _visitor.visit_expr_call(_binding_0);
         }
-        MethodCall(ref _binding_0, ) => {
+        Expr::MethodCall(ref _binding_0, ) => {
             full!(_visitor.visit_expr_method_call(_binding_0));
         }
-        Tuple(ref _binding_0, ) => {
+        Expr::Tuple(ref _binding_0, ) => {
             full!(_visitor.visit_expr_tuple(_binding_0));
         }
-        Binary(ref _binding_0, ) => {
+        Expr::Binary(ref _binding_0, ) => {
             _visitor.visit_expr_binary(_binding_0);
         }
-        Unary(ref _binding_0, ) => {
+        Expr::Unary(ref _binding_0, ) => {
             _visitor.visit_expr_unary(_binding_0);
         }
-        Lit(ref _binding_0, ) => {
+        Expr::Lit(ref _binding_0, ) => {
             _visitor.visit_expr_lit(_binding_0);
         }
-        Cast(ref _binding_0, ) => {
+        Expr::Cast(ref _binding_0, ) => {
             _visitor.visit_expr_cast(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        Expr::Type(ref _binding_0, ) => {
             full!(_visitor.visit_expr_type(_binding_0));
         }
-        If(ref _binding_0, ) => {
+        Expr::If(ref _binding_0, ) => {
             full!(_visitor.visit_expr_if(_binding_0));
         }
-        IfLet(ref _binding_0, ) => {
+        Expr::IfLet(ref _binding_0, ) => {
             full!(_visitor.visit_expr_if_let(_binding_0));
         }
-        While(ref _binding_0, ) => {
+        Expr::While(ref _binding_0, ) => {
             full!(_visitor.visit_expr_while(_binding_0));
         }
-        WhileLet(ref _binding_0, ) => {
+        Expr::WhileLet(ref _binding_0, ) => {
             full!(_visitor.visit_expr_while_let(_binding_0));
         }
-        ForLoop(ref _binding_0, ) => {
+        Expr::ForLoop(ref _binding_0, ) => {
             full!(_visitor.visit_expr_for_loop(_binding_0));
         }
-        Loop(ref _binding_0, ) => {
+        Expr::Loop(ref _binding_0, ) => {
             full!(_visitor.visit_expr_loop(_binding_0));
         }
-        Match(ref _binding_0, ) => {
+        Expr::Match(ref _binding_0, ) => {
             full!(_visitor.visit_expr_match(_binding_0));
         }
-        Closure(ref _binding_0, ) => {
+        Expr::Closure(ref _binding_0, ) => {
             full!(_visitor.visit_expr_closure(_binding_0));
         }
-        Unsafe(ref _binding_0, ) => {
+        Expr::Unsafe(ref _binding_0, ) => {
             full!(_visitor.visit_expr_unsafe(_binding_0));
         }
-        Block(ref _binding_0, ) => {
+        Expr::Block(ref _binding_0, ) => {
             full!(_visitor.visit_expr_block(_binding_0));
         }
-        Assign(ref _binding_0, ) => {
+        Expr::Assign(ref _binding_0, ) => {
             full!(_visitor.visit_expr_assign(_binding_0));
         }
-        AssignOp(ref _binding_0, ) => {
+        Expr::AssignOp(ref _binding_0, ) => {
             full!(_visitor.visit_expr_assign_op(_binding_0));
         }
-        Field(ref _binding_0, ) => {
+        Expr::Field(ref _binding_0, ) => {
             full!(_visitor.visit_expr_field(_binding_0));
         }
-        Index(ref _binding_0, ) => {
+        Expr::Index(ref _binding_0, ) => {
             _visitor.visit_expr_index(_binding_0);
         }
-        Range(ref _binding_0, ) => {
+        Expr::Range(ref _binding_0, ) => {
             full!(_visitor.visit_expr_range(_binding_0));
         }
-        Path(ref _binding_0, ) => {
+        Expr::Path(ref _binding_0, ) => {
             _visitor.visit_expr_path(_binding_0);
         }
-        AddrOf(ref _binding_0, ) => {
+        Expr::AddrOf(ref _binding_0, ) => {
             full!(_visitor.visit_expr_addr_of(_binding_0));
         }
-        Break(ref _binding_0, ) => {
+        Expr::Break(ref _binding_0, ) => {
             full!(_visitor.visit_expr_break(_binding_0));
         }
-        Continue(ref _binding_0, ) => {
+        Expr::Continue(ref _binding_0, ) => {
             full!(_visitor.visit_expr_continue(_binding_0));
         }
-        Return(ref _binding_0, ) => {
+        Expr::Return(ref _binding_0, ) => {
             full!(_visitor.visit_expr_return(_binding_0));
         }
-        Macro(ref _binding_0, ) => {
+        Expr::Macro(ref _binding_0, ) => {
             full!(_visitor.visit_expr_macro(_binding_0));
         }
-        Struct(ref _binding_0, ) => {
+        Expr::Struct(ref _binding_0, ) => {
             full!(_visitor.visit_expr_struct(_binding_0));
         }
-        Repeat(ref _binding_0, ) => {
+        Expr::Repeat(ref _binding_0, ) => {
             full!(_visitor.visit_expr_repeat(_binding_0));
         }
-        Paren(ref _binding_0, ) => {
+        Expr::Paren(ref _binding_0, ) => {
             full!(_visitor.visit_expr_paren(_binding_0));
         }
-        Group(ref _binding_0, ) => {
+        Expr::Group(ref _binding_0, ) => {
             full!(_visitor.visit_expr_group(_binding_0));
         }
-        Try(ref _binding_0, ) => {
+        Expr::Try(ref _binding_0, ) => {
             full!(_visitor.visit_expr_try(_binding_0));
         }
-        Catch(ref _binding_0, ) => {
+        Expr::Catch(ref _binding_0, ) => {
             full!(_visitor.visit_expr_catch(_binding_0));
         }
-        Yield(ref _binding_0, ) => {
+        Expr::Yield(ref _binding_0, ) => {
             full!(_visitor.visit_expr_yield(_binding_0));
         }
-        Verbatim(ref _binding_0, ) => {
+        Expr::Verbatim(ref _binding_0, ) => {
             _visitor.visit_expr_verbatim(_binding_0);
         }
     }
@@ -1071,21 +1066,20 @@ pub fn visit_file<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast F
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_fn_arg<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FnArg) {
-    use ::FnArg::*;
     match *_i {
-        SelfRef(ref _binding_0, ) => {
+        FnArg::SelfRef(ref _binding_0, ) => {
             _visitor.visit_arg_self_ref(_binding_0);
         }
-        SelfValue(ref _binding_0, ) => {
+        FnArg::SelfValue(ref _binding_0, ) => {
             _visitor.visit_arg_self(_binding_0);
         }
-        Captured(ref _binding_0, ) => {
+        FnArg::Captured(ref _binding_0, ) => {
             _visitor.visit_arg_captured(_binding_0);
         }
-        Inferred(ref _binding_0, ) => {
+        FnArg::Inferred(ref _binding_0, ) => {
             _visitor.visit_pat(_binding_0);
         }
-        Ignored(ref _binding_0, ) => {
+        FnArg::Ignored(ref _binding_0, ) => {
             _visitor.visit_type(_binding_0);
         }
     }
@@ -1101,18 +1095,17 @@ pub fn visit_fn_decl<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_foreign_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ForeignItem) {
-    use ::ForeignItem::*;
     match *_i {
-        Fn(ref _binding_0, ) => {
+        ForeignItem::Fn(ref _binding_0, ) => {
             _visitor.visit_foreign_item_fn(_binding_0);
         }
-        Static(ref _binding_0, ) => {
+        ForeignItem::Static(ref _binding_0, ) => {
             _visitor.visit_foreign_item_static(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        ForeignItem::Type(ref _binding_0, ) => {
             _visitor.visit_foreign_item_type(_binding_0);
         }
-        Verbatim(ref _binding_0, ) => {
+        ForeignItem::Verbatim(ref _binding_0, ) => {
             _visitor.visit_foreign_item_verbatim(_binding_0);
         }
     }
@@ -1150,45 +1143,42 @@ pub fn visit_foreign_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &m
 }
 
 pub fn visit_generic_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericArgument) {
-    use ::GenericArgument::*;
     match *_i {
-        Lifetime(ref _binding_0, ) => {
+        GenericArgument::Lifetime(ref _binding_0, ) => {
             _visitor.visit_lifetime(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        GenericArgument::Type(ref _binding_0, ) => {
             _visitor.visit_type(_binding_0);
         }
-        Binding(ref _binding_0, ) => {
+        GenericArgument::Binding(ref _binding_0, ) => {
             _visitor.visit_binding(_binding_0);
         }
-        Const(ref _binding_0, ) => {
+        GenericArgument::Const(ref _binding_0, ) => {
             _visitor.visit_expr(_binding_0);
         }
     }
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_generic_method_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericMethodArgument) {
-    use ::GenericMethodArgument::*;
     match *_i {
-        Type(ref _binding_0, ) => {
+        GenericMethodArgument::Type(ref _binding_0, ) => {
             _visitor.visit_type(_binding_0);
         }
-        Const(ref _binding_0, ) => {
+        GenericMethodArgument::Const(ref _binding_0, ) => {
             _visitor.visit_expr(_binding_0);
         }
     }
 }
 
 pub fn visit_generic_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericParam) {
-    use ::GenericParam::*;
     match *_i {
-        Lifetime(ref _binding_0, ) => {
+        GenericParam::Lifetime(ref _binding_0, ) => {
             _visitor.visit_lifetime_def(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        GenericParam::Type(ref _binding_0, ) => {
             _visitor.visit_type_param(_binding_0);
         }
-        Const(ref _binding_0, ) => {
+        GenericParam::Const(ref _binding_0, ) => {
             _visitor.visit_const_param(_binding_0);
         }
     }
@@ -1207,21 +1197,20 @@ pub fn visit_ident<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItem) {
-    use ::ImplItem::*;
     match *_i {
-        Const(ref _binding_0, ) => {
+        ImplItem::Const(ref _binding_0, ) => {
             _visitor.visit_impl_item_const(_binding_0);
         }
-        Method(ref _binding_0, ) => {
+        ImplItem::Method(ref _binding_0, ) => {
             _visitor.visit_impl_item_method(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        ImplItem::Type(ref _binding_0, ) => {
             _visitor.visit_impl_item_type(_binding_0);
         }
-        Macro(ref _binding_0, ) => {
+        ImplItem::Macro(ref _binding_0, ) => {
             _visitor.visit_impl_item_macro(_binding_0);
         }
-        Verbatim(ref _binding_0, ) => {
+        ImplItem::Verbatim(ref _binding_0, ) => {
             _visitor.visit_impl_item_verbatim(_binding_0);
         }
     }
@@ -1276,54 +1265,53 @@ pub fn visit_index<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Item) {
-    use ::Item::*;
     match *_i {
-        ExternCrate(ref _binding_0, ) => {
+        Item::ExternCrate(ref _binding_0, ) => {
             _visitor.visit_item_extern_crate(_binding_0);
         }
-        Use(ref _binding_0, ) => {
+        Item::Use(ref _binding_0, ) => {
             _visitor.visit_item_use(_binding_0);
         }
-        Static(ref _binding_0, ) => {
+        Item::Static(ref _binding_0, ) => {
             _visitor.visit_item_static(_binding_0);
         }
-        Const(ref _binding_0, ) => {
+        Item::Const(ref _binding_0, ) => {
             _visitor.visit_item_const(_binding_0);
         }
-        Fn(ref _binding_0, ) => {
+        Item::Fn(ref _binding_0, ) => {
             _visitor.visit_item_fn(_binding_0);
         }
-        Mod(ref _binding_0, ) => {
+        Item::Mod(ref _binding_0, ) => {
             _visitor.visit_item_mod(_binding_0);
         }
-        ForeignMod(ref _binding_0, ) => {
+        Item::ForeignMod(ref _binding_0, ) => {
             _visitor.visit_item_foreign_mod(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        Item::Type(ref _binding_0, ) => {
             _visitor.visit_item_type(_binding_0);
         }
-        Enum(ref _binding_0, ) => {
+        Item::Enum(ref _binding_0, ) => {
             _visitor.visit_item_enum(_binding_0);
         }
-        Struct(ref _binding_0, ) => {
+        Item::Struct(ref _binding_0, ) => {
             _visitor.visit_item_struct(_binding_0);
         }
-        Union(ref _binding_0, ) => {
+        Item::Union(ref _binding_0, ) => {
             _visitor.visit_item_union(_binding_0);
         }
-        Trait(ref _binding_0, ) => {
+        Item::Trait(ref _binding_0, ) => {
             _visitor.visit_item_trait(_binding_0);
         }
-        Impl(ref _binding_0, ) => {
+        Item::Impl(ref _binding_0, ) => {
             _visitor.visit_item_impl(_binding_0);
         }
-        Macro(ref _binding_0, ) => {
+        Item::Macro(ref _binding_0, ) => {
             _visitor.visit_item_macro(_binding_0);
         }
-        Macro2(ref _binding_0, ) => {
+        Item::Macro2(ref _binding_0, ) => {
             _visitor.visit_item_macro2(_binding_0);
         }
-        Verbatim(ref _binding_0, ) => {
+        Item::Verbatim(ref _binding_0, ) => {
             _visitor.visit_item_verbatim(_binding_0);
         }
     }
@@ -1544,42 +1532,39 @@ pub fn visit_macro<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 
 pub fn visit_macro_delimiter<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MacroDelimiter) {
-    use ::MacroDelimiter::*;
     match *_i {
-        Paren(ref _binding_0, ) => {
+        MacroDelimiter::Paren(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Brace(ref _binding_0, ) => {
+        MacroDelimiter::Brace(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Bracket(ref _binding_0, ) => {
+        MacroDelimiter::Bracket(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
 }
 
 pub fn visit_member<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Member) {
-    use ::Member::*;
     match *_i {
-        Named(ref _binding_0, ) => {
+        Member::Named(ref _binding_0, ) => {
             _visitor.visit_ident(_binding_0);
         }
-        Unnamed(ref _binding_0, ) => {
+        Member::Unnamed(ref _binding_0, ) => {
             _visitor.visit_index(_binding_0);
         }
     }
 }
 
 pub fn visit_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaItem) {
-    use ::MetaItem::*;
     match *_i {
-        Term(ref _binding_0, ) => {
+        MetaItem::Term(ref _binding_0, ) => {
             _visitor.visit_ident(_binding_0);
         }
-        List(ref _binding_0, ) => {
+        MetaItem::List(ref _binding_0, ) => {
             _visitor.visit_meta_item_list(_binding_0);
         }
-        NameValue(ref _binding_0, ) => {
+        MetaItem::NameValue(ref _binding_0, ) => {
             _visitor.visit_meta_name_value(_binding_0);
         }
     }
@@ -1613,12 +1598,11 @@ pub fn visit_method_turbofish<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V,
 }
 
 pub fn visit_nested_meta_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast NestedMetaItem) {
-    use ::NestedMetaItem::*;
     match *_i {
-        MetaItem(ref _binding_0, ) => {
+        NestedMetaItem::MetaItem(ref _binding_0, ) => {
             _visitor.visit_meta_item(_binding_0);
         }
-        Literal(ref _binding_0, ) => {
+        NestedMetaItem::Literal(ref _binding_0, ) => {
             _visitor.visit_lit(_binding_0);
         }
     }
@@ -1631,45 +1615,44 @@ pub fn visit_parenthesized_generic_arguments<'ast, V: Visitor<'ast> + ?Sized>(_v
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_pat<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat) {
-    use ::Pat::*;
     match *_i {
-        Wild(ref _binding_0, ) => {
+        Pat::Wild(ref _binding_0, ) => {
             _visitor.visit_pat_wild(_binding_0);
         }
-        Ident(ref _binding_0, ) => {
+        Pat::Ident(ref _binding_0, ) => {
             _visitor.visit_pat_ident(_binding_0);
         }
-        Struct(ref _binding_0, ) => {
+        Pat::Struct(ref _binding_0, ) => {
             _visitor.visit_pat_struct(_binding_0);
         }
-        TupleStruct(ref _binding_0, ) => {
+        Pat::TupleStruct(ref _binding_0, ) => {
             _visitor.visit_pat_tuple_struct(_binding_0);
         }
-        Path(ref _binding_0, ) => {
+        Pat::Path(ref _binding_0, ) => {
             _visitor.visit_pat_path(_binding_0);
         }
-        Tuple(ref _binding_0, ) => {
+        Pat::Tuple(ref _binding_0, ) => {
             _visitor.visit_pat_tuple(_binding_0);
         }
-        Box(ref _binding_0, ) => {
+        Pat::Box(ref _binding_0, ) => {
             _visitor.visit_pat_box(_binding_0);
         }
-        Ref(ref _binding_0, ) => {
+        Pat::Ref(ref _binding_0, ) => {
             _visitor.visit_pat_ref(_binding_0);
         }
-        Lit(ref _binding_0, ) => {
+        Pat::Lit(ref _binding_0, ) => {
             _visitor.visit_pat_lit(_binding_0);
         }
-        Range(ref _binding_0, ) => {
+        Pat::Range(ref _binding_0, ) => {
             _visitor.visit_pat_range(_binding_0);
         }
-        Slice(ref _binding_0, ) => {
+        Pat::Slice(ref _binding_0, ) => {
             _visitor.visit_pat_slice(_binding_0);
         }
-        Macro(ref _binding_0, ) => {
+        Pat::Macro(ref _binding_0, ) => {
             _visitor.visit_pat_macro(_binding_0);
         }
-        Verbatim(ref _binding_0, ) => {
+        Pat::Verbatim(ref _binding_0, ) => {
             _visitor.visit_pat_verbatim(_binding_0);
         }
     }
@@ -1758,13 +1741,12 @@ pub fn visit_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast P
 }
 
 pub fn visit_path_arguments<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PathArguments) {
-    use ::PathArguments::*;
     match *_i {
-        None => { }
-        AngleBracketed(ref _binding_0, ) => {
+        PathArguments::None => { }
+        PathArguments::AngleBracketed(ref _binding_0, ) => {
             _visitor.visit_angle_bracketed_generic_arguments(_binding_0);
         }
-        Parenthesized(ref _binding_0, ) => {
+        PathArguments::Parenthesized(ref _binding_0, ) => {
             _visitor.visit_parenthesized_generic_arguments(_binding_0);
         }
     }
@@ -1789,22 +1771,20 @@ pub fn visit_qself<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_range_limits<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast RangeLimits) {
-    use ::RangeLimits::*;
     match *_i {
-        HalfOpen(ref _binding_0, ) => {
+        RangeLimits::HalfOpen(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Closed(ref _binding_0, ) => {
+        RangeLimits::Closed(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
 }
 
 pub fn visit_return_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ReturnType) {
-    use ::ReturnType::*;
     match *_i {
-        Default => { }
-        Type(ref _binding_0, ref _binding_1, ) => {
+        ReturnType::Default => { }
+        ReturnType::Type(ref _binding_0, ref _binding_1, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
             _visitor.visit_type(& * * _binding_1);
         }
@@ -1815,18 +1795,17 @@ pub fn visit_span<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast S
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_stmt<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stmt) {
-    use ::Stmt::*;
     match *_i {
-        Local(ref _binding_0, ) => {
+        Stmt::Local(ref _binding_0, ) => {
             _visitor.visit_local(& * * _binding_0);
         }
-        Item(ref _binding_0, ) => {
+        Stmt::Item(ref _binding_0, ) => {
             _visitor.visit_item(& * * _binding_0);
         }
-        Expr(ref _binding_0, ) => {
+        Stmt::Expr(ref _binding_0, ) => {
             _visitor.visit_expr(& * * _binding_0);
         }
-        Semi(ref _binding_0, ref _binding_1, ) => {
+        Stmt::Semi(ref _binding_0, ref _binding_1, ) => {
             _visitor.visit_expr(& * * _binding_0);
             tokens_helper(_visitor, &(_binding_1).0);
         }
@@ -1834,31 +1813,29 @@ pub fn visit_stmt<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast S
 }
 
 pub fn visit_trait_bound_modifier<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitBoundModifier) {
-    use ::TraitBoundModifier::*;
     match *_i {
-        None => { }
-        Maybe(ref _binding_0, ) => {
+        TraitBoundModifier::None => { }
+        TraitBoundModifier::Maybe(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_trait_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitItem) {
-    use ::TraitItem::*;
     match *_i {
-        Const(ref _binding_0, ) => {
+        TraitItem::Const(ref _binding_0, ) => {
             _visitor.visit_trait_item_const(_binding_0);
         }
-        Method(ref _binding_0, ) => {
+        TraitItem::Method(ref _binding_0, ) => {
             _visitor.visit_trait_item_method(_binding_0);
         }
-        Type(ref _binding_0, ) => {
+        TraitItem::Type(ref _binding_0, ) => {
             _visitor.visit_trait_item_type(_binding_0);
         }
-        Macro(ref _binding_0, ) => {
+        TraitItem::Macro(ref _binding_0, ) => {
             _visitor.visit_trait_item_macro(_binding_0);
         }
-        Verbatim(ref _binding_0, ) => {
+        TraitItem::Verbatim(ref _binding_0, ) => {
             _visitor.visit_trait_item_verbatim(_binding_0);
         }
     }
@@ -1909,51 +1886,50 @@ pub fn visit_trait_item_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut
 }
 
 pub fn visit_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Type) {
-    use ::Type::*;
     match *_i {
-        Slice(ref _binding_0, ) => {
+        Type::Slice(ref _binding_0, ) => {
             _visitor.visit_type_slice(_binding_0);
         }
-        Array(ref _binding_0, ) => {
+        Type::Array(ref _binding_0, ) => {
             _visitor.visit_type_array(_binding_0);
         }
-        Ptr(ref _binding_0, ) => {
+        Type::Ptr(ref _binding_0, ) => {
             _visitor.visit_type_ptr(_binding_0);
         }
-        Reference(ref _binding_0, ) => {
+        Type::Reference(ref _binding_0, ) => {
             _visitor.visit_type_reference(_binding_0);
         }
-        BareFn(ref _binding_0, ) => {
+        Type::BareFn(ref _binding_0, ) => {
             _visitor.visit_type_bare_fn(_binding_0);
         }
-        Never(ref _binding_0, ) => {
+        Type::Never(ref _binding_0, ) => {
             _visitor.visit_type_never(_binding_0);
         }
-        Tuple(ref _binding_0, ) => {
+        Type::Tuple(ref _binding_0, ) => {
             _visitor.visit_type_tuple(_binding_0);
         }
-        Path(ref _binding_0, ) => {
+        Type::Path(ref _binding_0, ) => {
             _visitor.visit_type_path(_binding_0);
         }
-        TraitObject(ref _binding_0, ) => {
+        Type::TraitObject(ref _binding_0, ) => {
             _visitor.visit_type_trait_object(_binding_0);
         }
-        ImplTrait(ref _binding_0, ) => {
+        Type::ImplTrait(ref _binding_0, ) => {
             _visitor.visit_type_impl_trait(_binding_0);
         }
-        Paren(ref _binding_0, ) => {
+        Type::Paren(ref _binding_0, ) => {
             _visitor.visit_type_paren(_binding_0);
         }
-        Group(ref _binding_0, ) => {
+        Type::Group(ref _binding_0, ) => {
             _visitor.visit_type_group(_binding_0);
         }
-        Infer(ref _binding_0, ) => {
+        Type::Infer(ref _binding_0, ) => {
             _visitor.visit_type_infer(_binding_0);
         }
-        Macro(ref _binding_0, ) => {
+        Type::Macro(ref _binding_0, ) => {
             _visitor.visit_type_macro(_binding_0);
         }
-        Verbatim(ref _binding_0, ) => {
+        Type::Verbatim(ref _binding_0, ) => {
             _visitor.visit_type_verbatim(_binding_0);
         }
     }
@@ -2009,13 +1985,12 @@ pub fn visit_type_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 }
 
 pub fn visit_type_param_bound<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeParamBound) {
-    use ::TypeParamBound::*;
     match *_i {
-        Trait(ref _binding_0, ref _binding_1, ) => {
+        TypeParamBound::Trait(ref _binding_0, ref _binding_1, ) => {
             _visitor.visit_poly_trait_ref(_binding_0);
             _visitor.visit_trait_bound_modifier(_binding_1);
         }
-        Region(ref _binding_0, ) => {
+        TypeParamBound::Region(ref _binding_0, ) => {
             _visitor.visit_lifetime(_binding_0);
         }
     }
@@ -2065,15 +2040,14 @@ pub fn visit_type_verbatim<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i
 }
 
 pub fn visit_un_op<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UnOp) {
-    use ::UnOp::*;
     match *_i {
-        Deref(ref _binding_0, ) => {
+        UnOp::Deref(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Not(ref _binding_0, ) => {
+        UnOp::Not(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
-        Neg(ref _binding_0, ) => {
+        UnOp::Neg(ref _binding_0, ) => {
             tokens_helper(_visitor, &(_binding_0).0);
         }
     }
@@ -2097,15 +2071,14 @@ pub fn visit_use_path<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_use_tree<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseTree) {
-    use ::UseTree::*;
     match *_i {
-        Path(ref _binding_0, ) => {
+        UseTree::Path(ref _binding_0, ) => {
             _visitor.visit_use_path(_binding_0);
         }
-        Glob(ref _binding_0, ) => {
+        UseTree::Glob(ref _binding_0, ) => {
             _visitor.visit_use_glob(_binding_0);
         }
-        List(ref _binding_0, ) => {
+        UseTree::List(ref _binding_0, ) => {
             _visitor.visit_use_list(_binding_0);
         }
     }
@@ -2122,17 +2095,16 @@ pub fn visit_variant<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 }
 
 pub fn visit_variant_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VariantData) {
-    use ::VariantData::*;
     match *_i {
-        Struct(ref _binding_0, ref _binding_1, ) => {
+        VariantData::Struct(ref _binding_0, ref _binding_1, ) => {
             for el in _binding_0 { let it = el.item(); _visitor.visit_field(it) };
             tokens_helper(_visitor, &(_binding_1).0);
         }
-        Tuple(ref _binding_0, ref _binding_1, ) => {
+        VariantData::Tuple(ref _binding_0, ref _binding_1, ) => {
             for el in _binding_0 { let it = el.item(); _visitor.visit_field(it) };
             tokens_helper(_visitor, &(_binding_1).0);
         }
-        Unit => { }
+        VariantData::Unit => { }
     }
 }
 
@@ -2154,18 +2126,17 @@ pub fn visit_vis_restricted<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
 }
 
 pub fn visit_visibility<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Visibility) {
-    use ::Visibility::*;
     match *_i {
-        Public(ref _binding_0, ) => {
+        Visibility::Public(ref _binding_0, ) => {
             _visitor.visit_vis_public(_binding_0);
         }
-        Crate(ref _binding_0, ) => {
+        Visibility::Crate(ref _binding_0, ) => {
             _visitor.visit_vis_crate(_binding_0);
         }
-        Restricted(ref _binding_0, ) => {
+        Visibility::Restricted(ref _binding_0, ) => {
             _visitor.visit_vis_restricted(_binding_0);
         }
-        Inherited => { }
+        Visibility::Inherited => { }
     }
 }
 
@@ -2188,15 +2159,14 @@ pub fn visit_where_eq_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut 
 }
 
 pub fn visit_where_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WherePredicate) {
-    use ::WherePredicate::*;
     match *_i {
-        BoundPredicate(ref _binding_0, ) => {
+        WherePredicate::BoundPredicate(ref _binding_0, ) => {
             _visitor.visit_where_bound_predicate(_binding_0);
         }
-        RegionPredicate(ref _binding_0, ) => {
+        WherePredicate::RegionPredicate(ref _binding_0, ) => {
             _visitor.visit_where_region_predicate(_binding_0);
         }
-        EqPredicate(ref _binding_0, ) => {
+        WherePredicate::EqPredicate(ref _binding_0, ) => {
             _visitor.visit_where_eq_predicate(_binding_0);
         }
     }
