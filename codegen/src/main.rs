@@ -127,17 +127,16 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 
                 // Try to parse the AstItem declaration out of the item.
                 let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
-                    syn::parse_tokens::<parsing::AstStruct>(item.mac.tts.clone().into_tokens())
+                    syn::parse::<parsing::AstStruct>(item.mac.tts.clone().into())
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum".into()) {
-                    syn::parse_tokens::<parsing::AstEnum>(item.mac.tts.clone().into_tokens())
+                    syn::parse::<parsing::AstEnum>(item.mac.tts.clone().into())
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
-                    syn::parse_tokens::<parsing::AstEnumOfStructs>(
-                        item.mac.tts.clone().into_tokens(),
-                    ).map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
+                    syn::parse::<parsing::AstEnumOfStructs>(item.mac.tts.clone().into())
+                        .map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
                 } else {
                     continue;
@@ -178,6 +177,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 mod parsing {
     use super::AstItem;
 
+    use syn;
     use syn::synom::*;
     use syn::*;
     use quote::Tokens;
@@ -210,9 +210,9 @@ mod parsing {
         option!(manual_extra_traits) >>
         rest: syn!(TokenStream) >>
         (AstItem {
-            ast: parse_tokens::<DeriveInput>(quote! {
+            ast: syn::parse(quote! {
                 pub struct #id #rest
-            })?,
+            }.into())?,
             features: features.0,
             eos_full: features.1,
         })
@@ -286,9 +286,9 @@ mod parsing {
                             None => quote!(#name),
                         }
                     });
-                    parse_tokens::<DeriveInput>(quote! {
+                    syn::parse(quote! {
                         pub enum #id { #(#variants),* }
-                    })?
+                    }.into())?
                 };
                 let mut items = vec![AstItem {
                     ast: enum_item,

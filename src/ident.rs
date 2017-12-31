@@ -21,12 +21,10 @@ use proc_macro2::Span;
 /// - A lifetime is not an identifier. Use `syn::Lifetime` instead.
 ///
 /// An identifier constructed with `Ident::new` is permitted to be a Rust
-/// keyword, though parsing input with [`parse`], [`parse_str`] or
-/// [`parse_tokens`] rejects Rust keywords.
+/// keyword, though parsing one through its [`Synom`] implementation rejects
+/// Rust keywords.
 ///
-/// [`parse`]: fn.parse.html
-/// [`parse_str`]: fn.parse_str.html
-/// [`parse_tokens`]: fn.parse_tokens.html
+/// [`Synom`]: synom/trait.Synom.html
 ///
 /// # Examples
 ///

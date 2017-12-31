@@ -18,7 +18,7 @@ required-features = ["extra-traits", "parsing", "printing", "full"]
 [features]
 default = ["parsing", "printing", "clone-impls"]
 full = []
-parsing = ["quote"]
+parsing = []
 printing = ["quote"]
 visit = []
 visit_mut = []
@@ -29,7 +29,7 @@ verbose-trace = []
 all-features = []
 
 [dependencies]
-quote = { git = 'https://github.com/dtolnay/quote', optional = true }
+quote = { git = "https://github.com/dtolnay/quote", optional = true }
 proc-macro2 = "0.1"
 unicode-xid = "0.1"
 

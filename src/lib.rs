@@ -7,7 +7,7 @@ extern crate proc_macro2;
 extern crate proc_macro;
 extern crate unicode_xid;
 
-#[cfg(any(feature = "printing", feature = "parsing"))]
+#[cfg(feature = "printing")]
 extern crate quote;
 
 #[cfg(feature = "parsing")]
@@ -200,34 +200,6 @@ where
         Some(s) => Err(ParseError::new(format!("failed to parse {}: {}", s, err))),
         None => Err(err),
     }
-}
-
-/// Parse a `quote::Tokens` of Rust code into the chosen syn data type.
-///
-/// # Examples
-///
-/// ```rust
-/// extern crate syn;
-/// #
-/// # #[macro_use]
-/// # extern crate quote;
-/// #
-/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
-///
-/// use syn::Expr;
-///
-/// fn run() -> Result<()> {
-///     let code = quote!(assert_eq!(u8::max_value(), 255));
-///     let expr = syn::parse_tokens::<Expr>(code)?;
-///     println!("{:#?}", expr);
-///     Ok(())
-/// }
-/// #
-/// # fn main() { run().unwrap() }
-/// ```
-#[cfg(feature = "parsing")]
-pub fn parse_tokens<T: Synom>(tokens: quote::Tokens) -> Result<T, ParseError> {
-    _parse(tokens.into())
 }
 
 /// Parse a string of Rust code into the chosen syn data type.
