@@ -25,7 +25,7 @@ mod attr;
 pub use attr::{AttrStyle, Attribute, MetaItem, MetaItemList, MetaNameValue, NestedMetaItem};
 
 mod data;
-pub use data::{Field, Variant, VariantData, VisCrate, VisPublic, VisRestricted, Visibility};
+pub use data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, VisPublic, VisRestricted, Visibility};
 
 mod expr;
 pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
@@ -76,7 +76,7 @@ mod mac;
 pub use mac::{Macro, MacroDelimiter};
 
 mod derive;
-pub use derive::{Body, BodyEnum, BodyStruct, DeriveInput};
+pub use derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 
 mod op;
 pub use op::{BinOp, UnOp};

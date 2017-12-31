@@ -49,10 +49,10 @@ fn test_unit() {
         vis: Visibility::Inherited,
         attrs: Vec::new(),
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
+        data: Data::Struct(DataStruct {
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
-            data: VariantData::Unit,
+            fields: Fields::Unit,
         }),
     };
 
@@ -87,12 +87,12 @@ fn test_struct() {
             },
         ],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
+        data: Data::Struct(DataStruct {
             semi_token: None,
             struct_token: Default::default(),
-            data: VariantData::Struct(
-                Default::default(),
-                delimited![
+            fields: Fields::Named(FieldsNamed {
+                brace_token: Default::default(),
+                fields: delimited![
                     Field {
                         ident: Some("ident".into()),
                         colon_token: Some(Default::default()),
@@ -138,7 +138,7 @@ fn test_struct() {
                         }.into(),
                     },
                 ],
-            ),
+            }),
         }),
     };
 
@@ -226,14 +226,14 @@ fn test_enum() {
             gt_token: Some(Default::default()),
             where_clause: None,
         },
-        body: Body::Enum(BodyEnum {
+        data: Data::Enum(DataEnum {
             variants: delimited![
                 Variant {
                     ident: "Ok".into(),
                     attrs: Vec::new(),
-                    data: VariantData::Tuple(
-                        Default::default(),
-                        delimited![
+                    fields: Fields::Unnamed(FieldsUnnamed {
+                        paren_token: Default::default(),
+                        fields: delimited![
                             Field {
                                 colon_token: None,
                                 ident: None,
@@ -245,15 +245,15 @@ fn test_enum() {
                                 }.into(),
                             },
                         ],
-                    ),
+                    }),
                     discriminant: None,
                 },
                 Variant {
                     ident: "Err".into(),
                     attrs: Vec::new(),
-                    data: VariantData::Tuple(
-                        Default::default(),
-                        delimited![
+                    fields: Fields::Unnamed(FieldsUnnamed {
+                        paren_token: Default::default(),
+                        fields: delimited![
                             Field {
                                 ident: None,
                                 colon_token: None,
@@ -265,13 +265,13 @@ fn test_enum() {
                                 }.into(),
                             },
                         ],
-                    ),
+                    }),
                     discriminant: None,
                 },
                 Variant {
                     ident: "Surprise".into(),
                     attrs: Vec::new(),
-                    data: VariantData::Unit,
+                    fields: Fields::Unit,
                     discriminant: Some((
                         Default::default(),
                         Expr::Lit(ExprLit {
@@ -286,7 +286,7 @@ fn test_enum() {
                 Variant {
                     ident: "ProcMacroHack".into(),
                     attrs: Vec::new(),
-                    data: VariantData::Unit,
+                    fields: Fields::Unit,
                     discriminant: Some((
                         Default::default(),
                         Expr::Field(ExprField {
@@ -401,8 +401,8 @@ fn test_attr_with_path() {
             },
         ],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
-            data: VariantData::Unit,
+        data: Data::Struct(DataStruct {
+            fields: Fields::Unit,
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
         }),
@@ -439,8 +439,8 @@ fn test_attr_with_non_mod_style_path() {
             },
         ],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
-            data: VariantData::Unit,
+        data: Data::Struct(DataStruct {
+            fields: Fields::Unit,
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
         }),
@@ -477,8 +477,8 @@ fn test_attr_with_mod_style_path_with_self() {
             },
         ],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
-            data: VariantData::Unit,
+        data: Data::Struct(DataStruct {
+            fields: Fields::Unit,
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
         }),
@@ -508,10 +508,10 @@ fn test_pub_restricted() {
         }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
-            data: VariantData::Tuple(
-                Default::default(),
-                delimited![
+        data: Data::Struct(DataStruct {
+            fields: Fields::Unnamed(FieldsUnnamed {
+                paren_token: Default::default(),
+                fields: delimited![
                     Field {
                         ident: None,
                         vis: Visibility::Restricted(VisRestricted {
@@ -531,7 +531,7 @@ fn test_pub_restricted() {
                         }.into(),
                     },
                 ],
-            ),
+            }),
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
         }),
@@ -557,10 +557,10 @@ fn test_pub_restricted_crate() {
         }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
+        data: Data::Struct(DataStruct {
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
-            data: VariantData::Unit,
+            fields: Fields::Unit,
         }),
     };
 
@@ -585,10 +585,10 @@ fn test_pub_restricted_super() {
         }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
+        data: Data::Struct(DataStruct {
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
-            data: VariantData::Unit,
+            fields: Fields::Unit,
         }),
     };
 
@@ -613,10 +613,10 @@ fn test_pub_restricted_in_super() {
         }),
         attrs: vec![],
         generics: Generics::default(),
-        body: Body::Struct(BodyStruct {
+        data: Data::Struct(DataStruct {
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
-            data: VariantData::Unit,
+            fields: Fields::Unit,
         }),
     };
 

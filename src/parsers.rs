@@ -356,7 +356,7 @@ macro_rules! cond {
 ///             (types, variadic)
 ///         )) >>
 ///         ({
-///             let ((types, variadic), paren_token) = params;
+///             let (paren_token, (types, variadic)) = params;
 ///             VariadicFn {
 ///                 fn_token,
 ///                 paren_token,
@@ -879,8 +879,8 @@ macro_rules! alt {
 ///         (Macro {
 ///             name: name,
 ///             bang_token: bang,
-///             paren_token: body.1,
-///             tts: body.0,
+///             paren_token: body.0,
+///             tts: body.1,
 ///         })
 ///     ));
 /// }

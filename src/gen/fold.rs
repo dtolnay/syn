@@ -66,15 +66,17 @@ fn fold_binding(&mut self, i: Binding) -> Binding { fold_binding(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_block(&mut self, i: Block) -> Block { fold_block(self, i) }
 
-fn fold_body(&mut self, i: Body) -> Body { fold_body(self, i) }
-
-fn fold_body_enum(&mut self, i: BodyEnum) -> BodyEnum { fold_body_enum(self, i) }
-
-fn fold_body_struct(&mut self, i: BodyStruct) -> BodyStruct { fold_body_struct(self, i) }
-
 fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { fold_bound_lifetimes(self, i) }
 
 fn fold_const_param(&mut self, i: ConstParam) -> ConstParam { fold_const_param(self, i) }
+
+fn fold_data(&mut self, i: Data) -> Data { fold_data(self, i) }
+
+fn fold_data_enum(&mut self, i: DataEnum) -> DataEnum { fold_data_enum(self, i) }
+
+fn fold_data_struct(&mut self, i: DataStruct) -> DataStruct { fold_data_struct(self, i) }
+
+fn fold_data_union(&mut self, i: DataUnion) -> DataUnion { fold_data_union(self, i) }
 
 fn fold_derive_input(&mut self, i: DeriveInput) -> DeriveInput { fold_derive_input(self, i) }
 
@@ -165,6 +167,12 @@ fn fold_field(&mut self, i: Field) -> Field { fold_field(self, i) }
 fn fold_field_pat(&mut self, i: FieldPat) -> FieldPat { fold_field_pat(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_field_value(&mut self, i: FieldValue) -> FieldValue { fold_field_value(self, i) }
+
+fn fold_fields(&mut self, i: Fields) -> Fields { fold_fields(self, i) }
+
+fn fold_fields_named(&mut self, i: FieldsNamed) -> FieldsNamed { fold_fields_named(self, i) }
+
+fn fold_fields_unnamed(&mut self, i: FieldsUnnamed) -> FieldsUnnamed { fold_fields_unnamed(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_file(&mut self, i: File) -> File { fold_file(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -377,8 +385,6 @@ fn fold_use_path(&mut self, i: UsePath) -> UsePath { fold_use_path(self, i) }
 fn fold_use_tree(&mut self, i: UseTree) -> UseTree { fold_use_tree(self, i) }
 
 fn fold_variant(&mut self, i: Variant) -> Variant { fold_variant(self, i) }
-
-fn fold_variant_data(&mut self, i: VariantData) -> VariantData { fold_variant_data(self, i) }
 
 fn fold_vis_crate(&mut self, i: VisCrate) -> VisCrate { fold_vis_crate(self, i) }
 
@@ -672,37 +678,6 @@ pub fn fold_block<V: Folder + ?Sized>(_visitor: &mut V, _i: Block) -> Block {
     }
 }
 
-pub fn fold_body<V: Folder + ?Sized>(_visitor: &mut V, _i: Body) -> Body {
-    match _i {
-        Body::Enum(_binding_0, ) => {
-            Body::Enum (
-                _visitor.fold_body_enum(_binding_0),
-            )
-        }
-        Body::Struct(_binding_0, ) => {
-            Body::Struct (
-                _visitor.fold_body_struct(_binding_0),
-            )
-        }
-    }
-}
-
-pub fn fold_body_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyEnum) -> BodyEnum {
-    BodyEnum {
-        enum_token: Token ! [ enum ](tokens_helper(_visitor, &(_i . enum_token).0)),
-        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
-        variants: FoldHelper::lift(_i . variants, |it| { _visitor.fold_variant(it) }),
-    }
-}
-
-pub fn fold_body_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: BodyStruct) -> BodyStruct {
-    BodyStruct {
-        data: _visitor.fold_variant_data(_i . data),
-        struct_token: Token ! [ struct ](tokens_helper(_visitor, &(_i . struct_token).0)),
-        semi_token: (_i . semi_token).map(|it| { Token ! [ ; ](tokens_helper(_visitor, &(it).0)) }),
-    }
-}
-
 pub fn fold_bound_lifetimes<V: Folder + ?Sized>(_visitor: &mut V, _i: BoundLifetimes) -> BoundLifetimes {
     BoundLifetimes {
         for_token: Token ! [ for ](tokens_helper(_visitor, &(_i . for_token).0)),
@@ -724,13 +699,56 @@ pub fn fold_const_param<V: Folder + ?Sized>(_visitor: &mut V, _i: ConstParam) ->
     }
 }
 
+pub fn fold_data<V: Folder + ?Sized>(_visitor: &mut V, _i: Data) -> Data {
+    match _i {
+        Data::Struct(_binding_0, ) => {
+            Data::Struct (
+                _visitor.fold_data_struct(_binding_0),
+            )
+        }
+        Data::Enum(_binding_0, ) => {
+            Data::Enum (
+                _visitor.fold_data_enum(_binding_0),
+            )
+        }
+        Data::Union(_binding_0, ) => {
+            Data::Union (
+                _visitor.fold_data_union(_binding_0),
+            )
+        }
+    }
+}
+
+pub fn fold_data_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: DataEnum) -> DataEnum {
+    DataEnum {
+        enum_token: Token ! [ enum ](tokens_helper(_visitor, &(_i . enum_token).0)),
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
+        variants: FoldHelper::lift(_i . variants, |it| { _visitor.fold_variant(it) }),
+    }
+}
+
+pub fn fold_data_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: DataStruct) -> DataStruct {
+    DataStruct {
+        struct_token: Token ! [ struct ](tokens_helper(_visitor, &(_i . struct_token).0)),
+        fields: _visitor.fold_fields(_i . fields),
+        semi_token: (_i . semi_token).map(|it| { Token ! [ ; ](tokens_helper(_visitor, &(it).0)) }),
+    }
+}
+
+pub fn fold_data_union<V: Folder + ?Sized>(_visitor: &mut V, _i: DataUnion) -> DataUnion {
+    DataUnion {
+        union_token: Token ! [ union ](tokens_helper(_visitor, &(_i . union_token).0)),
+        fields: _visitor.fold_fields_named(_i . fields),
+    }
+}
+
 pub fn fold_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) -> DeriveInput {
     DeriveInput {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         vis: _visitor.fold_visibility(_i . vis),
         ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
-        body: _visitor.fold_body(_i . body),
+        data: _visitor.fold_data(_i . data),
     }
 }
 
@@ -1334,6 +1352,36 @@ pub fn fold_field_value<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldValue) ->
         expr: _visitor.fold_expr(_i . expr),
     }
 }
+
+pub fn fold_fields<V: Folder + ?Sized>(_visitor: &mut V, _i: Fields) -> Fields {
+    match _i {
+        Fields::Named(_binding_0, ) => {
+            Fields::Named (
+                _visitor.fold_fields_named(_binding_0),
+            )
+        }
+        Fields::Unnamed(_binding_0, ) => {
+            Fields::Unnamed (
+                _visitor.fold_fields_unnamed(_binding_0),
+            )
+        }
+        Fields::Unit => { Fields::Unit }
+    }
+}
+
+pub fn fold_fields_named<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldsNamed) -> FieldsNamed {
+    FieldsNamed {
+        brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
+        fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field(it) }),
+    }
+}
+
+pub fn fold_fields_unnamed<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldsUnnamed) -> FieldsUnnamed {
+    FieldsUnnamed {
+        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
+        fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field(it) }),
+    }
+}
 # [ cfg ( feature = "full" ) ]
 pub fn fold_file<V: Folder + ?Sized>(_visitor: &mut V, _i: File) -> File {
     File {
@@ -1649,14 +1697,14 @@ pub fn fold_item<V: Folder + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
                 _visitor.fold_item_type(_binding_0),
             )
         }
-        Item::Enum(_binding_0, ) => {
-            Item::Enum (
-                _visitor.fold_item_enum(_binding_0),
-            )
-        }
         Item::Struct(_binding_0, ) => {
             Item::Struct (
                 _visitor.fold_item_struct(_binding_0),
+            )
+        }
+        Item::Enum(_binding_0, ) => {
+            Item::Enum (
+                _visitor.fold_item_enum(_binding_0),
             )
         }
         Item::Union(_binding_0, ) => {
@@ -1831,7 +1879,7 @@ pub fn fold_item_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemStruct) ->
         struct_token: Token ! [ struct ](tokens_helper(_visitor, &(_i . struct_token).0)),
         ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
-        data: _visitor.fold_variant_data(_i . data),
+        fields: _visitor.fold_fields(_i . fields),
         semi_token: (_i . semi_token).map(|it| { Token ! [ ; ](tokens_helper(_visitor, &(it).0)) }),
     }
 }
@@ -1872,7 +1920,7 @@ pub fn fold_item_union<V: Folder + ?Sized>(_visitor: &mut V, _i: ItemUnion) -> I
         union_token: Token ! [ union ](tokens_helper(_visitor, &(_i . union_token).0)),
         ident: _visitor.fold_ident(_i . ident),
         generics: _visitor.fold_generics(_i . generics),
-        data: _visitor.fold_variant_data(_i . data),
+        fields: _visitor.fold_fields_named(_i . fields),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2715,29 +2763,11 @@ pub fn fold_variant<V: Folder + ?Sized>(_visitor: &mut V, _i: Variant) -> Varian
     Variant {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         ident: _visitor.fold_ident(_i . ident),
-        data: _visitor.fold_variant_data(_i . data),
+        fields: _visitor.fold_fields(_i . fields),
         discriminant: (_i . discriminant).map(|it| { (
             Token ! [ = ](tokens_helper(_visitor, &(( it ) . 0).0)),
             _visitor.fold_expr(( it ) . 1),
         ) }),
-    }
-}
-
-pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) -> VariantData {
-    match _i {
-        VariantData::Struct(_binding_0, _binding_1, ) => {
-            VariantData::Struct (
-                Brace(tokens_helper(_visitor, &(_binding_0).0)),
-                FoldHelper::lift(_binding_1, |it| { _visitor.fold_field(it) }),
-            )
-        }
-        VariantData::Tuple(_binding_0, _binding_1, ) => {
-            VariantData::Tuple (
-                Paren(tokens_helper(_visitor, &(_binding_0).0)),
-                FoldHelper::lift(_binding_1, |it| { _visitor.fold_field(it) }),
-            )
-        }
-        VariantData::Unit => { VariantData::Unit }
     }
 }
 

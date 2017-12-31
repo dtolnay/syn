@@ -110,6 +110,18 @@ ast_enum_of_structs! {
             pub ty: Box<Type>,
             pub semi_token: Token![;],
         }),
+        /// A struct definition (`struct` or `pub struct`).
+        ///
+        /// E.g. `struct Foo<A> { x: A }`
+        pub Struct(ItemStruct {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub struct_token: Token![struct],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub fields: Fields,
+            pub semi_token: Option<Token![;]>,
+        }),
         /// An enum definition (`enum` or `pub enum`).
         ///
         /// E.g. `enum Foo<A, B> { C<A>, D<B> }`
@@ -122,18 +134,6 @@ ast_enum_of_structs! {
             pub brace_token: token::Brace,
             pub variants: Delimited<Variant, Token![,]>,
         }),
-        /// A struct definition (`struct` or `pub struct`).
-        ///
-        /// E.g. `struct Foo<A> { x: A }`
-        pub Struct(ItemStruct {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub struct_token: Token![struct],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub data: VariantData,
-            pub semi_token: Option<Token![;]>,
-        }),
         /// A union definition (`union` or `pub union`).
         ///
         /// E.g. `union Foo<A, B> { x: A, y: B }`
@@ -143,7 +143,7 @@ ast_enum_of_structs! {
             pub union_token: Token![union],
             pub ident: Ident,
             pub generics: Generics,
-            pub data: VariantData,
+            pub fields: FieldsNamed,
         }),
         /// A Trait declaration (`trait` or `pub trait`).
         ///
@@ -256,8 +256,17 @@ impl Hash for ItemVerbatim {
 
 impl From<DeriveInput> for Item {
     fn from(input: DeriveInput) -> Item {
-        match input.body {
-            Body::Enum(data) => Item::Enum(ItemEnum {
+        match input.data {
+            Data::Struct(data) => Item::Struct(ItemStruct {
+                attrs: input.attrs,
+                vis: input.vis,
+                struct_token: data.struct_token,
+                ident: input.ident,
+                generics: input.generics,
+                fields: data.fields,
+                semi_token: data.semi_token,
+            }),
+            Data::Enum(data) => Item::Enum(ItemEnum {
                 attrs: input.attrs,
                 vis: input.vis,
                 enum_token: data.enum_token,
@@ -266,14 +275,13 @@ impl From<DeriveInput> for Item {
                 brace_token: data.brace_token,
                 variants: data.variants,
             }),
-            Body::Struct(data) => Item::Struct(ItemStruct {
+            Data::Union(data) => Item::Union(ItemUnion {
                 attrs: input.attrs,
                 vis: input.vis,
-                struct_token: data.struct_token,
+                union_token: data.union_token,
                 ident: input.ident,
                 generics: input.generics,
-                data: data.data,
-                semi_token: data.semi_token,
+                fields: data.fields,
             }),
         }
     }
@@ -1026,8 +1034,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         where_clause: option!(syn!(WhereClause)) >>
-        fields: braces!(call!(Delimited::parse_terminated_with,
-                              Field::parse_struct)) >>
+        fields: syn!(FieldsNamed) >>
         (ItemUnion {
             attrs: attrs,
             vis: vis,
@@ -1037,7 +1044,7 @@ pub mod parsing {
                 where_clause: where_clause,
                 .. generics
             },
-            data: VariantData::Struct(fields.0, fields.1),
+            fields: fields,
         })
     ));
 
@@ -1379,7 +1386,6 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use data::VariantData;
     use quote::{ToTokens, Tokens};
 
     impl ToTokens for ItemExternCrate {
@@ -1515,17 +1521,17 @@ mod printing {
             self.struct_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            match self.data {
-                VariantData::Struct(..) => {
+            match self.fields {
+                Fields::Named(ref fields) => {
                     self.generics.where_clause.to_tokens(tokens);
-                    self.data.to_tokens(tokens);
+                    fields.to_tokens(tokens);
                 }
-                VariantData::Tuple(..) => {
-                    self.data.to_tokens(tokens);
+                Fields::Unnamed(ref fields) => {
+                    fields.to_tokens(tokens);
                     self.generics.where_clause.to_tokens(tokens);
                     TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }
-                VariantData::Unit => {
+                Fields::Unit => {
                     self.generics.where_clause.to_tokens(tokens);
                     TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }
@@ -1541,9 +1547,7 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
-            // XXX: Should we handle / complain when using a
-            // non-VariantData::Struct Variant in Union?
-            self.data.to_tokens(tokens);
+            self.fields.to_tokens(tokens);
         }
     }
 

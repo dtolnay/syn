@@ -22,7 +22,7 @@ extern crate quote;
 extern crate syn;
 
 use quote::{ToTokens, Tokens};
-use syn::{Attribute, Body, BodyStruct, DeriveInput, Ident, Item};
+use syn::{Attribute, Data, DataStruct, DeriveInput, Ident, Item};
 use failure::{err_msg, Error};
 
 use std::io::{Read, Write};
@@ -158,8 +158,8 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                             vis: item.vis,
                             attrs: item.attrs,
                             generics: item.generics,
-                            body: Body::Struct(BodyStruct {
-                                data: item.data,
+                            data: Data::Struct(DataStruct {
+                                fields: item.fields,
                                 struct_token: item.struct_token,
                                 semi_token: item.semi_token,
                             }),
@@ -273,13 +273,13 @@ mod parsing {
             keyword!(pub) >>
             keyword!(enum) >>
             id: syn!(Ident) >>
-            body: braces!(many0!(eos_variant)) >>
+            variants: braces!(many0!(eos_variant)) >>
             option!(syn!(Ident)) >> // do_not_generate_to_tokens
             ({
                 // XXX: This is really gross - we shouldn't have to convert the
                 // tokens to strings to re-parse them.
                 let enum_item = {
-                    let variants = body.1.iter().map(|v| {
+                    let variants = variants.1.iter().map(|v| {
                         let name = v.name;
                         match v.member {
                             Some(ref member) => quote!(#name(#member)),
@@ -295,7 +295,7 @@ mod parsing {
                     features: quote!(),
                     eos_full:  false,
                 }];
-                items.extend(body.1.into_iter().filter_map(|v| v.inner));
+                items.extend(variants.1.into_iter().filter_map(|v| v.inner));
                 AstEnumOfStructs(items)
             })
         ));
@@ -725,21 +725,21 @@ mod codegen {
         ));
 
         // XXX:  This part is a disaster - I'm not sure how to make it cleaner though :'(
-        match s.ast.body {
-            Body::Enum(ref e) => {
+        match s.ast.data {
+            Data::Enum(ref e) => {
                 state.visit_impl.push_str("    match *_i {\n");
                 state.visit_mut_impl.push_str("    match *_i {\n");
                 state.fold_impl.push_str("    match _i {\n");
                 for variant in &e.variants {
-                    let fields: Vec<(&Field, Tokens)> = match variant.item().data {
-                        VariantData::Struct(..) => panic!("Doesn't support enum struct variants"),
-                        VariantData::Tuple(_, ref fields) => {
+                    let fields: Vec<(&Field, Tokens)> = match variant.item().fields {
+                        Fields::Named(..) => panic!("Doesn't support enum struct variants"),
+                        Fields::Unnamed(ref fields) => {
                             let binding = format!("        {}::{}(", s.ast.ident, variant.item().ident);
                             state.visit_impl.push_str(&binding);
                             state.visit_mut_impl.push_str(&binding);
                             state.fold_impl.push_str(&binding);
 
-                            let res = fields
+                            let res = fields.fields
                                 .iter()
                                 .enumerate()
                                 .map(|(idx, el)| {
@@ -768,7 +768,7 @@ mod codegen {
 
                             res
                         }
-                        VariantData::Unit => {
+                        Fields::Unit => {
                             state
                                 .visit_impl
                                 .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.item().ident));
@@ -836,13 +836,13 @@ mod codegen {
                 state.visit_mut_impl.push_str("    }\n");
                 state.fold_impl.push_str("    }\n");
             }
-            Body::Struct(ref v) => {
-                let fields: Vec<(&Field, Tokens)> = match v.data {
-                    VariantData::Struct(_, ref fields) => {
+            Data::Struct(ref v) => {
+                let fields: Vec<(&Field, Tokens)> = match v.fields {
+                    Fields::Named(ref fields) => {
                         state
                             .fold_impl
                             .push_str(&format!("    {} {{\n", s.ast.ident));
-                        fields
+                        fields.fields
                             .iter()
                             .map(|el| {
                                 let id = el.item().ident;
@@ -850,11 +850,11 @@ mod codegen {
                             })
                             .collect()
                     }
-                    VariantData::Tuple(_, ref fields) => {
+                    Fields::Unnamed(ref fields) => {
                         state
                             .fold_impl
                             .push_str(&format!("    {} (\n", s.ast.ident));
-                        fields
+                        fields.fields
                             .iter()
                             .enumerate()
                             .map(|(idx, el)| {
@@ -863,7 +863,7 @@ mod codegen {
                             })
                             .collect()
                     }
-                    VariantData::Unit => {
+                    Fields::Unit => {
                         state.fold_impl.push_str("    _i\n");
                         vec![]
                     }
@@ -901,12 +901,13 @@ mod codegen {
                     }
                 }
 
-                match v.data {
-                    VariantData::Struct(..) => state.fold_impl.push_str("    }\n"),
-                    VariantData::Tuple(..) => state.fold_impl.push_str("    )\n"),
-                    VariantData::Unit => {}
+                match v.fields {
+                    Fields::Named(..) => state.fold_impl.push_str("    }\n"),
+                    Fields::Unnamed(..) => state.fold_impl.push_str("    )\n"),
+                    Fields::Unit => {}
                 };
             }
+            Data::Union(..) => panic!("Union not supported"),
         }
 
         // Close the impl body
@@ -939,8 +940,8 @@ fn main() {
                     }),
                     attrs: vec![],
                     generics: Default::default(),
-                    body: Body::Struct(BodyStruct {
-                        data: VariantData::Unit,
+                    data: Data::Struct(DataStruct {
+                        fields: Fields::Unit,
                         struct_token: Default::default(),
                         semi_token: None,
                     }),

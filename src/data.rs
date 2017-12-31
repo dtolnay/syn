@@ -10,25 +10,32 @@ ast_struct! {
         /// Name of the variant.
         pub ident: Ident,
 
-        /// Type of variant.
-        pub data: VariantData,
+        /// Content stored in the variant.
+        pub fields: Fields,
 
         /// Explicit discriminant, e.g. `Foo = 1`
         pub discriminant: Option<(Token![=], Expr)>,
     }
 }
 
-ast_enum! {
+ast_enum_of_structs! {
     /// Data stored within an enum variant or struct.
-    pub enum VariantData {
-        /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-        Struct(token::Brace, Delimited<Field, Token![,]>),
+    pub enum Fields {
+        /// Named fields of a struct or struct variant such as `Point { x: f64,
+        /// y: f64 }`.
+        pub Named(FieldsNamed {
+            pub brace_token: token::Brace,
+            pub fields: Delimited<Field, Token![,]>,
+        }),
 
-        /// Tuple variant, e.g. `Some(T)`.
-        Tuple(token::Paren, Delimited<Field, Token![,]>),
+        /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
+        pub Unnamed(FieldsUnnamed {
+            pub paren_token: token::Paren,
+            pub fields: Delimited<Field, Token![,]>,
+        }),
 
-        /// Unit variant, e.g. `None`.
-        Unit,
+        /// Unit struct or unit variant such as `None`.
+        pub Unit,
     }
 }
 
@@ -87,8 +94,53 @@ pub mod parsing {
 
     use synom::Synom;
 
+    impl Synom for Variant {
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
+            id: syn!(Ident) >>
+            fields: alt!(
+                syn!(FieldsNamed) => { Fields::Named }
+                |
+                syn!(FieldsUnnamed) => { Fields::Unnamed }
+                |
+                epsilon!() => { |_| Fields::Unit }
+            ) >>
+            disr: option!(tuple!(punct!(=), syn!(Expr))) >>
+            (Variant {
+                ident: id,
+                attrs: attrs,
+                fields: fields,
+                discriminant: disr,
+            })
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("enum variant")
+        }
+    }
+
+    impl Synom for FieldsNamed {
+        named!(parse -> Self, map!(
+            braces!(call!(Delimited::parse_terminated_with, Field::parse_named)),
+            |(brace, fields)| FieldsNamed {
+                brace_token: brace,
+                fields: fields,
+            }
+        ));
+    }
+
+    impl Synom for FieldsUnnamed {
+        named!(parse -> Self, map!(
+            parens!(call!(Delimited::parse_terminated_with, Field::parse_unnamed)),
+            |(paren, fields)| FieldsUnnamed {
+                paren_token: paren,
+                fields: fields,
+            }
+        ));
+    }
+
     impl Field {
-        named!(pub parse_struct -> Self, do_parse!(
+        named!(pub parse_named -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             id: syn!(Ident) >>
@@ -103,7 +155,7 @@ pub mod parsing {
             })
         ));
 
-        named!(pub parse_tuple -> Self, do_parse!(
+        named!(pub parse_unnamed -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             ty: syn!(Type) >>
@@ -190,7 +242,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
             self.ident.to_tokens(tokens);
-            self.data.to_tokens(tokens);
+            self.fields.to_tokens(tokens);
             if let Some((ref eq_token, ref disc)) = self.discriminant {
                 eq_token.to_tokens(tokens);
                 disc.to_tokens(tokens);
@@ -198,21 +250,19 @@ mod printing {
         }
     }
 
-    impl ToTokens for VariantData {
+    impl ToTokens for FieldsNamed {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                VariantData::Struct(ref brace, ref fields) => {
-                    brace.surround(tokens, |tokens| {
-                        fields.to_tokens(tokens);
-                    });
-                }
-                VariantData::Tuple(ref paren, ref fields) => {
-                    paren.surround(tokens, |tokens| {
-                        fields.to_tokens(tokens);
-                    });
-                }
-                VariantData::Unit => {}
-            }
+            self.brace_token.surround(tokens, |tokens| {
+                self.fields.to_tokens(tokens);
+            });
+        }
+    }
+
+    impl ToTokens for FieldsUnnamed {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.paren_token.surround(tokens, |tokens| {
+                self.fields.to_tokens(tokens);
+            });
         }
     }
 

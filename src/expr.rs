@@ -1279,22 +1279,20 @@ pub mod parsing {
         mut e: call!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
             tap!(args: and_call => {
-                let (paren, args) = args;
                 e = ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
-                    args: args,
-                    paren_token: paren,
+                    paren_token: args.0,
+                    args: args.1,
                 }.into();
             })
             |
             tap!(i: and_index => {
-                let (i, token) = i;
                 e = ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    bracket_token: token,
-                    index: Box::new(i),
+                    bracket_token: i.0,
+                    index: Box::new(i.1),
                 }.into();
             })
         )) >>

@@ -62,15 +62,17 @@ fn visit_binding(&mut self, i: &'ast Binding) { visit_binding(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_block(&mut self, i: &'ast Block) { visit_block(self, i) }
 
-fn visit_body(&mut self, i: &'ast Body) { visit_body(self, i) }
-
-fn visit_body_enum(&mut self, i: &'ast BodyEnum) { visit_body_enum(self, i) }
-
-fn visit_body_struct(&mut self, i: &'ast BodyStruct) { visit_body_struct(self, i) }
-
 fn visit_bound_lifetimes(&mut self, i: &'ast BoundLifetimes) { visit_bound_lifetimes(self, i) }
 
 fn visit_const_param(&mut self, i: &'ast ConstParam) { visit_const_param(self, i) }
+
+fn visit_data(&mut self, i: &'ast Data) { visit_data(self, i) }
+
+fn visit_data_enum(&mut self, i: &'ast DataEnum) { visit_data_enum(self, i) }
+
+fn visit_data_struct(&mut self, i: &'ast DataStruct) { visit_data_struct(self, i) }
+
+fn visit_data_union(&mut self, i: &'ast DataUnion) { visit_data_union(self, i) }
 
 fn visit_derive_input(&mut self, i: &'ast DeriveInput) { visit_derive_input(self, i) }
 
@@ -161,6 +163,12 @@ fn visit_field(&mut self, i: &'ast Field) { visit_field(self, i) }
 fn visit_field_pat(&mut self, i: &'ast FieldPat) { visit_field_pat(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_field_value(&mut self, i: &'ast FieldValue) { visit_field_value(self, i) }
+
+fn visit_fields(&mut self, i: &'ast Fields) { visit_fields(self, i) }
+
+fn visit_fields_named(&mut self, i: &'ast FieldsNamed) { visit_fields_named(self, i) }
+
+fn visit_fields_unnamed(&mut self, i: &'ast FieldsUnnamed) { visit_fields_unnamed(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_file(&mut self, i: &'ast File) { visit_file(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -374,8 +382,6 @@ fn visit_use_tree(&mut self, i: &'ast UseTree) { visit_use_tree(self, i) }
 
 fn visit_variant(&mut self, i: &'ast Variant) { visit_variant(self, i) }
 
-fn visit_variant_data(&mut self, i: &'ast VariantData) { visit_variant_data(self, i) }
-
 fn visit_vis_crate(&mut self, i: &'ast VisCrate) { visit_vis_crate(self, i) }
 
 fn visit_vis_public(&mut self, i: &'ast VisPublic) { visit_vis_public(self, i) }
@@ -576,29 +582,6 @@ pub fn visit_block<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     for it in & _i . stmts { _visitor.visit_stmt(it) };
 }
 
-pub fn visit_body<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Body) {
-    match *_i {
-        Body::Enum(ref _binding_0, ) => {
-            _visitor.visit_body_enum(_binding_0);
-        }
-        Body::Struct(ref _binding_0, ) => {
-            _visitor.visit_body_struct(_binding_0);
-        }
-    }
-}
-
-pub fn visit_body_enum<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BodyEnum) {
-    tokens_helper(_visitor, &(& _i . enum_token).0);
-    tokens_helper(_visitor, &(& _i . brace_token).0);
-    for el in & _i . variants { let it = el.item(); _visitor.visit_variant(it) };
-}
-
-pub fn visit_body_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BodyStruct) {
-    _visitor.visit_variant_data(& _i . data);
-    tokens_helper(_visitor, &(& _i . struct_token).0);
-    if let Some(ref it) = _i . semi_token { tokens_helper(_visitor, &(it).0) };
-}
-
 pub fn visit_bound_lifetimes<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BoundLifetimes) {
     tokens_helper(_visitor, &(& _i . for_token).0);
     tokens_helper(_visitor, &(& _i . lt_token).0);
@@ -616,12 +599,43 @@ pub fn visit_const_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     if let Some(ref it) = _i . default { _visitor.visit_expr(it) };
 }
 
+pub fn visit_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Data) {
+    match *_i {
+        Data::Struct(ref _binding_0, ) => {
+            _visitor.visit_data_struct(_binding_0);
+        }
+        Data::Enum(ref _binding_0, ) => {
+            _visitor.visit_data_enum(_binding_0);
+        }
+        Data::Union(ref _binding_0, ) => {
+            _visitor.visit_data_union(_binding_0);
+        }
+    }
+}
+
+pub fn visit_data_enum<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataEnum) {
+    tokens_helper(_visitor, &(& _i . enum_token).0);
+    tokens_helper(_visitor, &(& _i . brace_token).0);
+    for el in & _i . variants { let it = el.item(); _visitor.visit_variant(it) };
+}
+
+pub fn visit_data_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataStruct) {
+    tokens_helper(_visitor, &(& _i . struct_token).0);
+    _visitor.visit_fields(& _i . fields);
+    if let Some(ref it) = _i . semi_token { tokens_helper(_visitor, &(it).0) };
+}
+
+pub fn visit_data_union<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataUnion) {
+    tokens_helper(_visitor, &(& _i . union_token).0);
+    _visitor.visit_fields_named(& _i . fields);
+}
+
 pub fn visit_derive_input<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DeriveInput) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_visibility(& _i . vis);
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_generics(& _i . generics);
-    _visitor.visit_body(& _i . body);
+    _visitor.visit_data(& _i . data);
 }
 
 pub fn visit_expr<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Expr) {
@@ -1058,6 +1072,28 @@ pub fn visit_field_value<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_expr(& _i . expr);
 }
+
+pub fn visit_fields<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Fields) {
+    match *_i {
+        Fields::Named(ref _binding_0, ) => {
+            _visitor.visit_fields_named(_binding_0);
+        }
+        Fields::Unnamed(ref _binding_0, ) => {
+            _visitor.visit_fields_unnamed(_binding_0);
+        }
+        Fields::Unit => { }
+    }
+}
+
+pub fn visit_fields_named<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FieldsNamed) {
+    tokens_helper(_visitor, &(& _i . brace_token).0);
+    for el in & _i . fields { let it = el.item(); _visitor.visit_field(it) };
+}
+
+pub fn visit_fields_unnamed<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FieldsUnnamed) {
+    tokens_helper(_visitor, &(& _i . paren_token).0);
+    for el in & _i . fields { let it = el.item(); _visitor.visit_field(it) };
+}
 # [ cfg ( feature = "full" ) ]
 pub fn visit_file<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast File) {
     // Skipped field _i . shebang;
@@ -1290,11 +1326,11 @@ pub fn visit_item<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast I
         Item::Type(ref _binding_0, ) => {
             _visitor.visit_item_type(_binding_0);
         }
-        Item::Enum(ref _binding_0, ) => {
-            _visitor.visit_item_enum(_binding_0);
-        }
         Item::Struct(ref _binding_0, ) => {
             _visitor.visit_item_struct(_binding_0);
+        }
+        Item::Enum(ref _binding_0, ) => {
+            _visitor.visit_item_enum(_binding_0);
         }
         Item::Union(ref _binding_0, ) => {
             _visitor.visit_item_union(_binding_0);
@@ -1435,7 +1471,7 @@ pub fn visit_item_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     tokens_helper(_visitor, &(& _i . struct_token).0);
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_generics(& _i . generics);
-    _visitor.visit_variant_data(& _i . data);
+    _visitor.visit_fields(& _i . fields);
     if let Some(ref it) = _i . semi_token { tokens_helper(_visitor, &(it).0) };
 }
 # [ cfg ( feature = "full" ) ]
@@ -1470,7 +1506,7 @@ pub fn visit_item_union<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
     tokens_helper(_visitor, &(& _i . union_token).0);
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_generics(& _i . generics);
-    _visitor.visit_variant_data(& _i . data);
+    _visitor.visit_fields_named(& _i . fields);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_item_use<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ItemUse) {
@@ -2087,25 +2123,11 @@ pub fn visit_use_tree<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 pub fn visit_variant<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Variant) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_ident(& _i . ident);
-    _visitor.visit_variant_data(& _i . data);
+    _visitor.visit_fields(& _i . fields);
     if let Some(ref it) = _i . discriminant { 
             tokens_helper(_visitor, &(& ( it ) . 0).0);
             _visitor.visit_expr(& ( it ) . 1);
          };
-}
-
-pub fn visit_variant_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VariantData) {
-    match *_i {
-        VariantData::Struct(ref _binding_0, ref _binding_1, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-            for el in _binding_1 { let it = el.item(); _visitor.visit_field(it) };
-        }
-        VariantData::Tuple(ref _binding_0, ref _binding_1, ) => {
-            tokens_helper(_visitor, &(_binding_0).0);
-            for el in _binding_1 { let it = el.item(); _visitor.visit_field(it) };
-        }
-        VariantData::Unit => { }
-    }
 }
 
 pub fn visit_vis_crate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VisCrate) {
