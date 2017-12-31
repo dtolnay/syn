@@ -1228,7 +1228,7 @@ pub fn visit_generics_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Gen
 }
 
 pub fn visit_ident_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {
-    // Skipped field _i . sym;
+    // Skipped field _i . term;
     _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( feature = "full" ) ]
@@ -1529,7 +1529,7 @@ pub fn visit_label_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Label)
 }
 
 pub fn visit_lifetime_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Lifetime) {
-    // Skipped field _i . sym;
+    // Skipped field _i . term;
     _visitor.visit_span_mut(& mut _i . span);
 }
 
