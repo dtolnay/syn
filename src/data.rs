@@ -32,27 +32,6 @@ ast_enum! {
     }
 }
 
-impl VariantData {
-    // TODO: expose this?
-    // /// Slice containing the fields stored in the variant.
-    // pub fn fields(&self) -> &Delimited<Field, token::Comma> {
-    //     match *self {
-    //         VariantData::Struct(_, ref fields) |
-    //         VariantData::Tuple(_, ref fields) => fields,
-    //         VariantData::Unit => &[],
-    //     }
-    // }
-    //
-    // /// Mutable slice containing the fields stored in the variant.
-    // pub fn fields_mut(&mut self) -> &mut Delimited<Field, token::Comma> {
-    //     match *self {
-    //         VariantData::Struct(ref mut fields, _) |
-    //         VariantData::Tuple(ref mut fields, _) => fields,
-    //         VariantData::Unit => &mut [],
-    //     }
-    // }
-}
-
 ast_struct! {
     /// A field of a struct or enum variant.
     pub struct Field {
