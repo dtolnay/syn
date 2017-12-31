@@ -423,7 +423,7 @@ pub mod parsing {
 
     fn lit_doc_comment(input: Cursor) -> PResult<TokenTree> {
         match input.literal() {
-            Some((rest, span, lit)) => {
+            Some((span, lit, rest)) => {
                 let literal = lit.to_string();
                 if literal.starts_with("//") || literal.starts_with("/*") {
                     Ok((

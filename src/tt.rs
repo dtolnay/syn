@@ -11,11 +11,11 @@ use std::hash::{Hash, Hasher};
 pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
     match input.token_tree() {
         Some((
-            rest,
             TokenTree {
                 span,
                 kind: TokenNode::Group(delimiter, tts),
             },
+            rest,
         )) => {
             let delimiter = match delimiter {
                 Delimiter::Parenthesis => MacroDelimiter::Paren(Paren(span)),
@@ -33,11 +33,11 @@ pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
 pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
     match input.token_tree() {
         Some((
-            rest,
             TokenTree {
                 span,
                 kind: TokenNode::Group(Delimiter::Brace, tts),
             },
+            rest,
         )) => Ok((rest, (Brace(span), tts))),
         _ => parse_error(),
     }
@@ -47,11 +47,11 @@ pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
 pub fn parenthesized(input: Cursor) -> PResult<(Paren, TokenStream)> {
     match input.token_tree() {
         Some((
-            rest,
             TokenTree {
                 span,
                 kind: TokenNode::Group(Delimiter::Parenthesis, tts),
             },
+            rest,
         )) => Ok((rest, (Paren(span), tts))),
         _ => parse_error(),
     }

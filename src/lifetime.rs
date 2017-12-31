@@ -99,7 +99,7 @@ pub mod parsing {
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (rest, span, term) = match input.term() {
+            let (span, term, rest) = match input.term() {
                 Some(term) => term,
                 _ => return parse_error(),
             };

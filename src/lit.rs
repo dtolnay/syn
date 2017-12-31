@@ -105,7 +105,7 @@ pub mod parsing {
     impl Synom for Lit {
         fn parse(input: Cursor) -> PResult<Self> {
             match input.literal() {
-                Some((rest, span, lit)) => Ok((
+                Some((span, lit, rest)) => Ok((
                     rest,
                     Lit {
                         span: span,
@@ -113,7 +113,7 @@ pub mod parsing {
                     },
                 )),
                 _ => match input.term() {
-                    Some((rest, span, term)) => {
+                    Some((span, term, rest)) => {
                         let kind = if term.as_str() == "true" {
                             LitKind::Bool(true)
                         } else if term.as_str() == "false" {

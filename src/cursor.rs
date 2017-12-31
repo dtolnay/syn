@@ -101,12 +101,6 @@ impl SynomBuffer {
     }
 }
 
-pub struct Group<'a> {
-    pub span: Span,
-    pub inside: Cursor<'a>,
-    pub outside: Cursor<'a>,
-}
-
 /// A cursor into an input `TokenStream`'s data. This cursor holds a reference
 /// into the immutable data which is used internally to represent a
 /// `TokenStream`, and can be efficiently manipulated and copied around.
@@ -208,7 +202,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a Group with the given `Delimiter`, return
     /// a cursor into that group, and one pointing to the next `TokenTree`.
-    pub fn group(mut self, delim: Delimiter) -> Option<Group<'a>> {
+    pub fn group(mut self, delim: Delimiter) -> Option<(Cursor<'a>, Span, Cursor<'a>)> {
         // If we're not trying to enter a none-delimited group, we want to
         // ignore them. We have to make sure to _not_ ignore them when we want
         // to enter them, of course. For obvious reasons.
@@ -218,11 +212,7 @@ impl<'a> Cursor<'a> {
 
         if let Entry::Group(span, group_delim, ref buf) = *self.entry() {
             if group_delim == delim {
-                return Some(Group {
-                    span: span,
-                    inside: buf.begin(),
-                    outside: unsafe { self.bump() },
-                });
+                return Some((buf.begin(), span, unsafe { self.bump() }));
             }
         }
 
@@ -231,30 +221,30 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a Term, return it and a cursor pointing at
     /// the next `TokenTree`.
-    pub fn term(mut self) -> Option<(Cursor<'a>, Span, Term)> {
+    pub fn term(mut self) -> Option<(Span, Term, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Term(span, term) => Some((unsafe { self.bump() }, span, term)),
+            Entry::Term(span, term) => Some((span, term, unsafe { self.bump() })),
             _ => None,
         }
     }
 
     /// If the cursor is pointing at an Op, return it and a cursor pointing
     /// at the next `TokenTree`.
-    pub fn op(mut self) -> Option<(Cursor<'a>, Span, char, Spacing)> {
+    pub fn op(mut self) -> Option<(Span, char, Spacing, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Op(span, chr, spacing) => Some((unsafe { self.bump() }, span, chr, spacing)),
+            Entry::Op(span, op, spacing) => Some((span, op, spacing, unsafe { self.bump() })),
             _ => None,
         }
     }
 
     /// If the cursor is pointing at a Literal, return it and a cursor pointing
     /// at the next `TokenTree`.
-    pub fn literal(mut self) -> Option<(Cursor<'a>, Span, Literal)> {
+    pub fn literal(mut self) -> Option<(Span, Literal, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Literal(span, ref lit) => Some((unsafe { self.bump() }, span, lit.clone())),
+            Entry::Literal(span, ref lit) => Some((span, lit.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -263,9 +253,9 @@ impl<'a> Cursor<'a> {
     pub fn token_stream(self) -> TokenStream {
         let mut tts = Vec::new();
         let mut cursor = self;
-        while let Some((next, tt)) = cursor.token_tree() {
+        while let Some((tt, rest)) = cursor.token_tree() {
             tts.push(tt);
-            cursor = next;
+            cursor = rest;
         }
         tts.into_iter().collect()
     }
@@ -276,7 +266,7 @@ impl<'a> Cursor<'a> {
     ///
     /// This method does not treat `None`-delimited groups as invisible, and
     /// will return a `Group(None, ..)` if the cursor is looking at one.
-    pub fn token_tree(self) -> Option<(Cursor<'a>, TokenTree)> {
+    pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
         let tree = match *self.entry() {
             Entry::Group(span, delim, ref buf) => {
                 let stream = buf.begin().token_stream();
@@ -302,7 +292,7 @@ impl<'a> Cursor<'a> {
             }
         };
 
-        Some((unsafe { self.bump() }, tree))
+        Some((tree, unsafe { self.bump() }))
     }
 }
 

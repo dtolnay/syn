@@ -510,7 +510,7 @@ mod parsing {
 
         for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
             match tokens.op() {
-                Some((rest, span, c, kind)) if c == ch => {
+                Some((span, op, kind, rest)) if op == ch => {
                     if i != s.len() - 1 {
                         match kind {
                             Spacing::Joint => {}
@@ -527,7 +527,7 @@ mod parsing {
     }
 
     pub fn keyword<'a, T>(keyword: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
-        if let Some((rest, span, term)) = tokens.term() {
+        if let Some((span, term, rest)) = tokens.term() {
             if term.as_str() == keyword {
                 return Ok((rest, new(span)));
             }
@@ -553,11 +553,11 @@ mod parsing {
             _ => panic!("unknown delimiter: {}", delim),
         };
 
-        if let Some(group) = tokens.group(delim) {
-            match f(group.inside) {
+        if let Some((inside, span, rest)) = tokens.group(delim) {
+            match f(inside) {
                 Ok((remaining, ret)) => {
                     if remaining.eof() {
-                        return Ok((group.outside, (new(group.span), ret)));
+                        return Ok((rest, (new(span), ret)));
                     }
                 }
                 Err(err) => return Err(err),

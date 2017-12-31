@@ -231,7 +231,7 @@ pub mod parsing {
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (rest, span, term) = match input.term() {
+            let (span, term, rest) = match input.term() {
                 Some(term) => term,
                 _ => return parse_error(),
             };
