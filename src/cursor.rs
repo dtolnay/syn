@@ -11,12 +11,13 @@
 use proc_macro2::*;
 
 use std::ptr;
-use std::fmt;
 use std::marker::PhantomData;
+
+#[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
+use std::fmt::{self, Debug};
 
 /// Internal type which is used instead of `TokenTree` to represent a single
 /// `TokenTree` within a `SynomBuffer`.
-#[derive(Debug)]
 enum Entry {
     /// Mimicing types from proc-macro.
     Group(Span, Delimiter, SynomBuffer),
@@ -30,7 +31,6 @@ enum Entry {
 
 /// A buffer of data which contains a structured representation of the input
 /// `TokenStream` object.
-#[derive(Debug)]
 pub struct SynomBuffer {
     // NOTE: Do not derive clone on this - there are raw pointers inside which
     // will be messed up. Moving the `SynomBuffer` itself is safe as the actual
@@ -101,7 +101,6 @@ impl SynomBuffer {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
 pub struct Group<'a> {
     pub span: Span,
     pub inside: Cursor<'a>,
@@ -309,7 +308,8 @@ impl<'a> Cursor<'a> {
 
 // We do a custom implementation for `Debug` as the default implementation is
 // pretty useless.
-impl<'a> fmt::Debug for Cursor<'a> {
+#[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
+impl<'a> Debug for Cursor<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Print what the cursor is currently looking at.
         // This will look like Cursor("some remaining tokens here")
