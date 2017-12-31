@@ -9,6 +9,9 @@ use proc_macro2::Delimiter::{Brace, Parenthesis};
 
 use std::iter::FromIterator;
 
+#[macro_use]
+mod macros;
+
 fn op(c: char) -> TokenTree {
     proc_macro2::TokenTree {
         span: Default::default(),
@@ -88,7 +91,7 @@ fn test_struct() {
             semi_token: None,
             struct_token: Default::default(),
             data: VariantData::Struct(
-                vec![
+                delimited![
                     Field {
                         ident: Some("ident".into()),
                         colon_token: Some(Default::default()),
@@ -112,28 +115,28 @@ fn test_struct() {
                             qself: None,
                             path: Path {
                                 leading_colon: None,
-                                segments: vec![
-                                PathSegment {
-                                    ident: "Vec".into(),
-                                    arguments: PathArguments::AngleBracketed(
-                                        AngleBracketedGenericArguments {
-                                            colon2_token: None,
-                                            lt_token: Default::default(),
-                                            args: vec![
-                                                GenericArgument::Type(Type::from(TypePath {
-                                                    qself: None,
-                                                    path: "Attribute".into(),
-                                                })),
-                                            ].into(),
-                                            gt_token: Default::default(),
-                                        },
-                                    ),
-                                }
-                            ].into(),
+                                segments: delimited![
+                                    PathSegment {
+                                        ident: "Vec".into(),
+                                        arguments: PathArguments::AngleBracketed(
+                                            AngleBracketedGenericArguments {
+                                                colon2_token: None,
+                                                lt_token: Default::default(),
+                                                args: delimited![
+                                                    GenericArgument::Type(Type::from(TypePath {
+                                                        qself: None,
+                                                        path: "Attribute".into(),
+                                                    })),
+                                                ],
+                                                gt_token: Default::default(),
+                                            },
+                                        ),
+                                    }
+                                ],
                             },
                         }.into(),
                     },
-                ].into(),
+                ],
                 Default::default(),
             ),
         }),
@@ -146,10 +149,10 @@ fn test_struct() {
     let expected_meta_item: MetaItem = MetaItemList {
         ident: "derive".into(),
         paren_token: Default::default(),
-        nested: vec![
+        nested: delimited![
             NestedMetaItem::MetaItem(MetaItem::Term("Debug".into())),
             NestedMetaItem::MetaItem(MetaItem::Term("Clone".into())),
-        ].into(),
+        ],
     }.into();
 
     assert_eq!(expected_meta_item, actual.attrs[0].meta_item().unwrap());
@@ -202,7 +205,7 @@ fn test_enum() {
         ],
         generics: Generics {
             lt_token: Some(Default::default()),
-            params: vec![
+            params: delimited![
                 GenericParam::Type(TypeParam {
                     attrs: Vec::new(),
                     ident: "T".into(),
@@ -219,17 +222,17 @@ fn test_enum() {
                     eq_token: None,
                     default: None,
                 }),
-            ].into(),
+            ],
             gt_token: Some(Default::default()),
             where_clause: None,
         },
         body: Body::Enum(BodyEnum {
-            variants: vec![
+            variants: delimited![
                 Variant {
                     ident: "Ok".into(),
                     attrs: Vec::new(),
                     data: VariantData::Tuple(
-                        vec![
+                        delimited![
                             Field {
                                 colon_token: None,
                                 ident: None,
@@ -240,7 +243,7 @@ fn test_enum() {
                                     path: "T".into(),
                                 }.into(),
                             },
-                        ].into(),
+                        ],
                         Default::default(),
                     ),
                     discriminant: None,
@@ -249,7 +252,7 @@ fn test_enum() {
                     ident: "Err".into(),
                     attrs: Vec::new(),
                     data: VariantData::Tuple(
-                        vec![
+                        delimited![
                             Field {
                                 ident: None,
                                 colon_token: None,
@@ -260,7 +263,7 @@ fn test_enum() {
                                     path: "E".into(),
                                 }.into(),
                             },
-                        ].into(),
+                        ],
                         Default::default(),
                     ),
                     discriminant: None,
@@ -291,7 +294,7 @@ fn test_enum() {
                             base: Box::new(Expr::Tuple(ExprTuple {
                                 attrs: Vec::new(),
                                 paren_token: Default::default(),
-                                elems: vec![
+                                elems: delimited![
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
                                         lit: Lit {
@@ -306,7 +309,7 @@ fn test_enum() {
                                             span: Default::default(),
                                         },
                                     }),
-                                ].into(),
+                                ],
                             })),
                             dot_token: Default::default(),
                             member: Member::Unnamed(Index {
@@ -316,7 +319,7 @@ fn test_enum() {
                         }),
                     )),
                 },
-            ].into(),
+            ],
             brace_token: Default::default(),
             enum_token: Default::default(),
         }),
@@ -367,10 +370,10 @@ fn test_attr_with_path() {
                 style: AttrStyle::Outer,
                 path: Path {
                     leading_colon: Some(Default::default()),
-                    segments: vec![
+                    segments: delimited![
                         PathSegment::from("attr_args"),
                         PathSegment::from("identity"),
-                    ].into(),
+                    ],
                 },
                 tts: TokenStream::from_iter(vec![
                     word("fn"),
@@ -429,7 +432,7 @@ fn test_attr_with_non_mod_style_path() {
                 style: AttrStyle::Outer,
                 path: Path {
                     leading_colon: None,
-                    segments: vec![PathSegment::from("inert")].into(),
+                    segments: delimited![PathSegment::from("inert")],
                 },
                 tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
                 is_sugared_doc: false,
@@ -467,7 +470,7 @@ fn test_attr_with_mod_style_path_with_self() {
                 style: AttrStyle::Outer,
                 path: Path {
                     leading_colon: None,
-                    segments: vec![PathSegment::from("foo"), PathSegment::from("self")].into(),
+                    segments: delimited![PathSegment::from("foo"), PathSegment::from("self")],
                 },
                 tts: TokenStream::empty(),
                 is_sugared_doc: false,
@@ -507,14 +510,13 @@ fn test_pub_restricted() {
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
             data: VariantData::Tuple(
-                vec![
+                delimited![
                     Field {
                         ident: None,
                         vis: Visibility::Restricted(VisRestricted {
                             path: Box::new(Path {
                                 leading_colon: None,
-                                segments: vec![PathSegment::from("m"), PathSegment::from("n")]
-                                    .into(),
+                                segments: delimited![PathSegment::from("m"), PathSegment::from("n")],
                             }),
                             in_token: Some(Default::default()),
                             paren_token: Default::default(),
@@ -527,7 +529,7 @@ fn test_pub_restricted() {
                             path: "u8".into(),
                         }.into(),
                     },
-                ].into(),
+                ],
                 Default::default(),
             ),
             semi_token: Some(Default::default()),

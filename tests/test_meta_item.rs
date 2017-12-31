@@ -7,6 +7,9 @@ use syn::*;
 use syn::synom::SynomBuffer;
 use proc_macro2::{Literal, TokenStream};
 
+#[macro_use]
+mod macros;
+
 fn lit<T: Into<Literal>>(t: T) -> Lit {
     Lit {
         value: LitKind::Other(t.into()),
@@ -38,7 +41,7 @@ fn test_meta_item_list_lit() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: vec![NestedMetaItem::Literal(lit(Literal::integer(5)))].into(),
+            nested: delimited![NestedMetaItem::Literal(lit(Literal::integer(5)))],
         },
     )
 }
@@ -50,7 +53,7 @@ fn test_meta_item_list_word() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: vec![NestedMetaItem::MetaItem(MetaItem::Term("bar".into()))].into(),
+            nested: delimited![NestedMetaItem::MetaItem(MetaItem::Term("bar".into()))],
         },
     )
 }
@@ -62,7 +65,7 @@ fn test_meta_item_list_name_value() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: vec![
+            nested: delimited![
                 NestedMetaItem::MetaItem(
                     MetaNameValue {
                         ident: "bar".into(),
@@ -70,7 +73,7 @@ fn test_meta_item_list_name_value() {
                         lit: lit(Literal::integer(5)),
                     }.into(),
                 ),
-            ].into(),
+            ],
         },
     )
 }
@@ -82,7 +85,7 @@ fn test_meta_item_multiple() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: vec![
+            nested: delimited![
                 NestedMetaItem::MetaItem(MetaItem::Term("word".into())),
                 NestedMetaItem::MetaItem(
                     MetaNameValue {
@@ -95,7 +98,7 @@ fn test_meta_item_multiple() {
                     MetaItemList {
                         ident: "list".into(),
                         paren_token: Default::default(),
-                        nested: vec![
+                        nested: delimited![
                             NestedMetaItem::MetaItem(
                                 MetaNameValue {
                                     ident: "name2".into(),
@@ -103,11 +106,11 @@ fn test_meta_item_multiple() {
                                     lit: lit(Literal::integer(6)),
                                 }.into(),
                             ),
-                        ].into(),
+                        ],
                     }.into(),
                 ),
                 NestedMetaItem::MetaItem(MetaItem::Term("word2".into())),
-            ].into(),
+            ],
         },
     )
 }

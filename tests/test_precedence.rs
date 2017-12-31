@@ -31,8 +31,10 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use common::{parse, respan};
 
-#[allow(dead_code)]
 #[macro_use]
+mod macros;
+
+#[allow(dead_code)]
 mod common;
 
 /// Test some pre-set expressions chosen by us.

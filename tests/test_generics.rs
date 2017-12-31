@@ -10,6 +10,9 @@ extern crate quote;
 extern crate proc_macro2;
 use proc_macro2::{Span, Term, TokenStream};
 
+#[macro_use]
+mod macros;
+
 mod common;
 
 #[test]
@@ -18,7 +21,7 @@ fn test_split_for_impl() {
     let generics = Generics {
         gt_token: Some(Default::default()),
         lt_token: Some(Default::default()),
-        params: vec![
+        params: delimited![
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'a"), Span::default()),
@@ -28,7 +31,7 @@ fn test_split_for_impl() {
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'b"), Span::default()),
-                bounds: vec![Lifetime::new(Term::intern("'a"), Span::default())].into(),
+                bounds: delimited![Lifetime::new(Term::intern("'a"), Span::default())],
                 colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
@@ -43,9 +46,9 @@ fn test_split_for_impl() {
                     },
                 ],
                 ident: "T".into(),
-                bounds: vec![
+                bounds: delimited![
                     TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default())),
-                ].into(),
+                ],
                 default: Some(
                     TypeTuple {
                         elems: Default::default(),
@@ -55,10 +58,10 @@ fn test_split_for_impl() {
                 colon_token: Some(Default::default()),
                 eq_token: Default::default(),
             }),
-        ].into(),
+        ],
         where_clause: Some(WhereClause {
             where_token: Default::default(),
-            predicates: vec![
+            predicates: delimited![
                 WherePredicate::BoundPredicate(WhereBoundPredicate {
                     bound_lifetimes: None,
                     colon_token: Default::default(),
@@ -66,7 +69,7 @@ fn test_split_for_impl() {
                         qself: None,
                         path: "T".into(),
                     }.into(),
-                    bounds: vec![
+                    bounds: delimited![
                         TypeParamBound::Trait(
                             PolyTraitRef {
                                 bound_lifetimes: None,
@@ -74,9 +77,9 @@ fn test_split_for_impl() {
                             },
                             TraitBoundModifier::None,
                         ),
-                    ].into(),
+                    ],
                 }),
-            ].into(),
+            ],
         }),
     };
 

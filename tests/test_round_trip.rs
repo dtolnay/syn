@@ -23,8 +23,10 @@ use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
-#[allow(dead_code)]
 #[macro_use]
+mod macros;
+
+#[allow(dead_code)]
 mod common;
 
 #[test]

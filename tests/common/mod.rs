@@ -9,16 +9,6 @@ use std::process::Command;
 
 use self::walkdir::DirEntry;
 
-macro_rules! errorf {
-    ($($tt:tt)*) => {
-        {
-            use ::std::io::Write;
-            let stderr = ::std::io::stderr();
-            write!(stderr.lock(), $($tt)*).unwrap();
-        }
-    };
-}
-
 pub mod parse;
 pub mod respan;
 

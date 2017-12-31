@@ -9,6 +9,9 @@ use syn::token::Group;
 extern crate proc_macro2;
 use proc_macro2::*;
 
+#[macro_use]
+mod macros;
+
 mod common;
 
 fn tt(k: TokenNode) -> TokenTree {
