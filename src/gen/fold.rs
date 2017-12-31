@@ -2727,14 +2727,14 @@ pub fn fold_variant_data<V: Folder + ?Sized>(_visitor: &mut V, _i: VariantData) 
     match _i {
         VariantData::Struct(_binding_0, _binding_1, ) => {
             VariantData::Struct (
-                FoldHelper::lift(_binding_0, |it| { _visitor.fold_field(it) }),
-                Brace(tokens_helper(_visitor, &(_binding_1).0)),
+                Brace(tokens_helper(_visitor, &(_binding_0).0)),
+                FoldHelper::lift(_binding_1, |it| { _visitor.fold_field(it) }),
             )
         }
         VariantData::Tuple(_binding_0, _binding_1, ) => {
             VariantData::Tuple (
-                FoldHelper::lift(_binding_0, |it| { _visitor.fold_field(it) }),
-                Paren(tokens_helper(_visitor, &(_binding_1).0)),
+                Paren(tokens_helper(_visitor, &(_binding_0).0)),
+                FoldHelper::lift(_binding_1, |it| { _visitor.fold_field(it) }),
             )
         }
         VariantData::Unit => { VariantData::Unit }

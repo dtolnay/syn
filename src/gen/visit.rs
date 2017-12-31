@@ -2097,12 +2097,12 @@ pub fn visit_variant<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 pub fn visit_variant_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VariantData) {
     match *_i {
         VariantData::Struct(ref _binding_0, ref _binding_1, ) => {
-            for el in _binding_0 { let it = el.item(); _visitor.visit_field(it) };
-            tokens_helper(_visitor, &(_binding_1).0);
+            tokens_helper(_visitor, &(_binding_0).0);
+            for el in _binding_1 { let it = el.item(); _visitor.visit_field(it) };
         }
         VariantData::Tuple(ref _binding_0, ref _binding_1, ) => {
-            for el in _binding_0 { let it = el.item(); _visitor.visit_field(it) };
-            tokens_helper(_visitor, &(_binding_1).0);
+            tokens_helper(_visitor, &(_binding_0).0);
+            for el in _binding_1 { let it = el.item(); _visitor.visit_field(it) };
         }
         VariantData::Unit => { }
     }

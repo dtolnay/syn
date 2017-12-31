@@ -400,7 +400,7 @@ pub mod parsing {
     impl Synom for TypeSlice {
         named!(parse -> Self, map!(
             brackets!(syn!(Type)),
-            |(ty, b)| TypeSlice {
+            |(b, ty)| TypeSlice {
                 elem: Box::new(ty),
                 bracket_token: b,
             }
@@ -419,7 +419,7 @@ pub mod parsing {
                     len: syn!(Expr) >>
                     (elem, semi, len)
             )),
-            |((elem, semi, len), brackets)| {
+            |(brackets, (elem, semi, len))| {
                 TypeArray {
                     elem: Box::new(elem),
                     len: len,
@@ -493,10 +493,10 @@ pub mod parsing {
                 abi: abi,
                 lifetimes: lifetimes,
                 output: output,
-                variadic: (parens.0).1,
+                variadic: (parens.1).1,
                 fn_token: fn_,
-                paren_token: parens.1,
-                inputs: (parens.0).0,
+                paren_token: parens.0,
+                inputs: (parens.1).0,
             })
         ));
 
@@ -531,8 +531,8 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             data: parens!(Delimited::parse_terminated) >>
             (TypeTuple {
-                elems: data.0,
-                paren_token: data.1,
+                paren_token: data.0,
+                elems: data.1,
             })
         ));
 
@@ -611,8 +611,8 @@ pub mod parsing {
             data: parens!(Delimited::parse_terminated) >>
             output: syn!(ReturnType) >>
             (ParenthesizedGenericArguments {
-                paren_token: data.1,
-                inputs: data.0,
+                paren_token: data.0,
+                inputs: data.1,
                 output: output,
             })
         ));
@@ -689,8 +689,8 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             data: grouped!(syn!(Type)) >>
             (TypeGroup {
-                group_token: data.1,
-                elem: Box::new(data.0),
+                group_token: data.0,
+                elem: Box::new(data.1),
             })
         ));
     }
@@ -704,8 +704,8 @@ pub mod parsing {
             data: parens!(syn!(Type)) >>
             cond!(allow_plus, not!(punct!(+))) >>
             (TypeParen {
-                paren_token: data.1,
-                elem: Box::new(data.0),
+                paren_token: data.0,
+                elem: Box::new(data.1),
             })
         ));
     }

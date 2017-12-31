@@ -277,11 +277,11 @@ macro_rules! not {
 ///         name: syn!(Ident) >>
 ///         bang: punct!(!) >>
 ///         empty_body: alt!(
-///             parens!(epsilon!()) => { |d| MacroDelimiter::Paren(d.1) }
+///             parens!(epsilon!()) => { |d| MacroDelimiter::Paren(d.0) }
 ///             |
-///             brackets!(epsilon!()) => { |d| MacroDelimiter::Bracket(d.1) }
+///             brackets!(epsilon!()) => { |d| MacroDelimiter::Bracket(d.0) }
 ///             |
-///             braces!(epsilon!()) => { |d| MacroDelimiter::Brace(d.1) }
+///             braces!(epsilon!()) => { |d| MacroDelimiter::Brace(d.0) }
 ///         ) >>
 ///         semi: cond!(empty_body.requires_semi(), punct!(;)) >>
 ///         (EmptyMacroCall {
@@ -422,8 +422,8 @@ macro_rules! cond_reduce {
 ///         (SimpleMod {
 ///             mod_token: mod_token,
 ///             name: name,
-///             brace_token: body.1,
-///             items: body.0,
+///             brace_token: body.0,
+///             items: body.1,
 ///         })
 ///     ));
 /// }
@@ -556,7 +556,7 @@ pub fn many0<T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T
 ///             |
 ///             StructOrEnum::Enum(enum_token) => map!(
 ///                 braces!(syn!(Ident)),
-///                 |(variant, brace_token)| UnitType::Enum {
+///                 |(brace_token, variant)| UnitType::Enum {
 ///                     enum_token: enum_token,
 ///                     name: name,
 ///                     brace_token: brace_token,
@@ -648,7 +648,7 @@ macro_rules! switch {
 ///             |
 ///             StructOrEnum::Enum(enum_token) => map!(
 ///                 braces!(syn!(Ident)),
-///                 |(variant, brace_token)| UnitType::Enum {
+///                 |(brace_token, variant)| UnitType::Enum {
 ///                     enum_token: enum_token,
 ///                     name: name,
 ///                     brace_token: brace_token,
@@ -1167,8 +1167,8 @@ macro_rules! tap {
 ///         (SimpleMod {
 ///             mod_token: mod_token,
 ///             name: name,
-///             brace_token: body.1,
-///             items: body.0,
+///             brace_token: body.0,
+///             items: body.1,
 ///         })
 ///     ));
 /// }
@@ -1188,8 +1188,8 @@ macro_rules! syn {
 /// the content inside. The sub-parser is required to consume all tokens within
 /// the parentheses in order for this parser to return successfully.
 ///
-/// - **Syntax:** `parens!(SUBPARSER)`
-/// - **Output:** `(SUBPARSER, token::Paren)`
+/// - **Syntax:** `parens!(CONTENT)`
+/// - **Output:** `(token::Paren, CONENT)`
 ///
 /// ```rust
 /// #[macro_use]
@@ -1201,7 +1201,7 @@ macro_rules! syn {
 /// /// Parses an expression inside of parentheses.
 /// ///
 /// /// Example: `(1 + 1)`
-/// named!(expr_paren -> (Expr, Paren), parens!(syn!(Expr)));
+/// named!(expr_paren -> (Paren, Expr), parens!(syn!(Expr)));
 /// #
 /// # fn main() {}
 /// ```
@@ -1222,8 +1222,8 @@ macro_rules! parens {
 /// content inside. The sub-parser is required to consume all tokens within the
 /// brackets in order for this parser to return successfully.
 ///
-/// - **Syntax:** `brackets!(SUBPARSER)`
-/// - **Output:** `(SUBPARSER, token::Bracket)`
+/// - **Syntax:** `brackets!(CONTENT)`
+/// - **Output:** `(token::Bracket, CONTENT)`
 ///
 /// ```rust
 /// #[macro_use]
@@ -1235,7 +1235,7 @@ macro_rules! parens {
 /// /// Parses an expression inside of brackets.
 /// ///
 /// /// Example: `[1 + 1]`
-/// named!(expr_paren -> (Expr, Bracket), brackets!(syn!(Expr)));
+/// named!(expr_paren -> (Bracket, Expr), brackets!(syn!(Expr)));
 /// #
 /// # fn main() {}
 /// ```
@@ -1256,8 +1256,8 @@ macro_rules! brackets {
 /// content inside. The sub-parser is required to consume all tokens within the
 /// braces in order for this parser to return successfully.
 ///
-/// - **Syntax:** `braces!(SUBPARSER)`
-/// - **Output:** `(SUBPARSER, token::Brace)`
+/// - **Syntax:** `braces!(CONTENT)`
+/// - **Output:** `(token::Brace, CONTENT)`
 ///
 /// ```rust
 /// #[macro_use]
@@ -1269,7 +1269,7 @@ macro_rules! brackets {
 /// /// Parses an expression inside of braces.
 /// ///
 /// /// Example: `{1 + 1}`
-/// named!(expr_paren -> (Expr, Brace), braces!(syn!(Expr)));
+/// named!(expr_paren -> (Brace, Expr), braces!(syn!(Expr)));
 /// #
 /// # fn main() {}
 /// ```

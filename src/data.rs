@@ -22,10 +22,10 @@ ast_enum! {
     /// Data stored within an enum variant or struct.
     pub enum VariantData {
         /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-        Struct(Delimited<Field, Token![,]>, token::Brace),
+        Struct(token::Brace, Delimited<Field, Token![,]>),
 
         /// Tuple variant, e.g. `Some(T)`.
-        Tuple(Delimited<Field, Token![,]>, token::Paren),
+        Tuple(token::Paren, Delimited<Field, Token![,]>),
 
         /// Unit variant, e.g. `None`.
         Unit,
@@ -37,8 +37,8 @@ impl VariantData {
     // /// Slice containing the fields stored in the variant.
     // pub fn fields(&self) -> &Delimited<Field, token::Comma> {
     //     match *self {
-    //         VariantData::Struct(ref fields, _) |
-    //         VariantData::Tuple(ref fields, _) => fields,
+    //         VariantData::Struct(_, ref fields) |
+    //         VariantData::Tuple(_, ref fields) => fields,
     //         VariantData::Unit => &[],
     //     }
     // }
@@ -144,9 +144,9 @@ pub mod parsing {
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(crate)) >>
                 (Visibility::Crate(VisCrate {
-                    crate_token: other.0,
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    crate_token: other.1,
                 }))
             )
             |
@@ -154,10 +154,10 @@ pub mod parsing {
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(self)) >>
                 (Visibility::Restricted(VisRestricted {
-                    path: Box::new(other.0.into()),
-                    in_token: None,
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    in_token: None,
+                    path: Box::new(other.1.into()),
                 }))
             )
             |
@@ -165,10 +165,10 @@ pub mod parsing {
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(super)) >>
                 (Visibility::Restricted(VisRestricted {
-                    path: Box::new(other.0.into()),
-                    in_token: None,
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    in_token: None,
+                    path: Box::new(other.1.into()),
                 }))
             )
             |
@@ -180,10 +180,10 @@ pub mod parsing {
                     (in_tok, restricted)
                 )) >>
                 (Visibility::Restricted(VisRestricted {
-                    path: Box::new((other.0).1),
-                    in_token: Some((other.0).0),
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    in_token: Some((other.1).0),
+                    path: Box::new((other.1).1),
                 }))
             )
             |
@@ -222,12 +222,12 @@ mod printing {
     impl ToTokens for VariantData {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                VariantData::Struct(ref fields, ref brace) => {
+                VariantData::Struct(ref brace, ref fields) => {
                     brace.surround(tokens, |tokens| {
                         fields.to_tokens(tokens);
                     });
                 }
-                VariantData::Tuple(ref fields, ref paren) => {
+                VariantData::Tuple(ref paren, ref fields) => {
                     paren.surround(tokens, |tokens| {
                         fields.to_tokens(tokens);
                     });

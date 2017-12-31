@@ -348,7 +348,7 @@ pub mod parsing {
                     syn!(TokenStream)
                 )) >>
                 ({
-                    let ((path, tts), bracket) = path_and_tts;
+                    let (bracket, (path, tts)) = path_and_tts;
 
                     Attribute {
                         style: AttrStyle::Inner(bang),
@@ -388,7 +388,7 @@ pub mod parsing {
                     syn!(TokenStream)
                 )) >>
                 ({
-                    let ((path, tts), bracket) = path_and_tts;
+                    let (bracket, (path, tts)) = path_and_tts;
 
                     Attribute {
                         style: AttrStyle::Outer,

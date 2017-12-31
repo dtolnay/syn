@@ -1227,7 +1227,7 @@ pub mod parsing {
         mut e: call!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
             tap!(args: and_call => {
-                let (args, paren) = args;
+                let (paren, args) = args;
                 e = ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
@@ -1253,11 +1253,11 @@ pub mod parsing {
             })
             |
             tap!(i: and_index => {
-                let (i, token) = i;
+                let (bracket, i) = i;
                 e = ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    bracket_token: token,
+                    bracket_token: bracket,
                     index: Box::new(i),
                 }.into();
             })
@@ -1279,7 +1279,7 @@ pub mod parsing {
         mut e: call!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
             tap!(args: and_call => {
-                let (args, paren) = args;
+                let (paren, args) = args;
                 e = ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
@@ -1417,8 +1417,8 @@ pub mod parsing {
             e: grouped!(syn!(Expr)) >>
             (ExprGroup {
                 attrs: Vec::new(),
-                expr: Box::new(e.0),
-                group_token: e.1,
+                expr: Box::new(e.1),
+                group_token: e.0,
             })
         ));
     }
@@ -1429,8 +1429,8 @@ pub mod parsing {
             e: parens!(syn!(Expr)) >>
             (ExprParen {
                 attrs: Vec::new(),
-                expr: Box::new(e.0),
-                paren_token: e.1,
+                paren_token: e.0,
+                expr: Box::new(e.1),
             })
         ));
     }
@@ -1441,8 +1441,8 @@ pub mod parsing {
             elems: brackets!(Delimited::parse_terminated) >>
             (ExprArray {
                 attrs: Vec::new(),
-                elems: elems.0,
-                bracket_token: elems.1,
+                bracket_token: elems.0,
+                elems: elems.1,
             })
         ));
 
@@ -1451,7 +1451,7 @@ pub mod parsing {
         }
     }
 
-    named!(and_call -> (Delimited<Expr, Token![,]>, token::Paren),
+    named!(and_call -> (token::Paren, Delimited<Expr, Token![,]>),
            parens!(Delimited::parse_terminated));
 
     #[cfg(feature = "full")]
@@ -1484,8 +1484,8 @@ pub mod parsing {
                     args: fish.2,
                     gt_token: fish.3,
                 }),
-                args: args.0,
-                paren_token: args.1,
+                args: args.1,
+                paren_token: args.0,
                 dot_token: dot,
             }
         })
@@ -1503,8 +1503,8 @@ pub mod parsing {
             elems: parens!(Delimited::parse_terminated) >>
             (ExprTuple {
                 attrs: Vec::new(),
-                elems: elems.0,
-                paren_token: elems.1,
+                elems: elems.1,
+                paren_token: elems.0,
             })
         ));
 
@@ -1530,8 +1530,8 @@ pub mod parsing {
                 eq_token: eq,
                 expr: Box::new(cond),
                 then_branch: Block {
-                    stmts: then_block.0,
-                    brace_token: then_block.1,
+                    brace_token: then_block.0,
+                    stmts: then_block.1,
                 },
                 if_token: if_,
                 else_branch: else_block,
@@ -1554,8 +1554,8 @@ pub mod parsing {
                 attrs: Vec::new(),
                 cond: Box::new(cond),
                 then_branch: Block {
-                    stmts: then_block.0,
-                    brace_token: then_block.1,
+                    brace_token: then_block.0,
+                    stmts: then_block.1,
                 },
                 if_token: if_,
                 else_branch: else_block,
@@ -1580,8 +1580,8 @@ pub mod parsing {
                 (Expr::Block(ExprBlock {
                     attrs: Vec::new(),
                     block: Block {
-                        stmts: else_block.0,
-                        brace_token: else_block.1,
+                        brace_token: else_block.0,
+                        stmts: else_block.1,
                     },
                 }))
             )
@@ -1639,15 +1639,12 @@ pub mod parsing {
             match_: keyword!(match) >>
             obj: expr_no_struct >>
             res: braces!(many0!(Arm::parse)) >>
-            ({
-                let (arms, brace) = res;
-                ExprMatch {
-                    attrs: Vec::new(),
-                    expr: Box::new(obj),
-                    match_token: match_,
-                    brace_token: brace,
-                    arms: arms,
-                }
+            (ExprMatch {
+                attrs: Vec::new(),
+                expr: Box::new(obj),
+                match_token: match_,
+                brace_token: res.0,
+                arms: res.1,
             })
         ));
 
@@ -1897,7 +1894,7 @@ pub mod parsing {
                 (fields, base)
             )) >>
             ({
-                let ((fields, base), brace) = data;
+                let (brace, (fields, base)) = data;
                 let (dots, rest) = match base.and_then(|b| b) {
                     Some((dots, base)) => (Some(dots), Some(base)),
                     None => (None, None),
@@ -1961,10 +1958,10 @@ pub mod parsing {
             )) >>
             (ExprRepeat {
                 attrs: Vec::new(),
-                expr: Box::new((data.0).0),
-                amt: Box::new((data.0).2),
-                bracket_token: data.1,
-                semi_token: (data.0).1,
+                expr: Box::new((data.1).0),
+                amt: Box::new((data.1).2),
+                bracket_token: data.0,
+                semi_token: (data.1).1,
             })
         ));
 
@@ -2052,15 +2049,15 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
 
-    named!(and_index -> (Expr, token::Bracket), brackets!(syn!(Expr)));
+    named!(and_index -> (token::Bracket, Expr), brackets!(syn!(Expr)));
 
     #[cfg(feature = "full")]
     impl Synom for Block {
         named!(parse -> Self, do_parse!(
             stmts: braces!(Block::parse_within) >>
             (Block {
-                stmts: stmts.0,
-                brace_token: stmts.1,
+                brace_token: stmts.0,
+                stmts: stmts.1,
             })
         ));
 
@@ -2130,8 +2127,8 @@ pub mod parsing {
             mac: Macro {
                 path: what,
                 bang_token: bang,
-                delimiter: MacroDelimiter::Brace(data.1),
-                tts: data.0,
+                delimiter: MacroDelimiter::Brace(data.0),
+                tts: data.1,
             },
             semi_token: semi,
         }))))
@@ -2302,9 +2299,9 @@ pub mod parsing {
             )) >>
             (PatStruct {
                 path: path,
-                fields: (data.0).0,
-                brace_token: data.1,
-                dot2_token: (data.0).1.and_then(|m| m),
+                fields: (data.1).0,
+                brace_token: data.0,
+                dot2_token: (data.1).1.and_then(|m| m),
             })
         ));
 
@@ -2420,7 +2417,7 @@ pub mod parsing {
                 (front, dotdot, back)
             )) >>
             ({
-                let ((front, dotdot, back), parens) = data;
+                let (parens, (front, dotdot, back)) = data;
                 let (dotdot, trailing) = match dotdot {
                     Some((a, b)) => (Some(a), Some(b)),
                     None => (None, None),
@@ -2532,7 +2529,7 @@ pub mod parsing {
                 ) >>
                 (before, middle, after)
             )),
-            |((before, middle, after), brackets)| {
+            |(brackets, (before, middle, after))| {
                 let mut before: Delimited<Pat, Token![,]> = before;
                 let after: Option<Delimited<Pat, Token![,]>> = after;
                 let middle: Option<(Token![..], Option<Token![,]>)> = middle;

@@ -708,8 +708,8 @@ pub mod parsing {
     impl_synom!(UseList "use list" do_parse!(
         list: braces!(Delimited::parse_terminated) >>
         (UseList {
-            brace_token: list.1,
-            items: list.0,
+            brace_token: list.0,
+            items: list.1,
         })
     ));
 
@@ -780,7 +780,7 @@ pub mod parsing {
         (ItemFn {
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend((inner_attrs_stmts.0).0);
+                attrs.extend((inner_attrs_stmts.1).0);
                 attrs
             },
             vis: vis,
@@ -789,8 +789,8 @@ pub mod parsing {
             abi: abi,
             decl: Box::new(FnDecl {
                 fn_token: fn_,
-                paren_token: inputs.1,
-                inputs: inputs.0,
+                paren_token: inputs.0,
+                inputs: inputs.1,
                 output: ret,
                 variadic: None,
                 generics: Generics {
@@ -800,8 +800,8 @@ pub mod parsing {
             }),
             ident: ident,
             block: Box::new(Block {
-                brace_token: inner_attrs_stmts.1,
-                stmts: (inner_attrs_stmts.0).1,
+                brace_token: inner_attrs_stmts.0,
+                stmts: (inner_attrs_stmts.1).1,
             }),
         })
     ));
@@ -868,7 +868,7 @@ pub mod parsing {
                     many0!(Attribute::parse_inner),
                     many0!(Item::parse)
                 )
-            ) => {|((inner_attrs, items), brace)| (
+            ) => {|(brace, (inner_attrs, items))| (
                 inner_attrs,
                 Some((brace, items)),
                 None,
@@ -895,8 +895,8 @@ pub mod parsing {
         (ItemForeignMod {
             attrs: attrs,
             abi: abi,
-            brace_token: items.1,
-            items: items.0,
+            brace_token: items.0,
+            items: items.1,
         })
     ));
 
@@ -923,7 +923,7 @@ pub mod parsing {
         where_clause: option!(syn!(WhereClause)) >>
         semi: punct!(;) >>
         ({
-            let ((inputs, variadic), parens) = inputs;
+            let (parens, (inputs, variadic)) = inputs;
             ForeignItemFn {
                 ident: ident,
                 attrs: attrs,
@@ -1066,8 +1066,8 @@ pub mod parsing {
             },
             colon_token: colon,
             supertraits: bounds.unwrap_or_default(),
-            brace_token: body.1,
-            items: body.0,
+            brace_token: body.0,
+            items: body.1,
         })
     ));
 
@@ -1141,7 +1141,7 @@ pub mod parsing {
         semi: cond!(body.is_none(), punct!(;)) >>
         ({
             let (inner_attrs, stmts) = match body {
-                Some(((inner_attrs, stmts), b)) => (inner_attrs, Some((stmts, b))),
+                Some((b, (inner_attrs, stmts))) => (inner_attrs, Some((stmts, b))),
                 None => (Vec::new(), None),
             };
             TraitItemMethod {
@@ -1156,10 +1156,10 @@ pub mod parsing {
                     abi: abi,
                     ident: ident,
                     decl: FnDecl {
-                        inputs: inputs.0,
+                        inputs: inputs.1,
                         output: ret,
                         fn_token: fn_,
-                        paren_token: inputs.1,
+                        paren_token: inputs.0,
                         variadic: None,
                         generics: Generics {
                             where_clause: where_clause,
@@ -1244,8 +1244,8 @@ pub mod parsing {
             },
             trait_: polarity_path,
             self_ty: Box::new(self_ty),
-            brace_token: body.1,
-            items: body.0,
+            brace_token: body.0,
+            items: body.1,
         })
     ));
 
@@ -1304,7 +1304,7 @@ pub mod parsing {
         (ImplItemMethod {
             attrs: {
                 let mut attrs = outer_attrs;
-                attrs.extend((inner_attrs_stmts.0).0);
+                attrs.extend((inner_attrs_stmts.1).0);
                 attrs
             },
             vis: vis,
@@ -1316,8 +1316,8 @@ pub mod parsing {
                 ident: ident,
                 decl: FnDecl {
                     fn_token: fn_,
-                    paren_token: inputs.1,
-                    inputs: inputs.0,
+                    paren_token: inputs.0,
+                    inputs: inputs.1,
                     output: ret,
                     generics: Generics {
                         where_clause: where_clause,
@@ -1327,8 +1327,8 @@ pub mod parsing {
                 },
             },
             block: Block {
-                brace_token: inner_attrs_stmts.1,
-                stmts: (inner_attrs_stmts.0).1,
+                brace_token: inner_attrs_stmts.0,
+                stmts: (inner_attrs_stmts.1).1,
             },
         })
     ));

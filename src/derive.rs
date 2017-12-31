@@ -75,7 +75,7 @@ pub mod parsing {
                     }),
                 })
                 |
-                Err(e) => map!(enum_body, move |(wh, body, brace)| DeriveInput {
+                Err(e) => map!(enum_body, move |(wh, brace, body)| DeriveInput {
                     ident: id,
                     vis: vis,
                     attrs: attrs,
@@ -119,7 +119,7 @@ pub mod parsing {
         )
     ));
 
-    named!(enum_body -> (Option<WhereClause>, Delimited<Variant, Token![,]>, token::Brace), do_parse!(
+    named!(enum_body -> (Option<WhereClause>, token::Brace, Delimited<Variant, Token![,]>), do_parse!(
         wh: option!(syn!(WhereClause)) >>
         data: braces!(Delimited::parse_terminated) >>
         (wh, data.0, data.1)
@@ -130,9 +130,9 @@ pub mod parsing {
             attrs: many0!(Attribute::parse_outer) >>
             id: syn!(Ident) >>
             data: alt!(
-                struct_like_body => { |(d, b)| VariantData::Struct(d, b) }
+                struct_like_body => { |(b, d)| VariantData::Struct(b, d) }
                 |
-                tuple_like_body => { |(d, b)| VariantData::Tuple(d, b) }
+                tuple_like_body => { |(b, d)| VariantData::Tuple(b, d) }
                 |
                 epsilon!() => { |_| VariantData::Unit }
             ) >>
@@ -150,10 +150,10 @@ pub mod parsing {
         }
     }
 
-    named!(struct_like_body -> (Delimited<Field, Token![,]>, token::Brace),
+    named!(struct_like_body -> (token::Brace, Delimited<Field, Token![,]>),
            braces!(call!(Delimited::parse_terminated_with, Field::parse_struct)));
 
-    named!(tuple_like_body -> (Delimited<Field, Token![,]>, token::Paren),
+    named!(tuple_like_body -> (token::Paren, Delimited<Field, Token![,]>),
            parens!(call!(Delimited::parse_terminated_with, Field::parse_tuple)));
 }
 

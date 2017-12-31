@@ -91,6 +91,7 @@ fn test_struct() {
             semi_token: None,
             struct_token: Default::default(),
             data: VariantData::Struct(
+                Default::default(),
                 delimited![
                     Field {
                         ident: Some("ident".into()),
@@ -137,7 +138,6 @@ fn test_struct() {
                         }.into(),
                     },
                 ],
-                Default::default(),
             ),
         }),
     };
@@ -232,6 +232,7 @@ fn test_enum() {
                     ident: "Ok".into(),
                     attrs: Vec::new(),
                     data: VariantData::Tuple(
+                        Default::default(),
                         delimited![
                             Field {
                                 colon_token: None,
@@ -244,7 +245,6 @@ fn test_enum() {
                                 }.into(),
                             },
                         ],
-                        Default::default(),
                     ),
                     discriminant: None,
                 },
@@ -252,6 +252,7 @@ fn test_enum() {
                     ident: "Err".into(),
                     attrs: Vec::new(),
                     data: VariantData::Tuple(
+                        Default::default(),
                         delimited![
                             Field {
                                 ident: None,
@@ -264,7 +265,6 @@ fn test_enum() {
                                 }.into(),
                             },
                         ],
-                        Default::default(),
                     ),
                     discriminant: None,
                 },
@@ -510,6 +510,7 @@ fn test_pub_restricted() {
         generics: Generics::default(),
         body: Body::Struct(BodyStruct {
             data: VariantData::Tuple(
+                Default::default(),
                 delimited![
                     Field {
                         ident: None,
@@ -530,7 +531,6 @@ fn test_pub_restricted() {
                         }.into(),
                     },
                 ],
-                Default::default(),
             ),
             semi_token: Some(Default::default()),
             struct_token: Default::default(),

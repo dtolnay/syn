@@ -256,7 +256,7 @@ mod parsing {
             call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.ast.ident), Some(x)) }
             |
             syn!(Path) => { |x| (x, None) }
-        )), |x| x.0)) >>
+        )), |x| x.1)) >>
         punct!(,) >>
         (EosVariant {
             name: variant,
@@ -279,7 +279,7 @@ mod parsing {
                 // XXX: This is really gross - we shouldn't have to convert the
                 // tokens to strings to re-parse them.
                 let enum_item = {
-                    let variants = body.0.iter().map(|v| {
+                    let variants = body.1.iter().map(|v| {
                         let name = v.name;
                         match v.member {
                             Some(ref member) => quote!(#name(#member)),
@@ -295,7 +295,7 @@ mod parsing {
                     features: quote!(),
                     eos_full:  false,
                 }];
-                items.extend(body.0.into_iter().filter_map(|v| v.inner));
+                items.extend(body.1.into_iter().filter_map(|v| v.inner));
                 AstEnumOfStructs(items)
             })
         ));
@@ -733,7 +733,7 @@ mod codegen {
                 for variant in &e.variants {
                     let fields: Vec<(&Field, Tokens)> = match variant.item().data {
                         VariantData::Struct(..) => panic!("Doesn't support enum struct variants"),
-                        VariantData::Tuple(ref fields, ..) => {
+                        VariantData::Tuple(_, ref fields) => {
                             let binding = format!("        {}::{}(", s.ast.ident, variant.item().ident);
                             state.visit_impl.push_str(&binding);
                             state.visit_mut_impl.push_str(&binding);
@@ -838,7 +838,7 @@ mod codegen {
             }
             Body::Struct(ref v) => {
                 let fields: Vec<(&Field, Tokens)> = match v.data {
-                    VariantData::Struct(ref fields, ..) => {
+                    VariantData::Struct(_, ref fields) => {
                         state
                             .fold_impl
                             .push_str(&format!("    {} {{\n", s.ast.ident));
@@ -850,7 +850,7 @@ mod codegen {
                             })
                             .collect()
                     }
-                    VariantData::Tuple(ref fields, ..) => {
+                    VariantData::Tuple(_, ref fields) => {
                         state
                             .fold_impl
                             .push_str(&format!("    {} (\n", s.ast.ident));

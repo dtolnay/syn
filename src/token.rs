@@ -171,7 +171,7 @@ macro_rules! delim {
             }
 
             #[cfg(feature = "parsing")]
-            pub fn parse<F, R>(tokens: $crate::synom::Cursor, f: F) -> $crate::synom::PResult<(R, $name)>
+            pub fn parse<F, R>(tokens: $crate::synom::Cursor, f: F) -> $crate::synom::PResult<($name, R)>
                 where F: FnOnce($crate::synom::Cursor) -> $crate::synom::PResult<R>
             {
                 parsing::delim($s, tokens, $name, f)
@@ -540,7 +540,7 @@ mod parsing {
         tokens: Cursor<'a>,
         new: fn(Span) -> T,
         f: F,
-    ) -> PResult<'a, (R, T)>
+    ) -> PResult<'a, (T, R)>
     where
         F: FnOnce(Cursor) -> PResult<R>,
     {
@@ -557,7 +557,7 @@ mod parsing {
             match f(seqinfo.inside) {
                 Ok((remaining, ret)) => {
                     if remaining.eof() {
-                        return Ok((seqinfo.outside, (ret, new(seqinfo.span))));
+                        return Ok((seqinfo.outside, (new(seqinfo.span), ret)));
                     }
                 }
                 Err(err) => return Err(err),

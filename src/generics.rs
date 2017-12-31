@@ -318,7 +318,7 @@ pub mod parsing {
             }
             |
             parens!(syn!(PolyTraitRef)) => {
-                |poly| TypeParamBound::Trait(poly.0, TraitBoundModifier::None)
+                |poly| TypeParamBound::Trait(poly.1, TraitBoundModifier::None)
             }
         ));
 
