@@ -523,13 +523,13 @@ mod parsing {
                 _ => return parse_error(),
             }
         }
-        Ok((tokens, new(T::from_spans(&spans))))
+        Ok((new(T::from_spans(&spans)), tokens))
     }
 
     pub fn keyword<'a, T>(keyword: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
         if let Some((span, term, rest)) = tokens.term() {
             if term.as_str() == keyword {
-                return Ok((rest, new(span)));
+                return Ok((new(span), rest));
             }
         }
         parse_error()
@@ -555,9 +555,9 @@ mod parsing {
 
         if let Some((inside, span, rest)) = tokens.group(delim) {
             match f(inside) {
-                Ok((remaining, ret)) => {
+                Ok((ret, remaining)) => {
                     if remaining.eof() {
-                        return Ok((rest, (new(span), ret)));
+                        return Ok(((new(span), ret), rest));
                     }
                 }
                 Err(err) => return Err(err),

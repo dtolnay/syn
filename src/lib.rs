@@ -184,7 +184,7 @@ where
     let buf = SynomBuffer::new(tokens);
     let result = T::parse(buf.begin());
     let err = match result {
-        Ok((rest, t)) => {
+        Ok((t, rest)) => {
             if rest.eof() {
                 return Ok(t);
             } else if rest == buf.begin() {

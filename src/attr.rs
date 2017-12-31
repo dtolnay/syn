@@ -427,11 +427,11 @@ pub mod parsing {
                 let literal = lit.to_string();
                 if literal.starts_with("//") || literal.starts_with("/*") {
                     Ok((
-                        rest,
                         TokenTree {
                             span: span,
                             kind: TokenNode::Literal(lit),
                         },
+                        rest,
                     ))
                 } else {
                     parse_error()

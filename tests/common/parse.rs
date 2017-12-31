@@ -53,7 +53,7 @@ pub fn syn<T: Synom>(tokens: proc_macro2::TokenStream) -> T {
     let buf = SynomBuffer::new(tokens);
     let result = T::parse(buf.begin());
     match result {
-        Ok((rest, t)) => {
+        Ok((t, rest)) => {
             if rest.eof() {
                 t
             } else if rest == buf.begin() {

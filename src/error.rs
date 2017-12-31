@@ -3,7 +3,7 @@ use cursor::Cursor;
 use std::fmt::{self, Display};
 
 /// The result of a parser
-pub type PResult<'a, O> = Result<(Cursor<'a>, O), ParseError>;
+pub type PResult<'a, O> = Result<(O, Cursor<'a>), ParseError>;
 
 /// An error with a default error message.
 ///

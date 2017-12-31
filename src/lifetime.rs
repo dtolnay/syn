@@ -108,11 +108,11 @@ pub mod parsing {
             }
 
             Ok((
-                rest,
                 Lifetime {
                     term: term,
                     span: span,
                 },
+                rest,
             ))
         }
 

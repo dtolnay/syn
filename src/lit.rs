@@ -106,11 +106,11 @@ pub mod parsing {
         fn parse(input: Cursor) -> PResult<Self> {
             match input.literal() {
                 Some((span, lit, rest)) => Ok((
-                    rest,
                     Lit {
                         span: span,
                         value: LitKind::Other(lit),
                     },
+                    rest,
                 )),
                 _ => match input.term() {
                     Some((span, term, rest)) => {
@@ -123,11 +123,11 @@ pub mod parsing {
                         };
 
                         Ok((
-                            rest,
                             Lit {
                                 span: span,
                                 value: kind,
                             },
+                            rest,
                         ))
                     }
                     _ => parse_error(),

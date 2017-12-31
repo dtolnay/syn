@@ -37,7 +37,7 @@ pub trait Synom: Sized {
 
 impl Synom for TokenStream {
     fn parse(input: Cursor) -> PResult<Self> {
-        Ok((Cursor::empty(), input.token_stream()))
+        Ok((input.token_stream(), Cursor::empty()))
     }
 
     fn description() -> Option<&'static str> {

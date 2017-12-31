@@ -285,7 +285,7 @@ mod parsing {
             parse: fn(Cursor) -> PResult<T>,
         ) -> PResult<Self> {
             match Self::parse(input, parse, false) {
-                Ok((_, ref b)) if b.is_empty() => parse_error(),
+                Ok((ref b, _)) if b.is_empty() => parse_error(),
                 other => other,
             }
         }
@@ -302,7 +302,7 @@ mod parsing {
             parse: fn(Cursor) -> PResult<T>,
         ) -> PResult<Self> {
             match Self::parse(input, parse, true) {
-                Ok((_, ref b)) if b.is_empty() => parse_error(),
+                Ok((ref b, _)) if b.is_empty() => parse_error(),
                 other => other,
             }
         }
@@ -316,8 +316,8 @@ mod parsing {
 
             // get the first element
             match parse(input) {
-                Err(_) => Ok((input, res)),
-                Ok((i, o)) => {
+                Err(_) => Ok((res, input)),
+                Ok((o, i)) => {
                     if i == input {
                         return parse_error();
                     }
@@ -325,13 +325,13 @@ mod parsing {
                     res.push(o);
 
                     // get the separator first
-                    while let Ok((i2, s)) = D::parse(input) {
+                    while let Ok((s, i2)) = D::parse(input) {
                         if i2 == input {
                             break;
                         }
 
                         // get the element next
-                        if let Ok((i3, o3)) = parse(i2) {
+                        if let Ok((o3, i3)) = parse(i2) {
                             if i3 == i2 {
                                 break;
                             }
@@ -343,12 +343,12 @@ mod parsing {
                         }
                     }
                     if terminated {
-                        if let Ok((after, sep)) = D::parse(input) {
+                        if let Ok((sep, after)) = D::parse(input) {
                             res.push_trailing(sep);
                             input = after;
                         }
                     }
-                    Ok((input, res))
+                    Ok((res, input))
                 }
             }
         }

@@ -119,7 +119,7 @@ fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
     let tokens = input.parse::<TokenStream>().unwrap();
     let buf = SynomBuffer::new(tokens);
     let attr = match Attribute::parse_outer(buf.begin()) {
-        Ok((rest, e)) => {
+        Ok((e, rest)) => {
             assert!(rest.eof());
             e
         }

@@ -23,7 +23,7 @@ pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
                 Delimiter::Bracket => MacroDelimiter::Bracket(Bracket(span)),
                 Delimiter::None => return parse_error(),
             };
-            Ok((rest, (delimiter, tts)))
+            Ok(((delimiter, tts), rest))
         }
         _ => parse_error(),
     }
@@ -38,7 +38,7 @@ pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
                 kind: TokenNode::Group(Delimiter::Brace, tts),
             },
             rest,
-        )) => Ok((rest, (Brace(span), tts))),
+        )) => Ok(((Brace(span), tts), rest)),
         _ => parse_error(),
     }
 }
@@ -52,7 +52,7 @@ pub fn parenthesized(input: Cursor) -> PResult<(Paren, TokenStream)> {
                 kind: TokenNode::Group(Delimiter::Parenthesis, tts),
             },
             rest,
-        )) => Ok((rest, (Paren(span), tts))),
+        )) => Ok(((Paren(span), tts), rest)),
         _ => parse_error(),
     }
 }

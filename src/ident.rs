@@ -251,11 +251,11 @@ pub mod parsing {
             }
 
             Ok((
-                rest,
                 Ident {
                     span: span,
                     term: term,
                 },
+                rest,
             ))
         }
 
