@@ -217,13 +217,12 @@ pub mod parsing {
                 lt_token: lt,
                 params: lifetimes.into_iter()
                     .map(Element::into_tuple)
-                    .map(|(lifetime, comma)| (GenericParam::Lifetime(lifetime), comma))
+                    .map(|(life, comma)| Element::new(GenericParam::Lifetime(life), comma))
                     .chain(ty_params.unwrap_or_default()
                         .into_iter()
                         .map(Element::into_tuple)
-                        .map(|(ty_param, comma)| (GenericParam::Type(ty_param), comma)))
-                    .collect::<Vec<_>>()
-                    .into(),
+                        .map(|(ty, comma)| Element::new(GenericParam::Type(ty), comma)))
+                    .collect(),
                 gt_token: gt,
                 where_clause: None,
             }

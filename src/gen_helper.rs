@@ -1,6 +1,6 @@
 #[cfg(feature = "fold")]
 pub mod fold {
-    use delimited::Delimited;
+    use delimited::{Delimited, Element};
     use fold::Folder;
     use proc_macro2::Span;
 
@@ -19,10 +19,10 @@ pub mod fold {
     impl<T, U> FoldHelper for Delimited<T, U> {
         type Item = T;
         fn lift<F>(self, mut f: F) -> Self where F: FnMut(Self::Item) -> Self::Item {
-            self.into_iter().map(|elem| {
-                let (t, u) = elem.into_tuple();
-                (f(t), u)
-            }).collect::<Vec<(T, Option<U>)>>().into()
+            self.into_iter()
+                .map(Element::into_tuple)
+                .map(|(t, u)| Element::new(f(t), u))
+                .collect()
         }
     }
 

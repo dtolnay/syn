@@ -23,36 +23,11 @@ impl<T, D> Delimited<T, D> {
         self.inner.len()
     }
 
-    pub fn get(&self, idx: usize) -> Element<&T, &D> {
-        let (ref t, ref d) = self.inner[idx];
-        match *d {
-            Some(ref d) => Element::Delimited(t, d),
-            None => Element::End(t),
-        }
-    }
-
-    pub fn get_mut(&mut self, idx: usize) -> Element<&mut T, &mut D> {
-        let (ref mut t, ref mut d) = self.inner[idx];
-        match *d {
-            Some(ref mut d) => Element::Delimited(t, d),
-            None => Element::End(t),
-        }
-    }
-
     pub fn first(&self) -> Option<Element<&T, &D>> {
         self.inner.first().map(|&(ref t, ref d)| match *d {
             Some(ref d) => Element::Delimited(t, d),
             None => Element::End(t),
         })
-    }
-
-    pub fn first_mut(&mut self) -> Option<Element<&mut T, &mut D>> {
-        self.inner
-            .first_mut()
-            .map(|&mut (ref mut t, ref mut d)| match *d {
-                Some(ref mut d) => Element::Delimited(t, d),
-                None => Element::End(t),
-            })
     }
 
     pub fn last(&self) -> Option<Element<&T, &D>> {
@@ -83,60 +58,24 @@ impl<T, D> Delimited<T, D> {
         }
     }
 
-    pub fn items(&self) -> Items<T, D> {
-        Items {
-            inner: self.inner.iter(),
-        }
-    }
-
-    pub fn push(&mut self, token: Element<T, D>) {
+    pub fn push(&mut self, token: T) {
         assert!(self.empty_or_trailing());
-        match token {
-            Element::Delimited(t, d) => self.inner.push((t, Some(d))),
-            Element::End(t) => self.inner.push((t, None)),
-        }
-    }
-
-    pub fn push_first(&mut self, token: T) {
-        assert!(self.is_empty());
-        self.inner.push((token, None));
-    }
-
-    pub fn push_next(&mut self, token: T, delimiter: D) {
-        self.push_trailing(delimiter);
         self.inner.push((token, None));
     }
 
     pub fn push_trailing(&mut self, delimiter: D) {
-        let len = self.len();
-        assert!(self.inner[len - 1].1.is_none());
-        self.inner[len - 1].1 = Some(delimiter);
-    }
-
-    pub fn push_default(&mut self, token: T)
-    where
-        D: Default,
-    {
-        if self.empty_or_trailing() {
-            self.inner.push((token, None));
-        } else {
-            self.push_next(token, D::default());
-        }
+        assert!(!self.is_empty());
+        let last = self.inner.last_mut().unwrap();
+        assert!(last.1.is_none());
+        last.1 = Some(delimiter);
     }
 
     pub fn pop(&mut self) -> Option<Element<T, D>> {
-        self.inner.pop().map(|e| match e {
-            (t, Some(d)) => Element::Delimited(t, d),
-            (t, None) => Element::End(t),
-        })
-    }
-
-    pub fn into_vec(self) -> Vec<T> {
-        self.inner.into_iter().map(|t| t.0).collect()
+        self.inner.pop().map(|(t, d)| Element::new(t, d))
     }
 
     pub fn trailing_delim(&self) -> bool {
-        self.inner[self.inner.len() - 1].1.is_some()
+        self.inner.last().map(|last| last.1.is_some()).unwrap_or(false)
     }
 
     /// Returns true if either this `Delimited` is empty, or it has a trailing
@@ -144,7 +83,7 @@ impl<T, D> Delimited<T, D> {
     ///
     /// Equivalent to `delimited.is_empty() || delimited.trailing_delim()`.
     pub fn empty_or_trailing(&self) -> bool {
-        self.is_empty() || self.trailing_delim()
+        self.inner.last().map(|last| last.1.is_some()).unwrap_or(true)
     }
 }
 
@@ -152,36 +91,6 @@ impl<T, D> Delimited<T, D> {
 impl<T: Debug, D: Debug> Debug for Delimited<T, D> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.inner.fmt(f)
-    }
-}
-
-impl<T, D> From<Vec<(T, Option<D>)>> for Delimited<T, D> {
-    fn from(v: Vec<(T, Option<D>)>) -> Self {
-        Delimited { inner: v }
-    }
-}
-
-impl<T, D> From<Vec<T>> for Delimited<T, D>
-where
-    D: Default,
-{
-    fn from(v: Vec<T>) -> Self {
-        let len = v.len();
-        Delimited {
-            inner: v.into_iter()
-                .enumerate()
-                .map(|(i, item)| {
-                    (
-                        item,
-                        if i + 1 == len {
-                            None
-                        } else {
-                            Some(D::default())
-                        },
-                    )
-                })
-                .collect(),
-        }
     }
 }
 
@@ -193,35 +102,13 @@ impl<T, D> FromIterator<Element<T, D>> for Delimited<T, D> {
     }
 }
 
-impl<T, D> FromIterator<T> for Delimited<T, D>
-where
-    D: Default,
-{
-    fn from_iter<I: IntoIterator<Item = T>>(i: I) -> Self {
-        let mut ret = Delimited::new();
-        ret.extend(i);
-        ret
-    }
-}
-
 impl<T, D> Extend<Element<T, D>> for Delimited<T, D> {
     fn extend<I: IntoIterator<Item = Element<T, D>>>(&mut self, i: I) {
-        for element in i {
-            match element {
+        for elem in i {
+            match elem {
                 Element::Delimited(a, b) => self.inner.push((a, Some(b))),
                 Element::End(a) => self.inner.push((a, None)),
             }
-        }
-    }
-}
-
-impl<T, D> Extend<T> for Delimited<T, D>
-where
-    D: Default,
-{
-    fn extend<I: IntoIterator<Item = T>>(&mut self, i: I) {
-        for element in i {
-            self.push_default(element);
         }
     }
 }
@@ -231,7 +118,7 @@ impl<'a, T, D> IntoIterator for &'a Delimited<T, D> {
     type IntoIter = Iter<'a, T, D>;
 
     fn into_iter(self) -> Self::IntoIter {
-        <Delimited<T, D>>::iter(self)
+        Delimited::iter(self)
     }
 }
 
@@ -240,7 +127,7 @@ impl<'a, T, D> IntoIterator for &'a mut Delimited<T, D> {
     type IntoIter = IterMut<'a, T, D>;
 
     fn into_iter(self) -> Self::IntoIter {
-        <Delimited<T, D>>::iter_mut(self)
+        Delimited::iter_mut(self)
     }
 }
 
@@ -291,18 +178,6 @@ impl<'a, T, D> Iterator for IterMut<'a, T, D> {
     }
 }
 
-pub struct Items<'a, T: 'a, D: 'a> {
-    inner: slice::Iter<'a, (T, Option<D>)>,
-}
-
-impl<'a, T, D> Iterator for Items<'a, T, D> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<&'a T> {
-        self.inner.next().map(|pair| &pair.0)
-    }
-}
-
 pub struct IntoIter<T, D> {
     inner: vec::IntoIter<(T, Option<D>)>,
 }
@@ -346,6 +221,13 @@ impl<T, D> Element<T, D> {
         match *self {
             Element::Delimited(_, ref d) => Some(d),
             Element::End(_) => None,
+        }
+    }
+
+    pub fn new(t: T, d: Option<D>) -> Self {
+        match d {
+            Some(d) => Element::Delimited(t, d),
+            None => Element::End(t),
         }
     }
 
@@ -440,7 +322,7 @@ mod parsing {
                         return parse_error();
                     }
                     input = i;
-                    res.push_first(o);
+                    res.push(o);
 
                     // get the separator first
                     while let Ok((i2, s)) = D::parse(input) {
@@ -453,7 +335,8 @@ mod parsing {
                             if i3 == i2 {
                                 break;
                             }
-                            res.push_next(o3, s);
+                            res.push_trailing(s);
+                            res.push(o3);
                             input = i3;
                         } else {
                             break;

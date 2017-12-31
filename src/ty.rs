@@ -152,10 +152,12 @@ where
     T: Into<PathSegment>,
 {
     fn from(segment: T) -> Self {
-        Path {
+        let mut path = Path {
             leading_colon: None,
-            segments: vec![(segment.into(), None)].into(),
-        }
+            segments: Delimited::new(),
+        };
+        path.segments.push(segment.into());
+        path
     }
 }
 
@@ -550,14 +552,14 @@ pub mod parsing {
     impl TypePath {
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             qpath: qpath >>
-            parenthesized: cond!(
+            parenthesized: option!(cond_reduce!(
                 qpath.1.segments.last().unwrap().item().arguments.is_empty(),
-                option!(syn!(ParenthesizedGenericArguments))
-            ) >>
+                syn!(ParenthesizedGenericArguments)
+            )) >>
             cond!(allow_plus, not!(punct!(+))) >>
             ({
                 let (qself, mut path) = qpath;
-                if let Some(Some(parenthesized)) = parenthesized {
+                if let Some(parenthesized) = parenthesized {
                     let parenthesized = PathArguments::Parenthesized(parenthesized);
                     path.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
                 }
@@ -580,12 +582,8 @@ pub mod parsing {
                 let (pos, as_, path) = match path {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
-                        if !path.segments.empty_or_trailing() {
-                            path.segments.push_trailing(colon2);
-                        }
-                        for item in rest {
-                            path.segments.push(item);
-                        }
+                        path.segments.push_trailing(colon2);
+                        path.segments.extend(rest);
                         (pos, Some(as_), path)
                     }
                     None => {
@@ -657,7 +655,11 @@ pub mod parsing {
             bounds: alt!(
                 cond_reduce!(allow_plus, Delimited::parse_terminated_nonempty)
                 |
-                syn!(TypeParamBound) => { |x| vec![x].into() }
+                syn!(TypeParamBound) => {|x| {
+                    let mut delimited = Delimited::new();
+                    delimited.push(x);
+                    delimited
+                }}
             ) >>
             (TypeTraitObject {
                 dyn_token: dyn_token,
@@ -844,15 +846,14 @@ pub mod parsing {
             bound_lifetimes: option!(syn!(BoundLifetimes)) >>
             trait_ref: syn!(Path) >>
             parenthesized: option!(cond_reduce!(
-                trait_ref.segments.get(trait_ref.segments.len() - 1).item().arguments.is_empty(),
+                trait_ref.segments.last().unwrap().item().arguments.is_empty(),
                 syn!(ParenthesizedGenericArguments)
             )) >>
             ({
                 let mut trait_ref = trait_ref;
                 if let Some(parenthesized) = parenthesized {
                     let parenthesized = PathArguments::Parenthesized(parenthesized);
-                    let len = trait_ref.segments.len();
-                    trait_ref.segments.get_mut(len - 1).item_mut().arguments = parenthesized;
+                    trait_ref.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
                 }
                 PolyTraitRef {
                     bound_lifetimes: bound_lifetimes,
