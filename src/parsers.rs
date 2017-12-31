@@ -37,9 +37,7 @@ use synom::PResult;
 ///     /// As the default behavior, we want there to be at least 1 type.
 ///     named!(parse -> Self, do_parse!(
 ///         types: call!(Delimited::parse_separated_nonempty) >>
-///         (CommaSeparatedTypes {
-///             types: types,
-///         })
+///         (CommaSeparatedTypes { types })
 ///     ));
 /// }
 ///
@@ -48,9 +46,7 @@ use synom::PResult;
 ///     /// for parsing 0 or more types, rather than the default 1 or more.
 ///     named!(pub parse0 -> Self, do_parse!(
 ///         types: call!(Delimited::parse_separated) >>
-///         (CommaSeparatedTypes {
-///             types: types,
-///         })
+///         (CommaSeparatedTypes { types })
 ///     ));
 /// }
 /// #
@@ -126,9 +122,7 @@ macro_rules! call {
 /// impl Synom for CommaSeparatedTypes {
 ///     named!(parse -> Self, do_parse!(
 ///         types: call!(Delimited::parse_separated_nonempty) >>
-///         (CommaSeparatedTypes {
-///             types: types,
-///         })
+///         (CommaSeparatedTypes { types })
 ///     ));
 /// }
 /// #
@@ -242,7 +236,7 @@ macro_rules! not {
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::Ident;
+/// use syn::{Ident, MacroDelimiter};
 /// use syn::token::{Paren, Bracket, Brace};
 /// use syn::synom::Synom;
 ///
@@ -253,29 +247,21 @@ macro_rules! not {
 /// struct EmptyMacroCall {
 ///     name: Ident,
 ///     bang_token: Token![!],
-///     delimiter: MacroDelimiter,
+///     empty_body: MacroDelimiter,
 ///     semi_token: Option<Token![;]>,
 /// }
 ///
-/// enum MacroDelimiter {
-///     Paren(Paren),
-///     Bracket(Bracket),
-///     Brace(Brace),
-/// }
-///
-/// impl MacroDelimiter {
-///     fn requires_semi(&self) -> bool {
-///         match *self {
-///             MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => true,
-///             MacroDelimiter::Brace(_) => false,
-///         }
+/// fn requires_semi(delimiter: &MacroDelimiter) -> bool {
+///     match *delimiter {
+///         MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => true,
+///         MacroDelimiter::Brace(_) => false,
 ///     }
 /// }
 ///
 /// impl Synom for EmptyMacroCall {
 ///     named!(parse -> Self, do_parse!(
 ///         name: syn!(Ident) >>
-///         bang: punct!(!) >>
+///         bang_token: punct!(!) >>
 ///         empty_body: alt!(
 ///             parens!(epsilon!()) => { |d| MacroDelimiter::Paren(d.0) }
 ///             |
@@ -283,12 +269,12 @@ macro_rules! not {
 ///             |
 ///             braces!(epsilon!()) => { |d| MacroDelimiter::Brace(d.0) }
 ///         ) >>
-///         semi: cond!(empty_body.requires_semi(), punct!(;)) >>
+///         semi_token: cond!(requires_semi(&empty_body), punct!(;)) >>
 ///         (EmptyMacroCall {
-///             name: name,
-///             bang_token: bang,
-///             delimiter: empty_body,
-///             semi_token: semi,
+///             name,
+///             bang_token,
+///             empty_body,
+///             semi_token,
 ///         })
 ///     ));
 /// }
@@ -420,8 +406,8 @@ macro_rules! cond_reduce {
 ///         name: syn!(Ident) >>
 ///         body: braces!(many0!(syn!(Item))) >>
 ///         (SimpleMod {
-///             mod_token: mod_token,
-///             name: name,
+///             mod_token,
+///             name,
 ///             brace_token: body.0,
 ///             items: body.1,
 ///         })
@@ -548,19 +534,19 @@ pub fn many0<T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T
 ///             StructOrEnum::Struct(struct_token) => map!(
 ///                 punct!(;),
 ///                 |semi_token| UnitType::Struct {
-///                     struct_token: struct_token,
-///                     name: name,
-///                     semi_token: semi_token,
+///                     struct_token,
+///                     name,
+///                     semi_token,
 ///                 }
 ///             )
 ///             |
 ///             StructOrEnum::Enum(enum_token) => map!(
 ///                 braces!(syn!(Ident)),
 ///                 |(brace_token, variant)| UnitType::Enum {
-///                     enum_token: enum_token,
-///                     name: name,
-///                     brace_token: brace_token,
-///                     variant: variant,
+///                     enum_token,
+///                     name,
+///                     brace_token,
+///                     variant,
 ///                 }
 ///             )
 ///         ) >>
@@ -640,19 +626,19 @@ macro_rules! switch {
 ///             StructOrEnum::Struct(struct_token) => map!(
 ///                 punct!(;),
 ///                 |semi_token| UnitType::Struct {
-///                     struct_token: struct_token,
-///                     name: name,
-///                     semi_token: semi_token,
+///                     struct_token,
+///                     name,
+///                     semi_token,
 ///                 }
 ///             )
 ///             |
 ///             StructOrEnum::Enum(enum_token) => map!(
 ///                 braces!(syn!(Ident)),
 ///                 |(brace_token, variant)| UnitType::Enum {
-///                     enum_token: enum_token,
-///                     name: name,
-///                     brace_token: brace_token,
-///                     variant: variant,
+///                     enum_token,
+///                     name,
+///                     brace_token,
+///                     variant,
 ///                 }
 ///             )
 ///         ) >>
@@ -874,11 +860,11 @@ macro_rules! alt {
 /// impl Synom for Macro {
 ///     named!(parse -> Self, do_parse!(
 ///         name: syn!(Ident) >>
-///         bang: punct!(!) >>
+///         bang_token: punct!(!) >>
 ///         body: parens!(syn!(TokenStream)) >>
 ///         (Macro {
-///             name: name,
-///             bang_token: bang,
+///             name,
+///             bang_token,
 ///             paren_token: body.0,
 ///             tts: body.1,
 ///         })
@@ -974,14 +960,14 @@ macro_rules! do_parse {
 /// impl Synom for TerminatedExpr {
 ///     named!(parse -> Self, do_parse!(
 ///         expr: syn!(Expr) >>
-///         semi: alt!(
+///         semi_token: alt!(
 ///             input_end!() => { |_| None }
 ///             |
 ///             punct!(;) => { Some }
 ///         ) >>
 ///         (TerminatedExpr {
-///             expr: expr,
-///             semi_token: semi,
+///             expr,
+///             semi_token,
 ///         })
 ///     ));
 /// }
@@ -1034,12 +1020,12 @@ pub fn input_end(input: Cursor) -> PResult<'static, ()> {
 ///     named!(parse -> Self, do_parse!(
 ///         // Loop may or may not have a label.
 ///         label: option!(syn!(Label)) >>
-///         loop_: keyword!(loop) >>
-///         block: syn!(Block) >>
+///         loop_token: keyword!(loop) >>
+///         body: syn!(Block) >>
 ///         (ExprLoop {
-///             label: label,
-///             loop_token: loop_,
-///             body: block,
+///             label,
+///             loop_token,
+///             body,
 ///         })
 ///     ));
 /// }
@@ -1165,8 +1151,8 @@ macro_rules! tap {
 ///         name: syn!(Ident) >>
 ///         body: braces!(many0!(syn!(Item))) >>
 ///         (SimpleMod {
-///             mod_token: mod_token,
-///             name: name,
+///             mod_token,
+///             name,
 ///             brace_token: body.0,
 ///             items: body.1,
 ///         })
