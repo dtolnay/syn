@@ -1,5 +1,5 @@
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 use proc_macro2::{Span, TokenStream};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
@@ -30,7 +30,7 @@ ast_enum_of_structs! {
         pub Array(ExprArray #full {
             pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
-            pub elems: Delimited<Expr, Token![,]>,
+            pub elems: Punctuated<Expr, Token![,]>,
         }),
 
         /// A function call.
@@ -38,7 +38,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub func: Box<Expr>,
             pub paren_token: token::Paren,
-            pub args: Delimited<Expr, Token![,]>,
+            pub args: Punctuated<Expr, Token![,]>,
         }),
 
         /// A method call (`x.foo::<Bar, Baz>(a, b, c, d)`)
@@ -53,14 +53,14 @@ ast_enum_of_structs! {
             pub method: Ident,
             pub turbofish: Option<MethodTurbofish>,
             pub paren_token: token::Paren,
-            pub args: Delimited<Expr, Token![,]>,
+            pub args: Punctuated<Expr, Token![,]>,
         }),
 
         /// A tuple, e.g. `(a, b, c, d)`.
         pub Tuple(ExprTuple #full {
             pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
-            pub elems: Delimited<Expr, Token![,]>,
+            pub elems: Punctuated<Expr, Token![,]>,
         }),
 
         /// A binary operation, e.g. `a + b`, `a * b`.
@@ -193,7 +193,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub capture: Option<Token![move]>,
             pub or1_token: Token![|],
-            pub inputs: Delimited<FnArg, Token![,]>,
+            pub inputs: Punctuated<FnArg, Token![,]>,
             pub or2_token: Token![|],
             pub output: ReturnType,
             pub body: Box<Expr>,
@@ -310,7 +310,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub path: Path,
             pub brace_token: token::Brace,
-            pub fields: Delimited<FieldValue, Token![,]>,
+            pub fields: Punctuated<FieldValue, Token![,]>,
             pub dot2_token: Option<Token![..]>,
             pub rest: Option<Box<Expr>>,
         }),
@@ -503,7 +503,7 @@ ast_struct! {
     pub struct MethodTurbofish {
         pub colon2_token: Token![::],
         pub lt_token: Token![<],
-        pub args: Delimited<GenericMethodArgument, Token![,]>,
+        pub args: Punctuated<GenericMethodArgument, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -620,7 +620,7 @@ ast_enum_of_structs! {
         pub Struct(PatStruct {
             pub path: Path,
             pub brace_token: token::Brace,
-            pub fields: Delimited<FieldPat, Token![,]>,
+            pub fields: Punctuated<FieldPat, Token![,]>,
             pub dot2_token: Option<Token![..]>,
         }),
 
@@ -646,10 +646,10 @@ ast_enum_of_structs! {
         /// 0 <= position <= subpats.len()
         pub Tuple(PatTuple {
             pub paren_token: token::Paren,
-            pub front: Delimited<Pat, Token![,]>,
+            pub front: Punctuated<Pat, Token![,]>,
             pub dot2_token: Option<Token![..]>,
             pub comma_token: Option<Token![,]>,
-            pub back: Delimited<Pat, Token![,]>,
+            pub back: Punctuated<Pat, Token![,]>,
         }),
         /// A `box` pattern
         pub Box(PatBox {
@@ -675,11 +675,11 @@ ast_enum_of_structs! {
         /// `[a, b, i.., y, z]` is represented as:
         pub Slice(PatSlice {
             pub bracket_token: token::Bracket,
-            pub front: Delimited<Pat, Token![,]>,
+            pub front: Punctuated<Pat, Token![,]>,
             pub middle: Option<Box<Pat>>,
             pub dot2_token: Option<Token![..]>,
             pub comma_token: Option<Token![,]>,
-            pub back: Delimited<Pat, Token![,]>,
+            pub back: Punctuated<Pat, Token![,]>,
         }),
         /// A macro pattern; pre-expansion
         pub Macro(PatMacro {
@@ -731,7 +731,7 @@ ast_struct! {
     /// ```
     pub struct Arm {
         pub attrs: Vec<Attribute>,
-        pub pats: Delimited<Pat, Token![|]>,
+        pub pats: Punctuated<Pat, Token![|]>,
         pub guard: Option<(Token![if], Box<Expr>)>,
         pub rocket_token: Token![=>],
         pub body: Box<Expr>,
@@ -1436,7 +1436,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprArray {
         named!(parse -> Self, do_parse!(
-            elems: brackets!(Delimited::parse_terminated) >>
+            elems: brackets!(Punctuated::parse_terminated) >>
             (ExprArray {
                 attrs: Vec::new(),
                 bracket_token: elems.0,
@@ -1449,8 +1449,8 @@ pub mod parsing {
         }
     }
 
-    named!(and_call -> (token::Paren, Delimited<Expr, Token![,]>),
-           parens!(Delimited::parse_terminated));
+    named!(and_call -> (token::Paren, Punctuated<Expr, Token![,]>),
+           parens!(Punctuated::parse_terminated));
 
     #[cfg(feature = "full")]
     named!(and_method_call -> ExprMethodCall, do_parse!(
@@ -1459,10 +1459,10 @@ pub mod parsing {
         turbofish: option!(tuple!(
             punct!(::),
             punct!(<),
-            call!(Delimited::parse_terminated),
+            call!(Punctuated::parse_terminated),
             punct!(>)
         )) >>
-        args: parens!(Delimited::parse_terminated) >>
+        args: parens!(Punctuated::parse_terminated) >>
         ({
             ExprMethodCall {
                 attrs: Vec::new(),
@@ -1498,7 +1498,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprTuple {
         named!(parse -> Self, do_parse!(
-            elems: parens!(Delimited::parse_terminated) >>
+            elems: parens!(Punctuated::parse_terminated) >>
             (ExprTuple {
                 attrs: Vec::new(),
                 elems: elems.1,
@@ -1691,7 +1691,7 @@ pub mod parsing {
     impl Synom for Arm {
         named!(parse -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
-            pats: call!(Delimited::parse_separated_nonempty) >>
+            pats: call!(Punctuated::parse_separated_nonempty) >>
             guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
             rocket: punct!(=>) >>
             body: do_parse!(
@@ -1726,7 +1726,7 @@ pub mod parsing {
     named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
         capture: option!(keyword!(move)) >>
         or1: punct!(|) >>
-        inputs: call!(Delimited::parse_terminated_with, fn_arg) >>
+        inputs: call!(Punctuated::parse_terminated_with, fn_arg) >>
         or2: punct!(|) >>
         ret_and_body: alt!(
             do_parse!(
@@ -1883,7 +1883,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             path: syn!(Path) >>
             data: braces!(do_parse!(
-                fields: call!(Delimited::parse_terminated) >>
+                fields: call!(Punctuated::parse_terminated) >>
                 base: option!(cond!(fields.empty_or_trailing(), do_parse!(
                     dots: punct!(..) >>
                     base: syn!(Expr) >>
@@ -2291,7 +2291,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             path: syn!(Path) >>
             data: braces!(do_parse!(
-                fields: call!(Delimited::parse_terminated) >>
+                fields: call!(Punctuated::parse_terminated) >>
                 base: option!(cond!(fields.empty_or_trailing(), punct!(..))) >>
                 (fields, base)
             )) >>
@@ -2403,7 +2403,7 @@ pub mod parsing {
     impl Synom for PatTuple {
         named!(parse -> Self, do_parse!(
             data: parens!(do_parse!(
-                front: call!(Delimited::parse_terminated) >>
+                front: call!(Punctuated::parse_terminated) >>
                 dotdot: option!(cond_reduce!(front.empty_or_trailing(),
                     tuple!(punct!(..), option!(punct!(,)))
                 )) >>
@@ -2411,7 +2411,7 @@ pub mod parsing {
                                 Some((_, Some(_))) => true,
                                 _ => false,
                             },
-                            Delimited::parse_terminated) >>
+                            Punctuated::parse_terminated) >>
                 (front, dotdot, back)
             )) >>
             ({
@@ -2512,7 +2512,7 @@ pub mod parsing {
     impl Synom for PatSlice {
         named!(parse -> Self, map!(
             brackets!(do_parse!(
-                before: call!(Delimited::parse_terminated) >>
+                before: call!(Punctuated::parse_terminated) >>
                 middle: option!(do_parse!(
                     dots: punct!(..) >>
                     trailing: option!(punct!(,)) >>
@@ -2523,13 +2523,13 @@ pub mod parsing {
                         Some((_, ref trailing)) => trailing.is_some(),
                         _ => false,
                     },
-                    Delimited::parse_terminated
+                    Punctuated::parse_terminated
                 ) >>
                 (before, middle, after)
             )),
             |(brackets, (before, middle, after))| {
-                let mut before: Delimited<Pat, Token![,]> = before;
-                let after: Option<Delimited<Pat, Token![,]>> = after;
+                let mut before: Punctuated<Pat, Token![,]> = before;
+                let after: Option<Punctuated<Pat, Token![,]>> = after;
                 let middle: Option<(Token![..], Option<Token![,]>)> = middle;
                 PatSlice {
                     dot2_token: middle.as_ref().map(|m| Token![..]((m.0).0)),
@@ -2868,8 +2868,8 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
-            for item in self.inputs.iter() {
-                match **item.item() {
+            for input in self.inputs.iter() {
+                match **input.item() {
                     FnArg::Captured(ArgCaptured {
                         ref pat,
                         ty: Type::Infer(_),
@@ -2877,9 +2877,9 @@ mod printing {
                     }) => {
                         pat.to_tokens(tokens);
                     }
-                    _ => item.item().to_tokens(tokens),
+                    _ => input.item().to_tokens(tokens),
                 }
-                item.delimiter().to_tokens(tokens);
+                input.punct().to_tokens(tokens);
             }
             self.or2_token.to_tokens(tokens);
             self.output.to_tokens(tokens);

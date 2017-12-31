@@ -1,5 +1,5 @@
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 use proc_macro2::{TokenStream};
 use token::{Paren, Brace};
 
@@ -31,7 +31,7 @@ ast_enum_of_structs! {
             pub vis: Visibility,
             pub use_token: Token![use],
             pub leading_colon: Option<Token![::]>,
-            pub prefix: Delimited<Ident, Token![::]>,
+            pub prefix: Punctuated<Ident, Token![::]>,
             pub tree: UseTree,
             pub semi_token: Token![;],
         }),
@@ -132,7 +132,7 @@ ast_enum_of_structs! {
             pub ident: Ident,
             pub generics: Generics,
             pub brace_token: token::Brace,
-            pub variants: Delimited<Variant, Token![,]>,
+            pub variants: Punctuated<Variant, Token![,]>,
         }),
         /// A union definition (`union` or `pub union`).
         ///
@@ -157,7 +157,7 @@ ast_enum_of_structs! {
             pub ident: Ident,
             pub generics: Generics,
             pub colon_token: Option<Token![:]>,
-            pub supertraits: Delimited<TypeParamBound, Token![+]>,
+            pub supertraits: Punctuated<TypeParamBound, Token![+]>,
             pub brace_token: token::Brace,
             pub items: Vec<TraitItem>,
         }),
@@ -302,7 +302,7 @@ ast_enum_of_structs! {
         /// `use prefix::{a, b, c}`
         pub List(UseList {
             pub brace_token: token::Brace,
-            pub items: Delimited<UseTree, Token![,]>,
+            pub items: Punctuated<UseTree, Token![,]>,
         }),
     }
 }
@@ -390,7 +390,7 @@ ast_enum_of_structs! {
             pub ident: Ident,
             pub generics: Generics,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
             pub default: Option<(Token![=], Type)>,
             pub semi_token: Token![;],
         }),
@@ -508,7 +508,7 @@ ast_struct! {
         pub fn_token: Token![fn],
         pub generics: Generics,
         pub paren_token: token::Paren,
-        pub inputs: Delimited<FnArg, Token![,]>,
+        pub inputs: Punctuated<FnArg, Token![,]>,
         pub variadic: Option<Token![...]>,
         pub output: ReturnType,
     }
@@ -643,7 +643,7 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         use_: keyword!(use) >>
         leading_colon: option!(punct!(::)) >>
-        mut prefix: call!(Delimited::parse_terminated_with, use_prefix) >>
+        mut prefix: call!(Punctuated::parse_terminated_with, use_prefix) >>
         tree: switch!(value!(prefix.empty_or_trailing()),
             true => syn!(UseTree)
             |
@@ -714,7 +714,7 @@ pub mod parsing {
     ));
 
     impl_synom!(UseList "use list" do_parse!(
-        list: braces!(Delimited::parse_terminated) >>
+        list: braces!(Punctuated::parse_terminated) >>
         (UseList {
             brace_token: list.0,
             items: list.1,
@@ -778,7 +778,7 @@ pub mod parsing {
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        inputs: parens!(Delimited::parse_terminated) >>
+        inputs: parens!(Punctuated::parse_terminated) >>
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
@@ -923,7 +923,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         inputs: parens!(do_parse!(
-            args: call!(Delimited::parse_terminated) >>
+            args: call!(Punctuated::parse_terminated) >>
             variadic: option!(cond_reduce!(args.empty_or_trailing(), punct!(...))) >>
             (args, variadic)
         )) >>
@@ -1057,7 +1057,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         colon: option!(punct!(:)) >>
-        bounds: cond!(colon.is_some(), Delimited::parse_separated_nonempty) >>
+        bounds: cond!(colon.is_some(), Punctuated::parse_separated_nonempty) >>
         where_clause: option!(syn!(WhereClause)) >>
         body: braces!(many0!(TraitItem::parse)) >>
         (ItemTrait {
@@ -1138,7 +1138,7 @@ pub mod parsing {
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        inputs: parens!(Delimited::parse_terminated) >>
+        inputs: parens!(Punctuated::parse_terminated) >>
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         body: option!(braces!(
@@ -1191,7 +1191,7 @@ pub mod parsing {
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
         colon: option!(punct!(:)) >>
-        bounds: cond!(colon.is_some(), Delimited::parse_separated_nonempty) >>
+        bounds: cond!(colon.is_some(), Punctuated::parse_separated_nonempty) >>
         where_clause: option!(syn!(WhereClause)) >>
         default: option!(tuple!(punct!(=), syn!(Type))) >>
         semi: punct!(;) >>
@@ -1301,7 +1301,7 @@ pub mod parsing {
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
-        inputs: parens!(Delimited::parse_terminated) >>
+        inputs: parens!(Punctuated::parse_terminated) >>
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(

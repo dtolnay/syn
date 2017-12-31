@@ -21,7 +21,7 @@ fn test_split_for_impl() {
     let generics = Generics {
         gt_token: Some(Default::default()),
         lt_token: Some(Default::default()),
-        params: delimited![
+        params: punctuated![
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'a"), Span::default()),
@@ -31,7 +31,7 @@ fn test_split_for_impl() {
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
                 lifetime: Lifetime::new(Term::intern("'b"), Span::default()),
-                bounds: delimited![Lifetime::new(Term::intern("'a"), Span::default())],
+                bounds: punctuated![Lifetime::new(Term::intern("'a"), Span::default())],
                 colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
@@ -46,7 +46,7 @@ fn test_split_for_impl() {
                     },
                 ],
                 ident: "T".into(),
-                bounds: delimited![
+                bounds: punctuated![
                     TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default())),
                 ],
                 default: Some(
@@ -61,7 +61,7 @@ fn test_split_for_impl() {
         ],
         where_clause: Some(WhereClause {
             where_token: Default::default(),
-            predicates: delimited![
+            predicates: punctuated![
                 WherePredicate::BoundPredicate(WhereBoundPredicate {
                     bound_lifetimes: None,
                     colon_token: Default::default(),
@@ -69,7 +69,7 @@ fn test_split_for_impl() {
                         qself: None,
                         path: "T".into(),
                     }.into(),
-                    bounds: delimited![
+                    bounds: punctuated![
                         TypeParamBound::Trait(
                             PolyTraitRef {
                                 bound_lifetimes: None,

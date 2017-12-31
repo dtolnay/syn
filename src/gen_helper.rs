@@ -1,6 +1,6 @@
 #[cfg(feature = "fold")]
 pub mod fold {
-    use delimited::{Delimited, Element};
+    use punctuated::{Punctuated, Element};
     use fold::Folder;
     use proc_macro2::Span;
 
@@ -16,7 +16,7 @@ pub mod fold {
         }
     }
 
-    impl<T, U> FoldHelper for Delimited<T, U> {
+    impl<T, U> FoldHelper for Punctuated<T, U> {
         type Item = T;
         fn lift<F>(self, mut f: F) -> Self where F: FnMut(Self::Item) -> Self::Item {
             self.into_iter()

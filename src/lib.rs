@@ -94,7 +94,7 @@ pub use ty::PathTokens;
 mod cursor;
 #[cfg(feature = "parsing")]
 pub mod synom;
-pub mod delimited;
+pub mod punctuated;
 #[cfg(feature = "parsing")]
 mod tt;
 

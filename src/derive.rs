@@ -1,5 +1,5 @@
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
@@ -35,7 +35,7 @@ ast_enum_of_structs! {
         pub Enum(DataEnum {
             pub enum_token: Token![enum],
             pub brace_token: token::Brace,
-            pub variants: Delimited<Variant, Token![,]>,
+            pub variants: Punctuated<Variant, Token![,]>,
         }),
 
         /// It's an untagged union.
@@ -125,9 +125,9 @@ pub mod parsing {
         )
     ));
 
-    named!(data_enum -> (Option<WhereClause>, token::Brace, Delimited<Variant, Token![,]>), do_parse!(
+    named!(data_enum -> (Option<WhereClause>, token::Brace, Punctuated<Variant, Token![,]>), do_parse!(
         wh: option!(syn!(WhereClause)) >>
-        data: braces!(Delimited::parse_terminated) >>
+        data: braces!(Punctuated::parse_terminated) >>
         (wh, data.0, data.1)
     ));
 }

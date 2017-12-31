@@ -41,7 +41,7 @@ fn test_meta_item_list_lit() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: delimited![NestedMetaItem::Literal(lit(Literal::integer(5)))],
+            nested: punctuated![NestedMetaItem::Literal(lit(Literal::integer(5)))],
         },
     )
 }
@@ -53,7 +53,7 @@ fn test_meta_item_list_word() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: delimited![NestedMetaItem::MetaItem(MetaItem::Term("bar".into()))],
+            nested: punctuated![NestedMetaItem::MetaItem(MetaItem::Term("bar".into()))],
         },
     )
 }
@@ -65,7 +65,7 @@ fn test_meta_item_list_name_value() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: delimited![
+            nested: punctuated![
                 NestedMetaItem::MetaItem(
                     MetaNameValue {
                         ident: "bar".into(),
@@ -85,7 +85,7 @@ fn test_meta_item_multiple() {
         MetaItemList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: delimited![
+            nested: punctuated![
                 NestedMetaItem::MetaItem(MetaItem::Term("word".into())),
                 NestedMetaItem::MetaItem(
                     MetaNameValue {
@@ -98,7 +98,7 @@ fn test_meta_item_multiple() {
                     MetaItemList {
                         ident: "list".into(),
                         paren_token: Default::default(),
-                        nested: delimited![
+                        nested: punctuated![
                             NestedMetaItem::MetaItem(
                                 MetaNameValue {
                                     ident: "name2".into(),

@@ -18,25 +18,25 @@ use synom::PResult;
 /// extern crate syn;
 ///
 /// use syn::Type;
-/// use syn::delimited::Delimited;
+/// use syn::punctuated::Punctuated;
 /// use syn::synom::Synom;
 ///
 /// /// Parses one or more Rust types separated by commas.
 /// ///
 /// /// Example: `String, Vec<T>, [u8; LEN + 1]`
-/// named!(pub comma_separated_types -> Delimited<Type, Token![,]>,
-///     call!(Delimited::parse_separated_nonempty)
+/// named!(pub comma_separated_types -> Punctuated<Type, Token![,]>,
+///     call!(Punctuated::parse_separated_nonempty)
 /// );
 ///
 /// /// The same function as a `Synom` implementation.
 /// struct CommaSeparatedTypes {
-///     types: Delimited<Type, Token![,]>,
+///     types: Punctuated<Type, Token![,]>,
 /// }
 ///
 /// impl Synom for CommaSeparatedTypes {
 ///     /// As the default behavior, we want there to be at least 1 type.
 ///     named!(parse -> Self, do_parse!(
-///         types: call!(Delimited::parse_separated_nonempty) >>
+///         types: call!(Punctuated::parse_separated_nonempty) >>
 ///         (CommaSeparatedTypes { types })
 ///     ));
 /// }
@@ -45,7 +45,7 @@ use synom::PResult;
 ///     /// A separate parser that the user can invoke explicitly which allows
 ///     /// for parsing 0 or more types, rather than the default 1 or more.
 ///     named!(pub parse0 -> Self, do_parse!(
-///         types: call!(Delimited::parse_separated) >>
+///         types: call!(Punctuated::parse_separated) >>
 ///         (CommaSeparatedTypes { types })
 ///     ));
 /// }
@@ -109,19 +109,19 @@ macro_rules! call {
 /// extern crate syn;
 ///
 /// use syn::Type;
-/// use syn::delimited::Delimited;
+/// use syn::punctuated::Punctuated;
 /// use syn::synom::Synom;
 ///
 /// /// Parses one or more Rust types separated by commas.
 /// ///
 /// /// Example: `String, Vec<T>, [u8; LEN + 1]`
 /// struct CommaSeparatedTypes {
-///     types: Delimited<Type, Token![,]>,
+///     types: Punctuated<Type, Token![,]>,
 /// }
 ///
 /// impl Synom for CommaSeparatedTypes {
 ///     named!(parse -> Self, do_parse!(
-///         types: call!(Delimited::parse_separated_nonempty) >>
+///         types: call!(Punctuated::parse_separated_nonempty) >>
 ///         (CommaSeparatedTypes { types })
 ///     ));
 /// }
@@ -316,7 +316,7 @@ macro_rules! cond {
 ///
 /// use syn::Type;
 /// use syn::token::Paren;
-/// use syn::delimited::Delimited;
+/// use syn::punctuated::Punctuated;
 /// use syn::synom::Synom;
 ///
 /// /// Parses a possibly variadic function signature.
@@ -326,7 +326,7 @@ macro_rules! cond {
 /// struct VariadicFn {
 ///     fn_token: Token![fn],
 ///     paren_token: Paren,
-///     types: Delimited<Type, Token![,]>,
+///     types: Punctuated<Type, Token![,]>,
 ///     variadic: Option<Token![...]>,
 /// }
 ///
@@ -335,7 +335,7 @@ macro_rules! cond {
 ///     named!(parse -> Self, do_parse!(
 ///         fn_token: keyword!(fn) >>
 ///         params: parens!(do_parse!(
-///             types: call!(Delimited::parse_terminated) >>
+///             types: call!(Punctuated::parse_terminated) >>
 ///             // Allow, but do not require, an ending `...` but only if the
 ///             // preceding list of types is empty or ends with a trailing comma.
 ///             variadic: option!(cond_reduce!(types.empty_or_trailing(), punct!(...))) >>
@@ -377,10 +377,10 @@ macro_rules! cond_reduce {
 ///
 /// You may also be looking for:
 ///
-/// - `call!(Delimited::parse_separated)` - zero or more values with separator
-/// - `call!(Delimited::parse_separated_nonempty)` - one or more values
-/// - `call!(Delimited::parse_terminated)` - zero or more, allows trailing separator
-/// - `call!(Delimited::parse_terminated_nonempty)` - one or more
+/// - `call!(Punctuated::parse_separated)` - zero or more values with separator
+/// - `call!(Punctuated::parse_separated_nonempty)` - one or more values
+/// - `call!(Punctuated::parse_terminated)` - zero or more, allows trailing separator
+/// - `call!(Punctuated::parse_terminated_nonempty)` - one or more
 ///
 /// ```rust
 /// #[macro_use]

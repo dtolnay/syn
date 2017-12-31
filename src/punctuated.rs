@@ -6,13 +6,13 @@ use std::fmt::{self, Debug};
 
 #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
-pub struct Delimited<T, D> {
-    inner: Vec<(T, Option<D>)>,
+pub struct Punctuated<T, P> {
+    inner: Vec<(T, Option<P>)>,
 }
 
-impl<T, D> Delimited<T, D> {
-    pub fn new() -> Delimited<T, D> {
-        Delimited { inner: Vec::new() }
+impl<T, P> Punctuated<T, P> {
+    pub fn new() -> Punctuated<T, P> {
+        Punctuated { inner: Vec::new() }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -23,36 +23,36 @@ impl<T, D> Delimited<T, D> {
         self.inner.len()
     }
 
-    pub fn first(&self) -> Option<Element<&T, &D>> {
+    pub fn first(&self) -> Option<Element<&T, &P>> {
         self.inner.first().map(|&(ref t, ref d)| match *d {
-            Some(ref d) => Element::Delimited(t, d),
+            Some(ref d) => Element::Punctuated(t, d),
             None => Element::End(t),
         })
     }
 
-    pub fn last(&self) -> Option<Element<&T, &D>> {
+    pub fn last(&self) -> Option<Element<&T, &P>> {
         self.inner.last().map(|&(ref t, ref d)| match *d {
-            Some(ref d) => Element::Delimited(t, d),
+            Some(ref d) => Element::Punctuated(t, d),
             None => Element::End(t),
         })
     }
 
-    pub fn last_mut(&mut self) -> Option<Element<&mut T, &mut D>> {
+    pub fn last_mut(&mut self) -> Option<Element<&mut T, &mut P>> {
         self.inner
             .last_mut()
             .map(|&mut (ref mut t, ref mut d)| match *d {
-                Some(ref mut d) => Element::Delimited(t, d),
+                Some(ref mut d) => Element::Punctuated(t, d),
                 None => Element::End(t),
             })
     }
 
-    pub fn iter(&self) -> Iter<T, D> {
+    pub fn iter(&self) -> Iter<T, P> {
         Iter {
             inner: self.inner.iter(),
         }
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<T, D> {
+    pub fn iter_mut(&mut self) -> IterMut<T, P> {
         IterMut {
             inner: self.inner.iter_mut(),
         }
@@ -63,14 +63,14 @@ impl<T, D> Delimited<T, D> {
         self.inner.push((token, None));
     }
 
-    pub fn push_trailing(&mut self, delimiter: D) {
+    pub fn push_trailing(&mut self, punctuation: P) {
         assert!(!self.is_empty());
         let last = self.inner.last_mut().unwrap();
         assert!(last.1.is_none());
-        last.1 = Some(delimiter);
+        last.1 = Some(punctuation);
     }
 
-    pub fn pop(&mut self) -> Option<Element<T, D>> {
+    pub fn pop(&mut self) -> Option<Element<T, P>> {
         self.inner.pop().map(|(t, d)| Element::new(t, d))
     }
 
@@ -78,62 +78,62 @@ impl<T, D> Delimited<T, D> {
         self.inner.last().map(|last| last.1.is_some()).unwrap_or(false)
     }
 
-    /// Returns true if either this `Delimited` is empty, or it has a trailing
-    /// delimiter.
+    /// Returns true if either this `Punctuated` is empty, or it has a trailing
+    /// punctuation.
     ///
-    /// Equivalent to `delimited.is_empty() || delimited.trailing_delim()`.
+    /// Equivalent to `punctuated.is_empty() || punctuated.trailing_delim()`.
     pub fn empty_or_trailing(&self) -> bool {
         self.inner.last().map(|last| last.1.is_some()).unwrap_or(true)
     }
 }
 
 #[cfg(feature = "extra-traits")]
-impl<T: Debug, D: Debug> Debug for Delimited<T, D> {
+impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
 
-impl<T, D> FromIterator<Element<T, D>> for Delimited<T, D> {
-    fn from_iter<I: IntoIterator<Item = Element<T, D>>>(i: I) -> Self {
-        let mut ret = Delimited::new();
+impl<T, P> FromIterator<Element<T, P>> for Punctuated<T, P> {
+    fn from_iter<I: IntoIterator<Item = Element<T, P>>>(i: I) -> Self {
+        let mut ret = Punctuated::new();
         ret.extend(i);
         ret
     }
 }
 
-impl<T, D> Extend<Element<T, D>> for Delimited<T, D> {
-    fn extend<I: IntoIterator<Item = Element<T, D>>>(&mut self, i: I) {
+impl<T, P> Extend<Element<T, P>> for Punctuated<T, P> {
+    fn extend<I: IntoIterator<Item = Element<T, P>>>(&mut self, i: I) {
         for elem in i {
             match elem {
-                Element::Delimited(a, b) => self.inner.push((a, Some(b))),
+                Element::Punctuated(a, b) => self.inner.push((a, Some(b))),
                 Element::End(a) => self.inner.push((a, None)),
             }
         }
     }
 }
 
-impl<'a, T, D> IntoIterator for &'a Delimited<T, D> {
-    type Item = Element<&'a T, &'a D>;
-    type IntoIter = Iter<'a, T, D>;
+impl<'a, T, P> IntoIterator for &'a Punctuated<T, P> {
+    type Item = Element<&'a T, &'a P>;
+    type IntoIter = Iter<'a, T, P>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Delimited::iter(self)
+        Punctuated::iter(self)
     }
 }
 
-impl<'a, T, D> IntoIterator for &'a mut Delimited<T, D> {
-    type Item = Element<&'a mut T, &'a mut D>;
-    type IntoIter = IterMut<'a, T, D>;
+impl<'a, T, P> IntoIterator for &'a mut Punctuated<T, P> {
+    type Item = Element<&'a mut T, &'a mut P>;
+    type IntoIter = IterMut<'a, T, P>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Delimited::iter_mut(self)
+        Punctuated::iter_mut(self)
     }
 }
 
-impl<T, D> IntoIterator for Delimited<T, D> {
-    type Item = Element<T, D>;
-    type IntoIter = IntoIter<T, D>;
+impl<T, P> IntoIterator for Punctuated<T, P> {
+    type Item = Element<T, P>;
+    type IntoIter = IntoIter<T, P>;
 
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
@@ -142,98 +142,98 @@ impl<T, D> IntoIterator for Delimited<T, D> {
     }
 }
 
-impl<T, D> Default for Delimited<T, D> {
+impl<T, P> Default for Punctuated<T, P> {
     fn default() -> Self {
-        Delimited::new()
+        Punctuated::new()
     }
 }
 
-pub struct Iter<'a, T: 'a, D: 'a> {
-    inner: slice::Iter<'a, (T, Option<D>)>,
+pub struct Iter<'a, T: 'a, P: 'a> {
+    inner: slice::Iter<'a, (T, Option<P>)>,
 }
 
-impl<'a, T, D> Iterator for Iter<'a, T, D> {
-    type Item = Element<&'a T, &'a D>;
+impl<'a, T, P> Iterator for Iter<'a, T, P> {
+    type Item = Element<&'a T, &'a P>;
 
-    fn next(&mut self) -> Option<Element<&'a T, &'a D>> {
+    fn next(&mut self) -> Option<Element<&'a T, &'a P>> {
         self.inner.next().map(|pair| match pair.1 {
-            Some(ref delimited) => Element::Delimited(&pair.0, delimited),
+            Some(ref p) => Element::Punctuated(&pair.0, p),
             None => Element::End(&pair.0),
         })
     }
 }
 
-pub struct IterMut<'a, T: 'a, D: 'a> {
-    inner: slice::IterMut<'a, (T, Option<D>)>,
+pub struct IterMut<'a, T: 'a, P: 'a> {
+    inner: slice::IterMut<'a, (T, Option<P>)>,
 }
 
-impl<'a, T, D> Iterator for IterMut<'a, T, D> {
-    type Item = Element<&'a mut T, &'a mut D>;
+impl<'a, T, P> Iterator for IterMut<'a, T, P> {
+    type Item = Element<&'a mut T, &'a mut P>;
 
-    fn next(&mut self) -> Option<Element<&'a mut T, &'a mut D>> {
+    fn next(&mut self) -> Option<Element<&'a mut T, &'a mut P>> {
         self.inner.next().map(|pair| match pair.1 {
-            Some(ref mut delimited) => Element::Delimited(&mut pair.0, delimited),
+            Some(ref mut p) => Element::Punctuated(&mut pair.0, p),
             None => Element::End(&mut pair.0),
         })
     }
 }
 
-pub struct IntoIter<T, D> {
-    inner: vec::IntoIter<(T, Option<D>)>,
+pub struct IntoIter<T, P> {
+    inner: vec::IntoIter<(T, Option<P>)>,
 }
 
-impl<T, D> Iterator for IntoIter<T, D> {
-    type Item = Element<T, D>;
+impl<T, P> Iterator for IntoIter<T, P> {
+    type Item = Element<T, P>;
 
-    fn next(&mut self) -> Option<Element<T, D>> {
+    fn next(&mut self) -> Option<Element<T, P>> {
         self.inner.next().map(|pair| match pair.1 {
-            Some(v) => Element::Delimited(pair.0, v),
+            Some(v) => Element::Punctuated(pair.0, v),
             None => Element::End(pair.0),
         })
     }
 }
 
-pub enum Element<T, D> {
-    Delimited(T, D),
+pub enum Element<T, P> {
+    Punctuated(T, P),
     End(T),
 }
 
-impl<T, D> Element<T, D> {
+impl<T, P> Element<T, P> {
     pub fn into_item(self) -> T {
         match self {
-            Element::Delimited(t, _) | Element::End(t) => t,
+            Element::Punctuated(t, _) | Element::End(t) => t,
         }
     }
 
     pub fn item(&self) -> &T {
         match *self {
-            Element::Delimited(ref t, _) | Element::End(ref t) => t,
+            Element::Punctuated(ref t, _) | Element::End(ref t) => t,
         }
     }
 
     pub fn item_mut(&mut self) -> &mut T {
         match *self {
-            Element::Delimited(ref mut t, _) | Element::End(ref mut t) => t,
+            Element::Punctuated(ref mut t, _) | Element::End(ref mut t) => t,
         }
     }
 
-    pub fn delimiter(&self) -> Option<&D> {
+    pub fn punct(&self) -> Option<&P> {
         match *self {
-            Element::Delimited(_, ref d) => Some(d),
+            Element::Punctuated(_, ref d) => Some(d),
             Element::End(_) => None,
         }
     }
 
-    pub fn new(t: T, d: Option<D>) -> Self {
+    pub fn new(t: T, d: Option<P>) -> Self {
         match d {
-            Some(d) => Element::Delimited(t, d),
+            Some(d) => Element::Punctuated(t, d),
             None => Element::End(t),
         }
     }
 
-    pub fn into_tuple(self) -> (T, Option<D>) {
+    pub fn into_tuple(self) -> (T, Option<P>) {
         match self {
-            Element::Delimited(t, d) => (t, Some(d)),
+            Element::Punctuated(t, d) => (t, Some(d)),
             Element::End(t) => (t, None),
         }
     }
@@ -241,16 +241,16 @@ impl<T, D> Element<T, D> {
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use super::Delimited;
+    use super::Punctuated;
     use synom::Synom;
     use cursor::Cursor;
     use parse_error;
     use synom::PResult;
 
-    impl<T, D> Delimited<T, D>
+    impl<T, P> Punctuated<T, P>
     where
         T: Synom,
-        D: Synom,
+        P: Synom,
     {
         pub fn parse_separated(input: Cursor) -> PResult<Self> {
             Self::parse(input, T::parse, false)
@@ -269,9 +269,9 @@ mod parsing {
         }
     }
 
-    impl<T, D> Delimited<T, D>
+    impl<T, P> Punctuated<T, P>
     where
-        D: Synom,
+        P: Synom,
     {
         pub fn parse_separated_with(
             input: Cursor,
@@ -312,7 +312,7 @@ mod parsing {
             parse: fn(Cursor) -> PResult<T>,
             terminated: bool,
         ) -> PResult<Self> {
-            let mut res = Delimited::new();
+            let mut res = Punctuated::new();
 
             // get the first element
             match parse(input) {
@@ -325,7 +325,7 @@ mod parsing {
                     res.push(o);
 
                     // get the separator first
-                    while let Ok((s, i2)) = D::parse(input) {
+                    while let Ok((s, i2)) = P::parse(input) {
                         if i2 == input {
                             break;
                         }
@@ -343,7 +343,7 @@ mod parsing {
                         }
                     }
                     if terminated {
-                        if let Ok((sep, after)) = D::parse(input) {
+                        if let Ok((sep, after)) = P::parse(input) {
                             res.push_trailing(sep);
                             input = after;
                         }
@@ -360,24 +360,24 @@ mod printing {
     use super::*;
     use quote::{ToTokens, Tokens};
 
-    impl<T, D> ToTokens for Delimited<T, D>
+    impl<T, P> ToTokens for Punctuated<T, P>
     where
         T: ToTokens,
-        D: ToTokens,
+        P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.iter())
         }
     }
 
-    impl<T, D> ToTokens for Element<T, D>
+    impl<T, P> ToTokens for Element<T, P>
     where
         T: ToTokens,
-        D: ToTokens,
+        P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                Element::Delimited(ref a, ref b) => {
+                Element::Punctuated(ref a, ref b) => {
                     a.to_tokens(tokens);
                     b.to_tokens(tokens);
                 }

@@ -8,20 +8,20 @@ macro_rules! errorf {
 }
 
 #[macro_export]
-macro_rules! delimited {
+macro_rules! punctuated {
     ($first:expr, $($rest:expr,)*) => {{
-        let mut d = ::syn::delimited::Delimited::new();
+        let mut seq = ::syn::punctuated::Punctuated::new();
         let mut last = $first;
         $(
-            d.push(::std::mem::replace(&mut last, $rest));
-            d.push_trailing(::std::default::Default::default());
+            seq.push(::std::mem::replace(&mut last, $rest));
+            seq.push_trailing(::std::default::Default::default());
         )*
         last = last;
-        d.push(last);
-        d
+        seq.push(last);
+        seq
     }};
 
     ($($e:expr),+) => {
-        delimited!($($e,)+)
+        punctuated!($($e,)+)
     };
 }

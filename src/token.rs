@@ -569,7 +569,7 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{Spacing, Span, Term, TokenNode, TokenTree};
+    use proc_macro2::{Delimiter, Spacing, Span, Term, TokenNode, TokenTree};
     use quote::Tokens;
 
     pub fn punct(s: &str, spans: &[Span], tokens: &mut Tokens) {

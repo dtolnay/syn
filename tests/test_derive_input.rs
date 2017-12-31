@@ -92,7 +92,7 @@ fn test_struct() {
             struct_token: Default::default(),
             fields: Fields::Named(FieldsNamed {
                 brace_token: Default::default(),
-                fields: delimited![
+                fields: punctuated![
                     Field {
                         ident: Some("ident".into()),
                         colon_token: Some(Default::default()),
@@ -116,14 +116,14 @@ fn test_struct() {
                             qself: None,
                             path: Path {
                                 leading_colon: None,
-                                segments: delimited![
+                                segments: punctuated![
                                     PathSegment {
                                         ident: "Vec".into(),
                                         arguments: PathArguments::AngleBracketed(
                                             AngleBracketedGenericArguments {
                                                 colon2_token: None,
                                                 lt_token: Default::default(),
-                                                args: delimited![
+                                                args: punctuated![
                                                     GenericArgument::Type(Type::from(TypePath {
                                                         qself: None,
                                                         path: "Attribute".into(),
@@ -149,7 +149,7 @@ fn test_struct() {
     let expected_meta_item: MetaItem = MetaItemList {
         ident: "derive".into(),
         paren_token: Default::default(),
-        nested: delimited![
+        nested: punctuated![
             NestedMetaItem::MetaItem(MetaItem::Term("Debug".into())),
             NestedMetaItem::MetaItem(MetaItem::Term("Clone".into())),
         ],
@@ -205,7 +205,7 @@ fn test_enum() {
         ],
         generics: Generics {
             lt_token: Some(Default::default()),
-            params: delimited![
+            params: punctuated![
                 GenericParam::Type(TypeParam {
                     attrs: Vec::new(),
                     ident: "T".into(),
@@ -227,13 +227,13 @@ fn test_enum() {
             where_clause: None,
         },
         data: Data::Enum(DataEnum {
-            variants: delimited![
+            variants: punctuated![
                 Variant {
                     ident: "Ok".into(),
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
-                        fields: delimited![
+                        fields: punctuated![
                             Field {
                                 colon_token: None,
                                 ident: None,
@@ -253,7 +253,7 @@ fn test_enum() {
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
-                        fields: delimited![
+                        fields: punctuated![
                             Field {
                                 ident: None,
                                 colon_token: None,
@@ -294,7 +294,7 @@ fn test_enum() {
                             base: Box::new(Expr::Tuple(ExprTuple {
                                 attrs: Vec::new(),
                                 paren_token: Default::default(),
-                                elems: delimited![
+                                elems: punctuated![
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
                                         lit: Lit {
@@ -370,7 +370,7 @@ fn test_attr_with_path() {
                 style: AttrStyle::Outer,
                 path: Path {
                     leading_colon: Some(Default::default()),
-                    segments: delimited![
+                    segments: punctuated![
                         PathSegment::from("attr_args"),
                         PathSegment::from("identity"),
                     ],
@@ -432,7 +432,7 @@ fn test_attr_with_non_mod_style_path() {
                 style: AttrStyle::Outer,
                 path: Path {
                     leading_colon: None,
-                    segments: delimited![PathSegment::from("inert")],
+                    segments: punctuated![PathSegment::from("inert")],
                 },
                 tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
                 is_sugared_doc: false,
@@ -470,7 +470,7 @@ fn test_attr_with_mod_style_path_with_self() {
                 style: AttrStyle::Outer,
                 path: Path {
                     leading_colon: None,
-                    segments: delimited![PathSegment::from("foo"), PathSegment::from("self")],
+                    segments: punctuated![PathSegment::from("foo"), PathSegment::from("self")],
                 },
                 tts: TokenStream::empty(),
                 is_sugared_doc: false,
@@ -511,13 +511,13 @@ fn test_pub_restricted() {
         data: Data::Struct(DataStruct {
             fields: Fields::Unnamed(FieldsUnnamed {
                 paren_token: Default::default(),
-                fields: delimited![
+                fields: punctuated![
                     Field {
                         ident: None,
                         vis: Visibility::Restricted(VisRestricted {
                             path: Box::new(Path {
                                 leading_colon: None,
-                                segments: delimited![PathSegment::from("m"), PathSegment::from("n")],
+                                segments: punctuated![PathSegment::from("m"), PathSegment::from("n")],
                             }),
                             in_token: Some(Default::default()),
                             paren_token: Default::default(),

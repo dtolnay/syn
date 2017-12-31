@@ -1,4 +1,4 @@
-use delimited::Delimited;
+use punctuated::Punctuated;
 use super::*;
 use proc_macro2::TokenStream;
 #[cfg(feature = "extra-traits")]
@@ -42,7 +42,7 @@ ast_enum_of_structs! {
             pub fn_token: Token![fn],
             pub lifetimes: Option<BoundLifetimes>,
             pub paren_token: token::Paren,
-            pub inputs: Delimited<BareFnArg, Token![,]>,
+            pub inputs: Punctuated<BareFnArg, Token![,]>,
             pub variadic: Option<Token![...]>,
             pub output: ReturnType,
         }),
@@ -53,7 +53,7 @@ ast_enum_of_structs! {
         /// A tuple (`(A, B, C, D, ...)`)
         pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
-            pub elems: Delimited<Type, Token![,]>,
+            pub elems: Punctuated<Type, Token![,]>,
         }),
         /// A path (`module::module::...::Type`), optionally
         /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
@@ -67,13 +67,13 @@ ast_enum_of_structs! {
         /// where `Bound` is a trait or a lifetime.
         pub TraitObject(TypeTraitObject {
             pub dyn_token: Option<Token![dyn]>,
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
         /// An `impl Bound1 + Bound2 + Bound3` type
         /// where `Bound` is a trait or a lifetime.
         pub ImplTrait(TypeImplTrait {
             pub impl_token: Token![impl],
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
         /// No-op; kept solely so that we can pretty-print faithfully
         pub Paren(TypeParen {
@@ -132,7 +132,7 @@ ast_struct! {
         /// module (like paths in an import).
         pub leading_colon: Option<Token![::]>,
         /// The segments in the path: the things separated by `::`.
-        pub segments: Delimited<PathSegment, Token![::]>,
+        pub segments: Punctuated<PathSegment, Token![::]>,
     }
 }
 
@@ -154,7 +154,7 @@ where
     fn from(segment: T) -> Self {
         let mut path = Path {
             leading_colon: None,
-            segments: Delimited::new(),
+            segments: Punctuated::new(),
         };
         path.segments.push(segment.into());
         path
@@ -242,7 +242,7 @@ ast_struct! {
     pub struct AngleBracketedGenericArguments {
         pub colon2_token: Option<Token![::]>,
         pub lt_token: Token![<],
-        pub args: Delimited<GenericArgument, Token![,]>,
+        pub args: Punctuated<GenericArgument, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -261,7 +261,7 @@ ast_struct! {
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
         /// `(A, B)`
-        pub inputs: Delimited<Type, Token![,]>,
+        pub inputs: Punctuated<Type, Token![,]>,
         /// `C`
         pub output: ReturnType,
     }
@@ -483,7 +483,7 @@ pub mod parsing {
             abi: option!(syn!(Abi)) >>
             fn_: keyword!(fn) >>
             parens: parens!(do_parse!(
-                inputs: call!(Delimited::parse_terminated) >>
+                inputs: call!(Punctuated::parse_terminated) >>
                 variadic: option!(cond_reduce!(inputs.empty_or_trailing(), punct!(...))) >>
                 (inputs, variadic)
             )) >>
@@ -529,7 +529,7 @@ pub mod parsing {
 
     impl Synom for TypeTuple {
         named!(parse -> Self, do_parse!(
-            data: parens!(Delimited::parse_terminated) >>
+            data: parens!(Punctuated::parse_terminated) >>
             (TypeTuple {
                 paren_token: data.0,
                 elems: data.1,
@@ -577,7 +577,7 @@ pub mod parsing {
             path: option!(tuple!(keyword!(as), syn!(Path))) >>
             gt: punct!(>) >>
             colon2: punct!(::) >>
-            rest: call!(Delimited::parse_separated_nonempty) >>
+            rest: call!(Punctuated::parse_separated_nonempty) >>
             ({
                 let (pos, as_, path) = match path {
                     Some((as_, mut path)) => {
@@ -608,7 +608,7 @@ pub mod parsing {
 
     impl Synom for ParenthesizedGenericArguments {
         named!(parse -> Self, do_parse!(
-            data: parens!(Delimited::parse_terminated) >>
+            data: parens!(Punctuated::parse_terminated) >>
             output: syn!(ReturnType) >>
             (ParenthesizedGenericArguments {
                 paren_token: data.0,
@@ -653,12 +653,12 @@ pub mod parsing {
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             dyn_token: option!(keyword!(dyn)) >>
             bounds: alt!(
-                cond_reduce!(allow_plus, Delimited::parse_terminated_nonempty)
+                cond_reduce!(allow_plus, Punctuated::parse_terminated_nonempty)
                 |
                 syn!(TypeParamBound) => {|x| {
-                    let mut delimited = Delimited::new();
-                    delimited.push(x);
-                    delimited
+                    let mut bounds = Punctuated::new();
+                    bounds.push(x);
+                    bounds
                 }}
             ) >>
             (TypeTraitObject {
@@ -673,7 +673,7 @@ pub mod parsing {
             impl_: keyword!(impl) >>
             // NOTE: rust-lang/rust#34511 includes discussion about whether or
             // not + should be allowed in ImplTrait directly without ().
-            elem: call!(Delimited::parse_terminated_nonempty) >>
+            elem: call!(Punctuated::parse_terminated_nonempty) >>
             (TypeImplTrait {
                 impl_token: impl_,
                 bounds: elem,
@@ -713,7 +713,7 @@ pub mod parsing {
     impl Synom for Path {
         named!(parse -> Self, do_parse!(
             colon: option!(punct!(::)) >>
-            segments: call!(Delimited::<PathSegment, Token![::]>::parse_separated_nonempty) >>
+            segments: call!(Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty) >>
             cond_reduce!(segments.first().map_or(true, |seg| seg.item().ident != "dyn"), epsilon!()) >>
             (Path {
                 leading_colon: colon,
@@ -760,7 +760,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             colon2: option!(punct!(::)) >>
             lt: punct!(<) >>
-            args: call!(Delimited::parse_terminated) >>
+            args: call!(Punctuated::parse_terminated) >>
             gt: punct!(>) >>
             (AngleBracketedGenericArguments {
                 colon2_token: colon2,
@@ -803,7 +803,7 @@ pub mod parsing {
     impl Path {
         named!(pub parse_mod_style -> Self, do_parse!(
             colon: option!(punct!(::)) >>
-            segments: call!(Delimited::parse_separated_nonempty_with,
+            segments: call!(Punctuated::parse_separated_nonempty_with,
                             mod_style_path_segment) >>
             (Path {
                 leading_colon: colon,
@@ -1024,7 +1024,7 @@ mod printing {
                     if i + 1 == pos {
                         segment.item().to_tokens(tokens);
                         qself.gt_token.to_tokens(tokens);
-                        segment.delimiter().to_tokens(tokens);
+                        segment.punct().to_tokens(tokens);
                     } else {
                         segment.to_tokens(tokens);
                     }

@@ -305,7 +305,7 @@ mod parsing {
 mod codegen {
     use super::{AstItem, Lookup};
     use syn::*;
-    use syn::delimited::Delimited;
+    use syn::punctuated::Punctuated;
     use quote::{ToTokens, Tokens};
     use std::fmt::{self, Display};
 
@@ -327,9 +327,9 @@ mod codegen {
     enum RelevantType<'a> {
         Box(&'a Type),
         Vec(&'a Type),
-        Delimited(&'a Type),
+        Punctuated(&'a Type),
         Option(&'a Type),
-        Tuple(&'a Delimited<Type, Token![,]>),
+        Tuple(&'a Punctuated<Type, Token![,]>),
         Simple(&'a AstItem),
         Token(Tokens),
         Pass,
@@ -342,7 +342,7 @@ mod codegen {
                 match last.ident.as_ref() {
                     "Box" => RelevantType::Box(first_arg(&last.arguments)),
                     "Vec" => RelevantType::Vec(first_arg(&last.arguments)),
-                    "Delimited" => RelevantType::Delimited(first_arg(&last.arguments)),
+                    "Punctuated" => RelevantType::Punctuated(first_arg(&last.arguments)),
                     "Option" => RelevantType::Option(first_arg(&last.arguments)),
                     "Brace" | "Bracket" | "Paren" | "Group" => {
                         RelevantType::Token(last.ident.into_tokens())
@@ -575,7 +575,7 @@ mod codegen {
     }
 
     fn tuple_visit(
-        elems: &Delimited<Type, Token![,]>,
+        elems: &Punctuated<Type, Token![,]>,
         lookup: &Lookup,
         kind: Kind,
         name: &Operand,
@@ -641,7 +641,7 @@ mod codegen {
             RelevantType::Vec(elem) => {
                 vec_visit(elem, lookup, kind, name)
             }
-            RelevantType::Delimited(elem) => {
+            RelevantType::Punctuated(elem) => {
                 delimited_visit(elem, lookup, kind, name)
             }
             RelevantType::Option(elem) => {

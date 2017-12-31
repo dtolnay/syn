@@ -1,5 +1,5 @@
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 
 use std::iter;
 
@@ -165,8 +165,8 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
 
 fn list_of_nested_meta_items_from_tokens(
     mut tts: &[TokenTree],
-) -> Option<Delimited<NestedMetaItem, Token![,]>> {
-    let mut delimited = Delimited::new();
+) -> Option<Punctuated<NestedMetaItem, Token![,]>> {
+    let mut nested_meta_items = Punctuated::new();
     let mut first = true;
 
     while !tts.is_empty() {
@@ -188,13 +188,13 @@ fn list_of_nested_meta_items_from_tokens(
             None => return None,
         };
         if let Some(comma) = prev_comma {
-            delimited.push_trailing(comma);
+            nested_meta_items.push_trailing(comma);
         }
-        delimited.push(nested);
+        nested_meta_items.push(nested);
         tts = rest;
     }
 
-    Some(delimited)
+    Some(nested_meta_items)
 }
 
 ast_enum! {
@@ -235,7 +235,7 @@ ast_enum_of_structs! {
             /// Arguments to this attribute
             ///
             /// E.g. `..` in `#[derive(..)]`
-            pub nested: Delimited<NestedMetaItem, Token![,]>,
+            pub nested: Punctuated<NestedMetaItem, Token![,]>,
         }),
 
         /// Name-value meta item.

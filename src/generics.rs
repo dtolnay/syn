@@ -1,5 +1,5 @@
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 
 ast_struct! {
     /// Represents lifetimes and type parameters attached to a declaration
@@ -7,7 +7,7 @@ ast_struct! {
     #[derive(Default)]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
-        pub params: Delimited<GenericParam, Token![,]>,
+        pub params: Punctuated<GenericParam, Token![,]>,
         pub gt_token: Option<Token![>]>,
         pub where_clause: Option<WhereClause>,
     }
@@ -20,14 +20,14 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub lifetime: Lifetime,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<Lifetime, Token![+]>,
+            pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
         /// A generic type parameter, e.g. `T: Into<String>`.
         pub Type(TypeParam {
             pub attrs: Vec<Attribute>,
             pub ident: Ident,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
             pub eq_token: Option<Token![=]>,
             pub default: Option<Type>,
         }),
@@ -102,7 +102,7 @@ ast_struct! {
     pub struct BoundLifetimes {
         pub for_token: Token![for],
         pub lt_token: Token![<],
-        pub lifetimes: Delimited<LifetimeDef, Token![,]>,
+        pub lifetimes: Punctuated<LifetimeDef, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -113,7 +113,7 @@ impl LifetimeDef {
             attrs: Vec::new(),
             lifetime: lifetime,
             colon_token: None,
-            bounds: Delimited::new(),
+            bounds: Punctuated::new(),
         }
     }
 }
@@ -124,7 +124,7 @@ impl From<Ident> for TypeParam {
             attrs: vec![],
             ident: ident,
             colon_token: None,
-            bounds: Delimited::new(),
+            bounds: Punctuated::new(),
             eq_token: None,
             default: None,
         }
@@ -156,7 +156,7 @@ ast_struct! {
     /// A `where` clause in a definition
     pub struct WhereClause {
         pub where_token: Token![where],
-        pub predicates: Delimited<WherePredicate, Token![,]>,
+        pub predicates: Punctuated<WherePredicate, Token![,]>,
     }
 }
 
@@ -171,14 +171,14 @@ ast_enum_of_structs! {
             pub bounded_ty: Type,
             pub colon_token: Token![:],
             /// Trait and lifetime bounds (`Clone+Send+'static`)
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
 
         /// A lifetime predicate, e.g. `'a: 'b+'c`
         pub RegionPredicate(WhereRegionPredicate {
             pub lifetime: Lifetime,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<Lifetime, Token![+]>,
+            pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
 
         /// An equality predicate (unsupported)
@@ -195,23 +195,23 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use delimited::Element;
+    use punctuated::Element;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(
             alt!(
                 do_parse!(
                     lt: punct!(<) >>
-                    lifetimes: call!(Delimited::<LifetimeDef, Token![,]>::parse_terminated) >>
+                    lifetimes: call!(Punctuated::<LifetimeDef, Token![,]>::parse_terminated) >>
                     ty_params: cond!(
                         lifetimes.empty_or_trailing(),
-                        Delimited::<TypeParam, Token![,]>::parse_terminated
+                        Punctuated::<TypeParam, Token![,]>::parse_terminated
                     ) >>
                     gt: punct!(>) >>
                     (lifetimes, ty_params, Some(lt), Some(gt))
                 )
                 |
-                epsilon!() => { |_| (Delimited::new(), None, None, None) }
+                epsilon!() => { |_| (Punctuated::new(), None, None, None) }
             ),
             |(lifetimes, ty_params, lt, gt)| Generics {
                 lt_token: lt,
@@ -240,7 +240,7 @@ pub mod parsing {
             colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
-                Delimited::parse_separated_nonempty
+                Punctuated::parse_separated_nonempty
             ) >>
             (LifetimeDef {
                 attrs: attrs,
@@ -259,7 +259,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             for_: keyword!(for) >>
             lt: punct!(<) >>
-            lifetimes: call!(Delimited::parse_terminated) >>
+            lifetimes: call!(Punctuated::parse_terminated) >>
             gt: punct!(>) >>
             (BoundLifetimes {
                 for_token: for_,
@@ -281,7 +281,7 @@ pub mod parsing {
             colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
-                Delimited::parse_separated_nonempty
+                Punctuated::parse_separated_nonempty
             ) >>
             default: option!(do_parse!(
                 eq: punct!(=) >>
@@ -360,7 +360,7 @@ pub mod parsing {
     impl Synom for WhereClause {
         named!(parse -> Self, do_parse!(
             where_: keyword!(where) >>
-            predicates: call!(Delimited::parse_terminated) >>
+            predicates: call!(Punctuated::parse_terminated) >>
             (WhereClause {
                 predicates: predicates,
                 where_token: where_,
@@ -379,7 +379,7 @@ pub mod parsing {
                 colon: option!(punct!(:)) >>
                 bounds: cond!(
                     colon.is_some(),
-                    Delimited::parse_separated
+                    Punctuated::parse_separated
                 ) >>
                 (WherePredicate::RegionPredicate(WhereRegionPredicate {
                     lifetime: ident,
@@ -392,7 +392,7 @@ pub mod parsing {
                 bound_lifetimes: option!(syn!(BoundLifetimes)) >>
                 bounded_ty: syn!(Type) >>
                 colon: punct!(:) >>
-                bounds: call!(Delimited::parse_separated_nonempty) >>
+                bounds: call!(Punctuated::parse_separated_nonempty) >>
                 (WherePredicate::BoundPredicate(WhereBoundPredicate {
                     bound_lifetimes: bound_lifetimes,
                     bounded_ty: bounded_ty,
@@ -461,7 +461,7 @@ mod printing {
                         param.ty.to_tokens(tokens);
                     }
                 }
-                param.delimiter().to_tokens(tokens);
+                param.punct().to_tokens(tokens);
             }
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
@@ -489,7 +489,7 @@ mod printing {
                         param.ident.to_tokens(tokens);
                     }
                 }
-                param.delimiter().to_tokens(tokens);
+                param.punct().to_tokens(tokens);
             }
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
