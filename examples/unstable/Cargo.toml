@@ -11,7 +11,5 @@ name = "unstable"
 path = "src/main.rs"
 
 [dependencies]
-syn = { path = "../../", features = ["full", "unstable"] }
-
-[patch.crates-io]
-proc-macro2 = { path = "../../../proc-macro2" }
+syn = { path = "../../", features = ["full"] }
+proc-macro2 = "0.1"

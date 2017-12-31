@@ -3,11 +3,10 @@
 extern crate syn;
 extern crate proc_macro;
 
-use proc_macro::{TokenStream, Span, Diagnostic};
-
 use syn::*;
-use syn::spanned::Spanned;
 use syn::synom::{Synom, Cursor, SynomBuffer};
+use syn::spanned::Spanned;
+use proc_macro::{TokenStream, Span, Diagnostic};
 
 struct Parser {
     buffer: Box<SynomBuffer>,
@@ -29,13 +28,11 @@ impl Parser {
     }
 
     fn current_span(&self) -> Span {
-        self.cursor.current_span()
-            .map(|sp| sp.into_inner())
-            .unwrap_or_else(|| Span::def_site())
+        self.cursor.span().unstable()
     }
 
     fn parse<T: Synom>(&mut self) -> Result<T, Diagnostic> {
-        let (cursor, val) = T::parse(self.cursor)
+        let (val, cursor) = T::parse(self.cursor)
             .map_err(|e| {
                 let expected = match T::description() {
                     Some(desc) => desc,
@@ -50,7 +47,7 @@ impl Parser {
     }
 
     fn eof(&mut self) -> Result<(), Diagnostic> {
-        if !self.cursor.is_eof() {
+        if !self.cursor.eof() {
             return Err(self.current_span()
                        .error("trailing characters; expected eof"));
         }
@@ -69,9 +66,9 @@ fn eval(input: TokenStream) -> Result<TokenStream, Diagnostic> {
 
     let (a_len, b_len) = (a.elems.len(), b.elems.len());
     if a_len != b_len {
-        let diag = b.span()
+        let diag = b.span().unstable()
             .error(format!("expected {} element(s), got {}", a_len, b_len))
-            .span_note(a.span(), "because of this");
+            .span_note(a.span().unstable(), "because of this");
 
         return Err(diag);
     }
