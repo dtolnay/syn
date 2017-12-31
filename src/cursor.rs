@@ -231,10 +231,10 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a Term, return it and a cursor pointing at
     /// the next `TokenTree`.
-    pub fn word(mut self) -> Option<(Cursor<'a>, Span, Term)> {
+    pub fn term(mut self) -> Option<(Cursor<'a>, Span, Term)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Term(span, sym) => Some((unsafe { self.bump() }, span, sym)),
+            Entry::Term(span, term) => Some((unsafe { self.bump() }, span, term)),
             _ => None,
         }
     }
@@ -244,7 +244,7 @@ impl<'a> Cursor<'a> {
     pub fn op(mut self) -> Option<(Cursor<'a>, Span, char, Spacing)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Op(span, chr, kind) => Some((unsafe { self.bump() }, span, chr, kind)),
+            Entry::Op(span, chr, spacing) => Some((unsafe { self.bump() }, span, chr, spacing)),
             _ => None,
         }
     }
@@ -293,9 +293,9 @@ impl<'a> Cursor<'a> {
                 span: span,
                 kind: TokenNode::Term(sym),
             },
-            Entry::Op(span, chr, kind) => TokenTree {
+            Entry::Op(span, chr, spacing) => TokenTree {
                 span: span,
-                kind: TokenNode::Op(chr, kind),
+                kind: TokenNode::Op(chr, spacing),
             },
             Entry::End(..) => {
                 return None;

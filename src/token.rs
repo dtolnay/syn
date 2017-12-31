@@ -9,23 +9,23 @@ use proc_macro2::Span;
 
 macro_rules! tokens {
     (
-        ops: {
-            $($op:tt pub struct $op_name:ident/$len:tt #[$op_doc:meta])*
+        punct: {
+            $($punct:tt pub struct $punct_name:ident/$len:tt #[$punct_doc:meta])*
         }
-        delim: {
-            $($delim:tt pub struct $delim_name:ident #[$delim_doc:meta])*
+        delimiter: {
+            $($delimiter:tt pub struct $delimiter_name:ident #[$delimiter_doc:meta])*
         }
-        syms: {
-            $($sym:tt pub struct $sym_name:ident #[$sym_doc:meta])*
+        keyword: {
+            $($keyword:tt pub struct $keyword_name:ident #[$keyword_doc:meta])*
         }
     ) => (
-        $(op! { #[$op_doc] $op pub struct $op_name/$len })*
-        $(delim! { #[$delim_doc] $delim pub struct $delim_name })*
-        $(sym! { #[$sym_doc] $sym pub struct $sym_name })*
+        $(token_punct! { #[$punct_doc] $punct pub struct $punct_name/$len })*
+        $(token_delimiter! { #[$delimiter_doc] $delimiter pub struct $delimiter_name })*
+        $(token_keyword! { #[$keyword_doc] $keyword pub struct $keyword_name })*
     )
 }
 
-macro_rules! op {
+macro_rules! token_punct {
     (#[$doc:meta] $s:tt pub struct $name:ident/$len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
@@ -65,14 +65,14 @@ macro_rules! op {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
-                printing::op($s, &self.0, tokens);
+                printing::punct($s, &self.0, tokens);
             }
         }
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
             fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
-                parsing::op($s, tokens, $name)
+                parsing::punct($s, tokens, $name)
             }
 
             fn description() -> Option<&'static str> {
@@ -82,7 +82,7 @@ macro_rules! op {
     }
 }
 
-macro_rules! sym {
+macro_rules! token_keyword {
     (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
@@ -116,20 +116,20 @@ macro_rules! sym {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
-                printing::sym($s, &self.0, tokens);
+                printing::keyword($s, &self.0, tokens);
             }
         }
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
             fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
-                parsing::sym($s, tokens, $name)
+                parsing::keyword($s, tokens, $name)
             }
         }
     }
 }
 
-macro_rules! delim {
+macro_rules! token_delimiter {
     (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
@@ -181,7 +181,7 @@ macro_rules! delim {
 }
 
 tokens! {
-    ops: {
+    punct: {
         "+"        pub struct Add/1        /// `+`
         "+="       pub struct AddEq/2      /// `+=`
         "&"        pub struct And/1        /// `&`
@@ -228,13 +228,13 @@ tokens! {
         "-="       pub struct SubEq/2      /// `-=`
         "_"        pub struct Underscore/1 /// `_`
     }
-    delim: {
+    delimiter: {
         "{"        pub struct Brace        /// `{...}`
         "["        pub struct Bracket      /// `[...]`
         "("        pub struct Paren        /// `(...)`
         " "        pub struct Group        /// None-delimited group
     }
-    syms: {
+    keyword: {
         "as"       pub struct As           /// `as`
         "auto"     pub struct Auto         /// `auto`
         "box"      pub struct Box          /// `box`
@@ -500,7 +500,7 @@ mod parsing {
         }
     }
 
-    pub fn op<'a, T, R>(s: &str, mut tokens: Cursor<'a>, new: fn(T) -> R) -> PResult<'a, R>
+    pub fn punct<'a, T, R>(s: &str, mut tokens: Cursor<'a>, new: fn(T) -> R) -> PResult<'a, R>
     where
         T: FromSpans,
     {
@@ -526,9 +526,9 @@ mod parsing {
         Ok((tokens, new(T::from_spans(&spans))))
     }
 
-    pub fn sym<'a, T>(sym: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
-        if let Some((rest, span, s)) = tokens.word() {
-            if s.as_str() == sym {
+    pub fn keyword<'a, T>(keyword: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
+        if let Some((rest, span, term)) = tokens.term() {
+            if term.as_str() == keyword {
                 return Ok((rest, new(span)));
             }
         }
@@ -553,11 +553,11 @@ mod parsing {
             _ => panic!("unknown delimiter: {}", delim),
         };
 
-        if let Some(seqinfo) = tokens.group(delim) {
-            match f(seqinfo.inside) {
+        if let Some(group) = tokens.group(delim) {
+            match f(group.inside) {
                 Ok((remaining, ret)) => {
                     if remaining.eof() {
-                        return Ok((seqinfo.outside, (new(seqinfo.span), ret)));
+                        return Ok((group.outside, (new(group.span), ret)));
                     }
                 }
                 Err(err) => return Err(err),
@@ -572,7 +572,7 @@ mod printing {
     use proc_macro2::{Spacing, Span, Term, TokenNode, TokenTree};
     use quote::Tokens;
 
-    pub fn op(s: &str, spans: &[Span], tokens: &mut Tokens) {
+    pub fn punct(s: &str, spans: &[Span], tokens: &mut Tokens) {
         assert_eq!(s.len(), spans.len());
 
         let mut chars = s.chars();
@@ -592,7 +592,7 @@ mod printing {
         });
     }
 
-    pub fn sym(s: &str, span: &Span, tokens: &mut Tokens) {
+    pub fn keyword(s: &str, span: &Span, tokens: &mut Tokens) {
         tokens.append(TokenTree {
             span: *span,
             kind: TokenNode::Term(Term::intern(s)),

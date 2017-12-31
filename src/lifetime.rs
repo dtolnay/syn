@@ -8,13 +8,13 @@ use unicode_xid::UnicodeXID;
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Lifetime {
-    sym: Term,
+    term: Term,
     pub span: Span,
 }
 
 impl Lifetime {
-    pub fn new(sym: Term, span: Span) -> Self {
-        let s = sym.as_str();
+    pub fn new(term: Term, span: Span) -> Self {
+        let s = term.as_str();
 
         if !s.starts_with('\'') {
             panic!(
@@ -51,7 +51,7 @@ impl Lifetime {
         }
 
         Lifetime {
-            sym: sym,
+            term: term,
             span: span,
         }
     }
@@ -59,13 +59,13 @@ impl Lifetime {
 
 impl Display for Lifetime {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.sym.as_str().fmt(formatter)
+        self.term.as_str().fmt(formatter)
     }
 }
 
 impl PartialEq for Lifetime {
     fn eq(&self, other: &Lifetime) -> bool {
-        self.sym.as_str() == other.sym.as_str()
+        self.term.as_str() == other.term.as_str()
     }
 }
 
@@ -79,13 +79,13 @@ impl PartialOrd for Lifetime {
 
 impl Ord for Lifetime {
     fn cmp(&self, other: &Lifetime) -> Ordering {
-        self.sym.as_str().cmp(other.sym.as_str())
+        self.term.as_str().cmp(other.term.as_str())
     }
 }
 
 impl Hash for Lifetime {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.sym.as_str().hash(h)
+        self.term.as_str().hash(h)
     }
 }
 
@@ -99,18 +99,18 @@ pub mod parsing {
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (rest, span, sym) = match input.word() {
-                Some(word) => word,
+            let (rest, span, term) = match input.term() {
+                Some(term) => term,
                 _ => return parse_error(),
             };
-            if !sym.as_str().starts_with('\'') {
+            if !term.as_str().starts_with('\'') {
                 return parse_error();
             }
 
             Ok((
                 rest,
                 Lifetime {
-                    sym: sym,
+                    term: term,
                     span: span,
                 },
             ))
@@ -132,7 +132,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
                 span: self.span,
-                kind: TokenNode::Term(self.sym),
+                kind: TokenNode::Term(self.term),
             })
         }
     }

@@ -1,0 +1,17 @@
+[package]
+name = "unstable"
+version = "0.1.0"
+authors = ["Sergio Benitez <sb@sergio.bz>"]
+
+[lib]
+proc-macro = true
+
+[[bin]]
+name = "unstable"
+path = "src/main.rs"
+
+[dependencies]
+syn = { path = "../../", features = ["full", "unstable"] }
+
+[patch.crates-io]
+proc-macro2 = { path = "../../../proc-macro2" }

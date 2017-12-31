@@ -87,7 +87,7 @@ use proc_macro2::Span;
 /// ```
 #[derive(Copy, Clone, Debug)]
 pub struct Ident {
-    sym: Term,
+    term: Term,
     pub span: Span,
 }
 
@@ -132,7 +132,7 @@ impl Ident {
         }
 
         Ident {
-            sym: Term::intern(s),
+            term: Term::intern(s),
             span: span,
         }
     }
@@ -182,13 +182,13 @@ impl From<String> for Ident {
 
 impl AsRef<str> for Ident {
     fn as_ref(&self) -> &str {
-        self.sym.as_str()
+        self.term.as_str()
     }
 }
 
 impl Display for Ident {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.sym.as_str().fmt(formatter)
+        self.term.as_str().fmt(formatter)
     }
 }
 
@@ -231,14 +231,14 @@ pub mod parsing {
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (rest, span, sym) = match input.word() {
-                Some(word) => word,
+            let (rest, span, term) = match input.term() {
+                Some(term) => term,
                 _ => return parse_error(),
             };
-            if sym.as_str().starts_with('\'') {
+            if term.as_str().starts_with('\'') {
                 return parse_error();
             }
-            match sym.as_str() {
+            match term.as_str() {
                 // From https://doc.rust-lang.org/grammar.html#keywords
                 "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
                 | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
@@ -254,7 +254,7 @@ pub mod parsing {
                 rest,
                 Ident {
                     span: span,
-                    sym: sym,
+                    term: term,
                 },
             ))
         }
@@ -275,7 +275,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
                 span: self.span,
-                kind: TokenNode::Term(self.sym),
+                kind: TokenNode::Term(self.term),
             })
         }
     }
