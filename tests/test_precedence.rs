@@ -317,7 +317,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                 | Expr::Unsafe(..)
                 | Expr::Block(..)
                 | Expr::IfLet(..) => {
-                    return fold_expr(self, expr);
+                    fold_expr(self, expr)
                 }
                 node => paren(self, node),
             }

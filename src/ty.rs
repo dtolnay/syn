@@ -746,9 +746,9 @@ pub mod parsing {
             |
             syn!(Binding) => { GenericArgument::Binding }
             |
-            syn!(ExprLit) => { |l| GenericArgument::Const(Expr::Lit(l).into()) }
+            syn!(ExprLit) => { |l| GenericArgument::Const(Expr::Lit(l)) }
             |
-            syn!(ExprBlock) => { |b| GenericArgument::Const(Expr::Block(b).into()) }
+            syn!(ExprBlock) => { |b| GenericArgument::Const(Expr::Block(b)) }
         ));
 
         fn description() -> Option<&'static str> {

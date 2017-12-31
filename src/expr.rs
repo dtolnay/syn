@@ -906,9 +906,9 @@ pub mod parsing {
                 ({
                     e = ExprAssign {
                         attrs: Vec::new(),
-                        left: Box::new(e.into()),
+                        left: Box::new(e),
                         eq_token: eq,
-                        right: Box::new(rhs.into()),
+                        right: Box::new(rhs),
                     }.into();
                 })
             )
@@ -920,9 +920,9 @@ pub mod parsing {
                 ({
                     e = ExprAssignOp {
                         attrs: Vec::new(),
-                        left: Box::new(e.into()),
+                        left: Box::new(e),
                         op: op,
-                        right: Box::new(rhs.into()),
+                        right: Box::new(rhs),
                     }.into();
                 })
             )
@@ -950,9 +950,9 @@ pub mod parsing {
                     e = ExprInPlace {
                         attrs: Vec::new(),
                         // op: BinOp::Place(larrow),
-                        place: Box::new(e.into()),
+                        place: Box::new(e),
                         arrow_token: arrow,
-                        value: Box::new(rhs.into()),
+                        value: Box::new(rhs),
                     }.into();
                 })
             )
@@ -984,9 +984,9 @@ pub mod parsing {
             ({
                 e = ExprRange {
                     attrs: Vec::new(),
-                    from: Some(Box::new(e.into())),
+                    from: Some(Box::new(e)),
                     limits: limits,
-                    to: hi.map(|e| Box::new(e.into())),
+                    to: hi.map(|e| Box::new(e)),
                 }.into();
             })
         )) >>
@@ -1113,7 +1113,7 @@ pub mod parsing {
                 ({
                     e = ExprCast {
                         attrs: Vec::new(),
-                        expr: Box::new(e.into()),
+                        expr: Box::new(e),
                         as_token: as_,
                         ty: Box::new(ty),
                     }.into();
@@ -1128,7 +1128,7 @@ pub mod parsing {
                 ({
                     e = ExprType {
                         attrs: Vec::new(),
-                        expr: Box::new(e.into()),
+                        expr: Box::new(e),
                         colon_token: colon,
                         ty: Box::new(ty),
                     }.into();
@@ -1150,7 +1150,7 @@ pub mod parsing {
             ({
                 e = ExprCast {
                     attrs: Vec::new(),
-                    expr: Box::new(e.into()),
+                    expr: Box::new(e),
                     as_token: as_,
                     ty: Box::new(ty),
                 }.into();
@@ -1171,7 +1171,7 @@ pub mod parsing {
             (ExprUnary {
                 attrs: Vec::new(),
                 op: op,
-                expr: Box::new(expr.into()),
+                expr: Box::new(expr),
             }.into())
         )
         |
@@ -1183,7 +1183,7 @@ pub mod parsing {
                 attrs: Vec::new(),
                 and_token: and,
                 mutability: mutability,
-                expr: Box::new(expr.into()),
+                expr: Box::new(expr),
             }.into())
         )
         |
@@ -1193,7 +1193,7 @@ pub mod parsing {
             (ExprBox {
                 attrs: Vec::new(),
                 box_token: box_,
-                expr: Box::new(expr.into()),
+                expr: Box::new(expr),
             }.into())
         )
         |
@@ -1209,7 +1209,7 @@ pub mod parsing {
             (ExprUnary {
                 attrs: Vec::new(),
                 op: op,
-                expr: Box::new(expr.into()),
+                expr: Box::new(expr),
             }.into())
         )
         |
@@ -1230,7 +1230,7 @@ pub mod parsing {
                 let (args, paren) = args;
                 e = ExprCall {
                     attrs: Vec::new(),
-                    func: Box::new(e.into()),
+                    func: Box::new(e),
                     args: args,
                     paren_token: paren,
                 }.into();
@@ -1238,7 +1238,7 @@ pub mod parsing {
             |
             tap!(more: and_method_call => {
                 let mut call = more;
-                call.receiver = Box::new(e.into());
+                call.receiver = Box::new(e);
                 e = call.into();
             })
             |
@@ -1246,7 +1246,7 @@ pub mod parsing {
                 let (token, member) = field;
                 e = ExprField {
                     attrs: Vec::new(),
-                    base: Box::new(e.into()),
+                    base: Box::new(e),
                     dot_token: token,
                     member: member,
                 }.into();
@@ -1256,7 +1256,7 @@ pub mod parsing {
                 let (i, token) = i;
                 e = ExprIndex {
                     attrs: Vec::new(),
-                    expr: Box::new(e.into()),
+                    expr: Box::new(e),
                     bracket_token: token,
                     index: Box::new(i),
                 }.into();
@@ -1265,7 +1265,7 @@ pub mod parsing {
             tap!(question: punct!(?) => {
                 e = ExprTry {
                     attrs: Vec::new(),
-                    expr: Box::new(e.into()),
+                    expr: Box::new(e),
                     question_token: question,
                 }.into();
             })
@@ -1282,7 +1282,7 @@ pub mod parsing {
                 let (args, paren) = args;
                 e = ExprCall {
                     attrs: Vec::new(),
-                    func: Box::new(e.into()),
+                    func: Box::new(e),
                     args: args,
                     paren_token: paren,
                 }.into();
@@ -1292,7 +1292,7 @@ pub mod parsing {
                 let (i, token) = i;
                 e = ExprIndex {
                     attrs: Vec::new(),
-                    expr: Box::new(e.into()),
+                    expr: Box::new(e),
                     bracket_token: token,
                     index: Box::new(i),
                 }.into();
@@ -1475,7 +1475,7 @@ pub mod parsing {
                         span: Span::default(),
                         value: LitKind::Bool(false),
                     },
-                }).into()),
+                })),
 
                 method: method,
                 turbofish: turbofish.map(|fish| MethodTurbofish {
@@ -1742,7 +1742,7 @@ pub mod parsing {
                  Expr::Block(ExprBlock {
                      attrs: Vec::new(),
                     block: body,
-                }).into())
+                }))
             )
             |
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
@@ -1939,7 +1939,7 @@ pub mod parsing {
                     attrs: Vec::new(),
                     qself: None,
                     path: name.into(),
-                }).into(),
+                }),
                 attrs: Vec::new(),
                 colon_token: None,
             })
@@ -2506,10 +2506,10 @@ pub mod parsing {
             Expr::Unary(ExprUnary {
                 attrs: Vec::new(),
                 op: UnOp::Neg(neg),
-                expr: Box::new(v.into())
-            }).into()
+                expr: Box::new(v)
+            })
         } else {
-            v.into()
+            v
         })
     ));
 
