@@ -98,6 +98,9 @@ pub mod punctuated;
 #[cfg(feature = "parsing")]
 mod tt;
 
+#[cfg(all(procmacro2_unstable, feature = "parsing", feature = "printing"))]
+pub mod spanned;
+
 mod gen {
     #[cfg(feature = "visit")]
     pub mod visit;
