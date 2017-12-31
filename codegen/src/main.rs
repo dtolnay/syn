@@ -581,11 +581,11 @@ mod codegen {
         name: &Operand,
     ) -> Option<String> {
         let mut code = String::new();
-        for (i, elem) in elems.items().enumerate() {
+        for (i, elem) in elems.iter().enumerate() {
             let name = name.tokens();
             let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
-            let val = visit(elem, lookup, kind, &it)
+            let val = visit(elem.item(), lookup, kind, &it)
                 .unwrap_or_else(|| noop_visit(kind, &it));
             code.push_str(&format!("            {}", val));
             match kind {
