@@ -338,7 +338,6 @@ pub mod parsing {
     }
 
     impl Attribute {
-        #[cfg(feature = "full")]
         named!(pub parse_inner -> Self, alt!(
             do_parse!(
                 pound: punct!(#) >>
@@ -362,7 +361,7 @@ pub mod parsing {
             )
             |
             map!(
-                lit_doc_comment,
+                call!(lit_doc_comment, Comment::Inner),
                 |lit| {
                     let span = lit.span;
                     Attribute {
@@ -402,7 +401,7 @@ pub mod parsing {
             )
             |
             map!(
-                lit_doc_comment,
+                call!(lit_doc_comment, Comment::Outer),
                 |lit| {
                     let span = lit.span;
                     Attribute {
@@ -421,11 +420,24 @@ pub mod parsing {
         ));
     }
 
-    fn lit_doc_comment(input: Cursor) -> PResult<TokenTree> {
+    enum Comment {
+        Inner,
+        Outer,
+    }
+
+    fn lit_doc_comment(input: Cursor, style: Comment) -> PResult<TokenTree> {
         match input.literal() {
             Some((span, lit, rest)) => {
-                let literal = lit.to_string();
-                if literal.starts_with("//") || literal.starts_with("/*") {
+                let string = lit.to_string();
+                let ok = match style {
+                    Comment::Inner => {
+                        string.starts_with("//!") || string.starts_with("/*!")
+                    }
+                    Comment::Outer => {
+                        string.starts_with("///") || string.starts_with("/**")
+                    }
+                };
+                if ok {
                     Ok((
                         TokenTree {
                             span: span,
