@@ -11,9 +11,9 @@ include = ["/Cargo.toml", "/src/**/*.rs", "/README.md", "/LICENSE-APACHE", "/LIC
 publish = false # this branch contains breaking changes
 
 [[example]]
-name = "dump-ast"
-path = "examples/dump-ast.rs"
-required-features = ["extra-traits", "parsing", "printing", "full"]
+name = "dump-syntax"
+path = "examples/dump-syntax/main.rs"
+required-features = ["full", "parsing", "extra-traits"]
 
 [features]
 default = ["parsing", "printing", "clone-impls"]
