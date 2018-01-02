@@ -52,6 +52,12 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
+    pub fn iter_mut(&mut self) -> IterMut<T, P> {
+        IterMut {
+            inner: self.inner.iter_mut(),
+        }
+    }
+
     pub fn elements(&self) -> Elements<T, P> {
         Elements {
             inner: self.inner.iter(),
@@ -70,12 +76,12 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
-    pub fn push(&mut self, token: T) {
+    pub fn push_item(&mut self, item: T) {
         assert!(self.empty_or_trailing());
-        self.inner.push((token, None));
+        self.inner.push((item, None));
     }
 
-    pub fn push_trailing(&mut self, punctuation: P) {
+    pub fn push_punct(&mut self, punctuation: P) {
         assert!(!self.is_empty());
         let last = self.inner.last_mut().unwrap();
         assert!(last.1.is_none());
@@ -86,16 +92,28 @@ impl<T, P> Punctuated<T, P> {
         self.inner.pop().map(|(t, d)| Element::new(t, d))
     }
 
-    pub fn trailing_delim(&self) -> bool {
+    pub fn trailing_punct(&self) -> bool {
         self.inner.last().map(|last| last.1.is_some()).unwrap_or(false)
     }
 
     /// Returns true if either this `Punctuated` is empty, or it has a trailing
     /// punctuation.
     ///
-    /// Equivalent to `punctuated.is_empty() || punctuated.trailing_delim()`.
+    /// Equivalent to `punctuated.is_empty() || punctuated.trailing_punct()`.
     pub fn empty_or_trailing(&self) -> bool {
         self.inner.last().map(|last| last.1.is_some()).unwrap_or(true)
+    }
+}
+
+impl<T, P> Punctuated<T, P>
+where
+    P: Default,
+{
+    pub fn push(&mut self, item: T) {
+        if !self.empty_or_trailing() {
+            self.push_punct(Default::default());
+        }
+        self.push_item(item);
     }
 }
 
@@ -142,6 +160,15 @@ impl<'a, T, P> IntoIterator for &'a Punctuated<T, P> {
 
     fn into_iter(self) -> Self::IntoIter {
         Punctuated::iter(self)
+    }
+}
+
+impl<'a, T, P> IntoIterator for &'a mut Punctuated<T, P> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T, P>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Punctuated::iter_mut(self)
     }
 }
 
@@ -217,6 +244,18 @@ impl<'a, T, P> Iterator for Iter<'a, T, P> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|pair| &pair.0)
+    }
+}
+
+pub struct IterMut<'a, T: 'a, P: 'a> {
+    inner: slice::IterMut<'a, (T, Option<P>)>,
+}
+
+impl<'a, T, P> Iterator for IterMut<'a, T, P> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|pair| &mut pair.0)
     }
 }
 
@@ -349,7 +388,7 @@ mod parsing {
                         return parse_error();
                     }
                     input = i;
-                    res.push(o);
+                    res.push_item(o);
 
                     // get the separator first
                     while let Ok((s, i2)) = P::parse(input) {
@@ -362,8 +401,8 @@ mod parsing {
                             if i3 == i2 {
                                 break;
                             }
-                            res.push_trailing(s);
-                            res.push(o3);
+                            res.push_punct(s);
+                            res.push_item(o3);
                             input = i3;
                         } else {
                             break;
@@ -371,7 +410,7 @@ mod parsing {
                     }
                     if terminated {
                         if let Ok((sep, after)) = P::parse(input) {
-                            res.push_trailing(sep);
+                            res.push_punct(sep);
                             input = after;
                         }
                     }
@@ -393,7 +432,7 @@ mod printing {
         P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append_all(self.iter())
+            tokens.append_all(self.elements())
         }
     }
 

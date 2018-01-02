@@ -9,15 +9,11 @@ macro_rules! errorf {
 
 #[macro_export]
 macro_rules! punctuated {
-    ($first:expr, $($rest:expr,)*) => {{
+    ($($e:expr,)+) => {{
         let mut seq = ::syn::punctuated::Punctuated::new();
-        let mut last = $first;
         $(
-            seq.push(::std::mem::replace(&mut last, $rest));
-            seq.push_trailing(::std::default::Default::default());
-        )*
-        last = last;
-        seq.push(last);
+            seq.push($e);
+        )+
         seq
     }};
 

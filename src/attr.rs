@@ -188,9 +188,9 @@ fn list_of_nested_meta_items_from_tokens(
             None => return None,
         };
         if let Some(comma) = prev_comma {
-            nested_meta_items.push_trailing(comma);
+            nested_meta_items.push_punct(comma);
         }
-        nested_meta_items.push(nested);
+        nested_meta_items.push_item(nested);
         tts = rest;
     }
 

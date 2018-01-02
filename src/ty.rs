@@ -156,7 +156,7 @@ where
             leading_colon: None,
             segments: Punctuated::new(),
         };
-        path.segments.push(segment.into());
+        path.segments.push_item(segment.into());
         path
     }
 }
@@ -582,7 +582,7 @@ pub mod parsing {
                 let (pos, as_, path) = match path {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
-                        path.segments.push_trailing(colon2);
+                        path.segments.push_punct(colon2);
                         path.segments.extend(rest.into_elements());
                         (pos, Some(as_), path)
                     }
@@ -657,7 +657,7 @@ pub mod parsing {
                 |
                 syn!(TypeParamBound) => {|x| {
                     let mut bounds = Punctuated::new();
-                    bounds.push(x);
+                    bounds.push_item(x);
                     bounds
                 }}
             ) >>

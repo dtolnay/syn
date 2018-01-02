@@ -2677,7 +2677,7 @@ mod printing {
                 self.elems.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
                 // distinguish ExprTuple from ExprParen.
-                if self.elems.len() == 1 && !self.elems.trailing_delim() {
+                if self.elems.len() == 1 && !self.elems.trailing_punct() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
             })
