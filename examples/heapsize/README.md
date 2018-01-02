@@ -1,4 +1,5 @@
-A complete working implementation of a custom derive.
+A complete working Macros 1.1 implementation of a custom derive. Works on any
+Rust compiler >=1.15.0.
 
 - [`heapsize/src/lib.rs`](heapsize/src/lib.rs)
 - [`heapsize_derive/src/lib.rs`](heapsize_derive/src/lib.rs)
