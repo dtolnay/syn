@@ -55,7 +55,7 @@ fn heap_size_sum(data: &Data) -> Tokens {
                 Fields::Named(ref fields) => {
                     // Expands to an expression like
                     //
-                    //     0 + self.x.heap_size + self.y.heap_size() + self.z.heap_size()
+                    //     0 + self.x.heap_size() + self.y.heap_size() + self.z.heap_size()
                     //
                     // but using fully qualified function call syntax.
                     let fnames = fields.named.iter().map(|f| f.ident);
@@ -68,7 +68,7 @@ fn heap_size_sum(data: &Data) -> Tokens {
                 Fields::Unnamed(ref fields) => {
                     // Expands to an expression like
                     //
-                    //     0 + self.0.heap_size + self.1.heap_size() + self.2.heap_size()
+                    //     0 + self.0.heap_size() + self.1.heap_size() + self.2.heap_size()
                     let indices = 0..fields.unnamed.len();
                     quote! {
                         0 #(
