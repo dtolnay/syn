@@ -15,13 +15,6 @@ ast_struct! {
 
 ast_enum_of_structs! {
     pub enum GenericParam {
-        /// A lifetime definition, e.g. `'a: 'b+'c+'d`
-        pub Lifetime(LifetimeDef {
-            pub attrs: Vec<Attribute>,
-            pub lifetime: Lifetime,
-            pub colon_token: Option<Token![:]>,
-            pub bounds: Punctuated<Lifetime, Token![+]>,
-        }),
         /// A generic type parameter, e.g. `T: Into<String>`.
         pub Type(TypeParam {
             pub attrs: Vec<Attribute>,
@@ -30,6 +23,13 @@ ast_enum_of_structs! {
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
             pub eq_token: Option<Token![=]>,
             pub default: Option<Type>,
+        }),
+        /// A lifetime definition, e.g. `'a: 'b+'c+'d`
+        pub Lifetime(LifetimeDef {
+            pub attrs: Vec<Attribute>,
+            pub lifetime: Lifetime,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
         /// A generic const parameter, e.g. `const LENGTH: usize`.
         pub Const(ConstParam {

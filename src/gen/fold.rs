@@ -1538,14 +1538,14 @@ pub fn fold_generic_method_argument<V: Folder + ?Sized>(_visitor: &mut V, _i: Ge
 
 pub fn fold_generic_param<V: Folder + ?Sized>(_visitor: &mut V, _i: GenericParam) -> GenericParam {
     match _i {
-        GenericParam::Lifetime(_binding_0, ) => {
-            GenericParam::Lifetime (
-                _visitor.fold_lifetime_def(_binding_0),
-            )
-        }
         GenericParam::Type(_binding_0, ) => {
             GenericParam::Type (
                 _visitor.fold_type_param(_binding_0),
+            )
+        }
+        GenericParam::Lifetime(_binding_0, ) => {
+            GenericParam::Lifetime (
+                _visitor.fold_lifetime_def(_binding_0),
             )
         }
         GenericParam::Const(_binding_0, ) => {

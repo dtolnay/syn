@@ -1208,11 +1208,11 @@ pub fn visit_generic_method_argument<'ast, V: Visitor<'ast> + ?Sized>(_visitor: 
 
 pub fn visit_generic_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast GenericParam) {
     match *_i {
-        GenericParam::Lifetime(ref _binding_0, ) => {
-            _visitor.visit_lifetime_def(_binding_0);
-        }
         GenericParam::Type(ref _binding_0, ) => {
             _visitor.visit_type_param(_binding_0);
+        }
+        GenericParam::Lifetime(ref _binding_0, ) => {
+            _visitor.visit_lifetime_def(_binding_0);
         }
         GenericParam::Const(ref _binding_0, ) => {
             _visitor.visit_const_param(_binding_0);
