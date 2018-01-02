@@ -92,7 +92,7 @@ fn test_struct() {
             struct_token: Default::default(),
             fields: Fields::Named(FieldsNamed {
                 brace_token: Default::default(),
-                fields: punctuated![
+                named: punctuated![
                     Field {
                         ident: Some("ident".into()),
                         colon_token: Some(Default::default()),
@@ -233,7 +233,7 @@ fn test_enum() {
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
-                        fields: punctuated![
+                        unnamed: punctuated![
                             Field {
                                 colon_token: None,
                                 ident: None,
@@ -253,7 +253,7 @@ fn test_enum() {
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
-                        fields: punctuated![
+                        unnamed: punctuated![
                             Field {
                                 ident: None,
                                 colon_token: None,
@@ -511,7 +511,7 @@ fn test_pub_restricted() {
         data: Data::Struct(DataStruct {
             fields: Fields::Unnamed(FieldsUnnamed {
                 paren_token: Default::default(),
-                fields: punctuated![
+                unnamed: punctuated![
                     Field {
                         ident: None,
                         vis: Visibility::Restricted(VisRestricted {

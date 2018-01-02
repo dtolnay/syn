@@ -1372,14 +1372,14 @@ pub fn fold_fields<V: Folder + ?Sized>(_visitor: &mut V, _i: Fields) -> Fields {
 pub fn fold_fields_named<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldsNamed) -> FieldsNamed {
     FieldsNamed {
         brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
-        fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field(it) }),
+        named: FoldHelper::lift(_i . named, |it| { _visitor.fold_field(it) }),
     }
 }
 
 pub fn fold_fields_unnamed<V: Folder + ?Sized>(_visitor: &mut V, _i: FieldsUnnamed) -> FieldsUnnamed {
     FieldsUnnamed {
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        fields: FoldHelper::lift(_i . fields, |it| { _visitor.fold_field(it) }),
+        unnamed: FoldHelper::lift(_i . unnamed, |it| { _visitor.fold_field(it) }),
     }
 }
 # [ cfg ( feature = "full" ) ]

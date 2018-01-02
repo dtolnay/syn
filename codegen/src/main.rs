@@ -740,7 +740,7 @@ mod codegen {
                             state.visit_mut_impl.push_str(&binding);
                             state.fold_impl.push_str(&binding);
 
-                            let res = fields.fields
+                            let res = fields.unnamed
                                 .iter()
                                 .enumerate()
                                 .map(|(idx, el)| {
@@ -843,7 +843,7 @@ mod codegen {
                         state
                             .fold_impl
                             .push_str(&format!("    {} {{\n", s.ast.ident));
-                        fields.fields
+                        fields.named
                             .iter()
                             .map(|el| {
                                 let id = el.item().ident;
@@ -855,7 +855,7 @@ mod codegen {
                         state
                             .fold_impl
                             .push_str(&format!("    {} (\n", s.ast.ident));
-                        fields.fields
+                        fields.unnamed
                             .iter()
                             .enumerate()
                             .map(|(idx, el)| {

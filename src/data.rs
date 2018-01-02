@@ -25,13 +25,13 @@ ast_enum_of_structs! {
         /// y: f64 }`.
         pub Named(FieldsNamed {
             pub brace_token: token::Brace,
-            pub fields: Punctuated<Field, Token![,]>,
+            pub named: Punctuated<Field, Token![,]>,
         }),
 
         /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
         pub Unnamed(FieldsUnnamed {
             pub paren_token: token::Paren,
-            pub fields: Punctuated<Field, Token![,]>,
+            pub unnamed: Punctuated<Field, Token![,]>,
         }),
 
         /// Unit struct or unit variant such as `None`.
@@ -124,7 +124,7 @@ pub mod parsing {
             braces!(call!(Punctuated::parse_terminated_with, Field::parse_named)),
             |(brace, fields)| FieldsNamed {
                 brace_token: brace,
-                fields: fields,
+                named: fields,
             }
         ));
     }
@@ -134,7 +134,7 @@ pub mod parsing {
             parens!(call!(Punctuated::parse_terminated_with, Field::parse_unnamed)),
             |(paren, fields)| FieldsUnnamed {
                 paren_token: paren,
-                fields: fields,
+                unnamed: fields,
             }
         ));
     }
@@ -253,7 +253,7 @@ mod printing {
     impl ToTokens for FieldsNamed {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.brace_token.surround(tokens, |tokens| {
-                self.fields.to_tokens(tokens);
+                self.named.to_tokens(tokens);
             });
         }
     }
@@ -261,7 +261,7 @@ mod printing {
     impl ToTokens for FieldsUnnamed {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.paren_token.surround(tokens, |tokens| {
-                self.fields.to_tokens(tokens);
+                self.unnamed.to_tokens(tokens);
             });
         }
     }

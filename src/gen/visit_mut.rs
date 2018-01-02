@@ -1087,12 +1087,12 @@ pub fn visit_fields_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut Field
 
 pub fn visit_fields_named_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FieldsNamed) {
     tokens_helper(_visitor, &mut (& mut _i . brace_token).0);
-    for mut el in & mut _i . fields { let it = el.item_mut(); _visitor.visit_field_mut(it) };
+    for mut el in & mut _i . named { let it = el.item_mut(); _visitor.visit_field_mut(it) };
 }
 
 pub fn visit_fields_unnamed_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut FieldsUnnamed) {
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    for mut el in & mut _i . fields { let it = el.item_mut(); _visitor.visit_field_mut(it) };
+    for mut el in & mut _i . unnamed { let it = el.item_mut(); _visitor.visit_field_mut(it) };
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_file_mut<V: VisitorMut + ?Sized>(_visitor: &mut V, _i: &mut File) {
