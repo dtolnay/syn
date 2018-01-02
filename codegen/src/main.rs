@@ -50,7 +50,7 @@ fn path_eq(a: &syn::Path, b: &syn::Path) -> bool {
     a.segments
         .iter()
         .zip(b.segments.iter())
-        .all(|(a, b)| a.item().ident.as_ref() == b.item().ident.as_ref())
+        .all(|(a, b)| a.ident.as_ref() == b.ident.as_ref())
 }
 
 fn get_features(attrs: &[Attribute], mut features: Tokens) -> Tokens {
@@ -505,7 +505,7 @@ mod codegen {
         })
     }
 
-    fn delimited_visit(
+    fn punctuated_visit(
         elem: &Type,
         lookup: &Lookup,
         kind: Kind,
@@ -519,7 +519,7 @@ mod codegen {
         Some(match kind {
             Visit => {
                 format!(
-                    "for el in {name} {{ \
+                    "for el in Punctuated::elements({name}) {{ \
                         let it = el.item(); \
                         {val} \
                         }}",
@@ -529,7 +529,7 @@ mod codegen {
             }
             VisitMut => {
                 format!(
-                    "for mut el in {name} {{ \
+                    "for mut el in Punctuated::elements_mut({name}) {{ \
                         let it = el.item_mut(); \
                         {val} \
                         }}",
@@ -586,7 +586,7 @@ mod codegen {
             let name = name.tokens();
             let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
-            let val = visit(elem.item(), lookup, kind, &it)
+            let val = visit(elem, lookup, kind, &it)
                 .unwrap_or_else(|| noop_visit(kind, &it));
             code.push_str(&format!("            {}", val));
             match kind {
@@ -643,7 +643,7 @@ mod codegen {
                 vec_visit(elem, lookup, kind, name)
             }
             RelevantType::Punctuated(elem) => {
-                delimited_visit(elem, lookup, kind, name)
+                punctuated_visit(elem, lookup, kind, name)
             }
             RelevantType::Option(elem) => {
                 option_visit(elem, lookup, kind, name)
@@ -732,10 +732,10 @@ mod codegen {
                 state.visit_mut_impl.push_str("    match *_i {\n");
                 state.fold_impl.push_str("    match _i {\n");
                 for variant in &e.variants {
-                    let fields: Vec<(&Field, Tokens)> = match variant.item().fields {
+                    let fields: Vec<(&Field, Tokens)> = match variant.fields {
                         Fields::Named(..) => panic!("Doesn't support enum struct variants"),
                         Fields::Unnamed(ref fields) => {
-                            let binding = format!("        {}::{}(", s.ast.ident, variant.item().ident);
+                            let binding = format!("        {}::{}(", s.ast.ident, variant.ident);
                             state.visit_impl.push_str(&binding);
                             state.visit_mut_impl.push_str(&binding);
                             state.fold_impl.push_str(&binding);
@@ -759,7 +759,7 @@ mod codegen {
                                     let mut tokens = quote!();
                                     Ident::from(name).to_tokens(&mut tokens);
 
-                                    (*el.item(), tokens)
+                                    (el, tokens)
                                 })
                                 .collect();
 
@@ -772,14 +772,14 @@ mod codegen {
                         Fields::Unit => {
                             state
                                 .visit_impl
-                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.item().ident));
+                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.ident));
                             state
                                 .visit_mut_impl
-                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.item().ident));
+                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.ident));
                             state.fold_impl.push_str(&format!(
                                 "        {0}::{1} => {{ {0}::{1} }}\n",
                                 s.ast.ident,
-                                variant.item().ident
+                                variant.ident
                             ));
                             continue;
                         }
@@ -792,7 +792,7 @@ mod codegen {
                     }
                     state
                         .fold_impl
-                        .push_str(&format!("            {}::{} (\n", s.ast.ident, variant.item().ident,));
+                        .push_str(&format!("            {}::{} (\n", s.ast.ident, variant.ident,));
                     for (field, binding) in fields {
                         state.visit_impl.push_str(&format!(
                             "            {};\n",
@@ -846,8 +846,8 @@ mod codegen {
                         fields.named
                             .iter()
                             .map(|el| {
-                                let id = el.item().ident;
-                                (*el.item(), quote!(_i.#id))
+                                let id = el.ident;
+                                (el, quote!(_i.#id))
                             })
                             .collect()
                     }
@@ -860,7 +860,7 @@ mod codegen {
                             .enumerate()
                             .map(|(idx, el)| {
                                 let id = Index::from(idx);
-                                (*el.item(), quote!(_i.#id))
+                                (el, quote!(_i.#id))
                             })
                             .collect()
                     }
@@ -1041,6 +1041,7 @@ pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Lifetime) -> 
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
+use punctuated::Punctuated;
 use proc_macro2::Span;
 use gen::helper::visit::*;
 
@@ -1082,6 +1083,7 @@ pub trait Visitor<'ast> {{
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
+use punctuated::Punctuated;
 use proc_macro2::Span;
 use gen::helper::visit_mut::*;
 

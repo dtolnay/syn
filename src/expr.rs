@@ -2868,7 +2868,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
-            for input in self.inputs.iter() {
+            for input in self.inputs.elements() {
                 match **input.item() {
                     FnArg::Captured(ArgCaptured {
                         ref pat,

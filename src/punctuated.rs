@@ -52,9 +52,21 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<T, P> {
-        IterMut {
+    pub fn elements(&self) -> Elements<T, P> {
+        Elements {
+            inner: self.inner.iter(),
+        }
+    }
+
+    pub fn elements_mut(&mut self) -> ElementsMut<T, P> {
+        ElementsMut {
             inner: self.inner.iter_mut(),
+        }
+    }
+
+    pub fn into_elements(self) -> IntoElements<T, P> {
+        IntoElements {
+            inner: self.inner.into_iter(),
         }
     }
 
@@ -113,26 +125,8 @@ impl<T, P> Extend<Element<T, P>> for Punctuated<T, P> {
     }
 }
 
-impl<'a, T, P> IntoIterator for &'a Punctuated<T, P> {
-    type Item = Element<&'a T, &'a P>;
-    type IntoIter = Iter<'a, T, P>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        Punctuated::iter(self)
-    }
-}
-
-impl<'a, T, P> IntoIterator for &'a mut Punctuated<T, P> {
-    type Item = Element<&'a mut T, &'a mut P>;
-    type IntoIter = IterMut<'a, T, P>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        Punctuated::iter_mut(self)
-    }
-}
-
 impl<T, P> IntoIterator for Punctuated<T, P> {
-    type Item = Element<T, P>;
+    type Item = T;
     type IntoIter = IntoIter<T, P>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -142,20 +136,29 @@ impl<T, P> IntoIterator for Punctuated<T, P> {
     }
 }
 
+impl<'a, T, P> IntoIterator for &'a Punctuated<T, P> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T, P>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Punctuated::iter(self)
+    }
+}
+
 impl<T, P> Default for Punctuated<T, P> {
     fn default() -> Self {
         Punctuated::new()
     }
 }
 
-pub struct Iter<'a, T: 'a, P: 'a> {
+pub struct Elements<'a, T: 'a, P: 'a> {
     inner: slice::Iter<'a, (T, Option<P>)>,
 }
 
-impl<'a, T, P> Iterator for Iter<'a, T, P> {
+impl<'a, T, P> Iterator for Elements<'a, T, P> {
     type Item = Element<&'a T, &'a P>;
 
-    fn next(&mut self) -> Option<Element<&'a T, &'a P>> {
+    fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|pair| match pair.1 {
             Some(ref p) => Element::Punctuated(&pair.0, p),
             None => Element::End(&pair.0),
@@ -163,17 +166,32 @@ impl<'a, T, P> Iterator for Iter<'a, T, P> {
     }
 }
 
-pub struct IterMut<'a, T: 'a, P: 'a> {
+pub struct ElementsMut<'a, T: 'a, P: 'a> {
     inner: slice::IterMut<'a, (T, Option<P>)>,
 }
 
-impl<'a, T, P> Iterator for IterMut<'a, T, P> {
+impl<'a, T, P> Iterator for ElementsMut<'a, T, P> {
     type Item = Element<&'a mut T, &'a mut P>;
 
-    fn next(&mut self) -> Option<Element<&'a mut T, &'a mut P>> {
+    fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|pair| match pair.1 {
             Some(ref mut p) => Element::Punctuated(&mut pair.0, p),
             None => Element::End(&mut pair.0),
+        })
+    }
+}
+
+pub struct IntoElements<T, P> {
+    inner: vec::IntoIter<(T, Option<P>)>,
+}
+
+impl<T, P> Iterator for IntoElements<T, P> {
+    type Item = Element<T, P>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|pair| match pair.1 {
+            Some(p) => Element::Punctuated(pair.0, p),
+            None => Element::End(pair.0),
         })
     }
 }
@@ -183,13 +201,22 @@ pub struct IntoIter<T, P> {
 }
 
 impl<T, P> Iterator for IntoIter<T, P> {
-    type Item = Element<T, P>;
+    type Item = T;
 
-    fn next(&mut self) -> Option<Element<T, P>> {
-        self.inner.next().map(|pair| match pair.1 {
-            Some(v) => Element::Punctuated(pair.0, v),
-            None => Element::End(pair.0),
-        })
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|pair| pair.0)
+    }
+}
+
+pub struct Iter<'a, T: 'a, P: 'a> {
+    inner: slice::Iter<'a, (T, Option<P>)>,
+}
+
+impl<'a, T, P> Iterator for Iter<'a, T, P> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|pair| &pair.0)
     }
 }
 

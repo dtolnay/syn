@@ -19,7 +19,7 @@ pub mod fold {
     impl<T, U> FoldHelper for Punctuated<T, U> {
         type Item = T;
         fn lift<F>(self, mut f: F) -> Self where F: FnMut(Self::Item) -> Self::Item {
-            self.into_iter()
+            self.into_elements()
                 .map(Element::into_tuple)
                 .map(|(t, u)| Element::new(f(t), u))
                 .collect()

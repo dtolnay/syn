@@ -215,11 +215,11 @@ pub mod parsing {
             ),
             |(lifetimes, ty_params, lt, gt)| Generics {
                 lt_token: lt,
-                params: lifetimes.into_iter()
+                params: lifetimes.into_elements()
                     .map(Element::into_tuple)
                     .map(|(life, comma)| Element::new(GenericParam::Lifetime(life), comma))
                     .chain(ty_params.unwrap_or_default()
-                        .into_iter()
+                        .into_elements()
                         .map(Element::into_tuple)
                         .map(|(ty, comma)| Element::new(GenericParam::Type(ty), comma)))
                     .collect(),
@@ -438,7 +438,7 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            for param in self.0.params.iter() {
+            for param in self.0.params.elements() {
                 match **param.item() {
                     GenericParam::Lifetime(ref param) => {
                         param.to_tokens(tokens);
@@ -474,7 +474,7 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            for param in self.0.params.iter() {
+            for param in self.0.params.elements() {
                 match **param.item() {
                     GenericParam::Lifetime(ref param) => {
                         // Leave off the lifetime bounds and attributes

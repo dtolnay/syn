@@ -583,7 +583,7 @@ pub mod parsing {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
                         path.segments.push_trailing(colon2);
-                        path.segments.extend(rest);
+                        path.segments.extend(rest.into_elements());
                         (pos, Some(as_), path)
                     }
                     None => {
@@ -1016,11 +1016,11 @@ mod printing {
             } else {
                 qself.position
             };
-            let mut segments = self.1.segments.iter();
+            let mut segments = self.1.segments.elements();
             if pos > 0 {
                 TokensOrDefault(&qself.as_token).to_tokens(tokens);
                 self.1.leading_colon.to_tokens(tokens);
-                for (i, segment) in (&mut segments).take(pos).enumerate() {
+                for (i, segment) in segments.by_ref().take(pos).enumerate() {
                     if i + 1 == pos {
                         segment.item().to_tokens(tokens);
                         qself.gt_token.to_tokens(tokens);
