@@ -314,6 +314,12 @@ fn fold_path_segment(&mut self, i: PathSegment) -> PathSegment { fold_path_segme
 
 fn fold_poly_trait_ref(&mut self, i: PolyTraitRef) -> PolyTraitRef { fold_poly_trait_ref(self, i) }
 
+fn fold_predicate_eq(&mut self, i: PredicateEq) -> PredicateEq { fold_predicate_eq(self, i) }
+
+fn fold_predicate_lifetime(&mut self, i: PredicateLifetime) -> PredicateLifetime { fold_predicate_lifetime(self, i) }
+
+fn fold_predicate_type(&mut self, i: PredicateType) -> PredicateType { fold_predicate_type(self, i) }
+
 fn fold_qself(&mut self, i: QSelf) -> QSelf { fold_qself(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_range_limits(&mut self, i: RangeLimits) -> RangeLimits { fold_range_limits(self, i) }
@@ -394,15 +400,9 @@ fn fold_vis_restricted(&mut self, i: VisRestricted) -> VisRestricted { fold_vis_
 
 fn fold_visibility(&mut self, i: Visibility) -> Visibility { fold_visibility(self, i) }
 
-fn fold_where_bound_predicate(&mut self, i: WhereBoundPredicate) -> WhereBoundPredicate { fold_where_bound_predicate(self, i) }
-
 fn fold_where_clause(&mut self, i: WhereClause) -> WhereClause { fold_where_clause(self, i) }
 
-fn fold_where_eq_predicate(&mut self, i: WhereEqPredicate) -> WhereEqPredicate { fold_where_eq_predicate(self, i) }
-
 fn fold_where_predicate(&mut self, i: WherePredicate) -> WherePredicate { fold_where_predicate(self, i) }
-
-fn fold_where_region_predicate(&mut self, i: WhereRegionPredicate) -> WhereRegionPredicate { fold_where_region_predicate(self, i) }
 
 }
 
@@ -2314,6 +2314,31 @@ pub fn fold_poly_trait_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PolyTraitRe
     }
 }
 
+pub fn fold_predicate_eq<V: Folder + ?Sized>(_visitor: &mut V, _i: PredicateEq) -> PredicateEq {
+    PredicateEq {
+        lhs_ty: _visitor.fold_type(_i . lhs_ty),
+        eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
+        rhs_ty: _visitor.fold_type(_i . rhs_ty),
+    }
+}
+
+pub fn fold_predicate_lifetime<V: Folder + ?Sized>(_visitor: &mut V, _i: PredicateLifetime) -> PredicateLifetime {
+    PredicateLifetime {
+        lifetime: _visitor.fold_lifetime(_i . lifetime),
+        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_lifetime(it) }),
+    }
+}
+
+pub fn fold_predicate_type<V: Folder + ?Sized>(_visitor: &mut V, _i: PredicateType) -> PredicateType {
+    PredicateType {
+        bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
+        bounded_ty: _visitor.fold_type(_i . bounded_ty),
+        colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
+        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
+    }
+}
+
 pub fn fold_qself<V: Folder + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
     QSelf {
         lt_token: Token ! [ < ](tokens_helper(_visitor, &(_i . lt_token).0)),
@@ -2815,15 +2840,6 @@ pub fn fold_visibility<V: Folder + ?Sized>(_visitor: &mut V, _i: Visibility) -> 
     }
 }
 
-pub fn fold_where_bound_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereBoundPredicate) -> WhereBoundPredicate {
-    WhereBoundPredicate {
-        bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
-        bounded_ty: _visitor.fold_type(_i . bounded_ty),
-        colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
-    }
-}
-
 pub fn fold_where_clause<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereClause) -> WhereClause {
     WhereClause {
         where_token: Token ! [ where ](tokens_helper(_visitor, &(_i . where_token).0)),
@@ -2831,39 +2847,23 @@ pub fn fold_where_clause<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereClause) 
     }
 }
 
-pub fn fold_where_eq_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereEqPredicate) -> WhereEqPredicate {
-    WhereEqPredicate {
-        lhs_ty: _visitor.fold_type(_i . lhs_ty),
-        eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
-        rhs_ty: _visitor.fold_type(_i . rhs_ty),
-    }
-}
-
 pub fn fold_where_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WherePredicate) -> WherePredicate {
     match _i {
-        WherePredicate::BoundPredicate(_binding_0, ) => {
-            WherePredicate::BoundPredicate (
-                _visitor.fold_where_bound_predicate(_binding_0),
+        WherePredicate::Type(_binding_0, ) => {
+            WherePredicate::Type (
+                _visitor.fold_predicate_type(_binding_0),
             )
         }
-        WherePredicate::RegionPredicate(_binding_0, ) => {
-            WherePredicate::RegionPredicate (
-                _visitor.fold_where_region_predicate(_binding_0),
+        WherePredicate::Lifetime(_binding_0, ) => {
+            WherePredicate::Lifetime (
+                _visitor.fold_predicate_lifetime(_binding_0),
             )
         }
-        WherePredicate::EqPredicate(_binding_0, ) => {
-            WherePredicate::EqPredicate (
-                _visitor.fold_where_eq_predicate(_binding_0),
+        WherePredicate::Eq(_binding_0, ) => {
+            WherePredicate::Eq (
+                _visitor.fold_predicate_eq(_binding_0),
             )
         }
-    }
-}
-
-pub fn fold_where_region_predicate<V: Folder + ?Sized>(_visitor: &mut V, _i: WhereRegionPredicate) -> WhereRegionPredicate {
-    WhereRegionPredicate {
-        lifetime: _visitor.fold_lifetime(_i . lifetime),
-        colon_token: (_i . colon_token).map(|it| { Token ! [ : ](tokens_helper(_visitor, &(it).0)) }),
-        bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_lifetime(it) }),
     }
 }
 

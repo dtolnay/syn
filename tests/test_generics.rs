@@ -62,7 +62,7 @@ fn test_split_for_impl() {
         where_clause: Some(WhereClause {
             where_token: Default::default(),
             predicates: punctuated![
-                WherePredicate::BoundPredicate(WhereBoundPredicate {
+                WherePredicate::Type(PredicateType {
                     bound_lifetimes: None,
                     colon_token: Default::default(),
                     bounded_ty: TypePath {

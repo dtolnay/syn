@@ -310,6 +310,12 @@ fn visit_path_segment(&mut self, i: &'ast PathSegment) { visit_path_segment(self
 
 fn visit_poly_trait_ref(&mut self, i: &'ast PolyTraitRef) { visit_poly_trait_ref(self, i) }
 
+fn visit_predicate_eq(&mut self, i: &'ast PredicateEq) { visit_predicate_eq(self, i) }
+
+fn visit_predicate_lifetime(&mut self, i: &'ast PredicateLifetime) { visit_predicate_lifetime(self, i) }
+
+fn visit_predicate_type(&mut self, i: &'ast PredicateType) { visit_predicate_type(self, i) }
+
 fn visit_qself(&mut self, i: &'ast QSelf) { visit_qself(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_range_limits(&mut self, i: &'ast RangeLimits) { visit_range_limits(self, i) }
@@ -390,15 +396,9 @@ fn visit_vis_restricted(&mut self, i: &'ast VisRestricted) { visit_vis_restricte
 
 fn visit_visibility(&mut self, i: &'ast Visibility) { visit_visibility(self, i) }
 
-fn visit_where_bound_predicate(&mut self, i: &'ast WhereBoundPredicate) { visit_where_bound_predicate(self, i) }
-
 fn visit_where_clause(&mut self, i: &'ast WhereClause) { visit_where_clause(self, i) }
 
-fn visit_where_eq_predicate(&mut self, i: &'ast WhereEqPredicate) { visit_where_eq_predicate(self, i) }
-
 fn visit_where_predicate(&mut self, i: &'ast WherePredicate) { visit_where_predicate(self, i) }
-
-fn visit_where_region_predicate(&mut self, i: &'ast WhereRegionPredicate) { visit_where_region_predicate(self, i) }
 
 }
 
@@ -1798,6 +1798,25 @@ pub fn visit_poly_trait_ref<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _
     _visitor.visit_path(& _i . trait_ref);
 }
 
+pub fn visit_predicate_eq<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PredicateEq) {
+    _visitor.visit_type(& _i . lhs_ty);
+    tokens_helper(_visitor, &(& _i . eq_token).0);
+    _visitor.visit_type(& _i . rhs_ty);
+}
+
+pub fn visit_predicate_lifetime<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PredicateLifetime) {
+    _visitor.visit_lifetime(& _i . lifetime);
+    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
+    for el in & _i . bounds { let it = el.item(); _visitor.visit_lifetime(it) };
+}
+
+pub fn visit_predicate_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PredicateType) {
+    if let Some(ref it) = _i . bound_lifetimes { _visitor.visit_bound_lifetimes(it) };
+    _visitor.visit_type(& _i . bounded_ty);
+    tokens_helper(_visitor, &(& _i . colon_token).0);
+    for el in & _i . bounds { let it = el.item(); _visitor.visit_type_param_bound(it) };
+}
+
 pub fn visit_qself<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast QSelf) {
     tokens_helper(_visitor, &(& _i . lt_token).0);
     _visitor.visit_type(& * _i . ty);
@@ -2162,41 +2181,22 @@ pub fn visit_visibility<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
     }
 }
 
-pub fn visit_where_bound_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WhereBoundPredicate) {
-    if let Some(ref it) = _i . bound_lifetimes { _visitor.visit_bound_lifetimes(it) };
-    _visitor.visit_type(& _i . bounded_ty);
-    tokens_helper(_visitor, &(& _i . colon_token).0);
-    for el in & _i . bounds { let it = el.item(); _visitor.visit_type_param_bound(it) };
-}
-
 pub fn visit_where_clause<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WhereClause) {
     tokens_helper(_visitor, &(& _i . where_token).0);
     for el in & _i . predicates { let it = el.item(); _visitor.visit_where_predicate(it) };
 }
 
-pub fn visit_where_eq_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WhereEqPredicate) {
-    _visitor.visit_type(& _i . lhs_ty);
-    tokens_helper(_visitor, &(& _i . eq_token).0);
-    _visitor.visit_type(& _i . rhs_ty);
-}
-
 pub fn visit_where_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WherePredicate) {
     match *_i {
-        WherePredicate::BoundPredicate(ref _binding_0, ) => {
-            _visitor.visit_where_bound_predicate(_binding_0);
+        WherePredicate::Type(ref _binding_0, ) => {
+            _visitor.visit_predicate_type(_binding_0);
         }
-        WherePredicate::RegionPredicate(ref _binding_0, ) => {
-            _visitor.visit_where_region_predicate(_binding_0);
+        WherePredicate::Lifetime(ref _binding_0, ) => {
+            _visitor.visit_predicate_lifetime(_binding_0);
         }
-        WherePredicate::EqPredicate(ref _binding_0, ) => {
-            _visitor.visit_where_eq_predicate(_binding_0);
+        WherePredicate::Eq(ref _binding_0, ) => {
+            _visitor.visit_predicate_eq(_binding_0);
         }
     }
-}
-
-pub fn visit_where_region_predicate<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WhereRegionPredicate) {
-    _visitor.visit_lifetime(& _i . lifetime);
-    if let Some(ref it) = _i . colon_token { tokens_helper(_visitor, &(it).0) };
-    for el in & _i . bounds { let it = el.item(); _visitor.visit_lifetime(it) };
 }
 

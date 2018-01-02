@@ -42,8 +42,8 @@ pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, L
 
 mod generics;
 pub use generics::{BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef,
-                   TraitBoundModifier, TypeParam, TypeParamBound, WhereBoundPredicate,
-                   WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate};
+                   PredicateEq, PredicateLifetime, PredicateType, TraitBoundModifier,
+                   TypeParam, TypeParamBound, WhereClause, WherePredicate};
 #[cfg(feature = "printing")]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 

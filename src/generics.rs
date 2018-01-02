@@ -164,7 +164,7 @@ ast_enum_of_structs! {
     /// A single predicate in a `where` clause
     pub enum WherePredicate {
         /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
-        pub BoundPredicate(WhereBoundPredicate {
+        pub Type(PredicateType {
             /// Any lifetimes from a `for` binding
             pub bound_lifetimes: Option<BoundLifetimes>,
             /// The type being bounded
@@ -175,14 +175,14 @@ ast_enum_of_structs! {
         }),
 
         /// A lifetime predicate, e.g. `'a: 'b+'c`
-        pub RegionPredicate(WhereRegionPredicate {
+        pub Lifetime(PredicateLifetime {
             pub lifetime: Lifetime,
             pub colon_token: Option<Token![:]>,
             pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
 
         /// An equality predicate (unsupported)
-        pub EqPredicate(WhereEqPredicate {
+        pub Eq(PredicateEq {
             pub lhs_ty: Type,
             pub eq_token: Token![=],
             pub rhs_ty: Type,
@@ -381,7 +381,7 @@ pub mod parsing {
                     colon.is_some(),
                     Punctuated::parse_separated
                 ) >>
-                (WherePredicate::RegionPredicate(WhereRegionPredicate {
+                (WherePredicate::Lifetime(PredicateLifetime {
                     lifetime: ident,
                     bounds: bounds.unwrap_or_default(),
                     colon_token: colon,
@@ -393,7 +393,7 @@ pub mod parsing {
                 bounded_ty: syn!(Type) >>
                 colon: punct!(:) >>
                 bounds: call!(Punctuated::parse_separated_nonempty) >>
-                (WherePredicate::BoundPredicate(WhereBoundPredicate {
+                (WherePredicate::Type(PredicateType {
                     bound_lifetimes: bound_lifetimes,
                     bounded_ty: bounded_ty,
                     bounds: bounds,
@@ -581,7 +581,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for WhereBoundPredicate {
+    impl ToTokens for PredicateType {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.bound_lifetimes.to_tokens(tokens);
             self.bounded_ty.to_tokens(tokens);
@@ -590,7 +590,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for WhereRegionPredicate {
+    impl ToTokens for PredicateLifetime {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lifetime.to_tokens(tokens);
             if !self.bounds.is_empty() {
@@ -600,7 +600,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for WhereEqPredicate {
+    impl ToTokens for PredicateEq {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lhs_ty.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
