@@ -312,8 +312,6 @@ fn fold_path_arguments(&mut self, i: PathArguments) -> PathArguments { fold_path
 
 fn fold_path_segment(&mut self, i: PathSegment) -> PathSegment { fold_path_segment(self, i) }
 
-fn fold_poly_trait_ref(&mut self, i: PolyTraitRef) -> PolyTraitRef { fold_poly_trait_ref(self, i) }
-
 fn fold_predicate_eq(&mut self, i: PredicateEq) -> PredicateEq { fold_predicate_eq(self, i) }
 
 fn fold_predicate_lifetime(&mut self, i: PredicateLifetime) -> PredicateLifetime { fold_predicate_lifetime(self, i) }
@@ -329,6 +327,8 @@ fn fold_return_type(&mut self, i: ReturnType) -> ReturnType { fold_return_type(s
 fn fold_span(&mut self, i: Span) -> Span { fold_span(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_stmt(&mut self, i: Stmt) -> Stmt { fold_stmt(self, i) }
+
+fn fold_trait_bound(&mut self, i: TraitBound) -> TraitBound { fold_trait_bound(self, i) }
 
 fn fold_trait_bound_modifier(&mut self, i: TraitBoundModifier) -> TraitBoundModifier { fold_trait_bound_modifier(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -2307,13 +2307,6 @@ pub fn fold_path_segment<V: Folder + ?Sized>(_visitor: &mut V, _i: PathSegment) 
     }
 }
 
-pub fn fold_poly_trait_ref<V: Folder + ?Sized>(_visitor: &mut V, _i: PolyTraitRef) -> PolyTraitRef {
-    PolyTraitRef {
-        bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
-        trait_ref: _visitor.fold_path(_i . trait_ref),
-    }
-}
-
 pub fn fold_predicate_eq<V: Folder + ?Sized>(_visitor: &mut V, _i: PredicateEq) -> PredicateEq {
     PredicateEq {
         lhs_ty: _visitor.fold_type(_i . lhs_ty),
@@ -2332,7 +2325,7 @@ pub fn fold_predicate_lifetime<V: Folder + ?Sized>(_visitor: &mut V, _i: Predica
 
 pub fn fold_predicate_type<V: Folder + ?Sized>(_visitor: &mut V, _i: PredicateType) -> PredicateType {
     PredicateType {
-        bound_lifetimes: (_i . bound_lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
+        lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         bounded_ty: _visitor.fold_type(_i . bounded_ty),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
         bounds: FoldHelper::lift(_i . bounds, |it| { _visitor.fold_type_param_bound(it) }),
@@ -2403,6 +2396,14 @@ pub fn fold_stmt<V: Folder + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
                 Token ! [ ; ](tokens_helper(_visitor, &(_binding_1).0)),
             )
         }
+    }
+}
+
+pub fn fold_trait_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TraitBound) -> TraitBound {
+    TraitBound {
+        modifier: _visitor.fold_trait_bound_modifier(_i . modifier),
+        lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
+        path: _visitor.fold_path(_i . path),
     }
 }
 
@@ -2648,14 +2649,13 @@ pub fn fold_type_param<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParam) -> T
 
 pub fn fold_type_param_bound<V: Folder + ?Sized>(_visitor: &mut V, _i: TypeParamBound) -> TypeParamBound {
     match _i {
-        TypeParamBound::Trait(_binding_0, _binding_1, ) => {
+        TypeParamBound::Trait(_binding_0, ) => {
             TypeParamBound::Trait (
-                _visitor.fold_poly_trait_ref(_binding_0),
-                _visitor.fold_trait_bound_modifier(_binding_1),
+                _visitor.fold_trait_bound(_binding_0),
             )
         }
-        TypeParamBound::Region(_binding_0, ) => {
-            TypeParamBound::Region (
+        TypeParamBound::Lifetime(_binding_0, ) => {
+            TypeParamBound::Lifetime (
                 _visitor.fold_lifetime(_binding_0),
             )
         }

@@ -309,8 +309,6 @@ fn visit_path_arguments(&mut self, i: &'ast PathArguments) { visit_path_argument
 
 fn visit_path_segment(&mut self, i: &'ast PathSegment) { visit_path_segment(self, i) }
 
-fn visit_poly_trait_ref(&mut self, i: &'ast PolyTraitRef) { visit_poly_trait_ref(self, i) }
-
 fn visit_predicate_eq(&mut self, i: &'ast PredicateEq) { visit_predicate_eq(self, i) }
 
 fn visit_predicate_lifetime(&mut self, i: &'ast PredicateLifetime) { visit_predicate_lifetime(self, i) }
@@ -326,6 +324,8 @@ fn visit_return_type(&mut self, i: &'ast ReturnType) { visit_return_type(self, i
 fn visit_span(&mut self, i: &'ast Span) { visit_span(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_stmt(&mut self, i: &'ast Stmt) { visit_stmt(self, i) }
+
+fn visit_trait_bound(&mut self, i: &'ast TraitBound) { visit_trait_bound(self, i) }
 
 fn visit_trait_bound_modifier(&mut self, i: &'ast TraitBoundModifier) { visit_trait_bound_modifier(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -1794,11 +1794,6 @@ pub fn visit_path_segment<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i:
     _visitor.visit_path_arguments(& _i . arguments);
 }
 
-pub fn visit_poly_trait_ref<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PolyTraitRef) {
-    if let Some(ref it) = _i . bound_lifetimes { _visitor.visit_bound_lifetimes(it) };
-    _visitor.visit_path(& _i . trait_ref);
-}
-
 pub fn visit_predicate_eq<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PredicateEq) {
     _visitor.visit_type(& _i . lhs_ty);
     tokens_helper(_visitor, &(& _i . eq_token).0);
@@ -1812,7 +1807,7 @@ pub fn visit_predicate_lifetime<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut 
 }
 
 pub fn visit_predicate_type<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PredicateType) {
-    if let Some(ref it) = _i . bound_lifetimes { _visitor.visit_bound_lifetimes(it) };
+    if let Some(ref it) = _i . lifetimes { _visitor.visit_bound_lifetimes(it) };
     _visitor.visit_type(& _i . bounded_ty);
     tokens_helper(_visitor, &(& _i . colon_token).0);
     for el in Punctuated::elements(& _i . bounds) { let it = el.item(); _visitor.visit_type_param_bound(it) };
@@ -1866,6 +1861,12 @@ pub fn visit_stmt<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast S
             tokens_helper(_visitor, &(_binding_1).0);
         }
     }
+}
+
+pub fn visit_trait_bound<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitBound) {
+    _visitor.visit_trait_bound_modifier(& _i . modifier);
+    if let Some(ref it) = _i . lifetimes { _visitor.visit_bound_lifetimes(it) };
+    _visitor.visit_path(& _i . path);
 }
 
 pub fn visit_trait_bound_modifier<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitBoundModifier) {
@@ -2042,11 +2043,10 @@ pub fn visit_type_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &
 
 pub fn visit_type_param_bound<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeParamBound) {
     match *_i {
-        TypeParamBound::Trait(ref _binding_0, ref _binding_1, ) => {
-            _visitor.visit_poly_trait_ref(_binding_0);
-            _visitor.visit_trait_bound_modifier(_binding_1);
+        TypeParamBound::Trait(ref _binding_0, ) => {
+            _visitor.visit_trait_bound(_binding_0);
         }
-        TypeParamBound::Region(ref _binding_0, ) => {
+        TypeParamBound::Lifetime(ref _binding_0, ) => {
             _visitor.visit_lifetime(_binding_0);
         }
     }

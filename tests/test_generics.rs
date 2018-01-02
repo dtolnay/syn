@@ -47,7 +47,7 @@ fn test_split_for_impl() {
                 ],
                 ident: "T".into(),
                 bounds: punctuated![
-                    TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default())),
+                    TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::default())),
                 ],
                 default: Some(
                     TypeTuple {
@@ -63,20 +63,18 @@ fn test_split_for_impl() {
             where_token: Default::default(),
             predicates: punctuated![
                 WherePredicate::Type(PredicateType {
-                    bound_lifetimes: None,
+                    lifetimes: None,
                     colon_token: Default::default(),
                     bounded_ty: TypePath {
                         qself: None,
                         path: "T".into(),
                     }.into(),
                     bounds: punctuated![
-                        TypeParamBound::Trait(
-                            PolyTraitRef {
-                                bound_lifetimes: None,
-                                trait_ref: "Debug".into(),
-                            },
-                            TraitBoundModifier::None,
-                        ),
+                        TypeParamBound::Trait(TraitBound {
+                            modifier: TraitBoundModifier::None,
+                            lifetimes: None,
+                            path: "Debug".into(),
+                        }),
                     ],
                 }),
             ],
@@ -105,33 +103,29 @@ fn test_split_for_impl() {
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    let expected = TypeParamBound::Region(Lifetime::new(Term::intern("'a"), Span::default()));
+    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::default()));
     assert_eq!(
         expected,
         common::parse::syn::<TypeParamBound>(tokens.into())
     );
 
     let tokens = quote!(Debug);
-    let expected = TypeParamBound::Trait(
-        PolyTraitRef {
-            bound_lifetimes: None,
-            trait_ref: "Debug".into(),
-        },
-        TraitBoundModifier::None,
-    );
+    let expected = TypeParamBound::Trait(TraitBound {
+        modifier: TraitBoundModifier::None,
+        lifetimes: None,
+        path: "Debug".into(),
+    });
     assert_eq!(
         expected,
         common::parse::syn::<TypeParamBound>(tokens.into())
     );
 
     let tokens = quote!(?Sized);
-    let expected = TypeParamBound::Trait(
-        PolyTraitRef {
-            bound_lifetimes: None,
-            trait_ref: "Sized".into(),
-        },
-        TraitBoundModifier::Maybe(Default::default()),
-    );
+    let expected = TypeParamBound::Trait(TraitBound {
+        modifier: TraitBoundModifier::Maybe(Default::default()),
+        lifetimes: None,
+        path: "Sized".into(),
+    });
     assert_eq!(
         expected,
         common::parse::syn::<TypeParamBound>(tokens.into())

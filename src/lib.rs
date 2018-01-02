@@ -42,7 +42,7 @@ pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, L
 
 mod generics;
 pub use generics::{BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef,
-                   PredicateEq, PredicateLifetime, PredicateType, TraitBoundModifier,
+                   PredicateEq, PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier,
                    TypeParam, TypeParamBound, WhereClause, WherePredicate};
 #[cfg(feature = "printing")]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
@@ -84,7 +84,7 @@ pub use op::{BinOp, UnOp};
 mod ty;
 pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
              Binding, GenericArgument, ParenthesizedGenericArguments, Path,
-             PathArguments, PathSegment, PolyTraitRef, QSelf, ReturnType, Type, TypeArray,
+             PathArguments, PathSegment, QSelf, ReturnType, Type, TypeArray,
              TypeBareFn, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
              TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim};
 #[cfg(feature = "printing")]

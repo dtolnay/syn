@@ -268,15 +268,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    pub struct PolyTraitRef {
-        /// The `for<'a>` in `for<'a> Foo<&'a T>`
-        pub bound_lifetimes: Option<BoundLifetimes>,
-        /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
-        pub trait_ref: Path,
-    }
-}
-
-ast_struct! {
     /// The explicit Self type in a "qualified path". The actual
     /// path, including the trait and the associated item, is stored
     /// separately. `position` represents the index of the associated
@@ -841,32 +832,6 @@ pub mod parsing {
         }
     }
 
-    impl Synom for PolyTraitRef {
-        named!(parse -> Self, do_parse!(
-            bound_lifetimes: option!(syn!(BoundLifetimes)) >>
-            trait_ref: syn!(Path) >>
-            parenthesized: option!(cond_reduce!(
-                trait_ref.segments.last().unwrap().item().arguments.is_empty(),
-                syn!(ParenthesizedGenericArguments)
-            )) >>
-            ({
-                let mut trait_ref = trait_ref;
-                if let Some(parenthesized) = parenthesized {
-                    let parenthesized = PathArguments::Parenthesized(parenthesized);
-                    trait_ref.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
-                }
-                PolyTraitRef {
-                    bound_lifetimes: bound_lifetimes,
-                    trait_ref: trait_ref,
-                }
-            })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("poly trait reference")
-        }
-    }
-
     impl Synom for BareFnArg {
         named!(parse -> Self, do_parse!(
             name: option!(do_parse!(
@@ -1176,13 +1141,6 @@ mod printing {
                     ty.to_tokens(tokens);
                 }
             }
-        }
-    }
-
-    impl ToTokens for PolyTraitRef {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.bound_lifetimes.to_tokens(tokens);
-            self.trait_ref.to_tokens(tokens);
         }
     }
 

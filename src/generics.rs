@@ -131,20 +131,26 @@ impl From<Ident> for TypeParam {
     }
 }
 
-ast_enum! {
-    /// The AST represents all type param bounds as types.
-    /// `typeck::collect::compute_bounds` matches these against
-    /// the "special" built-in traits (see `middle::lang_items`) and
-    /// detects Copy, Send and Sync.
+ast_enum_of_structs! {
     pub enum TypeParamBound {
-        Trait(PolyTraitRef, TraitBoundModifier),
-        Region(Lifetime),
+        pub Trait(TraitBound),
+        pub Lifetime(Lifetime),
+    }
+}
+
+ast_struct! {
+    pub struct TraitBound {
+        pub modifier: TraitBoundModifier,
+        /// The `for<'a>` in `for<'a> Foo<&'a T>`
+        pub lifetimes: Option<BoundLifetimes>,
+        /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
+        pub path: Path,
     }
 }
 
 ast_enum! {
     /// A modifier on a bound, currently this is only used for `?Sized`, where the
-    /// modifier is `Maybe`. Negative bounds should also be handled here.
+    /// modifier is `Maybe`.
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
@@ -166,7 +172,7 @@ ast_enum_of_structs! {
         /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
         pub Type(PredicateType {
             /// Any lifetimes from a `for` binding
-            pub bound_lifetimes: Option<BoundLifetimes>,
+            pub lifetimes: Option<BoundLifetimes>,
             /// The type being bounded
             pub bounded_ty: Type,
             pub colon_token: Token![:],
@@ -305,25 +311,54 @@ pub mod parsing {
 
     impl Synom for TypeParamBound {
         named!(parse -> Self, alt!(
-            do_parse!(
-                question: punct!(?) >>
-                poly: syn!(PolyTraitRef) >>
-                (TypeParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
-            )
+            syn!(Lifetime) => { TypeParamBound::Lifetime }
             |
-            syn!(Lifetime) => { TypeParamBound::Region }
+            syn!(TraitBound) => { TypeParamBound::Trait }
             |
-            syn!(PolyTraitRef) => {
-                |poly| TypeParamBound::Trait(poly, TraitBoundModifier::None)
-            }
-            |
-            parens!(syn!(PolyTraitRef)) => {
-                |poly| TypeParamBound::Trait(poly.1, TraitBoundModifier::None)
-            }
+            parens!(syn!(TraitBound)) => { |bound| TypeParamBound::Trait(bound.1) }
         ));
 
         fn description() -> Option<&'static str> {
             Some("type parameter bound")
+        }
+    }
+
+    impl Synom for TraitBound {
+        named!(parse -> Self, do_parse!(
+            modifier: syn!(TraitBoundModifier) >>
+            lifetimes: option!(syn!(BoundLifetimes)) >>
+            mut path: syn!(Path) >>
+            parenthesized: option!(cond_reduce!(
+                path.segments.last().unwrap().item().arguments.is_empty(),
+                syn!(ParenthesizedGenericArguments)
+            )) >>
+            ({
+                if let Some(parenthesized) = parenthesized {
+                    let parenthesized = PathArguments::Parenthesized(parenthesized);
+                    path.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
+                }
+                TraitBound {
+                    modifier: modifier,
+                    lifetimes: lifetimes,
+                    path: path,
+                }
+            })
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("trait bound")
+        }
+    }
+
+    impl Synom for TraitBoundModifier {
+        named!(parse -> Self, alt!(
+            punct!(?) => { TraitBoundModifier::Maybe }
+            |
+            epsilon!() => { |_| TraitBoundModifier::None }
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("trait bound modifier")
         }
     }
 
@@ -389,12 +424,12 @@ pub mod parsing {
             )
             |
             do_parse!(
-                bound_lifetimes: option!(syn!(BoundLifetimes)) >>
+                lifetimes: option!(syn!(BoundLifetimes)) >>
                 bounded_ty: syn!(Type) >>
                 colon: punct!(:) >>
                 bounds: call!(Punctuated::parse_separated_nonempty) >>
                 (WherePredicate::Type(PredicateType {
-                    bound_lifetimes: bound_lifetimes,
+                    lifetimes: lifetimes,
                     bounded_ty: bounded_ty,
                     bounds: bounds,
                     colon_token: colon,
@@ -539,15 +574,11 @@ mod printing {
         }
     }
 
-    impl ToTokens for TypeParamBound {
+    impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                TypeParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
-                TypeParamBound::Trait(ref trait_ref, ref modifier) => {
-                    modifier.to_tokens(tokens);
-                    trait_ref.to_tokens(tokens);
-                }
-            }
+            self.modifier.to_tokens(tokens);
+            self.lifetimes.to_tokens(tokens);
+            self.path.to_tokens(tokens);
         }
     }
 
@@ -583,7 +614,7 @@ mod printing {
 
     impl ToTokens for PredicateType {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.bound_lifetimes.to_tokens(tokens);
+            self.lifetimes.to_tokens(tokens);
             self.bounded_ty.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
