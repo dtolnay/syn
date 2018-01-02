@@ -296,6 +296,17 @@ pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
     Ok(file)
 }
 
+#[cfg(all(feature = "parsing", feature = "printing"))]
+#[macro_export]
+macro_rules! parse_quote {
+    ($($tt:tt)*) => {
+        ::std::result::Result::unwrap(
+            $crate::parse(
+                ::std::convert::Into::into(
+                    quote!($($tt)*))))
+    };
+}
+
 #[cfg(feature = "printing")]
 struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
 
