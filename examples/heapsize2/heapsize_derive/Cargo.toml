@@ -1,0 +1,14 @@
+[package]
+name = "heapsize_derive"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+heapsize = { path = "../heapsize" }
+syn = { path = "../../.." }
+quote = { git = "https://github.com/dtolnay/quote" }
+proc-macro2 = { version = "0.1", features = ["unstable"] }
