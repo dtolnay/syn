@@ -126,16 +126,17 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 let features = get_features(&item.attrs, features.clone());
 
                 // Try to parse the AstItem declaration out of the item.
+                let tts = &item.mac.tts;
                 let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
-                    syn::parse::<parsing::AstStruct>(item.mac.tts.clone().into())
+                    syn::parse_str::<parsing::AstStruct>(&quote!(#tts).to_string())
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum".into()) {
-                    syn::parse::<parsing::AstEnum>(item.mac.tts.clone().into())
+                    syn::parse_str::<parsing::AstEnum>(&quote!(#tts).to_string())
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
                 } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
-                    syn::parse::<parsing::AstEnumOfStructs>(item.mac.tts.clone().into())
+                    syn::parse_str::<parsing::AstEnumOfStructs>(&quote!(#tts).to_string())
                         .map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
                 } else {
@@ -210,9 +211,9 @@ mod parsing {
         option!(manual_extra_traits) >>
         rest: syn!(TokenStream) >>
         (AstItem {
-            ast: syn::parse(quote! {
+            ast: syn::parse_str(&quote! {
                 pub struct #id #rest
-            }.into())?,
+            }.to_string())?,
             features: features.0,
             eos_full: features.1,
         })
@@ -286,9 +287,9 @@ mod parsing {
                             None => quote!(#name),
                         }
                     });
-                    syn::parse(quote! {
+                    syn::parse_str(&quote! {
                         pub enum #id { #(#variants),* }
-                    }.into())?
+                    }.to_string())?
                 };
                 let mut items = vec![AstItem {
                     ast: enum_item,
