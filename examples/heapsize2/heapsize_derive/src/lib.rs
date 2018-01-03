@@ -7,7 +7,8 @@ extern crate syn;
 extern crate quote;
 
 use proc_macro::TokenStream;
-use syn::{DeriveInput, Data, Fields, Generics, GenericParam};
+use syn::{DeriveInput, Data, Fields, Generics, GenericParam, Ident};
+use syn::spanned::Spanned;
 use quote::Tokens;
 
 #[proc_macro_derive(HeapSize)]
@@ -74,22 +75,36 @@ fn heap_size_sum(data: &Data) -> Tokens {
                     // resolve to the right trait method, even if one of these
                     // fields has an inherent method with a conflicting name as
                     // demonstrated in main.rs.
-                    let fnames = fields.named.iter().map(|f| f.ident);
+                    //
+                    // We take some care to use the span of each `syn::Field` as
+                    // the span of the corresponding `heap_size_of_children`
+                    // call. This way if one of the field types does not
+                    // implement `HeapSize` then the compiler's error message
+                    // underlines which field it is. An example is shown in the
+                    // readme of the parent directory.
+                    let children = fields.named.iter().map(|f| {
+                        let name = f.ident;
+                        let method = Ident::new("heap_size_of_children", f.span());
+                        quote! {
+                            self.#name.#method()
+                        }
+                    });
                     quote! {
-                        0 #(
-                            + self.#fnames.heap_size_of_children()
-                        )*
+                        0 #(+ #children)*
                     }
                 }
                 Fields::Unnamed(ref fields) => {
-                    // Expands to an expression like
+                    // We can also expand in the straightforward way without
+                    // worrying about spans. This works but the error message
+                    // may not be as good in the case that one of the field
+                    // types does not implement HeapSize.
+                    //
+                    // This expands to an expression like
                     //
                     //     0 + self.0.heap_size() + self.1.heap_size() + self.2.heap_size()
                     let indices = 0..fields.unnamed.len();
                     quote! {
-                        0 #(
-                            + self.#indices.heap_size_of_children()
-                        )*
+                        0 #(+ self.#indices.heap_size_of_children())*
                     }
                 }
                 Fields::Unit => {
