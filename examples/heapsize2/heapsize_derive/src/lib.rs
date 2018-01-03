@@ -84,6 +84,8 @@ fn heap_size_sum(data: &Data) -> Tokens {
                     // readme of the parent directory.
                     let children = fields.named.iter().map(|f| {
                         let name = f.ident;
+                        // FIXME: this needs to be f.span().resolved_at(def_site).
+                        // https://github.com/rust-lang/rust/pull/47149
                         let method = Ident::new("heap_size_of_children", f.span());
                         quote! {
                             self.#name.#method()
