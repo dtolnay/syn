@@ -15,7 +15,7 @@ struct Demo<'a, T: ?Sized> {
 
 // This derive is going to generate `impl HeapSize for HeapSize` which is fine
 // because the two `HeapSize` tokens have different hygiene context. The first
-// one resolves to the `HeapSize` trait brough into scop eby the procedural
+// one resolves to the `HeapSize` trait brough into scope by the procedural
 // macro definition, and the second one refers to this struct.
 //
 // Also demonstrate that even though both `impl HeapSize for Demo` and `impl
