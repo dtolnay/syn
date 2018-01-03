@@ -11,6 +11,7 @@ impl<T> Spanned for T
 where
     T: ToTokens,
 {
+    #[cfg(procmacro2_semver_exempt)]
     fn span(&self) -> Span {
         let mut tokens = Tokens::new();
         self.to_tokens(&mut tokens);
@@ -28,5 +29,20 @@ where
             }
         }
         span
+    }
+
+    #[cfg(not(procmacro2_semver_exempt))]
+    fn span(&self) -> Span {
+        let mut tokens = Tokens::new();
+        self.to_tokens(&mut tokens);
+        let token_stream = TokenStream::from(tokens);
+        let mut iter = token_stream.into_iter();
+
+        // We can't join spans without procmacro2_semver_exempt so just grab the
+        // first one.
+        match iter.next() {
+            Some(tt) => tt.span,
+            None => Span::call_site(),
+        }
     }
 }

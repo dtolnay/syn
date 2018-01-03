@@ -98,7 +98,7 @@ pub mod punctuated;
 #[cfg(feature = "parsing")]
 mod tt;
 
-#[cfg(all(procmacro2_semver_exempt, feature = "parsing", feature = "printing"))]
+#[cfg(all(feature = "parsing", feature = "printing"))]
 pub mod spanned;
 
 mod gen {
