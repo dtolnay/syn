@@ -21,13 +21,19 @@ mod macros;
 #[macro_use]
 pub mod token;
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod attr;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use attr::{AttrStyle, Attribute, MetaItem, MetaItemList, MetaNameValue, NestedMetaItem};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod data;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, VisPublic, VisRestricted, Visibility};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
                ExprBox, ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue,
                ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
@@ -40,11 +46,13 @@ pub use expr::{Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, L
                MethodTurbofish, Pat, PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatRef, PatSlice,
                PatStruct, PatTuple, PatTupleStruct, PatVerbatim, PatWild, RangeLimits, Stmt};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod generics;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use generics::{BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef,
                    PredicateEq, PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier,
                    TypeParam, TypeParamBound, WhereClause, WherePredicate};
-#[cfg(feature = "printing")]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 mod ident;
@@ -66,28 +74,40 @@ mod file;
 #[cfg(feature = "full")]
 pub use file::File;
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod lifetime;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use lifetime::Lifetime;
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod lit;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use lit::{Lit, LitKind};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod mac;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use mac::{Macro, MacroDelimiter};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod derive;
+#[cfg(feature = "derive")]
 pub use derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod op;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use op::{BinOp, UnOp};
 
+#[cfg(any(feature = "full", feature = "derive"))]
 mod ty;
+#[cfg(any(feature = "full", feature = "derive"))]
 pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
              Binding, GenericArgument, ParenthesizedGenericArguments, Path,
              PathArguments, PathSegment, QSelf, ReturnType, Type, TypeArray,
              TypeBareFn, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
              TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim};
-#[cfg(feature = "printing")]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 pub use ty::PathTokens;
 
 #[cfg(feature = "parsing")]
@@ -95,7 +115,7 @@ mod cursor;
 #[cfg(feature = "parsing")]
 pub mod synom;
 pub mod punctuated;
-#[cfg(feature = "parsing")]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
 mod tt;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]
@@ -307,10 +327,10 @@ macro_rules! parse_quote {
     };
 }
 
-#[cfg(feature = "printing")]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
 
-#[cfg(feature = "printing")]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
 where
     T: quote::ToTokens + Default,

@@ -16,7 +16,8 @@ path = "examples/dump-syntax/main.rs"
 required-features = ["full", "parsing", "extra-traits"]
 
 [features]
-default = ["parsing", "printing", "clone-impls"]
+default = ["derive", "parsing", "printing", "clone-impls"]
+derive = []
 full = []
 parsing = []
 printing = ["quote"]
