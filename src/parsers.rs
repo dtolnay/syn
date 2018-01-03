@@ -81,7 +81,7 @@ macro_rules! named {
     };
 }
 
-#[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
+#[cfg(synom_verbose_trace)]
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {{
@@ -128,7 +128,7 @@ macro_rules! call {
 /// #
 /// # fn main() {}
 /// ```
-#[cfg(any(not(feature = "verbose-trace"), feature = "all-features"))]
+#[cfg(not(synom_verbose_trace))]
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {

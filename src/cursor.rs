@@ -13,7 +13,7 @@ use proc_macro2::*;
 use std::ptr;
 use std::marker::PhantomData;
 
-#[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
+#[cfg(synom_verbose_trace)]
 use std::fmt::{self, Debug};
 
 /// Internal type which is used instead of `TokenTree` to represent a single
@@ -310,7 +310,7 @@ impl<'a> Cursor<'a> {
 
 // We do a custom implementation for `Debug` as the default implementation is
 // pretty useless.
-#[cfg(all(feature = "verbose-trace", not(feature = "all-features")))]
+#[cfg(synom_verbose_trace)]
 impl<'a> Debug for Cursor<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Print what the cursor is currently looking at.

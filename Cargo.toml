@@ -26,8 +26,6 @@ visit_mut = []
 fold = []
 clone-impls = []
 extra-traits = []
-verbose-trace = []
-all-features = []
 
 [dependencies]
 quote = { git = "https://github.com/dtolnay/quote", optional = true }
