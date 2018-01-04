@@ -68,8 +68,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     // FIXME: ty.span().resolved_at(def_site)
     let ty_span = ty.span();
     let assert_sync = quote_spanned! {ty_span,
-        fn assert_sync<T: Sync>() {}
-        let _ = assert_sync::<#ty>;
+        struct _Assert where #ty: Sync;
     };
 
     // FIXME: init.span().resolved_at(def_site)
