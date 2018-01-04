@@ -10,4 +10,4 @@ proc-macro = true
 [dependencies]
 syn = { path = "../../.." }
 quote = { git = "https://github.com/dtolnay/quote" }
-proc-macro2 = { version = "0.1", features = ["unstable"] }
+proc-macro2 = { version = "0.1", features = ["nightly"] }
