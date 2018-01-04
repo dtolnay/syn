@@ -56,10 +56,10 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
             .emit();
     }
 
-    if let Type::Tuple(ref ty) = ty {
-        if ty.elems.is_empty() {
-            ty.span().unstable()
-                .error("I can't think of a legitimate use for lazily initializing `()`")
+    if let Expr::Tuple(ref init) = init {
+        if init.elems.is_empty() {
+            init.span().unstable()
+                .error("I can't think of a legitimate use for lazily initializing the value `()`")
                 .emit();
             return TokenStream::empty();
         }

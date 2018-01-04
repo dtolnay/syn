@@ -20,5 +20,6 @@ fn main() {
 }
 
 fn validate(name: &str) {
+    // The USERNAME regex is compiled lazily the first time its value is accessed.
     println!("is_match({:?}): {}", name, USERNAME.is_match(name));
 }
