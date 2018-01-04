@@ -1,0 +1,9 @@
+[package]
+name = "example"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+publish = false
+
+[dependencies]
+lazy_static = { path = "../lazy-static" }
+regex = "0.2"
