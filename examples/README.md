@@ -15,3 +15,9 @@ compiler. It illustrates some neat features of the hygiene system of Macros 2.0
 and shows how to leverage those to provide amazing error messages to users.
 Currently requires a nightly Rust compiler >=1.24.0-nightly but we are working
 to stabilize all of the APIs involved.
+
+### [`lazy-static`](lazy-static)
+
+An example of parsing a custom syntax within a `functionlike!(...)` procedural
+macro. Demonstrates how to trigger custom warnings and error messages on
+individual tokens of the input.
