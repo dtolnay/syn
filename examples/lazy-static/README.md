@@ -10,7 +10,7 @@ The library implements a `lazy_static!` macro similar to the one from the real
 crates.io.
 
 ```rust
-lazy_static {
+lazy_static! {
     static ref USERNAME: Regex = Regex::new("^[a-z0-9_-]{3,16}$").unwrap();
 }
 ```
@@ -30,8 +30,8 @@ warning: come on, pick a more creative name
    |                ^^^
 ```
 
-And if you try to lazily initialize `() = ()`, the macro will outright refuse
-the compile it for you.
+And if you try to lazily initialize `() = ()`, the macro will outright refuse to
+compile it for you.
 
 ```
 error: I can't think of a legitimate use for lazily initializing the value `()`
