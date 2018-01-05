@@ -255,6 +255,22 @@ fn fold_lifetime(&mut self, i: Lifetime) -> Lifetime { fold_lifetime(self, i) }
 fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef { fold_lifetime_def(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_lit(&mut self, i: Lit) -> Lit { fold_lit(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_bool(&mut self, i: LitBool) -> LitBool { fold_lit_bool(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_byte(&mut self, i: LitByte) -> LitByte { fold_lit_byte(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_byte_str(&mut self, i: LitByteStr) -> LitByteStr { fold_lit_byte_str(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_char(&mut self, i: LitChar) -> LitChar { fold_lit_char(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_float(&mut self, i: LitFloat) -> LitFloat { fold_lit_float(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_int(&mut self, i: LitInt) -> LitInt { fold_lit_int(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_str(&mut self, i: LitStr) -> LitStr { fold_lit_str(self, i) }
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn fold_lit_verbatim(&mut self, i: LitVerbatim) -> LitVerbatim { fold_lit_verbatim(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
 fn fold_local(&mut self, i: Local) -> Local { fold_local(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
@@ -406,15 +422,29 @@ fn fold_where_predicate(&mut self, i: WherePredicate) -> WherePredicate { fold_w
 
 }
 
-pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Ident) -> Ident {
-    _i.span = _visitor.fold_span(_i.span);
-    _i
+macro_rules! fold_span_only {
+    ($f:ident : $t:ident) => {
+        pub fn $f<V: Folder + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
+            _i.span = _visitor.fold_span(_i.span);
+            _i
+        }
+    }
 }
 
-pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Lifetime) -> Lifetime {
-    _i.span = _visitor.fold_span(_i.span);
-    _i
-}
+fold_span_only!(fold_ident: Ident);
+fold_span_only!(fold_lifetime: Lifetime);
+#[cfg(any(feature = "full", feature = "derive"))]
+fold_span_only!(fold_lit_byte: LitByte);
+#[cfg(any(feature = "full", feature = "derive"))]
+fold_span_only!(fold_lit_byte_str: LitByteStr);
+#[cfg(any(feature = "full", feature = "derive"))]
+fold_span_only!(fold_lit_char: LitChar);
+#[cfg(any(feature = "full", feature = "derive"))]
+fold_span_only!(fold_lit_float: LitFloat);
+#[cfg(any(feature = "full", feature = "derive"))]
+fold_span_only!(fold_lit_int: LitInt);
+#[cfg(any(feature = "full", feature = "derive"))]
+fold_span_only!(fold_lit_str: LitStr);
 
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn fold_abi<V: Folder + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
@@ -1959,8 +1989,60 @@ pub fn fold_lifetime_def<V: Folder + ?Sized>(_visitor: &mut V, _i: LifetimeDef) 
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn fold_lit<V: Folder + ?Sized>(_visitor: &mut V, _i: Lit) -> Lit {
-    Lit {
+    match _i {
+        Lit::Str(_binding_0, ) => {
+            Lit::Str (
+                _visitor.fold_lit_str(_binding_0),
+            )
+        }
+        Lit::ByteStr(_binding_0, ) => {
+            Lit::ByteStr (
+                _visitor.fold_lit_byte_str(_binding_0),
+            )
+        }
+        Lit::Byte(_binding_0, ) => {
+            Lit::Byte (
+                _visitor.fold_lit_byte(_binding_0),
+            )
+        }
+        Lit::Char(_binding_0, ) => {
+            Lit::Char (
+                _visitor.fold_lit_char(_binding_0),
+            )
+        }
+        Lit::Int(_binding_0, ) => {
+            Lit::Int (
+                _visitor.fold_lit_int(_binding_0),
+            )
+        }
+        Lit::Float(_binding_0, ) => {
+            Lit::Float (
+                _visitor.fold_lit_float(_binding_0),
+            )
+        }
+        Lit::Bool(_binding_0, ) => {
+            Lit::Bool (
+                _visitor.fold_lit_bool(_binding_0),
+            )
+        }
+        Lit::Verbatim(_binding_0, ) => {
+            Lit::Verbatim (
+                _visitor.fold_lit_verbatim(_binding_0),
+            )
+        }
+    }
+}
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+pub fn fold_lit_bool<V: Folder + ?Sized>(_visitor: &mut V, _i: LitBool) -> LitBool {
+    LitBool {
         value: _i . value,
+        span: _visitor.fold_span(_i . span),
+    }
+}
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+pub fn fold_lit_verbatim<V: Folder + ?Sized>(_visitor: &mut V, _i: LitVerbatim) -> LitVerbatim {
+    LitVerbatim {
+        token: _i . token,
         span: _visitor.fold_span(_i . span),
     }
 }

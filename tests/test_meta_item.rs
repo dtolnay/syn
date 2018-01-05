@@ -11,10 +11,7 @@ use proc_macro2::{Literal, TokenStream};
 mod macros;
 
 fn lit<T: Into<Literal>>(t: T) -> Lit {
-    Lit {
-        value: LitKind::Other(t.into()),
-        span: Default::default(),
-    }
+    Lit::new(t.into(), Default::default())
 }
 
 #[test]

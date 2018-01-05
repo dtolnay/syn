@@ -82,7 +82,8 @@ pub use lifetime::Lifetime;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod lit;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use lit::{Lit, LitKind};
+pub use lit::{Lit, LitStr, LitByteStr, LitByte, LitChar, LitInt, LitFloat, LitBool, LitVerbatim,
+              StrStyle, IntSuffix, FloatSuffix};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod mac;

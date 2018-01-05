@@ -796,7 +796,7 @@ pub mod parsing {
     use ty::parsing::ty_no_eq_after;
 
     #[cfg(feature = "full")]
-    use proc_macro2::{Span, TokenStream};
+    use proc_macro2::TokenStream;
     use synom::Synom;
     use cursor::Cursor;
     #[cfg(feature = "full")]
@@ -1467,12 +1467,8 @@ pub mod parsing {
             ExprMethodCall {
                 attrs: Vec::new(),
                 // this expr will get overwritten after being returned
-                receiver: Box::new(Expr::Lit(ExprLit {
-                    attrs: Vec::new(),
-                    lit: Lit {
-                        span: Span::default(),
-                        value: LitKind::Bool(false),
-                    },
+                receiver: Box::new(Expr::Verbatim(ExprVerbatim {
+                    tts: TokenStream::empty(),
                 })),
 
                 method: method,
@@ -2372,10 +2368,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for Index {
         named!(parse -> Self, do_parse!(
-            lit: syn!(Lit) >>
+            lit: syn!(LitInt) >>
             ({
-                if let Ok(i) = lit.value.to_string().parse() {
-                    Index { index: i, span: lit.span }
+                if let IntSuffix::None = lit.suffix() {
+                    Index { index: lit.value() as u32, span: lit.span }
                 } else {
                     return parse_error();
                 }

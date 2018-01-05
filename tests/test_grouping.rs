@@ -3,7 +3,7 @@
 
 #[macro_use]
 extern crate syn;
-use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprLit, Lit, LitKind};
+use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprLit, Lit};
 use syn::token::Group;
 
 extern crate proc_macro2;
@@ -28,10 +28,7 @@ fn expr<T: Into<Expr>>(t: T) -> Expr {
 fn lit<T: Into<Literal>>(t: T) -> Expr {
     Expr::Lit(ExprLit {
         attrs: Vec::new(),
-        lit: Lit {
-            value: LitKind::Other(t.into()),
-            span: Span::default(),
-        },
+        lit: Lit::new(t.into(), Span::default()),
     })
 }
 

@@ -95,10 +95,7 @@ impl Attribute {
                     return Some(MetaItem::NameValue(MetaNameValue {
                         ident: *name,
                         eq_token: Token![=]([tts[0].span]),
-                        lit: Lit {
-                            value: LitKind::Other(lit.clone()),
-                            span: tts[1].span,
-                        },
+                        lit: Lit::new(lit.clone(), tts[1].span),
                     }));
                 }
             }
@@ -113,10 +110,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
 
     match tts[0].kind {
         TokenNode::Literal(ref lit) => {
-            let lit = Lit {
-                value: LitKind::Other(lit.clone()),
-                span: tts[0].span,
-            };
+            let lit = Lit::new(lit.clone(), tts[0].span);
             Some((NestedMetaItem::Literal(lit), &tts[1..]))
         }
 
@@ -128,10 +122,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
                         let pair = MetaNameValue {
                             ident: Ident::new(sym.as_str(), tts[0].span),
                             eq_token: Token![=]([tts[1].span]),
-                            lit: Lit {
-                                value: LitKind::Other(lit.clone()),
-                                span: tts[2].span,
-                            },
+                            lit: Lit::new(lit.clone(), tts[2].span),
                         };
                         return Some((MetaItem::NameValue(pair).into(), &tts[3..]));
                     }
@@ -328,7 +319,7 @@ pub mod parsing {
     use cursor::Cursor;
     use parse_error;
     use synom::PResult;
-    use proc_macro2::{Spacing, Span, TokenNode, TokenTree};
+    use proc_macro2::{Spacing, Span, TokenNode, TokenTree, Literal};
 
     fn eq(span: Span) -> TokenTree {
         TokenTree {
@@ -441,7 +432,7 @@ pub mod parsing {
                     Ok((
                         TokenTree {
                             span: span,
-                            kind: TokenNode::Literal(lit),
+                            kind: TokenNode::Literal(Literal::string(&string)),
                         },
                         rest,
                     ))
@@ -458,6 +449,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use quote::{ToTokens, Tokens};
+    use proc_macro2::Literal;
 
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut Tokens) {
@@ -465,9 +457,11 @@ mod printing {
             if self.is_sugared_doc {
                 if let Some(MetaItem::NameValue(ref pair)) = self.meta_item() {
                     if pair.ident == "doc" {
-                        let value = pair.lit.value.to_string();
-                        if value.starts_with('/') {
-                            pair.lit.to_tokens(tokens);
+                        if let Lit::Str(ref comment) = pair.lit {
+                            tokens.append(TokenTree {
+                                span: comment.span,
+                                kind: TokenNode::Literal(Literal::doccomment(&comment.value())),
+                            });
                             return;
                         }
                     }
@@ -480,7 +474,7 @@ mod printing {
             }
             self.bracket_token.surround(tokens, |tokens| {
                 self.path.to_tokens(tokens);
-                tokens.append_all(&self.tts.clone().into_iter().collect::<Vec<_>>());
+                self.tts.to_tokens(tokens);
             });
         }
     }

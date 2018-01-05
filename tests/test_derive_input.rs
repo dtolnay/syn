@@ -188,7 +188,7 @@ fn test_enum() {
                 path: "doc".into(),
                 tts: TokenStream::from_iter(vec![
                     op('='),
-                    lit(Literal::doccomment(
+                    lit(Literal::string(
                         "/// See the std::result module documentation for details.",
                     )),
                 ]),
@@ -276,10 +276,7 @@ fn test_enum() {
                         Default::default(),
                         Expr::Lit(ExprLit {
                             attrs: Vec::new(),
-                            lit: Lit {
-                                value: LitKind::Other(Literal::isize(0)),
-                                span: Default::default(),
-                            },
+                            lit: Lit::Int(LitInt::new(0, IntSuffix::Isize, Default::default())),
                         }),
                     )),
                 },
@@ -297,17 +294,11 @@ fn test_enum() {
                                 elems: punctuated![
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
-                                        lit: Lit {
-                                            value: LitKind::Other(Literal::integer(0)),
-                                            span: Default::default(),
-                                        },
+                                        lit: Lit::Int(LitInt::new(0, IntSuffix::None, Default::default())),
                                     }),
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
-                                        lit: Lit {
-                                            value: LitKind::Other(Literal::string("data")),
-                                            span: Default::default(),
-                                        },
+                                        lit: Lit::Str(LitStr::new("data", Default::default())),
                                     }),
                                 ],
                             })),
@@ -333,12 +324,10 @@ fn test_enum() {
         MetaNameValue {
             ident: "doc".into(),
             eq_token: Default::default(),
-            lit: Lit {
-                value: LitKind::Other(Literal::doccomment(
-                    "/// See the std::result module documentation for details.",
-                )),
-                span: Default::default(),
-            },
+            lit: Lit::Str(LitStr::new(
+                "/// See the std::result module documentation for details.",
+                Default::default(),
+            )),
         }.into(),
         MetaItem::Term("must_use".into()),
     ];

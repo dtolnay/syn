@@ -44,7 +44,7 @@ macro_rules! ast_struct {
 macro_rules! ast_enum {
     (
         $(#[$enum_attr:meta])*
-        pub enum $name:ident { $($variants:tt)* }
+        pub enum $name:ident $(# $tags:ident)* { $($variants:tt)* }
     ) => (
         $(#[$enum_attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -164,7 +164,7 @@ macro_rules! maybe_ast_struct {
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
 }
 
-#[cfg(all(feature = "full", feature = "parsing"))]
+#[cfg(feature = "parsing")]
 macro_rules! impl_synom {
     ($t:ident $description:tt $($parser:tt)+) => {
         impl Synom for $t {

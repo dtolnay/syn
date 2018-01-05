@@ -39,7 +39,7 @@ const VISIT_MUT_SRC: &str = "../src/gen/visit_mut.rs";
 
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 
-const EXTRA_TYPES: &[&str] = &["Ident", "Lifetime", "Lit"];
+const EXTRA_TYPES: &[&str] = &["Ident", "Lifetime"];
 
 const TERMINAL_TYPES: &[&str] = &["Span"];
 
@@ -231,16 +231,35 @@ mod parsing {
         ));
     }
 
+    named!(no_visit -> (), do_parse!(
+        punct!(#) >>
+        id: syn!(Ident) >>
+        cond_reduce!(id == "no_visit", epsilon!()) >>
+        ()
+    ));
+
     // ast_enum! parsing
     pub struct AstEnum(pub Vec<AstItem>);
     impl Synom for AstEnum {
-        named!(parse -> Self, map!(syn!(DeriveInput), |x| {
-            AstEnum(vec![AstItem {
-                ast: x,
-                features: quote!(),
-                eos_full: false,
-            }])
-        }));
+        named!(parse -> Self, do_parse!(
+            many0!(Attribute::parse_outer) >>
+            keyword!(pub) >>
+            keyword!(enum) >>
+            id: syn!(Ident) >>
+            no_visit: option!(no_visit) >>
+            rest: syn!(TokenStream) >>
+            (AstEnum(if no_visit.is_some() {
+                vec![]
+            } else {
+                vec![AstItem {
+                    ast: syn::parse_str(&quote! {
+                        pub enum #id #rest
+                    }.to_string())?,
+                    features: quote!(),
+                    eos_full: false,
+                }]
+            }))
+        ));
     }
 
     // A single variant of an ast_enum_of_structs!
@@ -916,10 +935,14 @@ mod codegen {
         state.visit_mut_impl.push_str("}\n");
         state.fold_impl.push_str("}\n");
 
-        if s.ast.ident == "Ident" || s.ast.ident == "Lifetime" {
-            // Discard the generated impl. These have private fields and are
-            // handwritten.
-            state.fold_impl.truncate(before_fold_impl_len);
+        if let Data::Struct(ref data) = s.ast.data {
+            if let Fields::Named(ref fields) = data.fields {
+                if fields.named.iter().any(|field| field.vis == Visibility::Inherited) {
+                    // Discard the generated impl if there are private fields.
+                    // These have to be handwritten.
+                    state.fold_impl.truncate(before_fold_impl_len);
+                }
+            }
         }
     }
 }
@@ -1008,15 +1031,29 @@ pub trait Folder {{
 {fold_trait}
 }}
 
-pub fn fold_ident<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Ident) -> Ident {{
-    _i.span = _visitor.fold_span(_i.span);
-    _i
+macro_rules! fold_span_only {{
+    ($f:ident : $t:ident) => {{
+        pub fn $f<V: Folder + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {{
+            _i.span = _visitor.fold_span(_i.span);
+            _i
+        }}
+    }}
 }}
 
-pub fn fold_lifetime<V: Folder + ?Sized>(_visitor: &mut V, mut _i: Lifetime) -> Lifetime {{
-    _i.span = _visitor.fold_span(_i.span);
-    _i
-}}
+fold_span_only!(fold_ident: Ident);
+fold_span_only!(fold_lifetime: Lifetime);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
+fold_span_only!(fold_lit_byte: LitByte);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
+fold_span_only!(fold_lit_byte_str: LitByteStr);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
+fold_span_only!(fold_lit_char: LitChar);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
+fold_span_only!(fold_lit_float: LitFloat);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
+fold_span_only!(fold_lit_int: LitInt);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
+fold_span_only!(fold_lit_str: LitStr);
 
 {fold_impl}
 ",
