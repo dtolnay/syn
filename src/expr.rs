@@ -791,9 +791,9 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use ty::parsing::qpath;
+    use path::parsing::qpath;
     #[cfg(feature = "full")]
-    use ty::parsing::ty_no_eq_after;
+    use path::parsing::ty_no_eq_after;
 
     #[cfg(feature = "full")]
     use proc_macro2::TokenStream;

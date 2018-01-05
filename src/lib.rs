@@ -103,13 +103,17 @@ pub use op::{BinOp, UnOp};
 #[cfg(any(feature = "full", feature = "derive"))]
 mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use ty::{Abi, AngleBracketedGenericArguments, BareFnArg, BareFnArgName,
-             Binding, GenericArgument, ParenthesizedGenericArguments, Path,
-             PathArguments, PathSegment, QSelf, ReturnType, Type, TypeArray,
+pub use ty::{Abi, BareFnArg, BareFnArgName, ReturnType, Type, TypeArray,
              TypeBareFn, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
              TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim};
+
+#[cfg(any(feature = "full", feature = "derive"))]
+mod path;
+#[cfg(any(feature = "full", feature = "derive"))]
+pub use path::{Path, PathSegment, PathArguments, GenericArgument, AngleBracketedGenericArguments,
+               Binding, ParenthesizedGenericArguments, QSelf};
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
-pub use ty::PathTokens;
+pub use path::PathTokens;
 
 #[cfg(feature = "parsing")]
 mod cursor;
