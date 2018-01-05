@@ -10,8 +10,10 @@
 #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
 use *;
+#[cfg(any(feature = "full", feature = "derive"))]
 use punctuated::Punctuated;
 use proc_macro2::Span;
+#[cfg(any(feature = "full", feature = "derive"))]
 use gen::helper::visit::*;
 
 
@@ -20,7 +22,7 @@ macro_rules! full {
     ($e:expr) => { $e }
 }
 
-#[cfg(not(feature = "full"))]
+#[cfg(all(feature = "derive", not(feature = "full")))]
 macro_rules! full {
     ($e:expr) => { unreachable!() }
 }
@@ -66,15 +68,15 @@ fn visit_block(&mut self, i: &'ast Block) { visit_block(self, i) }
 fn visit_bound_lifetimes(&mut self, i: &'ast BoundLifetimes) { visit_bound_lifetimes(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_const_param(&mut self, i: &'ast ConstParam) { visit_const_param(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn visit_data(&mut self, i: &'ast Data) { visit_data(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn visit_data_enum(&mut self, i: &'ast DataEnum) { visit_data_enum(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn visit_data_struct(&mut self, i: &'ast DataStruct) { visit_data_struct(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn visit_data_union(&mut self, i: &'ast DataUnion) { visit_data_union(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn visit_derive_input(&mut self, i: &'ast DeriveInput) { visit_derive_input(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr(&mut self, i: &'ast Expr) { visit_expr(self, i) }
@@ -615,7 +617,7 @@ pub fn visit_const_param<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: 
     if let Some(ref it) = _i . eq_token { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . default { _visitor.visit_expr(it) };
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn visit_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Data) {
     match *_i {
         Data::Struct(ref _binding_0, ) => {
@@ -629,24 +631,24 @@ pub fn visit_data<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast D
         }
     }
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn visit_data_enum<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataEnum) {
     tokens_helper(_visitor, &(& _i . enum_token).0);
     tokens_helper(_visitor, &(& _i . brace_token).0);
     for el in Punctuated::elements(& _i . variants) { let it = el.item(); _visitor.visit_variant(it) };
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn visit_data_struct<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataStruct) {
     tokens_helper(_visitor, &(& _i . struct_token).0);
     _visitor.visit_fields(& _i . fields);
     if let Some(ref it) = _i . semi_token { tokens_helper(_visitor, &(it).0) };
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn visit_data_union<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataUnion) {
     tokens_helper(_visitor, &(& _i . union_token).0);
     _visitor.visit_fields_named(& _i . fields);
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn visit_derive_input<'ast, V: Visitor<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DeriveInput) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_visibility(& _i . vis);

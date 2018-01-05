@@ -10,8 +10,10 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
 use *;
+#[cfg(any(feature = "full", feature = "derive"))]
 use token::{Brace, Bracket, Paren, Group};
 use proc_macro2::Span;
+#[cfg(any(feature = "full", feature = "derive"))]
 use gen::helper::fold::*;
 
 
@@ -20,7 +22,7 @@ macro_rules! full {
     ($e:expr) => { $e }
 }
 
-#[cfg(not(feature = "full"))]
+#[cfg(all(feature = "derive", not(feature = "full")))]
 macro_rules! full {
     ($e:expr) => { unreachable!() }
 }
@@ -69,15 +71,15 @@ fn fold_block(&mut self, i: Block) -> Block { fold_block(self, i) }
 fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes { fold_bound_lifetimes(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_const_param(&mut self, i: ConstParam) -> ConstParam { fold_const_param(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn fold_data(&mut self, i: Data) -> Data { fold_data(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn fold_data_enum(&mut self, i: DataEnum) -> DataEnum { fold_data_enum(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn fold_data_struct(&mut self, i: DataStruct) -> DataStruct { fold_data_struct(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn fold_data_union(&mut self, i: DataUnion) -> DataUnion { fold_data_union(self, i) }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 fn fold_derive_input(&mut self, i: DeriveInput) -> DeriveInput { fold_derive_input(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr(&mut self, i: Expr) -> Expr { fold_expr(self, i) }
@@ -432,6 +434,7 @@ macro_rules! fold_span_only {
 }
 
 fold_span_only!(fold_ident: Ident);
+#[cfg(any(feature = "full", feature = "derive"))]
 fold_span_only!(fold_lifetime: Lifetime);
 #[cfg(any(feature = "full", feature = "derive"))]
 fold_span_only!(fold_lit_byte: LitByte);
@@ -728,7 +731,7 @@ pub fn fold_const_param<V: Folder + ?Sized>(_visitor: &mut V, _i: ConstParam) ->
         default: (_i . default).map(|it| { _visitor.fold_expr(it) }),
     }
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn fold_data<V: Folder + ?Sized>(_visitor: &mut V, _i: Data) -> Data {
     match _i {
         Data::Struct(_binding_0, ) => {
@@ -748,7 +751,7 @@ pub fn fold_data<V: Folder + ?Sized>(_visitor: &mut V, _i: Data) -> Data {
         }
     }
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn fold_data_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: DataEnum) -> DataEnum {
     DataEnum {
         enum_token: Token ! [ enum ](tokens_helper(_visitor, &(_i . enum_token).0)),
@@ -756,7 +759,7 @@ pub fn fold_data_enum<V: Folder + ?Sized>(_visitor: &mut V, _i: DataEnum) -> Dat
         variants: FoldHelper::lift(_i . variants, |it| { _visitor.fold_variant(it) }),
     }
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn fold_data_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: DataStruct) -> DataStruct {
     DataStruct {
         struct_token: Token ! [ struct ](tokens_helper(_visitor, &(_i . struct_token).0)),
@@ -764,14 +767,14 @@ pub fn fold_data_struct<V: Folder + ?Sized>(_visitor: &mut V, _i: DataStruct) ->
         semi_token: (_i . semi_token).map(|it| { Token ! [ ; ](tokens_helper(_visitor, &(it).0)) }),
     }
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn fold_data_union<V: Folder + ?Sized>(_visitor: &mut V, _i: DataUnion) -> DataUnion {
     DataUnion {
         union_token: Token ! [ union ](tokens_helper(_visitor, &(_i . union_token).0)),
         fields: _visitor.fold_fields_named(_i . fields),
     }
 }
-# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( feature = "derive" ) ]
 pub fn fold_derive_input<V: Folder + ?Sized>(_visitor: &mut V, _i: DeriveInput) -> DeriveInput {
     DeriveInput {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),

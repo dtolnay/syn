@@ -50,7 +50,7 @@ fn path_eq(a: &syn::Path, b: &syn::Path) -> bool {
     a.segments
         .iter()
         .zip(b.segments.iter())
-        .all(|(a, b)| a.ident.as_ref() == b.ident.as_ref())
+        .all(|(a, b)| a.ident == b.ident)
 }
 
 fn get_features(attrs: &[Attribute], mut features: Tokens) -> Tokens {
@@ -106,14 +106,21 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 // We don't want to try to load the generated rust files and
                 // parse them, so we ignore them here.
                 for name in IGNORED_MODS {
-                    if item.ident.as_ref() == *name {
+                    if item.ident == name {
                         continue 'items;
                     }
                 }
 
                 // Lookup any #[cfg()] attributes on the module and add them to
                 // the feature set.
-                let features = get_features(&item.attrs, features.clone());
+                //
+                // The derive module is weird because it is built with either
+                // `full` or `derive` but exported only under `derive`.
+                let features = if item.ident == "derive" {
+                    quote!(#[cfg(feature = "derive")])
+                } else {
+                    get_features(&item.attrs, features.clone())
+                };
 
                 // Look up the submodule file, and recursively parse it.
                 // XXX: Only handles same-directory .rs file submodules.
@@ -987,7 +994,7 @@ macro_rules! full {
     ($e:expr) => { $e }
 }
 
-#[cfg(not(feature = \"full\"))]
+#[cfg(all(feature = \"derive\", not(feature = \"full\")))]
 macro_rules! full {
     ($e:expr) => { unreachable!() }
 }
@@ -1009,8 +1016,10 @@ macro_rules! full {
 #![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
 
 use *;
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use token::{{Brace, Bracket, Paren, Group}};
 use proc_macro2::Span;
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::fold::*;
 
 {full_macro}
@@ -1041,6 +1050,7 @@ macro_rules! fold_span_only {{
 }}
 
 fold_span_only!(fold_ident: Ident);
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 fold_span_only!(fold_lifetime: Lifetime);
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 fold_span_only!(fold_lit_byte: LitByte);
@@ -1078,8 +1088,10 @@ fold_span_only!(fold_lit_str: LitStr);
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
 use proc_macro2::Span;
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::visit::*;
 
 {full_macro}
@@ -1120,8 +1132,10 @@ pub trait Visitor<'ast> {{
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
 use *;
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
 use proc_macro2::Span;
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::visit_mut::*;
 
 {full_macro}

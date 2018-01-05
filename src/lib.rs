@@ -136,6 +136,7 @@ mod gen {
     #[cfg(feature = "fold")]
     pub mod fold;
 
+    #[cfg(any(feature = "full", feature = "derive"))]
     #[path = "../gen_helper.rs"]
     mod helper;
 }
