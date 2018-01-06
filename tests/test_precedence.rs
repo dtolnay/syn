@@ -297,13 +297,13 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to
-/// reveal the precidence of the parsed expressions, and produce a stringified form
+/// reveal the precedence of the parsed expressions, and produce a stringified form
 /// of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::*;
     use syn::fold::*;
 
-    fn paren(folder: &mut BracketsFolder, mut node: Expr) -> Expr {
+    fn paren(folder: &mut ParenthesizeEveryExpr, mut node: Expr) -> Expr {
         let attrs = node.replace_attrs(Vec::new());
         Expr::Paren(ExprParen {
             attrs: attrs,
@@ -312,8 +312,8 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         })
     }
 
-    struct BracketsFolder;
-    impl Folder for BracketsFolder {
+    struct ParenthesizeEveryExpr;
+    impl Fold for ParenthesizeEveryExpr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             match expr {
                 Expr::Group(_) => unreachable!(),
@@ -346,7 +346,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         }
     }
 
-    let mut folder = BracketsFolder;
+    let mut folder = ParenthesizeEveryExpr;
     folder.fold_expr(syn_expr)
 }
 
@@ -356,8 +356,8 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
     use syn::fold::*;
     use syn::punctuated::Punctuated;
 
-    struct CollectExprsFolder(Vec<Expr>);
-    impl Folder for CollectExprsFolder {
+    struct CollectExprs(Vec<Expr>);
+    impl Fold for CollectExprs {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             self.0.push(expr);
 
@@ -369,7 +369,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
         }
     }
 
-    let mut folder = CollectExprsFolder(vec![]);
+    let mut folder = CollectExprs(vec![]);
     folder.fold_file(file);
     folder.0
 }
