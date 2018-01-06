@@ -73,7 +73,7 @@ impl Attribute {
     /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
     pub fn meta_item(&self) -> Option<MetaItem> {
         let name = if self.path.segments.len() == 1 {
-            &self.path.segments.first().unwrap().item().ident
+            &self.path.segments.first().unwrap().value().ident
         } else {
             return None;
         };
@@ -189,7 +189,7 @@ fn list_of_nested_meta_items_from_tokens(
         if let Some(comma) = prev_comma {
             nested_meta_items.push_punct(comma);
         }
-        nested_meta_items.push_item(nested);
+        nested_meta_items.push_value(nested);
         tts = rest;
     }
 

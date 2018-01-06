@@ -8,7 +8,7 @@
 
 #[cfg(feature = "fold")]
 pub mod fold {
-    use punctuated::{Element, Punctuated};
+    use punctuated::{Pair, Punctuated};
     use fold::Fold;
     use proc_macro2::Span;
 
@@ -35,9 +35,9 @@ pub mod fold {
         where
             F: FnMut(Self::Item) -> Self::Item,
         {
-            self.into_elements()
-                .map(Element::into_tuple)
-                .map(|(t, u)| Element::new(f(t), u))
+            self.into_pairs()
+                .map(Pair::into_tuple)
+                .map(|(t, u)| Pair::new(f(t), u))
                 .collect()
         }
     }

@@ -2543,7 +2543,7 @@ pub mod parsing {
                         if before.empty_or_trailing() {
                             None
                         } else {
-                            Some(Box::new(before.pop().unwrap().into_item()))
+                            Some(Box::new(before.pop().unwrap().into_value()))
                         }
                     }),
                     front: before,
@@ -2865,8 +2865,8 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
-            for input in self.inputs.elements() {
-                match **input.item() {
+            for input in self.inputs.pairs() {
+                match **input.value() {
                     FnArg::Captured(ArgCaptured {
                         ref pat,
                         ty: Type::Infer(_),
@@ -2874,7 +2874,7 @@ mod printing {
                     }) => {
                         pat.to_tokens(tokens);
                     }
-                    _ => input.item().to_tokens(tokens),
+                    _ => input.value().to_tokens(tokens),
                 }
                 input.punct().to_tokens(tokens);
             }

@@ -660,14 +660,14 @@ pub mod parsing {
             false => alt!(
                 tuple!(keyword!(as), syn!(Ident)) => {
                     |rename| UseTree::Path(UsePath {
-                        ident: prefix.pop().unwrap().into_item(),
+                        ident: prefix.pop().unwrap().into_value(),
                         rename: Some(rename),
                     })
                 }
                 |
                 epsilon!() => {
                     |_| UseTree::Path(UsePath {
-                        ident: prefix.pop().unwrap().into_item(),
+                        ident: prefix.pop().unwrap().into_value(),
                         rename: None,
                     })
                 }

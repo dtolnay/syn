@@ -213,7 +213,7 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use punctuated::Element;
+    use punctuated::Pair;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(
@@ -233,13 +233,13 @@ pub mod parsing {
             ),
             |(lifetimes, ty_params, lt, gt)| Generics {
                 lt_token: lt,
-                params: lifetimes.into_elements()
-                    .map(Element::into_tuple)
-                    .map(|(life, comma)| Element::new(GenericParam::Lifetime(life), comma))
+                params: lifetimes.into_pairs()
+                    .map(Pair::into_tuple)
+                    .map(|(life, comma)| Pair::new(GenericParam::Lifetime(life), comma))
                     .chain(ty_params.unwrap_or_default()
-                        .into_elements()
-                        .map(Element::into_tuple)
-                        .map(|(ty, comma)| Element::new(GenericParam::Type(ty), comma)))
+                        .into_pairs()
+                        .map(Pair::into_tuple)
+                        .map(|(ty, comma)| Pair::new(GenericParam::Type(ty), comma)))
                     .collect(),
                 gt_token: gt,
                 where_clause: None,
@@ -341,13 +341,13 @@ pub mod parsing {
             lifetimes: option!(syn!(BoundLifetimes)) >>
             mut path: syn!(Path) >>
             parenthesized: option!(cond_reduce!(
-                path.segments.last().unwrap().item().arguments.is_empty(),
+                path.segments.last().unwrap().value().arguments.is_empty(),
                 syn!(ParenthesizedGenericArguments)
             )) >>
             ({
                 if let Some(parenthesized) = parenthesized {
                     let parenthesized = PathArguments::Parenthesized(parenthesized);
-                    path.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
+                    path.segments.last_mut().unwrap().value_mut().arguments = parenthesized;
                 }
                 TraitBound {
                     modifier: modifier,
@@ -485,8 +485,8 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            for param in self.0.params.elements() {
-                match **param.item() {
+            for param in self.0.params.pairs() {
+                match **param.value() {
                     GenericParam::Lifetime(ref param) => {
                         param.to_tokens(tokens);
                     }
@@ -521,8 +521,8 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            for param in self.0.params.elements() {
-                match **param.item() {
+            for param in self.0.params.pairs() {
+                match **param.value() {
                     GenericParam::Lifetime(ref param) => {
                         // Leave off the lifetime bounds and attributes
                         param.lifetime.to_tokens(tokens);

@@ -31,26 +31,26 @@ impl<T, P> Punctuated<T, P> {
         self.inner.len()
     }
 
-    pub fn first(&self) -> Option<Element<&T, &P>> {
+    pub fn first(&self) -> Option<Pair<&T, &P>> {
         self.inner.first().map(|&(ref t, ref d)| match *d {
-            Some(ref d) => Element::Punctuated(t, d),
-            None => Element::End(t),
+            Some(ref d) => Pair::Punctuated(t, d),
+            None => Pair::End(t),
         })
     }
 
-    pub fn last(&self) -> Option<Element<&T, &P>> {
+    pub fn last(&self) -> Option<Pair<&T, &P>> {
         self.inner.last().map(|&(ref t, ref d)| match *d {
-            Some(ref d) => Element::Punctuated(t, d),
-            None => Element::End(t),
+            Some(ref d) => Pair::Punctuated(t, d),
+            None => Pair::End(t),
         })
     }
 
-    pub fn last_mut(&mut self) -> Option<Element<&mut T, &mut P>> {
+    pub fn last_mut(&mut self) -> Option<Pair<&mut T, &mut P>> {
         self.inner
             .last_mut()
             .map(|&mut (ref mut t, ref mut d)| match *d {
-                Some(ref mut d) => Element::Punctuated(t, d),
-                None => Element::End(t),
+                Some(ref mut d) => Pair::Punctuated(t, d),
+                None => Pair::End(t),
             })
     }
 
@@ -66,27 +66,27 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
-    pub fn elements(&self) -> Elements<T, P> {
-        Elements {
+    pub fn pairs(&self) -> Pairs<T, P> {
+        Pairs {
             inner: self.inner.iter(),
         }
     }
 
-    pub fn elements_mut(&mut self) -> ElementsMut<T, P> {
-        ElementsMut {
+    pub fn pairs_mut(&mut self) -> PairsMut<T, P> {
+        PairsMut {
             inner: self.inner.iter_mut(),
         }
     }
 
-    pub fn into_elements(self) -> IntoElements<T, P> {
-        IntoElements {
+    pub fn into_pairs(self) -> IntoPairs<T, P> {
+        IntoPairs {
             inner: self.inner.into_iter(),
         }
     }
 
-    pub fn push_item(&mut self, item: T) {
+    pub fn push_value(&mut self, value: T) {
         assert!(self.empty_or_trailing());
-        self.inner.push((item, None));
+        self.inner.push((value, None));
     }
 
     pub fn push_punct(&mut self, punctuation: P) {
@@ -96,8 +96,8 @@ impl<T, P> Punctuated<T, P> {
         last.1 = Some(punctuation);
     }
 
-    pub fn pop(&mut self) -> Option<Element<T, P>> {
-        self.inner.pop().map(|(t, d)| Element::new(t, d))
+    pub fn pop(&mut self) -> Option<Pair<T, P>> {
+        self.inner.pop().map(|(t, d)| Pair::new(t, d))
     }
 
     pub fn trailing_punct(&self) -> bool {
@@ -123,11 +123,11 @@ impl<T, P> Punctuated<T, P>
 where
     P: Default,
 {
-    pub fn push(&mut self, item: T) {
+    pub fn push(&mut self, value: T) {
         if !self.empty_or_trailing() {
             self.push_punct(Default::default());
         }
-        self.push_item(item);
+        self.push_value(value);
     }
 }
 
@@ -138,20 +138,20 @@ impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     }
 }
 
-impl<T, P> FromIterator<Element<T, P>> for Punctuated<T, P> {
-    fn from_iter<I: IntoIterator<Item = Element<T, P>>>(i: I) -> Self {
+impl<T, P> FromIterator<Pair<T, P>> for Punctuated<T, P> {
+    fn from_iter<I: IntoIterator<Item = Pair<T, P>>>(i: I) -> Self {
         let mut ret = Punctuated::new();
         ret.extend(i);
         ret
     }
 }
 
-impl<T, P> Extend<Element<T, P>> for Punctuated<T, P> {
-    fn extend<I: IntoIterator<Item = Element<T, P>>>(&mut self, i: I) {
-        for elem in i {
-            match elem {
-                Element::Punctuated(a, b) => self.inner.push((a, Some(b))),
-                Element::End(a) => self.inner.push((a, None)),
+impl<T, P> Extend<Pair<T, P>> for Punctuated<T, P> {
+    fn extend<I: IntoIterator<Item = Pair<T, P>>>(&mut self, i: I) {
+        for pair in i {
+            match pair {
+                Pair::Punctuated(a, b) => self.inner.push((a, Some(b))),
+                Pair::End(a) => self.inner.push((a, None)),
             }
         }
     }
@@ -192,47 +192,47 @@ impl<T, P> Default for Punctuated<T, P> {
     }
 }
 
-pub struct Elements<'a, T: 'a, P: 'a> {
+pub struct Pairs<'a, T: 'a, P: 'a> {
     inner: slice::Iter<'a, (T, Option<P>)>,
 }
 
-impl<'a, T, P> Iterator for Elements<'a, T, P> {
-    type Item = Element<&'a T, &'a P>;
+impl<'a, T, P> Iterator for Pairs<'a, T, P> {
+    type Item = Pair<&'a T, &'a P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|pair| match pair.1 {
-            Some(ref p) => Element::Punctuated(&pair.0, p),
-            None => Element::End(&pair.0),
+            Some(ref p) => Pair::Punctuated(&pair.0, p),
+            None => Pair::End(&pair.0),
         })
     }
 }
 
-pub struct ElementsMut<'a, T: 'a, P: 'a> {
+pub struct PairsMut<'a, T: 'a, P: 'a> {
     inner: slice::IterMut<'a, (T, Option<P>)>,
 }
 
-impl<'a, T, P> Iterator for ElementsMut<'a, T, P> {
-    type Item = Element<&'a mut T, &'a mut P>;
+impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
+    type Item = Pair<&'a mut T, &'a mut P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|pair| match pair.1 {
-            Some(ref mut p) => Element::Punctuated(&mut pair.0, p),
-            None => Element::End(&mut pair.0),
+            Some(ref mut p) => Pair::Punctuated(&mut pair.0, p),
+            None => Pair::End(&mut pair.0),
         })
     }
 }
 
-pub struct IntoElements<T, P> {
+pub struct IntoPairs<T, P> {
     inner: vec::IntoIter<(T, Option<P>)>,
 }
 
-impl<T, P> Iterator for IntoElements<T, P> {
-    type Item = Element<T, P>;
+impl<T, P> Iterator for IntoPairs<T, P> {
+    type Item = Pair<T, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|pair| match pair.1 {
-            Some(p) => Element::Punctuated(pair.0, p),
-            None => Element::End(pair.0),
+            Some(p) => Pair::Punctuated(pair.0, p),
+            None => Pair::End(pair.0),
         })
     }
 }
@@ -273,48 +273,48 @@ impl<'a, T, P> Iterator for IterMut<'a, T, P> {
     }
 }
 
-pub enum Element<T, P> {
+pub enum Pair<T, P> {
     Punctuated(T, P),
     End(T),
 }
 
-impl<T, P> Element<T, P> {
-    pub fn into_item(self) -> T {
+impl<T, P> Pair<T, P> {
+    pub fn into_value(self) -> T {
         match self {
-            Element::Punctuated(t, _) | Element::End(t) => t,
+            Pair::Punctuated(t, _) | Pair::End(t) => t,
         }
     }
 
-    pub fn item(&self) -> &T {
+    pub fn value(&self) -> &T {
         match *self {
-            Element::Punctuated(ref t, _) | Element::End(ref t) => t,
+            Pair::Punctuated(ref t, _) | Pair::End(ref t) => t,
         }
     }
 
-    pub fn item_mut(&mut self) -> &mut T {
+    pub fn value_mut(&mut self) -> &mut T {
         match *self {
-            Element::Punctuated(ref mut t, _) | Element::End(ref mut t) => t,
+            Pair::Punctuated(ref mut t, _) | Pair::End(ref mut t) => t,
         }
     }
 
     pub fn punct(&self) -> Option<&P> {
         match *self {
-            Element::Punctuated(_, ref d) => Some(d),
-            Element::End(_) => None,
+            Pair::Punctuated(_, ref d) => Some(d),
+            Pair::End(_) => None,
         }
     }
 
     pub fn new(t: T, d: Option<P>) -> Self {
         match d {
-            Some(d) => Element::Punctuated(t, d),
-            None => Element::End(t),
+            Some(d) => Pair::Punctuated(t, d),
+            None => Pair::End(t),
         }
     }
 
     pub fn into_tuple(self) -> (T, Option<P>) {
         match self {
-            Element::Punctuated(t, d) => (t, Some(d)),
-            Element::End(t) => (t, None),
+            Pair::Punctuated(t, d) => (t, Some(d)),
+            Pair::End(t) => (t, None),
         }
     }
 }
@@ -402,7 +402,7 @@ mod parsing {
                         return parse_error();
                     }
                     input = i;
-                    res.push_item(o);
+                    res.push_value(o);
 
                     // get the separator first
                     while let Ok((s, i2)) = P::parse(input) {
@@ -416,7 +416,7 @@ mod parsing {
                                 break;
                             }
                             res.push_punct(s);
-                            res.push_item(o3);
+                            res.push_value(o3);
                             input = i3;
                         } else {
                             break;
@@ -446,22 +446,22 @@ mod printing {
         P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append_all(self.elements())
+            tokens.append_all(self.pairs())
         }
     }
 
-    impl<T, P> ToTokens for Element<T, P>
+    impl<T, P> ToTokens for Pair<T, P>
     where
         T: ToTokens,
         P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
-                Element::Punctuated(ref a, ref b) => {
+                Pair::Punctuated(ref a, ref b) => {
                     a.to_tokens(tokens);
                     b.to_tokens(tokens);
                 }
-                Element::End(ref a) => a.to_tokens(tokens),
+                Pair::End(ref a) => a.to_tokens(tokens),
             }
         }
     }

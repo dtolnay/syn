@@ -45,7 +45,7 @@ where
             leading_colon: None,
             segments: Punctuated::new(),
         };
-        path.segments.push_item(segment.into());
+        path.segments.push_value(segment.into());
         path
     }
 }
@@ -189,7 +189,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             colon: option!(punct!(::)) >>
             segments: call!(Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty) >>
-            cond_reduce!(segments.first().map_or(true, |seg| seg.item().ident != "dyn"), epsilon!()) >>
+            cond_reduce!(segments.first().map_or(true, |seg| seg.value().ident != "dyn"), epsilon!()) >>
             (Path {
                 leading_colon: colon,
                 segments: segments,
@@ -341,7 +341,7 @@ pub mod parsing {
                     Some((as_, mut path)) => {
                         let pos = path.segments.len();
                         path.segments.push_punct(colon2);
-                        path.segments.extend(rest.into_elements());
+                        path.segments.extend(rest.into_pairs());
                         (pos, Some(as_), path)
                     }
                     None => {

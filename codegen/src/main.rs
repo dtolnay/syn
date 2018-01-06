@@ -365,7 +365,7 @@ mod codegen {
     fn classify<'a>(ty: &'a Type, lookup: &'a Lookup) -> RelevantType<'a> {
         match *ty {
             Type::Path(TypePath { qself: None, ref path }) => {
-                let last = path.segments.last().unwrap().into_item();
+                let last = path.segments.last().unwrap().into_value();
                 match last.ident.as_ref() {
                     "Box" => RelevantType::Box(first_arg(&last.arguments)),
                     "Vec" => RelevantType::Vec(first_arg(&last.arguments)),
@@ -386,7 +386,7 @@ mod codegen {
             Type::Tuple(TypeTuple { ref elems, .. }) => {
                 RelevantType::Tuple(elems)
             }
-            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_item().ident == "Token" => {
+            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident == "Token" => {
                 RelevantType::Token(mac.into_tokens())
             }
             _ => RelevantType::Pass,
@@ -452,7 +452,7 @@ mod codegen {
         match **data.args
             .first()
             .expect("Expected at least 1 type argument here")
-            .item()
+            .value()
         {
             GenericArgument::Type(ref ty) => ty,
             _ => panic!("Expected at least 1 type argument here"),
@@ -545,8 +545,8 @@ mod codegen {
         Some(match kind {
             Visit => {
                 format!(
-                    "for el in Punctuated::elements({name}) {{ \
-                        let it = el.item(); \
+                    "for el in Punctuated::pairs({name}) {{ \
+                        let it = el.value(); \
                         {val} \
                         }}",
                     name = name.ref_tokens(),
@@ -555,8 +555,8 @@ mod codegen {
             }
             VisitMut => {
                 format!(
-                    "for mut el in Punctuated::elements_mut({name}) {{ \
-                        let it = el.item_mut(); \
+                    "for mut el in Punctuated::pairs_mut({name}) {{ \
+                        let it = el.value_mut(); \
                         {val} \
                         }}",
                     name = name.ref_mut_tokens(),

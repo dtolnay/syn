@@ -382,7 +382,7 @@ pub mod parsing {
         named!(parse(allow_plus: bool) -> Self, do_parse!(
             qpath: qpath >>
             parenthesized: option!(cond_reduce!(
-                qpath.1.segments.last().unwrap().item().arguments.is_empty(),
+                qpath.1.segments.last().unwrap().value().arguments.is_empty(),
                 syn!(ParenthesizedGenericArguments)
             )) >>
             cond!(allow_plus, not!(punct!(+))) >>
@@ -390,7 +390,7 @@ pub mod parsing {
                 let (qself, mut path) = qpath;
                 if let Some(parenthesized) = parenthesized {
                     let parenthesized = PathArguments::Parenthesized(parenthesized);
-                    path.segments.last_mut().unwrap().item_mut().arguments = parenthesized;
+                    path.segments.last_mut().unwrap().value_mut().arguments = parenthesized;
                 }
                 TypePath { qself: qself, path: path }
             })
@@ -432,7 +432,7 @@ pub mod parsing {
                 |
                 syn!(TypeParamBound) => {|x| {
                     let mut bounds = Punctuated::new();
-                    bounds.push_item(x);
+                    bounds.push_value(x);
                     bounds
                 }}
             ) >>
@@ -634,13 +634,13 @@ mod printing {
             } else {
                 qself.position
             };
-            let mut segments = self.1.segments.elements();
+            let mut segments = self.1.segments.pairs();
             if pos > 0 {
                 TokensOrDefault(&qself.as_token).to_tokens(tokens);
                 self.1.leading_colon.to_tokens(tokens);
                 for (i, segment) in segments.by_ref().take(pos).enumerate() {
                     if i + 1 == pos {
-                        segment.item().to_tokens(tokens);
+                        segment.value().to_tokens(tokens);
                         qself.gt_token.to_tokens(tokens);
                         segment.punct().to_tokens(tokens);
                     } else {
