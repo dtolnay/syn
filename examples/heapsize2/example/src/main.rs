@@ -26,20 +26,6 @@ struct HeapSize {
     e: String,
 }
 
-// Try to trip up the custom derive by having an inherent method with the same
-// name as the trait method. The `impl HeapSize for Demo` is going to generate
-// an expression that calls `self.d.heap_size_of_children()`. Ordinarily
-// inherent methods take precedence over trait methods, so an unhygienic macro
-// implementation would resolve to this method. Instead the call in the
-// generated code resolves correctly to the `HeapSize` trait method because that
-// is what is in scope within the macro definition.
-impl HeapSize {
-    #[allow(dead_code)]
-    fn heap_size_of_children(&self) -> usize {
-        unimplemented!()
-    }
-}
-
 fn main() {
     extern crate heapsize;
 

@@ -38,11 +38,11 @@ With just a bit of work, as shown in the `heapsize_derive` implementation here,
 we can improve this error to point out exactly which field is not right.
 
 ```
-error[E0599]: no method named `heap_size_of_children` found for type `std::thread::Thread` in the current scope
+error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
  --> src/main.rs:7:5
   |
 7 |     bad: std::thread::Thread,
-  |     ^^^
+  |     ^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
 ```
 
 Some unstable APIs in the `proc-macro2` crate let us improve this further by
@@ -53,9 +53,9 @@ and building with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo build` is
 able to show errors like the following.
 
 ```
-error[E0599]: no method named `heap_size_of_children` found for type `std::thread::Thread` in the current scope
+error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
  --> src/main.rs:7:5
   |
 7 |     bad: std::thread::Thread,
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
 ```
