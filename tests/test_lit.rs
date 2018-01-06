@@ -173,6 +173,7 @@ fn ints() {
 
 #[test]
 fn floats() {
+    #[cfg_attr(feature = "cargo-clippy", allow(float_cmp))]
     fn test_float(s: &str, value: f64, suffix: FloatSuffix) {
         match lit(s) {
             Lit::Float(lit) => {

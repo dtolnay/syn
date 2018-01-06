@@ -539,6 +539,9 @@ mod value {
         }
     }
 
+    // Clippy false positive
+    // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
+    #[cfg_attr(feature = "cargo-clippy", allow(needless_continue))]
     fn parse_lit_str_cooked(mut s: &str) -> String {
         assert_eq!(byte(s, 0), b'"');
         s = &s[1..];
@@ -555,10 +558,10 @@ mod value {
                             let (byte, rest) = backslash_x(s);
                             s = rest;
                             assert!(byte <= 0x80, "Invalid \\x byte in string literal");
-                            char::from_u32(byte as u32).unwrap()
+                            char::from_u32(u32::from(byte)).unwrap()
                         }
                         b'u' => {
-                            let (chr, rest) = backslash_u(&s);
+                            let (chr, rest) = backslash_u(s);
                             s = rest;
                             chr
                         }
@@ -624,6 +627,9 @@ mod value {
         }
     }
 
+    // Clippy false positive
+    // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
+    #[cfg_attr(feature = "cargo-clippy", allow(needless_continue))]
     fn parse_lit_byte_str_cooked(mut s: &str) -> Vec<u8> {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'"');
@@ -654,7 +660,7 @@ mod value {
                         b'"' => b'"',
                         b'\r' | b'\n' => loop {
                             let byte = byte(s, 0);
-                            let ch = char::from_u32(byte as u32).unwrap();
+                            let ch = char::from_u32(u32::from(byte)).unwrap();
                             if ch.is_whitespace() {
                                 s = &s[1..];
                             } else {
@@ -736,7 +742,7 @@ mod value {
                         let (byte, rest) = backslash_x(s);
                         s = rest;
                         assert!(byte <= 0x80, "Invalid \\x byte in string literal");
-                        char::from_u32(byte as u32).unwrap()
+                        char::from_u32(u32::from(byte)).unwrap()
                     }
                     b'u' => {
                         let (chr, rest) = backslash_u(s);
@@ -776,7 +782,7 @@ mod value {
             b'A'...b'F' => 10 + (b0 - b'A'),
             _ => panic!("unexpected non-hex character after \\x"),
         };
-        ch += 0x1 * match b1 {
+        ch += match b1 {
             b'0'...b'9' => b1 - b'0',
             b'a'...b'f' => 10 + (b1 - b'a'),
             b'A'...b'F' => 10 + (b1 - b'A'),
@@ -797,17 +803,17 @@ mod value {
             match b {
                 b'0'...b'9' => {
                     ch *= 0x10;
-                    ch += (b - b'0') as u32;
+                    ch += u32::from(b - b'0');
                     s = &s[1..];
                 }
                 b'a'...b'f' => {
                     ch *= 0x10;
-                    ch += (10 + b - b'a') as u32;
+                    ch += u32::from(10 + b - b'a');
                     s = &s[1..];
                 }
                 b'A'...b'F' => {
                     ch *= 0x10;
-                    ch += (10 + b - b'A') as u32;
+                    ch += u32::from(10 + b - b'A');
                     s = &s[1..];
                 }
                 b'}' => break,
@@ -846,9 +852,9 @@ mod value {
         loop {
             let b = byte(s, 0);
             let digit = match b {
-                b'0'...b'9' => (b - b'0') as u64,
-                b'a'...b'f' if base > 10 => 10 + (b - b'a') as u64,
-                b'A'...b'F' if base > 10 => 10 + (b - b'A') as u64,
+                b'0'...b'9' => u64::from(b - b'0'),
+                b'a'...b'f' if base > 10 => 10 + u64::from(b - b'a'),
+                b'A'...b'F' if base > 10 => 10 + u64::from(b - b'A'),
                 b'_' => {
                     s = &s[1..];
                     continue;
@@ -887,7 +893,8 @@ mod value {
         for read in 0..bytes.len() {
             if bytes[read] == b'_' {
                 continue; // Don't increase write
-            } else if write != read {
+            }
+            if write != read {
                 let x = bytes[read];
                 bytes[write] = x;
             }
@@ -895,7 +902,7 @@ mod value {
         }
         bytes.truncate(write);
         let input = String::from_utf8(bytes).unwrap();
-        let end = input.find('f').unwrap_or(input.len());
+        let end = input.find('f').unwrap_or_else(|| input.len());
         input[..end].parse().unwrap()
     }
 

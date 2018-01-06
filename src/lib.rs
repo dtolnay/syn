@@ -9,7 +9,7 @@
 #![doc(html_root_url = "https://dtolnay.github.io/syn")]
 #![cfg_attr(feature = "cargo-clippy",
             allow(const_static_lifetime, doc_markdown, large_enum_variant, match_bool,
-                  redundant_closure))]
+                  redundant_closure, needless_pass_by_value))]
 
 extern crate proc_macro2;
 extern crate proc_macro;

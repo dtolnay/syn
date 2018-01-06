@@ -307,10 +307,10 @@ impl<'a> Cursor<'a> {
     /// cursor points to eof.
     pub fn span(self) -> Span {
         match *self.entry() {
-            Entry::Group(span, ..) => span,
-            Entry::Literal(span, ..) => span,
-            Entry::Term(span, ..) => span,
-            Entry::Op(span, ..) => span,
+            Entry::Group(span, ..)
+            | Entry::Literal(span, ..)
+            | Entry::Term(span, ..)
+            | Entry::Op(span, ..) => span,
             Entry::End(..) => Span::call_site(),
         }
     }
