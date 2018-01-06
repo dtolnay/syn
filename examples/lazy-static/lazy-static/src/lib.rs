@@ -96,7 +96,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //     10 |     static ref PTR: *const () = &();
     //        |                     ^^^^^^^^^ `*const ()` cannot be shared between threads safely
     let ty_span = ty.span().resolved_at(def_site);
-    let assert_sync = quote_spanned! {ty_span,
+    let assert_sync = quote_spanned! {ty_span=>
         struct _AssertSync where #ty: Sync;
     };
 
@@ -109,12 +109,12 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //        |
     //     10 |     static ref A: str = "";
     //        |                   ^^^ `str` does not have a constant size known at compile-time
-    let assert_sized = quote_spanned! {ty_span,
+    let assert_sized = quote_spanned! {ty_span=>
         struct _AssertSized where #ty: Sized;
     };
 
     let init_span = init.span().resolved_at(def_site);
-    let init_ptr = quote_spanned! {init_span,
+    let init_ptr = quote_spanned! {init_span=>
         Box::into_raw(Box::new(#init))
     };
 

@@ -82,9 +82,9 @@ fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
                     // readme of the parent directory.
                     let recurse = fields.named.iter().map(|f| {
                         let name = f.ident;
-                        let access = quote_spanned!(call_site, #var.#name);
+                        let access = quote_spanned!(call_site=> #var.#name);
                         let span = f.span().resolved_at(def_site);
-                        quote_spanned! {span,
+                        quote_spanned! {span=>
                             HeapSize::heap_size_of_children(&#access)
                         }
                     });
@@ -98,9 +98,9 @@ fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
                     //     0 + HeapSize::heap_size(&self.0) + HeapSize::heap_size(&self.1)
                     let recurse = fields.unnamed.iter().enumerate().map(|(i, f)| {
                         let index = Index { index: i as u32, span: call_site };
-                        let access = quote_spanned!(call_site, #var.#index);
+                        let access = quote_spanned!(call_site=> #var.#index);
                         let span = f.span().resolved_at(def_site);
-                        quote_spanned! {span,
+                        quote_spanned! {span=>
                             HeapSize::heap_size_of_children(&#access)
                         }
                     });
