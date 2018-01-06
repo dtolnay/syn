@@ -123,7 +123,7 @@ pub mod visit {
     }
 }
 
-#[cfg(feature = "visit_mut")]
+#[cfg(feature = "visit-mut")]
 pub mod visit_mut {
     use proc_macro2::Span;
     use visit_mut::VisitMut;

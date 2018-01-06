@@ -391,7 +391,7 @@ mod gen {
     #[cfg(feature = "visit")]
     pub mod visit;
 
-    #[cfg(feature = "visit_mut")]
+    #[cfg(feature = "visit-mut")]
     pub mod visit_mut;
 
     #[cfg(feature = "fold")]
