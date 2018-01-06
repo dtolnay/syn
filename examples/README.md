@@ -21,3 +21,8 @@ to stabilize all of the APIs involved.
 An example of parsing a custom syntax within a `functionlike!(...)` procedural
 macro. Demonstrates how to trigger custom warnings and error messages on
 individual tokens of the input.
+
+### [`trace-var`](trace-var)
+
+An attribute procedural macro that uses a syntax tree traversal to transform
+certain syntax tree nodes in a function body.

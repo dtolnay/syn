@@ -1,0 +1,8 @@
+[package]
+name = "example"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+publish = false
+
+[dependencies]
+trace-var = { path = "../trace-var" }
