@@ -463,11 +463,11 @@ pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
 {
-    _parse(tokens.into())
+    parse2(tokens.into())
 }
 
 #[cfg(feature = "parsing")]
-fn _parse<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
+pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
 {
@@ -516,7 +516,7 @@ where
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
     match s.parse() {
-        Ok(tts) => _parse(tts),
+        Ok(tts) => parse2(tts),
         Err(_) => Err(ParseError::new("error while lexing input string")),
     }
 }
