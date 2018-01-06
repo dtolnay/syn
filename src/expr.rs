@@ -403,47 +403,45 @@ impl Expr {
     #[cfg(feature = "full")]
     pub fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match *self {
-            Expr::Box(ExprBox { ref mut attrs, .. }) |
-            Expr::InPlace(ExprInPlace { ref mut attrs, .. }) |
-            Expr::Array(ExprArray { ref mut attrs, .. }) |
-            Expr::Call(ExprCall { ref mut attrs, .. }) |
-            Expr::MethodCall(ExprMethodCall { ref mut attrs, .. }) |
-            Expr::Tuple(ExprTuple { ref mut attrs, .. }) |
-            Expr::Binary(ExprBinary { ref mut attrs, .. }) |
-            Expr::Unary(ExprUnary { ref mut attrs, .. }) |
-            Expr::Lit(ExprLit { ref mut attrs, .. }) |
-            Expr::Cast(ExprCast { ref mut attrs, .. }) |
-            Expr::Type(ExprType { ref mut attrs, .. }) |
-            Expr::If(ExprIf { ref mut attrs, .. }) |
-            Expr::IfLet(ExprIfLet { ref mut attrs, .. }) |
-            Expr::While(ExprWhile { ref mut attrs, .. }) |
-            Expr::WhileLet(ExprWhileLet { ref mut attrs, .. }) |
-            Expr::ForLoop(ExprForLoop { ref mut attrs, .. }) |
-            Expr::Loop(ExprLoop { ref mut attrs, .. }) |
-            Expr::Match(ExprMatch { ref mut attrs, .. }) |
-            Expr::Closure(ExprClosure { ref mut attrs, .. }) |
-            Expr::Unsafe(ExprUnsafe { ref mut attrs, .. }) |
-            Expr::Block(ExprBlock { ref mut attrs, .. }) |
-            Expr::Assign(ExprAssign { ref mut attrs, .. }) |
-            Expr::AssignOp(ExprAssignOp { ref mut attrs, .. }) |
-            Expr::Field(ExprField { ref mut attrs, .. }) |
-            Expr::Index(ExprIndex { ref mut attrs, .. }) |
-            Expr::Range(ExprRange { ref mut attrs, .. }) |
-            Expr::Path(ExprPath { ref mut attrs, .. }) |
-            Expr::AddrOf(ExprAddrOf { ref mut attrs, .. }) |
-            Expr::Break(ExprBreak { ref mut attrs, .. }) |
-            Expr::Continue(ExprContinue { ref mut attrs, .. }) |
-            Expr::Return(ExprReturn { ref mut attrs, .. }) |
-            Expr::Macro(ExprMacro { ref mut attrs, .. }) |
-            Expr::Struct(ExprStruct { ref mut attrs, .. }) |
-            Expr::Repeat(ExprRepeat { ref mut attrs, .. }) |
-            Expr::Paren(ExprParen { ref mut attrs, .. }) |
-            Expr::Group(ExprGroup { ref mut attrs, .. }) |
-            Expr::Try(ExprTry { ref mut attrs, .. }) |
-            Expr::Catch(ExprCatch { ref mut attrs, .. }) |
-            Expr::Yield(ExprYield { ref mut attrs, .. }) => {
-                mem::replace(attrs, new)
-            }
+            Expr::Box(ExprBox { ref mut attrs, .. })
+            | Expr::InPlace(ExprInPlace { ref mut attrs, .. })
+            | Expr::Array(ExprArray { ref mut attrs, .. })
+            | Expr::Call(ExprCall { ref mut attrs, .. })
+            | Expr::MethodCall(ExprMethodCall { ref mut attrs, .. })
+            | Expr::Tuple(ExprTuple { ref mut attrs, .. })
+            | Expr::Binary(ExprBinary { ref mut attrs, .. })
+            | Expr::Unary(ExprUnary { ref mut attrs, .. })
+            | Expr::Lit(ExprLit { ref mut attrs, .. })
+            | Expr::Cast(ExprCast { ref mut attrs, .. })
+            | Expr::Type(ExprType { ref mut attrs, .. })
+            | Expr::If(ExprIf { ref mut attrs, .. })
+            | Expr::IfLet(ExprIfLet { ref mut attrs, .. })
+            | Expr::While(ExprWhile { ref mut attrs, .. })
+            | Expr::WhileLet(ExprWhileLet { ref mut attrs, .. })
+            | Expr::ForLoop(ExprForLoop { ref mut attrs, .. })
+            | Expr::Loop(ExprLoop { ref mut attrs, .. })
+            | Expr::Match(ExprMatch { ref mut attrs, .. })
+            | Expr::Closure(ExprClosure { ref mut attrs, .. })
+            | Expr::Unsafe(ExprUnsafe { ref mut attrs, .. })
+            | Expr::Block(ExprBlock { ref mut attrs, .. })
+            | Expr::Assign(ExprAssign { ref mut attrs, .. })
+            | Expr::AssignOp(ExprAssignOp { ref mut attrs, .. })
+            | Expr::Field(ExprField { ref mut attrs, .. })
+            | Expr::Index(ExprIndex { ref mut attrs, .. })
+            | Expr::Range(ExprRange { ref mut attrs, .. })
+            | Expr::Path(ExprPath { ref mut attrs, .. })
+            | Expr::AddrOf(ExprAddrOf { ref mut attrs, .. })
+            | Expr::Break(ExprBreak { ref mut attrs, .. })
+            | Expr::Continue(ExprContinue { ref mut attrs, .. })
+            | Expr::Return(ExprReturn { ref mut attrs, .. })
+            | Expr::Macro(ExprMacro { ref mut attrs, .. })
+            | Expr::Struct(ExprStruct { ref mut attrs, .. })
+            | Expr::Repeat(ExprRepeat { ref mut attrs, .. })
+            | Expr::Paren(ExprParen { ref mut attrs, .. })
+            | Expr::Group(ExprGroup { ref mut attrs, .. })
+            | Expr::Try(ExprTry { ref mut attrs, .. })
+            | Expr::Catch(ExprCatch { ref mut attrs, .. })
+            | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => {
                 // TODO
                 Vec::new()
@@ -2568,7 +2566,7 @@ mod printing {
     use attr::FilterAttrs;
     use quote::{ToTokens, Tokens};
     #[cfg(feature = "full")]
-    use proc_macro2::{TokenTree, TokenNode, Literal};
+    use proc_macro2::{Literal, TokenNode, TokenTree};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `Tokens`.
@@ -2589,8 +2587,7 @@ mod printing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut Tokens) {
-    }
+    fn attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut Tokens) {}
 
     #[cfg(feature = "full")]
     impl ToTokens for ExprBox {
@@ -2724,10 +2721,7 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    fn maybe_wrap_else(
-        tokens: &mut Tokens,
-        else_: &Option<(Token![else], Box<Expr>)>,
-    ) {
+    fn maybe_wrap_else(tokens: &mut Tokens, else_: &Option<(Token![else], Box<Expr>)>) {
         if let Some((ref else_token, ref else_)) = *else_ {
             else_token.to_tokens(tokens);
 

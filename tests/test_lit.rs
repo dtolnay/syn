@@ -1,14 +1,20 @@
-extern crate syn;
-extern crate quote;
 extern crate proc_macro2;
+extern crate quote;
+extern crate syn;
 
-use syn::{Lit, IntSuffix, FloatSuffix};
+use syn::{FloatSuffix, IntSuffix, Lit};
 use quote::ToTokens;
-use proc_macro2::{TokenStream, TokenNode, Span};
+use proc_macro2::{Span, TokenNode, TokenStream};
 use std::str::FromStr;
 
 fn lit(s: &str) -> Lit {
-    match TokenStream::from_str(s).unwrap().into_iter().next().unwrap().kind {
+    match TokenStream::from_str(s)
+        .unwrap()
+        .into_iter()
+        .next()
+        .unwrap()
+        .kind
+    {
         TokenNode::Literal(lit) => Lit::new(lit, Span::default()),
         _ => panic!(),
     }
@@ -38,8 +44,10 @@ fn strings() {
     test_string("\"'\"", "'");
     test_string("\"\"", "");
     test_string("\"\\u{1F415}\"", "\u{1F415}");
-    test_string("\"contains\nnewlines\\\nescaped newlines\"",
-                "contains\nnewlinesescaped newlines");
+    test_string(
+        "\"contains\nnewlines\\\nescaped newlines\"",
+        "contains\nnewlinesescaped newlines",
+    );
     test_string("r\"raw\nstring\\\nhere\"", "raw\nstring\\\nhere");
 }
 
@@ -65,8 +73,10 @@ fn byte_strings() {
     test_byte_string("b\"\\\"\"", b"\"");
     test_byte_string("b\"'\"", b"'");
     test_byte_string("b\"\"", b"");
-    test_byte_string("b\"contains\nnewlines\\\nescaped newlines\"",
-                b"contains\nnewlinesescaped newlines");
+    test_byte_string(
+        "b\"contains\nnewlines\\\nescaped newlines\"",
+        b"contains\nnewlinesescaped newlines",
+    );
     test_byte_string("br\"raw\nstring\\\nhere\"", b"raw\nstring\\\nhere");
 }
 

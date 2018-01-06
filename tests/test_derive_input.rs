@@ -294,7 +294,11 @@ fn test_enum() {
                                 elems: punctuated![
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
-                                        lit: Lit::Int(LitInt::new(0, IntSuffix::None, Default::default())),
+                                        lit: Lit::Int(LitInt::new(
+                                            0,
+                                            IntSuffix::None,
+                                            Default::default()
+                                        )),
                                     }),
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
@@ -506,7 +510,10 @@ fn test_pub_restricted() {
                         vis: Visibility::Restricted(VisRestricted {
                             path: Box::new(Path {
                                 leading_colon: None,
-                                segments: punctuated![PathSegment::from("m"), PathSegment::from("n")],
+                                segments: punctuated![
+                                    PathSegment::from("m"),
+                                    PathSegment::from("n")
+                                ],
                             }),
                             in_token: Some(Default::default()),
                             paren_token: Default::default(),

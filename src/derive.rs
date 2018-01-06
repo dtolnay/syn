@@ -152,23 +152,21 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
             match self.data {
-                Data::Struct(ref data) => {
-                    match data.fields {
-                        Fields::Named(ref fields) => {
-                            self.generics.where_clause.to_tokens(tokens);
-                            fields.to_tokens(tokens);
-                        }
-                        Fields::Unnamed(ref fields) => {
-                            fields.to_tokens(tokens);
-                            self.generics.where_clause.to_tokens(tokens);
-                            TokensOrDefault(&data.semi_token).to_tokens(tokens);
-                        }
-                        Fields::Unit => {
-                            self.generics.where_clause.to_tokens(tokens);
-                            TokensOrDefault(&data.semi_token).to_tokens(tokens);
-                        }
+                Data::Struct(ref data) => match data.fields {
+                    Fields::Named(ref fields) => {
+                        self.generics.where_clause.to_tokens(tokens);
+                        fields.to_tokens(tokens);
                     }
-                }
+                    Fields::Unnamed(ref fields) => {
+                        fields.to_tokens(tokens);
+                        self.generics.where_clause.to_tokens(tokens);
+                        TokensOrDefault(&data.semi_token).to_tokens(tokens);
+                    }
+                    Fields::Unit => {
+                        self.generics.where_clause.to_tokens(tokens);
+                        TokensOrDefault(&data.semi_token).to_tokens(tokens);
+                    }
+                },
                 Data::Enum(ref data) => {
                     self.generics.where_clause.to_tokens(tokens);
                     data.brace_token.surround(tokens, |tokens| {

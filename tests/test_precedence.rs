@@ -299,10 +299,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         let attrs = node.replace_attrs(Vec::new());
         Expr::Paren(ExprParen {
             attrs: attrs,
-            expr: Box::new(fold_expr(
-                folder,
-                node,
-            )),
+            expr: Box::new(fold_expr(folder, node)),
             paren_token: token::Paren::default(),
         })
     }
@@ -313,10 +310,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             match expr {
                 Expr::Group(_) => unreachable!(),
                 Expr::Paren(p) => paren(self, *p.expr),
-                Expr::If(..)
-                | Expr::Unsafe(..)
-                | Expr::Block(..)
-                | Expr::IfLet(..) => {
+                Expr::If(..) | Expr::Unsafe(..) | Expr::Block(..) | Expr::IfLet(..) => {
                     fold_expr(self, expr)
                 }
                 node => paren(self, node),

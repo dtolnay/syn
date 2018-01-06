@@ -1,5 +1,5 @@
 use proc_macro2::{Span, TokenStream};
-use quote::{Tokens, ToTokens};
+use quote::{ToTokens, Tokens};
 
 pub trait Spanned {
     /// Returns a `Span` covering the complete contents of this AST node, or

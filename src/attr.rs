@@ -319,7 +319,7 @@ pub mod parsing {
     use cursor::Cursor;
     use parse_error;
     use synom::PResult;
-    use proc_macro2::{Spacing, Span, TokenNode, TokenTree, Literal};
+    use proc_macro2::{Literal, Spacing, Span, TokenNode, TokenTree};
 
     fn eq(span: Span) -> TokenTree {
         TokenTree {
@@ -421,12 +421,8 @@ pub mod parsing {
             Some((span, lit, rest)) => {
                 let string = lit.to_string();
                 let ok = match style {
-                    Comment::Inner => {
-                        string.starts_with("//!") || string.starts_with("/*!")
-                    }
-                    Comment::Outer => {
-                        string.starts_with("///") || string.starts_with("/**")
-                    }
+                    Comment::Inner => string.starts_with("//!") || string.starts_with("/*!"),
+                    Comment::Outer => string.starts_with("///") || string.starts_with("/**"),
                 };
                 if ok {
                     Ok((

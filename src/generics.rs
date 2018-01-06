@@ -84,7 +84,11 @@ impl Generics {
     /// # }
     /// ```
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        (ImplGenerics(self), TypeGenerics(self), self.where_clause.as_ref())
+        (
+            ImplGenerics(self),
+            TypeGenerics(self),
+            self.where_clause.as_ref(),
+        )
     }
 }
 

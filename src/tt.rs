@@ -1,9 +1,9 @@
-use proc_macro2::{TokenNode, TokenStream, TokenTree, Delimiter};
+use proc_macro2::{Delimiter, TokenNode, TokenStream, TokenTree};
 use cursor::Cursor;
 use parse_error;
 use synom::PResult;
 use MacroDelimiter;
-use token::{Paren, Brace, Bracket};
+use token::{Brace, Bracket, Paren};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};

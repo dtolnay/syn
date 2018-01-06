@@ -1123,7 +1123,7 @@ macro_rules! tap {
 /// implementation is provided by Syn or is one that you write.
 ///
 /// [`Synom`]: synom/trait.Synom.html
-/// 
+///
 /// - **Syntax:** `syn!(TYPE)`
 /// - **Output:** `TYPE`
 ///

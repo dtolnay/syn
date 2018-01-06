@@ -1,24 +1,32 @@
 #[cfg(feature = "fold")]
 pub mod fold {
-    use punctuated::{Punctuated, Element};
+    use punctuated::{Element, Punctuated};
     use fold::Folder;
     use proc_macro2::Span;
 
     pub trait FoldHelper {
         type Item;
-        fn lift<F>(self, f: F) -> Self where F: FnMut(Self::Item) -> Self::Item;
+        fn lift<F>(self, f: F) -> Self
+        where
+            F: FnMut(Self::Item) -> Self::Item;
     }
 
     impl<T> FoldHelper for Vec<T> {
         type Item = T;
-        fn lift<F>(self, f: F) -> Self where F: FnMut(Self::Item) -> Self::Item {
+        fn lift<F>(self, f: F) -> Self
+        where
+            F: FnMut(Self::Item) -> Self::Item,
+        {
             self.into_iter().map(f).collect()
         }
     }
 
     impl<T, U> FoldHelper for Punctuated<T, U> {
         type Item = T;
-        fn lift<F>(self, mut f: F) -> Self where F: FnMut(Self::Item) -> Self::Item {
+        fn lift<F>(self, mut f: F) -> Self
+        where
+            F: FnMut(Self::Item) -> Self::Item,
+        {
             self.into_elements()
                 .map(Element::into_tuple)
                 .map(|(t, u)| Element::new(f(t), u))
@@ -54,7 +62,11 @@ pub mod fold {
 
     impl Spans for [Span; 3] {
         fn fold<F: Folder + ?Sized>(&self, folder: &mut F) -> Self {
-            [folder.fold_span(self[0]), folder.fold_span(self[1]), folder.fold_span(self[2])]
+            [
+                folder.fold_span(self[0]),
+                folder.fold_span(self[1]),
+                folder.fold_span(self[2]),
+            ]
         }
     }
 }
@@ -64,7 +76,10 @@ pub mod visit {
     use proc_macro2::Span;
     use visit::Visitor;
 
-    pub fn tokens_helper<'ast, V: Visitor<'ast> + ?Sized, S: Spans>(visitor: &mut V, spans: &'ast S) {
+    pub fn tokens_helper<'ast, V: Visitor<'ast> + ?Sized, S: Spans>(
+        visitor: &mut V,
+        spans: &'ast S,
+    ) {
         spans.visit(visitor);
     }
 

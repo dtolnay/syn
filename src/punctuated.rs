@@ -93,7 +93,10 @@ impl<T, P> Punctuated<T, P> {
     }
 
     pub fn trailing_punct(&self) -> bool {
-        self.inner.last().map(|last| last.1.is_some()).unwrap_or(false)
+        self.inner
+            .last()
+            .map(|last| last.1.is_some())
+            .unwrap_or(false)
     }
 
     /// Returns true if either this `Punctuated` is empty, or it has a trailing
@@ -101,7 +104,10 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Equivalent to `punctuated.is_empty() || punctuated.trailing_punct()`.
     pub fn empty_or_trailing(&self) -> bool {
-        self.inner.last().map(|last| last.1.is_some()).unwrap_or(true)
+        self.inner
+            .last()
+            .map(|last| last.1.is_some())
+            .unwrap_or(true)
     }
 }
 

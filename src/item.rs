@@ -1,8 +1,8 @@
 use super::*;
 use derive::{Data, DeriveInput};
 use punctuated::Punctuated;
-use proc_macro2::{TokenStream};
-use token::{Paren, Brace};
+use proc_macro2::TokenStream;
+use token::{Brace, Paren};
 
 #[cfg(feature = "extra-traits")]
 use tt::TokenStreamHelper;
@@ -544,7 +544,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::{Synom, Cursor, PResult};
+    use synom::{Cursor, PResult, Synom};
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }
@@ -1094,7 +1094,7 @@ pub mod parsing {
         braces!(epsilon!()) >>
         end: call!(grab_cursor) >>
         ({
-            let mut tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
             let len = tts.len() - end.token_stream().into_iter().count();
             ItemVerbatim {
                 tts: tts.into_iter().take(len).collect(),

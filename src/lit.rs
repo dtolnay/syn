@@ -180,10 +180,7 @@ impl LitFloat {
 
     pub fn suffix(&self) -> FloatSuffix {
         let value = self.token.to_string();
-        for (s, suffix) in vec![
-            ("f32", FloatSuffix::F32),
-            ("f64", FloatSuffix::F64),
-        ] {
+        for (s, suffix) in vec![("f32", FloatSuffix::F32), ("f64", FloatSuffix::F64)] {
             if value.ends_with(s) {
                 return suffix;
             }
@@ -352,25 +349,33 @@ pub mod parsing {
             let value = token.to_string();
 
             match value::byte(&value, 0) {
-                b'"' | b'r' => return Lit::Str(LitStr {
-                    token: token,
-                    span: span,
-                }),
-                b'b' => match value::byte(&value, 1) {
-                    b'"' | b'r' => return Lit::ByteStr(LitByteStr {
+                b'"' | b'r' => {
+                    return Lit::Str(LitStr {
                         token: token,
                         span: span,
-                    }),
-                    b'\'' => return Lit::Byte(LitByte {
-                        token: token,
-                        span: span,
-                    }),
-                    _ => {}
+                    })
                 }
-                b'\'' => return Lit::Char(LitChar {
-                    token: token,
-                    span: span,
-                }),
+                b'b' => match value::byte(&value, 1) {
+                    b'"' | b'r' => {
+                        return Lit::ByteStr(LitByteStr {
+                            token: token,
+                            span: span,
+                        })
+                    }
+                    b'\'' => {
+                        return Lit::Byte(LitByte {
+                            token: token,
+                            span: span,
+                        })
+                    }
+                    _ => {}
+                },
+                b'\'' => {
+                    return Lit::Char(LitChar {
+                        token: token,
+                        span: span,
+                    })
+                }
                 b'0'...b'9' => if number_is_int(&value) {
                     return Lit::Int(LitInt {
                         token: token,
@@ -387,13 +392,13 @@ pub mod parsing {
                         token: token,
                         span: span,
                     });
-                }
+                },
                 _ => if value == "true" || value == "false" {
                     return Lit::Bool(LitBool {
                         value: value == "true",
                         span: span,
                     });
-                }
+                },
             }
 
             panic!("Unrecognized literal: {}", value);
@@ -482,11 +487,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
                 span: self.span,
-                kind: TokenNode::Term(Term::intern(if self.value {
-                    "true"
-                } else {
-                    "false"
-                })),
+                kind: TokenNode::Term(Term::intern(if self.value { "true" } else { "false" })),
             });
         }
     }
@@ -560,19 +561,15 @@ mod value {
                         b'0' => '\0',
                         b'\'' => '\'',
                         b'"' => '"',
-                        b'\r' | b'\n' => {
-                            loop {
-                                let ch = next_chr(s);
-                                if ch.is_whitespace() {
-                                    s = &s[ch.len_utf8()..];
-                                } else {
-                                    continue 'outer;
-                                }
+                        b'\r' | b'\n' => loop {
+                            let ch = next_chr(s);
+                            if ch.is_whitespace() {
+                                s = &s[ch.len_utf8()..];
+                            } else {
+                                continue 'outer;
                             }
-                        }
-                        b => {
-                            panic!("unexpected byte {:?} after \\ character in byte literal", b)
-                        }
+                        },
+                        b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
                     }
                 }
                 b'\r' => {
@@ -647,20 +644,16 @@ mod value {
                         b'0' => b'\0',
                         b'\'' => b'\'',
                         b'"' => b'"',
-                        b'\r' | b'\n' => {
-                            loop {
-                                let byte = byte(s, 0);
-                                let ch = char::from_u32(byte as u32).unwrap();
-                                if ch.is_whitespace() {
-                                    s = &s[1..];
-                                } else {
-                                    continue 'outer;
-                                }
+                        b'\r' | b'\n' => loop {
+                            let byte = byte(s, 0);
+                            let ch = char::from_u32(byte as u32).unwrap();
+                            if ch.is_whitespace() {
+                                s = &s[1..];
+                            } else {
+                                continue 'outer;
                             }
-                        }
-                        b => {
-                            panic!("unexpected byte {:?} after \\ character in byte literal", b)
-                        }
+                        },
+                        b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
                     }
                 }
                 b'\r' => {
@@ -709,9 +702,7 @@ mod value {
                     b'0' => b'\0',
                     b'\'' => b'\'',
                     b'"' => b'"',
-                    b => {
-                        panic!("unexpected byte {:?} after \\ character in byte literal", b)
-                    }
+                    b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
                 }
             }
             b => {
@@ -751,9 +742,7 @@ mod value {
                     b'0' => '\0',
                     b'\'' => '\'',
                     b'"' => '"',
-                    b => {
-                        panic!("unexpected byte {:?} after \\ character in byte literal", b)
-                    }
+                    b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
                 }
             }
             _ => {
@@ -767,7 +756,8 @@ mod value {
     }
 
     fn backslash_x<S>(s: &S) -> (u8, &S)
-        where S: Index<RangeFrom<usize>, Output=S> + AsRef<[u8]> + ?Sized
+    where
+        S: Index<RangeFrom<usize>, Output = S> + AsRef<[u8]> + ?Sized,
     {
         let mut ch = 0;
         let b0 = byte(s, 0);
