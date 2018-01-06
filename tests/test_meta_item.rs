@@ -12,7 +12,7 @@ extern crate proc_macro2;
 extern crate syn;
 
 use syn::*;
-use syn::synom::SynomBuffer;
+use syn::buffer::TokenBuffer;
 use proc_macro2::{Literal, TokenStream};
 
 #[macro_use]
@@ -122,7 +122,7 @@ fn test_meta_item_multiple() {
 
 fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
     let tokens = input.parse::<TokenStream>().unwrap();
-    let buf = SynomBuffer::new(tokens);
+    let buf = TokenBuffer::new(tokens);
     let attr = match Attribute::parse_outer(buf.begin()) {
         Ok((e, rest)) => {
             assert!(rest.eof());

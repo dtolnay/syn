@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use cursor::Cursor;
+use buffer::Cursor;
 use parse_error;
 use synom::PResult;
 
@@ -63,13 +63,13 @@ use synom::PResult;
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: $crate::synom::Cursor) -> $crate::synom::PResult<$o> {
+        fn $name(i: $crate::buffer::Cursor) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: $crate::synom::Cursor) -> $crate::synom::PResult<$o> {
+        pub fn $name(i: $crate::buffer::Cursor) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
@@ -77,13 +77,13 @@ macro_rules! named {
     // These two variants are for defining named parsers which have custom
     // arguments, and are called with `call!()`
     ($name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::synom::PResult<$o> {
+        fn $name(i: $crate::buffer::Cursor, $($params)*) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };
 
     (pub $name:ident($($params:tt)*) -> $o:ty, $submac:ident!( $($args:tt)* )) => {
-        pub fn $name(i: $crate::synom::Cursor, $($params)*) -> $crate::synom::PResult<$o> {
+        pub fn $name(i: $crate::buffer::Cursor, $($params)*) -> $crate::synom::PResult<$o> {
             $submac!(i, $($args)*)
         }
     };

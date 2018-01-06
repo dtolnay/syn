@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use std::error::Error;
-use cursor::Cursor;
+use buffer::Cursor;
 use std::fmt::{self, Display};
 
 /// The result of a parser

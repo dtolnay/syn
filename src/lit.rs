@@ -271,7 +271,7 @@ ast_enum! {
 pub mod parsing {
     use super::*;
     use synom::Synom;
-    use cursor::Cursor;
+    use buffer::Cursor;
     use parse_error;
     use synom::PResult;
 

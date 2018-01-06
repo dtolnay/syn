@@ -19,7 +19,8 @@ use self::syntax_pos::FileName;
 
 use std::panic;
 
-use self::syn::synom::{Synom, SynomBuffer};
+use self::syn::buffer::TokenBuffer;
+use self::syn::synom::Synom;
 
 pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
@@ -58,7 +59,7 @@ pub fn syn_expr(input: &str) -> Option<syn::Expr> {
 }
 
 pub fn syn<T: Synom>(tokens: proc_macro2::TokenStream) -> T {
-    let buf = SynomBuffer::new(tokens);
+    let buf = TokenBuffer::new(tokens);
     let result = T::parse(buf.begin());
     match result {
         Ok((t, rest)) => {

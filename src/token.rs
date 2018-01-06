@@ -79,7 +79,7 @@ macro_rules! token_punct {
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
-            fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
+            fn parse(tokens: $crate::buffer::Cursor) -> $crate::synom::PResult<$name> {
                 parsing::punct($s, tokens, $name)
             }
 
@@ -130,7 +130,7 @@ macro_rules! token_keyword {
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
-            fn parse(tokens: $crate::synom::Cursor) -> $crate::synom::PResult<$name> {
+            fn parse(tokens: $crate::buffer::Cursor) -> $crate::synom::PResult<$name> {
                 parsing::keyword($s, tokens, $name)
             }
         }
@@ -179,8 +179,8 @@ macro_rules! token_delimiter {
             }
 
             #[cfg(feature = "parsing")]
-            pub fn parse<F, R>(tokens: $crate::synom::Cursor, f: F) -> $crate::synom::PResult<($name, R)>
-                where F: FnOnce($crate::synom::Cursor) -> $crate::synom::PResult<R>
+            pub fn parse<F, R>(tokens: $crate::buffer::Cursor, f: F) -> $crate::synom::PResult<($name, R)>
+                where F: FnOnce($crate::buffer::Cursor) -> $crate::synom::PResult<R>
             {
                 parsing::delim($s, tokens, $name, f)
             }
@@ -482,7 +482,7 @@ macro_rules! keyword {
 mod parsing {
     use proc_macro2::{Delimiter, Spacing, Span};
 
-    use cursor::Cursor;
+    use buffer::Cursor;
     use parse_error;
     use synom::PResult;
 

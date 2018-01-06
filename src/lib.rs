@@ -377,7 +377,7 @@ pub use path::{AngleBracketedGenericArguments, Binding, GenericArgument,
 pub use path::PathTokens;
 
 #[cfg(feature = "parsing")]
-mod cursor;
+pub mod buffer;
 #[cfg(feature = "parsing")]
 pub mod synom;
 pub mod punctuated;
@@ -408,7 +408,7 @@ pub use gen::*;
 #[cfg(feature = "parsing")]
 use synom::Synom;
 #[cfg(feature = "parsing")]
-use cursor::SynomBuffer;
+use buffer::TokenBuffer;
 
 #[cfg(feature = "parsing")]
 mod error;
@@ -471,7 +471,7 @@ pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
 {
-    let buf = SynomBuffer::new(tokens);
+    let buf = TokenBuffer::new(tokens);
     let result = T::parse(buf.begin());
     let err = match result {
         Ok((t, rest)) => {

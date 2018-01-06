@@ -552,7 +552,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::{Cursor, PResult, Synom};
+    use buffer::Cursor;
+    use synom::{PResult, Synom};
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }

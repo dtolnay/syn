@@ -804,7 +804,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     use proc_macro2::TokenStream;
     use synom::Synom;
-    use cursor::Cursor;
+    use buffer::Cursor;
     #[cfg(feature = "full")]
     use parse_error;
     use synom::PResult;

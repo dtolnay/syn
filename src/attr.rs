@@ -324,7 +324,7 @@ where
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use cursor::Cursor;
+    use buffer::Cursor;
     use parse_error;
     use synom::PResult;
     use proc_macro2::{Literal, Spacing, Span, TokenNode, TokenTree};

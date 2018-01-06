@@ -31,9 +31,9 @@
 
 use proc_macro2::TokenStream;
 
-pub use cursor::*;
-
 pub use error::{PResult, ParseError};
+
+use buffer::Cursor;
 
 pub trait Synom: Sized {
     fn parse(input: Cursor) -> PResult<Self>;

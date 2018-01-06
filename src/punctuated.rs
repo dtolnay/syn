@@ -323,7 +323,7 @@ impl<T, P> Element<T, P> {
 mod parsing {
     use super::Punctuated;
     use synom::Synom;
-    use cursor::Cursor;
+    use buffer::Cursor;
     use parse_error;
     use synom::PResult;
 

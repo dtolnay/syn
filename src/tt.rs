@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use proc_macro2::{Delimiter, TokenNode, TokenStream, TokenTree};
-use cursor::Cursor;
+use buffer::Cursor;
 use parse_error;
 use synom::PResult;
 use MacroDelimiter;

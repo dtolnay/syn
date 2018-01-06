@@ -25,10 +25,10 @@ use std::marker::PhantomData;
 use std::fmt::{self, Debug};
 
 /// Internal type which is used instead of `TokenTree` to represent a single
-/// `TokenTree` within a `SynomBuffer`.
+/// `TokenTree` within a `TokenBuffer`.
 enum Entry {
     /// Mimicing types from proc-macro.
-    Group(Span, Delimiter, SynomBuffer),
+    Group(Span, Delimiter, TokenBuffer),
     Term(Span, Term),
     Op(Span, char, Spacing),
     Literal(Span, Literal),
@@ -39,17 +39,17 @@ enum Entry {
 
 /// A buffer of data which contains a structured representation of the input
 /// `TokenStream` object.
-pub struct SynomBuffer {
+pub struct TokenBuffer {
     // NOTE: Do not derive clone on this - there are raw pointers inside which
-    // will be messed up. Moving the `SynomBuffer` itself is safe as the actual
+    // will be messed up. Moving the `TokenBuffer` itself is safe as the actual
     // backing slices won't be moved.
     data: Box<[Entry]>,
 }
 
-impl SynomBuffer {
+impl TokenBuffer {
     // NOTE: DO NOT MUTATE THE `Vec` RETURNED FROM THIS FUNCTION ONCE IT
     // RETURNS, THE ADDRESS OF ITS BACKING MEMORY MUST REMAIN STABLE.
-    fn inner_new(stream: TokenStream, up: *const Entry) -> SynomBuffer {
+    fn inner_new(stream: TokenStream, up: *const Entry) -> TokenBuffer {
         // Build up the entries list, recording the locations of any Groups
         // in the list to be processed later.
         let mut entries = Vec::new();
@@ -94,12 +94,12 @@ impl SynomBuffer {
             entries[idx] = Entry::Group(span, delim, inner);
         }
 
-        SynomBuffer { data: entries }
+        TokenBuffer { data: entries }
     }
 
-    /// Create a new SynomBuffer, which contains the data from the given
+    /// Create a new TokenBuffer, which contains the data from the given
     /// TokenStream.
-    pub fn new(stream: TokenStream) -> SynomBuffer {
+    pub fn new(stream: TokenStream) -> TokenBuffer {
         Self::inner_new(stream, ptr::null())
     }
 
@@ -113,7 +113,7 @@ impl SynomBuffer {
 /// into the immutable data which is used internally to represent a
 /// `TokenStream`, and can be efficiently manipulated and copied around.
 ///
-/// An empty `Cursor` can be created directly, or one may create a `SynomBuffer`
+/// An empty `Cursor` can be created directly, or one may create a `TokenBuffer`
 /// object and get a cursor to its first token with `begin()`.
 ///
 /// Two cursors are equal if they have the same location in the same input
