@@ -2573,7 +2573,6 @@ mod printing {
     #[cfg(feature = "full")]
     use attr::FilterAttrs;
     use quote::{ToTokens, Tokens};
-    #[cfg(feature = "full")]
     use proc_macro2::{Literal, TokenNode, TokenTree};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
@@ -2942,7 +2941,6 @@ mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl ToTokens for Index {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
