@@ -9,6 +9,9 @@
 //! A trait that can provide the `Span` of the complete contents of a syntax
 //! tree node.
 //!
+//! *This module is available if Syn is built with both the `"parsing"` and
+//! `"printing"` features.*
+//!
 //! # Example
 //!
 //! Suppose in a procedural macro we have a [`Type`] that we want to assert
@@ -97,6 +100,9 @@ use quote::{ToTokens, Tokens};
 /// See the [module documentation] for an example.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with both the `"parsing"` and
+/// `"printing"` features.*
 pub trait Spanned {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.

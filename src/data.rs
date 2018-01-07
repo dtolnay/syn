@@ -11,6 +11,9 @@ use punctuated::Punctuated;
 
 ast_struct! {
     /// An enum variant.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Variant {
         /// Attributes tagged on the variant.
         pub attrs: Vec<Attribute>,
@@ -29,6 +32,9 @@ ast_struct! {
 ast_enum_of_structs! {
     /// Data stored within an enum variant or struct.
     ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -37,12 +43,18 @@ ast_enum_of_structs! {
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Named(FieldsNamed {
             pub brace_token: token::Brace,
             pub named: Punctuated<Field, Token![,]>,
         }),
 
         /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Unnamed(FieldsUnnamed {
             pub paren_token: token::Paren,
             pub unnamed: Punctuated<Field, Token![,]>,
@@ -55,6 +67,9 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A field of a struct or enum variant.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Field {
         /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
@@ -78,6 +93,9 @@ ast_enum_of_structs! {
     /// The visibility level of an item: inherited or `pub` or
     /// `pub(restricted)`.
     ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -85,11 +103,17 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Visibility {
         /// A public visibility level: `pub`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Public(VisPublic {
             pub pub_token: Token![pub],
         }),
 
         /// A crate-level visibility: `pub(crate)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Crate(VisCrate {
             pub pub_token: Token![pub],
             pub paren_token: token::Paren,
@@ -98,6 +122,9 @@ ast_enum_of_structs! {
 
         /// A visibility level restricted to some path: `pub(self)` or
         /// `pub(super)` or `pub(in some::module)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Restricted(VisRestricted {
             pub pub_token: Token![pub],
             pub paren_token: token::Paren,

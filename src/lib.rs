@@ -418,6 +418,8 @@ mod gen {
     ///     # fn visit_bin_op(&mut self, node: &'ast BinOp);
     /// }
     /// ```
+    ///
+    /// *This module is available if Syn is built with the `"visit"` feature.*
     #[cfg(feature = "visit")]
     pub mod visit;
 
@@ -453,6 +455,9 @@ mod gen {
     ///     # fn visit_bin_op_mut(&mut self, node: &mut BinOp);
     /// }
     /// ```
+    ///
+    /// *This module is available if Syn is built with the `"visit-mut"`
+    /// feature.*
     #[cfg(feature = "visit-mut")]
     pub mod visit_mut;
 
@@ -489,6 +494,8 @@ mod gen {
     ///     # fn fold_bin_op(&mut self, node: BinOp) -> BinOp;
     /// }
     /// ```
+    ///
+    /// *This module is available if Syn is built with the `"fold"` feature.*
     #[cfg(feature = "fold")]
     pub mod fold;
 
@@ -527,6 +534,8 @@ pub use error::parse_error;
 /// `proc_macro2::TokenStream`, use [`syn::parse2`] instead.
 ///
 /// [`syn::parse2`]: fn.parse2.html
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
 ///
 /// # Examples
 ///
@@ -577,6 +586,8 @@ where
 ///
 /// [`Macro`]: struct.Macro.html
 /// [`syn::parse`]: fn.parse.html
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
@@ -604,6 +615,8 @@ where
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
 ///
 /// # Examples
 ///
@@ -642,6 +655,8 @@ pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
 /// - It preserves the shebang line of the file, such as `#!/usr/bin/env rustx`.
 ///
 /// If present, either of these would be an error using `from_str`.
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
 ///
 /// # Examples
 ///
@@ -724,6 +739,9 @@ pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
 ///     println!("{:#?}", stmt);
 /// }
 /// ```
+///
+/// *This macro is available if Syn is built with both the `"parsing"` and
+/// `"printing"` features.*
 ///
 /// # Example
 ///

@@ -480,6 +480,8 @@ macro_rules! Token {
 /// See the [token module] documentation for details and examples.
 ///
 /// [token module]: token/index.html
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 #[macro_export]
 macro_rules! punct {
@@ -535,6 +537,8 @@ macro_rules! punct {
 /// See the [token module] documentation for details and examples.
 ///
 /// [token module]: token/index.html
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 #[macro_export]
 macro_rules! keyword {

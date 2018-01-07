@@ -15,6 +15,8 @@ use std::fmt::{self, Display};
 /// Refer to the [module documentation] for details about parsing in Syn.
 ///
 /// [module documentation]: index.html
+///
+/// *This type is available if Syn is built with the `"parsing"` feature.*
 pub type PResult<'a, O> = Result<(O, Cursor<'a>), ParseError>;
 
 /// An error with a default error message.
@@ -29,6 +31,8 @@ pub fn parse_error<O>() -> PResult<'static, O> {
 /// Refer to the [module documentation] for details about parsing in Syn.
 ///
 /// [module documentation]: index.html
+///
+/// *This type is available if Syn is built with the `"parsing"` feature.*
 #[derive(Debug)]
 pub struct ParseError(Option<String>);
 

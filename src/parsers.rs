@@ -60,6 +60,8 @@ use synom::PResult;
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! named {
     ($name:ident -> $o:ty, $submac:ident!( $($args:tt)* )) => {
@@ -136,6 +138,8 @@ macro_rules! call {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[cfg(not(synom_verbose_trace))]
 #[macro_export]
 macro_rules! call {
@@ -175,6 +179,8 @@ macro_rules! call {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! map {
     ($i:expr, $submac:ident!( $($args:tt)* ), $g:expr) => {
@@ -222,6 +228,8 @@ pub fn invoke<T, R, F: FnOnce(T) -> R>(f: F, t: T) -> R {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! not {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -289,6 +297,8 @@ macro_rules! not {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! cond {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
@@ -363,6 +373,8 @@ macro_rules! cond {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! cond_reduce {
     ($i:expr, $cond:expr, $submac:ident!( $($args:tt)* )) => {
@@ -424,6 +436,8 @@ macro_rules! cond_reduce {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! many0 {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {{
@@ -564,6 +578,8 @@ pub fn many0<T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! switch {
     ($i:expr, $submac:ident!( $($args:tt)* ), $($p:pat => $subrule:ident!( $($args2:tt)* ))|* ) => {
@@ -656,6 +672,8 @@ macro_rules! switch {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! value {
     ($i:expr, $res:expr) => {
@@ -687,6 +705,8 @@ macro_rules! value {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! reject {
     ($i:expr,) => {{
@@ -710,6 +730,8 @@ macro_rules! reject {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! tuple {
     ($i:expr, $($rest:tt)*) => {
@@ -830,6 +852,8 @@ macro_rules! tuple_parser {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! alt {
     ($i:expr, $e:ident | $($rest:tt)*) => {
@@ -922,6 +946,8 @@ macro_rules! alt {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! do_parse {
     ($i:expr, ( $($rest:expr),* )) => {
@@ -1023,6 +1049,8 @@ macro_rules! do_parse {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! input_end {
     ($i:expr,) => {
@@ -1081,6 +1109,8 @@ pub fn input_end(input: Cursor) -> PResult<'static, ()> {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! option {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -1132,6 +1162,8 @@ macro_rules! option {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! epsilon {
     ($i:expr,) => {
@@ -1210,6 +1242,8 @@ macro_rules! tap {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! syn {
     ($i:expr, $t:ty) => {
@@ -1240,6 +1274,8 @@ macro_rules! syn {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! parens {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -1274,6 +1310,8 @@ macro_rules! parens {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! brackets {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
@@ -1308,6 +1346,8 @@ macro_rules! brackets {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[macro_export]
 macro_rules! braces {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {

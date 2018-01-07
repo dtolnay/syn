@@ -21,6 +21,9 @@ use tt::TokenStreamHelper;
 ast_struct! {
     /// An attribute like `#[repr(transparent)]`.
     ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
     /// # Syntax
     ///
     /// Rust has six types of attributes.
@@ -225,6 +228,9 @@ ast_enum! {
     /// Distinguishes between attributes that decorate an item and attributes
     /// that are contained within an item.
     ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
     /// # Outer attributes
     ///
     /// - `#[repr(transparent)]`
@@ -245,6 +251,9 @@ ast_enum! {
 
 ast_enum_of_structs! {
     /// Content of a compile-time structured attribute.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     ///
     /// ## Word
     ///
@@ -267,12 +276,18 @@ ast_enum_of_structs! {
     pub enum Meta {
         pub Word(Ident),
         /// A structured list within an attribute, like `derive(Copy, Clone)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub List(MetaList {
             pub ident: Ident,
             pub paren_token: token::Paren,
             pub nested: Punctuated<NestedMeta, Token![,]>,
         }),
         /// A name-value pair within an attribute, like `feature = "nightly"`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub NameValue(MetaNameValue {
             pub ident: Ident,
             pub eq_token: Token![=],
@@ -297,6 +312,9 @@ impl Meta {
 
 ast_enum_of_structs! {
     /// Element of a compile-time attribute list.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
         /// would be a nested `Meta::Word`.

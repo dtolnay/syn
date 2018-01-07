@@ -11,6 +11,9 @@ use super::*;
 
 ast_struct! {
     /// A path at which a named item is exported: `std::collections::HashMap`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Path {
         pub leading_colon: Option<Token![::]>,
         pub segments: Punctuated<PathSegment, Token![::]>,
@@ -45,6 +48,9 @@ impl Path {
 /// #
 /// # fn main() {}
 /// ```
+///
+/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -66,6 +72,9 @@ where
 
 ast_struct! {
     /// A segment of a path together with any path arguments on that segment.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct PathSegment {
         pub ident: Ident,
         pub arguments: PathArguments,
@@ -88,6 +97,9 @@ ast_enum! {
     /// Bracketed or parenthesized arguments of a path segment.
     ///
     /// E.g. `<K, V>` as in `HashMap<K, V>` or `(A, B) -> C` as in `Fn(A, B) -> C`
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum PathArguments {
         None,
         /// The `<'a, T>` in `std::slice::iter<'a, T>`.
@@ -115,6 +127,9 @@ impl PathArguments {
 
 ast_enum! {
     /// An individual generic argument, like `'a`, `T`, or `Item = T`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum GenericArgument {
         /// A lifetime argument.
         Lifetime(Lifetime),
@@ -135,6 +150,9 @@ ast_enum! {
 ast_struct! {
     /// Angle bracketed arguments of a path segment: the `<K, V>` in `HashMap<K,
     /// V>`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct AngleBracketedGenericArguments {
         pub colon2_token: Option<Token![::]>,
         pub lt_token: Token![<],
@@ -145,6 +163,9 @@ ast_struct! {
 
 ast_struct! {
     /// A binding (equality constraint) on an associated type: `Item = u8`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Binding {
         pub ident: Ident,
         pub eq_token: Token![=],
@@ -155,6 +176,9 @@ ast_struct! {
 ast_struct! {
     /// Arguments of a function path segment: the `(A, B)` and `C` in `Fn(A,B)
     /// -> C`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
         /// `(A, B)`
@@ -181,6 +205,9 @@ ast_struct! {
     ///  ^~~~~~   ^
     ///  ty       position = 0
     /// ```
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct QSelf {
         pub lt_token: Token![<],
         pub ty: Box<Type>,

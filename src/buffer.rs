@@ -14,6 +14,8 @@
 //!
 //! [`Synom`]: ../synom/trait.Synom.html
 //!
+//! *This module is available if Syn is built with the `"parsing"` feature.*
+//!
 //! # Example
 //!
 //! This example shows a basic token parser for parsing a token stream without
@@ -154,6 +156,8 @@ enum Entry {
 /// See the [module documentation] for an example of `TokenBuffer` in action.
 ///
 /// [module documentation]: index.html
+///
+/// *This type is available if Syn is built with the `"parsing"` feature.*
 pub struct TokenBuffer {
     // NOTE: Do not derive clone on this - there are raw pointers inside which
     // will be messed up. Moving the `TokenBuffer` itself is safe as the actual
@@ -246,6 +250,8 @@ impl TokenBuffer {
 /// See the [module documentation] for an example of a `Cursor` in action.
 ///
 /// [module documentation]: index.html
+///
+/// *This type is available if Syn is built with the `"parsing"` feature.*
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Cursor<'a> {
     /// The current entry which the `Cursor` is pointing at.

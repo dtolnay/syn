@@ -1026,6 +1026,8 @@ use gen::helper::fold::*;
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `\"fold\"` feature.*
 pub trait Fold {{
 {fold_trait}
 }}
@@ -1086,6 +1088,8 @@ use gen::helper::visit::*;
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `\"visit\"` feature.*
 pub trait Visit<'ast> {{
 {visit_trait}
 }}
@@ -1122,6 +1126,8 @@ use gen::helper::visit_mut::*;
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `\"visit-mut\"` feature.*
 pub trait VisitMut {{
 {visit_mut_trait}
 }}

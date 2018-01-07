@@ -41,6 +41,8 @@
 //! - [`syn!`](../macro.syn.html)
 //! - [`tuple!`](../macro.tuple.html)
 //! - [`value!`](../macro.value.html)
+//!
+//! *This module is available if Syn is built with the `"parsing"` feature.*
 
 use proc_macro2::TokenStream;
 
@@ -54,6 +56,8 @@ use buffer::Cursor;
 /// Refer to the [module documentation] for details about parsing in Syn.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `"parsing"` feature.*
 pub trait Synom: Sized {
     fn parse(input: Cursor) -> PResult<Self>;
 

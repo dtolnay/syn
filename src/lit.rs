@@ -18,6 +18,9 @@ use std::hash::{Hash, Hasher};
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
     ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -25,24 +28,36 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Lit {
         /// A UTF-8 string literal: `"foo"`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Str(LitStr #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
         /// A byte string literal: `b"foo"`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub ByteStr(LitByteStr #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
         /// A byte literal: `b'f'`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Byte(LitByte #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
         /// A character literal: `'a'`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Char(LitChar #manual_extra_traits {
             token: Literal,
             pub span: Span,
@@ -52,6 +67,9 @@ ast_enum_of_structs! {
         ///
         /// Holds up to 64 bits of data. Use `LitVerbatim` for any larger
         /// integer literal.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Int(LitInt #manual_extra_traits {
             token: Literal,
             pub span: Span,
@@ -60,12 +78,18 @@ ast_enum_of_structs! {
         /// A floating point literal: `1f64` or `1.0e10f64`.
         ///
         /// Must be finite. May not be infinte or NaN.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Float(LitFloat #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
         /// A boolean literal: `true` or `false`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Bool(LitBool #manual_extra_traits {
             pub value: bool,
             pub span: Span,
@@ -73,6 +97,9 @@ ast_enum_of_structs! {
 
         /// A raw token literal not interpreted by Syn, possibly because it
         /// represents an integer larger than 64 bits.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Verbatim(LitVerbatim #manual_extra_traits {
             pub token: Literal,
             pub span: Span,
@@ -245,6 +272,9 @@ lit_extra_traits!(LitVerbatim, token);
 ast_enum! {
     /// The style of a string literal, either plain quoted or a raw string like
     /// `r##"data"##`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum StrStyle #no_visit {
         /// An ordinary string like `"data"`.
         Cooked,
@@ -257,6 +287,9 @@ ast_enum! {
 
 ast_enum! {
     /// The suffix on an integer literal if any, like the `u8` in `127u8`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum IntSuffix #no_visit {
         I8,
         I16,
@@ -277,6 +310,9 @@ ast_enum! {
 ast_enum! {
     /// The suffix on a floating point literal if any, like the `f32` in
     /// `1.0f32`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum FloatSuffix #no_visit {
         F32,
         F64,

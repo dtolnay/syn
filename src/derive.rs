@@ -11,6 +11,8 @@ use punctuated::Punctuated;
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` feature.*
     pub struct DeriveInput {
         /// Attributes tagged on the whole struct or enum.
         pub attrs: Vec<Attribute>,
@@ -32,6 +34,8 @@ ast_struct! {
 ast_enum_of_structs! {
     /// The storage of a struct, enum or union data structure.
     ///
+    /// *This type is available if Syn is built with the `"derive"` feature.*
+    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -39,6 +43,9 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Data {
         /// A struct input to a `proc_macro_derive` macro.
+        ///
+        /// *This type is available if Syn is built with the `"derive"`
+        /// feature.*
         pub Struct(DataStruct {
             pub struct_token: Token![struct],
             pub fields: Fields,
@@ -46,6 +53,9 @@ ast_enum_of_structs! {
         }),
 
         /// An enum input to a `proc_macro_derive` macro.
+        ///
+        /// *This type is available if Syn is built with the `"derive"`
+        /// feature.*
         pub Enum(DataEnum {
             pub enum_token: Token![enum],
             pub brace_token: token::Brace,
@@ -53,6 +63,9 @@ ast_enum_of_structs! {
         }),
 
         /// A tagged union input to a `proc_macro_derive` macro.
+        ///
+        /// *This type is available if Syn is built with the `"derive"`
+        /// feature.*
         pub Union(DataUnion {
             pub union_token: Token![union],
             pub fields: FieldsNamed,

@@ -10,6 +10,8 @@ use super::*;
 
 ast_struct! {
     /// A complete file of Rust source code.
+    ///
+    /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct File {
         pub shebang: Option<String>,
         pub attrs: Vec<Attribute>,

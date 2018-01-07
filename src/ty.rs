@@ -17,6 +17,9 @@ use tt::TokenStreamHelper;
 ast_enum_of_structs! {
     /// The possible types that a Rust value could have.
     ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -24,12 +27,18 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Type {
         /// A dynamically sized slice type: `[T]`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Slice(TypeSlice {
             pub bracket_token: token::Bracket,
             pub elem: Box<Type>,
         }),
 
         /// A fixed size array type: `[T; n]`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Array(TypeArray {
             pub bracket_token: token::Bracket,
             pub elem: Box<Type>,
@@ -38,6 +47,9 @@ ast_enum_of_structs! {
         }),
 
         /// A raw pointer type: `*const T` or `*mut T`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Ptr(TypePtr {
             pub star_token: Token![*],
             pub const_token: Option<Token![const]>,
@@ -46,6 +58,9 @@ ast_enum_of_structs! {
         }),
 
         /// A reference type: `&'a T` or `&'a mut T`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Reference(TypeReference {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
@@ -54,6 +69,9 @@ ast_enum_of_structs! {
         }),
 
         /// A bare function type: `fn(usize) -> bool`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub BareFn(TypeBareFn {
             pub unsafety: Option<Token![unsafe]>,
             pub abi: Option<Abi>,
@@ -66,11 +84,17 @@ ast_enum_of_structs! {
         }),
 
         /// The never type: `!`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Never(TypeNever {
             pub bang_token: Token![!],
         }),
 
         /// A tuple type: `(A, B, C, String)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
             pub elems: Punctuated<Type, Token![,]>,
@@ -80,6 +104,9 @@ ast_enum_of_structs! {
         /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
         ///
         /// Type arguments are stored in the Path itself.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Path(TypePath {
             pub qself: Option<QSelf>,
             pub path: Path,
@@ -87,6 +114,9 @@ ast_enum_of_structs! {
 
         /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
         /// trait or a lifetime.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub TraitObject(TypeTraitObject {
             pub dyn_token: Option<Token![dyn]>,
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
@@ -94,34 +124,52 @@ ast_enum_of_structs! {
 
         /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
         /// a lifetime.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub ImplTrait(TypeImplTrait {
             pub impl_token: Token![impl],
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
 
         /// A parenthesized type equivalent to the inner type.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Paren(TypeParen {
             pub paren_token: token::Paren,
             pub elem: Box<Type>,
         }),
 
         /// A type contained within invisible delimiters.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Group(TypeGroup {
             pub group_token: token::Group,
             pub elem: Box<Type>,
         }),
 
         /// Indication that a type should be inferred by the compiler: `_`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Infer(TypeInfer {
             pub underscore_token: Token![_],
         }),
 
         /// A macro in the type position.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Macro(TypeMacro {
             pub mac: Macro,
         }),
 
         /// Tokens in type position not interpreted by Syn.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Verbatim(TypeVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -150,6 +198,9 @@ impl Hash for TypeVerbatim {
 
 ast_struct! {
     /// The binary interface of a function: `extern "C"`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Abi {
         pub extern_token: Token![extern],
         pub name: Option<LitStr>,
@@ -158,6 +209,9 @@ ast_struct! {
 
 ast_struct! {
     /// An argument in a function type: the `usize` in `fn(usize) -> bool`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct BareFnArg {
         pub name: Option<(BareFnArgName, Token![:])>,
         pub ty: Type,
@@ -166,6 +220,9 @@ ast_struct! {
 
 ast_enum! {
     /// Name of an argument in a function type: the `n` in `fn(n: usize)`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum BareFnArgName {
         /// Argument given a name.
         Named(Ident),
@@ -176,6 +233,9 @@ ast_enum! {
 
 ast_enum! {
     /// Return type of a function signature.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum ReturnType {
         /// Return type is not specified.
         ///
