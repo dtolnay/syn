@@ -220,7 +220,7 @@
 //! generated code looks like. Use `cargo rustc -- -Zunstable-options
 //! --pretty=expanded` or the [`cargo expand`] subcommand.
 //!
-//! [`cargo-expand`]: https://github.com/dtolnay/cargo-expand
+//! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 //!
 //! To show the expanded code for some crate that uses your procedural macro,
 //! run `cargo expand` from that crate. To show the expanded code for one of
