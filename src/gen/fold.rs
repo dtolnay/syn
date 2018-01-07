@@ -30,6 +30,8 @@ macro_rules! full {
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `"fold"` feature.*
 pub trait Fold {
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_abi(&mut self, i: Abi) -> Abi { fold_abi(self, i) }

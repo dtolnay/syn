@@ -29,6 +29,8 @@ macro_rules! full {
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `"visit-mut"` feature.*
 pub trait VisitMut {
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_abi_mut(&mut self, i: &mut Abi) { visit_abi_mut(self, i) }
