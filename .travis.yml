@@ -32,18 +32,18 @@ script:
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features full &&
-          cargo build --features 'fold visit visit_mut' &&
-          cargo build --features 'full fold visit visit_mut' &&
+          cargo build --features 'fold visit visit-mut' &&
+          cargo build --features 'full fold visit visit-mut' &&
           cargo build --no-default-features --features 'full parsing printing' &&
-          cargo build --no-default-features --features 'fold visit visit_mut parsing printing' &&
-          cargo build --no-default-features --features 'full fold visit visit_mut parsing printing'
+          cargo build --no-default-features --features 'fold visit visit-mut parsing printing' &&
+          cargo build --no-default-features --features 'full fold visit visit-mut parsing printing'
           ;;
         test)
           cargo test --all-features --release
           ;;
         clippy)
           cargo install clippy --debug --force || exit
-          cargo clippy --features 'full fold visit visit_mut' -- -Dclippy
+          cargo clippy --features 'full fold visit visit-mut' -- -Dclippy
           ;;
         codegen)
           (cd codegen && cargo run) &&
@@ -66,7 +66,7 @@ after_success:
         curl -sSLo synom.crate.tgz "https://crates.io/api/v1/crates/synom/${SYNOM}/download" &&
         tar xf synom.crate.tgz &&
         mv "synom-${SYNOM}" synom &&
-        cargo doc --features 'full fold visit visit_mut' &&
+        cargo doc --features 'full fold visit visit-mut' &&
         travis-cargo doc-upload
       fi
 
