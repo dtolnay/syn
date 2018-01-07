@@ -773,19 +773,60 @@ macro_rules! tuple_parser {
 /// - **Syntax:** `alt!(THING1 | THING2 => { FUNC } | ...)`
 /// - **Output:** `T`, the return type of `THING1` and `FUNC(THING2)` and ...
 ///
+/// # Example
+///
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
 ///
 /// use syn::Ident;
 ///
-/// named!(ident_or_bang -> Ident,
-///     alt!(
-///         syn!(Ident)
+/// // Parse any identifier token, or the `!` token in which case the
+/// // identifier is treated as `"BANG"`.
+/// named!(ident_or_bang -> Ident, alt!(
+///     syn!(Ident)
+///     |
+///     punct!(!) => { |_| "BANG".into() }
+/// ));
+/// #
+/// # fn main() {}
+/// ```
+///
+/// The `alt!` macro is most commonly seen when parsing a syntax tree enum such
+/// as the [`Item`] enum.
+///
+/// [`Item`]: enum.Item.html
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate syn;
+/// #
+/// # use syn::synom::Synom;
+/// #
+/// # struct Item;
+/// #
+/// impl Synom for Item {
+///     named!(parse -> Self, alt!(
+/// #       epsilon!() => { |_| unimplemented!() }
+/// #   ));
+/// # }
+/// #
+/// # mod example {
+/// #   use syn::*;
+/// #
+/// #   named!(parse -> Item, alt!(
+///         syn!(ItemExternCrate) => { Item::ExternCrate }
 ///         |
-///         punct!(!) => { |_| "BANG".into() }
-///     )
-/// );
+///         syn!(ItemUse) => { Item::Use }
+///         |
+///         syn!(ItemStatic) => { Item::Static }
+///         |
+///         syn!(ItemConst) => { Item::Const }
+///         |
+///         /* ... */
+/// #       syn!(ItemFn) => { Item::Fn }
+///     ));
+/// }
 /// #
 /// # fn main() {}
 /// ```
