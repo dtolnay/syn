@@ -19,24 +19,48 @@ use std::hash::{Hash, Hasher};
 use tt::TokenStreamHelper;
 
 ast_struct! {
-    /// Doc-comments are promoted to attributes that have `is_sugared_doc` = true
+    /// An attribute like `#[repr(transparent)]`.
+    ///
+    /// # Syntax
+    ///
+    /// Rust has six types of attributes.
+    ///
+    /// - Outer attributes like `#[repr(transparent)]`. These appear outside or
+    ///   in front of the item they describe.
+    /// - Inner attributes like `#![feature(proc_macro)]`. These appear inside
+    ///   of the item they describe, usually a module.
+    /// - Outer doc comments like `/// # Example`.
+    /// - Inner doc comments like `//! Please file an issue`.
+    /// - Outer block comments `/** # Example */`.
+    /// - Inner block comments `/*! Please file an issue */`.
+    ///
+    /// The `style` field of type `AttrStyle` distinguishes whether an attribute
+    /// is outer or inner. Doc comments and block comments are promoted to
+    /// attributes that have `is_sugared_doc` set to true, as this is how they
+    /// are processed by the compiler and by `macro_rules!` macros.
+    ///
+    /// The `path` field gives the possibly colon-delimited path against which
+    /// the attribute is resolved. It is equal to `"doc"` for desugared doc
+    /// comments. The `tts` field contains the rest of the attribute body as
+    /// tokens.
+    ///
+    /// ```text
+    /// #[derive(Copy)]      #[crate::precondition x < 5]
+    ///   ^^^^^^~~~~~~         ^^^^^^^^^^^^^^^^^^^ ~~~~~
+    ///    path  tts                   path         tts
+    /// ```
+    ///
+    /// Use the [`meta_item`] method to try parsing the tokens of an attribute
+    /// into the structured representation that is used by convention across
+    /// most Rust libraries.
+    ///
+    /// [`meta_item`]: #method.meta_item
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
         pub style: AttrStyle,
         pub bracket_token: token::Bracket,
-
-        /// The path of the attribute.
-        ///
-        /// E.g. `derive` in `#[derive(Copy)]`
-        /// E.g. `crate::precondition` in `#[crate::precondition x < 5]`
         pub path: Path,
-
-        /// Any tokens after the path.
-        ///
-        /// E.g. `( Copy )` in `#[derive(Copy)]`
-        /// E.g. `x < 5` in `#[crate::precondition x < 5]`
         pub tts: TokenStream,
-
         pub is_sugared_doc: bool,
     }
 }
@@ -198,14 +222,22 @@ fn list_of_nested_meta_items_from_tokens(
 
 ast_enum! {
     /// Distinguishes between Attributes that decorate items and Attributes that
-    /// are contained as statements within items. These two cases need to be
-    /// distinguished for pretty-printing.
+    /// are contained as statements within items.
+    ///
+    /// # Outer attributes
+    ///
+    /// - `#[repr(transparent)]`
+    /// - `/// # Example`
+    /// - `/** Please file an issue */`
+    ///
+    /// # Inner attributes
+    ///
+    /// - `#![feature(proc_macro)]`
+    /// - `//! # Example`
+    /// - `/*! Please file an issue */`
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum AttrStyle {
-        /// Attribute of the form `#[...]`.
         Outer,
-
-        /// Attribute of the form `#![...]`.
         Inner(Token![!]),
     }
 }
