@@ -79,14 +79,14 @@ where
 }
 
 ast_enum! {
-    /// Arguments of a path segment.
+    /// Bracketed or parenthesized arguments of a path segment.
     ///
-    /// E.g. `<A, B>` as in `Foo<A, B>` or `(A, B)` as in `Foo(A, B)`
+    /// E.g. `<K, V>` as in `HashMap<K, V>` or `(A, B) -> C` as in `Fn(A, B) -> C`
     pub enum PathArguments {
         None,
-        /// The `<'a, A, B, C>` in `foo::bar::baz::<'a, A, B, C>`
+        /// The `<'a, T>` in `std::slice::iter<'a, T>`.
         AngleBracketed(AngleBracketedGenericArguments),
-        /// The `(A, B)` and `C` in `Foo(A, B) -> C`
+        /// The `(A, B)` and `C` in `Fn(A, B) -> C`.
         Parenthesized(ParenthesizedGenericArguments),
     }
 }
@@ -108,17 +108,17 @@ impl PathArguments {
 }
 
 ast_enum! {
-    /// A individual generic argument, like `'a`, `T`, or `Item=T`.
+    /// A individual generic argument, like `'a`, `T`, or `Item = T`.
     pub enum GenericArgument {
-        /// The lifetime parameters for this path segment.
+        /// A lifetime argument.
         Lifetime(Lifetime),
-        /// The type parameters for this path segment, if present.
+        /// A type argument.
         Type(Type),
-        /// Bindings (equality constraints) on associated types, if present.
+        /// A binding (equality constraint) on an associated type.
         ///
-        /// E.g., `Foo<A=Bar>`.
+        /// E.g. in `Iterator<Item = u8>`.
         Binding(Binding),
-        /// Const expression. Must be inside of a block.
+        /// A const expression. Must be inside of a block.
         ///
         /// NOTE: Identity expressions are represented as Type arguments, as
         /// they are indistinguishable syntactically.
@@ -127,7 +127,8 @@ ast_enum! {
 }
 
 ast_struct! {
-    /// A path like `Foo<'a, T>`
+    /// Angle bracketed arguments of a path segment: the `<K, V>` in `HashMap<K,
+    /// V>`.
     pub struct AngleBracketedGenericArguments {
         pub colon2_token: Option<Token![::]>,
         pub lt_token: Token![<],
@@ -137,7 +138,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Bind a type to an associated type: `A=Foo`.
+    /// A binding (equality constraint) on an associated type: `Item = u8`.
     pub struct Binding {
         pub ident: Ident,
         pub eq_token: Token![=],
@@ -146,7 +147,8 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A path like `Foo(A,B) -> C`
+    /// Arguments of a function path segment: the `(A, B)` and `C` in `Fn(A,B)
+    /// -> C`.
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
         /// `(A, B)`
@@ -157,9 +159,11 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// The explicit Self type in a "qualified path". The actual
-    /// path, including the trait and the associated item, is stored
-    /// separately. `position` represents the index of the associated
+    /// The explicit Self type in a qualified path: the `T` in `<T as
+    /// Display>::fmt`
+    ///
+    /// The actual path, including the trait and the associated item, is stored
+    /// separately. The `position` field represents the index of the associated
     /// item qualified with this Self type.
     ///
     /// ```text
