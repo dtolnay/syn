@@ -178,7 +178,7 @@
 //!  --> src/main.rs:7:5
 //!   |
 //! 7 |     bad: std::thread::Thread,
-//!   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
+//!   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `Thread`
 //! ```
 //!
 //! ## Parsing a custom syntax using combinators
