@@ -247,7 +247,7 @@
 //! - **`printing`** *(enabled by default)* — Ability to print a syntax tree
 //!   node as tokens of Rust source code.
 //! - **`visit`** — Trait for traversing a syntax tree.
-//! - **`visit_mut`** — Trait for traversing and mutating in place a syntax
+//! - **`visit-mut`** — Trait for traversing and mutating in place a syntax
 //!   tree.
 //! - **`fold`** — Trait for transforming an owned syntax tree.
 //! - **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
