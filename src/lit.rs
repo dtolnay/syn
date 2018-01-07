@@ -16,32 +16,33 @@ use proc_macro2::{Term, TokenTree};
 use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
+    /// A Rust literal such as a string or integer or boolean.
     pub enum Lit {
-        /// A string literal (`"foo"`)
+        /// A UTF-8 string literal: `"foo"`.
         pub Str(LitStr #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
-        /// A byte string (`b"foo"`)
+        /// A byte string literal: `b"foo"`.
         pub ByteStr(LitByteStr #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
-        /// A byte char (`b'f'`)
+        /// A byte literal: `b'f'`.
         pub Byte(LitByte #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
-        /// A character literal (`'a'`)
+        /// A character literal: `'a'`.
         pub Char(LitChar #manual_extra_traits {
             token: Literal,
             pub span: Span,
         }),
 
-        /// An integer literal (`1`)
+        /// An integer literal: `1` or `1u16`.
         ///
         /// Holds up to 64 bits of data. Use `LitVerbatim` for any larger
         /// integer literal.
@@ -50,7 +51,7 @@ ast_enum_of_structs! {
             pub span: Span,
         }),
 
-        /// A float literal (`1f64` or `1E10f64`)
+        /// A floating point literal: `1f64` or `1.0e10f64`.
         ///
         /// Must be finite. May not be infinte or NaN.
         pub Float(LitFloat #manual_extra_traits {
@@ -58,12 +59,14 @@ ast_enum_of_structs! {
             pub span: Span,
         }),
 
-        /// A boolean literal
+        /// A boolean literal: `true` or `false`.
         pub Bool(LitBool #manual_extra_traits {
             pub value: bool,
             pub span: Span,
         }),
 
+        /// A raw token literal not interpreted by Syn, possibly because it
+        /// represents an integer larger than 64 bits.
         pub Verbatim(LitVerbatim #manual_extra_traits {
             pub token: Literal,
             pub span: Span,
@@ -234,10 +237,12 @@ lit_extra_traits!(LitBool, value);
 lit_extra_traits!(LitVerbatim, token);
 
 ast_enum! {
+    /// The style of a string literal, either plain or a raw string like
+    /// `r##"data"##`.
     pub enum StrStyle #no_visit {
-        /// A regular string, like `"foo"`
+        /// An ordinary string like `"data"`.
         Cooked,
-        /// A raw string, like `r##"foo"##`
+        /// A raw string like `r##"data"##`.
         ///
         /// The unsigned integer is the number of `#` symbols used.
         Raw(usize),
@@ -245,6 +250,7 @@ ast_enum! {
 }
 
 ast_enum! {
+    /// The suffix on an integer literal if any, like the `u8` in `127u8`.
     pub enum IntSuffix #no_visit {
         I8,
         I16,
@@ -263,6 +269,8 @@ ast_enum! {
 }
 
 ast_enum! {
+    /// The suffix on a floating point literal if any, like the `f32` in
+    /// `1.0f32`.
     pub enum FloatSuffix #no_visit {
         F32,
         F64,
