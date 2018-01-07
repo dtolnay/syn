@@ -59,7 +59,7 @@ pub fn syn_expr(input: &str) -> Option<syn::Expr> {
 }
 
 pub fn syn<T: Synom>(tokens: proc_macro2::TokenStream) -> T {
-    let buf = TokenBuffer::new(tokens);
+    let buf = TokenBuffer::new2(tokens);
     let result = T::parse(buf.begin());
     match result {
         Ok((t, rest)) => {
