@@ -137,6 +137,10 @@ pub mod parsing {
                 named: fields,
             }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("named fields in a struct or struct variant")
+        }
     }
 
     impl Synom for FieldsUnnamed {
@@ -147,6 +151,10 @@ pub mod parsing {
                 unnamed: fields,
             }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("unnamed fields in a tuple struct or tuple variant")
+        }
     }
 
     impl Field {

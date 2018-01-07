@@ -1386,6 +1386,10 @@ pub mod parsing {
                 lit: lit,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("literal")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1397,6 +1401,10 @@ pub mod parsing {
                 mac: mac,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("macro invocation expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1409,6 +1417,10 @@ pub mod parsing {
                 group_token: e.0,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("expression surrounded by invisible delimiters")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1421,6 +1433,10 @@ pub mod parsing {
                 expr: Box::new(e.1),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("parenthesized expression")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1435,7 +1451,7 @@ pub mod parsing {
         ));
 
         fn description() -> Option<&'static str> {
-            Some("array")
+            Some("array expression")
         }
     }
 
@@ -1479,6 +1495,10 @@ pub mod parsing {
     impl Synom for GenericMethodArgument {
         // TODO parse const generics as well
         named!(parse -> Self, map!(ty_no_eq_after, GenericMethodArgument::Type));
+
+        fn description() -> Option<&'static str> {
+            Some("generic method argument")
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1798,6 +1818,10 @@ pub mod parsing {
                 label: label,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("`while let` expression")
+        }
     }
 
     #[cfg(feature = "full")]

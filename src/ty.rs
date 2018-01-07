@@ -384,10 +384,18 @@ pub mod parsing {
 
     impl Synom for TypeMacro {
         named!(parse -> Self, map!(syn!(Macro), |mac| TypeMacro { mac: mac }));
+
+        fn description() -> Option<&'static str> {
+            Some("macro invocation")
+        }
     }
 
     impl Synom for TypePath {
         named!(parse -> Self, call!(Self::parse, false));
+
+        fn description() -> Option<&'static str> {
+            Some("type path")
+        }
     }
 
     impl TypePath {
@@ -480,10 +488,18 @@ pub mod parsing {
                 elem: Box::new(data.1),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("type surrounded by invisible delimiters")
+        }
     }
 
     impl Synom for TypeParen {
         named!(parse -> Self, call!(Self::parse, false));
+
+        fn description() -> Option<&'static str> {
+            Some("parenthesized type")
+        }
     }
 
     impl TypeParen {
@@ -540,7 +556,7 @@ pub mod parsing {
         ));
 
         fn description() -> Option<&'static str> {
-            Some("ABI qualifier")
+            Some("`extern` ABI qualifier")
         }
     }
 }

@@ -217,6 +217,10 @@ macro_rules! token_keyword {
             fn parse(tokens: $crate::buffer::Cursor) -> $crate::synom::PResult<$name> {
                 parsing::keyword($s, tokens, $name)
             }
+
+            fn description() -> Option<&'static str> {
+                Some(concat!("`", $s, "`"))
+            }
         }
     }
 }
