@@ -122,6 +122,11 @@ macro_rules! token_punct {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
         #[$doc]
+        ///
+        /// Don't try to remember the name of this type -- use the [`Token!`]
+        /// macro instead.
+        ///
+        /// [`Token!`]: index.html
         pub struct $name(pub [Span; $len]);
 
         impl $name {
@@ -179,6 +184,11 @@ macro_rules! token_keyword {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[derive(Default)]
         #[$doc]
+        ///
+        /// Don't try to remember the name of this type -- use the [`Token!`]
+        /// macro instead.
+        ///
+        /// [`Token!`]: index.html
         pub struct $name(pub Span);
 
         #[cfg(feature = "extra-traits")]
