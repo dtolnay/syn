@@ -388,12 +388,107 @@ mod tt;
 pub mod spanned;
 
 mod gen {
+    /// Syntax tree traversal to walk a shared borrow of a syntax tree.
+    ///
+    /// Each method of the [`Visit`] trait is a hook that can be overridden to
+    /// customize the behavior when visiting the corresponding type of node. By
+    /// default, every method recursively visits the substructure of the input
+    /// by invoking the right visitor method of each of its fields.
+    ///
+    /// [`Visit`]: trait.Visit.html
+    ///
+    /// ```rust
+    /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
+    /// #
+    /// pub trait Visit<'ast> {
+    ///     /* ... */
+    ///
+    ///     fn visit_expr_binary(&mut self, node: &'ast ExprBinary) {
+    ///         for attr in &node.attrs {
+    ///             self.visit_attribute(attr);
+    ///         }
+    ///         self.visit_expr(&*node.left);
+    ///         self.visit_bin_op(&node.op);
+    ///         self.visit_expr(&*node.right);
+    ///     }
+    ///
+    ///     /* ... */
+    ///     # fn visit_attribute(&mut self, node: &'ast Attribute);
+    ///     # fn visit_expr(&mut self, node: &'ast Expr);
+    ///     # fn visit_bin_op(&mut self, node: &'ast BinOp);
+    /// }
+    /// ```
     #[cfg(feature = "visit")]
     pub mod visit;
 
+
+    /// Syntax tree traversal to mutate an exclusive borrow of a syntax tree in
+    /// place.
+    ///
+    /// Each method of the [`VisitMut`] trait is a hook that can be overridden
+    /// to customize the behavior when mutating the corresponding type of node.
+    /// By default, every method recursively visits the substructure of the
+    /// input by invoking the right visitor method of each of its fields.
+    ///
+    /// [`VisitMut`]: trait.VisitMut.html
+    ///
+    /// ```rust
+    /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
+    /// #
+    /// pub trait VisitMut {
+    ///     /* ... */
+    ///
+    ///     fn visit_expr_binary_mut(&mut self, node: &mut ExprBinary) {
+    ///         for attr in &mut node.attrs {
+    ///             self.visit_attribute_mut(attr);
+    ///         }
+    ///         self.visit_expr_mut(&mut *node.left);
+    ///         self.visit_bin_op_mut(&mut node.op);
+    ///         self.visit_expr_mut(&mut *node.right);
+    ///     }
+    ///
+    ///     /* ... */
+    ///     # fn visit_attribute_mut(&mut self, node: &mut Attribute);
+    ///     # fn visit_expr_mut(&mut self, node: &mut Expr);
+    ///     # fn visit_bin_op_mut(&mut self, node: &mut BinOp);
+    /// }
+    /// ```
     #[cfg(feature = "visit-mut")]
     pub mod visit_mut;
 
+    /// Syntax tree traversal to transform the nodes of an owned syntax tree.
+    ///
+    /// Each method of the [`Fold`] trait is a hook that can be overridden to
+    /// customize the behavior when transforming the corresponding type of node.
+    /// By default, every method recursively visits the substructure of the
+    /// input by invoking the right visitor method of each of its fields.
+    ///
+    /// [`Fold`]: trait.Fold.html
+    ///
+    /// ```rust
+    /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
+    /// #
+    /// pub trait Fold {
+    ///     /* ... */
+    ///
+    ///     fn fold_expr_binary(&mut self, node: ExprBinary) -> ExprBinary {
+    ///         ExprBinary {
+    ///             attrs: node.attrs
+    ///                        .into_iter()
+    ///                        .map(|attr| self.fold_attribute(attr))
+    ///                        .collect(),
+    ///             left: Box::new(self.fold_expr(*node.left)),
+    ///             op: self.fold_bin_op(node.op),
+    ///             right: Box::new(self.fold_expr(*node.right)),
+    ///         }
+    ///     }
+    ///
+    ///     /* ... */
+    ///     # fn fold_attribute(&mut self, node: Attribute) -> Attribute;
+    ///     # fn fold_expr(&mut self, node: Expr) -> Expr;
+    ///     # fn fold_bin_op(&mut self, node: BinOp) -> BinOp;
+    /// }
+    /// ```
     #[cfg(feature = "fold")]
     pub mod fold;
 
