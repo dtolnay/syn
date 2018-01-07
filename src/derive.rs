@@ -32,21 +32,21 @@ ast_struct! {
 ast_enum_of_structs! {
     /// The storage of a struct, enum or union data structure.
     pub enum Data {
-        /// It's a struct.
+        /// A struct input to a `proc_macro_derive` macro.
         pub Struct(DataStruct {
             pub struct_token: Token![struct],
             pub fields: Fields,
             pub semi_token: Option<Token![;]>,
         }),
 
-        /// It's an enum.
+        /// An enum input to a `proc_macro_derive` macro.
         pub Enum(DataEnum {
             pub enum_token: Token![enum],
             pub brace_token: token::Brace,
             pub variants: Punctuated<Variant, Token![,]>,
         }),
 
-        /// It's an untagged union.
+        /// A tagged union input to a `proc_macro_derive` macro.
         pub Union(DataUnion {
             pub union_token: Token![union],
             pub fields: FieldsNamed,
