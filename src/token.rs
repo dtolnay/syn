@@ -6,12 +6,96 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Discrete tokens that can be parsed out by synom.
+//! Tokens representing Rust punctuation, keywords, and delimiters.
 //!
-//! This module contains a number of useful tokens like `+=` and `/` along with
-//! keywords like `crate` and such. These structures are used to track the spans
-//! of these tokens and all implment the `ToTokens` and `Synom` traits when the
-//! corresponding feature is activated.
+//! The type names in this module can be difficult to keep straight, so we
+//! prefer to use the [`Token!`] macro instead. This is a type-macro that
+//! expands to the token type of the given token.
+//!
+//! [`Token!`]: ../macro.Token.html
+//!
+//! # Example
+//!
+//! The [`ItemStatic`] syntax tree node is defined like this.
+//!
+//! [`ItemStatic`]: ../struct.ItemStatic.html
+//!
+//! ```
+//! # #[macro_use]
+//! # extern crate syn;
+//! #
+//! # use syn::{Attribute, Visibility, Ident, Type, Expr};
+//! #
+//! pub struct ItemStatic {
+//!     pub attrs: Vec<Attribute>,
+//!     pub vis: Visibility,
+//!     pub static_token: Token![static],
+//!     pub mutability: Option<Token![mut]>,
+//!     pub ident: Ident,
+//!     pub colon_token: Token![:],
+//!     pub ty: Box<Type>,
+//!     pub eq_token: Token![=],
+//!     pub expr: Box<Expr>,
+//!     pub semi_token: Token![;],
+//! }
+//! #
+//! # fn main() {}
+//! ```
+//!
+//! # Parsing
+//!
+//! These tokens can be parsed using the [`Synom`] trait and the parser
+//! combinator macros [`punct!`], [`keyword!`], [`parens!`], [`braces!`], and
+//! [`brackets!`].
+//!
+//! [`Synom`]: ../synom/trait.Synom.html
+//! [`punct!`]: ../macro.punct.html
+//! [`keyword!`]: ../macro.keyword.html
+//! [`parens!`]: ../macro.parens.html
+//! [`braces!`]: ../macro.braces.html
+//! [`brackets!`]: ../macro.brackets.html
+//!
+//! ```
+//! #[macro_use]
+//! extern crate syn;
+//!
+//! use syn::synom::Synom;
+//! use syn::{Attribute, Visibility, Ident, Type, Expr};
+//! #
+//! # struct ItemStatic;
+//! # use syn::ItemStatic as SynItemStatic;
+//!
+//! // Parse the ItemStatic struct shown above.
+//! impl Synom for ItemStatic {
+//!     named!(parse -> Self, do_parse!(
+//! #       (ItemStatic)
+//! #   ));
+//! # }
+//! #
+//! # mod example {
+//! #   use super::*;
+//! #   use super::SynItemStatic as ItemStatic;
+//! #
+//! #   named!(parse -> ItemStatic, do_parse!(
+//!         attrs: many0!(Attribute::parse_outer) >>
+//!         vis: syn!(Visibility) >>
+//!         static_token: keyword!(static) >>
+//!         mutability: option!(keyword!(mut)) >>
+//!         ident: syn!(Ident) >>
+//!         colon_token: punct!(:) >>
+//!         ty: syn!(Type) >>
+//!         eq_token: punct!(=) >>
+//!         expr: syn!(Expr) >>
+//!         semi_token: punct!(;) >>
+//!         (ItemStatic {
+//!             attrs, vis, static_token, mutability, ident, colon_token,
+//!             ty: Box::new(ty), eq_token, expr: Box::new(expr), semi_token,
+//!         })
+//!     ));
+//! }
+//! #
+//! # fn main() {}
+//! ```
 
 use proc_macro2::Span;
 
