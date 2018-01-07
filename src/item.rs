@@ -317,9 +317,9 @@ ast_enum_of_structs! {
 }
 
 ast_enum_of_structs! {
-    /// An item within an `extern` block
+    /// An item within an `extern` block.
     pub enum ForeignItem {
-        /// A foreign function
+        /// A foreign function in an `extern` block.
         pub Fn(ForeignItemFn {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -327,7 +327,8 @@ ast_enum_of_structs! {
             pub decl: Box<FnDecl>,
             pub semi_token: Token![;],
         }),
-        /// A foreign static item (`static ext: u8`)
+
+        /// A foreign static item in an `extern` block: `static ext: u8`.
         pub Static(ForeignItemStatic {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -338,7 +339,8 @@ ast_enum_of_structs! {
             pub ty: Box<Type>,
             pub semi_token: Token![;],
         }),
-        /// A foreign type
+
+        /// A foreign type in an `extern` block: `type void`.
         pub Type(ForeignItemType {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -346,6 +348,8 @@ ast_enum_of_structs! {
             pub ident: Ident,
             pub semi_token: Token![;],
         }),
+
+        /// Tokens in an `extern` block not interpreted by Syn.
         pub Verbatim(ForeignItemVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -373,11 +377,9 @@ impl Hash for ForeignItemVerbatim {
 }
 
 ast_enum_of_structs! {
-    /// Represents an item declaration within a trait declaration,
-    /// possibly including a default implementation. A trait item is
-    /// either required (meaning it doesn't have an implementation, just a
-    /// signature) or provided (meaning it has a default implementation).
+    /// An item declaration within the definition of a trait.
     pub enum TraitItem {
+        /// An associated constant within the definition of a trait.
         pub Const(TraitItemConst {
             pub attrs: Vec<Attribute>,
             pub const_token: Token![const],
@@ -387,12 +389,16 @@ ast_enum_of_structs! {
             pub default: Option<(Token![=], Expr)>,
             pub semi_token: Token![;],
         }),
+
+        /// A trait method within the definition of a trait.
         pub Method(TraitItemMethod {
             pub attrs: Vec<Attribute>,
             pub sig: MethodSig,
             pub default: Option<Block>,
             pub semi_token: Option<Token![;]>,
         }),
+
+        /// An associated type within the definition of a trait.
         pub Type(TraitItemType {
             pub attrs: Vec<Attribute>,
             pub type_token: Token![type],
@@ -403,11 +409,15 @@ ast_enum_of_structs! {
             pub default: Option<(Token![=], Type)>,
             pub semi_token: Token![;],
         }),
+
+        /// A macro invocation within the definition of a trait.
         pub Macro(TraitItemMacro {
             pub attrs: Vec<Attribute>,
             pub mac: Macro,
             pub semi_token: Option<Token![;]>,
         }),
+
+        /// Tokens within the definition of a trait not interpreted by Syn.
         pub Verbatim(TraitItemVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -435,7 +445,9 @@ impl Hash for TraitItemVerbatim {
 }
 
 ast_enum_of_structs! {
+    /// An item within an impl block.
     pub enum ImplItem {
+        /// An associated constant within an impl block.
         pub Const(ImplItemConst {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -448,6 +460,8 @@ ast_enum_of_structs! {
             pub expr: Expr,
             pub semi_token: Token![;],
         }),
+
+        /// A method within an impl block.
         pub Method(ImplItemMethod {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -455,6 +469,8 @@ ast_enum_of_structs! {
             pub sig: MethodSig,
             pub block: Block,
         }),
+
+        /// An associated type within an impl block.
         pub Type(ImplItemType {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -466,11 +482,15 @@ ast_enum_of_structs! {
             pub ty: Type,
             pub semi_token: Token![;],
         }),
+
+        /// A macro invocation within an impl block.
         pub Macro(ImplItemMacro {
             pub attrs: Vec<Attribute>,
             pub mac: Macro,
             pub semi_token: Option<Token![;]>,
         }),
+
+        /// Tokens within an impl block not interpreted by Syn.
         pub Verbatim(ImplItemVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -510,9 +530,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Header (not the body) of a function declaration.
-    ///
-    /// E.g. `fn foo(bar: baz)`
+    /// Header of a function declaration, without including the body.
     pub struct FnDecl {
         pub fn_token: Token![fn],
         pub generics: Generics,
