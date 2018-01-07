@@ -471,7 +471,7 @@ pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
 {
-    let buf = TokenBuffer::new(tokens);
+    let buf = TokenBuffer::new2(tokens);
     let result = T::parse(buf.begin());
     let err = match result {
         Ok((t, rest)) => {

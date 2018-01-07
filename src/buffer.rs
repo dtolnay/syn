@@ -6,17 +6,127 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! This module defines a cheaply-copyable cursor into a TokenStream's data.
+//! A stably addressed token buffer supporting efficient traversal based on a
+//! cheaply copyable cursor.
 //!
-//! It does this by copying the data into a stably-addressed structured buffer,
-//! and holding raw pointers into that buffer to allow walking through delimited
-//! groups cheaply.
+//! The [`Synom`] trait is implemented for syntax tree types that can be parsed
+//! from one of these token cursors.
 //!
-//! This module is heavily commented as it contains the only unsafe code in
-//! `syn`, and caution should be made when editing it. It provides a safe
-//! interface, but is fragile internally.
+//! [`Synom`]: ../synom/trait.Synom.html
+//!
+//! # Example
+//!
+//! This example shows a basic token parser for parsing a token stream without
+//! using Syn's parser combinator macros.
+//!
+//! ```
+//! #![feature(proc_macro)]
+//!
+//! extern crate syn;
+//! extern crate proc_macro;
+//!
+//! #[macro_use]
+//! extern crate quote;
+//!
+//! use syn::{token, ExprTuple};
+//! use syn::buffer::{Cursor, TokenBuffer};
+//! use syn::spanned::Spanned;
+//! use syn::synom::Synom;
+//! use proc_macro::{Diagnostic, Span, TokenStream};
+//!
+//! /// A basic token parser for parsing a token stream without using Syn's
+//! /// parser combinator macros.
+//! pub struct Parser<'a> {
+//!     cursor: Cursor<'a>,
+//! }
+//!
+//! impl<'a> Parser<'a> {
+//!     pub fn new(cursor: Cursor<'a>) -> Self {
+//!         Parser { cursor }
+//!     }
+//!
+//!     pub fn current_span(&self) -> Span {
+//!         self.cursor.span().unstable()
+//!     }
+//!
+//!     pub fn parse<T: Synom>(&mut self) -> Result<T, Diagnostic> {
+//!         let (val, rest) = T::parse(self.cursor)
+//!             .map_err(|e| match T::description() {
+//!                 Some(desc) => {
+//!                     self.current_span().error(format!("{}: expected {}", e, desc))
+//!                 }
+//!                 None => {
+//!                     self.current_span().error(e.to_string())
+//!                 }
+//!             })?;
+//!
+//!         self.cursor = rest;
+//!         Ok(val)
+//!     }
+//!
+//!     pub fn expect_eof(&mut self) -> Result<(), Diagnostic> {
+//!         if !self.cursor.eof() {
+//!             return Err(self.current_span().error("trailing characters; expected eof"));
+//!         }
+//!
+//!         Ok(())
+//!     }
+//! }
+//!
+//! fn eval(input: TokenStream) -> Result<TokenStream, Diagnostic> {
+//!     let buffer = TokenBuffer::new(input);
+//!     let mut parser = Parser::new(buffer.begin());
+//!
+//!     // Parse some syntax tree types out of the input tokens. In this case we
+//!     // expect something like:
+//!     //
+//!     //     (a, b, c) = (1, 2, 3)
+//!     let a = parser.parse::<ExprTuple>()?;
+//!     parser.parse::<token::Eq>()?;
+//!     let b = parser.parse::<ExprTuple>()?;
+//!     parser.expect_eof()?;
+//!
+//!     // Perform some validation and report errors.
+//!     let (a_len, b_len) = (a.elems.len(), b.elems.len());
+//!     if a_len != b_len {
+//!         let diag = b.span().unstable()
+//!             .error(format!("expected {} element(s), got {}", a_len, b_len))
+//!             .span_note(a.span().unstable(), "because of this");
+//!
+//!         return Err(diag);
+//!     }
+//!
+//!     // Build the output tokens.
+//!     let out = quote! {
+//!         println!("All good! Received two tuples of size {}", #a_len);
+//!     };
+//!
+//!     Ok(out.into())
+//! }
+//! #
+//! # extern crate proc_macro2;
+//! #
+//! # // This method exists on proc_macro2::Span but is behind the "nightly"
+//! # // feature.
+//! # trait ToUnstableSpan {
+//! #     fn unstable(&self) -> Span;
+//! # }
+//! #
+//! # impl ToUnstableSpan for proc_macro2::Span {
+//! #     fn unstable(&self) -> Span {
+//! #         unimplemented!()
+//! #     }
+//! # }
+//! #
+//! # fn main() {}
+//! ```
 
-use proc_macro2::*;
+// This module is heavily commented as it contains the only unsafe code in Syn,
+// and caution should be used when editing it. The public-facing interface is
+// 100% safe but the implementation is fragile internally.
+
+use proc_macro as pm;
+use proc_macro2::{Delimiter, Literal, Spacing, Span, Term, TokenNode, TokenStream, TokenTree};
 
 use std::ptr;
 use std::marker::PhantomData;
@@ -24,21 +134,26 @@ use std::marker::PhantomData;
 #[cfg(synom_verbose_trace)]
 use std::fmt::{self, Debug};
 
-/// Internal type which is used instead of `TokenTree` to represent a single
-/// `TokenTree` within a `TokenBuffer`.
+/// Internal type which is used instead of `TokenTree` to represent a token tree
+/// within a `TokenBuffer`.
 enum Entry {
-    /// Mimicing types from proc-macro.
+    // Mimicking types from proc-macro.
     Group(Span, Delimiter, TokenBuffer),
     Term(Span, Term),
     Op(Span, char, Spacing),
     Literal(Span, Literal),
-    /// End entries contain a raw pointer to the entry from the containing
-    /// TokenTree.
+    // End entries contain a raw pointer to the entry from the containing
+    // token tree, or null if this is the outermost level.
     End(*const Entry),
 }
 
-/// A buffer of data which contains a structured representation of the input
-/// `TokenStream` object.
+/// A buffer that can be efficiently traversed multiple times, unlike
+/// `TokenStream` which requires a deep copy in order to traverse more than
+/// once.
+///
+/// See the [module documentation] for an example of `TokenBuffer` in action.
+///
+/// [module documentation]: index.html
 pub struct TokenBuffer {
     // NOTE: Do not derive clone on this - there are raw pointers inside which
     // will be messed up. Moving the `TokenBuffer` itself is safe as the actual
@@ -97,27 +212,40 @@ impl TokenBuffer {
         TokenBuffer { data: entries }
     }
 
-    /// Create a new TokenBuffer, which contains the data from the given
-    /// TokenStream.
-    pub fn new(stream: TokenStream) -> TokenBuffer {
+    /// Creates a `TokenBuffer` containing all the tokens from the input
+    /// `TokenStream`.
+    pub fn new(stream: pm::TokenStream) -> TokenBuffer {
+        Self::new2(stream.into())
+    }
+
+    /// Creates a `TokenBuffer` containing all the tokens from the input
+    /// `TokenStream`.
+    pub fn new2(stream: TokenStream) -> TokenBuffer {
         Self::inner_new(stream, ptr::null())
     }
 
-    /// Create a cursor referencing the first token in the input.
+    /// Creates a cursor referencing the first token in the buffer and able to
+    /// traverse until the end of the buffer.
     pub fn begin(&self) -> Cursor {
         unsafe { Cursor::create(&self.data[0], &self.data[self.data.len() - 1]) }
     }
 }
 
-/// A cursor into an input `TokenStream`'s data. This cursor holds a reference
-/// into the immutable data which is used internally to represent a
-/// `TokenStream`, and can be efficiently manipulated and copied around.
+/// A cheaply copyable cursor into a `TokenBuffer`.
+///
+/// This cursor holds a shared reference into the immutable data which is used
+/// internally to represent a `TokenStream`, and can be efficiently manipulated
+/// and copied around.
 ///
 /// An empty `Cursor` can be created directly, or one may create a `TokenBuffer`
 /// object and get a cursor to its first token with `begin()`.
 ///
 /// Two cursors are equal if they have the same location in the same input
 /// stream, and have the same scope.
+///
+/// See the [module documentation] for an example of a `Cursor` in action.
+///
+/// [module documentation]: index.html
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Cursor<'a> {
     /// The current entry which the `Cursor` is pointing at.
@@ -131,7 +259,7 @@ pub struct Cursor<'a> {
 }
 
 impl<'a> Cursor<'a> {
-    /// Create a cursor referencing a static empty TokenStream.
+    /// Creates a cursor referencing a static empty TokenStream.
     pub fn empty() -> Self {
         // It's safe in this situation for us to put an `Entry` object in global
         // storage, despite it not actually being safe to send across threads
@@ -201,15 +329,16 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// Check if the cursor is currently pointing at the end of its valid scope.
+    /// Checks whether the cursor is currently pointing at the end of its valid
+    /// scope.
     #[inline]
     pub fn eof(self) -> bool {
         // We're at eof if we're at the end of our scope.
         self.ptr == self.scope
     }
 
-    /// If the cursor is pointing at a Group with the given `Delimiter`, return
-    /// a cursor into that group, and one pointing to the next `TokenTree`.
+    /// If the cursor is pointing at a `Group` with the given delimiter, returns
+    /// a cursor into that group and one pointing to the next `TokenTree`.
     pub fn group(mut self, delim: Delimiter) -> Option<(Cursor<'a>, Span, Cursor<'a>)> {
         // If we're not trying to enter a none-delimited group, we want to
         // ignore them. We have to make sure to _not_ ignore them when we want
@@ -227,8 +356,8 @@ impl<'a> Cursor<'a> {
         None
     }
 
-    /// If the cursor is pointing at a Term, return it and a cursor pointing at
-    /// the next `TokenTree`.
+    /// If the cursor is pointing at a `Term`, returns it along with a cursor
+    /// pointing at the next `TokenTree`.
     pub fn term(mut self) -> Option<(Span, Term, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
@@ -237,8 +366,8 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// If the cursor is pointing at an Op, return it and a cursor pointing
-    /// at the next `TokenTree`.
+    /// If the cursor is pointing at an `Op`, returns it along with a cursor
+    /// pointing at the next `TokenTree`.
     pub fn op(mut self) -> Option<(Span, char, Spacing, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
@@ -247,8 +376,8 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// If the cursor is pointing at a Literal, return it and a cursor pointing
-    /// at the next `TokenTree`.
+    /// If the cursor is pointing at a `Literal`, return it along with a cursor
+    /// pointing at the next `TokenTree`.
     pub fn literal(mut self) -> Option<(Span, Literal, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
@@ -257,7 +386,8 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// Copy all remaining tokens visible from this cursor into a `TokenStream`.
+    /// Copies all remaining tokens visible from this cursor into a
+    /// `TokenStream`.
     pub fn token_stream(self) -> TokenStream {
         let mut tts = Vec::new();
         let mut cursor = self;
@@ -268,11 +398,12 @@ impl<'a> Cursor<'a> {
         tts.into_iter().collect()
     }
 
-    /// If the cursor is looking at a `TokenTree`, returns it along with a
-    /// cursor pointing to the next token in the group, otherwise returns
-    /// `None`.
+    /// If the cursor is pointing at a `TokenTree`, returns it along with a
+    /// cursor pointing at the next `TokenTree`.
     ///
-    /// This method does not treat `None`-delimited groups as invisible, and
+    /// Returns `None` if the cursor has reached the end of its stream.
+    ///
+    /// This method does not treat `None`-delimited groups as transparent, and
     /// will return a `Group(None, ..)` if the cursor is looking at one.
     pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
         let tree = match *self.entry() {
