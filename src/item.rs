@@ -524,26 +524,33 @@ ast_struct! {
 }
 
 ast_enum_of_structs! {
-    /// An argument in a function header.
+    /// An argument in a function signature.
     ///
     /// E.g. `bar: usize` as in `fn foo(bar: usize)`
     pub enum FnArg {
+        /// Self captured by reference in a function signature: `&self` or `&mut
+        /// self`.
         pub SelfRef(ArgSelfRef {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
             pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
         }),
+        /// Self captured by value in a function signature: `self` or `mut
+        /// self`.
         pub SelfValue(ArgSelf {
             pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
         }),
+        /// An explicitly typed pattern captured by a function signature.
         pub Captured(ArgCaptured {
             pub pat: Pat,
             pub colon_token: Token![:],
             pub ty: Type,
         }),
+        /// A pattern whose type is inferred captured by a function signature.
         pub Inferred(Pat),
+        /// A type not bound to any pattern in a function signature.
         pub Ignored(Type),
     }
 }
