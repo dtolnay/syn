@@ -372,6 +372,12 @@ tokens! {
     }
 }
 
+/// A type-macro that expands to the name of the Rust type representation of a
+/// given token.
+///
+/// See the [token module] documentation for details and examples.
+///
+/// [token module]: token/index.html
 // Unfortunate duplication due to a rustdoc bug.
 // https://github.com/rust-lang/rust/issues/45939
 #[macro_export]
@@ -465,6 +471,11 @@ macro_rules! Token {
     (yield)    => { $crate::token::Yield };
 }
 
+/// Parse a single Rust punctuation token.
+///
+/// See the [token module] documentation for details and examples.
+///
+/// [token module]: token/index.html
 #[cfg(feature = "parsing")]
 #[macro_export]
 macro_rules! punct {
@@ -515,6 +526,11 @@ macro_rules! punct {
     ($i:expr, _)   => { call!($i, <$crate::token::Underscore as $crate::synom::Synom>::parse) };
 }
 
+/// Parse a single Rust keyword token.
+///
+/// See the [token module] documentation for details and examples.
+///
+/// [token module]: token/index.html
 #[cfg(feature = "parsing")]
 #[macro_export]
 macro_rules! keyword {
