@@ -108,7 +108,7 @@ impl PathArguments {
 }
 
 ast_enum! {
-    /// A individual generic argument, like `'a`, `T`, or `Item = T`.
+    /// An individual generic argument, like `'a`, `T`, or `Item = T`.
     pub enum GenericArgument {
         /// A lifetime argument.
         Lifetime(Lifetime),

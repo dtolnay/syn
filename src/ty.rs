@@ -22,6 +22,7 @@ ast_enum_of_structs! {
             pub bracket_token: token::Bracket,
             pub elem: Box<Type>,
         }),
+
         /// A fixed size array type: `[T; n]`.
         pub Array(TypeArray {
             pub bracket_token: token::Bracket,
@@ -29,6 +30,7 @@ ast_enum_of_structs! {
             pub semi_token: Token![;],
             pub len: Expr,
         }),
+
         /// A raw pointer type: `*const T` or `*mut T`.
         pub Ptr(TypePtr {
             pub star_token: Token![*],
@@ -36,6 +38,7 @@ ast_enum_of_structs! {
             pub mutability: Option<Token![mut]>,
             pub elem: Box<Type>,
         }),
+
         /// A reference type: `&'a T` or `&'a mut T`.
         pub Reference(TypeReference {
             pub and_token: Token![&],
@@ -43,6 +46,7 @@ ast_enum_of_structs! {
             pub mutability: Option<Token![mut]>,
             pub elem: Box<Type>,
         }),
+
         /// A bare function type: `fn(usize) -> bool`.
         pub BareFn(TypeBareFn {
             pub unsafety: Option<Token![unsafe]>,
@@ -54,16 +58,19 @@ ast_enum_of_structs! {
             pub variadic: Option<Token![...]>,
             pub output: ReturnType,
         }),
+
         /// The never type: `!`.
         pub Never(TypeNever {
             pub bang_token: Token![!],
         }),
+
         /// A tuple type: `(A, B, C, String)`.
         pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
             pub elems: Punctuated<Type, Token![,]>,
         }),
-        /// A path like `std::slice::Iter`, optionally "qualified" with a
+
+        /// A path like `std::slice::Iter`, optionally qualified with a
         /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
         ///
         /// Type arguments are stored in the Path itself.
@@ -71,38 +78,43 @@ ast_enum_of_structs! {
             pub qself: Option<QSelf>,
             pub path: Path,
         }),
+
         /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
         /// trait or a lifetime.
         pub TraitObject(TypeTraitObject {
             pub dyn_token: Option<Token![dyn]>,
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
+
         /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
         /// a lifetime.
         pub ImplTrait(TypeImplTrait {
             pub impl_token: Token![impl],
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
-        /// A parenthesized type equal to the inner type; important for
-        /// round-tripping types faithfully.
+
+        /// A parenthesized type equivalent to the inner type.
         pub Paren(TypeParen {
             pub paren_token: token::Paren,
             pub elem: Box<Type>,
         }),
-        /// A type contained within invisible delimiters; important for
-        /// round-tripping types faithfully.
+
+        /// A type contained within invisible delimiters.
         pub Group(TypeGroup {
             pub group_token: token::Group,
             pub elem: Box<Type>,
         }),
+
         /// Indication that a type should be inferred by the compiler: `_`.
         pub Infer(TypeInfer {
             pub underscore_token: Token![_],
         }),
+
         /// A macro in the type position.
         pub Macro(TypeMacro {
             pub mac: Macro,
         }),
+
         /// Tokens in type position not interpreted by Syn.
         pub Verbatim(TypeVerbatim #manual_extra_traits {
             pub tts: TokenStream,
