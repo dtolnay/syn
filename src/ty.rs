@@ -15,35 +15,35 @@ use std::hash::{Hash, Hasher};
 use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
-    /// The different kinds of types recognized by the compiler
+    /// The possible types that a Rust value could have.
     pub enum Type {
-        /// A variable-length array (`[T]`)
+        /// A dynamically sized slice type: `[T]`.
         pub Slice(TypeSlice {
             pub bracket_token: token::Bracket,
             pub elem: Box<Type>,
         }),
-        /// A fixed length array (`[T; n]`)
+        /// A fixed size array type: `[T; n]`.
         pub Array(TypeArray {
             pub bracket_token: token::Bracket,
             pub elem: Box<Type>,
             pub semi_token: Token![;],
             pub len: Expr,
         }),
-        /// A raw pointer (`*const T` or `*mut T`)
+        /// A raw pointer type: `*const T` or `*mut T`.
         pub Ptr(TypePtr {
             pub star_token: Token![*],
             pub const_token: Option<Token![const]>,
             pub mutability: Option<Token![mut]>,
             pub elem: Box<Type>,
         }),
-        /// A reference (`&'a T` or `&'a mut T`)
+        /// A reference type: `&'a T` or `&'a mut T`.
         pub Reference(TypeReference {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
             pub mutability: Option<Token![mut]>,
             pub elem: Box<Type>,
         }),
-        /// A bare function (e.g. `fn(usize) -> bool`)
+        /// A bare function type: `fn(usize) -> bool`.
         pub BareFn(TypeBareFn {
             pub unsafety: Option<Token![unsafe]>,
             pub abi: Option<Abi>,
@@ -54,47 +54,48 @@ ast_enum_of_structs! {
             pub variadic: Option<Token![...]>,
             pub output: ReturnType,
         }),
-        /// The never type (`!`)
+        /// The never type: `!`.
         pub Never(TypeNever {
             pub bang_token: Token![!],
         }),
-        /// A tuple (`(A, B, C, D, ...)`)
+        /// A tuple type: `(A, B, C, String)`.
         pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
             pub elems: Punctuated<Type, Token![,]>,
         }),
-        /// A path (`module::module::...::Type`), optionally
-        /// "qualified", e.g. `<Vec<T> as SomeTrait>::SomeType`.
+        /// A path like `std::slice::Iter`, optionally "qualified" with a
+        /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
         ///
-        /// Type arguments are stored in the Path itself
+        /// Type arguments are stored in the Path itself.
         pub Path(TypePath {
             pub qself: Option<QSelf>,
             pub path: Path,
         }),
-        /// A trait object type `Bound1 + Bound2 + Bound3`
-        /// where `Bound` is a trait or a lifetime.
+        /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
+        /// trait or a lifetime.
         pub TraitObject(TypeTraitObject {
             pub dyn_token: Option<Token![dyn]>,
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
-        /// An `impl Bound1 + Bound2 + Bound3` type
-        /// where `Bound` is a trait or a lifetime.
+        /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
+        /// a lifetime.
         pub ImplTrait(TypeImplTrait {
             pub impl_token: Token![impl],
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
-        /// No-op; kept solely so that we can pretty-print faithfully
+        /// A parenthesized type equal to the inner type; important for
+        /// round-tripping types faithfully.
         pub Paren(TypeParen {
             pub paren_token: token::Paren,
             pub elem: Box<Type>,
         }),
-        /// No-op: kept solely so that we can pretty-print faithfully
+        /// A type contained within invisible delimiters; important for
+        /// round-tripping types faithfully.
         pub Group(TypeGroup {
             pub group_token: token::Group,
             pub elem: Box<Type>,
         }),
-        /// TypeKind::Infer means the type should be inferred instead of it having been
-        /// specified. This can appear anywhere in a type.
+        /// Indication that a type should be inferred by the compiler: `_`.
         pub Infer(TypeInfer {
             pub underscore_token: Token![_],
         }),
@@ -102,6 +103,7 @@ ast_enum_of_structs! {
         pub Macro(TypeMacro {
             pub mac: Macro,
         }),
+        /// Tokens in type position not interpreted by Syn.
         pub Verbatim(TypeVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
@@ -137,9 +139,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// An argument in a function type.
-    ///
-    /// E.g. `bar: usize` as in `fn foo(bar: usize)`
+    /// An argument in a function type: the `usize` in `fn(usize) -> bool`.
     pub struct BareFnArg {
         pub name: Option<(BareFnArgName, Token![:])>,
         pub ty: Type,
@@ -147,24 +147,23 @@ ast_struct! {
 }
 
 ast_enum! {
-    /// Names of arguments in the `BareFnArg` structure
+    /// Name of an argument in a function type: the `n` in `fn(n: usize)`.
     pub enum BareFnArgName {
-        /// Argument with the provided name
+        /// Argument given a name.
         Named(Ident),
-        /// Argument matched with `_`
+        /// Argument not given a name, matched with `_`.
         Wild(Token![_]),
     }
 }
 
 ast_enum! {
+    /// Return type of a function signature.
     pub enum ReturnType {
         /// Return type is not specified.
         ///
-        /// Functions default to `()` and
-        /// closures default to inference. Span points to where return
-        /// type would be inserted.
+        /// Functions default to `()` and closures default to type inference.
         Default,
-        /// Everything else
+        /// A particular type is returned.
         Type(Token![->], Box<Type>),
     }
 }
