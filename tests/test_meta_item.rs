@@ -24,7 +24,7 @@ fn lit<T: Into<Literal>>(t: T) -> Lit {
 
 #[test]
 fn test_meta_item_word() {
-    run_test("#[foo]", MetaItem::Term("foo".into()))
+    run_test("#[foo]", Meta::Word("foo".into()))
 }
 
 #[test]
@@ -43,10 +43,10 @@ fn test_meta_item_name_value() {
 fn test_meta_item_list_lit() {
     run_test(
         "#[foo(5)]",
-        MetaItemList {
+        MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: punctuated![NestedMetaItem::Literal(lit(Literal::integer(5)))],
+            nested: punctuated![NestedMeta::Literal(lit(Literal::integer(5)))],
         },
     )
 }
@@ -55,10 +55,10 @@ fn test_meta_item_list_lit() {
 fn test_meta_item_list_word() {
     run_test(
         "#[foo(bar)]",
-        MetaItemList {
+        MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: punctuated![NestedMetaItem::MetaItem(MetaItem::Term("bar".into()))],
+            nested: punctuated![NestedMeta::Meta(Meta::Word("bar".into()))],
         },
     )
 }
@@ -67,11 +67,11 @@ fn test_meta_item_list_word() {
 fn test_meta_item_list_name_value() {
     run_test(
         "#[foo(bar = 5)]",
-        MetaItemList {
+        MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
             nested: punctuated![
-                NestedMetaItem::MetaItem(
+                NestedMeta::Meta(
                     MetaNameValue {
                         ident: "bar".into(),
                         eq_token: Default::default(),
@@ -87,24 +87,24 @@ fn test_meta_item_list_name_value() {
 fn test_meta_item_multiple() {
     run_test(
         "#[foo(word, name = 5, list(name2 = 6), word2)]",
-        MetaItemList {
+        MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
             nested: punctuated![
-                NestedMetaItem::MetaItem(MetaItem::Term("word".into())),
-                NestedMetaItem::MetaItem(
+                NestedMeta::Meta(Meta::Word("word".into())),
+                NestedMeta::Meta(
                     MetaNameValue {
                         ident: "name".into(),
                         eq_token: Default::default(),
                         lit: lit(Literal::integer(5)),
                     }.into(),
                 ),
-                NestedMetaItem::MetaItem(
-                    MetaItemList {
+                NestedMeta::Meta(
+                    MetaList {
                         ident: "list".into(),
                         paren_token: Default::default(),
                         nested: punctuated![
-                            NestedMetaItem::MetaItem(
+                            NestedMeta::Meta(
                                 MetaNameValue {
                                     ident: "name2".into(),
                                     eq_token: Default::default(),
@@ -114,13 +114,13 @@ fn test_meta_item_multiple() {
                         ],
                     }.into(),
                 ),
-                NestedMetaItem::MetaItem(MetaItem::Term("word2".into())),
+                NestedMeta::Meta(Meta::Word("word2".into())),
             ],
         },
     )
 }
 
-fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
+fn run_test<T: Into<Meta>>(input: &str, expected: T) {
     let tokens = input.parse::<TokenStream>().unwrap();
     let buf = TokenBuffer::new2(tokens);
     let attr = match Attribute::parse_outer(buf.begin()) {
@@ -130,5 +130,5 @@ fn run_test<T: Into<MetaItem>>(input: &str, expected: T) {
         }
         Err(err) => panic!(err),
     };
-    assert_eq!(expected.into(), attr.meta_item().unwrap());
+    assert_eq!(expected.into(), attr.interpret_meta().unwrap());
 }

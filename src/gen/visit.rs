@@ -270,9 +270,9 @@ fn visit_macro_delimiter(&mut self, i: &'ast MacroDelimiter) { visit_macro_delim
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_member(&mut self, i: &'ast Member) { visit_member(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_meta_item(&mut self, i: &'ast MetaItem) { visit_meta_item(self, i) }
+fn visit_meta(&mut self, i: &'ast Meta) { visit_meta(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_meta_item_list(&mut self, i: &'ast MetaItemList) { visit_meta_item_list(self, i) }
+fn visit_meta_list(&mut self, i: &'ast MetaList) { visit_meta_list(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_meta_name_value(&mut self, i: &'ast MetaNameValue) { visit_meta_name_value(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -280,7 +280,7 @@ fn visit_method_sig(&mut self, i: &'ast MethodSig) { visit_method_sig(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
 fn visit_method_turbofish(&mut self, i: &'ast MethodTurbofish) { visit_method_turbofish(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_nested_meta_item(&mut self, i: &'ast NestedMetaItem) { visit_nested_meta_item(self, i) }
+fn visit_nested_meta(&mut self, i: &'ast NestedMeta) { visit_nested_meta(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_parenthesized_generic_arguments(&mut self, i: &'ast ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
@@ -1666,24 +1666,24 @@ pub fn visit_member<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast M
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_meta_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaItem) {
+pub fn visit_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Meta) {
     match *_i {
-        MetaItem::Term(ref _binding_0, ) => {
+        Meta::Word(ref _binding_0, ) => {
             _visitor.visit_ident(_binding_0);
         }
-        MetaItem::List(ref _binding_0, ) => {
-            _visitor.visit_meta_item_list(_binding_0);
+        Meta::List(ref _binding_0, ) => {
+            _visitor.visit_meta_list(_binding_0);
         }
-        MetaItem::NameValue(ref _binding_0, ) => {
+        Meta::NameValue(ref _binding_0, ) => {
             _visitor.visit_meta_name_value(_binding_0);
         }
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_meta_item_list<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaItemList) {
+pub fn visit_meta_list<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaList) {
     _visitor.visit_ident(& _i . ident);
     tokens_helper(_visitor, &(& _i . paren_token).0);
-    for el in Punctuated::pairs(& _i . nested) { let it = el.value(); _visitor.visit_nested_meta_item(it) };
+    for el in Punctuated::pairs(& _i . nested) { let it = el.value(); _visitor.visit_nested_meta(it) };
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_meta_name_value<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaNameValue) {
@@ -1707,12 +1707,12 @@ pub fn visit_method_turbofish<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _
     tokens_helper(_visitor, &(& _i . gt_token).0);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_nested_meta_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast NestedMetaItem) {
+pub fn visit_nested_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast NestedMeta) {
     match *_i {
-        NestedMetaItem::MetaItem(ref _binding_0, ) => {
-            _visitor.visit_meta_item(_binding_0);
+        NestedMeta::Meta(ref _binding_0, ) => {
+            _visitor.visit_meta(_binding_0);
         }
-        NestedMetaItem::Literal(ref _binding_0, ) => {
+        NestedMeta::Literal(ref _binding_0, ) => {
             _visitor.visit_lit(_binding_0);
         }
     }

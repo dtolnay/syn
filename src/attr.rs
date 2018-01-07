@@ -94,8 +94,8 @@ impl Hash for Attribute {
 }
 
 impl Attribute {
-    /// Parses the tokens after the path as a [`MetaItem`](enum.MetaItem.html) if possible.
-    pub fn meta_item(&self) -> Option<MetaItem> {
+    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if possible.
+    pub fn interpret_meta(&self) -> Option<Meta> {
         let name = if self.path.segments.len() == 1 {
             &self.path.segments.first().unwrap().value().ident
         } else {
@@ -103,7 +103,7 @@ impl Attribute {
         };
 
         if self.tts.is_empty() {
-            return Some(MetaItem::Term(*name));
+            return Some(Meta::Word(*name));
         }
 
         let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
@@ -112,7 +112,7 @@ impl Attribute {
             if let TokenNode::Group(Delimiter::Parenthesis, ref ts) = tts[0].kind {
                 let tokens = ts.clone().into_iter().collect::<Vec<_>>();
                 if let Some(nested_meta_items) = list_of_nested_meta_items_from_tokens(&tokens) {
-                    return Some(MetaItem::List(MetaItemList {
+                    return Some(Meta::List(MetaList {
                         paren_token: token::Paren(tts[0].span),
                         ident: *name,
                         nested: nested_meta_items,
@@ -124,7 +124,7 @@ impl Attribute {
         if tts.len() == 2 {
             if let TokenNode::Op('=', Spacing::Alone) = tts[0].kind {
                 if let TokenNode::Literal(ref lit) = tts[1].kind {
-                    return Some(MetaItem::NameValue(MetaNameValue {
+                    return Some(Meta::NameValue(MetaNameValue {
                         ident: *name,
                         eq_token: Token![=]([tts[0].span]),
                         lit: Lit::new(lit.clone(), tts[1].span),
@@ -137,13 +137,13 @@ impl Attribute {
     }
 }
 
-fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[TokenTree])> {
+fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[TokenTree])> {
     assert!(!tts.is_empty());
 
     match tts[0].kind {
         TokenNode::Literal(ref lit) => {
             let lit = Lit::new(lit.clone(), tts[0].span);
-            Some((NestedMetaItem::Literal(lit), &tts[1..]))
+            Some((NestedMeta::Literal(lit), &tts[1..]))
         }
 
         TokenNode::Term(sym) => {
@@ -156,7 +156,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
                             eq_token: Token![=]([tts[1].span]),
                             lit: Lit::new(lit.clone(), tts[2].span),
                         };
-                        return Some((MetaItem::NameValue(pair).into(), &tts[3..]));
+                        return Some((Meta::NameValue(pair).into(), &tts[3..]));
                     }
                 }
             }
@@ -166,12 +166,12 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
                     let inner_tts = inner_tts.clone().into_iter().collect::<Vec<_>>();
                     return match list_of_nested_meta_items_from_tokens(&inner_tts) {
                         Some(nested_meta_items) => {
-                            let list = MetaItemList {
+                            let list = MetaList {
                                 ident: ident,
                                 paren_token: token::Paren(tts[1].span),
                                 nested: nested_meta_items,
                             };
-                            Some((MetaItem::List(list).into(), &tts[2..]))
+                            Some((Meta::List(list).into(), &tts[2..]))
                         }
 
                         None => None,
@@ -179,7 +179,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
                 }
             }
 
-            Some((MetaItem::Term(ident).into(), &tts[1..]))
+            Some((Meta::Word(ident).into(), &tts[1..]))
         }
 
         _ => None,
@@ -188,7 +188,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMetaItem, &[
 
 fn list_of_nested_meta_items_from_tokens(
     mut tts: &[TokenTree],
-) -> Option<Punctuated<NestedMetaItem, Token![,]>> {
+) -> Option<Punctuated<NestedMeta, Token![,]>> {
     let mut nested_meta_items = Punctuated::new();
     let mut first = true;
 
@@ -246,16 +246,16 @@ ast_enum_of_structs! {
     /// A compile-time attribute item.
     ///
     /// E.g. `#[test]`, `#[derive(..)]` or `#[feature = "foo"]`
-    pub enum MetaItem {
+    pub enum Meta {
         /// Term meta item.
         ///
         /// E.g. `test` as in `#[test]`
-        pub Term(Ident),
+        pub Word(Ident),
 
         /// List meta item.
         ///
         /// E.g. `derive(..)` as in `#[derive(..)]`
-        pub List(MetaItemList {
+        pub List(MetaList {
             /// Name of this attribute.
             ///
             /// E.g. `derive` in `#[derive(..)]`
@@ -266,7 +266,7 @@ ast_enum_of_structs! {
             /// Arguments to this attribute
             ///
             /// E.g. `..` in `#[derive(..)]`
-            pub nested: Punctuated<NestedMetaItem, Token![,]>,
+            pub nested: Punctuated<NestedMeta, Token![,]>,
         }),
 
         /// Name-value meta item.
@@ -288,16 +288,16 @@ ast_enum_of_structs! {
     }
 }
 
-impl MetaItem {
+impl Meta {
     /// Name of the item.
     ///
     /// E.g. `test` as in `#[test]`, `derive` as in `#[derive(..)]`, and
     /// `feature` as in `#[feature = "foo"]`.
     pub fn name(&self) -> &str {
         match *self {
-            MetaItem::Term(ref name) => name.as_ref(),
-            MetaItem::NameValue(ref pair) => pair.ident.as_ref(),
-            MetaItem::List(ref list) => list.ident.as_ref(),
+            Meta::Word(ref name) => name.as_ref(),
+            Meta::NameValue(ref pair) => pair.ident.as_ref(),
+            Meta::List(ref list) => list.ident.as_ref(),
         }
     }
 }
@@ -306,11 +306,11 @@ ast_enum_of_structs! {
     /// Possible values inside of compile-time attribute lists.
     ///
     /// E.g. the '..' in `#[name(..)]`.
-    pub enum NestedMetaItem {
-        /// A full `MetaItem`.
+    pub enum NestedMeta {
+        /// A full `Meta`.
         ///
-        /// E.g. `Copy` in `#[derive(Copy)]` would be a `MetaItem::Term(Ident::from("Copy"))`.
-        pub MetaItem(MetaItem),
+        /// E.g. `Copy` in `#[derive(Copy)]` would be a `Meta::Word(Ident::from("Copy"))`.
+        pub Meta(Meta),
 
         /// A Rust literal.
         ///
@@ -491,7 +491,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             // If this was a sugared doc, emit it in its original form instead of `#[doc = "..."]`
             if self.is_sugared_doc {
-                if let Some(MetaItem::NameValue(ref pair)) = self.meta_item() {
+                if let Some(Meta::NameValue(ref pair)) = self.interpret_meta() {
                     if pair.ident == "doc" {
                         if let Lit::Str(ref comment) = pair.lit {
                             tokens.append(TokenTree {
@@ -515,7 +515,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for MetaItemList {
+    impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.ident.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {

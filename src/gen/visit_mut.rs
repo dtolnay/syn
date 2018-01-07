@@ -271,9 +271,9 @@ fn visit_macro_delimiter_mut(&mut self, i: &mut MacroDelimiter) { visit_macro_de
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_member_mut(&mut self, i: &mut Member) { visit_member_mut(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_meta_item_mut(&mut self, i: &mut MetaItem) { visit_meta_item_mut(self, i) }
+fn visit_meta_mut(&mut self, i: &mut Meta) { visit_meta_mut(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_meta_item_list_mut(&mut self, i: &mut MetaItemList) { visit_meta_item_list_mut(self, i) }
+fn visit_meta_list_mut(&mut self, i: &mut MetaList) { visit_meta_list_mut(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_meta_name_value_mut(&mut self, i: &mut MetaNameValue) { visit_meta_name_value_mut(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -281,7 +281,7 @@ fn visit_method_sig_mut(&mut self, i: &mut MethodSig) { visit_method_sig_mut(sel
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
 fn visit_method_turbofish_mut(&mut self, i: &mut MethodTurbofish) { visit_method_turbofish_mut(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_nested_meta_item_mut(&mut self, i: &mut NestedMetaItem) { visit_nested_meta_item_mut(self, i) }
+fn visit_nested_meta_mut(&mut self, i: &mut NestedMeta) { visit_nested_meta_mut(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_parenthesized_generic_arguments_mut(&mut self, i: &mut ParenthesizedGenericArguments) { visit_parenthesized_generic_arguments_mut(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
@@ -1667,24 +1667,24 @@ pub fn visit_member_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Member)
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_meta_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MetaItem) {
+pub fn visit_meta_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Meta) {
     match *_i {
-        MetaItem::Term(ref mut _binding_0, ) => {
+        Meta::Word(ref mut _binding_0, ) => {
             _visitor.visit_ident_mut(_binding_0);
         }
-        MetaItem::List(ref mut _binding_0, ) => {
-            _visitor.visit_meta_item_list_mut(_binding_0);
+        Meta::List(ref mut _binding_0, ) => {
+            _visitor.visit_meta_list_mut(_binding_0);
         }
-        MetaItem::NameValue(ref mut _binding_0, ) => {
+        Meta::NameValue(ref mut _binding_0, ) => {
             _visitor.visit_meta_name_value_mut(_binding_0);
         }
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_meta_item_list_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MetaItemList) {
+pub fn visit_meta_list_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MetaList) {
     _visitor.visit_ident_mut(& mut _i . ident);
     tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
-    for mut el in Punctuated::pairs_mut(& mut _i . nested) { let it = el.value_mut(); _visitor.visit_nested_meta_item_mut(it) };
+    for mut el in Punctuated::pairs_mut(& mut _i . nested) { let it = el.value_mut(); _visitor.visit_nested_meta_mut(it) };
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_meta_name_value_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MetaNameValue) {
@@ -1708,12 +1708,12 @@ pub fn visit_method_turbofish_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &m
     tokens_helper(_visitor, &mut (& mut _i . gt_token).0);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_nested_meta_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut NestedMetaItem) {
+pub fn visit_nested_meta_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut NestedMeta) {
     match *_i {
-        NestedMetaItem::MetaItem(ref mut _binding_0, ) => {
-            _visitor.visit_meta_item_mut(_binding_0);
+        NestedMeta::Meta(ref mut _binding_0, ) => {
+            _visitor.visit_meta_mut(_binding_0);
         }
-        NestedMetaItem::Literal(ref mut _binding_0, ) => {
+        NestedMeta::Literal(ref mut _binding_0, ) => {
             _visitor.visit_lit_mut(_binding_0);
         }
     }

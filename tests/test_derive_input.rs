@@ -154,16 +154,16 @@ fn test_struct() {
 
     assert_eq!(expected, actual);
 
-    let expected_meta_item: MetaItem = MetaItemList {
+    let expected_meta_item: Meta = MetaList {
         ident: "derive".into(),
         paren_token: Default::default(),
         nested: punctuated![
-            NestedMetaItem::MetaItem(MetaItem::Term("Debug".into())),
-            NestedMetaItem::MetaItem(MetaItem::Term("Clone".into())),
+            NestedMeta::Meta(Meta::Word("Debug".into())),
+            NestedMeta::Meta(Meta::Word("Clone".into())),
         ],
     }.into();
 
-    assert_eq!(expected_meta_item, actual.attrs[0].meta_item().unwrap());
+    assert_eq!(expected_meta_item, actual.attrs[0].interpret_meta().unwrap());
 }
 
 #[test]
@@ -341,13 +341,13 @@ fn test_enum() {
                 Default::default(),
             )),
         }.into(),
-        MetaItem::Term("must_use".into()),
+        Meta::Word("must_use".into()),
     ];
 
     let actual_meta_items: Vec<_> = actual
         .attrs
         .into_iter()
-        .map(|attr| attr.meta_item().unwrap())
+        .map(|attr| attr.interpret_meta().unwrap())
         .collect();
 
     assert_eq!(expected_meta_items, actual_meta_items);
@@ -413,7 +413,7 @@ fn test_attr_with_path() {
 
     assert_eq!(expected, actual);
 
-    assert!(actual.attrs[0].meta_item().is_none());
+    assert!(actual.attrs[0].interpret_meta().is_none());
 }
 
 #[test]
@@ -451,7 +451,7 @@ fn test_attr_with_non_mod_style_path() {
 
     assert_eq!(expected, actual);
 
-    assert!(actual.attrs[0].meta_item().is_none());
+    assert!(actual.attrs[0].interpret_meta().is_none());
 }
 
 #[test]
@@ -489,7 +489,7 @@ fn test_attr_with_mod_style_path_with_self() {
 
     assert_eq!(expected, actual);
 
-    assert!(actual.attrs[0].meta_item().is_none());
+    assert!(actual.attrs[0].interpret_meta().is_none());
 }
 
 #[test]

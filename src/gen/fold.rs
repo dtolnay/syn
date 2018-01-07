@@ -272,9 +272,9 @@ fn fold_macro_delimiter(&mut self, i: MacroDelimiter) -> MacroDelimiter { fold_m
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_member(&mut self, i: Member) -> Member { fold_member(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn fold_meta_item(&mut self, i: MetaItem) -> MetaItem { fold_meta_item(self, i) }
+fn fold_meta(&mut self, i: Meta) -> Meta { fold_meta(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn fold_meta_item_list(&mut self, i: MetaItemList) -> MetaItemList { fold_meta_item_list(self, i) }
+fn fold_meta_list(&mut self, i: MetaList) -> MetaList { fold_meta_list(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_meta_name_value(&mut self, i: MetaNameValue) -> MetaNameValue { fold_meta_name_value(self, i) }
 # [ cfg ( feature = "full" ) ]
@@ -282,7 +282,7 @@ fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig { fold_method_sig(self,
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
 fn fold_method_turbofish(&mut self, i: MethodTurbofish) -> MethodTurbofish { fold_method_turbofish(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn fold_nested_meta_item(&mut self, i: NestedMetaItem) -> NestedMetaItem { fold_nested_meta_item(self, i) }
+fn fold_nested_meta(&mut self, i: NestedMeta) -> NestedMeta { fold_nested_meta(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_parenthesized_generic_arguments(&mut self, i: ParenthesizedGenericArguments) -> ParenthesizedGenericArguments { fold_parenthesized_generic_arguments(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
@@ -2101,31 +2101,31 @@ pub fn fold_member<V: Fold + ?Sized>(_visitor: &mut V, _i: Member) -> Member {
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn fold_meta_item<V: Fold + ?Sized>(_visitor: &mut V, _i: MetaItem) -> MetaItem {
+pub fn fold_meta<V: Fold + ?Sized>(_visitor: &mut V, _i: Meta) -> Meta {
     match _i {
-        MetaItem::Term(_binding_0, ) => {
-            MetaItem::Term (
+        Meta::Word(_binding_0, ) => {
+            Meta::Word (
                 _visitor.fold_ident(_binding_0),
             )
         }
-        MetaItem::List(_binding_0, ) => {
-            MetaItem::List (
-                _visitor.fold_meta_item_list(_binding_0),
+        Meta::List(_binding_0, ) => {
+            Meta::List (
+                _visitor.fold_meta_list(_binding_0),
             )
         }
-        MetaItem::NameValue(_binding_0, ) => {
-            MetaItem::NameValue (
+        Meta::NameValue(_binding_0, ) => {
+            Meta::NameValue (
                 _visitor.fold_meta_name_value(_binding_0),
             )
         }
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn fold_meta_item_list<V: Fold + ?Sized>(_visitor: &mut V, _i: MetaItemList) -> MetaItemList {
-    MetaItemList {
+pub fn fold_meta_list<V: Fold + ?Sized>(_visitor: &mut V, _i: MetaList) -> MetaList {
+    MetaList {
         ident: _visitor.fold_ident(_i . ident),
         paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
-        nested: FoldHelper::lift(_i . nested, |it| { _visitor.fold_nested_meta_item(it) }),
+        nested: FoldHelper::lift(_i . nested, |it| { _visitor.fold_nested_meta(it) }),
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
@@ -2156,15 +2156,15 @@ pub fn fold_method_turbofish<V: Fold + ?Sized>(_visitor: &mut V, _i: MethodTurbo
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn fold_nested_meta_item<V: Fold + ?Sized>(_visitor: &mut V, _i: NestedMetaItem) -> NestedMetaItem {
+pub fn fold_nested_meta<V: Fold + ?Sized>(_visitor: &mut V, _i: NestedMeta) -> NestedMeta {
     match _i {
-        NestedMetaItem::MetaItem(_binding_0, ) => {
-            NestedMetaItem::MetaItem (
-                _visitor.fold_meta_item(_binding_0),
+        NestedMeta::Meta(_binding_0, ) => {
+            NestedMeta::Meta (
+                _visitor.fold_meta(_binding_0),
             )
         }
-        NestedMetaItem::Literal(_binding_0, ) => {
-            NestedMetaItem::Literal (
+        NestedMeta::Literal(_binding_0, ) => {
+            NestedMeta::Literal (
                 _visitor.fold_lit(_binding_0),
             )
         }
