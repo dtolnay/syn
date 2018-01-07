@@ -678,12 +678,75 @@ pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
     Ok(file)
 }
 
+/// Quasi-quotation macro that accepts input like the [`quote!`] macro but uses
+/// type inference to figure out a return type for those tokens.
+///
+/// [`quote!`]: https://docs.rs/quote/0.4/quote/index.html
+///
+/// The return type can be any syntax tree node that implements the [`Synom`]
+/// trait.
+///
+/// [`Synom`]: synom/trait.Synom.html
+///
+/// ```
+/// #[macro_use]
+/// extern crate syn;
+///
+/// #[macro_use]
+/// extern crate quote;
+///
+/// use syn::Stmt;
+///
+/// fn main() {
+///     let name = quote!(v);
+///     let ty = quote!(u8);
+///
+///     let stmt: Stmt = parse_quote! {
+///         let #name: #ty = Default::default();
+///     };
+///
+///     println!("{:#?}", stmt);
+/// }
+/// ```
+///
+/// # Example
+///
+/// The following helper function adds a bound `T: HeapSize` to every type
+/// parameter `T` in the input generics.
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate syn;
+/// #
+/// # #[macro_use]
+/// # extern crate quote;
+/// #
+/// # use syn::{Generics, GenericParam};
+/// #
+/// // Add a bound `T: HeapSize` to every type parameter T.
+/// fn add_trait_bounds(mut generics: Generics) -> Generics {
+///     for param in &mut generics.params {
+///         if let GenericParam::Type(ref mut type_param) = *param {
+///             type_param.bounds.push(parse_quote!(HeapSize));
+///         }
+///     }
+///     generics
+/// }
+/// #
+/// # fn main() {}
+/// ```
+///
+/// # Panics
+///
+/// Panics if the tokens fail to parse as the expected syntax tree type. The
+/// caller is responsible for ensuring that the input tokens are syntactically
+/// valid.
 #[cfg(all(feature = "parsing", feature = "printing"))]
 #[macro_export]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {
         ::std::result::Result::unwrap(
-            $crate::parse(
+            $crate::parse2(
                 ::std::convert::Into::into(
                     quote!($($tt)*))))
     };
