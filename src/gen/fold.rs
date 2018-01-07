@@ -443,7 +443,7 @@ fold_span_only!(fold_lit_str: LitStr);
 pub fn fold_abi<V: Fold + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
     Abi {
         extern_token: Token ! [ extern ](tokens_helper(_visitor, &(_i . extern_token).0)),
-        name: (_i . name).map(|it| { _visitor.fold_lit(it) }),
+        name: (_i . name).map(|it| { _visitor.fold_lit_str(it) }),
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]

@@ -416,7 +416,7 @@ fn visit_where_predicate_mut(&mut self, i: &mut WherePredicate) { visit_where_pr
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_abi_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Abi) {
     tokens_helper(_visitor, &mut (& mut _i . extern_token).0);
-    if let Some(ref mut it) = _i . name { _visitor.visit_lit_mut(it) };
+    if let Some(ref mut it) = _i . name { _visitor.visit_lit_str_mut(it) };
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_angle_bracketed_generic_arguments_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut AngleBracketedGenericArguments) {
