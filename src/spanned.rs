@@ -26,22 +26,37 @@
 //! static assertion that `Sync` is implemented for that type.
 //!
 //! ```
-//! # #[macro_use]
-//! # extern crate quote;
+//! #[macro_use]
+//! extern crate quote;
+//!
+//! extern crate syn;
+//! extern crate proc_macro;
+//! extern crate proc_macro2;
+//!
+//! use syn::Type;
+//! use syn::spanned::Spanned;
+//! use proc_macro::TokenStream;
+//! use proc_macro2::Span;
+//!
+//! # const IGNORE_TOKENS: &str = stringify! {
+//! #[proc_macro_derive(MyMacro)]
+//! # };
+//! pub fn my_macro(input: TokenStream) -> TokenStream {
+//!     # let ty = get_a_type();
+//!     /* ... */
+//!
+//!     let def_site = Span::def_site();
+//!     let ty_span = ty.span().resolved_at(def_site);
+//!     let assert_sync = quote_spanned! {ty_span=>
+//!         struct _AssertSync where #ty: Sync;
+//!     };
+//!
+//!     /* ... */
+//!     # input
+//! }
 //! #
-//! # extern crate syn;
-//! # extern crate proc_macro2;
-//! #
-//! # use syn::Type;
-//! # use syn::spanned::Spanned;
-//! # use proc_macro2::Span;
-//! #
-//! # fn example(ty: Type) {
-//! let def_site = Span::def_site();
-//! let ty_span = ty.span().resolved_at(def_site);
-//! let assert_sync = quote_spanned! {ty_span=>
-//!     struct _AssertSync where #ty: Sync;
-//! };
+//! # fn get_a_type() -> Type {
+//! #     unimplemented!()
 //! # }
 //! #
 //! # fn main() {}
