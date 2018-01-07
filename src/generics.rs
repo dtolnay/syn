@@ -10,8 +10,8 @@ use super::*;
 use punctuated::Punctuated;
 
 ast_struct! {
-    /// Represents lifetimes and type parameters attached to a declaration
-    /// of a function, enum, trait, etc.
+    /// Lifetimes and type parameters attached to a declaration of a function,
+    /// enum, trait, etc.
     #[derive(Default)]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
@@ -23,7 +23,7 @@ ast_struct! {
 
 ast_enum_of_structs! {
     pub enum GenericParam {
-        /// A generic type parameter, e.g. `T: Into<String>`.
+        /// A generic type parameter: `T: Into<String>`.
         pub Type(TypeParam {
             pub attrs: Vec<Attribute>,
             pub ident: Ident,
@@ -32,14 +32,16 @@ ast_enum_of_structs! {
             pub eq_token: Option<Token![=]>,
             pub default: Option<Type>,
         }),
-        /// A lifetime definition, e.g. `'a: 'b+'c+'d`
+
+        /// A lifetime definition: `'a: 'b + 'c + 'd`.
         pub Lifetime(LifetimeDef {
             pub attrs: Vec<Attribute>,
             pub lifetime: Lifetime,
             pub colon_token: Option<Token![:]>,
             pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
-        /// A generic const parameter, e.g. `const LENGTH: usize`.
+
+        /// A const generic parameter: `const LENGTH: usize`.
         pub Const(ConstParam {
             pub attrs: Vec<Attribute>,
             pub const_token: Token![const],
@@ -144,6 +146,7 @@ impl From<Ident> for TypeParam {
 }
 
 ast_enum_of_structs! {
+    /// A trait or lifetime used as a bound on a type parameter.
     pub enum TypeParamBound {
         pub Trait(TraitBound),
         pub Lifetime(Lifetime),
@@ -151,6 +154,7 @@ ast_enum_of_structs! {
 }
 
 ast_struct! {
+    /// A trait used as a bound on a type parameter.
     pub struct TraitBound {
         pub modifier: TraitBoundModifier,
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
@@ -161,8 +165,8 @@ ast_struct! {
 }
 
 ast_enum! {
-    /// A modifier on a bound, currently this is only used for `?Sized`, where the
-    /// modifier is `Maybe`.
+    /// A modifier on a trait bound, currently only used for the `?` in
+    /// `?Sized`.
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
@@ -171,7 +175,7 @@ ast_enum! {
 }
 
 ast_struct! {
-    /// A `where` clause in a definition
+    /// A `where` clause in a definition.
     pub struct WhereClause {
         pub where_token: Token![where],
         pub predicates: Punctuated<WherePredicate, Token![,]>,
@@ -179,9 +183,9 @@ ast_struct! {
 }
 
 ast_enum_of_structs! {
-    /// A single predicate in a `where` clause
+    /// A single predicate in a `where` clause.
     pub enum WherePredicate {
-        /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
+        /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
         pub Type(PredicateType {
             /// Any lifetimes from a `for` binding
             pub lifetimes: Option<BoundLifetimes>,
@@ -192,14 +196,14 @@ ast_enum_of_structs! {
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
 
-        /// A lifetime predicate, e.g. `'a: 'b+'c`
+        /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
         pub Lifetime(PredicateLifetime {
             pub lifetime: Lifetime,
             pub colon_token: Option<Token![:]>,
             pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
 
-        /// An equality predicate (unsupported)
+        /// An equality predicate in a `where` clause (unsupported).
         pub Eq(PredicateEq {
             pub lhs_ty: Type,
             pub eq_token: Token![=],
