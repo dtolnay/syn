@@ -18,11 +18,9 @@ use tt::TokenStreamHelper;
 use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
-    /// Things that can appear directly inside of a module.
+    /// Things that can appear directly inside of a module or scope.
     pub enum Item {
-        /// An `extern crate` item, with optional original crate name.
-        ///
-        /// E.g. `extern crate foo` or `extern crate foo_bar as foo`
+        /// An `extern crate` item: `extern crate serde`.
         pub ExternCrate(ItemExternCrate {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -32,9 +30,8 @@ ast_enum_of_structs! {
             pub rename: Option<(Token![as], Ident)>,
             pub semi_token: Token![;],
         }),
-        /// A use declaration (`use` or `pub use`) item.
-        ///
-        /// E.g. `use foo;`, `use foo::bar;` or `use foo::bar as FooBar;`
+
+        /// A use declaration: `use std::collections::HashMap`.
         pub Use(ItemUse {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -44,9 +41,8 @@ ast_enum_of_structs! {
             pub tree: UseTree,
             pub semi_token: Token![;],
         }),
-        /// A static item (`static` or `pub static`).
-        ///
-        /// E.g. `static FOO: i32 = 42;` or `static FOO: &'static str = "bar";`
+
+        /// A static item: `static BIKE: Shed = Shed(42)`.
         pub Static(ItemStatic {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -59,9 +55,8 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
             pub semi_token: Token![;],
         }),
-        /// A constant item (`const` or `pub const`).
-        ///
-        /// E.g. `const FOO: i32 = 42;`
+
+        /// A constant item: `const MAX: u16 = 65535`.
         pub Const(ItemConst {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -73,9 +68,8 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
             pub semi_token: Token![;],
         }),
-        /// A function declaration (`fn` or `pub fn`).
-        ///
-        /// E.g. `fn foo(bar: usize) -> usize { .. }`
+
+        /// A free-standing function: `fn process(n: usize) -> Result<()> { ... }`.
         pub Fn(ItemFn {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -86,9 +80,8 @@ ast_enum_of_structs! {
             pub decl: Box<FnDecl>,
             pub block: Box<Block>,
         }),
-        /// A module declaration (`mod` or `pub mod`).
-        ///
-        /// E.g. `mod foo;` or `mod foo { .. }`
+
+        /// A module or module declaration: `mod m` or `mod m { ... }`.
         pub Mod(ItemMod {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -97,18 +90,16 @@ ast_enum_of_structs! {
             pub content: Option<(token::Brace, Vec<Item>)>,
             pub semi: Option<Token![;]>,
         }),
-        /// An external module (`extern` or `pub extern`).
-        ///
-        /// E.g. `extern {}` or `extern "C" {}`
+
+        /// A block of foreign items: `extern "C" { ... }`.
         pub ForeignMod(ItemForeignMod {
             pub attrs: Vec<Attribute>,
             pub abi: Abi,
             pub brace_token: token::Brace,
             pub items: Vec<ForeignItem>,
         }),
-        /// A type alias (`type` or `pub type`).
-        ///
-        /// E.g. `type Foo = Bar<u8>;`
+
+        /// A type alias: `type Result<T> = std::result::Result<T, MyError>`.
         pub Type(ItemType {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -119,9 +110,8 @@ ast_enum_of_structs! {
             pub ty: Box<Type>,
             pub semi_token: Token![;],
         }),
-        /// A struct definition (`struct` or `pub struct`).
-        ///
-        /// E.g. `struct Foo<A> { x: A }`
+
+        /// A struct definition: `struct Foo<A> { x: A }`.
         pub Struct(ItemStruct {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -131,9 +121,8 @@ ast_enum_of_structs! {
             pub fields: Fields,
             pub semi_token: Option<Token![;]>,
         }),
-        /// An enum definition (`enum` or `pub enum`).
-        ///
-        /// E.g. `enum Foo<A, B> { C<A>, D<B> }`
+
+        /// An enum definition: `enum Foo<A, B> { C<A>, D<B> }`.
         pub Enum(ItemEnum {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -143,9 +132,8 @@ ast_enum_of_structs! {
             pub brace_token: token::Brace,
             pub variants: Punctuated<Variant, Token![,]>,
         }),
-        /// A union definition (`union` or `pub union`).
-        ///
-        /// E.g. `union Foo<A, B> { x: A, y: B }`
+
+        /// A union definition: `union Foo<A, B> { x: A, y: B }`.
         pub Union(ItemUnion {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -154,9 +142,8 @@ ast_enum_of_structs! {
             pub generics: Generics,
             pub fields: FieldsNamed,
         }),
-        /// A Trait declaration (`trait` or `pub trait`).
-        ///
-        /// E.g. `trait Foo { .. }` or `trait Foo<T> { .. }`
+
+        /// A trait definition: `pub trait Iterator { ... }`.
         pub Trait(ItemTrait {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -170,9 +157,9 @@ ast_enum_of_structs! {
             pub brace_token: token::Brace,
             pub items: Vec<TraitItem>,
         }),
-        /// An implementation.
-        ///
-        /// E.g. `impl<A> Foo<A> { .. }` or `impl<A> Trait for Foo<A> { .. }`
+
+        /// An impl block providing trait or associated items: `impl<A> Trait
+        /// for Data<A> { ... }`.
         pub Impl(ItemImpl {
             pub attrs: Vec<Attribute>,
             pub defaultness: Option<Token![default]>,
@@ -186,9 +173,8 @@ ast_enum_of_structs! {
             pub brace_token: token::Brace,
             pub items: Vec<ImplItem>,
         }),
-        /// A macro invocation (which includes macro definition).
-        ///
-        /// E.g. `macro_rules! foo { .. }` or `foo!(..)`
+
+        /// A macro invocation, which includes `macro_rules!` definitions.
         pub Macro(ItemMacro {
             pub attrs: Vec<Attribute>,
             /// The `example` in `macro_rules! example { ... }`.
@@ -196,6 +182,8 @@ ast_enum_of_structs! {
             pub mac: Macro,
             pub semi_token: Option<Token![;]>,
         }),
+
+        /// A 2.0-style declarative macro introduced by the `macro` keyword.
         pub Macro2(ItemMacro2 #manual_extra_traits {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
@@ -206,6 +194,8 @@ ast_enum_of_structs! {
             pub brace_token: Brace,
             pub body: TokenStream,
         }),
+
+        /// Tokens forming an item not interpreted by Syn.
         pub Verbatim(ItemVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
