@@ -94,17 +94,23 @@ where
 }
 
 ast_enum! {
-    /// Bracketed or parenthesized arguments of a path segment.
-    ///
-    /// E.g. `<K, V>` as in `HashMap<K, V>` or `(A, B) -> C` as in `Fn(A, B) -> C`
+    /// Angle bracketed or parenthesized arguments of a path segment.
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    ///
+    /// ## Angle bracketed
+    ///
+    /// The `<'a, T>` in `std::slice::iter<'a, T>`.
+    ///
+    /// ## Parenthesized
+    ///
+    /// The `(A, B) -> C` in `Fn(A, B) -> C`.
     pub enum PathArguments {
         None,
         /// The `<'a, T>` in `std::slice::iter<'a, T>`.
         AngleBracketed(AngleBracketedGenericArguments),
-        /// The `(A, B)` and `C` in `Fn(A, B) -> C`.
+        /// The `(A, B) -> C` in `Fn(A, B) -> C`.
         Parenthesized(ParenthesizedGenericArguments),
     }
 }
@@ -135,9 +141,8 @@ ast_enum! {
         Lifetime(Lifetime),
         /// A type argument.
         Type(Type),
-        /// A binding (equality constraint) on an associated type.
-        ///
-        /// E.g. in `Iterator<Item = u8>`.
+        /// A binding (equality constraint) on an associated type: the `Item =
+        /// u8` in `Iterator<Item = u8>`.
         Binding(Binding),
         /// A const expression. Must be inside of a block.
         ///
@@ -174,8 +179,8 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Arguments of a function path segment: the `(A, B)` and `C` in `Fn(A,B)
-    /// -> C`.
+    /// Arguments of a function path segment: the `(A, B) -> C` in `Fn(A,B) ->
+    /// C`.
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*

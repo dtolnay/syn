@@ -645,9 +645,7 @@ ast_struct! {
 }
 
 ast_enum_of_structs! {
-    /// An argument in a function signature.
-    ///
-    /// E.g. `bar: usize` as in `fn foo(bar: usize)`
+    /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     ///
