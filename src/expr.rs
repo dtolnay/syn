@@ -313,7 +313,7 @@ ast_enum_of_structs! {
             pub bracket_token: token::Bracket,
             pub expr: Box<Expr>,
             pub semi_token: Token![;],
-            pub amt: Box<Expr>,
+            pub len: Box<Expr>,
         }),
 
         /// A parenthesized expression: `(a + b)`.
@@ -1943,7 +1943,7 @@ pub mod parsing {
             (ExprRepeat {
                 attrs: Vec::new(),
                 expr: Box::new((data.1).0),
-                amt: Box::new((data.1).2),
+                len: Box::new((data.1).2),
                 bracket_token: data.0,
                 semi_token: (data.1).1,
             })
@@ -3032,7 +3032,7 @@ mod printing {
             self.bracket_token.surround(tokens, |tokens| {
                 self.expr.to_tokens(tokens);
                 self.semi_token.to_tokens(tokens);
-                self.amt.to_tokens(tokens);
+                self.len.to_tokens(tokens);
             })
         }
     }

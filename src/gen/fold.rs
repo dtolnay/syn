@@ -1247,7 +1247,7 @@ pub fn fold_expr_repeat<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprRepeat) -> E
         bracket_token: Bracket(tokens_helper(_visitor, &(_i . bracket_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
-        amt: Box::new(_visitor.fold_expr(* _i . amt)),
+        len: Box::new(_visitor.fold_expr(* _i . len)),
     }
 }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]

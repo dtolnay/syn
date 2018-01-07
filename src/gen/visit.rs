@@ -983,7 +983,7 @@ pub fn visit_expr_repeat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     tokens_helper(_visitor, &(& _i . bracket_token).0);
     _visitor.visit_expr(& * _i . expr);
     tokens_helper(_visitor, &(& _i . semi_token).0);
-    _visitor.visit_expr(& * _i . amt);
+    _visitor.visit_expr(& * _i . len);
 }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_return<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprReturn) {

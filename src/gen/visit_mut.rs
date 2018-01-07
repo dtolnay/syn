@@ -984,7 +984,7 @@ pub fn visit_expr_repeat_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
     tokens_helper(_visitor, &mut (& mut _i . bracket_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     tokens_helper(_visitor, &mut (& mut _i . semi_token).0);
-    _visitor.visit_expr_mut(& mut * _i . amt);
+    _visitor.visit_expr_mut(& mut * _i . len);
 }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_return_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprReturn) {
