@@ -572,16 +572,16 @@ ast_enum! {
     /// A statement, usually ending in a semicolon.
     pub enum Stmt {
         /// A local (let) binding.
-        Local(Box<Local>),
+        Local(Local),
 
         /// An item definition.
-        Item(Box<Item>),
+        Item(Item),
 
         /// Expr without trailing semicolon.
-        Expr(Box<Expr>),
+        Expr(Expr),
 
         /// Expression with trailing semicolon;
-        Semi(Box<Expr>, Token![;]),
+        Semi(Expr, Token![;]),
     }
 }
 
@@ -2080,7 +2080,7 @@ pub mod parsing {
                 mut e: syn!(Expr) >>
                 ({
                     e.replace_attrs(attrs);
-                    Stmt::Expr(Box::new(e))
+                    Stmt::Expr(e)
                 })
             )) >>
             (match last {
@@ -2121,7 +2121,7 @@ pub mod parsing {
     // expression statements
         data: braces!(syn!(TokenStream)) >>
         semi: option!(punct!(;)) >>
-        (Stmt::Item(Box::new(Item::Macro(ItemMacro {
+        (Stmt::Item(Item::Macro(ItemMacro {
             attrs: attrs,
             ident: None,
             mac: Macro {
@@ -2131,7 +2131,7 @@ pub mod parsing {
                 tts: data.1,
             },
             semi_token: semi,
-        }))))
+        })))
     ));
 
     #[cfg(feature = "full")]
@@ -2142,18 +2142,18 @@ pub mod parsing {
         ty: option!(tuple!(punct!(:), syn!(Type))) >>
         init: option!(tuple!(punct!(=), syn!(Expr))) >>
         semi: punct!(;) >>
-        (Stmt::Local(Box::new(Local {
+        (Stmt::Local(Local {
             attrs: attrs,
             let_token: let_,
             pat: Box::new(pat),
             ty: ty.map(|(colon, ty)| (colon, Box::new(ty))),
             init: init.map(|(eq, expr)| (eq, Box::new(expr))),
             semi_token: semi,
-        })))
+        }))
     ));
 
     #[cfg(feature = "full")]
-    named!(stmt_item -> Stmt, map!(syn!(Item), |i| Stmt::Item(Box::new(i))));
+    named!(stmt_item -> Stmt, map!(syn!(Item), |i| Stmt::Item(i)));
 
     #[cfg(feature = "full")]
     named!(stmt_blockexpr -> Stmt, do_parse!(
@@ -2167,9 +2167,9 @@ pub mod parsing {
         ({
             e.replace_attrs(attrs);
             if let Some(semi) = semi {
-                Stmt::Semi(Box::new(e), semi)
+                Stmt::Semi(e, semi)
             } else {
-                Stmt::Expr(Box::new(e))
+                Stmt::Expr(e)
             }
         })
     ));
@@ -2181,7 +2181,7 @@ pub mod parsing {
         semi: punct!(;) >>
         ({
             e.replace_attrs(attrs);
-            Stmt::Semi(Box::new(e), semi)
+            Stmt::Semi(e, semi)
         })
     ));
 

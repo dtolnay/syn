@@ -328,8 +328,8 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
-                Stmt::Expr(e) => Stmt::Expr(Box::new(fold_expr(self, *e))),
-                Stmt::Semi(e, semi) => Stmt::Semi(Box::new(fold_expr(self, *e)), semi),
+                Stmt::Expr(e) => Stmt::Expr(fold_expr(self, e)),
+                Stmt::Semi(e, semi) => Stmt::Semi(fold_expr(self, e), semi),
                 s => s,
             }
         }

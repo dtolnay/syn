@@ -2462,22 +2462,22 @@ pub fn fold_stmt<V: Fold + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
     match _i {
         Stmt::Local(_binding_0, ) => {
             Stmt::Local (
-                Box::new(_visitor.fold_local(* _binding_0)),
+                _visitor.fold_local(_binding_0),
             )
         }
         Stmt::Item(_binding_0, ) => {
             Stmt::Item (
-                Box::new(_visitor.fold_item(* _binding_0)),
+                _visitor.fold_item(_binding_0),
             )
         }
         Stmt::Expr(_binding_0, ) => {
             Stmt::Expr (
-                Box::new(_visitor.fold_expr(* _binding_0)),
+                _visitor.fold_expr(_binding_0),
             )
         }
         Stmt::Semi(_binding_0, _binding_1, ) => {
             Stmt::Semi (
-                Box::new(_visitor.fold_expr(* _binding_0)),
+                _visitor.fold_expr(_binding_0),
                 Token ! [ ; ](tokens_helper(_visitor, &(_binding_1).0)),
             )
         }

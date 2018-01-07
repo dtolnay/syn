@@ -1930,16 +1930,16 @@ pub fn visit_span<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Spa
 pub fn visit_stmt<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stmt) {
     match *_i {
         Stmt::Local(ref _binding_0, ) => {
-            _visitor.visit_local(& * * _binding_0);
+            _visitor.visit_local(_binding_0);
         }
         Stmt::Item(ref _binding_0, ) => {
-            _visitor.visit_item(& * * _binding_0);
+            _visitor.visit_item(_binding_0);
         }
         Stmt::Expr(ref _binding_0, ) => {
-            _visitor.visit_expr(& * * _binding_0);
+            _visitor.visit_expr(_binding_0);
         }
         Stmt::Semi(ref _binding_0, ref _binding_1, ) => {
-            _visitor.visit_expr(& * * _binding_0);
+            _visitor.visit_expr(_binding_0);
             tokens_helper(_visitor, &(_binding_1).0);
         }
     }

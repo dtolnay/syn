@@ -102,7 +102,7 @@ fn test_catch_expr() {
 
     assert_let!(Item::Fn(ItemFn { ref block, .. }) = actual.items[1]; {
         assert_let!(Stmt::Local(ref local) = block.stmts[0]; {
-            assert_let!(Local { init: Some((_, ref init_expr)), .. } = **local; {
+            assert_let!(Local { init: Some((_, ref init_expr)), .. } = *local; {
                 assert_let!(Expr::Catch(..) = **init_expr);
             });
         });
@@ -114,7 +114,7 @@ fn test_catch_expr() {
         });
 
         assert_let!(Stmt::Expr(ref expr) = block.stmts[3]; {
-            assert_let!(Expr::While(ExprWhile { ref cond, .. }) = **expr; {
+            assert_let!(Expr::While(ExprWhile { ref cond, .. }) = *expr; {
                 assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **cond; {
                     assert_eq!(*path, "catch".into());
                 });
@@ -122,7 +122,7 @@ fn test_catch_expr() {
         });
 
         assert_let!(Stmt::Semi(ref expr, _) = block.stmts[5]; {
-            assert_let!(Expr::Assign(ExprAssign { ref left, ref right, .. }) = **expr; {
+            assert_let!(Expr::Assign(ExprAssign { ref left, ref right, .. }) = *expr; {
                 assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **left; {
                     assert_eq!(*path, "catch".into());
                 });
@@ -136,7 +136,7 @@ fn test_catch_expr() {
         });
 
         assert_let!(Stmt::Semi(ref expr, _) = block.stmts[7]; {
-            assert_let!(Expr::Match(ExprMatch { ref expr, .. }) = **expr; {
+            assert_let!(Expr::Match(ExprMatch { ref expr, .. }) = *expr; {
                 assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **expr; {
                     assert_eq!(*path, "catch".into());
                 });

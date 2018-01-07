@@ -148,9 +148,9 @@ impl Fold for Args {
         match s {
             Stmt::Local(s) => {
                 if s.init.is_some() && self.should_print_pat(&s.pat) {
-                    self.let_and_print(*s)
+                    self.let_and_print(s)
                 } else {
-                    Stmt::Local(Box::new(fold::fold_local(self, *s)))
+                    Stmt::Local(fold::fold_local(self, s))
                 }
             }
             _ => fold::fold_stmt(self, s),
