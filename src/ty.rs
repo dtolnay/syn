@@ -129,9 +129,10 @@ impl Hash for TypeVerbatim {
 }
 
 ast_struct! {
+    /// The binary interface of a function: `extern "C"`.
     pub struct Abi {
         pub extern_token: Token![extern],
-        pub name: Option<Lit>,
+        pub name: Option<LitStr>,
     }
 }
 
@@ -520,8 +521,7 @@ pub mod parsing {
     impl Synom for Abi {
         named!(parse -> Self, do_parse!(
             extern_: keyword!(extern) >>
-            // TODO: this parses all literals, not just strings
-            name: option!(syn!(Lit)) >>
+            name: option!(syn!(LitStr)) >>
             (Abi {
                 extern_token: extern_,
                 name: name,
