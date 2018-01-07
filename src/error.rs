@@ -10,7 +10,11 @@ use std::error::Error;
 use buffer::Cursor;
 use std::fmt::{self, Display};
 
-/// The result of a parser
+/// The result of a `Synom` parser.
+///
+/// Refer to the [module documentation] for details about parsing in Syn.
+///
+/// [module documentation]: index.html
 pub type PResult<'a, O> = Result<(O, Cursor<'a>), ParseError>;
 
 /// An error with a default error message.
@@ -20,6 +24,11 @@ pub fn parse_error<O>() -> PResult<'static, O> {
     Err(ParseError(None))
 }
 
+/// Error returned when a `Synom` parser cannot parse the input tokens.
+///
+/// Refer to the [module documentation] for details about parsing in Syn.
+///
+/// [module documentation]: index.html
 #[derive(Debug)]
 pub struct ParseError(Option<String>);
 
@@ -34,7 +43,7 @@ impl Error for ParseError {
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <str as fmt::Display>::fmt(self.description(), f)
+        Display::fmt(self.description(), f)
     }
 }
 

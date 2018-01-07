@@ -6,28 +6,41 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Adapted from [`nom`](https://github.com/Geal/nom) by removing the
-//! `IPResult::Incomplete` variant which:
+//! Parsing interface for parsing a token stream into a syntax tree node.
 //!
-//! - we don't need,
-//! - is an unintuitive footgun when working with non-streaming use cases, and
-//! - more than doubles compilation time.
+//! All syntax tree nodes that can be parsed from a token stream need to
+//! implement the [`Synom`] trait. This trait is usually implemented using the
+//! [`nom`]-style parser combinator macros provided by Syn, but may also be
+//! implemented without macros be using the low-level [`Cursor`] API directly.
 //!
-//! ## Whitespace handling strategy
+//! [`Synom`]: trait.Synom.html
+//! [`nom`]: https://github.com/Geal/nom
+//! [`Cursor`]: ../buffer/index.html
 //!
-//! As (sy)nom is a parser combinator library, the parsers provided here and
-//! that you implement yourself are all made up of successively more primitive
-//! parsers, eventually culminating in a small number of fundamental parsers
-//! that are implemented in Rust. Among these are `punct!` and `keyword!`.
+//! The following parser combinator macros are available and a `Synom` parsing
+//! example is provided for each one.
 //!
-//! All synom fundamental parsers (those not combined out of other parsers)
-//! should be written to skip over leading whitespace in their input. This way,
-//! as long as every parser eventually boils down to some combination of
-//! fundamental parsers, we get correct whitespace handling at all levels for
-//! free.
-//!
-//! For our use case, this strategy is a huge improvement in usability,
-//! correctness, and compile time over nom's `ws!` strategy.
+//! - [`alt!`](../macro.alt.html)
+//! - [`braces!`](../macro.braces.html)
+//! - [`brackets!`](../macro.brackets.html)
+//! - [`call!`](../macro.call.html)
+//! - [`cond!`](../macro.cond.html)
+//! - [`cond_reduce!`](../macro.cond_reduce.html)
+//! - [`do_parse!`](../macro.do_parse.html)
+//! - [`epsilon!`](../macro.epsilon.html)
+//! - [`input_end!`](../macro.input_end.html)
+//! - [`keyword!`](../macro.keyword.html)
+//! - [`many0!`](../macro.many0.html)
+//! - [`map!`](../macro.map.html)
+//! - [`not!`](../macro.not.html)
+//! - [`option!`](../macro.option.html)
+//! - [`parens!`](../macro.parens.html)
+//! - [`punct!`](../macro.punct.html)
+//! - [`reject!`](../macro.reject.html)
+//! - [`switch!`](../macro.switch.html)
+//! - [`syn!`](../macro.syn.html)
+//! - [`tuple!`](../macro.tuple.html)
+//! - [`value!`](../macro.value.html)
 
 use proc_macro2::TokenStream;
 
@@ -35,6 +48,12 @@ pub use error::{PResult, ParseError};
 
 use buffer::Cursor;
 
+/// Parsing interface implemented by all types that can be parsed from a token
+/// stream.
+///
+/// Refer to the [module documentation] for details about parsing in Syn.
+///
+/// [module documentation]: index.html
 pub trait Synom: Sized {
     fn parse(input: Cursor) -> PResult<Self>;
 
