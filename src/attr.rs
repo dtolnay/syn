@@ -50,11 +50,11 @@ ast_struct! {
     ///    path  tts                   path         tts
     /// ```
     ///
-    /// Use the [`meta_item`] method to try parsing the tokens of an attribute
-    /// into the structured representation that is used by convention across
-    /// most Rust libraries.
+    /// Use the [`interpret_meta`] method to try parsing the tokens of an
+    /// attribute into the structured representation that is used by convention
+    /// across most Rust libraries.
     ///
-    /// [`meta_item`]: #method.meta_item
+    /// [`interpret_meta`]: #method.interpret_meta
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
         pub style: AttrStyle,
@@ -94,7 +94,8 @@ impl Hash for Attribute {
 }
 
 impl Attribute {
-    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if possible.
+    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
+    /// possible.
     pub fn interpret_meta(&self) -> Option<Meta> {
         let name = if self.path.segments.len() == 1 {
             &self.path.segments.first().unwrap().value().ident
@@ -243,78 +244,59 @@ ast_enum! {
 }
 
 ast_enum_of_structs! {
-    /// A compile-time attribute item.
+    /// Content of a compile-time structured attribute.
     ///
-    /// E.g. `#[test]`, `#[derive(..)]` or `#[feature = "foo"]`
+    /// ## Word
+    ///
+    /// A meta word is like the `test` in `#[test]`.
+    ///
+    /// ## List
+    ///
+    /// A meta list is like the `derive(Copy)` in `#[derive(Copy)]`.
+    ///
+    /// ## NameValue
+    ///
+    /// A name-value meta is like the `path = "..."` in `#[path =
+    /// "sys/windows.rs"]`.
     pub enum Meta {
-        /// Term meta item.
-        ///
-        /// E.g. `test` as in `#[test]`
         pub Word(Ident),
-
-        /// List meta item.
-        ///
-        /// E.g. `derive(..)` as in `#[derive(..)]`
+        /// A structured list within an attribute, like `derive(Copy, Clone)`.
         pub List(MetaList {
-            /// Name of this attribute.
-            ///
-            /// E.g. `derive` in `#[derive(..)]`
             pub ident: Ident,
-
             pub paren_token: token::Paren,
-
-            /// Arguments to this attribute
-            ///
-            /// E.g. `..` in `#[derive(..)]`
             pub nested: Punctuated<NestedMeta, Token![,]>,
         }),
-
-        /// Name-value meta item.
-        ///
-        /// E.g. `feature = "foo"` as in `#[feature = "foo"]`
+        /// A name-value pair within an attribute, like `feature = "nightly"`.
         pub NameValue(MetaNameValue {
-            /// Name of this attribute.
-            ///
-            /// E.g. `feature` in `#[feature = "foo"]`
             pub ident: Ident,
-
             pub eq_token: Token![=],
-
-            /// Arguments to this attribute
-            ///
-            /// E.g. `"foo"` in `#[feature = "foo"]`
             pub lit: Lit,
         }),
     }
 }
 
 impl Meta {
-    /// Name of the item.
+    /// Returns the identifier that begins this structured meta item.
     ///
-    /// E.g. `test` as in `#[test]`, `derive` as in `#[derive(..)]`, and
-    /// `feature` as in `#[feature = "foo"]`.
-    pub fn name(&self) -> &str {
+    /// For example this would return the `test` in `#[test]`, the `derive` in
+    /// `#[derive(Copy)]`, and the `path` in `#[path = "sys/windows.rs"]`.
+    pub fn name(&self) -> Ident {
         match *self {
-            Meta::Word(ref name) => name.as_ref(),
-            Meta::NameValue(ref pair) => pair.ident.as_ref(),
-            Meta::List(ref list) => list.ident.as_ref(),
+            Meta::Word(ref meta) => *meta,
+            Meta::List(ref meta) => meta.ident,
+            Meta::NameValue(ref meta) => meta.ident,
         }
     }
 }
 
 ast_enum_of_structs! {
-    /// Possible values inside of compile-time attribute lists.
-    ///
-    /// E.g. the '..' in `#[name(..)]`.
+    /// Element of a compile-time attribute list.
     pub enum NestedMeta {
-        /// A full `Meta`.
-        ///
-        /// E.g. `Copy` in `#[derive(Copy)]` would be a `Meta::Word(Ident::from("Copy"))`.
+        /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
+        /// would be a nested `Meta::Word`.
         pub Meta(Meta),
 
-        /// A Rust literal.
-        ///
-        /// E.g. `"name"` in `#[rename("name")]`.
+        /// A Rust literal, like the `"new_name"` in `#[rename("new_name")]`.
         pub Literal(Lit),
     }
 }
