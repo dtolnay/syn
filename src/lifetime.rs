@@ -13,6 +13,17 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::{Span, Term};
 use unicode_xid::UnicodeXID;
 
+/// A Rust lifetime: `'a`.
+///
+/// Lifetime names must conform to the following rules:
+///
+/// - Must start with an apostrophe.
+/// - Must not consist of just an apostrophe: `'`.
+/// - Must not consist of apostrophe + underscore: `'_`.
+/// - Character after the apostrophe must be `_` or a Unicode code point with
+///   the XID_Start property.
+/// - All following characters must be Unicode code points with the XID_Continue
+///   property.
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Lifetime {

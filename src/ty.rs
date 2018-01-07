@@ -630,44 +630,6 @@ mod printing {
         }
     }
 
-    impl<'a> ToTokens for PathTokens<'a> {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            let qself = match *self.0 {
-                Some(ref qself) => qself,
-                None => return self.1.to_tokens(tokens),
-            };
-            qself.lt_token.to_tokens(tokens);
-            qself.ty.to_tokens(tokens);
-
-            // XXX: Gross.
-            let pos = if qself.position > 0 && qself.position >= self.1.segments.len() {
-                self.1.segments.len() - 1
-            } else {
-                qself.position
-            };
-            let mut segments = self.1.segments.pairs();
-            if pos > 0 {
-                TokensOrDefault(&qself.as_token).to_tokens(tokens);
-                self.1.leading_colon.to_tokens(tokens);
-                for (i, segment) in segments.by_ref().take(pos).enumerate() {
-                    if i + 1 == pos {
-                        segment.value().to_tokens(tokens);
-                        qself.gt_token.to_tokens(tokens);
-                        segment.punct().to_tokens(tokens);
-                    } else {
-                        segment.to_tokens(tokens);
-                    }
-                }
-            } else {
-                qself.gt_token.to_tokens(tokens);
-                self.1.leading_colon.to_tokens(tokens);
-            }
-            for segment in segments {
-                segment.to_tokens(tokens);
-            }
-        }
-    }
-
     impl ToTokens for TypeTraitObject {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.dyn_token.to_tokens(tokens);

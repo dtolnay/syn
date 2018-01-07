@@ -287,18 +287,18 @@ impl From<DeriveInput> for Item {
 }
 
 ast_enum_of_structs! {
-    /// Things that can appear directly inside of a module.
+    /// A suffix of an import tree in a `use` item: `Type as Renamed` or `*`.
     pub enum UseTree {
-        /// `use prefix::Ty` or `use prefix::Ty as Renamed`
+        /// An identifier imported by a `use` item: `Type` or `Type as Renamed`.
         pub Path(UsePath {
             pub ident: Ident,
             pub rename: Option<(Token![as], Ident)>,
         }),
-        /// `use prefix::*`
+        /// A glob import in a `use` item: `*`.
         pub Glob(UseGlob {
             pub star_token: Token![*],
         }),
-        /// `use prefix::{a, b, c}`
+        /// A braced list of imports in a `use` item: `{A, B, C}`.
         pub List(UseList {
             pub brace_token: token::Brace,
             pub items: Punctuated<UseTree, Token![,]>,
@@ -508,8 +508,8 @@ impl Hash for ImplItemVerbatim {
 }
 
 ast_struct! {
-    /// Represents a method's signature in a trait declaration,
-    /// or in an implementation.
+    /// A method's signature in a trait or implementation: `unsafe fn
+    /// initialize(&self)`.
     pub struct MethodSig {
         pub constness: Option<Token![const]>,
         pub unsafety: Option<Token![unsafe]>,

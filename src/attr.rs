@@ -222,8 +222,8 @@ fn list_of_nested_meta_items_from_tokens(
 }
 
 ast_enum! {
-    /// Distinguishes between Attributes that decorate items and Attributes that
-    /// are contained as statements within items.
+    /// Distinguishes between attributes that decorate an item and attributes
+    /// that are contained within an item.
     ///
     /// # Outer attributes
     ///

@@ -22,6 +22,8 @@ ast_struct! {
 }
 
 ast_enum_of_structs! {
+    /// A generic type parameter, lifetime, or const generic: `T: Into<String>`,
+    /// `'a: 'b`, `const LEN: usize`.
     pub enum GenericParam {
         /// A generic type parameter: `T: Into<String>`.
         pub Type(TypeParam {
@@ -111,7 +113,7 @@ impl<'a> TypeGenerics<'a> {
 }
 
 ast_struct! {
-    /// A set of bound lifetimes, e.g. `for<'a, 'b, 'c>`
+    /// A set of bound lifetimes: `for<'a, 'b, 'c>`.
     #[derive(Default)]
     pub struct BoundLifetimes {
         pub for_token: Token![for],
@@ -175,7 +177,8 @@ ast_enum! {
 }
 
 ast_struct! {
-    /// A `where` clause in a definition.
+    /// A `where` clause in a definition: `where T: Deserialize<'de>, D:
+    /// 'static`.
     pub struct WhereClause {
         pub where_token: Token![where],
         pub predicates: Punctuated<WherePredicate, Token![,]>,
@@ -183,7 +186,7 @@ ast_struct! {
 }
 
 ast_enum_of_structs! {
-    /// A single predicate in a `where` clause.
+    /// A single predicate in a `where` clause: `T: Deserialize<'de>`.
     pub enum WherePredicate {
         /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
         pub Type(PredicateType {

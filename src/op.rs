@@ -7,6 +7,7 @@
 // except according to those terms.
 
 ast_enum! {
+    /// A binary operator: `+`, `+=`, `&`.
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOp {
         /// The `+` operator (addition)
@@ -69,6 +70,7 @@ ast_enum! {
 }
 
 ast_enum! {
+    /// A unary operator: `*`, `!`, `-`.
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum UnOp {
         /// The `*` operator for dereferencing

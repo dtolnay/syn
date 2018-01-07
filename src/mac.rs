@@ -16,9 +16,7 @@ use std::hash::{Hash, Hasher};
 use tt::TokenStreamHelper;
 
 ast_struct! {
-    /// Represents a macro invocation. The Path indicates which macro is being
-    /// invoked, and the `TokenStream` contains the source of the macro
-    /// invocation.
+    /// A macro invocation: `println!("{}", mac)`.
     pub struct Macro #manual_extra_traits {
         pub path: Path,
         pub bang_token: Token![!],
@@ -28,12 +26,10 @@ ast_struct! {
 }
 
 ast_enum! {
+    /// A grouping token that surrounds a macro body: `m!(...)` or `m!{...}` or `m![...]`.
     pub enum MacroDelimiter {
-        /// `macro!(...)`
         Paren(Paren),
-        /// `macro!{...}`
         Brace(Brace),
-        /// `macro![...]`
         Bracket(Bracket),
     }
 }

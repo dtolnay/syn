@@ -231,7 +231,7 @@ ast_enum_of_structs! {
             pub member: Member,
         }),
 
-        /// A square bracketed indexing expression: `vector[2]`
+        /// A square bracketed indexing expression: `vector[2]`.
         pub Index(ExprIndex {
             pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,

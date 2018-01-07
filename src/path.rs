@@ -10,17 +10,9 @@ use punctuated::Punctuated;
 use super::*;
 
 ast_struct! {
-    /// A "Path" is essentially Rust's notion of a name.
-    ///
-    /// It's represented as a sequence of identifiers,
-    /// along with a bunch of supporting information.
-    ///
-    /// E.g. `std::cmp::PartialEq`
+    /// A path at which a named item is exported: `std::collections::HashMap`.
     pub struct Path {
-        /// A `::foo` path, is relative to the crate root rather than current
-        /// module (like paths in an import).
         pub leading_colon: Option<Token![::]>,
-        /// The segments in the path: the things separated by `::`.
         pub segments: Punctuated<PathSegment, Token![::]>,
     }
 }
@@ -31,6 +23,28 @@ impl Path {
     }
 }
 
+/// A helper for printing a self-type qualified path as tokens.
+///
+/// ```rust
+/// extern crate syn;
+/// extern crate quote;
+///
+/// use syn::{QSelf, Path, PathTokens};
+/// use quote::{Tokens, ToTokens};
+///
+/// struct MyNode {
+///     qself: Option<QSelf>,
+///     path: Path,
+/// }
+///
+/// impl ToTokens for MyNode {
+///     fn to_tokens(&self, tokens: &mut Tokens) {
+///         PathTokens(&self.qself, &self.path).to_tokens(tokens);
+///     }
+/// }
+/// #
+/// # fn main() {}
+/// ```
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -51,17 +65,9 @@ where
 }
 
 ast_struct! {
-    /// A segment of a path: an identifier, an optional lifetime, and a set of types.
-    ///
-    /// E.g. `std`, `String` or `Box<T>`
+    /// A segment of a path together with any path arguments on that segment.
     pub struct PathSegment {
-        /// The identifier portion of this path segment.
         pub ident: Ident,
-        /// Type/lifetime arguments attached to this path. They come in
-        /// two flavors: `Path<A,B,C>` and `Path(A,B) -> C`. Note that
-        /// this is more than just simple syntactic sugar; the use of
-        /// parens affects the region binding rules, so we preserve the
-        /// distinction.
         pub arguments: PathArguments,
     }
 }
@@ -160,7 +166,7 @@ ast_struct! {
 
 ast_struct! {
     /// The explicit Self type in a qualified path: the `T` in `<T as
-    /// Display>::fmt`
+    /// Display>::fmt`.
     ///
     /// The actual path, including the trait and the associated item, is stored
     /// separately. The `position` field represents the index of the associated
@@ -457,6 +463,44 @@ mod printing {
                 self.inputs.to_tokens(tokens);
             });
             self.output.to_tokens(tokens);
+        }
+    }
+
+    impl<'a> ToTokens for PathTokens<'a> {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            let qself = match *self.0 {
+                Some(ref qself) => qself,
+                None => return self.1.to_tokens(tokens),
+            };
+            qself.lt_token.to_tokens(tokens);
+            qself.ty.to_tokens(tokens);
+
+            // XXX: Gross.
+            let pos = if qself.position > 0 && qself.position >= self.1.segments.len() {
+                self.1.segments.len() - 1
+            } else {
+                qself.position
+            };
+            let mut segments = self.1.segments.pairs();
+            if pos > 0 {
+                TokensOrDefault(&qself.as_token).to_tokens(tokens);
+                self.1.leading_colon.to_tokens(tokens);
+                for (i, segment) in segments.by_ref().take(pos).enumerate() {
+                    if i + 1 == pos {
+                        segment.value().to_tokens(tokens);
+                        qself.gt_token.to_tokens(tokens);
+                        segment.punct().to_tokens(tokens);
+                    } else {
+                        segment.to_tokens(tokens);
+                    }
+                }
+            } else {
+                qself.gt_token.to_tokens(tokens);
+                self.1.leading_colon.to_tokens(tokens);
+            }
+            for segment in segments {
+                segment.to_tokens(tokens);
+            }
         }
     }
 }

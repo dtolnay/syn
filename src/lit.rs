@@ -237,7 +237,7 @@ lit_extra_traits!(LitBool, value);
 lit_extra_traits!(LitVerbatim, token);
 
 ast_enum! {
-    /// The style of a string literal, either plain or a raw string like
+    /// The style of a string literal, either plain quoted or a raw string like
     /// `r##"data"##`.
     pub enum StrStyle #no_visit {
         /// An ordinary string like `"data"`.

@@ -21,7 +21,7 @@ ast_struct! {
         /// Content stored in the variant.
         pub fields: Fields,
 
-        /// Explicit discriminant, e.g. `Foo = 1`
+        /// Explicit discriminant: `Variant = 1`
         pub discriminant: Option<(Token![=], Expr)>,
     }
 }
@@ -69,21 +69,23 @@ ast_struct! {
 }
 
 ast_enum_of_structs! {
-    /// Visibility level of an item.
+    /// The visibility level of an item: inherited or `pub` or
+    /// `pub(restricted)`.
     pub enum Visibility {
-        /// Public, i.e. `pub`.
+        /// A public visibility level: `pub`.
         pub Public(VisPublic {
             pub pub_token: Token![pub],
         }),
 
-        /// Crate-visible, i.e. `pub(crate)`.
+        /// A crate-level visibility: `pub(crate)`.
         pub Crate(VisCrate {
             pub pub_token: Token![pub],
             pub paren_token: token::Paren,
             pub crate_token: Token![crate],
         }),
 
-        /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
+        /// A visibility level restricted to some path: `pub(self)` or
+        /// `pub(super)` or `pub(in some::module)`.
         pub Restricted(VisRestricted {
             pub pub_token: Token![pub],
             pub paren_token: token::Paren,
@@ -91,7 +93,7 @@ ast_enum_of_structs! {
             pub path: Box<Path>,
         }),
 
-        /// Inherited, i.e. private.
+        /// An inherited visibility, which usually means private.
         pub Inherited,
     }
 }
@@ -236,7 +238,7 @@ pub mod parsing {
         ));
 
         fn description() -> Option<&'static str> {
-            Some("visibility qualifier, e.g. `pub`")
+            Some("visibility qualifier such as `pub`")
         }
     }
 }
