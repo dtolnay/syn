@@ -6,8 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use proc_macro2::{Literal, Span, Term, TokenNode, TokenTree};
+use proc_macro2::{Literal, Span, TokenNode};
 use std::str;
+
+#[cfg(feature = "printing")]
+use proc_macro2::{Term, TokenTree};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
@@ -351,85 +354,6 @@ pub mod parsing {
         |
         _ => reject!()
     ));
-
-    impl Lit {
-        pub fn new(token: Literal, span: Span) -> Self {
-            let value = token.to_string();
-
-            match value::byte(&value, 0) {
-                b'"' | b'r' => {
-                    return Lit::Str(LitStr {
-                        token: token,
-                        span: span,
-                    })
-                }
-                b'b' => match value::byte(&value, 1) {
-                    b'"' | b'r' => {
-                        return Lit::ByteStr(LitByteStr {
-                            token: token,
-                            span: span,
-                        })
-                    }
-                    b'\'' => {
-                        return Lit::Byte(LitByte {
-                            token: token,
-                            span: span,
-                        })
-                    }
-                    _ => {}
-                },
-                b'\'' => {
-                    return Lit::Char(LitChar {
-                        token: token,
-                        span: span,
-                    })
-                }
-                b'0'...b'9' => if number_is_int(&value) {
-                    return Lit::Int(LitInt {
-                        token: token,
-                        span: span,
-                    });
-                } else if number_is_float(&value) {
-                    return Lit::Float(LitFloat {
-                        token: token,
-                        span: span,
-                    });
-                } else {
-                    // number overflow
-                    return Lit::Verbatim(LitVerbatim {
-                        token: token,
-                        span: span,
-                    });
-                },
-                _ => if value == "true" || value == "false" {
-                    return Lit::Bool(LitBool {
-                        value: value == "true",
-                        span: span,
-                    });
-                },
-            }
-
-            panic!("Unrecognized literal: {}", value);
-        }
-    }
-
-    fn number_is_int(value: &str) -> bool {
-        if number_is_float(value) {
-            false
-        } else {
-            value::parse_lit_int(value).is_some()
-        }
-    }
-
-    fn number_is_float(value: &str) -> bool {
-        if value.contains('.') {
-            true
-        } else if value.starts_with("0x") || value.ends_with("size") {
-            false
-        } else {
-            value.contains('e') || value.contains('E')
-        }
-    }
 }
 
 #[cfg(feature = "printing")]
@@ -515,6 +439,85 @@ mod value {
     use std::char;
     use std::ops::{Index, RangeFrom};
     use proc_macro2::TokenStream;
+
+    impl Lit {
+        pub fn new(token: Literal, span: Span) -> Self {
+            let value = token.to_string();
+
+            match value::byte(&value, 0) {
+                b'"' | b'r' => {
+                    return Lit::Str(LitStr {
+                        token: token,
+                        span: span,
+                    })
+                }
+                b'b' => match value::byte(&value, 1) {
+                    b'"' | b'r' => {
+                        return Lit::ByteStr(LitByteStr {
+                            token: token,
+                            span: span,
+                        })
+                    }
+                    b'\'' => {
+                        return Lit::Byte(LitByte {
+                            token: token,
+                            span: span,
+                        })
+                    }
+                    _ => {}
+                },
+                b'\'' => {
+                    return Lit::Char(LitChar {
+                        token: token,
+                        span: span,
+                    })
+                }
+                b'0'...b'9' => if number_is_int(&value) {
+                    return Lit::Int(LitInt {
+                        token: token,
+                        span: span,
+                    });
+                } else if number_is_float(&value) {
+                    return Lit::Float(LitFloat {
+                        token: token,
+                        span: span,
+                    });
+                } else {
+                    // number overflow
+                    return Lit::Verbatim(LitVerbatim {
+                        token: token,
+                        span: span,
+                    });
+                },
+                _ => if value == "true" || value == "false" {
+                    return Lit::Bool(LitBool {
+                        value: value == "true",
+                        span: span,
+                    });
+                },
+            }
+
+            panic!("Unrecognized literal: {}", value);
+        }
+    }
+
+    fn number_is_int(value: &str) -> bool {
+        if number_is_float(value) {
+            false
+        } else {
+            value::parse_lit_int(value).is_some()
+        }
+    }
+
+    fn number_is_float(value: &str) -> bool {
+        if value.contains('.') {
+            true
+        } else if value.starts_with("0x") || value.ends_with("size") {
+            false
+        } else {
+            value.contains('e') || value.contains('E')
+        }
+    }
 
     /// Get the byte at offset idx, or a default of `b'\0'` if we're looking
     /// past the end of the input buffer.
