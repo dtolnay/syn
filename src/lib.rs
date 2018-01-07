@@ -515,12 +515,18 @@ use error::ParseError;
 #[doc(hidden)]
 pub use error::parse_error;
 
-/// Parse tokens of source code into the chosen syn data type.
+/// Parse tokens of source code into the chosen syntax tree node.
 ///
 /// This is preferred over parsing a string because tokens are able to preserve
 /// information about where in the user's code they were originally written (the
 /// "span" of the token), possibly allowing the compiler to produce better error
 /// messages.
+///
+/// This function parses a `proc_macro::TokenStream` which is the type used for
+/// interop with the compiler in a procedural macro. To parse a
+/// `proc_macro2::TokenStream`, use [`syn::parse2`] instead.
+///
+/// [`syn::parse2`]: fn.parse2.html
 ///
 /// # Examples
 ///
@@ -561,6 +567,16 @@ where
     parse2(tokens.into())
 }
 
+/// Parse a proc-macro2 token stream into the chosen syntax tree node.
+///
+/// This function parses a `proc_macro2::TokenStream` which is commonly useful
+/// when the input comes from a node of the Syn syntax tree, for example the tts
+/// of a [`Macro`] node. When in a procedural macro parsing the
+/// `proc_macro::TokenStream` provided by the compiler, use [`syn::parse`]
+/// instead.
+///
+/// [`Macro`]: struct.Macro.html
+/// [`syn::parse`]: fn.parse.html
 #[cfg(feature = "parsing")]
 pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
@@ -587,7 +603,7 @@ where
     }
 }
 
-/// Parse a string of Rust code into the chosen syn data type.
+/// Parse a string of Rust code into the chosen syntax tree node.
 ///
 /// # Examples
 ///
