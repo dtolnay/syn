@@ -255,7 +255,8 @@
 //! - **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
 //!   types.
 
-#![doc(html_root_url = "https://dtolnay.github.io/syn")]
+// Syn types in rustdoc of other crates get linked to here.
+#![doc(html_root_url = "https://docs.rs/syn/0.12.0")]
 #![cfg_attr(feature = "cargo-clippy",
             allow(const_static_lifetime, doc_markdown, large_enum_variant, match_bool,
                   redundant_closure, needless_pass_by_value))]
