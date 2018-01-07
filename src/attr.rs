@@ -258,6 +258,12 @@ ast_enum_of_structs! {
     ///
     /// A name-value meta is like the `path = "..."` in `#[path =
     /// "sys/windows.rs"]`.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Meta {
         pub Word(Ident),
         /// A structured list within an attribute, like `derive(Copy, Clone)`.

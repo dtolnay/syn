@@ -28,6 +28,12 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// Data stored within an enum variant or struct.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
@@ -71,6 +77,12 @@ ast_struct! {
 ast_enum_of_structs! {
     /// The visibility level of an item: inherited or `pub` or
     /// `pub(restricted)`.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Visibility {
         /// A public visibility level: `pub`.
         pub Public(VisPublic {

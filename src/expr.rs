@@ -18,6 +18,88 @@ use std::mem;
 
 ast_enum_of_structs! {
     /// A Rust expression.
+    ///
+    /// # Syntax tree enums
+    ///
+    /// This type is a syntax tree enum. In Syn this and other syntax tree enums
+    /// are designed to be traversed using the following rebinding idiom.
+    ///
+    /// ```
+    /// # use syn::Expr;
+    /// #
+    /// # fn example(expr: Expr) {
+    /// # const IGNORE: &str = stringify! {
+    /// let expr: Expr = /* ... */;
+    /// # };
+    /// match expr {
+    ///     Expr::MethodCall(expr) => {
+    ///         /* ... */
+    ///     }
+    ///     Expr::Cast(expr) => {
+    ///         /* ... */
+    ///     }
+    ///     Expr::IfLet(expr) => {
+    ///         /* ... */
+    ///     }
+    ///     /* ... */
+    ///     # _ => {}
+    /// }
+    /// # }
+    /// ```
+    ///
+    /// We begin with a variable `expr` of type `Expr` that has no fields
+    /// (because it is an enum), and by matching on it and rebinding a variable
+    /// with the same name `expr` we effectively imbue our variable with all of
+    /// the data fields provided by the variant that it turned out to be. So for
+    /// example above if we ended up in the `MethodCall` case then we get to use
+    /// `expr.receiver`, `expr.args` etc; if we ended up in the `IfLet` case we
+    /// get to use `expr.pat`, `expr.then_branch`, `expr.else_branch`.
+    ///
+    /// The pattern is similar if the input expression is borrowed:
+    ///
+    /// ```
+    /// # use syn::Expr;
+    /// #
+    /// # fn example(expr: &Expr) {
+    /// match *expr {
+    ///     Expr::MethodCall(ref expr) => {
+    /// #   }
+    /// #   _ => {}
+    /// # }
+    /// # }
+    /// ```
+    ///
+    /// This approach avoids repeating the variant names twice on every line.
+    ///
+    /// ```
+    /// # use syn::{Expr, ExprMethodCall};
+    /// #
+    /// # fn example(expr: Expr) {
+    /// # match expr {
+    /// Expr::MethodCall(ExprMethodCall { method, args, .. }) => { // repetitive
+    /// # }
+    /// # _ => {}
+    /// # }
+    /// # }
+    /// ```
+    ///
+    /// In general, the name to which a syntax tree enum variant is bound should
+    /// be a suitable name for the complete syntax tree enum type.
+    ///
+    /// ```
+    /// # use syn::{Expr, ExprField};
+    /// #
+    /// # fn example(discriminant: &ExprField) {
+    /// // Binding is called `base` which is the name I would use if I were
+    /// // assigning `*discriminant.base` without an `if let`.
+    /// if let Expr::Tuple(ref base) = *discriminant.base {
+    /// # }
+    /// # }
+    /// ```
+    ///
+    /// A sign that you may not be choosing the right variable names is if you
+    /// see names getting repeated in your code, like accessing
+    /// `receiver.receiver` or `pat.pat` or `cond.cond`.
     pub enum Expr {
         /// A box expression: `box f`.
         pub Box(ExprBox #full {
@@ -581,6 +663,12 @@ ast_struct! {
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
     /// various other places.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     // Clippy false positive
     // https://github.com/Manishearth/rust-clippy/issues/1241
     #[cfg_attr(feature = "cargo-clippy", allow(enum_variant_names))]

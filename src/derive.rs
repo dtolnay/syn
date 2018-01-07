@@ -31,6 +31,12 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// The storage of a struct, enum or union data structure.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Data {
         /// A struct input to a `proc_macro_derive` macro.
         pub Struct(DataStruct {

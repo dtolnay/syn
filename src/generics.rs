@@ -24,6 +24,12 @@ ast_struct! {
 ast_enum_of_structs! {
     /// A generic type parameter, lifetime, or const generic: `T: Into<String>`,
     /// `'a: 'b`, `const LEN: usize`.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum GenericParam {
         /// A generic type parameter: `T: Into<String>`.
         pub Type(TypeParam {
@@ -187,6 +193,12 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// A single predicate in a `where` clause: `T: Deserialize<'de>`.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum WherePredicate {
         /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
         pub Type(PredicateType {

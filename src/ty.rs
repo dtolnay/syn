@@ -16,6 +16,12 @@ use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// The possible types that a Rust value could have.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Type {
         /// A dynamically sized slice type: `[T]`.
         pub Slice(TypeSlice {

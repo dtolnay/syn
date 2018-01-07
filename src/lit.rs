@@ -17,6 +17,12 @@ use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Lit {
         /// A UTF-8 string literal: `"foo"`.
         pub Str(LitStr #manual_extra_traits {

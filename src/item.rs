@@ -19,6 +19,12 @@ use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module or scope.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Item {
         /// An `extern crate` item: `extern crate serde`.
         pub ExternCrate(ItemExternCrate {
@@ -288,6 +294,12 @@ impl From<DeriveInput> for Item {
 
 ast_enum_of_structs! {
     /// A suffix of an import tree in a `use` item: `Type as Renamed` or `*`.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum UseTree {
         /// An identifier imported by a `use` item: `Type` or `Type as Renamed`.
         pub Path(UsePath {
@@ -308,6 +320,12 @@ ast_enum_of_structs! {
 
 ast_enum_of_structs! {
     /// An item within an `extern` block.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum ForeignItem {
         /// A foreign function in an `extern` block.
         pub Fn(ForeignItemFn {
@@ -368,6 +386,12 @@ impl Hash for ForeignItemVerbatim {
 
 ast_enum_of_structs! {
     /// An item declaration within the definition of a trait.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum TraitItem {
         /// An associated constant within the definition of a trait.
         pub Const(TraitItemConst {
@@ -436,6 +460,12 @@ impl Hash for TraitItemVerbatim {
 
 ast_enum_of_structs! {
     /// An item within an impl block.
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum ImplItem {
         /// An associated constant within an impl block.
         pub Const(ImplItemConst {
@@ -535,6 +565,12 @@ ast_enum_of_structs! {
     /// An argument in a function signature.
     ///
     /// E.g. `bar: usize` as in `fn foo(bar: usize)`
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum FnArg {
         /// Self captured by reference in a function signature: `&self` or `&mut
         /// self`.
