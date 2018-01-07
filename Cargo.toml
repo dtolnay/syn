@@ -35,3 +35,6 @@ unicode-xid = "0.1"
 [dev-dependencies]
 rayon = "0.9"
 walkdir = "1.0.1"
+
+[package.metadata.docs.rs]
+all-features = true
