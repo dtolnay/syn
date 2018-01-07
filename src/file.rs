@@ -9,6 +9,7 @@
 use super::*;
 
 ast_struct! {
+    /// A complete file of Rust source code.
     pub struct File {
         pub shebang: Option<String>,
         pub attrs: Vec<Attribute>,
