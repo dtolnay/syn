@@ -28,6 +28,7 @@
 //! ```
 
 use std::iter::FromIterator;
+use std::ops::{Index, IndexMut};
 use std::slice;
 use std::vec;
 #[cfg(feature = "extra-traits")]
@@ -443,6 +444,20 @@ impl<T, P> Pair<T, P> {
             Pair::Punctuated(t, d) => (t, Some(d)),
             Pair::End(t) => (t, None),
         }
+    }
+}
+
+impl<T, P> Index<usize> for Punctuated<T, P> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.inner[index].0
+    }
+}
+
+impl<T, P> IndexMut<usize> for Punctuated<T, P> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.inner[index].0
     }
 }
 
