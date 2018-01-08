@@ -382,7 +382,7 @@ pub mod buffer;
 #[cfg(feature = "parsing")]
 pub mod synom;
 pub mod punctuated;
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
+#[cfg(any(feature = "full", feature = "derive"))]
 mod tt;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]

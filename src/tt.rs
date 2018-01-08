@@ -6,16 +6,22 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use proc_macro2::{Delimiter, TokenNode, TokenStream, TokenTree};
+#[cfg(feature = "parsing")]
 use buffer::Cursor;
-use parse_error;
+#[cfg(feature = "parsing")]
 use synom::PResult;
-use MacroDelimiter;
+#[cfg(feature = "parsing")]
 use token::{Brace, Bracket, Paren};
+#[cfg(feature = "parsing")]
+use {parse_error, MacroDelimiter};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
+#[cfg(any(feature = "parsing", feature = "extra-traits"))]
+use proc_macro2::{Delimiter, TokenNode, TokenStream, TokenTree};
+
+#[cfg(feature = "parsing")]
 pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
     match input.token_tree() {
         Some((
@@ -37,7 +43,7 @@ pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
     }
 }
 
-#[cfg(feature = "full")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
     match input.token_tree() {
         Some((
@@ -51,7 +57,7 @@ pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
     }
 }
 
-#[cfg(feature = "full")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 pub fn parenthesized(input: Cursor) -> PResult<(Paren, TokenStream)> {
     match input.token_tree() {
         Some((
