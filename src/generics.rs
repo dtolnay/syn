@@ -327,6 +327,20 @@ pub mod parsing {
         }
     }
 
+    impl Synom for GenericParam {
+        named!(parse -> Self, alt!(
+            syn!(TypeParam) => { GenericParam::Type }
+            |
+            syn!(LifetimeDef) => { GenericParam::Lifetime }
+            |
+            syn!(ConstParam) => { GenericParam::Const }
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("generic parameter")
+        }
+    }
+
     impl Synom for LifetimeDef {
         named!(parse -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
