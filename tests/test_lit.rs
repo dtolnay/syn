@@ -23,7 +23,7 @@ fn lit(s: &str) -> Lit {
         .unwrap()
         .kind
     {
-        TokenNode::Literal(lit) => Lit::new(lit, Span::default()),
+        TokenNode::Literal(lit) => Lit::new(lit, Span::def_site()),
         _ => panic!(),
     }
 }

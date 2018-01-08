@@ -639,7 +639,7 @@ impl From<usize> for Index {
         assert!(index < std::u32::MAX as usize);
         Index {
             index: index as u32,
-            span: Span::default(),
+            span: Span::def_site(),
         }
     }
 }

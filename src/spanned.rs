@@ -107,7 +107,7 @@ pub trait Spanned {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.
     ///
-    /// [`Span::call_site()`]: https://docs.rs/proc-macro2/0.1/proc_macro2/struct.Span.html#method.call_site
+    /// [`Span::call_site()`]: https://docs.rs/proc-macro2/0.2/proc_macro2/struct.Span.html#method.call_site
     fn span(&self) -> Span;
 }
 

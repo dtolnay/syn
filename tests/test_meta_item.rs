@@ -13,13 +13,13 @@ extern crate syn;
 
 use syn::*;
 use syn::buffer::TokenBuffer;
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::{Literal, Span, TokenStream};
 
 #[macro_use]
 mod macros;
 
 fn lit<T: Into<Literal>>(t: T) -> Lit {
-    Lit::new(t.into(), Default::default())
+    Lit::new(t.into(), Span::def_site())
 }
 
 #[test]

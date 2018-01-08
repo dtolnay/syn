@@ -120,7 +120,6 @@ macro_rules! tokens {
 macro_rules! token_punct {
     (#[$doc:meta] $s:tt pub struct $name:ident/$len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[derive(Default)]
         #[$doc]
         ///
         /// Don't try to remember the name of this type -- use the [`Token!`]
@@ -132,6 +131,12 @@ macro_rules! token_punct {
         impl $name {
             pub fn new(span: Span) -> Self {
                 $name([span; $len])
+            }
+        }
+
+        impl ::std::default::Default for $name {
+            fn default() -> Self {
+                $name([Span::def_site(); $len])
             }
         }
 
@@ -182,7 +187,6 @@ macro_rules! token_punct {
 macro_rules! token_keyword {
     (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[derive(Default)]
         #[$doc]
         ///
         /// Don't try to remember the name of this type -- use the [`Token!`]
@@ -190,6 +194,12 @@ macro_rules! token_keyword {
         ///
         /// [`Token!`]: index.html
         pub struct $name(pub Span);
+
+        impl ::std::default::Default for $name {
+            fn default() -> Self {
+                $name(Span::def_site())
+            }
+        }
 
         #[cfg(feature = "extra-traits")]
         impl ::std::fmt::Debug for $name {
@@ -238,9 +248,14 @@ macro_rules! token_keyword {
 macro_rules! token_delimiter {
     (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
-        #[derive(Default)]
         #[$doc]
         pub struct $name(pub Span);
+
+        impl ::std::default::Default for $name {
+            fn default() -> Self {
+                $name(Span::def_site())
+            }
+        }
 
         #[cfg(feature = "extra-traits")]
         impl ::std::fmt::Debug for $name {
@@ -630,7 +645,7 @@ mod parsing {
     where
         T: FromSpans,
     {
-        let mut spans = [Span::default(); 3];
+        let mut spans = [Span::def_site(); 3];
         assert!(s.len() <= spans.len());
         let chars = s.chars();
 

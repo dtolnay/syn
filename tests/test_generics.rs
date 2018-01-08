@@ -32,14 +32,14 @@ fn test_split_for_impl() {
         params: punctuated![
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new(Term::intern("'a"), Span::default()),
+                lifetime: Lifetime::new(Term::intern("'a"), Span::def_site()),
                 bounds: Default::default(),
                 colon_token: None,
             }),
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new(Term::intern("'b"), Span::default()),
-                bounds: punctuated![Lifetime::new(Term::intern("'a"), Span::default())],
+                lifetime: Lifetime::new(Term::intern("'b"), Span::def_site()),
+                bounds: punctuated![Lifetime::new(Term::intern("'a"), Span::def_site())],
                 colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
@@ -55,7 +55,7 @@ fn test_split_for_impl() {
                 ],
                 ident: "T".into(),
                 bounds: punctuated![
-                    TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::default())),
+                    TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::def_site())),
                 ],
                 default: Some(
                     TypeTuple {
@@ -111,7 +111,7 @@ fn test_split_for_impl() {
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::default()));
+    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::def_site()));
     assert_eq!(
         expected,
         common::parse::syn::<TypeParamBound>(tokens.into())

@@ -9,5 +9,5 @@ proc-macro = true
 
 [dependencies]
 syn = { path = "../../../", features = ["full"] }
-quote = { git = "https://github.com/dtolnay/quote" }
-proc-macro2 = { version = "0.1", features = ["nightly"] }
+quote = "0.4"
+proc-macro2 = { version = "0.2", features = ["nightly"] }

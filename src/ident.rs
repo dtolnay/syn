@@ -146,7 +146,7 @@ impl Ident {
 
 impl<'a> From<&'a str> for Ident {
     fn from(s: &str) -> Self {
-        Ident::new(s, Span::default())
+        Ident::new(s, Span::def_site())
     }
 }
 
@@ -176,13 +176,13 @@ impl From<Token![crate]> for Ident {
 
 impl<'a> From<Cow<'a, str>> for Ident {
     fn from(s: Cow<'a, str>) -> Self {
-        Ident::new(&s, Span::default())
+        Ident::new(&s, Span::def_site())
     }
 }
 
 impl From<String> for Ident {
     fn from(s: String) -> Self {
-        Ident::new(&s, Span::default())
+        Ident::new(&s, Span::def_site())
     }
 }
 

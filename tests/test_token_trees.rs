@@ -14,33 +14,33 @@ extern crate quote;
 extern crate syn;
 
 use syn::{AttrStyle, Attribute, Lit};
-use proc_macro2::{Delimiter, Spacing, Term, TokenNode, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Spacing, Span, Term, TokenNode, TokenStream, TokenTree};
 use proc_macro2::Delimiter::*;
 
 fn alone(c: char) -> TokenTree {
     proc_macro2::TokenTree {
-        span: Default::default(),
+        span: Span::def_site(),
         kind: TokenNode::Op(c, Spacing::Alone),
     }
 }
 
 fn joint(c: char) -> TokenTree {
     proc_macro2::TokenTree {
-        span: Default::default(),
+        span: Span::def_site(),
         kind: TokenNode::Op(c, Spacing::Joint),
     }
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
     proc_macro2::TokenTree {
-        span: Default::default(),
+        span: Span::def_site(),
         kind: TokenNode::Group(delim, tokens.into_iter().collect()),
     }
 }
 
 fn word(sym: &str) -> TokenTree {
     proc_macro2::TokenTree {
-        span: Default::default(),
+        span: Span::def_site(),
         kind: TokenNode::Term(Term::intern(sym)),
     }
 }

@@ -24,7 +24,7 @@ mod common;
 
 fn tt(k: TokenNode) -> TokenTree {
     TokenTree {
-        span: Span::default(),
+        span: Span::def_site(),
         kind: k,
     }
 }
@@ -36,7 +36,7 @@ fn expr<T: Into<Expr>>(t: T) -> Expr {
 fn lit<T: Into<Literal>>(t: T) -> Expr {
     Expr::Lit(ExprLit {
         attrs: Vec::new(),
-        lit: Lit::new(t.into(), Span::default()),
+        lit: Lit::new(t.into(), Span::def_site()),
     })
 }
 
