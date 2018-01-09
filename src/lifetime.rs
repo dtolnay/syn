@@ -28,7 +28,7 @@ use unicode_xid::UnicodeXID;
 /// *This type is available if Syn is built with the `"derive"` or `"full"`
 /// feature.*
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
+#[derive(Copy, Clone)]
 pub struct Lifetime {
     term: Term,
     pub span: Span,
