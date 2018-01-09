@@ -3172,7 +3172,6 @@ mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl ToTokens for Member {
         fn to_tokens(&self, tokens: &mut Tokens) {
             match *self {
