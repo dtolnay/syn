@@ -220,6 +220,28 @@ impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     }
 }
 
+impl<T, P> FromIterator<T> for Punctuated<T, P>
+where
+    P: Default,
+{
+    fn from_iter<I: IntoIterator<Item = T>>(i: I) -> Self {
+        let mut ret = Punctuated::new();
+        ret.extend(i);
+        ret
+    }
+}
+
+impl<T, P> Extend<T> for Punctuated<T, P>
+where
+    P: Default,
+{
+    fn extend<I: IntoIterator<Item = T>>(&mut self, i: I) {
+        for value in i {
+            self.push(value);
+        }
+    }
+}
+
 impl<T, P> FromIterator<Pair<T, P>> for Punctuated<T, P> {
     fn from_iter<I: IntoIterator<Item = Pair<T, P>>>(i: I) -> Self {
         let mut ret = Punctuated::new();
