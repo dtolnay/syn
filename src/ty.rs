@@ -507,6 +507,15 @@ pub mod parsing {
         }
     }
 
+    fn at_least_one_type(bounds: &Punctuated<TypeParamBound, Token![+]>) -> bool {
+        for bound in bounds {
+            if let TypeParamBound::Trait(_) = *bound {
+                return true;
+            }
+        }
+        false
+    }
+
     impl TypeTraitObject {
         named!(pub without_plus -> Self, call!(Self::parse, false));
 
@@ -522,6 +531,8 @@ pub mod parsing {
                     bounds
                 }}
             ) >>
+            // Just lifetimes like `'a + 'b` is not a TraitObject.
+            cond_reduce!(at_least_one_type(&bounds), epsilon!()) >>
             (TypeTraitObject {
                 dyn_token: dyn_token,
                 bounds: bounds,
