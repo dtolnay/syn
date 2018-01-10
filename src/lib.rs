@@ -594,25 +594,12 @@ pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
 {
-    let buf = TokenBuffer::new2(tokens);
-    let result = T::parse(buf.begin());
-    let err = match result {
-        Ok((t, rest)) => {
-            if rest.eof() {
-                return Ok(t);
-            } else if rest == buf.begin() {
-                // parsed nothing
-                ParseError::new("failed to parse anything")
-            } else {
-                ParseError::new("failed to parse all tokens")
-            }
+    run_parser2(tokens, T::parse).map_err(|err| {
+        match T::description() {
+            Some(s) => ParseError::new(format!("failed to parse {}: {}", s, err)),
+            None => err,
         }
-        Err(err) => err,
-    };
-    match T::description() {
-        Some(s) => Err(ParseError::new(format!("failed to parse {}: {}", s, err))),
-        None => Err(err),
-    }
+    })
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
@@ -642,6 +629,129 @@ where
 pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
     match s.parse() {
         Ok(tts) => parse2(tts),
+        Err(_) => Err(ParseError::new("error while lexing input string")),
+    }
+}
+
+/// Parse tokens of source code with the chosen `synom` parser.
+///
+/// This is preferred over parsing a string because tokens are able to preserve
+/// information about where in the user's code they were originally written (the
+/// "span" of the token), possibly allowing the compiler to produce better error
+/// messages.
+///
+/// This function parses a `proc_macro::TokenStream` which is the type used for
+/// interop with the compiler in a procedural macro. To parse a
+/// `proc_macro2::TokenStream`, use [`syn::run_parser2`] instead.
+///
+/// [`syn::run_parser2`]: fn.run_parser2.html
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate proc_macro;
+/// use proc_macro::TokenStream;
+///
+/// extern crate syn;
+///
+/// #[macro_use]
+/// extern crate quote;
+///
+/// use syn::Expr;
+/// use syn::punctuated::Punctuated;
+/// use syn::token;
+///
+/// # const IGNORE_TOKENS: &str = stringify! {
+/// #[proc_macro]
+/// # };
+/// pub fn my_macro(input: TokenStream) -> TokenStream {
+///     // Run a parser over an input token stream.
+///     let args: Punctuated<Expr, token::Comma> =
+///         syn::run_parser(input, Punctuated::parse_terminated).unwrap();
+///
+///     // Build the output, possibly using quasi-quotation
+///     let expanded = quote! {
+///         /* ... */
+///     };
+///
+///     // Convert into a token stream and return it
+///     expanded.into()
+/// }
+/// #
+/// # fn main() {}
+/// ```
+#[cfg(feature = "parsing")]
+pub fn run_parser<F, R>(tokens: proc_macro::TokenStream, parser: F) -> Result<R, ParseError>
+where
+    F: for<'a> FnOnce(buffer::Cursor<'a>) -> synom::PResult<'a, R>,
+{
+    run_parser2(tokens.into(), parser)
+}
+
+/// Parse a proc-macro2 token stream using the chosen `synom` parser.
+///
+/// This function parses a `proc_macro2::TokenStream` which is commonly useful
+/// when the input comes from a node of the Syn syntax tree, for example the tts
+/// of a [`Macro`] node. When in a procedural macro parsing the
+/// `proc_macro::TokenStream` provided by the compiler, use [`syn::run_parser`]
+/// instead.
+///
+/// [`Macro`]: struct.Macro.html
+/// [`syn::run_parser`]: fn.run_parser.html
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
+#[cfg(feature = "parsing")]
+pub fn run_parser2<F, R>(tokens: proc_macro2::TokenStream, parser: F) -> Result<R, ParseError>
+where
+    F: for<'a> FnOnce(buffer::Cursor<'a>) -> synom::PResult<'a, R>,
+{
+    let buf = TokenBuffer::new2(tokens);
+    let (t, rest) = parser(buf.begin())?;
+
+    if rest.eof() {
+        Ok(t)
+    } else if rest == buf.begin() {
+        Err(ParseError::new("failed to parse anything"))
+    } else {
+        Err(ParseError::new("failed to parse all tokens"))
+    }
+}
+
+/// Parse a string using the chosen synom parser.
+///
+/// *This function is available if Syn is built with the `"parsing"` feature.*
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate syn;
+/// #
+/// #
+/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
+///
+/// use syn::Expr;
+/// use syn::punctuated::Punctuated;
+/// use syn::token;
+///
+/// fn run() -> Result<()> {
+///     let code = "assert_eq!(u8::max_value(), 255), 10";
+///     let exprs: Punctuated<Expr, token::Comma> =
+///         syn::run_parser_str(code, Punctuated::parse_terminated)?;
+///     println!("{:#?}", exprs);
+///     Ok(())
+/// }
+/// #
+/// # fn main() { run().unwrap() }
+/// ```
+#[cfg(feature = "parsing")]
+pub fn run_parser_str<F, R>(s: &str, parser: F) -> Result<R, ParseError>
+where
+    F: for<'a> FnOnce(buffer::Cursor<'a>) -> synom::PResult<'a, R>,
+{
+    match s.parse() {
+        Ok(tts) => run_parser2(tts, parser),
         Err(_) => Err(ParseError::new("error while lexing input string")),
     }
 }
