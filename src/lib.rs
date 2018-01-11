@@ -509,9 +509,7 @@ pub use gen::*;
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
-use synom::Synom;
-#[cfg(feature = "parsing")]
-use buffer::TokenBuffer;
+use synom::{Synom, Parser};
 
 #[cfg(feature = "parsing")]
 mod error;
@@ -594,25 +592,13 @@ pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
 {
-    let buf = TokenBuffer::new2(tokens);
-    let result = T::parse(buf.begin());
-    let err = match result {
-        Ok((t, rest)) => {
-            if rest.eof() {
-                return Ok(t);
-            } else if rest == buf.begin() {
-                // parsed nothing
-                ParseError::new("failed to parse anything")
-            } else {
-                ParseError::new("failed to parse all tokens")
-            }
+    let parser = T::parse;
+    parser.parse2(tokens).map_err(|err| {
+        match T::description() {
+            Some(s) => ParseError::new(format!("failed to parse {}: {}", s, err)),
+            None => err,
         }
-        Err(err) => err,
-    };
-    match T::description() {
-        Some(s) => Err(ParseError::new(format!("failed to parse {}: {}", s, err))),
-        None => Err(err),
-    }
+    })
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
