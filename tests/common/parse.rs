@@ -1,6 +1,13 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 extern crate proc_macro2;
 extern crate syn;
-extern crate synom;
 extern crate syntax;
 extern crate syntax_pos;
 
@@ -12,7 +19,8 @@ use self::syntax_pos::FileName;
 
 use std::panic;
 
-use self::synom::{Synom, SynomBuffer};
+use self::syn::buffer::TokenBuffer;
+use self::syn::synom::Synom;
 
 pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
@@ -27,14 +35,12 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
             Ok(expr) => expr,
             Err(mut diagnostic) => {
                 diagnostic.emit();;
-                return None
+                return None;
             }
         })
     }) {
         Ok(Some(e)) => Some(e),
-        Ok(None) => {
-            None
-        }
+        Ok(None) => None,
         Err(_) => {
             errorf!("libsyntax panicked\n");
             None
@@ -53,10 +59,10 @@ pub fn syn_expr(input: &str) -> Option<syn::Expr> {
 }
 
 pub fn syn<T: Synom>(tokens: proc_macro2::TokenStream) -> T {
-    let buf = SynomBuffer::new(tokens);
+    let buf = TokenBuffer::new2(tokens);
     let result = T::parse(buf.begin());
     match result {
-        Ok((rest, t)) => {
+        Ok((t, rest)) => {
             if rest.eof() {
                 t
             } else if rest == buf.begin() {

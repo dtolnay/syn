@@ -1,4 +1,16 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 ast_enum! {
+    /// A binary operator: `+`, `+=`, `&`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOp {
         /// The `+` operator (addition)
@@ -61,6 +73,10 @@ ast_enum! {
 }
 
 ast_enum! {
+    /// A unary operator: `*`, `!`, `-`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum UnOp {
         /// The `*` operator for dereferencing
@@ -148,13 +164,17 @@ pub mod parsing {
             |
             punct!(-) => { UnOp::Neg }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("unary operator: `*`, `!`, or `-`")
+        }
     }
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for BinOp {
         fn to_tokens(&self, tokens: &mut Tokens) {

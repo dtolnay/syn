@@ -1,7 +1,15 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 #![allow(dead_code)]
 
-extern crate walkdir;
 extern crate syntax;
+extern crate walkdir;
 
 use std;
 use std::env;
@@ -9,25 +17,16 @@ use std::process::Command;
 
 use self::walkdir::DirEntry;
 
-macro_rules! errorf {
-    ($($tt:tt)*) => {
-        {
-            use ::std::io::Write;
-            let stderr = ::std::io::stderr();
-            write!(stderr.lock(), $($tt)*).unwrap();
-        }
-    };
-}
-
 pub mod parse;
 pub mod respan;
 
 pub fn check_min_stack() {
     let min_stack_value = env::var("RUST_MIN_STACK")
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");
-    let min_stack_value: usize = min_stack_value.parse()
+    let min_stack_value: usize = min_stack_value
+        .parse()
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");
-    assert!(min_stack_value >= 16000000);
+    assert!(min_stack_value >= 16_000_000);
 }
 
 /// Read the `ABORT_AFTER_FAILURE` environment variable, and parse it.
@@ -53,8 +52,9 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         path_string
     };
     // TODO assert that parsing fails on the parse-fail cases
-    if path_string.starts_with("tests/rust/src/test/parse-fail") ||
-       path_string.starts_with("tests/rust/src/test/compile-fail") {
+    if path_string.starts_with("tests/rust/src/test/parse-fail")
+        || path_string.starts_with("tests/rust/src/test/compile-fail")
+    {
         return false;
     }
 
@@ -64,11 +64,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
             // Expected to fail in some way
             return false;
         }
-    }
-
-    // TODO: support `macro` definitions
-    if path_string.starts_with("tests/rust/src/test/run-pass/hygiene") {
-        return false;
     }
 
     match path_string.as_ref() {
@@ -100,6 +95,14 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         //      Box<'foo + Bar>
         "tests/rust/src/test/run-pass/trait-object-lifetime-first.rs" |
+        // TODO feature(use_nested_groups)
+        //
+        //      use a::{B, D::{self, *, g::H}};
+        "tests/rust/src/test/run-pass/use-nested-groups.rs" |
+        // Deprecated placement syntax
+        "tests/rust/src/test/run-pass/new-box-syntax.rs" |
+        // Deprecated placement syntax
+        "tests/rust/src/test/run-pass/placement-in-syntax.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
@@ -107,7 +110,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
 }
 
 pub fn clone_rust() {
-    let result = Command::new("tests/rust/clone.sh").status().unwrap();
+    let result = Command::new("tests/clone.sh").status().unwrap();
     println!("result: {}", result);
     assert!(result.success());
 }

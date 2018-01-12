@@ -21,10 +21,6 @@ matrix:
     - env: ROLE=clippy
   fast_finish: true
 
-before_script:
-  - pip install 'travis-cargo<0.2' --user
-  - export PATH=$HOME/.local/bin:$PATH
-
 script:
   - |
       case $ROLE in
@@ -32,45 +28,27 @@ script:
           cargo build --no-default-features &&
           cargo build &&
           cargo build --features full &&
-          cargo build --features 'visit fold' &&
-          cargo build --features 'full visit fold' &&
+          cargo build --features 'fold visit visit-mut' &&
+          cargo build --features 'full fold visit visit-mut' &&
           cargo build --no-default-features --features 'full parsing printing' &&
-          cargo build --no-default-features --features 'visit fold parsing printing' &&
-          cargo build --no-default-features --features 'full visit fold parsing printing' &&
-          (cd synom && cargo test)
+          cargo build --no-default-features --features 'fold visit visit-mut parsing printing' &&
+          cargo build --no-default-features --features 'full fold visit visit-mut parsing printing'
           ;;
         test)
           cargo test --all-features --release
           ;;
         clippy)
           cargo install clippy --debug --force || exit
-          cargo clippy --features 'full visit fold' -- -Dclippy
-          (cd synom && cargo clippy -- -Dclippy)
+          cargo clippy --features 'full fold visit visit-mut' -- -Dclippy
           ;;
         codegen)
-          (cd syn_codegen && cargo run) &&
+          (cd codegen && cargo run) &&
           git diff --exit-code
           ;;
         *)
           exit 1
           ;;
       esac
-
-after_success:
-  - |
-      if [ "$ROLE" = build ] && [ "$TRAVIS_RUST_VERSION" = nightly ]; then
-        SYN=$(curl -sS https://crates.io/api/v1/crates/syn | jq -r .crate.max_version)
-        SYNOM=$(curl -sS https://crates.io/api/v1/crates/synom | jq -r .crate.max_version)
-        echo "Documenting syn ${SYN}"
-        curl -sSLo syn.crate.tgz "https://crates.io/api/v1/crates/syn/${SYN}/download" &&
-        tar xf syn.crate.tgz &&
-        cd "syn-${SYN}" &&
-        curl -sSLo synom.crate.tgz "https://crates.io/api/v1/crates/synom/${SYNOM}/download" &&
-        tar xf synom.crate.tgz &&
-        mv "synom-${SYNOM}" synom &&
-        cargo doc --features 'full visit fold' &&
-        travis-cargo doc-upload
-      fi
 
 env:
   matrix:
@@ -80,6 +58,3 @@ env:
     - ROLE=codegen
   global:
     - RUST_MIN_STACK=16000000
-    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
-      # GH_TOKEN
-    - secure: E2sT5g8HshdADgO9E7t8cukYM59/wHxwztzKeceUxYE5TQ7ZCTufBIfqh8oFimKf98y0s7lvWS9sMrmNdo73tKsO/YvXeUorVfjj43GM7opejlQnSd2iLUk05RnWYeT4sZu88JXxOTOapi3rW2M35E+oVA2I6eMurShNAJI/wZka/LDhZp2YwoaCoOc4RVrZoy1j3ODw/9P+whUTaMPQb6fBq2H0UfWLUQFP6w1+8khqERMLLYq234A19wI73rfbsR1k2lf6HNbtPPLfc+CLsthGPfbn74E6HlZ+/7Dm2RIaRaPWmX9h68aspWnaOoQ8ca1APwia6GSwrPlKQcc8xcwHKTAi8FH1WP6cTGvBnoER9Ajbmq2UKAVD3BpD758y4IJctuJ6d/5gR0rFr3Z8upHWiUSUdgkr0Sspiib8kDXJpyLTw85pwhRZm8mWsUwjzMdti020pimwKkJ/YbCXxKMArzRkCRBsQvaVubivg+2nS+EpYUbVC4JOJ4JHwvVOnH5GZ5iYPtP+W2ryYQ1+fXCmVdZP6E9NKpebJm5bPcsMmN1l3ek/E3ws1CSw7lEKwdlSoX3GBfNpYUknFctaMOeGm3itewI7JXAsMT/I3IphXguvxAVd3Ijk4MlxkHSqObnlQ8IdVRJ5Go7BQsMqkNgAOHthXAcA54F9z/n6GXc=

@@ -1,37 +1,70 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 
 ast_struct! {
-    /// Represents lifetimes and type parameters attached to a declaration
-    /// of a function, enum, trait, etc.
+    /// Lifetimes and type parameters attached to a declaration of a function,
+    /// enum, trait, etc.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     #[derive(Default)]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
-        pub params: Delimited<GenericParam, Token![,]>,
+        pub params: Punctuated<GenericParam, Token![,]>,
         pub gt_token: Option<Token![>]>,
-        pub where_clause: WhereClause,
+        pub where_clause: Option<WhereClause>,
     }
 }
 
 ast_enum_of_structs! {
+    /// A generic type parameter, lifetime, or const generic: `T: Into<String>`,
+    /// `'a: 'b`, `const LEN: usize`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum GenericParam {
-        /// A lifetime definition, e.g. `'a: 'b+'c+'d`
-        pub Lifetime(LifetimeDef {
-            pub attrs: Vec<Attribute>,
-            pub lifetime: Lifetime,
-            pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<Lifetime, Token![+]>,
-        }),
-        /// A generic type parameter, e.g. `T: Into<String>`.
+        /// A generic type parameter: `T: Into<String>`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Type(TypeParam {
             pub attrs: Vec<Attribute>,
             pub ident: Ident,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
             pub eq_token: Option<Token![=]>,
             pub default: Option<Type>,
         }),
-        /// A generic const parameter, e.g. `const LENGTH: usize`.
+
+        /// A lifetime definition: `'a: 'b + 'c + 'd`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Lifetime(LifetimeDef {
+            pub attrs: Vec<Attribute>,
+            pub lifetime: Lifetime,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Punctuated<Lifetime, Token![+]>,
+        }),
+
+        /// A const generic parameter: `const LENGTH: usize`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Const(ConstParam {
             pub attrs: Vec<Attribute>,
             pub const_token: Token![const],
@@ -44,22 +77,31 @@ ast_enum_of_structs! {
     }
 }
 
+/// Returned by `Generics::split_for_impl`.
+///
+/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
-/// Returned by `Generics::split_for_impl`.
 pub struct ImplGenerics<'a>(&'a Generics);
 
+/// Returned by `Generics::split_for_impl`.
+///
+/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
-/// Returned by `Generics::split_for_impl`.
 pub struct TypeGenerics<'a>(&'a Generics);
 
+/// Returned by `TypeGenerics::as_turbofish`.
+///
+/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
-/// Returned by `TypeGenerics::as_turbofish`.
 pub struct Turbofish<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
@@ -83,26 +125,39 @@ impl Generics {
     /// # ;
     /// # }
     /// ```
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, &WhereClause) {
-        (ImplGenerics(self), TypeGenerics(self), &self.where_clause)
+    ///
+    /// *This method is available if Syn is built with the `"derive"` or
+    /// `"full"` feature and the `"printing"` feature.*
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        (
+            ImplGenerics(self),
+            TypeGenerics(self),
+            self.where_clause.as_ref(),
+        )
     }
 }
 
 #[cfg(feature = "printing")]
 impl<'a> TypeGenerics<'a> {
     /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
+    ///
+    /// *This method is available if Syn is built with the `"derive"` or
+    /// `"full"` feature and the `"printing"` feature.*
     pub fn as_turbofish(&self) -> Turbofish {
         Turbofish(self.0)
     }
 }
 
 ast_struct! {
-    /// A set of bound lifetimes, e.g. `for<'a, 'b, 'c>`
+    /// A set of bound lifetimes: `for<'a, 'b, 'c>`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     #[derive(Default)]
     pub struct BoundLifetimes {
         pub for_token: Token![for],
         pub lt_token: Token![<],
-        pub lifetimes: Delimited<LifetimeDef, Token![,]>,
+        pub lifetimes: Punctuated<LifetimeDef, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -113,7 +168,7 @@ impl LifetimeDef {
             attrs: Vec::new(),
             lifetime: lifetime,
             colon_token: None,
-            bounds: Delimited::new(),
+            bounds: Punctuated::new(),
         }
     }
 }
@@ -124,27 +179,44 @@ impl From<Ident> for TypeParam {
             attrs: vec![],
             ident: ident,
             colon_token: None,
-            bounds: Delimited::new(),
+            bounds: Punctuated::new(),
             eq_token: None,
             default: None,
         }
     }
 }
 
-ast_enum! {
-    /// The AST represents all type param bounds as types.
-    /// `typeck::collect::compute_bounds` matches these against
-    /// the "special" built-in traits (see `middle::lang_items`) and
-    /// detects Copy, Send and Sync.
+ast_enum_of_structs! {
+    /// A trait or lifetime used as a bound on a type parameter.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub enum TypeParamBound {
-        Trait(PolyTraitRef, TraitBoundModifier),
-        Region(Lifetime),
+        pub Trait(TraitBound),
+        pub Lifetime(Lifetime),
+    }
+}
+
+ast_struct! {
+    /// A trait used as a bound on a type parameter.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    pub struct TraitBound {
+        pub modifier: TraitBoundModifier,
+        /// The `for<'a>` in `for<'a> Foo<&'a T>`
+        pub lifetimes: Option<BoundLifetimes>,
+        /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
+        pub path: Path,
     }
 }
 
 ast_enum! {
-    /// A modifier on a bound, currently this is only used for `?Sized`, where the
-    /// modifier is `Maybe`. Negative bounds should also be handled here.
+    /// A modifier on a trait bound, currently only used for the `?` in
+    /// `?Sized`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
@@ -153,43 +225,58 @@ ast_enum! {
 }
 
 ast_struct! {
-    /// A `where` clause in a definition
-    #[derive(Default)]
+    /// A `where` clause in a definition: `where T: Deserialize<'de>, D:
+    /// 'static`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct WhereClause {
-        pub where_token: Option<Token![where]>,
-        pub predicates: Delimited<WherePredicate, Token![,]>,
-    }
-}
-
-impl WhereClause {
-    pub fn none() -> Self {
-        WhereClause::default()
+        pub where_token: Token![where],
+        pub predicates: Punctuated<WherePredicate, Token![,]>,
     }
 }
 
 ast_enum_of_structs! {
-    /// A single predicate in a `where` clause
+    /// A single predicate in a `where` clause: `T: Deserialize<'de>`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum WherePredicate {
-        /// A type binding, e.g. `for<'c> Foo: Send+Clone+'c`
-        pub BoundPredicate(WhereBoundPredicate {
+        /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Type(PredicateType {
             /// Any lifetimes from a `for` binding
-            pub bound_lifetimes: Option<BoundLifetimes>,
+            pub lifetimes: Option<BoundLifetimes>,
             /// The type being bounded
             pub bounded_ty: Type,
             pub colon_token: Token![:],
             /// Trait and lifetime bounds (`Clone+Send+'static`)
-            pub bounds: Delimited<TypeParamBound, Token![+]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
 
-        /// A lifetime predicate, e.g. `'a: 'b+'c`
-        pub RegionPredicate(WhereRegionPredicate {
+        /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Lifetime(PredicateLifetime {
             pub lifetime: Lifetime,
             pub colon_token: Option<Token![:]>,
-            pub bounds: Delimited<Lifetime, Token![+]>,
+            pub bounds: Punctuated<Lifetime, Token![+]>,
         }),
 
-        /// An equality predicate (unsupported)
-        pub EqPredicate(WhereEqPredicate {
+        /// An equality predicate in a `where` clause (unsupported).
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Eq(PredicateEq {
             pub lhs_ty: Type,
             pub eq_token: Token![=],
             pub rhs_ty: Type,
@@ -202,64 +289,85 @@ pub mod parsing {
     use super::*;
 
     use synom::Synom;
-    use synom::delimited::Element;
+    use punctuated::Pair;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(
             alt!(
                 do_parse!(
                     lt: punct!(<) >>
-                    lifetimes: call!(Delimited::<LifetimeDef, Token![,]>::parse_terminated) >>
+                    lifetimes: call!(Punctuated::<LifetimeDef, Token![,]>::parse_terminated) >>
                     ty_params: cond!(
                         lifetimes.empty_or_trailing(),
-                        call!(Delimited::<TypeParam, Token![,]>::parse_terminated)
+                        Punctuated::<TypeParam, Token![,]>::parse_terminated
                     ) >>
                     gt: punct!(>) >>
                     (lifetimes, ty_params, Some(lt), Some(gt))
                 )
                 |
-                epsilon!() => { |_| (Delimited::new(), None, None, None) }
+                epsilon!() => { |_| (Punctuated::new(), None, None, None) }
             ),
             |(lifetimes, ty_params, lt, gt)| Generics {
                 lt_token: lt,
-                params: lifetimes.into_iter()
-                    .map(Element::into_tuple)
-                    .map(|(lifetime, comma)| (GenericParam::Lifetime(lifetime), comma))
+                params: lifetimes.into_pairs()
+                    .map(Pair::into_tuple)
+                    .map(|(life, comma)| Pair::new(GenericParam::Lifetime(life), comma))
                     .chain(ty_params.unwrap_or_default()
-                        .into_iter()
-                        .map(Element::into_tuple)
-                        .map(|(ty_param, comma)| (GenericParam::Type(ty_param), comma)))
-                    .collect::<Vec<_>>()
-                    .into(),
+                        .into_pairs()
+                        .map(Pair::into_tuple)
+                        .map(|(ty, comma)| Pair::new(GenericParam::Type(ty), comma)))
+                    .collect(),
                 gt_token: gt,
-                where_clause: WhereClause::default(),
+                where_clause: None,
             }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("generic parameters in declaration")
+        }
+    }
+
+    impl Synom for GenericParam {
+        named!(parse -> Self, alt!(
+            syn!(TypeParam) => { GenericParam::Type }
+            |
+            syn!(LifetimeDef) => { GenericParam::Lifetime }
+            |
+            syn!(ConstParam) => { GenericParam::Const }
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("generic parameter")
+        }
     }
 
     impl Synom for LifetimeDef {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             life: syn!(Lifetime) >>
             colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
-                call!(Delimited::parse_separated_nonempty)
+                Punctuated::parse_separated_nonempty
             ) >>
             (LifetimeDef {
                 attrs: attrs,
                 lifetime: life,
                 bounds: bounds.unwrap_or_default(),
-                colon_token: colon.map(|_| <Token![:]>::default()),
+                colon_token: colon,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("lifetime definition")
+        }
     }
 
     impl Synom for BoundLifetimes {
         named!(parse -> Self, do_parse!(
             for_: keyword!(for) >>
             lt: punct!(<) >>
-            lifetimes: call!(Delimited::parse_terminated) >>
+            lifetimes: call!(Punctuated::parse_terminated) >>
             gt: punct!(>) >>
             (BoundLifetimes {
                 for_token: for_,
@@ -268,16 +376,20 @@ pub mod parsing {
                 lifetimes: lifetimes,
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("bound lifetimes")
+        }
     }
 
     impl Synom for TypeParam {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             id: syn!(Ident) >>
             colon: option!(punct!(:)) >>
             bounds: cond!(
                 colon.is_some(),
-                call!(Delimited::parse_separated_nonempty)
+                Punctuated::parse_separated_nonempty
             ) >>
             default: option!(do_parse!(
                 eq: punct!(=) >>
@@ -293,21 +405,19 @@ pub mod parsing {
                 default: default.map(|d| d.1),
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("type parameter")
+        }
     }
 
     impl Synom for TypeParamBound {
         named!(parse -> Self, alt!(
-            do_parse!(
-                question: punct!(?) >>
-                poly: syn!(PolyTraitRef) >>
-                (TypeParamBound::Trait(poly, TraitBoundModifier::Maybe(question)))
-            )
+            syn!(Lifetime) => { TypeParamBound::Lifetime }
             |
-            syn!(Lifetime) => { TypeParamBound::Region }
+            syn!(TraitBound) => { TypeParamBound::Trait }
             |
-            syn!(PolyTraitRef) => {
-                |poly| TypeParamBound::Trait(poly, TraitBoundModifier::None)
-            }
+            parens!(syn!(TraitBound)) => { |bound| TypeParamBound::Trait(bound.1) }
         ));
 
         fn description() -> Option<&'static str> {
@@ -315,9 +425,48 @@ pub mod parsing {
         }
     }
 
+    impl Synom for TraitBound {
+        named!(parse -> Self, do_parse!(
+            modifier: syn!(TraitBoundModifier) >>
+            lifetimes: option!(syn!(BoundLifetimes)) >>
+            mut path: syn!(Path) >>
+            parenthesized: option!(cond_reduce!(
+                path.segments.last().unwrap().value().arguments.is_empty(),
+                syn!(ParenthesizedGenericArguments)
+            )) >>
+            ({
+                if let Some(parenthesized) = parenthesized {
+                    let parenthesized = PathArguments::Parenthesized(parenthesized);
+                    path.segments.last_mut().unwrap().value_mut().arguments = parenthesized;
+                }
+                TraitBound {
+                    modifier: modifier,
+                    lifetimes: lifetimes,
+                    path: path,
+                }
+            })
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("trait bound")
+        }
+    }
+
+    impl Synom for TraitBoundModifier {
+        named!(parse -> Self, alt!(
+            punct!(?) => { TraitBoundModifier::Maybe }
+            |
+            epsilon!() => { |_| TraitBoundModifier::None }
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("trait bound modifier")
+        }
+    }
+
     impl Synom for ConstParam {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+            attrs: many0!(Attribute::parse_outer) >>
             const_: keyword!(const) >>
             ident: syn!(Ident) >>
             colon: punct!(:) >>
@@ -339,20 +488,20 @@ pub mod parsing {
                 }
             })
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("generic `const` parameter")
+        }
     }
 
     impl Synom for WhereClause {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                where_: keyword!(where) >>
-                predicates: call!(Delimited::parse_terminated) >>
-                (WhereClause {
-                    predicates: predicates,
-                    where_token: Some(where_),
-                })
-            )
-            |
-            epsilon!() => { |_| WhereClause::default() }
+        named!(parse -> Self, do_parse!(
+            where_: keyword!(where) >>
+            predicates: call!(Punctuated::parse_terminated) >>
+            (WhereClause {
+                predicates: predicates,
+                where_token: where_,
+            })
         ));
 
         fn description() -> Option<&'static str> {
@@ -367,9 +516,9 @@ pub mod parsing {
                 colon: option!(punct!(:)) >>
                 bounds: cond!(
                     colon.is_some(),
-                    call!(Delimited::parse_separated)
+                    Punctuated::parse_separated
                 ) >>
-                (WherePredicate::RegionPredicate(WhereRegionPredicate {
+                (WherePredicate::Lifetime(PredicateLifetime {
                     lifetime: ident,
                     bounds: bounds.unwrap_or_default(),
                     colon_token: colon,
@@ -377,18 +526,22 @@ pub mod parsing {
             )
             |
             do_parse!(
-                bound_lifetimes: option!(syn!(BoundLifetimes)) >>
+                lifetimes: option!(syn!(BoundLifetimes)) >>
                 bounded_ty: syn!(Type) >>
                 colon: punct!(:) >>
-                bounds: call!(Delimited::parse_separated_nonempty) >>
-                (WherePredicate::BoundPredicate(WhereBoundPredicate {
-                    bound_lifetimes: bound_lifetimes,
+                bounds: call!(Punctuated::parse_separated_nonempty) >>
+                (WherePredicate::Type(PredicateType {
+                    lifetimes: lifetimes,
                     bounded_ty: bounded_ty,
                     bounds: bounds,
                     colon_token: colon,
                 }))
             )
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("predicate in where clause")
+        }
     }
 }
 
@@ -396,7 +549,7 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     /// Returns true if the generics object has no lifetimes or ty_params.
     fn empty_normal_generics(generics: &Generics) -> bool {
@@ -410,20 +563,45 @@ mod printing {
             }
 
             TokensOrDefault(&self.lt_token).to_tokens(tokens);
-            self.params.to_tokens(tokens);
+
+            // Print lifetimes before types and consts, regardless of their
+            // order in self.params.
+            //
+            // TODO: ordering rules for const parameters vs type parameters have
+            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
+            let mut trailing_or_empty = true;
+            for param in self.params.pairs() {
+                if let GenericParam::Lifetime(_) = **param.value() {
+                    param.to_tokens(tokens);
+                    trailing_or_empty = param.punct().is_some();
+                }
+            }
+            for param in self.params.pairs() {
+                match **param.value() {
+                    GenericParam::Type(_) | GenericParam::Const(_) => {
+                        if !trailing_or_empty {
+                            <Token![,]>::default().to_tokens(tokens);
+                            trailing_or_empty = true;
+                        }
+                        param.to_tokens(tokens);
+                    }
+                    GenericParam::Lifetime(_) => {}
+                }
+            }
+
             TokensOrDefault(&self.gt_token).to_tokens(tokens);
         }
     }
 
     impl<'a> ToTokens for ImplGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(&self.0) {
+            if empty_normal_generics(self.0) {
                 return;
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            for param in self.0.params.iter() {
-                match **param.item() {
+            for param in self.0.params.pairs() {
+                match **param.value() {
                     GenericParam::Lifetime(ref param) => {
                         param.to_tokens(tokens);
                     }
@@ -445,7 +623,7 @@ mod printing {
                         param.ty.to_tokens(tokens);
                     }
                 }
-                param.delimiter().to_tokens(tokens);
+                param.punct().to_tokens(tokens);
             }
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
@@ -453,13 +631,13 @@ mod printing {
 
     impl<'a> ToTokens for TypeGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(&self.0) {
+            if empty_normal_generics(self.0) {
                 return;
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
-            for param in self.0.params.iter() {
-                match **param.item() {
+            for param in self.0.params.pairs() {
+                match **param.value() {
                     GenericParam::Lifetime(ref param) => {
                         // Leave off the lifetime bounds and attributes
                         param.lifetime.to_tokens(tokens);
@@ -473,7 +651,7 @@ mod printing {
                         param.ident.to_tokens(tokens);
                     }
                 }
-                param.delimiter().to_tokens(tokens);
+                param.punct().to_tokens(tokens);
             }
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
@@ -481,7 +659,7 @@ mod printing {
 
     impl<'a> ToTokens for Turbofish<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !empty_normal_generics(&self.0) {
+            if !empty_normal_generics(self.0) {
                 <Token![::]>::default().to_tokens(tokens);
                 TypeGenerics(self.0).to_tokens(tokens);
             }
@@ -523,15 +701,11 @@ mod printing {
         }
     }
 
-    impl ToTokens for TypeParamBound {
+    impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                TypeParamBound::Region(ref lifetime) => lifetime.to_tokens(tokens),
-                TypeParamBound::Trait(ref trait_ref, ref modifier) => {
-                    modifier.to_tokens(tokens);
-                    trait_ref.to_tokens(tokens);
-                }
-            }
+            self.modifier.to_tokens(tokens);
+            self.lifetimes.to_tokens(tokens);
+            self.path.to_tokens(tokens);
         }
     }
 
@@ -560,23 +734,21 @@ mod printing {
 
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !self.predicates.is_empty() {
-                TokensOrDefault(&self.where_token).to_tokens(tokens);
-                self.predicates.to_tokens(tokens);
-            }
+            self.where_token.to_tokens(tokens);
+            self.predicates.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for WhereBoundPredicate {
+    impl ToTokens for PredicateType {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.bound_lifetimes.to_tokens(tokens);
+            self.lifetimes.to_tokens(tokens);
             self.bounded_ty.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for WhereRegionPredicate {
+    impl ToTokens for PredicateLifetime {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lifetime.to_tokens(tokens);
             if !self.bounds.is_empty() {
@@ -586,7 +758,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for WhereEqPredicate {
+    impl ToTokens for PredicateEq {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.lhs_ty.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);

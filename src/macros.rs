@@ -1,3 +1,12 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
@@ -20,6 +29,16 @@ macro_rules! ast_struct {
 
     (
         $(#[$attr:meta])*
+        pub struct $name:ident #manual_extra_traits $($rest:tt)*
+    ) => {
+        $(#[$attr])*
+        #[cfg_attr(feature = "extra-traits", derive(Debug))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name $($rest)*
+    };
+
+    (
+        $(#[$attr:meta])*
         pub struct $name:ident $($rest:tt)*
     ) => {
         $(#[$attr])*
@@ -29,10 +48,11 @@ macro_rules! ast_struct {
     };
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! ast_enum {
     (
         $(#[$enum_attr:meta])*
-        pub enum $name:ident { $($variants:tt)* }
+        pub enum $name:ident $(# $tags:ident)* { $($variants:tt)* }
     ) => (
         $(#[$enum_attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -43,13 +63,14 @@ macro_rules! ast_enum {
     )
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
         pub enum $name:ident {
             $(
                 $(#[$variant_attr:meta])*
-                pub $variant:ident($member:ident $($rest:tt)*),
+                pub $variant:ident $( ($member:ident $($rest:tt)*) )*,
             )*
         }
 
@@ -60,7 +81,7 @@ macro_rules! ast_enum_of_structs {
             pub enum $name {
                 $(
                     $(#[$variant_attr])*
-                    $variant($member),
+                    $variant $( ($member) )*,
                 )*
             }
         }
@@ -68,40 +89,57 @@ macro_rules! ast_enum_of_structs {
         $(
             maybe_ast_struct! {
                 $(#[$variant_attr])*
-                pub struct $member $($rest)*
+                $(
+                    pub struct $member $($rest)*
+                )*
             }
 
-            impl From<$member> for $name {
-                fn from(e: $member) -> $name {
-                    $name::$variant(e)
+            $(
+                impl From<$member> for $name {
+                    fn from(e: $member) -> $name {
+                        $name::$variant(e)
+                    }
                 }
-            }
+            )*
         )*
 
         #[cfg(feature = "printing")]
         generate_to_tokens! {
             $($remaining)*
-            enum $name { $($variant [$($rest)*],)* }
+            ()
+            tokens
+            $name { $($variant $( [$($rest)*] )*,)* }
         }
     )
 }
 
-#[cfg(feature = "printing")]
+#[cfg(all(feature = "printing", any(feature = "full", feature = "derive")))]
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
-    (enum $name:ident { $($variant:ident [$($rest:tt)*],)* }) => (
+    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident, $($next:tt)*}) => {
+        generate_to_tokens!(
+            ($($arms)* $name::$variant => {})
+            $tokens $name { $($next)* }
+        );
+    };
+
+    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident [$($rest:tt)*], $($next:tt)*}) => {
+        generate_to_tokens!(
+            ($($arms)* $name::$variant(ref _e) => to_tokens_call!(_e, $tokens, $($rest)*),)
+            $tokens $name { $($next)* }
+        );
+    };
+
+    (($($arms:tt)*) $tokens:ident $name:ident {}) => {
         impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+            fn to_tokens(&self, $tokens: &mut ::quote::Tokens) {
                 match *self {
-                    $(
-                        $name::$variant(ref _e) =>
-                            to_tokens_call!(_e, tokens, $($rest)*),
-                    )*
+                    $($arms)*
                 }
             }
         }
-    );
+    };
 }
 
 #[cfg(all(feature = "printing", feature = "full"))]
@@ -111,7 +149,7 @@ macro_rules! to_tokens_call {
     };
 }
 
-#[cfg(all(feature = "printing", not(feature = "full")))]
+#[cfg(all(feature = "printing", feature = "derive", not(feature = "full")))]
 macro_rules! to_tokens_call {
     // If the variant is marked as #full, don't auto-generate to-tokens for it.
     ($e:ident, $tokens:ident, #full $($rest:tt)*) => {
@@ -122,16 +160,19 @@ macro_rules! to_tokens_call {
     };
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! maybe_ast_struct {
     (
         $(#[$attr:meta])*
-        pub struct $name:ident
+        $(
+            pub struct $name:ident
+        )*
     ) => ();
 
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
 }
 
-#[cfg(all(feature = "full", feature = "parsing"))]
+#[cfg(all(feature = "parsing", any(feature = "full", feature = "derive")))]
 macro_rules! impl_synom {
     ($t:ident $description:tt $($parser:tt)+) => {
         impl Synom for $t {

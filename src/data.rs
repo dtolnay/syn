@@ -1,106 +1,139 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 use super::*;
-use delimited::Delimited;
+use punctuated::Punctuated;
 
 ast_struct! {
     /// An enum variant.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Variant {
-        /// Name of the variant.
-        pub ident: Ident,
-
         /// Attributes tagged on the variant.
         pub attrs: Vec<Attribute>,
 
-        /// Type of variant.
-        pub data: VariantData,
+        /// Name of the variant.
+        pub ident: Ident,
 
-        /// Explicit discriminant, e.g. `Foo = 1`
-        pub discriminant: Option<Expr>,
+        /// Content stored in the variant.
+        pub fields: Fields,
 
-        pub eq_token: Option<Token![=]>,
+        /// Explicit discriminant: `Variant = 1`
+        pub discriminant: Option<(Token![=], Expr)>,
     }
 }
 
-ast_enum! {
+ast_enum_of_structs! {
     /// Data stored within an enum variant or struct.
-    pub enum VariantData {
-        /// Struct variant, e.g. `Point { x: f64, y: f64 }`.
-        Struct(Delimited<Field, Token![,]>, tokens::Brace),
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
+    pub enum Fields {
+        /// Named fields of a struct or struct variant such as `Point { x: f64,
+        /// y: f64 }`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Named(FieldsNamed {
+            pub brace_token: token::Brace,
+            pub named: Punctuated<Field, Token![,]>,
+        }),
 
-        /// Tuple variant, e.g. `Some(T)`.
-        Tuple(Delimited<Field, Token![,]>, tokens::Paren),
+        /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Unnamed(FieldsUnnamed {
+            pub paren_token: token::Paren,
+            pub unnamed: Punctuated<Field, Token![,]>,
+        }),
 
-        /// Unit variant, e.g. `None`.
-        Unit,
+        /// Unit struct or unit variant such as `None`.
+        pub Unit,
     }
-}
-
-impl VariantData {
-    // TODO: expose this?
-    // /// Slice containing the fields stored in the variant.
-    // pub fn fields(&self) -> &Delimited<Field, tokens::Comma> {
-    //     match *self {
-    //         VariantData::Struct(ref fields, _) |
-    //         VariantData::Tuple(ref fields, _) => fields,
-    //         VariantData::Unit => &[],
-    //     }
-    // }
-    //
-    // /// Mutable slice containing the fields stored in the variant.
-    // pub fn fields_mut(&mut self) -> &mut Delimited<Field, tokens::Comma> {
-    //     match *self {
-    //         VariantData::Struct(ref mut fields, _) |
-    //         VariantData::Tuple(ref mut fields, _) => fields,
-    //         VariantData::Unit => &mut [],
-    //     }
-    // }
 }
 
 ast_struct! {
     /// A field of a struct or enum variant.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
     pub struct Field {
+        /// Attributes tagged on the field.
+        pub attrs: Vec<Attribute>,
+
+        /// Visibility of the field.
+        pub vis: Visibility,
+
         /// Name of the field, if any.
         ///
         /// Fields of tuple structs have no names.
         pub ident: Option<Ident>,
 
-        /// Visibility of the field.
-        pub vis: Visibility,
-
-        /// Attributes tagged on the field.
-        pub attrs: Vec<Attribute>,
+        pub colon_token: Option<Token![:]>,
 
         /// Type of the field.
         pub ty: Type,
-
-        pub colon_token: Option<Token![:]>,
     }
 }
 
 ast_enum_of_structs! {
-    /// Visibility level of an item.
+    /// The visibility level of an item: inherited or `pub` or
+    /// `pub(restricted)`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    ///
+    /// # Syntax tree enum
+    ///
+    /// This type is a [syntax tree enum].
+    ///
+    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Visibility {
-        /// Public, i.e. `pub`.
+        /// A public visibility level: `pub`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Public(VisPublic {
             pub pub_token: Token![pub],
         }),
 
-        /// Crate-visible, i.e. `pub(crate)`.
+        /// A crate-level visibility: `pub(crate)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Crate(VisCrate {
             pub pub_token: Token![pub],
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub crate_token: Token![crate],
         }),
 
-        /// Restricted, e.g. `pub(self)` or `pub(super)` or `pub(in some::module)`.
+        /// A visibility level restricted to some path: `pub(self)` or
+        /// `pub(super)` or `pub(in some::module)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
         pub Restricted(VisRestricted {
             pub pub_token: Token![pub],
-            pub paren_token: tokens::Paren,
+            pub paren_token: token::Paren,
             pub in_token: Option<Token![in]>,
             pub path: Box<Path>,
         }),
 
-        /// Inherited, i.e. private.
-        pub Inherited(VisInherited {}),
+        /// An inherited visibility, which usually means private.
+        pub Inherited,
     }
 }
 
@@ -110,9 +143,62 @@ pub mod parsing {
 
     use synom::Synom;
 
+    impl Synom for Variant {
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
+            id: syn!(Ident) >>
+            fields: alt!(
+                syn!(FieldsNamed) => { Fields::Named }
+                |
+                syn!(FieldsUnnamed) => { Fields::Unnamed }
+                |
+                epsilon!() => { |_| Fields::Unit }
+            ) >>
+            disr: option!(tuple!(punct!(=), syn!(Expr))) >>
+            (Variant {
+                ident: id,
+                attrs: attrs,
+                fields: fields,
+                discriminant: disr,
+            })
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("enum variant")
+        }
+    }
+
+    impl Synom for FieldsNamed {
+        named!(parse -> Self, map!(
+            braces!(call!(Punctuated::parse_terminated_with, Field::parse_named)),
+            |(brace, fields)| FieldsNamed {
+                brace_token: brace,
+                named: fields,
+            }
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("named fields in a struct or struct variant")
+        }
+    }
+
+    impl Synom for FieldsUnnamed {
+        named!(parse -> Self, map!(
+            parens!(call!(Punctuated::parse_terminated_with, Field::parse_unnamed)),
+            |(paren, fields)| FieldsUnnamed {
+                paren_token: paren,
+                unnamed: fields,
+            }
+        ));
+
+        fn description() -> Option<&'static str> {
+            Some("unnamed fields in a tuple struct or tuple variant")
+        }
+    }
+
     impl Field {
-        named!(pub parse_struct -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+        named!(pub parse_named -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             id: syn!(Ident) >>
             colon: punct!(:) >>
@@ -126,8 +212,8 @@ pub mod parsing {
             })
         ));
 
-        named!(pub parse_tuple -> Self, do_parse!(
-            attrs: many0!(call!(Attribute::parse_outer)) >>
+        named!(pub parse_unnamed -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             vis: syn!(Visibility) >>
             ty: syn!(Type) >>
             (Field {
@@ -146,9 +232,9 @@ pub mod parsing {
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(crate)) >>
                 (Visibility::Crate(VisCrate {
-                    crate_token: other.0,
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    crate_token: other.1,
                 }))
             )
             |
@@ -156,10 +242,10 @@ pub mod parsing {
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(self)) >>
                 (Visibility::Restricted(VisRestricted {
-                    path: Box::new(other.0.into()),
-                    in_token: None,
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    in_token: None,
+                    path: Box::new(other.1.into()),
                 }))
             )
             |
@@ -167,10 +253,10 @@ pub mod parsing {
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(super)) >>
                 (Visibility::Restricted(VisRestricted {
-                    path: Box::new(other.0.into()),
-                    in_token: None,
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    in_token: None,
+                    path: Box::new(other.1.into()),
                 }))
             )
             |
@@ -182,10 +268,10 @@ pub mod parsing {
                     (in_tok, restricted)
                 )) >>
                 (Visibility::Restricted(VisRestricted {
-                    path: Box::new((other.0).1),
-                    in_token: Some((other.0).0),
-                    paren_token: other.1,
                     pub_token: pub_token,
+                    paren_token: other.0,
+                    in_token: Some((other.1).0),
+                    path: Box::new((other.1).1),
                 }))
             )
             |
@@ -195,43 +281,45 @@ pub mod parsing {
                 })
             } }
             |
-            epsilon!() => { |_| Visibility::Inherited(VisInherited {}) }
+            epsilon!() => { |_| Visibility::Inherited }
         ));
+
+        fn description() -> Option<&'static str> {
+            Some("visibility qualifier such as `pub`")
+        }
     }
 }
 
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
+    use quote::{ToTokens, Tokens};
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
             self.ident.to_tokens(tokens);
-            self.data.to_tokens(tokens);
-            if let Some(ref disc) = self.discriminant {
-                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+            self.fields.to_tokens(tokens);
+            if let Some((ref eq_token, ref disc)) = self.discriminant {
+                eq_token.to_tokens(tokens);
                 disc.to_tokens(tokens);
             }
         }
     }
 
-    impl ToTokens for VariantData {
+    impl ToTokens for FieldsNamed {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            match *self {
-                VariantData::Struct(ref fields, ref brace) => {
-                    brace.surround(tokens, |tokens| {
-                        fields.to_tokens(tokens);
-                    });
-                }
-                VariantData::Tuple(ref fields, ref paren) => {
-                    paren.surround(tokens, |tokens| {
-                        fields.to_tokens(tokens);
-                    });
-                }
-                VariantData::Unit => {}
-            }
+            self.brace_token.surround(tokens, |tokens| {
+                self.named.to_tokens(tokens);
+            });
+        }
+    }
+
+    impl ToTokens for FieldsUnnamed {
+        fn to_tokens(&self, tokens: &mut Tokens) {
+            self.paren_token.surround(tokens, |tokens| {
+                self.unnamed.to_tokens(tokens);
+            });
         }
     }
 
@@ -271,11 +359,6 @@ mod printing {
                 self.in_token.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             });
-        }
-    }
-
-    impl ToTokens for VisInherited {
-        fn to_tokens(&self, _tokens: &mut Tokens) {
         }
     }
 }

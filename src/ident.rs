@@ -1,3 +1,11 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{self, Display};
@@ -6,7 +14,7 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::Term;
 use unicode_xid::UnicodeXID;
 
-use Span;
+use proc_macro2::Span;
 
 /// A word of Rust code, such as a keyword or variable name.
 ///
@@ -21,12 +29,10 @@ use Span;
 /// - A lifetime is not an identifier. Use `syn::Lifetime` instead.
 ///
 /// An identifier constructed with `Ident::new` is permitted to be a Rust
-/// keyword, though parsing input with [`parse`], [`parse_str`] or
-/// [`parse_tokens`] rejects Rust keywords.
+/// keyword, though parsing one through its [`Synom`] implementation rejects
+/// Rust keywords.
 ///
-/// [`parse`]: fn.parse.html
-/// [`parse_str`]: fn.parse_str.html
-/// [`parse_tokens`]: fn.parse_tokens.html
+/// [`Synom`]: synom/trait.Synom.html
 ///
 /// # Examples
 ///
@@ -68,7 +74,7 @@ use Span;
 /// If `syn` is used to parse existing Rust source code, it is often useful to
 /// convert the `Ident` to a more generic string data type at some point. The
 /// methods `as_ref()` and `to_string()` achieve this.
-/// 
+///
 /// ```rust
 /// # use syn::Ident;
 /// # let ident = Ident::from("another_identifier");
@@ -87,19 +93,16 @@ use Span;
 /// ```
 #[derive(Copy, Clone, Debug)]
 pub struct Ident {
-    pub sym: Term,
+    term: Term,
     pub span: Span,
 }
 
 impl Ident {
-
     /// Creates a new `Ident` from the structured items. This is mainly used
     /// by the parser to create `Ident`s from existing Rust source code.
     ///
     /// Creating new `Ident`s programmatically is easier with `Ident::from`.
-    pub fn new(sym: Term, span: Span) -> Self {
-        let s = sym.as_str();
-
+    pub fn new(s: &str, span: Span) -> Self {
         if s.is_empty() {
             panic!("ident is not allowed to be empty; use Option<Ident>");
         }
@@ -109,7 +112,11 @@ impl Ident {
         }
 
         if s == "_" {
-            panic!("`_` is not a valid ident; use syn::tokens::Underscore");
+            panic!("`_` is not a valid ident; use syn::token::Underscore");
+        }
+
+        if s.bytes().all(|digit| digit >= b'0' && digit <= b'9') {
+            panic!("ident cannot be a number, use syn::Index instead");
         }
 
         fn xid_ok(s: &str) -> bool {
@@ -126,16 +133,12 @@ impl Ident {
             true
         }
 
-        fn integer_ok(s: &str) -> bool {
-            s.bytes().all(|digit| digit >= b'0' && digit <= b'9')
-        }
-
-        if !(xid_ok(s) || integer_ok(s)) {
+        if !xid_ok(s) {
             panic!("{:?} is not a valid ident", s);
         }
 
         Ident {
-            sym: sym,
+            term: Term::intern(s),
             span: span,
         }
     }
@@ -143,54 +146,61 @@ impl Ident {
 
 impl<'a> From<&'a str> for Ident {
     fn from(s: &str) -> Self {
-        Ident::new(Term::intern(s), Span::default())
+        Ident::new(s, Span::def_site())
     }
 }
 
 impl From<Token![self]> for Ident {
     fn from(tok: Token![self]) -> Self {
-        Ident::new(Term::intern("self"), tok.0)
+        Ident::new("self", tok.0)
     }
 }
 
 impl From<Token![Self]> for Ident {
     fn from(tok: Token![Self]) -> Self {
-        Ident::new(Term::intern("Self"), tok.0)
+        Ident::new("Self", tok.0)
     }
 }
 
 impl From<Token![super]> for Ident {
     fn from(tok: Token![super]) -> Self {
-        Ident::new(Term::intern("super"), tok.0)
+        Ident::new("super", tok.0)
+    }
+}
+
+impl From<Token![crate]> for Ident {
+    fn from(tok: Token![crate]) -> Self {
+        Ident::new("crate", tok.0)
     }
 }
 
 impl<'a> From<Cow<'a, str>> for Ident {
     fn from(s: Cow<'a, str>) -> Self {
-        Ident::new(Term::intern(&s), Span::default())
+        Ident::new(&s, Span::def_site())
     }
 }
 
 impl From<String> for Ident {
     fn from(s: String) -> Self {
-        Ident::new(Term::intern(&s), Span::default())
+        Ident::new(&s, Span::def_site())
     }
 }
 
 impl AsRef<str> for Ident {
     fn as_ref(&self) -> &str {
-        self.sym.as_str()
+        self.term.as_str()
     }
 }
 
 impl Display for Ident {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.sym.as_str().fmt(formatter)
+        self.term.as_str().fmt(formatter)
     }
 }
 
 impl<T: ?Sized> PartialEq<T> for Ident
-    where T: AsRef<str>
+where
+    T: AsRef<str>,
 {
     fn eq(&self, other: &T) -> bool {
         self.as_ref() == other.as_ref()
@@ -213,40 +223,46 @@ impl Ord for Ident {
 
 impl Hash for Ident {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.as_ref().hash(h)
+        self.as_ref().hash(h);
     }
 }
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::{Synom, PResult, Cursor, parse_error};
+    use synom::Synom;
+    use buffer::Cursor;
+    use parse_error;
+    use synom::PResult;
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (rest, span, sym) = match input.word() {
-                Some(word) => word,
+            let (span, term, rest) = match input.term() {
+                Some(term) => term,
                 _ => return parse_error(),
             };
-            if sym.as_str().starts_with('\'') {
+            if term.as_str().starts_with('\'') {
                 return parse_error();
             }
-            match sym.as_str() {
+            match term.as_str() {
                 // From https://doc.rust-lang.org/grammar.html#keywords
-                "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const" | "continue" |
-                "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" | "for" |
-                "if" | "impl" | "in" | "let" | "loop" | "macro" | "match" | "mod" | "move" |
-                "mut" | "offsetof" | "override" | "priv" | "proc" | "pub" | "pure" | "ref" |
-                "return" | "Self" | "self" | "sizeof" | "static" | "struct" | "super" | "trait" |
-                "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
-                "while" | "yield" => return parse_error(),
+                "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
+                | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
+                | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
+                | "mod" | "move" | "mut" | "offsetof" | "override" | "priv" | "proc" | "pub"
+                | "pure" | "ref" | "return" | "Self" | "self" | "sizeof" | "static" | "struct"
+                | "super" | "trait" | "true" | "type" | "typeof" | "unsafe" | "unsized" | "use"
+                | "virtual" | "where" | "while" | "yield" => return parse_error(),
                 _ => {}
             }
 
-            Ok((rest, Ident {
-                span: Span(span),
-                sym: sym,
-            }))
+            Ok((
+                Ident {
+                    span: span,
+                    term: term,
+                },
+                rest,
+            ))
         }
 
         fn description() -> Option<&'static str> {
@@ -258,14 +274,14 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
-    use proc_macro2::{TokenTree, TokenNode};
+    use quote::{ToTokens, Tokens};
+    use proc_macro2::{TokenNode, TokenTree};
 
     impl ToTokens for Ident {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
-                span: self.span.0,
-                kind: TokenNode::Term(self.sym),
+                span: self.span,
+                kind: TokenNode::Term(self.term),
             })
         }
     }

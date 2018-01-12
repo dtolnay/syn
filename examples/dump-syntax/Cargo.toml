@@ -1,0 +1,12 @@
+[package]
+name = "dump-syntax"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+publish = false
+
+[dependencies]
+syn = { path = "../..", features = ["full", "extra-traits"] }
+
+[[bin]]
+name = "dump-syntax"
+path = "main.rs"

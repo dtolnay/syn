@@ -1,10 +1,18 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 extern crate syntax;
 extern crate syntax_pos;
 
 use self::syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
-                        ImplItemKind, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
+                        ImplItemKind, Item, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
                         NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
-                        Visibility, Item, WhereClause};
+                        Visibility, WhereClause};
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
 use self::syntax::parse::token::{Lit, Token};
@@ -77,15 +85,19 @@ impl Folder for Respanner {
                     }
                     ExprKind::Binary(op, lhs, rhs) => {
                         // default fold_expr does not fold the op span
-                        ExprKind::Binary(self.fold_spanned(op),
-                                            self.fold_expr(lhs),
-                                            self.fold_expr(rhs))
+                        ExprKind::Binary(
+                            self.fold_spanned(op),
+                            self.fold_expr(lhs),
+                            self.fold_expr(rhs),
+                        )
                     }
                     ExprKind::AssignOp(op, lhs, rhs) => {
                         // default fold_expr does not fold the op span
-                        ExprKind::AssignOp(self.fold_spanned(op),
-                                            self.fold_expr(lhs),
-                                            self.fold_expr(rhs))
+                        ExprKind::AssignOp(
+                            self.fold_spanned(op),
+                            self.fold_expr(lhs),
+                            self.fold_expr(rhs),
+                        )
                     }
                     other => other,
                 },
@@ -103,24 +115,32 @@ impl Folder for Respanner {
     }
 
     fn fold_fn_decl(&mut self, decl: P<FnDecl>) -> P<FnDecl> {
-        decl.map(|FnDecl { inputs, output, variadic }| {
-            FnDecl {
-                inputs: inputs.move_map(|x| self.fold_arg(x)),
-                output: match output {
-                    FunctionRetTy::Ty(ty) => FunctionRetTy::Ty(self.fold_ty(ty)),
-                    // default fold_fn_decl does not fold this span
-                    FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
-                },
-                variadic: variadic,
-            }
-        })
+        decl.map(
+            |FnDecl {
+                 inputs,
+                 output,
+                 variadic,
+             }| {
+                FnDecl {
+                    inputs: inputs.move_map(|x| self.fold_arg(x)),
+                    output: match output {
+                        FunctionRetTy::Ty(ty) => FunctionRetTy::Ty(self.fold_ty(ty)),
+                        // default fold_fn_decl does not fold this span
+                        FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
+                    },
+                    variadic: variadic,
+                }
+            },
+        )
     }
 
     fn fold_field(&mut self, field: Field) -> Field {
         Field {
-            ident: codemap::respan(// default fold_field does not fold this span
-                                    self.new_span(field.ident.span),
-                                    self.fold_ident(field.ident.node)),
+            ident: codemap::respan(
+                // default fold_field does not fold this span
+                self.new_span(field.ident.span),
+                self.fold_ident(field.ident.node),
+            ),
             expr: self.fold_expr(field.expr),
             span: self.new_span(field.span),
             is_shorthand: field.is_shorthand,
@@ -133,12 +153,13 @@ impl Folder for Respanner {
         let noop = fold::noop_fold_trait_item(i, self).expect_one("");
         SmallVector::one(TraitItem {
             node: match noop.node {
-                TraitItemKind::Method(sig, body) => {
-                    TraitItemKind::Method(MethodSig {
+                TraitItemKind::Method(sig, body) => TraitItemKind::Method(
+                    MethodSig {
                         constness: self.fold_spanned(sig.constness),
                         ..sig
-                    }, body)
-                }
+                    },
+                    body,
+                ),
                 node => node,
             },
             ..noop
@@ -150,12 +171,13 @@ impl Folder for Respanner {
         let noop = fold::noop_fold_impl_item(i, self).expect_one("");
         SmallVector::one(ImplItem {
             node: match noop.node {
-                ImplItemKind::Method(sig, body) => {
-                    ImplItemKind::Method(MethodSig {
+                ImplItemKind::Method(sig, body) => ImplItemKind::Method(
+                    MethodSig {
                         constness: self.fold_spanned(sig.constness),
                         ..sig
-                    }, body)
-                }
+                    },
+                    body,
+                ),
                 node => node,
             },
             ..noop
@@ -204,19 +226,24 @@ impl Folder for Respanner {
     }
 
     fn fold_token(&mut self, t: Token) -> Token {
-        fold::noop_fold_token(match t {
-            // default fold_token does not fold literals
-            Token::Literal(lit, repr) => Token::Literal(self.fold_lit(lit), repr),
-            _ => t,
-        }, self)
+        fold::noop_fold_token(
+            match t {
+                // default fold_token does not fold literals
+                Token::Literal(lit, repr) => Token::Literal(self.fold_lit(lit), repr),
+                _ => t,
+            },
+            self,
+        )
     }
 
     fn fold_vis(&mut self, vis: Visibility) -> Visibility {
-        fold::noop_fold_vis(match vis {
-            Visibility::Crate(span, sugar) =>
-                Visibility::Crate(self.new_span(span), sugar),
-            _ => vis,
-        }, self)
+        fold::noop_fold_vis(
+            match vis {
+                Visibility::Crate(span, sugar) => Visibility::Crate(self.new_span(span), sugar),
+                _ => vis,
+            },
+            self,
+        )
     }
 
     // noop_fold_where_clause doesn't modify the span.

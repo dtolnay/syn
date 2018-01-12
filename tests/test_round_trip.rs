@@ -1,5 +1,12 @@
-#![cfg(feature = "full")]
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 
+#![cfg(feature = "full")]
 #![feature(rustc_private)]
 
 #[macro_use]
@@ -10,12 +17,12 @@ extern crate syntax;
 extern crate syntax_pos;
 extern crate walkdir;
 
-use rayon::iter::{ParallelIterator, IntoParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
-use syntax::parse::{self, ParseSess, PResult};
+use syntax::parse::{self, PResult, ParseSess};
 use syntax::codemap::FilePathMapping;
 use syntax_pos::FileName;
-use walkdir::{WalkDir, WalkDirIterator, DirEntry};
+use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 use std::fs::File;
 use std::io::Read;
@@ -24,8 +31,10 @@ use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
-#[allow(dead_code)]
 #[macro_use]
+mod macros;
+
+#[allow(dead_code)]
 mod common;
 
 #[test]
@@ -46,82 +55,88 @@ fn test_round_trip() {
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
         .unwrap()
         .into_par_iter()
-        .for_each(|entry|
-    {
-        let path = entry.path();
-        if path.is_dir() {
-            return;
-        }
-
-        let mut file = File::open(path).unwrap();
-        let mut content = String::new();
-        file.read_to_string(&mut content).unwrap();
-
-        let start = Instant::now();
-        let (krate, elapsed) = match syn::parse_file(&content) {
-            Ok(krate) => (krate, start.elapsed()),
-            Err(msg) => {
-                errorf!("=== {}: syn failed to parse\n{:?}\n",
-                        path.display(),
-                        msg);
-                let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
-                if prev_failed + 1 >= abort_after {
-                    process::exit(1);
-                }
+        .for_each(|entry| {
+            let path = entry.path();
+            if path.is_dir() {
                 return;
             }
-        };
-        let back = quote!(#krate).to_string();
 
-        let equal = panic::catch_unwind(|| {
-            let sess = ParseSess::new(FilePathMapping::empty());
-            let before = match libsyntax_parse(content, &sess) {
-                Ok(before) => before,
-                Err(mut diagnostic) => {
-                    diagnostic.cancel();
-                    if diagnostic.message().starts_with("file not found for module") {
-                        errorf!("=== {}: ignore\n", path.display());
-                    } else {
-                        errorf!("=== {}: ignore - libsyntax failed to parse original content: {}\n",
-                                path.display(),
-                                diagnostic.message());
+            let mut file = File::open(path).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+
+            let start = Instant::now();
+            let (krate, elapsed) = match syn::parse_file(&content) {
+                Ok(krate) => (krate, start.elapsed()),
+                Err(msg) => {
+                    errorf!("=== {}: syn failed to parse\n{:?}\n", path.display(), msg);
+                    let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
+                    if prev_failed + 1 >= abort_after {
+                        process::exit(1);
                     }
-                    return true;
+                    return;
                 }
             };
-            let after = match libsyntax_parse(back, &sess) {
-                Ok(after) => after,
-                Err(mut diagnostic) => {
-                    errorf!("=== {}: libsyntax failed to parse", path.display());
-                    diagnostic.emit();
-                    return false;
-                }
-            };
+            let back = quote!(#krate).to_string();
 
-            if before == after {
-                errorf!("=== {}: pass in {}ms\n",
+            let equal = panic::catch_unwind(|| {
+                let sess = ParseSess::new(FilePathMapping::empty());
+                let before = match libsyntax_parse(content, &sess) {
+                    Ok(before) => before,
+                    Err(mut diagnostic) => {
+                        diagnostic.cancel();
+                        if diagnostic
+                            .message()
+                            .starts_with("file not found for module")
+                        {
+                            errorf!("=== {}: ignore\n", path.display());
+                        } else {
+                            errorf!(
+                                "=== {}: ignore - libsyntax failed to parse original content: {}\n",
+                                path.display(),
+                                diagnostic.message()
+                            );
+                        }
+                        return true;
+                    }
+                };
+                let after = match libsyntax_parse(back, &sess) {
+                    Ok(after) => after,
+                    Err(mut diagnostic) => {
+                        errorf!("=== {}: libsyntax failed to parse", path.display());
+                        diagnostic.emit();
+                        return false;
+                    }
+                };
+
+                if before == after {
+                    errorf!(
+                        "=== {}: pass in {}ms\n",
                         path.display(),
-                        elapsed.as_secs() * 1000 + elapsed.subsec_nanos() as u64 / 1_000_000);
-                true
-            } else {
-                errorf!("=== {}: FAIL\nbefore: {}\nafter: {}\n",
+                        elapsed.as_secs() * 1000 + u64::from(elapsed.subsec_nanos()) / 1_000_000
+                    );
+                    true
+                } else {
+                    errorf!(
+                        "=== {}: FAIL\nbefore: {}\nafter: {}\n",
                         path.display(),
                         format!("{:?}", before).replace("\n", ""),
-                        format!("{:?}", after).replace("\n", ""));
-                false
+                        format!("{:?}", after).replace("\n", "")
+                    );
+                    false
+                }
+            });
+            match equal {
+                Err(_) => errorf!("=== {}: ignoring libsyntax panic\n", path.display()),
+                Ok(true) => {}
+                Ok(false) => {
+                    let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
+                    if prev_failed + 1 >= abort_after {
+                        process::exit(1);
+                    }
+                }
             }
         });
-        match equal {
-            Err(_) => errorf!("=== {}: ignoring libsyntax panic\n", path.display()),
-            Ok(true) => {}
-            Ok(false) => {
-                let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
-                if prev_failed + 1 >= abort_after {
-                    process::exit(1);
-                }
-            },
-        }
-    });
 
     let failed = failed.load(Ordering::SeqCst);
     if failed > 0 {
@@ -131,6 +146,5 @@ fn test_round_trip() {
 
 fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = FileName::Custom("test_round_trip".to_string());
-    parse::parse_crate_from_source_str(name, content, sess)
-        .map(common::respan::respan_crate)
+    parse::parse_crate_from_source_str(name, content, sess).map(common::respan::respan_crate)
 }

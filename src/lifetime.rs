@@ -1,27 +1,49 @@
+// Copyright 2018 Syn Developers
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::Term;
+use proc_macro2::{Span, Term};
 use unicode_xid::UnicodeXID;
 
-use Span;
-
+/// A Rust lifetime: `'a`.
+///
+/// Lifetime names must conform to the following rules:
+///
+/// - Must start with an apostrophe.
+/// - Must not consist of just an apostrophe: `'`.
+/// - Must not consist of apostrophe + underscore: `'_`.
+/// - Character after the apostrophe must be `_` or a Unicode code point with
+///   the XID_Start property.
+/// - All following characters must be Unicode code points with the XID_Continue
+///   property.
+///
+/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// feature.*
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
+#[derive(Copy, Clone)]
 pub struct Lifetime {
-    pub sym: Term,
+    term: Term,
     pub span: Span,
 }
 
 impl Lifetime {
-    pub fn new(sym: Term, span: Span) -> Self {
-        let s = sym.as_str();
+    pub fn new(term: Term, span: Span) -> Self {
+        let s = term.as_str();
 
         if !s.starts_with('\'') {
-            panic!("lifetime name must start with apostrophe as in \"'a\", \
-                   got {:?}",
-                   s);
+            panic!(
+                "lifetime name must start with apostrophe as in \"'a\", \
+                 got {:?}",
+                s
+            );
         }
 
         if s == "'" {
@@ -47,11 +69,11 @@ impl Lifetime {
         }
 
         if !xid_ok(&s[1..]) {
-            panic!("{:?} is not a valid lifetime name");
+            panic!("{:?} is not a valid lifetime name", s);
         }
 
         Lifetime {
-            sym: sym,
+            term: term,
             span: span,
         }
     }
@@ -59,13 +81,13 @@ impl Lifetime {
 
 impl Display for Lifetime {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.sym.as_str().fmt(formatter)
+        self.term.as_str().fmt(formatter)
     }
 }
 
 impl PartialEq for Lifetime {
     fn eq(&self, other: &Lifetime) -> bool {
-        self.sym.as_str() == other.sym.as_str()
+        self.term.as_str() == other.term.as_str()
     }
 }
 
@@ -79,35 +101,45 @@ impl PartialOrd for Lifetime {
 
 impl Ord for Lifetime {
     fn cmp(&self, other: &Lifetime) -> Ordering {
-        self.sym.as_str().cmp(other.sym.as_str())
+        self.term.as_str().cmp(other.term.as_str())
     }
 }
 
 impl Hash for Lifetime {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.sym.as_str().hash(h)
+        self.term.as_str().hash(h)
     }
 }
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::{Synom, PResult, Cursor, parse_error};
+    use synom::Synom;
+    use buffer::Cursor;
+    use parse_error;
+    use synom::PResult;
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (rest, span, sym) = match input.word() {
-                Some(word) => word,
+            let (span, term, rest) = match input.term() {
+                Some(term) => term,
                 _ => return parse_error(),
             };
-            if !sym.as_str().starts_with('\'') {
+            if !term.as_str().starts_with('\'') {
                 return parse_error();
             }
 
-            Ok((rest, Lifetime {
-                sym: sym,
-                span: Span(span),
-            }))
+            Ok((
+                Lifetime {
+                    term: term,
+                    span: span,
+                },
+                rest,
+            ))
+        }
+
+        fn description() -> Option<&'static str> {
+            Some("lifetime")
         }
     }
 }
@@ -115,14 +147,14 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{Tokens, ToTokens};
-    use proc_macro2::{TokenTree, TokenNode};
+    use quote::{ToTokens, Tokens};
+    use proc_macro2::{TokenNode, TokenTree};
 
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append(TokenTree {
-                span: self.span.0,
-                kind: TokenNode::Term(self.sym),
+                span: self.span,
+                kind: TokenNode::Term(self.term),
             })
         }
     }
