@@ -551,14 +551,9 @@ mod printing {
     use attr::FilterAttrs;
     use quote::{ToTokens, Tokens};
 
-    /// Returns true if the generics object has no lifetimes or ty_params.
-    fn empty_normal_generics(generics: &Generics) -> bool {
-        generics.params.is_empty()
-    }
-
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(self) {
+            if self.params.is_empty() {
                 return;
             }
 
@@ -595,7 +590,7 @@ mod printing {
 
     impl<'a> ToTokens for ImplGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(self.0) {
+            if self.0.params.is_empty() {
                 return;
             }
 
@@ -650,7 +645,7 @@ mod printing {
 
     impl<'a> ToTokens for TypeGenerics<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if empty_normal_generics(self.0) {
+            if self.0.params.is_empty() {
                 return;
             }
 
@@ -698,7 +693,7 @@ mod printing {
 
     impl<'a> ToTokens for Turbofish<'a> {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            if !empty_normal_generics(self.0) {
+            if !self.0.params.is_empty() {
                 <Token![::]>::default().to_tokens(tokens);
                 TypeGenerics(self.0).to_tokens(tokens);
             }
