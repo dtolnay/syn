@@ -716,32 +716,3 @@ where
         }
     }
 }
-
-pub trait SpanExt : Copy {
-    /// Creates `T` from `self`.
-    fn as_token<T: FromSpan>(self) -> T;
-
-    fn new_ident<S: AsRef<str>>(self, sym: S) -> Ident;
-}
-
-impl SpanExt for Span {
-    /// Creates `T` from `self`.
-    fn as_token<T: FromSpan>(self) -> T {
-        FromSpan::from_span(self)
-    }
-
-    fn new_ident<S: AsRef<str>>(self, sym: S) -> Ident {
-        Ident::new(proc_macro2::Term::intern(sym.as_ref()), self)
-    }
-}
-
-impl SpanExt for proc_macro2::Span {
-    /// Creates `T` from `self`.
-    fn as_token<T: FromSpan>(self) -> T {
-        Span(self).as_token()
-    }
-
-    fn new_ident<S: AsRef<str>>(self, sym: S) -> Ident {
-        Span(self).new_ident(sym)
-    }
-}
