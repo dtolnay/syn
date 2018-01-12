@@ -196,7 +196,7 @@ mod parsing {
     named!(full -> (Tokens, bool), map!(option!(do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id == "full", epsilon!()) >>
+        cond_reduce!(id == "full") >>
         ()
     )), |s| if s.is_some() {
         (quote!(#[cfg(feature = "full")]), true)
@@ -207,7 +207,7 @@ mod parsing {
     named!(manual_extra_traits -> (), do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id == "manual_extra_traits", epsilon!()) >>
+        cond_reduce!(id == "manual_extra_traits") >>
         ()
     ));
 
@@ -241,7 +241,7 @@ mod parsing {
     named!(no_visit -> (), do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id == "no_visit", epsilon!()) >>
+        cond_reduce!(id == "no_visit") >>
         ()
     ));
 

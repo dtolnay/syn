@@ -328,6 +328,13 @@ macro_rules! cond {
 /// - **Syntax:** `cond_reduce!(CONDITION, THING)`
 /// - **Output:** `THING`
 ///
+/// The subparser may be omitted in which case it defaults to [`epsilon!`].
+///
+/// [`epsilon!`]: macro.epsilon.html
+///
+/// - **Syntax:** `cond_reduce!(CONDITION)`
+/// - **Output:** `()`
+///
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
@@ -383,6 +390,10 @@ macro_rules! cond_reduce {
         } else {
             $crate::parse_error()
         }
+    };
+
+    ($i:expr, $cond:expr) => {
+        cond_reduce!($i, $cond, epsilon!())
     };
 
     ($i:expr, $cond:expr, $f:expr) => {

@@ -532,7 +532,7 @@ pub mod parsing {
                 }}
             ) >>
             // Just lifetimes like `'a + 'b` is not a TraitObject.
-            cond_reduce!(at_least_one_type(&bounds), epsilon!()) >>
+            cond_reduce!(at_least_one_type(&bounds)) >>
             (TypeTraitObject {
                 dyn_token: dyn_token,
                 bounds: bounds,

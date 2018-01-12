@@ -231,7 +231,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             colon: option!(punct!(::)) >>
             segments: call!(Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty) >>
-            cond_reduce!(segments.first().map_or(true, |seg| seg.value().ident != "dyn"), epsilon!()) >>
+            cond_reduce!(segments.first().map_or(true, |seg| seg.value().ident != "dyn")) >>
             (Path {
                 leading_colon: colon,
                 segments: segments,
