@@ -211,6 +211,22 @@ where
         }
         self.push_value(value);
     }
+
+    /// Inserts an element at position `index`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is greater than the number of elements previously in
+    /// this punctuated sequence.
+    pub fn insert(&mut self, index: usize, value: T) {
+        assert!(index <= self.len());
+
+        if index == self.len() {
+            self.push(value);
+        } else {
+            self.inner.insert(index, (value, Some(Default::default())));
+        }
+    }
 }
 
 #[cfg(feature = "extra-traits")]
