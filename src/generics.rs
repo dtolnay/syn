@@ -600,11 +600,29 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
+
+            // Print lifetimes before types and consts, regardless of their
+            // order in self.params.
+            //
+            // TODO: ordering rules for const parameters vs type parameters have
+            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
+            let mut trailing_or_empty = true;
             for param in self.0.params.pairs() {
+                if let GenericParam::Lifetime(_) = **param.value() {
+                    param.to_tokens(tokens);
+                    trailing_or_empty = param.punct().is_some();
+                }
+            }
+            for param in self.0.params.pairs() {
+                if let GenericParam::Lifetime(_) = **param.value() {
+                    continue;
+                }
+                if !trailing_or_empty {
+                    <Token![,]>::default().to_tokens(tokens);
+                    trailing_or_empty = true;
+                }
                 match **param.value() {
-                    GenericParam::Lifetime(ref param) => {
-                        param.to_tokens(tokens);
-                    }
+                    GenericParam::Lifetime(_) => unreachable!(),
                     GenericParam::Type(ref param) => {
                         // Leave off the type parameter defaults
                         tokens.append_all(param.attrs.outer());
@@ -625,6 +643,7 @@ mod printing {
                 }
                 param.punct().to_tokens(tokens);
             }
+
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
     }
@@ -636,12 +655,31 @@ mod printing {
             }
 
             TokensOrDefault(&self.0.lt_token).to_tokens(tokens);
+
+            // Print lifetimes before types and consts, regardless of their
+            // order in self.params.
+            //
+            // TODO: ordering rules for const parameters vs type parameters have
+            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
+            let mut trailing_or_empty = true;
             for param in self.0.params.pairs() {
+                if let GenericParam::Lifetime(ref def) = **param.value() {
+                    // Leave off the lifetime bounds and attributes
+                    def.lifetime.to_tokens(tokens);
+                    param.punct().to_tokens(tokens);
+                    trailing_or_empty = param.punct().is_some();
+                }
+            }
+            for param in self.0.params.pairs() {
+                if let GenericParam::Lifetime(_) = **param.value() {
+                    continue;
+                }
+                if !trailing_or_empty {
+                    <Token![,]>::default().to_tokens(tokens);
+                    trailing_or_empty = true;
+                }
                 match **param.value() {
-                    GenericParam::Lifetime(ref param) => {
-                        // Leave off the lifetime bounds and attributes
-                        param.lifetime.to_tokens(tokens);
-                    }
+                    GenericParam::Lifetime(_) => unreachable!(),
                     GenericParam::Type(ref param) => {
                         // Leave off the type parameter defaults
                         param.ident.to_tokens(tokens);
@@ -653,6 +691,7 @@ mod printing {
                 }
                 param.punct().to_tokens(tokens);
             }
+
             TokensOrDefault(&self.0.gt_token).to_tokens(tokens);
         }
     }
