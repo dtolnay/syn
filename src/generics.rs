@@ -563,7 +563,32 @@ mod printing {
             }
 
             TokensOrDefault(&self.lt_token).to_tokens(tokens);
-            self.params.to_tokens(tokens);
+
+            // Print lifetimes before types and consts, regardless of their
+            // order in self.params.
+            //
+            // TODO: ordering rules for const parameters vs type parameters have
+            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
+            let mut trailing_or_empty = true;
+            for param in self.params.pairs() {
+                if let GenericParam::Lifetime(_) = **param.value() {
+                    param.to_tokens(tokens);
+                    trailing_or_empty = param.punct().is_some();
+                }
+            }
+            for param in self.params.pairs() {
+                match **param.value() {
+                    GenericParam::Type(_) | GenericParam::Const(_) => {
+                        if !trailing_or_empty {
+                            <Token![,]>::default().to_tokens(tokens);
+                            trailing_or_empty = true;
+                        }
+                        param.to_tokens(tokens);
+                    }
+                    GenericParam::Lifetime(_) => {}
+                }
+            }
+
             TokensOrDefault(&self.gt_token).to_tokens(tokens);
         }
     }

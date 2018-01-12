@@ -476,7 +476,41 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.colon2_token.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
-            self.args.to_tokens(tokens);
+
+            // Print lifetimes before types and consts, all before bindings,
+            // regardless of their order in self.args.
+            //
+            // TODO: ordering rules for const arguments vs type arguments have
+            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
+            let mut trailing_or_empty = true;
+            for param in self.args.pairs() {
+                if let GenericArgument::Lifetime(_) = **param.value() {
+                    param.to_tokens(tokens);
+                    trailing_or_empty = param.punct().is_some();
+                }
+            }
+            for param in self.args.pairs() {
+                match **param.value() {
+                    GenericArgument::Type(_) | GenericArgument::Const(_) => {
+                        if !trailing_or_empty {
+                            <Token![,]>::default().to_tokens(tokens);
+                        }
+                        param.to_tokens(tokens);
+                        trailing_or_empty = param.punct().is_some();
+                    }
+                    GenericArgument::Lifetime(_) | GenericArgument::Binding(_) => {}
+                }
+            }
+            for param in self.args.pairs() {
+                if let GenericArgument::Binding(_) = **param.value() {
+                    if !trailing_or_empty {
+                        <Token![,]>::default().to_tokens(tokens);
+                        trailing_or_empty = true;
+                    }
+                    param.to_tokens(tokens);
+                }
+            }
+
             self.gt_token.to_tokens(tokens);
         }
     }
