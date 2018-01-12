@@ -49,6 +49,10 @@
 //! # }
 //! ```
 //!
+//! The [`parse_quote!`] macro also uses this approach.
+//!
+//! [`parse_quote!`]: ../macro.parse_quote.html
+//!
 //! ## The `Parser` trait
 //!
 //! Some types can be parsed in several ways depending on context. For example
