@@ -192,12 +192,20 @@ impl Synom for proc_macro2::TokenStream {
 pub trait Parser: Sized {
     type Output;
 
+    /// Parse a proc-macro2 token stream into the chosen syntax tree node.
     fn parse2(self, tokens: proc_macro2::TokenStream) -> Result<Self::Output, ParseError>;
 
+    /// Parse tokens of source code into the chosen syntax tree node.
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output, ParseError> {
         self.parse2(tokens.into())
     }
 
+    /// Parse a string of Rust code into the chosen syntax tree node.
+    ///
+    /// # Hygiene
+    ///
+    /// Every span in the resulting syntax tree will be set to resolve at the
+    /// macro call site.
     fn parse_str(self, s: &str) -> Result<Self::Output, ParseError> {
         match s.parse() {
             Ok(tts) => self.parse2(tts),
