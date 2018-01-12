@@ -181,6 +181,12 @@ macro_rules! token_punct {
                 Some(concat!("`", $s, "`"))
             }
         }
+
+        impl From<Span> for $name {
+            fn from(span: Span) -> Self {
+                $name([span; $len])
+            }
+        }
     }
 }
 
@@ -242,6 +248,12 @@ macro_rules! token_keyword {
                 Some(concat!("`", $s, "`"))
             }
         }
+
+        impl From<Span> for $name {
+            fn from(span: Span) -> Self {
+                $name(span)
+            }
+        }
     }
 }
 
@@ -296,6 +308,12 @@ macro_rules! token_delimiter {
                 where F: FnOnce($crate::buffer::Cursor) -> $crate::synom::PResult<R>
             {
                 parsing::delim($s, tokens, $name, f)
+            }
+        }
+
+        impl From<Span> for $name {
+            fn from(span: Span) -> Self {
+                $name(span)
             }
         }
     }
