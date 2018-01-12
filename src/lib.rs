@@ -610,6 +610,11 @@ where
 ///
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 ///
+/// # Hygiene
+///
+/// Every span in the resulting syntax tree will be set to resolve at the macro
+/// call site.
+///
 /// # Examples
 ///
 /// ```rust
