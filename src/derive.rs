@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use super::*;
-use punctuated::Punctuated;
+use punctuated::{Iter, IterMut, Punctuated};
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
@@ -73,6 +73,42 @@ ast_enum_of_structs! {
     }
 
     do_not_generate_to_tokens
+}
+
+impl DataStruct {
+    /// Returns an iterator over the fields of this struct
+    pub fn fields(&self) -> MaybeEmpty<Iter<Field, Token![,]>> {
+        match self.fields {
+            Fields::Unit => MaybeEmpty::None,
+            Fields::Named(FieldsNamed { ref named, .. }) => MaybeEmpty::Some(named.iter()),
+            Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }) => MaybeEmpty::Some(unnamed.iter()),
+        }
+    }
+
+    /// Returns an iterator over mutable references to the fields of this struct
+    pub fn fields_mut(&mut self) -> MaybeEmpty<IterMut<Field, Token![,]>> {
+        match self.fields {
+            Fields::Unit => MaybeEmpty::None,
+            Fields::Named(FieldsNamed { ref mut named, .. }) => MaybeEmpty::Some(named.iter_mut()),
+            Fields::Unnamed(FieldsUnnamed { ref mut unnamed, .. }) => MaybeEmpty::Some(unnamed.iter_mut()),
+        }
+    }
+}
+
+pub enum MaybeEmpty<T> {
+    Some(T),
+    None,
+}
+
+impl<T: Iterator> Iterator for MaybeEmpty<T> {
+    type Item = T::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match *self {
+            MaybeEmpty::Some(ref mut x) => x.next(),
+            MaybeEmpty::None => None,
+        }
+    }
 }
 
 #[cfg(feature = "parsing")]
