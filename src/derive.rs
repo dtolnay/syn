@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use super::*;
-use punctuated::{Iter, IterMut, Punctuated};
+use punctuated::{Iter, Punctuated};
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
@@ -75,23 +75,23 @@ ast_enum_of_structs! {
     do_not_generate_to_tokens
 }
 
-impl DataStruct {
-    /// Returns an iterator over the fields of this struct
-    pub fn fields(&self) -> MaybeEmpty<Iter<Field, Token![,]>> {
-        match self.fields {
+impl Fields {
+    /// Returns an iterator over the fields
+    pub fn iter(&self) -> MaybeEmpty<Iter<Field, Token![,]>> {
+        match *self {
             Fields::Unit => MaybeEmpty::None,
             Fields::Named(FieldsNamed { ref named, .. }) => MaybeEmpty::Some(named.iter()),
             Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }) => MaybeEmpty::Some(unnamed.iter()),
         }
     }
+}
 
-    /// Returns an iterator over mutable references to the fields of this struct
-    pub fn fields_mut(&mut self) -> MaybeEmpty<IterMut<Field, Token![,]>> {
-        match self.fields {
-            Fields::Unit => MaybeEmpty::None,
-            Fields::Named(FieldsNamed { ref mut named, .. }) => MaybeEmpty::Some(named.iter_mut()),
-            Fields::Unnamed(FieldsUnnamed { ref mut unnamed, .. }) => MaybeEmpty::Some(unnamed.iter_mut()),
-        }
+impl<'a> IntoIterator for &'a Fields {
+    type Item = &'a Field;
+    type IntoIter = MaybeEmpty<Iter<'a, Field, Token![,]>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 

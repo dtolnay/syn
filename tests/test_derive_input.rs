@@ -637,7 +637,7 @@ fn test_fields_on_unit_struct() {
         _ => panic!("expected a struct"),
     };
 
-    assert_eq!(0, struct_body.fields().count());
+    assert_eq!(0, struct_body.fields.iter().count());
 }
 
 #[test]
@@ -671,7 +671,7 @@ fn test_fields_on_named_struct() {
     ];
     let expected = expected.iter().collect::<Vec<_>>();
 
-    assert_eq!(expected, struct_body.fields().collect::<Vec<_>>());
+    assert_eq!(expected, struct_body.fields.iter().collect::<Vec<_>>());
 }
 
 #[test]
@@ -702,81 +702,5 @@ fn test_fields_on_tuple_struct() {
     ];
     let expected = expected.iter().collect::<Vec<_>>();
 
-    assert_eq!(expected, struct_body.fields().collect::<Vec<_>>());
-}
-
-#[test]
-fn test_fields_mut_on_unit_struct() {
-    let raw = "struct S;";
-    let mut struct_body = match syn::parse_str::<DeriveInput>(raw).unwrap().data {
-        Data::Struct(body) => body,
-        _ => panic!("expected a struct"),
-    };
-
-    assert_eq!(0, struct_body.fields_mut().count());
-}
-
-#[test]
-fn test_fields_mut_on_named_struct() {
-    let raw = "struct S {
-        foo: i32,
-        pub bar: String,
-    }";
-    let mut struct_body = match syn::parse_str::<DeriveInput>(raw).unwrap().data {
-        Data::Struct(body) => body,
-        _ => panic!("expected a struct"),
-    };
-
-    let mut expected = vec![
-        Field {
-            attrs: vec![],
-            vis: Visibility::Inherited,
-            ident: Some(Ident::from("foo")),
-            colon_token: Some(Default::default()),
-            ty: syn::parse_str("i32").unwrap(),
-        },
-        Field {
-            attrs: vec![],
-            vis: Visibility::Public(VisPublic {
-                pub_token: Default::default(),
-            }),
-            ident: Some(Ident::from("bar")),
-            colon_token: Some(Default::default()),
-            ty: syn::parse_str("String").unwrap(),
-        },
-    ];
-    let expected = expected.iter_mut().collect::<Vec<_>>();
-
-    assert_eq!(expected, struct_body.fields_mut().collect::<Vec<_>>());
-}
-
-#[test]
-fn test_fields_mut_on_tuple_struct() {
-    let raw = "struct S(i32, pub String);";
-    let mut struct_body = match syn::parse_str::<DeriveInput>(raw).unwrap().data {
-        Data::Struct(body) => body,
-        _ => panic!("expected a struct"),
-    };
-
-    let mut expected = vec![
-        Field {
-            attrs: vec![],
-            vis: Visibility::Inherited,
-            ident: None,
-            colon_token: None,
-            ty: syn::parse_str("i32").unwrap(),
-        },
-        Field {
-            attrs: vec![],
-            vis: Visibility::Public(VisPublic {
-                pub_token: Default::default(),
-            }),
-            ident: None,
-            colon_token: None,
-            ty: syn::parse_str("String").unwrap(),
-        },
-    ];
-    let expected = expected.iter_mut().collect::<Vec<_>>();
-
-    assert_eq!(expected, struct_body.fields_mut().collect::<Vec<_>>());
+    assert_eq!(expected, struct_body.fields.iter().collect::<Vec<_>>());
 }
