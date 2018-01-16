@@ -77,37 +77,21 @@ ast_enum_of_structs! {
 
 impl Fields {
     /// Returns an iterator over the fields
-    pub fn iter(&self) -> MaybeEmpty<Iter<Field, Token![,]>> {
+    pub fn iter(&self) -> Iter<Field, Token![,]> {
         match *self {
-            Fields::Unit => MaybeEmpty::None,
-            Fields::Named(FieldsNamed { ref named, .. }) => MaybeEmpty::Some(named.iter()),
-            Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }) => MaybeEmpty::Some(unnamed.iter()),
+            Fields::Unit => Iter::empty(),
+            Fields::Named(FieldsNamed { ref named, .. }) => named.iter(),
+            Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }) => unnamed.iter(),
         }
     }
 }
 
 impl<'a> IntoIterator for &'a Fields {
     type Item = &'a Field;
-    type IntoIter = MaybeEmpty<Iter<'a, Field, Token![,]>>;
+    type IntoIter = Iter<'a, Field, Token![,]>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
-    }
-}
-
-pub enum MaybeEmpty<T> {
-    Some(T),
-    None,
-}
-
-impl<T: Iterator> Iterator for MaybeEmpty<T> {
-    type Item = T::Item;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match *self {
-            MaybeEmpty::Some(ref mut x) => x.next(),
-            MaybeEmpty::None => None,
-        }
     }
 }
 
