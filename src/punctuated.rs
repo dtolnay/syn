@@ -398,6 +398,14 @@ pub struct Iter<'a, T: 'a, P: 'a> {
     inner: slice::Iter<'a, (T, Option<P>)>,
 }
 
+impl<'a, T: 'a, P: 'a> Iter<'a, T, P> {
+    pub(crate) fn empty() -> Self {
+        Self {
+            inner: [].iter(),
+        }
+    }
+}
+
 impl<'a, T, P> Iterator for Iter<'a, T, P> {
     type Item = &'a T;
 
