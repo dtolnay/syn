@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use super::*;
-use punctuated::{Iter, Punctuated};
+use punctuated::Punctuated;
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
@@ -73,26 +73,6 @@ ast_enum_of_structs! {
     }
 
     do_not_generate_to_tokens
-}
-
-impl Fields {
-    /// Returns an iterator over the fields
-    pub fn iter(&self) -> Iter<Field, Token![,]> {
-        match *self {
-            Fields::Unit => Iter::empty(),
-            Fields::Named(FieldsNamed { ref named, .. }) => named.iter(),
-            Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }) => unnamed.iter(),
-        }
-    }
-}
-
-impl<'a> IntoIterator for &'a Fields {
-    type Item = &'a Field;
-    type IntoIter = Iter<'a, Field, Token![,]>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
 }
 
 #[cfg(feature = "parsing")]

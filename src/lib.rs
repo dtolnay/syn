@@ -287,8 +287,8 @@ pub use attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue, NestedMeta};
 #[cfg(any(feature = "full", feature = "derive"))]
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, VisPublic,
-               VisRestricted, Visibility};
+pub use data::{Field, Fields, FieldsNamed, FieldsUnnamed, FieldsIter, Variant,
+               VisCrate, VisPublic, VisRestricted, Visibility};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
