@@ -78,40 +78,73 @@ ast_enum_of_structs! {
 }
 
 impl Generics {
-    /// Returns an immutable iterator over the type parameters.
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
+    ///   href="struct.TypeParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the type parameters in `self.params`.
     pub fn type_params(&self) -> TypeParams {
         TypeParams(self.params.iter())
     }
 
-    /// Returns a mutable iterator over the type parameters.
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
+    ///   href="struct.TypeParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the type parameters in `self.params`.
     pub fn type_params_mut(&mut self) -> TypeParamsMut {
         TypeParamsMut(self.params.iter_mut())
     }
 
-    /// Returns an immutable iterator over the lifetimes.
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
+    ///   href="struct.LifetimeDef.html"><code
+    ///   style="padding-left:0;padding-right:0;">LifetimeDef</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the lifetime parameters in `self.params`.
     pub fn lifetimes(&self) -> Lifetimes {
         Lifetimes(self.params.iter())
     }
 
-    /// Returns a mutable iterator over the lifetimes.
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
+    ///   href="struct.LifetimeDef.html"><code
+    ///   style="padding-left:0;padding-right:0;">LifetimeDef</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the lifetime parameters in `self.params`.
     pub fn lifetimes_mut(&mut self) -> LifetimesMut {
         LifetimesMut(self.params.iter_mut())
     }
 
-    /// Returns an immutable iterator over the const parameters.
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
+    ///   href="struct.ConstParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">ConstParam</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the constant parameters in `self.params`.
     pub fn const_params(&self) -> ConstParams {
         ConstParams(self.params.iter())
     }
 
-    /// Returns a mutable iterator over the const parameters.
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
+    ///   href="struct.ConstParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">ConstParam</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the constant parameters in `self.params`.
     pub fn const_params_mut(&mut self) -> ConstParamsMut {
         ConstParamsMut(self.params.iter_mut())
     }
 }
 
-/// An immutable iterator over the type parameters of `Generics`.
-///
-/// Returned by `Generics::type_params`
 pub struct TypeParams<'a>(Iter<'a, GenericParam, Token![,]>);
 
 impl<'a> Iterator for TypeParams<'a> {
@@ -131,9 +164,6 @@ impl<'a> Iterator for TypeParams<'a> {
     }
 }
 
-/// A mutable iterator over the type parameters of `Generics`.
-///
-/// Returned by `Generics::type_params_mut`
 pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam, Token![,]>);
 
 impl<'a> Iterator for TypeParamsMut<'a> {
@@ -153,9 +183,6 @@ impl<'a> Iterator for TypeParamsMut<'a> {
     }
 }
 
-/// An immutable iterator over the lifetimes of `Generics`.
-///
-/// Returned by `Generics::lifetimes`
 pub struct Lifetimes<'a>(Iter<'a, GenericParam, Token![,]>);
 
 impl<'a> Iterator for Lifetimes<'a> {
@@ -175,9 +202,6 @@ impl<'a> Iterator for Lifetimes<'a> {
     }
 }
 
-/// A mutable iterator over the lifetimes of `Generics`.
-///
-/// Returned by `Generics::lifetimes_mut`
 pub struct LifetimesMut<'a>(IterMut<'a, GenericParam, Token![,]>);
 
 impl<'a> Iterator for LifetimesMut<'a> {
@@ -197,9 +221,6 @@ impl<'a> Iterator for LifetimesMut<'a> {
     }
 }
 
-/// An immutable iterator over the const parameters of `Generics`.
-///
-/// Returned by `Generics::const_params`
 pub struct ConstParams<'a>(Iter<'a, GenericParam, Token![,]>);
 
 impl<'a> Iterator for ConstParams<'a> {
@@ -219,9 +240,6 @@ impl<'a> Iterator for ConstParams<'a> {
     }
 }
 
-/// A mutable iterator over the const parameters of `Generics`.
-///
-/// Returned by `Generics::const_params_mut`
 pub struct ConstParamsMut<'a>(IterMut<'a, GenericParam, Token![,]>);
 
 impl<'a> Iterator for ConstParamsMut<'a> {
