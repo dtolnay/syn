@@ -398,6 +398,17 @@ pub struct Iter<'a, T: 'a, P: 'a> {
     inner: slice::Iter<'a, (T, Option<P>)>,
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
+impl<'a, T, P> Iter<'a, T, P> {
+    // Not public API.
+    #[doc(hidden)]
+    pub fn private_empty() -> Self {
+        Iter {
+            inner: [].iter(),
+        }
+    }
+}
+
 impl<'a, T, P> Iterator for Iter<'a, T, P> {
     type Item = &'a T;
 

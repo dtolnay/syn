@@ -65,42 +65,24 @@ ast_enum_of_structs! {
     }
 }
 
-/// The `Iterator` type returned by [`Fields::iter`].
-///
-/// [`Fields::iter`]: struct.Fields.html#method.iter
-///
-/// *This type is available if Syn is build with the `"derive"` or `"full"`
-/// feature.*
-pub struct FieldsIter<'a>(Option<punctuated::Iter<'a, Field, Token![,]>>);
-
-impl<'a> Iterator for FieldsIter<'a> {
-    type Item = &'a Field;
-    fn next(&mut self) -> Option<&'a Field> {
-        match self.0 {
-            Some(ref mut i) => i.next(),
-            None => None,
-        }
-    }
-}
-
 impl Fields {
     /// Get an iterator over the [`Field`] items in this object. This iterator
     /// can be used to iterate over a named or unnamed struct or variant's
     /// fields uniformly.
     ///
     /// [`Field`]: struct.Field.html
-    pub fn iter(&self) -> FieldsIter {
+    pub fn iter(&self) -> punctuated::Iter<Field, Token![,]> {
         match *self {
-            Fields::Unit => FieldsIter(None),
-            Fields::Named(ref f) => FieldsIter(Some(f.named.iter())),
-            Fields::Unnamed(ref f) => FieldsIter(Some(f.unnamed.iter())),
+            Fields::Unit => punctuated::Iter::private_empty(),
+            Fields::Named(ref f) => f.named.iter(),
+            Fields::Unnamed(ref f) => f.unnamed.iter(),
         }
     }
 }
 
 impl<'a> IntoIterator for &'a Fields {
     type Item = &'a Field;
-    type IntoIter = FieldsIter<'a>;
+    type IntoIter = punctuated::Iter<'a, Field, Token![,]>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
