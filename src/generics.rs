@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use super::*;
-use punctuated::Punctuated;
+use punctuated::{Iter, IterMut, Punctuated};
 
 ast_struct! {
     /// Lifetimes and type parameters attached to a declaration of a function,
@@ -74,6 +74,170 @@ ast_enum_of_structs! {
             pub eq_token: Option<Token![=]>,
             pub default: Option<Expr>,
         }),
+    }
+}
+
+impl Generics {
+    /// Returns an immutable iterator over the type parameters.
+    pub fn type_params(&self) -> TypeParams {
+        TypeParams(self.params.iter())
+    }
+
+    /// Returns a mutable iterator over the type parameters.
+    pub fn type_params_mut(&mut self) -> TypeParamsMut {
+        TypeParamsMut(self.params.iter_mut())
+    }
+
+    /// Returns an immutable iterator over the lifetimes.
+    pub fn lifetimes(&self) -> Lifetimes {
+        Lifetimes(self.params.iter())
+    }
+
+    /// Returns a mutable iterator over the lifetimes.
+    pub fn lifetimes_mut(&mut self) -> LifetimesMut {
+        LifetimesMut(self.params.iter_mut())
+    }
+
+    /// Returns an immutable iterator over the const parameters.
+    pub fn const_params(&self) -> ConstParams {
+        ConstParams(self.params.iter())
+    }
+
+    /// Returns a mutable iterator over the const parameters.
+    pub fn const_params_mut(&mut self) -> ConstParamsMut {
+        ConstParamsMut(self.params.iter_mut())
+    }
+}
+
+/// An immutable iterator over the type parameters of `Generics`.
+///
+/// Returned by `Generics::type_params`
+pub struct TypeParams<'a>(Iter<'a, GenericParam, Token![,]>);
+
+impl<'a> Iterator for TypeParams<'a> {
+    type Item = &'a TypeParam;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // FIXME: Remove this when ? on Option is stable
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Type(ref type_param) = *next {
+            Some(type_param)
+        } else {
+            self.next()
+        }
+    }
+}
+
+/// A mutable iterator over the type parameters of `Generics`.
+///
+/// Returned by `Generics::type_params_mut`
+pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam, Token![,]>);
+
+impl<'a> Iterator for TypeParamsMut<'a> {
+    type Item = &'a mut TypeParam;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // FIXME: Remove this when ? on Option is stable
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Type(ref mut type_param) = *next {
+            Some(type_param)
+        } else {
+            self.next()
+        }
+    }
+}
+
+/// An immutable iterator over the lifetimes of `Generics`.
+///
+/// Returned by `Generics::lifetimes`
+pub struct Lifetimes<'a>(Iter<'a, GenericParam, Token![,]>);
+
+impl<'a> Iterator for Lifetimes<'a> {
+    type Item = &'a LifetimeDef;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // FIXME: Remove this when ? on Option is stable
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Lifetime(ref lifetime) = *next {
+            Some(lifetime)
+        } else {
+            self.next()
+        }
+    }
+}
+
+/// A mutable iterator over the lifetimes of `Generics`.
+///
+/// Returned by `Generics::lifetimes_mut`
+pub struct LifetimesMut<'a>(IterMut<'a, GenericParam, Token![,]>);
+
+impl<'a> Iterator for LifetimesMut<'a> {
+    type Item = &'a mut LifetimeDef;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // FIXME: Remove this when ? on Option is stable
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Lifetime(ref mut lifetime) = *next {
+            Some(lifetime)
+        } else {
+            self.next()
+        }
+    }
+}
+
+/// An immutable iterator over the const parameters of `Generics`.
+///
+/// Returned by `Generics::const_params`
+pub struct ConstParams<'a>(Iter<'a, GenericParam, Token![,]>);
+
+impl<'a> Iterator for ConstParams<'a> {
+    type Item = &'a ConstParam;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // FIXME: Remove this when ? on Option is stable
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Const(ref const_param) = *next {
+            Some(const_param)
+        } else {
+            self.next()
+        }
+    }
+}
+
+/// A mutable iterator over the const parameters of `Generics`.
+///
+/// Returned by `Generics::const_params_mut`
+pub struct ConstParamsMut<'a>(IterMut<'a, GenericParam, Token![,]>);
+
+impl<'a> Iterator for ConstParamsMut<'a> {
+    type Item = &'a mut ConstParam;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // FIXME: Remove this when ? on Option is stable
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Const(ref mut const_param) = *next {
+            Some(const_param)
+        } else {
+            self.next()
+        }
     }
 }
 
