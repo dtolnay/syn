@@ -1269,7 +1269,7 @@ macro_rules! syn {
 /// the parentheses in order for this parser to return successfully.
 ///
 /// - **Syntax:** `parens!(CONTENT)`
-/// - **Output:** `(token::Paren, CONENT)`
+/// - **Output:** `(token::Paren, CONTENT)`
 ///
 /// ```rust
 /// #[macro_use]
