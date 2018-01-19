@@ -2158,28 +2158,26 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     impl Synom for FieldValue {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                member: syn!(Member) >>
-                colon: punct!(:) >>
-                value: syn!(Expr) >>
-                (FieldValue {
-                    member: member,
-                    expr: value,
-                    attrs: Vec::new(),
-                    colon_token: Some(colon),
-                })
-            )
-            |
-            map!(syn!(Ident), |name| FieldValue {
-                member: Member::Named(name),
-                expr: Expr::Path(ExprPath {
-                    attrs: Vec::new(),
-                    qself: None,
-                    path: name.into(),
-                }),
-                attrs: Vec::new(),
-                colon_token: None,
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
+            field_value: alt!(
+                tuple!(syn!(Member), map!(punct!(:), Some), syn!(Expr))
+                |
+                map!(syn!(Ident), |name| (
+                    Member::Named(name),
+                    None,
+                    Expr::Path(ExprPath {
+                        attrs: Vec::new(),
+                        qself: None,
+                        path: name.into(),
+                    }),
+                ))
+            ) >>
+            (FieldValue {
+                attrs: attrs,
+                member: field_value.0,
+                colon_token: field_value.1,
+                expr: field_value.2,
             })
         ));
 
@@ -3339,6 +3337,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut Tokens) {
+            tokens.append_all(self.attrs.outer());
             self.member.to_tokens(tokens);
             if let Some(ref colon_token) = self.colon_token {
                 colon_token.to_tokens(tokens);

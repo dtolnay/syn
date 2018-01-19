@@ -69,10 +69,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     match path_string.as_ref() {
         // TODO better support for attributes
         //
-        //      let a = A { #[a] b: c };
-        "tests/rust/src/librustc_data_structures/blake2b.rs" |
-        // TODO better support for attributes
-        //
         //      enum A { B = #[a] 2 }
         "tests/rust/src/test/incremental/hashes/enum_defs.rs" |
         // TODO better support for attributes
