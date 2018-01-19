@@ -87,6 +87,10 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/placement-in-syntax.rs" |
+        // TODO feature(extern_in_paths)
+        //
+        //      use extern::xcrate;
+        "tests/rust/src/test/run-pass/rfc-2126-extern-absolute-paths/extern.rs" |
         // not actually a test case
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
