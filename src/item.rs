@@ -695,8 +695,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use buffer::Cursor;
-    use synom::{PResult, Synom};
+    use synom::Synom;
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }
@@ -722,8 +721,6 @@ pub mod parsing {
         syn!(ItemUnion) => { Item::Union }
         |
         syn!(ItemTrait) => { Item::Trait }
-        |
-        call!(deprecated_default_impl) => { Item::Verbatim }
         |
         syn!(ItemImpl) => { Item::Impl }
         |
@@ -1228,29 +1225,6 @@ pub mod parsing {
             supertraits: bounds.unwrap_or_default(),
             brace_token: body.0,
             items: body.1,
-        })
-    ));
-
-    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
-        Ok((cursor, cursor))
-    }
-
-    named!(deprecated_default_impl -> ItemVerbatim, do_parse!(
-        begin: call!(grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        option!(keyword!(unsafe)) >>
-        keyword!(impl) >>
-        syn!(Path) >>
-        keyword!(for) >>
-        punct!(..) >>
-        braces!(epsilon!()) >>
-        end: call!(grab_cursor) >>
-        ({
-            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
-            let len = tts.len() - end.token_stream().into_iter().count();
-            ItemVerbatim {
-                tts: tts.into_iter().take(len).collect(),
-            }
         })
     ));
 
