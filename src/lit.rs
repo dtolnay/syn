@@ -491,6 +491,17 @@ mod value {
     use proc_macro2::TokenStream;
 
     impl Lit {
+        /// Interpret a Syn literal from a proc-macro2 literal.
+        ///
+        /// Not all proc-macro2 literals are valid Syn literals. In particular,
+        /// doc comments are considered by proc-macro2 to be literals but in Syn
+        /// they are [`Attribute`].
+        ///
+        /// [`Attribute`]: struct.Attribute.html
+        ///
+        /// # Panics
+        ///
+        /// Panics if the input is a doc comment literal.
         pub fn new(token: Literal, span: Span) -> Self {
             let value = token.to_string();
 
