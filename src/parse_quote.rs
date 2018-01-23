@@ -81,21 +81,24 @@
 #[macro_export]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {
-        $crate::parse_quote::parse(quote!($($tt)*))
+        $crate::parse_quote::parse($crate::parse_quote::From::from(quote!($($tt)*)))
     };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Synom.
 
-use quote::Tokens;
 use synom::{Synom, Parser, PResult};
 use buffer::Cursor;
+use proc_macro2::TokenStream;
 
 // Not public API.
 #[doc(hidden)]
-pub fn parse<T: ParseQuote>(tokens: Tokens) -> T {
-    let token_stream = tokens.into();
+pub use std::convert::From;
+
+// Not public API.
+#[doc(hidden)]
+pub fn parse<T: ParseQuote>(token_stream: TokenStream) -> T {
     let parser = T::parse;
     match parser.parse2(token_stream) {
         Ok(t) => t,
