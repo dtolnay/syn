@@ -386,7 +386,7 @@ pub mod punctuated;
 mod tt;
 
 // Not public API except the `parse_quote!` macro.
-#[cfg(all(feature = "parsing", feature = "printing"))]
+#[cfg(feature = "parsing")]
 #[doc(hidden)]
 pub mod parse_quote;
 
