@@ -73,7 +73,7 @@ pub mod parsing {
 
     impl Synom for Macro {
         named!(parse -> Self, do_parse!(
-            what: syn!(Path) >>
+            what: call!(Path::parse_mod_style) >>
             bang: punct!(!) >>
             body: call!(tt::delimited) >>
             (Macro {

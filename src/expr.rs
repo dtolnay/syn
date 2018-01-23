@@ -2354,7 +2354,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
-        what: syn!(Path) >>
+        what: call!(Path::parse_mod_style) >>
         bang: punct!(!) >>
     // Only parse braces here; paren and bracket will get parsed as
     // expression statements
