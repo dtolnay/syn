@@ -16,7 +16,7 @@ use unicode_xid::UnicodeXID;
 
 use proc_macro2::Span;
 
-/// A word of Rust code, such as a keyword or variable name.
+/// A word of Rust code, which may be a keyword or legal variable name.
 ///
 /// An identifier consists of at least one Unicode code point, the first of
 /// which has the XID_Start property and the rest of which have the XID_Continue
@@ -37,43 +37,48 @@ use proc_macro2::Span;
 /// # Examples
 ///
 /// A new ident can be created from a string using the `Ident::from` function.
+/// Idents produced by `Ident::from` are set to resolve at the procedural macro
+/// *def site* by default. A different span can be provided explicitly by using
+/// `Ident::new`.
 ///
 /// ```rust
 /// extern crate syn;
+/// extern crate proc_macro2;
+///
 /// use syn::Ident;
-/// #
-/// # fn main() {
+/// use proc_macro2::Span;
 ///
-/// let ident = Ident::from("another_identifier");
+/// fn main() {
+///     let def_ident = Ident::from("definitely");
+///     let call_ident = Ident::new("calligraphy", Span::call_site());
 ///
-/// # }
+///     println!("{} {}", def_ident, call_ident);
+/// }
 /// ```
 ///
-/// When the ident is used in Macros 1.1 output, it needs to be turned into
-/// a token stream. This is easy to do using the `quote!` macro from the `quote`
-/// crate.
+/// An ident can be interpolated into a token stream using the `quote!` macro.
 ///
 /// ```rust
-/// # #[macro_use]
-/// # extern crate quote;
-/// # extern crate syn;
-/// # use syn::Ident;
-/// # fn main() {
-/// # let ident = Ident::from("another_identifier");
-/// #
-/// // Create tokens using the ident.
-/// let expanded = quote! { let #ident = 10; };
+/// #[macro_use]
+/// extern crate quote;
 ///
-/// // Derive a new ident from the existing one.
-/// let temp_ident = Ident::from(format!("new_{}", ident));
-/// let expanded = quote! { let $temp_ident = 10; };
+/// extern crate syn;
+/// use syn::Ident;
 ///
-/// # }
+/// fn main() {
+///     let ident = Ident::from("demo");
+///
+///     // Create a variable binding whose name is this ident.
+///     let expanded = quote! { let #ident = 10; };
+///
+///     // Create a variable binding with a slightly different name.
+///     let temp_ident = Ident::from(format!("new_{}", ident));
+///     let expanded = quote! { let #temp_ident = 10; };
+/// }
 /// ```
 ///
-/// If `syn` is used to parse existing Rust source code, it is often useful to
-/// convert the `Ident` to a more generic string data type at some point. The
-/// methods `as_ref()` and `to_string()` achieve this.
+/// A string representation of the ident is available through the `as_ref()` and
+/// `to_string()` methods.
 ///
 /// ```rust
 /// # use syn::Ident;
@@ -98,10 +103,12 @@ pub struct Ident {
 }
 
 impl Ident {
-    /// Creates a new `Ident` from the structured items. This is mainly used
-    /// by the parser to create `Ident`s from existing Rust source code.
+    /// Creates an ident with the given string representation.
     ///
-    /// Creating new `Ident`s programmatically is easier with `Ident::from`.
+    /// # Panics
+    ///
+    /// Panics if the input string is neither a keyword nor a legal variable
+    /// name.
     pub fn new(s: &str, span: Span) -> Self {
         if s.is_empty() {
             panic!("ident is not allowed to be empty; use Option<Ident>");
