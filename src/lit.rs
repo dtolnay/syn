@@ -331,7 +331,14 @@ pub mod parsing {
     impl Synom for Lit {
         fn parse(input: Cursor) -> PResult<Self> {
             match input.literal() {
-                Some((span, lit, rest)) => Ok((Lit::new(lit, span), rest)),
+                Some((span, lit, rest)) => {
+                    if lit.to_string().starts_with('/') {
+                        // Doc comment literal which is not a Syn literal
+                        parse_error()
+                    } else {
+                        Ok((Lit::new(lit, span), rest))
+                    }
+                }
                 _ => match input.term() {
                     Some((span, term, rest)) => Ok((
                         Lit::Bool(LitBool {

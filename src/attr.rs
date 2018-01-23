@@ -128,11 +128,13 @@ impl Attribute {
         if tts.len() == 2 {
             if let TokenNode::Op('=', Spacing::Alone) = tts[0].kind {
                 if let TokenNode::Literal(ref lit) = tts[1].kind {
-                    return Some(Meta::NameValue(MetaNameValue {
-                        ident: *name,
-                        eq_token: Token![=]([tts[0].span]),
-                        lit: Lit::new(lit.clone(), tts[1].span),
-                    }));
+                    if !lit.to_string().starts_with('/') {
+                        return Some(Meta::NameValue(MetaNameValue {
+                            ident: *name,
+                            eq_token: Token![=]([tts[0].span]),
+                            lit: Lit::new(lit.clone(), tts[1].span),
+                        }));
+                    }
                 } else if let TokenNode::Term(ref term) = tts[1].kind {
                     match term.as_str() {
                         v @ "true" | v @ "false" => {
@@ -157,8 +159,12 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
 
     match tts[0].kind {
         TokenNode::Literal(ref lit) => {
-            let lit = Lit::new(lit.clone(), tts[0].span);
-            Some((NestedMeta::Literal(lit), &tts[1..]))
+            if lit.to_string().starts_with('/') {
+                None
+            } else {
+                let lit = Lit::new(lit.clone(), tts[0].span);
+                Some((NestedMeta::Literal(lit), &tts[1..]))
+            }
         }
 
         TokenNode::Term(sym) => {
@@ -166,12 +172,14 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
             if tts.len() >= 3 {
                 if let TokenNode::Op('=', Spacing::Alone) = tts[1].kind {
                     if let TokenNode::Literal(ref lit) = tts[2].kind {
-                        let pair = MetaNameValue {
-                            ident: Ident::new(sym.as_str(), tts[0].span),
-                            eq_token: Token![=]([tts[1].span]),
-                            lit: Lit::new(lit.clone(), tts[2].span),
-                        };
-                        return Some((Meta::NameValue(pair).into(), &tts[3..]));
+                        if !lit.to_string().starts_with('/') {
+                            let pair = MetaNameValue {
+                                ident: Ident::new(sym.as_str(), tts[0].span),
+                                eq_token: Token![=]([tts[1].span]),
+                                lit: Lit::new(lit.clone(), tts[2].span),
+                            };
+                            return Some((Meta::NameValue(pair).into(), &tts[3..]));
+                        }
                     } else if let TokenNode::Term(ref term) = tts[2].kind {
                         match term.as_str() {
                             v @ "true" | v @ "false" => {
