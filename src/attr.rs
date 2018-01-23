@@ -133,6 +133,17 @@ impl Attribute {
                         eq_token: Token![=]([tts[0].span]),
                         lit: Lit::new(lit.clone(), tts[1].span),
                     }));
+                } else if let TokenNode::Term(ref term) = tts[1].kind {
+                    match term.as_str() {
+                        v @ "true" | v @ "false" => {
+                            return Some(Meta::NameValue(MetaNameValue {
+                                ident: *name,
+                                eq_token: Token![=]([tts[0].span]),
+                                lit: Lit::Bool(LitBool { value: v == "true", span: tts[1].span }),
+                            }));
+                        },
+                        _ => {}
+                    }
                 }
             }
         }
@@ -161,6 +172,18 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
                             lit: Lit::new(lit.clone(), tts[2].span),
                         };
                         return Some((Meta::NameValue(pair).into(), &tts[3..]));
+                    } else if let TokenNode::Term(ref term) = tts[2].kind {
+                        match term.as_str() {
+                            v @ "true" | v @ "false" => {
+                                let pair = MetaNameValue {
+                                    ident: Ident::new(sym.as_str(), tts[0].span),
+                                    eq_token: Token![=]([tts[1].span]),
+                                    lit: Lit::Bool(LitBool { value: v == "true", span: tts[2].span }),
+                                };
+                                return Some((Meta::NameValue(pair).into(), &tts[3..]));
+                            },
+                            _ => {}
+                        }
                     }
                 }
             }

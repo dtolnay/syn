@@ -40,6 +40,26 @@ fn test_meta_item_name_value() {
 }
 
 #[test]
+fn test_meta_item_bool_value() {
+    run_test(
+        "#[foo = true]",
+        MetaNameValue {
+            ident: "foo".into(),
+            eq_token: Default::default(),
+            lit: Lit::Bool(LitBool { value: true, span: Span::def_site() }),
+        },
+    );
+    run_test(
+        "#[foo = false]",
+        MetaNameValue {
+            ident: "foo".into(),
+            eq_token: Default::default(),
+            lit: Lit::Bool(LitBool { value: false, span: Span::def_site() }),
+        },
+    )
+}
+
+#[test]
 fn test_meta_item_list_lit() {
     run_test(
         "#[foo(5)]",
@@ -76,6 +96,26 @@ fn test_meta_item_list_name_value() {
                         ident: "bar".into(),
                         eq_token: Default::default(),
                         lit: lit(Literal::integer(5)),
+                    }.into(),
+                ),
+            ],
+        },
+    )
+}
+
+#[test]
+fn test_meta_item_list_bool_value() {
+    run_test(
+        "#[foo(bar = true)]",
+        MetaList {
+            ident: "foo".into(),
+            paren_token: Default::default(),
+            nested: punctuated![
+                NestedMeta::Meta(
+                    MetaNameValue {
+                        ident: "bar".into(),
+                        eq_token: Default::default(),
+                        lit: Lit::Bool(LitBool { value: true, span: Span::def_site() }),
                     }.into(),
                 ),
             ],
