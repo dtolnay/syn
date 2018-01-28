@@ -12,6 +12,11 @@ use std::str;
 #[cfg(feature = "printing")]
 use proc_macro2::{Term, TokenTree};
 
+#[cfg(feature = "parsing")]
+use proc_macro2::TokenStream;
+#[cfg(feature = "parsing")]
+use {ParseError, Synom};
+
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
@@ -117,6 +122,39 @@ impl LitStr {
 
     pub fn value(&self) -> String {
         value::parse_lit_str(&self.token.to_string())
+    }
+
+    /// Parse a syntax tree node from the content of this string literal.
+    ///
+    /// All spans in the syntax tree will point to the span of this `LitStr`.
+    #[cfg(feature = "parsing")]
+    pub fn parse<T: Synom>(&self) -> Result<T, ParseError> {
+        // Parse string literal into a token stream with every span equal to the
+        // original literal's span.
+        fn spanned_tokens(s: &LitStr) -> Result<TokenStream, ParseError> {
+            let stream = ::parse_str(&s.value())?;
+            Ok(respan_token_stream(stream, s.span))
+        }
+
+        // Token stream with every span replaced by the given one.
+        fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
+            stream.into_iter().map(|token| respan_token_tree(token, span)).collect()
+        }
+
+        // Token tree with every span replaced by the given one.
+        fn respan_token_tree(token: TokenTree, span: Span) -> TokenTree {
+            TokenTree {
+                span: span,
+                kind: match token.kind {
+                    TokenNode::Group(delimiter, nested) => {
+                        TokenNode::Group(delimiter, respan_token_stream(nested, span))
+                    }
+                    other => other,
+                },
+            }
+        }
+
+        spanned_tokens(self).and_then(::parse2)
     }
 }
 
