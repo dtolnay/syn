@@ -123,7 +123,7 @@ fn visit_expr_macro(&mut self, i: &'ast ExprMacro) { visit_expr_macro(self, i) }
 fn visit_expr_match(&mut self, i: &'ast ExprMatch) { visit_expr_match(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_method_call(&mut self, i: &'ast ExprMethodCall) { visit_expr_method_call(self, i) }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_paren(&mut self, i: &'ast ExprParen) { visit_expr_paren(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_path(&mut self, i: &'ast ExprPath) { visit_expr_path(self, i) }
@@ -755,7 +755,7 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
             full!(_visitor.visit_expr_repeat(_binding_0));
         }
         Expr::Paren(ref _binding_0, ) => {
-            full!(_visitor.visit_expr_paren(_binding_0));
+            _visitor.visit_expr_paren(_binding_0);
         }
         Expr::Group(ref _binding_0, ) => {
             full!(_visitor.visit_expr_group(_binding_0));
@@ -960,7 +960,7 @@ pub fn visit_expr_method_call<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _
     tokens_helper(_visitor, &(& _i . paren_token).0);
     for el in Punctuated::pairs(& _i . args) { let it = el.value(); _visitor.visit_expr(it) };
 }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_paren<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprParen) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . paren_token).0);

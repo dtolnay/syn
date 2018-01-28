@@ -125,7 +125,7 @@ fn fold_expr_macro(&mut self, i: ExprMacro) -> ExprMacro { fold_expr_macro(self,
 fn fold_expr_match(&mut self, i: ExprMatch) -> ExprMatch { fold_expr_match(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr_method_call(&mut self, i: ExprMethodCall) -> ExprMethodCall { fold_expr_method_call(self, i) }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr_paren(&mut self, i: ExprParen) -> ExprParen { fold_expr_paren(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr_path(&mut self, i: ExprPath) -> ExprPath { fold_expr_path(self, i) }
@@ -951,7 +951,7 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         }
         Expr::Paren(_binding_0, ) => {
             Expr::Paren (
-                full!(_visitor.fold_expr_paren(_binding_0)),
+                _visitor.fold_expr_paren(_binding_0),
             )
         }
         Expr::Group(_binding_0, ) => {
@@ -1217,7 +1217,7 @@ pub fn fold_expr_method_call<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprMethodC
         args: FoldHelper::lift(_i . args, |it| { _visitor.fold_expr(it) }),
     }
 }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn fold_expr_paren<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprParen) -> ExprParen {
     ExprParen {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
