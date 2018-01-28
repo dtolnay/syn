@@ -479,7 +479,7 @@ ast_enum_of_structs! {
         /// A parenthesized expression: `(a + b)`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Paren(ExprParen #full {
+        pub Paren(ExprParen {
             pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
             pub expr: Box<Expr>,
@@ -1583,6 +1583,8 @@ pub mod parsing {
     named!(atom_expr(_allow_struct: bool, _allow_block: bool) -> Expr, alt!(
         syn!(ExprLit) => { Expr::Lit }
         |
+        syn!(ExprParen) => { Expr::Paren }
+        |
         syn!(ExprPath) => { Expr::Path }
     ));
 
@@ -1656,7 +1658,6 @@ pub mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl Synom for ExprParen {
         named!(parse -> Self, do_parse!(
             e: parens!(syn!(Expr)) >>
@@ -3301,7 +3302,6 @@ mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl ToTokens for ExprParen {
         fn to_tokens(&self, tokens: &mut Tokens) {
             attrs_to_tokens(&self.attrs, tokens);
