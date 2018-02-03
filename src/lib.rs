@@ -653,7 +653,7 @@ pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
 ///
 /// If present, either of these would be an error using `from_str`.
 ///
-/// *This function is available if Syn is built with the `"parsing"` feature.*
+/// *This function is available if Syn is built with the `"parsing"` and `"full"` features.*
 ///
 /// # Examples
 ///
