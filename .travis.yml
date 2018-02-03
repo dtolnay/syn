@@ -30,6 +30,11 @@ script:
           cargo build --features full &&
           cargo build --features 'fold visit visit-mut' &&
           cargo build --features 'full fold visit visit-mut' &&
+          cargo build --no-default-features --features derive &&
+          cargo build --no-default-features --features 'derive parsing' &&
+          cargo build --no-default-features --features 'derive printing' &&
+          cargo build --no-default-features --features 'full parsing' &&
+          cargo build --no-default-features --features 'full printing' &&
           cargo build --no-default-features --features 'full parsing printing' &&
           cargo build --no-default-features --features 'fold visit visit-mut parsing printing' &&
           cargo build --no-default-features --features 'full fold visit visit-mut parsing printing'

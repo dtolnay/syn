@@ -10,12 +10,15 @@ use proc_macro2::{Literal, Span, TokenNode};
 use std::str;
 
 #[cfg(feature = "printing")]
-use proc_macro2::{Term, TokenTree};
+use proc_macro2::Term;
 
 #[cfg(feature = "parsing")]
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
 use {ParseError, Synom};
+
+#[cfg(any(feature = "printing", feature = "parsing"))]
+use proc_macro2::TokenTree;
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
