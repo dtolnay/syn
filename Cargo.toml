@@ -32,7 +32,7 @@ proc-macro2 = "0.2"
 unicode-xid = "0.1"
 
 [dev-dependencies]
-rayon = "0.9"
+rayon = "1.0.0"
 walkdir = "1.0.1"
 
 [package.metadata.docs.rs]
