@@ -19,7 +19,6 @@ use unicode_xid::UnicodeXID;
 ///
 /// - Must start with an apostrophe.
 /// - Must not consist of just an apostrophe: `'`.
-/// - Must not consist of apostrophe + underscore: `'_`.
 /// - Character after the apostrophe must be `_` or a Unicode code point with
 ///   the XID_Start property.
 /// - All following characters must be Unicode code points with the XID_Continue
@@ -48,10 +47,6 @@ impl Lifetime {
 
         if s == "'" {
             panic!("lifetime name must not be empty");
-        }
-
-        if s == "'_" {
-            panic!("\"'_\" is not a valid lifetime name");
         }
 
         fn xid_ok(s: &str) -> bool {

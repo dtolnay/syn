@@ -117,6 +117,13 @@ fn test_ty_param_bound() {
         common::parse::syn::<TypeParamBound>(tokens.into())
     );
 
+    let tokens = quote!('_);
+    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::intern("'_"), Span::def_site()));
+    assert_eq!(
+        expected,
+        common::parse::syn::<TypeParamBound>(tokens.into())
+    );
+
     let tokens = quote!(Debug);
     let expected = TypeParamBound::Trait(TraitBound {
         modifier: TraitBoundModifier::None,
