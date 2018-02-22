@@ -15,7 +15,7 @@ path = "examples/dump-syntax/main.rs"
 required-features = ["full", "parsing", "extra-traits"]
 
 [features]
-default = ["derive", "parsing", "printing", "clone-impls"]
+default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
 derive = []
 full = []
 parsing = []
@@ -25,11 +25,12 @@ visit-mut = []
 fold = []
 clone-impls = []
 extra-traits = []
+proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 
 [dependencies]
-proc-macro2 = "0.3"
-#quote = { version = "0.5", optional = true }
-quote = { git = 'https://github.com/dtolnay/quote', optional = true }
+proc-macro2 = { version = "0.3", default-features = false }
+#quote = { version = "0.5", optional = true, default-features = false }
+quote = { git = 'https://github.com/dtolnay/quote', optional = true, default-features = false }
 unicode-xid = "0.1"
 
 [dev-dependencies]
