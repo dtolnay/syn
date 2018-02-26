@@ -237,13 +237,7 @@ impl Folder for Respanner {
     }
 
     fn fold_vis(&mut self, vis: Visibility) -> Visibility {
-        fold::noop_fold_vis(
-            match vis {
-                Visibility::Crate(span, sugar) => Visibility::Crate(self.new_span(span), sugar),
-                _ => vis,
-            },
-            self,
-        )
+        fold::noop_fold_vis(self.fold_spanned(vis), self)
     }
 
     // noop_fold_where_clause doesn't modify the span.
