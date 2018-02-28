@@ -167,6 +167,30 @@ use buffer::{Cursor, TokenBuffer};
 pub trait Synom: Sized {
     fn parse(input: Cursor) -> PResult<Self>;
 
+    /// A short name of the type being parsed.
+    ///
+    /// The description should only be used for a simple name.  It should not
+    /// contain newlines or sentence-ending punctuation, to facilitate embedding in
+    /// larger user-facing strings.  Syn will use this description when building
+    /// error messages about parse failures.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// struct ExprForLoop {
+    ///     // ...
+    /// }
+    ///
+    /// impl Synom for ExprForLoop {
+    /// #   fn parse(input: Cursor) -> PResult<Self> { unimplemented!() }
+    ///     // fn parse(...) -> ... { ... }
+    ///
+    ///     fn description() -> Option<&'static str> {
+    ///         // will result in messages like "failed to parse `for` loop: $reason"
+    ///         Some("`for` loop")
+    ///     }
+    /// }
+    /// ```
     fn description() -> Option<&'static str> {
         None
     }
