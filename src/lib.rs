@@ -133,6 +133,58 @@
 //! }
 //! ```
 //!
+//! ## Reporting parse errors
+//!
+//! The function which acts as the entry point to your procedural
+//! macro will generally start by parsing the [`TokenStream`] provided
+//! by the compiler using [`syn::parse`], and this in turn will output a
+//! `Result<T, `[`ParseError`]`>`.  However, the prototype of your
+//! procedural macro entry point returns a [`TokenStream`], not a `Result`:
+//!
+//! ```
+//! #[proc_macro_derive]
+//! pub fn my_proc_macro(input: TokenStream) -> TokenStream {
+//!     let derive: DeriveInput = syn::parse(input).unwrap();
+//!     //                                          ^^^^^^^^
+//!     //                                          will panic if parsing fails
+//!
+//!     // process the derive input and generate a TokenStream
+//!     // ...
+//! # unimplemented!();
+//! }
+//! ```
+//!
+//! We want to take the result of a failed [`syn::parse`] and translate it into
+//! something that will let the compiler give the user a meaningful error.  We
+//! can do this by generating a [`TokenStream`] with a [`compile_error!`]
+//! invocation in it:
+
+//! ```
+//! #[proc_macro_derive]
+//! pub fn my_proc_macro(input: TokenStream) -> TokenStream {
+//!     let derive: DeriveInput = match syn::parse(input) {
+//!         Ok(o) => o,
+//!         Err(e) => {
+//!             let desc = e.description();
+//!             let tokens = quote! {
+//!                 compile_error!(#desc);
+//!             };
+//!
+//!             return tokens.into();
+//!         }
+//!     };
+//!
+//!     // process the derive input and generate a TokenStream
+//!     // ...
+//! # unimplemented!();
+//! }
+//! ```
+//!
+//! [`TokenStream`]: https://doc.rust-lang.org/proc_macro/struct.TokenStream.html
+//! [`syn::parse`]: fn.parse.html
+//! [`ParseError`]: synom/struct.ParseError.html
+//! [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
+//!
 //! ## Spans and error reporting
 //!
 //! The [`heapsize2`] example directory is an extension of the `heapsize`
