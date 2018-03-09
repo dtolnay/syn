@@ -950,8 +950,10 @@ mod printing {
 
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.where_token.to_tokens(tokens);
-            self.predicates.to_tokens(tokens);
+            if !self.predicates.is_empty() {
+                self.where_token.to_tokens(tokens);
+                self.predicates.to_tokens(tokens);
+            }
         }
     }
 
