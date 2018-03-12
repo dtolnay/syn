@@ -22,7 +22,7 @@ use syntax::ast;
 use syntax::parse::{self, PResult, ParseSess};
 use syntax::codemap::FilePathMapping;
 use syntax_pos::FileName;
-use walkdir::{DirEntry, WalkDir, WalkDirIterator};
+use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
 use std::io::Read;
@@ -49,7 +49,7 @@ fn test_round_trip() {
     let failed = AtomicUsize::new(0);
 
     WalkDir::new("tests/rust")
-        .sort_by(|a, b| a.cmp(b))
+        .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
         .filter_entry(common::base_dir_filter)
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
