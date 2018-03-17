@@ -44,7 +44,7 @@ script:
           ;;
         clippy)
           cargo install clippy --debug --force || exit
-          cargo clippy --features 'full fold visit visit-mut' -- -Dclippy
+          cargo clippy --all-features -- -Dclippy
           ;;
         codegen)
           (cd codegen && cargo run) &&
