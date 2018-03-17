@@ -259,7 +259,7 @@
 #![doc(html_root_url = "https://docs.rs/syn/0.12.14")]
 #![cfg_attr(feature = "cargo-clippy",
             allow(const_static_lifetime, doc_markdown, large_enum_variant, match_bool,
-                  redundant_closure, needless_pass_by_value))]
+                  redundant_closure, needless_pass_by_value, redundant_field_names))]
 
 extern crate proc_macro2;
 extern crate proc_macro;
