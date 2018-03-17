@@ -30,7 +30,7 @@ extern crate walkdir;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
 use syntax::ptr::P;
-use walkdir::{DirEntry, WalkDir, WalkDirIterator};
+use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
 use std::io::Read;
@@ -97,7 +97,7 @@ fn test_rustc_precedence() {
     let failed = AtomicUsize::new(0);
 
     WalkDir::new("tests/rust")
-        .sort_by(|a, b| a.cmp(b))
+        .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
         .filter_entry(common::base_dir_filter)
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
