@@ -128,7 +128,7 @@ impl Folder for Respanner {
                         // default fold_fn_decl does not fold this span
                         FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
                     },
-                    variadic: variadic,
+                    variadic,
                 }
             },
         )
@@ -192,7 +192,7 @@ impl Folder for Respanner {
     fn fold_meta_item(&mut self, meta_item: MetaItem) -> MetaItem {
         let MetaItem { name, node, span } = meta_item;
         MetaItem {
-            name: name,
+            name,
             node: match node {
                 MetaItemKind::Word => MetaItemKind::Word,
                 MetaItemKind::List(nested) => {

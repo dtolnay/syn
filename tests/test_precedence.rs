@@ -216,7 +216,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     fn expr(node: ExprKind) -> P<Expr> {
         P(Expr {
             id: ast::DUMMY_NODE_ID,
-            node: node,
+            node,
             span: DUMMY_SP,
             attrs: ThinVec::new(),
         })
@@ -274,7 +274,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                 s => s,
             };
 
-            SmallVector::one(Stmt { node: node, ..stmt })
+            SmallVector::one(Stmt { node, ..stmt })
         }
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {
@@ -306,7 +306,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     fn paren(folder: &mut ParenthesizeEveryExpr, mut node: Expr) -> Expr {
         let attrs = node.replace_attrs(Vec::new());
         Expr::Paren(ExprParen {
-            attrs: attrs,
+            attrs,
             expr: Box::new(fold_expr(folder, node)),
             paren_token: token::Paren::default(),
         })

@@ -93,7 +93,7 @@ fn test_struct() {
             pound_token: Default::default(),
             bracket_token: Default::default(),
             path: "test".into(),
-            tts: tts,
+            tts,
             is_sugared_doc: false,
         }
     }
