@@ -146,5 +146,7 @@ fn test_round_trip() {
 
 fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = FileName::Custom("test_round_trip".to_string());
-    parse::parse_crate_from_source_str(name, content, sess).map(common::respan::respan_crate)
+    syntax::with_globals(|| {
+        parse::parse_crate_from_source_str(name, content, sess).map(common::respan::respan_crate)
+    })
 }

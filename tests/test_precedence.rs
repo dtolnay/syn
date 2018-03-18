@@ -162,7 +162,7 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    for expr in exprs {
+    syntax::with_globals(|| for expr in exprs {
         let raw = quote!(#expr).to_string();
 
         let libsyntax_ast = if let Some(e) = libsyntax_parse_and_rewrite(&raw) {
@@ -191,7 +191,7 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
             failed += 1;
             errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, libsyntax_ast);
         }
-    }
+    });
 
     (passed, failed)
 }
