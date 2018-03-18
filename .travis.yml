@@ -62,4 +62,4 @@ env:
     - ROLE=clippy
     - ROLE=codegen
   global:
-    - RUST_MIN_STACK=16000000
+    - RUST_MIN_STACK=20000000
