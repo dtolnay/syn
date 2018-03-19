@@ -2,41 +2,50 @@
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
-        pub struct $name:ident #full $($rest:tt)*
+        $pub:ident $struct:ident $name:ident #full $($rest:tt)*
     ) => {
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(struct $struct);
+
         #[cfg(feature = "full")]
         $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $pub $struct $name $($rest)*
 
         #[cfg(not(feature = "full"))]
         $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name {
+        $pub $struct $name {
             _noconstruct: (),
         }
     };
 
     (
         $(#[$attr:meta])*
-        pub struct $name:ident #manual_extra_traits $($rest:tt)*
+        $pub:ident $struct:ident $name:ident #manual_extra_traits $($rest:tt)*
     ) => {
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(struct $struct);
+
         $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $pub $struct $name $($rest)*
     };
 
     (
         $(#[$attr:meta])*
-        pub struct $name:ident $($rest:tt)*
+        $pub:ident $struct:ident $name:ident $($rest:tt)*
     ) => {
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(struct $struct);
+
         $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $pub $struct $name $($rest)*
     };
 }
 
@@ -44,12 +53,15 @@ macro_rules! ast_struct {
 macro_rules! ast_enum {
     (
         $(#[$enum_attr:meta])*
-        pub enum $name:ident $(# $tags:ident)* { $($variants:tt)* }
+        $pub:ident $enum:ident $name:ident $(# $tags:ident)* { $($variants:tt)* }
     ) => (
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(enum $enum);
+
         $(#[$enum_attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub enum $name {
+        $pub $enum $name {
             $($variants)*
         }
     )
@@ -59,18 +71,21 @@ macro_rules! ast_enum {
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
-        pub enum $name:ident {
+        $pub:ident $enum:ident $name:ident {
             $(
                 $(#[$variant_attr:meta])*
-                pub $variant:ident $( ($member:ident $($rest:tt)*) )*,
+                $vpub:ident $variant:ident $( ($member:ident $($rest:tt)*) )*,
             )*
         }
 
         $($remaining:tt)*
     ) => (
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(enum $enum);
+
         ast_enum! {
             $(#[$enum_attr])*
-            pub enum $name {
+            $pub $enum $name {
                 $(
                     $(#[$variant_attr])*
                     $variant $( ($member) )*,
@@ -79,10 +94,11 @@ macro_rules! ast_enum_of_structs {
         }
 
         $(
+            check_keyword_matches!(pub $vpub);
             maybe_ast_struct! {
                 $(#[$variant_attr])*
                 $(
-                    pub struct $member $($rest)*
+                    $vpub struct $member $($rest)*
                 )*
             }
 
@@ -162,4 +178,11 @@ macro_rules! maybe_ast_struct {
     ) => ();
 
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
+}
+
+#[cfg(any(feature = "full", feature = "derive"))]
+macro_rules! check_keyword_matches {
+    (struct struct) => {};
+    (enum enum) => {};
+    (pub pub) => {};
 }
