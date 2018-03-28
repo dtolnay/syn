@@ -27,8 +27,9 @@ clone-impls = []
 extra-traits = []
 
 [dependencies]
-quote = { version = "0.4", optional = true }
-proc-macro2 = "0.2"
+proc-macro2 = "0.3"
+#quote = { version = "0.5", optional = true }
+quote = { git = 'https://github.com/dtolnay/quote', optional = true }
 unicode-xid = "0.1"
 
 [dev-dependencies]

@@ -639,7 +639,7 @@ impl From<usize> for Index {
         assert!(index < std::u32::MAX as usize);
         Index {
             index: index as u32,
-            span: Span::def_site(),
+            span: Span::call_site(),
         }
     }
 }
@@ -2617,7 +2617,7 @@ pub mod parsing {
             lit: syn!(LitInt) >>
             ({
                 if let IntSuffix::None = lit.suffix() {
-                    Index { index: lit.value() as u32, span: lit.span }
+                    Index { index: lit.value() as u32, span: lit.span() }
                 } else {
                     return parse_error();
                 }
@@ -2813,7 +2813,7 @@ mod printing {
     #[cfg(feature = "full")]
     use attr::FilterAttrs;
     use quote::{ToTokens, Tokens};
-    use proc_macro2::{Literal, TokenNode, TokenTree};
+    use proc_macro2::Literal;
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `Tokens`.
@@ -3182,10 +3182,9 @@ mod printing {
 
     impl ToTokens for Index {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            tokens.append(TokenTree {
-                span: self.span,
-                kind: TokenNode::Literal(Literal::integer(i64::from(self.index))),
-            });
+            let mut lit = Literal::i64_unsuffixed(i64::from(self.index));
+            lit.set_span(self.span);
+            tokens.append(lit);
         }
     }
 

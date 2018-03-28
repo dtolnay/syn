@@ -1035,7 +1035,8 @@ pub trait Fold {{
 macro_rules! fold_span_only {{
     ($f:ident : $t:ident) => {{
         pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {{
-            _i.span = _visitor.fold_span(_i.span);
+            let span = _visitor.fold_span(_i.span());
+            _i.set_span(span);
             _i
         }}
     }}

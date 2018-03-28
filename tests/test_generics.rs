@@ -32,14 +32,14 @@ fn test_split_for_impl() {
         params: punctuated![
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new(Term::intern("'a"), Span::def_site()),
+                lifetime: Lifetime::new(Term::new("'a", Span::call_site())),
                 bounds: Default::default(),
                 colon_token: None,
             }),
             GenericParam::Lifetime(LifetimeDef {
                 attrs: Default::default(),
-                lifetime: Lifetime::new(Term::intern("'b"), Span::def_site()),
-                bounds: punctuated![Lifetime::new(Term::intern("'a"), Span::def_site())],
+                lifetime: Lifetime::new(Term::new("'b", Span::call_site())),
+                bounds: punctuated![Lifetime::new(Term::new("'a", Span::call_site()))],
                 colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
@@ -55,7 +55,7 @@ fn test_split_for_impl() {
                 ],
                 ident: "T".into(),
                 bounds: punctuated![
-                    TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::def_site())),
+                    TypeParamBound::Lifetime(Lifetime::new(Term::new("'a", Span::call_site()))),
                 ],
                 default: Some(
                     TypeTuple {
@@ -111,14 +111,14 @@ fn test_split_for_impl() {
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::intern("'a"), Span::def_site()));
+    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::new("'a", Span::call_site())));
     assert_eq!(
         expected,
         common::parse::syn::<TypeParamBound>(tokens.into())
     );
 
     let tokens = quote!('_);
-    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::intern("'_"), Span::def_site()));
+    let expected = TypeParamBound::Lifetime(Lifetime::new(Term::new("'_", Span::call_site())));
     assert_eq!(
         expected,
         common::parse::syn::<TypeParamBound>(tokens.into())

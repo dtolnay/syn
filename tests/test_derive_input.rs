@@ -12,7 +12,8 @@ extern crate proc_macro2;
 extern crate syn;
 
 use syn::*;
-use proc_macro2::{Delimiter, Literal, Spacing, Span, Term, TokenNode, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Literal, Spacing, Span, Term, Op, TokenStream, TokenTree};
+use proc_macro2::Group;
 use proc_macro2::Delimiter::{Brace, Parenthesis};
 
 use std::iter::FromIterator;
@@ -21,31 +22,19 @@ use std::iter::FromIterator;
 mod macros;
 
 fn op(c: char) -> TokenTree {
-    proc_macro2::TokenTree {
-        span: Span::def_site(),
-        kind: TokenNode::Op(c, Spacing::Alone),
-    }
+    Op::new(c, Spacing::Alone).into()
 }
 
 fn lit<T: Into<Literal>>(t: T) -> TokenTree {
-    proc_macro2::TokenTree {
-        span: Span::def_site(),
-        kind: TokenNode::Literal(t.into()),
-    }
+    t.into().into()
 }
 
 fn word(sym: &str) -> TokenTree {
-    proc_macro2::TokenTree {
-        span: Span::def_site(),
-        kind: TokenNode::Term(Term::intern(sym)),
-    }
+    Term::new(sym, Span::call_site()).into()
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
-    proc_macro2::TokenTree {
-        span: Span::def_site(),
-        kind: TokenNode::Group(delim, tokens.into_iter().collect()),
-    }
+    Group::new(delim, tokens.into_iter().collect()).into()
 }
 
 #[test]
@@ -284,7 +273,7 @@ fn test_enum() {
                         Default::default(),
                         Expr::Lit(ExprLit {
                             attrs: Vec::new(),
-                            lit: Lit::Int(LitInt::new(0, IntSuffix::Isize, Span::def_site())),
+                            lit: Lit::Int(LitInt::new(0, IntSuffix::Isize, Span::call_site())),
                         }),
                     )),
                 },
@@ -305,19 +294,19 @@ fn test_enum() {
                                         lit: Lit::Int(LitInt::new(
                                             0,
                                             IntSuffix::None,
-                                            Span::def_site()
+                                            Span::call_site()
                                         )),
                                     }),
                                     Expr::Lit(ExprLit {
                                         attrs: Vec::new(),
-                                        lit: Lit::Str(LitStr::new("data", Span::def_site())),
+                                        lit: Lit::Str(LitStr::new("data", Span::call_site())),
                                     }),
                                 ],
                             })),
                             dot_token: Default::default(),
                             member: Member::Unnamed(Index {
                                 index: 0,
-                                span: Span::def_site(),
+                                span: Span::call_site(),
                             }),
                         }),
                     )),
@@ -338,7 +327,7 @@ fn test_enum() {
             eq_token: Default::default(),
             lit: Lit::Str(LitStr::new(
                 "/// See the std::result module documentation for details.",
-                Span::def_site(),
+                Span::call_site(),
             )),
         }.into(),
         Meta::Word("must_use".into()),

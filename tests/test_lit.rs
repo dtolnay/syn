@@ -12,7 +12,7 @@ extern crate syn;
 
 use syn::{FloatSuffix, IntSuffix, Lit};
 use quote::ToTokens;
-use proc_macro2::{Span, TokenNode, TokenStream};
+use proc_macro2::{TokenTree, TokenStream};
 use std::str::FromStr;
 
 fn lit(s: &str) -> Lit {
@@ -21,9 +21,8 @@ fn lit(s: &str) -> Lit {
         .into_iter()
         .next()
         .unwrap()
-        .kind
     {
-        TokenNode::Literal(lit) => Lit::new(lit, Span::def_site()),
+        TokenTree::Literal(lit) => Lit::new(lit),
         _ => panic!(),
     }
 }

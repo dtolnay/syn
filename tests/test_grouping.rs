@@ -22,13 +22,6 @@ mod macros;
 
 mod common;
 
-fn tt(k: TokenNode) -> TokenTree {
-    TokenTree {
-        span: Span::def_site(),
-        kind: k,
-    }
-}
-
 fn expr<T: Into<Expr>>(t: T) -> Expr {
     t.into()
 }
@@ -36,26 +29,26 @@ fn expr<T: Into<Expr>>(t: T) -> Expr {
 fn lit<T: Into<Literal>>(t: T) -> Expr {
     Expr::Lit(ExprLit {
         attrs: Vec::new(),
-        lit: Lit::new(t.into(), Span::def_site()),
+        lit: Lit::new(t.into()),
     })
 }
 
 #[test]
 fn test_grouping() {
     let raw: TokenStream = vec![
-        tt(TokenNode::Literal(Literal::i32(1))),
-        tt(TokenNode::Op('+', Spacing::Alone)),
-        tt(TokenNode::Group(
+        TokenTree::Literal(Literal::i32_suffixed(1)),
+        TokenTree::Op(Op::new('+', Spacing::Alone)),
+        TokenTree::Group(proc_macro2::Group::new(
             Delimiter::None,
             vec![
-                tt(TokenNode::Literal(Literal::i32(2))),
-                tt(TokenNode::Op('+', Spacing::Alone)),
-                tt(TokenNode::Literal(Literal::i32(3))),
+                TokenTree::Literal(Literal::i32_suffixed(2)),
+                TokenTree::Op(Op::new('+', Spacing::Alone)),
+                TokenTree::Literal(Literal::i32_suffixed(3)),
             ].into_iter()
                 .collect(),
         )),
-        tt(TokenNode::Op('*', Spacing::Alone)),
-        tt(TokenNode::Literal(Literal::i32(4))),
+        TokenTree::Op(Op::new('*', Spacing::Alone)),
+        TokenTree::Literal(Literal::i32_suffixed(4)),
     ].into_iter()
         .collect();
 
@@ -65,7 +58,7 @@ fn test_grouping() {
         common::parse::syn::<Expr>(raw),
         expr(ExprBinary {
             attrs: Vec::new(),
-            left: Box::new(lit(Literal::i32(1))),
+            left: Box::new(lit(Literal::i32_suffixed(1))),
             op: BinOp::Add(<Token![+]>::default()),
             right: Box::new(expr(ExprBinary {
                 attrs: Vec::new(),
@@ -74,13 +67,13 @@ fn test_grouping() {
                     group_token: Group::default(),
                     expr: Box::new(expr(ExprBinary {
                         attrs: Vec::new(),
-                        left: Box::new(lit(Literal::i32(2))),
+                        left: Box::new(lit(Literal::i32_suffixed(2))),
                         op: BinOp::Add(<Token![+]>::default()),
-                        right: Box::new(lit(Literal::i32(3))),
+                        right: Box::new(lit(Literal::i32_suffixed(3))),
                     })),
                 })),
                 op: BinOp::Mul(<Token![*]>::default()),
-                right: Box::new(lit(Literal::i32(4))),
+                right: Box::new(lit(Literal::i32_suffixed(4))),
             })),
         })
     );
@@ -89,19 +82,19 @@ fn test_grouping() {
 #[test]
 fn test_invalid_grouping() {
     let raw: TokenStream = vec![
-        tt(TokenNode::Literal(Literal::i32(1))),
-        tt(TokenNode::Op('+', Spacing::Alone)),
-        tt(TokenNode::Group(
+        TokenTree::Literal(Literal::i32_suffixed(1)),
+        TokenTree::Op(Op::new('+', Spacing::Alone)),
+        TokenTree::Group(proc_macro2::Group::new(
             Delimiter::None,
             vec![
-                tt(TokenNode::Literal(Literal::i32(2))),
-                tt(TokenNode::Op('+', Spacing::Alone)),
+                TokenTree::Literal(Literal::i32_suffixed(2)),
+                TokenTree::Op(Op::new('+', Spacing::Alone)),
             ].into_iter()
                 .collect(),
         )),
-        tt(TokenNode::Literal(Literal::i32(3))),
-        tt(TokenNode::Op('*', Spacing::Alone)),
-        tt(TokenNode::Literal(Literal::i32(4))),
+        TokenTree::Literal(Literal::i32_suffixed(3)),
+        TokenTree::Op(Op::new('*', Spacing::Alone)),
+        TokenTree::Literal(Literal::i32_suffixed(4)),
     ].into_iter()
         .collect();
 
@@ -113,16 +106,16 @@ fn test_invalid_grouping() {
             attrs: Vec::new(),
             left: Box::new(expr(ExprBinary {
                 attrs: Vec::new(),
-                left: Box::new(lit(Literal::i32(1))),
+                left: Box::new(lit(Literal::i32_suffixed(1))),
                 op: BinOp::Add(<Token![+]>::default()),
-                right: Box::new(lit(Literal::i32(2))),
+                right: Box::new(lit(Literal::i32_suffixed(2))),
             })),
             op: BinOp::Add(<Token![+]>::default()),
             right: Box::new(expr(ExprBinary {
                 attrs: Vec::new(),
-                left: Box::new(lit(Literal::i32(3))),
+                left: Box::new(lit(Literal::i32_suffixed(3))),
                 op: BinOp::Mul(<Token![*]>::default()),
-                right: Box::new(lit(Literal::i32(4))),
+                right: Box::new(lit(Literal::i32_suffixed(4))),
             })),
         })
     );

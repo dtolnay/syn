@@ -7,7 +7,8 @@ publish = false # this is an internal crate which should never be published
 
 [dependencies]
 syn = { path = "..", features = ["full", "extra-traits"] }
-quote = "0.4"
+#quote = "0.5"
+quote = { git = 'https://github.com/dtolnay/quote' }
 failure = "0.1"
 inflections = "1.1"
-proc-macro2 = "0.2"
+proc-macro2 = "0.3"

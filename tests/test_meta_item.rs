@@ -19,7 +19,7 @@ use proc_macro2::{Literal, Span, TokenStream};
 mod macros;
 
 fn lit<T: Into<Literal>>(t: T) -> Lit {
-    Lit::new(t.into(), Span::def_site())
+    Lit::new(t.into())
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn test_meta_item_name_value() {
         MetaNameValue {
             ident: "foo".into(),
             eq_token: Default::default(),
-            lit: lit(Literal::integer(5)),
+            lit: lit(Literal::i32_unsuffixed(5)),
         },
     )
 }
@@ -46,7 +46,7 @@ fn test_meta_item_bool_value() {
         MetaNameValue {
             ident: "foo".into(),
             eq_token: Default::default(),
-            lit: Lit::Bool(LitBool { value: true, span: Span::def_site() }),
+            lit: Lit::Bool(LitBool { value: true, span: Span::call_site() }),
         },
     );
     run_test(
@@ -54,7 +54,7 @@ fn test_meta_item_bool_value() {
         MetaNameValue {
             ident: "foo".into(),
             eq_token: Default::default(),
-            lit: Lit::Bool(LitBool { value: false, span: Span::def_site() }),
+            lit: Lit::Bool(LitBool { value: false, span: Span::call_site() }),
         },
     )
 }
@@ -66,7 +66,7 @@ fn test_meta_item_list_lit() {
         MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: punctuated![NestedMeta::Literal(lit(Literal::integer(5)))],
+            nested: punctuated![NestedMeta::Literal(lit(Literal::i32_unsuffixed(5)))],
         },
     )
 }
@@ -95,7 +95,7 @@ fn test_meta_item_list_name_value() {
                     MetaNameValue {
                         ident: "bar".into(),
                         eq_token: Default::default(),
-                        lit: lit(Literal::integer(5)),
+                        lit: lit(Literal::i32_unsuffixed(5)),
                     }.into(),
                 ),
             ],
@@ -115,7 +115,7 @@ fn test_meta_item_list_bool_value() {
                     MetaNameValue {
                         ident: "bar".into(),
                         eq_token: Default::default(),
-                        lit: Lit::Bool(LitBool { value: true, span: Span::def_site() }),
+                        lit: Lit::Bool(LitBool { value: true, span: Span::call_site() }),
                     }.into(),
                 ),
             ],
@@ -136,7 +136,7 @@ fn test_meta_item_multiple() {
                     MetaNameValue {
                         ident: "name".into(),
                         eq_token: Default::default(),
-                        lit: lit(Literal::integer(5)),
+                        lit: lit(Literal::i32_unsuffixed(5)),
                     }.into(),
                 ),
                 NestedMeta::Meta(
@@ -148,7 +148,7 @@ fn test_meta_item_multiple() {
                                 MetaNameValue {
                                     ident: "name2".into(),
                                     eq_token: Default::default(),
-                                    lit: lit(Literal::integer(6)),
+                                    lit: lit(Literal::i32_unsuffixed(6)),
                                 }.into(),
                             ),
                         ],
