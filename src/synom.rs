@@ -180,17 +180,19 @@ pub trait Synom: Sized {
     /// # use syn::buffer::Cursor;
     /// # use syn::synom::{Synom, PResult};
     /// #
-    /// struct ExprForLoop {
+    /// struct ExprMacro {
     ///     // ...
     /// }
     ///
-    /// impl Synom for ExprForLoop {
+    /// impl Synom for ExprMacro {
     /// #   fn parse(input: Cursor) -> PResult<Self> { unimplemented!() }
     ///     // fn parse(...) -> ... { ... }
     ///
     ///     fn description() -> Option<&'static str> {
-    ///         // will result in messages like "failed to parse `for` loop: $reason"
-    ///         Some("`for` loop")
+    ///         // Will result in messages like
+    ///         //
+    ///         //     "failed to parse macro invocation expression: $reason"
+    ///         Some("macro invocation expression")
     ///     }
     /// }
     /// ```
