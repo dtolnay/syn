@@ -176,7 +176,10 @@ pub trait Synom: Sized {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```
+    /// # use syn::buffer::Cursor;
+    /// # use syn::synom::{Synom, PResult};
+    /// #
     /// struct ExprForLoop {
     ///     // ...
     /// }
