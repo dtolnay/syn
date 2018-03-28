@@ -262,6 +262,14 @@ pub mod parsing {
                 }))
             )
             |
+            keyword!(crate) => { |tok| {
+                Visibility::Crate(VisCrate {
+                    pub_token: <Token![pub]>::default(),
+                    paren_token: token::Paren::default(),
+                    crate_token: tok,
+                })
+            } }
+            |
             do_parse!(
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(self)) >>
