@@ -329,8 +329,8 @@ pub use item::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl, ForeignItem, For
                ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2,
                ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemType, ItemUnion, ItemUse,
                ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
-               TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseList, UsePath,
-               UseTree};
+               TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName,
+               UsePath, UseRename, UseTree};
 
 #[cfg(feature = "full")]
 mod file;

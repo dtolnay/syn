@@ -394,9 +394,13 @@ fn fold_un_op(&mut self, i: UnOp) -> UnOp { fold_un_op(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_use_glob(&mut self, i: UseGlob) -> UseGlob { fold_use_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn fold_use_list(&mut self, i: UseList) -> UseList { fold_use_list(self, i) }
+fn fold_use_group(&mut self, i: UseGroup) -> UseGroup { fold_use_group(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_use_name(&mut self, i: UseName) -> UseName { fold_use_name(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_use_path(&mut self, i: UsePath) -> UsePath { fold_use_path(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn fold_use_rename(&mut self, i: UseRename) -> UseRename { fold_use_rename(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn fold_use_tree(&mut self, i: UseTree) -> UseTree { fold_use_tree(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
@@ -1957,7 +1961,6 @@ pub fn fold_item_use<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemUse
         vis: _visitor.fold_visibility(_i . vis),
         use_token: Token ! [ use ](tokens_helper(_visitor, &(_i . use_token).0)),
         leading_colon: (_i . leading_colon).map(|it| { Token ! [ :: ](tokens_helper(_visitor, &(it).0)) }),
-        prefix: FoldHelper::lift(_i . prefix, |it| { _visitor.fold_ident(it) }),
         tree: _visitor.fold_use_tree(_i . tree),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &(_i . semi_token).0)),
     }
@@ -2825,20 +2828,32 @@ pub fn fold_use_glob<V: Fold + ?Sized>(_visitor: &mut V, _i: UseGlob) -> UseGlob
     }
 }
 # [ cfg ( feature = "full" ) ]
-pub fn fold_use_list<V: Fold + ?Sized>(_visitor: &mut V, _i: UseList) -> UseList {
-    UseList {
+pub fn fold_use_group<V: Fold + ?Sized>(_visitor: &mut V, _i: UseGroup) -> UseGroup {
+    UseGroup {
         brace_token: Brace(tokens_helper(_visitor, &(_i . brace_token).0)),
         items: FoldHelper::lift(_i . items, |it| { _visitor.fold_use_tree(it) }),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_use_name<V: Fold + ?Sized>(_visitor: &mut V, _i: UseName) -> UseName {
+    UseName {
+        ident: _visitor.fold_ident(_i . ident),
     }
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_use_path<V: Fold + ?Sized>(_visitor: &mut V, _i: UsePath) -> UsePath {
     UsePath {
         ident: _visitor.fold_ident(_i . ident),
-        rename: (_i . rename).map(|it| { (
-            Token ! [ as ](tokens_helper(_visitor, &(( it ) . 0).0)),
-            _visitor.fold_ident(( it ) . 1),
-        ) }),
+        colon2_token: Token ! [ :: ](tokens_helper(_visitor, &(_i . colon2_token).0)),
+        tree: Box::new(_visitor.fold_use_tree(* _i . tree)),
+    }
+}
+# [ cfg ( feature = "full" ) ]
+pub fn fold_use_rename<V: Fold + ?Sized>(_visitor: &mut V, _i: UseRename) -> UseRename {
+    UseRename {
+        ident: _visitor.fold_ident(_i . ident),
+        as_token: Token ! [ as ](tokens_helper(_visitor, &(_i . as_token).0)),
+        rename: _visitor.fold_ident(_i . rename),
     }
 }
 # [ cfg ( feature = "full" ) ]
@@ -2849,14 +2864,24 @@ pub fn fold_use_tree<V: Fold + ?Sized>(_visitor: &mut V, _i: UseTree) -> UseTree
                 _visitor.fold_use_path(_binding_0),
             )
         }
+        UseTree::Name(_binding_0, ) => {
+            UseTree::Name (
+                _visitor.fold_use_name(_binding_0),
+            )
+        }
+        UseTree::Rename(_binding_0, ) => {
+            UseTree::Rename (
+                _visitor.fold_use_rename(_binding_0),
+            )
+        }
         UseTree::Glob(_binding_0, ) => {
             UseTree::Glob (
                 _visitor.fold_use_glob(_binding_0),
             )
         }
-        UseTree::List(_binding_0, ) => {
-            UseTree::List (
-                _visitor.fold_use_list(_binding_0),
+        UseTree::Group(_binding_0, ) => {
+            UseTree::Group (
+                _visitor.fold_use_group(_binding_0),
             )
         }
     }

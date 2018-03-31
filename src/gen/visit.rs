@@ -392,9 +392,13 @@ fn visit_un_op(&mut self, i: &'ast UnOp) { visit_un_op(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_use_glob(&mut self, i: &'ast UseGlob) { visit_use_glob(self, i) }
 # [ cfg ( feature = "full" ) ]
-fn visit_use_list(&mut self, i: &'ast UseList) { visit_use_list(self, i) }
+fn visit_use_group(&mut self, i: &'ast UseGroup) { visit_use_group(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_use_name(&mut self, i: &'ast UseName) { visit_use_name(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_use_path(&mut self, i: &'ast UsePath) { visit_use_path(self, i) }
+# [ cfg ( feature = "full" ) ]
+fn visit_use_rename(&mut self, i: &'ast UseRename) { visit_use_rename(self, i) }
 # [ cfg ( feature = "full" ) ]
 fn visit_use_tree(&mut self, i: &'ast UseTree) { visit_use_tree(self, i) }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
@@ -1526,7 +1530,6 @@ pub fn visit_item_use<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     _visitor.visit_visibility(& _i . vis);
     tokens_helper(_visitor, &(& _i . use_token).0);
     if let Some(ref it) = _i . leading_colon { tokens_helper(_visitor, &(it).0) };
-    for el in Punctuated::pairs(& _i . prefix) { let it = el.value(); _visitor.visit_ident(it) };
     _visitor.visit_use_tree(& _i . tree);
     tokens_helper(_visitor, &(& _i . semi_token).0);
 }
@@ -2180,17 +2183,25 @@ pub fn visit_use_glob<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     tokens_helper(_visitor, &(& _i . star_token).0);
 }
 # [ cfg ( feature = "full" ) ]
-pub fn visit_use_list<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseList) {
+pub fn visit_use_group<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseGroup) {
     tokens_helper(_visitor, &(& _i . brace_token).0);
     for el in Punctuated::pairs(& _i . items) { let it = el.value(); _visitor.visit_use_tree(it) };
 }
 # [ cfg ( feature = "full" ) ]
+pub fn visit_use_name<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseName) {
+    _visitor.visit_ident(& _i . ident);
+}
+# [ cfg ( feature = "full" ) ]
 pub fn visit_use_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UsePath) {
     _visitor.visit_ident(& _i . ident);
-    if let Some(ref it) = _i . rename { 
-            tokens_helper(_visitor, &(& ( it ) . 0).0);
-            _visitor.visit_ident(& ( it ) . 1);
-         };
+    tokens_helper(_visitor, &(& _i . colon2_token).0);
+    _visitor.visit_use_tree(& * _i . tree);
+}
+# [ cfg ( feature = "full" ) ]
+pub fn visit_use_rename<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseRename) {
+    _visitor.visit_ident(& _i . ident);
+    tokens_helper(_visitor, &(& _i . as_token).0);
+    _visitor.visit_ident(& _i . rename);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_use_tree<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseTree) {
@@ -2198,11 +2209,17 @@ pub fn visit_use_tree<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
         UseTree::Path(ref _binding_0, ) => {
             _visitor.visit_use_path(_binding_0);
         }
+        UseTree::Name(ref _binding_0, ) => {
+            _visitor.visit_use_name(_binding_0);
+        }
+        UseTree::Rename(ref _binding_0, ) => {
+            _visitor.visit_use_rename(_binding_0);
+        }
         UseTree::Glob(ref _binding_0, ) => {
             _visitor.visit_use_glob(_binding_0);
         }
-        UseTree::List(ref _binding_0, ) => {
-            _visitor.visit_use_list(_binding_0);
+        UseTree::Group(ref _binding_0, ) => {
+            _visitor.visit_use_group(_binding_0);
         }
     }
 }
