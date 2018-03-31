@@ -139,8 +139,6 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub Crate(VisCrate {
-            pub pub_token: Token![pub],
-            pub paren_token: token::Paren,
             pub crate_token: Token![crate],
         }),
 
@@ -255,17 +253,16 @@ pub mod parsing {
             do_parse!(
                 pub_token: keyword!(pub) >>
                 other: parens!(keyword!(crate)) >>
-                (Visibility::Crate(VisCrate {
+                (Visibility::Restricted(VisRestricted {
                     pub_token: pub_token,
                     paren_token: other.0,
-                    crate_token: other.1,
+                    in_token: None,
+                    path: Box::new(other.1.into()),
                 }))
             )
             |
             keyword!(crate) => { |tok| {
                 Visibility::Crate(VisCrate {
-                    pub_token: <Token![pub]>::default(),
-                    paren_token: token::Paren::default(),
                     crate_token: tok,
                 })
             } }
@@ -375,10 +372,7 @@ mod printing {
 
     impl ToTokens for VisCrate {
         fn to_tokens(&self, tokens: &mut Tokens) {
-            self.pub_token.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.crate_token.to_tokens(tokens);
-            })
+            self.crate_token.to_tokens(tokens);
         }
     }
 
@@ -386,8 +380,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             self.pub_token.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
-                // XXX: If we have a path which is not "self" or "super",
-                // automatically add the "in" token.
+                // XXX: If we have a path which is not "self" or "super" or
+                // "crate", automatically add the "in" token.
                 self.in_token.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             });

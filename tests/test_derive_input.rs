@@ -536,6 +536,31 @@ fn test_pub_restricted() {
 }
 
 #[test]
+fn test_vis_crate() {
+    let raw = r#"
+        crate struct S;
+    "#;
+
+    let expected = DeriveInput {
+        ident: "S".into(),
+        vis: Visibility::Crate(VisCrate {
+            crate_token: Default::default(),
+        }),
+        attrs: vec![],
+        generics: Generics::default(),
+        data: Data::Struct(DataStruct {
+            semi_token: Some(Default::default()),
+            struct_token: Default::default(),
+            fields: Fields::Unit,
+        }),
+    };
+
+    let actual = syn::parse_str(raw).unwrap();
+
+    assert_eq!(expected, actual);
+}
+
+#[test]
 fn test_pub_restricted_crate() {
     let raw = r#"
         pub(crate) struct S;
@@ -543,10 +568,11 @@ fn test_pub_restricted_crate() {
 
     let expected = DeriveInput {
         ident: "S".into(),
-        vis: Visibility::Crate(VisCrate {
+        vis: Visibility::Restricted(VisRestricted {
             pub_token: Default::default(),
-            crate_token: Default::default(),
             paren_token: Default::default(),
+            in_token: None,
+            path: Box::new("crate".into()),
         }),
         attrs: vec![],
         generics: Generics::default(),

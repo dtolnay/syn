@@ -2218,8 +2218,6 @@ pub fn visit_variant_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Varian
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_vis_crate_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut VisCrate) {
-    tokens_helper(_visitor, &mut (& mut _i . pub_token).0);
-    tokens_helper(_visitor, &mut (& mut _i . paren_token).0);
     tokens_helper(_visitor, &mut (& mut _i . crate_token).0);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]

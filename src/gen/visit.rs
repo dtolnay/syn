@@ -2217,8 +2217,6 @@ pub fn visit_variant<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_vis_crate<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast VisCrate) {
-    tokens_helper(_visitor, &(& _i . pub_token).0);
-    tokens_helper(_visitor, &(& _i . paren_token).0);
     tokens_helper(_visitor, &(& _i . crate_token).0);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]

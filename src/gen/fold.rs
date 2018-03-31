@@ -2875,8 +2875,6 @@ pub fn fold_variant<V: Fold + ?Sized>(_visitor: &mut V, _i: Variant) -> Variant 
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn fold_vis_crate<V: Fold + ?Sized>(_visitor: &mut V, _i: VisCrate) -> VisCrate {
     VisCrate {
-        pub_token: Token ! [ pub ](tokens_helper(_visitor, &(_i . pub_token).0)),
-        paren_token: Paren(tokens_helper(_visitor, &(_i . paren_token).0)),
         crate_token: Token ! [ crate ](tokens_helper(_visitor, &(_i . crate_token).0)),
     }
 }
