@@ -496,7 +496,7 @@ pub fn fold_arm<V: Fold + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
             Token ! [ if ](tokens_helper(_visitor, &(( it ) . 0).0)),
             Box::new(_visitor.fold_expr(* ( it ) . 1)),
         ) }),
-        rocket_token: Token ! [ => ](tokens_helper(_visitor, &(_i . rocket_token).0)),
+        fat_arrow_token: Token ! [ => ](tokens_helper(_visitor, &(_i . fat_arrow_token).0)),
         body: Box::new(_visitor.fold_expr(* _i . body)),
         comma: (_i . comma).map(|it| { Token ! [ , ](tokens_helper(_visitor, &(it).0)) }),
     }

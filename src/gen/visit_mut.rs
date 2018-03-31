@@ -458,7 +458,7 @@ pub fn visit_arm_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Arm) {
             tokens_helper(_visitor, &mut (& mut ( it ) . 0).0);
             _visitor.visit_expr_mut(& mut * ( it ) . 1);
          };
-    tokens_helper(_visitor, &mut (& mut _i . rocket_token).0);
+    tokens_helper(_visitor, &mut (& mut _i . fat_arrow_token).0);
     _visitor.visit_expr_mut(& mut * _i . body);
     if let Some(ref mut it) = _i . comma { tokens_helper(_visitor, &mut (it).0) };
 }

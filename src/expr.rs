@@ -956,7 +956,7 @@ ast_struct! {
         pub leading_vert: Option<Token![|]>,
         pub pats: Punctuated<Pat, Token![|]>,
         pub guard: Option<(Token![if], Box<Expr>)>,
-        pub rocket_token: Token![=>],
+        pub fat_arrow_token: Token![=>],
         pub body: Box<Expr>,
         pub comma: Option<Token![,]>,
     }
@@ -1935,7 +1935,7 @@ pub mod parsing {
             leading_vert: option!(punct!(|)) >>
             pats: call!(Punctuated::parse_separated_nonempty) >>
             guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
-            rocket: punct!(=>) >>
+            fat_arrow: punct!(=>) >>
             body: do_parse!(
                 expr: alt!(expr_nosemi | syn!(Expr)) >>
                 comma: switch!(value!(arm_expr_requires_comma(&expr)),
@@ -1950,7 +1950,7 @@ pub mod parsing {
                 (expr, comma)
             ) >>
             (Arm {
-                rocket_token: rocket,
+                fat_arrow_token: fat_arrow,
                 attrs: attrs,
                 leading_vert: leading_vert,
                 pats: pats,
@@ -3358,7 +3358,7 @@ mod printing {
                 if_token.to_tokens(tokens);
                 guard.to_tokens(tokens);
             }
-            self.rocket_token.to_tokens(tokens);
+            self.fat_arrow_token.to_tokens(tokens);
             self.body.to_tokens(tokens);
             self.comma.to_tokens(tokens);
         }
