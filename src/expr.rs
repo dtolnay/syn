@@ -242,7 +242,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub if_token: Token![if],
             pub let_token: Token![let],
-            pub pat: Box<Pat>,
+            pub pats: Punctuated<Pat, Token![|]>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
             pub then_branch: Block,
@@ -268,7 +268,7 @@ ast_enum_of_structs! {
             pub label: Option<Label>,
             pub while_token: Token![while],
             pub let_token: Token![let],
-            pub pat: Box<Pat>,
+            pub pats: Punctuated<Pat, Token![|]>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
             pub body: Block,
@@ -764,7 +764,7 @@ ast_struct! {
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
-        pub pat: Box<Pat>,
+        pub pats: Punctuated<Pat, Token![|]>,
         pub ty: Option<(Token![:], Box<Type>)>,
         pub init: Option<(Token![=], Box<Expr>)>,
         pub semi_token: Token![;],
@@ -1758,14 +1758,14 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             if_: keyword!(if) >>
             let_: keyword!(let) >>
-            pat: syn!(Pat) >>
+            pats: call!(Punctuated::parse_separated_nonempty) >>
             eq: punct!(=) >>
             cond: expr_no_struct >>
             then_block: braces!(Block::parse_within) >>
             else_block: option!(else_block) >>
             (ExprIfLet {
                 attrs: Vec::new(),
-                pat: Box::new(pat),
+                pats: pats,
                 let_token: let_,
                 eq_token: eq,
                 expr: Box::new(cond),
@@ -2043,7 +2043,7 @@ pub mod parsing {
             label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             let_: keyword!(let) >>
-            pat: syn!(Pat) >>
+            pats: call!(Punctuated::parse_separated_nonempty) >>
             eq: punct!(=) >>
             value: expr_no_struct >>
             while_block: syn!(Block) >>
@@ -2052,7 +2052,7 @@ pub mod parsing {
                 eq_token: eq,
                 let_token: let_,
                 while_token: while_,
-                pat: Box::new(pat),
+                pats: pats,
                 expr: Box::new(value),
                 body: while_block,
                 label: label,
@@ -2384,14 +2384,14 @@ pub mod parsing {
     named!(stmt_local -> Stmt, do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         let_: keyword!(let) >>
-        pat: syn!(Pat) >>
+        pats: call!(Punctuated::parse_separated_nonempty) >>
         ty: option!(tuple!(punct!(:), syn!(Type))) >>
         init: option!(tuple!(punct!(=), syn!(Expr))) >>
         semi: punct!(;) >>
         (Stmt::Local(Local {
             attrs: attrs,
             let_token: let_,
-            pat: Box::new(pat),
+            pats: pats,
             ty: ty.map(|(colon, ty)| (colon, Box::new(ty))),
             init: init.map(|(eq, expr)| (eq, Box::new(expr))),
             semi_token: semi,
@@ -3010,7 +3010,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.if_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
+            self.pats.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.then_branch.to_tokens(tokens);
@@ -3036,7 +3036,7 @@ mod printing {
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
+            self.pats.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.body.to_tokens(tokens);
@@ -3565,7 +3565,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.let_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
+            self.pats.to_tokens(tokens);
             if let Some((ref colon_token, ref ty)) = self.ty {
                 colon_token.to_tokens(tokens);
                 ty.to_tokens(tokens);

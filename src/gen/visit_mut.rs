@@ -902,7 +902,7 @@ pub fn visit_expr_if_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ex
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . if_token).0);
     tokens_helper(_visitor, &mut (& mut _i . let_token).0);
-    _visitor.visit_pat_mut(& mut * _i . pat);
+    for mut el in Punctuated::pairs_mut(& mut _i . pats) { let it = el.value_mut(); _visitor.visit_pat_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     _visitor.visit_block_mut(& mut _i . then_branch);
@@ -1058,7 +1058,7 @@ pub fn visit_expr_while_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut
     if let Some(ref mut it) = _i . label { _visitor.visit_label_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . while_token).0);
     tokens_helper(_visitor, &mut (& mut _i . let_token).0);
-    _visitor.visit_pat_mut(& mut * _i . pat);
+    for mut el in Punctuated::pairs_mut(& mut _i . pats) { let it = el.value_mut(); _visitor.visit_pat_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . eq_token).0);
     _visitor.visit_expr_mut(& mut * _i . expr);
     _visitor.visit_block_mut(& mut _i . body);
@@ -1621,7 +1621,7 @@ pub fn visit_lit_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut L
 pub fn visit_local_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     tokens_helper(_visitor, &mut (& mut _i . let_token).0);
-    _visitor.visit_pat_mut(& mut * _i . pat);
+    for mut el in Punctuated::pairs_mut(& mut _i . pats) { let it = el.value_mut(); _visitor.visit_pat_mut(it) };
     if let Some(ref mut it) = _i . ty { 
             tokens_helper(_visitor, &mut (& mut ( it ) . 0).0);
             _visitor.visit_type_mut(& mut * ( it ) . 1);

@@ -1142,7 +1142,7 @@ pub fn fold_expr_if_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> Ex
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         if_token: Token ! [ if ](tokens_helper(_visitor, &(_i . if_token).0)),
         let_token: Token ! [ let ](tokens_helper(_visitor, &(_i . let_token).0)),
-        pat: Box::new(_visitor.fold_pat(* _i . pat)),
+        pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         then_branch: _visitor.fold_block(_i . then_branch),
@@ -1342,7 +1342,7 @@ pub fn fold_expr_while_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprWhileLet)
         label: (_i . label).map(|it| { _visitor.fold_label(it) }),
         while_token: Token ! [ while ](tokens_helper(_visitor, &(_i . while_token).0)),
         let_token: Token ! [ let ](tokens_helper(_visitor, &(_i . let_token).0)),
-        pat: Box::new(_visitor.fold_pat(* _i . pat)),
+        pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &(_i . eq_token).0)),
         expr: Box::new(_visitor.fold_expr(* _i . expr)),
         body: _visitor.fold_block(_i . body),
@@ -2051,7 +2051,7 @@ pub fn fold_local<V: Fold + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
     Local {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
         let_token: Token ! [ let ](tokens_helper(_visitor, &(_i . let_token).0)),
-        pat: Box::new(_visitor.fold_pat(* _i . pat)),
+        pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         ty: (_i . ty).map(|it| { (
             Token ! [ : ](tokens_helper(_visitor, &(( it ) . 0).0)),
             Box::new(_visitor.fold_type(* ( it ) . 1)),

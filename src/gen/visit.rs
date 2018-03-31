@@ -901,7 +901,7 @@ pub fn visit_expr_if_let<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . if_token).0);
     tokens_helper(_visitor, &(& _i . let_token).0);
-    _visitor.visit_pat(& * _i . pat);
+    for el in Punctuated::pairs(& _i . pats) { let it = el.value(); _visitor.visit_pat(it) };
     tokens_helper(_visitor, &(& _i . eq_token).0);
     _visitor.visit_expr(& * _i . expr);
     _visitor.visit_block(& _i . then_branch);
@@ -1057,7 +1057,7 @@ pub fn visit_expr_while_let<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i:
     if let Some(ref it) = _i . label { _visitor.visit_label(it) };
     tokens_helper(_visitor, &(& _i . while_token).0);
     tokens_helper(_visitor, &(& _i . let_token).0);
-    _visitor.visit_pat(& * _i . pat);
+    for el in Punctuated::pairs(& _i . pats) { let it = el.value(); _visitor.visit_pat(it) };
     tokens_helper(_visitor, &(& _i . eq_token).0);
     _visitor.visit_expr(& * _i . expr);
     _visitor.visit_block(& _i . body);
@@ -1620,7 +1620,7 @@ pub fn visit_lit_verbatim<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
 pub fn visit_local<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Local) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     tokens_helper(_visitor, &(& _i . let_token).0);
-    _visitor.visit_pat(& * _i . pat);
+    for el in Punctuated::pairs(& _i . pats) { let it = el.value(); _visitor.visit_pat(it) };
     if let Some(ref it) = _i . ty { 
             tokens_helper(_visitor, &(& ( it ) . 0).0);
             _visitor.visit_type(& * ( it ) . 1);
