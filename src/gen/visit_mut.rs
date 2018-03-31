@@ -1936,6 +1936,7 @@ pub fn visit_stmt_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Stmt) {
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_trait_bound_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut TraitBound) {
+    if let Some(ref mut it) = _i . paren_token { tokens_helper(_visitor, &mut (it).0) };
     _visitor.visit_trait_bound_modifier_mut(& mut _i . modifier);
     if let Some(ref mut it) = _i . lifetimes { _visitor.visit_bound_lifetimes_mut(it) };
     _visitor.visit_path_mut(& mut _i . path);

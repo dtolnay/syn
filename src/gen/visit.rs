@@ -1935,6 +1935,7 @@ pub fn visit_stmt<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stm
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_trait_bound<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitBound) {
+    if let Some(ref it) = _i . paren_token { tokens_helper(_visitor, &(it).0) };
     _visitor.visit_trait_bound_modifier(& _i . modifier);
     if let Some(ref it) = _i . lifetimes { _visitor.visit_bound_lifetimes(it) };
     _visitor.visit_path(& _i . path);

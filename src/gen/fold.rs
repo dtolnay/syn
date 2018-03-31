@@ -2483,6 +2483,7 @@ pub fn fold_stmt<V: Fold + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn fold_trait_bound<V: Fold + ?Sized>(_visitor: &mut V, _i: TraitBound) -> TraitBound {
     TraitBound {
+        paren_token: (_i . paren_token).map(|it| { Paren(tokens_helper(_visitor, &(it).0)) }),
         modifier: _visitor.fold_trait_bound_modifier(_i . modifier),
         lifetimes: (_i . lifetimes).map(|it| { _visitor.fold_bound_lifetimes(it) }),
         path: _visitor.fold_path(_i . path),

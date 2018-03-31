@@ -79,6 +79,7 @@ fn test_split_for_impl() {
                     }.into(),
                     bounds: punctuated![
                         TypeParamBound::Trait(TraitBound {
+                            paren_token: None,
                             modifier: TraitBoundModifier::None,
                             lifetimes: None,
                             path: "Debug".into(),
@@ -126,6 +127,7 @@ fn test_ty_param_bound() {
 
     let tokens = quote!(Debug);
     let expected = TypeParamBound::Trait(TraitBound {
+        paren_token: None,
         modifier: TraitBoundModifier::None,
         lifetimes: None,
         path: "Debug".into(),
@@ -137,6 +139,7 @@ fn test_ty_param_bound() {
 
     let tokens = quote!(?Sized);
     let expected = TypeParamBound::Trait(TraitBound {
+        paren_token: None,
         modifier: TraitBoundModifier::Maybe(Default::default()),
         lifetimes: None,
         path: "Sized".into(),
