@@ -68,8 +68,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! syn = "0.12"
-//! quote = "0.4"
+//! syn = "0.13"
+//! quote = "0.5"
 //!
 //! [lib]
 //! proc-macro = true
@@ -256,7 +256,7 @@
 //!   types.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn/0.12.15")]
+#![doc(html_root_url = "https://docs.rs/syn/0.13.0")]
 #![cfg_attr(feature = "cargo-clippy",
             allow(const_static_lifetime, doc_markdown, large_enum_variant, match_bool,
                   redundant_closure, needless_pass_by_value, redundant_field_names))]
