@@ -486,6 +486,7 @@ pub fn fold_arg_self_ref<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -> 
 pub fn fold_arm<V: Fold + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
     Arm {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),
+        leading_vert: (_i . leading_vert).map(|it| { Token ! [ | ](tokens_helper(_visitor, &(it).0)) }),
         pats: FoldHelper::lift(_i . pats, |it| { _visitor.fold_pat(it) }),
         guard: (_i . guard).map(|it| { (
             Token ! [ if ](tokens_helper(_visitor, &(( it ) . 0).0)),

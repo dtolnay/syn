@@ -953,6 +953,7 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct Arm {
         pub attrs: Vec<Attribute>,
+        pub leading_vert: Option<Token![|]>,
         pub pats: Punctuated<Pat, Token![|]>,
         pub guard: Option<(Token![if], Box<Expr>)>,
         pub rocket_token: Token![=>],
@@ -1931,6 +1932,7 @@ pub mod parsing {
     impl Synom for Arm {
         named!(parse -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
+            leading_vert: option!(punct!(|)) >>
             pats: call!(Punctuated::parse_separated_nonempty) >>
             guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
             rocket: punct!(=>) >>
@@ -1950,6 +1952,7 @@ pub mod parsing {
             (Arm {
                 rocket_token: rocket,
                 attrs: attrs,
+                leading_vert: leading_vert,
                 pats: pats,
                 guard: guard.map(|(if_, guard)| (if_, Box::new(guard))),
                 body: Box::new(body.0),
@@ -3349,6 +3352,7 @@ mod printing {
     impl ToTokens for Arm {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(&self.attrs);
+            self.leading_vert.to_tokens(tokens);
             self.pats.to_tokens(tokens);
             if let Some((ref if_token, ref guard)) = self.guard {
                 if_token.to_tokens(tokens);

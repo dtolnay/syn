@@ -447,6 +447,7 @@ pub fn visit_arg_self_ref<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
 pub fn visit_arm<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Arm) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
+    if let Some(ref it) = _i . leading_vert { tokens_helper(_visitor, &(it).0) };
     for el in Punctuated::pairs(& _i . pats) { let it = el.value(); _visitor.visit_pat(it) };
     if let Some(ref it) = _i . guard { 
             tokens_helper(_visitor, &(& ( it ) . 0).0);
