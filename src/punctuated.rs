@@ -27,7 +27,9 @@
 //!                 ^^^^^ ~~~~~ ^^^^
 //! ```
 
-use std::iter::{self, FromIterator};
+#[cfg(any(feature = "full", feature = "derive"))]
+use std::iter;
+use std::iter::FromIterator;
 use std::ops::{Index, IndexMut};
 use std::slice;
 use std::vec;
