@@ -11,8 +11,8 @@
 
 #[macro_use]
 extern crate syn;
-use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprLit, Lit};
 use syn::token::Group;
+use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprLit, Lit};
 
 extern crate proc_macro2;
 use proc_macro2::*;

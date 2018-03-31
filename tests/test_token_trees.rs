@@ -13,9 +13,9 @@ extern crate proc_macro2;
 extern crate quote;
 extern crate syn;
 
-use syn::{AttrStyle, Attribute, Lit};
-use proc_macro2::{Delimiter, Spacing, Span, Term, Op, Group, TokenStream, TokenTree};
 use proc_macro2::Delimiter::*;
+use proc_macro2::{Delimiter, Group, Op, Spacing, Span, Term, TokenStream, TokenTree};
+use syn::{AttrStyle, Attribute, Lit};
 
 fn alone(c: char) -> TokenTree {
     Op::new(c, Spacing::Alone).into()

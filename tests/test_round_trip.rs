@@ -19,8 +19,8 @@ extern crate walkdir;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
-use syntax::parse::{self, PResult, ParseSess};
 use syntax::codemap::FilePathMapping;
+use syntax::parse::{self, PResult, ParseSess};
 use syntax_pos::FileName;
 use walkdir::{DirEntry, WalkDir};
 
@@ -79,53 +79,56 @@ fn test_round_trip() {
             };
             let back = quote!(#krate).to_string();
 
-            let equal = panic::catch_unwind(|| syntax::with_globals(|| {
-                let sess = ParseSess::new(FilePathMapping::empty());
-                let before = match libsyntax_parse(content, &sess) {
-                    Ok(before) => before,
-                    Err(mut diagnostic) => {
-                        diagnostic.cancel();
-                        if diagnostic
-                            .message()
-                            .starts_with("file not found for module")
-                        {
-                            errorf!("=== {}: ignore\n", path.display());
-                        } else {
-                            errorf!(
+            let equal = panic::catch_unwind(|| {
+                syntax::with_globals(|| {
+                    let sess = ParseSess::new(FilePathMapping::empty());
+                    let before = match libsyntax_parse(content, &sess) {
+                        Ok(before) => before,
+                        Err(mut diagnostic) => {
+                            diagnostic.cancel();
+                            if diagnostic
+                                .message()
+                                .starts_with("file not found for module")
+                            {
+                                errorf!("=== {}: ignore\n", path.display());
+                            } else {
+                                errorf!(
                                 "=== {}: ignore - libsyntax failed to parse original content: {}\n",
                                 path.display(),
                                 diagnostic.message()
                             );
+                            }
+                            return true;
                         }
-                        return true;
-                    }
-                };
-                let after = match libsyntax_parse(back, &sess) {
-                    Ok(after) => after,
-                    Err(mut diagnostic) => {
-                        errorf!("=== {}: libsyntax failed to parse", path.display());
-                        diagnostic.emit();
-                        return false;
-                    }
-                };
+                    };
+                    let after = match libsyntax_parse(back, &sess) {
+                        Ok(after) => after,
+                        Err(mut diagnostic) => {
+                            errorf!("=== {}: libsyntax failed to parse", path.display());
+                            diagnostic.emit();
+                            return false;
+                        }
+                    };
 
-                if before == after {
-                    errorf!(
-                        "=== {}: pass in {}ms\n",
-                        path.display(),
-                        elapsed.as_secs() * 1000 + u64::from(elapsed.subsec_nanos()) / 1_000_000
-                    );
-                    true
-                } else {
-                    errorf!(
-                        "=== {}: FAIL\nbefore: {}\nafter: {}\n",
-                        path.display(),
-                        format!("{:?}", before).replace("\n", ""),
-                        format!("{:?}", after).replace("\n", "")
-                    );
-                    false
-                }
-            }));
+                    if before == after {
+                        errorf!(
+                            "=== {}: pass in {}ms\n",
+                            path.display(),
+                            elapsed.as_secs() * 1000
+                                + u64::from(elapsed.subsec_nanos()) / 1_000_000
+                        );
+                        true
+                    } else {
+                        errorf!(
+                            "=== {}: FAIL\nbefore: {}\nafter: {}\n",
+                            path.display(),
+                            format!("{:?}", before).replace("\n", ""),
+                            format!("{:?}", after).replace("\n", "")
+                        );
+                        false
+                    }
+                })
+            });
             match equal {
                 Err(_) => errorf!("=== {}: ignoring libsyntax panic\n", path.display()),
                 Ok(true) => {}

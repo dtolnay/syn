@@ -11,9 +11,9 @@
 extern crate proc_macro2;
 extern crate syn;
 
-use syn::*;
-use syn::buffer::TokenBuffer;
 use proc_macro2::{Literal, Span, TokenStream};
+use syn::buffer::TokenBuffer;
+use syn::*;
 
 #[macro_use]
 mod macros;
@@ -46,7 +46,10 @@ fn test_meta_item_bool_value() {
         MetaNameValue {
             ident: "foo".into(),
             eq_token: Default::default(),
-            lit: Lit::Bool(LitBool { value: true, span: Span::call_site() }),
+            lit: Lit::Bool(LitBool {
+                value: true,
+                span: Span::call_site(),
+            }),
         },
     );
     run_test(
@@ -54,7 +57,10 @@ fn test_meta_item_bool_value() {
         MetaNameValue {
             ident: "foo".into(),
             eq_token: Default::default(),
-            lit: Lit::Bool(LitBool { value: false, span: Span::call_site() }),
+            lit: Lit::Bool(LitBool {
+                value: false,
+                span: Span::call_site(),
+            }),
         },
     )
 }
@@ -115,7 +121,10 @@ fn test_meta_item_list_bool_value() {
                     MetaNameValue {
                         ident: "bar".into(),
                         eq_token: Default::default(),
-                        lit: Lit::Bool(LitBool { value: true, span: Span::call_site() }),
+                        lit: Lit::Bool(LitBool {
+                            value: true,
+                            span: Span::call_site()
+                        }),
                     }.into(),
                 ),
             ],

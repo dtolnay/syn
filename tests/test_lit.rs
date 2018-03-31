@@ -10,10 +10,10 @@ extern crate proc_macro2;
 extern crate quote;
 extern crate syn;
 
-use syn::{FloatSuffix, IntSuffix, Lit};
+use proc_macro2::{TokenStream, TokenTree};
 use quote::ToTokens;
-use proc_macro2::{TokenTree, TokenStream};
 use std::str::FromStr;
+use syn::{FloatSuffix, IntSuffix, Lit};
 
 fn lit(s: &str) -> Lit {
     match TokenStream::from_str(s)

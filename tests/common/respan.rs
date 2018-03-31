@@ -21,8 +21,8 @@ use self::syntax::symbol::Symbol;
 use self::syntax::util::move_map::MoveMap;
 use self::syntax::util::small_vector::SmallVector;
 
-use self::syntax_pos::{Span, DUMMY_SP};
 use self::syntax::ast;
+use self::syntax_pos::{Span, DUMMY_SP};
 
 struct Respanner;
 

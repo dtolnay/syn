@@ -162,34 +162,36 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    syntax::with_globals(|| for expr in exprs {
-        let raw = quote!(#expr).to_string();
+    syntax::with_globals(|| {
+        for expr in exprs {
+            let raw = quote!(#expr).to_string();
 
-        let libsyntax_ast = if let Some(e) = libsyntax_parse_and_rewrite(&raw) {
-            e
-        } else {
-            failed += 1;
-            errorf!("\nFAIL - libsyntax failed to parse raw\n");
-            continue;
-        };
+            let libsyntax_ast = if let Some(e) = libsyntax_parse_and_rewrite(&raw) {
+                e
+            } else {
+                failed += 1;
+                errorf!("\nFAIL - libsyntax failed to parse raw\n");
+                continue;
+            };
 
-        let syn_expr = syn_brackets(expr);
-        let syn_ast = if let Some(e) = parse::libsyntax_expr(&quote!(#syn_expr).to_string()) {
-            e
-        } else {
-            failed += 1;
-            errorf!("\nFAIL - libsyntax failed to parse bracketed\n");
-            continue;
-        };
+            let syn_expr = syn_brackets(expr);
+            let syn_ast = if let Some(e) = parse::libsyntax_expr(&quote!(#syn_expr).to_string()) {
+                e
+            } else {
+                failed += 1;
+                errorf!("\nFAIL - libsyntax failed to parse bracketed\n");
+                continue;
+            };
 
-        let syn_ast = respan::respan_expr(syn_ast);
-        let libsyntax_ast = respan::respan_expr(libsyntax_ast);
+            let syn_ast = respan::respan_expr(syn_ast);
+            let libsyntax_ast = respan::respan_expr(libsyntax_ast);
 
-        if syn_ast == libsyntax_ast {
-            passed += 1;
-        } else {
-            failed += 1;
-            errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, libsyntax_ast);
+            if syn_ast == libsyntax_ast {
+                passed += 1;
+            } else {
+                failed += 1;
+                errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, libsyntax_ast);
+            }
         }
     });
 
@@ -207,11 +209,11 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
+    use syntax::codemap;
+    use syntax::ext::quote::rt::DUMMY_SP;
     use syntax::fold::{self, Folder};
     use syntax::util::ThinVec;
     use syntax::util::small_vector::SmallVector;
-    use syntax::ext::quote::rt::DUMMY_SP;
-    use syntax::codemap;
 
     fn expr(node: ExprKind) -> P<Expr> {
         P(Expr {
@@ -300,8 +302,8 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 /// reveal the precedence of the parsed expressions, and produce a stringified form
 /// of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
-    use syn::*;
     use syn::fold::*;
+    use syn::*;
 
     fn paren(folder: &mut ParenthesizeEveryExpr, mut node: Expr) -> Expr {
         let attrs = node.replace_attrs(Vec::new());
@@ -352,9 +354,9 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
 /// Walk through a crate collecting all expressions we can find in it.
 fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
-    use syn::*;
     use syn::fold::*;
     use syn::punctuated::Punctuated;
+    use syn::*;
 
     struct CollectExprs(Vec<Expr>);
     impl Fold for CollectExprs {

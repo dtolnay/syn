@@ -11,10 +11,10 @@
 extern crate proc_macro2;
 extern crate syn;
 
-use syn::*;
-use proc_macro2::{Delimiter, Literal, Spacing, Span, Term, Op, TokenStream, TokenTree};
-use proc_macro2::Group;
 use proc_macro2::Delimiter::{Brace, Parenthesis};
+use proc_macro2::Group;
+use proc_macro2::{Delimiter, Literal, Op, Spacing, Span, Term, TokenStream, TokenTree};
+use syn::*;
 
 use std::iter::FromIterator;
 
@@ -129,7 +129,7 @@ fn test_struct() {
                                                 gt_token: Default::default(),
                                             },
                                         ),
-                                    }
+                                    },
                                 ],
                             },
                         }.into(),
@@ -152,7 +152,10 @@ fn test_struct() {
         ],
     }.into();
 
-    assert_eq!(expected_meta_item, actual.attrs[0].interpret_meta().unwrap());
+    assert_eq!(
+        expected_meta_item,
+        actual.attrs[0].interpret_meta().unwrap()
+    );
 }
 
 #[test]
