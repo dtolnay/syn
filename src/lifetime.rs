@@ -33,9 +33,7 @@ pub struct Lifetime {
 }
 
 impl Lifetime {
-    pub fn new(term: Term) -> Self {
-        let s = term.as_str();
-
+    pub fn new(s: &str, span: Span) -> Self {
         if !s.starts_with('\'') {
             panic!(
                 "lifetime name must start with apostrophe as in \"'a\", \
@@ -67,7 +65,7 @@ impl Lifetime {
         }
 
         Lifetime {
-            term: term,
+            term: Term::new(s, span),
         }
     }
 
