@@ -356,7 +356,7 @@ tokens! {
         "<-"       pub struct LArrow/2     /// `<-`
         "%"        pub struct Rem/1        /// `%`
         "%="       pub struct RemEq/2      /// `%=`
-        "=>"       pub struct Rocket/2     /// `=>`
+        "=>"       pub struct FatArrow/2   /// `=>`
         ";"        pub struct Semi/1       /// `;`
         "<<"       pub struct Shl/2        /// `<<`
         "<<="      pub struct ShlEq/3      /// `<<=`
@@ -464,7 +464,7 @@ macro_rules! Token {
     (<-)       => { $crate::token::LArrow };
     (%)        => { $crate::token::Rem };
     (%=)       => { $crate::token::RemEq };
-    (=>)       => { $crate::token::Rocket };
+    (=>)       => { $crate::token::FatArrow };
     (;)        => { $crate::token::Semi };
     (<<)       => { $crate::token::Shl };
     (<<=)      => { $crate::token::ShlEq };
@@ -563,7 +563,7 @@ macro_rules! punct {
     ($i:expr, <-)  => { call!($i, <$crate::token::LArrow as $crate::synom::Synom>::parse) };
     ($i:expr, %)   => { call!($i, <$crate::token::Rem as $crate::synom::Synom>::parse) };
     ($i:expr, %=)  => { call!($i, <$crate::token::RemEq as $crate::synom::Synom>::parse) };
-    ($i:expr, =>)  => { call!($i, <$crate::token::Rocket as $crate::synom::Synom>::parse) };
+    ($i:expr, =>)  => { call!($i, <$crate::token::FatArrow as $crate::synom::Synom>::parse) };
     ($i:expr, ;)   => { call!($i, <$crate::token::Semi as $crate::synom::Synom>::parse) };
     ($i:expr, <<)  => { call!($i, <$crate::token::Shl as $crate::synom::Synom>::parse) };
     ($i:expr, <<=) => { call!($i, <$crate::token::ShlEq as $crate::synom::Synom>::parse) };
