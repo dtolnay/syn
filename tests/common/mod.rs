@@ -91,7 +91,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         //      use extern::xcrate;
         "tests/rust/src/test/run-pass/rfc-2126-extern-absolute-paths/extern.rs" |
-        // not actually a test case
+        // not actually test cases
+        "tests/rust/src/test/run-pass/auxiliary/macro-comma-support.rs" |
         "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
     }
