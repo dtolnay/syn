@@ -74,19 +74,13 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // TODO better support for attributes
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
         // TODO better support for attributes
-        //
-        //      impl Foo { #![a] }
-        "tests/rust/src/test/run-pass/inner-attrs-on-impl.rs" |
-        // TODO better support for attributes
         "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO feature(use_nested_groups)
-        //
-        //      use a::{B, D::{self, *, g::H}};
-        "tests/rust/src/test/run-pass/use-nested-groups.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/placement-in-syntax.rs" |
+        // TODO inclusive range syntax
+        "tests/rust/src/test/run-pass/range-inclusive-pattern-precedence.rs" |
         // TODO feature(extern_in_paths)
         //
         //      use extern::xcrate;
