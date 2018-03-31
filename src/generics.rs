@@ -145,7 +145,7 @@ impl Generics {
     }
 }
 
-pub struct TypeParams<'a>(Iter<'a, GenericParam, Token![,]>);
+pub struct TypeParams<'a>(Iter<'a, GenericParam>);
 
 impl<'a> Iterator for TypeParams<'a> {
     type Item = &'a TypeParam;
@@ -164,7 +164,7 @@ impl<'a> Iterator for TypeParams<'a> {
     }
 }
 
-pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam, Token![,]>);
+pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam>);
 
 impl<'a> Iterator for TypeParamsMut<'a> {
     type Item = &'a mut TypeParam;
@@ -183,7 +183,7 @@ impl<'a> Iterator for TypeParamsMut<'a> {
     }
 }
 
-pub struct Lifetimes<'a>(Iter<'a, GenericParam, Token![,]>);
+pub struct Lifetimes<'a>(Iter<'a, GenericParam>);
 
 impl<'a> Iterator for Lifetimes<'a> {
     type Item = &'a LifetimeDef;
@@ -202,7 +202,7 @@ impl<'a> Iterator for Lifetimes<'a> {
     }
 }
 
-pub struct LifetimesMut<'a>(IterMut<'a, GenericParam, Token![,]>);
+pub struct LifetimesMut<'a>(IterMut<'a, GenericParam>);
 
 impl<'a> Iterator for LifetimesMut<'a> {
     type Item = &'a mut LifetimeDef;
@@ -221,7 +221,7 @@ impl<'a> Iterator for LifetimesMut<'a> {
     }
 }
 
-pub struct ConstParams<'a>(Iter<'a, GenericParam, Token![,]>);
+pub struct ConstParams<'a>(Iter<'a, GenericParam>);
 
 impl<'a> Iterator for ConstParams<'a> {
     type Item = &'a ConstParam;
@@ -240,7 +240,7 @@ impl<'a> Iterator for ConstParams<'a> {
     }
 }
 
-pub struct ConstParamsMut<'a>(IterMut<'a, GenericParam, Token![,]>);
+pub struct ConstParamsMut<'a>(IterMut<'a, GenericParam>);
 
 impl<'a> Iterator for ConstParamsMut<'a> {
     type Item = &'a mut ConstParam;

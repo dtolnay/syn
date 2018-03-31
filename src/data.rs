@@ -71,7 +71,7 @@ impl Fields {
     /// fields uniformly.
     ///
     /// [`Field`]: struct.Field.html
-    pub fn iter(&self) -> punctuated::Iter<Field, Token![,]> {
+    pub fn iter(&self) -> punctuated::Iter<Field> {
         match *self {
             Fields::Unit => punctuated::Iter::private_empty(),
             Fields::Named(ref f) => f.named.iter(),
@@ -82,7 +82,7 @@ impl Fields {
 
 impl<'a> IntoIterator for &'a Fields {
     type Item = &'a Field;
-    type IntoIter = punctuated::Iter<'a, Field, Token![,]>;
+    type IntoIter = punctuated::Iter<'a, Field>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
