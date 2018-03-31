@@ -930,7 +930,7 @@ mod printing {
                 self.path.to_tokens(tokens);
             };
             match self.paren_token {
-                Some(paren) => paren.surround(tokens, to_tokens),
+                Some(ref paren) => paren.surround(tokens, to_tokens),
                 None => to_tokens(tokens),
             }
         }
