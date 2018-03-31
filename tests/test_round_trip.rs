@@ -79,7 +79,7 @@ fn test_round_trip() {
             };
             let back = quote!(#krate).to_string();
 
-            let equal = panic::catch_unwind(|| {
+            let equal = panic::catch_unwind(|| syntax::with_globals(|| {
                 let sess = ParseSess::new(FilePathMapping::empty());
                 let before = match libsyntax_parse(content, &sess) {
                     Ok(before) => before,
@@ -125,7 +125,7 @@ fn test_round_trip() {
                     );
                     false
                 }
-            });
+            }));
             match equal {
                 Err(_) => errorf!("=== {}: ignoring libsyntax panic\n", path.display()),
                 Ok(true) => {}
@@ -146,7 +146,5 @@ fn test_round_trip() {
 
 fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = FileName::Custom("test_round_trip".to_string());
-    syntax::with_globals(|| {
-        parse::parse_crate_from_source_str(name, content, sess).map(common::respan::respan_crate)
-    })
+    parse::parse_crate_from_source_str(name, content, sess).map(common::respan::respan_crate)
 }

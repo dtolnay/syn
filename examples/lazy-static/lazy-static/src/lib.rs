@@ -6,13 +6,11 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 extern crate proc_macro;
-extern crate proc_macro2;
 
 use syn::{Visibility, Ident, Type, Expr};
 use syn::synom::Synom;
 use syn::spanned::Spanned;
 use proc_macro::TokenStream;
-use proc_macro2::Span;
 
 /// Parses the following syntax, which aligns with the input of the real
 /// `lazy_static` crate.
@@ -51,7 +49,6 @@ impl Synom for LazyStatic {
 #[proc_macro]
 pub fn lazy_static(input: TokenStream) -> TokenStream {
     let LazyStatic { visibility, name, ty, init } = syn::parse(input).unwrap();
-    let def_site = Span::def_site();
 
     // The warning looks like this.
     //
@@ -84,20 +81,15 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
 
     // Assert that the static type implements Sync. If not, user sees an error
     // message like the following. We span this assertion with the field type's
-    // line/column so that the error message appears in the correct place, but
-    // resolve it at the def site so that we are guaranteed it is checking the
-    // correct Sync. If the `Sync` token were resolved at the call site, the
-    // user could circumvent the check by defining their own Sync trait that is
-    // implemented for their type.
+    // line/column so that the error message appears in the correct place.
     //
     //     error[E0277]: the trait bound `*const (): std::marker::Sync` is not satisfied
     //       --> src/main.rs:10:21
     //        |
     //     10 |     static ref PTR: *const () = &();
     //        |                     ^^^^^^^^^ `*const ()` cannot be shared between threads safely
-    let ty_span = ty.span().resolved_at(def_site);
-    let assert_sync = quote_spanned! {ty_span=>
-        struct _AssertSync where #ty: Sync;
+    let assert_sync = quote_spanned! {ty.span()=>
+        struct _AssertSync where #ty: ::std::marker::Sync;
     };
 
     // Check for Sized. Not vital to check here, but the error message is less
@@ -109,28 +101,25 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //        |
     //     10 |     static ref A: str = "";
     //        |                   ^^^ `str` does not have a constant size known at compile-time
-    let assert_sized = quote_spanned! {ty_span=>
-        struct _AssertSized where #ty: Sized;
+    let assert_sized = quote_spanned! {ty.span()=>
+        struct _AssertSized where #ty: ::std::marker::Sized;
     };
 
-    let init_span = init.span().resolved_at(def_site);
-    let init_ptr = quote_spanned! {init_span=>
+    let init_ptr = quote_spanned! {init.span()=>
         Box::into_raw(Box::new(#init))
     };
 
     let expanded = quote! {
-        extern crate std;
-
         #visibility struct #name;
 
-        impl std::ops::Deref for #name {
+        impl ::std::ops::Deref for #name {
             type Target = #ty;
 
             fn deref(&self) -> &#ty {
                 #assert_sync
                 #assert_sized
 
-                static ONCE: std::sync::Once = std::sync::ONCE_INIT;
+                static ONCE: ::std::sync::Once = ::std::sync::ONCE_INIT;
                 static mut VALUE: *mut #ty = 0 as *mut #ty;
 
                 unsafe {

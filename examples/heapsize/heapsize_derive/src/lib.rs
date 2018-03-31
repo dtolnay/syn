@@ -1,4 +1,6 @@
 extern crate proc_macro;
+
+#[macro_use]
 extern crate syn;
 
 #[macro_use]
@@ -40,8 +42,7 @@ pub fn derive_heap_size(input: TokenStream) -> TokenStream {
 fn add_trait_bounds(mut generics: Generics) -> Generics {
     for param in &mut generics.params {
         if let GenericParam::Type(ref mut type_param) = *param {
-            let bound = syn::parse_str("::heapsize::HeapSize").unwrap();
-            type_param.bounds.push(bound);
+            type_param.bounds.push(parse_quote!(::heapsize::HeapSize));
         }
     }
     generics

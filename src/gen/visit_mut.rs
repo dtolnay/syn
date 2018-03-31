@@ -1242,7 +1242,6 @@ pub fn visit_generics_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Gener
 
 pub fn visit_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {
     // Skipped field _i . term;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ImplItem) {
@@ -1543,7 +1542,6 @@ pub fn visit_label_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Label) {
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lifetime_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Lifetime) {
     // Skipped field _i . term;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lifetime_def_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LifetimeDef) {
@@ -1589,37 +1587,30 @@ pub fn visit_lit_bool_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitBo
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_byte_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitByte) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_byte_str_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitByteStr) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_char_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitChar) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_float_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitFloat) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_int_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitInt) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_str_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitStr) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lit_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitVerbatim) {
     // Skipped field _i . token;
-    _visitor.visit_span_mut(& mut _i . span);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ] # [ cfg ( feature = "full" ) ]
 pub fn visit_local_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {

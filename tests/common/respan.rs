@@ -186,6 +186,7 @@ impl Folder for Respanner {
 
     fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
         at.id.0 = 0;
+        at.is_sugared_doc = false;
         fold::noop_fold_attribute(at, self)
     }
 
