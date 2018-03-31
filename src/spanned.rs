@@ -114,13 +114,13 @@ where
         let token_stream = TokenStream::from(tokens);
         let mut iter = token_stream.into_iter();
         let mut span = match iter.next() {
-            Some(tt) => tt.span,
+            Some(tt) => tt.span(),
             None => {
                 return Span::call_site();
             }
         };
         for tt in iter {
-            if let Some(joined) = span.join(tt.span) {
+            if let Some(joined) = span.join(tt.span()) {
                 span = joined;
             }
         }
