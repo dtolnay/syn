@@ -30,19 +30,10 @@ pub fn derive_heap_size(input: TokenStream) -> TokenStream {
     let sum = heap_size_sum(&input.data, &var);
 
     let expanded = quote! {
-        mod scope {
-            extern crate heapsize;
-            use self::heapsize::HeapSize;
-
-            // The generated impl. Okay to use `HeapSize` unqualified here, it
-            // is guaranteed to resolve to the import on the previous line. This
-            // works even in edge cases like the user's struct having the name
-            // `HeapSize` as demonstrated in main.rs, in which case the
-            // generated code looks like `impl HeapSize for HeapSize`.
-            impl #impl_generics HeapSize for #name #ty_generics #where_clause {
-                fn heap_size_of_children(&#var) -> usize {
-                    #sum
-                }
+        // The generated impl.
+        impl #impl_generics ::heapsize::HeapSize for #name #ty_generics #where_clause {
+            fn heap_size_of_children(&#var) -> usize {
+                #sum
             }
         }
     };
@@ -55,7 +46,7 @@ pub fn derive_heap_size(input: TokenStream) -> TokenStream {
 fn add_trait_bounds(mut generics: Generics) -> Generics {
     for param in &mut generics.params {
         if let GenericParam::Type(ref mut type_param) = *param {
-            type_param.bounds.push(parse_quote!(HeapSize));
+            type_param.bounds.push(parse_quote!(::heapsize::HeapSize));
         }
     }
     generics
@@ -63,7 +54,6 @@ fn add_trait_bounds(mut generics: Generics) -> Generics {
 
 // Generate an expression to sum up the heap size of each field.
 fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
-    let def_site = Span::def_site();
     let call_site = Span::call_site();
 
     match *data {
@@ -83,9 +73,8 @@ fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
                     let recurse = fields.named.iter().map(|f| {
                         let name = f.ident;
                         let access = quote_spanned!(call_site=> #var.#name);
-                        let span = f.span().resolved_at(def_site);
-                        quote_spanned! {span=>
-                            HeapSize::heap_size_of_children(&#access)
+                        quote_spanned! {f.span()=>
+                            ::heapsize::HeapSize::heap_size_of_children(&#access)
                         }
                     });
                     quote! {
@@ -99,9 +88,8 @@ fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
                     let recurse = fields.unnamed.iter().enumerate().map(|(i, f)| {
                         let index = Index { index: i as u32, span: call_site };
                         let access = quote_spanned!(call_site=> #var.#index);
-                        let span = f.span().resolved_at(def_site);
-                        quote_spanned! {span=>
-                            HeapSize::heap_size_of_children(&#access)
+                        quote_spanned! {f.span()=>
+                            ::heapsize::HeapSize::heap_size_of_children(&#access)
                         }
                     });
                     quote! {
