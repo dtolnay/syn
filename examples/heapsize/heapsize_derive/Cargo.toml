@@ -10,4 +10,4 @@ proc-macro = true
 [dependencies]
 syn = { path = "../../.." }
 #quote = "0.5"
-quote = { git = 'https://github.com/alexcrichton/quote', branch = 'v3' }
+quote = { git = 'https://github.com/dtolnay/quote' }
