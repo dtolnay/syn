@@ -262,6 +262,7 @@
                   redundant_closure, needless_pass_by_value, redundant_field_names))]
 
 extern crate proc_macro2;
+#[cfg(feature = "proc-macro")]
 extern crate proc_macro;
 extern crate unicode_xid;
 
@@ -572,7 +573,7 @@ pub use error::parse_error;
 /// #
 /// # fn main() {}
 /// ```
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "parsing", feature = "proc-macro"))]
 pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,

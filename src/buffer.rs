@@ -127,6 +127,7 @@
 // and caution should be used when editing it. The public-facing interface is
 // 100% safe but the implementation is fragile internally.
 
+#[cfg(feature = "proc-macro")]
 use proc_macro as pm;
 use proc_macro2::{Delimiter, Literal, Span, Term, TokenStream};
 use proc_macro2::{Group, TokenTree, Op};
@@ -219,6 +220,7 @@ impl TokenBuffer {
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
     /// `TokenStream`.
+    #[cfg(feature = "proc-macro")]
     pub fn new(stream: pm::TokenStream) -> TokenBuffer {
         Self::new2(stream.into())
     }

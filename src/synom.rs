@@ -149,6 +149,7 @@
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
+#[cfg(feature = "proc-macro")]
 use proc_macro;
 use proc_macro2;
 
@@ -225,6 +226,7 @@ pub trait Parser: Sized {
     fn parse2(self, tokens: proc_macro2::TokenStream) -> Result<Self::Output, ParseError>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
+    #[cfg(feature = "proc-macro")]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output, ParseError> {
         self.parse2(tokens.into())
     }
