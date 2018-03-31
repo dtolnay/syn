@@ -293,7 +293,7 @@ pub use data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, Vis
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use expr::{Expr, ExprAddrOf, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
+pub use expr::{Expr, ExprReference, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
                ExprBox, ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue,
                ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
                ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprParen, ExprPath,

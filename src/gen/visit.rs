@@ -74,8 +74,6 @@ fn visit_derive_input(&mut self, i: &'ast DeriveInput) { visit_derive_input(self
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr(&mut self, i: &'ast Expr) { visit_expr(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-fn visit_expr_addr_of(&mut self, i: &'ast ExprAddrOf) { visit_expr_addr_of(self, i) }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_array(&mut self, i: &'ast ExprArray) { visit_expr_array(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_assign(&mut self, i: &'ast ExprAssign) { visit_expr_assign(self, i) }
@@ -129,6 +127,8 @@ fn visit_expr_paren(&mut self, i: &'ast ExprParen) { visit_expr_paren(self, i) }
 fn visit_expr_path(&mut self, i: &'ast ExprPath) { visit_expr_path(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_range(&mut self, i: &'ast ExprRange) { visit_expr_range(self, i) }
+# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+fn visit_expr_reference(&mut self, i: &'ast ExprReference) { visit_expr_reference(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_repeat(&mut self, i: &'ast ExprRepeat) { visit_expr_repeat(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
@@ -733,8 +733,8 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
         Expr::Path(ref _binding_0, ) => {
             _visitor.visit_expr_path(_binding_0);
         }
-        Expr::AddrOf(ref _binding_0, ) => {
-            full!(_visitor.visit_expr_addr_of(_binding_0));
+        Expr::Reference(ref _binding_0, ) => {
+            full!(_visitor.visit_expr_reference(_binding_0));
         }
         Expr::Break(ref _binding_0, ) => {
             full!(_visitor.visit_expr_break(_binding_0));
@@ -773,13 +773,6 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
             _visitor.visit_expr_verbatim(_binding_0);
         }
     }
-}
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
-pub fn visit_expr_addr_of<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprAddrOf) {
-    for it in & _i . attrs { _visitor.visit_attribute(it) };
-    tokens_helper(_visitor, &(& _i . and_token).0);
-    if let Some(ref it) = _i . mutability { tokens_helper(_visitor, &(it).0) };
-    _visitor.visit_expr(& * _i . expr);
 }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_array<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprArray) {
@@ -978,6 +971,13 @@ pub fn visit_expr_range<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     if let Some(ref it) = _i . from { _visitor.visit_expr(& * * it) };
     _visitor.visit_range_limits(& _i . limits);
     if let Some(ref it) = _i . to { _visitor.visit_expr(& * * it) };
+}
+# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+pub fn visit_expr_reference<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprReference) {
+    for it in & _i . attrs { _visitor.visit_attribute(it) };
+    tokens_helper(_visitor, &(& _i . and_token).0);
+    if let Some(ref it) = _i . mutability { tokens_helper(_visitor, &(it).0) };
+    _visitor.visit_expr(& * _i . expr);
 }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_repeat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprRepeat) {

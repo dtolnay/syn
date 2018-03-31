@@ -406,7 +406,7 @@ ast_enum_of_structs! {
         /// A referencing operation: `&a` or `&mut a`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub AddrOf(ExprAddrOf #full {
+        pub Reference(ExprReference #full {
             pub attrs: Vec<Attribute>,
             pub and_token: Token![&],
             pub mutability: Option<Token![mut]>,
@@ -589,7 +589,7 @@ impl Expr {
             | Expr::Index(ExprIndex { ref mut attrs, .. })
             | Expr::Range(ExprRange { ref mut attrs, .. })
             | Expr::Path(ExprPath { ref mut attrs, .. })
-            | Expr::AddrOf(ExprAddrOf { ref mut attrs, .. })
+            | Expr::Reference(ExprReference { ref mut attrs, .. })
             | Expr::Break(ExprBreak { ref mut attrs, .. })
             | Expr::Continue(ExprContinue { ref mut attrs, .. })
             | Expr::Return(ExprReturn { ref mut attrs, .. })
@@ -1402,7 +1402,7 @@ pub mod parsing {
             and: punct!(&) >>
             mutability: option!(keyword!(mut)) >>
             expr: call!(unary_expr, allow_struct, true) >>
-            (ExprAddrOf {
+            (ExprReference {
                 attrs: Vec::new(),
                 and_token: and,
                 mutability: mutability,
@@ -3219,7 +3219,7 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprAddrOf {
+    impl ToTokens for ExprReference {
         fn to_tokens(&self, tokens: &mut Tokens) {
             tokens.append_all(self.attrs.outer());
             self.and_token.to_tokens(tokens);
