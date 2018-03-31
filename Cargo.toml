@@ -7,6 +7,7 @@ description = "Nom parser for Rust source code"
 repository = "https://github.com/dtolnay/syn"
 documentation = "https://docs.rs/syn"
 categories = ["development-tools::procedural-macro-helpers"]
+readme = "README.md"
 include = ["/Cargo.toml", "/src/**/*.rs", "/README.md", "/LICENSE-APACHE", "/LICENSE-MIT"]
 
 [[example]]
