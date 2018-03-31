@@ -1365,7 +1365,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemImpl "impl item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::parse_outer) >>
         defaultness: option!(keyword!(default)) >>
         unsafety: option!(keyword!(unsafe)) >>
         impl_: keyword!(impl) >>
@@ -1382,9 +1382,16 @@ pub mod parsing {
         ) >>
         self_ty: syn!(Type) >>
         where_clause: option!(syn!(WhereClause)) >>
-        body: braces!(many0!(ImplItem::parse)) >>
+        inner: braces!(tuple!(
+            many0!(Attribute::parse_inner),
+            many0!(ImplItem::parse)
+        )) >>
         (ItemImpl {
-            attrs: attrs,
+            attrs: {
+                let mut attrs = outer_attrs;
+                attrs.extend((inner.1).0);
+                attrs
+            },
             defaultness: defaultness,
             unsafety: unsafety,
             impl_token: impl_,
@@ -1394,8 +1401,8 @@ pub mod parsing {
             },
             trait_: polarity_path,
             self_ty: Box::new(self_ty),
-            brace_token: body.0,
-            items: body.1,
+            brace_token: inner.0,
+            items: (inner.1).1,
         })
     ));
 
@@ -1728,6 +1735,7 @@ mod printing {
             self.self_ty.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 tokens.append_all(&self.items);
             });
         }
