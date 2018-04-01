@@ -143,6 +143,21 @@ impl Generics {
     pub fn const_params_mut(&mut self) -> ConstParamsMut {
         ConstParamsMut(self.params.iter_mut())
     }
+
+    /// Initializes an empty `where`-clause if there is not one present already.
+    pub fn make_where_clause(&mut self) -> &mut WhereClause {
+        // This is Option::get_or_insert_with in Rust 1.20.
+        if self.where_clause.is_none() {
+            self.where_clause = Some(WhereClause {
+                where_token: Default::default(),
+                predicates: Punctuated::new(),
+            });
+        }
+        match self.where_clause {
+            Some(ref mut where_clause) => where_clause,
+            None => unreachable!(),
+        }
+    }
 }
 
 pub struct TypeParams<'a>(Iter<'a, GenericParam>);
