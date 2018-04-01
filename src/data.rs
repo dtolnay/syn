@@ -134,7 +134,7 @@ ast_enum_of_structs! {
             pub pub_token: Token![pub],
         }),
 
-        /// A crate-level visibility: `pub(crate)`.
+        /// A crate-level visibility: `crate`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
@@ -143,7 +143,7 @@ ast_enum_of_structs! {
         }),
 
         /// A visibility level restricted to some path: `pub(self)` or
-        /// `pub(super)` or `pub(in some::module)`.
+        /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
