@@ -189,10 +189,10 @@ fn test_enum() {
                 tts: TokenStream::from_iter(vec![
                     op('='),
                     lit(Literal::string(
-                        "/// See the std::result module documentation for details.",
+                        " See the std::result module documentation for details.",
                     )),
                 ]),
-                is_sugared_doc: true,
+                is_sugared_doc: false,
             },
             Attribute {
                 bracket_token: Default::default(),
@@ -329,7 +329,7 @@ fn test_enum() {
             ident: "doc".into(),
             eq_token: Default::default(),
             lit: Lit::Str(LitStr::new(
-                "/// See the std::result module documentation for details.",
+                " See the std::result module documentation for details.",
                 Span::call_site(),
             )),
         }.into(),

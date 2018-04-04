@@ -12,14 +12,16 @@ extern crate syntax_pos;
 use self::syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
                         ImplItemKind, Item, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
                         NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
-                        Visibility, WhereClause};
+                        Visibility, WhereClause, AttrStyle, Ident};
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
-use self::syntax::parse::token::{Lit, Token};
+use self::syntax::parse::token::{Lit, Token, DelimToken};
+use self::syntax::parse::lexer::comments;
 use self::syntax::ptr::P;
 use self::syntax::symbol::Symbol;
 use self::syntax::util::move_map::MoveMap;
 use self::syntax::util::small_vector::SmallVector;
+use self::syntax::tokenstream::{TokenStream, Delimited, TokenTree};
 
 use self::syntax::ast;
 use self::syntax_pos::{Span, DUMMY_SP};
@@ -245,6 +247,38 @@ impl Folder for Respanner {
     fn fold_where_clause(&mut self, mut clause: WhereClause) -> WhereClause {
         clause.span = self.new_span(clause.span);
         fold::noop_fold_where_clause(clause, self)
+    }
+
+    fn fold_tts(&mut self, tts: TokenStream) -> TokenStream {
+        let mut tokens = Vec::new();
+        for tt in tts.into_trees() {
+            let c = match tt {
+                TokenTree::Token(_, Token::DocComment(c)) => c,
+                _ => {
+                    tokens.push(tt);
+                    continue
+                }
+            };
+            let contents = comments::strip_doc_comment_decoration(&c.as_str());
+            let style = comments::doc_comment_style(&c.as_str());
+            tokens.push(TokenTree::Token(DUMMY_SP, Token::Pound));
+            if style == AttrStyle::Inner {
+                tokens.push(TokenTree::Token(DUMMY_SP, Token::Not));
+            }
+            let lit = Lit::Str_(Symbol::intern(&contents));
+            let mut tts = vec![
+                TokenTree::Token(DUMMY_SP, Token::Ident(Ident::from_str("doc"), false)),
+                TokenTree::Token(DUMMY_SP, Token::Eq),
+                TokenTree::Token(DUMMY_SP, Token::Literal(lit, None)),
+            ];
+            tokens.push(TokenTree::Delimited(DUMMY_SP, Delimited {
+                delim: DelimToken::Bracket,
+                tts: tts.into_iter()
+                    .collect::<TokenStream>()
+                    .into()
+            }));
+        }
+        tokens.into_iter().map(|tt| self.fold_tt(tt)).collect()
     }
 }
 
