@@ -117,10 +117,6 @@ impl Ident {
             panic!("ident is not allowed to be a lifetime; use syn::Lifetime");
         }
 
-        if s == "_" {
-            panic!("`_` is not a valid ident; use syn::token::Underscore");
-        }
-
         if s.bytes().all(|digit| digit >= b'0' && digit <= b'9') {
             panic!("ident cannot be a number, use syn::Index instead");
         }

@@ -80,7 +80,6 @@ fn ident_new_lifetime() {
 }
 
 #[test]
-#[should_panic(expected = "`_` is not a valid ident; use syn::token::Underscore")]
 fn ident_new_underscore() {
     new("_");
 }
