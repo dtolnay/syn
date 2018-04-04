@@ -220,6 +220,9 @@ impl TokenBuffer {
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
     /// `TokenStream`.
+    ///
+    /// *This method is available if Syn is built with both the `"parsing"` and
+    /// `"proc-macro"` features.*
     #[cfg(feature = "proc-macro")]
     pub fn new(stream: pm::TokenStream) -> TokenBuffer {
         Self::new2(stream.into())
