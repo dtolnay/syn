@@ -254,6 +254,8 @@
 //!   types.
 //! - **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
 //!   types.
+//! - **`proc-macro`** *(enabled by default)* — Runtime dependency on the
+//!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/0.13.1")]
@@ -540,7 +542,8 @@ pub use error::parse_error;
 ///
 /// [`syn::parse2`]: fn.parse2.html
 ///
-/// *This function is available if Syn is built with the `"parsing"` feature.*
+/// *This function is available if Syn is built with both the `"parsing"` and
+/// `"proc-macro"` features.*
 ///
 /// # Examples
 ///
