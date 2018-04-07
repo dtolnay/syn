@@ -9,8 +9,8 @@
 extern crate proc_macro2;
 extern crate syn;
 
+use proc_macro2::{Span, TokenStream};
 use std::str::FromStr;
-use proc_macro2::{TokenStream, Span};
 use syn::Ident;
 use syn::synom::ParseError;
 

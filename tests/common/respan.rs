@@ -9,19 +9,18 @@
 extern crate syntax;
 extern crate syntax_pos;
 
-use self::syntax::ast::{Attribute, Expr, ExprKind, ImplItem,
-                        ImplItemKind, Item, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
-                        NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind,
-                        Visibility, WhereClause, AttrStyle, Ident};
+use self::syntax::ast::{AttrStyle, Attribute, Expr, ExprKind, Ident, ImplItem, ImplItemKind, Item,
+                        ItemKind, Mac, MetaItem, MetaItemKind, MethodSig, NestedMetaItem,
+                        NestedMetaItemKind, TraitItem, TraitItemKind, Visibility, WhereClause};
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
-use self::syntax::parse::token::{Lit, Token, DelimToken};
 use self::syntax::parse::lexer::comments;
+use self::syntax::parse::token::{DelimToken, Lit, Token};
 use self::syntax::ptr::P;
 use self::syntax::symbol::Symbol;
+use self::syntax::tokenstream::{Delimited, TokenStream, TokenTree};
 use self::syntax::util::move_map::MoveMap;
 use self::syntax::util::small_vector::SmallVector;
-use self::syntax::tokenstream::{TokenStream, Delimited, TokenTree};
 
 use self::syntax::ast;
 use self::syntax_pos::{Span, DUMMY_SP};
@@ -208,7 +207,7 @@ impl Folder for Respanner {
                 TokenTree::Token(_, Token::DocComment(c)) => c,
                 _ => {
                     tokens.push(tt);
-                    continue
+                    continue;
                 }
             };
             let contents = comments::strip_doc_comment_decoration(&c.as_str());
@@ -223,12 +222,13 @@ impl Folder for Respanner {
                 TokenTree::Token(DUMMY_SP, Token::Eq),
                 TokenTree::Token(DUMMY_SP, Token::Literal(lit, None)),
             ];
-            tokens.push(TokenTree::Delimited(DUMMY_SP, Delimited {
-                delim: DelimToken::Bracket,
-                tts: tts.into_iter()
-                    .collect::<TokenStream>()
-                    .into()
-            }));
+            tokens.push(TokenTree::Delimited(
+                DUMMY_SP,
+                Delimited {
+                    delim: DelimToken::Bracket,
+                    tts: tts.into_iter().collect::<TokenStream>().into(),
+                },
+            ));
         }
         tokens.into_iter().map(|tt| self.fold_tt(tt)).collect()
     }
