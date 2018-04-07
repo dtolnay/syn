@@ -244,15 +244,12 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
         fn fold_field(&mut self, f: Field) -> Field {
             Field {
-                ident: self.fold_ident(f.ident),
                 expr: if f.is_shorthand {
                     f.expr.map(|e| fold::noop_fold_expr(e, self))
                 } else {
                     self.fold_expr(f.expr)
                 },
-                span: self.new_span(f.span),
-                is_shorthand: f.is_shorthand,
-                attrs: fold::fold_thin_attrs(f.attrs, self),
+                ..f
             }
         }
 

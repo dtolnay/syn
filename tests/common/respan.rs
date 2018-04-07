@@ -9,7 +9,7 @@
 extern crate syntax;
 extern crate syntax_pos;
 
-use self::syntax::ast::{Attribute, Expr, ExprKind, FnDecl, FunctionRetTy, ImplItem,
+use self::syntax::ast::{Attribute, Expr, ExprKind, ImplItem,
                         ImplItemKind, Item, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
                         NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind,
                         Visibility, WhereClause, AttrStyle, Ident};
@@ -87,45 +87,17 @@ impl Folder for Respanner {
                     }
                     ExprKind::Binary(op, lhs, rhs) => {
                         // default fold_expr does not fold the op span
-                        ExprKind::Binary(
-                            self.fold_spanned(op),
-                            self.fold_expr(lhs),
-                            self.fold_expr(rhs),
-                        )
+                        ExprKind::Binary(self.fold_spanned(op), lhs, rhs)
                     }
                     ExprKind::AssignOp(op, lhs, rhs) => {
                         // default fold_expr does not fold the op span
-                        ExprKind::AssignOp(
-                            self.fold_spanned(op),
-                            self.fold_expr(lhs),
-                            self.fold_expr(rhs),
-                        )
+                        ExprKind::AssignOp(self.fold_spanned(op), lhs, rhs)
                     }
                     other => other,
                 },
                 ..folded
             }
         })
-    }
-
-    fn fold_fn_decl(&mut self, decl: P<FnDecl>) -> P<FnDecl> {
-        decl.map(
-            |FnDecl {
-                 inputs,
-                 output,
-                 variadic,
-             }| {
-                FnDecl {
-                    inputs: inputs.move_map(|x| self.fold_arg(x)),
-                    output: match output {
-                        FunctionRetTy::Ty(ty) => FunctionRetTy::Ty(self.fold_ty(ty)),
-                        // default fold_fn_decl does not fold this span
-                        FunctionRetTy::Default(span) => FunctionRetTy::Default(self.new_span(span)),
-                    },
-                    variadic,
-                }
-            },
-        )
     }
 
     fn fold_trait_item(&mut self, mut i: TraitItem) -> SmallVector<TraitItem> {
@@ -135,6 +107,7 @@ impl Folder for Respanner {
             node: match noop.node {
                 TraitItemKind::Method(sig, body) => TraitItemKind::Method(
                     MethodSig {
+                        // default fold_trait_item does not fold this span
                         constness: self.fold_spanned(sig.constness),
                         ..sig
                     },
@@ -153,6 +126,7 @@ impl Folder for Respanner {
             node: match noop.node {
                 ImplItemKind::Method(sig, body) => ImplItemKind::Method(
                     MethodSig {
+                        // default fold_impl_item does not fold this span
                         constness: self.fold_spanned(sig.constness),
                         ..sig
                     },
@@ -221,8 +195,8 @@ impl Folder for Respanner {
         fold::noop_fold_vis(self.fold_spanned(vis), self)
     }
 
-    // noop_fold_where_clause doesn't modify the span.
     fn fold_where_clause(&mut self, mut clause: WhereClause) -> WhereClause {
+        // default fold_where_clause does not fold the span
         clause.span = self.new_span(clause.span);
         fold::noop_fold_where_clause(clause, self)
     }
