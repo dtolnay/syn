@@ -209,7 +209,6 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
-    use syntax::codemap;
     use syntax::ext::quote::rt::DUMMY_SP;
     use syntax::fold::{self, Folder};
     use syntax::util::ThinVec;
@@ -245,7 +244,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
         fn fold_field(&mut self, f: Field) -> Field {
             Field {
-                ident: codemap::respan(f.ident.span, self.fold_ident(f.ident.node)),
+                ident: self.fold_ident(f.ident),
                 expr: if f.is_shorthand {
                     f.expr.map(|e| fold::noop_fold_expr(e, self))
                 } else {

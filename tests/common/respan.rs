@@ -9,9 +9,9 @@
 extern crate syntax;
 extern crate syntax_pos;
 
-use self::syntax::ast::{Attribute, Expr, ExprKind, Field, FnDecl, FunctionRetTy, ImplItem,
+use self::syntax::ast::{Attribute, Expr, ExprKind, FnDecl, FunctionRetTy, ImplItem,
                         ImplItemKind, Item, ItemKind, Mac, MetaItem, MetaItemKind, MethodSig,
-                        NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind, TyParam,
+                        NestedMetaItem, NestedMetaItemKind, TraitItem, TraitItemKind,
                         Visibility, WhereClause, AttrStyle, Ident};
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
@@ -108,14 +108,6 @@ impl Folder for Respanner {
         })
     }
 
-    fn fold_ty_param(&mut self, tp: TyParam) -> TyParam {
-        TyParam {
-            // default fold_ty_param does not fold the span
-            span: self.new_span(tp.span),
-            ..fold::noop_fold_ty_param(tp, self)
-        }
-    }
-
     fn fold_fn_decl(&mut self, decl: P<FnDecl>) -> P<FnDecl> {
         decl.map(
             |FnDecl {
@@ -134,20 +126,6 @@ impl Folder for Respanner {
                 }
             },
         )
-    }
-
-    fn fold_field(&mut self, field: Field) -> Field {
-        Field {
-            ident: codemap::respan(
-                // default fold_field does not fold this span
-                self.new_span(field.ident.span),
-                self.fold_ident(field.ident.node),
-            ),
-            expr: self.fold_expr(field.expr),
-            span: self.new_span(field.span),
-            is_shorthand: field.is_shorthand,
-            attrs: ast::ThinVec::new(),
-        }
     }
 
     fn fold_trait_item(&mut self, mut i: TraitItem) -> SmallVector<TraitItem> {
@@ -193,9 +171,9 @@ impl Folder for Respanner {
     }
 
     fn fold_meta_item(&mut self, meta_item: MetaItem) -> MetaItem {
-        let MetaItem { name, node, span } = meta_item;
+        let MetaItem { ident, node, span } = meta_item;
         MetaItem {
-            name,
+            ident,
             node: match node {
                 MetaItemKind::Word => MetaItemKind::Word,
                 MetaItemKind::List(nested) => {
