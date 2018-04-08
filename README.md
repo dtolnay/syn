@@ -242,6 +242,8 @@ available.
   types.
 - **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
   types.
+- **`proc-macro`** *(enabled by default)* — Runtime dependency on the dynamic
+  library libproc_macro from rustc toolchain.
 
 ## Nightly features
 
