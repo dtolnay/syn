@@ -4,8 +4,10 @@ version = "0.0.0"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 publish = false
 
-[dependencies]
-syn = { path = "../..", features = ["full", "extra-traits"] }
+[dependencies.syn]
+path = "../.."
+default-features = false
+features = ["parsing", "full", "extra-traits"]
 
 [[bin]]
 name = "dump-syntax"
