@@ -177,7 +177,6 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Panics if the sequence is empty or already has a trailing punctuation.
     pub fn push_punct(&mut self, punctuation: P) {
-        assert!(!self.is_empty()); // redundant
         assert!(self.last.is_some());
         let last = self.last.take().unwrap();
         self.inner.push((*last, punctuation));
