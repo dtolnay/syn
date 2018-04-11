@@ -352,7 +352,7 @@ impl<'a, T, P> Iterator for Pairs<'a, T, P> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|&(ref t, ref p)| Pair::Punctuated(t, p))
-            .or_else(|| self.last.next().map(|t| Pair::End(t)))
+            .or_else(|| self.last.next().map(Pair::End))
     }
 }
 
@@ -371,7 +371,7 @@ impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|&mut (ref mut t, ref mut p)| Pair::Punctuated(t, p))
-            .or_else(|| self.last.next().map(|t| Pair::End(t)))
+            .or_else(|| self.last.next().map(Pair::End))
     }
 }
 
@@ -390,7 +390,7 @@ impl<T, P> Iterator for IntoPairs<T, P> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|(t, p)| Pair::Punctuated(t, p))
-            .or_else(|| self.last.next().map(|t| Pair::End(t)))
+            .or_else(|| self.last.next().map(Pair::End))
     }
 }
 
