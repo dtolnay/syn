@@ -245,7 +245,12 @@ where
 #[cfg(feature = "extra-traits")]
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.inner.fmt(f) // TODO: ???
+        let mut list = f.debug_list();
+        list.entries(&self.inner);
+        for t in self.last.iter() {
+            list.entry(&*t);
+        }
+        list.finish()
     }
 }
 
