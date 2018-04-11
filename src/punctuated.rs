@@ -30,7 +30,6 @@
 #[cfg(any(feature = "full", feature = "derive"))]
 use std::iter;
 use std::iter::FromIterator;
-use std::mem;
 use std::ops::{Index, IndexMut};
 use std::option;
 use std::slice;
@@ -180,15 +179,15 @@ impl<T, P> Punctuated<T, P> {
     pub fn push_punct(&mut self, punctuation: P) {
         assert!(!self.is_empty()); // redundant
         assert!(self.last.is_some());
-        let last = mem::replace(&mut self.last, None);
-        self.inner.push((*last.unwrap(), punctuation));
+        let last = self.last.take().unwrap();
+        self.inner.push((*last, punctuation));
     }
 
     /// Removes the last punctuated pair from this sequence, or `None` if the
     /// sequence is empty.
     pub fn pop(&mut self) -> Option<Pair<T, P>> {
         if self.last.is_some() {
-            mem::replace(&mut self.last, None).map(|t| Pair::End(*t))
+            self.last.take().map(|t| Pair::End(*t))
         } else {
             self.inner.pop().map(|(t, d)| Pair::Punctuated(t, d))
         }
