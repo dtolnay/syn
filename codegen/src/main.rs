@@ -124,7 +124,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 
                 // Look up the submodule file, and recursively parse it.
                 // XXX: Only handles same-directory .rs file submodules.
-                let path = parent.join(&format!("{}.rs", item.ident.as_ref()));
+                let path = parent.join(&format!("{}.rs", item.ident.as_str()));
                 load_file(path, &features, lookup)?;
             }
             Item::Macro(item) => {
@@ -158,7 +158,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
             }
             Item::Struct(item) => {
                 let ident = item.ident;
-                if EXTRA_TYPES.contains(&ident.as_ref()) {
+                if EXTRA_TYPES.contains(&ident.as_str()) {
                     lookup.insert(ident, AstItem {
                         ast: DeriveInput {
                             ident: ident,
@@ -348,7 +348,7 @@ mod codegen {
 
     fn under_name(name: Ident) -> Ident {
         use inflections::Inflect;
-        name.as_ref().to_snake_case().into()
+        name.as_str().to_snake_case().into()
     }
 
     enum RelevantType<'a> {
@@ -366,7 +366,7 @@ mod codegen {
         match *ty {
             Type::Path(TypePath { qself: None, ref path }) => {
                 let last = path.segments.last().unwrap().into_value();
-                match last.ident.as_ref() {
+                match last.ident.as_str() {
                     "Box" => RelevantType::Box(first_arg(&last.arguments)),
                     "Vec" => RelevantType::Vec(first_arg(&last.arguments)),
                     "Punctuated" => RelevantType::Punctuated(first_arg(&last.arguments)),

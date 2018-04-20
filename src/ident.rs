@@ -78,7 +78,7 @@ use proc_macro2::Span;
 /// }
 /// ```
 ///
-/// A string representation of the ident is available through the `as_ref()` and
+/// A string representation of the ident is available through the `as_str()` and
 /// `to_string()` methods.
 ///
 /// ```rust
@@ -86,7 +86,7 @@ use proc_macro2::Span;
 /// # let ident = Ident::from("another_identifier");
 /// #
 /// // Examine the ident as a &str.
-/// let ident_str = ident.as_ref();
+/// let ident_str = ident.as_str();
 /// if ident_str.len() > 60 {
 ///     println!("Very long identifier: {}", ident_str)
 /// }
@@ -143,6 +143,10 @@ impl Ident {
         Ident {
             term: Term::new(s, span),
         }
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.term.as_str()
     }
 
     pub fn span(&self) -> Span {
@@ -225,7 +229,7 @@ where
     T: AsRef<str>,
 {
     fn eq(&self, other: &T) -> bool {
-        self.as_ref() == other.as_ref()
+        self.as_str() == other.as_ref()
     }
 }
 
@@ -239,13 +243,13 @@ impl PartialOrd for Ident {
 
 impl Ord for Ident {
     fn cmp(&self, other: &Ident) -> Ordering {
-        self.as_ref().cmp(other.as_ref())
+        self.as_str().cmp(other.as_str())
     }
 }
 
 impl Hash for Ident {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.as_ref().hash(h);
+        self.as_str().hash(h);
     }
 }
 
