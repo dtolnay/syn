@@ -10,6 +10,7 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
+use std::path::Path;
 
 use proc_macro2::Term;
 use unicode_xid::UnicodeXID;
@@ -198,6 +199,18 @@ impl From<String> for Ident {
 impl AsRef<str> for Ident {
     fn as_ref(&self) -> &str {
         self.term.as_str()
+    }
+}
+
+impl AsRef<Path> for Ident {
+    fn as_ref(&self) -> &Path {
+        Path::new(
+            match self.term.as_str() {
+                "self" => ".",
+                "super" => "..",
+                other => other,
+            }
+        )
     }
 }
 
