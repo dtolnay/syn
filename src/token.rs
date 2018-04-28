@@ -111,13 +111,14 @@ macro_rules! tokens {
             $($keyword:tt pub struct $keyword_name:ident #[$keyword_doc:meta])*
         }
     ) => (
-        $(token_punct! { #[$punct_doc] $punct pub struct $punct_name/$len })*
+        $(token_punct_def! { #[$punct_doc] $punct pub struct $punct_name/$len })*
+        $(token_punct_parser! { $punct pub struct $punct_name })*
         $(token_delimiter! { #[$delimiter_doc] $delimiter pub struct $delimiter_name })*
         $(token_keyword! { #[$keyword_doc] $keyword pub struct $keyword_name })*
     )
 }
 
-macro_rules! token_punct {
+macro_rules! token_punct_def {
     (#[$doc:meta] $s:tt pub struct $name:ident/$len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[$doc]
@@ -164,6 +165,16 @@ macro_rules! token_punct {
             {}
         }
 
+        impl From<Span> for $name {
+            fn from(span: Span) -> Self {
+                $name([span; $len])
+            }
+        }
+    }
+}
+
+macro_rules! token_punct_parser {
+    ($s:tt pub struct $name:ident) => {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
@@ -179,12 +190,6 @@ macro_rules! token_punct {
 
             fn description() -> Option<&'static str> {
                 Some(concat!("`", $s, "`"))
-            }
-        }
-
-        impl From<Span> for $name {
-            fn from(span: Span) -> Self {
-                $name([span; $len])
             }
         }
     }
@@ -319,6 +324,37 @@ macro_rules! token_delimiter {
     }
 }
 
+token_punct_def! {
+    /// `_`
+    "_" pub struct Underscore/1
+}
+
+#[cfg(feature = "printing")]
+impl ::quote::ToTokens for Underscore {
+    fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+        // FIXME: This should really be the following (see #408):
+        // tokens.append(::proc_macro2::Term::new("_", self.0[0]));
+        printing::punct("_", &self.0, tokens);
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl ::Synom for Underscore {
+    fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
+        match input.term() {
+            Some((term, rest)) if term.as_str() == "_" => {
+                Ok((Underscore([term.span()]), rest))
+            }
+            Some(_) => ::parse_error(),
+            None => parsing::punct("_", input, Underscore)
+        }
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("`_`")
+    }
+}
+
 tokens! {
     punct: {
         "+"        pub struct Add/1        /// `+`
@@ -365,7 +401,6 @@ tokens! {
         "*"        pub struct Star/1       /// `*`
         "-"        pub struct Sub/1        /// `-`
         "-="       pub struct SubEq/2      /// `-=`
-        "_"        pub struct Underscore/1 /// `_`
     }
     delimiter: {
         "{"        pub struct Brace        /// `{...}`
