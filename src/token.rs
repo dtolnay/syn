@@ -332,9 +332,7 @@ token_punct_def! {
 #[cfg(feature = "printing")]
 impl ::quote::ToTokens for Underscore {
     fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
-        // FIXME: This should really be the following (see #408):
-        // tokens.append(::proc_macro2::Term::new("_", self.0[0]));
-        printing::punct("_", &self.0, tokens);
+        tokens.append(::proc_macro2::Term::new("_", self.0[0]));
     }
 }
 
