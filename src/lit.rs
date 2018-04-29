@@ -17,7 +17,6 @@ use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
 use {ParseError, Synom};
 
-#[cfg(any(feature = "printing", feature = "parsing", feature = "derive"))]
 use proc_macro2::TokenTree;
 
 #[cfg(feature = "extra-traits")]
