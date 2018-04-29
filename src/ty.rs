@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use punctuated::Punctuated;
 use super::*;
 use proc_macro2::TokenStream;
+use punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "extra-traits")]
@@ -249,8 +249,8 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::Synom;
     use path::parsing::qpath;
+    use synom::Synom;
 
     impl Synom for Type {
         named!(parse -> Self, call!(ambig_ty, true));

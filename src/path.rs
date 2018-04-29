@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use punctuated::Punctuated;
 use super::*;
+use punctuated::Punctuated;
 
 ast_struct! {
     /// A path at which a named item is exported: `std::collections::HashMap`.

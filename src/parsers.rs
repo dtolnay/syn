@@ -723,7 +723,7 @@ macro_rules! reject {
     ($i:expr,) => {{
         let _ = $i;
         $crate::parse_error()
-    }}
+    }};
 }
 
 /// Run a series of parsers and produce all of the results in a tuple.

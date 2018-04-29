@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::error::Error;
 use buffer::Cursor;
+use std::error::Error;
 use std::fmt::{self, Display};
 
 /// The result of a `Synom` parser.

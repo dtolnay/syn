@@ -113,10 +113,10 @@ impl Hash for Lifetime {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::Synom;
     use buffer::Cursor;
     use parse_error;
     use synom::PResult;
+    use synom::Synom;
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
@@ -128,12 +128,7 @@ pub mod parsing {
                 return parse_error();
             }
 
-            Ok((
-                Lifetime {
-                    term: term,
-                },
-                rest,
-            ))
+            Ok((Lifetime { term: term }, rest))
         }
 
         fn description() -> Option<&'static str> {

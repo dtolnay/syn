@@ -211,8 +211,8 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::ext::quote::rt::DUMMY_SP;
     use syntax::fold::{self, Folder};
-    use syntax::util::ThinVec;
     use syntax::util::small_vector::SmallVector;
+    use syntax::util::ThinVec;
 
     fn expr(node: ExprKind) -> P<Expr> {
         P(Expr {

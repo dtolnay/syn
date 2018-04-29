@@ -259,13 +259,17 @@
 
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/0.13.2")]
-#![cfg_attr(feature = "cargo-clippy",
-            allow(const_static_lifetime, doc_markdown, large_enum_variant, match_bool,
-                  redundant_closure, needless_pass_by_value, redundant_field_names))]
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(
+        const_static_lifetime, doc_markdown, large_enum_variant, match_bool, redundant_closure,
+        needless_pass_by_value, redundant_field_names
+    )
+)]
 
-extern crate proc_macro2;
 #[cfg(feature = "proc-macro")]
 extern crate proc_macro;
+extern crate proc_macro2;
 extern crate unicode_xid;
 
 #[cfg(feature = "printing")]
@@ -296,11 +300,11 @@ pub use data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, Vis
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use expr::{Expr, ExprReference, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock,
-               ExprBox, ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue,
-               ExprField, ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex,
-               ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprParen, ExprPath,
-               ExprRange, ExprRepeat, ExprReturn, ExprStruct, ExprTry, ExprTuple, ExprType,
+pub use expr::{Expr, ExprArray, ExprAssign, ExprAssignOp, ExprBinary, ExprBlock, ExprBox,
+               ExprBreak, ExprCall, ExprCast, ExprCatch, ExprClosure, ExprContinue, ExprField,
+               ExprForLoop, ExprGroup, ExprIf, ExprIfLet, ExprInPlace, ExprIndex, ExprLit,
+               ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange,
+               ExprReference, ExprRepeat, ExprReturn, ExprStruct, ExprTry, ExprTuple, ExprType,
                ExprUnary, ExprUnsafe, ExprVerbatim, ExprWhile, ExprWhileLet, ExprYield, Index,
                Member};
 
@@ -374,17 +378,17 @@ pub use ty::{Abi, BareFnArg, BareFnArgName, ReturnType, Type, TypeArray, TypeBar
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod path;
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
+pub use path::PathTokens;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use path::{AngleBracketedGenericArguments, Binding, GenericArgument,
                ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf};
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
-pub use path::PathTokens;
 
 #[cfg(feature = "parsing")]
 pub mod buffer;
+pub mod punctuated;
 #[cfg(feature = "parsing")]
 pub mod synom;
-pub mod punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod tt;
 
@@ -431,7 +435,6 @@ mod gen {
     /// *This module is available if Syn is built with the `"visit"` feature.*
     #[cfg(feature = "visit")]
     pub mod visit;
-
 
     /// Syntax tree traversal to mutate an exclusive borrow of a syntax tree in
     /// place.
@@ -517,7 +520,7 @@ pub use gen::*;
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
-use synom::{Synom, Parser};
+use synom::{Parser, Synom};
 
 #[cfg(feature = "parsing")]
 mod error;
@@ -602,11 +605,9 @@ where
     T: Synom,
 {
     let parser = T::parse;
-    parser.parse2(tokens).map_err(|err| {
-        match T::description() {
-            Some(s) => ParseError::new(format!("failed to parse {}: {}", s, err)),
-            None => err,
-        }
+    parser.parse2(tokens).map_err(|err| match T::description() {
+        Some(s) => ParseError::new(format!("failed to parse {}: {}", s, err)),
+        None => err,
     })
 }
 

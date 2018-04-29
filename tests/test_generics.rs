@@ -43,20 +43,19 @@ fn test_split_for_impl() {
                 colon_token: Some(token::Colon::default()),
             }),
             GenericParam::Type(TypeParam {
-                attrs: vec![
-                    Attribute {
-                        bracket_token: Default::default(),
-                        pound_token: Default::default(),
-                        style: AttrStyle::Outer,
-                        path: "may_dangle".into(),
-                        tts: TokenStream::empty(),
-                        is_sugared_doc: false,
-                    },
-                ],
+                attrs: vec![Attribute {
+                    bracket_token: Default::default(),
+                    pound_token: Default::default(),
+                    style: AttrStyle::Outer,
+                    path: "may_dangle".into(),
+                    tts: TokenStream::empty(),
+                    is_sugared_doc: false,
+                }],
                 ident: "T".into(),
-                bounds: punctuated![
-                    TypeParamBound::Lifetime(Lifetime::new("'a", Span::call_site())),
-                ],
+                bounds: punctuated![TypeParamBound::Lifetime(Lifetime::new(
+                    "'a",
+                    Span::call_site()
+                )),],
                 default: Some(
                     TypeTuple {
                         elems: Default::default(),
@@ -69,24 +68,20 @@ fn test_split_for_impl() {
         ],
         where_clause: Some(WhereClause {
             where_token: Default::default(),
-            predicates: punctuated![
-                WherePredicate::Type(PredicateType {
+            predicates: punctuated![WherePredicate::Type(PredicateType {
+                lifetimes: None,
+                colon_token: Default::default(),
+                bounded_ty: TypePath {
+                    qself: None,
+                    path: "T".into(),
+                }.into(),
+                bounds: punctuated![TypeParamBound::Trait(TraitBound {
+                    paren_token: None,
+                    modifier: TraitBoundModifier::None,
                     lifetimes: None,
-                    colon_token: Default::default(),
-                    bounded_ty: TypePath {
-                        qself: None,
-                        path: "T".into(),
-                    }.into(),
-                    bounds: punctuated![
-                        TypeParamBound::Trait(TraitBound {
-                            paren_token: None,
-                            modifier: TraitBoundModifier::None,
-                            lifetimes: None,
-                            path: "Debug".into(),
-                        }),
-                    ],
-                }),
-            ],
+                    path: "Debug".into(),
+                }),],
+            }),],
         }),
     };
 

@@ -8,14 +8,14 @@
 
 use super::*;
 use derive::{Data, DeriveInput};
-use punctuated::Punctuated;
 use proc_macro2::TokenStream;
+use punctuated::Punctuated;
 use token::{Brace, Paren};
 
 #[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
-#[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
+#[cfg(feature = "extra-traits")]
+use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module or scope.

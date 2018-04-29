@@ -248,7 +248,10 @@ pub trait Parser: Sized {
     }
 }
 
-impl<F, T> Parser for F where F: FnOnce(Cursor) -> PResult<T> {
+impl<F, T> Parser for F
+where
+    F: FnOnce(Cursor) -> PResult<T>,
+{
     type Output = T;
 
     fn parse2(self, tokens: proc_macro2::TokenStream) -> Result<T, ParseError> {

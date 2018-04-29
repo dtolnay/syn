@@ -239,10 +239,10 @@ impl Hash for Ident {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::Synom;
     use buffer::Cursor;
     use parse_error;
     use synom::PResult;
+    use synom::Synom;
 
     impl Synom for Ident {
         fn parse(input: Cursor) -> PResult<Self> {
@@ -266,12 +266,7 @@ pub mod parsing {
                 _ => {}
             }
 
-            Ok((
-                Ident {
-                    term: term,
-                },
-                rest,
-            ))
+            Ok((Ident { term: term }, rest))
         }
 
         fn description() -> Option<&'static str> {

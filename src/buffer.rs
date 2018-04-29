@@ -130,10 +130,10 @@
 #[cfg(feature = "proc-macro")]
 use proc_macro as pm;
 use proc_macro2::{Delimiter, Literal, Span, Term, TokenStream};
-use proc_macro2::{Group, TokenTree, Op};
+use proc_macro2::{Group, Op, TokenTree};
 
-use std::ptr;
 use std::marker::PhantomData;
+use std::ptr;
 
 #[cfg(synom_verbose_trace)]
 use std::fmt::{self, Debug};

@@ -111,9 +111,7 @@ impl LitStr {
     pub fn new(value: &str, span: Span) -> Self {
         let mut lit = Literal::string(value);
         lit.set_span(span);
-        LitStr {
-            token: lit,
-        }
+        LitStr { token: lit }
     }
 
     pub fn value(&self) -> String {
@@ -136,7 +134,10 @@ impl LitStr {
 
         // Token stream with every span replaced by the given one.
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
-            stream.into_iter().map(|token| respan_token_tree(token, span)).collect()
+            stream
+                .into_iter()
+                .map(|token| respan_token_tree(token, span))
+                .collect()
         }
 
         // Token tree with every span replaced by the given one.
@@ -336,7 +337,7 @@ macro_rules! lit_extra_traits {
                 self.$field.to_string().hash(state);
             }
         }
-    }
+    };
 }
 
 impl LitVerbatim {
@@ -412,10 +413,10 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use synom::Synom;
     use buffer::Cursor;
     use parse_error;
     use synom::PResult;
+    use synom::Synom;
 
     impl Synom for Lit {
         fn parse(input: Cursor) -> PResult<Self> {
@@ -559,9 +560,9 @@ mod printing {
 
 mod value {
     use super::*;
+    use proc_macro2::TokenStream;
     use std::char;
     use std::ops::{Index, RangeFrom};
-    use proc_macro2::TokenStream;
 
     impl Lit {
         /// Interpret a Syn literal from a proc-macro2 literal.
@@ -579,42 +580,20 @@ mod value {
             let value = token.to_string();
 
             match value::byte(&value, 0) {
-                b'"' | b'r' => {
-                    return Lit::Str(LitStr {
-                        token: token,
-                    })
-                }
+                b'"' | b'r' => return Lit::Str(LitStr { token: token }),
                 b'b' => match value::byte(&value, 1) {
-                    b'"' | b'r' => {
-                        return Lit::ByteStr(LitByteStr {
-                            token: token,
-                        })
-                    }
-                    b'\'' => {
-                        return Lit::Byte(LitByte {
-                            token: token,
-                        })
-                    }
+                    b'"' | b'r' => return Lit::ByteStr(LitByteStr { token: token }),
+                    b'\'' => return Lit::Byte(LitByte { token: token }),
                     _ => {}
                 },
-                b'\'' => {
-                    return Lit::Char(LitChar {
-                        token: token,
-                    })
-                }
+                b'\'' => return Lit::Char(LitChar { token: token }),
                 b'0'...b'9' => if number_is_int(&value) {
-                    return Lit::Int(LitInt {
-                        token: token,
-                    });
+                    return Lit::Int(LitInt { token: token });
                 } else if number_is_float(&value) {
-                    return Lit::Float(LitFloat {
-                        token: token,
-                    });
+                    return Lit::Float(LitFloat { token: token });
                 } else {
                     // number overflow
-                    return Lit::Verbatim(LitVerbatim {
-                        token: token,
-                    });
+                    return Lit::Verbatim(LitVerbatim { token: token });
                 },
                 _ => if value == "true" || value == "false" {
                     return Lit::Bool(LitBool {

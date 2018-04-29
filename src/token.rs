@@ -119,7 +119,7 @@ macro_rules! tokens {
 }
 
 macro_rules! token_punct_def {
-    (#[$doc:meta] $s:tt pub struct $name:ident/$len:tt) => {
+    (#[$doc:meta] $s:tt pub struct $name:ident / $len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[$doc]
         ///
@@ -161,8 +161,10 @@ macro_rules! token_punct_def {
         #[cfg(feature = "extra-traits")]
         impl ::std::hash::Hash for $name {
             fn hash<H>(&self, _state: &mut H)
-                where H: ::std::hash::Hasher
-            {}
+            where
+                H: ::std::hash::Hasher,
+            {
+            }
         }
 
         impl From<Span> for $name {
@@ -170,7 +172,7 @@ macro_rules! token_punct_def {
                 $name([span; $len])
             }
         }
-    }
+    };
 }
 
 macro_rules! token_punct_parser {
@@ -192,7 +194,7 @@ macro_rules! token_punct_parser {
                 Some(concat!("`", $s, "`"))
             }
         }
-    }
+    };
 }
 
 macro_rules! token_keyword {
@@ -232,8 +234,10 @@ macro_rules! token_keyword {
         #[cfg(feature = "extra-traits")]
         impl ::std::hash::Hash for $name {
             fn hash<H>(&self, _state: &mut H)
-                where H: ::std::hash::Hasher
-            {}
+            where
+                H: ::std::hash::Hasher,
+            {
+            }
         }
 
         #[cfg(feature = "printing")]
@@ -259,7 +263,7 @@ macro_rules! token_keyword {
                 $name(span)
             }
         }
-    }
+    };
 }
 
 macro_rules! token_delimiter {
@@ -294,23 +298,28 @@ macro_rules! token_delimiter {
         #[cfg(feature = "extra-traits")]
         impl ::std::hash::Hash for $name {
             fn hash<H>(&self, _state: &mut H)
-                where H: ::std::hash::Hasher
-            {}
+            where
+                H: ::std::hash::Hasher,
+            {
+            }
         }
 
         impl $name {
             #[cfg(feature = "printing")]
-            pub fn surround<F>(&self,
-                               tokens: &mut ::quote::Tokens,
-                               f: F)
-                where F: FnOnce(&mut ::quote::Tokens)
+            pub fn surround<F>(&self, tokens: &mut ::quote::Tokens, f: F)
+            where
+                F: FnOnce(&mut ::quote::Tokens),
             {
                 printing::delim($s, &self.0, tokens, f);
             }
 
             #[cfg(feature = "parsing")]
-            pub fn parse<F, R>(tokens: $crate::buffer::Cursor, f: F) -> $crate::synom::PResult<($name, R)>
-                where F: FnOnce($crate::buffer::Cursor) -> $crate::synom::PResult<R>
+            pub fn parse<F, R>(
+                tokens: $crate::buffer::Cursor,
+                f: F,
+            ) -> $crate::synom::PResult<($name, R)>
+            where
+                F: FnOnce($crate::buffer::Cursor) -> $crate::synom::PResult<R>,
             {
                 parsing::delim($s, tokens, $name, f)
             }
@@ -321,7 +330,7 @@ macro_rules! token_delimiter {
                 $name(span)
             }
         }
-    }
+    };
 }
 
 token_punct_def! {
@@ -340,11 +349,9 @@ impl ::quote::ToTokens for Underscore {
 impl ::Synom for Underscore {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
         match input.term() {
-            Some((term, rest)) if term.as_str() == "_" => {
-                Ok((Underscore([term.span()]), rest))
-            }
+            Some((term, rest)) if term.as_str() == "_" => Ok((Underscore([term.span()]), rest)),
             Some(_) => ::parse_error(),
-            None => parsing::punct("_", input, Underscore)
+            None => parsing::punct("_", input, Underscore),
         }
     }
 
@@ -764,7 +771,7 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{Delimiter, Spacing, Span, Term, Op, Group};
+    use proc_macro2::{Delimiter, Group, Op, Spacing, Span, Term};
     use quote::Tokens;
 
     pub fn punct(s: &str, spans: &[Span], tokens: &mut Tokens) {

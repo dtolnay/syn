@@ -486,8 +486,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::Synom;
     use punctuated::Pair;
+    use synom::Synom;
 
     impl Synom for Generics {
         named!(parse -> Self, map!(

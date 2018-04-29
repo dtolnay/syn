@@ -96,15 +96,13 @@ fn test_meta_item_list_name_value() {
         MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: punctuated![
-                NestedMeta::Meta(
-                    MetaNameValue {
-                        ident: "bar".into(),
-                        eq_token: Default::default(),
-                        lit: lit(Literal::i32_unsuffixed(5)),
-                    }.into(),
-                ),
-            ],
+            nested: punctuated![NestedMeta::Meta(
+                MetaNameValue {
+                    ident: "bar".into(),
+                    eq_token: Default::default(),
+                    lit: lit(Literal::i32_unsuffixed(5)),
+                }.into(),
+            ),],
         },
     )
 }
@@ -116,18 +114,16 @@ fn test_meta_item_list_bool_value() {
         MetaList {
             ident: "foo".into(),
             paren_token: Default::default(),
-            nested: punctuated![
-                NestedMeta::Meta(
-                    MetaNameValue {
-                        ident: "bar".into(),
-                        eq_token: Default::default(),
-                        lit: Lit::Bool(LitBool {
-                            value: true,
-                            span: Span::call_site()
-                        }),
-                    }.into(),
-                ),
-            ],
+            nested: punctuated![NestedMeta::Meta(
+                MetaNameValue {
+                    ident: "bar".into(),
+                    eq_token: Default::default(),
+                    lit: Lit::Bool(LitBool {
+                        value: true,
+                        span: Span::call_site()
+                    }),
+                }.into(),
+            ),],
         },
     )
 }
@@ -152,15 +148,13 @@ fn test_meta_item_multiple() {
                     MetaList {
                         ident: "list".into(),
                         paren_token: Default::default(),
-                        nested: punctuated![
-                            NestedMeta::Meta(
-                                MetaNameValue {
-                                    ident: "name2".into(),
-                                    eq_token: Default::default(),
-                                    lit: lit(Literal::i32_unsuffixed(6)),
-                                }.into(),
-                            ),
-                        ],
+                        nested: punctuated![NestedMeta::Meta(
+                            MetaNameValue {
+                                ident: "name2".into(),
+                                eq_token: Default::default(),
+                                lit: lit(Literal::i32_unsuffixed(6)),
+                            }.into(),
+                        ),],
                     }.into(),
                 ),
                 NestedMeta::Meta(Meta::Word("word2".into())),

@@ -32,7 +32,7 @@ pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
             Delimiter::None => return parse_error(),
         };
 
-        return Ok(((delimiter, g.stream().clone()), rest))
+        return Ok(((delimiter, g.stream().clone()), rest));
     }
     parse_error()
 }
@@ -41,7 +41,7 @@ pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
 pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
     if let Some((TokenTree::Group(g), rest)) = input.token_tree() {
         if g.delimiter() == Delimiter::Brace {
-            return Ok(((Brace(g.span()), g.stream().clone()), rest))
+            return Ok(((Brace(g.span()), g.stream().clone()), rest));
         }
     }
     parse_error()
@@ -51,7 +51,7 @@ pub fn braced(input: Cursor) -> PResult<(Brace, TokenStream)> {
 pub fn parenthesized(input: Cursor) -> PResult<(Paren, TokenStream)> {
     if let Some((TokenTree::Group(g), rest)) = input.token_tree() {
         if g.delimiter() == Delimiter::Parenthesis {
-            return Ok(((Paren(g.span()), g.stream().clone()), rest))
+            return Ok(((Paren(g.span()), g.stream().clone()), rest));
         }
     }
     parse_error()

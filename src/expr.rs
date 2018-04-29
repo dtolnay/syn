@@ -7,14 +7,14 @@
 // except according to those terms.
 
 use super::*;
-use punctuated::Punctuated;
 use proc_macro2::{Span, TokenStream};
+use punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
 #[cfg(feature = "full")]
 use std::mem;
+#[cfg(feature = "extra-traits")]
+use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// A Rust expression.
@@ -1020,13 +1020,13 @@ pub mod parsing {
     #[cfg(feature = "full")]
     use path::parsing::ty_no_eq_after;
 
-    #[cfg(feature = "full")]
-    use proc_macro2::TokenStream;
-    use synom::Synom;
     use buffer::Cursor;
     #[cfg(feature = "full")]
     use parse_error;
+    #[cfg(feature = "full")]
+    use proc_macro2::TokenStream;
     use synom::PResult;
+    use synom::Synom;
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
@@ -2818,8 +2818,8 @@ mod printing {
     use super::*;
     #[cfg(feature = "full")]
     use attr::FilterAttrs;
-    use quote::{ToTokens, Tokens};
     use proc_macro2::Literal;
+    use quote::{ToTokens, Tokens};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `Tokens`.

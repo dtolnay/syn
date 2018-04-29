@@ -71,18 +71,17 @@ fn test_struct() {
         vis: Visibility::Public(VisPublic {
             pub_token: Default::default(),
         }),
-        attrs: vec![
-            Attribute {
-                bracket_token: Default::default(),
-                pound_token: Default::default(),
-                style: AttrStyle::Outer,
-                path: "derive".into(),
-                tts: TokenStream::from_iter(vec![
-                    delimited(Parenthesis, vec![word("Debug"), op(','), word("Clone")]),
-                ]),
-                is_sugared_doc: false,
-            },
-        ],
+        attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
+            style: AttrStyle::Outer,
+            path: "derive".into(),
+            tts: TokenStream::from_iter(vec![delimited(
+                Parenthesis,
+                vec![word("Debug"), op(','), word("Clone")],
+            )]),
+            is_sugared_doc: false,
+        }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
             semi_token: None,
@@ -113,24 +112,22 @@ fn test_struct() {
                             qself: None,
                             path: Path {
                                 leading_colon: None,
-                                segments: punctuated![
-                                    PathSegment {
-                                        ident: "Vec".into(),
-                                        arguments: PathArguments::AngleBracketed(
-                                            AngleBracketedGenericArguments {
-                                                colon2_token: None,
-                                                lt_token: Default::default(),
-                                                args: punctuated![
-                                                    GenericArgument::Type(Type::from(TypePath {
-                                                        qself: None,
-                                                        path: "Attribute".into(),
-                                                    })),
-                                                ],
-                                                gt_token: Default::default(),
-                                            },
-                                        ),
-                                    },
-                                ],
+                                segments: punctuated![PathSegment {
+                                    ident: "Vec".into(),
+                                    arguments: PathArguments::AngleBracketed(
+                                        AngleBracketedGenericArguments {
+                                            colon2_token: None,
+                                            lt_token: Default::default(),
+                                            args: punctuated![GenericArgument::Type(Type::from(
+                                                TypePath {
+                                                    qself: None,
+                                                    path: "Attribute".into(),
+                                                }
+                                            )),],
+                                            gt_token: Default::default(),
+                                        },
+                                    ),
+                                },],
                             },
                         }.into(),
                     },
@@ -233,18 +230,16 @@ fn test_enum() {
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
-                        unnamed: punctuated![
-                            Field {
-                                colon_token: None,
-                                ident: None,
-                                vis: Visibility::Inherited,
-                                attrs: Vec::new(),
-                                ty: TypePath {
-                                    qself: None,
-                                    path: "T".into(),
-                                }.into(),
-                            },
-                        ],
+                        unnamed: punctuated![Field {
+                            colon_token: None,
+                            ident: None,
+                            vis: Visibility::Inherited,
+                            attrs: Vec::new(),
+                            ty: TypePath {
+                                qself: None,
+                                path: "T".into(),
+                            }.into(),
+                        },],
                     }),
                     discriminant: None,
                 },
@@ -253,18 +248,16 @@ fn test_enum() {
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
-                        unnamed: punctuated![
-                            Field {
-                                ident: None,
-                                colon_token: None,
-                                vis: Visibility::Inherited,
-                                attrs: Vec::new(),
-                                ty: TypePath {
-                                    qself: None,
-                                    path: "E".into(),
-                                }.into(),
-                            },
-                        ],
+                        unnamed: punctuated![Field {
+                            ident: None,
+                            colon_token: None,
+                            vis: Visibility::Inherited,
+                            attrs: Vec::new(),
+                            ty: TypePath {
+                                qself: None,
+                                path: "E".into(),
+                            }.into(),
+                        },],
                     }),
                     discriminant: None,
                 },
@@ -356,43 +349,41 @@ fn test_attr_with_path() {
     let expected = DeriveInput {
         ident: "Dummy".into(),
         vis: Visibility::Inherited,
-        attrs: vec![
-            Attribute {
-                bracket_token: Default::default(),
-                pound_token: Default::default(),
-                style: AttrStyle::Outer,
-                path: Path {
-                    leading_colon: Some(Default::default()),
-                    segments: punctuated![
-                        PathSegment::from("attr_args"),
-                        PathSegment::from("identity"),
-                    ],
-                },
-                tts: TokenStream::from_iter(vec![
-                    word("fn"),
-                    word("main"),
-                    delimited(Parenthesis, vec![]),
-                    delimited(
-                        Brace,
-                        vec![
-                            word("assert_eq"),
-                            op('!'),
-                            delimited(
-                                Parenthesis,
-                                vec![
-                                    word("foo"),
-                                    delimited(Parenthesis, vec![]),
-                                    op(','),
-                                    lit(Literal::string("Hello, world!")),
-                                ],
-                            ),
-                            op(';'),
-                        ],
-                    ),
-                ]),
-                is_sugared_doc: false,
+        attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
+            style: AttrStyle::Outer,
+            path: Path {
+                leading_colon: Some(Default::default()),
+                segments: punctuated![
+                    PathSegment::from("attr_args"),
+                    PathSegment::from("identity"),
+                ],
             },
-        ],
+            tts: TokenStream::from_iter(vec![
+                word("fn"),
+                word("main"),
+                delimited(Parenthesis, vec![]),
+                delimited(
+                    Brace,
+                    vec![
+                        word("assert_eq"),
+                        op('!'),
+                        delimited(
+                            Parenthesis,
+                            vec![
+                                word("foo"),
+                                delimited(Parenthesis, vec![]),
+                                op(','),
+                                lit(Literal::string("Hello, world!")),
+                            ],
+                        ),
+                        op(';'),
+                    ],
+                ),
+            ]),
+            is_sugared_doc: false,
+        }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
             fields: Fields::Unit,
@@ -418,19 +409,17 @@ fn test_attr_with_non_mod_style_path() {
     let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Inherited,
-        attrs: vec![
-            Attribute {
-                bracket_token: Default::default(),
-                pound_token: Default::default(),
-                style: AttrStyle::Outer,
-                path: Path {
-                    leading_colon: None,
-                    segments: punctuated![PathSegment::from("inert")],
-                },
-                tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
-                is_sugared_doc: false,
+        attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
+            style: AttrStyle::Outer,
+            path: Path {
+                leading_colon: None,
+                segments: punctuated![PathSegment::from("inert")],
             },
-        ],
+            tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
+            is_sugared_doc: false,
+        }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
             fields: Fields::Unit,
@@ -456,19 +445,17 @@ fn test_attr_with_mod_style_path_with_self() {
     let expected = DeriveInput {
         ident: "S".into(),
         vis: Visibility::Inherited,
-        attrs: vec![
-            Attribute {
-                bracket_token: Default::default(),
-                pound_token: Default::default(),
-                style: AttrStyle::Outer,
-                path: Path {
-                    leading_colon: None,
-                    segments: punctuated![PathSegment::from("foo"), PathSegment::from("self")],
-                },
-                tts: TokenStream::empty(),
-                is_sugared_doc: false,
+        attrs: vec![Attribute {
+            bracket_token: Default::default(),
+            pound_token: Default::default(),
+            style: AttrStyle::Outer,
+            path: Path {
+                leading_colon: None,
+                segments: punctuated![PathSegment::from("foo"), PathSegment::from("self")],
             },
-        ],
+            tts: TokenStream::empty(),
+            is_sugared_doc: false,
+        }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
             fields: Fields::Unit,
@@ -504,29 +491,24 @@ fn test_pub_restricted() {
         data: Data::Struct(DataStruct {
             fields: Fields::Unnamed(FieldsUnnamed {
                 paren_token: Default::default(),
-                unnamed: punctuated![
-                    Field {
-                        ident: None,
-                        vis: Visibility::Restricted(VisRestricted {
-                            path: Box::new(Path {
-                                leading_colon: None,
-                                segments: punctuated![
-                                    PathSegment::from("m"),
-                                    PathSegment::from("n")
-                                ],
-                            }),
-                            in_token: Some(Default::default()),
-                            paren_token: Default::default(),
-                            pub_token: Default::default(),
+                unnamed: punctuated![Field {
+                    ident: None,
+                    vis: Visibility::Restricted(VisRestricted {
+                        path: Box::new(Path {
+                            leading_colon: None,
+                            segments: punctuated![PathSegment::from("m"), PathSegment::from("n")],
                         }),
-                        colon_token: None,
-                        attrs: vec![],
-                        ty: TypePath {
-                            qself: None,
-                            path: "u8".into(),
-                        }.into(),
-                    },
-                ],
+                        in_token: Some(Default::default()),
+                        paren_token: Default::default(),
+                        pub_token: Default::default(),
+                    }),
+                    colon_token: None,
+                    attrs: vec![],
+                    ty: TypePath {
+                        qself: None,
+                        path: "u8".into(),
+                    }.into(),
+                },],
             }),
             semi_token: Some(Default::default()),
             struct_token: Default::default(),
