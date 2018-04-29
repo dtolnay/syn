@@ -254,8 +254,9 @@ pub mod parsing {
                 return parse_error();
             }
             match term.as_str() {
+                "_"
                 // From https://doc.rust-lang.org/grammar.html#keywords
-                "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
+                | "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
                 | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
                 | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
                 | "mod" | "move" | "mut" | "offsetof" | "override" | "priv" | "proc" | "pub"
