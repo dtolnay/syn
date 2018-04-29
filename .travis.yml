@@ -33,6 +33,7 @@ script:
           cargo build --no-default-features --features derive &&
           cargo build --no-default-features --features 'derive parsing' &&
           cargo build --no-default-features --features 'derive printing' &&
+          cargo build --no-default-features --features full &&
           cargo build --no-default-features --features 'full parsing' &&
           cargo build --no-default-features --features 'full printing' &&
           cargo build --no-default-features --features 'full parsing printing' &&
