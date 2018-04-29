@@ -461,6 +461,7 @@ tokens! {
 // Unfortunate duplication due to a rustdoc bug.
 // https://github.com/rust-lang/rust/issues/45939
 #[macro_export]
+#[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! Token {
     (+)        => { $crate::token::Add };
     (+=)       => { $crate::token::AddEq };
@@ -560,6 +561,7 @@ macro_rules! Token {
 /// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 #[macro_export]
+#[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! punct {
     ($i:expr, +)   => { call!($i, <$crate::token::Add as $crate::synom::Synom>::parse) };
     ($i:expr, +=)  => { call!($i, <$crate::token::AddEq as $crate::synom::Synom>::parse) };
@@ -617,6 +619,7 @@ macro_rules! punct {
 /// *This macro is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 #[macro_export]
+#[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! keyword {
     ($i:expr, as)       => { call!($i, <$crate::token::As as $crate::synom::Synom>::parse) };
     ($i:expr, auto)     => { call!($i, <$crate::token::Auto as $crate::synom::Synom>::parse) };
