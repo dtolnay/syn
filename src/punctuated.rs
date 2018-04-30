@@ -361,6 +361,12 @@ impl<'a, T, P> Iterator for Pairs<'a, T, P> {
     }
 }
 
+impl<'a, T, P> ExactSizeIterator for Pairs<'a, T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + self.last.len()
+    }
+}
+
 /// An iterator over mutably borrowed pairs of type `Pair<&mut T, &mut P>`.
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
@@ -379,6 +385,12 @@ impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
             .next()
             .map(|&mut (ref mut t, ref mut p)| Pair::Punctuated(t, p))
             .or_else(|| self.last.next().map(Pair::End))
+    }
+}
+
+impl<'a, T, P> ExactSizeIterator for PairsMut<'a, T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + self.last.len()
     }
 }
 
@@ -403,6 +415,12 @@ impl<T, P> Iterator for IntoPairs<T, P> {
     }
 }
 
+impl<T, P> ExactSizeIterator for IntoPairs<T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + self.last.len()
+    }
+}
+
 /// An iterator over owned values of type `T`.
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
@@ -424,13 +442,19 @@ impl<T, P> Iterator for IntoIter<T, P> {
     }
 }
 
+impl<T, P> ExactSizeIterator for IntoIter<T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + self.last.len()
+    }
+}
+
 /// An iterator over borrowed values of type `&T`.
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
 /// [module documentation]: index.html
 pub struct Iter<'a, T: 'a> {
-    inner: Box<Iterator<Item = &'a T> + 'a>,
+    inner: Box<ExactSizeIterator<Item = &'a T> + 'a>,
 }
 
 struct PrivateIter<'a, T: 'a, P: 'a> {
@@ -457,6 +481,12 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T> ExactSizeIterator for Iter<'a, T> {
+    fn len(&self) -> usize {
+        self.inner.len()
+    }
+}
+
 impl<'a, T, P> Iterator for PrivateIter<'a, T, P> {
     type Item = &'a T;
 
@@ -468,13 +498,19 @@ impl<'a, T, P> Iterator for PrivateIter<'a, T, P> {
     }
 }
 
+impl<'a, T, P> ExactSizeIterator for PrivateIter<'a, T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + self.last.len()
+    }
+}
+
 /// An iterator over mutably borrowed values of type `&mut T`.
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
 /// [module documentation]: index.html
 pub struct IterMut<'a, T: 'a> {
-    inner: Box<Iterator<Item = &'a mut T> + 'a>,
+    inner: Box<ExactSizeIterator<Item = &'a mut T> + 'a>,
 }
 
 struct PrivateIterMut<'a, T: 'a, P: 'a> {
@@ -490,6 +526,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     }
 }
 
+impl<'a, T> ExactSizeIterator for IterMut<'a, T> {
+    fn len(&self) -> usize {
+        self.inner.len()
+    }
+}
+
 impl<'a, T, P> Iterator for PrivateIterMut<'a, T, P> {
     type Item = &'a mut T;
 
@@ -498,6 +540,12 @@ impl<'a, T, P> Iterator for PrivateIterMut<'a, T, P> {
             .next()
             .map(|pair| &mut pair.0)
             .or_else(|| self.last.next())
+    }
+}
+
+impl<'a, T, P> ExactSizeIterator for PrivateIterMut<'a, T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + self.last.len()
     }
 }
 
