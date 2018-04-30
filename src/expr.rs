@@ -1591,29 +1591,36 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(expr_nosemi -> Expr, map!(alt!(
-        syn!(ExprIf) => { Expr::If }
-        |
-        syn!(ExprIfLet) => { Expr::IfLet }
-        |
-        syn!(ExprWhile) => { Expr::While }
-        |
-        syn!(ExprWhileLet) => { Expr::WhileLet }
-        |
-        syn!(ExprForLoop) => { Expr::ForLoop }
-        |
-        syn!(ExprLoop) => { Expr::Loop }
-        |
-        syn!(ExprMatch) => { Expr::Match }
-        |
-        syn!(ExprCatch) => { Expr::Catch }
-        |
-        syn!(ExprYield) => { Expr::Yield }
-        |
-        syn!(ExprUnsafe) => { Expr::Unsafe }
-        |
-        syn!(ExprBlock) => { Expr::Block }
-    ), Expr::from));
+    named!(expr_nosemi -> Expr, do_parse!(
+        nosemi: alt!(
+            syn!(ExprIf) => { Expr::If }
+            |
+            syn!(ExprIfLet) => { Expr::IfLet }
+            |
+            syn!(ExprWhile) => { Expr::While }
+            |
+            syn!(ExprWhileLet) => { Expr::WhileLet }
+            |
+            syn!(ExprForLoop) => { Expr::ForLoop }
+            |
+            syn!(ExprLoop) => { Expr::Loop }
+            |
+            syn!(ExprMatch) => { Expr::Match }
+            |
+            syn!(ExprCatch) => { Expr::Catch }
+            |
+            syn!(ExprYield) => { Expr::Yield }
+            |
+            syn!(ExprUnsafe) => { Expr::Unsafe }
+            |
+            syn!(ExprBlock) => { Expr::Block }
+        ) >>
+        // If the next token is a `.` or a `?` it is special-cased to parse
+        // as an expression instead of a blockexpression.
+        not!(punct!(.)) >>
+        not!(punct!(?)) >>
+        (Expr::from(nosemi))
+    ));
 
     impl Synom for ExprLit {
         named!(parse -> Self, do_parse!(
@@ -2405,10 +2412,6 @@ pub mod parsing {
     named!(stmt_blockexpr -> Stmt, do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mut e: expr_nosemi >>
-        // If the next token is a `.` or a `?` it is special-cased to parse as
-        // an expression instead of a blockexpression.
-        not!(punct!(.)) >>
-        not!(punct!(?)) >>
         semi: option!(punct!(;)) >>
         ({
             e.replace_attrs(attrs);
