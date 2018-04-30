@@ -6,8 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! This module contains some simple tests where we can write strings which we
-
 extern crate syn;
 
 macro_rules! should_parse {
