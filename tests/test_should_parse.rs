@@ -44,3 +44,11 @@ should_parse!(generic_associated_type_where, {
         fn foo<T>(&self, t: T) -> Self::Item<T>;
     }
 });
+
+should_parse!(match_with_block_expr, {
+    fn main() {
+        match false {
+            _ => {}.a()
+        }
+    }
+});
