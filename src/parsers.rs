@@ -1262,6 +1262,58 @@ macro_rules! syn {
     };
 }
 
+/// Parse the given word as a keyword.
+///
+/// For words that are keywords in the Rust language, it is better to use the
+/// [`keyword!`] parser which returns a unique type for each keyword.
+///
+/// [`keyword!`]: macro.keyword.html
+///
+/// - **Syntax:** `custom_keyword!(KEYWORD)`
+/// - **Output:** `Ident`
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Ident;
+/// use syn::synom::Synom;
+///
+/// struct Flag {
+///     name: Ident,
+/// }
+///
+/// // Parses the custom keyword `flag` followed by any name for a flag.
+/// //
+/// // Example: `flag Verbose`
+/// impl Synom for Flag {
+///     named!(parse -> Flag, do_parse!(
+///         custom_keyword!(flag) >>
+///         name: syn!(Ident) >>
+///         (Flag { name })
+///     ));
+/// }
+/// #
+/// # fn main() {}
+/// ```
+///
+/// *This macro is available if Syn is built with the `"parsing"` feature.*
+#[macro_export]
+macro_rules! custom_keyword {
+    ($i:expr, $keyword:ident) => {
+        match <$crate::Ident as $crate::synom::Synom>::parse($i) {
+            ::std::result::Result::Err(err) => ::std::result::Result::Err(err),
+            ::std::result::Result::Ok((token, i)) => {
+                if token == stringify!($keyword) {
+                    ::std::result::Result::Ok((token, i))
+                } else {
+                    $crate::parse_error()
+                }
+            }
+        }
+    }
+}
+
 /// Parse inside of `(` `)` parentheses.
 ///
 /// This macro parses a set of balanced parentheses and invokes a sub-parser on

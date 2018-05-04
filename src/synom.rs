@@ -131,6 +131,7 @@
 //! - [`call!`](../macro.call.html)
 //! - [`cond!`](../macro.cond.html)
 //! - [`cond_reduce!`](../macro.cond_reduce.html)
+//! - [`custom_keyword!`](../macro.custom_keyword.html)
 //! - [`do_parse!`](../macro.do_parse.html)
 //! - [`epsilon!`](../macro.epsilon.html)
 //! - [`input_end!`](../macro.input_end.html)
