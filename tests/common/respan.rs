@@ -9,9 +9,11 @@
 extern crate syntax;
 extern crate syntax_pos;
 
-use self::syntax::ast::{AttrStyle, Attribute, Expr, ExprKind, Ident, ImplItem, ImplItemKind, Item,
-                        ItemKind, Mac, MetaItem, MetaItemKind, MethodSig, NestedMetaItem,
-                        NestedMetaItemKind, TraitItem, TraitItemKind, Visibility, WhereClause};
+use self::syntax::ast::{
+    AttrStyle, Attribute, Expr, ExprKind, Ident, ImplItem, ImplItemKind, Item, ItemKind, Mac,
+    MetaItem, MetaItemKind, MethodSig, NestedMetaItem, NestedMetaItemKind, TraitItem,
+    TraitItemKind, Visibility, WhereClause,
+};
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
 use self::syntax::parse::lexer::comments;

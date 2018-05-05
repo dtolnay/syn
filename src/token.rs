@@ -728,7 +728,11 @@ mod parsing {
         Ok((make(T::from_spans(&spans)), tokens))
     }
 
-    pub fn keyword<'a, T>(keyword: &str, tokens: Cursor<'a>, make: fn(Span) -> T) -> PResult<'a, T> {
+    pub fn keyword<'a, T>(
+        keyword: &str,
+        tokens: Cursor<'a>,
+        make: fn(Span) -> T,
+    ) -> PResult<'a, T> {
         if let Some((term, rest)) = tokens.term() {
             if term.as_str() == keyword {
                 return Ok((make(term.span()), rest));

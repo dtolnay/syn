@@ -1311,7 +1311,7 @@ macro_rules! custom_keyword {
                 }
             }
         }
-    }
+    };
 }
 
 /// Parse inside of `(` `)` parentheses.

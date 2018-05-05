@@ -48,7 +48,7 @@ should_parse!(generic_associated_type_where, {
 should_parse!(match_with_block_expr, {
     fn main() {
         match false {
-            _ => {}.a()
+            _ => {}.a(),
         }
     }
 });
