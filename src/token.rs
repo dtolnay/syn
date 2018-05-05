@@ -376,6 +376,7 @@ tokens! {
         ","        pub struct Comma/1      /// `,`
         "/"        pub struct Div/1        /// `/`
         "/="       pub struct DivEq/2      /// `/=`
+        "$"        pub struct Dollar/1     /// `$`
         "."        pub struct Dot/1        /// `.`
         ".."       pub struct Dot2/2       /// `..`
         "..."      pub struct Dot3/3       /// `...`
