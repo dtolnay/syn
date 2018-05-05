@@ -1619,7 +1619,7 @@ pub mod parsing {
         // as an expression instead of a blockexpression.
         not!(punct!(.)) >>
         not!(punct!(?)) >>
-        (Expr::from(nosemi))
+        (nosemi)
     ));
 
     impl Synom for ExprLit {
