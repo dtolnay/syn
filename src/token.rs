@@ -703,7 +703,7 @@ mod parsing {
         }
     }
 
-    pub fn punct<'a, T, R>(s: &str, mut tokens: Cursor<'a>, make: fn(T) -> R) -> PResult<'a, R>
+    pub fn punct<'a, T, R>(s: &str, mut tokens: Cursor<'a>, new: fn(T) -> R) -> PResult<'a, R>
     where
         T: FromSpans,
     {
@@ -726,17 +726,17 @@ mod parsing {
                 _ => return parse_error(),
             }
         }
-        Ok((make(T::from_spans(&spans)), tokens))
+        Ok((new(T::from_spans(&spans)), tokens))
     }
 
     pub fn keyword<'a, T>(
         keyword: &str,
         tokens: Cursor<'a>,
-        make: fn(Span) -> T,
+        new: fn(Span) -> T,
     ) -> PResult<'a, T> {
         if let Some((term, rest)) = tokens.term() {
             if term.as_str() == keyword {
-                return Ok((make(term.span()), rest));
+                return Ok((new(term.span()), rest));
             }
         }
         parse_error()
@@ -745,7 +745,7 @@ mod parsing {
     pub fn delim<'a, F, R, T>(
         delim: &str,
         tokens: Cursor<'a>,
-        make: fn(Span) -> T,
+        new: fn(Span) -> T,
         f: F,
     ) -> PResult<'a, (T, R)>
     where
@@ -764,7 +764,7 @@ mod parsing {
             match f(inside) {
                 Ok((ret, remaining)) => {
                     if remaining.eof() {
-                        return Ok(((make(span), ret), rest));
+                        return Ok(((new(span), ret), rest));
                     }
                 }
                 Err(err) => return Err(err),
