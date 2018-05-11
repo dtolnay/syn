@@ -28,6 +28,9 @@ clone-impls = []
 extra-traits = []
 proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 
+# Features to build for play.rust-lang.org. Not public API.
+playground = ["full", "visit", "visit-mut", "fold", "extra-traits"]
+
 [dependencies]
 proc-macro2 = { version = "0.3", default-features = false }
 quote = { version = "0.5", optional = true, default-features = false }
