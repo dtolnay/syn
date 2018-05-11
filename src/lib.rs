@@ -258,7 +258,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn/0.13.7")]
+#![doc(html_root_url = "https://docs.rs/syn/0.13.8")]
 #![cfg_attr(
     feature = "cargo-clippy",
     allow(
