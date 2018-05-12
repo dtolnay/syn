@@ -30,7 +30,8 @@ use proc_macro2::Span;
 ///
 /// An identifier constructed with `Ident::new` is permitted to be a Rust
 /// keyword, though parsing one through its [`Synom`] implementation rejects
-/// Rust keywords.
+/// Rust keywords. Use `call!(Ident::parse_any)` when parsing to match the
+/// behaviour of `Ident::new`.
 ///
 /// [`Synom`]: synom/trait.Synom.html
 ///
