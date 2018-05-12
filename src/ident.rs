@@ -273,6 +273,23 @@ pub mod parsing {
             Some("identifier")
         }
     }
+    
+    impl Ident {
+        /// Parses any identifier
+        /// 
+        /// This is useful when parsing a DSL which allows Rust keywords as identifiers.
+        pub fn parse_any(input: Cursor) -> PResult<Self> {
+            let (term, rest) = match input.term() {
+                Some(term) => term,
+                _ => return parse_error(),
+            };
+            if term.as_str().starts_with('\'') {
+                return parse_error();
+            }
+
+            Ok((Ident { term: term }, rest))
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
