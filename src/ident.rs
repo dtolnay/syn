@@ -30,7 +30,8 @@ use proc_macro2::Span;
 ///
 /// An identifier constructed with `Ident::new` is permitted to be a Rust
 /// keyword, though parsing one through its [`Synom`] implementation rejects
-/// Rust keywords.
+/// Rust keywords. Use `call!(Ident::parse_any)` when parsing to match the
+/// behaviour of `Ident::new`.
 ///
 /// [`Synom`]: synom/trait.Synom.html
 ///
@@ -271,6 +272,23 @@ pub mod parsing {
 
         fn description() -> Option<&'static str> {
             Some("identifier")
+        }
+    }
+    
+    impl Ident {
+        /// Parses any identifier
+        /// 
+        /// This is useful when parsing a DSL which allows Rust keywords as identifiers.
+        pub fn parse_any(input: Cursor) -> PResult<Self> {
+            let (term, rest) = match input.term() {
+                Some(term) => term,
+                _ => return parse_error(),
+            };
+            if term.as_str().starts_with('\'') {
+                return parse_error();
+            }
+
+            Ok((Ident { term: term }, rest))
         }
     }
 }
