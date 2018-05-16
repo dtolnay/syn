@@ -111,10 +111,11 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{ToTokens, Tokens};
+    use quote::{ToTokens, TokenStreamExt};
+    use proc_macro2::TokenStream;
 
     impl ToTokens for File {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.inner());
             tokens.append_all(&self.items);
         }

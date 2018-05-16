@@ -7,6 +7,7 @@
 // except according to those terms.
 
 use super::*;
+use proc_macro2::Ident;
 use punctuated::Punctuated;
 
 ast_struct! {
@@ -163,10 +164,11 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{ToTokens, Tokens};
+    use quote::ToTokens;
+    use proc_macro2::TokenStream;
 
     impl ToTokens for DeriveInput {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             for attr in self.attrs.outer() {
                 attr.to_tokens(tokens);
             }

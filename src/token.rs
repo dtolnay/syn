@@ -97,7 +97,7 @@
 //! # fn main() {}
 //! ```
 
-use proc_macro2::Span;
+use proc_macro2::{Span, Ident};
 
 macro_rules! tokens {
     (
@@ -179,7 +179,7 @@ macro_rules! token_punct_parser {
     ($s:tt pub struct $name:ident) => {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+            fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
                 printing::punct($s, &self.0, tokens);
             }
         }
@@ -242,7 +242,7 @@ macro_rules! token_keyword {
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+            fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
                 printing::keyword($s, &self.0, tokens);
             }
         }
@@ -255,6 +255,12 @@ macro_rules! token_keyword {
 
             fn description() -> Option<&'static str> {
                 Some(concat!("`", $s, "`"))
+            }
+        }
+
+        impl From<$name> for Ident {
+            fn from(me: $name) -> Ident {
+                Ident::new($s, me.0)
             }
         }
 
@@ -306,9 +312,9 @@ macro_rules! token_delimiter {
 
         impl $name {
             #[cfg(feature = "printing")]
-            pub fn surround<F>(&self, tokens: &mut ::quote::Tokens, f: F)
+            pub fn surround<F>(&self, tokens: &mut ::proc_macro2::TokenStream, f: F)
             where
-                F: FnOnce(&mut ::quote::Tokens),
+                F: FnOnce(&mut ::proc_macro2::TokenStream),
             {
                 printing::delim($s, &self.0, tokens, f);
             }
@@ -340,8 +346,9 @@ token_punct_def! {
 
 #[cfg(feature = "printing")]
 impl ::quote::ToTokens for Underscore {
-    fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
-        tokens.append(::proc_macro2::Term::new("_", self.0[0]));
+    fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
+        use quote::TokenStreamExt;
+        tokens.append(::proc_macro2::Ident::new("_", self.0[0]));
     }
 }
 
@@ -349,8 +356,13 @@ impl ::quote::ToTokens for Underscore {
 impl ::Synom for Underscore {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
         match input.term() {
-            Some((term, rest)) if term.as_str() == "_" => Ok((Underscore([term.span()]), rest)),
-            Some(_) => ::parse_error(),
+            Some((term, rest)) => {
+                if term.to_string() == "_" {
+                    Ok((Underscore([term.span()]), rest))
+                } else {
+                    ::parse_error()
+                }
+            }
             None => parsing::punct("_", input, Underscore),
         }
     }
@@ -713,15 +725,19 @@ mod parsing {
 
         for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
             match tokens.op() {
-                Some((op, rest)) if op.op() == ch => {
-                    if i != s.len() - 1 {
-                        match op.spacing() {
-                            Spacing::Joint => {}
-                            _ => return parse_error(),
+                Some((op, rest)) => {
+                    if op.as_char() == ch {
+                        if i != s.len() - 1 {
+                            match op.spacing() {
+                                Spacing::Joint => {}
+                                _ => return parse_error(),
+                            }
                         }
+                        *slot = op.span();
+                        tokens = rest;
+                    } else {
+                        return parse_error()
                     }
-                    *slot = op.span();
-                    tokens = rest;
                 }
                 _ => return parse_error(),
             }
@@ -735,7 +751,7 @@ mod parsing {
         new: fn(Span) -> T,
     ) -> PResult<'a, T> {
         if let Some((term, rest)) = tokens.term() {
-            if term.as_str() == keyword {
+            if term.to_string() == keyword {
                 return Ok((new(term.span()), rest));
             }
         }
@@ -776,10 +792,10 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{Delimiter, Group, Op, Spacing, Span, Term};
-    use quote::Tokens;
+    use proc_macro2::{Delimiter, Group, Punct, Spacing, Span, Ident, TokenStream};
+    use quote::TokenStreamExt;
 
-    pub fn punct(s: &str, spans: &[Span], tokens: &mut Tokens) {
+    pub fn punct(s: &str, spans: &[Span], tokens: &mut TokenStream) {
         assert_eq!(s.len(), spans.len());
 
         let mut chars = s.chars();
@@ -787,23 +803,23 @@ mod printing {
         let ch = chars.next_back().unwrap();
         let span = spans.next_back().unwrap();
         for (ch, span) in chars.zip(spans) {
-            let mut op = Op::new(ch, Spacing::Joint);
+            let mut op = Punct::new(ch, Spacing::Joint);
             op.set_span(*span);
             tokens.append(op);
         }
 
-        let mut op = Op::new(ch, Spacing::Alone);
+        let mut op = Punct::new(ch, Spacing::Alone);
         op.set_span(*span);
         tokens.append(op);
     }
 
-    pub fn keyword(s: &str, span: &Span, tokens: &mut Tokens) {
-        tokens.append(Term::new(s, *span));
+    pub fn keyword(s: &str, span: &Span, tokens: &mut TokenStream) {
+        tokens.append(Ident::new(s, *span));
     }
 
-    pub fn delim<F>(s: &str, span: &Span, tokens: &mut Tokens, f: F)
+    pub fn delim<F>(s: &str, span: &Span, tokens: &mut TokenStream, f: F)
     where
-        F: FnOnce(&mut Tokens),
+        F: FnOnce(&mut TokenStream),
     {
         let delim = match s {
             "(" => Delimiter::Parenthesis,
@@ -812,7 +828,7 @@ mod printing {
             " " => Delimiter::None,
             _ => panic!("unknown delimiter: {}", s),
         };
-        let mut inner = Tokens::new();
+        let mut inner = TokenStream::empty();
         f(&mut inner);
         let mut g = Group::new(delim, inner.into());
         g.set_span(*span);

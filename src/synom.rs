@@ -213,6 +213,16 @@ impl Synom for proc_macro2::TokenStream {
     }
 }
 
+impl Synom for proc_macro2::Ident {
+    fn parse(input: Cursor) -> PResult<Self> {
+        input.term().ok_or_else(|| ParseError::new("not an ident"))
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("arbitrary token stream")
+    }
+}
+
 /// Parser that can parse Rust tokens into a particular syntax tree node.
 ///
 /// Refer to the [module documentation] for details about parsing in Syn.

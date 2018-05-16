@@ -8,7 +8,7 @@
 
 use super::*;
 use derive::{Data, DeriveInput};
-use proc_macro2::TokenStream;
+use proc_macro2::{TokenStream, Ident};
 use punctuated::Punctuated;
 use token::{Brace, Paren};
 
@@ -1536,10 +1536,11 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{ToTokens, Tokens};
+    use quote::{ToTokens, TokenStreamExt};
+    use proc_macro2::TokenStream;
 
     impl ToTokens for ItemExternCrate {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.extern_token.to_tokens(tokens);
@@ -1554,7 +1555,7 @@ mod printing {
     }
 
     impl ToTokens for ItemUse {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.use_token.to_tokens(tokens);
@@ -1565,7 +1566,7 @@ mod printing {
     }
 
     impl ToTokens for ItemStatic {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.static_token.to_tokens(tokens);
@@ -1580,7 +1581,7 @@ mod printing {
     }
 
     impl ToTokens for ItemConst {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.const_token.to_tokens(tokens);
@@ -1594,13 +1595,13 @@ mod printing {
     }
 
     impl ToTokens for ItemFn {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
-            NamedDecl(&self.decl, self.ident).to_tokens(tokens);
+            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.attrs.inner());
                 tokens.append_all(&self.block.stmts);
@@ -1609,7 +1610,7 @@ mod printing {
     }
 
     impl ToTokens for ItemMod {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.mod_token.to_tokens(tokens);
@@ -1626,7 +1627,7 @@ mod printing {
     }
 
     impl ToTokens for ItemForeignMod {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.abi.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
@@ -1636,7 +1637,7 @@ mod printing {
     }
 
     impl ToTokens for ItemType {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.type_token.to_tokens(tokens);
@@ -1650,7 +1651,7 @@ mod printing {
     }
 
     impl ToTokens for ItemEnum {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.enum_token.to_tokens(tokens);
@@ -1664,7 +1665,7 @@ mod printing {
     }
 
     impl ToTokens for ItemStruct {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.struct_token.to_tokens(tokens);
@@ -1689,7 +1690,7 @@ mod printing {
     }
 
     impl ToTokens for ItemUnion {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.union_token.to_tokens(tokens);
@@ -1701,7 +1702,7 @@ mod printing {
     }
 
     impl ToTokens for ItemTrait {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
@@ -1721,7 +1722,7 @@ mod printing {
     }
 
     impl ToTokens for ItemImpl {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.defaultness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
@@ -1742,7 +1743,7 @@ mod printing {
     }
 
     impl ToTokens for ItemMacro {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.mac.path.to_tokens(tokens);
             self.mac.bang_token.to_tokens(tokens);
@@ -1763,7 +1764,7 @@ mod printing {
     }
 
     impl ToTokens for ItemMacro2 {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.macro_token.to_tokens(tokens);
@@ -1778,13 +1779,13 @@ mod printing {
     }
 
     impl ToTokens for ItemVerbatim {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.tts.to_tokens(tokens);
         }
     }
 
     impl ToTokens for UsePath {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
             self.colon2_token.to_tokens(tokens);
             self.tree.to_tokens(tokens);
@@ -1792,13 +1793,13 @@ mod printing {
     }
 
     impl ToTokens for UseName {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
         }
     }
 
     impl ToTokens for UseRename {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
             self.as_token.to_tokens(tokens);
             self.rename.to_tokens(tokens);
@@ -1806,13 +1807,13 @@ mod printing {
     }
 
     impl ToTokens for UseGlob {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.star_token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for UseGroup {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.brace_token.surround(tokens, |tokens| {
                 self.items.to_tokens(tokens);
             });
@@ -1820,7 +1821,7 @@ mod printing {
     }
 
     impl ToTokens for TraitItemConst {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
@@ -1835,7 +1836,7 @@ mod printing {
     }
 
     impl ToTokens for TraitItemMethod {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.sig.to_tokens(tokens);
             match self.default {
@@ -1853,7 +1854,7 @@ mod printing {
     }
 
     impl ToTokens for TraitItemType {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
@@ -1872,7 +1873,7 @@ mod printing {
     }
 
     impl ToTokens for TraitItemMacro {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
@@ -1880,13 +1881,13 @@ mod printing {
     }
 
     impl ToTokens for TraitItemVerbatim {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.tts.to_tokens(tokens);
         }
     }
 
     impl ToTokens for ImplItemConst {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.defaultness.to_tokens(tokens);
@@ -1901,7 +1902,7 @@ mod printing {
     }
 
     impl ToTokens for ImplItemMethod {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.defaultness.to_tokens(tokens);
@@ -1914,7 +1915,7 @@ mod printing {
     }
 
     impl ToTokens for ImplItemType {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.defaultness.to_tokens(tokens);
@@ -1928,7 +1929,7 @@ mod printing {
     }
 
     impl ToTokens for ImplItemMacro {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
@@ -1936,22 +1937,22 @@ mod printing {
     }
 
     impl ToTokens for ImplItemVerbatim {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.tts.to_tokens(tokens);
         }
     }
 
     impl ToTokens for ForeignItemFn {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            NamedDecl(&self.decl, self.ident).to_tokens(tokens);
+            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for ForeignItemStatic {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.static_token.to_tokens(tokens);
@@ -1964,7 +1965,7 @@ mod printing {
     }
 
     impl ToTokens for ForeignItemType {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.type_token.to_tokens(tokens);
@@ -1974,24 +1975,24 @@ mod printing {
     }
 
     impl ToTokens for ForeignItemVerbatim {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.tts.to_tokens(tokens);
         }
     }
 
     impl ToTokens for MethodSig {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
-            NamedDecl(&self.decl, self.ident).to_tokens(tokens);
+            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
         }
     }
 
-    struct NamedDecl<'a>(&'a FnDecl, Ident);
+    struct NamedDecl<'a>(&'a FnDecl, &'a Ident);
 
     impl<'a> ToTokens for NamedDecl<'a> {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.0.fn_token.to_tokens(tokens);
             self.1.to_tokens(tokens);
             self.0.generics.to_tokens(tokens);
@@ -2008,7 +2009,7 @@ mod printing {
     }
 
     impl ToTokens for ArgSelfRef {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.and_token.to_tokens(tokens);
             self.lifetime.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
@@ -2017,14 +2018,14 @@ mod printing {
     }
 
     impl ToTokens for ArgSelf {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for ArgCaptured {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pat.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);

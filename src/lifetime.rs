@@ -10,7 +10,7 @@ use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::{Span, Term};
+use proc_macro2::{Span, Ident};
 use unicode_xid::UnicodeXID;
 
 /// A Rust lifetime: `'a`.
@@ -27,9 +27,9 @@ use unicode_xid::UnicodeXID;
 /// *This type is available if Syn is built with the `"derive"` or `"full"`
 /// feature.*
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Lifetime {
-    term: Term,
+    ident: Ident,
 }
 
 impl Lifetime {
@@ -65,28 +65,29 @@ impl Lifetime {
         }
 
         Lifetime {
-            term: Term::new(s, span),
+            ident: Ident::new(&s[1..], span),
         }
     }
 
     pub fn span(&self) -> Span {
-        self.term.span()
+        self.ident.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.term.set_span(span);
+        self.ident.set_span(span);
     }
 }
 
 impl Display for Lifetime {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.term.as_str().fmt(formatter)
+        "'".fmt(formatter)?;
+        self.ident.fmt(formatter)
     }
 }
 
 impl PartialEq for Lifetime {
     fn eq(&self, other: &Lifetime) -> bool {
-        self.term.as_str() == other.term.as_str()
+        self.ident.eq(&other.ident)
     }
 }
 
@@ -100,19 +101,20 @@ impl PartialOrd for Lifetime {
 
 impl Ord for Lifetime {
     fn cmp(&self, other: &Lifetime) -> Ordering {
-        self.term.as_str().cmp(other.term.as_str())
+        self.ident.cmp(&other.ident)
     }
 }
 
 impl Hash for Lifetime {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.term.as_str().hash(h)
+        self.ident.hash(h)
     }
 }
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use proc_macro2::Spacing;
     use buffer::Cursor;
     use parse_error;
     use synom::PResult;
@@ -120,15 +122,22 @@ pub mod parsing {
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
-            let (term, rest) = match input.term() {
-                Some(term) => term,
+            let rest = match input.op() {
+                Some((op, rest)) => {
+                    if op.as_char() == '\'' && op.spacing() == Spacing::Joint {
+                        rest
+                    } else {
+                        return parse_error()
+                    }
+                }
                 _ => return parse_error(),
             };
-            if !term.as_str().starts_with('\'') {
-                return parse_error();
-            }
+            let (ident, rest) = match rest.term() {
+                Some(pair) => pair,
+                None => return parse_error(),
+            };
 
-            Ok((Lifetime { term: term }, rest))
+            Ok((Lifetime { ident: ident }, rest))
         }
 
         fn description() -> Option<&'static str> {
@@ -140,11 +149,13 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{ToTokens, Tokens};
+    use quote::{ToTokens, TokenStreamExt};
+    use proc_macro2::{TokenStream, Punct, Spacing};
 
     impl ToTokens for Lifetime {
-        fn to_tokens(&self, tokens: &mut Tokens) {
-            self.term.to_tokens(tokens);
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append(Punct::new('\'', Spacing::Joint));
+            self.ident.to_tokens(tokens);
         }
     }
 }

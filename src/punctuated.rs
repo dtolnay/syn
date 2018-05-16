@@ -762,14 +762,15 @@ where
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{ToTokens, Tokens};
+    use quote::{ToTokens, TokenStreamExt};
+    use proc_macro2::TokenStream;
 
     impl<T, P> ToTokens for Punctuated<T, P>
     where
         T: ToTokens,
         P: ToTokens,
     {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.pairs())
         }
     }
@@ -779,7 +780,7 @@ mod printing {
         T: ToTokens,
         P: ToTokens,
     {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             match *self {
                 Pair::Punctuated(ref a, ref b) => {
                     a.to_tokens(tokens);

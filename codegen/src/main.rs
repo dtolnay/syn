@@ -22,8 +22,9 @@ extern crate quote;
 extern crate syn;
 
 use quote::{ToTokens, Tokens};
-use syn::{Attribute, Data, DataStruct, DeriveInput, Ident, Item};
+use syn::{Attribute, Data, DataStruct, DeriveInput, Item};
 use failure::{err_msg, Error};
+use proc_macro2::{Ident, Span};
 
 use std::io::{Read, Write};
 use std::fmt::{self, Debug};
@@ -43,19 +44,19 @@ const EXTRA_TYPES: &[&str] = &["Ident", "Lifetime"];
 
 const TERMINAL_TYPES: &[&str] = &["Span"];
 
-fn path_eq(a: &syn::Path, b: &syn::Path) -> bool {
-    if a.global() != b.global() || a.segments.len() != b.segments.len() {
-        return false;
+fn path_eq(a: &syn::Path, b: &str) -> bool {
+    if a.global() {
+        return false
     }
-    a.segments
-        .iter()
-        .zip(b.segments.iter())
-        .all(|(a, b)| a.ident == b.ident)
+    if a.segments.len() != 1 {
+        return false
+    }
+    a.segments[0].ident.to_string() == b
 }
 
 fn get_features(attrs: &[Attribute], mut features: Tokens) -> Tokens {
     for attr in attrs {
-        if path_eq(&attr.path, &"cfg".into()) {
+        if path_eq(&attr.path, "cfg") {
             attr.to_tokens(&mut features);
         }
     }
@@ -106,7 +107,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 // We don't want to try to load the generated rust files and
                 // parse them, so we ignore them here.
                 for name in IGNORED_MODS {
-                    if item.ident == name {
+                    if item.ident.to_string() == *name {
                         continue 'items;
                     }
                 }
@@ -116,7 +117,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 //
                 // The derive module is weird because it is built with either
                 // `full` or `derive` but exported only under `derive`.
-                let features = if item.ident == "derive" {
+                let features = if item.ident.to_string() == "derive" {
                     quote!(#[cfg(feature = "derive")])
                 } else {
                     get_features(&item.attrs, features.clone())
@@ -124,7 +125,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 
                 // Look up the submodule file, and recursively parse it.
                 // XXX: Only handles same-directory .rs file submodules.
-                let path = parent.join(&format!("{}.rs", item.ident.as_ref()));
+                let path = parent.join(&format!("{}.rs", item.ident));
                 load_file(path, &features, lookup)?;
             }
             Item::Macro(item) => {
@@ -134,15 +135,15 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
 
                 // Try to parse the AstItem declaration out of the item.
                 let tts = &item.mac.tts;
-                let found = if path_eq(&item.mac.path, &"ast_struct".into()) {
+                let found = if path_eq(&item.mac.path, "ast_struct") {
                     syn::parse_str::<parsing::AstStruct>(&quote!(#tts).to_string())
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
-                } else if path_eq(&item.mac.path, &"ast_enum".into()) {
+                } else if path_eq(&item.mac.path, "ast_enum") {
                     syn::parse_str::<parsing::AstEnum>(&quote!(#tts).to_string())
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
-                } else if path_eq(&item.mac.path, &"ast_enum_of_structs".into()) {
+                } else if path_eq(&item.mac.path, "ast_enum_of_structs") {
                     syn::parse_str::<parsing::AstEnumOfStructs>(&quote!(#tts).to_string())
                         .map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
@@ -153,13 +154,13 @@ fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) ->
                 // Record our features on the parsed AstItems.
                 for mut item in found {
                     features.to_tokens(&mut item.features);
-                    lookup.insert(item.ast.ident, item);
+                    lookup.insert(item.ast.ident.clone(), item);
                 }
             }
             Item::Struct(item) => {
                 let ident = item.ident;
-                if EXTRA_TYPES.contains(&ident.as_ref()) {
-                    lookup.insert(ident, AstItem {
+                if EXTRA_TYPES.contains(&&ident.to_string()[..]) {
+                    lookup.insert(ident.clone(), AstItem {
                         ast: DeriveInput {
                             ident: ident,
                             vis: item.vis,
@@ -189,14 +190,14 @@ mod parsing {
     use syn::synom::*;
     use syn::*;
     use quote::Tokens;
-    use proc_macro2::TokenStream;
+    use proc_macro2::{TokenStream, Ident};
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
     named!(full -> (Tokens, bool), map!(option!(do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id == "full") >>
+        cond_reduce!(id.to_string() == "full") >>
         ()
     )), |s| if s.is_some() {
         (quote!(#[cfg(feature = "full")]), true)
@@ -207,7 +208,7 @@ mod parsing {
     named!(manual_extra_traits -> (), do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id == "manual_extra_traits") >>
+        cond_reduce!(id.to_string() == "manual_extra_traits") >>
         ()
     ));
 
@@ -241,7 +242,7 @@ mod parsing {
     named!(no_visit -> (), do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id == "no_visit") >>
+        cond_reduce!(id.to_string() == "no_visit") >>
         ()
     ));
 
@@ -280,7 +281,7 @@ mod parsing {
         keyword!(pub) >>
         variant: syn!(Ident) >>
         member: option!(map!(parens!(alt!(
-            call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.ast.ident), Some(x)) }
+            call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.ast.ident.clone()), Some(x)) }
             |
             syn!(Path) => { |x| (x, None) }
         )), |x| x.1)) >>
@@ -307,7 +308,7 @@ mod parsing {
                 // tokens to strings to re-parse them.
                 let enum_item = {
                     let variants = variants.1.iter().map(|v| {
-                        let name = v.name;
+                        let name = v.name.clone();
                         match v.member {
                             Some(ref member) => quote!(#name(#member)),
                             None => quote!(#name),
@@ -335,6 +336,7 @@ mod codegen {
     use syn::punctuated::Punctuated;
     use quote::{ToTokens, Tokens};
     use std::fmt::{self, Display};
+    use proc_macro2::{Ident, Span};
 
     #[derive(Default)]
     pub struct State {
@@ -348,7 +350,7 @@ mod codegen {
 
     fn under_name(name: Ident) -> Ident {
         use inflections::Inflect;
-        name.as_ref().to_snake_case().into()
+        Ident::new(&name.to_string().to_snake_case(), Span::call_site())
     }
 
     enum RelevantType<'a> {
@@ -366,13 +368,13 @@ mod codegen {
         match *ty {
             Type::Path(TypePath { qself: None, ref path }) => {
                 let last = path.segments.last().unwrap().into_value();
-                match last.ident.as_ref() {
+                match &last.ident.to_string()[..] {
                     "Box" => RelevantType::Box(first_arg(&last.arguments)),
                     "Vec" => RelevantType::Vec(first_arg(&last.arguments)),
                     "Punctuated" => RelevantType::Punctuated(first_arg(&last.arguments)),
                     "Option" => RelevantType::Option(first_arg(&last.arguments)),
                     "Brace" | "Bracket" | "Paren" | "Group" => {
-                        RelevantType::Token(last.ident.into_tokens())
+                        RelevantType::Token(last.ident.clone().into_tokens())
                     }
                     _ => {
                         if let Some(item) = lookup.get(&last.ident) {
@@ -386,7 +388,7 @@ mod codegen {
             Type::Tuple(TypeTuple { ref elems, .. }) => {
                 RelevantType::Tuple(elems)
             }
-            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident == "Token" => {
+            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident.to_string() == "Token" => {
                 RelevantType::Token(mac.into_tokens())
             }
             _ => RelevantType::Pass,
@@ -467,17 +469,17 @@ mod codegen {
         match kind {
             Visit => format!(
                 "_visitor.visit_{under_name}({name})",
-                under_name = under_name(item.ast.ident),
+                under_name = under_name(item.ast.ident.clone()),
                 name = name.ref_tokens(),
             ),
             VisitMut => format!(
                 "_visitor.visit_{under_name}_mut({name})",
-                under_name = under_name(item.ast.ident),
+                under_name = under_name(item.ast.ident.clone()),
                 name = name.ref_mut_tokens(),
             ),
             Fold => format!(
                 "_visitor.fold_{under_name}({name})",
-                under_name = under_name(item.ast.ident),
+                under_name = under_name(item.ast.ident.clone()),
                 name = name.owned_tokens(),
             ),
         }
@@ -695,7 +697,7 @@ mod codegen {
     }
 
     pub fn generate(state: &mut State, lookup: &Lookup, s: &AstItem) {
-        let under_name = under_name(s.ast.ident);
+        let under_name = under_name(s.ast.ident.clone());
 
         state.visit_trait.push_str(&format!(
             "{features}\n\
@@ -783,7 +785,7 @@ mod codegen {
                                     state.fold_impl.push_str(", ");
 
                                     let mut tokens = quote!();
-                                    Ident::from(name).to_tokens(&mut tokens);
+                                    Ident::new(&name, Span::call_site()).to_tokens(&mut tokens);
 
                                     (el, tokens)
                                 })
@@ -872,7 +874,7 @@ mod codegen {
                         fields.named
                             .iter()
                             .map(|el| {
-                                let id = el.ident;
+                                let id = el.ident.clone();
                                 (el, quote!(_i.#id))
                             })
                             .collect()
@@ -962,10 +964,10 @@ fn main() {
     for &tt in TERMINAL_TYPES {
         use syn::*;
         lookup.insert(
-            Ident::from(tt),
+            Ident::new(&tt, Span::call_site()),
             AstItem {
                 ast: DeriveInput {
-                    ident: Ident::from(tt),
+                    ident: Ident::new(tt, Span::call_site()),
                     vis: Visibility::Public(VisPublic {
                         pub_token: Default::default(),
                     }),
@@ -1015,7 +1017,7 @@ macro_rules! full {
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use token::{{Brace, Bracket, Paren, Group}};
-use proc_macro2::Span;
+use proc_macro2::{{Span, Ident}};
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::fold::*;
 
