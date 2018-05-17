@@ -9,10 +9,9 @@
 extern crate proc_macro2;
 extern crate syn;
 
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Span, TokenStream, Ident};
 use std::str::FromStr;
 use syn::synom::ParseError;
-use syn::Ident;
 
 fn parse(s: &str) -> Result<Ident, ParseError> {
     syn::parse2(TokenStream::from_str(s).unwrap())
@@ -29,7 +28,7 @@ fn ident_parse() {
 
 #[test]
 fn ident_parse_keyword() {
-    parse("abstract").unwrap_err();
+    parse("abstract").unwrap();
 }
 
 #[test]
@@ -44,7 +43,7 @@ fn ident_parse_lifetime() {
 
 #[test]
 fn ident_parse_underscore() {
-    parse("_").unwrap_err();
+    parse("_").unwrap();
 }
 
 #[test]
@@ -68,13 +67,13 @@ fn ident_new_keyword() {
 }
 
 #[test]
-#[should_panic(expected = "ident is not allowed to be empty; use Option<Ident>")]
+#[should_panic(expected = "use Option<Ident>")]
 fn ident_new_empty() {
     new("");
 }
 
 #[test]
-#[should_panic(expected = "ident is not allowed to be a lifetime; use syn::Lifetime")]
+#[should_panic(expected = "not a valid Ident")]
 fn ident_new_lifetime() {
     new("'static");
 }
@@ -85,13 +84,13 @@ fn ident_new_underscore() {
 }
 
 #[test]
-#[should_panic(expected = "ident cannot be a number, use syn::Index instead")]
+#[should_panic(expected = "use Literal instead")]
 fn ident_new_number() {
     new("255");
 }
 
 #[test]
-#[should_panic(expected = "\"a#\" is not a valid ident")]
+#[should_panic(expected = "\"a#\" is not a valid Ident")]
 fn ident_new_invalid() {
     new("a#");
 }
