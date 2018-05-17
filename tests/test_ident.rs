@@ -28,7 +28,7 @@ fn ident_parse() {
 
 #[test]
 fn ident_parse_keyword() {
-    parse("abstract").unwrap();
+    parse("abstract").unwrap_err();
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn ident_parse_lifetime() {
 
 #[test]
 fn ident_parse_underscore() {
-    parse("_").unwrap();
+    parse("_").unwrap_err();
 }
 
 #[test]
