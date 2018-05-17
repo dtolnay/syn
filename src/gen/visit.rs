@@ -4,6 +4,7 @@
 
 #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
+#[cfg(any(feature = "full", feature = "derive"))]
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use punctuated::Punctuated;

@@ -21,10 +21,10 @@ extern crate quote;
 #[macro_use]
 extern crate syn;
 
-use quote::{ToTokens, Tokens};
+use quote::ToTokens;
 use syn::{Attribute, Data, DataStruct, DeriveInput, Item};
 use failure::{err_msg, Error};
-use proc_macro2::{Ident, Span};
+use proc_macro2::{Ident, Span, TokenStream};
 
 use std::io::{Read, Write};
 use std::fmt::{self, Debug};
@@ -54,7 +54,7 @@ fn path_eq(a: &syn::Path, b: &str) -> bool {
     a.segments[0].ident.to_string() == b
 }
 
-fn get_features(attrs: &[Attribute], mut features: Tokens) -> Tokens {
+fn get_features(attrs: &[Attribute], mut features: TokenStream) -> TokenStream {
     for attr in attrs {
         if path_eq(&attr.path, "cfg") {
             attr.to_tokens(&mut features);
@@ -66,7 +66,7 @@ fn get_features(attrs: &[Attribute], mut features: Tokens) -> Tokens {
 #[derive(Clone)]
 pub struct AstItem {
     ast: DeriveInput,
-    features: Tokens,
+    features: TokenStream,
     // True if this is an ast_enum_of_structs! item with a #full annotation.
     eos_full: bool,
 }
@@ -83,7 +83,7 @@ impl Debug for AstItem {
 // NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
 type Lookup = BTreeMap<Ident, AstItem>;
 
-fn load_file<P: AsRef<Path>>(name: P, features: &Tokens, lookup: &mut Lookup) -> Result<(), Error> {
+fn load_file<P: AsRef<Path>>(name: P, features: &TokenStream, lookup: &mut Lookup) -> Result<(), Error> {
     let name = name.as_ref();
     let parent = name.parent().ok_or_else(|| err_msg("no parent path"))?;
 
@@ -189,12 +189,11 @@ mod parsing {
     use syn;
     use syn::synom::*;
     use syn::*;
-    use quote::Tokens;
     use proc_macro2::{TokenStream, Ident};
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
-    named!(full -> (Tokens, bool), map!(option!(do_parse!(
+    named!(full -> (TokenStream, bool), map!(option!(do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
         cond_reduce!(id.to_string() == "full") >>
@@ -334,9 +333,9 @@ mod codegen {
     use super::{AstItem, Lookup};
     use syn::*;
     use syn::punctuated::Punctuated;
-    use quote::{ToTokens, Tokens};
+    use quote::ToTokens;
     use std::fmt::{self, Display};
-    use proc_macro2::{Ident, Span};
+    use proc_macro2::{Ident, Span, TokenStream};
 
     #[derive(Default)]
     pub struct State {
@@ -360,7 +359,7 @@ mod codegen {
         Option(&'a Type),
         Tuple(&'a Punctuated<Type, Token![,]>),
         Simple(&'a AstItem),
-        Token(Tokens),
+        Token(TokenStream),
         Pass,
     }
 
@@ -374,7 +373,7 @@ mod codegen {
                     "Punctuated" => RelevantType::Punctuated(first_arg(&last.arguments)),
                     "Option" => RelevantType::Option(first_arg(&last.arguments)),
                     "Brace" | "Bracket" | "Paren" | "Group" => {
-                        RelevantType::Token(last.ident.clone().into_tokens())
+                        RelevantType::Token(last.ident.clone().into_token_stream())
                     }
                     _ => {
                         if let Some(item) = lookup.get(&last.ident) {
@@ -389,7 +388,7 @@ mod codegen {
                 RelevantType::Tuple(elems)
             }
             Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident.to_string() == "Token" => {
-                RelevantType::Token(mac.into_tokens())
+                RelevantType::Token(mac.into_token_stream())
             }
             _ => RelevantType::Pass,
         }
@@ -403,35 +402,35 @@ mod codegen {
     }
 
     enum Operand {
-        Borrowed(Tokens),
-        Owned(Tokens),
+        Borrowed(TokenStream),
+        Owned(TokenStream),
     }
 
     use self::Operand::*;
     use self::Kind::*;
 
     impl Operand {
-        fn tokens(&self) -> &Tokens {
+        fn tokens(&self) -> &TokenStream {
             match *self {
                 Borrowed(ref n) | Owned(ref n) => n,
             }
         }
 
-        fn ref_tokens(&self) -> Tokens {
+        fn ref_tokens(&self) -> TokenStream {
             match *self {
                 Borrowed(ref n) => n.clone(),
                 Owned(ref n) => quote!(&#n),
             }
         }
 
-        fn ref_mut_tokens(&self) -> Tokens {
+        fn ref_mut_tokens(&self) -> TokenStream {
             match *self {
                 Borrowed(ref n) => n.clone(),
                 Owned(ref n) => quote!(&mut #n),
             }
         }
 
-        fn owned_tokens(&self) -> Tokens {
+        fn owned_tokens(&self) -> TokenStream {
             match *self {
                 Borrowed(ref n) => quote!(*#n),
                 Owned(ref n) => n.clone(),
@@ -637,7 +636,7 @@ mod codegen {
         }
     }
 
-    fn token_visit(ty: Tokens, kind: Kind, name: &Operand) -> String {
+    fn token_visit(ty: TokenStream, kind: Kind, name: &Operand) -> String {
         match kind {
             Fold => format!(
                 "{ty}(tokens_helper(_visitor, &({name}).0))",
@@ -760,7 +759,7 @@ mod codegen {
                 state.visit_mut_impl.push_str("    match *_i {\n");
                 state.fold_impl.push_str("    match _i {\n");
                 for variant in &e.variants {
-                    let fields: Vec<(&Field, Tokens)> = match variant.fields {
+                    let fields: Vec<(&Field, TokenStream)> = match variant.fields {
                         Fields::Named(..) => panic!("Doesn't support enum struct variants"),
                         Fields::Unnamed(ref fields) => {
                             let binding = format!("        {}::{}(", s.ast.ident, variant.ident);
@@ -866,7 +865,7 @@ mod codegen {
                 state.fold_impl.push_str("    }\n");
             }
             Data::Struct(ref v) => {
-                let fields: Vec<(&Field, Tokens)> = match v.fields {
+                let fields: Vec<(&Field, TokenStream)> = match v.fields {
                     Fields::Named(ref fields) => {
                         state
                             .fold_impl
@@ -979,7 +978,7 @@ fn main() {
                         semi_token: None,
                     }),
                 },
-                features: Default::default(),
+                features: TokenStream::empty(),
                 eos_full: false,
             },
         );
@@ -1014,6 +1013,7 @@ macro_rules! full {
 #![allow(unreachable_code)]
 #![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
 
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use token::{{Brace, Bracket, Paren, Group}};
@@ -1077,6 +1077,7 @@ fold_span_only!(fold_lit_str: LitStr);
 
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
@@ -1114,6 +1115,7 @@ pub trait Visit<'ast> {{
 
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
