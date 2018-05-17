@@ -7,10 +7,10 @@ publish = false # this is an internal crate which should never be published
 
 [dependencies]
 syn = { path = "..", features = ["full", "extra-traits"] }
-quote = "0.6"
+quote = "0.5"
 failure = "0.1"
 inflections = "1.1"
 proc-macro2 = "0.4"
 
 [patch.crates-io]
-quote = { git = 'https://github.com/alexcrichton/quote', branch = 'next' }
+quote = { git = 'https://github.com/dtolnay/quote' }
