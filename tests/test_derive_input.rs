@@ -12,8 +12,7 @@ extern crate proc_macro2;
 extern crate syn;
 
 use proc_macro2::Delimiter::{Brace, Parenthesis};
-use proc_macro2::Group;
-use proc_macro2::{Delimiter, Literal, Op, Spacing, Span, Term, TokenStream, TokenTree};
+use proc_macro2::*;
 use syn::*;
 
 use std::iter::FromIterator;
@@ -22,15 +21,19 @@ use std::iter::FromIterator;
 mod macros;
 
 fn op(c: char) -> TokenTree {
-    Op::new(c, Spacing::Alone).into()
+    Punct::new(c, Spacing::Alone).into()
 }
 
 fn lit<T: Into<Literal>>(t: T) -> TokenTree {
     t.into().into()
 }
 
+fn ident(sym: &str) -> Ident {
+    Ident::new(sym, Span::call_site())
+}
+
 fn word(sym: &str) -> TokenTree {
-    Term::new(sym, Span::call_site()).into()
+    ident(sym).into()
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
@@ -42,7 +45,7 @@ fn test_unit() {
     let raw = "struct Unit;";
 
     let expected = DeriveInput {
-        ident: "Unit".into(),
+        ident: ident("Unit"),
         vis: Visibility::Inherited,
         attrs: Vec::new(),
         generics: Generics::default(),
@@ -67,7 +70,7 @@ fn test_struct() {
     ";
 
     let expected = DeriveInput {
-        ident: "Item".into(),
+        ident: ident("Item"),
         vis: Visibility::Public(VisPublic {
             pub_token: Default::default(),
         }),
@@ -75,7 +78,7 @@ fn test_struct() {
             bracket_token: Default::default(),
             pound_token: Default::default(),
             style: AttrStyle::Outer,
-            path: "derive".into(),
+            path: ident("derive").into(),
             tts: TokenStream::from_iter(vec![delimited(
                 Parenthesis,
                 vec![word("Debug"), op(','), word("Clone")],
@@ -90,7 +93,7 @@ fn test_struct() {
                 brace_token: Default::default(),
                 named: punctuated![
                     Field {
-                        ident: Some("ident".into()),
+                        ident: Some(ident("ident")),
                         colon_token: Some(Default::default()),
                         vis: Visibility::Public(VisPublic {
                             pub_token: Default::default(),
@@ -98,11 +101,11 @@ fn test_struct() {
                         attrs: Vec::new(),
                         ty: TypePath {
                             qself: None,
-                            path: "Ident".into(),
+                            path: ident("Ident").into(),
                         }.into(),
                     },
                     Field {
-                        ident: Some("attrs".into()),
+                        ident: Some(ident("attrs")),
                         colon_token: Some(Default::default()),
                         vis: Visibility::Public(VisPublic {
                             pub_token: Default::default(),
@@ -113,7 +116,7 @@ fn test_struct() {
                             path: Path {
                                 leading_colon: None,
                                 segments: punctuated![PathSegment {
-                                    ident: "Vec".into(),
+                                    ident: ident("Vec"),
                                     arguments: PathArguments::AngleBracketed(
                                         AngleBracketedGenericArguments {
                                             colon2_token: None,
@@ -121,7 +124,7 @@ fn test_struct() {
                                             args: punctuated![GenericArgument::Type(Type::from(
                                                 TypePath {
                                                     qself: None,
-                                                    path: "Attribute".into(),
+                                                    path: ident("Attribute").into(),
                                                 }
                                             )),],
                                             gt_token: Default::default(),
@@ -141,11 +144,11 @@ fn test_struct() {
     assert_eq!(expected, actual);
 
     let expected_meta_item: Meta = MetaList {
-        ident: "derive".into(),
+        ident: ident("derive"),
         paren_token: Default::default(),
         nested: punctuated![
-            NestedMeta::Meta(Meta::Word("Debug".into())),
-            NestedMeta::Meta(Meta::Word("Clone".into())),
+            NestedMeta::Meta(Meta::Word(ident("Debug"))),
+            NestedMeta::Meta(Meta::Word(ident("Clone"))),
         ],
     }.into();
 
@@ -173,7 +176,7 @@ fn test_enum() {
     "#;
 
     let expected = DeriveInput {
-        ident: "Result".into(),
+        ident: ident("Result"),
         vis: Visibility::Public(VisPublic {
             pub_token: Default::default(),
         }),
@@ -182,7 +185,7 @@ fn test_enum() {
                 bracket_token: Default::default(),
                 pound_token: Default::default(),
                 style: AttrStyle::Outer,
-                path: "doc".into(),
+                path: ident("doc").into(),
                 tts: TokenStream::from_iter(vec![
                     op('='),
                     lit(Literal::string(
@@ -195,7 +198,7 @@ fn test_enum() {
                 bracket_token: Default::default(),
                 pound_token: Default::default(),
                 style: AttrStyle::Outer,
-                path: "must_use".into(),
+                path: ident("must_use").into(),
                 tts: TokenStream::empty(),
                 is_sugared_doc: false,
             },
@@ -205,7 +208,7 @@ fn test_enum() {
             params: punctuated![
                 GenericParam::Type(TypeParam {
                     attrs: Vec::new(),
-                    ident: "T".into(),
+                    ident: ident("T"),
                     bounds: Default::default(),
                     default: None,
                     colon_token: None,
@@ -213,7 +216,7 @@ fn test_enum() {
                 }),
                 GenericParam::Type(TypeParam {
                     attrs: Vec::new(),
-                    ident: "E".into(),
+                    ident: ident("E"),
                     bounds: Default::default(),
                     colon_token: None,
                     eq_token: None,
@@ -226,7 +229,7 @@ fn test_enum() {
         data: Data::Enum(DataEnum {
             variants: punctuated![
                 Variant {
-                    ident: "Ok".into(),
+                    ident: ident("Ok"),
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
@@ -237,14 +240,14 @@ fn test_enum() {
                             attrs: Vec::new(),
                             ty: TypePath {
                                 qself: None,
-                                path: "T".into(),
+                                path: ident("T").into(),
                             }.into(),
                         },],
                     }),
                     discriminant: None,
                 },
                 Variant {
-                    ident: "Err".into(),
+                    ident: ident("Err"),
                     attrs: Vec::new(),
                     fields: Fields::Unnamed(FieldsUnnamed {
                         paren_token: Default::default(),
@@ -255,14 +258,14 @@ fn test_enum() {
                             attrs: Vec::new(),
                             ty: TypePath {
                                 qself: None,
-                                path: "E".into(),
+                                path: ident("E").into(),
                             }.into(),
                         },],
                     }),
                     discriminant: None,
                 },
                 Variant {
-                    ident: "Surprise".into(),
+                    ident: ident("Surprise"),
                     attrs: Vec::new(),
                     fields: Fields::Unit,
                     discriminant: Some((
@@ -274,7 +277,7 @@ fn test_enum() {
                     )),
                 },
                 Variant {
-                    ident: "ProcMacroHack".into(),
+                    ident: ident("ProcMacroHack"),
                     attrs: Vec::new(),
                     fields: Fields::Unit,
                     discriminant: Some((
@@ -319,14 +322,14 @@ fn test_enum() {
 
     let expected_meta_items = vec![
         MetaNameValue {
-            ident: "doc".into(),
+            ident: ident("doc"),
             eq_token: Default::default(),
             lit: Lit::Str(LitStr::new(
                 " See the std::result module documentation for details.",
                 Span::call_site(),
             )),
         }.into(),
-        Meta::Word("must_use".into()),
+        Meta::Word(ident("must_use")),
     ];
 
     let actual_meta_items: Vec<_> = actual
@@ -347,7 +350,7 @@ fn test_attr_with_path() {
     "#;
 
     let expected = DeriveInput {
-        ident: "Dummy".into(),
+        ident: ident("Dummy"),
         vis: Visibility::Inherited,
         attrs: vec![Attribute {
             bracket_token: Default::default(),
@@ -356,8 +359,8 @@ fn test_attr_with_path() {
             path: Path {
                 leading_colon: Some(Default::default()),
                 segments: punctuated![
-                    PathSegment::from("attr_args"),
-                    PathSegment::from("identity"),
+                    PathSegment::from(ident("attr_args")),
+                    PathSegment::from(ident("identity")),
                 ],
             },
             tts: TokenStream::from_iter(vec![
@@ -407,7 +410,7 @@ fn test_attr_with_non_mod_style_path() {
     "#;
 
     let expected = DeriveInput {
-        ident: "S".into(),
+        ident: ident("S"),
         vis: Visibility::Inherited,
         attrs: vec![Attribute {
             bracket_token: Default::default(),
@@ -415,7 +418,7 @@ fn test_attr_with_non_mod_style_path() {
             style: AttrStyle::Outer,
             path: Path {
                 leading_colon: None,
-                segments: punctuated![PathSegment::from("inert")],
+                segments: punctuated![PathSegment::from(ident("inert"))],
             },
             tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
             is_sugared_doc: false,
@@ -443,7 +446,7 @@ fn test_attr_with_mod_style_path_with_self() {
     "#;
 
     let expected = DeriveInput {
-        ident: "S".into(),
+        ident: ident("S"),
         vis: Visibility::Inherited,
         attrs: vec![Attribute {
             bracket_token: Default::default(),
@@ -451,7 +454,10 @@ fn test_attr_with_mod_style_path_with_self() {
             style: AttrStyle::Outer,
             path: Path {
                 leading_colon: None,
-                segments: punctuated![PathSegment::from("foo"), PathSegment::from("self")],
+                segments: punctuated![
+                    PathSegment::from(ident("foo")),
+                    PathSegment::from(ident("self")),
+                ],
             },
             tts: TokenStream::empty(),
             is_sugared_doc: false,
@@ -479,9 +485,9 @@ fn test_pub_restricted() {
     "#;
 
     let expected = DeriveInput {
-        ident: "Z".into(),
+        ident: ident("Z"),
         vis: Visibility::Restricted(VisRestricted {
-            path: Box::new("m".into()),
+            path: Box::new(ident("m").into()),
             in_token: Some(Default::default()),
             paren_token: Default::default(),
             pub_token: Default::default(),
@@ -496,7 +502,10 @@ fn test_pub_restricted() {
                     vis: Visibility::Restricted(VisRestricted {
                         path: Box::new(Path {
                             leading_colon: None,
-                            segments: punctuated![PathSegment::from("m"), PathSegment::from("n")],
+                            segments: punctuated![
+                                PathSegment::from(ident("m")),
+                                PathSegment::from(ident("n")),
+                            ],
                         }),
                         in_token: Some(Default::default()),
                         paren_token: Default::default(),
@@ -506,7 +515,7 @@ fn test_pub_restricted() {
                     attrs: vec![],
                     ty: TypePath {
                         qself: None,
-                        path: "u8".into(),
+                        path: ident("u8").into(),
                     }.into(),
                 },],
             }),
@@ -527,7 +536,7 @@ fn test_vis_crate() {
     "#;
 
     let expected = DeriveInput {
-        ident: "S".into(),
+        ident: ident("S"),
         vis: Visibility::Crate(VisCrate {
             crate_token: Default::default(),
         }),
@@ -552,12 +561,12 @@ fn test_pub_restricted_crate() {
     "#;
 
     let expected = DeriveInput {
-        ident: "S".into(),
+        ident: ident("S"),
         vis: Visibility::Restricted(VisRestricted {
             pub_token: Default::default(),
             paren_token: Default::default(),
             in_token: None,
-            path: Box::new("crate".into()),
+            path: Box::new(ident("crate").into()),
         }),
         attrs: vec![],
         generics: Generics::default(),
@@ -580,9 +589,9 @@ fn test_pub_restricted_super() {
     "#;
 
     let expected = DeriveInput {
-        ident: "S".into(),
+        ident: ident("S"),
         vis: Visibility::Restricted(VisRestricted {
-            path: Box::new("super".into()),
+            path: Box::new(ident("super").into()),
             in_token: None,
             paren_token: Default::default(),
             pub_token: Default::default(),
@@ -608,9 +617,9 @@ fn test_pub_restricted_in_super() {
     "#;
 
     let expected = DeriveInput {
-        ident: "S".into(),
+        ident: ident("S"),
         vis: Visibility::Restricted(VisRestricted {
-            path: Box::new("super".into()),
+            path: Box::new(ident("super").into()),
             in_token: Some(Default::default()),
             paren_token: Default::default(),
             pub_token: Default::default(),
@@ -655,7 +664,7 @@ fn test_fields_on_named_struct() {
         Field {
             attrs: vec![],
             vis: Visibility::Inherited,
-            ident: Some(Ident::from("foo")),
+            ident: Some(ident("foo")),
             colon_token: Some(Default::default()),
             ty: syn::parse_str("i32").unwrap(),
         },
@@ -664,7 +673,7 @@ fn test_fields_on_named_struct() {
             vis: Visibility::Public(VisPublic {
                 pub_token: Default::default(),
             }),
-            ident: Some(Ident::from("bar")),
+            ident: Some(ident("bar")),
             colon_token: Some(Default::default()),
             ty: syn::parse_str("String").unwrap(),
         },
