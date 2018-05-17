@@ -32,9 +32,11 @@ impl Path {
 /// ```rust
 /// extern crate syn;
 /// extern crate quote;
+/// extern crate proc_macro2;
 ///
 /// use syn::{QSelf, Path, PathTokens};
-/// use quote::{Tokens, ToTokens};
+/// use proc_macro2::TokenStream;
+/// use quote::ToTokens;
 ///
 /// struct MyNode {
 ///     qself: Option<QSelf>,

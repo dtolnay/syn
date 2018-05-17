@@ -308,12 +308,14 @@ impl Generics {
     /// for that type.
     ///
     /// ```
+    /// # extern crate proc_macro2;
     /// # extern crate syn;
     /// # #[macro_use]
     /// # extern crate quote;
+    /// # use proc_macro2::{Span, Ident};
     /// # fn main() {
     /// # let generics: syn::Generics = Default::default();
-    /// # let name = syn::Ident::from("MyType");
+    /// # let name = Ident::new("MyType", Span::call_site());
     /// let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     /// quote! {
     ///     impl #impl_generics MyTrait for #name #ty_generics #where_clause {
