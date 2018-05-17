@@ -45,3 +45,4 @@ all-features = true
 
 [patch.crates-io]
 quote = { git = 'https://github.com/alexcrichton/quote', branch = 'next' }
+proc-macro2 = { git = 'https://github.com/alexcrichton/proc-macro2', branch = 'under' }
