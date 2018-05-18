@@ -42,7 +42,7 @@ const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 
 const EXTRA_TYPES: &[&str] = &["Ident", "Lifetime"];
 
-const TERMINAL_TYPES: &[&str] = &["Span"];
+const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
 fn path_eq(a: &syn::Path, b: &str) -> bool {
     if a.global() {
