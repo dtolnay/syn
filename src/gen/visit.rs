@@ -8,7 +8,7 @@
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use punctuated::Punctuated;
-use proc_macro2::Span;
+use proc_macro2::{Span, Ident};
 #[cfg(any(feature = "full", feature = "derive"))]
 use gen::helper::visit::*;
 
@@ -1545,6 +1545,7 @@ pub fn visit_label<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast La
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lifetime<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lifetime) {
+    // Skipped field _i . apostrophe;
     _visitor.visit_ident(& _i . ident);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]

@@ -13,6 +13,8 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::{Span, Ident};
 use unicode_xid::UnicodeXID;
 
+use token::Apostrophe;
+
 /// A Rust lifetime: `'a`.
 ///
 /// Lifetime names must conform to the following rules:
@@ -29,7 +31,8 @@ use unicode_xid::UnicodeXID;
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[derive(Clone)]
 pub struct Lifetime {
-    ident: Ident,
+    pub apostrophe: Apostrophe,
+    pub ident: Ident,
 }
 
 impl Lifetime {
@@ -65,16 +68,9 @@ impl Lifetime {
         }
 
         Lifetime {
+            apostrophe: Default::default(),
             ident: Ident::new(&s[1..], span),
         }
-    }
-
-    pub fn span(&self) -> Span {
-        self.ident.span()
-    }
-
-    pub fn set_span(&mut self, span: Span) {
-        self.ident.set_span(span);
     }
 }
 
@@ -114,7 +110,6 @@ impl Hash for Lifetime {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use proc_macro2::Spacing;
     use buffer::Cursor;
     use parse_error;
     use synom::PResult;
@@ -122,22 +117,17 @@ pub mod parsing {
 
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
-            let rest = match input.op() {
-                Some((op, rest)) => {
-                    if op.as_char() == '\'' && op.spacing() == Spacing::Joint {
-                        rest
-                    } else {
-                        return parse_error()
-                    }
-                }
-                _ => return parse_error(),
-            };
+            let (apostrophe, rest) = Apostrophe::parse(input)?;
             let (ident, rest) = match rest.term() {
                 Some(pair) => pair,
                 None => return parse_error(),
             };
 
-            Ok((Lifetime { ident: ident }, rest))
+            let ret = Lifetime {
+                ident: ident,
+                apostrophe: apostrophe,
+            };
+            Ok((ret, rest))
         }
 
         fn description() -> Option<&'static str> {
@@ -149,12 +139,12 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{ToTokens, TokenStreamExt};
-    use proc_macro2::{TokenStream, Punct, Spacing};
+    use quote::ToTokens;
+    use proc_macro2::TokenStream;
 
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append(Punct::new('\'', Spacing::Joint));
+            self.apostrophe.to_tokens(tokens);
             self.ident.to_tokens(tokens);
         }
     }

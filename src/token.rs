@@ -376,6 +376,41 @@ impl ::Synom for Underscore {
     }
 }
 
+token_punct_def! {
+    /// `'`
+    "'" pub struct Apostrophe/1
+}
+
+#[cfg(feature = "printing")]
+impl ::quote::ToTokens for Apostrophe {
+    fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
+        use quote::TokenStreamExt;
+        let mut token = ::proc_macro2::Punct::new('\'', ::proc_macro2::Spacing::Joint);
+        token.set_span(self.0[0]);
+        tokens.append(token);
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl ::Synom for Apostrophe {
+    fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Apostrophe> {
+        match input.op() {
+            Some((op, rest)) => {
+                if op.as_char() == '\'' && op.spacing() == ::proc_macro2::Spacing::Joint {
+                    Ok((Apostrophe([op.span()]), rest))
+                } else {
+                    ::parse_error()
+                }
+            }
+            None => ::parse_error()
+        }
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("`'`")
+    }
+}
+
 tokens! {
     punct: {
         "+"        pub struct Add/1        /// `+`

@@ -40,7 +40,7 @@ const VISIT_MUT_SRC: &str = "../src/gen/visit_mut.rs";
 
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 
-const EXTRA_TYPES: &[&str] = &["Ident", "Lifetime"];
+const EXTRA_TYPES: &[&str] = &["Lifetime"];
 
 const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
@@ -1044,9 +1044,6 @@ macro_rules! fold_span_only {{
     }}
 }}
 
-fold_span_only!(fold_ident: Ident);
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lifetime: Lifetime);
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 fold_span_only!(fold_lit_byte: LitByte);
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
@@ -1081,7 +1078,7 @@ fold_span_only!(fold_lit_str: LitStr);
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
-use proc_macro2::Span;
+use proc_macro2::{{Span, Ident}};
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::visit::*;
 
@@ -1119,7 +1116,7 @@ pub trait Visit<'ast> {{
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
-use proc_macro2::Span;
+use proc_macro2::{{Span, Ident}};
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::visit_mut::*;
 

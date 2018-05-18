@@ -431,9 +431,6 @@ macro_rules! fold_span_only {
     }
 }
 
-fold_span_only!(fold_ident: Ident);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lifetime: Lifetime);
 #[cfg(any(feature = "full", feature = "derive"))]
 fold_span_only!(fold_lit_byte: LitByte);
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1982,6 +1979,13 @@ pub fn fold_label<V: Fold + ?Sized>(_visitor: &mut V, _i: Label) -> Label {
     Label {
         name: _visitor.fold_lifetime(_i . name),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
+    }
+}
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+pub fn fold_lifetime<V: Fold + ?Sized>(_visitor: &mut V, _i: Lifetime) -> Lifetime {
+    Lifetime {
+        apostrophe: _i . apostrophe,
+        ident: _visitor.fold_ident(_i . ident),
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
