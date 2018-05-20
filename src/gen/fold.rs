@@ -10,7 +10,7 @@
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use token::{Brace, Bracket, Paren, Group};
-use proc_macro2::{Span, Ident};
+use proc_macro2::Span;
 #[cfg(any(feature = "full", feature = "derive"))]
 use gen::helper::fold::*;
 

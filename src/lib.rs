@@ -286,6 +286,8 @@ mod macros;
 #[macro_use]
 pub mod token;
 
+pub use proc_macro2::Ident;
+
 #[cfg(any(feature = "full", feature = "derive"))]
 mod attr;
 #[cfg(any(feature = "full", feature = "derive"))]

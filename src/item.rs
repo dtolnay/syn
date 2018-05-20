@@ -8,7 +8,7 @@
 
 use super::*;
 use derive::{Data, DeriveInput};
-use proc_macro2::{TokenStream, Ident};
+use proc_macro2::TokenStream;
 use punctuated::Punctuated;
 use token::{Brace, Paren};
 

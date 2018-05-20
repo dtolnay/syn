@@ -251,10 +251,8 @@ macro_rules! not {
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
-/// extern crate proc_macro2;
 ///
-/// use proc_macro2::Ident;
-/// use syn::MacroDelimiter;
+/// use syn::{Ident, MacroDelimiter};
 /// use syn::token::{Paren, Bracket, Brace};
 /// use syn::synom::Synom;
 ///
@@ -418,10 +416,8 @@ macro_rules! cond_reduce {
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
-/// extern crate proc_macro2;
 ///
-/// use proc_macro2::Ident;
-/// use syn::Item;
+/// use syn::{Ident, Item};
 /// use syn::token::Brace;
 /// use syn::synom::Synom;
 ///
@@ -530,9 +526,8 @@ pub fn many0<T>(mut input: Cursor, f: fn(Cursor) -> PResult<T>) -> PResult<Vec<T
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
-/// extern crate proc_macro2;
 ///
-/// use proc_macro2::Ident;
+/// use syn::Ident;
 /// use syn::token::Brace;
 /// use syn::synom::Synom;
 ///
@@ -625,9 +620,8 @@ macro_rules! switch {
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
-/// extern crate proc_macro2;
 ///
-/// use proc_macro2::Ident;
+/// use syn::Ident;
 /// use syn::token::Brace;
 /// use syn::synom::Synom;
 ///
@@ -1229,10 +1223,8 @@ macro_rules! tap {
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
-/// extern crate proc_macro2;
 ///
-/// use proc_macro2::Ident;
-/// use syn::Item;
+/// use syn::{Ident, Item};
 /// use syn::token::Brace;
 /// use syn::synom::Synom;
 ///
@@ -1284,9 +1276,8 @@ macro_rules! syn {
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
-/// extern crate proc_macro2;
 ///
-/// use proc_macro2::Ident;
+/// use syn::Ident;
 /// use syn::synom::Synom;
 ///
 /// struct Flag {
@@ -1311,11 +1302,7 @@ macro_rules! syn {
 #[macro_export]
 macro_rules! custom_keyword {
     ($i:expr, $keyword:ident) => {
-        match <
-            $crate::parsers::__custom_keyword_inner::Ident
-            as
-            $crate::synom::Synom
-        >::parse($i) {
+        match <$crate::Ident as $crate::synom::Synom>::parse($i) {
             ::std::result::Result::Err(err) => ::std::result::Result::Err(err),
             ::std::result::Result::Ok((token, i)) => {
                 if token.to_string() == stringify!($keyword) {
@@ -1326,11 +1313,6 @@ macro_rules! custom_keyword {
             }
         }
     };
-}
-
-#[doc(hidden)]
-pub mod __custom_keyword_inner {
-    pub use proc_macro2::Ident;
 }
 
 /// Parse inside of `(` `)` parentheses.

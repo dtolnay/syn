@@ -8,7 +8,7 @@
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use punctuated::Punctuated;
-use proc_macro2::{Span, Ident};
+use proc_macro2::Span;
 #[cfg(any(feature = "full", feature = "derive"))]
 use gen::helper::visit_mut::*;
 

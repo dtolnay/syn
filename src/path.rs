@@ -7,7 +7,6 @@
 // except according to those terms.
 
 use super::*;
-use proc_macro2::Ident;
 use punctuated::Punctuated;
 
 ast_struct! {

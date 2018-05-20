@@ -23,10 +23,8 @@
 //! ```
 //! # #[macro_use]
 //! # extern crate syn;
-//! # extern crate proc_macro2;
 //! #
-//! # use proc_macro2::Ident;
-//! # use syn::{Attribute, Visibility, Type, Expr};
+//! # use syn::{Attribute, Visibility, Ident, Type, Expr};
 //! #
 //! pub struct ItemStatic {
 //!     pub attrs: Vec<Attribute>,
@@ -60,11 +58,9 @@
 //! ```
 //! #[macro_use]
 //! extern crate syn;
-//! extern crate proc_macro2;
 //!
-//! use proc_macro2::Ident;
 //! use syn::synom::Synom;
-//! use syn::{Attribute, Visibility, Type, Expr};
+//! use syn::{Attribute, Visibility, Ident, Type, Expr};
 //! #
 //! # struct ItemStatic;
 //! # use syn::ItemStatic as SynItemStatic;

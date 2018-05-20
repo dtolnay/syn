@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use super::*;
-use proc_macro2::{TokenStream, Ident};
+use proc_macro2::TokenStream;
 use punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};

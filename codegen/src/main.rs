@@ -22,9 +22,9 @@ extern crate quote;
 extern crate syn;
 
 use quote::ToTokens;
-use syn::{Attribute, Data, DataStruct, DeriveInput, Item};
+use syn::{Attribute, Data, DataStruct, DeriveInput, Ident, Item};
 use failure::{err_msg, Error};
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Span, TokenStream};
 
 use std::io::{Read, Write};
 use std::fmt::{self, Debug};
@@ -189,7 +189,7 @@ mod parsing {
     use syn;
     use syn::synom::*;
     use syn::*;
-    use proc_macro2::{TokenStream, Ident};
+    use proc_macro2::TokenStream;
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
@@ -335,7 +335,7 @@ mod codegen {
     use syn::punctuated::Punctuated;
     use quote::ToTokens;
     use std::fmt::{self, Display};
-    use proc_macro2::{Ident, Span, TokenStream};
+    use proc_macro2::{Span, TokenStream};
 
     #[derive(Default)]
     pub struct State {
@@ -1017,7 +1017,7 @@ macro_rules! full {
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use token::{{Brace, Bracket, Paren, Group}};
-use proc_macro2::{{Span, Ident}};
+use proc_macro2::Span;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::fold::*;
 
@@ -1078,7 +1078,7 @@ fold_span_only!(fold_lit_str: LitStr);
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
-use proc_macro2::{{Span, Ident}};
+use proc_macro2::Span;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::visit::*;
 
@@ -1116,7 +1116,7 @@ pub trait Visit<'ast> {{
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
-use proc_macro2::{{Span, Ident}};
+use proc_macro2::Span;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use gen::helper::visit_mut::*;
 

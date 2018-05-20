@@ -11,7 +11,7 @@ use punctuated::Punctuated;
 
 use std::iter;
 
-use proc_macro2::{Delimiter, Spacing, TokenStream, TokenTree, Ident};
+use proc_macro2::{Delimiter, Spacing, TokenStream, TokenTree};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
