@@ -295,7 +295,7 @@ pub mod parsing {
     impl Synom for ParenthesizedGenericArguments {
         named!(parse -> Self, do_parse!(
             data: parens!(Punctuated::parse_terminated) >>
-            output: syn!(ReturnType) >>
+            output: call!(ReturnType::without_plus) >>
             (ParenthesizedGenericArguments {
                 paren_token: data.0,
                 inputs: data.1,
