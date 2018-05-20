@@ -144,3 +144,21 @@ fn test_ty_param_bound() {
         common::parse::syn::<TypeParamBound>(tokens.into())
     );
 }
+
+#[test]
+fn test_fn_precedence_in_where_clause() {
+    // This should parse as two separate bounds, `FnOnce() -> i32` and `Send` - not `FnOnce() -> (i32 + Send)`.
+    let sig = quote!(fn f<G>() where G: FnOnce() -> i32 + Send {});
+    let fun = common::parse::syn::<ItemFn>(sig.into());
+    let where_clause = fun.decl.generics.where_clause.as_ref().unwrap();
+    assert_eq!(where_clause.predicates.len(), 1);
+    let predicate = match where_clause.predicates[0] {
+        WherePredicate::Type(ref pred) => pred,
+        _ => panic!("wrong predicate kind"),
+    };
+    assert_eq!(predicate.bounds.len(), 2, "{:#?}", predicate.bounds);
+    let first_bound = &predicate.bounds[0];
+    assert_eq!(quote!(#first_bound).to_string(), "FnOnce ( ) -> i32");
+    let second_bound = &predicate.bounds[1];
+    assert_eq!(quote!(#second_bound).to_string(), "Send");
+}

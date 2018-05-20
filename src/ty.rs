@@ -394,7 +394,7 @@ pub mod parsing {
                 variadic: option!(cond_reduce!(inputs.empty_or_trailing(), punct!(...))) >>
                 (inputs, variadic)
             )) >>
-            output: syn!(ReturnType) >>
+            output: call!(ReturnType::without_plus) >>
             (TypeBareFn {
                 unsafety: unsafety,
                 abi: abi,
@@ -483,16 +483,21 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for ReturnType {
-        named!(parse -> Self, alt!(
+    impl ReturnType {
+        named!(pub without_plus -> Self, call!(Self::parse, false));
+        named!(parse(allow_plus: bool) -> Self, alt!(
             do_parse!(
                 arrow: punct!(->) >>
-                ty: syn!(Type) >>
+                ty: call!(ambig_ty, allow_plus) >>
                 (ReturnType::Type(arrow, Box::new(ty)))
             )
             |
             epsilon!() => { |_| ReturnType::Default }
         ));
+    }
+
+    impl Synom for ReturnType {
+        named!(parse -> Self, call!(Self::parse, true));
 
         fn description() -> Option<&'static str> {
             Some("return type")
