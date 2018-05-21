@@ -111,8 +111,7 @@ where
     fn span(&self) -> Span {
         let mut tokens = TokenStream::empty();
         self.to_tokens(&mut tokens);
-        let token_stream = TokenStream::from(tokens);
-        let mut iter = token_stream.into_iter();
+        let mut iter = tokens.into_iter();
         let mut span = match iter.next() {
             Some(tt) => tt.span(),
             None => {
@@ -131,8 +130,7 @@ where
     fn span(&self) -> Span {
         let mut tokens = TokenStream::empty();
         self.to_tokens(&mut tokens);
-        let token_stream = TokenStream::from(tokens);
-        let mut iter = token_stream.into_iter();
+        let mut iter = tokens.into_iter();
 
         // We can't join spans without procmacro2_semver_exempt so just grab the
         // first one.

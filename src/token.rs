@@ -882,7 +882,7 @@ mod printing {
         };
         let mut inner = TokenStream::empty();
         f(&mut inner);
-        let mut g = Group::new(delim, inner.into());
+        let mut g = Group::new(delim, inner);
         g.set_span(*span);
         tokens.append(g);
     }
