@@ -371,6 +371,14 @@ token_punct_def! {
     pub struct Apostrophe/1
 }
 
+// Implement Clone anyway because it is required for cloning Lifetime.
+#[cfg(not(feature = "clone-impls"))]
+impl Clone for Apostrophe {
+    fn clone(&self) -> Self {
+        Apostrophe(self.0)
+    }
+}
+
 #[cfg(feature = "printing")]
 impl ::quote::ToTokens for Apostrophe {
     fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
