@@ -1,4 +1,5 @@
 extern crate proc_macro;
+extern crate proc_macro2;
 
 #[macro_use]
 extern crate syn;
@@ -6,12 +7,11 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 
-use proc_macro::TokenStream;
+use proc_macro2::TokenStream;
 use syn::{DeriveInput, Data, Fields, Generics, GenericParam};
-use quote::Tokens;
 
 #[proc_macro_derive(HeapSize)]
-pub fn derive_heap_size(input: TokenStream) -> TokenStream {
+pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Parse the input tokens into a syntax tree.
     let input: DeriveInput = syn::parse(input).unwrap();
 
@@ -49,7 +49,7 @@ fn add_trait_bounds(mut generics: Generics) -> Generics {
 }
 
 // Generate an expression to sum up the heap size of each field.
-fn heap_size_sum(data: &Data) -> Tokens {
+fn heap_size_sum(data: &Data) -> TokenStream {
     match *data {
         Data::Struct(ref data) => {
             match data.fields {
@@ -59,7 +59,7 @@ fn heap_size_sum(data: &Data) -> Tokens {
                     //     0 + self.x.heap_size() + self.y.heap_size() + self.z.heap_size()
                     //
                     // but using fully qualified function call syntax.
-                    let fnames = fields.named.iter().map(|f| f.ident);
+                    let fnames = fields.named.iter().map(|f| &f.ident);
                     quote! {
                         0 #(
                             + ::heapsize::HeapSize::heap_size_of_children(&self.#fnames)
