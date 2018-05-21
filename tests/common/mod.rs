@@ -21,8 +21,13 @@ pub mod parse;
 pub mod respan;
 
 pub fn check_min_stack() {
-    let min_stack_value = env::var("RUST_MIN_STACK")
-        .expect("RUST_MIN_STACK env var should be set since some tests require it.");
+    let min_stack_value = match env::var("RUST_MIN_STACK") {
+        Ok(s) => s,
+        Err(_) => {
+            env::set_var("RUST_MIN_STACK", 16000000.to_string());
+            return
+        }
+    };
     let min_stack_value: usize = min_stack_value
         .parse()
         .expect("RUST_MIN_STACK env var should be set since some tests require it.");

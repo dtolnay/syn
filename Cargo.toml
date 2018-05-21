@@ -29,7 +29,7 @@ extra-traits = []
 proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 
 [dependencies]
-proc-macro2 = { version = "0.3", default-features = false }
+proc-macro2 = { version = "0.4.1", default-features = false }
 quote = { version = "0.5", optional = true, default-features = false }
 unicode-xid = "0.1"
 
@@ -42,3 +42,6 @@ all-features = true
 
 [package.metadata.playground]
 all-features = true
+
+[patch.crates-io]
+quote = { git = 'https://github.com/dtolnay/quote' }

@@ -120,10 +120,10 @@ fn test_round_trip() {
                         true
                     } else {
                         errorf!(
-                            "=== {}: FAIL\nbefore: {}\nafter: {}\n",
+                            "=== {}: FAIL\nbefore: {:#?}\nafter: {:#?}\n",
                             path.display(),
-                            format!("{:?}", before).replace("\n", ""),
-                            format!("{:?}", after).replace("\n", "")
+                            before,
+                            after,
                         );
                         false
                     }

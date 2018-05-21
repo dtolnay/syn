@@ -33,7 +33,7 @@ fn strings() {
         match lit(s) {
             Lit::Str(lit) => {
                 assert_eq!(lit.value(), value);
-                let again = lit.into_tokens().to_string();
+                let again = lit.into_token_stream().to_string();
                 if again != s {
                     test_string(&again, value);
                 }
@@ -64,7 +64,7 @@ fn byte_strings() {
         match lit(s) {
             Lit::ByteStr(lit) => {
                 assert_eq!(lit.value(), value);
-                let again = lit.into_tokens().to_string();
+                let again = lit.into_token_stream().to_string();
                 if again != s {
                     test_byte_string(&again, value);
                 }
@@ -93,7 +93,7 @@ fn bytes() {
         match lit(s) {
             Lit::Byte(lit) => {
                 assert_eq!(lit.value(), value);
-                let again = lit.into_tokens().to_string();
+                let again = lit.into_token_stream().to_string();
                 assert_eq!(again, s);
             }
             wrong => panic!("{:?}", wrong),
@@ -114,7 +114,7 @@ fn chars() {
         match lit(s) {
             Lit::Char(lit) => {
                 assert_eq!(lit.value(), value);
-                let again = lit.into_tokens().to_string();
+                let again = lit.into_token_stream().to_string();
                 if again != s {
                     test_char(&again, value);
                 }
@@ -140,7 +140,7 @@ fn ints() {
             Lit::Int(lit) => {
                 assert_eq!(lit.value(), value);
                 assert_eq!(lit.suffix(), suffix);
-                let again = lit.into_tokens().to_string();
+                let again = lit.into_token_stream().to_string();
                 if again != s {
                     test_int(&again, value, suffix);
                 }
@@ -178,7 +178,7 @@ fn floats() {
             Lit::Float(lit) => {
                 assert_eq!(lit.value(), value);
                 assert_eq!(lit.suffix(), suffix);
-                let again = lit.into_tokens().to_string();
+                let again = lit.into_token_stream().to_string();
                 if again != s {
                     test_float(&again, value, suffix);
                 }

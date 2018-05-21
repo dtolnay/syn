@@ -9,7 +9,9 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate syn;
+extern crate proc_macro2;
 use syn::*;
+use proc_macro2::*;
 
 macro_rules! assert_let {
     ($p:pat = $e:expr) => {
@@ -116,7 +118,8 @@ fn test_catch_expr() {
         assert_let!(Stmt::Expr(ref expr) = block.stmts[3]; {
             assert_let!(Expr::While(ExprWhile { ref cond, .. }) = *expr; {
                 assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **cond; {
-                    assert_eq!(*path, "catch".into());
+                    let name = Ident::new("catch", Span::call_site());
+                    assert_eq!(*path, name.into());
                 });
             });
         });
@@ -124,12 +127,14 @@ fn test_catch_expr() {
         assert_let!(Stmt::Semi(ref expr, _) = block.stmts[5]; {
             assert_let!(Expr::Assign(ExprAssign { ref left, ref right, .. }) = *expr; {
                 assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **left; {
-                    assert_eq!(*path, "catch".into());
+                    let name = Ident::new("catch", Span::call_site());
+                    assert_eq!(*path, name.into());
                 });
 
                 assert_let!(Expr::If(ExprIf { ref cond, .. }) = **right; {
                     assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **cond; {
-                        assert_eq!(*path, "catch".into());
+                        let name = Ident::new("catch", Span::call_site());
+                        assert_eq!(*path, name.into());
                     });
                 });
             });
@@ -138,7 +143,8 @@ fn test_catch_expr() {
         assert_let!(Stmt::Semi(ref expr, _) = block.stmts[7]; {
             assert_let!(Expr::Match(ExprMatch { ref expr, .. }) = *expr; {
                 assert_let!(Expr::Path(ExprPath { qself: None, ref path, .. }) = **expr; {
-                    assert_eq!(*path, "catch".into());
+                    let name = Ident::new("catch", Span::call_site());
+                    assert_eq!(*path, name.into());
                 });
             });
         });

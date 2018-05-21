@@ -286,6 +286,8 @@ mod macros;
 #[macro_use]
 pub mod token;
 
+pub use proc_macro2::Ident;
+
 #[cfg(any(feature = "full", feature = "derive"))]
 mod attr;
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -328,9 +330,6 @@ pub use generics::{
 };
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
-
-mod ident;
-pub use ident::Ident;
 
 #[cfg(feature = "full")]
 mod item;
@@ -732,7 +731,7 @@ impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
 where
     T: quote::ToTokens + Default,
 {
-    fn to_tokens(&self, tokens: &mut quote::Tokens) {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match *self.0 {
             Some(ref t) => t.to_tokens(tokens),
             None => T::default().to_tokens(tokens),

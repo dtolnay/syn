@@ -155,6 +155,7 @@ use proc_macro;
 use proc_macro2;
 
 pub use error::{PResult, ParseError};
+use error::parse_error;
 
 use buffer::{Cursor, TokenBuffer};
 
@@ -211,6 +212,33 @@ impl Synom for proc_macro2::TokenStream {
     fn description() -> Option<&'static str> {
         Some("arbitrary token stream")
     }
+}
+
+impl Synom for proc_macro2::Ident {
+	fn parse(input: Cursor) -> PResult<Self> {
+		let (term, rest) = match input.ident() {
+			Some(term) => term,
+			_ => return parse_error(),
+		};
+		match &term.to_string()[..] {
+			"_"
+			// From https://doc.rust-lang.org/grammar.html#keywords
+			| "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
+			| "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
+			| "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
+			| "mod" | "move" | "mut" | "offsetof" | "override" | "priv" | "proc" | "pub"
+			| "pure" | "ref" | "return" | "Self" | "self" | "sizeof" | "static" | "struct"
+			| "super" | "trait" | "true" | "type" | "typeof" | "unsafe" | "unsized" | "use"
+			| "virtual" | "where" | "while" | "yield" => return parse_error(),
+			_ => {}
+		}
+
+		Ok((term, rest))
+	}
+
+	fn description() -> Option<&'static str> {
+		Some("identifier")
+	}
 }
 
 /// Parser that can parse Rust tokens into a particular syntax tree node.

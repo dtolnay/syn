@@ -217,7 +217,7 @@ pub fn invoke<T, R, F: FnOnce(T) -> R>(f: F, t: T) -> R {
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::{Expr, Ident};
+/// use syn::Expr;
 ///
 /// /// Parses any expression that does not begin with a `-` minus sign.
 /// named!(not_negative_expr -> Expr, do_parse!(
@@ -811,15 +811,16 @@ macro_rules! tuple_parser {
 /// ```rust
 /// #[macro_use]
 /// extern crate syn;
+/// extern crate proc_macro2;
 ///
-/// use syn::Ident;
+/// use proc_macro2::{Ident, Span};
 ///
 /// // Parse any identifier token, or the `!` token in which case the
 /// // identifier is treated as `"BANG"`.
 /// named!(ident_or_bang -> Ident, alt!(
 ///     syn!(Ident)
 ///     |
-///     punct!(!) => { |_| "BANG".into() }
+///     punct!(!) => { |_| Ident::new("BANG", Span::call_site()) }
 /// ));
 /// #
 /// # fn main() {}
@@ -926,10 +927,10 @@ macro_rules! alt {
 /// extern crate syn;
 /// extern crate proc_macro2;
 ///
-/// use syn::Ident;
+/// use proc_macro2::Ident;
+/// use proc_macro2::TokenStream;
 /// use syn::token::Paren;
 /// use syn::synom::Synom;
-/// use proc_macro2::TokenStream;
 ///
 /// /// Parse a macro invocation that uses `(` `)` parentheses.
 /// ///

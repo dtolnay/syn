@@ -14,15 +14,15 @@ extern crate quote;
 extern crate syn;
 
 use proc_macro2::Delimiter::*;
-use proc_macro2::{Delimiter, Group, Op, Spacing, Span, Term, TokenStream, TokenTree};
+use proc_macro2::*;
 use syn::{AttrStyle, Attribute, Lit};
 
 fn alone(c: char) -> TokenTree {
-    Op::new(c, Spacing::Alone).into()
+    Punct::new(c, Spacing::Alone).into()
 }
 
 fn joint(c: char) -> TokenTree {
-    Op::new(c, Spacing::Joint).into()
+    Punct::new(c, Spacing::Joint).into()
 }
 
 fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
@@ -30,7 +30,7 @@ fn delimited(delim: Delimiter, tokens: Vec<TokenTree>) -> TokenTree {
 }
 
 fn word(sym: &str) -> TokenTree {
-    Term::new(sym, Span::call_site()).into()
+    Ident::new(sym, Span::call_site()).into()
 }
 
 #[test]
@@ -80,7 +80,7 @@ fn test_struct() {
             style: AttrStyle::Outer,
             pound_token: Default::default(),
             bracket_token: Default::default(),
-            path: "test".into(),
+            path: Ident::new("test", Span::call_site()).into(),
             tts,
             is_sugared_doc: false,
         }

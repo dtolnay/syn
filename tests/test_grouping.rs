@@ -37,17 +37,17 @@ fn lit<T: Into<Literal>>(t: T) -> Expr {
 fn test_grouping() {
     let raw: TokenStream = vec![
         TokenTree::Literal(Literal::i32_suffixed(1)),
-        TokenTree::Op(Op::new('+', Spacing::Alone)),
+        TokenTree::Punct(Punct::new('+', Spacing::Alone)),
         TokenTree::Group(proc_macro2::Group::new(
             Delimiter::None,
             vec![
                 TokenTree::Literal(Literal::i32_suffixed(2)),
-                TokenTree::Op(Op::new('+', Spacing::Alone)),
+                TokenTree::Punct(Punct::new('+', Spacing::Alone)),
                 TokenTree::Literal(Literal::i32_suffixed(3)),
             ].into_iter()
                 .collect(),
         )),
-        TokenTree::Op(Op::new('*', Spacing::Alone)),
+        TokenTree::Punct(Punct::new('*', Spacing::Alone)),
         TokenTree::Literal(Literal::i32_suffixed(4)),
     ].into_iter()
         .collect();
@@ -83,17 +83,17 @@ fn test_grouping() {
 fn test_invalid_grouping() {
     let raw: TokenStream = vec![
         TokenTree::Literal(Literal::i32_suffixed(1)),
-        TokenTree::Op(Op::new('+', Spacing::Alone)),
+        TokenTree::Punct(Punct::new('+', Spacing::Alone)),
         TokenTree::Group(proc_macro2::Group::new(
             Delimiter::None,
             vec![
                 TokenTree::Literal(Literal::i32_suffixed(2)),
-                TokenTree::Op(Op::new('+', Spacing::Alone)),
+                TokenTree::Punct(Punct::new('+', Spacing::Alone)),
             ].into_iter()
                 .collect(),
         )),
         TokenTree::Literal(Literal::i32_suffixed(3)),
-        TokenTree::Op(Op::new('*', Spacing::Alone)),
+        TokenTree::Punct(Punct::new('*', Spacing::Alone)),
         TokenTree::Literal(Literal::i32_suffixed(4)),
     ].into_iter()
         .collect();

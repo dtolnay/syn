@@ -4,6 +4,7 @@
 
 #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
+#[cfg(any(feature = "full", feature = "derive"))]
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use punctuated::Punctuated;
@@ -1246,7 +1247,6 @@ pub fn visit_generics<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
 }
 
 pub fn visit_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {
-    // Skipped field _i . term;
 }
 # [ cfg ( feature = "full" ) ]
 pub fn visit_impl_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItem) {
@@ -1545,7 +1545,8 @@ pub fn visit_label<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast La
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lifetime<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lifetime) {
-    // Skipped field _i . term;
+    // Skipped field _i . apostrophe;
+    _visitor.visit_ident(& _i . ident);
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_lifetime_def<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LifetimeDef) {

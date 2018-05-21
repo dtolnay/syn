@@ -129,8 +129,8 @@
 
 #[cfg(feature = "proc-macro")]
 use proc_macro as pm;
-use proc_macro2::{Delimiter, Literal, Span, Term, TokenStream};
-use proc_macro2::{Group, Op, TokenTree};
+use proc_macro2::{Delimiter, Literal, Span, Ident, TokenStream};
+use proc_macro2::{Group, Punct, TokenTree};
 
 use std::marker::PhantomData;
 use std::ptr;
@@ -143,8 +143,8 @@ use std::fmt::{self, Debug};
 enum Entry {
     // Mimicking types from proc-macro.
     Group(Span, Delimiter, TokenBuffer),
-    Term(Term),
-    Op(Op),
+    Ident(Ident),
+    Punct(Punct),
     Literal(Literal),
     // End entries contain a raw pointer to the entry from the containing
     // token tree, or null if this is the outermost level.
@@ -177,11 +177,11 @@ impl TokenBuffer {
         let mut seqs = Vec::new();
         for tt in stream {
             match tt {
-                TokenTree::Term(sym) => {
-                    entries.push(Entry::Term(sym));
+                TokenTree::Ident(sym) => {
+                    entries.push(Entry::Ident(sym));
                 }
-                TokenTree::Op(op) => {
-                    entries.push(Entry::Op(op));
+                TokenTree::Punct(op) => {
+                    entries.push(Entry::Punct(op));
                 }
                 TokenTree::Literal(l) => {
                     entries.push(Entry::Literal(l));
@@ -275,8 +275,8 @@ impl<'a> Cursor<'a> {
     pub fn empty() -> Self {
         // It's safe in this situation for us to put an `Entry` object in global
         // storage, despite it not actually being safe to send across threads
-        // (`Term` is a reference into a thread-local table). This is because
-        // this entry never includes a `Term` object.
+        // (`Ident` is a reference into a thread-local table). This is because
+        // this entry never includes a `Ident` object.
         //
         // This wrapper struct allows us to break the rules and put a `Sync`
         // object in global storage.
@@ -368,22 +368,22 @@ impl<'a> Cursor<'a> {
         None
     }
 
-    /// If the cursor is pointing at a `Term`, returns it along with a cursor
+    /// If the cursor is pointing at a `Ident`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
-    pub fn term(mut self) -> Option<(Term, Cursor<'a>)> {
+    pub fn ident(mut self) -> Option<(Ident, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Term(term) => Some((term, unsafe { self.bump() })),
+            Entry::Ident(ref term) => Some((term.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
 
-    /// If the cursor is pointing at an `Op`, returns it along with a cursor
+    /// If the cursor is pointing at an `Punct`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
-    pub fn op(mut self) -> Option<(Op, Cursor<'a>)> {
+    pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Op(op) => Some((op, unsafe { self.bump() })),
+            Entry::Punct(ref op) => Some((op.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -426,8 +426,8 @@ impl<'a> Cursor<'a> {
                 TokenTree::from(g)
             }
             Entry::Literal(ref lit) => lit.clone().into(),
-            Entry::Term(term) => term.into(),
-            Entry::Op(op) => op.into(),
+            Entry::Ident(ref term) => term.clone().into(),
+            Entry::Punct(ref op) => op.clone().into(),
             Entry::End(..) => {
                 return None;
             }
@@ -442,8 +442,8 @@ impl<'a> Cursor<'a> {
         match *self.entry() {
             Entry::Group(span, ..) => span,
             Entry::Literal(ref l) => l.span(),
-            Entry::Term(t) => t.span(),
-            Entry::Op(o) => o.span(),
+            Entry::Ident(ref t) => t.span(),
+            Entry::Punct(ref o) => o.span(),
             Entry::End(..) => Span::call_site(),
         }
     }

@@ -16,12 +16,16 @@ use syn::*;
 extern crate quote;
 
 extern crate proc_macro2;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Span, TokenStream, Ident};
 
 #[macro_use]
 mod macros;
 
 mod common;
+
+fn ident(s: &str) -> Ident {
+    Ident::new(s, Span::call_site())
+}
 
 #[test]
 fn test_split_for_impl() {
@@ -47,11 +51,11 @@ fn test_split_for_impl() {
                     bracket_token: Default::default(),
                     pound_token: Default::default(),
                     style: AttrStyle::Outer,
-                    path: "may_dangle".into(),
+                    path: ident("may_dangle").into(),
                     tts: TokenStream::empty(),
                     is_sugared_doc: false,
                 }],
-                ident: "T".into(),
+                ident: ident("T"),
                 bounds: punctuated![TypeParamBound::Lifetime(Lifetime::new(
                     "'a",
                     Span::call_site()
@@ -73,13 +77,13 @@ fn test_split_for_impl() {
                 colon_token: Default::default(),
                 bounded_ty: TypePath {
                     qself: None,
-                    path: "T".into(),
+                    path: ident("T").into(),
                 }.into(),
                 bounds: punctuated![TypeParamBound::Trait(TraitBound {
                     paren_token: None,
                     modifier: TraitBoundModifier::None,
                     lifetimes: None,
-                    path: "Debug".into(),
+                    path: ident("Debug").into(),
                 }),],
             }),],
         }),
@@ -114,6 +118,7 @@ fn test_ty_param_bound() {
     );
 
     let tokens = quote!('_);
+    println!("{:?}", tokens);
     let expected = TypeParamBound::Lifetime(Lifetime::new("'_", Span::call_site()));
     assert_eq!(
         expected,
@@ -125,7 +130,7 @@ fn test_ty_param_bound() {
         paren_token: None,
         modifier: TraitBoundModifier::None,
         lifetimes: None,
-        path: "Debug".into(),
+        path: ident("Debug").into(),
     });
     assert_eq!(
         expected,
@@ -137,7 +142,7 @@ fn test_ty_param_bound() {
         paren_token: None,
         modifier: TraitBoundModifier::Maybe(Default::default()),
         lifetimes: None,
-        path: "Sized".into(),
+        path: ident("Sized").into(),
     });
     assert_eq!(
         expected,

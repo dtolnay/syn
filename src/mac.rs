@@ -93,10 +93,11 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{ToTokens, Tokens};
+    use quote::ToTokens;
+    use proc_macro2::TokenStream;
 
     impl ToTokens for Macro {
-        fn to_tokens(&self, tokens: &mut Tokens) {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
             match self.delimiter {

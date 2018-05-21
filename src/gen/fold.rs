@@ -6,6 +6,7 @@
 #![allow(unreachable_code)]
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
+#[cfg(any(feature = "full", feature = "derive"))]
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use token::{Brace, Bracket, Paren, Group};
@@ -430,9 +431,6 @@ macro_rules! fold_span_only {
     }
 }
 
-fold_span_only!(fold_ident: Ident);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lifetime: Lifetime);
 #[cfg(any(feature = "full", feature = "derive"))]
 fold_span_only!(fold_lit_byte: LitByte);
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1596,6 +1594,10 @@ pub fn fold_generics<V: Fold + ?Sized>(_visitor: &mut V, _i: Generics) -> Generi
         where_clause: (_i . where_clause).map(|it| { _visitor.fold_where_clause(it) }),
     }
 }
+
+pub fn fold_ident<V: Fold + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
+    _i
+}
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
     match _i {
@@ -1977,6 +1979,13 @@ pub fn fold_label<V: Fold + ?Sized>(_visitor: &mut V, _i: Label) -> Label {
     Label {
         name: _visitor.fold_lifetime(_i . name),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &(_i . colon_token).0)),
+    }
+}
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+pub fn fold_lifetime<V: Fold + ?Sized>(_visitor: &mut V, _i: Lifetime) -> Lifetime {
+    Lifetime {
+        apostrophe: _i . apostrophe,
+        ident: _visitor.fold_ident(_i . ident),
     }
 }
 # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]

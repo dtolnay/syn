@@ -97,7 +97,7 @@
 //! # fn main() {}
 //! ```
 
-use proc_macro2::Span;
+use proc_macro2::{Span, Ident};
 
 macro_rules! tokens {
     (
@@ -111,7 +111,7 @@ macro_rules! tokens {
             $($keyword:tt pub struct $keyword_name:ident #[$keyword_doc:meta])*
         }
     ) => (
-        $(token_punct_def! { #[$punct_doc] $punct pub struct $punct_name/$len })*
+        $(token_punct_def! { #[$punct_doc] pub struct $punct_name/$len })*
         $(token_punct_parser! { $punct pub struct $punct_name })*
         $(token_delimiter! { #[$delimiter_doc] $delimiter pub struct $delimiter_name })*
         $(token_keyword! { #[$keyword_doc] $keyword pub struct $keyword_name })*
@@ -119,7 +119,7 @@ macro_rules! tokens {
 }
 
 macro_rules! token_punct_def {
-    (#[$doc:meta] $s:tt pub struct $name:ident / $len:tt) => {
+    (#[$doc:meta] pub struct $name:ident / $len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[$doc]
         ///
@@ -179,7 +179,7 @@ macro_rules! token_punct_parser {
     ($s:tt pub struct $name:ident) => {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+            fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
                 printing::punct($s, &self.0, tokens);
             }
         }
@@ -242,7 +242,7 @@ macro_rules! token_keyword {
 
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+            fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
                 printing::keyword($s, &self.0, tokens);
             }
         }
@@ -306,9 +306,9 @@ macro_rules! token_delimiter {
 
         impl $name {
             #[cfg(feature = "printing")]
-            pub fn surround<F>(&self, tokens: &mut ::quote::Tokens, f: F)
+            pub fn surround<F>(&self, tokens: &mut ::proc_macro2::TokenStream, f: F)
             where
-                F: FnOnce(&mut ::quote::Tokens),
+                F: FnOnce(&mut ::proc_macro2::TokenStream),
             {
                 printing::delim($s, &self.0, tokens, f);
             }
@@ -335,28 +335,69 @@ macro_rules! token_delimiter {
 
 token_punct_def! {
     /// `_`
-    "_" pub struct Underscore/1
+    pub struct Underscore/1
 }
 
 #[cfg(feature = "printing")]
 impl ::quote::ToTokens for Underscore {
-    fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
-        tokens.append(::proc_macro2::Term::new("_", self.0[0]));
+    fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
+        use quote::TokenStreamExt;
+        tokens.append(::proc_macro2::Ident::new("_", self.0[0]));
     }
 }
 
 #[cfg(feature = "parsing")]
 impl ::Synom for Underscore {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
-        match input.term() {
-            Some((term, rest)) if term.as_str() == "_" => Ok((Underscore([term.span()]), rest)),
-            Some(_) => ::parse_error(),
+        match input.ident() {
+            Some((term, rest)) => {
+                if term == "_" {
+                    Ok((Underscore([term.span()]), rest))
+                } else {
+                    ::parse_error()
+                }
+            }
             None => parsing::punct("_", input, Underscore),
         }
     }
 
     fn description() -> Option<&'static str> {
         Some("`_`")
+    }
+}
+
+token_punct_def! {
+    /// `'`
+    pub struct Apostrophe/1
+}
+
+#[cfg(feature = "printing")]
+impl ::quote::ToTokens for Apostrophe {
+    fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
+        use quote::TokenStreamExt;
+        let mut token = ::proc_macro2::Punct::new('\'', ::proc_macro2::Spacing::Joint);
+        token.set_span(self.0[0]);
+        tokens.append(token);
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl ::Synom for Apostrophe {
+    fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Apostrophe> {
+        match input.punct() {
+            Some((op, rest)) => {
+                if op.as_char() == '\'' && op.spacing() == ::proc_macro2::Spacing::Joint {
+                    Ok((Apostrophe([op.span()]), rest))
+                } else {
+                    ::parse_error()
+                }
+            }
+            None => ::parse_error()
+        }
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("`'`")
     }
 }
 
@@ -673,6 +714,21 @@ macro_rules! keyword {
     ($i:expr, yield)    => { call!($i, <$crate::token::Yield as $crate::synom::Synom>::parse) };
 }
 
+macro_rules! ident_from_token {
+    ($token:ident) => {
+        impl From<Token![$token]> for Ident {
+            fn from(token: Token![$token]) -> Ident {
+                Ident::new(stringify!($token), token.0)
+            }
+        }
+    };
+}
+
+ident_from_token!(self);
+ident_from_token!(Self);
+ident_from_token!(super);
+ident_from_token!(crate);
+
 #[cfg(feature = "parsing")]
 mod parsing {
     use proc_macro2::{Delimiter, Spacing, Span};
@@ -712,16 +768,20 @@ mod parsing {
         let chars = s.chars();
 
         for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
-            match tokens.op() {
-                Some((op, rest)) if op.op() == ch => {
-                    if i != s.len() - 1 {
-                        match op.spacing() {
-                            Spacing::Joint => {}
-                            _ => return parse_error(),
+            match tokens.punct() {
+                Some((op, rest)) => {
+                    if op.as_char() == ch {
+                        if i != s.len() - 1 {
+                            match op.spacing() {
+                                Spacing::Joint => {}
+                                _ => return parse_error(),
+                            }
                         }
+                        *slot = op.span();
+                        tokens = rest;
+                    } else {
+                        return parse_error()
                     }
-                    *slot = op.span();
-                    tokens = rest;
                 }
                 _ => return parse_error(),
             }
@@ -734,8 +794,8 @@ mod parsing {
         tokens: Cursor<'a>,
         new: fn(Span) -> T,
     ) -> PResult<'a, T> {
-        if let Some((term, rest)) = tokens.term() {
-            if term.as_str() == keyword {
+        if let Some((term, rest)) = tokens.ident() {
+            if term == keyword {
                 return Ok((new(term.span()), rest));
             }
         }
@@ -776,10 +836,10 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{Delimiter, Group, Op, Spacing, Span, Term};
-    use quote::Tokens;
+    use proc_macro2::{Delimiter, Group, Punct, Spacing, Span, Ident, TokenStream};
+    use quote::TokenStreamExt;
 
-    pub fn punct(s: &str, spans: &[Span], tokens: &mut Tokens) {
+    pub fn punct(s: &str, spans: &[Span], tokens: &mut TokenStream) {
         assert_eq!(s.len(), spans.len());
 
         let mut chars = s.chars();
@@ -787,23 +847,23 @@ mod printing {
         let ch = chars.next_back().unwrap();
         let span = spans.next_back().unwrap();
         for (ch, span) in chars.zip(spans) {
-            let mut op = Op::new(ch, Spacing::Joint);
+            let mut op = Punct::new(ch, Spacing::Joint);
             op.set_span(*span);
             tokens.append(op);
         }
 
-        let mut op = Op::new(ch, Spacing::Alone);
+        let mut op = Punct::new(ch, Spacing::Alone);
         op.set_span(*span);
         tokens.append(op);
     }
 
-    pub fn keyword(s: &str, span: &Span, tokens: &mut Tokens) {
-        tokens.append(Term::new(s, *span));
+    pub fn keyword(s: &str, span: &Span, tokens: &mut TokenStream) {
+        tokens.append(Ident::new(s, *span));
     }
 
-    pub fn delim<F>(s: &str, span: &Span, tokens: &mut Tokens, f: F)
+    pub fn delim<F>(s: &str, span: &Span, tokens: &mut TokenStream, f: F)
     where
-        F: FnOnce(&mut Tokens),
+        F: FnOnce(&mut TokenStream),
     {
         let delim = match s {
             "(" => Delimiter::Parenthesis,
@@ -812,7 +872,7 @@ mod printing {
             " " => Delimiter::None,
             _ => panic!("unknown delimiter: {}", s),
         };
-        let mut inner = Tokens::new();
+        let mut inner = TokenStream::empty();
         f(&mut inner);
         let mut g = Group::new(delim, inner.into());
         g.set_span(*span);
