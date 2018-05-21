@@ -99,7 +99,7 @@ fn test_catch_expr() {
     let actual: File = syn::parse_str(raw).unwrap();
 
     assert_let!(Item::Struct(ItemStruct { ref ident, .. }) = actual.items[0]; {
-        assert_eq!(ident.to_string(), "catch");
+        assert_eq!(ident, "catch");
     });
 
     assert_let!(Item::Fn(ItemFn { ref block, .. }) = actual.items[1]; {
@@ -111,7 +111,7 @@ fn test_catch_expr() {
 
         assert_let!(Stmt::Local(ref local) = block.stmts[2]; {
             assert_let!(Pat::Ident(PatIdent { by_ref: None, mutability: Some(_), ref ident, .. }) = local.pats.iter().next().unwrap(); {
-                assert_eq!(ident.to_string(), "catch");
+                assert_eq!(ident, "catch");
             });
         });
 

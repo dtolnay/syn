@@ -432,9 +432,9 @@ pub mod parsing {
                 _ => match input.term() {
                     Some((term, rest)) => Ok((
                         Lit::Bool(LitBool {
-                            value: if term.to_string() == "true" {
+                            value: if term == "true" {
                                 true
-                            } else if term.to_string() == "false" {
+                            } else if term == "false" {
                                 false
                             } else {
                                 return parse_error();

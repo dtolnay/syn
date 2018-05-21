@@ -351,7 +351,7 @@ impl ::Synom for Underscore {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
         match input.term() {
             Some((term, rest)) => {
-                if term.to_string() == "_" {
+                if term == "_" {
                     Ok((Underscore([term.span()]), rest))
                 } else {
                     ::parse_error()
@@ -795,7 +795,7 @@ mod parsing {
         new: fn(Span) -> T,
     ) -> PResult<'a, T> {
         if let Some((term, rest)) = tokens.term() {
-            if term.to_string() == keyword {
+            if term == keyword {
                 return Ok((new(term.span()), rest));
             }
         }

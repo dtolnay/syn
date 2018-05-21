@@ -51,7 +51,7 @@ fn path_eq(a: &syn::Path, b: &str) -> bool {
     if a.segments.len() != 1 {
         return false
     }
-    a.segments[0].ident.to_string() == b
+    a.segments[0].ident == b
 }
 
 fn get_features(attrs: &[Attribute], mut features: TokenStream) -> TokenStream {
@@ -107,7 +107,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &TokenStream, lookup: &mut Looku
                 // We don't want to try to load the generated rust files and
                 // parse them, so we ignore them here.
                 for name in IGNORED_MODS {
-                    if item.ident.to_string() == *name {
+                    if item.ident == name {
                         continue 'items;
                     }
                 }
@@ -117,7 +117,7 @@ fn load_file<P: AsRef<Path>>(name: P, features: &TokenStream, lookup: &mut Looku
                 //
                 // The derive module is weird because it is built with either
                 // `full` or `derive` but exported only under `derive`.
-                let features = if item.ident.to_string() == "derive" {
+                let features = if item.ident == "derive" {
                     quote!(#[cfg(feature = "derive")])
                 } else {
                     get_features(&item.attrs, features.clone())
@@ -196,7 +196,7 @@ mod parsing {
     named!(full -> (TokenStream, bool), map!(option!(do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id.to_string() == "full") >>
+        cond_reduce!(id == "full") >>
         ()
     )), |s| if s.is_some() {
         (quote!(#[cfg(feature = "full")]), true)
@@ -207,7 +207,7 @@ mod parsing {
     named!(manual_extra_traits -> (), do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id.to_string() == "manual_extra_traits") >>
+        cond_reduce!(id == "manual_extra_traits") >>
         ()
     ));
 
@@ -241,7 +241,7 @@ mod parsing {
     named!(no_visit -> (), do_parse!(
         punct!(#) >>
         id: syn!(Ident) >>
-        cond_reduce!(id.to_string() == "no_visit") >>
+        cond_reduce!(id == "no_visit") >>
         ()
     ));
 
@@ -387,7 +387,7 @@ mod codegen {
             Type::Tuple(TypeTuple { ref elems, .. }) => {
                 RelevantType::Tuple(elems)
             }
-            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident.to_string() == "Token" => {
+            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident == "Token" => {
                 RelevantType::Token(mac.into_token_stream())
             }
             _ => RelevantType::Pass,

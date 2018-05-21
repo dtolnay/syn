@@ -1305,7 +1305,7 @@ macro_rules! custom_keyword {
         match <$crate::Ident as $crate::synom::Synom>::parse($i) {
             ::std::result::Result::Err(err) => ::std::result::Result::Err(err),
             ::std::result::Result::Ok((token, i)) => {
-                if token.to_string() == stringify!($keyword) {
+                if token == stringify!($keyword) {
                     ::std::result::Result::Ok((token, i))
                 } else {
                     $crate::parse_error()
