@@ -349,7 +349,7 @@ impl ::quote::ToTokens for Underscore {
 #[cfg(feature = "parsing")]
 impl ::Synom for Underscore {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
-        match input.term() {
+        match input.ident() {
             Some((term, rest)) => {
                 if term == "_" {
                     Ok((Underscore([term.span()]), rest))
@@ -384,7 +384,7 @@ impl ::quote::ToTokens for Apostrophe {
 #[cfg(feature = "parsing")]
 impl ::Synom for Apostrophe {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Apostrophe> {
-        match input.op() {
+        match input.punct() {
             Some((op, rest)) => {
                 if op.as_char() == '\'' && op.spacing() == ::proc_macro2::Spacing::Joint {
                     Ok((Apostrophe([op.span()]), rest))
@@ -768,7 +768,7 @@ mod parsing {
         let chars = s.chars();
 
         for (i, (ch, slot)) in chars.zip(&mut spans).enumerate() {
-            match tokens.op() {
+            match tokens.punct() {
                 Some((op, rest)) => {
                     if op.as_char() == ch {
                         if i != s.len() - 1 {
@@ -794,7 +794,7 @@ mod parsing {
         tokens: Cursor<'a>,
         new: fn(Span) -> T,
     ) -> PResult<'a, T> {
-        if let Some((term, rest)) = tokens.term() {
+        if let Some((term, rest)) = tokens.ident() {
             if term == keyword {
                 return Ok((new(term.span()), rest));
             }

@@ -216,7 +216,7 @@ impl Synom for proc_macro2::TokenStream {
 
 impl Synom for proc_macro2::Ident {
 	fn parse(input: Cursor) -> PResult<Self> {
-		let (term, rest) = match input.term() {
+		let (term, rest) = match input.ident() {
 			Some(term) => term,
 			_ => return parse_error(),
 		};

@@ -429,7 +429,7 @@ pub mod parsing {
                         Ok((Lit::new(lit), rest))
                     }
                 }
-                _ => match input.term() {
+                _ => match input.ident() {
                     Some((term, rest)) => Ok((
                         Lit::Bool(LitBool {
                             value: if term == "true" {

@@ -118,7 +118,7 @@ pub mod parsing {
     impl Synom for Lifetime {
         fn parse(input: Cursor) -> PResult<Self> {
             let (apostrophe, rest) = Apostrophe::parse(input)?;
-            let (ident, rest) = match rest.term() {
+            let (ident, rest) = match rest.ident() {
                 Some(pair) => pair,
                 None => return parse_error(),
             };

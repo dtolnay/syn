@@ -370,7 +370,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Ident`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
-    pub fn term(mut self) -> Option<(Ident, Cursor<'a>)> {
+    pub fn ident(mut self) -> Option<(Ident, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
             Entry::Ident(ref term) => Some((term.clone(), unsafe { self.bump() })),
@@ -380,7 +380,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at an `Punct`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
-    pub fn op(mut self) -> Option<(Punct, Cursor<'a>)> {
+    pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
             Entry::Punct(ref op) => Some((op.clone(), unsafe { self.bump() })),
