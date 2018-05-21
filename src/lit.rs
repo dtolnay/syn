@@ -506,8 +506,8 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{ToTokens, TokenStreamExt};
     use proc_macro2::TokenStream;
+    use quote::{ToTokens, TokenStreamExt};
 
     impl ToTokens for LitStr {
         fn to_tokens(&self, tokens: &mut TokenStream) {

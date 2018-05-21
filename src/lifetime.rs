@@ -10,7 +10,7 @@ use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
-use proc_macro2::{Span, Ident};
+use proc_macro2::{Ident, Span};
 use unicode_xid::UnicodeXID;
 
 use token::Apostrophe;
@@ -139,8 +139,8 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::ToTokens;
     use proc_macro2::TokenStream;
+    use quote::ToTokens;
 
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut TokenStream) {

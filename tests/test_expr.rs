@@ -8,10 +8,10 @@
 
 #![cfg(feature = "extra-traits")]
 
-extern crate syn;
 extern crate proc_macro2;
-use syn::*;
+extern crate syn;
 use proc_macro2::*;
+use syn::*;
 
 macro_rules! assert_let {
     ($p:pat = $e:expr) => {

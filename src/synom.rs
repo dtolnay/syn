@@ -154,8 +154,8 @@
 use proc_macro;
 use proc_macro2;
 
-pub use error::{PResult, ParseError};
 use error::parse_error;
+pub use error::{PResult, ParseError};
 
 use buffer::{Cursor, TokenBuffer};
 
@@ -215,12 +215,12 @@ impl Synom for proc_macro2::TokenStream {
 }
 
 impl Synom for proc_macro2::Ident {
-	fn parse(input: Cursor) -> PResult<Self> {
-		let (term, rest) = match input.ident() {
-			Some(term) => term,
-			_ => return parse_error(),
-		};
-		match &term.to_string()[..] {
+    fn parse(input: Cursor) -> PResult<Self> {
+        let (term, rest) = match input.ident() {
+            Some(term) => term,
+            _ => return parse_error(),
+        };
+        match &term.to_string()[..] {
 			"_"
 			// From https://doc.rust-lang.org/grammar.html#keywords
 			| "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
@@ -233,12 +233,12 @@ impl Synom for proc_macro2::Ident {
 			_ => {}
 		}
 
-		Ok((term, rest))
-	}
+        Ok((term, rest))
+    }
 
-	fn description() -> Option<&'static str> {
-		Some("identifier")
-	}
+    fn description() -> Option<&'static str> {
+        Some("identifier")
+    }
 }
 
 /// Parser that can parse Rust tokens into a particular syntax tree node.

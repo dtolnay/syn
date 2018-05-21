@@ -110,7 +110,8 @@ fn test_rustc_precedence() {
             }
 
             // Our version of `libsyntax` can't parse this tests
-            if path.to_str()
+            if path
+                .to_str()
                 .unwrap()
                 .ends_with("optional_comma_in_match_arm.rs")
             {

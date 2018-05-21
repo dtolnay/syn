@@ -16,7 +16,7 @@ use syn::*;
 extern crate quote;
 
 extern crate proc_macro2;
-use proc_macro2::{Span, TokenStream, Ident};
+use proc_macro2::{Ident, Span, TokenStream};
 
 #[macro_use]
 mod macros;
@@ -153,7 +153,13 @@ fn test_ty_param_bound() {
 #[test]
 fn test_fn_precedence_in_where_clause() {
     // This should parse as two separate bounds, `FnOnce() -> i32` and `Send` - not `FnOnce() -> (i32 + Send)`.
-    let sig = quote!(fn f<G>() where G: FnOnce() -> i32 + Send {});
+    let sig = quote! {
+        fn f<G>()
+        where
+            G: FnOnce() -> i32 + Send,
+        {
+        }
+    };
     let fun = common::parse::syn::<ItemFn>(sig.into());
     let where_clause = fun.decl.generics.where_clause.as_ref().unwrap();
     assert_eq!(where_clause.predicates.len(), 1);

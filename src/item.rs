@@ -248,8 +248,11 @@ impl Eq for ItemMacro2 {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for ItemMacro2 {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.macro_token == other.macro_token
-            && self.ident == other.ident && self.paren_token == other.paren_token
+        self.attrs == other.attrs
+            && self.vis == other.vis
+            && self.macro_token == other.macro_token
+            && self.ident == other.ident
+            && self.paren_token == other.paren_token
             && TokenStreamHelper(&self.args) == TokenStreamHelper(&other.args)
             && self.brace_token == other.brace_token
             && TokenStreamHelper(&self.body) == TokenStreamHelper(&other.body)
@@ -1536,8 +1539,8 @@ pub mod parsing {
 mod printing {
     use super::*;
     use attr::FilterAttrs;
-    use quote::{ToTokens, TokenStreamExt};
     use proc_macro2::TokenStream;
+    use quote::{ToTokens, TokenStreamExt};
 
     impl ToTokens for ItemExternCrate {
         fn to_tokens(&self, tokens: &mut TokenStream) {

@@ -129,7 +129,7 @@
 
 #[cfg(feature = "proc-macro")]
 use proc_macro as pm;
-use proc_macro2::{Delimiter, Literal, Span, Ident, TokenStream};
+use proc_macro2::{Delimiter, Ident, Literal, Span, TokenStream};
 use proc_macro2::{Group, Punct, TokenTree};
 
 use std::marker::PhantomData;

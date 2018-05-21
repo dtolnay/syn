@@ -25,7 +25,7 @@ pub fn check_min_stack() {
         Ok(s) => s,
         Err(_) => {
             env::set_var("RUST_MIN_STACK", 16000000.to_string());
-            return
+            return;
         }
     };
     let min_stack_value: usize = min_stack_value

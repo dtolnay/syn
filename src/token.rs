@@ -97,7 +97,7 @@
 //! # fn main() {}
 //! ```
 
-use proc_macro2::{Span, Ident};
+use proc_macro2::{Ident, Span};
 
 macro_rules! tokens {
     (
@@ -119,7 +119,7 @@ macro_rules! tokens {
 }
 
 macro_rules! token_punct_def {
-    (#[$doc:meta] pub struct $name:ident / $len:tt) => {
+    (#[$doc:meta]pub struct $name:ident / $len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[$doc]
         ///
@@ -400,7 +400,7 @@ impl ::Synom for Apostrophe {
                     ::parse_error()
                 }
             }
-            None => ::parse_error()
+            None => ::parse_error(),
         }
     }
 
@@ -788,7 +788,7 @@ mod parsing {
                         *slot = op.span();
                         tokens = rest;
                     } else {
-                        return parse_error()
+                        return parse_error();
                     }
                 }
                 _ => return parse_error(),
@@ -797,11 +797,7 @@ mod parsing {
         Ok((new(T::from_spans(&spans)), tokens))
     }
 
-    pub fn keyword<'a, T>(
-        keyword: &str,
-        tokens: Cursor<'a>,
-        new: fn(Span) -> T,
-    ) -> PResult<'a, T> {
+    pub fn keyword<'a, T>(keyword: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
         if let Some((term, rest)) = tokens.ident() {
             if term == keyword {
                 return Ok((new(term.span()), rest));
@@ -844,7 +840,7 @@ mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use proc_macro2::{Delimiter, Group, Punct, Spacing, Span, Ident, TokenStream};
+    use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream};
     use quote::TokenStreamExt;
 
     pub fn punct(s: &str, spans: &[Span], tokens: &mut TokenStream) {

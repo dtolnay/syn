@@ -11,7 +11,7 @@
 extern crate proc_macro2;
 extern crate syn;
 
-use proc_macro2::{Literal, Span, TokenStream, Ident};
+use proc_macro2::{Ident, Literal, Span, TokenStream};
 use syn::buffer::TokenBuffer;
 use syn::*;
 

@@ -762,8 +762,8 @@ where
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use quote::{ToTokens, TokenStreamExt};
     use proc_macro2::TokenStream;
+    use quote::{ToTokens, TokenStreamExt};
 
     impl<T, P> ToTokens for Punctuated<T, P>
     where
