@@ -2825,7 +2825,7 @@ mod printing {
     use quote::{ToTokens, TokenStreamExt};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
-    // before appending it to `Tokens`.
+    // before appending it to `TokenStream`.
     #[cfg(feature = "full")]
     fn wrap_bare_struct(tokens: &mut TokenStream, e: &Expr) {
         if let Expr::Struct(_) = *e {
