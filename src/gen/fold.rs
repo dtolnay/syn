@@ -1595,7 +1595,7 @@ pub fn fold_generics<V: Fold + ?Sized>(_visitor: &mut V, _i: Generics) -> Generi
 }
 
 pub fn fold_ident<V: Fold + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
-    _i
+    Ident::new(&_i.to_string(), _visitor.fold_span(_i.span()))
 }
 # [ cfg ( feature = "full" ) ]
 pub fn fold_impl_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
