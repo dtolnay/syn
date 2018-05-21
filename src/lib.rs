@@ -272,8 +272,9 @@
 #![cfg_attr(
     feature = "cargo-clippy",
     allow(
-        cast_possible_truncation, cast_possible_wrap, items_after_statements, similar_names,
-        single_match_else, stutter, unseparated_literal_suffix, use_self
+        cast_possible_truncation, cast_possible_wrap, if_not_else, items_after_statements,
+        similar_names, single_match_else, stutter, unseparated_literal_suffix, use_self,
+        used_underscore_binding
     )
 )]
 
