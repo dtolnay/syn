@@ -26,7 +26,7 @@ visit-mut = []
 fold = []
 clone-impls = []
 extra-traits = []
-proc-macro = ["proc-macro2/proc-macro"]
+proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 
 [dependencies]
 proc-macro2 = { version = "0.4.1", default-features = false }
