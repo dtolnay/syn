@@ -21,16 +21,16 @@ extern crate quote;
 #[macro_use]
 extern crate syn;
 
-use quote::ToTokens;
-use syn::{Attribute, Data, DataStruct, DeriveInput, Ident, Item};
 use failure::{err_msg, Error};
 use proc_macro2::{Span, TokenStream};
+use quote::ToTokens;
+use syn::{Attribute, Data, DataStruct, DeriveInput, Ident, Item};
 
-use std::io::{Read, Write};
+use std::collections::BTreeMap;
 use std::fmt::{self, Debug};
 use std::fs::File;
+use std::io::{Read, Write};
 use std::path::Path;
-use std::collections::BTreeMap;
 
 const SYN_CRATE_ROOT: &str = "../src/lib.rs";
 
@@ -46,10 +46,10 @@ const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
 fn path_eq(a: &syn::Path, b: &str) -> bool {
     if a.global() {
-        return false
+        return false;
     }
     if a.segments.len() != 1 {
-        return false
+        return false;
     }
     a.segments[0].ident == b
 }
@@ -83,7 +83,11 @@ impl Debug for AstItem {
 // NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
 type Lookup = BTreeMap<Ident, AstItem>;
 
-fn load_file<P: AsRef<Path>>(name: P, features: &TokenStream, lookup: &mut Lookup) -> Result<(), Error> {
+fn load_file<P: AsRef<Path>>(
+    name: P,
+    features: &TokenStream,
+    lookup: &mut Lookup,
+) -> Result<(), Error> {
     let name = name.as_ref();
     let parent = name.parent().ok_or_else(|| err_msg("no parent path"))?;
 
@@ -160,21 +164,24 @@ fn load_file<P: AsRef<Path>>(name: P, features: &TokenStream, lookup: &mut Looku
             Item::Struct(item) => {
                 let ident = item.ident;
                 if EXTRA_TYPES.contains(&&ident.to_string()[..]) {
-                    lookup.insert(ident.clone(), AstItem {
-                        ast: DeriveInput {
-                            ident: ident,
-                            vis: item.vis,
-                            attrs: item.attrs,
-                            generics: item.generics,
-                            data: Data::Struct(DataStruct {
-                                fields: item.fields,
-                                struct_token: item.struct_token,
-                                semi_token: item.semi_token,
-                            }),
+                    lookup.insert(
+                        ident.clone(),
+                        AstItem {
+                            ast: DeriveInput {
+                                ident: ident,
+                                vis: item.vis,
+                                attrs: item.attrs,
+                                generics: item.generics,
+                                data: Data::Struct(DataStruct {
+                                    fields: item.fields,
+                                    struct_token: item.struct_token,
+                                    semi_token: item.semi_token,
+                                }),
+                            },
+                            features: features.clone(),
+                            eos_full: false,
                         },
-                        features: features.clone(),
-                        eos_full: false,
-                    });
+                    );
                 }
             }
             _ => {}
@@ -186,10 +193,10 @@ fn load_file<P: AsRef<Path>>(name: P, features: &TokenStream, lookup: &mut Looku
 mod parsing {
     use super::AstItem;
 
+    use proc_macro2::TokenStream;
     use syn;
     use syn::synom::*;
     use syn::*;
-    use proc_macro2::TokenStream;
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
@@ -331,11 +338,11 @@ mod parsing {
 
 mod codegen {
     use super::{AstItem, Lookup};
-    use syn::*;
-    use syn::punctuated::Punctuated;
+    use proc_macro2::{Span, TokenStream};
     use quote::ToTokens;
     use std::fmt::{self, Display};
-    use proc_macro2::{Span, TokenStream};
+    use syn::punctuated::Punctuated;
+    use syn::*;
 
     #[derive(Default)]
     pub struct State {
@@ -365,7 +372,10 @@ mod codegen {
 
     fn classify<'a>(ty: &'a Type, lookup: &'a Lookup) -> RelevantType<'a> {
         match *ty {
-            Type::Path(TypePath { qself: None, ref path }) => {
+            Type::Path(TypePath {
+                qself: None,
+                ref path,
+            }) => {
                 let last = path.segments.last().unwrap().into_value();
                 match &last.ident.to_string()[..] {
                     "Box" => RelevantType::Box(first_arg(&last.arguments)),
@@ -384,10 +394,10 @@ mod codegen {
                     }
                 }
             }
-            Type::Tuple(TypeTuple { ref elems, .. }) => {
-                RelevantType::Tuple(elems)
-            }
-            Type::Macro(TypeMacro { ref mac }) if mac.path.segments.last().unwrap().into_value().ident == "Token" => {
+            Type::Tuple(TypeTuple { ref elems, .. }) => RelevantType::Tuple(elems),
+            Type::Macro(TypeMacro { ref mac })
+                if mac.path.segments.last().unwrap().into_value().ident == "Token" =>
+            {
                 RelevantType::Token(mac.into_token_stream())
             }
             _ => RelevantType::Pass,
@@ -406,8 +416,8 @@ mod codegen {
         Owned(TokenStream),
     }
 
-    use self::Operand::*;
     use self::Kind::*;
+    use self::Operand::*;
 
     impl Operand {
         fn tokens(&self) -> &TokenStream {
@@ -450,7 +460,8 @@ mod codegen {
             _ => panic!("Expected at least 1 type argument here"),
         };
 
-        match **data.args
+        match **data
+            .args
             .first()
             .expect("Expected at least 1 type argument here")
             .value()
@@ -460,11 +471,7 @@ mod codegen {
         }
     }
 
-    fn simple_visit(
-        item: &AstItem,
-        kind: Kind,
-        name: &Operand,
-    ) -> String {
+    fn simple_visit(item: &AstItem, kind: Kind, name: &Operand) -> String {
         match kind {
             Visit => format!(
                 "_visitor.visit_{under_name}({name})",
@@ -484,12 +491,7 @@ mod codegen {
         }
     }
 
-    fn box_visit(
-        elem: &Type,
-        lookup: &Lookup,
-        kind: Kind,
-        name: &Operand,
-    ) -> Option<String> {
+    fn box_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
         let name = name.owned_tokens();
         let res = visit(elem, lookup, kind, &Owned(quote!(*#name)))?;
         Some(match kind {
@@ -498,32 +500,23 @@ mod codegen {
         })
     }
 
-    fn vec_visit(
-        elem: &Type,
-        lookup: &Lookup,
-        kind: Kind,
-        name: &Operand,
-    ) -> Option<String> {
+    fn vec_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
         let operand = match kind {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
         let val = visit(elem, lookup, kind, &operand)?;
         Some(match kind {
-            Visit => {
-                format!(
-                    "for it in {name} {{ {val} }}",
-                    name = name.ref_tokens(),
-                    val = val,
-                )
-            }
-            VisitMut => {
-                format!(
-                    "for it in {name} {{ {val} }}",
-                    name = name.ref_mut_tokens(),
-                    val = val,
-                )
-            }
+            Visit => format!(
+                "for it in {name} {{ {val} }}",
+                name = name.ref_tokens(),
+                val = val,
+            ),
+            VisitMut => format!(
+                "for it in {name} {{ {val} }}",
+                name = name.ref_mut_tokens(),
+                val = val,
+            ),
             Fold => format!(
                 "FoldHelper::lift({name}, |it| {{ {val} }})",
                 name = name.owned_tokens(),
@@ -544,26 +537,22 @@ mod codegen {
         };
         let val = visit(elem, lookup, kind, &operand)?;
         Some(match kind {
-            Visit => {
-                format!(
-                    "for el in Punctuated::pairs({name}) {{ \
-                        let it = el.value(); \
-                        {val} \
-                        }}",
-                    name = name.ref_tokens(),
-                    val = val,
-                )
-            }
-            VisitMut => {
-                format!(
-                    "for mut el in Punctuated::pairs_mut({name}) {{ \
-                        let it = el.value_mut(); \
-                        {val} \
-                        }}",
-                    name = name.ref_mut_tokens(),
-                    val = val,
-                )
-            }
+            Visit => format!(
+                "for el in Punctuated::pairs({name}) {{ \
+                 let it = el.value(); \
+                 {val} \
+                 }}",
+                name = name.ref_tokens(),
+                val = val,
+            ),
+            VisitMut => format!(
+                "for mut el in Punctuated::pairs_mut({name}) {{ \
+                 let it = el.value_mut(); \
+                 {val} \
+                 }}",
+                name = name.ref_mut_tokens(),
+                val = val,
+            ),
             Fold => format!(
                 "FoldHelper::lift({name}, |it| {{ {val} }})",
                 name = name.owned_tokens(),
@@ -572,12 +561,7 @@ mod codegen {
         })
     }
 
-    fn option_visit(
-        elem: &Type,
-        lookup: &Lookup,
-        kind: Kind,
-        name: &Operand,
-    ) -> Option<String> {
+    fn option_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
         let it = match kind {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
@@ -613,8 +597,7 @@ mod codegen {
             let name = name.tokens();
             let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
-            let val = visit(elem, lookup, kind, &it)
-                .unwrap_or_else(|| noop_visit(kind, &it));
+            let val = visit(elem, lookup, kind, &it).unwrap_or_else(|| noop_visit(kind, &it));
             code.push_str(&format!("            {}", val));
             match kind {
                 Fold => code.push(','),
@@ -626,12 +609,8 @@ mod codegen {
             None
         } else {
             Some(match kind {
-                Fold => {
-                    format!("(\n{}        )", code)
-                }
-                Visit | VisitMut => {
-                    format!("\n{}        ", code)
-                }
+                Fold => format!("(\n{}        )", code),
+                Visit | VisitMut => format!("\n{}        ", code),
             })
         }
     }
@@ -663,21 +642,11 @@ mod codegen {
 
     fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
         match classify(ty, lookup) {
-            RelevantType::Box(elem) => {
-                box_visit(elem, lookup, kind, name)
-            }
-            RelevantType::Vec(elem) => {
-                vec_visit(elem, lookup, kind, name)
-            }
-            RelevantType::Punctuated(elem) => {
-                punctuated_visit(elem, lookup, kind, name)
-            }
-            RelevantType::Option(elem) => {
-                option_visit(elem, lookup, kind, name)
-            }
-            RelevantType::Tuple(elems) => {
-                tuple_visit(elems, lookup, kind, name)
-            }
+            RelevantType::Box(elem) => box_visit(elem, lookup, kind, name),
+            RelevantType::Vec(elem) => vec_visit(elem, lookup, kind, name),
+            RelevantType::Punctuated(elem) => punctuated_visit(elem, lookup, kind, name),
+            RelevantType::Option(elem) => option_visit(elem, lookup, kind, name),
+            RelevantType::Tuple(elems) => tuple_visit(elems, lookup, kind, name),
             RelevantType::Simple(item) => {
                 let mut res = simple_visit(item, kind, name);
                 Some(if item.eos_full {
@@ -686,12 +655,8 @@ mod codegen {
                     res
                 })
             }
-            RelevantType::Token(ty) => {
-                Some(token_visit(ty, kind, name))
-            }
-            RelevantType::Pass => {
-                None
-            }
+            RelevantType::Token(ty) => Some(token_visit(ty, kind, name)),
+            RelevantType::Pass => None,
         }
     }
 
@@ -767,7 +732,8 @@ mod codegen {
                             state.visit_mut_impl.push_str(&binding);
                             state.fold_impl.push_str(&binding);
 
-                            let res = fields.unnamed
+                            let res = fields
+                                .unnamed
                                 .iter()
                                 .enumerate()
                                 .map(|(idx, el)| {
@@ -797,16 +763,17 @@ mod codegen {
                             res
                         }
                         Fields::Unit => {
-                            state
-                                .visit_impl
-                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.ident));
-                            state
-                                .visit_mut_impl
-                                .push_str(&format!("        {0}::{1} => {{ }}\n", s.ast.ident, variant.ident));
+                            state.visit_impl.push_str(&format!(
+                                "        {0}::{1} => {{ }}\n",
+                                s.ast.ident, variant.ident
+                            ));
+                            state.visit_mut_impl.push_str(&format!(
+                                "        {0}::{1} => {{ }}\n",
+                                s.ast.ident, variant.ident
+                            ));
                             state.fold_impl.push_str(&format!(
                                 "        {0}::{1} => {{ {0}::{1} }}\n",
-                                s.ast.ident,
-                                variant.ident
+                                s.ast.ident, variant.ident
                             ));
                             continue;
                         }
@@ -817,41 +784,28 @@ mod codegen {
                         state.visit_mut_impl.push_str(") => {\n");
                         state.fold_impl.push_str(") => {\n");
                     }
-                    state
-                        .fold_impl
-                        .push_str(&format!("            {}::{} (\n", s.ast.ident, variant.ident,));
+                    state.fold_impl.push_str(&format!(
+                        "            {}::{} (\n",
+                        s.ast.ident, variant.ident,
+                    ));
                     for (field, binding) in fields {
                         state.visit_impl.push_str(&format!(
                             "            {};\n",
-                            visit(
-                                &field.ty,
-                                lookup,
-                                Visit,
-                                &Borrowed(binding.clone())
-                            ).unwrap_or_else(|| noop_visit(
-                                Visit,
-                                &Borrowed(binding.clone())
-                            )),
+                            visit(&field.ty, lookup, Visit, &Borrowed(binding.clone()))
+                                .unwrap_or_else(|| noop_visit(Visit, &Borrowed(binding.clone()))),
                         ));
                         state.visit_mut_impl.push_str(&format!(
                             "            {};\n",
-                            visit(
-                                &field.ty,
-                                lookup,
-                                VisitMut,
-                                &Borrowed(binding.clone())
-                            ).unwrap_or_else(|| noop_visit(
-                                VisitMut,
-                                &Borrowed(binding.clone())
-                            )),
+                            visit(&field.ty, lookup, VisitMut, &Borrowed(binding.clone()))
+                                .unwrap_or_else(|| noop_visit(
+                                    VisitMut,
+                                    &Borrowed(binding.clone())
+                                )),
                         ));
                         state.fold_impl.push_str(&format!(
                             "                {},\n",
                             visit(&field.ty, lookup, Fold, &Owned(binding.clone()))
-                                .unwrap_or_else(|| noop_visit(
-                                    Fold,
-                                    &Owned(binding)
-                                )),
+                                .unwrap_or_else(|| noop_visit(Fold, &Owned(binding))),
                         ));
                     }
                     state.fold_impl.push_str("            )\n");
@@ -870,7 +824,8 @@ mod codegen {
                         state
                             .fold_impl
                             .push_str(&format!("    {} {{\n", s.ast.ident));
-                        fields.named
+                        fields
+                            .named
                             .iter()
                             .map(|el| {
                                 let id = el.ident.clone();
@@ -882,7 +837,8 @@ mod codegen {
                         state
                             .fold_impl
                             .push_str(&format!("    {} (\n", s.ast.ident));
-                        fields.unnamed
+                        fields
+                            .unnamed
                             .iter()
                             .enumerate()
                             .map(|(idx, el)| {
@@ -893,7 +849,9 @@ mod codegen {
                     }
                     Fields::Unit => {
                         if s.ast.ident == "Ident" {
-                            state.fold_impl.push_str("    Ident::new(&_i.to_string(), _visitor.fold_span(_i.span()))\n");
+                            state.fold_impl.push_str(
+                                "    Ident::new(&_i.to_string(), _visitor.fold_span(_i.span()))\n",
+                            );
                         } else {
                             state.fold_impl.push_str("    _i\n");
                         }
@@ -906,24 +864,15 @@ mod codegen {
                     state.visit_impl.push_str(&format!(
                         "    {};\n",
                         visit(&field.ty, lookup, Visit, &ref_toks)
-                            .unwrap_or_else(|| noop_visit(
-                                Visit,
-                                &ref_toks,
-                            ))
+                            .unwrap_or_else(|| noop_visit(Visit, &ref_toks,))
                     ));
                     state.visit_mut_impl.push_str(&format!(
                         "    {};\n",
                         visit(&field.ty, lookup, VisitMut, &ref_toks)
-                            .unwrap_or_else(|| noop_visit(
-                                VisitMut,
-                                &ref_toks,
-                            ))
+                            .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks,))
                     ));
                     let fold = visit(&field.ty, lookup, Fold, &ref_toks)
-                        .unwrap_or_else(|| noop_visit(
-                            Fold,
-                            &ref_toks,
-                        ));
+                        .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
                     if let Some(ref name) = field.ident {
                         state
                             .fold_impl
@@ -949,7 +898,11 @@ mod codegen {
 
         if let Data::Struct(ref data) = s.ast.data {
             if let Fields::Named(ref fields) = data.fields {
-                if fields.named.iter().any(|field| field.vis == Visibility::Inherited) {
+                if fields
+                    .named
+                    .iter()
+                    .any(|field| field.vis == Visibility::Inherited)
+                {
                     // Discard the generated impl if there are private fields.
                     // These have to be handwritten.
                     state.fold_impl.truncate(before_fold_impl_len);
