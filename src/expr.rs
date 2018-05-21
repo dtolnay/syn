@@ -637,7 +637,7 @@ ast_struct! {
 
 impl From<usize> for Index {
     fn from(index: usize) -> Index {
-        assert!(index < std::u32::MAX as usize);
+        assert!(index < u32::max_value() as usize);
         Index {
             index: index as u32,
             span: Span::call_site(),

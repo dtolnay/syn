@@ -259,11 +259,28 @@
 
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/0.13.11")]
+#![cfg_attr(feature = "cargo-clippy", deny(clippy, clippy_pedantic))]
+
+// Ignored clippy lints.
 #![cfg_attr(
     feature = "cargo-clippy",
     allow(
         const_static_lifetime, doc_markdown, large_enum_variant, match_bool, redundant_closure,
         needless_pass_by_value, redundant_field_names
+    )
+)]
+// Ignored clippy_pedantic lints.
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(
+        cast_possible_truncation,
+        cast_possible_wrap,
+        items_after_statements,
+        similar_names,
+        single_match_else,
+        stutter,
+        unseparated_literal_suffix,
+        use_self,
     )
 )]
 
