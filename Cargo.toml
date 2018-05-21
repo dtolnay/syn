@@ -34,8 +34,8 @@ quote = { version = "0.5", optional = true, default-features = false }
 unicode-xid = "0.1"
 
 [dev-dependencies]
-rayon = "1.0.0"
-walkdir = "2"
+rayon = "1.0"
+walkdir = "2.1"
 
 [package.metadata.docs.rs]
 all-features = true
