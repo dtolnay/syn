@@ -57,6 +57,8 @@ first support for procedural macros in Rust 1.15.0. Some features especially
 around error reporting are only available in newer compilers or on the nightly
 channel.*
 
+[*Release notes*](https://github.com/dtolnay/syn/releases)
+
 ## Example of a custom derive
 
 The canonical custom derive using Syn looks like this. We write an ordinary Rust
