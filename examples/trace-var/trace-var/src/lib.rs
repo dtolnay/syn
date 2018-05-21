@@ -31,8 +31,8 @@ struct Args {
 
 impl Synom for Args {
     named!(parse -> Self, map!(
-        parens!(Punctuated::<Ident, Token![,]>::parse_terminated_nonempty),
-        |(_parens, vars)| Args {
+        call!(Punctuated::<Ident, Token![,]>::parse_terminated_nonempty),
+        |vars| Args {
             vars: vars.into_iter().collect(),
         }
     ));
@@ -62,8 +62,11 @@ impl Args {
     /// Determines whether the given `Pat` is an identifier equal to one of the
     /// variables we intend to print. Patterns are used as the left-hand side of
     /// a `let` binding.
-    fn should_print_pat(&self, p: &Pat) -> bool {
-        match *p {
+    fn should_print_pat(&self, p: &Punctuated<Pat, Token![|]>) -> bool {
+        if p.len() != 1 {
+            return false;
+        }
+        match p[0] {
             Pat::Ident(ref p) => self.vars.contains(&p.ident),
             _ => false,
         }
@@ -94,11 +97,12 @@ impl Args {
     ///     // After
     ///     let VAR = { let VAR = INIT; println!("VAR = {:?}", VAR); VAR };
     fn let_and_print(&mut self, local: Local) -> Stmt {
-        let Local { pat, ty, init, .. } = local;
+        let Local { pats, ty, init, .. } = local;
+        let pat = &pats[0];
         let ty = ty.map(|(colon_token, ty)| quote!(#colon_token #ty));
         let init = self.fold_expr(*init.unwrap().1);
         let ident = match *pat {
-            Pat::Ident(ref p) => p.ident,
+            Pat::Ident(ref p) => &p.ident,
             _ => unreachable!(),
         };
         parse_quote! {
@@ -147,7 +151,7 @@ impl Fold for Args {
     fn fold_stmt(&mut self, s: Stmt) -> Stmt {
         match s {
             Stmt::Local(s) => {
-                if s.init.is_some() && self.should_print_pat(&s.pat) {
+                if s.init.is_some() && self.should_print_pat(&s.pats) {
                     self.let_and_print(s)
                 } else {
                     Stmt::Local(fold::fold_local(self, s))
