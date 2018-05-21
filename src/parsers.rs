@@ -95,6 +95,8 @@ macro_rules! named {
 #[macro_export]
 macro_rules! call {
     ($i:expr, $fun:expr $(, $args:expr)*) => {{
+        #[allow(unused_imports)]
+        use $crate::synom::ext::*;
         let i = $i;
         eprintln!(concat!(" -> ", stringify!($fun), " @ {:?}"), i);
         let r = $fun(i $(, $args)*);
@@ -143,9 +145,11 @@ macro_rules! call {
 #[cfg(not(synom_verbose_trace))]
 #[macro_export]
 macro_rules! call {
-    ($i:expr, $fun:expr $(, $args:expr)*) => {
+    ($i:expr, $fun:expr $(, $args:expr)*) => {{
+        #[allow(unused_imports)]
+        use $crate::synom::ext::*;
         $fun($i $(, $args)*)
-    };
+    }};
 }
 
 /// Transform the result of a parser by applying a function or closure.
