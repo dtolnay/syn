@@ -68,8 +68,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! syn = "0.13"
-//! quote = "0.5"
+//! syn = "0.14"
+//! quote = "0.6"
 //!
 //! [lib]
 //! proc-macro = true
@@ -258,7 +258,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn/0.13.11")]
+#![doc(html_root_url = "https://docs.rs/syn/0.14.0")]
 #![cfg_attr(feature = "cargo-clippy", deny(clippy, clippy_pedantic))]
 // Ignored clippy lints.
 #![cfg_attr(
