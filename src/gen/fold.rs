@@ -6,7 +6,6 @@
 #![allow(unreachable_code)]
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
-#[cfg(any(feature = "full", feature = "derive"))]
 use *;
 #[cfg(any(feature = "full", feature = "derive"))]
 use token::{Brace, Bracket, Paren, Group};

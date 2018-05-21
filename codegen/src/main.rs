@@ -1013,7 +1013,6 @@ macro_rules! full {
 #![allow(unreachable_code)]
 #![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
 
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use token::{{Brace, Bracket, Paren, Group}};
@@ -1074,7 +1073,6 @@ fold_span_only!(fold_lit_str: LitStr);
 
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
@@ -1112,7 +1110,6 @@ pub trait Visit<'ast> {{
 
 #![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
 
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
 use *;
 #[cfg(any(feature = \"full\", feature = \"derive\"))]
 use punctuated::Punctuated;
