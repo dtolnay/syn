@@ -7,14 +7,12 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 
-use proc_macro::TokenStream;
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream};
 use syn::{DeriveInput, Data, Fields, Generics, GenericParam, Index};
 use syn::spanned::Spanned;
-use quote::Tokens;
 
 #[proc_macro_derive(HeapSize)]
-pub fn derive_heap_size(input: TokenStream) -> TokenStream {
+pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Parse the input tokens into a syntax tree.
     let input: DeriveInput = syn::parse(input).unwrap();
 
@@ -53,7 +51,7 @@ fn add_trait_bounds(mut generics: Generics) -> Generics {
 }
 
 // Generate an expression to sum up the heap size of each field.
-fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
+fn heap_size_sum(data: &Data, var: &TokenStream) -> TokenStream {
     let call_site = Span::call_site();
 
     match *data {
@@ -71,7 +69,7 @@ fn heap_size_sum(data: &Data, var: &Tokens) -> Tokens {
                     // underlines which field it is. An example is shown in the
                     // readme of the parent directory.
                     let recurse = fields.named.iter().map(|f| {
-                        let name = f.ident;
+                        let name = &f.ident;
                         let access = quote_spanned!(call_site=> #var.#name);
                         quote_spanned! {f.span()=>
                             ::heapsize::HeapSize::heap_size_of_children(&#access)
