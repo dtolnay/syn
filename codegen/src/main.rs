@@ -849,12 +849,11 @@ mod codegen {
                     }
                     Fields::Unit => {
                         if s.ast.ident == "Ident" {
-                            state.fold_impl.push_str(
-                                "    Ident::new(&_i.to_string(), _visitor.fold_span(_i.span()))\n",
-                            );
-                        } else {
-                            state.fold_impl.push_str("    _i\n");
+                            state.fold_impl.push_str("    let mut _i = _i;\n");
+                            state.fold_impl.push_str("    let span = _visitor.fold_span(_i.span());\n");
+                            state.fold_impl.push_str("    _i.set_span(span);\n");
                         }
+                        state.fold_impl.push_str("    _i\n");
                         vec![]
                     }
                 };
