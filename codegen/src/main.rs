@@ -990,6 +990,7 @@ pub trait Fold {{
 {fold_trait}
 }}
 
+#[cfg(any(feature = \"full\", feature = \"derive\"))]
 macro_rules! fold_span_only {{
     ($f:ident : $t:ident) => {{
         pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {{

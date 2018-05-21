@@ -420,6 +420,7 @@ fn fold_where_predicate(&mut self, i: WherePredicate) -> WherePredicate { fold_w
 
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! fold_span_only {
     ($f:ident : $t:ident) => {
         pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
