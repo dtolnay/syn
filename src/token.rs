@@ -111,7 +111,7 @@ macro_rules! tokens {
             $($keyword:tt pub struct $keyword_name:ident #[$keyword_doc:meta])*
         }
     ) => (
-        $(token_punct_def! { #[$punct_doc] $punct pub struct $punct_name/$len })*
+        $(token_punct_def! { #[$punct_doc] pub struct $punct_name/$len })*
         $(token_punct_parser! { $punct pub struct $punct_name })*
         $(token_delimiter! { #[$delimiter_doc] $delimiter pub struct $delimiter_name })*
         $(token_keyword! { #[$keyword_doc] $keyword pub struct $keyword_name })*
@@ -119,7 +119,7 @@ macro_rules! tokens {
 }
 
 macro_rules! token_punct_def {
-    (#[$doc:meta] $s:tt pub struct $name:ident / $len:tt) => {
+    (#[$doc:meta] pub struct $name:ident / $len:tt) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[$doc]
         ///
@@ -258,12 +258,6 @@ macro_rules! token_keyword {
             }
         }
 
-        impl From<$name> for Ident {
-            fn from(me: $name) -> Ident {
-                Ident::new($s, me.0)
-            }
-        }
-
         impl From<Span> for $name {
             fn from(span: Span) -> Self {
                 $name(span)
@@ -341,7 +335,7 @@ macro_rules! token_delimiter {
 
 token_punct_def! {
     /// `_`
-    "_" pub struct Underscore/1
+    pub struct Underscore/1
 }
 
 #[cfg(feature = "printing")]
@@ -374,7 +368,7 @@ impl ::Synom for Underscore {
 
 token_punct_def! {
     /// `'`
-    "'" pub struct Apostrophe/1
+    pub struct Apostrophe/1
 }
 
 #[cfg(feature = "printing")]
@@ -719,6 +713,21 @@ macro_rules! keyword {
     ($i:expr, while)    => { call!($i, <$crate::token::While as $crate::synom::Synom>::parse) };
     ($i:expr, yield)    => { call!($i, <$crate::token::Yield as $crate::synom::Synom>::parse) };
 }
+
+macro_rules! ident_from_token {
+    ($token:ident) => {
+        impl From<Token![$token]> for Ident {
+            fn from(token: Token![$token]) -> Ident {
+                Ident::new(stringify!($token), token.0)
+            }
+        }
+    };
+}
+
+ident_from_token!(self);
+ident_from_token!(Self);
+ident_from_token!(super);
+ident_from_token!(crate);
 
 #[cfg(feature = "parsing")]
 mod parsing {
