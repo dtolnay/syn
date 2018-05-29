@@ -876,7 +876,7 @@ mod printing {
             " " => Delimiter::None,
             _ => panic!("unknown delimiter: {}", s),
         };
-        let mut inner = TokenStream::empty();
+        let mut inner = TokenStream::new();
         f(&mut inner);
         let mut g = Group::new(delim, inner);
         g.set_span(*span);

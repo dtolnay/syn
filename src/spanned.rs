@@ -109,7 +109,7 @@ where
 {
     #[cfg(procmacro2_semver_exempt)]
     fn span(&self) -> Span {
-        let mut tokens = TokenStream::empty();
+        let mut tokens = TokenStream::new();
         self.to_tokens(&mut tokens);
         let mut iter = tokens.into_iter();
         let mut span = match iter.next() {
@@ -128,7 +128,7 @@ where
 
     #[cfg(not(procmacro2_semver_exempt))]
     fn span(&self) -> Span {
-        let mut tokens = TokenStream::empty();
+        let mut tokens = TokenStream::new();
         self.to_tokens(&mut tokens);
         let mut iter = tokens.into_iter();
 

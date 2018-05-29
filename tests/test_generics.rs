@@ -52,7 +52,7 @@ fn test_split_for_impl() {
                     pound_token: Default::default(),
                     style: AttrStyle::Outer,
                     path: ident("may_dangle").into(),
-                    tts: TokenStream::empty(),
+                    tts: TokenStream::new(),
                     is_sugared_doc: false,
                 }],
                 ident: ident("T"),

@@ -91,19 +91,19 @@
 //! use syn::{PathSegment, Expr, Attribute};
 //!
 //! # fn run_parsers() -> Result<(), syn::synom::ParseError> {
-//! #     let tokens = TokenStream::empty().into();
+//! #     let tokens = TokenStream::new().into();
 //! // Parse a nonempty sequence of path segments separated by `::` punctuation
 //! // with no trailing punctuation.
 //! let parser = Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty;
 //! let path = parser.parse(tokens)?;
 //!
-//! #     let tokens = TokenStream::empty().into();
+//! #     let tokens = TokenStream::new().into();
 //! // Parse a possibly empty sequence of expressions terminated by commas with
 //! // an optional trailing punctuation.
 //! let parser = Punctuated::<Expr, Token![,]>::parse_terminated;
 //! let args = parser.parse(tokens)?;
 //!
-//! #     let tokens = TokenStream::empty().into();
+//! #     let tokens = TokenStream::new().into();
 //! // Parse zero or more outer attributes but not inner attributes.
 //! named!(outer_attrs -> Vec<Attribute>, many0!(Attribute::parse_outer));
 //! let attrs = outer_attrs.parse(tokens)?;
