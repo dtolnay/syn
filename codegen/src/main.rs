@@ -934,7 +934,7 @@ fn main() {
                         semi_token: None,
                     }),
                 },
-                features: TokenStream::empty(),
+                features: TokenStream::new(),
                 eos_full: false,
             },
         );

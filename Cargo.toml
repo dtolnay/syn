@@ -29,7 +29,7 @@ extra-traits = []
 proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 
 [dependencies]
-proc-macro2 = { version = "0.4.2", default-features = false }
+proc-macro2 = { version = "0.4.4", default-features = false }
 quote = { version = "0.6", optional = true, default-features = false }
 unicode-xid = "0.1"
 

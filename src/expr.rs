@@ -1717,7 +1717,7 @@ pub mod parsing {
                 attrs: Vec::new(),
                 // this expr will get overwritten after being returned
                 receiver: Box::new(Expr::Verbatim(ExprVerbatim {
-                    tts: TokenStream::empty(),
+                    tts: TokenStream::new(),
                 })),
 
                 method: method,

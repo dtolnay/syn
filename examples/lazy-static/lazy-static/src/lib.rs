@@ -75,7 +75,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
             init.span().unstable()
                 .error("I can't think of a legitimate use for lazily initializing the value `()`")
                 .emit();
-            return TokenStream::empty();
+            return TokenStream::new();
         }
     }
 
