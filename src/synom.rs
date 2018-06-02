@@ -152,7 +152,7 @@
 
 #[cfg(feature = "proc-macro")]
 use proc_macro;
-use proc_macro2;
+use proc_macro2::{self, Delimiter, Group, Literal, Punct, TokenTree};
 
 use error::parse_error;
 pub use error::{PResult, ParseError};
@@ -214,6 +214,39 @@ impl Synom for proc_macro2::TokenStream {
     }
 }
 
+impl Synom for TokenTree {
+    fn parse(input: Cursor) -> PResult<Self> {
+        match input.token_tree() {
+            Some((tt, rest)) => Ok((tt, rest)),
+            None => parse_error(),
+        }
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("token tree")
+    }
+}
+
+impl Synom for Group {
+    fn parse(input: Cursor) -> PResult<Self> {
+        for delim in &[Delimiter::Parenthesis, Delimiter::Brace, Delimiter::Bracket] {
+            match input.group(*delim) {
+                Some((inside, span, rest)) => {
+                    let mut group = Group::new(*delim, inside.token_stream());
+                    group.set_span(span);
+                    return Ok((group, rest));
+                }
+                None => {}
+            }
+        }
+        parse_error()
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("group token")
+    }
+}
+
 impl Synom for proc_macro2::Ident {
     fn parse(input: Cursor) -> PResult<Self> {
         let (term, rest) = match input.ident() {
@@ -238,6 +271,32 @@ impl Synom for proc_macro2::Ident {
 
     fn description() -> Option<&'static str> {
         Some("identifier")
+    }
+}
+
+impl Synom for Punct {
+    fn parse(input: Cursor) -> PResult<Self> {
+        match input.punct() {
+            Some((punct, rest)) => Ok((punct, rest)),
+            None => parse_error(),
+        }
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("punctuation token")
+    }
+}
+
+impl Synom for Literal {
+    fn parse(input: Cursor) -> PResult<Self> {
+        match input.literal() {
+            Some((literal, rest)) => Ok((literal, rest)),
+            None => parse_error(),
+        }
+    }
+
+    fn description() -> Option<&'static str> {
+        Some("literal token")
     }
 }
 
