@@ -152,7 +152,7 @@
 
 #[cfg(feature = "proc-macro")]
 use proc_macro;
-use proc_macro2::{self, Delimiter, Group, Literal, Punct, TokenTree};
+use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, TokenStream, TokenTree};
 
 use error::parse_error;
 pub use error::{PResult, ParseError};
@@ -204,7 +204,7 @@ pub trait Synom: Sized {
     }
 }
 
-impl Synom for proc_macro2::TokenStream {
+impl Synom for TokenStream {
     fn parse(input: Cursor) -> PResult<Self> {
         Ok((input.token_stream(), Cursor::empty()))
     }
@@ -247,7 +247,7 @@ impl Synom for Group {
     }
 }
 
-impl Synom for proc_macro2::Ident {
+impl Synom for Ident {
     fn parse(input: Cursor) -> PResult<Self> {
         let (term, rest) = match input.ident() {
             Some(term) => term,
@@ -311,7 +311,7 @@ pub trait Parser: Sized {
     type Output;
 
     /// Parse a proc-macro2 token stream into the chosen syntax tree node.
-    fn parse2(self, tokens: proc_macro2::TokenStream) -> Result<Self::Output, ParseError>;
+    fn parse2(self, tokens: TokenStream) -> Result<Self::Output, ParseError>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
     ///
@@ -342,7 +342,7 @@ where
 {
     type Output = T;
 
-    fn parse2(self, tokens: proc_macro2::TokenStream) -> Result<T, ParseError> {
+    fn parse2(self, tokens: TokenStream) -> Result<T, ParseError> {
         let buf = TokenBuffer::new2(tokens);
         let (t, rest) = self(buf.begin())?;
         if rest.eof() {
