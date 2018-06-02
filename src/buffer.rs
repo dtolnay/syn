@@ -373,7 +373,7 @@ impl<'a> Cursor<'a> {
     pub fn ident(mut self) -> Option<(Ident, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Ident(ref term) => Some((term.clone(), unsafe { self.bump() })),
+            Entry::Ident(ref ident) => Some((ident.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -426,7 +426,7 @@ impl<'a> Cursor<'a> {
                 TokenTree::from(g)
             }
             Entry::Literal(ref lit) => lit.clone().into(),
-            Entry::Ident(ref term) => term.clone().into(),
+            Entry::Ident(ref ident) => ident.clone().into(),
             Entry::Punct(ref op) => op.clone().into(),
             Entry::End(..) => {
                 return None;

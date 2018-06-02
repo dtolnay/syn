@@ -350,9 +350,9 @@ impl ::quote::ToTokens for Underscore {
 impl ::Synom for Underscore {
     fn parse(input: ::buffer::Cursor) -> ::synom::PResult<Underscore> {
         match input.ident() {
-            Some((term, rest)) => {
-                if term == "_" {
-                    Ok((Underscore([term.span()]), rest))
+            Some((ident, rest)) => {
+                if ident == "_" {
+                    Ok((Underscore([ident.span()]), rest))
                 } else {
                     ::parse_error()
                 }
@@ -798,9 +798,9 @@ mod parsing {
     }
 
     pub fn keyword<'a, T>(keyword: &str, tokens: Cursor<'a>, new: fn(Span) -> T) -> PResult<'a, T> {
-        if let Some((term, rest)) = tokens.ident() {
-            if term == keyword {
-                return Ok((new(term.span()), rest));
+        if let Some((ident, rest)) = tokens.ident() {
+            if ident == keyword {
+                return Ok((new(ident.span()), rest));
             }
         }
         parse_error()

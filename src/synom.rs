@@ -249,11 +249,11 @@ impl Synom for Group {
 
 impl Synom for Ident {
     fn parse(input: Cursor) -> PResult<Self> {
-        let (term, rest) = match input.ident() {
-            Some(term) => term,
+        let (ident, rest) = match input.ident() {
+            Some(ident) => ident,
             _ => return parse_error(),
         };
-        match &term.to_string()[..] {
+        match &ident.to_string()[..] {
 			"_"
 			// From https://doc.rust-lang.org/grammar.html#keywords
 			| "abstract" | "alignof" | "as" | "become" | "box" | "break" | "const"
@@ -266,7 +266,7 @@ impl Synom for Ident {
 			_ => {}
 		}
 
-        Ok((term, rest))
+        Ok((ident, rest))
     }
 
     fn description() -> Option<&'static str> {

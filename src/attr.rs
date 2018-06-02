@@ -169,7 +169,7 @@ impl Attribute {
                     lit: Lit::new(l.clone()),
                 }))
             }
-            TokenTree::Ident(ref term) => match &term.to_string()[..] {
+            TokenTree::Ident(ref v) => match &v.to_string()[..] {
                 v @ "true" | v @ "false" => Some(Meta::NameValue(MetaNameValue {
                     ident: ident,
                     eq_token: Token![=]([a.span()]),

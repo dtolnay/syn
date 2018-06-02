@@ -430,16 +430,16 @@ pub mod parsing {
                     }
                 }
                 _ => match input.ident() {
-                    Some((term, rest)) => Ok((
+                    Some((ident, rest)) => Ok((
                         Lit::Bool(LitBool {
-                            value: if term == "true" {
+                            value: if ident == "true" {
                                 true
-                            } else if term == "false" {
+                            } else if ident == "false" {
                                 false
                             } else {
                                 return parse_error();
                             },
-                            span: term.span(),
+                            span: ident.span(),
                         }),
                         rest,
                     )),
