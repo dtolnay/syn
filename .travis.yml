@@ -43,6 +43,11 @@ matrix:
         - (cd codegen && cargo run)
         - git diff --exit-code
     - rust: nightly
+      env: ROLE=minimal
+      script:
+        - cargo update -Z minimal-versions
+        - cargo build --all-features
+    - rust: nightly
       env: ROLE=clippy
       script:
         - cargo install clippy --debug --force || exit
