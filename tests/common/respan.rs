@@ -10,9 +10,8 @@ extern crate syntax;
 extern crate syntax_pos;
 
 use self::syntax::ast::{
-    AttrStyle, Attribute, Expr, ExprKind, Ident, ImplItem, ImplItemKind, Item, ItemKind, Mac,
-    MetaItem, MetaItemKind, MethodSig, NestedMetaItem, NestedMetaItemKind, TraitItem,
-    TraitItemKind, Visibility, WhereClause,
+    AttrStyle, Attribute, Expr, ExprKind, FnHeader, Ident, ImplItem, Item, Mac, MetaItem,
+    MetaItemKind, NestedMetaItem, NestedMetaItemKind, TraitItem, Visibility, WhereClause,
 };
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
@@ -63,17 +62,11 @@ impl Folder for Respanner {
         fold::noop_fold_item(i, self)
     }
 
-    fn fold_item_kind(&mut self, i: ItemKind) -> ItemKind {
-        match i {
-            ItemKind::Fn(decl, unsafety, constness, abi, generics, body) => {
-                let generics = self.fold_generics(generics);
-                let decl = self.fold_fn_decl(decl);
-                let body = self.fold_block(body);
-                // default fold_item_kind does not fold this span
-                let constness = self.fold_spanned(constness);
-                ItemKind::Fn(decl, unsafety, constness, abi, generics, body)
-            }
-            _ => fold::noop_fold_item_kind(i, self),
+    fn fold_fn_header(&mut self, header: FnHeader) -> FnHeader {
+        FnHeader {
+            // default fold_item_kind does not fold this span
+            constness: self.fold_spanned(header.constness),
+            ..fold::noop_fold_fn_header(header, self)
         }
     }
 
@@ -103,40 +96,12 @@ impl Folder for Respanner {
 
     fn fold_trait_item(&mut self, mut i: TraitItem) -> SmallVector<TraitItem> {
         i.tokens = None;
-        let noop = fold::noop_fold_trait_item(i, self).expect_one("");
-        SmallVector::one(TraitItem {
-            node: match noop.node {
-                TraitItemKind::Method(sig, body) => TraitItemKind::Method(
-                    MethodSig {
-                        // default fold_trait_item does not fold this span
-                        constness: self.fold_spanned(sig.constness),
-                        ..sig
-                    },
-                    body,
-                ),
-                node => node,
-            },
-            ..noop
-        })
+        fold::noop_fold_trait_item(i, self)
     }
 
     fn fold_impl_item(&mut self, mut i: ImplItem) -> SmallVector<ImplItem> {
         i.tokens = None;
-        let noop = fold::noop_fold_impl_item(i, self).expect_one("");
-        SmallVector::one(ImplItem {
-            node: match noop.node {
-                ImplItemKind::Method(sig, body) => ImplItemKind::Method(
-                    MethodSig {
-                        // default fold_impl_item does not fold this span
-                        constness: self.fold_spanned(sig.constness),
-                        ..sig
-                    },
-                    body,
-                ),
-                node => node,
-            },
-            ..noop
-        })
+        fold::noop_fold_impl_item(i, self)
     }
 
     fn fold_attribute(&mut self, mut at: Attribute) -> Option<Attribute> {
