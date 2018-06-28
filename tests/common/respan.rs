@@ -11,7 +11,8 @@ extern crate syntax_pos;
 
 use self::syntax::ast::{
     AttrStyle, Attribute, Expr, ExprKind, FnHeader, Ident, ImplItem, Item, Mac, MetaItem,
-    MetaItemKind, NestedMetaItem, NestedMetaItemKind, TraitItem, Visibility, WhereClause,
+    MetaItemKind, NestedMetaItem, NestedMetaItemKind, Pat, PatKind, TraitItem, Visibility,
+    WhereClause,
 };
 use self::syntax::codemap::{self, Spanned};
 use self::syntax::fold::{self, Folder};
@@ -91,6 +92,18 @@ impl Folder for Respanner {
                 },
                 ..folded
             }
+        })
+    }
+
+    fn fold_pat(&mut self, p: P<Pat>) -> P<Pat> {
+        fold::noop_fold_pat(p, self).map(|mut p| {
+            match p.node {
+                PatKind::Range(_, _, ref mut end) => {
+                    end.span = self.new_span(end.span);
+                }
+                _ => {}
+            }
+            p
         })
     }
 
