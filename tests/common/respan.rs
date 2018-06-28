@@ -97,11 +97,8 @@ impl Folder for Respanner {
 
     fn fold_pat(&mut self, p: P<Pat>) -> P<Pat> {
         fold::noop_fold_pat(p, self).map(|mut p| {
-            match p.node {
-                PatKind::Range(_, _, ref mut end) => {
-                    end.span = self.new_span(end.span);
-                }
-                _ => {}
+            if let PatKind::Range(_, _, ref mut end) = p.node {
+                end.span = self.new_span(end.span);
             }
             p
         })

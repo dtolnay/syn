@@ -265,16 +265,16 @@
     feature = "cargo-clippy",
     allow(
         const_static_lifetime, doc_markdown, large_enum_variant, match_bool, redundant_closure,
-        needless_pass_by_value, redundant_field_names
+        needless_pass_by_value, redundant_field_names, trivially_copy_pass_by_ref
     )
 )]
 // Ignored clippy_pedantic lints.
 #![cfg_attr(
     feature = "cargo-clippy",
     allow(
-        cast_possible_truncation, cast_possible_wrap, if_not_else, items_after_statements,
-        similar_names, single_match_else, stutter, unseparated_literal_suffix, use_self,
-        used_underscore_binding
+        cast_possible_truncation, cast_possible_wrap, if_not_else, indexing_slicing,
+        items_after_statements, similar_names, single_match_else, stutter,
+        unseparated_literal_suffix, use_self, used_underscore_binding
     )
 )]
 

@@ -230,13 +230,10 @@ impl Synom for TokenTree {
 impl Synom for Group {
     fn parse(input: Cursor) -> PResult<Self> {
         for delim in &[Delimiter::Parenthesis, Delimiter::Brace, Delimiter::Bracket] {
-            match input.group(*delim) {
-                Some((inside, span, rest)) => {
-                    let mut group = Group::new(*delim, inside.token_stream());
-                    group.set_span(span);
-                    return Ok((group, rest));
-                }
-                None => {}
+            if let Some((inside, span, rest)) = input.group(*delim) {
+                let mut group = Group::new(*delim, inside.token_stream());
+                group.set_span(span);
+                return Ok((group, rest));
             }
         }
         parse_error()

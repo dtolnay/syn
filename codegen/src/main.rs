@@ -620,15 +620,15 @@ mod codegen {
             Fold => format!(
                 "{ty}(tokens_helper(_visitor, &({name}).0))",
                 ty = ty,
-                name = name.owned_tokens(),
+                name = name.tokens(),
             ),
             Visit => format!(
                 "tokens_helper(_visitor, &({name}).0)",
-                name = name.ref_tokens(),
+                name = name.tokens(),
             ),
             VisitMut => format!(
                 "tokens_helper(_visitor, &mut ({name}).0)",
-                name = name.ref_mut_tokens(),
+                name = name.tokens(),
             ),
         }
     }

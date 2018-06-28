@@ -68,7 +68,7 @@ impl Lifetime {
         }
 
         Lifetime {
-            apostrophe: Default::default(),
+            apostrophe: Apostrophe::default(),
             ident: Ident::new(&s[1..], span),
         }
     }
