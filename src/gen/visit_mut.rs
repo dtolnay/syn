@@ -98,7 +98,7 @@ fn visit_expr_catch_mut(&mut self, i: &mut ExprCatch) { visit_expr_catch_mut(sel
 fn visit_expr_closure_mut(&mut self, i: &mut ExprClosure) { visit_expr_closure_mut(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_continue_mut(&mut self, i: &mut ExprContinue) { visit_expr_continue_mut(self, i) }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_field_mut(&mut self, i: &mut ExprField) { visit_expr_field_mut(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_for_loop_mut(&mut self, i: &mut ExprForLoop) { visit_expr_for_loop_mut(self, i) }
@@ -728,7 +728,7 @@ pub fn visit_expr_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
             full!(_visitor.visit_expr_assign_op_mut(_binding_0));
         }
         Expr::Field(ref mut _binding_0, ) => {
-            full!(_visitor.visit_expr_field_mut(_binding_0));
+            _visitor.visit_expr_field_mut(_binding_0);
         }
         Expr::Index(ref mut _binding_0, ) => {
             _visitor.visit_expr_index_mut(_binding_0);
@@ -863,7 +863,7 @@ pub fn visit_expr_continue_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut 
     tokens_helper(_visitor, &mut (_i . continue_token).0);
     if let Some(ref mut it) = _i . label { _visitor.visit_lifetime_mut(it) };
 }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_field_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprField) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     _visitor.visit_expr_mut(& mut * _i . base);

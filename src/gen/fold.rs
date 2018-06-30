@@ -99,7 +99,7 @@ fn fold_expr_catch(&mut self, i: ExprCatch) -> ExprCatch { fold_expr_catch(self,
 fn fold_expr_closure(&mut self, i: ExprClosure) -> ExprClosure { fold_expr_closure(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr_continue(&mut self, i: ExprContinue) -> ExprContinue { fold_expr_continue(self, i) }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr_field(&mut self, i: ExprField) -> ExprField { fold_expr_field(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn fold_expr_for_loop(&mut self, i: ExprForLoop) -> ExprForLoop { fold_expr_for_loop(self, i) }
@@ -900,7 +900,7 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         }
         Expr::Field(_binding_0, ) => {
             Expr::Field (
-                full!(_visitor.fold_expr_field(_binding_0)),
+                _visitor.fold_expr_field(_binding_0),
             )
         }
         Expr::Index(_binding_0, ) => {
@@ -1092,7 +1092,7 @@ pub fn fold_expr_continue<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprContinue) 
         label: (_i . label).map(|it| { _visitor.fold_lifetime(it) }),
     }
 }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn fold_expr_field<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprField) -> ExprField {
     ExprField {
         attrs: FoldHelper::lift(_i . attrs, |it| { _visitor.fold_attribute(it) }),

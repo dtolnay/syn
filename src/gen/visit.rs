@@ -97,7 +97,7 @@ fn visit_expr_catch(&mut self, i: &'ast ExprCatch) { visit_expr_catch(self, i) }
 fn visit_expr_closure(&mut self, i: &'ast ExprClosure) { visit_expr_closure(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_continue(&mut self, i: &'ast ExprContinue) { visit_expr_continue(self, i) }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_field(&mut self, i: &'ast ExprField) { visit_expr_field(self, i) }
 # [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 fn visit_expr_for_loop(&mut self, i: &'ast ExprForLoop) { visit_expr_for_loop(self, i) }
@@ -727,7 +727,7 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
             full!(_visitor.visit_expr_assign_op(_binding_0));
         }
         Expr::Field(ref _binding_0, ) => {
-            full!(_visitor.visit_expr_field(_binding_0));
+            _visitor.visit_expr_field(_binding_0);
         }
         Expr::Index(ref _binding_0, ) => {
             _visitor.visit_expr_index(_binding_0);
@@ -862,7 +862,7 @@ pub fn visit_expr_continue<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: 
     tokens_helper(_visitor, &(_i . continue_token).0);
     if let Some(ref it) = _i . label { _visitor.visit_lifetime(it) };
 }
-# [ cfg ( feature = "full" ) ] # [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
+# [ cfg ( any ( feature = "full" , feature = "derive" ) ) ]
 pub fn visit_expr_field<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprField) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     _visitor.visit_expr(& * _i . base);
