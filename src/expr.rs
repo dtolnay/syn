@@ -363,7 +363,7 @@ ast_enum_of_structs! {
         /// field (`obj.0`).
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Field(ExprField #full {
+        pub Field(ExprField {
             pub attrs: Vec<Attribute>,
             pub base: Box<Expr>,
             pub dot_token: Token![.],
@@ -1512,6 +1512,16 @@ pub mod parsing {
                 }.into();
             })
             |
+            tap!(field: and_field => {
+                let (token, member) = field;
+                e = ExprField {
+                    attrs: Vec::new(),
+                    base: Box::new(e),
+                    dot_token: token,
+                    member: member,
+                }.into();
+            })
+            |
             tap!(i: and_index => {
                 e = ExprIndex {
                     attrs: Vec::new(),
@@ -2299,7 +2309,6 @@ pub mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     named!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
 
     named!(and_index -> (token::Bracket, Expr), brackets!(syn!(Expr)));
@@ -2607,7 +2616,6 @@ pub mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl Synom for Member {
         named!(parse -> Self, alt!(
             syn!(Ident) => { Member::Named }
@@ -2620,7 +2628,6 @@ pub mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl Synom for Index {
         named!(parse -> Self, do_parse!(
             lit: syn!(LitInt) >>
@@ -3171,9 +3178,9 @@ mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     impl ToTokens for ExprField {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            #[cfg(feature = "full")]
             tokens.append_all(self.attrs.outer());
             self.base.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
