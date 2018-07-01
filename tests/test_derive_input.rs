@@ -713,3 +713,43 @@ fn test_fields_on_tuple_struct() {
 
     assert_eq!(expected, struct_body.fields.iter().collect::<Vec<_>>());
 }
+
+#[test]
+fn test_ambiguous_crate() {
+    // The field type is `(crate::X)` not `crate (::X)`.
+    let raw = "struct S(crate::X);";
+
+    let expected = DeriveInput {
+        ident: ident("S"),
+        vis: Visibility::Inherited,
+        attrs: vec![],
+        generics: Generics::default(),
+        data: Data::Struct(DataStruct {
+            struct_token: Default::default(),
+            fields: Fields::Unnamed(FieldsUnnamed {
+                paren_token: Default::default(),
+                unnamed: punctuated![Field {
+                    attrs: Vec::new(),
+                    vis: Visibility::Inherited,
+                    ident: None,
+                    colon_token: None,
+                    ty: Type::Path(TypePath {
+                        qself: None,
+                        path: Path {
+                            leading_colon: None,
+                            segments: punctuated![
+                                ident("crate").into(),
+                                ident("X").into(),
+                            ],
+                        },
+                    }),
+                }],
+            }),
+            semi_token: Some(Default::default()),
+        }),
+    };
+
+    let actual = syn::parse_str(raw).unwrap();
+
+    assert_eq!(expected, actual);
+}
