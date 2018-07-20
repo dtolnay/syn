@@ -1379,6 +1379,9 @@ pub fn visit_expr_closure<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
+    if let Some(ref it) = _i.asyncness {
+        tokens_helper(_visitor, &it.span)
+    };
     if let Some(ref it) = _i.movability {
         tokens_helper(_visitor, &it.span)
     };

@@ -12,7 +12,7 @@ extern crate proc_macro2;
 extern crate syn;
 
 use proc_macro2::Span;
-use syn::{Block, FnDecl, Ident, ItemFn, ReturnType, Visibility};
+use syn::{Block, Expr, ExprBlock, ExprClosure, FnDecl, Ident, ItemFn, ReturnType, Visibility};
 use syn::punctuated::Punctuated;
 
 #[test]
@@ -40,6 +40,31 @@ fn test_async_fn() {
             stmts: vec![],
         }),
     };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_async_closure() {
+    let raw = "async || {}";
+
+    let expected = Expr::Closure(ExprClosure {
+        attrs: vec![],
+        movability: None,
+        asyncness: Some(Default::default()),
+        capture: None,
+        or1_token: Default::default(),
+        inputs: Punctuated::new(),
+        or2_token:Default::default(),
+        output: ReturnType::Default,
+        body: Box::new(Expr::Block(ExprBlock {
+            attrs: vec![],
+            block: Block {
+                brace_token: Default::default(),
+                stmts: vec![],
+            }
+        })),
+    });
 
     assert_eq!(expected, syn::parse_str(raw).unwrap());
 }

@@ -313,6 +313,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Closure(ExprClosure #full {
             pub attrs: Vec<Attribute>,
+            pub asyncness: Option<Token![async]>,
             pub movability: Option<Token![static]>,
             pub capture: Option<Token![move]>,
             pub or1_token: Token![|],
@@ -2101,7 +2102,6 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
         attrs: many0!(Attribute::parse_outer) >>
         asyncness: option!(keyword!(async)) >>
         movability: option!(cond_reduce!(asyncness.is_none(), keyword!(static))) >>
@@ -2125,27 +2125,17 @@ pub mod parsing {
             |
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
         ) >>
-        end: call!(verbatim::grab_cursor) >>
-        ({
-            if asyncness.is_some() {
-                // TODO: include asyncness in ExprClosure
-                // https://github.com/dtolnay/syn/issues/396
-                Expr::Verbatim(ExprVerbatim {
-                    tts: verbatim::token_range(begin..end),
-                })
-            } else {
-                Expr::Closure(ExprClosure {
-                    attrs: attrs,
-                    movability: movability,
-                    capture: capture,
-                    or1_token: or1,
-                    inputs: inputs,
-                    or2_token: or2,
-                    output: ret_and_body.0,
-                    body: Box::new(ret_and_body.1),
-                })
-            }
-        })
+        (Expr::Closure(ExprClosure {
+            attrs: attrs,
+            asyncness: asyncness,
+            movability: movability,
+            capture: capture,
+            or1_token: or1,
+            inputs: inputs,
+            or2_token: or2,
+            output: ret_and_body.0,
+            body: Box::new(ret_and_body.1),
+        }))
     ));
 
     #[cfg(feature = "full")]
@@ -3444,6 +3434,7 @@ mod printing {
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
+            self.asyncness.to_tokens(tokens);
             self.movability.to_tokens(tokens);
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);

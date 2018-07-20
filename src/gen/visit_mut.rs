@@ -1374,6 +1374,9 @@ pub fn visit_expr_closure_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut E
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
     }
+    if let Some(ref mut it) = _i.asyncness {
+        tokens_helper(_visitor, &mut it.span)
+    };
     if let Some(ref mut it) = _i.movability {
         tokens_helper(_visitor, &mut it.span)
     };

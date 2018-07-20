@@ -1309,6 +1309,7 @@ pub fn fold_expr_catch<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> Exp
 pub fn fold_expr_closure<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprClosure) -> ExprClosure {
     ExprClosure {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
         movability: (_i.movability).map(|it| Token ! [ static ](tokens_helper(_visitor, &it.span))),
         capture: (_i.capture).map(|it| Token ! [ move ](tokens_helper(_visitor, &it.span))),
         or1_token: Token ! [ | ](tokens_helper(_visitor, &_i.or1_token.spans)),
