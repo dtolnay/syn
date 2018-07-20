@@ -1409,6 +1409,7 @@ pub fn visit_item_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     _visitor.visit_visibility(& _i . vis);
     if let Some(ref it) = _i . constness { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . unsafety { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . asyncness { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . abi { _visitor.visit_abi(it) };
     _visitor.visit_ident(& _i . ident);
     _visitor.visit_fn_decl(& * _i . decl);

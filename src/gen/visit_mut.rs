@@ -1410,6 +1410,7 @@ pub fn visit_item_fn_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemFn
     _visitor.visit_visibility_mut(& mut _i . vis);
     if let Some(ref mut it) = _i . constness { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . unsafety { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . asyncness { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . abi { _visitor.visit_abi_mut(it) };
     _visitor.visit_ident_mut(& mut _i . ident);
     _visitor.visit_fn_decl_mut(& mut * _i . decl);
