@@ -1996,6 +1996,7 @@ pub fn fold_item_fn<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn {
         vis: _visitor.fold_visibility(_i.vis),
         constness: (_i.constness).map(|it| Token ! [ const ](tokens_helper(_visitor, &it.span))),
         unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
         abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
         ident: _visitor.fold_ident(_i.ident),
         decl: Box::new(_visitor.fold_fn_decl(*_i.decl)),
@@ -2290,6 +2291,7 @@ pub fn fold_method_sig<V: Fold + ?Sized>(_visitor: &mut V, _i: MethodSig) -> Met
     MethodSig {
         constness: (_i.constness).map(|it| Token ! [ const ](tokens_helper(_visitor, &it.span))),
         unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
         abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
         ident: _visitor.fold_ident(_i.ident),
         decl: _visitor.fold_fn_decl(_i.decl),

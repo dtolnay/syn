@@ -93,6 +93,7 @@ ast_enum_of_structs! {
             pub vis: Visibility,
             pub constness: Option<Token![const]>,
             pub unsafety: Option<Token![unsafe]>,
+            pub asyncness: Option<Token![async]>,
             pub abi: Option<Abi>,
             pub ident: Ident,
             pub decl: Box<FnDecl>,
@@ -652,6 +653,7 @@ ast_struct! {
     pub struct MethodSig {
         pub constness: Option<Token![const]>,
         pub unsafety: Option<Token![unsafe]>,
+        pub asyncness: Option<Token![async]>,
         pub abi: Option<Abi>,
         pub ident: Ident,
         pub decl: FnDecl,
@@ -735,8 +737,6 @@ pub mod parsing {
         syn!(ItemConst) => { Item::Const }
         |
         syn!(ItemFn) => { Item::Fn }
-        |
-        call!(unstable_async_fn) => { Item::Verbatim }
         |
         syn!(ItemMod) => { Item::Mod }
         |
@@ -958,6 +958,7 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         constness: option!(keyword!(const)) >>
         unsafety: option!(keyword!(unsafe)) >>
+        asyncness: option!(keyword!(async)) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
@@ -978,6 +979,7 @@ pub mod parsing {
             vis: vis,
             constness: constness,
             unsafety: unsafety,
+            asyncness: asyncness,
             abi: abi,
             decl: Box::new(FnDecl {
                 fn_token: fn_,
@@ -995,30 +997,6 @@ pub mod parsing {
                 brace_token: inner_attrs_stmts.0,
                 stmts: (inner_attrs_stmts.1).1,
             }),
-        })
-    ));
-
-    named!(unstable_async_fn -> ItemVerbatim, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        syn!(Visibility) >>
-        option!(keyword!(const)) >>
-        option!(keyword!(unsafe)) >>
-        keyword!(async) >>
-        option!(syn!(Abi)) >>
-        keyword!(fn) >>
-        syn!(Ident) >>
-        syn!(Generics) >>
-        parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
-        syn!(ReturnType) >>
-        option!(syn!(WhereClause)) >>
-        braces!(tuple!(
-            many0!(Attribute::parse_inner),
-            call!(Block::parse_within),
-        )) >>
-        end: call!(verbatim::grab_cursor) >>
-        (ItemVerbatim {
-            tts: verbatim::token_range(begin..end),
         })
     ));
 
@@ -1391,6 +1369,7 @@ pub mod parsing {
                 sig: MethodSig {
                     constness: constness,
                     unsafety: unsafety,
+                    asyncness: None,
                     abi: abi,
                     ident: ident,
                     decl: FnDecl {
@@ -1504,8 +1483,6 @@ pub mod parsing {
         |
         syn!(ImplItemMethod) => { ImplItem::Method }
         |
-        call!(unstable_async_method) => { ImplItem::Verbatim }
-        |
         syn!(ImplItemType) => { ImplItem::Type }
         |
         call!(unstable_impl_existential_type) => { ImplItem::Verbatim }
@@ -1544,6 +1521,7 @@ pub mod parsing {
         defaultness: option!(keyword!(default)) >>
         constness: option!(keyword!(const)) >>
         unsafety: option!(keyword!(unsafe)) >>
+        asyncness: option!(keyword!(async)) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
@@ -1566,6 +1544,7 @@ pub mod parsing {
             sig: MethodSig {
                 constness: constness,
                 unsafety: unsafety,
+                asyncness: asyncness,
                 abi: abi,
                 ident: ident,
                 decl: FnDecl {
@@ -1584,31 +1563,6 @@ pub mod parsing {
                 brace_token: inner_attrs_stmts.0,
                 stmts: (inner_attrs_stmts.1).1,
             },
-        })
-    ));
-
-    named!(unstable_async_method -> ImplItemVerbatim, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        syn!(Visibility) >>
-        option!(keyword!(default)) >>
-        option!(keyword!(const)) >>
-        option!(keyword!(unsafe)) >>
-        keyword!(async) >>
-        option!(syn!(Abi)) >>
-        keyword!(fn) >>
-        syn!(Ident) >>
-        syn!(Generics) >>
-        parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
-        syn!(ReturnType) >>
-        option!(syn!(WhereClause)) >>
-        braces!(tuple!(
-            many0!(Attribute::parse_inner),
-            call!(Block::parse_within),
-        )) >>
-        end: call!(verbatim::grab_cursor) >>
-        (ImplItemVerbatim {
-            tts: verbatim::token_range(begin..end),
         })
     ));
 
@@ -1731,6 +1685,7 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
@@ -2125,6 +2080,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
         }

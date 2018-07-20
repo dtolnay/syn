@@ -2221,6 +2221,9 @@ pub fn visit_item_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     if let Some(ref it) = _i.unsafety {
         tokens_helper(_visitor, &it.span)
     };
+    if let Some(ref it) = _i.asyncness {
+        tokens_helper(_visitor, &it.span)
+    };
     if let Some(ref it) = _i.abi {
         _visitor.visit_abi(it)
     };
@@ -2595,6 +2598,9 @@ pub fn visit_method_sig<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         tokens_helper(_visitor, &it.span)
     };
     if let Some(ref it) = _i.unsafety {
+        tokens_helper(_visitor, &it.span)
+    };
+    if let Some(ref it) = _i.asyncness {
         tokens_helper(_visitor, &it.span)
     };
     if let Some(ref it) = _i.abi {
