@@ -849,6 +849,7 @@ pub fn visit_expr_catch<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 pub fn visit_expr_closure<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprClosure) {
     for it in & _i . attrs { _visitor.visit_attribute(it) };
     if let Some(ref it) = _i . movability { tokens_helper(_visitor, &(it).0) };
+    if let Some(ref it) = _i . asyncness { tokens_helper(_visitor, &(it).0) };
     if let Some(ref it) = _i . capture { tokens_helper(_visitor, &(it).0) };
     tokens_helper(_visitor, &(_i . or1_token).0);
     for el in Punctuated::pairs(& _i . inputs) { let it = el.value(); _visitor.visit_fn_arg(it) };

@@ -314,6 +314,7 @@ ast_enum_of_structs! {
         pub Closure(ExprClosure #full {
             pub attrs: Vec<Attribute>,
             pub movability: Option<Token![static]>,
+            pub asyncness: Option<Token![async]>,
             pub capture: Option<Token![move]>,
             pub or1_token: Token![|],
             pub inputs: Punctuated<FnArg, Token![,]>,
@@ -1986,6 +1987,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
         movability: option!(keyword!(static)) >>
+        asyncness: option!(keyword!(async)) >>
         capture: option!(keyword!(move)) >>
         or1: punct!(|) >>
         inputs: call!(Punctuated::parse_terminated_with, fn_arg) >>
@@ -2007,6 +2009,7 @@ pub mod parsing {
         (ExprClosure {
             attrs: Vec::new(),
             movability: movability,
+            asyncness: asyncness,
             capture: capture,
             or1_token: or1,
             inputs: inputs,
@@ -3120,6 +3123,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.movability.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
             for input in self.inputs.pairs() {

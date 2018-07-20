@@ -850,6 +850,7 @@ pub fn visit_expr_catch_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
 pub fn visit_expr_closure_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprClosure) {
     for it in & mut _i . attrs { _visitor.visit_attribute_mut(it) };
     if let Some(ref mut it) = _i . movability { tokens_helper(_visitor, &mut (it).0) };
+    if let Some(ref mut it) = _i . asyncness { tokens_helper(_visitor, &mut (it).0) };
     if let Some(ref mut it) = _i . capture { tokens_helper(_visitor, &mut (it).0) };
     tokens_helper(_visitor, &mut (_i . or1_token).0);
     for mut el in Punctuated::pairs_mut(& mut _i . inputs) { let it = el.value_mut(); _visitor.visit_fn_arg_mut(it) };
