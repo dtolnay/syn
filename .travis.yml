@@ -55,9 +55,6 @@ matrix:
   allow_failures:
     - rust: nightly
       env: ROLE=clippy
-      script:
-        - rustup component add clippy-preview
-        - cargo clippy --all-features -- -Dclippy
   fast_finish: true
 
 env:
