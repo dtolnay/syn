@@ -89,9 +89,9 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // TODO feature(extern_in_paths)
         //
         //      use extern::xcrate;
+        "tests/rust/src/test/run-make-fulldeps/save-analysis-rfc2126/extern_in_paths.rs" |
         "tests/rust/src/test/run-pass/rfc-2126-extern-absolute-paths/extern.rs" |
         // TODO
-        "tests/rust/src/test/run-make-fulldeps/save-analysis-rfc2126/extern_in_paths.rs" |
         "tests/rust/src/test/run-pass-fulldeps/proc-macro/attr-stmt-expr.rs" |
         "tests/rust/src/test/run-pass-fulldeps/proc-macro/macros-in-extern.rs" |
         "tests/rust/src/test/run-pass/async-await.rs" |
