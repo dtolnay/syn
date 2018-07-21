@@ -214,31 +214,21 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use syntax::util::small_vector::SmallVector;
     use syntax::util::ThinVec;
 
-    fn expr(node: ExprKind) -> P<Expr> {
-        P(Expr {
-            id: ast::DUMMY_NODE_ID,
-            node,
-            span: DUMMY_SP,
-            attrs: ThinVec::new(),
-        })
-    }
-
     struct BracketsFolder {
         failed: bool,
     };
     impl Folder for BracketsFolder {
         fn fold_expr(&mut self, e: P<Expr>) -> P<Expr> {
-            e.map(|e| Expr {
-                node: match e.node {
-                    ExprKind::Paren(inner) => {
-                        ExprKind::Paren(inner.map(|e| fold::noop_fold_expr(e, self)))
-                    }
-                    ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {
-                        return fold::noop_fold_expr(e, self);
-                    }
-                    node => ExprKind::Paren(expr(node).map(|e| fold::noop_fold_expr(e, self))),
+            e.map(|e| match e.node {
+                ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {
+                    fold::noop_fold_expr(e, self)
+                }
+                _ => Expr {
+                    id: ast::DUMMY_NODE_ID,
+                    node: ExprKind::Paren(P(fold::noop_fold_expr(e, self))),
+                    span: DUMMY_SP,
+                    attrs: ThinVec::new(),
                 },
-                ..e
             })
         }
 
@@ -301,25 +291,19 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::*;
     use syn::*;
 
-    fn paren(folder: &mut ParenthesizeEveryExpr, mut node: Expr) -> Expr {
-        let attrs = node.replace_attrs(Vec::new());
-        Expr::Paren(ExprParen {
-            attrs,
-            expr: Box::new(fold_expr(folder, node)),
-            paren_token: token::Paren::default(),
-        })
-    }
-
     struct ParenthesizeEveryExpr;
     impl Fold for ParenthesizeEveryExpr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             match expr {
                 Expr::Group(_) => unreachable!(),
-                Expr::Paren(p) => paren(self, *p.expr),
                 Expr::If(..) | Expr::Unsafe(..) | Expr::Block(..) | Expr::IfLet(..) => {
                     fold_expr(self, expr)
                 }
-                node => paren(self, node),
+                node => Expr::Paren(ExprParen {
+                    attrs: Vec::new(),
+                    expr: Box::new(fold_expr(self, node)),
+                    paren_token: token::Paren::default(),
+                }),
             }
         }
 

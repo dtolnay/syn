@@ -73,12 +73,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // TODO inner attributes within expressions
-        //
-        // https://github.com/dtolnay/syn/issues/458
-        // https://github.com/dtolnay/syn/issues/459
-        // https://github.com/dtolnay/syn/issues/460
-        "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
         // TODO feature(macros_in_extern)
         //
         // https://github.com/dtolnay/syn/issues/390

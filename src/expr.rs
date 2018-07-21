@@ -1391,21 +1391,23 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(unary_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
         do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             op: syn!(UnOp) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprUnary {
-                attrs: Vec::new(),
+                attrs: attrs,
                 op: op,
                 expr: Box::new(expr),
             }.into())
         )
         |
         do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             and: punct!(&) >>
             mutability: option!(keyword!(mut)) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprReference {
-                attrs: Vec::new(),
+                attrs: attrs,
                 and_token: and,
                 mutability: mutability,
                 expr: Box::new(expr),
@@ -1413,10 +1415,11 @@ pub mod parsing {
         )
         |
         do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             box_: keyword!(box) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprBox {
-                attrs: Vec::new(),
+                attrs: attrs,
                 box_token: box_,
                 expr: Box::new(expr),
             }.into())
@@ -1441,6 +1444,19 @@ pub mod parsing {
         call!(trailer_expr, allow_struct, allow_block)
     ));
 
+    fn take_outer(attrs: &mut Vec<Attribute>) -> Vec<Attribute> {
+        let mut outer = Vec::new();
+        let mut inner = Vec::new();
+        for attr in mem::replace(attrs, Vec::new()) {
+            match attr.style {
+                AttrStyle::Outer => outer.push(attr),
+                AttrStyle::Inner(_) => inner.push(attr),
+            }
+        }
+        *attrs = inner;
+        outer
+    }
+
     // <atom> (..<args>) ...
     // <atom> . <ident> (..<args>) ...
     // <atom> . <ident> ...
@@ -1450,6 +1466,12 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(trailer_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
         mut e: call!(atom_expr, allow_struct, allow_block) >>
+        outer_attrs: value!({
+            let mut attrs = e.replace_attrs(Vec::new());
+            let outer_attrs = take_outer(&mut attrs);
+            e.replace_attrs(attrs);
+            outer_attrs
+        }) >>
         many0!(alt!(
             tap!(args: and_call => {
                 let (paren, args) = args;
@@ -1495,7 +1517,12 @@ pub mod parsing {
                 }.into();
             })
         )) >>
-        (e)
+        ({
+            let mut attrs = outer_attrs;
+            attrs.extend(e.replace_attrs(Vec::new()));
+            e.replace_attrs(attrs);
+            e
+        })
     ));
 
     // XXX: Duplication == ugly
@@ -1650,9 +1677,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprMacro {
         named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             mac: syn!(Macro) >>
             (ExprMacro {
-                attrs: Vec::new(),
+                attrs: attrs,
                 mac: mac,
             })
         ));
@@ -1680,11 +1708,19 @@ pub mod parsing {
 
     impl Synom for ExprParen {
         named!(parse -> Self, do_parse!(
-            e: parens!(syn!(Expr)) >>
+            outer_attrs: many0!(Attribute::parse_outer) >>
+            e: parens!(tuple!(
+                many0!(Attribute::parse_inner),
+                syn!(Expr)
+            )) >>
             (ExprParen {
-                attrs: Vec::new(),
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((e.1).0);
+                    attrs
+                },
                 paren_token: e.0,
-                expr: Box::new(e.1),
+                expr: Box::new((e.1).1),
             })
         ));
 
@@ -1696,11 +1732,19 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprArray {
         named!(parse -> Self, do_parse!(
-            elems: brackets!(Punctuated::parse_terminated) >>
+            outer_attrs: many0!(Attribute::parse_outer) >>
+            elems: brackets!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Punctuated::parse_terminated)
+            )) >>
             (ExprArray {
-                attrs: Vec::new(),
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((elems.1).0);
+                    attrs
+                },
                 bracket_token: elems.0,
-                elems: elems.1,
+                elems: (elems.1).1,
             })
         ));
 
@@ -1758,10 +1802,18 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprTuple {
         named!(parse -> Self, do_parse!(
-            elems: parens!(Punctuated::parse_terminated) >>
+            outer_attrs: many0!(Attribute::parse_outer) >>
+            elems: parens!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Punctuated::parse_terminated)
+            )) >>
             (ExprTuple {
-                attrs: Vec::new(),
-                elems: elems.1,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((elems.1).0);
+                    attrs
+                },
+                elems: (elems.1).1,
                 paren_token: elems.0,
             })
         ));
@@ -1850,20 +1902,31 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprForLoop {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             label: option!(syn!(Label)) >>
             for_: keyword!(for) >>
             pat: syn!(Pat) >>
             in_: keyword!(in) >>
             expr: expr_no_struct >>
-            loop_block: syn!(Block) >>
+            block: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Block::parse_within)
+            )) >>
             (ExprForLoop {
-                attrs: Vec::new(),
-                for_token: for_,
-                in_token: in_,
-                pat: Box::new(pat),
-                expr: Box::new(expr),
-                body: loop_block,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((block.1).0);
+                    attrs
+                },
                 label: label,
+                for_token: for_,
+                pat: Box::new(pat),
+                in_token: in_,
+                expr: Box::new(expr),
+                body: Block {
+                    brace_token: block.0,
+                    stmts: (block.1).1,
+                },
             })
         ));
 
@@ -1875,14 +1938,25 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprLoop {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             label: option!(syn!(Label)) >>
             loop_: keyword!(loop) >>
-            loop_block: syn!(Block) >>
+            block: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Block::parse_within)
+            )) >>
             (ExprLoop {
-                attrs: Vec::new(),
-                loop_token: loop_,
-                body: loop_block,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((block.1).0);
+                    attrs
+                },
                 label: label,
+                loop_token: loop_,
+                body: Block {
+                    brace_token: block.0,
+                    stmts: (block.1).1,
+                },
             })
         ));
 
@@ -1894,15 +1968,23 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprMatch {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             match_: keyword!(match) >>
             obj: expr_no_struct >>
-            res: braces!(many0!(Arm::parse)) >>
+            braced_content: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                many0!(syn!(Arm))
+            )) >>
             (ExprMatch {
-                attrs: Vec::new(),
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((braced_content.1).0);
+                    attrs
+                },
                 expr: Box::new(obj),
                 match_token: match_,
-                brace_token: res.0,
-                arms: res.1,
+                brace_token: braced_content.0,
+                arms: (braced_content.1).1,
             })
         ));
 
@@ -2038,16 +2120,27 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhile {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             cond: expr_no_struct >>
-            while_block: syn!(Block) >>
+            block: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Block::parse_within)
+            )) >>
             (ExprWhile {
-                attrs: Vec::new(),
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((block.1).0);
+                    attrs
+                },
+                label: label,
                 while_token: while_,
                 cond: Box::new(cond),
-                body: while_block,
-                label: label,
+                body: Block {
+                    brace_token: block.0,
+                    stmts: (block.1).1,
+                },
             })
         ));
 
@@ -2059,22 +2152,33 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhileLet {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             let_: keyword!(let) >>
             pats: call!(Punctuated::parse_separated_nonempty) >>
             eq: punct!(=) >>
             value: expr_no_struct >>
-            while_block: syn!(Block) >>
+            block: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Block::parse_within)
+            )) >>
             (ExprWhileLet {
-                attrs: Vec::new(),
-                eq_token: eq,
-                let_token: let_,
-                while_token: while_,
-                pats: pats,
-                expr: Box::new(value),
-                body: while_block,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((block.1).0);
+                    attrs
+                },
                 label: label,
+                while_token: while_,
+                let_token: let_,
+                pats: pats,
+                eq_token: eq,
+                expr: Box::new(value),
+                body: Block {
+                    brace_token: block.0,
+                    stmts: (block.1).1,
+                },
             })
         ));
 
@@ -2102,10 +2206,11 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprContinue {
         named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             cont: keyword!(continue) >>
             label: option!(syn!(Lifetime)) >>
             (ExprContinue {
-                attrs: Vec::new(),
+                attrs: attrs,
                 continue_token: cont,
                 label: label,
             })
@@ -2118,13 +2223,14 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_break(allow_struct: bool) -> Expr, do_parse!(
+        attrs: many0!(Attribute::parse_outer) >>
         break_: keyword!(break) >>
         label: option!(syn!(Lifetime)) >>
         // We can't allow blocks after a `break` expression when we wouldn't
         // allow structs, as this expression is ambiguous.
         val: opt_ambiguous_expr!(allow_struct) >>
         (ExprBreak {
-            attrs: Vec::new(),
+            attrs: attrs,
             label: label,
             expr: val.map(Box::new),
             break_token: break_,
@@ -2133,6 +2239,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_ret(allow_struct: bool) -> Expr, do_parse!(
+        attrs: many0!(Attribute::parse_outer) >>
         return_: keyword!(return) >>
         // NOTE: return is greedy and eats blocks after it even when in a
         // position where structs are not allowed, such as in if statement
@@ -2141,7 +2248,7 @@ pub mod parsing {
         // if return { println!("A") } {} // Prints "A"
         ret_value: option!(ambiguous_expr!(allow_struct)) >>
         (ExprReturn {
-            attrs: Vec::new(),
+            attrs: attrs,
             expr: ret_value.map(Box::new),
             return_token: return_,
         }.into())
@@ -2150,24 +2257,30 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprStruct {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             path: syn!(Path) >>
             data: braces!(do_parse!(
+                inner_attrs: many0!(Attribute::parse_inner) >>
                 fields: call!(Punctuated::parse_terminated) >>
                 base: option!(cond!(fields.empty_or_trailing(), do_parse!(
                     dots: punct!(..) >>
                     base: syn!(Expr) >>
                     (dots, base)
                 ))) >>
-                (fields, base)
+                (inner_attrs, fields, base)
             )) >>
             ({
-                let (brace, (fields, base)) = data;
+                let (brace, (inner_attrs, fields, base)) = data;
                 let (dots, rest) = match base.and_then(|b| b) {
                     Some((dots, base)) => (Some(dots), Some(base)),
                     None => (None, None),
                 };
                 ExprStruct {
-                    attrs: Vec::new(),
+                    attrs: {
+                        let mut attrs = outer_attrs;
+                        attrs.extend(inner_attrs);
+                        attrs
+                    },
                     brace_token: brace,
                     path: path,
                     fields: fields,
@@ -2215,18 +2328,23 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprRepeat {
         named!(parse -> Self, do_parse!(
-            data: brackets!(do_parse!(
-                value: syn!(Expr) >>
-                semi: punct!(;) >>
-                times: syn!(Expr) >>
-                (value, semi, times)
+            outer_attrs: many0!(Attribute::parse_outer) >>
+            data: brackets!(tuple!(
+                many0!(Attribute::parse_inner),
+                syn!(Expr),
+                punct!(;),
+                syn!(Expr)
             )) >>
             (ExprRepeat {
-                attrs: Vec::new(),
-                expr: Box::new((data.1).0),
-                len: Box::new((data.1).2),
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((data.1).0);
+                    attrs
+                },
+                expr: Box::new((data.1).1),
+                len: Box::new((data.1).3),
                 bracket_token: data.0,
-                semi_token: (data.1).1,
+                semi_token: (data.1).2,
             })
         ));
 
@@ -2255,10 +2373,21 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprBlock {
         named!(parse -> Self, do_parse!(
-            b: syn!(Block) >>
+            outer_attrs: many0!(Attribute::parse_outer) >>
+            block: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Block::parse_within)
+            )) >>
             (ExprBlock {
-                attrs: Vec::new(),
-                block: b,
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((block.1).0);
+                    attrs
+                },
+                block: Block {
+                    brace_token: block.0,
+                    stmts: (block.1).1,
+                },
             })
         ));
 
@@ -2422,10 +2551,11 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_blockexpr -> Stmt, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        mut attrs: many0!(Attribute::parse_outer) >>
         mut e: expr_nosemi >>
         semi: option!(punct!(;)) >>
         ({
+            attrs.extend(e.replace_attrs(Vec::new()));
             e.replace_attrs(attrs);
             if let Some(semi) = semi {
                 Stmt::Semi(e, semi)
@@ -2437,10 +2567,11 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_expr -> Stmt, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        mut attrs: many0!(Attribute::parse_outer) >>
         mut e: syn!(Expr) >>
         semi: punct!(;) >>
         ({
+            attrs.extend(e.replace_attrs(Vec::new()));
             e.replace_attrs(attrs);
             Stmt::Semi(e, semi)
         })
@@ -2879,6 +3010,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 self.elems.to_tokens(tokens);
             })
         }
@@ -2933,6 +3065,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.paren_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 self.elems.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
                 // distinguish ExprTuple from ExprParen.
@@ -3038,7 +3171,10 @@ mod printing {
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
-            self.body.to_tokens(tokens);
+            self.body.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.body.stmts);
+            });
         }
     }
 
@@ -3052,7 +3188,10 @@ mod printing {
             self.pats.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
-            self.body.to_tokens(tokens);
+            self.body.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.body.stmts);
+            });
         }
     }
 
@@ -3065,7 +3204,10 @@ mod printing {
             self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
-            self.body.to_tokens(tokens);
+            self.body.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.body.stmts);
+            });
         }
     }
 
@@ -3075,7 +3217,10 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.label.to_tokens(tokens);
             self.loop_token.to_tokens(tokens);
-            self.body.to_tokens(tokens);
+            self.body.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.body.stmts);
+            });
         }
     }
 
@@ -3086,6 +3231,7 @@ mod printing {
             self.match_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 for (i, arm) in self.arms.iter().enumerate() {
                     arm.to_tokens(tokens);
                     // Ensure that we have a comma after a non-block arm, except
@@ -3157,7 +3303,10 @@ mod printing {
     impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            self.block.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
+                tokens.append_all(&self.block.stmts);
+            });
         }
     }
 
@@ -3290,6 +3439,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 self.fields.to_tokens(tokens);
                 if self.rest.is_some() {
                     TokensOrDefault(&self.dot2_token).to_tokens(tokens);
@@ -3304,6 +3454,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 self.expr.to_tokens(tokens);
                 self.semi_token.to_tokens(tokens);
                 self.len.to_tokens(tokens);
@@ -3325,6 +3476,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             attrs_to_tokens(&self.attrs, tokens);
             self.paren_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 self.expr.to_tokens(tokens);
             });
         }
