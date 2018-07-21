@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![cfg(feature = "full")]
+#![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
 #[macro_use]
@@ -36,6 +37,8 @@ mod macros;
 
 #[allow(dead_code)]
 mod common;
+
+use common::eq::SpanlessEq;
 
 #[test]
 fn test_round_trip() {
@@ -110,7 +113,7 @@ fn test_round_trip() {
                         }
                     };
 
-                    if before == after {
+                    if SpanlessEq::eq(&before, &after) {
                         errorf!(
                             "=== {}: pass in {}ms\n",
                             path.display(),
@@ -149,5 +152,5 @@ fn test_round_trip() {
 
 fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = FileName::Custom("test_round_trip".to_string());
-    parse::parse_crate_from_source_str(name, content, sess).map(common::respan::respan_crate)
+    parse::parse_crate_from_source_str(name, content, sess)
 }

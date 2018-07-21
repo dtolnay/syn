@@ -17,8 +17,8 @@ use std::process::Command;
 
 use self::walkdir::DirEntry;
 
+pub mod eq;
 pub mod parse;
-pub mod respan;
 
 pub fn check_min_stack() {
     let min_stack_value = match env::var("RUST_MIN_STACK") {

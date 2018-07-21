@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![cfg(feature = "extra-traits")]
+#![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
 extern crate syn;

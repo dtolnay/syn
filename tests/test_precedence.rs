@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![cfg(all(feature = "full", feature = "fold"))]
+#![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
 //! The tests in this module do the following:
@@ -37,7 +38,8 @@ use std::io::Read;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use common::{parse, respan};
+use common::eq::SpanlessEq;
+use common::parse;
 
 #[macro_use]
 mod macros;
@@ -184,10 +186,7 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
                 continue;
             };
 
-            let syn_ast = respan::respan_expr(syn_ast);
-            let libsyntax_ast = respan::respan_expr(libsyntax_ast);
-
-            if syn_ast == libsyntax_ast {
+            if SpanlessEq::eq(&syn_ast, &libsyntax_ast) {
                 passed += 1;
             } else {
                 failed += 1;

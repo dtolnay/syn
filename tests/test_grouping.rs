@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![cfg(all(feature = "extra-traits", feature = "full"))]
+#![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
 #[macro_use]
