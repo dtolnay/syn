@@ -112,10 +112,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         // https://github.com/dtolnay/syn/issues/455
         "tests/rust/src/test/run-pass/label_break_value.rs" |
-        // TODO unreserve pure, offsetof, sizeof, alignof
-        //
-        // https://github.com/dtolnay/syn/issues/454
-        "tests/rust/src/test/run-pass/rfc-2421-unreserve-pure-offsetof-sizeof-alignof.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
