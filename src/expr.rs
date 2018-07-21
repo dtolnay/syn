@@ -1985,6 +1985,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
+        attrs: many0!(Attribute::parse_outer) >>
         movability: option!(keyword!(static)) >>
         capture: option!(keyword!(move)) >>
         or1: punct!(|) >>
@@ -2005,7 +2006,7 @@ pub mod parsing {
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
         ) >>
         (ExprClosure {
-            attrs: Vec::new(),
+            attrs: attrs,
             movability: movability,
             capture: capture,
             or1_token: or1,

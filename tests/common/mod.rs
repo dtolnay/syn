@@ -79,10 +79,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //     #[cfg(unset)] 341
         "tests/rust/src/test/run-pass-fulldeps/proc-macro/attr-stmt-expr.rs" |
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
-        // TODO outer attributes on closures
-        //
-        // https://github.com/dtolnay/syn/issues/457
-        "tests/rust/src/test/run-pass/issue-49632.rs" |
         // TODO inner attributes within expressions
         //
         // https://github.com/dtolnay/syn/issues/458
