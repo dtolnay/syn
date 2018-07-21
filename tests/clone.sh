@@ -2,7 +2,7 @@
 
 REMOTE=rust
 REPO=https://github.com/rust-lang/rust
-REV=fb44b4c0eb1d344f84f7bb2c90f28e31a8a180be
+REV=12ed235adc62e63b16bb4f715b143c37a5efa00d
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
