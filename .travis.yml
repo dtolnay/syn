@@ -50,14 +50,11 @@ matrix:
     - rust: nightly
       env: ROLE=clippy
       script:
-        - cargo install clippy --debug --force || exit
+        - rustup component add clippy-preview
         - cargo clippy --all-features -- -Dclippy
   allow_failures:
     - rust: nightly
       env: ROLE=clippy
-      script:
-        - cargo install clippy --debug --force || exit
-        - cargo clippy --all-features -- -Dclippy
   fast_finish: true
 
 env:
