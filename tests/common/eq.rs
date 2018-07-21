@@ -339,7 +339,6 @@ spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mutable Immutable);
 spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
-spanless_eq_enum!(RangeSyntax; DotDotDot DotDotEq);
 spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Mac(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1));
@@ -388,10 +387,22 @@ impl SpanlessEq for Lit {
     }
 }
 
+impl SpanlessEq for RangeSyntax {
+    fn eq(&self, _other: &Self) -> bool {
+        match self {
+            RangeSyntax::DotDotDot | RangeSyntax::DotDotEq => true,
+        }
+    }
+}
+
 impl SpanlessEq for Token {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Token::Literal(this, _), Token::Literal(other, _)) => SpanlessEq::eq(this, other),
+            (Token::DotDotEq, _) | (Token::DotDotDot, _) => match other {
+                Token::DotDotEq | Token::DotDotDot => true,
+                _ => false,
+            }
             _ => self == other,
         }
     }
