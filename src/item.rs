@@ -832,6 +832,8 @@ pub mod parsing {
         keyword!(super) => { Into::into }
         |
         keyword!(crate) => { Into::into }
+        |
+        keyword!(extern) => { Into::into }
     ));
 
     impl_synom!(UseTree "use tree" alt!(

@@ -93,11 +93,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         // https://github.com/dtolnay/syn/issues/456
         "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO feature(extern_in_paths)
-        //
-        // https://github.com/dtolnay/syn/issues/337
-        "tests/rust/src/test/run-make-fulldeps/save-analysis-rfc2126/extern_in_paths.rs" |
-        "tests/rust/src/test/run-pass/rfc-2126-extern-absolute-paths/extern.rs" |
         // TODO feature(macros_in_extern)
         //
         // https://github.com/dtolnay/syn/issues/390

@@ -736,6 +736,7 @@ ident_from_token!(self);
 ident_from_token!(Self);
 ident_from_token!(super);
 ident_from_token!(crate);
+ident_from_token!(extern);
 
 #[cfg(feature = "parsing")]
 mod parsing {
