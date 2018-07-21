@@ -1500,6 +1500,7 @@ pub mod parsing {
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
+        where_clause: option!(syn!(WhereClause)) >>
         eq: punct!(=) >>
         ty: syn!(Type) >>
         semi: punct!(;) >>
@@ -1509,7 +1510,10 @@ pub mod parsing {
             defaultness: defaultness,
             type_token: type_,
             ident: ident,
-            generics: generics,
+            generics: Generics {
+                where_clause: where_clause,
+                ..generics
+            },
             eq_token: eq,
             ty: ty,
             semi_token: semi,
@@ -1925,6 +1929,7 @@ mod printing {
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);

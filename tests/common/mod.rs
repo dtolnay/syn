@@ -116,10 +116,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         //
         // https://github.com/dtolnay/syn/issues/454
         "tests/rust/src/test/run-pass/rfc-2421-unreserve-pure-offsetof-sizeof-alignof.rs" |
-        // TODO where-clause on associated types
-        //
-        // https://github.com/dtolnay/syn/issues/453
-        "tests/rust/src/test/ui/rfc1598-generic-associated-types/generic-associated-types-where.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
