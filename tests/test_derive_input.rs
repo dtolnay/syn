@@ -737,10 +737,7 @@ fn test_ambiguous_crate() {
                         qself: None,
                         path: Path {
                             leading_colon: None,
-                            segments: punctuated![
-                                ident("crate").into(),
-                                ident("X").into(),
-                            ],
+                            segments: punctuated![ident("crate").into(), ident("X").into(),],
                         },
                     }),
                 }],

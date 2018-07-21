@@ -264,17 +264,31 @@
 #![cfg_attr(
     feature = "cargo-clippy",
     allow(
-        const_static_lifetime, doc_markdown, large_enum_variant, match_bool, redundant_closure,
-        needless_pass_by_value, redundant_field_names, trivially_copy_pass_by_ref
+        const_static_lifetime,
+        doc_markdown,
+        large_enum_variant,
+        match_bool,
+        redundant_closure,
+        needless_pass_by_value,
+        redundant_field_names,
+        trivially_copy_pass_by_ref
     )
 )]
 // Ignored clippy_pedantic lints.
 #![cfg_attr(
     feature = "cargo-clippy",
     allow(
-        cast_possible_truncation, cast_possible_wrap, if_not_else, indexing_slicing,
-        items_after_statements, similar_names, single_match_else, stutter,
-        unseparated_literal_suffix, use_self, used_underscore_binding
+        cast_possible_truncation,
+        cast_possible_wrap,
+        if_not_else,
+        indexing_slicing,
+        items_after_statements,
+        similar_names,
+        single_match_else,
+        stutter,
+        unseparated_literal_suffix,
+        use_self,
+        used_underscore_binding
     )
 )]
 
@@ -339,7 +353,12 @@ pub use generics::{
     PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound,
     WhereClause, WherePredicate,
 };
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
+#[cfg(
+    all(
+        any(feature = "full", feature = "derive"),
+        feature = "printing"
+    )
+)]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 #[cfg(feature = "full")]
@@ -399,7 +418,12 @@ pub use ty::{
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod path;
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
+#[cfg(
+    all(
+        any(feature = "full", feature = "derive"),
+        feature = "printing"
+    )
+)]
 pub use path::PathTokens;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use path::{
@@ -734,10 +758,20 @@ pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
     Ok(file)
 }
 
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
+#[cfg(
+    all(
+        any(feature = "full", feature = "derive"),
+        feature = "printing"
+    )
+)]
 struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
 
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
+#[cfg(
+    all(
+        any(feature = "full", feature = "derive"),
+        feature = "printing"
+    )
+)]
 impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
 where
     T: quote::ToTokens + Default,
