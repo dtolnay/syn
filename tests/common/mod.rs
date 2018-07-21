@@ -81,21 +81,21 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
         // TODO outer attributes on closures
         //
-        //     #[inline] || {}
+        // https://github.com/dtolnay/syn/issues/457
         "tests/rust/src/test/run-pass/issue-49632.rs" |
         // TODO inner attributes within expressions
         //
-        //     { #![foo] }
+        // https://github.com/dtolnay/syn/issues/458
+        // https://github.com/dtolnay/syn/issues/459
+        // https://github.com/dtolnay/syn/issues/460
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
-        // TODO inner attributes within blocks
+        // TODO inner attributes within foreign mod
         //
-        //     fn test_fn_inner() { #![inner_fn_attr] }
+        // https://github.com/dtolnay/syn/issues/456
         "tests/rust/src/test/run-pass/item-attributes.rs" |
-        // TODO inclusive range syntax
-        "tests/rust/src/test/run-pass/range-inclusive-pattern-precedence.rs" |
         // TODO feature(extern_in_paths)
         //
-        //      use extern::xcrate;
+        // https://github.com/dtolnay/syn/issues/337
         "tests/rust/src/test/run-make-fulldeps/save-analysis-rfc2126/extern_in_paths.rs" |
         "tests/rust/src/test/run-pass/rfc-2126-extern-absolute-paths/extern.rs" |
         // TODO feature(macros_in_extern)
@@ -110,15 +110,15 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/async-await.rs" |
         // TODO feature(label_break_value)
         //
-        //     'block: { break 'block "value" }
+        // https://github.com/dtolnay/syn/issues/455
         "tests/rust/src/test/run-pass/label_break_value.rs" |
         // TODO unreserve pure, offsetof, sizeof, alignof
+        //
+        // https://github.com/dtolnay/syn/issues/454
         "tests/rust/src/test/run-pass/rfc-2421-unreserve-pure-offsetof-sizeof-alignof.rs" |
         // TODO where-clause on associated types
         //
-        //     impl Foo for Bar {
-        //         type Assoc3<T> where T: Iterator = Vec<T>;
-        //     }
+        // https://github.com/dtolnay/syn/issues/453
         "tests/rust/src/test/ui/rfc1598-generic-associated-types/generic-associated-types-where.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
