@@ -73,12 +73,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // TODO outer attributes on literals
-        //
-        //     #[noop] "Hello, world!"
-        //     #[cfg(unset)] 341
-        "tests/rust/src/test/run-pass-fulldeps/proc-macro/attr-stmt-expr.rs" |
-        "tests/rust/src/test/run-pass/cfg_stmt_expr.rs" |
         // TODO inner attributes within expressions
         //
         // https://github.com/dtolnay/syn/issues/458

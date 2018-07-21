@@ -1634,9 +1634,10 @@ pub mod parsing {
 
     impl Synom for ExprLit {
         named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             lit: syn!(Lit) >>
             (ExprLit {
-                attrs: Vec::new(),
+                attrs: attrs,
                 lit: lit,
             })
         ));
@@ -2297,9 +2298,10 @@ pub mod parsing {
 
     impl Synom for ExprPath {
         named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
             pair: qpath >>
             (ExprPath {
-                attrs: Vec::new(),
+                attrs: attrs,
                 qself: pair.0,
                 path: pair.1,
             })
