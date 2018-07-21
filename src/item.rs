@@ -972,7 +972,7 @@ pub mod parsing {
                 variadic: None,
                 generics: Generics {
                     where_clause: where_clause,
-                    .. generics
+                    ..generics
                 },
             }),
             ident: ident,
@@ -1113,7 +1113,7 @@ pub mod parsing {
                     output: ret,
                     generics: Generics {
                         where_clause: where_clause,
-                        .. generics
+                        ..generics
                     },
                 }),
                 vis: vis,
@@ -1211,7 +1211,7 @@ pub mod parsing {
             ident: ident,
             generics: Generics {
                 where_clause: where_clause,
-                .. generics
+                ..generics
             },
             fields: fields,
         })
@@ -1238,7 +1238,7 @@ pub mod parsing {
             ident: ident,
             generics: Generics {
                 where_clause: where_clause,
-                .. generics
+                ..generics
             },
             colon_token: colon,
             supertraits: bounds.unwrap_or_default(),
@@ -1316,7 +1316,7 @@ pub mod parsing {
                         variadic: None,
                         generics: Generics {
                             where_clause: where_clause,
-                            .. generics
+                            ..generics
                         },
                     },
                 },
@@ -1347,7 +1347,7 @@ pub mod parsing {
             ident: ident,
             generics: Generics {
                 where_clause: where_clause,
-                .. generics
+                ..generics
             },
             colon_token: colon,
             bounds: bounds.unwrap_or_default(),
@@ -1400,7 +1400,7 @@ pub mod parsing {
             impl_token: impl_,
             generics: Generics {
                 where_clause: where_clause,
-                .. generics
+                ..generics
             },
             trait_: polarity_path,
             self_ty: Box::new(self_ty),
@@ -1481,7 +1481,7 @@ pub mod parsing {
                     output: ret,
                     generics: Generics {
                         where_clause: where_clause,
-                        .. generics
+                        ..generics
                     },
                     variadic: None,
                 },

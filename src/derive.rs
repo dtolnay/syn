@@ -99,7 +99,7 @@ pub mod parsing {
                     attrs: attrs,
                     generics: Generics {
                         where_clause: wh,
-                        .. generics
+                        ..generics
                     },
                     data: Data::Struct(DataStruct {
                         struct_token: s,
@@ -114,7 +114,7 @@ pub mod parsing {
                     attrs: attrs,
                     generics: Generics {
                         where_clause: wh,
-                        .. generics
+                        ..generics
                     },
                     data: Data::Enum(DataEnum {
                         variants: variants,
