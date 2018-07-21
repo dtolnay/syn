@@ -89,10 +89,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // https://github.com/dtolnay/syn/issues/459
         // https://github.com/dtolnay/syn/issues/460
         "tests/rust/src/test/pretty/stmt_expr_attributes.rs" |
-        // TODO inner attributes within foreign mod
-        //
-        // https://github.com/dtolnay/syn/issues/456
-        "tests/rust/src/test/run-pass/item-attributes.rs" |
         // TODO feature(macros_in_extern)
         //
         // https://github.com/dtolnay/syn/issues/390

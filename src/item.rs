@@ -1068,14 +1068,21 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemForeignMod "foreign mod item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::parse_outer) >>
         abi: syn!(Abi) >>
-        items: braces!(many0!(ForeignItem::parse)) >>
+        braced_content: braces!(tuple!(
+            many0!(Attribute::parse_inner),
+            many0!(ForeignItem::parse)
+        )) >>
         (ItemForeignMod {
-            attrs: attrs,
+            attrs: {
+                let mut attrs = outer_attrs;
+                attrs.extend((braced_content.1).0);
+                attrs
+            },
             abi: abi,
-            brace_token: items.0,
-            items: items.1,
+            brace_token: braced_content.0,
+            items: (braced_content.1).1,
         })
     ));
 
@@ -1640,6 +1647,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.abi.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 tokens.append_all(&self.items);
             });
         }
