@@ -14,6 +14,7 @@ extern crate syn;
 use proc_macro2::Delimiter::{Brace, Parenthesis};
 use proc_macro2::*;
 use syn::*;
+use syn::punctuated::Punctuated;
 
 use std::iter::FromIterator;
 
@@ -156,6 +157,69 @@ fn test_struct() {
         expected_meta_item,
         actual.attrs[0].interpret_meta().unwrap()
     );
+}
+
+#[test]
+fn test_union() {
+    let raw = "
+        union MaybeUninit<T> {
+            uninit: (),
+            value: T
+        }
+    ";
+
+    let expected = DeriveInput {
+        ident: ident("MaybeUninit"),
+        vis: Visibility::Inherited,
+        attrs: Vec::new(),
+        generics: Generics {
+            lt_token: Some(Default::default()),
+            params: punctuated![
+                GenericParam::Type(TypeParam {
+                    attrs: Vec::new(),
+                    ident: ident("T"),
+                    bounds: Default::default(),
+                    default: None,
+                    colon_token: None,
+                    eq_token: None,
+                }),
+            ],
+            gt_token: Some(Default::default()),
+            where_clause: None,
+        },
+        data: Data::Union(DataUnion {
+            union_token: Default::default(),
+            fields: FieldsNamed {
+                brace_token: Default::default(),
+                named: punctuated![
+                    Field {
+                        ident: Some(ident("uninit")),
+                        colon_token: Some(Default::default()),
+                        vis: Visibility::Inherited,
+                        attrs: Vec::new(),
+                        ty: TypeTuple {
+                            paren_token: Default::default(),
+                            elems: Punctuated::new(),
+                        }.into(),
+                    },
+                    Field {
+                        ident: Some(ident("value")),
+                        colon_token: Some(Default::default()),
+                        vis: Visibility::Inherited,
+                        attrs: Vec::new(),
+                        ty: TypePath {
+                            qself: None,
+                            path: ident("T").into(),
+                        }.into(),
+                    },
+                ],
+            },
+        }),
+    };
+
+    let actual = syn::parse_str(raw).unwrap();
+
+    assert_eq!(expected, actual);
 }
 
 #[test]
