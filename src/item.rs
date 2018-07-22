@@ -93,6 +93,7 @@ ast_enum_of_structs! {
             pub vis: Visibility,
             pub constness: Option<Token![const]>,
             pub unsafety: Option<Token![unsafe]>,
+            pub asyncness: Option<Token![async]>,
             pub abi: Option<Abi>,
             pub ident: Ident,
             pub decl: Box<FnDecl>,
@@ -945,6 +946,7 @@ pub mod parsing {
         vis: syn!(Visibility) >>
         constness: option!(keyword!(const)) >>
         unsafety: option!(keyword!(unsafe)) >>
+        asyncness: option!(keyword!(async)) >>
         abi: option!(syn!(Abi)) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
@@ -965,6 +967,7 @@ pub mod parsing {
             vis: vis,
             constness: constness,
             unsafety: unsafety,
+            asyncness: asyncness,
             abi: abi,
             decl: Box::new(FnDecl {
                 fn_token: fn_,
@@ -1616,6 +1619,7 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {

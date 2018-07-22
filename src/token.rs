@@ -506,6 +506,7 @@ tokens! {
         "where"    pub struct Where        /// `where`
         "while"    pub struct While        /// `while`
         "yield"    pub struct Yield        /// `yield`
+        "async"    pub struct Async        /// `async`
     }
 }
 
@@ -607,6 +608,7 @@ macro_rules! Token {
     (where)    => { $crate::token::Where };
     (while)    => { $crate::token::While };
     (yield)    => { $crate::token::Yield };
+    (async)    => { $crate::token::Async };
 }
 
 /// Parse a single Rust punctuation token.
@@ -720,6 +722,7 @@ macro_rules! keyword {
     ($i:expr, where)    => { call!($i, <$crate::token::Where as $crate::synom::Synom>::parse) };
     ($i:expr, while)    => { call!($i, <$crate::token::While as $crate::synom::Synom>::parse) };
     ($i:expr, yield)    => { call!($i, <$crate::token::Yield as $crate::synom::Synom>::parse) };
+    ($i:expr, async)    => { call!($i, <$crate::token::Async as $crate::synom::Synom>::parse) };
 }
 
 macro_rules! ident_from_token {
