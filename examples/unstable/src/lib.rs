@@ -10,22 +10,22 @@ use syn::synom::Synom;
 use syn::{token, ExprTuple};
 
 struct Parser {
-    buffer: Box<TokenBuffer>,
     cursor: Cursor<'static>,
+
+    #[allow(dead_code)]
+    buffer: Box<TokenBuffer>,
 }
 
 impl Parser {
     fn new(tokens: TokenStream) -> Parser {
-        let buffer = Box::new(TokenBuffer::new(tokens.into()));
+        let buffer = Box::new(TokenBuffer::new(tokens));
         let cursor = unsafe {
-            let buffer: &'static TokenBuffer = std::mem::transmute(&*buffer);
+            let buffer: *const TokenBuffer = &*buffer;
+            let buffer: &'static TokenBuffer = &*buffer;
             buffer.begin()
         };
 
-        Parser {
-            buffer: buffer,
-            cursor: cursor,
-        }
+        Parser { cursor, buffer }
     }
 
     fn current_span(&self) -> Span {
