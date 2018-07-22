@@ -7,7 +7,7 @@ use proc_macro::{Diagnostic, Span, TokenStream};
 use syn::buffer::{Cursor, TokenBuffer};
 use syn::spanned::Spanned;
 use syn::synom::Synom;
-use syn::*;
+use syn::{token, ExprTuple};
 
 struct Parser {
     buffer: Box<TokenBuffer>,
