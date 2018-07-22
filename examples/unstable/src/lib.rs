@@ -1,23 +1,24 @@
-#![feature(proc_macro, core_intrinsics)]
+#![feature(core_intrinsics, proc_macro_diagnostic)]
 
 extern crate syn;
 extern crate proc_macro;
 
 use syn::*;
-use syn::synom::{Synom, Cursor, SynomBuffer};
+use syn::synom::Synom;
+use syn::buffer::{Cursor, TokenBuffer};
 use syn::spanned::Spanned;
 use proc_macro::{TokenStream, Span, Diagnostic};
 
 struct Parser {
-    buffer: Box<SynomBuffer>,
+    buffer: Box<TokenBuffer>,
     cursor: Cursor<'static>,
 }
 
 impl Parser {
     fn new(tokens: TokenStream) -> Parser {
-        let buffer = Box::new(SynomBuffer::new(tokens.into()));
+        let buffer = Box::new(TokenBuffer::new(tokens.into()));
         let cursor = unsafe {
-            let buffer: &'static SynomBuffer = ::std::mem::transmute(&*buffer);
+            let buffer: &'static TokenBuffer = ::std::mem::transmute(&*buffer);
             buffer.begin()
         };
 

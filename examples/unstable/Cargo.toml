@@ -2,14 +2,11 @@
 name = "unstable"
 version = "0.1.0"
 authors = ["Sergio Benitez <sb@sergio.bz>"]
+publish = false
 
 [lib]
 proc-macro = true
 
-[[bin]]
-name = "unstable"
-path = "src/main.rs"
-
 [dependencies]
 syn = { path = "../../", features = ["full"] }
-proc-macro2 = "0.1"
+proc-macro2 = { version = "0.4", features = ["nightly"] }
