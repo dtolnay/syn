@@ -1,13 +1,13 @@
 #![feature(core_intrinsics, proc_macro_diagnostic)]
 
-extern crate syn;
 extern crate proc_macro;
+extern crate syn;
 
-use syn::*;
-use syn::synom::Synom;
+use proc_macro::{Diagnostic, Span, TokenStream};
 use syn::buffer::{Cursor, TokenBuffer};
 use syn::spanned::Spanned;
-use proc_macro::{TokenStream, Span, Diagnostic};
+use syn::synom::Synom;
+use syn::*;
 
 struct Parser {
     buffer: Box<TokenBuffer>,
@@ -18,7 +18,7 @@ impl Parser {
     fn new(tokens: TokenStream) -> Parser {
         let buffer = Box::new(TokenBuffer::new(tokens.into()));
         let cursor = unsafe {
-            let buffer: &'static TokenBuffer = ::std::mem::transmute(&*buffer);
+            let buffer: &'static TokenBuffer = std::mem::transmute(&*buffer);
             buffer.begin()
         };
 
@@ -33,15 +33,15 @@ impl Parser {
     }
 
     fn parse<T: Synom>(&mut self) -> Result<T, Diagnostic> {
-        let (val, cursor) = T::parse(self.cursor)
-            .map_err(|e| {
-                let expected = match T::description() {
-                    Some(desc) => desc,
-                    None => unsafe { ::std::intrinsics::type_name::<T>() }
-                };
+        let (val, cursor) = T::parse(self.cursor).map_err(|e| {
+            let expected = match T::description() {
+                Some(desc) => desc,
+                None => unsafe { std::intrinsics::type_name::<T>() },
+            };
 
-                self.current_span().error(format!("{}: expected {}", e, expected))
-            })?;
+            self.current_span()
+                .error(format!("{}: expected {}", e, expected))
+        })?;
 
         self.cursor = cursor;
         Ok(val)
@@ -49,8 +49,9 @@ impl Parser {
 
     fn eof(&mut self) -> Result<(), Diagnostic> {
         if !self.cursor.eof() {
-            return Err(self.current_span()
-                       .error("trailing characters; expected eof"));
+            return Err(self
+                .current_span()
+                .error("trailing characters; expected eof"));
         }
 
         Ok(())
@@ -67,7 +68,9 @@ fn eval(input: TokenStream) -> Result<TokenStream, Diagnostic> {
 
     let (a_len, b_len) = (a.elems.len(), b.elems.len());
     if a_len != b_len {
-        let diag = b.span().unstable()
+        let diag = b
+            .span()
+            .unstable()
             .error(format!("expected {} element(s), got {}", a_len, b_len))
             .span_note(a.span().unstable(), "because of this");
 
