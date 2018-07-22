@@ -1444,6 +1444,7 @@ pub mod parsing {
         call!(trailer_expr, allow_struct, allow_block)
     ));
 
+    #[cfg(feature = "full")]
     fn take_outer(attrs: &mut Vec<Attribute>) -> Vec<Attribute> {
         let mut outer = Vec::new();
         let mut inner = Vec::new();
@@ -2979,17 +2980,25 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    fn attrs_to_tokens(attrs: &[Attribute], tokens: &mut TokenStream) {
+    fn outer_attrs_to_tokens(attrs: &[Attribute], tokens: &mut TokenStream) {
         tokens.append_all(attrs.outer());
     }
 
+    #[cfg(feature = "full")]
+    fn inner_attrs_to_tokens(attrs: &[Attribute], tokens: &mut TokenStream) {
+        tokens.append_all(attrs.inner());
+    }
+
     #[cfg(not(feature = "full"))]
-    fn attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
+    fn outer_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
+
+    #[cfg(not(feature = "full"))]
+    fn inner_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
 
     #[cfg(feature = "full")]
     impl ToTokens for ExprBox {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.box_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
@@ -2998,7 +3007,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprInPlace {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.place.to_tokens(tokens);
             self.arrow_token.to_tokens(tokens);
             self.value.to_tokens(tokens);
@@ -3008,9 +3017,9 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprArray {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.bracket_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.elems.to_tokens(tokens);
             })
         }
@@ -3018,7 +3027,7 @@ mod printing {
 
     impl ToTokens for ExprCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.func.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
@@ -3029,7 +3038,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.receiver.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.method.to_tokens(tokens);
@@ -3063,9 +3072,9 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.paren_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.elems.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
                 // distinguish ExprTuple from ExprParen.
@@ -3078,7 +3087,7 @@ mod printing {
 
     impl ToTokens for ExprBinary {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.left.to_tokens(tokens);
             self.op.to_tokens(tokens);
             self.right.to_tokens(tokens);
@@ -3087,7 +3096,7 @@ mod printing {
 
     impl ToTokens for ExprUnary {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.op.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
@@ -3095,14 +3104,14 @@ mod printing {
 
     impl ToTokens for ExprLit {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.lit.to_tokens(tokens);
         }
     }
 
     impl ToTokens for ExprCast {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.as_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -3112,7 +3121,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -3142,7 +3151,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprIf {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.if_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
             self.then_branch.to_tokens(tokens);
@@ -3153,7 +3162,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprIfLet {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.if_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
             self.pats.to_tokens(tokens);
@@ -3167,12 +3176,12 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprWhile {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
             self.body.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
             });
         }
@@ -3181,7 +3190,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprWhileLet {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
@@ -3189,7 +3198,7 @@ mod printing {
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.body.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
             });
         }
@@ -3198,14 +3207,14 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprForLoop {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.for_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.body.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
             });
         }
@@ -3214,11 +3223,11 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprLoop {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.loop_token.to_tokens(tokens);
             self.body.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
             });
         }
@@ -3227,11 +3236,11 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprMatch {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.match_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 for (i, arm) in self.arms.iter().enumerate() {
                     arm.to_tokens(tokens);
                     // Ensure that we have a comma after a non-block arm, except
@@ -3248,7 +3257,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprCatch {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.do_token.to_tokens(tokens);
             self.catch_token.to_tokens(tokens);
             self.block.to_tokens(tokens);
@@ -3258,7 +3267,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprYield {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.yield_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
@@ -3267,7 +3276,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.movability.to_tokens(tokens);
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
@@ -3293,7 +3302,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprUnsafe {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.unsafe_token.to_tokens(tokens);
             self.block.to_tokens(tokens);
         }
@@ -3302,9 +3311,9 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.block.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.block.stmts);
             });
         }
@@ -3313,7 +3322,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprAssign {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.left.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.right.to_tokens(tokens);
@@ -3323,7 +3332,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprAssignOp {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.left.to_tokens(tokens);
             self.op.to_tokens(tokens);
             self.right.to_tokens(tokens);
@@ -3332,8 +3341,7 @@ mod printing {
 
     impl ToTokens for ExprField {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            #[cfg(feature = "full")]
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.base.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
             self.member.to_tokens(tokens);
@@ -3359,7 +3367,7 @@ mod printing {
 
     impl ToTokens for ExprIndex {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.bracket_token.surround(tokens, |tokens| {
                 self.index.to_tokens(tokens);
@@ -3370,7 +3378,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.from.to_tokens(tokens);
             match self.limits {
                 RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
@@ -3382,7 +3390,7 @@ mod printing {
 
     impl ToTokens for ExprPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             ::PathTokens(&self.qself, &self.path).to_tokens(tokens)
         }
     }
@@ -3390,7 +3398,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.expr.to_tokens(tokens);
@@ -3400,7 +3408,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprBreak {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.break_token.to_tokens(tokens);
             self.label.to_tokens(tokens);
             self.expr.to_tokens(tokens);
@@ -3410,7 +3418,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprContinue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.continue_token.to_tokens(tokens);
             self.label.to_tokens(tokens);
         }
@@ -3419,7 +3427,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprReturn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.return_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
@@ -3428,7 +3436,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprMacro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.mac.to_tokens(tokens);
         }
     }
@@ -3436,10 +3444,10 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.fields.to_tokens(tokens);
                 if self.rest.is_some() {
                     TokensOrDefault(&self.dot2_token).to_tokens(tokens);
@@ -3452,9 +3460,9 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprRepeat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.bracket_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.expr.to_tokens(tokens);
                 self.semi_token.to_tokens(tokens);
                 self.len.to_tokens(tokens);
@@ -3465,7 +3473,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprGroup {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.group_token.surround(tokens, |tokens| {
                 self.expr.to_tokens(tokens);
             });
@@ -3474,9 +3482,9 @@ mod printing {
 
     impl ToTokens for ExprParen {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            attrs_to_tokens(&self.attrs, tokens);
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.paren_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
+                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.expr.to_tokens(tokens);
             });
         }
@@ -3485,7 +3493,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for ExprTry {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.question_token.to_tokens(tokens);
         }
@@ -3508,7 +3516,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.member.to_tokens(tokens);
             if let Some(ref colon_token) = self.colon_token {
                 colon_token.to_tokens(tokens);
@@ -3728,7 +3736,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for Local {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
             self.pats.to_tokens(tokens);
             if let Some((ref colon_token, ref ty)) = self.ty {
