@@ -1661,6 +1661,16 @@ pub mod parsing {
     ));
 
     impl Synom for ExprLit {
+        #[cfg(not(feature = "full"))]
+        named!(parse -> Self, do_parse!(
+            lit: syn!(Lit) >>
+            (ExprLit {
+                attrs: Vec::new(),
+                lit: lit,
+            })
+        ));
+
+        #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
             lit: syn!(Lit) >>
@@ -1708,6 +1718,17 @@ pub mod parsing {
     }
 
     impl Synom for ExprParen {
+        #[cfg(not(feature = "full"))]
+        named!(parse -> Self, do_parse!(
+            e: parens!(syn!(Expr)) >>
+            (ExprParen {
+                attrs: Vec::new(),
+                paren_token: e.0,
+                expr: Box::new(e.1),
+            })
+        ));
+
+        #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
             outer_attrs: many0!(Attribute::parse_outer) >>
             e: parens!(tuple!(
@@ -2427,6 +2448,17 @@ pub mod parsing {
     }
 
     impl Synom for ExprPath {
+        #[cfg(not(feature = "full"))]
+        named!(parse -> Self, do_parse!(
+            pair: qpath >>
+            (ExprPath {
+                attrs: Vec::new(),
+                qself: pair.0,
+                path: pair.1,
+            })
+        ));
+
+        #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
             attrs: many0!(Attribute::parse_outer) >>
             pair: qpath >>
