@@ -954,7 +954,7 @@ pub mod parsing {
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
             many0!(Attribute::parse_inner),
-            call!(Block::parse_within)
+            call!(Block::parse_within),
         )) >>
         (ItemFn {
             attrs: {
@@ -1045,7 +1045,7 @@ pub mod parsing {
             braces!(
                 tuple!(
                     many0!(Attribute::parse_inner),
-                    many0!(Item::parse)
+                    many0!(Item::parse),
                 )
             ) => {|(brace, (inner_attrs, items))| (
                 inner_attrs,
@@ -1072,7 +1072,7 @@ pub mod parsing {
         abi: syn!(Abi) >>
         braced_content: braces!(tuple!(
             many0!(Attribute::parse_inner),
-            many0!(ForeignItem::parse)
+            many0!(ForeignItem::parse),
         )) >>
         (ItemForeignMod {
             attrs: {
@@ -1396,7 +1396,7 @@ pub mod parsing {
         where_clause: option!(syn!(WhereClause)) >>
         inner: braces!(tuple!(
             many0!(Attribute::parse_inner),
-            many0!(ImplItem::parse)
+            many0!(ImplItem::parse),
         )) >>
         (ItemImpl {
             attrs: {
@@ -1468,7 +1468,7 @@ pub mod parsing {
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
             many0!(Attribute::parse_inner),
-            call!(Block::parse_within)
+            call!(Block::parse_within),
         )) >>
         (ImplItemMethod {
             attrs: {

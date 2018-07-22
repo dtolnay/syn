@@ -1712,7 +1712,7 @@ pub mod parsing {
             outer_attrs: many0!(Attribute::parse_outer) >>
             e: parens!(tuple!(
                 many0!(Attribute::parse_inner),
-                syn!(Expr)
+                syn!(Expr),
             )) >>
             (ExprParen {
                 attrs: {
@@ -1736,7 +1736,7 @@ pub mod parsing {
             outer_attrs: many0!(Attribute::parse_outer) >>
             elems: brackets!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Punctuated::parse_terminated)
+                call!(Punctuated::parse_terminated),
             )) >>
             (ExprArray {
                 attrs: {
@@ -1765,7 +1765,7 @@ pub mod parsing {
             punct!(::),
             punct!(<),
             call!(Punctuated::parse_terminated),
-            punct!(>)
+            punct!(>),
         )) >>
         args: parens!(Punctuated::parse_terminated) >>
         ({
@@ -1806,7 +1806,7 @@ pub mod parsing {
             outer_attrs: many0!(Attribute::parse_outer) >>
             elems: parens!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Punctuated::parse_terminated)
+                call!(Punctuated::parse_terminated),
             )) >>
             (ExprTuple {
                 attrs: {
@@ -1911,7 +1911,7 @@ pub mod parsing {
             expr: expr_no_struct >>
             block: braces!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Block::parse_within)
+                call!(Block::parse_within),
             )) >>
             (ExprForLoop {
                 attrs: {
@@ -1944,7 +1944,7 @@ pub mod parsing {
             loop_: keyword!(loop) >>
             block: braces!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Block::parse_within)
+                call!(Block::parse_within),
             )) >>
             (ExprLoop {
                 attrs: {
@@ -1974,7 +1974,7 @@ pub mod parsing {
             obj: expr_no_struct >>
             braced_content: braces!(tuple!(
                 many0!(Attribute::parse_inner),
-                many0!(syn!(Arm))
+                many0!(syn!(Arm)),
             )) >>
             (ExprMatch {
                 attrs: {
@@ -2127,7 +2127,7 @@ pub mod parsing {
             cond: expr_no_struct >>
             block: braces!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Block::parse_within)
+                call!(Block::parse_within),
             )) >>
             (ExprWhile {
                 attrs: {
@@ -2162,7 +2162,7 @@ pub mod parsing {
             value: expr_no_struct >>
             block: braces!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Block::parse_within)
+                call!(Block::parse_within),
             )) >>
             (ExprWhileLet {
                 attrs: {
@@ -2334,7 +2334,7 @@ pub mod parsing {
                 many0!(Attribute::parse_inner),
                 syn!(Expr),
                 punct!(;),
-                syn!(Expr)
+                syn!(Expr),
             )) >>
             (ExprRepeat {
                 attrs: {
@@ -2377,7 +2377,7 @@ pub mod parsing {
             outer_attrs: many0!(Attribute::parse_outer) >>
             block: braces!(tuple!(
                 many0!(Attribute::parse_inner),
-                call!(Block::parse_within)
+                call!(Block::parse_within),
             )) >>
             (ExprBlock {
                 attrs: {

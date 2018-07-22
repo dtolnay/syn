@@ -186,7 +186,7 @@ pub mod parsing {
 
     named!(data_union -> (Option<WhereClause>, FieldsNamed), tuple!(
         option!(syn!(WhereClause)),
-        syn!(FieldsNamed)
+        syn!(FieldsNamed),
     ));
 }
 
