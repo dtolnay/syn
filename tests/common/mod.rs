@@ -78,11 +78,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // https://github.com/dtolnay/syn/issues/390
         "tests/rust/src/test/run-pass-fulldeps/proc-macro/macros-in-extern.rs" |
         "tests/rust/src/test/run-pass/macros-in-extern.rs" |
-        // TODO async closures and async functions
-        //
-        // https://github.com/dtolnay/syn/issues/396
-        // https://github.com/dtolnay/syn/issues/395
-        "tests/rust/src/test/run-pass/async-await.rs" |
         // TODO feature(label_break_value)
         //
         // https://github.com/dtolnay/syn/issues/455
