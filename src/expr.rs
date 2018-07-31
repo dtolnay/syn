@@ -1570,6 +1570,9 @@ pub mod parsing {
         |
         syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
         |
+        // must be before ExprStruct
+        call!(unstable_async_block) => { Expr::Verbatim }
+        |
         // must be before expr_path
         cond_reduce!(allow_struct, syn!(ExprStruct)) => { Expr::Struct }
         |
@@ -2153,6 +2156,24 @@ pub mod parsing {
             |
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
         ) >>
+        end: call!(grab_cursor) >>
+        ({
+            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let len = tts.len() - end.token_stream().into_iter().count();
+            ExprVerbatim {
+                tts: tts.into_iter().take(len).collect(),
+            }.into()
+        })
+    ));
+
+    #[cfg(feature = "full")]
+    named!(unstable_async_block -> ExprVerbatim, do_parse!(
+        begin: call!(grab_cursor) >>
+        _attrs: many0!(Attribute::parse_outer) >>
+        _asyncness: option!(keyword!(async)) >>
+        _movability: option!(keyword!(static)) >>
+        _capture: option!(keyword!(move)) >>
+        _body: syn!(Block) >>
         end: call!(grab_cursor) >>
         ({
             let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
