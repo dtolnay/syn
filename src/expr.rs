@@ -2136,7 +2136,7 @@ pub mod parsing {
     named!(expr_unstable_async_closure(allow_struct: bool) -> Expr, do_parse!(
         begin: call!(grab_cursor) >>
         _attrs: many0!(Attribute::parse_outer) >>
-        _asyncness: option!(keyword!(async)) >>
+        _asyncness: keyword!(async) >>
         _movability: option!(keyword!(static)) >>
         _capture: option!(keyword!(move)) >>
         _or1: punct!(|) >>
@@ -2170,7 +2170,7 @@ pub mod parsing {
     named!(unstable_async_block -> ExprVerbatim, do_parse!(
         begin: call!(grab_cursor) >>
         _attrs: many0!(Attribute::parse_outer) >>
-        _asyncness: option!(keyword!(async)) >>
+        _asyncness: keyword!(async) >>
         _movability: option!(keyword!(static)) >>
         _capture: option!(keyword!(move)) >>
         _body: syn!(Block) >>

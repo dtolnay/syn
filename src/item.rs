@@ -998,7 +998,7 @@ pub mod parsing {
         _vis: syn!(Visibility) >>
         _constness: option!(keyword!(const)) >>
         _unsafety: option!(keyword!(unsafe)) >>
-        _asyncness: option!(keyword!(async)) >>
+        _asyncness: keyword!(async) >>
         _abi: option!(syn!(Abi)) >>
         _fn_: keyword!(fn) >>
         _ident: syn!(Ident) >>
@@ -1546,7 +1546,7 @@ pub mod parsing {
         _defaultness: option!(keyword!(default)) >>
         _constness: option!(keyword!(const)) >>
         _unsafety: option!(keyword!(unsafe)) >>
-        _asyncness: option!(keyword!(async)) >>
+        _asyncness: keyword!(async) >>
         _abi: option!(syn!(Abi)) >>
         _fn_: keyword!(fn) >>
         _ident: syn!(Ident) >>
