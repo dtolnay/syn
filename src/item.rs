@@ -714,7 +714,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use synom::Synom;
+    use buffer::Cursor;
+    use synom::{PResult, Synom};
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }
@@ -726,6 +727,8 @@ pub mod parsing {
         syn!(ItemConst) => { Item::Const }
         |
         syn!(ItemFn) => { Item::Fn }
+        |
+        call!(unstable_async_fn) => { Item::Verbatim }
         |
         syn!(ItemMod) => { Item::Mod }
         |
@@ -982,6 +985,38 @@ pub mod parsing {
                 brace_token: inner_attrs_stmts.0,
                 stmts: (inner_attrs_stmts.1).1,
             }),
+        })
+    ));
+
+    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
+        Ok((cursor, cursor))
+    }
+
+    named!(unstable_async_fn -> ItemVerbatim, do_parse!(
+        begin: call!(grab_cursor) >>
+        _outer_attrs: many0!(Attribute::parse_outer) >>
+        _vis: syn!(Visibility) >>
+        _constness: option!(keyword!(const)) >>
+        _unsafety: option!(keyword!(unsafe)) >>
+        _asyncness: option!(keyword!(async)) >>
+        _abi: option!(syn!(Abi)) >>
+        _fn_: keyword!(fn) >>
+        _ident: syn!(Ident) >>
+        _generics: syn!(Generics) >>
+        _inputs: parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
+        _ret: syn!(ReturnType) >>
+        _where_clause: option!(syn!(WhereClause)) >>
+        _inner_attrs_stmts: braces!(tuple!(
+            many0!(Attribute::parse_inner),
+            call!(Block::parse_within),
+        )) >>
+        end: call!(grab_cursor) >>
+        ({
+            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let len = tts.len() - end.token_stream().into_iter().count();
+            ItemVerbatim {
+                tts: tts.into_iter().take(len).collect(),
+            }
         })
     ));
 

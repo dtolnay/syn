@@ -1609,6 +1609,8 @@ pub mod parsing {
         |
         call!(expr_closure, allow_struct)
         |
+        call!(expr_unstable_async_closure, allow_struct)
+        |
         cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
         |
         // NOTE: This is the prefix-form of range
@@ -2120,6 +2122,45 @@ pub mod parsing {
             output: ret_and_body.0,
             body: Box::new(ret_and_body.1),
         }.into())
+    ));
+
+    #[cfg(feature = "full")]
+    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
+        Ok((cursor, cursor))
+    }
+
+    #[cfg(feature = "full")]
+    named!(expr_unstable_async_closure(allow_struct: bool) -> Expr, do_parse!(
+        begin: call!(grab_cursor) >>
+        _attrs: many0!(Attribute::parse_outer) >>
+        _asyncness: option!(keyword!(async)) >>
+        _movability: option!(keyword!(static)) >>
+        _capture: option!(keyword!(move)) >>
+        _or1: punct!(|) >>
+        _inputs: call!(Punctuated::<FnArg, Token![,]>::parse_terminated_with, fn_arg) >>
+        _or2: punct!(|) >>
+        _ret_and_body: alt!(
+            do_parse!(
+                arrow: punct!(->) >>
+                ty: syn!(Type) >>
+                body: syn!(Block) >>
+                (ReturnType::Type(arrow, Box::new(ty)),
+                 Expr::Block(ExprBlock {
+                    attrs: Vec::new(),
+                    block: body,
+                }))
+            )
+            |
+            map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
+        ) >>
+        end: call!(grab_cursor) >>
+        ({
+            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let len = tts.len() - end.token_stream().into_iter().count();
+            ExprVerbatim {
+                tts: tts.into_iter().take(len).collect(),
+            }.into()
+        })
     ));
 
     #[cfg(feature = "full")]
