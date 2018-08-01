@@ -11,6 +11,7 @@
 //! 3. The path to `syn` is hardcoded.
 
 #![cfg_attr(feature = "cargo-clippy", allow(redundant_closure))]
+#![recursion_limit = "128"]
 
 #[macro_use]
 extern crate failure;
@@ -30,7 +31,7 @@ use syn::{Attribute, Data, DataStruct, DeriveInput, Ident, Item};
 use std::collections::BTreeMap;
 use std::fmt::{self, Debug};
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::Path;
 
 const SYN_CRATE_ROOT: &str = "../src/lib.rs";
@@ -340,19 +341,18 @@ mod parsing {
 mod codegen {
     use super::{AstItem, Lookup};
     use proc_macro2::{Span, TokenStream};
-    use quote::ToTokens;
-    use std::fmt::{self, Display};
+    use quote::{ToTokens, TokenStreamExt};
     use syn::punctuated::Punctuated;
     use syn::*;
 
     #[derive(Default)]
     pub struct State {
-        pub visit_trait: String,
-        pub visit_impl: String,
-        pub visit_mut_trait: String,
-        pub visit_mut_impl: String,
-        pub fold_trait: String,
-        pub fold_impl: String,
+        pub visit_trait: TokenStream,
+        pub visit_impl: TokenStream,
+        pub visit_mut_trait: TokenStream,
+        pub visit_mut_impl: TokenStream,
+        pub fold_trait: TokenStream,
+        pub fold_impl: TokenStream,
     }
 
     fn under_name(name: Ident) -> Ident {
@@ -449,12 +449,6 @@ mod codegen {
         }
     }
 
-    impl Display for Operand {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            Display::fmt(self.tokens(), formatter)
-        }
-    }
-
     fn first_arg(params: &PathArguments) -> &Type {
         let data = match *params {
             PathArguments::AngleBracketed(ref data) => data,
@@ -472,57 +466,74 @@ mod codegen {
         }
     }
 
-    fn simple_visit(item: &AstItem, kind: Kind, name: &Operand) -> String {
+    fn simple_visit(item: &AstItem, kind: Kind, name: &Operand) -> TokenStream {
+        let ident = under_name(item.ast.ident.clone());
+
         match kind {
-            Visit => format!(
-                "_visitor.visit_{under_name}({name})",
-                under_name = under_name(item.ast.ident.clone()),
-                name = name.ref_tokens(),
-            ),
-            VisitMut => format!(
-                "_visitor.visit_{under_name}_mut({name})",
-                under_name = under_name(item.ast.ident.clone()),
-                name = name.ref_mut_tokens(),
-            ),
-            Fold => format!(
-                "_visitor.fold_{under_name}({name})",
-                under_name = under_name(item.ast.ident.clone()),
-                name = name.owned_tokens(),
-            ),
+            Visit => {
+                let method = Ident::new(&format!("visit_{}", ident), Span::call_site());
+                let name = name.ref_tokens();
+                quote! {
+                    _visitor.#method(#name)
+                }
+            }
+            VisitMut => {
+                let method = Ident::new(&format!("visit_{}_mut", ident), Span::call_site());
+                let name = name.ref_mut_tokens();
+                quote! {
+                    _visitor.#method(#name)
+                }
+            }
+            Fold => {
+                let method = Ident::new(&format!("fold_{}", ident), Span::call_site());
+                let name = name.owned_tokens();
+                quote! {
+                    _visitor.#method(#name)
+                }
+            }
         }
     }
 
-    fn box_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
+    fn box_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<TokenStream> {
         let name = name.owned_tokens();
         let res = visit(elem, lookup, kind, &Owned(quote!(*#name)))?;
         Some(match kind {
-            Fold => format!("Box::new({})", res),
+            Fold => quote! {
+                Box::new(#res)
+            },
             Visit | VisitMut => res,
         })
     }
 
-    fn vec_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
+    fn vec_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<TokenStream> {
         let operand = match kind {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
         let val = visit(elem, lookup, kind, &operand)?;
         Some(match kind {
-            Visit => format!(
-                "for it in {name} {{ {val} }}",
-                name = name.ref_tokens(),
-                val = val,
-            ),
-            VisitMut => format!(
-                "for it in {name} {{ {val} }}",
-                name = name.ref_mut_tokens(),
-                val = val,
-            ),
-            Fold => format!(
-                "FoldHelper::lift({name}, |it| {{ {val} }})",
-                name = name.owned_tokens(),
-                val = val,
-            ),
+            Visit => {
+                let name = name.ref_tokens();
+                quote! {
+                    for it in #name {
+                        #val
+                    }
+                }
+            }
+            VisitMut => {
+                let name = name.ref_mut_tokens();
+                quote! {
+                    for it in #name {
+                        #val
+                    }
+                }
+            }
+            Fold => {
+                let name = name.owned_tokens();
+                quote! {
+                    FoldHelper::lift(#name, |it| { #val })
+                }
+            }
         })
     }
 
@@ -531,59 +542,66 @@ mod codegen {
         lookup: &Lookup,
         kind: Kind,
         name: &Operand,
-    ) -> Option<String> {
+    ) -> Option<TokenStream> {
         let operand = match kind {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
         let val = visit(elem, lookup, kind, &operand)?;
         Some(match kind {
-            Visit => format!(
-                "for el in Punctuated::pairs({name}) {{ \
-                 let it = el.value(); \
-                 {val} \
-                 }}",
-                name = name.ref_tokens(),
-                val = val,
-            ),
-            VisitMut => format!(
-                "for mut el in Punctuated::pairs_mut({name}) {{ \
-                 let it = el.value_mut(); \
-                 {val} \
-                 }}",
-                name = name.ref_mut_tokens(),
-                val = val,
-            ),
-            Fold => format!(
-                "FoldHelper::lift({name}, |it| {{ {val} }})",
-                name = name.owned_tokens(),
-                val = val,
-            ),
+            Visit => {
+                let name = name.ref_tokens();
+                quote! {
+                    for el in Punctuated::pairs(#name) {
+                        let it = el.value();
+                        #val
+                    }
+                }
+            }
+            VisitMut => {
+                let name = name.ref_mut_tokens();
+                quote! {
+                    for mut el in Punctuated::pairs_mut(#name) {
+                        let it = el.value_mut();
+                        #val
+                    }
+                }
+            }
+            Fold => {
+                let name = name.owned_tokens();
+                quote! {
+                    FoldHelper::lift(#name, |it| { #val })
+                }
+            }
         })
     }
 
-    fn option_visit(elem: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
+    fn option_visit(
+        elem: &Type,
+        lookup: &Lookup,
+        kind: Kind,
+        name: &Operand,
+    ) -> Option<TokenStream> {
         let it = match kind {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
         let val = visit(elem, lookup, kind, &it)?;
+        let name = name.owned_tokens();
         Some(match kind {
-            Visit => format!(
-                "if let Some(ref it) = {name} {{ {val} }}",
-                name = name.owned_tokens(),
-                val = val,
-            ),
-            VisitMut => format!(
-                "if let Some(ref mut it) = {name} {{ {val} }}",
-                name = name.owned_tokens(),
-                val = val,
-            ),
-            Fold => format!(
-                "({name}).map(|it| {{ {val} }})",
-                name = name.owned_tokens(),
-                val = val,
-            ),
+            Visit => quote! {
+                if let Some(ref it) = #name {
+                    #val
+                }
+            },
+            VisitMut => quote! {
+                if let Some(ref mut it) = #name {
+                    #val
+                }
+            },
+            Fold => quote! {
+                (#name).map(|it| { #val })
+            },
         })
     }
 
@@ -592,53 +610,59 @@ mod codegen {
         lookup: &Lookup,
         kind: Kind,
         name: &Operand,
-    ) -> Option<String> {
-        let mut code = String::new();
+    ) -> Option<TokenStream> {
+        if elems.is_empty() {
+            return None;
+        }
+
+        let mut code = TokenStream::new();
         for (i, elem) in elems.iter().enumerate() {
             let name = name.tokens();
             let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
             let val = visit(elem, lookup, kind, &it).unwrap_or_else(|| noop_visit(kind, &it));
-            code.push_str(&format!("            {}", val));
+            code.append_all(val);
             match kind {
-                Fold => code.push(','),
-                Visit | VisitMut => code.push(';'),
+                Fold => code.append_all(quote!(,)),
+                Visit | VisitMut => code.append_all(quote!(;)),
             }
-            code.push('\n');
         }
-        if code.is_empty() {
-            None
-        } else {
-            Some(match kind {
-                Fold => format!("(\n{}        )", code),
-                Visit | VisitMut => format!("\n{}        ", code),
-            })
-        }
+        Some(match kind {
+            Fold => quote! {
+                (#code)
+            },
+            Visit | VisitMut => code,
+        })
     }
 
-    fn token_visit(ty: TokenStream, kind: Kind, name: &Operand) -> String {
+    fn token_visit(ty: TokenStream, kind: Kind, name: &Operand) -> TokenStream {
+        let name = name.tokens();
         match kind {
-            Fold => format!(
-                "{ty}(tokens_helper(_visitor, &({name}).0))",
-                ty = ty,
-                name = name.tokens(),
-            ),
-            Visit => format!("tokens_helper(_visitor, &({name}).0)", name = name.tokens(),),
-            VisitMut => format!(
-                "tokens_helper(_visitor, &mut ({name}).0)",
-                name = name.tokens(),
-            ),
+            Fold => quote! {
+                #ty(tokens_helper(_visitor, &(#name).0))
+            },
+            Visit => quote! {
+                tokens_helper(_visitor, &(#name).0)
+            },
+            VisitMut => quote! {
+                tokens_helper(_visitor, &mut (#name).0)
+            },
         }
     }
 
-    fn noop_visit(kind: Kind, name: &Operand) -> String {
+    fn noop_visit(kind: Kind, name: &Operand) -> TokenStream {
         match kind {
-            Fold => name.owned_tokens().to_string(),
-            Visit | VisitMut => format!("// Skipped field {}", name),
+            Fold => name.owned_tokens(),
+            Visit | VisitMut => {
+                let name = name.tokens();
+                quote! {
+                    skip!(#name)
+                }
+            }
         }
     }
 
-    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<String> {
+    fn visit(ty: &Type, lookup: &Lookup, kind: Kind, name: &Operand) -> Option<TokenStream> {
         match classify(ty, lookup) {
             RelevantType::Box(elem) => box_visit(elem, lookup, kind, name),
             RelevantType::Vec(elem) => vec_visit(elem, lookup, kind, name),
@@ -648,7 +672,9 @@ mod codegen {
             RelevantType::Simple(item) => {
                 let mut res = simple_visit(item, kind, name);
                 Some(if item.eos_full {
-                    format!("full!({res})", res = res)
+                    quote! {
+                        full!(#res)
+                    }
                 } else {
                     res
                 })
@@ -659,239 +685,197 @@ mod codegen {
     }
 
     pub fn generate(state: &mut State, lookup: &Lookup, s: &AstItem) {
+        let features = &s.features;
         let under_name = under_name(s.ast.ident.clone());
+        let ty = &s.ast.ident;
+        let visit_fn = Ident::new(&format!("visit_{}", under_name), Span::call_site());
+        let visit_mut_fn = Ident::new(&format!("visit_{}_mut", under_name), Span::call_site());
+        let fold_fn = Ident::new(&format!("fold_{}", under_name), Span::call_site());
 
-        state.visit_trait.push_str(&format!(
-            "{features}\n\
-             fn visit_{under_name}(&mut self, i: &'ast {ty}) {{ \
-             visit_{under_name}(self, i) \
-             }}\n",
-            features = s.features,
-            under_name = under_name,
-            ty = s.ast.ident,
-        ));
-        state.visit_mut_trait.push_str(&format!(
-            "{features}\n\
-             fn visit_{under_name}_mut(&mut self, i: &mut {ty}) {{ \
-             visit_{under_name}_mut(self, i) \
-             }}\n",
-            features = s.features,
-            under_name = under_name,
-            ty = s.ast.ident,
-        ));
-        state.fold_trait.push_str(&format!(
-            "{features}\n\
-             fn fold_{under_name}(&mut self, i: {ty}) -> {ty} {{ \
-             fold_{under_name}(self, i) \
-             }}\n",
-            features = s.features,
-            under_name = under_name,
-            ty = s.ast.ident,
-        ));
+        let mut visit_impl = TokenStream::new();
+        let mut visit_mut_impl = TokenStream::new();
+        let mut fold_impl = TokenStream::new();
 
-        state.visit_impl.push_str(&format!(
-            "{features}\n\
-             pub fn visit_{under_name}<'ast, V: Visit<'ast> + ?Sized>(\
-             _visitor: &mut V, _i: &'ast {ty}) {{\n",
-            features = s.features,
-            under_name = under_name,
-            ty = s.ast.ident,
-        ));
-        state.visit_mut_impl.push_str(&format!(
-            "{features}\n\
-             pub fn visit_{under_name}_mut<V: VisitMut + ?Sized>(\
-             _visitor: &mut V, _i: &mut {ty}) {{\n",
-            features = s.features,
-            under_name = under_name,
-            ty = s.ast.ident,
-        ));
-        let before_fold_impl_len = state.fold_impl.len();
-        state.fold_impl.push_str(&format!(
-            "{features}\n\
-             pub fn fold_{under_name}<V: Fold + ?Sized>(\
-             _visitor: &mut V, _i: {ty}) -> {ty} {{\n",
-            features = s.features,
-            under_name = under_name,
-            ty = s.ast.ident,
-        ));
-
-        // XXX:  This part is a disaster - I'm not sure how to make it cleaner though :'(
         match s.ast.data {
             Data::Enum(ref e) => {
-                state.visit_impl.push_str("    match *_i {\n");
-                state.visit_mut_impl.push_str("    match *_i {\n");
-                state.fold_impl.push_str("    match _i {\n");
+                let mut visit_variants = TokenStream::new();
+                let mut visit_mut_variants = TokenStream::new();
+                let mut fold_variants = TokenStream::new();
+
                 for variant in &e.variants {
-                    let fields: Vec<(&Field, TokenStream)> = match variant.fields {
+                    let variant_ident = &variant.ident;
+
+                    match variant.fields {
                         Fields::Named(..) => panic!("Doesn't support enum struct variants"),
                         Fields::Unnamed(ref fields) => {
-                            let binding = format!("        {}::{}(", s.ast.ident, variant.ident);
-                            state.visit_impl.push_str(&binding);
-                            state.visit_mut_impl.push_str(&binding);
-                            state.fold_impl.push_str(&binding);
+                            let mut bind_visit_fields = TokenStream::new();
+                            let mut bind_visit_mut_fields = TokenStream::new();
+                            let mut bind_fold_fields = TokenStream::new();
 
-                            let res = fields
-                                .unnamed
-                                .iter()
-                                .enumerate()
-                                .map(|(idx, el)| {
-                                    let name = format!("_binding_{}", idx);
+                            let mut visit_fields = TokenStream::new();
+                            let mut visit_mut_fields = TokenStream::new();
+                            let mut fold_fields = TokenStream::new();
 
-                                    state.visit_impl.push_str("ref ");
-                                    state.visit_mut_impl.push_str("ref mut ");
+                            for (idx, field) in fields.unnamed.iter().enumerate() {
+                                let name = format!("_binding_{}", idx);
+                                let binding = Ident::new(&name, Span::call_site());
 
-                                    state.visit_impl.push_str(&name);
-                                    state.visit_mut_impl.push_str(&name);
-                                    state.fold_impl.push_str(&name);
-                                    state.visit_impl.push_str(", ");
-                                    state.visit_mut_impl.push_str(", ");
-                                    state.fold_impl.push_str(", ");
+                                bind_visit_fields.append_all(quote! {
+                                    ref #binding,
+                                });
+                                bind_visit_mut_fields.append_all(quote! {
+                                    ref mut #binding,
+                                });
+                                bind_fold_fields.append_all(quote! {
+                                    #binding,
+                                });
 
-                                    let mut tokens = quote!();
-                                    Ident::new(&name, Span::call_site()).to_tokens(&mut tokens);
+                                let borrowed_binding = Borrowed(quote!(#binding));
+                                let owned_binding = Owned(quote!(#binding));
 
-                                    (el, tokens)
-                                }).collect();
+                                visit_fields.append_all(
+                                    visit(&field.ty, lookup, Visit, &borrowed_binding)
+                                        .unwrap_or_else(|| noop_visit(Visit, &borrowed_binding)),
+                                );
+                                visit_mut_fields.append_all(
+                                    visit(&field.ty, lookup, VisitMut, &borrowed_binding)
+                                        .unwrap_or_else(|| noop_visit(VisitMut, &borrowed_binding)),
+                                );
+                                fold_fields.append_all(
+                                    visit(&field.ty, lookup, Fold, &owned_binding)
+                                        .unwrap_or_else(|| noop_visit(Fold, &owned_binding)),
+                                );
 
-                            state.visit_impl.push_str(") => {\n");
-                            state.visit_mut_impl.push_str(") => {\n");
-                            state.fold_impl.push_str(") => {\n");
+                                visit_fields.append_all(quote!(;));
+                                visit_mut_fields.append_all(quote!(;));
+                                fold_fields.append_all(quote!(,));
+                            }
 
-                            res
+                            visit_variants.append_all(quote! {
+                                #ty::#variant_ident(#bind_visit_fields) => {
+                                    #visit_fields
+                                }
+                            });
+
+                            visit_mut_variants.append_all(quote! {
+                                #ty::#variant_ident(#bind_visit_mut_fields) => {
+                                    #visit_mut_fields
+                                }
+                            });
+
+                            fold_variants.append_all(quote! {
+                                #ty::#variant_ident(#bind_fold_fields) => {
+                                    #ty::#variant_ident(
+                                        #fold_fields
+                                    )
+                                }
+                            });
                         }
                         Fields::Unit => {
-                            state.visit_impl.push_str(&format!(
-                                "        {0}::{1} => {{ }}\n",
-                                s.ast.ident, variant.ident
-                            ));
-                            state.visit_mut_impl.push_str(&format!(
-                                "        {0}::{1} => {{ }}\n",
-                                s.ast.ident, variant.ident
-                            ));
-                            state.fold_impl.push_str(&format!(
-                                "        {0}::{1} => {{ {0}::{1} }}\n",
-                                s.ast.ident, variant.ident
-                            ));
-                            continue;
+                            visit_variants.append_all(quote! {
+                                #ty::#variant_ident => {}
+                            });
+                            visit_mut_variants.append_all(quote! {
+                                #ty::#variant_ident => {}
+                            });
+                            fold_variants.append_all(quote! {
+                                #ty::#variant_ident => {
+                                    #ty::#variant_ident
+                                }
+                            });
                         }
-                    };
-
-                    if fields.is_empty() {
-                        state.visit_impl.push_str("            {}");
-                        state.visit_mut_impl.push_str(") => {\n");
-                        state.fold_impl.push_str(") => {\n");
                     }
-                    state.fold_impl.push_str(&format!(
-                        "            {}::{} (\n",
-                        s.ast.ident, variant.ident,
-                    ));
-                    for (field, binding) in fields {
-                        state.visit_impl.push_str(&format!(
-                            "            {};\n",
-                            visit(&field.ty, lookup, Visit, &Borrowed(binding.clone()))
-                                .unwrap_or_else(|| noop_visit(Visit, &Borrowed(binding.clone()))),
-                        ));
-                        state.visit_mut_impl.push_str(&format!(
-                            "            {};\n",
-                            visit(&field.ty, lookup, VisitMut, &Borrowed(binding.clone()))
-                                .unwrap_or_else(|| noop_visit(
-                                    VisitMut,
-                                    &Borrowed(binding.clone())
-                                )),
-                        ));
-                        state.fold_impl.push_str(&format!(
-                            "                {},\n",
-                            visit(&field.ty, lookup, Fold, &Owned(binding.clone()))
-                                .unwrap_or_else(|| noop_visit(Fold, &Owned(binding))),
-                        ));
-                    }
-                    state.fold_impl.push_str("            )\n");
-
-                    state.visit_impl.push_str("        }\n");
-                    state.visit_mut_impl.push_str("        }\n");
-                    state.fold_impl.push_str("        }\n");
                 }
-                state.visit_impl.push_str("    }\n");
-                state.visit_mut_impl.push_str("    }\n");
-                state.fold_impl.push_str("    }\n");
+
+                visit_impl.append_all(quote! {
+                    match *_i {
+                        #visit_variants
+                    }
+                });
+
+                visit_mut_impl.append_all(quote! {
+                    match *_i {
+                        #visit_mut_variants
+                    }
+                });
+
+                fold_impl.append_all(quote! {
+                    match _i {
+                        #fold_variants
+                    }
+                });
             }
             Data::Struct(ref v) => {
                 let fields: Vec<(&Field, TokenStream)> = match v.fields {
-                    Fields::Named(ref fields) => {
-                        state
-                            .fold_impl
-                            .push_str(&format!("    {} {{\n", s.ast.ident));
-                        fields
-                            .named
-                            .iter()
-                            .map(|el| {
-                                let id = el.ident.clone();
-                                (el, quote!(_i.#id))
-                            }).collect()
-                    }
-                    Fields::Unnamed(ref fields) => {
-                        state
-                            .fold_impl
-                            .push_str(&format!("    {} (\n", s.ast.ident));
-                        fields
-                            .unnamed
-                            .iter()
-                            .enumerate()
-                            .map(|(idx, el)| {
-                                let id = Index::from(idx);
-                                (el, quote!(_i.#id))
-                            }).collect()
-                    }
-                    Fields::Unit => {
-                        if s.ast.ident == "Ident" {
-                            state.fold_impl.push_str("    let mut _i = _i;\n");
-                            state
-                                .fold_impl
-                                .push_str("    let span = _visitor.fold_span(_i.span());\n");
-                            state.fold_impl.push_str("    _i.set_span(span);\n");
-                        }
-                        state.fold_impl.push_str("    _i\n");
-                        vec![]
-                    }
+                    Fields::Named(ref fields) => fields
+                        .named
+                        .iter()
+                        .map(|el| {
+                            let id = el.ident.clone();
+                            (el, quote!(_i.#id))
+                        }).collect(),
+                    Fields::Unnamed(ref fields) => fields
+                        .unnamed
+                        .iter()
+                        .enumerate()
+                        .map(|(idx, el)| {
+                            let id = Index::from(idx);
+                            (el, quote!(_i.#id))
+                        }).collect(),
+                    Fields::Unit => Vec::new(),
                 };
+
+                let mut fold_fields = TokenStream::new();
 
                 for (field, ref_toks) in fields {
                     let ref_toks = Owned(ref_toks);
-                    state.visit_impl.push_str(&format!(
-                        "    {};\n",
-                        visit(&field.ty, lookup, Visit, &ref_toks)
-                            .unwrap_or_else(|| noop_visit(Visit, &ref_toks,))
-                    ));
-                    state.visit_mut_impl.push_str(&format!(
-                        "    {};\n",
-                        visit(&field.ty, lookup, VisitMut, &ref_toks)
-                            .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks,))
-                    ));
+                    let visit_field = visit(&field.ty, lookup, Visit, &ref_toks)
+                        .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
+                    visit_impl.append_all(quote! {
+                        #visit_field;
+                    });
+                    let visit_mut_field = visit(&field.ty, lookup, VisitMut, &ref_toks)
+                        .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
+                    visit_mut_impl.append_all(quote! {
+                        #visit_mut_field;
+                    });
                     let fold = visit(&field.ty, lookup, Fold, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
                     if let Some(ref name) = field.ident {
-                        state
-                            .fold_impl
-                            .push_str(&format!("        {}: {},\n", name, fold));
+                        fold_fields.append_all(quote! {
+                            #name: #fold,
+                        });
                     } else {
-                        state.fold_impl.push_str(&format!("        {},\n", fold));
+                        fold_fields.append_all(quote! {
+                            #fold,
+                        });
                     }
                 }
 
                 match v.fields {
-                    Fields::Named(..) => state.fold_impl.push_str("    }\n"),
-                    Fields::Unnamed(..) => state.fold_impl.push_str("    )\n"),
-                    Fields::Unit => {}
+                    Fields::Named(..) | Fields::Unnamed(..) => fold_impl.append_all(quote! {
+                        #ty {
+                            #fold_fields
+                        }
+                    }),
+                    Fields::Unit => {
+                        if ty == "Ident" {
+                            fold_impl.append_all(quote! {
+                                let mut _i = _i;
+                                let span = _visitor.fold_span(_i.span());
+                                _i.set_span(span);
+                            });
+                        }
+                        fold_impl.append_all(quote! {
+                            _i
+                        });
+                    }
                 };
             }
             Data::Union(..) => panic!("Union not supported"),
         }
 
-        // Close the impl body
-        state.visit_impl.push_str("}\n");
-        state.visit_mut_impl.push_str("}\n");
-        state.fold_impl.push_str("}\n");
-
+        let mut include_fold_impl = true;
         if let Data::Struct(ref data) = s.ast.data {
             if let Fields::Named(ref fields) = data.fields {
                 if fields
@@ -901,20 +885,76 @@ mod codegen {
                 {
                     // Discard the generated impl if there are private fields.
                     // These have to be handwritten.
-                    state.fold_impl.truncate(before_fold_impl_len);
+                    include_fold_impl = false;
                 }
             }
+        }
+
+        state.visit_trait.append_all(quote! {
+            #features
+            fn #visit_fn(&mut self, i: &'ast #ty) {
+                #visit_fn(self, i)
+            }
+        });
+
+        state.visit_impl.append_all(quote! {
+            #features
+            pub fn #visit_fn<'ast, V: Visit<'ast> + ?Sized>(
+                _visitor: &mut V, _i: &'ast #ty
+            ) {
+                #visit_impl
+            }
+        });
+
+        state.visit_mut_trait.append_all(quote! {
+            #features
+            fn #visit_mut_fn(&mut self, i: &mut #ty) {
+                #visit_mut_fn(self, i)
+            }
+        });
+
+        state.visit_mut_impl.append_all(quote! {
+            #features
+            pub fn #visit_mut_fn<V: VisitMut + ?Sized>(
+                _visitor: &mut V, _i: &mut #ty
+            ) {
+                #visit_mut_impl
+            }
+        });
+
+        state.fold_trait.append_all(quote! {
+            #features
+            fn #fold_fn(&mut self, i: #ty) -> #ty {
+                #fold_fn(self, i)
+            }
+        });
+
+        if include_fold_impl {
+            state.fold_impl.append_all(quote! {
+                #features
+                pub fn #fold_fn<V: Fold + ?Sized>(
+                    _visitor: &mut V, _i: #ty
+                ) -> #ty {
+                    #fold_impl
+                }
+            });
         }
     }
 }
 
-fn write_file(path: &str, content: String) {
+fn write_file(path: &str, content: TokenStream) {
     let mut file = File::create(path).unwrap();
+    write!(
+        file,
+        "// THIS FILE IS AUTOMATICALLY GENERATED; DO NOT EDIT\n\n"
+    ).unwrap();
     let mut config = rustfmt::Config::default();
     config.set().emit_mode(rustfmt::EmitMode::Stdout);
     config.set().verbose(rustfmt::Verbosity::Quiet);
     let mut session = rustfmt::Session::new(config, Some(&mut file));
-    session.format(rustfmt::Input::Text(content)).unwrap();
+    session
+        .format(rustfmt::Input::Text(content.to_string()))
+        .unwrap();
 }
 
 fn main() {
@@ -930,13 +970,13 @@ fn main() {
                 ast: DeriveInput {
                     ident: Ident::new(tt, Span::call_site()),
                     vis: Visibility::Public(VisPublic {
-                        pub_token: Default::default(),
+                        pub_token: <Token![pub]>::default(),
                     }),
                     attrs: vec![],
-                    generics: Default::default(),
+                    generics: Generics::default(),
                     data: Data::Struct(DataStruct {
                         fields: Fields::Unit,
-                        struct_token: Default::default(),
+                        struct_token: <Token![struct]>::default(),
                         semi_token: None,
                     }),
                 },
@@ -946,155 +986,153 @@ fn main() {
         );
     }
 
-    let mut state = Default::default();
+    let mut state = codegen::State::default();
     for s in lookup.values() {
         codegen::generate(&mut state, &lookup, s);
     }
 
-    let full_macro = "
-#[cfg(feature = \"full\")]
-macro_rules! full {
-    ($e:expr) => { $e }
-}
+    let full_macro = quote! {
+        #[cfg(feature = "full")]
+        macro_rules! full {
+            ($e:expr) => {
+                $e
+            };
+        }
 
-#[cfg(all(feature = \"derive\", not(feature = \"full\")))]
-macro_rules! full {
-    ($e:expr) => { unreachable!() }
-}
-";
+        #[cfg(all(feature = "derive", not(feature = "full")))]
+        macro_rules! full {
+            ($e:expr) => {
+                unreachable!()
+            };
+        }
+    };
 
+    let skip_macro = quote! {
+        #[cfg(any(feature = "full", feature = "derive"))]
+        macro_rules! skip {
+            ($($tt:tt)*) => {};
+        }
+    };
+
+    let fold_trait = state.fold_trait;
+    let fold_impl = state.fold_impl;
     write_file(
         FOLD_SRC,
-        format!(
-            "\
-// THIS FILE IS AUTOMATICALLY GENERATED; DO NOT EDIT
+        quote! {
+            // Unreachable code is generated sometimes without the full feature.
+            #![allow(unreachable_code)]
+            #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
-// Unreachable code is generated sometimes without the full feature.
-#![allow(unreachable_code)]
-#![cfg_attr(feature = \"cargo-clippy\", allow(needless_pass_by_value))]
+            use *;
+            #[cfg(any(feature = "full", feature = "derive"))]
+            use token::{Brace, Bracket, Paren, Group};
+            use proc_macro2::Span;
+            #[cfg(any(feature = "full", feature = "derive"))]
+            use gen::helper::fold::*;
 
-use *;
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-use token::{{Brace, Bracket, Paren, Group}};
-use proc_macro2::Span;
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-use gen::helper::fold::*;
+            #full_macro
 
-{full_macro}
+            /// Syntax tree traversal to transform the nodes of an owned syntax tree.
+            ///
+            /// See the [module documentation] for details.
+            ///
+            /// [module documentation]: index.html
+            ///
+            /// *This trait is available if Syn is built with the `"fold"` feature.*
+            pub trait Fold {
+                #fold_trait
+            }
 
-/// Syntax tree traversal to transform the nodes of an owned syntax tree.
-///
-/// See the [module documentation] for details.
-///
-/// [module documentation]: index.html
-///
-/// *This trait is available if Syn is built with the `\"fold\"` feature.*
-pub trait Fold {{
-{fold_trait}
-}}
+            #[cfg(any(feature = "full", feature = "derive"))]
+            macro_rules! fold_span_only {
+                ($f:ident : $t:ident) => {
+                    pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
+                        let span = _visitor.fold_span(_i.span());
+                        _i.set_span(span);
+                        _i
+                    }
+                }
+            }
 
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-macro_rules! fold_span_only {{
-    ($f:ident : $t:ident) => {{
-        pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {{
-            let span = _visitor.fold_span(_i.span());
-            _i.set_span(span);
-            _i
-        }}
-    }}
-}}
+            #[cfg(any(feature = "full", feature = "derive"))]
+            fold_span_only!(fold_lit_byte: LitByte);
+            #[cfg(any(feature = "full", feature = "derive"))]
+            fold_span_only!(fold_lit_byte_str: LitByteStr);
+            #[cfg(any(feature = "full", feature = "derive"))]
+            fold_span_only!(fold_lit_char: LitChar);
+            #[cfg(any(feature = "full", feature = "derive"))]
+            fold_span_only!(fold_lit_float: LitFloat);
+            #[cfg(any(feature = "full", feature = "derive"))]
+            fold_span_only!(fold_lit_int: LitInt);
+            #[cfg(any(feature = "full", feature = "derive"))]
+            fold_span_only!(fold_lit_str: LitStr);
 
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lit_byte: LitByte);
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lit_byte_str: LitByteStr);
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lit_char: LitChar);
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lit_float: LitFloat);
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lit_int: LitInt);
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-fold_span_only!(fold_lit_str: LitStr);
-
-{fold_impl}
-",
-            full_macro = full_macro,
-            fold_trait = state.fold_trait,
-            fold_impl = state.fold_impl
-        ),
+            #fold_impl
+        },
     );
 
+    let visit_trait = state.visit_trait;
+    let visit_impl = state.visit_impl;
     write_file(
         VISIT_SRC,
-        format!(
-            "\
-// THIS FILE IS AUTOMATICALLY GENERATED; DO NOT EDIT
+        quote! {
+            #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
-#![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
+            use *;
+            #[cfg(any(feature = "full", feature = "derive"))]
+            use punctuated::Punctuated;
+            use proc_macro2::Span;
+            #[cfg(any(feature = "full", feature = "derive"))]
+            use gen::helper::visit::*;
 
-use *;
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-use punctuated::Punctuated;
-use proc_macro2::Span;
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-use gen::helper::visit::*;
+            #full_macro
+            #skip_macro
 
-{full_macro}
+            /// Syntax tree traversal to walk a shared borrow of a syntax tree.
+            ///
+            /// See the [module documentation] for details.
+            ///
+            /// [module documentation]: index.html
+            ///
+            /// *This trait is available if Syn is built with the `"visit"` feature.*
+            pub trait Visit<'ast> {
+                #visit_trait
+            }
 
-/// Syntax tree traversal to walk a shared borrow of a syntax tree.
-///
-/// See the [module documentation] for details.
-///
-/// [module documentation]: index.html
-///
-/// *This trait is available if Syn is built with the `\"visit\"` feature.*
-pub trait Visit<'ast> {{
-{visit_trait}
-}}
-
-{visit_impl}
-",
-            full_macro = full_macro,
-            visit_trait = state.visit_trait,
-            visit_impl = state.visit_impl
-        ),
+            #visit_impl
+        },
     );
 
+    let visit_mut_trait = state.visit_mut_trait;
+    let visit_mut_impl = state.visit_mut_impl;
     write_file(
         VISIT_MUT_SRC,
-        format!(
-            "\
-// THIS FILE IS AUTOMATICALLY GENERATED; DO NOT EDIT
+        quote! {
+            #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
 
-#![cfg_attr(feature = \"cargo-clippy\", allow(match_same_arms))]
+            use *;
+            #[cfg(any(feature = "full", feature = "derive"))]
+            use punctuated::Punctuated;
+            use proc_macro2::Span;
+            #[cfg(any(feature = "full", feature = "derive"))]
+            use gen::helper::visit_mut::*;
 
-use *;
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-use punctuated::Punctuated;
-use proc_macro2::Span;
-#[cfg(any(feature = \"full\", feature = \"derive\"))]
-use gen::helper::visit_mut::*;
+            #full_macro
+            #skip_macro
 
-{full_macro}
+            /// Syntax tree traversal to mutate an exclusive borrow of a syntax tree in
+            /// place.
+            ///
+            /// See the [module documentation] for details.
+            ///
+            /// [module documentation]: index.html
+            ///
+            /// *This trait is available if Syn is built with the `"visit-mut"` feature.*
+            pub trait VisitMut {
+                #visit_mut_trait
+            }
 
-/// Syntax tree traversal to mutate an exclusive borrow of a syntax tree in
-/// place.
-///
-/// See the [module documentation] for details.
-///
-/// [module documentation]: index.html
-///
-/// *This trait is available if Syn is built with the `\"visit-mut\"` feature.*
-pub trait VisitMut {{
-{visit_mut_trait}
-}}
-
-{visit_mut_impl}
-",
-            full_macro = full_macro,
-            visit_mut_trait = state.visit_mut_trait,
-            visit_mut_impl = state.visit_mut_impl
-        ),
+            #visit_mut_impl
+        },
     );
 }
