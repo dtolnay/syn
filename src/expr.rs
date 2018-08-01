@@ -1570,6 +1570,9 @@ pub mod parsing {
         |
         syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
         |
+        // must be before ExprStruct
+        call!(unstable_async_block) => { Expr::Verbatim }
+        |
         // must be before expr_path
         cond_reduce!(allow_struct, syn!(ExprStruct)) => { Expr::Struct }
         |
@@ -1608,6 +1611,8 @@ pub mod parsing {
         syn!(ExprUnsafe) => { Expr::Unsafe }
         |
         call!(expr_closure, allow_struct)
+        |
+        call!(expr_unstable_async_closure, allow_struct)
         |
         cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
         |
@@ -2120,6 +2125,63 @@ pub mod parsing {
             output: ret_and_body.0,
             body: Box::new(ret_and_body.1),
         }.into())
+    ));
+
+    #[cfg(feature = "full")]
+    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
+        Ok((cursor, cursor))
+    }
+
+    #[cfg(feature = "full")]
+    named!(expr_unstable_async_closure(allow_struct: bool) -> Expr, do_parse!(
+        begin: call!(grab_cursor) >>
+        _attrs: many0!(Attribute::parse_outer) >>
+        _asyncness: keyword!(async) >>
+        _movability: option!(keyword!(static)) >>
+        _capture: option!(keyword!(move)) >>
+        _or1: punct!(|) >>
+        _inputs: call!(Punctuated::<FnArg, Token![,]>::parse_terminated_with, fn_arg) >>
+        _or2: punct!(|) >>
+        _ret_and_body: alt!(
+            do_parse!(
+                arrow: punct!(->) >>
+                ty: syn!(Type) >>
+                body: syn!(Block) >>
+                (ReturnType::Type(arrow, Box::new(ty)),
+                 Expr::Block(ExprBlock {
+                    attrs: Vec::new(),
+                    block: body,
+                }))
+            )
+            |
+            map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
+        ) >>
+        end: call!(grab_cursor) >>
+        ({
+            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let len = tts.len() - end.token_stream().into_iter().count();
+            ExprVerbatim {
+                tts: tts.into_iter().take(len).collect(),
+            }.into()
+        })
+    ));
+
+    #[cfg(feature = "full")]
+    named!(unstable_async_block -> ExprVerbatim, do_parse!(
+        begin: call!(grab_cursor) >>
+        _attrs: many0!(Attribute::parse_outer) >>
+        _asyncness: keyword!(async) >>
+        _movability: option!(keyword!(static)) >>
+        _capture: option!(keyword!(move)) >>
+        _body: syn!(Block) >>
+        end: call!(grab_cursor) >>
+        ({
+            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
+            let len = tts.len() - end.token_stream().into_iter().count();
+            ExprVerbatim {
+                tts: tts.into_iter().take(len).collect(),
+            }.into()
+        })
     ));
 
     #[cfg(feature = "full")]
