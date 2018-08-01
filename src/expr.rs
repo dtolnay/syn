@@ -2458,7 +2458,7 @@ pub mod parsing {
     named!(unstable_labeled_block -> ExprVerbatim, do_parse!(
         begin: call!(verbatim::grab_cursor) >>
         many0!(Attribute::parse_outer) >>
-        option!(syn!(Label)) >>
+        syn!(Label) >>
         braces!(tuple!(
             many0!(Attribute::parse_inner),
             call!(Block::parse_within),

@@ -220,6 +220,12 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     impl Folder for BracketsFolder {
         fn fold_expr(&mut self, e: P<Expr>) -> P<Expr> {
             e.map(|e| match e.node {
+                ExprKind::Block(_, label) if label.is_some() => Expr {
+                    id: ast::DUMMY_NODE_ID,
+                    node: ExprKind::Paren(P(e)),
+                    span: DUMMY_SP,
+                    attrs: ThinVec::new(),
+                },
                 ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {
                     fold::noop_fold_expr(e, self)
                 }
