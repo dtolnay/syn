@@ -465,6 +465,7 @@ tokens! {
     }
     keyword: {
         "as"       pub struct As           /// `as`
+        "async"    pub struct Async        /// `async`
         "auto"     pub struct Auto         /// `auto`
         "box"      pub struct Box          /// `box`
         "break"    pub struct Break        /// `break`
@@ -506,7 +507,6 @@ tokens! {
         "where"    pub struct Where        /// `where`
         "while"    pub struct While        /// `while`
         "yield"    pub struct Yield        /// `yield`
-        "async"    pub struct Async        /// `async`
     }
 }
 
@@ -567,6 +567,7 @@ macro_rules! Token {
     (-=)       => { $crate::token::SubEq };
     (_)        => { $crate::token::Underscore };
     (as)       => { $crate::token::As };
+    (async)    => { $crate::token::Async };
     (auto)     => { $crate::token::Auto };
     (box)      => { $crate::token::Box };
     (break)    => { $crate::token::Break };
@@ -608,7 +609,6 @@ macro_rules! Token {
     (where)    => { $crate::token::Where };
     (while)    => { $crate::token::While };
     (yield)    => { $crate::token::Yield };
-    (async)    => { $crate::token::Async };
 }
 
 /// Parse a single Rust punctuation token.
@@ -681,6 +681,7 @@ macro_rules! punct {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! keyword {
     ($i:expr, as)       => { call!($i, <$crate::token::As as $crate::synom::Synom>::parse) };
+    ($i:expr, async)    => { call!($i, <$crate::token::Async as $crate::synom::Synom>::parse) };
     ($i:expr, auto)     => { call!($i, <$crate::token::Auto as $crate::synom::Synom>::parse) };
     ($i:expr, box)      => { call!($i, <$crate::token::Box as $crate::synom::Synom>::parse) };
     ($i:expr, break)    => { call!($i, <$crate::token::Break as $crate::synom::Synom>::parse) };
@@ -722,7 +723,6 @@ macro_rules! keyword {
     ($i:expr, where)    => { call!($i, <$crate::token::Where as $crate::synom::Synom>::parse) };
     ($i:expr, while)    => { call!($i, <$crate::token::While as $crate::synom::Synom>::parse) };
     ($i:expr, yield)    => { call!($i, <$crate::token::Yield as $crate::synom::Synom>::parse) };
-    ($i:expr, async)    => { call!($i, <$crate::token::Async as $crate::synom::Synom>::parse) };
 }
 
 macro_rules! ident_from_token {
