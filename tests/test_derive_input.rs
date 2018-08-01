@@ -13,8 +13,8 @@ extern crate syn;
 
 use proc_macro2::Delimiter::{Brace, Parenthesis};
 use proc_macro2::*;
-use syn::*;
 use syn::punctuated::Punctuated;
+use syn::*;
 
 use std::iter::FromIterator;
 
@@ -174,16 +174,14 @@ fn test_union() {
         attrs: Vec::new(),
         generics: Generics {
             lt_token: Some(Default::default()),
-            params: punctuated![
-                GenericParam::Type(TypeParam {
-                    attrs: Vec::new(),
-                    ident: ident("T"),
-                    bounds: Default::default(),
-                    default: None,
-                    colon_token: None,
-                    eq_token: None,
-                }),
-            ],
+            params: punctuated![GenericParam::Type(TypeParam {
+                attrs: Vec::new(),
+                ident: ident("T"),
+                bounds: Default::default(),
+                default: None,
+                colon_token: None,
+                eq_token: None,
+            }),],
             gt_token: Some(Default::default()),
             where_clause: None,
         },
