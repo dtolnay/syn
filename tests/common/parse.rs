@@ -33,13 +33,13 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
             FileName::Custom("test_precedence".to_string()),
             input.to_string(),
         ).parse_expr();
-        Some(match e {
-            Ok(expr) => expr,
+        match e {
+            Ok(expr) => Some(expr),
             Err(mut diagnostic) => {
-                diagnostic.emit();;
-                return None;
+                diagnostic.emit();
+                None
             }
-        })
+        }
     }) {
         Ok(Some(e)) => Some(e),
         Ok(None) => None,
