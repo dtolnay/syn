@@ -714,8 +714,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use buffer::Cursor;
-    use synom::{PResult, Synom};
+    use synom::Synom;
 
     impl_synom!(Item "item" alt!(
         syn!(ItemExternCrate) => { Item::ExternCrate }
@@ -988,12 +987,8 @@ pub mod parsing {
         })
     ));
 
-    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
-        Ok((cursor, cursor))
-    }
-
     named!(unstable_async_fn -> ItemVerbatim, do_parse!(
-        begin: call!(grab_cursor) >>
+        begin: call!(verbatim::grab_cursor) >>
         _outer_attrs: many0!(Attribute::parse_outer) >>
         _vis: syn!(Visibility) >>
         _constness: option!(keyword!(const)) >>
@@ -1010,13 +1005,9 @@ pub mod parsing {
             many0!(Attribute::parse_inner),
             call!(Block::parse_within),
         )) >>
-        end: call!(grab_cursor) >>
-        ({
-            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
-            let len = tts.len() - end.token_stream().into_iter().count();
-            ItemVerbatim {
-                tts: tts.into_iter().take(len).collect(),
-            }
+        end: call!(verbatim::grab_cursor) >>
+        (ItemVerbatim {
+            tts: verbatim::token_range(begin..end),
         })
     ));
 
@@ -1540,7 +1531,7 @@ pub mod parsing {
     ));
 
     named!(unstable_async_method -> ImplItemVerbatim, do_parse!(
-        begin: call!(grab_cursor) >>
+        begin: call!(verbatim::grab_cursor) >>
         _outer_attrs: many0!(Attribute::parse_outer) >>
         _vis: syn!(Visibility) >>
         _defaultness: option!(keyword!(default)) >>
@@ -1558,13 +1549,9 @@ pub mod parsing {
             many0!(Attribute::parse_inner),
             call!(Block::parse_within),
         )) >>
-        end: call!(grab_cursor) >>
-        ({
-            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
-            let len = tts.len() - end.token_stream().into_iter().count();
-            ImplItemVerbatim {
-                tts: tts.into_iter().take(len).collect(),
-            }
+        end: call!(verbatim::grab_cursor) >>
+        (ImplItemVerbatim {
+            tts: verbatim::token_range(begin..end),
         })
     ));
 

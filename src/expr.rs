@@ -1612,7 +1612,7 @@ pub mod parsing {
         |
         call!(expr_closure, allow_struct)
         |
-        call!(expr_unstable_async_closure, allow_struct)
+        call!(expr_unstable_async_closure, allow_struct) => { Expr::Verbatim }
         |
         cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
         |
@@ -2128,13 +2128,8 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
-        Ok((cursor, cursor))
-    }
-
-    #[cfg(feature = "full")]
-    named!(expr_unstable_async_closure(allow_struct: bool) -> Expr, do_parse!(
-        begin: call!(grab_cursor) >>
+    named!(expr_unstable_async_closure(allow_struct: bool) -> ExprVerbatim, do_parse!(
+        begin: call!(verbatim::grab_cursor) >>
         _attrs: many0!(Attribute::parse_outer) >>
         _asyncness: keyword!(async) >>
         _movability: option!(keyword!(static)) >>
@@ -2156,30 +2151,22 @@ pub mod parsing {
             |
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))
         ) >>
-        end: call!(grab_cursor) >>
-        ({
-            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
-            let len = tts.len() - end.token_stream().into_iter().count();
-            ExprVerbatim {
-                tts: tts.into_iter().take(len).collect(),
-            }.into()
+        end: call!(verbatim::grab_cursor) >>
+        (ExprVerbatim {
+            tts: verbatim::token_range(begin..end),
         })
     ));
 
     #[cfg(feature = "full")]
     named!(unstable_async_block -> ExprVerbatim, do_parse!(
-        begin: call!(grab_cursor) >>
+        begin: call!(verbatim::grab_cursor) >>
         _attrs: many0!(Attribute::parse_outer) >>
         _asyncness: keyword!(async) >>
         _capture: option!(keyword!(move)) >>
         _body: syn!(Block) >>
-        end: call!(grab_cursor) >>
-        ({
-            let tts = begin.token_stream().into_iter().collect::<Vec<_>>();
-            let len = tts.len() - end.token_stream().into_iter().count();
-            ExprVerbatim {
-                tts: tts.into_iter().take(len).collect(),
-            }.into()
+        end: call!(verbatim::grab_cursor) >>
+        (ExprVerbatim {
+            tts: verbatim::token_range(begin..end),
         })
     ));
 
