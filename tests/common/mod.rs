@@ -73,11 +73,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // TODO feature(macros_in_extern)
-        //
-        // https://github.com/dtolnay/syn/issues/390
-        "tests/rust/src/test/run-pass-fulldeps/proc-macro/macros-in-extern.rs" |
-        "tests/rust/src/test/run-pass/macros-in-extern.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |

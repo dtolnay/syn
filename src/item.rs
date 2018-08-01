@@ -1118,6 +1118,8 @@ pub mod parsing {
         syn!(ForeignItemStatic) => { ForeignItem::Static }
         |
         syn!(ForeignItemType) => { ForeignItem::Type }
+        |
+        call!(foreign_item_macro) => { ForeignItem::Verbatim }
     ));
 
     impl_synom!(ForeignItemFn "foreign function" do_parse!(
@@ -1189,6 +1191,17 @@ pub mod parsing {
             type_token: type_,
             ident: ident,
             semi_token: semi,
+        })
+    ));
+
+    named!(foreign_item_macro -> ForeignItemVerbatim, do_parse!(
+        begin: call!(verbatim::grab_cursor) >>
+        many0!(Attribute::parse_outer) >>
+        mac: syn!(Macro) >>
+        cond!(!is_brace(&mac.delimiter), punct!(;)) >>
+        end: call!(verbatim::grab_cursor) >>
+        (ForeignItemVerbatim {
+            tts: verbatim::token_range(begin..end),
         })
     ));
 
