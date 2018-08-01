@@ -78,10 +78,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // https://github.com/dtolnay/syn/issues/390
         "tests/rust/src/test/run-pass-fulldeps/proc-macro/macros-in-extern.rs" |
         "tests/rust/src/test/run-pass/macros-in-extern.rs" |
-        // TODO feature(label_break_value)
-        //
-        // https://github.com/dtolnay/syn/issues/455
-        "tests/rust/src/test/run-pass/label_break_value.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |

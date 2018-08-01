@@ -1614,6 +1614,8 @@ pub mod parsing {
         |
         cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
         |
+        call!(unstable_labeled_block) => { Expr::Verbatim }
+        |
         // NOTE: This is the prefix-form of range
         call!(expr_range, allow_struct)
         |
@@ -1655,6 +1657,8 @@ pub mod parsing {
             syn!(ExprUnsafe) => { Expr::Unsafe }
             |
             syn!(ExprBlock) => { Expr::Block }
+            |
+            call!(unstable_labeled_block) => { Expr::Verbatim }
         ) >>
         // If the next token is a `.` or a `?` it is special-cased to parse
         // as an expression instead of a blockexpression.
@@ -2449,6 +2453,21 @@ pub mod parsing {
             Some("block: `{ .. }`")
         }
     }
+
+    #[cfg(feature = "full")]
+    named!(unstable_labeled_block -> ExprVerbatim, do_parse!(
+        begin: call!(verbatim::grab_cursor) >>
+        many0!(Attribute::parse_outer) >>
+        option!(syn!(Label)) >>
+        braces!(tuple!(
+            many0!(Attribute::parse_inner),
+            call!(Block::parse_within),
+        )) >>
+        end: call!(verbatim::grab_cursor) >>
+        (ExprVerbatim {
+            tts: verbatim::token_range(begin..end),
+        })
+    ));
 
     #[cfg(feature = "full")]
     named!(expr_range(allow_struct: bool) -> Expr, do_parse!(
