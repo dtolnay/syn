@@ -15,7 +15,8 @@ use self::syntax::ast;
 use self::syntax::codemap::FilePathMapping;
 use self::syntax::parse::{self, ParseSess};
 use self::syntax::ptr::P;
-use self::syntax_pos::FileName;
+use self::syntax_pos::{hygiene, FileName};
+use self::syntax_pos::edition::Edition;
 
 use std::panic;
 
@@ -24,6 +25,7 @@ use self::syn::synom::Synom;
 
 pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
+        hygiene::set_default_edition(Edition::Edition2018);
         let sess = ParseSess::new(FilePathMapping::empty());
         sess.span_diagnostic.set_continue_after_error(false);
         let e = parse::new_parser_from_source_str(
