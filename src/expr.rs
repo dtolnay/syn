@@ -2171,7 +2171,6 @@ pub mod parsing {
         begin: call!(grab_cursor) >>
         _attrs: many0!(Attribute::parse_outer) >>
         _asyncness: keyword!(async) >>
-        _movability: option!(keyword!(static)) >>
         _capture: option!(keyword!(move)) >>
         _body: syn!(Block) >>
         end: call!(grab_cursor) >>
