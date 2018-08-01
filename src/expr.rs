@@ -1779,7 +1779,8 @@ pub mod parsing {
     }
 
     named!(and_call -> (token::Paren, Punctuated<Expr, Token![,]>),
-           parens!(Punctuated::parse_terminated));
+        parens!(Punctuated::parse_terminated)
+    );
 
     #[cfg(feature = "full")]
     named!(and_method_call -> ExprMethodCall, do_parse!(
@@ -2106,11 +2107,13 @@ pub mod parsing {
                 arrow: punct!(->) >>
                 ty: syn!(Type) >>
                 body: syn!(Block) >>
-                (ReturnType::Type(arrow, Box::new(ty)),
-                 Expr::Block(ExprBlock {
-                     attrs: Vec::new(),
-                    block: body,
-                }))
+                (
+                    ReturnType::Type(arrow, Box::new(ty)),
+                    Expr::Block(ExprBlock {
+                        attrs: Vec::new(),
+                        block: body,
+                    },
+                ))
             )
             |
             map!(ambiguous_expr!(allow_struct), |e| (ReturnType::Default, e))

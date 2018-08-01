@@ -1322,10 +1322,10 @@ pub mod parsing {
         inputs: parens!(Punctuated::parse_terminated) >>
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
-        body: option!(braces!(
-            tuple!(many0!(Attribute::parse_inner),
-                   call!(Block::parse_within))
-        )) >>
+        body: option!(braces!(tuple!(
+            many0!(Attribute::parse_inner),
+            call!(Block::parse_within),
+        ))) >>
         semi: cond!(body.is_none(), punct!(;)) >>
         ({
             let (inner_attrs, stmts) = match body {
