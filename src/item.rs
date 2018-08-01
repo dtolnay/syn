@@ -989,19 +989,19 @@ pub mod parsing {
 
     named!(unstable_async_fn -> ItemVerbatim, do_parse!(
         begin: call!(verbatim::grab_cursor) >>
-        _outer_attrs: many0!(Attribute::parse_outer) >>
-        _vis: syn!(Visibility) >>
-        _constness: option!(keyword!(const)) >>
-        _unsafety: option!(keyword!(unsafe)) >>
-        _asyncness: keyword!(async) >>
-        _abi: option!(syn!(Abi)) >>
-        _fn_: keyword!(fn) >>
-        _ident: syn!(Ident) >>
-        _generics: syn!(Generics) >>
-        _inputs: parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
-        _ret: syn!(ReturnType) >>
-        _where_clause: option!(syn!(WhereClause)) >>
-        _inner_attrs_stmts: braces!(tuple!(
+        many0!(Attribute::parse_outer) >>
+        syn!(Visibility) >>
+        option!(keyword!(const)) >>
+        option!(keyword!(unsafe)) >>
+        keyword!(async) >>
+        option!(syn!(Abi)) >>
+        keyword!(fn) >>
+        syn!(Ident) >>
+        syn!(Generics) >>
+        parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
+        syn!(ReturnType) >>
+        option!(syn!(WhereClause)) >>
+        braces!(tuple!(
             many0!(Attribute::parse_inner),
             call!(Block::parse_within),
         )) >>
@@ -1532,20 +1532,20 @@ pub mod parsing {
 
     named!(unstable_async_method -> ImplItemVerbatim, do_parse!(
         begin: call!(verbatim::grab_cursor) >>
-        _outer_attrs: many0!(Attribute::parse_outer) >>
-        _vis: syn!(Visibility) >>
-        _defaultness: option!(keyword!(default)) >>
-        _constness: option!(keyword!(const)) >>
-        _unsafety: option!(keyword!(unsafe)) >>
-        _asyncness: keyword!(async) >>
-        _abi: option!(syn!(Abi)) >>
-        _fn_: keyword!(fn) >>
-        _ident: syn!(Ident) >>
-        _generics: syn!(Generics) >>
-        _inputs: parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
-        _ret: syn!(ReturnType) >>
-        _where_clause: option!(syn!(WhereClause)) >>
-        _inner_attrs_stmts: braces!(tuple!(
+        many0!(Attribute::parse_outer) >>
+        syn!(Visibility) >>
+        option!(keyword!(default)) >>
+        option!(keyword!(const)) >>
+        option!(keyword!(unsafe)) >>
+        keyword!(async) >>
+        option!(syn!(Abi)) >>
+        keyword!(fn) >>
+        syn!(Ident) >>
+        syn!(Generics) >>
+        parens!(Punctuated::<FnArg, Token![,]>::parse_terminated) >>
+        syn!(ReturnType) >>
+        option!(syn!(WhereClause)) >>
+        braces!(tuple!(
             many0!(Attribute::parse_inner),
             call!(Block::parse_within),
         )) >>

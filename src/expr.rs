@@ -2141,10 +2141,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(unstable_async_block -> ExprVerbatim, do_parse!(
         begin: call!(verbatim::grab_cursor) >>
-        _attrs: many0!(Attribute::parse_outer) >>
-        _asyncness: keyword!(async) >>
-        _capture: option!(keyword!(move)) >>
-        _body: syn!(Block) >>
+        many0!(Attribute::parse_outer) >>
+        keyword!(async) >>
+        option!(keyword!(move)) >>
+        syn!(Block) >>
         end: call!(verbatim::grab_cursor) >>
         (ExprVerbatim {
             tts: verbatim::token_range(begin..end),
