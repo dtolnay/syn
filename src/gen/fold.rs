@@ -10,13 +10,13 @@ use token::{Brace, Bracket, Group, Paren};
 use *;
 #[cfg(feature = "full")]
 macro_rules! full {
-    ( $ e : expr ) => {
+    ($e:expr) => {
         $e
     };
 }
 #[cfg(all(feature = "derive", not(feature = "full")))]
 macro_rules! full {
-    ( $ e : expr ) => {
+    ($e:expr) => {
         unreachable!()
     };
 }
@@ -857,7 +857,7 @@ pub trait Fold {
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! fold_span_only {
-    ( $ f : ident : $ t : ident ) => {
+    ($f:ident : $t:ident) => {
         pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
             let span = _visitor.fold_span(_i.span());
             _i.set_span(span);

@@ -9,19 +9,19 @@ use punctuated::Punctuated;
 use *;
 #[cfg(feature = "full")]
 macro_rules! full {
-    ( $ e : expr ) => {
+    ($e:expr) => {
         $e
     };
 }
 #[cfg(all(feature = "derive", not(feature = "full")))]
 macro_rules! full {
-    ( $ e : expr ) => {
+    ($e:expr) => {
         unreachable!()
     };
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! skip {
-    ( $ ( $ tt : tt ) * ) => {};
+    ($($tt:tt)*) => {};
 }
 #[doc = r" Syntax tree traversal to walk a shared borrow of a syntax tree."]
 #[doc = r""]
