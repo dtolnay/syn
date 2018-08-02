@@ -10,8 +10,15 @@
 //!    - only submodules located in the same directory.
 //! 3. The path to `syn` is hardcoded.
 
-#![cfg_attr(feature = "cargo-clippy", allow(redundant_closure))]
 #![recursion_limit = "128"]
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(
+        needless_pass_by_value,
+        redundant_closure,
+        write_with_newline,
+    )
+)]
 
 #[macro_use]
 extern crate failure;
@@ -170,7 +177,7 @@ fn load_file<P: AsRef<Path>>(
                         ident.clone(),
                         AstItem {
                             ast: DeriveInput {
-                                ident: ident,
+                                ident,
                                 vis: item.vis,
                                 attrs: item.attrs,
                                 generics: item.generics,
@@ -340,6 +347,7 @@ mod parsing {
 
 mod codegen {
     use super::{AstItem, Lookup};
+    use inflections::Inflect;
     use proc_macro2::{Span, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
     use syn::punctuated::Punctuated;
@@ -356,7 +364,6 @@ mod codegen {
     }
 
     fn under_name(name: Ident) -> Ident {
-        use inflections::Inflect;
         Ident::new(&name.to_string().to_snake_case(), Span::call_site())
     }
 
