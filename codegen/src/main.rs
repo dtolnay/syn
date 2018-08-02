@@ -813,29 +813,14 @@ mod codegen {
                 });
             }
             Data::Struct(ref v) => {
-                let fields: Vec<(&Field, TokenStream)> = match v.fields {
-                    Fields::Named(ref fields) => fields
-                        .named
-                        .iter()
-                        .map(|el| {
-                            let id = el.ident.clone();
-                            (el, quote!(_i.#id))
-                        }).collect(),
-                    Fields::Unnamed(ref fields) => fields
-                        .unnamed
-                        .iter()
-                        .enumerate()
-                        .map(|(idx, el)| {
-                            let id = Index::from(idx);
-                            (el, quote!(_i.#id))
-                        }).collect(),
-                    Fields::Unit => Vec::new(),
-                };
-
                 let mut fold_fields = TokenStream::new();
 
-                for (field, ref_toks) in fields {
-                    let ref_toks = Owned(ref_toks);
+                for (idx, field) in v.fields.iter().enumerate() {
+                    let id = match field.ident {
+                        Some(ref ident) => Member::Named(ident.clone()),
+                        None => Member::Unnamed(Index::from(idx)),
+                    };
+                    let ref_toks = Owned(quote!(_i.#id));
                     let visit_field = visit(&field.ty, lookup, Visit, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
                     visit_impl.append_all(quote! {
