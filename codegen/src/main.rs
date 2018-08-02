@@ -319,8 +319,6 @@ mod parsing {
             variants: braces!(many0!(eos_variant)) >>
             option!(syn!(Ident)) >> // do_not_generate_to_tokens
             ({
-                // XXX: This is really gross - we shouldn't have to convert the
-                // tokens to strings to re-parse them.
                 let enum_item = {
                     let variants = variants.1.iter().map(|v| {
                         let name = v.name.clone();
@@ -329,9 +327,11 @@ mod parsing {
                             None => quote!(#name),
                         }
                     });
-                    syn::parse_str(&quote! {
-                        pub enum #id { #(#variants),* }
-                    }.to_string())?
+                    parse_quote! {
+                        pub enum #id {
+                            #(#variants),*
+                        }
+                    }
                 };
                 let mut items = vec![AstItem {
                     ast: enum_item,
