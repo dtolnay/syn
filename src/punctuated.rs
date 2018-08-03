@@ -521,6 +521,17 @@ struct PrivateIterMut<'a, T: 'a, P: 'a> {
     last: option::IntoIter<&'a mut T>,
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
+impl<'a, T> IterMut<'a, T> {
+    // Not public API.
+    #[doc(hidden)]
+    pub fn private_empty() -> Self {
+        IterMut {
+            inner: Box::new(iter::empty()),
+        }
+    }
+}
+
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
