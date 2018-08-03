@@ -66,9 +66,9 @@ ast_enum_of_structs! {
 }
 
 impl Fields {
-    /// Get an iterator over the [`Field`] items in this object. This iterator
-    /// can be used to iterate over a named or unnamed struct or variant's
-    /// fields uniformly.
+    /// Get an iterator over the borrowed [`Field`] items in this object. This
+    /// iterator can be used to iterate over a named or unnamed struct or
+    /// variant's fields uniformly.
     ///
     /// [`Field`]: struct.Field.html
     pub fn iter(&self) -> punctuated::Iter<Field> {
@@ -76,6 +76,19 @@ impl Fields {
             Fields::Unit => punctuated::Iter::private_empty(),
             Fields::Named(ref f) => f.named.iter(),
             Fields::Unnamed(ref f) => f.unnamed.iter(),
+        }
+    }
+
+    /// Get an iterator over the mutably borrowed [`Field`] items in this
+    /// object. This iterator can be used to iterate over a named or unnamed
+    /// struct or variant's fields uniformly.
+    ///
+    /// [`Field`]: struct.Field.html
+    pub fn iter_mut(&mut self) -> punctuated::IterMut<Field> {
+        match *self {
+            Fields::Unit => punctuated::IterMut::private_empty(),
+            Fields::Named(ref mut f) => f.named.iter_mut(),
+            Fields::Unnamed(ref mut f) => f.unnamed.iter_mut(),
         }
     }
 }
@@ -86,6 +99,15 @@ impl<'a> IntoIterator for &'a Fields {
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut Fields {
+    type Item = &'a mut Field;
+    type IntoIter = punctuated::IterMut<'a, Field>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
     }
 }
 
