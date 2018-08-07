@@ -42,3 +42,6 @@ all-features = true
 
 [package.metadata.playground]
 all-features = true
+
+[badges]
+travis-ci = { repository = "dtolnay/syn" }
