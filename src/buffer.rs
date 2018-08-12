@@ -127,7 +127,7 @@
 // and caution should be used when editing it. The public-facing interface is
 // 100% safe but the implementation is fragile internally.
 
-#[cfg(feature = "proc-macro")]
+#[cfg(all(not(all(target_arch = "wasm32", target_os = "unknown")), feature = "proc-macro"))]
 use proc_macro as pm;
 use proc_macro2::{Delimiter, Ident, Literal, Span, TokenStream};
 use proc_macro2::{Group, Punct, TokenTree};
@@ -223,7 +223,7 @@ impl TokenBuffer {
     ///
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
-    #[cfg(feature = "proc-macro")]
+    #[cfg(all(not(all(target_arch = "wasm32", target_os = "unknown")), feature = "proc-macro"))]
     pub fn new(stream: pm::TokenStream) -> TokenBuffer {
         Self::new2(stream.into())
     }
