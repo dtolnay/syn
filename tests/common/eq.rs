@@ -6,6 +6,7 @@ extern crate syntax_pos;
 use std::mem;
 
 use self::rustc_data_structures::sync::Lrc;
+use self::rustc_data_structures::thin_vec::ThinVec;
 use self::rustc_target::abi::FloatTy;
 use self::rustc_target::spec::abi::Abi;
 use self::syntax::ast::{
@@ -29,7 +30,6 @@ use self::syntax::parse::token::{DelimToken, Lit, Token};
 use self::syntax::ptr::P;
 use self::syntax::symbol::Symbol;
 use self::syntax::tokenstream::{Delimited, ThinTokenStream, TokenStream, TokenTree};
-use self::syntax::util::ThinVec;
 use self::syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
