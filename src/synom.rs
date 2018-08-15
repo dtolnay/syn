@@ -150,7 +150,10 @@
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
-#[cfg(all(not(all(target_arch = "wasm32", target_os = "unknown")), feature = "proc-macro"))]
+#[cfg(all(
+    not(all(target_arch = "wasm32", target_os = "unknown")),
+    feature = "proc-macro"
+))]
 use proc_macro;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, TokenStream, TokenTree};
 
@@ -315,7 +318,10 @@ pub trait Parser: Sized {
     ///
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
-    #[cfg(all(not(all(target_arch = "wasm32", target_os = "unknown")), feature = "proc-macro"))]
+    #[cfg(all(
+        not(all(target_arch = "wasm32", target_os = "unknown")),
+        feature = "proc-macro"
+    ))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output, ParseError> {
         self.parse2(tokens.into())
     }

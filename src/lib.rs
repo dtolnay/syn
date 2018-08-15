@@ -292,7 +292,10 @@
     )
 )]
 
-#[cfg(all(not(all(target_arch = "wasm32", target_os = "unknown")), feature = "proc-macro"))]
+#[cfg(all(
+    not(all(target_arch = "wasm32", target_os = "unknown")),
+    feature = "proc-macro"
+))]
 extern crate proc_macro;
 extern crate proc_macro2;
 extern crate unicode_xid;
@@ -353,12 +356,10 @@ pub use generics::{
     PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound,
     WhereClause, WherePredicate,
 };
-#[cfg(
-    all(
-        any(feature = "full", feature = "derive"),
-        feature = "printing"
-    )
-)]
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    feature = "printing"
+))]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 #[cfg(feature = "full")]
@@ -418,12 +419,10 @@ pub use ty::{
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod path;
-#[cfg(
-    all(
-        any(feature = "full", feature = "derive"),
-        feature = "printing"
-    )
-)]
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    feature = "printing"
+))]
 pub use path::PathTokens;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use path::{
@@ -629,7 +628,11 @@ pub use error::parse_error;
 /// #
 /// # fn main() {}
 /// ```
-#[cfg(all(not(all(target_arch = "wasm32", target_os = "unknown")), feature = "parsing", feature = "proc-macro"))]
+#[cfg(all(
+    not(all(target_arch = "wasm32", target_os = "unknown")),
+    feature = "parsing",
+    feature = "proc-macro"
+))]
 pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>
 where
     T: Synom,
@@ -761,20 +764,16 @@ pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
     Ok(file)
 }
 
-#[cfg(
-    all(
-        any(feature = "full", feature = "derive"),
-        feature = "printing"
-    )
-)]
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    feature = "printing"
+))]
 struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
 
-#[cfg(
-    all(
-        any(feature = "full", feature = "derive"),
-        feature = "printing"
-    )
-)]
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    feature = "printing"
+))]
 impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
 where
     T: quote::ToTokens + Default,
