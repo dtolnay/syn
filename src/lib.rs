@@ -283,6 +283,7 @@
         if_not_else,
         indexing_slicing,
         items_after_statements,
+        shadow_unrelated,
         similar_names,
         single_match_else,
         stutter,
