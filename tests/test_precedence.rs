@@ -18,7 +18,8 @@
 //!    methods).
 //! 3. Serialize the `syn` expression back into a string, and re-parse it with
 //!    `libsyntax`.
-//! 4. Respan all of the expressions, replacing the spans with the default spans.
+//! 4. Respan all of the expressions, replacing the spans with the default
+//!    spans.
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
 #[macro_use]
@@ -204,8 +205,8 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to
-/// reveal the precidence of the parsed expressions, and produce a stringified form
-/// of the resulting expression.
+/// reveal the precidence of the parsed expressions, and produce a stringified
+/// form of the resulting expression.
 ///
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
@@ -292,8 +293,8 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to
-/// reveal the precedence of the parsed expressions, and produce a stringified form
-/// of the resulting expression.
+/// reveal the precedence of the parsed expressions, and produce a stringified
+/// form of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::*;
     use syn::*;
