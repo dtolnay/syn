@@ -73,16 +73,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // Existential type
-        "tests/rust/src/test/run-pass/existential_type.rs" |
-        "tests/rust/src/test/ui/existential_types/bound_reduction.rs" |
-        "tests/rust/src/test/ui/existential_types/different_defining_uses_never_type2.rs" |
-        "tests/rust/src/test/ui/existential_types/existential-associated-type.rs" |
-        "tests/rust/src/test/ui/existential_types/generic_lifetime_param.rs" |
-        "tests/rust/src/test/ui/impl-trait/associated-existential-type-generic-trait.rs" |
-        "tests/rust/src/test/ui/impl-trait/associated-existential-type-trivial.rs" |
-        "tests/rust/src/test/ui/impl-trait/associated-existential-type.rs" |
-        "tests/rust/src/test/ui/impl-trait/existential_type_in_fn_body.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |

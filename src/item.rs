@@ -735,6 +735,8 @@ pub mod parsing {
         |
         syn!(ItemType) => { Item::Type }
         |
+        call!(unstable_existential_type) => { Item::Verbatim }
+        |
         syn!(ItemStruct) => { Item::Struct }
         |
         syn!(ItemEnum) => { Item::Enum }
@@ -1230,6 +1232,30 @@ pub mod parsing {
         })
     ));
 
+    named!(existential_type_helper(vis: bool) -> TokenStream, do_parse!(
+        begin: call!(verbatim::grab_cursor) >>
+        many0!(Attribute::parse_outer) >>
+        cond_reduce!(vis, syn!(Visibility)) >>
+        custom_keyword!(existential) >>
+        keyword!(type) >>
+        syn!(Ident) >>
+        syn!(Generics) >>
+        option!(syn!(WhereClause)) >>
+        colon: option!(punct!(:)) >>
+        cond!(
+            colon.is_some(),
+            Punctuated::<TypeParamBound, Token![+]>::parse_separated_nonempty
+        ) >>
+        punct!(;) >>
+        end: call!(verbatim::grab_cursor) >>
+        (verbatim::token_range(begin..end))
+    ));
+
+    named!(unstable_existential_type -> ItemVerbatim, map!(
+        call!(existential_type_helper, true),
+        |tts| ItemVerbatim { tts: tts }
+    ));
+
     impl_synom!(ItemStruct "struct item" switch!(
         map!(syn!(DeriveInput), Into::into),
         Item::Struct(item) => value!(item)
@@ -1301,6 +1327,8 @@ pub mod parsing {
         syn!(TraitItemMethod) => { TraitItem::Method }
         |
         syn!(TraitItemType) => { TraitItem::Type }
+        |
+        call!(unstable_trait_existential_type) => { TraitItem::Verbatim }
         |
         syn!(TraitItemMacro) => { TraitItem::Macro }
     ));
@@ -1404,6 +1432,11 @@ pub mod parsing {
         })
     ));
 
+    named!(unstable_trait_existential_type -> TraitItemVerbatim, map!(
+        call!(existential_type_helper, false),
+        |tts| TraitItemVerbatim { tts: tts }
+    ));
+
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
         attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
@@ -1465,6 +1498,8 @@ pub mod parsing {
         call!(unstable_async_method) => { ImplItem::Verbatim }
         |
         syn!(ImplItemType) => { ImplItem::Type }
+        |
+        call!(unstable_impl_existential_type) => { ImplItem::Verbatim }
         |
         syn!(ImplItemMacro) => { ImplItem::Macro }
     ));
@@ -1593,6 +1628,11 @@ pub mod parsing {
             ty: ty,
             semi_token: semi,
         })
+    ));
+
+    named!(unstable_impl_existential_type -> ImplItemVerbatim, map!(
+        call!(existential_type_helper, true),
+        |tts| ImplItemVerbatim { tts: tts }
     ));
 
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
