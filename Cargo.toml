@@ -1,0 +1,21 @@
+[package]
+name = "syn-error-experiment"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "Syn error experiment"
+repository = "https://github.com/dtolnay/syn/issues/47"
+documentation = "https://docs.rs/syn-error-experiment"
+categories = ["development-tools::procedural-macro-helpers"]
+
+[features]
+default = ["proc-macro"]
+proc-macro = ["proc-macro2/proc-macro", "syn/proc-macro"]
+
+[dependencies]
+proc-macro2 = { version = "0.4", default-features = false }
+
+[dependencies.syn]
+version = "0.14"
+default-features = false
+features = ["parsing"]
