@@ -136,6 +136,11 @@ pub trait VisitMut {
     fn visit_expr_assign_op_mut(&mut self, i: &mut ExprAssignOp) {
         visit_expr_assign_op_mut(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn visit_expr_async_mut(&mut self, i: &mut ExprAsync) {
+        visit_expr_async_mut(self, i)
+    }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_binary_mut(&mut self, i: &mut ExprBinary) {
         visit_expr_binary_mut(self, i)
@@ -1254,6 +1259,9 @@ pub fn visit_expr_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
         Expr::Try(ref mut _binding_0) => {
             full!(_visitor.visit_expr_try_mut(_binding_0));
         }
+        Expr::Async(ref mut _binding_0) => {
+            full!(_visitor.visit_expr_async_mut(_binding_0));
+        }
         Expr::TryBlock(ref mut _binding_0) => {
             full!(_visitor.visit_expr_try_block_mut(_binding_0));
         }
@@ -1296,6 +1304,18 @@ pub fn visit_expr_assign_op_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut
     _visitor.visit_expr_mut(&mut *_i.left);
     _visitor.visit_bin_op_mut(&mut _i.op);
     _visitor.visit_expr_mut(&mut *_i.right);
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn visit_expr_async_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprAsync) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.async_token.span);
+    if let Some(ref mut it) = _i.capture {
+        tokens_helper(_visitor, &mut it.span)
+    };
+    _visitor.visit_block_mut(&mut _i.block);
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_expr_binary_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprBinary) {

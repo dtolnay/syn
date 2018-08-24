@@ -509,6 +509,16 @@ ast_enum_of_structs! {
             pub question_token: Token![?],
         }),
 
+        /// An async block: `async { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Async(ExprAsync #full {
+            pub attrs: Vec<Attribute>,
+            pub async_token: Token![async],
+            pub capture: Option<Token![move]>,
+            pub block: Block,
+        }),
+
         /// A try block: `try { ... }`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -600,6 +610,7 @@ impl Expr {
             | Expr::Paren(ExprParen { ref mut attrs, .. })
             | Expr::Group(ExprGroup { ref mut attrs, .. })
             | Expr::Try(ExprTry { ref mut attrs, .. })
+            | Expr::Async(ExprAsync { ref mut attrs, .. })
             | Expr::TryBlock(ExprTryBlock { ref mut attrs, .. })
             | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => {
@@ -1008,6 +1019,7 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
         | Expr::WhileLet(..)
         | Expr::Loop(..)
         | Expr::ForLoop(..)
+        | Expr::Async(..)
         | Expr::TryBlock(..) => false,
         _ => true,
     }
@@ -1571,7 +1583,7 @@ pub mod parsing {
         syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
         |
         // must be before ExprStruct
-        call!(unstable_async_block) => { Expr::Verbatim }
+        syn!(ExprAsync) => { Expr::Async }
         |
         // must be before ExprStruct
         syn!(ExprTryBlock) => { Expr::TryBlock }
@@ -2134,17 +2146,20 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(unstable_async_block -> ExprVerbatim, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        keyword!(async) >>
-        option!(keyword!(move)) >>
-        syn!(Block) >>
-        end: call!(verbatim::grab_cursor) >>
-        (ExprVerbatim {
-            tts: verbatim::token_range(begin..end),
-        })
-    ));
+    impl Synom for ExprAsync {
+        named!(parse -> Self, do_parse!(
+            attrs: many0!(Attribute::parse_outer) >>
+            async_token: keyword!(async) >>
+            capture: option!(keyword!(move)) >>
+            block: syn!(Block) >>
+            (ExprAsync {
+                attrs: attrs,
+                async_token: async_token,
+                capture: capture,
+                block: block,
+            })
+        ));
+    }
 
     #[cfg(feature = "full")]
     named!(fn_arg -> FnArg, do_parse!(
@@ -3391,6 +3406,16 @@ mod printing {
                     }
                 }
             });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for ExprAsync {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.async_token.to_tokens(tokens);
+            self.capture.to_tokens(tokens);
+            self.block.to_tokens(tokens);
         }
     }
 

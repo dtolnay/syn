@@ -132,6 +132,11 @@ pub trait Fold {
     fn fold_expr_assign_op(&mut self, i: ExprAssignOp) -> ExprAssignOp {
         fold_expr_assign_op(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn fold_expr_async(&mut self, i: ExprAsync) -> ExprAsync {
+        fold_expr_async(self, i)
+    }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_binary(&mut self, i: ExprBinary) -> ExprBinary {
         fold_expr_binary(self, i)
@@ -1206,6 +1211,7 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         Expr::Paren(_binding_0) => Expr::Paren(_visitor.fold_expr_paren(_binding_0)),
         Expr::Group(_binding_0) => Expr::Group(full!(_visitor.fold_expr_group(_binding_0))),
         Expr::Try(_binding_0) => Expr::Try(full!(_visitor.fold_expr_try(_binding_0))),
+        Expr::Async(_binding_0) => Expr::Async(full!(_visitor.fold_expr_async(_binding_0))),
         Expr::TryBlock(_binding_0) => {
             Expr::TryBlock(full!(_visitor.fold_expr_try_block(_binding_0)))
         }
@@ -1240,6 +1246,16 @@ pub fn fold_expr_assign_op<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprAssignOp)
         left: Box::new(_visitor.fold_expr(*_i.left)),
         op: _visitor.fold_bin_op(_i.op),
         right: Box::new(_visitor.fold_expr(*_i.right)),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn fold_expr_async<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprAsync) -> ExprAsync {
+    ExprAsync {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        async_token: Token![async](tokens_helper(_visitor, &_i.async_token.span)),
+        capture: (_i.capture).map(|it| Token ! [ move ](tokens_helper(_visitor, &it.span))),
+        block: _visitor.fold_block(_i.block),
     }
 }
 #[cfg(any(feature = "full", feature = "derive"))]
