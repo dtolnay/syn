@@ -134,7 +134,9 @@ macro_rules! token_punct_def {
         #[doc(hidden)]
         #[allow(non_snake_case)]
         pub fn $name<S: IntoSpans<[Span; $len]>>(spans: S) -> $name {
-            $name { spans: spans.into_spans() }
+            $name {
+                spans: spans.into_spans(),
+            }
         }
 
         impl ::std::default::Default for $name {
@@ -215,7 +217,9 @@ macro_rules! token_keyword {
         #[doc(hidden)]
         #[allow(non_snake_case)]
         pub fn $name<S: IntoSpans<[Span; 1]>>(span: S) -> $name {
-            $name { span: span.into_spans()[0] }
+            $name {
+                span: span.into_spans()[0],
+            }
         }
 
         impl ::std::default::Default for $name {
@@ -287,7 +291,9 @@ macro_rules! token_delimiter {
         #[doc(hidden)]
         #[allow(non_snake_case)]
         pub fn $name<S: IntoSpans<[Span; 1]>>(span: S) -> $name {
-            $name { span: span.into_spans()[0] }
+            $name {
+                span: span.into_spans()[0],
+            }
         }
 
         impl ::std::default::Default for $name {
