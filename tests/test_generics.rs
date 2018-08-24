@@ -54,7 +54,6 @@ fn test_split_for_impl() {
                     style: AttrStyle::Outer,
                     path: ident("may_dangle").into(),
                     tts: TokenStream::new(),
-                    is_sugared_doc: false,
                 }],
                 ident: ident("T"),
                 bounds: punctuated![TypeParamBound::Lifetime(Lifetime::new(

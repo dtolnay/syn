@@ -39,8 +39,8 @@ ast_struct! {
     ///
     /// The `style` field of type `AttrStyle` distinguishes whether an attribute
     /// is outer or inner. Doc comments and block comments are promoted to
-    /// attributes that have `is_sugared_doc` set to true, as this is how they
-    /// are processed by the compiler and by `macro_rules!` macros.
+    /// attributes, as this is how they are processed by the compiler and by
+    /// `macro_rules!` macros.
     ///
     /// The `path` field gives the possibly colon-delimited path against which
     /// the attribute is resolved. It is equal to `"doc"` for desugared doc
@@ -64,7 +64,6 @@ ast_struct! {
         pub bracket_token: token::Bracket,
         pub path: Path,
         pub tts: TokenStream,
-        pub is_sugared_doc: bool,
     }
 }
 
@@ -79,7 +78,6 @@ impl PartialEq for Attribute {
             && self.bracket_token == other.bracket_token
             && self.path == other.path
             && TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
-            && self.is_sugared_doc == other.is_sugared_doc
     }
 }
 
@@ -94,7 +92,6 @@ impl Hash for Attribute {
         self.bracket_token.hash(state);
         self.path.hash(state);
         TokenStreamHelper(&self.tts).hash(state);
-        self.is_sugared_doc.hash(state);
     }
 }
 
@@ -423,7 +420,6 @@ pub mod parsing {
                         style: AttrStyle::Inner(bang),
                         path: path,
                         tts: tts,
-                        is_sugared_doc: false,
                         pound_token: pound,
                         bracket_token: bracket,
                     }
@@ -441,7 +437,6 @@ pub mod parsing {
                             eq(span),
                             lit,
                         ].into_iter().collect(),
-                        is_sugared_doc: true,
                         pound_token: Token![#](span),
                         bracket_token: token::Bracket(span),
                     }
@@ -463,7 +458,6 @@ pub mod parsing {
                         style: AttrStyle::Outer,
                         path: path,
                         tts: tts,
-                        is_sugared_doc: false,
                         pound_token: pound,
                         bracket_token: bracket,
                     }
@@ -481,7 +475,6 @@ pub mod parsing {
                             eq(span),
                             lit,
                         ].into_iter().collect(),
-                        is_sugared_doc: true,
                         pound_token: Token![#](span),
                         bracket_token: token::Bracket(span),
                     }

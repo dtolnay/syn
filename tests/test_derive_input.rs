@@ -84,7 +84,6 @@ fn test_struct() {
                 Parenthesis,
                 vec![word("Debug"), op(','), word("Clone")],
             )]),
-            is_sugared_doc: false,
         }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
@@ -254,7 +253,6 @@ fn test_enum() {
                         " See the std::result module documentation for details.",
                     )),
                 ]),
-                is_sugared_doc: false,
             },
             Attribute {
                 bracket_token: Default::default(),
@@ -262,7 +260,6 @@ fn test_enum() {
                 style: AttrStyle::Outer,
                 path: ident("must_use").into(),
                 tts: TokenStream::new(),
-                is_sugared_doc: false,
             },
         ],
         generics: Generics {
@@ -447,7 +444,6 @@ fn test_attr_with_path() {
                     ],
                 ),
             ]),
-            is_sugared_doc: false,
         }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
@@ -483,7 +479,6 @@ fn test_attr_with_non_mod_style_path() {
                 segments: punctuated![PathSegment::from(ident("inert"))],
             },
             tts: TokenStream::from_iter(vec![op('<'), word("T"), op('>')]),
-            is_sugared_doc: false,
         }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {
@@ -522,7 +517,6 @@ fn test_attr_with_mod_style_path_with_self() {
                 ],
             },
             tts: TokenStream::new(),
-            is_sugared_doc: false,
         }],
         generics: Generics::default(),
         data: Data::Struct(DataStruct {

@@ -82,7 +82,6 @@ fn test_struct() {
             bracket_token: Default::default(),
             path: Ident::new("test", Span::call_site()).into(),
             tts,
-            is_sugared_doc: false,
         }
     }
 

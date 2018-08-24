@@ -937,7 +937,6 @@ pub fn visit_attribute<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     tokens_helper(_visitor, &_i.bracket_token.span);
     _visitor.visit_path(&_i.path);
     skip!(_i.tts);
-    skip!(_i.is_sugared_doc);
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_bare_fn_arg<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BareFnArg) {

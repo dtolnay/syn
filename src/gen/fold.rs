@@ -956,7 +956,6 @@ pub fn fold_attribute<V: Fold + ?Sized>(_visitor: &mut V, _i: Attribute) -> Attr
         bracket_token: Bracket(tokens_helper(_visitor, &_i.bracket_token.span)),
         path: _visitor.fold_path(_i.path),
         tts: _i.tts,
-        is_sugared_doc: _i.is_sugared_doc,
     }
 }
 #[cfg(any(feature = "full", feature = "derive"))]

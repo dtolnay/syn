@@ -941,7 +941,6 @@ pub fn visit_attribute_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Attr
     tokens_helper(_visitor, &mut _i.bracket_token.span);
     _visitor.visit_path_mut(&mut _i.path);
     skip!(_i.tts);
-    skip!(_i.is_sugared_doc);
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_bare_fn_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut BareFnArg) {
