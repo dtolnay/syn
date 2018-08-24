@@ -68,9 +68,11 @@ pub trait Peek: private::Sealed {
     type Token: Token;
 }
 
-impl<F: FnOnce(Span) -> T, T: Token> Peek for F {
+impl<F: FnOnce(TokenMarker) -> T, T: Token> Peek for F {
     type Token = T;
 }
+
+pub enum TokenMarker {}
 
 // Not public API.
 #[doc(hidden)]
@@ -83,7 +85,7 @@ pub fn is_token(lookahead: &Lookahead1, repr: &'static str) -> bool {
 }
 
 mod private {
-    use super::{Span, Token};
+    use super::{Token, TokenMarker};
     pub trait Sealed {}
-    impl<F, T: Token> Sealed for F where F: FnOnce(Span) -> T {}
+    impl<F: FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
 }

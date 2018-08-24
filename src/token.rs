@@ -1,8 +1,13 @@
 //! Tokens representing Rust punctuation, keywords, and delimiters.
 
-use proc_macro2::Span;
+use std::ops::{Deref, DerefMut};
 
+use proc_macro2::{Spacing, Span};
+
+use error::Error;
+use lookahead;
 use parse::{Lookahead1, Parse, ParseStream, Result};
+use span::{FromSpans, IntoSpans};
 
 /// Marker trait for types that represent single tokens.
 ///
@@ -30,17 +35,14 @@ macro_rules! Token {
     (enum)   => { $crate::token::Enum };
     (:)      => { $crate::token::Colon };
     (,)      => { $crate::token::Comma };
+    (..)     => { $crate::token::Dot2 };
 }
 
-macro_rules! define_token {
+macro_rules! impl_token {
     ($token:tt $name:ident #[$doc:meta]) => {
-        #[$doc]
-        #[derive(Debug)]
-        pub struct $name(pub Span);
-
         impl Token for $name {
             fn peek(lookahead: &Lookahead1) -> bool {
-                ::lookahead::is_token(lookahead, $token)
+                lookahead::is_token(lookahead, $token)
             }
 
             fn display() -> String {
@@ -53,9 +55,23 @@ macro_rules! define_token {
 }
 
 macro_rules! define_keywords {
-    ($($token:tt $name:ident #[$doc:meta])*) => {
+    ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
         $(
-            define_token!($token $name #[$doc]);
+            #[$doc]
+            #[derive(Debug)]
+            pub struct $name {
+                pub span: Span,
+            }
+
+            #[doc(hidden)]
+            #[allow(non_snake_case)]
+            pub fn $name<T: IntoSpans<[Span; 1]>>(span: T) -> $name {
+                $name {
+                    span: span.into_spans()[0],
+                }
+            }
+
+            impl_token!($token $name #[$doc]);
 
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
@@ -67,13 +83,41 @@ macro_rules! define_keywords {
 }
 
 macro_rules! define_punctuation {
-    ($($token:tt $name:ident #[$doc:meta])*) => {
+    ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
-            define_token!($token $name #[$doc]);
+            #[$doc]
+            #[derive(Debug)]
+            pub struct $name {
+                pub spans: [Span; $len],
+            }
+
+            impl Deref for $name {
+                type Target = [Span; $len];
+
+                fn deref(&self) -> &Self::Target {
+                    &self.spans
+                }
+            }
+
+            impl DerefMut for $name {
+                fn deref_mut(&mut self) -> &mut Self::Target {
+                    &mut self.spans
+                }
+            }
+
+            #[doc(hidden)]
+            #[allow(non_snake_case)]
+            pub fn $name<T: IntoSpans<[Span; $len]>>(spans: T) -> $name {
+                $name {
+                    spans: spans.into_spans(),
+                }
+            }
+
+            impl_token!($token $name #[$doc]);
 
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
-                    parse_punctuation(input, $token).map($name)
+                    parse_punctuation(input, $token).map($name::<[Span; $len]>)
                 }
             }
         )*
@@ -81,13 +125,14 @@ macro_rules! define_punctuation {
 }
 
 define_keywords! {
-    "struct" Struct /// `struct`
-    "enum"   Enum   /// `enum`
+    "struct" pub struct Struct /// `struct`
+    "enum"   pub struct Enum   /// `enum`
 }
 
 define_punctuation! {
-    ":" Colon /// `:`
-    "," Comma /// `,`
+    ":"  pub struct Colon/1 /// `:`
+    ","  pub struct Comma/1 /// `,`
+    ".." pub struct Dot2/2  /// `..`
 }
 
 /// `{...}`
@@ -105,14 +150,29 @@ fn parse_keyword(input: ParseStream, token: &str) -> Result<Span> {
     })
 }
 
-fn parse_punctuation(input: ParseStream, token: &str) -> Result<Span> {
+fn parse_punctuation<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
     input.step_cursor(|cursor| {
-        // TODO: support multi-character punctuation
-        if let Some((punct, rest)) = cursor.punct() {
-            if punct.as_char() == token.chars().next().unwrap() {
-                return Ok((punct.span(), rest));
+        let mut cursor = *cursor;
+        let mut spans = [cursor.span(); 3];
+        assert!(token.len() <= spans.len());
+
+        for (i, ch) in token.chars().enumerate() {
+            match cursor.punct() {
+                Some((punct, rest)) => {
+                    spans[i] = punct.span();
+                    if punct.as_char() != ch {
+                        break;
+                    } else if i == token.len() - 1 {
+                        return Ok((S::from_spans(&spans), rest));
+                    } else if punct.spacing() != Spacing::Joint {
+                        break;
+                    }
+                    cursor = rest;
+                }
+                None => break,
             }
         }
-        Err(cursor.error(format!("expected `{}`", token)))
+
+        Err(Error::new(spans[0], format!("expected `{}`", token)))
     })
 }

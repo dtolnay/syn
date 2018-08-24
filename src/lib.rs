@@ -18,6 +18,7 @@ mod group;
 mod ast;
 mod error;
 mod lookahead;
+mod span;
 
 pub use ast::*;
 pub use proc_macro2::Ident;
