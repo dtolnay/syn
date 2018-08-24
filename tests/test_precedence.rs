@@ -25,12 +25,14 @@
 #[macro_use]
 extern crate quote;
 extern crate rayon;
+extern crate regex;
 extern crate rustc_data_structures;
 extern crate syn;
 extern crate syntax;
 extern crate walkdir;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use regex::Regex;
 use syntax::ast;
 use syntax::ptr::P;
 use walkdir::{DirEntry, WalkDir};
@@ -100,6 +102,9 @@ fn test_rustc_precedence() {
     let passed = AtomicUsize::new(0);
     let failed = AtomicUsize::new(0);
 
+    // 2018 edition is hard
+    let edition_regex = Regex::new(r"\b(async|try)[!(]").unwrap();
+
     WalkDir::new("tests/rust")
         .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
@@ -125,6 +130,7 @@ fn test_rustc_precedence() {
             let mut file = File::open(path).unwrap();
             let mut content = String::new();
             file.read_to_string(&mut content).unwrap();
+            let content = edition_regex.replace_all(&content, "_$0");
 
             let (l_passed, l_failed) = match syn::parse_file(&content) {
                 Ok(file) => {
@@ -270,7 +276,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                 s => s,
             };
 
-            OneVector::one(Stmt { node, ..stmt })
+            OneVector::from_vec(vec![Stmt { node, ..stmt }])
         }
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {

@@ -20,8 +20,8 @@ extern crate walkdir;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
-use syntax::codemap::FilePathMapping;
 use syntax::parse::{self, PResult, ParseSess};
+use syntax::source_map::FilePathMapping;
 use syntax_pos::FileName;
 use walkdir::{DirEntry, WalkDir};
 

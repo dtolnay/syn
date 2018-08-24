@@ -12,9 +12,9 @@ extern crate syntax;
 extern crate syntax_pos;
 
 use self::syntax::ast;
-use self::syntax::codemap::FilePathMapping;
 use self::syntax::parse::{self, ParseSess};
 use self::syntax::ptr::P;
+use self::syntax::source_map::FilePathMapping;
 use self::syntax_pos::edition::Edition;
 use self::syntax_pos::{hygiene, FileName};
 
