@@ -509,13 +509,12 @@ ast_enum_of_structs! {
             pub question_token: Token![?],
         }),
 
-        /// A catch expression: `do catch { ... }`.
+        /// A try block: `try { ... }`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Catch(ExprCatch #full {
+        pub TryBlock(ExprTryBlock #full {
             pub attrs: Vec<Attribute>,
-            pub do_token: Token![do],
-            pub catch_token: Token![catch],
+            pub try_token: Token![try],
             pub block: Block,
         }),
 
@@ -601,7 +600,7 @@ impl Expr {
             | Expr::Paren(ExprParen { ref mut attrs, .. })
             | Expr::Group(ExprGroup { ref mut attrs, .. })
             | Expr::Try(ExprTry { ref mut attrs, .. })
-            | Expr::Catch(ExprCatch { ref mut attrs, .. })
+            | Expr::TryBlock(ExprTryBlock { ref mut attrs, .. })
             | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => {
                 // TODO
@@ -1009,7 +1008,7 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
         | Expr::WhileLet(..)
         | Expr::Loop(..)
         | Expr::ForLoop(..)
-        | Expr::Catch(..) => false,
+        | Expr::TryBlock(..) => false,
         _ => true,
     }
 }
@@ -1575,7 +1574,7 @@ pub mod parsing {
         call!(unstable_async_block) => { Expr::Verbatim }
         |
         // must be before ExprStruct
-        call!(unstable_try_block) => { Expr::Verbatim }
+        syn!(ExprTryBlock) => { Expr::TryBlock }
         |
         // must be before expr_path
         cond_reduce!(allow_struct, syn!(ExprStruct)) => { Expr::Struct }
@@ -1607,8 +1606,6 @@ pub mod parsing {
         syn!(ExprLoop) => { Expr::Loop }
         |
         syn!(ExprMatch) => { Expr::Match }
-        |
-        syn!(ExprCatch) => { Expr::Catch }
         |
         syn!(ExprYield) => { Expr::Yield }
         |
@@ -1654,7 +1651,7 @@ pub mod parsing {
             |
             syn!(ExprMatch) => { Expr::Match }
             |
-            syn!(ExprCatch) => { Expr::Catch }
+            syn!(ExprTryBlock) => { Expr::TryBlock }
             |
             syn!(ExprYield) => { Expr::Yield }
             |
@@ -2028,21 +2025,19 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Synom for ExprCatch {
+    impl Synom for ExprTryBlock {
         named!(parse -> Self, do_parse!(
-            do_: keyword!(do) >>
-            catch_: keyword!(catch) >>
-            catch_block: syn!(Block) >>
-            (ExprCatch {
+            try_token: keyword!(try) >>
+            block: syn!(Block) >>
+            (ExprTryBlock {
                 attrs: Vec::new(),
-                block: catch_block,
-                do_token: do_,
-                catch_token: catch_,
+                try_token: try_token,
+                block: block,
             })
         ));
 
         fn description() -> Option<&'static str> {
-            Some("`catch` expression")
+            Some("`try` block")
         }
     }
 
@@ -2144,18 +2139,6 @@ pub mod parsing {
         many0!(Attribute::parse_outer) >>
         keyword!(async) >>
         option!(keyword!(move)) >>
-        syn!(Block) >>
-        end: call!(verbatim::grab_cursor) >>
-        (ExprVerbatim {
-            tts: verbatim::token_range(begin..end),
-        })
-    ));
-
-    #[cfg(feature = "full")]
-    named!(unstable_try_block -> ExprVerbatim, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        keyword!(try) >>
         syn!(Block) >>
         end: call!(verbatim::grab_cursor) >>
         (ExprVerbatim {
@@ -3412,11 +3395,10 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprCatch {
+    impl ToTokens for ExprTryBlock {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.do_token.to_tokens(tokens);
-            self.catch_token.to_tokens(tokens);
+            self.try_token.to_tokens(tokens);
             self.block.to_tokens(tokens);
         }
     }

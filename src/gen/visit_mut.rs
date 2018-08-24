@@ -165,11 +165,6 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
-    fn visit_expr_catch_mut(&mut self, i: &mut ExprCatch) {
-        visit_expr_catch_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_closure_mut(&mut self, i: &mut ExprClosure) {
         visit_expr_closure_mut(self, i)
     }
@@ -272,6 +267,11 @@ pub trait VisitMut {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_try_mut(&mut self, i: &mut ExprTry) {
         visit_expr_try_mut(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn visit_expr_try_block_mut(&mut self, i: &mut ExprTryBlock) {
+        visit_expr_try_block_mut(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
@@ -1254,8 +1254,8 @@ pub fn visit_expr_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
         Expr::Try(ref mut _binding_0) => {
             full!(_visitor.visit_expr_try_mut(_binding_0));
         }
-        Expr::Catch(ref mut _binding_0) => {
-            full!(_visitor.visit_expr_catch_mut(_binding_0));
+        Expr::TryBlock(ref mut _binding_0) => {
+            full!(_visitor.visit_expr_try_block_mut(_binding_0));
         }
         Expr::Yield(ref mut _binding_0) => {
             full!(_visitor.visit_expr_yield_mut(_binding_0));
@@ -1357,16 +1357,6 @@ pub fn visit_expr_cast_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Expr
     _visitor.visit_expr_mut(&mut *_i.expr);
     tokens_helper(_visitor, &mut _i.as_token.span);
     _visitor.visit_type_mut(&mut *_i.ty);
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_expr_catch_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprCatch) {
-    for it in &mut _i.attrs {
-        _visitor.visit_attribute_mut(it)
-    }
-    tokens_helper(_visitor, &mut _i.do_token.span);
-    tokens_helper(_visitor, &mut _i.catch_token.span);
-    _visitor.visit_block_mut(&mut _i.block);
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1640,6 +1630,15 @@ pub fn visit_expr_try_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprT
     }
     _visitor.visit_expr_mut(&mut *_i.expr);
     tokens_helper(_visitor, &mut _i.question_token.spans);
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn visit_expr_try_block_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprTryBlock) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.try_token.span);
+    _visitor.visit_block_mut(&mut _i.block);
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]

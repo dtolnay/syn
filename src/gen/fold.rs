@@ -161,11 +161,6 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
-    fn fold_expr_catch(&mut self, i: ExprCatch) -> ExprCatch {
-        fold_expr_catch(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_closure(&mut self, i: ExprClosure) -> ExprClosure {
         fold_expr_closure(self, i)
     }
@@ -268,6 +263,11 @@ pub trait Fold {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_try(&mut self, i: ExprTry) -> ExprTry {
         fold_expr_try(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn fold_expr_try_block(&mut self, i: ExprTryBlock) -> ExprTryBlock {
+        fold_expr_try_block(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
@@ -1206,7 +1206,9 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         Expr::Paren(_binding_0) => Expr::Paren(_visitor.fold_expr_paren(_binding_0)),
         Expr::Group(_binding_0) => Expr::Group(full!(_visitor.fold_expr_group(_binding_0))),
         Expr::Try(_binding_0) => Expr::Try(full!(_visitor.fold_expr_try(_binding_0))),
-        Expr::Catch(_binding_0) => Expr::Catch(full!(_visitor.fold_expr_catch(_binding_0))),
+        Expr::TryBlock(_binding_0) => {
+            Expr::TryBlock(full!(_visitor.fold_expr_try_block(_binding_0)))
+        }
         Expr::Yield(_binding_0) => Expr::Yield(full!(_visitor.fold_expr_yield(_binding_0))),
         Expr::Verbatim(_binding_0) => Expr::Verbatim(_visitor.fold_expr_verbatim(_binding_0)),
     }
@@ -1292,16 +1294,6 @@ pub fn fold_expr_cast<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprCast) -> ExprC
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
         as_token: Token ! [ as ](tokens_helper(_visitor, &_i.as_token.span)),
         ty: Box::new(_visitor.fold_type(*_i.ty)),
-    }
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
-pub fn fold_expr_catch<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprCatch) -> ExprCatch {
-    ExprCatch {
-        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        do_token: Token ! [ do ](tokens_helper(_visitor, &_i.do_token.span)),
-        catch_token: Token![catch](tokens_helper(_visitor, &_i.catch_token.span)),
-        block: _visitor.fold_block(_i.block),
     }
 }
 #[cfg(feature = "full")]
@@ -1540,6 +1532,15 @@ pub fn fold_expr_try<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprTry) -> ExprTry
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
         question_token: Token ! [ ? ](tokens_helper(_visitor, &_i.question_token.spans)),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn fold_expr_try_block<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprTryBlock) -> ExprTryBlock {
+    ExprTryBlock {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        try_token: Token![try](tokens_helper(_visitor, &_i.try_token.span)),
+        block: _visitor.fold_block(_i.block),
     }
 }
 #[cfg(feature = "full")]

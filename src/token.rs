@@ -494,12 +494,10 @@ tokens! {
         "box"      pub struct Box          /// `box`
         "break"    pub struct Break        /// `break`
         "Self"     pub struct CapSelf      /// `Self`
-        "catch"    pub struct Catch        /// `catch`
         "const"    pub struct Const        /// `const`
         "continue" pub struct Continue     /// `continue`
         "crate"    pub struct Crate        /// `crate`
         "default"  pub struct Default      /// `default`
-        "do"       pub struct Do           /// `do`
         "dyn"      pub struct Dyn          /// `dyn`
         "else"     pub struct Else         /// `else`
         "enum"     pub struct Enum         /// `enum`
@@ -597,12 +595,10 @@ macro_rules! Token {
     (box)      => { $crate::token::Box };
     (break)    => { $crate::token::Break };
     (Self)     => { $crate::token::CapSelf };
-    (catch)    => { $crate::token::Catch };
     (const)    => { $crate::token::Const };
     (continue) => { $crate::token::Continue };
     (crate)    => { $crate::token::Crate };
     (default)  => { $crate::token::Default };
-    (do)       => { $crate::token::Do };
     (dyn)      => { $crate::token::Dyn };
     (else)     => { $crate::token::Else };
     (enum)     => { $crate::token::Enum };
@@ -712,12 +708,10 @@ macro_rules! keyword {
     ($i:expr, box)      => { call!($i, <$crate::token::Box as $crate::synom::Synom>::parse) };
     ($i:expr, break)    => { call!($i, <$crate::token::Break as $crate::synom::Synom>::parse) };
     ($i:expr, Self)     => { call!($i, <$crate::token::CapSelf as $crate::synom::Synom>::parse) };
-    ($i:expr, catch)    => { call!($i, <$crate::token::Catch as $crate::synom::Synom>::parse) };
     ($i:expr, const)    => { call!($i, <$crate::token::Const as $crate::synom::Synom>::parse) };
     ($i:expr, continue) => { call!($i, <$crate::token::Continue as $crate::synom::Synom>::parse) };
     ($i:expr, crate)    => { call!($i, <$crate::token::Crate as $crate::synom::Synom>::parse) };
     ($i:expr, default)  => { call!($i, <$crate::token::Default as $crate::synom::Synom>::parse) };
-    ($i:expr, do)       => { call!($i, <$crate::token::Do as $crate::synom::Synom>::parse) };
     ($i:expr, dyn)      => { call!($i, <$crate::token::Dyn as $crate::synom::Synom>::parse) };
     ($i:expr, else)     => { call!($i, <$crate::token::Else as $crate::synom::Synom>::parse) };
     ($i:expr, enum)     => { call!($i, <$crate::token::Enum as $crate::synom::Synom>::parse) };

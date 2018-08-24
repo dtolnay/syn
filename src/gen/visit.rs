@@ -161,11 +161,6 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
-    fn visit_expr_catch(&mut self, i: &'ast ExprCatch) {
-        visit_expr_catch(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_closure(&mut self, i: &'ast ExprClosure) {
         visit_expr_closure(self, i)
     }
@@ -268,6 +263,11 @@ pub trait Visit<'ast> {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_try(&mut self, i: &'ast ExprTry) {
         visit_expr_try(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn visit_expr_try_block(&mut self, i: &'ast ExprTryBlock) {
+        visit_expr_try_block(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
@@ -1256,8 +1256,8 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
         Expr::Try(ref _binding_0) => {
             full!(_visitor.visit_expr_try(_binding_0));
         }
-        Expr::Catch(ref _binding_0) => {
-            full!(_visitor.visit_expr_catch(_binding_0));
+        Expr::TryBlock(ref _binding_0) => {
+            full!(_visitor.visit_expr_try_block(_binding_0));
         }
         Expr::Yield(ref _binding_0) => {
             full!(_visitor.visit_expr_yield(_binding_0));
@@ -1362,16 +1362,6 @@ pub fn visit_expr_cast<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_expr(&*_i.expr);
     tokens_helper(_visitor, &_i.as_token.span);
     _visitor.visit_type(&*_i.ty);
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_expr_catch<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprCatch) {
-    for it in &_i.attrs {
-        _visitor.visit_attribute(it)
-    }
-    tokens_helper(_visitor, &_i.do_token.span);
-    tokens_helper(_visitor, &_i.catch_token.span);
-    _visitor.visit_block(&_i.block);
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1654,6 +1644,18 @@ pub fn visit_expr_try<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     }
     _visitor.visit_expr(&*_i.expr);
     tokens_helper(_visitor, &_i.question_token.spans);
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn visit_expr_try_block<'ast, V: Visit<'ast> + ?Sized>(
+    _visitor: &mut V,
+    _i: &'ast ExprTryBlock,
+) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    tokens_helper(_visitor, &_i.try_token.span);
+    _visitor.visit_block(&_i.block);
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]
