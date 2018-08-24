@@ -435,14 +435,14 @@ pub mod parsing {
                 |lit| {
                     let span = lit.span();
                     Attribute {
-                        style: AttrStyle::Inner(<Token![!]>::new(span)),
+                        style: AttrStyle::Inner(Token![!](span)),
                         path: Ident::new("doc", span).into(),
                         tts: vec![
                             eq(span),
                             lit,
                         ].into_iter().collect(),
                         is_sugared_doc: true,
-                        pound_token: <Token![#]>::new(span),
+                        pound_token: Token![#](span),
                         bracket_token: token::Bracket(span),
                     }
                 }
@@ -482,7 +482,7 @@ pub mod parsing {
                             lit,
                         ].into_iter().collect(),
                         is_sugared_doc: true,
-                        pound_token: <Token![#]>::new(span),
+                        pound_token: Token![#](span),
                         bracket_token: token::Bracket(span),
                     }
                 }

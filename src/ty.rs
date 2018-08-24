@@ -700,8 +700,8 @@ mod printing {
                 self.inputs.to_tokens(tokens);
                 if let Some(ref variadic) = self.variadic {
                     if !self.inputs.empty_or_trailing() {
-                        let span = variadic.0[0];
-                        <Token![,]>::new(span).to_tokens(tokens);
+                        let span = variadic.spans[0];
+                        Token![,](span).to_tokens(tokens);
                     }
                     variadic.to_tokens(tokens);
                 }

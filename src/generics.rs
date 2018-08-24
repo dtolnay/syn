@@ -601,7 +601,7 @@ pub mod parsing {
                 ident: id,
                 bounds: bounds.unwrap_or_default(),
                 colon_token: colon,
-                eq_token: default.as_ref().map(|d| Token![=]((d.0).0)),
+                eq_token: default.as_ref().map(|d| Token![=](d.0.spans)),
                 default: default.map(|d| d.1),
             })
         ));

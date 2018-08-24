@@ -112,7 +112,7 @@ macro_rules! tokens {
         }
     ) => (
         $(token_punct_def! { #[$punct_doc] pub struct $punct_name/$len })*
-        $(token_punct_parser! { $punct pub struct $punct_name })*
+        $(token_punct_parser! { $punct pub struct $punct_name/$len })*
         $(token_delimiter! { #[$delimiter_doc] $delimiter pub struct $delimiter_name })*
         $(token_keyword! { #[$keyword_doc] $keyword pub struct $keyword_name })*
     )
@@ -127,12 +127,14 @@ macro_rules! token_punct_def {
         /// macro instead.
         ///
         /// [`Token!`]: index.html
-        pub struct $name(pub [Span; $len]);
+        pub struct $name {
+            pub spans: [Span; $len],
+        }
 
-        impl $name {
-            pub fn new(span: Span) -> Self {
-                $name([span; $len])
-            }
+        #[doc(hidden)]
+        #[allow(non_snake_case)]
+        pub fn $name<S: IntoSpans<[Span; $len]>>(spans: S) -> $name {
+            $name { spans: spans.into_spans() }
         }
 
         impl ::std::default::Default for $name {
@@ -176,18 +178,18 @@ macro_rules! token_punct_def {
 }
 
 macro_rules! token_punct_parser {
-    ($s:tt pub struct $name:ident) => {
+    ($s:tt pub struct $name:ident/$len:tt) => {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
-                printing::punct($s, &self.0, tokens);
+                printing::punct($s, &self.spans, tokens);
             }
         }
 
         #[cfg(feature = "parsing")]
         impl ::Synom for $name {
             fn parse(tokens: $crate::buffer::Cursor) -> $crate::synom::PResult<$name> {
-                parsing::punct($s, tokens, $name)
+                parsing::punct($s, tokens, $name::<[Span; $len]>)
             }
 
             fn description() -> Option<&'static str> {
@@ -206,7 +208,15 @@ macro_rules! token_keyword {
         /// macro instead.
         ///
         /// [`Token!`]: index.html
-        pub struct $name(pub Span);
+        pub struct $name {
+            pub span: Span,
+        }
+
+        #[doc(hidden)]
+        #[allow(non_snake_case)]
+        pub fn $name<S: IntoSpans<[Span; 1]>>(span: S) -> $name {
+            $name { span: span.into_spans()[0] }
+        }
 
         impl ::std::default::Default for $name {
             fn default() -> Self {
@@ -243,7 +253,7 @@ macro_rules! token_keyword {
         #[cfg(feature = "printing")]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
-                printing::keyword($s, &self.0, tokens);
+                printing::keyword($s, &self.span, tokens);
             }
         }
 
@@ -270,7 +280,15 @@ macro_rules! token_delimiter {
     (#[$doc:meta] $s:tt pub struct $name:ident) => {
         #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
         #[$doc]
-        pub struct $name(pub Span);
+        pub struct $name {
+            pub span: Span,
+        }
+
+        #[doc(hidden)]
+        #[allow(non_snake_case)]
+        pub fn $name<S: IntoSpans<[Span; 1]>>(span: S) -> $name {
+            $name { span: span.into_spans()[0] }
+        }
 
         impl ::std::default::Default for $name {
             fn default() -> Self {
@@ -310,7 +328,7 @@ macro_rules! token_delimiter {
             where
                 F: FnOnce(&mut ::proc_macro2::TokenStream),
             {
-                printing::delim($s, &self.0, tokens, f);
+                printing::delim($s, &self.span, tokens, f);
             }
 
             #[cfg(feature = "parsing")]
@@ -342,7 +360,7 @@ token_punct_def! {
 impl ::quote::ToTokens for Underscore {
     fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
         use quote::TokenStreamExt;
-        tokens.append(::proc_macro2::Ident::new("_", self.0[0]));
+        tokens.append(::proc_macro2::Ident::new("_", self.spans[0]));
     }
 }
 
@@ -357,7 +375,7 @@ impl ::Synom for Underscore {
                     ::parse_error()
                 }
             }
-            None => parsing::punct("_", input, Underscore),
+            None => parsing::punct("_", input, Underscore::<[Span; 1]>),
         }
     }
 
@@ -375,7 +393,7 @@ token_punct_def! {
 #[cfg(not(feature = "clone-impls"))]
 impl Clone for Apostrophe {
     fn clone(&self) -> Self {
-        Apostrophe(self.0)
+        Apostrophe(self.spans)
     }
 }
 
@@ -384,7 +402,7 @@ impl ::quote::ToTokens for Apostrophe {
     fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
         use quote::TokenStreamExt;
         let mut token = ::proc_macro2::Punct::new('\'', ::proc_macro2::Spacing::Joint);
-        token.set_span(self.0[0]);
+        token.set_span(self.spans[0]);
         tokens.append(token);
     }
 }
@@ -732,7 +750,7 @@ macro_rules! ident_from_token {
     ($token:ident) => {
         impl From<Token![$token]> for Ident {
             fn from(token: Token![$token]) -> Ident {
-                Ident::new(stringify!($token), token.0)
+                Ident::new(stringify!($token), token.span)
             }
         }
     };
@@ -743,6 +761,48 @@ ident_from_token!(Self);
 ident_from_token!(super);
 ident_from_token!(crate);
 ident_from_token!(extern);
+
+// Not public API.
+#[doc(hidden)]
+pub trait IntoSpans<S> {
+    fn into_spans(self) -> S;
+}
+
+impl IntoSpans<[Span; 1]> for Span {
+    fn into_spans(self) -> [Span; 1] {
+        [self]
+    }
+}
+
+impl IntoSpans<[Span; 2]> for Span {
+    fn into_spans(self) -> [Span; 2] {
+        [self, self]
+    }
+}
+
+impl IntoSpans<[Span; 3]> for Span {
+    fn into_spans(self) -> [Span; 3] {
+        [self, self, self]
+    }
+}
+
+impl IntoSpans<Self> for [Span; 1] {
+    fn into_spans(self) -> Self {
+        self
+    }
+}
+
+impl IntoSpans<Self> for [Span; 2] {
+    fn into_spans(self) -> Self {
+        self
+    }
+}
+
+impl IntoSpans<Self> for [Span; 3] {
+    fn into_spans(self) -> Self {
+        self
+    }
+}
 
 #[cfg(feature = "parsing")]
 mod parsing {

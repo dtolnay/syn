@@ -2503,7 +2503,7 @@ pub mod parsing {
             punct!(..=) => { RangeLimits::Closed }
             |
             // Must come before Dot2
-            punct!(...) => { |dot3| RangeLimits::Closed(Token![..=](dot3.0)) }
+            punct!(...) => { |dot3| RangeLimits::Closed(Token![..=](dot3.spans)) }
             |
             punct!(..) => { RangeLimits::HalfOpen }
         ));
@@ -3092,9 +3092,9 @@ pub mod parsing {
                 let after: Option<Punctuated<Pat, Token![,]>> = after;
                 let middle: Option<(Token![..], Option<Token![,]>)> = middle;
                 PatSlice {
-                    dot2_token: middle.as_ref().map(|m| Token![..]((m.0).0)),
+                    dot2_token: middle.as_ref().map(|m| Token![..](m.0.spans)),
                     comma_token: middle.as_ref().and_then(|m| {
-                        m.1.as_ref().map(|m| Token![,](m.0))
+                        m.1.as_ref().map(|m| Token![,](m.spans))
                     }),
                     bracket_token: brackets,
                     middle: middle.and_then(|_| {
@@ -3810,7 +3810,7 @@ mod printing {
             self.lo.to_tokens(tokens);
             match self.limits {
                 RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
-                RangeLimits::Closed(ref t) => Token![...](t.0).to_tokens(tokens),
+                RangeLimits::Closed(ref t) => Token![...](t.spans).to_tokens(tokens),
             }
             self.hi.to_tokens(tokens);
         }

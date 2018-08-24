@@ -351,6 +351,8 @@ mod codegen {
     use proc_macro2::{Span, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
     use syn::punctuated::Punctuated;
+    use syn::synom::ext::IdentExt;
+    use syn::synom::Parser;
     use syn::*;
 
     #[derive(Default)]
@@ -374,7 +376,9 @@ mod codegen {
         Option(&'a Type),
         Tuple(&'a Punctuated<Type, Token![,]>),
         Simple(&'a AstItem),
-        Token(TokenStream),
+        TokenPunct(TokenStream),
+        TokenKeyword(TokenStream),
+        TokenGroup(Ident),
         Pass,
     }
 
@@ -391,7 +395,7 @@ mod codegen {
                     "Punctuated" => RelevantType::Punctuated(first_arg(&last.arguments)),
                     "Option" => RelevantType::Option(first_arg(&last.arguments)),
                     "Brace" | "Bracket" | "Paren" | "Group" => {
-                        RelevantType::Token(last.ident.clone().into_token_stream())
+                        RelevantType::TokenGroup(last.ident.clone())
                     }
                     _ => {
                         if let Some(item) = lookup.get(&last.ident) {
@@ -406,7 +410,13 @@ mod codegen {
             Type::Macro(TypeMacro { ref mac })
                 if mac.path.segments.last().unwrap().into_value().ident == "Token" =>
             {
-                RelevantType::Token(mac.into_token_stream())
+                let is_ident = Ident::parse_any.parse2(mac.tts.clone()).is_ok() ;
+                let is_underscore = parse2::<Token![_]>(mac.tts.clone()).is_ok();
+                if is_ident && !is_underscore {
+                    RelevantType::TokenKeyword(mac.into_token_stream())
+                } else {
+                    RelevantType::TokenPunct(mac.into_token_stream())
+                }
             }
             _ => RelevantType::Pass,
         }
@@ -642,17 +652,47 @@ mod codegen {
         })
     }
 
-    fn token_visit(ty: TokenStream, kind: Kind, name: &Operand) -> TokenStream {
+    fn token_punct_visit(ty: TokenStream, kind: Kind, name: &Operand) -> TokenStream {
         let name = name.tokens();
         match kind {
             Fold => quote! {
-                #ty(tokens_helper(_visitor, &(#name).0))
+                #ty(tokens_helper(_visitor, &#name.spans))
             },
             Visit => quote! {
-                tokens_helper(_visitor, &(#name).0)
+                tokens_helper(_visitor, &#name.spans)
             },
             VisitMut => quote! {
-                tokens_helper(_visitor, &mut (#name).0)
+                tokens_helper(_visitor, &mut #name.spans)
+            },
+        }
+    }
+
+    fn token_keyword_visit(ty: TokenStream, kind: Kind, name: &Operand) -> TokenStream {
+        let name = name.tokens();
+        match kind {
+            Fold => quote! {
+                #ty(tokens_helper(_visitor, &#name.span))
+            },
+            Visit => quote! {
+                tokens_helper(_visitor, &#name.span)
+            },
+            VisitMut => quote! {
+                tokens_helper(_visitor, &mut #name.span)
+            },
+        }
+    }
+
+    fn token_group_visit(ty: Ident, kind: Kind, name: &Operand) -> TokenStream {
+        let name = name.tokens();
+        match kind {
+            Fold => quote! {
+                #ty(tokens_helper(_visitor, &#name.span))
+            },
+            Visit => quote! {
+                tokens_helper(_visitor, &#name.span)
+            },
+            VisitMut => quote! {
+                tokens_helper(_visitor, &mut #name.span)
             },
         }
     }
@@ -686,7 +726,9 @@ mod codegen {
                     res
                 })
             }
-            RelevantType::Token(ty) => Some(token_visit(ty, kind, name)),
+            RelevantType::TokenPunct(ty) => Some(token_punct_visit(ty, kind, name)),
+            RelevantType::TokenKeyword(ty) => Some(token_keyword_visit(ty, kind, name)),
+            RelevantType::TokenGroup(ty) => Some(token_group_visit(ty, kind, name)),
             RelevantType::Pass => None,
         }
     }
