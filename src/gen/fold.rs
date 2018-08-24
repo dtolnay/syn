@@ -1272,6 +1272,7 @@ pub fn fold_expr_binary<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprBinary) -> E
 pub fn fold_expr_block<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprBlock) -> ExprBlock {
     ExprBlock {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        label: (_i.label).map(|it| _visitor.fold_label(it)),
         block: _visitor.fold_block(_i.block),
     }
 }

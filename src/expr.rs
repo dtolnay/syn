@@ -337,6 +337,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Block(ExprBlock #full {
             pub attrs: Vec<Attribute>,
+            pub label: Option<Label>,
             pub block: Block,
         }),
 
@@ -1627,8 +1628,6 @@ pub mod parsing {
         |
         cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
         |
-        call!(unstable_labeled_block) => { Expr::Verbatim }
-        |
         // NOTE: This is the prefix-form of range
         call!(expr_range, allow_struct)
         |
@@ -1670,8 +1669,6 @@ pub mod parsing {
             syn!(ExprUnsafe) => { Expr::Unsafe }
             |
             syn!(ExprBlock) => { Expr::Block }
-            |
-            call!(unstable_labeled_block) => { Expr::Verbatim }
         ) >>
         // If the next token is a `.` or a `?` it is special-cased to parse
         // as an expression instead of a blockexpression.
@@ -1932,6 +1929,7 @@ pub mod parsing {
                 else_block: braces!(Block::parse_within) >>
                 (Expr::Block(ExprBlock {
                     attrs: Vec::new(),
+                    label: None,
                     block: Block {
                         brace_token: else_block.0,
                         stmts: else_block.1,
@@ -2125,6 +2123,7 @@ pub mod parsing {
                     ReturnType::Type(arrow, Box::new(ty)),
                     Expr::Block(ExprBlock {
                         attrs: Vec::new(),
+                        label: None,
                         block: body,
                     },
                 ))
@@ -2435,6 +2434,7 @@ pub mod parsing {
     impl Synom for ExprBlock {
         named!(parse -> Self, do_parse!(
             outer_attrs: many0!(Attribute::parse_outer) >>
+            label: option!(syn!(Label)) >>
             block: braces!(tuple!(
                 many0!(Attribute::parse_inner),
                 call!(Block::parse_within),
@@ -2445,6 +2445,7 @@ pub mod parsing {
                     attrs.extend((block.1).0);
                     attrs
                 },
+                label: label,
                 block: Block {
                     brace_token: block.0,
                     stmts: (block.1).1,
@@ -2456,21 +2457,6 @@ pub mod parsing {
             Some("block: `{ .. }`")
         }
     }
-
-    #[cfg(feature = "full")]
-    named!(unstable_labeled_block -> ExprVerbatim, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        syn!(Label) >>
-        braces!(tuple!(
-            many0!(Attribute::parse_inner),
-            call!(Block::parse_within),
-        )) >>
-        end: call!(verbatim::grab_cursor) >>
-        (ExprVerbatim {
-            tts: verbatim::token_range(begin..end),
-        })
-    ));
 
     #[cfg(feature = "full")]
     named!(expr_range(allow_struct: bool) -> Expr, do_parse!(
@@ -3477,6 +3463,7 @@ mod printing {
     impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
+            self.label.to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.block.stmts);

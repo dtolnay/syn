@@ -1332,6 +1332,9 @@ pub fn visit_expr_block_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
     }
+    if let Some(ref mut it) = _i.label {
+        _visitor.visit_label_mut(it)
+    };
     _visitor.visit_block_mut(&mut _i.block);
 }
 #[cfg(feature = "full")]

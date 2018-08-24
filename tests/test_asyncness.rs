@@ -59,6 +59,7 @@ fn test_async_closure() {
         output: ReturnType::Default,
         body: Box::new(Expr::Block(ExprBlock {
             attrs: vec![],
+            label: None,
             block: Block {
                 brace_token: Default::default(),
                 stmts: vec![],

@@ -1337,6 +1337,9 @@ pub fn visit_expr_block<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
+    if let Some(ref it) = _i.label {
+        _visitor.visit_label(it)
+    };
     _visitor.visit_block(&_i.block);
 }
 #[cfg(feature = "full")]
