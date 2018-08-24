@@ -358,7 +358,7 @@ pub mod parsing {
         ));
     }
 
-    named!(mod_style_path_segment -> PathSegment, alt!(
+    named!(pub mod_style_path_segment -> PathSegment, alt!(
         syn!(Ident) => { Into::into }
         |
         keyword!(super) => { Into::into }

@@ -1016,7 +1016,7 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use path::parsing::qpath;
+    use path::parsing::mod_style_path_segment;
     #[cfg(feature = "full")]
     use path::parsing::ty_no_eq_after;
 
@@ -2539,6 +2539,75 @@ pub mod parsing {
             Some("path: `a::b::c`")
         }
     }
+
+    named!(path -> Path, do_parse!(
+        colon: option!(punct!(::)) >>
+        segments: call!(Punctuated::<_, Token![::]>::parse_separated_nonempty_with, path_segment) >>
+        cond_reduce!(segments.first().map_or(true, |seg| seg.value().ident != "dyn")) >>
+        (Path {
+            leading_colon: colon,
+            segments: segments,
+        })
+    ));
+
+    named!(path_segment -> PathSegment, alt!(
+        do_parse!(
+            ident: syn!(Ident) >>
+            colon2: punct!(::) >>
+            lt: punct!(<) >>
+            args: call!(Punctuated::parse_terminated) >>
+            gt: punct!(>) >>
+            (PathSegment {
+                ident: ident,
+                arguments: PathArguments::AngleBracketed(AngleBracketedGenericArguments {
+                    colon2_token: Some(colon2),
+                    lt_token: lt,
+                    args: args,
+                    gt_token: gt,
+                }),
+            })
+        )
+        |
+        mod_style_path_segment
+    ));
+
+    named!(qpath -> (Option<QSelf>, Path), alt!(
+        map!(path, |p| (None, p))
+        |
+        do_parse!(
+            lt: punct!(<) >>
+            this: syn!(Type) >>
+            path: option!(tuple!(keyword!(as), syn!(Path))) >>
+            gt: punct!(>) >>
+            colon2: punct!(::) >>
+            rest: call!(Punctuated::parse_separated_nonempty_with, path_segment) >>
+            ({
+                let (pos, as_, path) = match path {
+                    Some((as_, mut path)) => {
+                        let pos = path.segments.len();
+                        path.segments.push_punct(colon2);
+                        path.segments.extend(rest.into_pairs());
+                        (pos, Some(as_), path)
+                    }
+                    None => {
+                        (0, None, Path {
+                            leading_colon: Some(colon2),
+                            segments: rest,
+                        })
+                    }
+                };
+                (Some(QSelf {
+                    lt_token: lt,
+                    ty: Box::new(this),
+                    position: pos,
+                    as_token: as_,
+                    gt_token: gt,
+                }), path)
+            })
+        )
+        |
+        map!(keyword!(self), |s| (None, s.into()))
+    ));
 
     named!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
 
