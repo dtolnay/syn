@@ -1573,6 +1573,9 @@ pub mod parsing {
         // must be before ExprStruct
         call!(unstable_async_block) => { Expr::Verbatim }
         |
+        // must be before ExprStruct
+        call!(unstable_try_block) => { Expr::Verbatim }
+        |
         // must be before expr_path
         cond_reduce!(allow_struct, syn!(ExprStruct)) => { Expr::Struct }
         |
@@ -2151,6 +2154,18 @@ pub mod parsing {
         many0!(Attribute::parse_outer) >>
         keyword!(async) >>
         option!(keyword!(move)) >>
+        syn!(Block) >>
+        end: call!(verbatim::grab_cursor) >>
+        (ExprVerbatim {
+            tts: verbatim::token_range(begin..end),
+        })
+    ));
+
+    #[cfg(feature = "full")]
+    named!(unstable_try_block -> ExprVerbatim, do_parse!(
+        begin: call!(verbatim::grab_cursor) >>
+        many0!(Attribute::parse_outer) >>
+        keyword!(try) >>
         syn!(Block) >>
         end: call!(verbatim::grab_cursor) >>
         (ExprVerbatim {

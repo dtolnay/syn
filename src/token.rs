@@ -500,6 +500,7 @@ tokens! {
         "struct"   pub struct Struct       /// `struct`
         "super"    pub struct Super        /// `super`
         "trait"    pub struct Trait        /// `trait`
+        "try"      pub struct Try          /// `try`
         "type"     pub struct Type         /// `type`
         "union"    pub struct Union        /// `union`
         "unsafe"   pub struct Unsafe       /// `unsafe`
@@ -602,6 +603,7 @@ macro_rules! Token {
     (struct)   => { $crate::token::Struct };
     (super)    => { $crate::token::Super };
     (trait)    => { $crate::token::Trait };
+    (try)      => { $crate::token::Try };
     (type)     => { $crate::token::Type };
     (union)    => { $crate::token::Union };
     (unsafe)   => { $crate::token::Unsafe };
@@ -716,6 +718,7 @@ macro_rules! keyword {
     ($i:expr, struct)   => { call!($i, <$crate::token::Struct as $crate::synom::Synom>::parse) };
     ($i:expr, super)    => { call!($i, <$crate::token::Super as $crate::synom::Synom>::parse) };
     ($i:expr, trait)    => { call!($i, <$crate::token::Trait as $crate::synom::Synom>::parse) };
+    ($i:expr, try)      => { call!($i, <$crate::token::Try as $crate::synom::Synom>::parse) };
     ($i:expr, type)     => { call!($i, <$crate::token::Type as $crate::synom::Synom>::parse) };
     ($i:expr, union)    => { call!($i, <$crate::token::Union as $crate::synom::Synom>::parse) };
     ($i:expr, unsafe)   => { call!($i, <$crate::token::Unsafe as $crate::synom::Synom>::parse) };
