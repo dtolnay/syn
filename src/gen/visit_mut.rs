@@ -358,6 +358,10 @@ pub trait VisitMut {
         visit_foreign_item_fn_mut(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_foreign_item_macro_mut(&mut self, i: &mut ForeignItemMacro) {
+        visit_foreign_item_macro_mut(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_foreign_item_static_mut(&mut self, i: &mut ForeignItemStatic) {
         visit_foreign_item_static_mut(self, i)
     }
@@ -1842,6 +1846,9 @@ pub fn visit_foreign_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut F
         ForeignItem::Type(ref mut _binding_0) => {
             _visitor.visit_foreign_item_type_mut(_binding_0);
         }
+        ForeignItem::Macro(ref mut _binding_0) => {
+            _visitor.visit_foreign_item_macro_mut(_binding_0);
+        }
         ForeignItem::Verbatim(ref mut _binding_0) => {
             _visitor.visit_foreign_item_verbatim_mut(_binding_0);
         }
@@ -1856,6 +1863,19 @@ pub fn visit_foreign_item_fn_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
     _visitor.visit_ident_mut(&mut _i.ident);
     _visitor.visit_fn_decl_mut(&mut *_i.decl);
     tokens_helper(_visitor, &mut _i.semi_token.spans);
+}
+#[cfg(feature = "full")]
+pub fn visit_foreign_item_macro_mut<V: VisitMut + ?Sized>(
+    _visitor: &mut V,
+    _i: &mut ForeignItemMacro,
+) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    _visitor.visit_macro_mut(&mut _i.mac);
+    if let Some(ref mut it) = _i.semi_token {
+        tokens_helper(_visitor, &mut it.spans)
+    };
 }
 #[cfg(feature = "full")]
 pub fn visit_foreign_item_static_mut<V: VisitMut + ?Sized>(

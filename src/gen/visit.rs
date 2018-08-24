@@ -354,6 +354,10 @@ pub trait Visit<'ast> {
         visit_foreign_item_fn(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_foreign_item_macro(&mut self, i: &'ast ForeignItemMacro) {
+        visit_foreign_item_macro(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_foreign_item_static(&mut self, i: &'ast ForeignItemStatic) {
         visit_foreign_item_static(self, i)
     }
@@ -1865,6 +1869,9 @@ pub fn visit_foreign_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
         ForeignItem::Type(ref _binding_0) => {
             _visitor.visit_foreign_item_type(_binding_0);
         }
+        ForeignItem::Macro(ref _binding_0) => {
+            _visitor.visit_foreign_item_macro(_binding_0);
+        }
         ForeignItem::Verbatim(ref _binding_0) => {
             _visitor.visit_foreign_item_verbatim(_binding_0);
         }
@@ -1882,6 +1889,19 @@ pub fn visit_foreign_item_fn<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_fn_decl(&*_i.decl);
     tokens_helper(_visitor, &_i.semi_token.spans);
+}
+#[cfg(feature = "full")]
+pub fn visit_foreign_item_macro<'ast, V: Visit<'ast> + ?Sized>(
+    _visitor: &mut V,
+    _i: &'ast ForeignItemMacro,
+) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    _visitor.visit_macro(&_i.mac);
+    if let Some(ref it) = _i.semi_token {
+        tokens_helper(_visitor, &it.spans)
+    };
 }
 #[cfg(feature = "full")]
 pub fn visit_foreign_item_static<'ast, V: Visit<'ast> + ?Sized>(

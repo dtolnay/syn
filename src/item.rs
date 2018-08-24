@@ -429,6 +429,15 @@ ast_enum_of_structs! {
             pub semi_token: Token![;],
         }),
 
+        /// A macro invocation within an extern block.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Macro(ForeignItemMacro {
+            pub attrs: Vec<Attribute>,
+            pub mac: Macro,
+            pub semi_token: Option<Token![;]>,
+        }),
+
         /// Tokens in an `extern` block not interpreted by Syn.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -1121,7 +1130,7 @@ pub mod parsing {
         |
         syn!(ForeignItemType) => { ForeignItem::Type }
         |
-        call!(foreign_item_macro) => { ForeignItem::Verbatim }
+        syn!(ForeignItemMacro) => { ForeignItem::Macro }
     ));
 
     impl_synom!(ForeignItemFn "foreign function" do_parse!(
@@ -1196,14 +1205,14 @@ pub mod parsing {
         })
     ));
 
-    named!(foreign_item_macro -> ForeignItemVerbatim, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
+    impl_synom!(ForeignItemMacro "macro in extern block" do_parse!(
+        attrs: many0!(Attribute::parse_outer) >>
         mac: syn!(Macro) >>
-        cond!(!is_brace(&mac.delimiter), punct!(;)) >>
-        end: call!(verbatim::grab_cursor) >>
-        (ForeignItemVerbatim {
-            tts: verbatim::token_range(begin..end),
+        semi: cond!(!is_brace(&mac.delimiter), punct!(;)) >>
+        (ForeignItemMacro {
+            attrs: attrs,
+            mac: mac,
+            semi_token: semi,
         })
     ));
 
@@ -2094,6 +2103,14 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ForeignItemMacro {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
