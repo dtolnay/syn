@@ -234,6 +234,12 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                     span: DUMMY_SP,
                     attrs: ThinVec::new(),
                 },
+                ExprKind::TryBlock(_) => Expr {
+                    id: ast::DUMMY_NODE_ID,
+                    node: ExprKind::Paren(P(e)),
+                    span: DUMMY_SP,
+                    attrs: ThinVec::new(),
+                },
                 ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {
                     fold::noop_fold_expr(e, self)
                 }
