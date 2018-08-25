@@ -26,7 +26,6 @@ pub trait Parse: Sized {
 pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 
 /// Cursor position within a buffered token stream.
-#[derive(Clone)]
 pub struct ParseBuffer<'a> {
     scope: Span,
     cell: Cell<Cursor<'static>>,
@@ -38,6 +37,19 @@ impl<'a> Drop for ParseBuffer<'a> {
     fn drop(&mut self) {
         if !self.is_empty() && self.unexpected.get().is_none() {
             self.unexpected.set(Some(self.cursor().span()));
+        }
+    }
+}
+
+impl<'a> Clone for ParseBuffer<'a> {
+    fn clone(&self) -> Self {
+        ParseBuffer {
+            scope: self.scope,
+            cell: self.cell.clone(),
+            marker: PhantomData,
+            // Not the parent's unexpected. Nothing cares whether the clone
+            // parses all the way.
+            unexpected: Rc::new(Cell::new(None)),
         }
     }
 }
