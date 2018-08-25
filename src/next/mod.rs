@@ -11,8 +11,6 @@ mod error;
 mod lookahead;
 mod span;
 
-pub use proc_macro2::Ident;
-
 // Not public API.
 #[doc(hidden)]
 pub mod export;
