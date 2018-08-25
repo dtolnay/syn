@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use proc_macro2::Span;
+use proc_macro2::{Delimiter, Span};
 
 use buffer::Cursor;
 use error::{self, Error};
@@ -88,6 +88,12 @@ pub fn is_token(lookahead: &Lookahead1, repr: &'static str) -> bool {
     } else {
         false
     }
+}
+
+// Not public API.
+#[doc(hidden)]
+pub fn is_delimiter(lookahead: &Lookahead1, delimiter: Delimiter) -> bool {
+    lookahead.cursor.group(delimiter).is_some()
 }
 
 mod private {

@@ -105,6 +105,8 @@ use std::fmt::{self, Debug};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
+#[cfg(feature = "parsing")]
+use proc_macro2::Delimiter;
 #[cfg(any(feature = "printing", feature = "parsing"))]
 use proc_macro2::Spacing;
 use proc_macro2::{Ident, Span};
@@ -371,6 +373,9 @@ macro_rules! define_delimiters {
                     parsing::delim($token, tokens, $name, f)
                 }
             }
+
+            #[cfg(feature = "parsing")]
+            impl private::Sealed for $name {}
         )*
     };
 }
@@ -434,6 +439,39 @@ impl Parse for Underscore {
             }
             Err(cursor.error("expected `_`"))
         })
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl Token for Paren {
+    fn peek(lookahead: &Lookahead1) -> bool {
+        lookahead::is_delimiter(lookahead, Delimiter::Parenthesis)
+    }
+
+    fn display() -> String {
+        "parentheses".to_owned()
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl Token for Brace {
+    fn peek(lookahead: &Lookahead1) -> bool {
+        lookahead::is_delimiter(lookahead, Delimiter::Brace)
+    }
+
+    fn display() -> String {
+        "curly braces".to_owned()
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl Token for Bracket {
+    fn peek(lookahead: &Lookahead1) -> bool {
+        lookahead::is_delimiter(lookahead, Delimiter::Bracket)
+    }
+
+    fn display() -> String {
+        "square brackets".to_owned()
     }
 }
 
