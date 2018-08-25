@@ -114,10 +114,21 @@ impl Parse for Ident {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step_cursor(|cursor| {
             if let Some((ident, rest)) = cursor.ident() {
-                Ok((ident, rest))
-            } else {
-                Err(cursor.error("expected identifier"))
+                match ident.to_string().as_str() {
+                    "_"
+                    // Based on https://doc.rust-lang.org/grammar.html#keywords
+                    // and https://github.com/rust-lang/rfcs/blob/master/text/2421-unreservations-2018.md
+                    | "abstract" | "as" | "become" | "box" | "break" | "const"
+                    | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
+                    | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
+                    | "mod" | "move" | "mut" | "override" | "priv" | "proc" | "pub"
+                    | "ref" | "return" | "Self" | "self" | "static" | "struct"
+                    | "super" | "trait" | "true" | "type" | "typeof" | "unsafe" | "unsized" | "use"
+                    | "virtual" | "where" | "while" | "yield" => {}
+                    _ => return Ok((ident, rest)),
+                }
             }
+            Err(cursor.error("expected identifier"))
         })
     }
 }

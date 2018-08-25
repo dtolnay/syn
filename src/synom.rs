@@ -155,12 +155,13 @@
     feature = "proc-macro"
 ))]
 use proc_macro;
-use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
 use error::parse_error;
 pub use error::{PResult, ParseError};
 
 use buffer::{Cursor, TokenBuffer};
+use next;
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.
@@ -207,6 +208,16 @@ pub trait Synom: Sized {
     }
 }
 
+impl<T> Synom for T where T: next::parse::Parse {
+    fn parse(input: Cursor) -> PResult<Self> {
+        let state = next::parse::ParseBuffer::new(Span::call_site(), input);
+        match <T as next::parse::Parse>::parse(&state) {
+            Ok(node) => Ok((node, state.cursor())),
+            Err(err) => Err(ParseError::new(err.to_string())),
+        }
+    }
+}
+
 impl Synom for TokenStream {
     fn parse(input: Cursor) -> PResult<Self> {
         Ok((input.token_stream(), Cursor::empty()))
@@ -244,34 +255,6 @@ impl Synom for Group {
 
     fn description() -> Option<&'static str> {
         Some("group token")
-    }
-}
-
-impl Synom for Ident {
-    fn parse(input: Cursor) -> PResult<Self> {
-        let (ident, rest) = match input.ident() {
-            Some(ident) => ident,
-            _ => return parse_error(),
-        };
-        match &ident.to_string()[..] {
-            "_"
-            // Based on https://doc.rust-lang.org/grammar.html#keywords
-            // and https://github.com/rust-lang/rfcs/blob/master/text/2421-unreservations-2018.md
-            | "abstract" | "as" | "become" | "box" | "break" | "const"
-            | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
-            | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
-            | "mod" | "move" | "mut" | "override" | "priv" | "proc" | "pub"
-            | "ref" | "return" | "Self" | "self" | "static" | "struct"
-            | "super" | "trait" | "true" | "type" | "typeof" | "unsafe" | "unsized" | "use"
-            | "virtual" | "where" | "while" | "yield" => return parse_error(),
-            _ => {}
-        }
-
-        Ok((ident, rest))
-    }
-
-    fn description() -> Option<&'static str> {
-        Some("identifier")
     }
 }
 
