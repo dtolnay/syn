@@ -9,10 +9,10 @@ use std::ops::Deref;
 use proc_macro2::{Ident, Span};
 use syn::buffer::Cursor;
 
-use error;
+use super::error;
 
-pub use error::{Error, Result};
-pub use lookahead::{Lookahead1, Peek};
+pub use super::error::{Error, Result};
+pub use super::lookahead::{Lookahead1, Peek};
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.

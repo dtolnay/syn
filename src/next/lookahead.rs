@@ -3,9 +3,9 @@ use std::cell::RefCell;
 use proc_macro2::Span;
 use syn::buffer::Cursor;
 
-use error;
-use parse::Error;
-use token::Token;
+use super::error;
+use super::parse::Error;
+use super::token::Token;
 
 /// Support for checking the next token in a stream to decide how to parse.
 ///

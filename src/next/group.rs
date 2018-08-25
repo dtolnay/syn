@@ -1,7 +1,7 @@
 use proc_macro2::Delimiter;
 
-use parse::{ParseBuffer, Result};
-use token;
+use super::parse::{ParseBuffer, Result};
+use super::token;
 
 pub struct Braces<'a> {
     pub token: token::Brace,
@@ -63,13 +63,13 @@ impl<'a> ParseBuffer<'a> {
 #[macro_export]
 macro_rules! braced {
     ($content:ident in $cursor:expr) => {
-        match $crate::parse::ParseBuffer::parse_braces(&$cursor) {
-            $crate::export::Ok(braces) => {
+        match $crate::next::parse::ParseBuffer::parse_braces(&$cursor) {
+            $crate::next::export::Ok(braces) => {
                 $content = braces.content;
                 braces.token
             }
-            $crate::export::Err(error) => {
-                return $crate::export::Err(error);
+            $crate::next::export::Err(error) => {
+                return $crate::next::export::Err(error);
             }
         }
     };

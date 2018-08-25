@@ -4,10 +4,10 @@ use std::ops::{Deref, DerefMut};
 
 use proc_macro2::{Spacing, Span};
 
-use error::Error;
-use lookahead;
-use parse::{Lookahead1, Parse, ParseStream, Result};
-use span::{FromSpans, IntoSpans};
+use super::error::Error;
+use super::lookahead;
+use super::parse::{Lookahead1, Parse, ParseStream, Result};
+use super::span::{FromSpans, IntoSpans};
 
 /// Marker trait for types that represent single tokens.
 ///
@@ -31,11 +31,11 @@ mod private {
 #[macro_export]
 #[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! Token {
-    (struct) => { $crate::token::Struct };
-    (enum)   => { $crate::token::Enum };
-    (:)      => { $crate::token::Colon };
-    (,)      => { $crate::token::Comma };
-    (..)     => { $crate::token::Dot2 };
+    (struct) => { $crate::next::token::Struct };
+    (enum)   => { $crate::next::token::Enum };
+    (:)      => { $crate::next::token::Colon };
+    (,)      => { $crate::next::token::Comma };
+    (..)     => { $crate::next::token::Dot2 };
 }
 
 macro_rules! impl_token {

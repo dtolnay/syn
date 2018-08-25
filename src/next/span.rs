@@ -1,6 +1,6 @@
 use proc_macro2::Span;
 
-use lookahead::TokenMarker;
+use super::lookahead::TokenMarker;
 
 pub trait IntoSpans<S> {
     // Not public API.
