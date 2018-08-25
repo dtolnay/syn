@@ -105,11 +105,11 @@ use std::fmt::{self, Debug};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
+#[cfg(any(feature = "printing", feature = "parsing"))]
+use proc_macro2::Spacing;
 use proc_macro2::{Ident, Span};
 #[cfg(feature = "printing")]
 use proc_macro2::{Punct, TokenStream};
-#[cfg(any(feature = "printing", feature = "parsing"))]
-use proc_macro2::Spacing;
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 

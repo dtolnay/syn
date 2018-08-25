@@ -40,28 +40,31 @@ impl<'a> ParseBuffer<'a> {
     // Not public API.
     #[doc(hidden)]
     pub fn parse_parens(&self) -> Result<Parens<'a>> {
-        self.parse_group(Delimiter::Parenthesis).map(|(span, content)| Parens {
-            token: token::Paren(span),
-            content: content,
-        })
+        self.parse_group(Delimiter::Parenthesis)
+            .map(|(span, content)| Parens {
+                token: token::Paren(span),
+                content: content,
+            })
     }
 
     // Not public API.
     #[doc(hidden)]
     pub fn parse_braces(&self) -> Result<Braces<'a>> {
-        self.parse_group(Delimiter::Brace).map(|(span, content)| Braces {
-            token: token::Brace(span),
-            content: content,
-        })
+        self.parse_group(Delimiter::Brace)
+            .map(|(span, content)| Braces {
+                token: token::Brace(span),
+                content: content,
+            })
     }
 
     // Not public API.
     #[doc(hidden)]
     pub fn parse_brackets(&self) -> Result<Brackets<'a>> {
-        self.parse_group(Delimiter::Bracket).map(|(span, content)| Brackets {
-            token: token::Bracket(span),
-            content: content,
-        })
+        self.parse_group(Delimiter::Bracket)
+            .map(|(span, content)| Brackets {
+                token: token::Bracket(span),
+                content: content,
+            })
     }
 }
 

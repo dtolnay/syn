@@ -591,9 +591,9 @@ mod span;
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
-use synom::{Parser, Synom};
-#[cfg(feature = "parsing")]
 use proc_macro2::Span;
+#[cfg(feature = "parsing")]
+use synom::{Parser, Synom};
 
 #[cfg(feature = "parsing")]
 mod error;
@@ -720,7 +720,10 @@ where
 pub fn parse_str<T: Synom>(s: &str) -> Result<T, Error> {
     match s.parse() {
         Ok(tts) => parse2(tts),
-        Err(_) => Err(Error::new(Span::call_site(), "error while lexing input string")),
+        Err(_) => Err(Error::new(
+            Span::call_site(),
+            "error while lexing input string",
+        )),
     }
 }
 

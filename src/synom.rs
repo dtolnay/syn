@@ -158,7 +158,7 @@ use proc_macro;
 use proc_macro2::{Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
 use error::parse_error;
-pub use error::{PResult, Error};
+pub use error::{Error, PResult};
 
 use buffer::{Cursor, TokenBuffer};
 use parse;
@@ -208,7 +208,10 @@ pub trait Synom: Sized {
     }
 }
 
-impl<T> Synom for T where T: parse::Parse {
+impl<T> Synom for T
+where
+    T: parse::Parse,
+{
     fn parse(input: Cursor) -> PResult<Self> {
         let state = parse::ParseBuffer::new(Span::call_site(), input);
         match <T as parse::Parse>::parse(&state) {
@@ -318,7 +321,10 @@ pub trait Parser: Sized {
     fn parse_str(self, s: &str) -> Result<Self::Output, Error> {
         match s.parse() {
             Ok(tts) => self.parse2(tts),
-            Err(_) => Err(Error::new(Span::call_site(), "error while lexing input string")),
+            Err(_) => Err(Error::new(
+                Span::call_site(),
+                "error while lexing input string",
+            )),
         }
     }
 }
