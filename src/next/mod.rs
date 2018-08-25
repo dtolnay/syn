@@ -7,8 +7,6 @@ pub mod lookahead;
 #[macro_use]
 mod group;
 
-mod error;
-
 use std::str::FromStr;
 
 use buffer::TokenBuffer;
@@ -16,7 +14,8 @@ use buffer::TokenBuffer;
 use proc_macro;
 use proc_macro2::{self, Span};
 
-use self::parse::{Parse, ParseBuffer, Result};
+use error::Result;
+use self::parse::{Parse, ParseBuffer};
 
 /// Parse tokens of source code into the chosen syntax tree node.
 #[cfg(feature = "proc-macro")]

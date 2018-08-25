@@ -13,11 +13,11 @@
 //! cheaply copyable cursor over a range of tokens in a token stream, and
 //! `PResult` is a result that packages together a parsed syntax tree node `T`
 //! with a stream of remaining unparsed tokens after `T` represented as another
-//! `Cursor`, or a [`ParseError`] if parsing failed.
+//! `Cursor`, or an [`Error`] if parsing failed.
 //!
 //! [`Cursor`]: ../buffer/index.html
 //! [`PResult<T>`]: type.PResult.html
-//! [`ParseError`]: struct.ParseError.html
+//! [`Error`]: struct.Error.html
 //!
 //! This `Cursor`- and `PResult`-based interface is convenient for parser
 //! combinators and parser implementations, but not necessarily when you just
@@ -39,7 +39,7 @@
 //! ```
 //! use syn::Type;
 //!
-//! # fn run_parser() -> Result<(), syn::synom::ParseError> {
+//! # fn run_parser() -> Result<(), syn::synom::Error> {
 //! let t: Type = syn::parse_str("std::collections::HashMap<String, Value>")?;
 //! #     Ok(())
 //! # }
@@ -90,7 +90,7 @@
 //! use syn::punctuated::Punctuated;
 //! use syn::{PathSegment, Expr, Attribute};
 //!
-//! # fn run_parsers() -> Result<(), syn::synom::ParseError> {
+//! # fn run_parsers() -> Result<(), syn::synom::Error> {
 //! #     let tokens = TokenStream::new().into();
 //! // Parse a nonempty sequence of path segments separated by `::` punctuation
 //! // with no trailing punctuation.
@@ -158,7 +158,7 @@ use proc_macro;
 use proc_macro2::{Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
 use error::parse_error;
-pub use error::{PResult, ParseError};
+pub use error::{PResult, Error};
 
 use buffer::{Cursor, TokenBuffer};
 use next;
@@ -213,7 +213,7 @@ impl<T> Synom for T where T: next::parse::Parse {
         let state = next::parse::ParseBuffer::new(Span::call_site(), input);
         match <T as next::parse::Parse>::parse(&state) {
             Ok(node) => Ok((node, state.cursor())),
-            Err(err) => Err(ParseError::new(err.to_string())),
+            Err(err) => Err(err),
         }
     }
 }
@@ -295,7 +295,7 @@ pub trait Parser: Sized {
     type Output;
 
     /// Parse a proc-macro2 token stream into the chosen syntax tree node.
-    fn parse2(self, tokens: TokenStream) -> Result<Self::Output, ParseError>;
+    fn parse2(self, tokens: TokenStream) -> Result<Self::Output, Error>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
     ///
@@ -305,7 +305,7 @@ pub trait Parser: Sized {
         not(all(target_arch = "wasm32", target_os = "unknown")),
         feature = "proc-macro"
     ))]
-    fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output, ParseError> {
+    fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output, Error> {
         self.parse2(tokens.into())
     }
 
@@ -315,10 +315,10 @@ pub trait Parser: Sized {
     ///
     /// Every span in the resulting syntax tree will be set to resolve at the
     /// macro call site.
-    fn parse_str(self, s: &str) -> Result<Self::Output, ParseError> {
+    fn parse_str(self, s: &str) -> Result<Self::Output, Error> {
         match s.parse() {
             Ok(tts) => self.parse2(tts),
-            Err(_) => Err(ParseError::new("error while lexing input string")),
+            Err(_) => Err(Error::new(Span::call_site(), "error while lexing input string")),
         }
     }
 }
@@ -329,16 +329,16 @@ where
 {
     type Output = T;
 
-    fn parse2(self, tokens: TokenStream) -> Result<T, ParseError> {
+    fn parse2(self, tokens: TokenStream) -> Result<T, Error> {
         let buf = TokenBuffer::new2(tokens);
         let (t, rest) = self(buf.begin())?;
         if rest.eof() {
             Ok(t)
         } else if rest == buf.begin() {
             // parsed nothing
-            Err(ParseError::new("failed to parse anything"))
+            Err(Error::new(Span::call_site(), "failed to parse anything"))
         } else {
-            Err(ParseError::new("failed to parse all tokens"))
+            Err(Error::new(Span::call_site(), "failed to parse all tokens"))
         }
     }
 }

@@ -11,9 +11,9 @@ extern crate syn;
 
 use proc_macro2::{Ident, Span, TokenStream};
 use std::str::FromStr;
-use syn::synom::ParseError;
+use syn::error::Error;
 
-fn parse(s: &str) -> Result<Ident, ParseError> {
+fn parse(s: &str) -> Result<Ident, Error> {
     syn::parse2(TokenStream::from_str(s).unwrap())
 }
 

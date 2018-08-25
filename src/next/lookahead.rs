@@ -1,11 +1,10 @@
 use std::cell::RefCell;
 
-use buffer::Cursor;
 use proc_macro2::Span;
 
+use buffer::Cursor;
+use error::{self, Error};
 use span::IntoSpans;
-use super::error;
-use super::parse::Error;
 use token::Token;
 
 /// Support for checking the next token in a stream to decide how to parse.

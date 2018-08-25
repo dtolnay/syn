@@ -175,7 +175,7 @@ fn run_test<T: Into<Meta>>(input: &str, expected: T) {
             assert!(rest.eof());
             e
         }
-        Err(err) => panic!(err),
+        Err(err) => panic!(err.to_string()),
     };
     assert_eq!(expected.into(), attr.interpret_meta().unwrap());
 }

@@ -15,7 +15,7 @@ use proc_macro2::Ident;
 #[cfg(feature = "parsing")]
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
-use {ParseError, Synom};
+use {Error, Synom};
 
 use proc_macro2::TokenTree;
 
@@ -122,12 +122,12 @@ impl LitStr {
     ///
     /// All spans in the syntax tree will point to the span of this `LitStr`.
     #[cfg(feature = "parsing")]
-    pub fn parse<T: Synom>(&self) -> Result<T, ParseError> {
+    pub fn parse<T: Synom>(&self) -> Result<T, Error> {
         use proc_macro2::Group;
 
         // Parse string literal into a token stream with every span equal to the
         // original literal's span.
-        fn spanned_tokens(s: &LitStr) -> Result<TokenStream, ParseError> {
+        fn spanned_tokens(s: &LitStr) -> Result<TokenStream, Error> {
             let stream = ::parse_str(&s.value())?;
             Ok(respan_token_stream(stream, s.span()))
         }

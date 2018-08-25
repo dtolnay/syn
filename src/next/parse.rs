@@ -7,11 +7,9 @@ use std::mem;
 use std::ops::Deref;
 
 use buffer::Cursor;
+use error::{self, Error, Result};
 use proc_macro2::{Ident, Span};
 
-use super::error;
-
-pub use super::error::{Error, Result};
 pub use super::lookahead::{Lookahead1, Peek};
 
 /// Parsing interface implemented by all types that can be parsed in a default

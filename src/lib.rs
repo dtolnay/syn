@@ -582,11 +582,13 @@ mod span;
 
 #[cfg(feature = "parsing")]
 use synom::{Parser, Synom};
+#[cfg(feature = "parsing")]
+use proc_macro2::Span;
 
 #[cfg(feature = "parsing")]
-mod error;
+pub mod error;
 #[cfg(feature = "parsing")]
-use error::ParseError;
+use error::Error;
 
 // Not public API.
 #[cfg(feature = "parsing")]
@@ -645,7 +647,7 @@ pub use error::parse_error;
     feature = "parsing",
     feature = "proc-macro"
 ))]
-pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, ParseError>
+pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, Error>
 where
     T: Synom,
 {
@@ -665,13 +667,13 @@ where
 ///
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
-pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, ParseError>
+pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, Error>
 where
     T: Synom,
 {
     let parser = T::parse;
     parser.parse2(tokens).map_err(|err| match T::description() {
-        Some(s) => ParseError::new(format!("failed to parse {}: {}", s, err)),
+        Some(s) => Error::new(Span::call_site(), format!("failed to parse {}: {}", s, err)),
         None => err,
     })
 }
@@ -705,10 +707,10 @@ where
 /// # fn main() { run().unwrap() }
 /// ```
 #[cfg(feature = "parsing")]
-pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
+pub fn parse_str<T: Synom>(s: &str) -> Result<T, Error> {
     match s.parse() {
         Ok(tts) => parse2(tts),
-        Err(_) => Err(ParseError::new("error while lexing input string")),
+        Err(_) => Err(Error::new(Span::call_site(), "error while lexing input string")),
     }
 }
 
@@ -753,7 +755,7 @@ pub fn parse_str<T: Synom>(s: &str) -> Result<T, ParseError> {
 /// # fn main() { run().unwrap() }
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
-pub fn parse_file(mut content: &str) -> Result<File, ParseError> {
+pub fn parse_file(mut content: &str) -> Result<File, Error> {
     // Strip the BOM if it is present
     const BOM: &'static str = "\u{feff}";
     if content.starts_with(BOM) {

@@ -114,9 +114,11 @@ use proc_macro2::Spacing;
 use quote::{ToTokens, TokenStreamExt};
 
 #[cfg(feature = "parsing")]
+use error::Result;
+#[cfg(feature = "parsing")]
 use next::lookahead;
 #[cfg(feature = "parsing")]
-use next::parse::{Lookahead1, Parse, ParseStream, Result};
+use next::parse::{Lookahead1, Parse, ParseStream};
 use span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
@@ -772,7 +774,8 @@ mod parsing {
     use proc_macro2::{Delimiter, Spacing, Span};
 
     use buffer::Cursor;
-    use next::parse::{Error, ParseStream, Result};
+    use error::{Error, Result};
+    use next::parse::ParseStream;
     use parse_error;
     use span::FromSpans;
     use synom::PResult;
