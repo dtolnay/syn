@@ -11,6 +11,7 @@ use proc_macro2::{Ident, Span};
 
 use buffer::Cursor;
 use error;
+use synom::PResult;
 
 pub use error::{Error, Result};
 pub use lookahead::{Lookahead1, Peek};
@@ -102,6 +103,14 @@ impl<'a> ParseBuffer<'a> {
         T::parse(self)
     }
 
+    pub fn peek<T: Peek>(&self, token: T) -> bool {
+        self.lookahead1().peek(token)
+    }
+
+    pub fn fork(&self) -> Self {
+        self.clone()
+    }
+
     // Not public API.
     #[doc(hidden)]
     pub fn step_cursor<F, R>(&self, function: F) -> Result<R>
@@ -120,6 +129,12 @@ impl<'a> ParseBuffer<'a> {
             }
             Err(err) => Err(err),
         }
+    }
+
+    // Not public API.
+    #[doc(hidden)]
+    pub fn parse_synom<T>(&self, parse: fn(Cursor) -> PResult<T>) -> Result<T> {
+        self.step_cursor(|step| parse(step.cursor))
     }
 
     // Not public API.
