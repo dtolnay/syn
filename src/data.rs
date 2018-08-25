@@ -185,6 +185,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
+    use parse::{Parse, ParseStream, Result};
+    use synom::ext::IdentExt;
     use synom::Synom;
 
     impl Synom for Variant {
@@ -270,75 +272,66 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for Visibility {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                pub_token: keyword!(pub) >>
-                other: parens!(keyword!(crate)) >>
-                (Visibility::Restricted(VisRestricted {
-                    pub_token: pub_token,
-                    paren_token: other.0,
-                    in_token: None,
-                    path: Box::new(other.1.into()),
-                }))
-            )
-            |
-            do_parse!(
-                crate_token: keyword!(crate) >>
-                not!(punct!(::)) >>
-                (Visibility::Crate(VisCrate {
-                    crate_token: crate_token,
-                }))
-            )
-            |
-            do_parse!(
-                pub_token: keyword!(pub) >>
-                other: parens!(keyword!(self)) >>
-                (Visibility::Restricted(VisRestricted {
-                    pub_token: pub_token,
-                    paren_token: other.0,
-                    in_token: None,
-                    path: Box::new(other.1.into()),
-                }))
-            )
-            |
-            do_parse!(
-                pub_token: keyword!(pub) >>
-                other: parens!(keyword!(super)) >>
-                (Visibility::Restricted(VisRestricted {
-                    pub_token: pub_token,
-                    paren_token: other.0,
-                    in_token: None,
-                    path: Box::new(other.1.into()),
-                }))
-            )
-            |
-            do_parse!(
-                pub_token: keyword!(pub) >>
-                other: parens!(do_parse!(
-                    in_tok: keyword!(in) >>
-                    restricted: call!(Path::parse_mod_style) >>
-                    (in_tok, restricted)
-                )) >>
-                (Visibility::Restricted(VisRestricted {
-                    pub_token: pub_token,
-                    paren_token: other.0,
-                    in_token: Some((other.1).0),
-                    path: Box::new((other.1).1),
-                }))
-            )
-            |
-            keyword!(pub) => { |tok| {
-                Visibility::Public(VisPublic {
-                    pub_token: tok,
-                })
-            } }
-            |
-            epsilon!() => { |_| Visibility::Inherited }
-        ));
+    impl Parse for Visibility {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Token![pub]) {
+                Self::parse_pub(input)
+            } else if input.peek(Token![crate]) {
+                Self::parse_crate(input)
+            } else {
+                Ok(Visibility::Inherited)
+            }
+        }
+    }
 
-        fn description() -> Option<&'static str> {
-            Some("visibility qualifier such as `pub`")
+    impl Visibility {
+        fn parse_pub(input: ParseStream) -> Result<Self> {
+            let pub_token = input.parse::<Token![pub]>()?;
+
+            if input.peek(token::Paren) {
+                let ahead = input.fork();
+                let mut content;
+                parenthesized!(content in ahead);
+
+                if content.peek(Token![crate])
+                    || content.peek(Token![self])
+                    || content.peek(Token![super])
+                {
+                    return Ok(Visibility::Restricted(VisRestricted {
+                        pub_token: pub_token,
+                        paren_token: parenthesized!(content in input),
+                        in_token: None,
+                        path: Box::new(Path::from(content.parse_synom(Ident::parse_any)?)),
+                    }));
+                } else if content.peek(Token![in]) {
+                    return Ok(Visibility::Restricted(VisRestricted {
+                        pub_token: pub_token,
+                        paren_token: parenthesized!(content in input),
+                        in_token: Some(content.parse()?),
+                        path: Box::new(content.parse_synom(Path::parse_mod_style)?),
+                    }));
+                }
+            }
+
+            Ok(Visibility::Public(VisPublic {
+                pub_token: pub_token,
+            }))
+        }
+
+        fn parse_crate(input: ParseStream) -> Result<Self> {
+            let followed_by_colons = {
+                let ahead = input.fork();
+                ahead.parse::<Token![crate]>()?;
+                ahead.peek(Token![::])
+            };
+
+            if followed_by_colons {
+                Ok(Visibility::Inherited)
+            } else {
+                Ok(Visibility::Crate(VisCrate {
+                    crate_token: input.parse()?,
+                }))
+            }
         }
     }
 }
