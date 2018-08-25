@@ -576,6 +576,10 @@ pub mod export;
 #[cfg(feature = "parsing")]
 pub mod next;
 
+#[cfg(feature = "parsing")]
+#[macro_use]
+mod group;
+
 mod span;
 
 ////////////////////////////////////////////////////////////////////////////////

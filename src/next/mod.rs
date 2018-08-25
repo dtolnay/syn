@@ -4,9 +4,6 @@ pub mod parse;
 // FIXME
 pub mod lookahead;
 
-#[macro_use]
-mod group;
-
 use std::str::FromStr;
 
 use buffer::TokenBuffer;
