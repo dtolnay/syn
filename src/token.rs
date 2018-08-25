@@ -98,12 +98,16 @@
 //! ```
 
 use std;
+#[cfg(feature = "parsing")]
+use std::cell::Cell;
 #[cfg(feature = "extra-traits")]
 use std::cmp;
 #[cfg(feature = "extra-traits")]
 use std::fmt::{self, Debug};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
+#[cfg(feature = "parsing")]
+use std::rc::Rc;
 
 #[cfg(feature = "parsing")]
 use proc_macro2::Delimiter;
@@ -120,7 +124,7 @@ use error::Result;
 #[cfg(feature = "parsing")]
 use lookahead;
 #[cfg(feature = "parsing")]
-use parse::{Lookahead1, Parse, ParseStream};
+use parse::{Lookahead1, Parse, ParseBuffer, ParseStream};
 use span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
@@ -147,7 +151,13 @@ macro_rules! impl_token {
         #[cfg(feature = "parsing")]
         impl Token for $name {
             fn peek(lookahead: &Lookahead1) -> bool {
-                lookahead::is_token(lookahead, $token)
+                // TODO factor out in a way that can be compiled just once
+                let scope = Span::call_site();
+                let cursor = lookahead.cursor();
+                let unexpected = Rc::new(Cell::new(None));
+                ParseBuffer::new(scope, cursor, unexpected)
+                    .parse::<Self>()
+                    .is_ok()
             }
 
             fn display() -> String {

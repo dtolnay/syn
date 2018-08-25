@@ -57,6 +57,12 @@ impl<'a> Lookahead1<'a> {
             }
         }
     }
+
+    // Not public API.
+    #[doc(hidden)]
+    pub fn cursor(&self) -> Cursor<'a> {
+        self.cursor
+    }
 }
 
 /// Types that can be parsed by looking at just one token.
@@ -77,16 +83,6 @@ pub enum TokenMarker {}
 impl<S> IntoSpans<S> for TokenMarker {
     fn into_spans(self) -> S {
         match self {}
-    }
-}
-
-// Not public API.
-#[doc(hidden)]
-pub fn is_token(lookahead: &Lookahead1, repr: &'static str) -> bool {
-    if let Some((token, _rest)) = lookahead.cursor.token_tree() {
-        token.to_string() == repr
-    } else {
-        false
     }
 }
 
