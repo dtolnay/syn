@@ -577,6 +577,12 @@ pub mod export;
 pub mod next;
 
 #[cfg(feature = "parsing")]
+mod lookahead;
+
+#[cfg(feature = "parsing")]
+pub mod parse;
+
+#[cfg(feature = "parsing")]
 #[macro_use]
 mod group;
 
@@ -590,7 +596,7 @@ use synom::{Parser, Synom};
 use proc_macro2::Span;
 
 #[cfg(feature = "parsing")]
-pub mod error;
+mod error;
 #[cfg(feature = "parsing")]
 use error::Error;
 

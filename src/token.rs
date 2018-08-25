@@ -116,9 +116,9 @@ use quote::{ToTokens, TokenStreamExt};
 #[cfg(feature = "parsing")]
 use error::Result;
 #[cfg(feature = "parsing")]
-use next::lookahead;
+use lookahead;
 #[cfg(feature = "parsing")]
-use next::parse::{Lookahead1, Parse, ParseStream};
+use parse::{Lookahead1, Parse, ParseStream};
 use span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
@@ -775,7 +775,7 @@ mod parsing {
 
     use buffer::Cursor;
     use error::{Error, Result};
-    use next::parse::ParseStream;
+    use parse::ParseStream;
     use parse_error;
     use span::FromSpans;
     use synom::PResult;

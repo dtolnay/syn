@@ -1,9 +1,3 @@
-#[macro_use]
-pub mod parse;
-
-// FIXME
-pub mod lookahead;
-
 use std::str::FromStr;
 
 use buffer::TokenBuffer;
@@ -12,7 +6,7 @@ use proc_macro;
 use proc_macro2::{self, Span};
 
 use error::Result;
-use self::parse::{Parse, ParseBuffer};
+use parse::{Parse, ParseBuffer};
 
 /// Parse tokens of source code into the chosen syntax tree node.
 #[cfg(feature = "proc-macro")]
@@ -44,7 +38,7 @@ pub fn parse_str<T: Parse>(input: &str) -> Result<T> {
 /// #
 /// use proc_macro::TokenStream;
 /// use syn::parse_macro_input;
-/// use syn::next::parse::{Parse, ParseStream, Result};
+/// use syn::parse::{Parse, ParseStream, Result};
 ///
 /// struct MyMacroInput {
 ///     /* ... */

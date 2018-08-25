@@ -7,10 +7,11 @@ use std::mem;
 use std::ops::Deref;
 
 use buffer::Cursor;
-use error::{self, Error, Result};
+use error;
 use proc_macro2::{Ident, Span};
 
-pub use super::lookahead::{Lookahead1, Peek};
+pub use error::{Error, Result};
+pub use lookahead::{Lookahead1, Peek};
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.

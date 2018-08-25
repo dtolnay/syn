@@ -161,7 +161,7 @@ use error::parse_error;
 pub use error::{PResult, Error};
 
 use buffer::{Cursor, TokenBuffer};
-use next;
+use parse;
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.
@@ -208,10 +208,10 @@ pub trait Synom: Sized {
     }
 }
 
-impl<T> Synom for T where T: next::parse::Parse {
+impl<T> Synom for T where T: parse::Parse {
     fn parse(input: Cursor) -> PResult<Self> {
-        let state = next::parse::ParseBuffer::new(Span::call_site(), input);
-        match <T as next::parse::Parse>::parse(&state) {
+        let state = parse::ParseBuffer::new(Span::call_site(), input);
+        match <T as parse::Parse>::parse(&state) {
             Ok(node) => Ok((node, state.cursor())),
             Err(err) => Err(err),
         }

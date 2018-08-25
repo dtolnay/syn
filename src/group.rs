@@ -1,7 +1,7 @@
 use proc_macro2::{Delimiter, Span};
 
 use error::Result;
-use next::parse::ParseBuffer;
+use parse::ParseBuffer;
 use token;
 
 pub struct Parens<'a> {
@@ -69,7 +69,7 @@ impl<'a> ParseBuffer<'a> {
 #[macro_export]
 macro_rules! parenthesized {
     ($content:ident in $cursor:expr) => {
-        match $crate::next::parse::ParseBuffer::parse_parens(&$cursor) {
+        match $crate::parse::ParseBuffer::parse_parens(&$cursor) {
             $crate::export::Ok(parens) => {
                 $content = parens.content;
                 parens.token
@@ -86,16 +86,15 @@ macro_rules! parenthesized {
 /// ```rust
 /// # extern crate syn;
 /// #
-/// use syn::{braced, Token};
-/// use syn::next::{token, Ident};
-/// use syn::next::parse::{Parse, ParseStream, Result};
+/// use syn::{braced, token, Ident, Token};
+/// use syn::parse::{Parse, ParseStream, Result};
 /// #
 /// # mod example {
 /// #     use super::{syn, braced, token, Ident, Parse, ParseStream, Result};
 /// #
 /// #     macro_rules! Token {
 /// #         (struct) => {
-/// #             syn::next::token::Struct
+/// #             syn::token::Struct
 /// #         };
 /// #     }
 /// #
@@ -132,7 +131,7 @@ macro_rules! parenthesized {
 #[macro_export]
 macro_rules! braced {
     ($content:ident in $cursor:expr) => {
-        match $crate::next::parse::ParseBuffer::parse_braces(&$cursor) {
+        match $crate::parse::ParseBuffer::parse_braces(&$cursor) {
             $crate::export::Ok(braces) => {
                 $content = braces.content;
                 braces.token
@@ -149,7 +148,7 @@ macro_rules! braced {
 #[macro_export]
 macro_rules! bracketed {
     ($content:ident in $cursor:expr) => {
-        match $crate::next::parse::ParseBuffer::parse_brackets(&$cursor) {
+        match $crate::parse::ParseBuffer::parse_brackets(&$cursor) {
             $crate::export::Ok(brackets) => {
                 $content = brackets.content;
                 brackets.token
