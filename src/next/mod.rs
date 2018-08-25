@@ -9,10 +9,6 @@ mod group;
 
 mod error;
 
-// Not public API.
-#[doc(hidden)]
-pub mod export;
-
 use std::str::FromStr;
 
 use buffer::TokenBuffer;
@@ -82,9 +78,9 @@ pub fn parse_str<T: Parse>(input: &str) -> Result<T> {
 macro_rules! parse_macro_input {
     ($tokenstream:ident as $ty:ty) => {
         match $crate::next::parse::<$ty>($tokenstream) {
-            $crate::next::export::Ok(data) => data,
-            $crate::next::export::Err(err) => {
-                return $crate::next::export::TokenStream::from(err.into_compile_error());
+            $crate::export::Ok(data) => data,
+            $crate::export::Err(err) => {
+                return $crate::export::TokenStream::from(err.into_compile_error());
             }
         };
     };

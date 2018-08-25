@@ -78,12 +78,12 @@ impl<'a> ParseBuffer<'a> {
 macro_rules! braced {
     ($content:ident in $cursor:expr) => {
         match $crate::next::parse::ParseBuffer::parse_braces(&$cursor) {
-            $crate::next::export::Ok(braces) => {
+            $crate::export::Ok(braces) => {
                 $content = braces.content;
                 braces.token
             }
-            $crate::next::export::Err(error) => {
-                return $crate::next::export::Err(error);
+            $crate::export::Err(error) => {
+                return $crate::export::Err(error);
             }
         }
     };

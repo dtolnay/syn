@@ -569,6 +569,10 @@ mod gen {
 }
 pub use gen::*;
 
+// Not public API.
+#[doc(hidden)]
+pub mod export;
+
 #[cfg(feature = "parsing")]
 pub mod next;
 
