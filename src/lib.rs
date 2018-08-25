@@ -369,11 +369,12 @@ mod item;
 pub use item::{
     ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
     ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
-    ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item, ItemConst, ItemEnum,
-    ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic,
-    ItemStruct, ItemTrait, ItemType, ItemUnion, ItemUse, ItemVerbatim, MethodSig, TraitItem,
-    TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob,
-    UseGroup, UseName, UsePath, UseRename, UseTree,
+    ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
+    ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
+    ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemType, ItemUnion,
+    ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemExistential,
+    TraitItemMacro, TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName,
+    UsePath, UseRename, UseTree,
 };
 
 #[cfg(feature = "full")]

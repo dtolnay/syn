@@ -136,6 +136,21 @@ ast_enum_of_structs! {
             pub semi_token: Token![;],
         }),
 
+        /// An existential type: `existential type Iter: Iterator<Item = u8>`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Existential(ItemExistential {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub existential_token: Token![existential],
+            pub type_token: Token![type],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
+            pub semi_token: Token![;],
+        }),
+
         /// A struct definition: `struct Foo<A> { x: A }`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -516,6 +531,20 @@ ast_enum_of_structs! {
             pub semi_token: Token![;],
         }),
 
+        /// An existential type within the definition of a trait.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Existential(TraitItemExistential {
+            pub attrs: Vec<Attribute>,
+            pub existential_token: Token![existential],
+            pub type_token: Token![type],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
+            pub semi_token: Token![;],
+        }),
+
         /// A macro invocation within the definition of a trait.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -604,6 +633,20 @@ ast_enum_of_structs! {
             pub generics: Generics,
             pub eq_token: Token![=],
             pub ty: Type,
+            pub semi_token: Token![;],
+        }),
+
+        /// An existential type within an impl block.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Existential(ImplItemExistential {
+            pub attrs: Vec<Attribute>,
+            pub existential_token: Token![existential],
+            pub type_token: Token![type],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
             pub semi_token: Token![;],
         }),
 
@@ -744,7 +787,7 @@ pub mod parsing {
         |
         syn!(ItemType) => { Item::Type }
         |
-        call!(unstable_existential_type) => { Item::Verbatim }
+        syn!(ItemExistential) => { Item::Existential }
         |
         syn!(ItemStruct) => { Item::Struct }
         |
@@ -1219,29 +1262,37 @@ pub mod parsing {
         })
     ));
 
-    named!(existential_type_helper(vis: bool) -> TokenStream, do_parse!(
-        begin: call!(verbatim::grab_cursor) >>
-        many0!(Attribute::parse_outer) >>
-        cond_reduce!(vis, syn!(Visibility)) >>
-        custom_keyword!(existential) >>
-        keyword!(type) >>
-        syn!(Ident) >>
-        syn!(Generics) >>
-        option!(syn!(WhereClause)) >>
+    named!(existential_type(vis: bool) -> ItemExistential, do_parse!(
+        attrs: many0!(Attribute::parse_outer) >>
+        vis: cond_reduce!(vis, syn!(Visibility)) >>
+        existential_token: keyword!(existential) >>
+        type_token: keyword!(type) >>
+        ident: syn!(Ident) >>
+        generics: syn!(Generics) >>
+        where_clause: option!(syn!(WhereClause)) >>
         colon: option!(punct!(:)) >>
-        cond!(
+        bounds: cond!(
             colon.is_some(),
             Punctuated::<TypeParamBound, Token![+]>::parse_separated_nonempty
         ) >>
-        punct!(;) >>
-        end: call!(verbatim::grab_cursor) >>
-        (verbatim::token_range(begin..end))
+        semi: punct!(;) >>
+        (ItemExistential {
+            attrs: attrs,
+            vis: vis,
+            existential_token: existential_token,
+            type_token: type_token,
+            ident: ident,
+            generics: Generics {
+                where_clause: where_clause,
+                ..generics
+            },
+            colon_token: colon,
+            bounds: bounds.unwrap_or_else(Punctuated::new),
+            semi_token: semi,
+        })
     ));
 
-    named!(unstable_existential_type -> ItemVerbatim, map!(
-        call!(existential_type_helper, true),
-        |tts| ItemVerbatim { tts: tts }
-    ));
+    impl_synom!(ItemExistential "existential type" call!(existential_type, true));
 
     impl_synom!(ItemStruct "struct item" switch!(
         map!(syn!(DeriveInput), Into::into),
@@ -1315,7 +1366,7 @@ pub mod parsing {
         |
         syn!(TraitItemType) => { TraitItem::Type }
         |
-        call!(unstable_trait_existential_type) => { TraitItem::Verbatim }
+        syn!(TraitItemExistential) => { TraitItem::Existential }
         |
         syn!(TraitItemMacro) => { TraitItem::Macro }
     ));
@@ -1420,9 +1471,18 @@ pub mod parsing {
         })
     ));
 
-    named!(unstable_trait_existential_type -> TraitItemVerbatim, map!(
-        call!(existential_type_helper, false),
-        |tts| TraitItemVerbatim { tts: tts }
+    impl_synom!(TraitItemExistential "trait item existential type" map!(
+        call!(existential_type, false),
+        |ety| TraitItemExistential {
+            attrs: ety.attrs,
+            existential_token: ety.existential_token,
+            type_token: ety.type_token,
+            ident: ety.ident,
+            generics: ety.generics,
+            colon_token: ety.colon_token,
+            bounds: ety.bounds,
+            semi_token: ety.semi_token,
+        }
     ));
 
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
@@ -1485,7 +1545,7 @@ pub mod parsing {
         |
         syn!(ImplItemType) => { ImplItem::Type }
         |
-        call!(unstable_impl_existential_type) => { ImplItem::Verbatim }
+        syn!(ImplItemExistential) => { ImplItem::Existential }
         |
         syn!(ImplItemMacro) => { ImplItem::Macro }
     ));
@@ -1593,9 +1653,18 @@ pub mod parsing {
         })
     ));
 
-    named!(unstable_impl_existential_type -> ImplItemVerbatim, map!(
-        call!(existential_type_helper, true),
-        |tts| ImplItemVerbatim { tts: tts }
+    impl_synom!(ImplItemExistential "existential type in impl block" map!(
+        call!(existential_type, true),
+        |ety| ImplItemExistential {
+            attrs: ety.attrs,
+            existential_token: ety.existential_token,
+            type_token: ety.type_token,
+            ident: ety.ident,
+            generics: ety.generics,
+            colon_token: ety.colon_token,
+            bounds: ety.bounds,
+            semi_token: ety.semi_token,
+        }
     ));
 
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
@@ -1733,6 +1802,23 @@ mod printing {
             self.generics.where_clause.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemExistential {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.existential_token.to_tokens(tokens);
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -1959,6 +2045,22 @@ mod printing {
         }
     }
 
+    impl ToTokens for TraitItemExistential {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.existential_token.to_tokens(tokens);
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for TraitItemMacro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -2012,6 +2114,22 @@ mod printing {
             self.generics.where_clause.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ImplItemExistential {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.existential_token.to_tokens(tokens);
+            self.type_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            if !self.bounds.is_empty() {
+                TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                self.bounds.to_tokens(tokens);
+            }
             self.semi_token.to_tokens(tokens);
         }
     }

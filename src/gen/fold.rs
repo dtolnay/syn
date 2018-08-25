@@ -403,6 +403,10 @@ pub trait Fold {
         fold_impl_item_const(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_impl_item_existential(&mut self, i: ImplItemExistential) -> ImplItemExistential {
+        fold_impl_item_existential(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_impl_item_macro(&mut self, i: ImplItemMacro) -> ImplItemMacro {
         fold_impl_item_macro(self, i)
     }
@@ -433,6 +437,10 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_item_enum(&mut self, i: ItemEnum) -> ItemEnum {
         fold_item_enum(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_item_existential(&mut self, i: ItemExistential) -> ItemExistential {
+        fold_item_existential(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_item_extern_crate(&mut self, i: ItemExternCrate) -> ItemExternCrate {
@@ -718,6 +726,10 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_trait_item_const(&mut self, i: TraitItemConst) -> TraitItemConst {
         fold_trait_item_const(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_trait_item_existential(&mut self, i: TraitItemExistential) -> TraitItemExistential {
+        fold_trait_item_existential(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_trait_item_macro(&mut self, i: TraitItemMacro) -> TraitItemMacro {
@@ -1861,6 +1873,9 @@ pub fn fold_impl_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplI
             ImplItem::Method(_visitor.fold_impl_item_method(_binding_0))
         }
         ImplItem::Type(_binding_0) => ImplItem::Type(_visitor.fold_impl_item_type(_binding_0)),
+        ImplItem::Existential(_binding_0) => {
+            ImplItem::Existential(_visitor.fold_impl_item_existential(_binding_0))
+        }
         ImplItem::Macro(_binding_0) => ImplItem::Macro(_visitor.fold_impl_item_macro(_binding_0)),
         ImplItem::Verbatim(_binding_0) => {
             ImplItem::Verbatim(_visitor.fold_impl_item_verbatim(_binding_0))
@@ -1882,6 +1897,22 @@ pub fn fold_impl_item_const<V: Fold + ?Sized>(
         ty: _visitor.fold_type(_i.ty),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
         expr: _visitor.fold_expr(_i.expr),
+        semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_impl_item_existential<V: Fold + ?Sized>(
+    _visitor: &mut V,
+    _i: ImplItemExistential,
+) -> ImplItemExistential {
+    ImplItemExistential {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        existential_token: Token![existential](tokens_helper(_visitor, &_i.existential_token.span)),
+        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        ident: _visitor.fold_ident(_i.ident),
+        generics: _visitor.fold_generics(_i.generics),
+        colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
+        bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }
@@ -1952,6 +1983,9 @@ pub fn fold_item<V: Fold + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
             Item::ForeignMod(_visitor.fold_item_foreign_mod(_binding_0))
         }
         Item::Type(_binding_0) => Item::Type(_visitor.fold_item_type(_binding_0)),
+        Item::Existential(_binding_0) => {
+            Item::Existential(_visitor.fold_item_existential(_binding_0))
+        }
         Item::Struct(_binding_0) => Item::Struct(_visitor.fold_item_struct(_binding_0)),
         Item::Enum(_binding_0) => Item::Enum(_visitor.fold_item_enum(_binding_0)),
         Item::Union(_binding_0) => Item::Union(_visitor.fold_item_union(_binding_0)),
@@ -1986,6 +2020,23 @@ pub fn fold_item_enum<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> ItemE
         generics: _visitor.fold_generics(_i.generics),
         brace_token: Brace(tokens_helper(_visitor, &_i.brace_token.span)),
         variants: FoldHelper::lift(_i.variants, |it| _visitor.fold_variant(it)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_item_existential<V: Fold + ?Sized>(
+    _visitor: &mut V,
+    _i: ItemExistential,
+) -> ItemExistential {
+    ItemExistential {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        vis: _visitor.fold_visibility(_i.vis),
+        existential_token: Token![existential](tokens_helper(_visitor, &_i.existential_token.span)),
+        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        ident: _visitor.fold_ident(_i.ident),
+        generics: _visitor.fold_generics(_i.generics),
+        colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
+        bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
+        semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }
 #[cfg(feature = "full")]
@@ -2621,6 +2672,9 @@ pub fn fold_trait_item<V: Fold + ?Sized>(_visitor: &mut V, _i: TraitItem) -> Tra
             TraitItem::Method(_visitor.fold_trait_item_method(_binding_0))
         }
         TraitItem::Type(_binding_0) => TraitItem::Type(_visitor.fold_trait_item_type(_binding_0)),
+        TraitItem::Existential(_binding_0) => {
+            TraitItem::Existential(_visitor.fold_trait_item_existential(_binding_0))
+        }
         TraitItem::Macro(_binding_0) => {
             TraitItem::Macro(_visitor.fold_trait_item_macro(_binding_0))
         }
@@ -2646,6 +2700,22 @@ pub fn fold_trait_item_const<V: Fold + ?Sized>(
                 _visitor.fold_expr((it).1),
             )
         }),
+        semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_trait_item_existential<V: Fold + ?Sized>(
+    _visitor: &mut V,
+    _i: TraitItemExistential,
+) -> TraitItemExistential {
+    TraitItemExistential {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        existential_token: Token![existential](tokens_helper(_visitor, &_i.existential_token.span)),
+        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        ident: _visitor.fold_ident(_i.ident),
+        generics: _visitor.fold_generics(_i.generics),
+        colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
+        bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }

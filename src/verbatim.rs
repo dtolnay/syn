@@ -4,10 +4,12 @@ use buffer::Cursor;
 use proc_macro2::TokenStream;
 use synom::PResult;
 
+#[allow(dead_code)]
 pub fn grab_cursor(cursor: Cursor) -> PResult<Cursor> {
     Ok((cursor, cursor))
 }
 
+#[allow(dead_code)]
 pub fn token_range(range: Range<Cursor>) -> TokenStream {
     let mut tts = Vec::new();
     let mut cursor = range.start;

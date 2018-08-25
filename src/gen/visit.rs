@@ -403,6 +403,10 @@ pub trait Visit<'ast> {
         visit_impl_item_const(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_impl_item_existential(&mut self, i: &'ast ImplItemExistential) {
+        visit_impl_item_existential(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_impl_item_macro(&mut self, i: &'ast ImplItemMacro) {
         visit_impl_item_macro(self, i)
     }
@@ -433,6 +437,10 @@ pub trait Visit<'ast> {
     #[cfg(feature = "full")]
     fn visit_item_enum(&mut self, i: &'ast ItemEnum) {
         visit_item_enum(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn visit_item_existential(&mut self, i: &'ast ItemExistential) {
+        visit_item_existential(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_item_extern_crate(&mut self, i: &'ast ItemExternCrate) {
@@ -715,6 +723,10 @@ pub trait Visit<'ast> {
     #[cfg(feature = "full")]
     fn visit_trait_item_const(&mut self, i: &'ast TraitItemConst) {
         visit_trait_item_const(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn visit_trait_item_existential(&mut self, i: &'ast TraitItemExistential) {
+        visit_trait_item_existential(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_trait_item_macro(&mut self, i: &'ast TraitItemMacro) {
@@ -2050,6 +2062,9 @@ pub fn visit_impl_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         ImplItem::Type(ref _binding_0) => {
             _visitor.visit_impl_item_type(_binding_0);
         }
+        ImplItem::Existential(ref _binding_0) => {
+            _visitor.visit_impl_item_existential(_binding_0);
+        }
         ImplItem::Macro(ref _binding_0) => {
             _visitor.visit_impl_item_macro(_binding_0);
         }
@@ -2076,6 +2091,27 @@ pub fn visit_impl_item_const<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_type(&_i.ty);
     tokens_helper(_visitor, &_i.eq_token.spans);
     _visitor.visit_expr(&_i.expr);
+    tokens_helper(_visitor, &_i.semi_token.spans);
+}
+#[cfg(feature = "full")]
+pub fn visit_impl_item_existential<'ast, V: Visit<'ast> + ?Sized>(
+    _visitor: &mut V,
+    _i: &'ast ImplItemExistential,
+) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    tokens_helper(_visitor, &_i.existential_token.span);
+    tokens_helper(_visitor, &_i.type_token.span);
+    _visitor.visit_ident(&_i.ident);
+    _visitor.visit_generics(&_i.generics);
+    if let Some(ref it) = _i.colon_token {
+        tokens_helper(_visitor, &it.spans)
+    };
+    for el in Punctuated::pairs(&_i.bounds) {
+        let it = el.value();
+        _visitor.visit_type_param_bound(it)
+    }
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
 #[cfg(feature = "full")]
@@ -2164,6 +2200,9 @@ pub fn visit_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ite
         Item::Type(ref _binding_0) => {
             _visitor.visit_item_type(_binding_0);
         }
+        Item::Existential(ref _binding_0) => {
+            _visitor.visit_item_existential(_binding_0);
+        }
         Item::Struct(ref _binding_0) => {
             _visitor.visit_item_struct(_binding_0);
         }
@@ -2218,6 +2257,28 @@ pub fn visit_item_enum<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         let it = el.value();
         _visitor.visit_variant(it)
     }
+}
+#[cfg(feature = "full")]
+pub fn visit_item_existential<'ast, V: Visit<'ast> + ?Sized>(
+    _visitor: &mut V,
+    _i: &'ast ItemExistential,
+) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    _visitor.visit_visibility(&_i.vis);
+    tokens_helper(_visitor, &_i.existential_token.span);
+    tokens_helper(_visitor, &_i.type_token.span);
+    _visitor.visit_ident(&_i.ident);
+    _visitor.visit_generics(&_i.generics);
+    if let Some(ref it) = _i.colon_token {
+        tokens_helper(_visitor, &it.spans)
+    };
+    for el in Punctuated::pairs(&_i.bounds) {
+        let it = el.value();
+        _visitor.visit_type_param_bound(it)
+    }
+    tokens_helper(_visitor, &_i.semi_token.spans);
 }
 #[cfg(feature = "full")]
 pub fn visit_item_extern_crate<'ast, V: Visit<'ast> + ?Sized>(
@@ -2999,6 +3060,9 @@ pub fn visit_trait_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         TraitItem::Type(ref _binding_0) => {
             _visitor.visit_trait_item_type(_binding_0);
         }
+        TraitItem::Existential(ref _binding_0) => {
+            _visitor.visit_trait_item_existential(_binding_0);
+        }
         TraitItem::Macro(ref _binding_0) => {
             _visitor.visit_trait_item_macro(_binding_0);
         }
@@ -3023,6 +3087,27 @@ pub fn visit_trait_item_const<'ast, V: Visit<'ast> + ?Sized>(
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_expr(&(it).1);
     };
+    tokens_helper(_visitor, &_i.semi_token.spans);
+}
+#[cfg(feature = "full")]
+pub fn visit_trait_item_existential<'ast, V: Visit<'ast> + ?Sized>(
+    _visitor: &mut V,
+    _i: &'ast TraitItemExistential,
+) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    tokens_helper(_visitor, &_i.existential_token.span);
+    tokens_helper(_visitor, &_i.type_token.span);
+    _visitor.visit_ident(&_i.ident);
+    _visitor.visit_generics(&_i.generics);
+    if let Some(ref it) = _i.colon_token {
+        tokens_helper(_visitor, &it.spans)
+    };
+    for el in Punctuated::pairs(&_i.bounds) {
+        let it = el.value();
+        _visitor.visit_type_param_bound(it)
+    }
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
 #[cfg(feature = "full")]
