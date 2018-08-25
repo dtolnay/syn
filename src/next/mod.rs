@@ -1,15 +1,13 @@
 #[macro_use]
-pub mod token;
-
-#[macro_use]
 pub mod parse;
+
+// FIXME
+pub mod lookahead;
 
 #[macro_use]
 mod group;
 
 mod error;
-mod lookahead;
-mod span;
 
 // Not public API.
 #[doc(hidden)]

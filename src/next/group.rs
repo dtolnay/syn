@@ -1,7 +1,7 @@
 use proc_macro2::Delimiter;
 
 use super::parse::{ParseBuffer, Result};
-use super::token;
+use token;
 
 pub struct Braces<'a> {
     pub token: token::Brace,

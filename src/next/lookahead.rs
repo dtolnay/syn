@@ -3,9 +3,10 @@ use std::cell::RefCell;
 use buffer::Cursor;
 use proc_macro2::Span;
 
+use span::IntoSpans;
 use super::error;
 use super::parse::Error;
-use super::token::Token;
+use token::Token;
 
 /// Support for checking the next token in a stream to decide how to parse.
 ///
@@ -73,6 +74,12 @@ impl<F: FnOnce(TokenMarker) -> T, T: Token> Peek for F {
 }
 
 pub enum TokenMarker {}
+
+impl<S> IntoSpans<S> for TokenMarker {
+    fn into_spans(self) -> S {
+        match self {}
+    }
+}
 
 // Not public API.
 #[doc(hidden)]
