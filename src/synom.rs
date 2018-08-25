@@ -150,6 +150,9 @@
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
+use std::cell::Cell;
+use std::rc::Rc;
+
 #[cfg(all(
     not(all(target_arch = "wasm32", target_os = "unknown")),
     feature = "proc-macro"
@@ -210,11 +213,11 @@ pub trait Synom: Sized {
 
 impl<T: Parse> Synom for T {
     fn parse(input: Cursor) -> PResult<Self> {
-        let state = ParseBuffer::new(Span::call_site(), input);
-        match <T as Parse>::parse(&state) {
-            Ok(node) => Ok((node, state.cursor())),
-            Err(err) => Err(err),
-        }
+        let unexpected = Rc::new(Cell::new(None));
+        let state = ParseBuffer::new(Span::call_site(), input, unexpected);
+        let node = <T as Parse>::parse(&state)?;
+        state.check_unexpected()?;
+        Ok((node, state.cursor()))
     }
 }
 

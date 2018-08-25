@@ -5,10 +5,12 @@ use std::fmt::Display;
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::Deref;
+use std::rc::Rc;
+
+use proc_macro2::{Ident, Span};
 
 use buffer::Cursor;
 use error;
-use proc_macro2::{Ident, Span};
 
 pub use error::{Error, Result};
 pub use lookahead::{Lookahead1, Peek};
@@ -28,6 +30,15 @@ pub struct ParseBuffer<'a> {
     scope: Span,
     cell: Cell<Cursor<'static>>,
     marker: PhantomData<Cursor<'a>>,
+    unexpected: Rc<Cell<Option<Span>>>,
+}
+
+impl<'a> Drop for ParseBuffer<'a> {
+    fn drop(&mut self) {
+        if !self.is_empty() && self.unexpected.get().is_none() {
+            self.unexpected.set(Some(self.cursor().span()));
+        }
+    }
 }
 
 // Not public API.
@@ -64,12 +75,13 @@ impl<'c, 'a> StepCursor<'c, 'a> {
 impl<'a> ParseBuffer<'a> {
     // Not public API.
     #[doc(hidden)]
-    pub fn new(scope: Span, cursor: Cursor<'a>) -> Self {
+    pub fn new(scope: Span, cursor: Cursor<'a>, unexpected: Rc<Cell<Option<Span>>>) -> Self {
         let extend = unsafe { mem::transmute::<Cursor<'a>, Cursor<'static>>(cursor) };
         ParseBuffer {
             scope: scope,
             cell: Cell::new(extend),
             marker: PhantomData,
+            unexpected: unexpected,
         }
     }
 
@@ -86,6 +98,7 @@ impl<'a> ParseBuffer<'a> {
     }
 
     pub fn parse<T: Parse>(&self) -> Result<T> {
+        self.check_unexpected()?;
         T::parse(self)
     }
 
@@ -95,6 +108,7 @@ impl<'a> ParseBuffer<'a> {
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
     {
+        self.check_unexpected()?;
         match function(StepCursor {
             scope: self.scope,
             cursor: self.cell.get(),
@@ -105,6 +119,21 @@ impl<'a> ParseBuffer<'a> {
                 Ok(ret)
             }
             Err(err) => Err(err),
+        }
+    }
+
+    // Not public API.
+    #[doc(hidden)]
+    pub fn get_unexpected(&self) -> Rc<Cell<Option<Span>>> {
+        self.unexpected.clone()
+    }
+
+    // Not public API.
+    #[doc(hidden)]
+    pub fn check_unexpected(&self) -> Result<()> {
+        match self.unexpected.get() {
+            Some(span) => Err(Error::new(span, "unexpected token")),
+            None => Ok(()),
         }
     }
 }

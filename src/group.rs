@@ -23,7 +23,8 @@ impl<'a> ParseBuffer<'a> {
     fn parse_group(&self, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
         self.step_cursor(|cursor| {
             if let Some((content, span, rest)) = cursor.group(delimiter) {
-                let content = ParseBuffer::new(span, cursor.advance(content));
+                let content =
+                    ParseBuffer::new(span, cursor.advance(content), self.get_unexpected());
                 Ok(((span, content), rest))
             } else {
                 let message = match delimiter {

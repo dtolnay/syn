@@ -1,3 +1,5 @@
+use std::cell::Cell;
+use std::rc::Rc;
 use std::str::FromStr;
 
 use buffer::TokenBuffer;
@@ -17,8 +19,11 @@ pub fn parse<T: Parse>(input: proc_macro::TokenStream) -> Result<T> {
 /// Parse a proc-macro2 token stream into the chosen syntax tree node.
 pub fn parse2<T: Parse>(input: proc_macro2::TokenStream) -> Result<T> {
     let buf = TokenBuffer::new2(input);
-    let state = ParseBuffer::new(Span::call_site(), buf.begin());
-    T::parse(&state)
+    let unexpected = Rc::new(Cell::new(None));
+    let state = ParseBuffer::new(Span::call_site(), buf.begin(), unexpected);
+    let node = T::parse(&state)?;
+    state.check_unexpected()?;
+    Ok(node)
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
