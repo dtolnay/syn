@@ -280,6 +280,7 @@
     allow(
         cast_possible_truncation,
         cast_possible_wrap,
+        empty_enum,
         if_not_else,
         indexing_slicing,
         items_after_statements,
