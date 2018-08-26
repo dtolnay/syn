@@ -88,21 +88,21 @@ ast_struct! {
 pub mod parsing {
     use super::*;
 
-    use synom::Synom;
+    use parse::{Parse, ParseStream, Result};
 
-    impl Synom for File {
-        named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::old_parse_inner) >>
-            items: many0!(Item::parse) >>
-            (File {
+    impl Parse for File {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(File {
                 shebang: None,
-                attrs: attrs,
-                items: items,
+                attrs: input.call(Attribute::parse_inner)?,
+                items: {
+                    let mut items = Vec::new();
+                    while !input.is_empty() {
+                        items.push(input.parse_synom(Item::parse)?);
+                    }
+                    items
+                },
             })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("crate")
         }
     }
 }

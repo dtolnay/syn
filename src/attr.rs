@@ -416,7 +416,7 @@ pub mod parsing {
 
         pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
-            while input.peek(Token![#]) {
+            while input.peek(Token![#]) && input.peek2(Token![!]) {
                 attrs.push(input.parse_synom(Attribute::old_parse_inner)?);
             }
             Ok(attrs)
