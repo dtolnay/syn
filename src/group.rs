@@ -92,17 +92,9 @@ macro_rules! parenthesized {
 /// #
 /// use syn::{braced, token, Ident, Token};
 /// use syn::parse::{Parse, ParseStream, Result};
+/// use syn::punctuated::Punctuated;
 /// #
-/// # mod example {
-/// #     use super::{syn, braced, token, Ident, Parse, ParseStream, Result};
-/// #
-/// #     macro_rules! Token {
-/// #         (struct) => {
-/// #             syn::token::Struct
-/// #         };
-/// #     }
-/// #
-/// #     type Field = Ident;
+/// # type Field = Ident;
 ///
 /// // Parse a simplified struct syntax like:
 /// //
@@ -114,7 +106,7 @@ macro_rules! parenthesized {
 ///     pub struct_token: Token![struct],
 ///     pub ident: Ident,
 ///     pub brace_token: token::Brace,
-///     pub fields: Vec<Field>,
+///     pub fields: Punctuated<Field, Token![,]>,
 /// }
 ///
 /// impl Parse for Struct {
@@ -124,13 +116,10 @@ macro_rules! parenthesized {
 ///             struct_token: input.parse()?,
 ///             ident: input.parse()?,
 ///             brace_token: braced!(content in input),
-///             fields: content.parse()?,
+///             fields: content.parse_terminated(Field::parse)?,
 ///         })
 ///     }
 /// }
-/// # }
-/// #
-/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! braced {
