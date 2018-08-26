@@ -2950,9 +2950,7 @@ pub fn visit_predicate_lifetime<'ast, V: Visit<'ast> + ?Sized>(
     _i: &'ast PredicateLifetime,
 ) {
     _visitor.visit_lifetime(&_i.lifetime);
-    if let Some(ref it) = _i.colon_token {
-        tokens_helper(_visitor, &it.spans)
-    };
+    tokens_helper(_visitor, &_i.colon_token.spans);
     for el in Punctuated::pairs(&_i.bounds) {
         let it = el.value();
         _visitor.visit_lifetime(it)

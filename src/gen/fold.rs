@@ -2580,7 +2580,7 @@ pub fn fold_predicate_lifetime<V: Fold + ?Sized>(
 ) -> PredicateLifetime {
     PredicateLifetime {
         lifetime: _visitor.fold_lifetime(_i.lifetime),
-        colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
+        colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_lifetime(it)),
     }
 }

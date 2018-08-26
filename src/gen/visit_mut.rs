@@ -2888,9 +2888,7 @@ pub fn visit_predicate_lifetime_mut<V: VisitMut + ?Sized>(
     _i: &mut PredicateLifetime,
 ) {
     _visitor.visit_lifetime_mut(&mut _i.lifetime);
-    if let Some(ref mut it) = _i.colon_token {
-        tokens_helper(_visitor, &mut it.spans)
-    };
+    tokens_helper(_visitor, &mut _i.colon_token.spans);
     for mut el in Punctuated::pairs_mut(&mut _i.bounds) {
         let it = el.value_mut();
         _visitor.visit_lifetime_mut(it)

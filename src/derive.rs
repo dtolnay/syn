@@ -90,7 +90,7 @@ pub mod parsing {
             if lookahead.peek(Token![struct]) {
                 let struct_token = input.parse::<Token![struct]>()?;
                 let ident = input.parse::<Ident>()?;
-                let generics = input.parse_synom(Generics::parse)?;
+                let generics = input.parse::<Generics>()?;
                 let (where_clause, fields, semi) = data_struct(input)?;
                 Ok(DeriveInput {
                     attrs: attrs,
@@ -109,7 +109,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![enum]) {
                 let enum_token = input.parse::<Token![enum]>()?;
                 let ident = input.parse::<Ident>()?;
-                let generics = input.parse_synom(Generics::parse)?;
+                let generics = input.parse::<Generics>()?;
                 let (where_clause, brace, variants) = data_enum(input)?;
                 Ok(DeriveInput {
                     attrs: attrs,
@@ -128,7 +128,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![union]) {
                 let union_token = input.parse::<Token![union]>()?;
                 let ident = input.parse::<Ident>()?;
-                let generics = input.parse_synom(Generics::parse)?;
+                let generics = input.parse::<Generics>()?;
                 let (where_clause, fields) = data_union(input)?;
                 Ok(DeriveInput {
                     attrs: attrs,
@@ -153,7 +153,7 @@ pub mod parsing {
         let mut lookahead = input.lookahead1();
         let mut where_clause = None;
         if lookahead.peek(Token![where]) {
-            where_clause = Some(input.parse_synom(WhereClause::parse)?);
+            where_clause = Some(input.parse()?);
             lookahead = input.lookahead1();
         }
 
@@ -162,7 +162,7 @@ pub mod parsing {
 
             lookahead = input.lookahead1();
             if lookahead.peek(Token![where]) {
-                where_clause = Some(input.parse_synom(WhereClause::parse)?);
+                where_clause = Some(input.parse()?);
                 lookahead = input.lookahead1();
             }
 
@@ -190,11 +190,7 @@ pub mod parsing {
         token::Brace,
         Punctuated<Variant, Token![,]>,
     )> {
-        let where_clause = if input.peek(Token![where]) {
-            Some(input.parse_synom(WhereClause::parse)?)
-        } else {
-            None
-        };
+        let where_clause = input.parse()?;
 
         let content;
         let brace = braced!(content in input);
@@ -204,14 +200,8 @@ pub mod parsing {
     }
 
     fn data_union(input: ParseStream) -> Result<(Option<WhereClause>, FieldsNamed)> {
-        let where_clause = if input.peek(Token![where]) {
-            Some(input.parse_synom(WhereClause::parse)?)
-        } else {
-            None
-        };
-
+        let where_clause = input.parse()?;
         let fields = input.parse()?;
-
         Ok((where_clause, fields))
     }
 }
