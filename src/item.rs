@@ -805,7 +805,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemMacro "macro item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         what: call!(Path::parse_mod_style) >>
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
@@ -826,7 +826,7 @@ pub mod parsing {
 
     // TODO: figure out the actual grammar; is body required to be braced?
     impl_synom!(ItemMacro2 "macro2 item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         macro_: keyword!(macro) >>
         ident: syn!(Ident) >>
@@ -845,7 +845,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemExternCrate "extern crate item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         extern_: keyword!(extern) >>
         crate_: keyword!(crate) >>
@@ -864,7 +864,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemUse "use item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         use_: keyword!(use) >>
         leading_colon: option!(punct!(::)) >>
@@ -949,7 +949,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemStatic "static item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         static_: keyword!(static) >>
         mutability: option!(keyword!(mut)) >>
@@ -974,7 +974,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemConst "const item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         const_: keyword!(const) >>
         ident: syn!(Ident) >>
@@ -997,7 +997,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemFn "fn item" do_parse!(
-        outer_attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         constness: option!(keyword!(const)) >>
         unsafety: option!(keyword!(unsafe)) >>
@@ -1010,7 +1010,7 @@ pub mod parsing {
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
-            many0!(Attribute::parse_inner),
+            many0!(Attribute::old_parse_inner),
             call!(Block::parse_within),
         )) >>
         (ItemFn {
@@ -1089,7 +1089,7 @@ pub mod parsing {
     }
 
     impl_synom!(ItemMod "mod item" do_parse!(
-        outer_attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         mod_: keyword!(mod) >>
         ident: syn!(Ident) >>
@@ -1102,7 +1102,7 @@ pub mod parsing {
             |
             braces!(
                 tuple!(
-                    many0!(Attribute::parse_inner),
+                    many0!(Attribute::old_parse_inner),
                     many0!(Item::parse),
                 )
             ) => {|(brace, (inner_attrs, items))| (
@@ -1126,10 +1126,10 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemForeignMod "foreign mod item" do_parse!(
-        outer_attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::old_parse_outer) >>
         abi: syn!(Abi) >>
         braced_content: braces!(tuple!(
-            many0!(Attribute::parse_inner),
+            many0!(Attribute::old_parse_inner),
             many0!(ForeignItem::parse),
         )) >>
         (ItemForeignMod {
@@ -1155,7 +1155,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ForeignItemFn "foreign function" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         fn_: keyword!(fn) >>
         ident: syn!(Ident) >>
@@ -1191,7 +1191,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ForeignItemStatic "foreign static" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         static_: keyword!(static) >>
         mutability: option!(keyword!(mut)) >>
@@ -1212,7 +1212,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ForeignItemType "foreign type" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
@@ -1227,7 +1227,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ForeignItemMacro "macro in extern block" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         mac: syn!(Macro) >>
         semi: cond!(!is_brace(&mac.delimiter), punct!(;)) >>
         (ForeignItemMacro {
@@ -1238,7 +1238,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemType "type item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
@@ -1263,7 +1263,7 @@ pub mod parsing {
     ));
 
     named!(existential_type(vis: bool) -> ItemExistential, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: cond_reduce!(vis, syn!(Visibility)) >>
         existential_token: keyword!(existential) >>
         type_token: keyword!(type) >>
@@ -1309,7 +1309,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemUnion "union item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         union_: keyword!(union) >>
         ident: syn!(Ident) >>
@@ -1330,7 +1330,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemTrait "trait item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         unsafety: option!(keyword!(unsafe)) >>
         auto_: option!(keyword!(auto)) >>
@@ -1372,7 +1372,7 @@ pub mod parsing {
     ));
 
     impl_synom!(TraitItemConst "const trait item" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         const_: keyword!(const) >>
         ident: syn!(Ident) >>
         colon: punct!(:) >>
@@ -1391,7 +1391,7 @@ pub mod parsing {
     ));
 
     impl_synom!(TraitItemMethod "method trait item" do_parse!(
-        outer_attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::old_parse_outer) >>
         constness: option!(keyword!(const)) >>
         unsafety: option!(keyword!(unsafe)) >>
         abi: option!(syn!(Abi)) >>
@@ -1402,7 +1402,7 @@ pub mod parsing {
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         body: option!(braces!(tuple!(
-            many0!(Attribute::parse_inner),
+            many0!(Attribute::old_parse_inner),
             call!(Block::parse_within),
         ))) >>
         semi: cond!(body.is_none(), punct!(;)) >>
@@ -1447,7 +1447,7 @@ pub mod parsing {
     ));
 
     impl_synom!(TraitItemType "trait item type" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         type_: keyword!(type) >>
         ident: syn!(Ident) >>
         generics: syn!(Generics) >>
@@ -1486,7 +1486,7 @@ pub mod parsing {
     ));
 
     impl_synom!(TraitItemMacro "trait item macro" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         mac: syn!(Macro) >>
         semi: cond!(!is_brace(&mac.delimiter), punct!(;)) >>
         (TraitItemMacro {
@@ -1497,7 +1497,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ItemImpl "impl item" do_parse!(
-        outer_attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::old_parse_outer) >>
         defaultness: option!(keyword!(default)) >>
         unsafety: option!(keyword!(unsafe)) >>
         impl_: keyword!(impl) >>
@@ -1515,7 +1515,7 @@ pub mod parsing {
         self_ty: syn!(Type) >>
         where_clause: option!(syn!(WhereClause)) >>
         inner: braces!(tuple!(
-            many0!(Attribute::parse_inner),
+            many0!(Attribute::old_parse_inner),
             many0!(ImplItem::parse),
         )) >>
         (ItemImpl {
@@ -1551,7 +1551,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ImplItemConst "const item in impl block" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         defaultness: option!(keyword!(default)) >>
         const_: keyword!(const) >>
@@ -1576,7 +1576,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ImplItemMethod "method in impl block" do_parse!(
-        outer_attrs: many0!(Attribute::parse_outer) >>
+        outer_attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         defaultness: option!(keyword!(default)) >>
         constness: option!(keyword!(const)) >>
@@ -1590,7 +1590,7 @@ pub mod parsing {
         ret: syn!(ReturnType) >>
         where_clause: option!(syn!(WhereClause)) >>
         inner_attrs_stmts: braces!(tuple!(
-            many0!(Attribute::parse_inner),
+            many0!(Attribute::old_parse_inner),
             call!(Block::parse_within),
         )) >>
         (ImplItemMethod {
@@ -1627,7 +1627,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ImplItemType "type in impl block" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         vis: syn!(Visibility) >>
         defaultness: option!(keyword!(default)) >>
         type_: keyword!(type) >>
@@ -1668,7 +1668,7 @@ pub mod parsing {
     ));
 
     impl_synom!(ImplItemMacro "macro in impl block" do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         mac: syn!(Macro) >>
         semi: cond!(!is_brace(&mac.delimiter), punct!(;)) >>
         (ImplItemMacro {

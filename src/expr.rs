@@ -1404,7 +1404,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(unary_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
         do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             op: syn!(UnOp) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprUnary {
@@ -1415,7 +1415,7 @@ pub mod parsing {
         )
         |
         do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             and: punct!(&) >>
             mutability: option!(keyword!(mut)) >>
             expr: call!(unary_expr, allow_struct, true) >>
@@ -1428,7 +1428,7 @@ pub mod parsing {
         )
         |
         do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             box_: keyword!(box) >>
             expr: call!(unary_expr, allow_struct, true) >>
             (ExprBox {
@@ -1689,7 +1689,7 @@ pub mod parsing {
 
         #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             lit: syn!(Lit) >>
             (ExprLit {
                 attrs: attrs,
@@ -1705,7 +1705,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprMacro {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             mac: syn!(Macro) >>
             (ExprMacro {
                 attrs: attrs,
@@ -1747,9 +1747,9 @@ pub mod parsing {
 
         #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             e: parens!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 syn!(Expr),
             )) >>
             (ExprParen {
@@ -1771,9 +1771,9 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprArray {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             elems: brackets!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Punctuated::parse_terminated),
             )) >>
             (ExprArray {
@@ -1842,9 +1842,9 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprTuple {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             elems: parens!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Punctuated::parse_terminated),
             )) >>
             (ExprTuple {
@@ -1943,14 +1943,14 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprForLoop {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             label: option!(syn!(Label)) >>
             for_: keyword!(for) >>
             pat: syn!(Pat) >>
             in_: keyword!(in) >>
             expr: expr_no_struct >>
             block: braces!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Block::parse_within),
             )) >>
             (ExprForLoop {
@@ -1979,11 +1979,11 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprLoop {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             label: option!(syn!(Label)) >>
             loop_: keyword!(loop) >>
             block: braces!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Block::parse_within),
             )) >>
             (ExprLoop {
@@ -2009,11 +2009,11 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprMatch {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             match_: keyword!(match) >>
             obj: expr_no_struct >>
             braced_content: braces!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 many0!(syn!(Arm)),
             )) >>
             (ExprMatch {
@@ -2071,7 +2071,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for Arm {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             leading_vert: option!(punct!(|)) >>
             pats: call!(Punctuated::parse_separated_nonempty) >>
             guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
@@ -2107,7 +2107,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         asyncness: option!(keyword!(async)) >>
         movability: option!(cond_reduce!(asyncness.is_none(), keyword!(static))) >>
         capture: option!(keyword!(move)) >>
@@ -2147,7 +2147,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprAsync {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             async_token: keyword!(async) >>
             capture: option!(keyword!(move)) >>
             block: syn!(Block) >>
@@ -2180,12 +2180,12 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhile {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             cond: expr_no_struct >>
             block: braces!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Block::parse_within),
             )) >>
             (ExprWhile {
@@ -2212,7 +2212,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprWhileLet {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
             let_: keyword!(let) >>
@@ -2220,7 +2220,7 @@ pub mod parsing {
             eq: punct!(=) >>
             value: expr_no_struct >>
             block: braces!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Block::parse_within),
             )) >>
             (ExprWhileLet {
@@ -2266,7 +2266,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprContinue {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             cont: keyword!(continue) >>
             label: option!(syn!(Lifetime)) >>
             (ExprContinue {
@@ -2283,7 +2283,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_break(allow_struct: bool) -> Expr, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         break_: keyword!(break) >>
         label: option!(syn!(Lifetime)) >>
         // We can't allow blocks after a `break` expression when we wouldn't
@@ -2299,7 +2299,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(expr_ret(allow_struct: bool) -> Expr, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         return_: keyword!(return) >>
         // NOTE: return is greedy and eats blocks after it even when in a
         // position where structs are not allowed, such as in if statement
@@ -2317,10 +2317,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprStruct {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             path: syn!(Path) >>
             data: braces!(do_parse!(
-                inner_attrs: many0!(Attribute::parse_inner) >>
+                inner_attrs: many0!(Attribute::old_parse_inner) >>
                 fields: call!(Punctuated::parse_terminated) >>
                 base: option!(cond!(fields.empty_or_trailing(), do_parse!(
                     dots: punct!(..) >>
@@ -2358,7 +2358,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for FieldValue {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             field_value: alt!(
                 tuple!(syn!(Member), map!(punct!(:), Some), syn!(Expr))
                 |
@@ -2388,9 +2388,9 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprRepeat {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             data: brackets!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 syn!(Expr),
                 punct!(;),
                 syn!(Expr),
@@ -2433,10 +2433,10 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprBlock {
         named!(parse -> Self, do_parse!(
-            outer_attrs: many0!(Attribute::parse_outer) >>
+            outer_attrs: many0!(Attribute::old_parse_outer) >>
             label: option!(syn!(Label)) >>
             block: braces!(tuple!(
-                many0!(Attribute::parse_inner),
+                many0!(Attribute::old_parse_inner),
                 call!(Block::parse_within),
             )) >>
             (ExprBlock {
@@ -2500,7 +2500,7 @@ pub mod parsing {
 
         #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             pair: qpath >>
             (ExprPath {
                 attrs: attrs,
@@ -2612,7 +2612,7 @@ pub mod parsing {
                 (stmt)
             )) >>
             last: option!(do_parse!(
-                attrs: many0!(Attribute::parse_outer) >>
+                attrs: many0!(Attribute::old_parse_outer) >>
                 mut e: syn!(Expr) >>
                 ({
                     e.replace_attrs(attrs);
@@ -2650,7 +2650,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_mac -> Stmt, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         what: call!(Path::parse_mod_style) >>
         bang: punct!(!) >>
     // Only parse braces here; paren and bracket will get parsed as
@@ -2672,7 +2672,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_local -> Stmt, do_parse!(
-        attrs: many0!(Attribute::parse_outer) >>
+        attrs: many0!(Attribute::old_parse_outer) >>
         let_: keyword!(let) >>
         pats: call!(Punctuated::parse_separated_nonempty) >>
         ty: option!(tuple!(punct!(:), syn!(Type))) >>
@@ -2693,7 +2693,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_blockexpr -> Stmt, do_parse!(
-        mut attrs: many0!(Attribute::parse_outer) >>
+        mut attrs: many0!(Attribute::old_parse_outer) >>
         mut e: expr_nosemi >>
         semi: option!(punct!(;)) >>
         ({
@@ -2709,7 +2709,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     named!(stmt_expr -> Stmt, do_parse!(
-        mut attrs: many0!(Attribute::parse_outer) >>
+        mut attrs: many0!(Attribute::old_parse_outer) >>
         mut e: syn!(Expr) >>
         semi: punct!(;) >>
         ({

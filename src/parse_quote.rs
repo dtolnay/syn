@@ -152,9 +152,9 @@ where
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
     named!(parse -> Self, alt!(
-        call!(Attribute::parse_outer)
+        call!(Attribute::old_parse_outer)
         |
-        call!(Attribute::parse_inner)
+        call!(Attribute::old_parse_inner)
     ));
 
     fn description() -> Option<&'static str> {

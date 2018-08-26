@@ -92,7 +92,7 @@ pub mod parsing {
 
     impl Synom for File {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_inner) >>
+            attrs: many0!(Attribute::old_parse_inner) >>
             items: many0!(Item::parse) >>
             (File {
                 shebang: None,

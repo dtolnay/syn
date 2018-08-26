@@ -170,7 +170,7 @@ fn test_meta_item_multiple() {
 fn run_test<T: Into<Meta>>(input: &str, expected: T) {
     let tokens = input.parse::<TokenStream>().unwrap();
     let buf = TokenBuffer::new2(tokens);
-    let attr = match Attribute::parse_outer(buf.begin()) {
+    let attr = match Attribute::old_parse_outer(buf.begin()) {
         Ok((e, rest)) => {
             assert!(rest.eof());
             e

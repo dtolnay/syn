@@ -406,23 +406,23 @@ pub mod parsing {
     }
 
     impl Attribute {
-        pub fn parse_outer2(input: ParseStream) -> Result<Vec<Self>> {
+        pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
             while input.peek(Token![#]) {
-                attrs.push(input.parse_synom(Attribute::parse_outer)?);
+                attrs.push(input.parse_synom(Attribute::old_parse_outer)?);
             }
             Ok(attrs)
         }
 
-        pub fn parse_inner2(input: ParseStream) -> Result<Vec<Self>> {
+        pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
             while input.peek(Token![#]) {
-                attrs.push(input.parse_synom(Attribute::parse_inner)?);
+                attrs.push(input.parse_synom(Attribute::old_parse_inner)?);
             }
             Ok(attrs)
         }
 
-        named!(pub parse_inner -> Self, alt!(
+        named!(pub old_parse_inner -> Self, alt!(
             do_parse!(
                 pound: punct!(#) >>
                 bang: punct!(!) >>
@@ -461,7 +461,7 @@ pub mod parsing {
             )
         ));
 
-        named!(pub parse_outer -> Self, alt!(
+        named!(pub old_parse_outer -> Self, alt!(
             do_parse!(
                 pound: punct!(#) >>
                 path_and_tts: brackets!(tuple!(

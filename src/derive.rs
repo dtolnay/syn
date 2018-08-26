@@ -99,7 +99,7 @@ pub mod parsing {
 
     impl Synom for DeriveInput {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             vis: syn!(Visibility) >>
             which: syn!(DeriveInputKind) >>
             id: syn!(Ident) >>

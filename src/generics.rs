@@ -543,7 +543,7 @@ pub mod parsing {
 
     impl Synom for LifetimeDef {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             life: syn!(Lifetime) >>
             colon: option!(punct!(:)) >>
             bounds: cond!(
@@ -584,7 +584,7 @@ pub mod parsing {
 
     impl Synom for TypeParam {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             id: syn!(Ident) >>
             colon: option!(punct!(:)) >>
             bounds: cond!(
@@ -670,7 +670,7 @@ pub mod parsing {
 
     impl Synom for ConstParam {
         named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             const_: keyword!(const) >>
             ident: syn!(Ident) >>
             colon: punct!(:) >>

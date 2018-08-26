@@ -105,7 +105,7 @@
 //!
 //! #     let tokens = TokenStream::new().into();
 //! // Parse zero or more outer attributes but not inner attributes.
-//! named!(outer_attrs -> Vec<Attribute>, many0!(Attribute::parse_outer));
+//! named!(outer_attrs -> Vec<Attribute>, many0!(Attribute::old_parse_outer));
 //! let attrs = outer_attrs.parse(tokens)?;
 //! #
 //! #     Ok(())

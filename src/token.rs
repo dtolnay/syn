@@ -77,7 +77,7 @@
 //! #   use super::SynItemStatic as ItemStatic;
 //! #
 //! #   named!(parse -> ItemStatic, do_parse!(
-//!         attrs: many0!(Attribute::parse_outer) >>
+//!         attrs: many0!(Attribute::old_parse_outer) >>
 //!         vis: syn!(Visibility) >>
 //!         static_token: keyword!(static) >>
 //!         mutability: option!(keyword!(mut)) >>

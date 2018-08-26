@@ -192,7 +192,7 @@ pub mod parsing {
     impl Parse for Variant {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Variant {
-                attrs: input.call(Attribute::parse_outer2)?,
+                attrs: input.call(Attribute::parse_outer)?,
                 ident: input.parse()?,
                 fields: {
                     if input.peek(token::Brace) {
@@ -244,7 +244,7 @@ pub mod parsing {
 
     impl Field {
         named!(pub parse_named -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             vis: syn!(Visibility) >>
             id: syn!(Ident) >>
             colon: punct!(:) >>
@@ -259,7 +259,7 @@ pub mod parsing {
         ));
 
         named!(pub parse_unnamed -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
+            attrs: many0!(Attribute::old_parse_outer) >>
             vis: syn!(Visibility) >>
             ty: syn!(Type) >>
             (Field {
