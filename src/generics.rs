@@ -166,7 +166,6 @@ impl<'a> Iterator for TypeParams<'a> {
     type Item = &'a TypeParam;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // FIXME: Remove this when ? on Option is stable
         let next = match self.0.next() {
             Some(item) => item,
             None => return None,
@@ -185,7 +184,6 @@ impl<'a> Iterator for TypeParamsMut<'a> {
     type Item = &'a mut TypeParam;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // FIXME: Remove this when ? on Option is stable
         let next = match self.0.next() {
             Some(item) => item,
             None => return None,
@@ -204,7 +202,6 @@ impl<'a> Iterator for Lifetimes<'a> {
     type Item = &'a LifetimeDef;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // FIXME: Remove this when ? on Option is stable
         let next = match self.0.next() {
             Some(item) => item,
             None => return None,
@@ -223,7 +220,6 @@ impl<'a> Iterator for LifetimesMut<'a> {
     type Item = &'a mut LifetimeDef;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // FIXME: Remove this when ? on Option is stable
         let next = match self.0.next() {
             Some(item) => item,
             None => return None,
@@ -242,7 +238,6 @@ impl<'a> Iterator for ConstParams<'a> {
     type Item = &'a ConstParam;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // FIXME: Remove this when ? on Option is stable
         let next = match self.0.next() {
             Some(item) => item,
             None => return None,
@@ -261,7 +256,6 @@ impl<'a> Iterator for ConstParamsMut<'a> {
     type Item = &'a mut ConstParam;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // FIXME: Remove this when ? on Option is stable
         let next = match self.0.next() {
             Some(item) => item,
             None => return None,
