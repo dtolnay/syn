@@ -164,7 +164,7 @@ use error::parse_error;
 pub use error::{Error, PResult};
 
 use buffer::{Cursor, TokenBuffer};
-use parse::{Parse, ParseBuffer};
+use parse::{Parse, ParseBuffer, ParseStream, Result};
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.
@@ -221,69 +221,51 @@ impl<T: Parse> Synom for T {
     }
 }
 
-impl Synom for TokenStream {
-    fn parse(input: Cursor) -> PResult<Self> {
-        Ok((input.token_stream(), Cursor::empty()))
-    }
-
-    fn description() -> Option<&'static str> {
-        Some("arbitrary token stream")
+impl Parse for TokenStream {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.step_cursor(|cursor| Ok((cursor.token_stream(), Cursor::empty())))
     }
 }
 
-impl Synom for TokenTree {
-    fn parse(input: Cursor) -> PResult<Self> {
-        match input.token_tree() {
+impl Parse for TokenTree {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.step_cursor(|cursor| match cursor.token_tree() {
             Some((tt, rest)) => Ok((tt, rest)),
-            None => parse_error(),
-        }
-    }
-
-    fn description() -> Option<&'static str> {
-        Some("token tree")
+            None => Err(cursor.error("expected token tree"))
+        })
     }
 }
 
-impl Synom for Group {
-    fn parse(input: Cursor) -> PResult<Self> {
-        for delim in &[Delimiter::Parenthesis, Delimiter::Brace, Delimiter::Bracket] {
-            if let Some((inside, span, rest)) = input.group(*delim) {
-                let mut group = Group::new(*delim, inside.token_stream());
-                group.set_span(span);
-                return Ok((group, rest));
+impl Parse for Group {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.step_cursor(|cursor| {
+            for delim in &[Delimiter::Parenthesis, Delimiter::Brace, Delimiter::Bracket] {
+                if let Some((inside, span, rest)) = cursor.group(*delim) {
+                    let mut group = Group::new(*delim, inside.token_stream());
+                    group.set_span(span);
+                    return Ok((group, rest));
+                }
             }
-        }
-        parse_error()
-    }
-
-    fn description() -> Option<&'static str> {
-        Some("group token")
+            Err(cursor.error("expected group token"))
+        })
     }
 }
 
-impl Synom for Punct {
-    fn parse(input: Cursor) -> PResult<Self> {
-        match input.punct() {
+impl Parse for Punct {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.step_cursor(|cursor| match cursor.punct() {
             Some((punct, rest)) => Ok((punct, rest)),
-            None => parse_error(),
-        }
-    }
-
-    fn description() -> Option<&'static str> {
-        Some("punctuation token")
+            None => Err(cursor.error("expected punctuation token")),
+        })
     }
 }
 
-impl Synom for Literal {
-    fn parse(input: Cursor) -> PResult<Self> {
-        match input.literal() {
+impl Parse for Literal {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.step_cursor(|cursor| match cursor.literal() {
             Some((literal, rest)) => Ok((literal, rest)),
-            None => parse_error(),
-        }
-    }
-
-    fn description() -> Option<&'static str> {
-        Some("literal token")
+            None => Err(cursor.error("expected literal token")),
+        })
     }
 }
 
@@ -298,7 +280,7 @@ pub trait Parser: Sized {
     type Output;
 
     /// Parse a proc-macro2 token stream into the chosen syntax tree node.
-    fn parse2(self, tokens: TokenStream) -> Result<Self::Output, Error>;
+    fn parse2(self, tokens: TokenStream) -> Result<Self::Output>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
     ///
@@ -308,7 +290,7 @@ pub trait Parser: Sized {
         not(all(target_arch = "wasm32", target_os = "unknown")),
         feature = "proc-macro"
     ))]
-    fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output, Error> {
+    fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {
         self.parse2(tokens.into())
     }
 
@@ -318,7 +300,7 @@ pub trait Parser: Sized {
     ///
     /// Every span in the resulting syntax tree will be set to resolve at the
     /// macro call site.
-    fn parse_str(self, s: &str) -> Result<Self::Output, Error> {
+    fn parse_str(self, s: &str) -> Result<Self::Output> {
         match s.parse() {
             Ok(tts) => self.parse2(tts),
             Err(_) => Err(Error::new(
@@ -335,7 +317,7 @@ where
 {
     type Output = T;
 
-    fn parse2(self, tokens: TokenStream) -> Result<T, Error> {
+    fn parse2(self, tokens: TokenStream) -> Result<T> {
         let buf = TokenBuffer::new2(tokens);
         let (t, rest) = self(buf.begin())?;
         if rest.eof() {
