@@ -1029,7 +1029,7 @@ fn arm_expr_requires_comma(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use path::parsing::mod_style_path_segment;
+    use path::parsing::old_mod_style_path_segment;
     #[cfg(feature = "full")]
     use path::parsing::ty_no_eq_after;
 
@@ -1347,7 +1347,7 @@ pub mod parsing {
                 as_: keyword!(as) >>
                 // We can't accept `A + B` in cast expressions, as it's
                 // ambiguous with the + expression.
-                ty: call!(Type::without_plus) >>
+                ty: shim!(Type::without_plus) >>
                 ({
                     e = ExprCast {
                         attrs: Vec::new(),
@@ -1362,7 +1362,7 @@ pub mod parsing {
                 colon: punct!(:) >>
                 // We can't accept `A + B` in cast expressions, as it's
                 // ambiguous with the + expression.
-                ty: call!(Type::without_plus) >>
+                ty: shim!(Type::without_plus) >>
                 ({
                     e = ExprType {
                         attrs: Vec::new(),
@@ -1384,7 +1384,7 @@ pub mod parsing {
             as_: keyword!(as) >>
             // We can't accept `A + B` in cast expressions, as it's
             // ambiguous with the + expression.
-            ty: call!(Type::without_plus) >>
+            ty: shim!(Type::without_plus) >>
             ({
                 e = ExprCast {
                     attrs: Vec::new(),
@@ -1721,7 +1721,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprGroup {
         named!(parse -> Self, do_parse!(
-            e: grouped!(syn!(Expr)) >>
+            e: old_grouped!(syn!(Expr)) >>
             (ExprGroup {
                 attrs: Vec::new(),
                 expr: Box::new(e.1),
@@ -2542,7 +2542,7 @@ pub mod parsing {
             })
         )
         |
-        mod_style_path_segment
+        old_mod_style_path_segment
     ));
 
     named!(qpath -> (Option<QSelf>, Path), alt!(
@@ -2651,7 +2651,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     named!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
-        what: call!(Path::parse_mod_style) >>
+        what: call!(Path::old_parse_mod_style) >>
         bang: punct!(!) >>
     // Only parse braces here; paren and bracket will get parsed as
     // expression statements

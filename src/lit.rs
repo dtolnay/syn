@@ -425,7 +425,6 @@ pub mod parsing {
     use super::*;
     use parse::{Parse, ParseStream, Result};
     use parse_error;
-    use synom::Synom;
 
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -460,54 +459,75 @@ pub mod parsing {
         }
     }
 
-    impl_synom!(LitStr "string literal" switch!(
-        syn!(Lit),
-        Lit::Str(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitStr {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::Str(lit) => Ok(lit),
+                _ => Err(head.error("expected string literal")),
+            }
+        }
+    }
 
-    impl_synom!(LitByteStr "byte string literal" switch!(
-        syn!(Lit),
-        Lit::ByteStr(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitByteStr {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::ByteStr(lit) => Ok(lit),
+                _ => Err(head.error("expected byte string literal")),
+            }
+        }
+    }
 
-    impl_synom!(LitByte "byte literal" switch!(
-        syn!(Lit),
-        Lit::Byte(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitByte {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::Byte(lit) => Ok(lit),
+                _ => Err(head.error("expected byte literal")),
+            }
+        }
+    }
 
-    impl_synom!(LitChar "character literal" switch!(
-        syn!(Lit),
-        Lit::Char(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitChar {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::Char(lit) => Ok(lit),
+                _ => Err(head.error("expected character literal")),
+            }
+        }
+    }
 
-    impl_synom!(LitInt "integer literal" switch!(
-        syn!(Lit),
-        Lit::Int(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitInt {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::Int(lit) => Ok(lit),
+                _ => Err(head.error("expected integer literal")),
+            }
+        }
+    }
 
-    impl_synom!(LitFloat "floating point literal" switch!(
-        syn!(Lit),
-        Lit::Float(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitFloat {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::Float(lit) => Ok(lit),
+                _ => Err(head.error("expected floating point literal")),
+            }
+        }
+    }
 
-    impl_synom!(LitBool "boolean literal" switch!(
-        syn!(Lit),
-        Lit::Bool(lit) => value!(lit)
-        |
-        _ => reject!()
-    ));
+    impl Parse for LitBool {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let head = input.fork();
+            match input.parse()? {
+                Lit::Bool(lit) => Ok(lit),
+                _ => Err(head.error("expected boolean literal")),
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]

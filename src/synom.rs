@@ -231,7 +231,7 @@ impl Parse for TokenTree {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step_cursor(|cursor| match cursor.token_tree() {
             Some((tt, rest)) => Ok((tt, rest)),
-            None => Err(cursor.error("expected token tree"))
+            None => Err(cursor.error("expected token tree")),
         })
     }
 }

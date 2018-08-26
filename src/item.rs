@@ -806,7 +806,7 @@ pub mod parsing {
 
     impl_synom!(ItemMacro "macro item" do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
-        what: call!(Path::parse_mod_style) >>
+        what: call!(Path::old_parse_mod_style) >>
         bang: punct!(!) >>
         ident: option!(syn!(Ident)) >>
         body: call!(tt::delimited) >>

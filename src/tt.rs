@@ -6,22 +6,25 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 use buffer::Cursor;
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 use synom::PResult;
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 use token::{Brace, Bracket, Paren};
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 use {parse_error, MacroDelimiter};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
-#[cfg(any(feature = "parsing", feature = "extra-traits"))]
+#[cfg(any(
+    all(feature = "full", feature = "parsing"),
+    feature = "extra-traits"
+))]
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "full", feature = "parsing"))]
 pub fn delimited(input: Cursor) -> PResult<(MacroDelimiter, TokenStream)> {
     if let Some((TokenTree::Group(g), rest)) = input.token_tree() {
         let span = g.span();

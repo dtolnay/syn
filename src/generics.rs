@@ -670,7 +670,7 @@ pub mod parsing {
                 },
                 default: {
                     if has_default {
-                        Some(input.parse_synom(Type::parse)?)
+                        Some(input.parse()?)
                     } else {
                         None
                     }
@@ -737,7 +737,7 @@ pub mod parsing {
                 const_token: input.parse()?,
                 ident: input.parse()?,
                 colon_token: input.parse()?,
-                ty: input.parse_synom(Type::parse)?,
+                ty: input.parse()?,
                 eq_token: {
                     if input.peek(Token![=]) {
                         let eq_token = input.parse()?;
@@ -822,7 +822,7 @@ pub mod parsing {
             } else {
                 Ok(WherePredicate::Type(PredicateType {
                     lifetimes: input.parse()?,
-                    bounded_ty: input.parse_synom(Type::parse)?,
+                    bounded_ty: input.parse()?,
                     colon_token: input.parse()?,
                     bounds: {
                         let mut bounds = Punctuated::new();

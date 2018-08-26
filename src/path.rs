@@ -229,7 +229,6 @@ pub mod parsing {
     use super::*;
     use parse::{Parse, ParseStream, Result};
     use synom::ext::IdentExt;
-    use synom::Synom;
 
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -303,7 +302,7 @@ pub mod parsing {
             Ok(ParenthesizedGenericArguments {
                 paren_token: parenthesized!(content in input),
                 inputs: content.parse_synom(Punctuated::parse_terminated)?,
-                output: input.parse_synom(ReturnType::without_plus)?,
+                output: input.call(ReturnType::without_plus)?,
             })
         }
     }
@@ -321,7 +320,7 @@ pub mod parsing {
             }
 
             let ident = input.parse()?;
-            if input.peek(Token![<]) && !input.peek2(Token![=])
+            if input.peek(Token![<]) && !input.peek(Token![<=])
                 || input.peek(Token![::]) && input.peek3(Token![<])
             {
                 Ok(PathSegment {
@@ -339,16 +338,49 @@ pub mod parsing {
             Ok(Binding {
                 ident: input.parse()?,
                 eq_token: input.parse()?,
-                ty: input.parse_synom(Type::parse)?,
+                ty: input.parse()?,
             })
         }
     }
 
     impl Path {
-        named!(pub parse_mod_style -> Self, do_parse!(
+        pub fn parse_mod_style(input: ParseStream) -> Result<Self> {
+            Ok(Path {
+                leading_colon: input.parse()?,
+                segments: {
+                    let mut segments = Punctuated::new();
+                    loop {
+                        if !input.peek(Ident)
+                            && !input.peek(Token![super])
+                            && !input.peek(Token![self])
+                            && !input.peek(Token![Self])
+                            && !input.peek(Token![crate])
+                            && !input.peek(Token![extern])
+                        {
+                            break;
+                        }
+                        let ident = Ident::parse_any2(input)?;
+                        segments.push_value(PathSegment::from(ident));
+                        if !input.peek(Token![::]) {
+                            break;
+                        }
+                        let punct = input.parse()?;
+                        segments.push_punct(punct);
+                    }
+                    if segments.is_empty() {
+                        return Err(input.error("expected path"));
+                    } else if segments.trailing_punct() {
+                        return Err(input.error("expected path segment"));
+                    }
+                    segments
+                },
+            })
+        }
+
+        named!(pub old_parse_mod_style -> Self, do_parse!(
             colon: option!(punct!(::)) >>
             segments: call!(Punctuated::parse_separated_nonempty_with,
-                            mod_style_path_segment) >>
+                            old_mod_style_path_segment) >>
             (Path {
                 leading_colon: colon,
                 segments: segments,
@@ -356,7 +388,30 @@ pub mod parsing {
         ));
     }
 
-    named!(pub mod_style_path_segment -> PathSegment, alt!(
+    // FIXME
+    /*
+    pub fn mod_style_path_segment(input: ParseStream) -> Result<PathSegment> {
+        let lookahead = input.lookahead1();
+        let ident = if lookahead.peek(Ident) {
+            input.parse()?
+        } else if lookahead.peek(Token![super]) {
+            Ident::from(input.parse::<Token![super]>()?)
+        } else if lookahead.peek(Token![self]) {
+            Ident::from(input.parse::<Token![self]>()?)
+        } else if lookahead.peek(Token![Self]) {
+            Ident::from(input.parse::<Token![Self]>()?)
+        } else if lookahead.peek(Token![crate]) {
+            Ident::from(input.parse::<Token![crate]>()?)
+        } else if lookahead.peek(Token![extern]) {
+            Ident::from(input.parse::<Token![extern]>()?)
+        } else {
+            return Err(lookahead.error());
+        };
+        Ok(PathSegment::from(ident))
+    }
+    */
+
+    named!(pub old_mod_style_path_segment -> PathSegment, alt!(
         syn!(Ident) => { Into::into }
         |
         keyword!(super) => { Into::into }
@@ -368,44 +423,6 @@ pub mod parsing {
         keyword!(crate) => { Into::into }
         |
         keyword!(extern) => { Into::into }
-    ));
-
-    named!(pub qpath -> (Option<QSelf>, Path), alt!(
-        map!(syn!(Path), |p| (None, p))
-        |
-        do_parse!(
-            lt: punct!(<) >>
-            this: syn!(Type) >>
-            path: option!(tuple!(keyword!(as), syn!(Path))) >>
-            gt: punct!(>) >>
-            colon2: punct!(::) >>
-            rest: call!(Punctuated::parse_separated_nonempty) >>
-            ({
-                let (pos, as_, path) = match path {
-                    Some((as_, mut path)) => {
-                        let pos = path.segments.len();
-                        path.segments.push_punct(colon2);
-                        path.segments.extend(rest.into_pairs());
-                        (pos, Some(as_), path)
-                    }
-                    None => {
-                        (0, None, Path {
-                            leading_colon: Some(colon2),
-                            segments: rest,
-                        })
-                    }
-                };
-                (Some(QSelf {
-                    lt_token: lt,
-                    ty: Box::new(this),
-                    position: pos,
-                    as_token: as_,
-                    gt_token: gt,
-                }), path)
-            })
-        )
-        |
-        map!(keyword!(self), |s| (None, s.into()))
     ));
 
     named!(pub ty_no_eq_after -> Type, do_parse!(

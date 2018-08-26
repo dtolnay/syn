@@ -1417,7 +1417,7 @@ macro_rules! braces {
 // Not public API.
 #[doc(hidden)]
 #[macro_export]
-macro_rules! grouped {
+macro_rules! old_grouped {
     ($i:expr, $submac:ident!( $($args:tt)* )) => {
         $crate::token::Group::parse($i, |i| $submac!(i, $($args)*))
     };
@@ -1425,4 +1425,20 @@ macro_rules! grouped {
     ($i:expr, $f:expr) => {
         grouped!($i, call!($f));
     };
+}
+
+macro_rules! shim {
+    ($i:expr, $parser:expr $(, $args:expr)*) => {{
+        let unexpected = ::std::rc::Rc::new(::std::cell::Cell::new(None));
+        let state = ::parse::ParseBuffer::new(::proc_macro2::Span::call_site(), $i, unexpected);
+        match $parser(&state $(, $args)*) {
+            Ok(node) => {
+                match state.check_unexpected() {
+                    Ok(()) => Ok((node, state.cursor())),
+                    Err(err) => Err(err),
+                }
+            }
+            Err(err) => Err(err),
+        }
+    }};
 }

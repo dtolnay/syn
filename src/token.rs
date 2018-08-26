@@ -124,7 +124,7 @@ use error::Result;
 #[cfg(feature = "parsing")]
 use lifetime::Lifetime;
 #[cfg(feature = "parsing")]
-use lit::Lit;
+use lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
 use lookahead;
 #[cfg(feature = "parsing")]
@@ -177,6 +177,13 @@ macro_rules! impl_token {
 impl_token!(Ident "identifier");
 impl_token!(Lifetime "lifetime");
 impl_token!(Lit "literal");
+impl_token!(LitStr "string literal");
+impl_token!(LitByteStr "byte string literal");
+impl_token!(LitByte "byte literal");
+impl_token!(LitChar "character literal");
+impl_token!(LitInt "integer literal");
+impl_token!(LitFloat "floating point literal");
+impl_token!(LitBool "boolean literal");
 
 macro_rules! define_keywords {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
@@ -490,6 +497,17 @@ impl Token for Bracket {
 
     fn display() -> String {
         "square brackets".to_owned()
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl Token for Group {
+    fn peek(lookahead: &Lookahead1) -> bool {
+        lookahead::is_delimiter(lookahead, Delimiter::None)
+    }
+
+    fn display() -> String {
+        "invisible group".to_owned()
     }
 }
 

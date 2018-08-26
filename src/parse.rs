@@ -115,7 +115,9 @@ impl<'a> ParseBuffer<'a> {
             return false;
         }
         let ahead = self.fork();
-        ahead.step_cursor(|cursor| Ok(cursor.token_tree().unwrap())).unwrap();
+        ahead
+            .step_cursor(|cursor| Ok(cursor.token_tree().unwrap()))
+            .unwrap();
         ahead.peek(token)
     }
 
@@ -124,8 +126,12 @@ impl<'a> ParseBuffer<'a> {
             return false;
         }
         let ahead = self.fork();
-        ahead.step_cursor(|cursor| Ok(cursor.token_tree().unwrap())).unwrap();
-        ahead.step_cursor(|cursor| Ok(cursor.token_tree().unwrap())).unwrap();
+        ahead
+            .step_cursor(|cursor| Ok(cursor.token_tree().unwrap()))
+            .unwrap();
+        ahead
+            .step_cursor(|cursor| Ok(cursor.token_tree().unwrap()))
+            .unwrap();
         ahead.peek(token)
     }
 
@@ -213,6 +219,12 @@ impl Parse for Ident {
             }
             Err(cursor.error("expected identifier"))
         })
+    }
+}
+
+impl<T: Parse> Parse for Box<T> {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.parse().map(Box::new)
     }
 }
 

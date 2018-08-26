@@ -179,10 +179,7 @@ macro_rules! maybe_ast_struct {
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
 }
 
-#[cfg(all(
-    feature = "parsing",
-    any(feature = "full", feature = "derive")
-))]
+#[cfg(all(feature = "parsing", feature = "full"))]
 macro_rules! impl_synom {
     ($t:ident $description:tt $($parser:tt)+) => {
         impl Synom for $t {
