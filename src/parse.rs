@@ -115,6 +115,10 @@ impl<'a> ParseBuffer<'a> {
         T::parse(self)
     }
 
+    pub fn call<T>(&self, function: fn(ParseStream) -> Result<T>) -> Result<T> {
+        function(self)
+    }
+
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         self.lookahead1().peek(token)
     }

@@ -394,6 +394,7 @@ where
 pub mod parsing {
     use super::*;
     use buffer::Cursor;
+    use parse::{ParseStream, Result};
     use parse_error;
     use proc_macro2::{Literal, Punct, Spacing, Span, TokenTree};
     use synom::PResult;
@@ -405,6 +406,22 @@ pub mod parsing {
     }
 
     impl Attribute {
+        pub fn parse_outer2(input: ParseStream) -> Result<Vec<Self>> {
+            let mut attrs = Vec::new();
+            while input.peek(Token![#]) {
+                attrs.push(input.parse_synom(Attribute::parse_outer)?);
+            }
+            Ok(attrs)
+        }
+
+        pub fn parse_inner2(input: ParseStream) -> Result<Vec<Self>> {
+            let mut attrs = Vec::new();
+            while input.peek(Token![#]) {
+                attrs.push(input.parse_synom(Attribute::parse_inner)?);
+            }
+            Ok(attrs)
+        }
+
         named!(pub parse_inner -> Self, alt!(
             do_parse!(
                 pound: punct!(#) >>

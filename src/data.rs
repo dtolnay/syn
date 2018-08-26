@@ -189,28 +189,28 @@ pub mod parsing {
     use synom::ext::IdentExt;
     use synom::Synom;
 
-    impl Synom for Variant {
-        named!(parse -> Self, do_parse!(
-            attrs: many0!(Attribute::parse_outer) >>
-            id: syn!(Ident) >>
-            fields: alt!(
-                syn!(FieldsNamed) => { Fields::Named }
-                |
-                syn!(FieldsUnnamed) => { Fields::Unnamed }
-                |
-                epsilon!() => { |_| Fields::Unit }
-            ) >>
-            disr: option!(tuple!(punct!(=), syn!(Expr))) >>
-            (Variant {
-                ident: id,
-                attrs: attrs,
-                fields: fields,
-                discriminant: disr,
+    impl Parse for Variant {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(Variant {
+                attrs: input.call(Attribute::parse_outer2)?,
+                ident: input.parse()?,
+                fields: {
+                    if input.peek(token::Brace) {
+                        Fields::Named(input.parse_synom(FieldsNamed::parse)?)
+                    } else if input.peek(token::Paren) {
+                        Fields::Unnamed(input.parse_synom(FieldsUnnamed::parse)?)
+                    } else {
+                        Fields::Unit
+                    }
+                },
+                discriminant: {
+                    if input.peek(Token![=]) {
+                        Some((input.parse()?, input.parse_synom(Expr::parse)?))
+                    } else {
+                        None
+                    }
+                },
             })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("enum variant")
         }
     }
 
