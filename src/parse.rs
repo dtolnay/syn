@@ -43,19 +43,6 @@ impl<'a> Drop for ParseBuffer<'a> {
     }
 }
 
-impl<'a> Clone for ParseBuffer<'a> {
-    fn clone(&self) -> Self {
-        ParseBuffer {
-            scope: self.scope,
-            cell: self.cell.clone(),
-            marker: PhantomData,
-            // Not the parent's unexpected. Nothing cares whether the clone
-            // parses all the way.
-            unexpected: Rc::new(Cell::new(None)),
-        }
-    }
-}
-
 // Not public API.
 #[doc(hidden)]
 #[derive(Copy, Clone)]
@@ -150,7 +137,14 @@ impl<'a> ParseBuffer<'a> {
     }
 
     pub fn fork(&self) -> Self {
-        self.clone()
+        ParseBuffer {
+            scope: self.scope,
+            cell: self.cell.clone(),
+            marker: PhantomData,
+            // Not the parent's unexpected. Nothing cares whether the clone
+            // parses all the way.
+            unexpected: Rc::new(Cell::new(None)),
+        }
     }
 
     pub fn error<T: Display>(&self, message: T) -> Error {
