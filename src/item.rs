@@ -768,6 +768,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
+    use parse::{Parse, ParseStream, Result};
     use synom::Synom;
 
     impl_synom!(Item "item" alt!(
@@ -1043,48 +1044,64 @@ pub mod parsing {
         })
     ));
 
-    impl Synom for FnArg {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                and: punct!(&) >>
-                lt: option!(syn!(Lifetime)) >>
-                mutability: option!(keyword!(mut)) >>
-                self_: keyword!(self) >>
-                not!(punct!(:)) >>
-                (ArgSelfRef {
-                    lifetime: lt,
-                    mutability: mutability,
-                    and_token: and,
-                    self_token: self_,
-                }.into())
-            )
-            |
-            do_parse!(
-                mutability: option!(keyword!(mut)) >>
-                self_: keyword!(self) >>
-                not!(punct!(:)) >>
-                (ArgSelf {
-                    mutability: mutability,
-                    self_token: self_,
-                }.into())
-            )
-            |
-            do_parse!(
-                pat: syn!(Pat) >>
-                colon: punct!(:) >>
-                ty: syn!(Type) >>
-                (ArgCaptured {
-                    pat: pat,
-                    ty: ty,
-                    colon_token: colon,
-                }.into())
-            )
-            |
-            syn!(Type) => { FnArg::Ignored }
-        ));
+    impl Parse for FnArg {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Token![&]) {
+                let ahead = input.fork();
+                if ahead.parse::<ArgSelfRef>().is_ok() && !ahead.peek(Token![:]) {
+                    return input.parse().map(FnArg::SelfRef);
+                }
+            }
 
-        fn description() -> Option<&'static str> {
-            Some("function argument")
+            if input.peek(Token![mut]) || input.peek(Token![self]) {
+                let ahead = input.fork();
+                if ahead.parse::<ArgSelf>().is_ok() && !ahead.peek(Token![:]) {
+                    return input.parse().map(FnArg::SelfValue);
+                }
+            }
+
+            let ahead = input.fork();
+            let err = match ahead.parse::<ArgCaptured>() {
+                Ok(_) => return input.parse().map(FnArg::Captured),
+                Err(err) => err,
+            };
+
+            let ahead = input.fork();
+            if ahead.parse::<Type>().is_ok() {
+                return input.parse().map(FnArg::Ignored);
+            }
+
+            Err(err)
+        }
+    }
+
+    impl Parse for ArgSelfRef {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ArgSelfRef {
+                and_token: input.parse()?,
+                lifetime: input.parse()?,
+                mutability: input.parse()?,
+                self_token: input.parse()?,
+            })
+        }
+    }
+
+    impl Parse for ArgSelf {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ArgSelf {
+                mutability: input.parse()?,
+                self_token: input.parse()?,
+            })
+        }
+    }
+
+    impl Parse for ArgCaptured {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ArgCaptured {
+                pat: input.parse_synom(Pat::parse)?,
+                colon_token: input.parse()?,
+                ty: input.parse()?,
+            })
         }
     }
 
