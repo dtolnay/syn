@@ -356,6 +356,8 @@ pub mod ext {
     use super::*;
     use proc_macro2::Ident;
 
+    use parse::{ParseStream, Result};
+
     /// Additional parsing methods for `Ident`.
     ///
     /// This trait is sealed and cannot be implemented for types outside of Syn.
@@ -390,11 +392,20 @@ pub mod ext {
         /// # fn main() {}
         /// ```
         fn parse_any(input: Cursor) -> PResult<Self>;
+
+        fn parse_any2(input: ParseStream) -> Result<Self>;
     }
 
     impl IdentExt for Ident {
         fn parse_any(input: Cursor) -> PResult<Self> {
             input.ident().map_or_else(parse_error, Ok)
+        }
+
+        fn parse_any2(input: ParseStream) -> Result<Self> {
+            input.step_cursor(|cursor| match cursor.ident() {
+                Some((ident, rest)) => Ok((ident, rest)),
+                None => Err(cursor.error("expected ident")),
+            })
         }
     }
 

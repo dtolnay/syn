@@ -109,28 +109,20 @@ impl Hash for Lifetime {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use buffer::Cursor;
-    use parse_error;
-    use synom::PResult;
-    use synom::Synom;
+    use parse::{Error, Parse, ParseStream, Result};
+    use synom::ext::IdentExt;
 
-    impl Synom for Lifetime {
-        fn parse(input: Cursor) -> PResult<Self> {
-            let (apostrophe, rest) = Apostrophe::parse(input)?;
-            let (ident, rest) = match rest.ident() {
-                Some(pair) => pair,
-                None => return parse_error(),
-            };
-
-            let ret = Lifetime {
-                ident: ident,
-                apostrophe: apostrophe,
-            };
-            Ok((ret, rest))
-        }
-
-        fn description() -> Option<&'static str> {
-            Some("lifetime")
+    impl Parse for Lifetime {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(Lifetime {
+                apostrophe: match input.parse() {
+                    Ok(apostrophe) => apostrophe,
+                    Err(err) => {
+                        return Err(Error::new(err.span(), "expected lifetime"));
+                    }
+                },
+                ident: input.call(Ident::parse_any2)?,
+            })
         }
     }
 }

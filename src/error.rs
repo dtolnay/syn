@@ -40,6 +40,10 @@ impl Error {
         }
     }
 
+    pub fn span(&self) -> Span {
+        self.span
+    }
+
     /// Render the error as an invocation of [`compile_error!`].
     ///
     /// The [`parse_macro_input!`] macro provides a convenient way to invoke
