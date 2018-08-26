@@ -1152,7 +1152,7 @@ pub mod parsing {
             )
             |
             do_parse!(
-                op: call!(BinOp::parse_assign_op) >>
+                op: shim!(BinOp::parse_assign_op) >>
                 // Recurse into self to parse right-associative operator.
                 rhs: call!(assign_expr, allow_struct, true) >>
                 ({
