@@ -246,7 +246,7 @@ mod parsing {
     pub struct AstStruct(pub Vec<AstItem>);
     impl Synom for AstStruct {
         named!(parse -> Self, do_parse!(
-            many0!(Attribute::parse_outer) >>
+            many0!(Attribute::old_parse_outer) >>
             keyword!(pub) >>
             keyword!(struct) >>
             res: call!(ast_struct_inner) >>
@@ -265,7 +265,7 @@ mod parsing {
     pub struct AstEnum(pub Vec<AstItem>);
     impl Synom for AstEnum {
         named!(parse -> Self, do_parse!(
-            many0!(Attribute::parse_outer) >>
+            many0!(Attribute::old_parse_outer) >>
             keyword!(pub) >>
             keyword!(enum) >>
             id: syn!(Ident) >>
@@ -292,7 +292,7 @@ mod parsing {
         inner: Option<AstItem>,
     }
     named!(eos_variant -> EosVariant, do_parse!(
-        many0!(Attribute::parse_outer) >>
+        many0!(Attribute::old_parse_outer) >>
         keyword!(pub) >>
         variant: syn!(Ident) >>
         member: option!(map!(parens!(alt!(
@@ -312,7 +312,7 @@ mod parsing {
     pub struct AstEnumOfStructs(pub Vec<AstItem>);
     impl Synom for AstEnumOfStructs {
         named!(parse -> Self, do_parse!(
-            many0!(Attribute::parse_outer) >>
+            many0!(Attribute::old_parse_outer) >>
             keyword!(pub) >>
             keyword!(enum) >>
             id: syn!(Ident) >>
