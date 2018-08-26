@@ -40,6 +40,8 @@ use std::vec;
 #[cfg(feature = "parsing")]
 use buffer::Cursor;
 #[cfg(feature = "parsing")]
+use parse::{Parse, ParseStream, Result};
+#[cfg(feature = "parsing")]
 use parse_error;
 #[cfg(feature = "parsing")]
 use synom::{PResult, Synom};
@@ -770,6 +772,34 @@ where
                 Ok((res, input))
             }
         }
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl<T, P> Punctuated<T, P>
+where
+    P: Parse,
+{
+    pub fn parse_terminated2(
+        input: ParseStream,
+        parser: fn(ParseStream) -> Result<T>,
+    ) -> Result<Self> {
+        let mut res = Punctuated::new();
+
+        loop {
+            if input.is_empty() {
+                break;
+            }
+            let value = parser(input)?;
+            res.push_value(value);
+            if input.is_empty() {
+                break;
+            }
+            let punct = input.parse()?;
+            res.push_punct(punct);
+        }
+
+        Ok(res)
     }
 }
 

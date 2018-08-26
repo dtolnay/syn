@@ -11,6 +11,7 @@ use proc_macro2::{Ident, Span};
 
 use buffer::Cursor;
 use error;
+use punctuated::Punctuated;
 use synom::PResult;
 
 pub use error::{Error, Result};
@@ -121,6 +122,13 @@ impl<'a> ParseBuffer<'a> {
 
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         self.lookahead1().peek(token)
+    }
+
+    pub fn parse_terminated<T, P: Parse>(
+        &self,
+        parser: fn(ParseStream) -> Result<T>,
+    ) -> Result<Punctuated<T, P>> {
+        Punctuated::parse_terminated2(self, parser)
     }
 
     pub fn fork(&self) -> Self {

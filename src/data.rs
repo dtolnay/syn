@@ -196,9 +196,9 @@ pub mod parsing {
                 ident: input.parse()?,
                 fields: {
                     if input.peek(token::Brace) {
-                        Fields::Named(input.parse_synom(FieldsNamed::parse)?)
+                        Fields::Named(input.parse()?)
                     } else if input.peek(token::Paren) {
-                        Fields::Unnamed(input.parse_synom(FieldsUnnamed::parse)?)
+                        Fields::Unnamed(input.parse()?)
                     } else {
                         Fields::Unit
                     }
@@ -214,62 +214,46 @@ pub mod parsing {
         }
     }
 
-    impl Synom for FieldsNamed {
-        named!(parse -> Self, map!(
-            braces!(call!(Punctuated::parse_terminated_with, Field::parse_named)),
-            |(brace, fields)| FieldsNamed {
-                brace_token: brace,
-                named: fields,
-            }
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("named fields in a struct or struct variant")
+    impl Parse for FieldsNamed {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            Ok(FieldsNamed {
+                brace_token: braced!(content in input),
+                named: content.parse_terminated(Field::parse_named)?,
+            })
         }
     }
 
-    impl Synom for FieldsUnnamed {
-        named!(parse -> Self, map!(
-            parens!(call!(Punctuated::parse_terminated_with, Field::parse_unnamed)),
-            |(paren, fields)| FieldsUnnamed {
-                paren_token: paren,
-                unnamed: fields,
-            }
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("unnamed fields in a tuple struct or tuple variant")
+    impl Parse for FieldsUnnamed {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            Ok(FieldsUnnamed {
+                paren_token: parenthesized!(content in input),
+                unnamed: content.parse_terminated(Field::parse_unnamed)?,
+            })
         }
     }
 
     impl Field {
-        named!(pub parse_named -> Self, do_parse!(
-            attrs: many0!(Attribute::old_parse_outer) >>
-            vis: syn!(Visibility) >>
-            id: syn!(Ident) >>
-            colon: punct!(:) >>
-            ty: syn!(Type) >>
-            (Field {
-                ident: Some(id),
-                vis: vis,
-                attrs: attrs,
-                ty: ty,
-                colon_token: Some(colon),
+        fn parse_named(input: ParseStream) -> Result<Self> {
+            Ok(Field {
+                attrs: input.call(Attribute::parse_outer)?,
+                vis: input.parse()?,
+                ident: Some(input.parse()?),
+                colon_token: Some(input.parse()?),
+                ty: input.parse_synom(Type::parse)?,
             })
-        ));
+        }
 
-        named!(pub parse_unnamed -> Self, do_parse!(
-            attrs: many0!(Attribute::old_parse_outer) >>
-            vis: syn!(Visibility) >>
-            ty: syn!(Type) >>
-            (Field {
+        fn parse_unnamed(input: ParseStream) -> Result<Self> {
+            Ok(Field {
+                attrs: input.call(Attribute::parse_outer)?,
+                vis: input.parse()?,
                 ident: None,
                 colon_token: None,
-                vis: vis,
-                attrs: attrs,
-                ty: ty,
+                ty: input.parse_synom(Type::parse)?,
             })
-        ));
+        }
     }
 
     impl Parse for Visibility {
