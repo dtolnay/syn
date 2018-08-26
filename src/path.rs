@@ -227,122 +227,120 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use parse::{Parse, ParseStream, Result};
+    use synom::ext::IdentExt;
     use synom::Synom;
 
-    impl Synom for Path {
-        named!(parse -> Self, do_parse!(
-            colon: option!(punct!(::)) >>
-            segments: call!(Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty) >>
-            cond_reduce!(segments.first().map_or(true, |seg| seg.value().ident != "dyn")) >>
-            (Path {
-                leading_colon: colon,
-                segments: segments,
+    impl Parse for Path {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Token![dyn]) {
+                return Err(input.error("expected path"));
+            }
+
+            Ok(Path {
+                leading_colon: input.parse()?,
+                segments: input.parse_synom(Punctuated::parse_separated_nonempty)?,
             })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("path")
         }
     }
 
-    #[cfg(not(feature = "full"))]
-    impl Synom for GenericArgument {
-        named!(parse -> Self, alt!(
-            call!(ty_no_eq_after) => { GenericArgument::Type }
-            |
-            syn!(Lifetime) => { GenericArgument::Lifetime }
-            |
-            syn!(Binding) => { GenericArgument::Binding }
-        ));
-    }
+    impl Parse for GenericArgument {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Lifetime) && !input.peek3(Token![+]) {
+                return Ok(GenericArgument::Lifetime(input.parse()?));
+            }
 
-    #[cfg(feature = "full")]
-    impl Synom for GenericArgument {
-        named!(parse -> Self, alt!(
-            call!(ty_no_eq_after) => { GenericArgument::Type }
-            |
-            syn!(Lifetime) => { GenericArgument::Lifetime }
-            |
-            syn!(Binding) => { GenericArgument::Binding }
-            |
-            syn!(ExprLit) => { |l| GenericArgument::Const(Expr::Lit(l)) }
-            |
-            syn!(ExprBlock) => { |b| GenericArgument::Const(Expr::Block(b)) }
-        ));
+            if input.peek(Ident) && input.peek2(Token![=]) {
+                return Ok(GenericArgument::Binding(input.parse()?));
+            }
 
-        fn description() -> Option<&'static str> {
-            Some("generic argument")
+            #[cfg(feature = "full")]
+            {
+                if input.peek(Lit) {
+                    let lit = input.parse_synom(ExprLit::parse)?;
+                    return Ok(GenericArgument::Const(Expr::Lit(lit)));
+                }
+
+                if input.peek(token::Brace) {
+                    let block = input.parse_synom(ExprBlock::parse)?;
+                    return Ok(GenericArgument::Const(Expr::Block(block)));
+                }
+            }
+
+            Ok(GenericArgument::Type(input.parse_synom(ty_no_eq_after)?))
         }
     }
 
-    impl Synom for AngleBracketedGenericArguments {
-        named!(parse -> Self, do_parse!(
-            colon2: option!(punct!(::)) >>
-            lt: punct!(<) >>
-            args: call!(Punctuated::parse_terminated) >>
-            gt: punct!(>) >>
-            (AngleBracketedGenericArguments {
-                colon2_token: colon2,
-                lt_token: lt,
-                args: args,
-                gt_token: gt,
+    impl Parse for AngleBracketedGenericArguments {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(AngleBracketedGenericArguments {
+                colon2_token: input.parse()?,
+                lt_token: input.parse()?,
+                args: {
+                    let mut args = Punctuated::new();
+                    loop {
+                        if input.peek(Token![>]) {
+                            break;
+                        }
+                        let value = input.parse()?;
+                        args.push_value(value);
+                        if input.peek(Token![>]) {
+                            break;
+                        }
+                        let punct = input.parse()?;
+                        args.push_punct(punct);
+                    }
+                    args
+                },
+                gt_token: input.parse()?,
             })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("angle bracketed generic arguments")
         }
     }
 
-    impl Synom for ParenthesizedGenericArguments {
-        named!(parse -> Self, do_parse!(
-            data: parens!(Punctuated::parse_terminated) >>
-            output: call!(ReturnType::without_plus) >>
-            (ParenthesizedGenericArguments {
-                paren_token: data.0,
-                inputs: data.1,
-                output: output,
+    impl Parse for ParenthesizedGenericArguments {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            Ok(ParenthesizedGenericArguments {
+                paren_token: parenthesized!(content in input),
+                inputs: content.parse_synom(Punctuated::parse_terminated)?,
+                output: input.parse_synom(ReturnType::without_plus)?,
             })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("parenthesized generic arguments: `Foo(A, B, ..) -> T`")
         }
     }
 
-    impl Synom for PathSegment {
-        named!(parse -> Self, alt!(
-            do_parse!(
-                ident: syn!(Ident) >>
-                arguments: syn!(AngleBracketedGenericArguments) >>
-                (PathSegment {
+    impl Parse for PathSegment {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Token![super])
+                || input.peek(Token![self])
+                || input.peek(Token![Self])
+                || input.peek(Token![crate])
+                || input.peek(Token![extern])
+            {
+                let ident = input.parse_synom(Ident::parse_any)?;
+                return Ok(PathSegment::from(ident));
+            }
+
+            let ident = input.parse()?;
+            if input.peek(Token![<]) && !input.peek2(Token![=])
+                || input.peek(Token![::]) && input.peek3(Token![<])
+            {
+                Ok(PathSegment {
                     ident: ident,
-                    arguments: PathArguments::AngleBracketed(arguments),
+                    arguments: PathArguments::AngleBracketed(input.parse()?),
                 })
-            )
-            |
-            mod_style_path_segment
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("path segment")
+            } else {
+                Ok(PathSegment::from(ident))
+            }
         }
     }
 
-    impl Synom for Binding {
-        named!(parse -> Self, do_parse!(
-            id: syn!(Ident) >>
-            eq: punct!(=) >>
-            ty: syn!(Type) >>
-            (Binding {
-                ident: id,
-                eq_token: eq,
-                ty: ty,
+    impl Parse for Binding {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(Binding {
+                ident: input.parse()?,
+                eq_token: input.parse()?,
+                ty: input.parse_synom(Type::parse)?,
             })
-        ));
-
-        fn description() -> Option<&'static str> {
-            Some("associated type binding")
         }
     }
 

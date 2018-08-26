@@ -13,6 +13,8 @@ use std::hash::{Hash, Hasher};
 use proc_macro2::{Ident, Span};
 use unicode_xid::UnicodeXID;
 
+#[cfg(feature = "parsing")]
+use lookahead;
 use token::Apostrophe;
 
 /// A Rust lifetime: `'a`.
@@ -104,6 +106,13 @@ impl Hash for Lifetime {
     fn hash<H: Hasher>(&self, h: &mut H) {
         self.ident.hash(h)
     }
+}
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
+    match marker {}
 }
 
 #[cfg(feature = "parsing")]

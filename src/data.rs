@@ -303,13 +303,7 @@ pub mod parsing {
         }
 
         fn parse_crate(input: ParseStream) -> Result<Self> {
-            let followed_by_colons = {
-                let ahead = input.fork();
-                ahead.parse::<Token![crate]>()?;
-                ahead.peek(Token![::])
-            };
-
-            if followed_by_colons {
+            if input.peek2(Token![::]) {
                 Ok(Visibility::Inherited)
             } else {
                 Ok(Visibility::Crate(VisCrate {

@@ -13,6 +13,7 @@ use buffer::Cursor;
 use error;
 use punctuated::Punctuated;
 use synom::PResult;
+use token::Token;
 
 pub use error::{Error, Result};
 pub use lookahead::{Lookahead1, Peek};
@@ -79,8 +80,6 @@ impl<'c, 'a> StepCursor<'c, 'a> {
         unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(other) }
     }
 
-    // Not public API.
-    #[doc(hidden)]
     pub fn error<T: Display>(self, message: T) -> Error {
         error::new_at(self.scope, self.cursor, message)
     }
@@ -124,6 +123,25 @@ impl<'a> ParseBuffer<'a> {
         self.lookahead1().peek(token)
     }
 
+    pub fn peek2<T: Peek>(&self, token: T) -> bool {
+        if self.is_empty() {
+            return false;
+        }
+        let ahead = self.fork();
+        ahead.step_cursor(|cursor| Ok(cursor.token_tree().unwrap())).unwrap();
+        ahead.peek(token)
+    }
+
+    pub fn peek3<T: Peek>(&self, token: T) -> bool {
+        if self.is_empty() {
+            return false;
+        }
+        let ahead = self.fork();
+        ahead.step_cursor(|cursor| Ok(cursor.token_tree().unwrap())).unwrap();
+        ahead.step_cursor(|cursor| Ok(cursor.token_tree().unwrap())).unwrap();
+        ahead.peek(token)
+    }
+
     pub fn parse_terminated<T, P: Parse>(
         &self,
         parser: fn(ParseStream) -> Result<T>,
@@ -133,6 +151,10 @@ impl<'a> ParseBuffer<'a> {
 
     pub fn fork(&self) -> Self {
         self.clone()
+    }
+
+    pub fn error<T: Display>(&self, message: T) -> Error {
+        error::new_at(self.scope, self.cursor(), message)
     }
 
     // Not public API.
@@ -200,14 +222,12 @@ impl Parse for Ident {
     }
 }
 
-// In reality the impl would be for Punctuated.
-impl<T: Parse> Parse for Vec<T> {
+impl<T: Parse + Token> Parse for Option<T> {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut vec = Vec::new();
-        while !input.is_empty() {
-            let t = input.parse::<T>()?;
-            vec.push(t);
+        if T::peek(&input.lookahead1()) {
+            Ok(Some(input.parse()?))
+        } else {
+            Ok(None)
         }
-        Ok(vec)
     }
 }

@@ -122,6 +122,10 @@ use quote::{ToTokens, TokenStreamExt};
 #[cfg(feature = "parsing")]
 use error::Result;
 #[cfg(feature = "parsing")]
+use lifetime::Lifetime;
+#[cfg(feature = "parsing")]
+use lit::Lit;
+#[cfg(feature = "parsing")]
 use lookahead;
 #[cfg(feature = "parsing")]
 use parse::{Lookahead1, Parse, ParseBuffer, ParseStream};
@@ -147,7 +151,7 @@ mod private {
 }
 
 macro_rules! impl_token {
-    ($token:tt $name:ident) => {
+    ($name:ident $display:expr) => {
         #[cfg(feature = "parsing")]
         impl Token for $name {
             fn peek(lookahead: &Lookahead1) -> bool {
@@ -161,7 +165,7 @@ macro_rules! impl_token {
             }
 
             fn display() -> String {
-                concat!("`", $token, "`").to_owned()
+                $display.to_owned()
             }
         }
 
@@ -169,6 +173,10 @@ macro_rules! impl_token {
         impl private::Sealed for $name {}
     };
 }
+
+impl_token!(Ident "identifier");
+impl_token!(Lifetime "lifetime");
+impl_token!(Lit "literal");
 
 macro_rules! define_keywords {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
@@ -192,7 +200,7 @@ macro_rules! define_keywords {
                 }
             }
 
-            impl_token!($token $name);
+            impl_token!($name concat!("`", $token, "`"));
 
             impl std::default::Default for $name {
                 fn default() -> Self {
@@ -261,7 +269,7 @@ macro_rules! define_punctuation_structs {
                 }
             }
 
-            impl_token!($token $name);
+            impl_token!($name concat!("`", $token, "`"));
 
             impl std::default::Default for $name {
                 fn default() -> Self {

@@ -183,7 +183,13 @@ pub mod parsing {
         }
     }
 
-    fn data_enum(input: ParseStream) -> Result<(Option<WhereClause>, token::Brace, Punctuated<Variant, Token![,]>)> {
+    fn data_enum(
+        input: ParseStream,
+    ) -> Result<(
+        Option<WhereClause>,
+        token::Brace,
+        Punctuated<Variant, Token![,]>,
+    )> {
         let where_clause = if input.peek(Token![where]) {
             Some(input.parse_synom(WhereClause::parse)?)
         } else {

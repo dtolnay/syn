@@ -22,6 +22,9 @@ use proc_macro2::TokenTree;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 
+#[cfg(feature = "parsing")]
+use lookahead;
+
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
     ///
@@ -411,45 +414,49 @@ ast_enum! {
 }
 
 #[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
+    match marker {}
+}
+
+#[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use buffer::Cursor;
+    use parse::{Parse, ParseStream, Result};
     use parse_error;
-    use synom::PResult;
     use synom::Synom;
 
-    impl Synom for Lit {
-        fn parse(input: Cursor) -> PResult<Self> {
-            match input.literal() {
-                Some((lit, rest)) => {
-                    if lit.to_string().starts_with('/') {
-                        // Doc comment literal which is not a Syn literal
-                        parse_error()
-                    } else {
-                        Ok((Lit::new(lit), rest))
+    impl Parse for Lit {
+        fn parse(input: ParseStream) -> Result<Self> {
+            input.step_cursor(|cursor| {
+                match cursor.literal() {
+                    Some((lit, rest)) => {
+                        if lit.to_string().starts_with('/') {
+                            // Doc comment literal which is not a Syn literal
+                            parse_error()
+                        } else {
+                            Ok((Lit::new(lit), rest))
+                        }
                     }
+                    _ => match cursor.ident() {
+                        Some((ident, rest)) => Ok((
+                            Lit::Bool(LitBool {
+                                value: if ident == "true" {
+                                    true
+                                } else if ident == "false" {
+                                    false
+                                } else {
+                                    return parse_error();
+                                },
+                                span: ident.span(),
+                            }),
+                            rest,
+                        )),
+                        _ => parse_error(),
+                    },
                 }
-                _ => match input.ident() {
-                    Some((ident, rest)) => Ok((
-                        Lit::Bool(LitBool {
-                            value: if ident == "true" {
-                                true
-                            } else if ident == "false" {
-                                false
-                            } else {
-                                return parse_error();
-                            },
-                            span: ident.span(),
-                        }),
-                        rest,
-                    )),
-                    _ => parse_error(),
-                },
-            }
-        }
-
-        fn description() -> Option<&'static str> {
-            Some("literal")
+            })
         }
     }
 
