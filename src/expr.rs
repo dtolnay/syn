@@ -1187,28 +1187,18 @@ pub mod parsing {
     //
     // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
-    named2!(placement_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(range_expr, allow_struct, allow_block) >>
-        alt!(
-            do_parse!(
-                arrow: punct!(<-) >>
-                // Recurse into self to parse right-associative operator.
-                rhs: shim!(placement_expr, allow_struct, AllowBlock(true)) >>
-                ({
-                    e = ExprInPlace {
-                        attrs: Vec::new(),
-                        // op: BinOp::Place(larrow),
-                        place: Box::new(e),
-                        arrow_token: arrow,
-                        value: Box::new(rhs),
-                    }.into();
-                })
-            )
-            |
-            epsilon!()
-        ) >>
-        (e)
-    ));
+    fn placement_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = range_expr(input, allow_struct, allow_block)?;
+        if input.peek(Token![<-]) {
+            e = Expr::InPlace(ExprInPlace {
+                attrs: Vec::new(),
+                place: Box::new(e),
+                arrow_token: input.parse()?,
+                value: Box::new(placement_expr(input, allow_struct, AllowBlock(true))?),
+            });
+        }
+        Ok(e)
+    }
 
     // <or> ... <or> ..
     // <or> .. <or> ..
