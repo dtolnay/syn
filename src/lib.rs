@@ -374,9 +374,8 @@ pub use item::{
     ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
     ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
     ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemType, ItemUnion,
-    ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemExistential,
-    TraitItemMacro, TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName,
-    UsePath, UseRename, UseTree,
+    ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod,
+    TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
 };
 
 #[cfg(feature = "full")]
@@ -439,7 +438,10 @@ pub mod buffer;
 pub mod punctuated;
 #[cfg(feature = "parsing")]
 pub mod synom;
-#[cfg(any(feature = "full", feature = "derive"))]
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    feature = "extra-traits"
+))]
 mod tt;
 
 // Not public API except the `parse_quote!` macro.

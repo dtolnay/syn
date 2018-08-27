@@ -725,10 +725,6 @@ pub trait Visit<'ast> {
         visit_trait_item_const(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_trait_item_existential(&mut self, i: &'ast TraitItemExistential) {
-        visit_trait_item_existential(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_trait_item_macro(&mut self, i: &'ast TraitItemMacro) {
         visit_trait_item_macro(self, i)
     }
@@ -3058,9 +3054,6 @@ pub fn visit_trait_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         TraitItem::Type(ref _binding_0) => {
             _visitor.visit_trait_item_type(_binding_0);
         }
-        TraitItem::Existential(ref _binding_0) => {
-            _visitor.visit_trait_item_existential(_binding_0);
-        }
         TraitItem::Macro(ref _binding_0) => {
             _visitor.visit_trait_item_macro(_binding_0);
         }
@@ -3085,27 +3078,6 @@ pub fn visit_trait_item_const<'ast, V: Visit<'ast> + ?Sized>(
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_expr(&(it).1);
     };
-    tokens_helper(_visitor, &_i.semi_token.spans);
-}
-#[cfg(feature = "full")]
-pub fn visit_trait_item_existential<'ast, V: Visit<'ast> + ?Sized>(
-    _visitor: &mut V,
-    _i: &'ast TraitItemExistential,
-) {
-    for it in &_i.attrs {
-        _visitor.visit_attribute(it)
-    }
-    tokens_helper(_visitor, &_i.existential_token.span);
-    tokens_helper(_visitor, &_i.type_token.span);
-    _visitor.visit_ident(&_i.ident);
-    _visitor.visit_generics(&_i.generics);
-    if let Some(ref it) = _i.colon_token {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
-    }
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
 #[cfg(feature = "full")]
@@ -3227,6 +3199,9 @@ pub fn visit_type_array<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_type_bare_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeBareFn) {
+    if let Some(ref it) = _i.lifetimes {
+        _visitor.visit_bound_lifetimes(it)
+    };
     if let Some(ref it) = _i.unsafety {
         tokens_helper(_visitor, &it.span)
     };
@@ -3234,9 +3209,6 @@ pub fn visit_type_bare_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
         _visitor.visit_abi(it)
     };
     tokens_helper(_visitor, &_i.fn_token.span);
-    if let Some(ref it) = _i.lifetimes {
-        _visitor.visit_bound_lifetimes(it)
-    };
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.inputs) {
         let it = el.value();

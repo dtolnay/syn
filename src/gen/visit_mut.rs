@@ -729,10 +729,6 @@ pub trait VisitMut {
         visit_trait_item_const_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_trait_item_existential_mut(&mut self, i: &mut TraitItemExistential) {
-        visit_trait_item_existential_mut(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_trait_item_macro_mut(&mut self, i: &mut TraitItemMacro) {
         visit_trait_item_macro_mut(self, i)
     }
@@ -2993,9 +2989,6 @@ pub fn visit_trait_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Tra
         TraitItem::Type(ref mut _binding_0) => {
             _visitor.visit_trait_item_type_mut(_binding_0);
         }
-        TraitItem::Existential(ref mut _binding_0) => {
-            _visitor.visit_trait_item_existential_mut(_binding_0);
-        }
         TraitItem::Macro(ref mut _binding_0) => {
             _visitor.visit_trait_item_macro_mut(_binding_0);
         }
@@ -3017,27 +3010,6 @@ pub fn visit_trait_item_const_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &m
         tokens_helper(_visitor, &mut (it).0.spans);
         _visitor.visit_expr_mut(&mut (it).1);
     };
-    tokens_helper(_visitor, &mut _i.semi_token.spans);
-}
-#[cfg(feature = "full")]
-pub fn visit_trait_item_existential_mut<V: VisitMut + ?Sized>(
-    _visitor: &mut V,
-    _i: &mut TraitItemExistential,
-) {
-    for it in &mut _i.attrs {
-        _visitor.visit_attribute_mut(it)
-    }
-    tokens_helper(_visitor, &mut _i.existential_token.span);
-    tokens_helper(_visitor, &mut _i.type_token.span);
-    _visitor.visit_ident_mut(&mut _i.ident);
-    _visitor.visit_generics_mut(&mut _i.generics);
-    if let Some(ref mut it) = _i.colon_token {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.bounds) {
-        let it = el.value_mut();
-        _visitor.visit_type_param_bound_mut(it)
-    }
     tokens_helper(_visitor, &mut _i.semi_token.spans);
 }
 #[cfg(feature = "full")]
@@ -3153,6 +3125,9 @@ pub fn visit_type_array_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Typ
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_type_bare_fn_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut TypeBareFn) {
+    if let Some(ref mut it) = _i.lifetimes {
+        _visitor.visit_bound_lifetimes_mut(it)
+    };
     if let Some(ref mut it) = _i.unsafety {
         tokens_helper(_visitor, &mut it.span)
     };
@@ -3160,9 +3135,6 @@ pub fn visit_type_bare_fn_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut T
         _visitor.visit_abi_mut(it)
     };
     tokens_helper(_visitor, &mut _i.fn_token.span);
-    if let Some(ref mut it) = _i.lifetimes {
-        _visitor.visit_bound_lifetimes_mut(it)
-    };
     tokens_helper(_visitor, &mut _i.paren_token.span);
     for mut el in Punctuated::pairs_mut(&mut _i.inputs) {
         let it = el.value_mut();

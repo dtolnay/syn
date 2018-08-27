@@ -728,10 +728,6 @@ pub trait Fold {
         fold_trait_item_const(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_trait_item_existential(&mut self, i: TraitItemExistential) -> TraitItemExistential {
-        fold_trait_item_existential(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_trait_item_macro(&mut self, i: TraitItemMacro) -> TraitItemMacro {
         fold_trait_item_macro(self, i)
     }
@@ -2672,9 +2668,6 @@ pub fn fold_trait_item<V: Fold + ?Sized>(_visitor: &mut V, _i: TraitItem) -> Tra
             TraitItem::Method(_visitor.fold_trait_item_method(_binding_0))
         }
         TraitItem::Type(_binding_0) => TraitItem::Type(_visitor.fold_trait_item_type(_binding_0)),
-        TraitItem::Existential(_binding_0) => {
-            TraitItem::Existential(_visitor.fold_trait_item_existential(_binding_0))
-        }
         TraitItem::Macro(_binding_0) => {
             TraitItem::Macro(_visitor.fold_trait_item_macro(_binding_0))
         }
@@ -2700,22 +2693,6 @@ pub fn fold_trait_item_const<V: Fold + ?Sized>(
                 _visitor.fold_expr((it).1),
             )
         }),
-        semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_trait_item_existential<V: Fold + ?Sized>(
-    _visitor: &mut V,
-    _i: TraitItemExistential,
-) -> TraitItemExistential {
-    TraitItemExistential {
-        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        existential_token: Token![existential](tokens_helper(_visitor, &_i.existential_token.span)),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
-        ident: _visitor.fold_ident(_i.ident),
-        generics: _visitor.fold_generics(_i.generics),
-        colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
-        bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }
@@ -2804,10 +2781,10 @@ pub fn fold_type_array<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeArray) -> Typ
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn fold_type_bare_fn<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeBareFn) -> TypeBareFn {
     TypeBareFn {
+        lifetimes: (_i.lifetimes).map(|it| _visitor.fold_bound_lifetimes(it)),
         unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
         abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
         fn_token: Token ! [ fn ](tokens_helper(_visitor, &_i.fn_token.span)),
-        lifetimes: (_i.lifetimes).map(|it| _visitor.fold_bound_lifetimes(it)),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
         inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_bare_fn_arg(it)),
         variadic: (_i.variadic).map(|it| Token ! [ ... ](tokens_helper(_visitor, &it.spans))),
