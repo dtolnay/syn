@@ -1476,102 +1476,134 @@ pub mod parsing {
     // <atom> [ <expr> ] ...
     // <atom> ? ...
     #[cfg(feature = "full")]
-    named2!(trailer_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(atom_expr, allow_struct, allow_block) >>
-        outer_attrs: value!({
-            let mut attrs = e.replace_attrs(Vec::new());
-            let outer_attrs = take_outer(&mut attrs);
-            e.replace_attrs(attrs);
-            outer_attrs
-        }) >>
-        many0!(alt!(
-            tap!(args: shim!(and_call) => {
-                let (paren, args) = args;
-                e = ExprCall {
+    fn trailer_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = atom_expr(input, allow_struct, allow_block)?;
+
+        let mut attrs = e.replace_attrs(Vec::new());
+        let outer_attrs = take_outer(&mut attrs);
+        e.replace_attrs(attrs);
+
+        loop {
+            if input.peek(token::Paren) {
+                let content;
+                e = Expr::Call(ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
-                    args: args,
-                    paren_token: paren,
-                }.into();
-            })
-            |
-            tap!(more: shim!(and_method_call) => {
-                let mut call = more;
-                call.receiver = Box::new(e);
-                e = call.into();
-            })
-            |
-            tap!(field: shim!(and_field) => {
-                let (token, member) = field;
-                e = ExprField {
+                    paren_token: parenthesized!(content in input),
+                    args: content.parse_terminated(<Expr as Parse>::parse)?,
+                });
+            } else if input.peek(Token![.]) && !input.peek(Token![..]) {
+                let dot_token: Token![.] = input.parse()?;
+                let member: Member = input.parse()?;
+                let turbofish = if member.is_named() && input.peek(Token![::]) {
+                    Some(MethodTurbofish {
+                        colon2_token: input.parse()?,
+                        lt_token: input.parse()?,
+                        args: {
+                            let mut args = Punctuated::new();
+                            loop {
+                                if input.peek(Token![>]) {
+                                    break;
+                                }
+                                let value = input.parse()?;
+                                args.push_value(value);
+                                if input.peek(Token![>]) {
+                                    break;
+                                }
+                                let punct = input.parse()?;
+                                args.push_punct(punct);
+                            }
+                            args
+                        },
+                        gt_token: input.parse()?,
+                    })
+                } else {
+                    None
+                };
+
+                if turbofish.is_some() || input.peek(token::Paren) {
+                    if let Member::Named(method) = member {
+                        let content;
+                        e = Expr::MethodCall(ExprMethodCall {
+                            attrs: Vec::new(),
+                            receiver: Box::new(e),
+                            dot_token: dot_token,
+                            method: method,
+                            turbofish: turbofish,
+                            paren_token: parenthesized!(content in input),
+                            args: content.parse_terminated(<Expr as Parse>::parse)?,
+                        });
+                        continue;
+                    }
+                }
+
+                e = Expr::Field(ExprField {
                     attrs: Vec::new(),
                     base: Box::new(e),
-                    dot_token: token,
+                    dot_token: dot_token,
                     member: member,
-                }.into();
-            })
-            |
-            tap!(i: shim!(and_index) => {
-                let (bracket, i) = i;
-                e = ExprIndex {
+                });
+            } else if input.peek(token::Bracket) {
+                let content;
+                e = Expr::Index(ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    bracket_token: bracket,
-                    index: Box::new(i),
-                }.into();
-            })
-            |
-            tap!(question: punct!(?) => {
-                e = ExprTry {
+                    bracket_token: bracketed!(content in input),
+                    index: content.parse()?,
+                });
+            } else if input.peek(Token![?]) {
+                e = Expr::Try(ExprTry {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    question_token: question,
-                }.into();
-            })
-        )) >>
-        ({
-            let mut attrs = outer_attrs;
-            attrs.extend(e.replace_attrs(Vec::new()));
-            e.replace_attrs(attrs);
-            e
-        })
-    ));
+                    question_token: input.parse()?,
+                });
+            } else {
+                break;
+            }
+        }
+
+        let mut attrs = outer_attrs;
+        attrs.extend(e.replace_attrs(Vec::new()));
+        e.replace_attrs(attrs);
+        Ok(e)
+    }
 
     // XXX: Duplication == ugly
     #[cfg(not(feature = "full"))]
-    named2!(trailer_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(atom_expr, allow_struct, allow_block) >>
-        many0!(alt!(
-            tap!(args: shim!(and_call) => {
-                e = ExprCall {
+    fn trailer_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = atom_expr(input, allow_struct, allow_block)?;
+
+        loop {
+            if input.peek(token::Paren) {
+                let content;
+                e = Expr::Call(ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
-                    paren_token: args.0,
-                    args: args.1,
-                }.into();
-            })
-            |
-            tap!(field: shim!(and_field) => {
-                let (token, member) = field;
-                e = ExprField {
+                    paren_token: parenthesized!(content in input),
+                    args: content.parse_terminated(<Expr as Parse>::parse)?,
+                });
+            } else if input.peek(Token![.]) {
+                e = Expr::Field(ExprField {
                     attrs: Vec::new(),
                     base: Box::new(e),
-                    dot_token: token,
-                    member: member,
-                }.into();
-            })
-            |
-            tap!(i: shim!(and_index) => {
-                e = ExprIndex {
+                    dot_token: input.parse()?,
+                    member: input.parse()?,
+                });
+            } else if input.peek(token::Bracket) {
+                let content;
+                e = Expr::Index(ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    bracket_token: i.0,
-                    index: Box::new(i.1),
-                }.into();
-            })
-        )) >>
-        (e)
-    ));
+                    bracket_token: bracketed!(content in input),
+                    index: content.parse()?,
+                });
+            } else {
+                break;
+            }
+        }
+
+        Ok(e)
+    }
 
     // Parse all atomic expressions which don't have to worry about precedence
     // interactions, as they are fully contained.
@@ -1770,47 +1802,12 @@ pub mod parsing {
         ));
     }
 
-    named2!(and_call -> (token::Paren, Punctuated<Expr, Token![,]>),
-        parens!(Punctuated::parse_terminated)
-    );
-
     #[cfg(feature = "full")]
-    named2!(and_method_call -> ExprMethodCall, do_parse!(
-        dot: punct!(.) >>
-        method: syn!(Ident) >>
-        turbofish: option!(tuple!(
-            punct!(::),
-            punct!(<),
-            call!(Punctuated::parse_terminated),
-            punct!(>),
-        )) >>
-        args: parens!(Punctuated::parse_terminated) >>
-        ({
-            ExprMethodCall {
-                attrs: Vec::new(),
-                // this expr will get overwritten after being returned
-                receiver: Box::new(Expr::Verbatim(ExprVerbatim {
-                    tts: TokenStream::new(),
-                })),
-
-                method: method,
-                turbofish: turbofish.map(|fish| MethodTurbofish {
-                    colon2_token: fish.0,
-                    lt_token: fish.1,
-                    args: fish.2,
-                    gt_token: fish.3,
-                }),
-                args: args.1,
-                paren_token: args.0,
-                dot_token: dot,
-            }
-        })
-    ));
-
-    #[cfg(feature = "full")]
-    impl Synom for GenericMethodArgument {
+    impl Parse for GenericMethodArgument {
         // TODO parse const generics as well
-        named!(parse -> Self, map!(ty_no_eq_after, GenericMethodArgument::Type));
+        fn parse(input: ParseStream) -> Result<Self> {
+            input.parse_synom(ty_no_eq_after).map(GenericMethodArgument::Type)
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2492,10 +2489,6 @@ pub mod parsing {
         map!(keyword!(self), |s| (None, s.into()))
     ));
 
-    named2!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
-
-    named2!(and_index -> (token::Bracket, Expr), brackets!(syn!(Expr)));
-
     #[cfg(feature = "full")]
     impl Synom for Block {
         named!(parse -> Self, do_parse!(
@@ -2769,25 +2762,30 @@ pub mod parsing {
         ));
     }
 
-    impl Synom for Member {
-        named!(parse -> Self, alt!(
-            syn!(Ident) => { Member::Named }
-            |
-            syn!(Index) => { Member::Unnamed }
-        ));
+    impl Parse for Member {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Ident) {
+                input.parse().map(Member::Named)
+            } else if input.peek(LitInt) {
+                input.parse().map(Member::Unnamed)
+            } else {
+                Err(input.error("expected identifier or integer"))
+            }
+        }
     }
 
-    impl Synom for Index {
-        named!(parse -> Self, do_parse!(
-            lit: syn!(LitInt) >>
-            ({
-                if let IntSuffix::None = lit.suffix() {
-                    Index { index: lit.value() as u32, span: lit.span() }
-                } else {
-                    return parse_error();
-                }
-            })
-        ));
+    impl Parse for Index {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let lit: LitInt = input.parse()?;
+            if let IntSuffix::None = lit.suffix() {
+                Ok(Index {
+                    index: lit.value() as u32,
+                    span: lit.span(),
+                })
+            } else {
+                Err(input.error("expected unsuffixed integer"))
+            }
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2937,6 +2935,16 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for PatMacro {
         named!(parse -> Self, map!(syn!(Macro), |mac| PatMacro { mac: mac }));
+    }
+
+    #[cfg(feature = "full")]
+    impl Member {
+        fn is_named(&self) -> bool {
+            match *self {
+                Member::Named(_) => true,
+                Member::Unnamed(_) => false,
+            }
+        }
     }
 }
 
