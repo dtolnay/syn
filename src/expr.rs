@@ -1212,24 +1212,31 @@ pub mod parsing {
     // NOTE: The form of ranges which don't include a preceding expression are
     // parsed by `atom_expr`, rather than by this function.
     #[cfg(feature = "full")]
-    named2!(range_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(or_expr, allow_struct, allow_block) >>
-        many0!(do_parse!(
-            limits: syn!(RangeLimits) >>
-            // We don't want to allow blocks here if we don't allow structs. See
-            // the reasoning for `opt_ambiguous_expr!` above.
-            hi: option!(shim!(or_expr, allow_struct, AllowBlock(allow_struct.0))) >>
-            ({
-                e = ExprRange {
-                    attrs: Vec::new(),
-                    from: Some(Box::new(e)),
-                    limits: limits,
-                    to: hi.map(|e| Box::new(e)),
-                }.into();
-            })
-        )) >>
-        (e)
-    ));
+    fn range_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = or_expr(input, allow_struct, allow_block)?;
+        while input.peek(Token![..]) {
+            e = Expr::Range(ExprRange {
+                attrs: Vec::new(),
+                from: Some(Box::new(e)),
+                limits: input.parse()?,
+                to: {
+                    if input.is_empty()
+                        || input.peek(Token![,])
+                        || input.peek(Token![;])
+                        || !allow_struct.0 && input.peek(token::Brace)
+                    {
+                        None
+                    } else {
+                        // We don't want to allow blocks here if we don't allow
+                        // structs. See the reasoning for `opt_ambiguous_expr!`
+                        // above.
+                        Some(Box::new(or_expr(input, allow_struct, AllowBlock(allow_struct.0))?))
+                    }
+                },
+            });
+        }
+        Ok(e)
+    }
 
     // <and> || <and> ...
     binop!(or_expr, and_expr, |input| {
@@ -2393,16 +2400,20 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    impl Synom for RangeLimits {
-        named!(parse -> Self, alt!(
-            // Must come before Dot2
-            punct!(..=) => { RangeLimits::Closed }
-            |
-            // Must come before Dot2
-            punct!(...) => { |dot3| RangeLimits::Closed(Token![..=](dot3.spans)) }
-            |
-            punct!(..) => { RangeLimits::HalfOpen }
-        ));
+    impl Parse for RangeLimits {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(Token![..=]) {
+                input.parse().map(RangeLimits::Closed)
+            } else if lookahead.peek(Token![...]) {
+                let dot3: Token![...] = input.parse()?;
+                Ok(RangeLimits::Closed(Token![..=](dot3.spans)))
+            } else if lookahead.peek(Token![..]) {
+                input.parse().map(RangeLimits::HalfOpen)
+            } else {
+                Err(lookahead.error())
+            }
+        }
     }
 
     impl Synom for ExprPath {
