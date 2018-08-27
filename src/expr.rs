@@ -1354,62 +1354,50 @@ pub mod parsing {
     // <unary> as <ty>
     // <unary> : <ty>
     #[cfg(feature = "full")]
-    named2!(cast_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(unary_expr, allow_struct, allow_block) >>
-        many0!(alt!(
-            do_parse!(
-                as_: keyword!(as) >>
-                // We can't accept `A + B` in cast expressions, as it's
-                // ambiguous with the + expression.
-                ty: shim!(Type::without_plus) >>
-                ({
-                    e = ExprCast {
-                        attrs: Vec::new(),
-                        expr: Box::new(e),
-                        as_token: as_,
-                        ty: Box::new(ty),
-                    }.into();
-                })
-            )
-            |
-            do_parse!(
-                colon: punct!(:) >>
-                // We can't accept `A + B` in cast expressions, as it's
-                // ambiguous with the + expression.
-                ty: shim!(Type::without_plus) >>
-                ({
-                    e = ExprType {
-                        attrs: Vec::new(),
-                        expr: Box::new(e),
-                        colon_token: colon,
-                        ty: Box::new(ty),
-                    }.into();
-                })
-            )
-        )) >>
-        (e)
-    ));
+    fn cast_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = unary_expr(input, allow_struct, allow_block)?;
+        loop {
+            if input.peek(Token![as]) {
+                e = Expr::Cast(ExprCast {
+                    attrs: Vec::new(),
+                    expr: Box::new(e),
+                    as_token: input.parse()?,
+                    // We can't accept `A + B` in cast expressions, as it's
+                    // ambiguous with the + expression.
+                    ty: Box::new(input.call(Type::without_plus)?),
+                });
+            } else if input.peek(Token![:]) {
+                e = Expr::Type(ExprType {
+                    attrs: Vec::new(),
+                    expr: Box::new(e),
+                    colon_token: input.parse()?,
+                    // We can't accept `A + B` in cast expressions, as it's
+                    // ambiguous with the + expression.
+                    ty: Box::new(input.call(Type::without_plus)?),
+                });
+            } else {
+                break;
+            }
+        }
+        Ok(e)
+    }
 
     // <unary> as <ty>
     #[cfg(not(feature = "full"))]
-    named2!(cast_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(unary_expr, allow_struct, allow_block) >>
-        many0!(do_parse!(
-            as_: keyword!(as) >>
-            // We can't accept `A + B` in cast expressions, as it's
-            // ambiguous with the + expression.
-            ty: shim!(Type::without_plus) >>
-            ({
-                e = ExprCast {
-                    attrs: Vec::new(),
-                    expr: Box::new(e),
-                    as_token: as_,
-                    ty: Box::new(ty),
-                }.into();
-            })
-        )) >>
-        (e)
-    ));
+    fn cast_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = unary_expr(input, allow_struct, allow_block)?;
+        while input.peek(Token![as]) {
+            e = Expr::Cast(ExprCast {
+                attrs: Vec::new(),
+                expr: Box::new(e),
+                as_token: input.parse()?,
+                // We can't accept `A + B` in cast expressions, as it's
+                // ambiguous with the + expression.
+                ty: Box::new(input.call(Type::without_plus)?),
+            });
+        }
+        Ok(e)
+    }
 
     // <UnOp> <trailer>
     // & <trailer>
