@@ -1033,24 +1033,45 @@ pub mod parsing {
     #[cfg(feature = "full")]
     use path::parsing::ty_no_eq_after;
 
-    use buffer::Cursor;
+    use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
     use parse_error;
     #[cfg(feature = "full")]
     use proc_macro2::TokenStream;
-    use synom::PResult;
     use synom::Synom;
+
+    macro_rules! named2 {
+        ($name:ident ($($arg:ident : $argty:ty),*) -> $ret:ty, $($rest:tt)*) => {
+            fn $name(input: ParseStream $(, $arg : $argty)*) -> Result<$ret> {
+                named!(_synom ($($arg : $argty),*) -> $ret, $($rest)*);
+                input.step_cursor(|cursor| _synom(*cursor $(, $arg)*))
+            }
+        };
+        ($name:ident -> $ret:ty, $($rest:tt)*) => {
+            fn $name(input: ParseStream) -> Result<$ret> {
+                named!(_synom -> $ret, $($rest)*);
+                input.step_cursor(|cursor| _synom(*cursor))
+            }
+        };
+    }
+
+    #[cfg(feature = "full")]
+    macro_rules! ambiguous_expr {
+        ($i:expr, $allow_struct:ident) => {
+            shim!($i, ambiguous_expr, $allow_struct, AllowBlock(true))
+        };
+    }
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
     //
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
-    macro_rules! ambiguous_expr {
-        ($i:expr, $allow_struct:ident) => {
-            ambiguous_expr($i, $allow_struct, true)
-        };
-    }
+    #[derive(Copy, Clone)]
+    pub struct AllowStruct(bool);
+
+    #[derive(Copy, Clone)]
+    pub struct AllowBlock(bool);
 
     // When we are parsing an optional suffix expression, we cannot allow blocks
     // if structs are not allowed.
@@ -1066,32 +1087,30 @@ pub mod parsing {
     #[cfg(feature = "full")]
     macro_rules! opt_ambiguous_expr {
         ($i:expr, $allow_struct:ident) => {
-            option!($i, call!(ambiguous_expr, $allow_struct, $allow_struct))
+            option!($i, shim!(ambiguous_expr, $allow_struct, AllowBlock($allow_struct.0)))
         };
     }
 
-    impl Synom for Expr {
-        named!(parse -> Self, ambiguous_expr!(true));
-
-        fn description() -> Option<&'static str> {
-            Some("expression")
+    impl Parse for Expr {
+        fn parse(input: ParseStream) -> Result<Self> {
+            ambiguous_expr(input, AllowStruct(true), AllowBlock(true))
         }
     }
 
     #[cfg(feature = "full")]
-    named!(expr_no_struct -> Expr, ambiguous_expr!(false));
+    named2!(expr_no_struct -> Expr, shim!(ambiguous_expr, AllowStruct(false), AllowBlock(true)));
 
     // Parse an arbitrary expression.
     #[cfg(feature = "full")]
-    fn ambiguous_expr(i: Cursor, allow_struct: bool, allow_block: bool) -> PResult<Expr> {
-        call!(i, assign_expr, allow_struct, allow_block)
+    fn ambiguous_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        assign_expr(input, allow_struct, allow_block)
     }
 
     #[cfg(not(feature = "full"))]
-    fn ambiguous_expr(i: Cursor, allow_struct: bool, allow_block: bool) -> PResult<Expr> {
+    fn ambiguous_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
         // NOTE: We intentionally skip assign_expr, placement_expr, and
-        // range_expr, as they are not parsed in non-full mode.
-        call!(i, or_expr, allow_struct, allow_block)
+        // range_expr as they are only parsed in full mode.
+        or_expr(input, allow_struct, allow_block)
     }
 
     // Parse a left-associative binary operator.
@@ -1101,22 +1120,29 @@ pub mod parsing {
             $next: ident,
             $submac: ident!( $($args:tt)* )
         ) => {
-            named!($name(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-                mut e: call!($next, allow_struct, allow_block) >>
-                many0!(do_parse!(
-                    op: $submac!($($args)*) >>
-                    rhs: call!($next, allow_struct, true) >>
-                    ({
-                        e = ExprBinary {
-                            attrs: Vec::new(),
-                            left: Box::new(e.into()),
-                            op: op,
-                            right: Box::new(rhs.into()),
-                        }.into();
-                    })
-                )) >>
-                (e)
-            ));
+            fn $name(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+                mod synom {
+                    use super::*;
+
+                    named!(pub $name(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+                        mut e: shim!($next, allow_struct, allow_block) >>
+                        many0!(do_parse!(
+                            op: $submac!($($args)*) >>
+                            rhs: shim!($next, allow_struct, AllowBlock(true)) >>
+                            ({
+                                e = ExprBinary {
+                                    attrs: Vec::new(),
+                                    left: Box::new(e.into()),
+                                    op: op,
+                                    right: Box::new(rhs.into()),
+                                }.into();
+                            })
+                        )) >>
+                        (e)
+                    ));
+                }
+                input.step_cursor(|cursor| synom::$name(*cursor, allow_struct, allow_block))
+            }
         }
     }
 
@@ -1134,13 +1160,13 @@ pub mod parsing {
     //
     // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
-    named!(assign_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(placement_expr, allow_struct, allow_block) >>
+    named2!(assign_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(placement_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
                 eq: punct!(=) >>
                 // Recurse into self to parse right-associative operator.
-                rhs: call!(assign_expr, allow_struct, true) >>
+                rhs: shim!(assign_expr, allow_struct, AllowBlock(true)) >>
                 ({
                     e = ExprAssign {
                         attrs: Vec::new(),
@@ -1154,7 +1180,7 @@ pub mod parsing {
             do_parse!(
                 op: shim!(BinOp::parse_assign_op) >>
                 // Recurse into self to parse right-associative operator.
-                rhs: call!(assign_expr, allow_struct, true) >>
+                rhs: shim!(assign_expr, allow_struct, AllowBlock(true)) >>
                 ({
                     e = ExprAssignOp {
                         attrs: Vec::new(),
@@ -1177,13 +1203,13 @@ pub mod parsing {
     //
     // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
-    named!(placement_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(range_expr, allow_struct, allow_block) >>
+    named2!(placement_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(range_expr, allow_struct, allow_block) >>
         alt!(
             do_parse!(
                 arrow: punct!(<-) >>
                 // Recurse into self to parse right-associative operator.
-                rhs: call!(placement_expr, allow_struct, true) >>
+                rhs: shim!(placement_expr, allow_struct, AllowBlock(true)) >>
                 ({
                     e = ExprInPlace {
                         attrs: Vec::new(),
@@ -1212,13 +1238,13 @@ pub mod parsing {
     // NOTE: The form of ranges which don't include a preceding expression are
     // parsed by `atom_expr`, rather than by this function.
     #[cfg(feature = "full")]
-    named!(range_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(or_expr, allow_struct, allow_block) >>
+    named2!(range_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(or_expr, allow_struct, allow_block) >>
         many0!(do_parse!(
             limits: syn!(RangeLimits) >>
             // We don't want to allow blocks here if we don't allow structs. See
             // the reasoning for `opt_ambiguous_expr!` above.
-            hi: option!(call!(or_expr, allow_struct, allow_struct)) >>
+            hi: option!(shim!(or_expr, allow_struct, AllowBlock(allow_struct.0))) >>
             ({
                 e = ExprRange {
                     attrs: Vec::new(),
@@ -1340,8 +1366,8 @@ pub mod parsing {
     // <unary> as <ty>
     // <unary> : <ty>
     #[cfg(feature = "full")]
-    named!(cast_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(unary_expr, allow_struct, allow_block) >>
+    named2!(cast_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(unary_expr, allow_struct, allow_block) >>
         many0!(alt!(
             do_parse!(
                 as_: keyword!(as) >>
@@ -1378,8 +1404,8 @@ pub mod parsing {
 
     // <unary> as <ty>
     #[cfg(not(feature = "full"))]
-    named!(cast_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(unary_expr, allow_struct, allow_block) >>
+    named2!(cast_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(unary_expr, allow_struct, allow_block) >>
         many0!(do_parse!(
             as_: keyword!(as) >>
             // We can't accept `A + B` in cast expressions, as it's
@@ -1402,11 +1428,11 @@ pub mod parsing {
     // &mut <trailer>
     // box <trailer>
     #[cfg(feature = "full")]
-    named!(unary_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
+    named2!(unary_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, alt!(
         do_parse!(
             attrs: many0!(Attribute::old_parse_outer) >>
             op: syn!(UnOp) >>
-            expr: call!(unary_expr, allow_struct, true) >>
+            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
             (ExprUnary {
                 attrs: attrs,
                 op: op,
@@ -1418,7 +1444,7 @@ pub mod parsing {
             attrs: many0!(Attribute::old_parse_outer) >>
             and: punct!(&) >>
             mutability: option!(keyword!(mut)) >>
-            expr: call!(unary_expr, allow_struct, true) >>
+            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
             (ExprReference {
                 attrs: attrs,
                 and_token: and,
@@ -1430,7 +1456,7 @@ pub mod parsing {
         do_parse!(
             attrs: many0!(Attribute::old_parse_outer) >>
             box_: keyword!(box) >>
-            expr: call!(unary_expr, allow_struct, true) >>
+            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
             (ExprBox {
                 attrs: attrs,
                 box_token: box_,
@@ -1438,15 +1464,15 @@ pub mod parsing {
             }.into())
         )
         |
-        call!(trailer_expr, allow_struct, allow_block)
+        shim!(trailer_expr, allow_struct, allow_block)
     ));
 
     // XXX: This duplication is ugly
     #[cfg(not(feature = "full"))]
-    named!(unary_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
+    named2!(unary_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, alt!(
         do_parse!(
             op: syn!(UnOp) >>
-            expr: call!(unary_expr, allow_struct, true) >>
+            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
             (ExprUnary {
                 attrs: Vec::new(),
                 op: op,
@@ -1454,7 +1480,7 @@ pub mod parsing {
             }.into())
         )
         |
-        call!(trailer_expr, allow_struct, allow_block)
+        shim!(trailer_expr, allow_struct, allow_block)
     ));
 
     #[cfg(feature = "full")]
@@ -1478,8 +1504,8 @@ pub mod parsing {
     // <atom> [ <expr> ] ...
     // <atom> ? ...
     #[cfg(feature = "full")]
-    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(atom_expr, allow_struct, allow_block) >>
+    named2!(trailer_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(atom_expr, allow_struct, allow_block) >>
         outer_attrs: value!({
             let mut attrs = e.replace_attrs(Vec::new());
             let outer_attrs = take_outer(&mut attrs);
@@ -1487,7 +1513,7 @@ pub mod parsing {
             outer_attrs
         }) >>
         many0!(alt!(
-            tap!(args: and_call => {
+            tap!(args: shim!(and_call) => {
                 let (paren, args) = args;
                 e = ExprCall {
                     attrs: Vec::new(),
@@ -1497,13 +1523,13 @@ pub mod parsing {
                 }.into();
             })
             |
-            tap!(more: and_method_call => {
+            tap!(more: shim!(and_method_call) => {
                 let mut call = more;
                 call.receiver = Box::new(e);
                 e = call.into();
             })
             |
-            tap!(field: and_field => {
+            tap!(field: shim!(and_field) => {
                 let (token, member) = field;
                 e = ExprField {
                     attrs: Vec::new(),
@@ -1513,7 +1539,7 @@ pub mod parsing {
                 }.into();
             })
             |
-            tap!(i: and_index => {
+            tap!(i: shim!(and_index) => {
                 let (bracket, i) = i;
                 e = ExprIndex {
                     attrs: Vec::new(),
@@ -1541,10 +1567,10 @@ pub mod parsing {
 
     // XXX: Duplication == ugly
     #[cfg(not(feature = "full"))]
-    named!(trailer_expr(allow_struct: bool, allow_block: bool) -> Expr, do_parse!(
-        mut e: call!(atom_expr, allow_struct, allow_block) >>
+    named2!(trailer_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
+        mut e: shim!(atom_expr, allow_struct, allow_block) >>
         many0!(alt!(
-            tap!(args: and_call => {
+            tap!(args: shim!(and_call) => {
                 e = ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
@@ -1553,7 +1579,7 @@ pub mod parsing {
                 }.into();
             })
             |
-            tap!(field: and_field => {
+            tap!(field: shim!(and_field) => {
                 let (token, member) = field;
                 e = ExprField {
                     attrs: Vec::new(),
@@ -1563,7 +1589,7 @@ pub mod parsing {
                 }.into();
             })
             |
-            tap!(i: and_index => {
+            tap!(i: shim!(and_index) => {
                 e = ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
@@ -1578,7 +1604,7 @@ pub mod parsing {
     // Parse all atomic expressions which don't have to worry about precedence
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
-    named!(atom_expr(allow_struct: bool, allow_block: bool) -> Expr, alt!(
+    named2!(atom_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, alt!(
         syn!(ExprGroup) => { Expr::Group } // must be placed first
         |
         syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
@@ -1590,17 +1616,17 @@ pub mod parsing {
         syn!(ExprTryBlock) => { Expr::TryBlock }
         |
         // must be before expr_path
-        cond_reduce!(allow_struct, syn!(ExprStruct)) => { Expr::Struct }
+        cond_reduce!(allow_struct.0, syn!(ExprStruct)) => { Expr::Struct }
         |
         syn!(ExprParen) => { Expr::Paren } // must be before expr_tup
         |
         syn!(ExprMacro) => { Expr::Macro } // must be before expr_path
         |
-        call!(expr_break, allow_struct) // must be before expr_path
+        shim!(expr_break, allow_struct) // must be before expr_path
         |
         syn!(ExprContinue) => { Expr::Continue } // must be before expr_path
         |
-        call!(expr_ret, allow_struct) // must be before expr_path
+        shim!(expr_ret, allow_struct) // must be before expr_path
         |
         syn!(ExprArray) => { Expr::Array }
         |
@@ -1624,12 +1650,12 @@ pub mod parsing {
         |
         syn!(ExprUnsafe) => { Expr::Unsafe }
         |
-        call!(expr_closure, allow_struct)
+        shim!(expr_closure, allow_struct)
         |
-        cond_reduce!(allow_block, syn!(ExprBlock)) => { Expr::Block }
+        cond_reduce!(allow_block.0, syn!(ExprBlock)) => { Expr::Block }
         |
         // NOTE: This is the prefix-form of range
-        call!(expr_range, allow_struct)
+        shim!(expr_range, allow_struct)
         |
         syn!(ExprPath) => { Expr::Path }
         |
@@ -1637,7 +1663,7 @@ pub mod parsing {
     ));
 
     #[cfg(not(feature = "full"))]
-    named!(atom_expr(_allow_struct: bool, _allow_block: bool) -> Expr, alt!(
+    named2!(atom_expr(_allow_struct: AllowStruct, _allow_block: AllowBlock) -> Expr, alt!(
         syn!(ExprLit) => { Expr::Lit }
         |
         syn!(ExprParen) => { Expr::Paren }
@@ -1646,7 +1672,7 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(expr_nosemi -> Expr, do_parse!(
+    named2!(expr_nosemi -> Expr, do_parse!(
         nosemi: alt!(
             syn!(ExprIf) => { Expr::If }
             |
@@ -1696,10 +1722,6 @@ pub mod parsing {
                 lit: lit,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("literal")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -1712,10 +1734,6 @@ pub mod parsing {
                 mac: mac,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("macro invocation expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -1728,10 +1746,6 @@ pub mod parsing {
                 group_token: e.0,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("expression surrounded by invisible delimiters")
-        }
     }
 
     impl Synom for ExprParen {
@@ -1762,10 +1776,6 @@ pub mod parsing {
                 expr: Box::new((e.1).1),
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("parenthesized expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -1786,18 +1796,14 @@ pub mod parsing {
                 elems: (elems.1).1,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("array expression")
-        }
     }
 
-    named!(and_call -> (token::Paren, Punctuated<Expr, Token![,]>),
+    named2!(and_call -> (token::Paren, Punctuated<Expr, Token![,]>),
         parens!(Punctuated::parse_terminated)
     );
 
     #[cfg(feature = "full")]
-    named!(and_method_call -> ExprMethodCall, do_parse!(
+    named2!(and_method_call -> ExprMethodCall, do_parse!(
         dot: punct!(.) >>
         method: syn!(Ident) >>
         turbofish: option!(tuple!(
@@ -1833,10 +1839,6 @@ pub mod parsing {
     impl Synom for GenericMethodArgument {
         // TODO parse const generics as well
         named!(parse -> Self, map!(ty_no_eq_after, GenericMethodArgument::Type));
-
-        fn description() -> Option<&'static str> {
-            Some("generic method argument")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -1857,10 +1859,6 @@ pub mod parsing {
                 paren_token: elems.0,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("tuple")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -1870,9 +1868,9 @@ pub mod parsing {
             let_: keyword!(let) >>
             pats: call!(Punctuated::parse_separated_nonempty) >>
             eq: punct!(=) >>
-            cond: expr_no_struct >>
-            then_block: braces!(Block::parse_within) >>
-            else_block: option!(else_block) >>
+            cond: shim!(expr_no_struct) >>
+            then_block: braces!(Block::old_parse_within) >>
+            else_block: option!(shim!(else_block)) >>
             (ExprIfLet {
                 attrs: Vec::new(),
                 pats: pats,
@@ -1887,19 +1885,15 @@ pub mod parsing {
                 else_branch: else_block,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`if let` expression")
-        }
     }
 
     #[cfg(feature = "full")]
     impl Synom for ExprIf {
         named!(parse -> Self, do_parse!(
             if_: keyword!(if) >>
-            cond: expr_no_struct >>
-            then_block: braces!(Block::parse_within) >>
-            else_block: option!(else_block) >>
+            cond: shim!(expr_no_struct) >>
+            then_block: braces!(Block::old_parse_within) >>
+            else_block: option!(shim!(else_block)) >>
             (ExprIf {
                 attrs: Vec::new(),
                 cond: Box::new(cond),
@@ -1911,14 +1905,10 @@ pub mod parsing {
                 else_branch: else_block,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`if` expression")
-        }
     }
 
     #[cfg(feature = "full")]
-    named!(else_block -> (Token![else], Box<Expr>), do_parse!(
+    named2!(else_block -> (Token![else], Box<Expr>), do_parse!(
         else_: keyword!(else) >>
         expr: alt!(
             syn!(ExprIf) => { Expr::If }
@@ -1926,7 +1916,7 @@ pub mod parsing {
             syn!(ExprIfLet) => { Expr::IfLet }
             |
             do_parse!(
-                else_block: braces!(Block::parse_within) >>
+                else_block: braces!(Block::old_parse_within) >>
                 (Expr::Block(ExprBlock {
                     attrs: Vec::new(),
                     label: None,
@@ -1948,10 +1938,10 @@ pub mod parsing {
             for_: keyword!(for) >>
             pat: syn!(Pat) >>
             in_: keyword!(in) >>
-            expr: expr_no_struct >>
+            expr: shim!(expr_no_struct) >>
             block: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
-                call!(Block::parse_within),
+                shim!(Block::parse_within),
             )) >>
             (ExprForLoop {
                 attrs: {
@@ -1970,10 +1960,6 @@ pub mod parsing {
                 },
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`for` loop")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -1984,7 +1970,7 @@ pub mod parsing {
             loop_: keyword!(loop) >>
             block: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
-                call!(Block::parse_within),
+                shim!(Block::parse_within),
             )) >>
             (ExprLoop {
                 attrs: {
@@ -2000,10 +1986,6 @@ pub mod parsing {
                 },
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`loop`")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2011,7 +1993,7 @@ pub mod parsing {
         named!(parse -> Self, do_parse!(
             outer_attrs: many0!(Attribute::old_parse_outer) >>
             match_: keyword!(match) >>
-            obj: expr_no_struct >>
+            obj: shim!(expr_no_struct) >>
             braced_content: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
                 many0!(syn!(Arm)),
@@ -2028,10 +2010,6 @@ pub mod parsing {
                 arms: (braced_content.1).1,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`match` expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2045,10 +2023,6 @@ pub mod parsing {
                 block: block,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`try` block")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2062,10 +2036,6 @@ pub mod parsing {
                 expr: expr.map(Box::new),
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`yield` expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2077,7 +2047,7 @@ pub mod parsing {
             guard: option!(tuple!(keyword!(if), syn!(Expr))) >>
             fat_arrow: punct!(=>) >>
             body: do_parse!(
-                expr: alt!(expr_nosemi | syn!(Expr)) >>
+                expr: alt!(shim!(expr_nosemi) | syn!(Expr)) >>
                 comma: switch!(value!(arm_expr_requires_comma(&expr)),
                     true => alt!(
                         input_end!() => { |_| None }
@@ -2099,14 +2069,10 @@ pub mod parsing {
                 comma: body.1,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`match` arm")
-        }
     }
 
     #[cfg(feature = "full")]
-    named!(expr_closure(allow_struct: bool) -> Expr, do_parse!(
+    named2!(expr_closure(allow_struct: AllowStruct) -> Expr, do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
         asyncness: option!(keyword!(async)) >>
         movability: option!(cond_reduce!(asyncness.is_none(), keyword!(static))) >>
@@ -2183,10 +2149,10 @@ pub mod parsing {
             outer_attrs: many0!(Attribute::old_parse_outer) >>
             label: option!(syn!(Label)) >>
             while_: keyword!(while) >>
-            cond: expr_no_struct >>
+            cond: shim!(expr_no_struct) >>
             block: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
-                call!(Block::parse_within),
+                shim!(Block::parse_within),
             )) >>
             (ExprWhile {
                 attrs: {
@@ -2203,10 +2169,6 @@ pub mod parsing {
                 },
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`while` expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2218,10 +2180,10 @@ pub mod parsing {
             let_: keyword!(let) >>
             pats: call!(Punctuated::parse_separated_nonempty) >>
             eq: punct!(=) >>
-            value: expr_no_struct >>
+            value: shim!(expr_no_struct) >>
             block: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
-                call!(Block::parse_within),
+                shim!(Block::parse_within),
             )) >>
             (ExprWhileLet {
                 attrs: {
@@ -2241,10 +2203,6 @@ pub mod parsing {
                 },
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`while let` expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2257,10 +2215,6 @@ pub mod parsing {
                 colon_token: colon,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`while let` expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2275,14 +2229,10 @@ pub mod parsing {
                 label: label,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("`continue`")
-        }
     }
 
     #[cfg(feature = "full")]
-    named!(expr_break(allow_struct: bool) -> Expr, do_parse!(
+    named2!(expr_break(allow_struct: AllowStruct) -> Expr, do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
         break_: keyword!(break) >>
         label: option!(syn!(Lifetime)) >>
@@ -2298,7 +2248,7 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(expr_ret(allow_struct: bool) -> Expr, do_parse!(
+    named2!(expr_ret(allow_struct: AllowStruct) -> Expr, do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
         return_: keyword!(return) >>
         // NOTE: return is greedy and eats blocks after it even when in a
@@ -2349,10 +2299,6 @@ pub mod parsing {
                 }
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("struct literal expression")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2379,10 +2325,6 @@ pub mod parsing {
                 expr: field_value.2,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("field-value pair: `field: value`")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2407,10 +2349,6 @@ pub mod parsing {
                 semi_token: (data.1).2,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("repeated array literal: `[val; N]`")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2420,7 +2358,7 @@ pub mod parsing {
             unsafe_: keyword!(unsafe) >>
             block: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
-                call!(Block::parse_within),
+                shim!(Block::parse_within),
             )) >>
             (ExprUnsafe {
                 attrs: {
@@ -2435,10 +2373,6 @@ pub mod parsing {
                 },
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("unsafe block: `unsafe { .. }`")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2448,7 +2382,7 @@ pub mod parsing {
             label: option!(syn!(Label)) >>
             block: braces!(tuple!(
                 many0!(Attribute::old_parse_inner),
-                call!(Block::parse_within),
+                shim!(Block::parse_within),
             )) >>
             (ExprBlock {
                 attrs: {
@@ -2463,14 +2397,10 @@ pub mod parsing {
                 },
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("block: `{ .. }`")
-        }
     }
 
     #[cfg(feature = "full")]
-    named!(expr_range(allow_struct: bool) -> Expr, do_parse!(
+    named2!(expr_range(allow_struct: AllowStruct) -> Expr, do_parse!(
         limits: syn!(RangeLimits) >>
         hi: opt_ambiguous_expr!(allow_struct) >>
         (ExprRange {
@@ -2492,16 +2422,12 @@ pub mod parsing {
             |
             punct!(..) => { RangeLimits::HalfOpen }
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("range limit: `..`, `...` or `..=`")
-        }
     }
 
     impl Synom for ExprPath {
         #[cfg(not(feature = "full"))]
         named!(parse -> Self, do_parse!(
-            pair: qpath >>
+            pair: shim!(qpath) >>
             (ExprPath {
                 attrs: Vec::new(),
                 qself: pair.0,
@@ -2512,20 +2438,16 @@ pub mod parsing {
         #[cfg(feature = "full")]
         named!(parse -> Self, do_parse!(
             attrs: many0!(Attribute::old_parse_outer) >>
-            pair: qpath >>
+            pair: shim!(qpath) >>
             (ExprPath {
                 attrs: attrs,
                 qself: pair.0,
                 path: pair.1,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("path: `a::b::c`")
-        }
     }
 
-    named!(path -> Path, do_parse!(
+    named2!(path -> Path, do_parse!(
         colon: option!(punct!(::)) >>
         segments: call!(Punctuated::<_, Token![::]>::parse_separated_nonempty_with, path_segment) >>
         cond_reduce!(segments.first().map_or(true, |seg| seg.value().ident != "dyn")) >>
@@ -2556,8 +2478,8 @@ pub mod parsing {
         old_mod_style_path_segment
     ));
 
-    named!(qpath -> (Option<QSelf>, Path), alt!(
-        map!(path, |p| (None, p))
+    named2!(qpath -> (Option<QSelf>, Path), alt!(
+        map!(shim!(path), |p| (None, p))
         |
         do_parse!(
             lt: punct!(<) >>
@@ -2594,28 +2516,28 @@ pub mod parsing {
         map!(keyword!(self), |s| (None, s.into()))
     ));
 
-    named!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
+    named2!(and_field -> (Token![.], Member), tuple!(punct!(.), syn!(Member)));
 
-    named!(and_index -> (token::Bracket, Expr), brackets!(syn!(Expr)));
+    named2!(and_index -> (token::Bracket, Expr), brackets!(syn!(Expr)));
 
     #[cfg(feature = "full")]
     impl Synom for Block {
         named!(parse -> Self, do_parse!(
-            stmts: braces!(Block::parse_within) >>
+            stmts: braces!(Block::old_parse_within) >>
             (Block {
                 brace_token: stmts.0,
                 stmts: stmts.1,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("block: `{ .. }`")
-        }
     }
 
     #[cfg(feature = "full")]
     impl Block {
-        named!(pub parse_within -> Vec<Stmt>, do_parse!(
+        pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
+            input.step_cursor(|cursor| Self::old_parse_within(*cursor))
+        }
+
+        named!(old_parse_within -> Vec<Stmt>, do_parse!(
             many0!(punct!(;)) >>
             mut standalone: many0!(do_parse!(
                 stmt: syn!(Stmt) >>
@@ -2643,24 +2565,20 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for Stmt {
         named!(parse -> Self, alt!(
-            stmt_mac
+            shim!(stmt_mac)
             |
-            stmt_local
+            shim!(stmt_local)
             |
-            stmt_item
+            shim!(stmt_item)
             |
-            stmt_blockexpr
+            shim!(stmt_blockexpr)
             |
-            stmt_expr
+            shim!(stmt_expr)
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("statement")
-        }
     }
 
     #[cfg(feature = "full")]
-    named!(stmt_mac -> Stmt, do_parse!(
+    named2!(stmt_mac -> Stmt, do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
         what: call!(Path::old_parse_mod_style) >>
         bang: punct!(!) >>
@@ -2682,7 +2600,7 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(stmt_local -> Stmt, do_parse!(
+    named2!(stmt_local -> Stmt, do_parse!(
         attrs: many0!(Attribute::old_parse_outer) >>
         let_: keyword!(let) >>
         pats: call!(Punctuated::parse_separated_nonempty) >>
@@ -2700,12 +2618,12 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(stmt_item -> Stmt, map!(syn!(Item), |i| Stmt::Item(i)));
+    named2!(stmt_item -> Stmt, map!(syn!(Item), |i| Stmt::Item(i)));
 
     #[cfg(feature = "full")]
-    named!(stmt_blockexpr -> Stmt, do_parse!(
+    named2!(stmt_blockexpr -> Stmt, do_parse!(
         mut attrs: many0!(Attribute::old_parse_outer) >>
-        mut e: expr_nosemi >>
+        mut e: shim!(expr_nosemi) >>
         semi: option!(punct!(;)) >>
         ({
             attrs.extend(e.replace_attrs(Vec::new()));
@@ -2719,7 +2637,7 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named!(stmt_expr -> Stmt, do_parse!(
+    named2!(stmt_expr -> Stmt, do_parse!(
         mut attrs: many0!(Attribute::old_parse_outer) >>
         mut e: syn!(Expr) >>
         semi: punct!(;) >>
@@ -2757,10 +2675,6 @@ pub mod parsing {
             |
             syn!(PatSlice) => { Pat::Slice }
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("pattern")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2769,10 +2683,6 @@ pub mod parsing {
             punct!(_),
             |u| PatWild { underscore_token: u }
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("wild pattern: `_`")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2785,10 +2695,6 @@ pub mod parsing {
                 box_token: boxed,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("box pattern")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2811,10 +2717,6 @@ pub mod parsing {
                 subpat: subpat.map(|(at, pat)| (at, Box::new(pat))),
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("pattern identifier binding")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2827,10 +2729,6 @@ pub mod parsing {
                 pat: tuple,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("tuple struct pattern")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2849,10 +2747,6 @@ pub mod parsing {
                 dot2_token: (data.1).1.and_then(|m| m),
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("struct pattern")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2897,10 +2791,6 @@ pub mod parsing {
                 })
             )
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("field pattern")
-        }
     }
 
     impl Synom for Member {
@@ -2909,10 +2799,6 @@ pub mod parsing {
             |
             syn!(Index) => { Member::Unnamed }
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("field member")
-        }
     }
 
     impl Synom for Index {
@@ -2926,10 +2812,6 @@ pub mod parsing {
                 }
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("field index")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2938,10 +2820,6 @@ pub mod parsing {
             syn!(ExprPath),
             |p| PatPath { qself: p.qself, path: p.path }
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("path pattern")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2974,10 +2852,6 @@ pub mod parsing {
                 }
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("tuple pattern")
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2992,16 +2866,12 @@ pub mod parsing {
                 and_token: and,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("reference pattern")
-        }
     }
 
     #[cfg(feature = "full")]
     impl Synom for PatLit {
         named!(parse -> Self, do_parse!(
-            lit: pat_lit_expr >>
+            lit: shim!(pat_lit_expr) >>
             (if let Expr::Path(_) = lit {
                 return parse_error(); // these need to be parsed by pat_path
             } else {
@@ -3010,32 +2880,24 @@ pub mod parsing {
                 }
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("literal pattern")
-        }
     }
 
     #[cfg(feature = "full")]
     impl Synom for PatRange {
         named!(parse -> Self, do_parse!(
-            lo: pat_lit_expr >>
+            lo: shim!(pat_lit_expr) >>
             limits: syn!(RangeLimits) >>
-            hi: pat_lit_expr >>
+            hi: shim!(pat_lit_expr) >>
             (PatRange {
                 lo: Box::new(lo),
                 hi: Box::new(hi),
                 limits: limits,
             })
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("range pattern")
-        }
     }
 
     #[cfg(feature = "full")]
-    named!(pat_lit_expr -> Expr, do_parse!(
+    named2!(pat_lit_expr -> Expr, do_parse!(
         neg: option!(punct!(-)) >>
         v: alt!(
             syn!(ExprLit) => { Expr::Lit }
@@ -3094,19 +2956,11 @@ pub mod parsing {
                 }
             }
         ));
-
-        fn description() -> Option<&'static str> {
-            Some("slice pattern")
-        }
     }
 
     #[cfg(feature = "full")]
     impl Synom for PatMacro {
         named!(parse -> Self, map!(syn!(Macro), |mac| PatMacro { mac: mac }));
-
-        fn description() -> Option<&'static str> {
-            Some("macro pattern")
-        }
     }
 }
 

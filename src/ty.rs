@@ -250,7 +250,6 @@ ast_enum! {
 pub mod parsing {
     use super::*;
     use parse::{Parse, ParseStream, Result};
-    use synom::Synom;
 
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -416,7 +415,7 @@ pub mod parsing {
                     bracket_token: bracket_token,
                     elem: Box::new(elem),
                     semi_token: content.parse()?,
-                    len: content.parse_synom(Expr::parse)?,
+                    len: content.parse()?,
                 }))
             } else {
                 Ok(Type::Slice(TypeSlice {
@@ -458,7 +457,7 @@ pub mod parsing {
                 bracket_token: bracketed!(content in input),
                 elem: content.parse()?,
                 semi_token: content.parse()?,
-                len: content.parse_synom(Expr::parse)?,
+                len: content.parse()?,
             })
         }
     }

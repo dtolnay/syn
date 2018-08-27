@@ -187,7 +187,6 @@ pub mod parsing {
 
     use parse::{Parse, ParseStream, Result};
     use synom::ext::IdentExt;
-    use synom::Synom;
 
     impl Parse for Variant {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -205,7 +204,9 @@ pub mod parsing {
                 },
                 discriminant: {
                     if input.peek(Token![=]) {
-                        Some((input.parse()?, input.parse_synom(Expr::parse)?))
+                        let eq_token: Token![=] = input.parse()?;
+                        let discriminant: Expr = input.parse()?;
+                        Some((eq_token, discriminant))
                     } else {
                         None
                     }

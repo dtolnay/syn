@@ -990,7 +990,7 @@ pub mod parsing {
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,
-                expr: Box::new(input.parse_synom(Expr::parse)?),
+                expr: input.parse()?,
                 semi_token: input.parse()?,
             })
         }
@@ -1006,7 +1006,7 @@ pub mod parsing {
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,
-                expr: Box::new(input.parse_synom(Expr::parse)?),
+                expr: input.parse()?,
                 semi_token: input.parse()?,
             })
         }
@@ -1034,7 +1034,7 @@ pub mod parsing {
             let content;
             let brace_token = braced!(content in input);
             let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.parse_synom(Block::parse_within)?;
+            let stmts = content.call(Block::parse_within)?;
 
             Ok(ItemFn {
                 attrs: {
@@ -1504,7 +1504,7 @@ pub mod parsing {
                 default: {
                     if input.peek(Token![=]) {
                         let eq_token: Token![=] = input.parse()?;
-                        let default = input.parse_synom(Expr::parse)?;
+                        let default: Expr = input.parse()?;
                         Some((eq_token, default))
                     } else {
                         None
@@ -1537,7 +1537,7 @@ pub mod parsing {
                 let content;
                 let brace_token = braced!(content in input);
                 let inner_attrs = content.call(Attribute::parse_inner)?;
-                let stmts = content.parse_synom(Block::parse_within)?;
+                let stmts = content.call(Block::parse_within)?;
                 (Some(brace_token), inner_attrs, stmts, None)
             } else if lookahead.peek(Token![;]) {
                 let semi_token: Token![;] = input.parse()?;
@@ -1754,7 +1754,7 @@ pub mod parsing {
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,
-                expr: input.parse_synom(Expr::parse)?,
+                expr: input.parse()?,
                 semi_token: input.parse()?,
             })
         }
@@ -1783,7 +1783,7 @@ pub mod parsing {
             let content;
             let brace_token = braced!(content in input);
             let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.parse_synom(Block::parse_within)?;
+            let stmts = content.call(Block::parse_within)?;
 
             Ok(ImplItemMethod {
                 attrs: {

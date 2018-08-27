@@ -483,7 +483,6 @@ pub mod parsing {
     use super::*;
 
     use parse::{Parse, ParseStream, Result};
-    use synom::Synom;
 
     impl Parse for Generics {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -741,7 +740,7 @@ pub mod parsing {
                 eq_token: {
                     if input.peek(Token![=]) {
                         let eq_token = input.parse()?;
-                        default = Some(input.parse_synom(Expr::parse)?);
+                        default = Some(input.parse::<Expr>()?);
                         Some(eq_token)
                     } else {
                         None
