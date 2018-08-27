@@ -1404,60 +1404,56 @@ pub mod parsing {
     // &mut <trailer>
     // box <trailer>
     #[cfg(feature = "full")]
-    named2!(unary_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, alt!(
-        do_parse!(
-            attrs: many0!(Attribute::old_parse_outer) >>
-            op: syn!(UnOp) >>
-            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
-            (ExprUnary {
-                attrs: attrs,
-                op: op,
-                expr: Box::new(expr),
-            }.into())
-        )
-        |
-        do_parse!(
-            attrs: many0!(Attribute::old_parse_outer) >>
-            and: punct!(&) >>
-            mutability: option!(keyword!(mut)) >>
-            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
-            (ExprReference {
-                attrs: attrs,
-                and_token: and,
-                mutability: mutability,
-                expr: Box::new(expr),
-            }.into())
-        )
-        |
-        do_parse!(
-            attrs: many0!(Attribute::old_parse_outer) >>
-            box_: keyword!(box) >>
-            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
-            (ExprBox {
-                attrs: attrs,
-                box_token: box_,
-                expr: Box::new(expr),
-            }.into())
-        )
-        |
-        shim!(trailer_expr, allow_struct, allow_block)
-    ));
+    fn unary_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let ahead = input.fork();
+        ahead.call(Attribute::parse_outer)?;
+        if ahead.peek(Token![&])
+            || ahead.peek(Token![box])
+            || ahead.peek(Token![*])
+            || ahead.peek(Token![!])
+            || ahead.peek(Token![-])
+        {
+            let attrs = input.call(Attribute::parse_outer)?;
+            if input.peek(Token![&]) {
+                Ok(Expr::Reference(ExprReference {
+                    attrs: attrs,
+                    and_token: input.parse()?,
+                    mutability: input.parse()?,
+                    expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                }))
+            } else if input.peek(Token![box]) {
+                Ok(Expr::Box(ExprBox {
+                    attrs: attrs,
+                    box_token: input.parse()?,
+                    expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                }))
+            } else {
+                Ok(Expr::Unary(ExprUnary {
+                    attrs: attrs,
+                    op: input.parse()?,
+                    expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                }))
+            }
+        } else {
+            trailer_expr(input, allow_struct, allow_block)
+        }
+    }
 
     // XXX: This duplication is ugly
     #[cfg(not(feature = "full"))]
-    named2!(unary_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, alt!(
-        do_parse!(
-            op: syn!(UnOp) >>
-            expr: shim!(unary_expr, allow_struct, AllowBlock(true)) >>
-            (ExprUnary {
-                attrs: Vec::new(),
-                op: op,
-                expr: Box::new(expr),
-            }.into())
-        )
-        |
-        shim!(trailer_expr, allow_struct, allow_block)
-    ));
+    fn unary_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let ahead = input.fork();
+        ahead.call(Attribute::parse_outer)?;
+        if ahead.peek(Token![*]) || ahead.peek(Token![!]) || ahead.peek(Token![-]) {
+            Ok(Expr::Unary(ExprUnary {
+                attrs: input.call(Attribute::parse_outer)?,
+                op: input.parse()?,
+                expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+            }))
+        } else {
+            trailer_expr(input, allow_struct, allow_block)
+        }
+    }
 
     #[cfg(feature = "full")]
     fn take_outer(attrs: &mut Vec<Attribute>) -> Vec<Attribute> {
