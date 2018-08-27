@@ -1115,33 +1115,19 @@ pub mod parsing {
 
     // Parse a left-associative binary operator.
     macro_rules! binop {
-        (
-            $name: ident,
-            $next: ident,
-            $submac: ident!( $($args:tt)* )
-        ) => {
+        ($name:ident, $next:ident, |$var:ident| $parse_op:expr) => {
             fn $name(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
-                mod synom {
-                    use super::*;
-
-                    named!(pub $name(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-                        mut e: shim!($next, allow_struct, allow_block) >>
-                        many0!(do_parse!(
-                            op: $submac!($($args)*) >>
-                            rhs: shim!($next, allow_struct, AllowBlock(true)) >>
-                            ({
-                                e = ExprBinary {
-                                    attrs: Vec::new(),
-                                    left: Box::new(e.into()),
-                                    op: op,
-                                    right: Box::new(rhs.into()),
-                                }.into();
-                            })
-                        )) >>
-                        (e)
-                    ));
+                let $var = input;
+                let mut e: Expr = $next(input, allow_struct, allow_block)?;
+                while let Some(op) = $parse_op {
+                    e = Expr::Binary(ExprBinary {
+                        attrs: Vec::new(),
+                        left: Box::new(e),
+                        op: op,
+                        right: Box::new($next(input, allow_struct, AllowBlock(true))?),
+                    });
                 }
-                input.step_cursor(|cursor| synom::$name(*cursor, allow_struct, allow_block))
+                Ok(e)
             }
         }
     }
@@ -1258,10 +1244,22 @@ pub mod parsing {
     ));
 
     // <and> || <and> ...
-    binop!(or_expr, and_expr, map!(punct!(||), BinOp::Or));
+    binop!(or_expr, and_expr, |input| {
+        if input.peek(Token![||]) {
+            Some(BinOp::Or(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <compare> && <compare> ...
-    binop!(and_expr, compare_expr, map!(punct!(&&), BinOp::And));
+    binop!(and_expr, compare_expr, |input| {
+        if input.peek(Token![&&]) {
+            Some(BinOp::And(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <bitor> == <bitor> ...
     // <bitor> != <bitor> ...
@@ -1272,96 +1270,91 @@ pub mod parsing {
     //
     // NOTE: This operator appears to be parsed as left-associative, but errors
     // if it is used in a non-associative manner.
-    binop!(
-        compare_expr,
-        bitor_expr,
-        alt!(
-        punct!(==) => { BinOp::Eq }
-        |
-        punct!(!=) => { BinOp::Ne }
-        |
-        // must be above Lt
-        punct!(<=) => { BinOp::Le }
-        |
-        // must be above Gt
-        punct!(>=) => { BinOp::Ge }
-        |
-        do_parse!(
-            // Make sure that we don't eat the < part of a <- operator
-            not!(punct!(<-)) >>
-            t: punct!(<) >>
-            (BinOp::Lt(t))
-        )
-        |
-        punct!(>) => { BinOp::Gt }
-    )
-    );
+    binop!(compare_expr, bitor_expr, |input| {
+        if input.peek(Token![==]) {
+            Some(BinOp::Eq(input.parse()?))
+        } else if input.peek(Token![!=]) {
+            Some(BinOp::Ne(input.parse()?))
+        // must be before `<`
+        } else if input.peek(Token![<=]) {
+            Some(BinOp::Le(input.parse()?))
+        // must be before `>`
+        } else if input.peek(Token![>=]) {
+            Some(BinOp::Ge(input.parse()?))
+        } else if input.peek(Token![<]) && !input.peek(Token![<<]) && !input.peek(Token![<-]) {
+            Some(BinOp::Lt(input.parse()?))
+        } else if input.peek(Token![>]) && !input.peek(Token![>>]) {
+            Some(BinOp::Gt(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <bitxor> | <bitxor> ...
-    binop!(
-        bitor_expr,
-        bitxor_expr,
-        do_parse!(not!(punct!(||)) >> not!(punct!(|=)) >> t: punct!(|) >> (BinOp::BitOr(t)))
-    );
+    binop!(bitor_expr, bitxor_expr, |input| {
+        if input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+            Some(BinOp::BitOr(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <bitand> ^ <bitand> ...
-    binop!(
-        bitxor_expr,
-        bitand_expr,
-        do_parse!(
-            // NOTE: Make sure we aren't looking at ^=.
-            not!(punct!(^=)) >> t: punct!(^) >> (BinOp::BitXor(t))
-        )
-    );
+    binop!(bitxor_expr, bitand_expr, |input| {
+        if input.peek(Token![^]) && !input.peek(Token![^=]) {
+            Some(BinOp::BitXor(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <shift> & <shift> ...
-    binop!(
-        bitand_expr,
-        shift_expr,
-        do_parse!(
-            // NOTE: Make sure we aren't looking at && or &=.
-            not!(punct!(&&)) >> not!(punct!(&=)) >> t: punct!(&) >> (BinOp::BitAnd(t))
-        )
-    );
+    binop!(bitand_expr, shift_expr, |input| {
+        if input.peek(Token![&]) && !input.peek(Token![&&]) && !input.peek(Token![&=]) {
+            Some(BinOp::BitAnd(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <arith> << <arith> ...
     // <arith> >> <arith> ...
-    binop!(
-        shift_expr,
-        arith_expr,
-        alt!(
-        punct!(<<) => { BinOp::Shl }
-        |
-        punct!(>>) => { BinOp::Shr }
-    )
-    );
+    binop!(shift_expr, arith_expr, |input| {
+        if input.peek(Token![<<]) && !input.peek(Token![<<=]) {
+            Some(BinOp::Shl(input.parse()?))
+        } else if input.peek(Token![>>]) && !input.peek(Token![>>=]) {
+            Some(BinOp::Shr(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <term> + <term> ...
     // <term> - <term> ...
-    binop!(
-        arith_expr,
-        term_expr,
-        alt!(
-        punct!(+) => { BinOp::Add }
-        |
-        punct!(-) => { BinOp::Sub }
-    )
-    );
+    binop!(arith_expr, term_expr, |input| {
+        if input.peek(Token![+]) && !input.peek(Token![+=]) {
+            Some(BinOp::Add(input.parse()?))
+        } else if input.peek(Token![-]) && !input.peek(Token![-=]) {
+            Some(BinOp::Sub(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <cast> * <cast> ...
     // <cast> / <cast> ...
     // <cast> % <cast> ...
-    binop!(
-        term_expr,
-        cast_expr,
-        alt!(
-        punct!(*) => { BinOp::Mul }
-        |
-        punct!(/) => { BinOp::Div }
-        |
-        punct!(%) => { BinOp::Rem }
-    )
-    );
+    binop!(term_expr, cast_expr, |input| {
+        if input.peek(Token![*]) && !input.peek(Token![*=]) {
+            Some(BinOp::Mul(input.parse()?))
+        } else if input.peek(Token![/]) && !input.peek(Token![/=]) {
+            Some(BinOp::Div(input.parse()?))
+        } else if input.peek(Token![%]) && !input.peek(Token![%=]) {
+            Some(BinOp::Rem(input.parse()?))
+        } else {
+            None
+        }
+    });
 
     // <unary> as <ty>
     // <unary> : <ty>
