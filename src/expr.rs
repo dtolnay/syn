@@ -2429,12 +2429,23 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Synom for ExprUnsafe {
         named!(parse -> Self, do_parse!(
+            outer_attrs: many0!(Attribute::parse_outer) >>
             unsafe_: keyword!(unsafe) >>
-            b: syn!(Block) >>
+            block: braces!(tuple!(
+                many0!(Attribute::parse_inner),
+                call!(Block::parse_within),
+            )) >>
             (ExprUnsafe {
-                attrs: Vec::new(),
+                attrs: {
+                    let mut attrs = outer_attrs;
+                    attrs.extend((block.1).0);
+                    attrs
+                },
                 unsafe_token: unsafe_,
-                block: b,
+                block: Block {
+                    brace_token: block.0,
+                    stmts: (block.1).1,
+                },
             })
         ));
 
@@ -3471,7 +3482,10 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.unsafe_token.to_tokens(tokens);
-            self.block.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                inner_attrs_to_tokens(&self.attrs, tokens);
+                tokens.append_all(&self.block.stmts);
+            });
         }
     }
 
