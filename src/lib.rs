@@ -313,6 +313,10 @@ pub mod parsers;
 #[macro_use]
 mod macros;
 
+#[cfg(feature = "parsing")]
+#[macro_use]
+mod group;
+
 #[macro_use]
 pub mod token;
 
@@ -584,10 +588,6 @@ mod lookahead;
 
 #[cfg(feature = "parsing")]
 pub mod parse;
-
-#[cfg(feature = "parsing")]
-#[macro_use]
-mod group;
 
 mod span;
 
