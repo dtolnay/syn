@@ -121,8 +121,10 @@ use quote::{ToTokens, TokenStreamExt};
 
 #[cfg(feature = "parsing")]
 use error::Result;
+#[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
 use lifetime::Lifetime;
+#[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
 use lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
@@ -175,14 +177,23 @@ macro_rules! impl_token {
 }
 
 impl_token!(Ident "identifier");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(Lifetime "lifetime");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(Lit "literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitStr "string literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitByteStr "byte string literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitByte "byte literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitChar "character literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitInt "integer literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitFloat "floating point literal");
+#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitBool "boolean literal");
 
 macro_rules! define_keywords {

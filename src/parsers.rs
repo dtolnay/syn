@@ -1427,6 +1427,7 @@ macro_rules! old_grouped {
     };
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! shim {
     ($i:expr, $parser:expr $(, $args:expr)*) => {{
         let unexpected = ::std::rc::Rc::new(::std::cell::Cell::new(None));
