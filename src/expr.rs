@@ -1098,7 +1098,9 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    named2!(expr_no_struct -> Expr, shim!(ambiguous_expr, AllowStruct(false), AllowBlock(true)));
+    fn expr_no_struct(input: ParseStream) -> Result<Expr> {
+        ambiguous_expr(input, AllowStruct(false), AllowBlock(true))
+    }
 
     // Parse an arbitrary expression.
     #[cfg(feature = "full")]
