@@ -265,7 +265,9 @@
     feature = "cargo-clippy",
     allow(
         const_static_lifetime,
+        cyclomatic_complexity,
         doc_markdown,
+        eval_order_dependence,
         large_enum_variant,
         match_bool,
         redundant_closure,
