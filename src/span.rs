@@ -24,20 +24,20 @@ impl IntoSpans<[Span; 3]> for Span {
     }
 }
 
-impl IntoSpans<Self> for [Span; 1] {
-    fn into_spans(self) -> Self {
+impl IntoSpans<[Span; 1]> for [Span; 1] {
+    fn into_spans(self) -> [Span; 1] {
         self
     }
 }
 
-impl IntoSpans<Self> for [Span; 2] {
-    fn into_spans(self) -> Self {
+impl IntoSpans<[Span; 2]> for [Span; 2] {
+    fn into_spans(self) -> [Span; 2] {
         self
     }
 }
 
-impl IntoSpans<Self> for [Span; 3] {
-    fn into_spans(self) -> Self {
+impl IntoSpans<[Span; 3]> for [Span; 3] {
+    fn into_spans(self) -> [Span; 3] {
         self
     }
 }
