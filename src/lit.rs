@@ -340,6 +340,13 @@ macro_rules! lit_extra_traits {
                 self.$field.to_string().hash(state);
             }
         }
+
+        #[cfg(feature = "parsing")]
+        #[doc(hidden)]
+        #[allow(non_snake_case)]
+        pub fn $ty(marker: lookahead::TokenMarker) -> $ty {
+            match marker {}
+        }
     };
 }
 

@@ -149,7 +149,9 @@ pub mod parsing {
         }
     }
 
-    fn data_struct(input: ParseStream) -> Result<(Option<WhereClause>, Fields, Option<Token![;]>)> {
+    pub fn data_struct(
+        input: ParseStream,
+    ) -> Result<(Option<WhereClause>, Fields, Option<Token![;]>)> {
         let mut lookahead = input.lookahead1();
         let mut where_clause = None;
         if lookahead.peek(Token![where]) {
@@ -183,7 +185,7 @@ pub mod parsing {
         }
     }
 
-    fn data_enum(
+    pub fn data_enum(
         input: ParseStream,
     ) -> Result<(
         Option<WhereClause>,
@@ -199,7 +201,7 @@ pub mod parsing {
         Ok((where_clause, brace, variants))
     }
 
-    fn data_union(input: ParseStream) -> Result<(Option<WhereClause>, FieldsNamed)> {
+    pub fn data_union(input: ParseStream) -> Result<(Option<WhereClause>, FieldsNamed)> {
         let where_clause = input.parse()?;
         let fields = input.parse()?;
         Ok((where_clause, fields))

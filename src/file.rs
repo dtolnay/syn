@@ -98,7 +98,7 @@ pub mod parsing {
                 items: {
                     let mut items = Vec::new();
                     while !input.is_empty() {
-                        items.push(input.parse_synom(Item::parse)?);
+                        items.push(input.parse()?);
                     }
                     items
                 },
