@@ -1148,41 +1148,37 @@ pub mod parsing {
     //
     // NOTE: This operator is right-associative.
     #[cfg(feature = "full")]
-    named2!(assign_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, do_parse!(
-        mut e: shim!(placement_expr, allow_struct, allow_block) >>
-        alt!(
-            do_parse!(
-                eq: punct!(=) >>
+    fn assign_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        let mut e = placement_expr(input, allow_struct, allow_block)?;
+        if input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
+            e = Expr::Assign(ExprAssign {
+                attrs: Vec::new(),
+                left: Box::new(e),
+                eq_token: input.parse()?,
                 // Recurse into self to parse right-associative operator.
-                rhs: shim!(assign_expr, allow_struct, AllowBlock(true)) >>
-                ({
-                    e = ExprAssign {
-                        attrs: Vec::new(),
-                        left: Box::new(e),
-                        eq_token: eq,
-                        right: Box::new(rhs),
-                    }.into();
-                })
-            )
-            |
-            do_parse!(
-                op: shim!(BinOp::parse_assign_op) >>
+                right: Box::new(assign_expr(input, allow_struct, AllowBlock(true))?),
+            });
+        } else if input.peek(Token![+=])
+            || input.peek(Token![-=])
+            || input.peek(Token![*=])
+            || input.peek(Token![/=])
+            || input.peek(Token![%=])
+            || input.peek(Token![^=])
+            || input.peek(Token![&=])
+            || input.peek(Token![|=])
+            || input.peek(Token![<<=])
+            || input.peek(Token![>>=])
+        {
+            e = Expr::AssignOp(ExprAssignOp {
+                attrs: Vec::new(),
+                left: Box::new(e),
+                op: BinOp::parse_assign_op(input)?,
                 // Recurse into self to parse right-associative operator.
-                rhs: shim!(assign_expr, allow_struct, AllowBlock(true)) >>
-                ({
-                    e = ExprAssignOp {
-                        attrs: Vec::new(),
-                        left: Box::new(e),
-                        op: op,
-                        right: Box::new(rhs),
-                    }.into();
-                })
-            )
-            |
-            epsilon!()
-        ) >>
-        (e)
-    ));
+                right: Box::new(assign_expr(input, allow_struct, AllowBlock(true))?),
+            });
+        }
+        Ok(e)
+    }
 
     // <range> <- <range> ..
     //
