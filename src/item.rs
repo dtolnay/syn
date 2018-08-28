@@ -756,7 +756,6 @@ pub mod parsing {
 
     use parse::{Parse, ParseStream, Result};
     use synom::ext::IdentExt;
-    use synom::Synom;
 
     impl Parse for Item {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -1116,7 +1115,7 @@ pub mod parsing {
 
     fn arg_captured(input: ParseStream) -> Result<ArgCaptured> {
         Ok(ArgCaptured {
-            pat: input.parse_synom(Pat::parse)?,
+            pat: input.parse()?,
             colon_token: input.parse()?,
             ty: input.parse()?,
         })

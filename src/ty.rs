@@ -249,7 +249,9 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+
     use parse::{Parse, ParseStream, Result};
+    use path;
 
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -559,58 +561,13 @@ pub mod parsing {
 
     impl Parse for TypePath {
         fn parse(input: ParseStream) -> Result<Self> {
-            let (qself, mut path) = if input.peek(Token![<]) {
-                let lt_token: Token![<] = input.parse()?;
-                let this: Type = input.parse()?;
-                let path = if input.peek(Token![as]) {
-                    let as_token: Token![as] = input.parse()?;
-                    let path: Path = input.parse()?;
-                    Some((as_token, path))
-                } else {
-                    None
-                };
-                let gt_token: Token![>] = input.parse()?;
-                let colon2_token: Token![::] = input.parse()?;
-                let rest = input.parse_synom(Punctuated::parse_separated_nonempty)?;
-                let (position, as_token, path) = match path {
-                    Some((as_token, mut path)) => {
-                        let pos = path.segments.len();
-                        path.segments.push_punct(colon2_token);
-                        path.segments.extend(rest.into_pairs());
-                        (pos, Some(as_token), path)
-                    }
-                    None => {
-                        let path = Path {
-                            leading_colon: Some(colon2_token),
-                            segments: rest,
-                        };
-                        (0, None, path)
-                    }
-                };
-                let qself = QSelf {
-                    lt_token: lt_token,
-                    ty: Box::new(this),
-                    position: position,
-                    as_token: as_token,
-                    gt_token: gt_token,
-                };
-                (Some(qself), path)
-            } else {
-                let path: Path = input.parse()?;
-                (None, path)
-            };
+            let (qself, mut path) = path::parsing::qpath(input, false)?;
 
-            let parenthesized = if path.segments.last().unwrap().value().arguments.is_empty()
+            if path.segments.last().unwrap().value().arguments.is_empty()
                 && input.peek(token::Paren)
             {
                 let args: ParenthesizedGenericArguments = input.parse()?;
-                Some(args)
-            } else {
-                None
-            };
-
-            if let Some(parenthesized) = parenthesized {
-                let parenthesized = PathArguments::Parenthesized(parenthesized);
+                let parenthesized = PathArguments::Parenthesized(args);
                 path.segments.last_mut().unwrap().value_mut().arguments = parenthesized;
             }
 
