@@ -1044,9 +1044,6 @@ pub mod parsing {
     #[derive(Copy, Clone)]
     pub struct AllowStruct(bool);
 
-    #[derive(Copy, Clone)]
-    pub struct AllowBlock(bool);
-
     #[derive(Copy, Clone, PartialEq, PartialOrd)]
     enum Precedence {
         Any,
@@ -1084,26 +1081,26 @@ pub mod parsing {
 
     impl Parse for Expr {
         fn parse(input: ParseStream) -> Result<Self> {
-            ambiguous_expr(input, AllowStruct(true), AllowBlock(true))
+            ambiguous_expr(input, AllowStruct(true))
         }
     }
 
     #[cfg(feature = "full")]
     fn expr_no_struct(input: ParseStream) -> Result<Expr> {
-        ambiguous_expr(input, AllowStruct(false), AllowBlock(true))
+        ambiguous_expr(input, AllowStruct(false))
     }
 
     #[cfg(feature = "full")]
-    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, allow_block: AllowBlock, base: Precedence) -> Result<Expr> {
+    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, base: Precedence) -> Result<Expr> {
         loop {
             if input.fork().parse::<BinOp>().ok().map_or(false, |op| Precedence::of(&op) >= base) {
                 let op: BinOp = input.parse()?;
                 let precedence = Precedence::of(&op);
-                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
                     let next = peek_precedence(input);
                     if next > precedence || next == precedence && precedence == Precedence::Assign {
-                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                        rhs = parse_expr(input, rhs, allow_struct, next)?;
                     } else {
                         break;
                     }
@@ -1116,11 +1113,11 @@ pub mod parsing {
                 });
             } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
                 let eq_token: Token![=] = input.parse()?;
-                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
                     let next = peek_precedence(input);
                     if next >= Precedence::Assign {
-                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                        rhs = parse_expr(input, rhs, allow_struct, next)?;
                     } else {
                         break;
                     }
@@ -1133,11 +1130,11 @@ pub mod parsing {
                 });
             } else if Precedence::Placement >= base && input.peek(Token![<-]) {
                 let arrow_token: Token![<-] = input.parse()?;
-                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
                     let next = peek_precedence(input);
                     if next > Precedence::Placement {
-                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                        rhs = parse_expr(input, rhs, allow_struct, next)?;
                     } else {
                         break;
                     }
@@ -1157,14 +1154,11 @@ pub mod parsing {
                 {
                     None
                 } else {
-                    // We don't want to allow blocks in the rhs if we don't
-                    // allow structs.
-                    let allow_block = AllowBlock(allow_struct.0);
-                    let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                    let mut rhs = unary_expr(input, allow_struct)?;
                     loop {
                         let next = peek_precedence(input);
                         if next > Precedence::Range {
-                            rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                            rhs = parse_expr(input, rhs, allow_struct, next)?;
                         } else {
                             break;
                         }
@@ -1203,16 +1197,16 @@ pub mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, allow_block: AllowBlock, base: Precedence) -> Result<Expr> {
+    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, base: Precedence) -> Result<Expr> {
         loop {
             if input.fork().parse::<BinOp>().ok().map_or(false, |op| Precedence::of(&op) >= base) {
                 let op: BinOp = input.parse()?;
                 let precedence = Precedence::of(&op);
-                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
                     let next = peek_precedence(input);
                     if next > precedence || next == precedence && precedence == Precedence::Assign {
-                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                        rhs = parse_expr(input, rhs, allow_struct, next)?;
                     } else {
                         break;
                     }
@@ -1259,10 +1253,9 @@ pub mod parsing {
     fn ambiguous_expr(
         input: ParseStream,
         allow_struct: AllowStruct,
-        allow_block: AllowBlock,
     ) -> Result<Expr> {
-        let lhs = unary_expr(input, allow_struct, allow_block)?;
-        parse_expr(input, lhs, allow_struct, allow_block, Precedence::Any)
+        let lhs = unary_expr(input, allow_struct)?;
+        parse_expr(input, lhs, allow_struct, Precedence::Any)
     }
 
     // <UnOp> <trailer>
@@ -1273,7 +1266,6 @@ pub mod parsing {
     fn unary_expr(
         input: ParseStream,
         allow_struct: AllowStruct,
-        allow_block: AllowBlock,
     ) -> Result<Expr> {
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
@@ -1289,23 +1281,23 @@ pub mod parsing {
                     attrs: attrs,
                     and_token: input.parse()?,
                     mutability: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                    expr: Box::new(unary_expr(input, allow_struct)?),
                 }))
             } else if input.peek(Token![box]) {
                 Ok(Expr::Box(ExprBox {
                     attrs: attrs,
                     box_token: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                    expr: Box::new(unary_expr(input, allow_struct)?),
                 }))
             } else {
                 Ok(Expr::Unary(ExprUnary {
                     attrs: attrs,
                     op: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                    expr: Box::new(unary_expr(input, allow_struct)?),
                 }))
             }
         } else {
-            trailer_expr(input, allow_struct, allow_block)
+            trailer_expr(input, allow_struct)
         }
     }
 
@@ -1314,7 +1306,6 @@ pub mod parsing {
     fn unary_expr(
         input: ParseStream,
         allow_struct: AllowStruct,
-        allow_block: AllowBlock,
     ) -> Result<Expr> {
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
@@ -1322,10 +1313,10 @@ pub mod parsing {
             Ok(Expr::Unary(ExprUnary {
                 attrs: input.call(Attribute::parse_outer)?,
                 op: input.parse()?,
-                expr: Box::new(unary_expr(input, allow_struct, AllowBlock(true))?),
+                expr: Box::new(unary_expr(input, allow_struct)?),
             }))
         } else {
-            trailer_expr(input, allow_struct, allow_block)
+            trailer_expr(input, allow_struct)
         }
     }
 
@@ -1353,9 +1344,8 @@ pub mod parsing {
     fn trailer_expr(
         input: ParseStream,
         allow_struct: AllowStruct,
-        allow_block: AllowBlock,
     ) -> Result<Expr> {
-        let mut e = atom_expr(input, allow_struct, allow_block)?;
+        let mut e = atom_expr(input, allow_struct)?;
 
         let mut attrs = e.replace_attrs(Vec::new());
         let outer_attrs = take_outer(&mut attrs);
@@ -1457,9 +1447,8 @@ pub mod parsing {
     fn trailer_expr(
         input: ParseStream,
         allow_struct: AllowStruct,
-        allow_block: AllowBlock,
     ) -> Result<Expr> {
-        let mut e = atom_expr(input, allow_struct, allow_block)?;
+        let mut e = atom_expr(input, allow_struct)?;
 
         loop {
             if input.peek(token::Paren) {
@@ -1496,7 +1485,7 @@ pub mod parsing {
     // Parse all atomic expressions which don't have to worry about precedence
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
-    fn atom_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+    fn atom_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         if input.peek(token::Group) {
             return input.parse().map(Expr::Group);
         }
@@ -1561,7 +1550,7 @@ pub mod parsing {
             Expr::Yield(input.parse()?)
         } else if input.peek(Token![unsafe]) {
             Expr::Unsafe(input.parse()?)
-        } else if allow_block.0 && input.peek(token::Brace) {
+        } else if input.peek(token::Brace) {
             Expr::Block(input.parse()?)
         } else if input.peek(Token![..]) {
             Expr::Range(expr_range(input, allow_struct)?)
@@ -1601,7 +1590,7 @@ pub mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn atom_expr(input: ParseStream, _allow_struct: AllowStruct, _allow_block: AllowBlock) -> Result<Expr> {
+    fn atom_expr(input: ParseStream, _allow_struct: AllowStruct) -> Result<Expr> {
         if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
@@ -1777,13 +1766,12 @@ pub mod parsing {
             Expr::Block(input.parse()?)
         } else {
             let allow_struct = AllowStruct(true);
-            let allow_block = AllowBlock(true);
-            let mut expr = unary_expr(input, allow_struct, allow_block)?;
+            let mut expr = unary_expr(input, allow_struct)?;
 
             attrs.extend(expr.replace_attrs(Vec::new()));
             expr.replace_attrs(attrs);
 
-            return parse_expr(input, expr, allow_struct, allow_block, Precedence::Any);
+            return parse_expr(input, expr, allow_struct, Precedence::Any);
         };
 
         if input.peek(Token![.]) || input.peek(Token![?]) {
@@ -1793,8 +1781,7 @@ pub mod parsing {
             expr.replace_attrs(attrs);
 
             let allow_struct = AllowStruct(true);
-            let allow_block = AllowBlock(true);
-            return parse_expr(input, expr, allow_struct, allow_block, Precedence::Any);
+            return parse_expr(input, expr, allow_struct, Precedence::Any);
         }
 
         attrs.extend(expr.replace_attrs(Vec::new()));
@@ -2215,7 +2202,7 @@ pub mod parsing {
             });
             (output, block)
         } else {
-            let body = ambiguous_expr(input, allow_struct, AllowBlock(true))?;
+            let body = ambiguous_expr(input, allow_struct)?;
             (ReturnType::Default, body)
         };
 
@@ -2381,10 +2368,7 @@ pub mod parsing {
                 {
                     None
                 } else {
-                    // We can't allow blocks after a `break` expression when we
-                    // wouldn't allow structs, as this expression is ambiguous.
-                    let allow_block = AllowBlock(allow_struct.0);
-                    let expr = ambiguous_expr(input, allow_struct, allow_block)?;
+                    let expr = ambiguous_expr(input, allow_struct)?;
                     Some(Box::new(expr))
                 }
             },
@@ -2405,7 +2389,7 @@ pub mod parsing {
                     // conditions. For example:
                     //
                     // if return { println!("A") } {} // Prints "A"
-                    let expr = ambiguous_expr(input, allow_struct, AllowBlock(true))?;
+                    let expr = ambiguous_expr(input, allow_struct)?;
                     Some(Box::new(expr))
                 }
             },
@@ -2583,7 +2567,7 @@ pub mod parsing {
                 {
                     None
                 } else {
-                    let to = ambiguous_expr(input, allow_struct, AllowBlock(allow_struct.0))?;
+                    let to = ambiguous_expr(input, allow_struct)?;
                     Some(Box::new(to))
                 }
             },
