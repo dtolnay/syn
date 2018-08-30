@@ -1007,7 +1007,7 @@ ast_struct! {
 
 #[cfg(any(feature = "parsing", feature = "printing"))]
 #[cfg(feature = "full")]
-fn arm_expr_requires_comma(expr: &Expr) -> bool {
+fn requires_terminator(expr: &Expr) -> bool {
     // see https://github.com/rust-lang/rust/blob/eb8f2586e/src/libsyntax/parse/classify.rs#L17-L37
     match *expr {
         Expr::Unsafe(..)
@@ -2027,7 +2027,7 @@ pub mod parsing {
             fat_arrow_token: input.parse()?,
             body: {
                 let body = input.call(expr_early)?;
-                requires_comma = arm_expr_requires_comma(&body);
+                requires_comma = requires_terminator(&body);
                 Box::new(body)
             },
             comma: {
@@ -2431,77 +2431,72 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Block {
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
-            input.step_cursor(|cursor| Self::old_parse_within(*cursor))
-        }
+            while input.peek(Token![;]) {
+                input.parse::<Token![;]>()?;
+            }
 
-        named!(old_parse_within -> Vec<Stmt>, do_parse!(
-            many0!(punct!(;)) >>
-            mut standalone: many0!(do_parse!(
-                stmt: syn!(Stmt) >>
-                many0!(punct!(;)) >>
-                (stmt)
-            )) >>
-            last: option!(do_parse!(
-                attrs: many0!(Attribute::old_parse_outer) >>
-                mut e: syn!(Expr) >>
-                ({
-                    e.replace_attrs(attrs);
-                    Stmt::Expr(e)
-                })
-            )) >>
-            (match last {
-                None => standalone,
-                Some(last) => {
-                    standalone.push(last);
-                    standalone
+            let mut stmts = Vec::new();
+            while !input.is_empty() {
+                let s = parse_stmt(input, true)?;
+                if let Stmt::Expr(ref s) = s {
+                    if requires_terminator(s) && !input.is_empty() {
+                        return Err(input.error("unexpected token"));
+                    }
                 }
-            })
-        ));
+                stmts.push(s);
+            }
+            Ok(stmts)
+        }
     }
 
     #[cfg(feature = "full")]
     impl Parse for Stmt {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ahead = input.fork();
-            ahead.call(Attribute::parse_outer)?;
+            parse_stmt(input, false)
+        }
+    }
 
-            // TODO: better error messages
-            if {
-                let ahead = ahead.fork();
-                // Only parse braces here; paren and bracket will get parsed as
-                // expression statements
-                ahead.call(Path::parse_mod_style).is_ok()
-                    && ahead.parse::<Token![!]>().is_ok()
-                    && (ahead.peek(token::Brace) || ahead.peek(Ident))
-            } {
-                stmt_mac(input)
-            } else if ahead.peek(Token![let]) {
-                stmt_local(input).map(Stmt::Local)
-            } else if ahead.peek(Token![pub])
-                || ahead.peek(Token![crate]) && !ahead.peek2(Token![::])
-                || ahead.peek(Token![extern]) && !ahead.peek2(Token![::])
-                || ahead.peek(Token![use])
-                || ahead.peek(Token![static]) && (ahead.peek2(Token![mut]) || ahead.peek2(Ident))
-                || ahead.peek(Token![const])
-                || ahead.peek(Token![unsafe]) && !ahead.peek2(token::Brace)
-                || ahead.peek(Token![async]) && (ahead.peek2(Token![extern]) || ahead.peek2(Token![fn]))
-                || ahead.peek(Token![fn])
-                || ahead.peek(Token![mod])
-                || ahead.peek(Token![type])
-                || ahead.peek(Token![existential]) && ahead.peek2(Token![type])
-                || ahead.peek(Token![struct])
-                || ahead.peek(Token![enum])
-                || ahead.peek(Token![union]) && ahead.peek2(Ident)
-                || ahead.peek(Token![auto]) && ahead.peek2(Token![trait])
-                || ahead.peek(Token![trait])
-                || ahead.peek(Token![default]) && (ahead.peek2(Token![unsafe]) || ahead.peek2(Token![impl]))
-                || ahead.peek(Token![impl])
-                || ahead.peek(Token![macro])
-            {
-                input.parse().map(Stmt::Item)
-            } else {
-                input.call(stmt_expr)
-            }
+    #[cfg(feature = "full")]
+    fn parse_stmt(input: ParseStream, allow_nosemi: bool) -> Result<Stmt> {
+        let ahead = input.fork();
+        ahead.call(Attribute::parse_outer)?;
+
+        // TODO: better error messages
+        if {
+            let ahead = ahead.fork();
+            // Only parse braces here; paren and bracket will get parsed as
+            // expression statements
+            ahead.call(Path::parse_mod_style).is_ok()
+                && ahead.parse::<Token![!]>().is_ok()
+                && (ahead.peek(token::Brace) || ahead.peek(Ident))
+        } {
+            stmt_mac(input)
+        } else if ahead.peek(Token![let]) {
+            stmt_local(input).map(Stmt::Local)
+        } else if ahead.peek(Token![pub])
+            || ahead.peek(Token![crate]) && !ahead.peek2(Token![::])
+            || ahead.peek(Token![extern]) && !ahead.peek2(Token![::])
+            || ahead.peek(Token![use])
+            || ahead.peek(Token![static]) && (ahead.peek2(Token![mut]) || ahead.peek2(Ident))
+            || ahead.peek(Token![const])
+            || ahead.peek(Token![unsafe]) && !ahead.peek2(token::Brace)
+            || ahead.peek(Token![async]) && (ahead.peek2(Token![extern]) || ahead.peek2(Token![fn]))
+            || ahead.peek(Token![fn])
+            || ahead.peek(Token![mod])
+            || ahead.peek(Token![type])
+            || ahead.peek(Token![existential]) && ahead.peek2(Token![type])
+            || ahead.peek(Token![struct])
+            || ahead.peek(Token![enum])
+            || ahead.peek(Token![union]) && ahead.peek2(Ident)
+            || ahead.peek(Token![auto]) && ahead.peek2(Token![trait])
+            || ahead.peek(Token![trait])
+            || ahead.peek(Token![default]) && (ahead.peek2(Token![unsafe]) || ahead.peek2(Token![impl]))
+            || ahead.peek(Token![impl])
+            || ahead.peek(Token![macro])
+        {
+            input.parse().map(Stmt::Item)
+        } else {
+            stmt_expr(input, allow_nosemi)
         }
     }
 
@@ -2567,7 +2562,7 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn stmt_expr(input: ParseStream) -> Result<Stmt> {
+    fn stmt_expr(input: ParseStream, allow_nosemi: bool) -> Result<Stmt> {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let mut e = expr_early(input)?;
 
@@ -2578,21 +2573,10 @@ pub mod parsing {
             return Ok(Stmt::Semi(e, input.parse()?));
         }
 
-        match e {
-            Expr::IfLet(_) |
-            Expr::If(_) |
-            Expr::WhileLet(_) |
-            Expr::While(_) |
-            Expr::ForLoop(_) |
-            Expr::Loop(_) |
-            Expr::Match(_) |
-            Expr::TryBlock(_) |
-            Expr::Yield(_) |
-            Expr::Unsafe(_) |
-            Expr::Block(_) => Ok(Stmt::Expr(e)),
-            _ => {
-                Err(input.error("expected semicolon"))
-            }
+        if allow_nosemi && !requires_terminator(&e) {
+            Ok(Stmt::Expr(e))
+        } else {
+            Err(input.error("expected semicolon"))
         }
     }
 
@@ -3269,7 +3253,7 @@ mod printing {
                     // Ensure that we have a comma after a non-block arm, except
                     // for the last one.
                     let is_last = i == self.arms.len() - 1;
-                    if !is_last && arm_expr_requires_comma(&arm.body) && arm.comma.is_none() {
+                    if !is_last && requires_terminator(&arm.body) && arm.comma.is_none() {
                         <Token![,]>::default().to_tokens(tokens);
                     }
                 }
