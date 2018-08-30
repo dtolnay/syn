@@ -1036,21 +1036,6 @@ pub mod parsing {
     #[cfg(feature = "full")]
     use synom::ext::IdentExt;
 
-    macro_rules! named2 {
-        ($name:ident ($($arg:ident : $argty:ty),*) -> $ret:ty, $($rest:tt)*) => {
-            fn $name(input: ParseStream $(, $arg : $argty)*) -> Result<$ret> {
-                named!(_synom ($($arg : $argty),*) -> $ret, $($rest)*);
-                input.step_cursor(|cursor| _synom(*cursor $(, $arg)*))
-            }
-        };
-        ($name:ident -> $ret:ty, $($rest:tt)*) => {
-            fn $name(input: ParseStream) -> Result<$ret> {
-                named!(_synom -> $ret, $($rest)*);
-                input.step_cursor(|cursor| _synom(*cursor))
-            }
-        };
-    }
-
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
     //
