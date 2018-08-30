@@ -229,6 +229,8 @@ pub mod parsing {
     use super::*;
     use parse::{Parse, ParseStream, Result};
     use synom::ext::IdentExt;
+    #[cfg(feature = "full")]
+    use expr;
 
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -249,12 +251,12 @@ pub mod parsing {
             #[cfg(feature = "full")]
             {
                 if input.peek(Lit) {
-                    let lit: ExprLit = input.parse()?;
+                    let lit = input.call(expr::parsing::expr_lit)?;
                     return Ok(GenericArgument::Const(Expr::Lit(lit)));
                 }
 
                 if input.peek(token::Brace) {
-                    let block: ExprBlock = input.parse()?;
+                    let block = input.call(expr::parsing::expr_block)?;
                     return Ok(GenericArgument::Const(Expr::Block(block)));
                 }
             }

@@ -1383,7 +1383,7 @@ pub mod parsing {
                                 if input.peek(Token![>]) {
                                     break;
                                 }
-                                let value = input.parse()?;
+                                let value = input.call(generic_method_argument)?;
                                 args.push_value(value);
                                 if input.peek(Token![>]) {
                                     break;
@@ -1487,21 +1487,21 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn atom_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         if input.peek(token::Group) {
-            return input.parse().map(Expr::Group);
+            return input.call(expr_group).map(Expr::Group);
         }
 
         let mut attrs = input.call(Attribute::parse_outer)?;
 
         let mut expr = if input.peek(token::Group) {
-            Expr::Group(input.parse()?)
+            Expr::Group(input.call(expr_group)?)
         } else if input.peek(Lit) {
-            Expr::Lit(input.parse()?)
+            Expr::Lit(input.call(expr_lit)?)
         } else if input.peek(Token![async])
             && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace))
         {
-            Expr::Async(input.parse()?)
+            Expr::Async(input.call(expr_async)?)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
-            Expr::TryBlock(input.parse()?)
+            Expr::TryBlock(input.call(expr_try_block)?)
         } else if input.peek(Token![|])
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
             || input.peek(Token![static])
@@ -1523,51 +1523,51 @@ pub mod parsing {
         } else if input.peek(Token![break]) {
             Expr::Break(expr_break(input, allow_struct)?)
         } else if input.peek(Token![continue]) {
-            Expr::Continue(input.parse()?)
+            Expr::Continue(input.call(expr_continue)?)
         } else if input.peek(Token![return]) {
             Expr::Return(expr_ret(input, allow_struct)?)
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)?
         } else if input.peek(Token![if]) {
             if input.peek2(Token![let]) {
-                Expr::IfLet(input.parse()?)
+                Expr::IfLet(input.call(expr_if_let)?)
             } else {
-                Expr::If(input.parse()?)
+                Expr::If(input.call(expr_if)?)
             }
         } else if input.peek(Token![while]) {
             if input.peek2(Token![let]) {
-                Expr::WhileLet(input.parse()?)
+                Expr::WhileLet(input.call(expr_while_let)?)
             } else {
-                Expr::While(input.parse()?)
+                Expr::While(input.call(expr_while)?)
             }
         } else if input.peek(Token![for]) {
-            Expr::ForLoop(input.parse()?)
+            Expr::ForLoop(input.call(expr_for_loop)?)
         } else if input.peek(Token![loop]) {
-            Expr::Loop(input.parse()?)
+            Expr::Loop(input.call(expr_loop)?)
         } else if input.peek(Token![match]) {
-            Expr::Match(input.parse()?)
+            Expr::Match(input.call(expr_match)?)
         } else if input.peek(Token![yield]) {
-            Expr::Yield(input.parse()?)
+            Expr::Yield(input.call(expr_yield)?)
         } else if input.peek(Token![unsafe]) {
-            Expr::Unsafe(input.parse()?)
+            Expr::Unsafe(input.call(expr_unsafe)?)
         } else if input.peek(token::Brace) {
-            Expr::Block(input.parse()?)
+            Expr::Block(input.call(expr_block)?)
         } else if input.peek(Token![..]) {
             Expr::Range(expr_range(input, allow_struct)?)
         } else if input.peek(Lifetime) {
             let the_label: Label = input.parse()?;
             let mut expr = if input.peek(Token![while]) {
                 if input.peek2(Token![let]) {
-                    Expr::WhileLet(input.parse()?)
+                    Expr::WhileLet(input.call(expr_while_let)?)
                 } else {
-                    Expr::While(input.parse()?)
+                    Expr::While(input.call(expr_while)?)
                 }
             } else if input.peek(Token![for]) {
-                Expr::ForLoop(input.parse()?)
+                Expr::ForLoop(input.call(expr_for_loop)?)
             } else if input.peek(Token![loop]) {
-                Expr::Loop(input.parse()?)
+                Expr::Loop(input.call(expr_loop)?)
             } else if input.peek(token::Brace) {
-                Expr::Block(input.parse()?)
+                Expr::Block(input.call(expr_block)?)
             } else {
                 return Err(input.error("expected loop or block expression"));
             };
@@ -1592,9 +1592,9 @@ pub mod parsing {
     #[cfg(not(feature = "full"))]
     fn atom_expr(input: ParseStream, _allow_struct: AllowStruct) -> Result<Expr> {
         if input.peek(Lit) {
-            input.parse().map(Expr::Lit)
+            input.call(expr_lit).map(Expr::Lit)
         } else if input.peek(token::Paren) {
-            input.parse().map(Expr::Paren)
+            input.call(expr_paren).map(Expr::Paren)
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -1742,28 +1742,28 @@ pub mod parsing {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let mut expr = if input.peek(Token![if]) {
             if input.peek2(Token![let]) {
-                Expr::IfLet(input.parse()?)
+                Expr::IfLet(input.call(expr_if_let)?)
             } else {
-                Expr::If(input.parse()?)
+                Expr::If(input.call(expr_if)?)
             }
         } else if input.peek(Token![while]) {
             if input.peek2(Token![let]) {
-                Expr::WhileLet(input.parse()?)
+                Expr::WhileLet(input.call(expr_while_let)?)
             } else {
-                Expr::While(input.parse()?)
+                Expr::While(input.call(expr_while)?)
             }
         } else if input.peek(Token![for]) {
-            Expr::ForLoop(input.parse()?)
+            Expr::ForLoop(input.call(expr_for_loop)?)
         } else if input.peek(Token![loop]) {
-            Expr::Loop(input.parse()?)
+            Expr::Loop(input.call(expr_loop)?)
         } else if input.peek(Token![match]) {
-            Expr::Match(input.parse()?)
+            Expr::Match(input.call(expr_match)?)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
-            Expr::TryBlock(input.parse()?)
+            Expr::TryBlock(input.call(expr_try_block)?)
         } else if input.peek(Token![unsafe]) {
-            Expr::Unsafe(input.parse()?)
+            Expr::Unsafe(input.call(expr_unsafe)?)
         } else if input.peek(token::Brace) {
-            Expr::Block(input.parse()?)
+            Expr::Block(input.call(expr_block)?)
         } else {
             let allow_struct = AllowStruct(true);
             let mut expr = unary_expr(input, allow_struct)?;
@@ -1789,185 +1789,90 @@ pub mod parsing {
         Ok(expr)
     }
 
-    impl Parse for ExprLit {
-        #[cfg(not(feature = "full"))]
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprLit {
-                attrs: Vec::new(),
-                lit: input.parse()?,
-            })
-        }
-
-        #[cfg(feature = "full")]
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprLit {
-                attrs: input.call(Attribute::parse_outer)?,
-                lit: input.parse()?,
-            })
-        }
+    pub fn expr_lit(input: ParseStream) -> Result<ExprLit> {
+        Ok(ExprLit {
+            attrs: Vec::new(),
+            lit: input.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprMacro {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprMacro {
-                attrs: input.call(Attribute::parse_outer)?,
-                mac: input.parse()?,
-            })
-        }
+    fn expr_group(input: ParseStream) -> Result<ExprGroup> {
+        let content;
+        Ok(ExprGroup {
+            attrs: Vec::new(),
+            group_token: grouped!(content in input),
+            expr: content.parse()?,
+        })
+    }
+
+    #[cfg(not(feature = "full"))]
+    fn expr_paren(input: ParseStream) -> Result<ExprParen> {
+        let content;
+        Ok(ExprParen {
+            attrs: Vec::new(),
+            paren_token: parenthesized!(content in input),
+            expr: content.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprGroup {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            Ok(ExprGroup {
-                attrs: Vec::new(),
-                group_token: grouped!(content in input),
-                expr: content.parse()?,
-            })
-        }
-    }
-
-    impl Parse for ExprParen {
-        #[cfg(not(feature = "full"))]
-        fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            Ok(ExprParen {
-                attrs: Vec::new(),
-                paren_token: parenthesized!(content in input),
-                expr: content.parse()?,
-            })
-        }
-
-        #[cfg(feature = "full")]
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let expr: Expr = content.parse()?;
-
-            Ok(ExprParen {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                paren_token: paren_token,
-                expr: Box::new(expr),
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for ExprArray {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-
-            let content;
-            let bracket_token = bracketed!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let elems = content.parse_terminated(<Expr as Parse>::parse)?;
-
-            Ok(ExprArray {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                bracket_token: bracket_token,
-                elems: elems,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for GenericMethodArgument {
+    fn generic_method_argument(input: ParseStream) -> Result<GenericMethodArgument> {
         // TODO parse const generics as well
-        fn parse(input: ParseStream) -> Result<Self> {
-            input
-                .parse_synom(ty_no_eq_after)
-                .map(GenericMethodArgument::Type)
-        }
+        input
+            .parse_synom(ty_no_eq_after)
+            .map(GenericMethodArgument::Type)
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprTuple {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let elems = content.parse_terminated(<Expr as Parse>::parse)?;
-
-            Ok(ExprTuple {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                paren_token: paren_token,
-                elems: elems,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for ExprIfLet {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprIfLet {
-                attrs: Vec::new(),
-                if_token: input.parse()?,
-                let_token: input.parse()?,
-                pats: {
-                    let mut pats = Punctuated::new();
+    fn expr_if_let(input: ParseStream) -> Result<ExprIfLet> {
+        Ok(ExprIfLet {
+            attrs: Vec::new(),
+            if_token: input.parse()?,
+            let_token: input.parse()?,
+            pats: {
+                let mut pats = Punctuated::new();
+                let value: Pat = input.parse()?;
+                pats.push_value(value);
+                while input.peek(Token![|])
+                    && !input.peek(Token![||])
+                    && !input.peek(Token![|=])
+                {
+                    let punct = input.parse()?;
+                    pats.push_punct(punct);
                     let value: Pat = input.parse()?;
                     pats.push_value(value);
-                    while input.peek(Token![|])
-                        && !input.peek(Token![||])
-                        && !input.peek(Token![|=])
-                    {
-                        let punct = input.parse()?;
-                        pats.push_punct(punct);
-                        let value: Pat = input.parse()?;
-                        pats.push_value(value);
-                    }
-                    pats
-                },
-                eq_token: input.parse()?,
-                expr: Box::new(input.call(expr_no_struct)?),
-                then_branch: input.parse()?,
-                else_branch: {
-                    if input.peek(Token![else]) {
-                        Some(input.call(else_block)?)
-                    } else {
-                        None
-                    }
-                },
-            })
-        }
+                }
+                pats
+            },
+            eq_token: input.parse()?,
+            expr: Box::new(input.call(expr_no_struct)?),
+            then_branch: input.parse()?,
+            else_branch: {
+                if input.peek(Token![else]) {
+                    Some(input.call(else_block)?)
+                } else {
+                    None
+                }
+            },
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprIf {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprIf {
-                attrs: Vec::new(),
-                if_token: input.parse()?,
-                cond: Box::new(input.call(expr_no_struct)?),
-                then_branch: input.parse()?,
-                else_branch: {
-                    if input.peek(Token![else]) {
-                        Some(input.call(else_block)?)
-                    } else {
-                        None
-                    }
-                },
-            })
-        }
+    fn expr_if(input: ParseStream) -> Result<ExprIf> {
+        Ok(ExprIf {
+            attrs: Vec::new(),
+            if_token: input.parse()?,
+            cond: Box::new(input.call(expr_no_struct)?),
+            then_branch: input.parse()?,
+            else_branch: {
+                if input.peek(Token![else]) {
+                    Some(input.call(else_block)?)
+                } else {
+                    None
+                }
+            },
+        })
     }
 
     #[cfg(feature = "full")]
@@ -1977,9 +1882,9 @@ pub mod parsing {
         let lookahead = input.lookahead1();
         let else_branch = if input.peek(Token![if]) {
             if input.peek2(Token![let]) {
-                input.parse().map(Expr::IfLet)?
+                input.call(expr_if_let).map(Expr::IfLet)?
             } else {
-                input.parse().map(Expr::If)?
+                input.call(expr_if).map(Expr::If)?
             }
         } else if input.peek(token::Brace) {
             Expr::Block(ExprBlock {
@@ -1995,176 +1900,148 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprForLoop {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let label: Option<Label> = input.parse()?;
-            let for_token: Token![for] = input.parse()?;
-            let pat: Pat = input.parse()?;
-            let in_token: Token![in] = input.parse()?;
-            let expr: Expr = input.call(expr_no_struct)?;
+    fn expr_for_loop(input: ParseStream) -> Result<ExprForLoop> {
+        let label: Option<Label> = input.parse()?;
+        let for_token: Token![for] = input.parse()?;
+        let pat: Pat = input.parse()?;
+        let in_token: Token![in] = input.parse()?;
+        let expr: Expr = input.call(expr_no_struct)?;
 
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
 
-            Ok(ExprForLoop {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                label: label,
-                for_token: for_token,
-                pat: Box::new(pat),
-                in_token: in_token,
-                expr: Box::new(expr),
-                body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for ExprLoop {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let label: Option<Label> = input.parse()?;
-            let loop_token: Token![loop] = input.parse()?;
-
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
-
-            Ok(ExprLoop {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                label: label,
-                loop_token: loop_token,
-                body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for ExprMatch {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let match_token: Token![match] = input.parse()?;
-            let expr = expr_no_struct(input)?;
-
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-
-            let mut arms = Vec::new();
-            while !content.is_empty() {
-                arms.push(content.parse()?);
-            }
-
-            Ok(ExprMatch {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                match_token: match_token,
-                expr: Box::new(expr),
+        Ok(ExprForLoop {
+            attrs: inner_attrs,
+            label: label,
+            for_token: for_token,
+            pat: Box::new(pat),
+            in_token: in_token,
+            expr: Box::new(expr),
+            body: Block {
                 brace_token: brace_token,
-                arms: arms,
-            })
-        }
+                stmts: stmts,
+            },
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprTryBlock {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprTryBlock {
-                attrs: Vec::new(),
-                try_token: input.parse()?,
-                block: input.parse()?,
-            })
-        }
+    fn expr_loop(input: ParseStream) -> Result<ExprLoop> {
+        let label: Option<Label> = input.parse()?;
+        let loop_token: Token![loop] = input.parse()?;
+
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
+
+        Ok(ExprLoop {
+            attrs: inner_attrs,
+            label: label,
+            loop_token: loop_token,
+            body: Block {
+                brace_token: brace_token,
+                stmts: stmts,
+            },
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprYield {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprYield {
-                attrs: Vec::new(),
-                yield_token: input.parse()?,
-                expr: {
-                    if !input.is_empty() && !input.peek(Token![,]) && !input.peek(Token![;]) {
-                        Some(input.parse()?)
-                    } else {
-                        None
+    fn expr_match(input: ParseStream) -> Result<ExprMatch> {
+        let match_token: Token![match] = input.parse()?;
+        let expr = expr_no_struct(input)?;
+
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+
+        let mut arms = Vec::new();
+        while !content.is_empty() {
+            arms.push(content.call(match_arm)?);
+        }
+
+        Ok(ExprMatch {
+            attrs: inner_attrs,
+            match_token: match_token,
+            expr: Box::new(expr),
+            brace_token: brace_token,
+            arms: arms,
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_try_block(input: ParseStream) -> Result<ExprTryBlock> {
+        Ok(ExprTryBlock {
+            attrs: Vec::new(),
+            try_token: input.parse()?,
+            block: input.parse()?,
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_yield(input: ParseStream) -> Result<ExprYield> {
+        Ok(ExprYield {
+            attrs: Vec::new(),
+            yield_token: input.parse()?,
+            expr: {
+                if !input.is_empty() && !input.peek(Token![,]) && !input.peek(Token![;]) {
+                    Some(input.parse()?)
+                } else {
+                    None
+                }
+            },
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn match_arm(input: ParseStream) -> Result<Arm> {
+        let requires_comma;
+        Ok(Arm {
+            attrs: input.call(Attribute::parse_outer)?,
+            leading_vert: input.parse()?,
+            pats: {
+                let mut pats = Punctuated::new();
+                let value: Pat = input.parse()?;
+                pats.push_value(value);
+                loop {
+                    if !input.peek(Token![|]) {
+                        break;
                     }
-                },
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for Arm {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let requires_comma;
-            Ok(Arm {
-                attrs: input.call(Attribute::parse_outer)?,
-                leading_vert: input.parse()?,
-                pats: {
-                    let mut pats = Punctuated::new();
+                    let punct = input.parse()?;
+                    pats.push_punct(punct);
                     let value: Pat = input.parse()?;
                     pats.push_value(value);
-                    loop {
-                        if !input.peek(Token![|]) {
-                            break;
-                        }
-                        let punct = input.parse()?;
-                        pats.push_punct(punct);
-                        let value: Pat = input.parse()?;
-                        pats.push_value(value);
-                    }
-                    pats
-                },
-                guard: {
-                    if input.peek(Token![if]) {
-                        let if_token: Token![if] = input.parse()?;
-                        let guard: Expr = input.parse()?;
-                        Some((if_token, Box::new(guard)))
-                    } else {
-                        None
-                    }
-                },
-                fat_arrow_token: input.parse()?,
-                body: {
-                    let body = input.call(expr_early)?;
-                    requires_comma = arm_expr_requires_comma(&body);
-                    Box::new(body)
-                },
-                comma: {
-                    if requires_comma && !input.is_empty() {
-                        Some(input.parse()?)
-                    } else {
-                        input.parse()?
-                    }
-                },
-            })
-        }
+                }
+                pats
+            },
+            guard: {
+                if input.peek(Token![if]) {
+                    let if_token: Token![if] = input.parse()?;
+                    let guard: Expr = input.parse()?;
+                    Some((if_token, Box::new(guard)))
+                } else {
+                    None
+                }
+            },
+            fat_arrow_token: input.parse()?,
+            body: {
+                let body = input.call(expr_early)?;
+                requires_comma = arm_expr_requires_comma(&body);
+                Box::new(body)
+            },
+            comma: {
+                if requires_comma && !input.is_empty() {
+                    Some(input.parse()?)
+                } else {
+                    input.parse()?
+                }
+            },
+        })
     }
 
     #[cfg(feature = "full")]
     fn expr_closure(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprClosure> {
-        let attrs = input.call(Attribute::parse_outer)?;
         let asyncness: Option<Token![async]> = input.parse()?;
         let movability: Option<Token![static]> = if asyncness.is_none() {
             input.parse()?
@@ -2207,7 +2084,7 @@ pub mod parsing {
         };
 
         Ok(ExprClosure {
-            attrs: attrs,
+            attrs: Vec::new(),
             asyncness: asyncness,
             movability: movability,
             capture: capture,
@@ -2220,15 +2097,13 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprAsync {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprAsync {
-                attrs: input.call(Attribute::parse_outer)?,
-                async_token: input.parse()?,
-                capture: input.parse()?,
-                block: input.parse()?,
-            })
-        }
+    fn expr_async(input: ParseStream) -> Result<ExprAsync> {
+        Ok(ExprAsync {
+            attrs: Vec::new(),
+            async_token: input.parse()?,
+            capture: input.parse()?,
+            block: input.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
@@ -2247,79 +2122,65 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprWhile {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let label: Option<Label> = input.parse()?;
-            let while_token: Token![while] = input.parse()?;
-            let cond = expr_no_struct(input)?;
+    fn expr_while(input: ParseStream) -> Result<ExprWhile> {
+        let label: Option<Label> = input.parse()?;
+        let while_token: Token![while] = input.parse()?;
+        let cond = expr_no_struct(input)?;
 
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
 
-            Ok(ExprWhile {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                label: label,
-                while_token: while_token,
-                cond: Box::new(cond),
-                body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
-            })
-        }
+        Ok(ExprWhile {
+            attrs: inner_attrs,
+            label: label,
+            while_token: while_token,
+            cond: Box::new(cond),
+            body: Block {
+                brace_token: brace_token,
+                stmts: stmts,
+            },
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprWhileLet {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let label: Option<Label> = input.parse()?;
-            let while_token: Token![while] = input.parse()?;
-            let let_token: Token![let] = input.parse()?;
+    fn expr_while_let(input: ParseStream) -> Result<ExprWhileLet> {
+        let label: Option<Label> = input.parse()?;
+        let while_token: Token![while] = input.parse()?;
+        let let_token: Token![let] = input.parse()?;
 
-            let mut pats = Punctuated::new();
+        let mut pats = Punctuated::new();
+        let value: Pat = input.parse()?;
+        pats.push_value(value);
+        while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+            let punct = input.parse()?;
+            pats.push_punct(punct);
             let value: Pat = input.parse()?;
             pats.push_value(value);
-            while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
-                let punct = input.parse()?;
-                pats.push_punct(punct);
-                let value: Pat = input.parse()?;
-                pats.push_value(value);
-            }
-
-            let eq_token: Token![=] = input.parse()?;
-            let expr = expr_no_struct(input)?;
-
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
-
-            Ok(ExprWhileLet {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                label: label,
-                while_token: while_token,
-                let_token: let_token,
-                pats: pats,
-                eq_token: eq_token,
-                expr: Box::new(expr),
-                body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
-            })
         }
+
+        let eq_token: Token![=] = input.parse()?;
+        let expr = expr_no_struct(input)?;
+
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
+
+        Ok(ExprWhileLet {
+            attrs: inner_attrs,
+            label: label,
+            while_token: while_token,
+            let_token: let_token,
+            pats: pats,
+            eq_token: eq_token,
+            expr: Box::new(expr),
+            body: Block {
+                brace_token: brace_token,
+                stmts: stmts,
+            },
+        })
     }
 
     #[cfg(feature = "full")]
@@ -2344,20 +2205,18 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprContinue {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprContinue {
-                attrs: input.call(Attribute::parse_outer)?,
-                continue_token: input.parse()?,
-                label: input.parse()?,
-            })
-        }
+    fn expr_continue(input: ParseStream) -> Result<ExprContinue> {
+        Ok(ExprContinue {
+            attrs: Vec::new(),
+            continue_token: input.parse()?,
+            label: input.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
     fn expr_break(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprBreak> {
         Ok(ExprBreak {
-            attrs: input.call(Attribute::parse_outer)?,
+            attrs: Vec::new(),
             break_token: input.parse()?,
             label: input.parse()?,
             expr: {
@@ -2378,7 +2237,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn expr_ret(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprReturn> {
         Ok(ExprReturn {
-            attrs: input.call(Attribute::parse_outer)?,
+            attrs: Vec::new(),
             return_token: input.parse()?,
             expr: {
                 if input.is_empty() || input.peek(Token![,]) || input.peek(Token![;]) {
@@ -2394,16 +2253,6 @@ pub mod parsing {
                 }
             },
         })
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for ExprStruct {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let path: Path = input.parse()?;
-
-            expr_struct_helper(input, outer_attrs, path)
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2476,81 +2325,41 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprRepeat {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
+    fn expr_unsafe(input: ParseStream) -> Result<ExprUnsafe> {
+        let unsafe_token: Token![unsafe] = input.parse()?;
 
-            let content;
-            let bracket_token = bracketed!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let expr: Expr = content.parse()?;
-            let semi_token: Token![;] = content.parse()?;
-            let len: Expr = content.parse()?;
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
 
-            Ok(ExprRepeat {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                bracket_token: bracket_token,
-                expr: Box::new(expr),
-                semi_token: semi_token,
-                len: Box::new(len),
-            })
-        }
+        Ok(ExprUnsafe {
+            attrs: inner_attrs,
+            unsafe_token: unsafe_token,
+            block: Block {
+                brace_token: brace_token,
+                stmts: stmts,
+            },
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for ExprUnsafe {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let unsafe_token: Token![unsafe] = input.parse()?;
+    pub fn expr_block(input: ParseStream) -> Result<ExprBlock> {
+        let label: Option<Label> = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
 
-            Ok(ExprUnsafe {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                unsafe_token: unsafe_token,
-                block: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for ExprBlock {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
-            let label: Option<Label> = input.parse()?;
-
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
-
-            Ok(ExprBlock {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                label: label,
-                block: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
-            })
-        }
+        Ok(ExprBlock {
+            attrs: inner_attrs,
+            label: label,
+            block: Block {
+                brace_token: brace_token,
+                stmts: stmts,
+            },
+        })
     }
 
     #[cfg(feature = "full")]
@@ -2793,34 +2602,34 @@ pub mod parsing {
             // TODO: better error messages
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![_]) {
-                input.parse().map(Pat::Wild)
+                input.call(pat_wild).map(Pat::Wild)
             } else if lookahead.peek(Token![box]) {
-                input.parse().map(Pat::Box)
-            } else if input.fork().parse::<PatRange>().is_ok() {
+                input.call(pat_box).map(Pat::Box)
+            } else if input.fork().call(pat_range).is_ok() {
                 // must be before Pat::Lit
-                input.parse().map(Pat::Range)
-            } else if input.fork().parse::<PatTupleStruct>().is_ok() {
+                input.call(pat_range).map(Pat::Range)
+            } else if input.fork().call(pat_tuple_struct).is_ok() {
                 // must be before Pat::Ident
-                input.parse().map(Pat::TupleStruct)
-            } else if input.fork().parse::<PatStruct>().is_ok() {
+                input.call(pat_tuple_struct).map(Pat::TupleStruct)
+            } else if input.fork().call(pat_struct).is_ok() {
                 // must be before Pat::Ident
-                input.parse().map(Pat::Struct)
-            } else if input.fork().parse::<PatMacro>().is_ok() {
+                input.call(pat_struct).map(Pat::Struct)
+            } else if input.fork().call(pat_macro).is_ok() {
                 // must be before Pat::Ident
-                input.parse().map(Pat::Macro)
-            } else if input.fork().parse::<PatLit>().is_ok() {
+                input.call(pat_macro).map(Pat::Macro)
+            } else if input.fork().call(pat_lit).is_ok() {
                 // must be before Pat::Ident
-                input.parse().map(Pat::Lit)
-            } else if input.fork().parse::<PatIdent>().is_ok() {
-                input.parse().map(Pat::Ident)
-            } else if input.fork().parse::<PatPath>().is_ok() {
-                input.parse().map(Pat::Path)
+                input.call(pat_lit).map(Pat::Lit)
+            } else if input.fork().call(pat_ident).is_ok() {
+                input.call(pat_ident).map(Pat::Ident)
+            } else if input.fork().call(pat_path).is_ok() {
+                input.call(pat_path).map(Pat::Path)
             } else if lookahead.peek(token::Paren) {
-                input.parse().map(Pat::Tuple)
+                input.call(pat_tuple).map(Pat::Tuple)
             } else if lookahead.peek(Token![&]) {
-                input.parse().map(Pat::Ref)
+                input.call(pat_ref).map(Pat::Ref)
             } else if lookahead.peek(token::Bracket) {
-                input.parse().map(Pat::Slice)
+                input.call(pat_slice).map(Pat::Slice)
             } else {
                 Err(lookahead.error())
             }
@@ -2828,143 +2637,131 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatWild {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatWild {
-                underscore_token: input.parse()?,
-            })
-        }
+    fn pat_wild(input: ParseStream) -> Result<PatWild> {
+        Ok(PatWild {
+            underscore_token: input.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatBox {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatBox {
-                box_token: input.parse()?,
-                pat: input.parse()?,
-            })
-        }
+    fn pat_box(input: ParseStream) -> Result<PatBox> {
+        Ok(PatBox {
+            box_token: input.parse()?,
+            pat: input.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatIdent {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatIdent {
-                by_ref: input.parse()?,
-                mutability: input.parse()?,
-                ident: {
-                    let ident = if input.peek(Ident) || input.peek(Token![self]) {
-                        input.call(Ident::parse_any2)?
-                    } else {
-                        return Err(input.error("expected identifier or `self`"));
-                    };
-                    if input.peek(Token![<]) || input.peek(Token![::]) {
-                        return Err(input.error("unexpected token"));
-                    }
-                    ident
-                },
-                subpat: {
-                    if input.peek(Token![@]) {
-                        let at_token: Token![@] = input.parse()?;
-                        let subpat: Pat = input.parse()?;
-                        Some((at_token, Box::new(subpat)))
-                    } else {
-                        None
-                    }
-                },
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for PatTupleStruct {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatTupleStruct {
-                path: input.parse()?,
-                pat: input.parse()?,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for PatStruct {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let path: Path = input.parse()?;
-
-            let content;
-            let brace_token = braced!(content in input);
-
-            let mut fields = Punctuated::new();
-            while !content.is_empty() && !content.peek(Token![..]) {
-                let value: FieldPat = content.parse()?;
-                fields.push_value(value);
-                if !content.peek(Token![,]) {
-                    break;
+    fn pat_ident(input: ParseStream) -> Result<PatIdent> {
+        Ok(PatIdent {
+            by_ref: input.parse()?,
+            mutability: input.parse()?,
+            ident: {
+                let ident = if input.peek(Ident) || input.peek(Token![self]) {
+                    input.call(Ident::parse_any2)?
+                } else {
+                    return Err(input.error("expected identifier or `self`"));
+                };
+                if input.peek(Token![<]) || input.peek(Token![::]) {
+                    return Err(input.error("unexpected token"));
                 }
-                let punct: Token![,] = content.parse()?;
-                fields.push_punct(punct);
-            }
-
-            let dot2_token = if fields.empty_or_trailing() && content.peek(Token![..]) {
-                Some(content.parse()?)
-            } else {
-                None
-            };
-
-            Ok(PatStruct {
-                path: path,
-                brace_token: brace_token,
-                fields: fields,
-                dot2_token: dot2_token,
-            })
-        }
+                ident
+            },
+            subpat: {
+                if input.peek(Token![@]) {
+                    let at_token: Token![@] = input.parse()?;
+                    let subpat: Pat = input.parse()?;
+                    Some((at_token, Box::new(subpat)))
+                } else {
+                    None
+                }
+            },
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for FieldPat {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let boxed: Option<Token![box]> = input.parse()?;
-            let by_ref: Option<Token![ref]> = input.parse()?;
-            let mutability: Option<Token![mut]> = input.parse()?;
-            let member: Member = input.parse()?;
+    fn pat_tuple_struct(input: ParseStream) -> Result<PatTupleStruct> {
+        Ok(PatTupleStruct {
+            path: input.parse()?,
+            pat: input.call(pat_tuple)?,
+        })
+    }
 
-            if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
-                || member.is_unnamed()
-            {
-                return Ok(FieldPat {
-                    attrs: Vec::new(),
-                    member: member,
-                    colon_token: input.parse()?,
-                    pat: input.parse()?,
-                });
+    #[cfg(feature = "full")]
+    fn pat_struct(input: ParseStream) -> Result<PatStruct> {
+        let path: Path = input.parse()?;
+
+        let content;
+        let brace_token = braced!(content in input);
+
+        let mut fields = Punctuated::new();
+        while !content.is_empty() && !content.peek(Token![..]) {
+            let value = content.call(field_pat)?;
+            fields.push_value(value);
+            if !content.peek(Token![,]) {
+                break;
             }
-
-            let ident = match member {
-                Member::Named(ident) => ident,
-                Member::Unnamed(_) => unreachable!(),
-            };
-
-            let mut pat = Pat::Ident(PatIdent {
-                by_ref: by_ref,
-                mutability: mutability,
-                ident: ident.clone(),
-                subpat: None,
-            });
-
-            if let Some(boxed) = boxed {
-                pat = Pat::Box(PatBox {
-                    pat: Box::new(pat),
-                    box_token: boxed,
-                });
-            }
-
-            Ok(FieldPat {
-                member: Member::Named(ident),
-                pat: Box::new(pat),
-                attrs: Vec::new(),
-                colon_token: None,
-            })
+            let punct: Token![,] = content.parse()?;
+            fields.push_punct(punct);
         }
+
+        let dot2_token = if fields.empty_or_trailing() && content.peek(Token![..]) {
+            Some(content.parse()?)
+        } else {
+            None
+        };
+
+        Ok(PatStruct {
+            path: path,
+            brace_token: brace_token,
+            fields: fields,
+            dot2_token: dot2_token,
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn field_pat(input: ParseStream) -> Result<FieldPat> {
+        let boxed: Option<Token![box]> = input.parse()?;
+        let by_ref: Option<Token![ref]> = input.parse()?;
+        let mutability: Option<Token![mut]> = input.parse()?;
+        let member: Member = input.parse()?;
+
+        if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
+            || member.is_unnamed()
+        {
+            return Ok(FieldPat {
+                attrs: Vec::new(),
+                member: member,
+                colon_token: input.parse()?,
+                pat: input.parse()?,
+            });
+        }
+
+        let ident = match member {
+            Member::Named(ident) => ident,
+            Member::Unnamed(_) => unreachable!(),
+        };
+
+        let mut pat = Pat::Ident(PatIdent {
+            by_ref: by_ref,
+            mutability: mutability,
+            ident: ident.clone(),
+            subpat: None,
+        });
+
+        if let Some(boxed) = boxed {
+            pat = Pat::Box(PatBox {
+                pat: Box::new(pat),
+                box_token: boxed,
+            });
+        }
+
+        Ok(FieldPat {
+            member: Member::Named(ident),
+            pat: Box::new(pat),
+            attrs: Vec::new(),
+            colon_token: None,
+        })
     }
 
     impl Parse for Member {
@@ -2994,92 +2791,82 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatPath {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let p: ExprPath = input.parse()?;
-            Ok(PatPath {
-                qself: p.qself,
-                path: p.path,
-            })
-        }
+    fn pat_path(input: ParseStream) -> Result<PatPath> {
+        let p: ExprPath = input.parse()?;
+        Ok(PatPath {
+            qself: p.qself,
+            path: p.path,
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatTuple {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            let paren_token = parenthesized!(content in input);
+    fn pat_tuple(input: ParseStream) -> Result<PatTuple> {
+        let content;
+        let paren_token = parenthesized!(content in input);
 
-            let mut front = Punctuated::new();
-            let mut dot2_token = None::<Token![..]>;
-            let mut comma_token = None::<Token![,]>;
-            loop {
-                if content.is_empty() {
-                    break;
-                }
-                if content.peek(Token![..]) {
-                    dot2_token = Some(content.parse()?);
-                    comma_token = content.parse()?;
-                    break;
-                }
-                let value: Pat = content.parse()?;
-                front.push_value(value);
-                if content.is_empty() {
-                    break;
-                }
-                let punct = content.parse()?;
-                front.push_punct(punct);
+        let mut front = Punctuated::new();
+        let mut dot2_token = None::<Token![..]>;
+        let mut comma_token = None::<Token![,]>;
+        loop {
+            if content.is_empty() {
+                break;
             }
-
-            let back = if comma_token.is_some() {
-                content.parse_synom(Punctuated::parse_terminated)?
-            } else {
-                Punctuated::new()
-            };
-
-            Ok(PatTuple {
-                paren_token: paren_token,
-                front: front,
-                dot2_token: dot2_token,
-                comma_token: comma_token,
-                back: back,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for PatRef {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatRef {
-                and_token: input.parse()?,
-                mutability: input.parse()?,
-                pat: input.parse()?,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl Parse for PatLit {
-        fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Lit) || input.peek(Token![-]) && input.peek2(Lit) {
-                Ok(PatLit {
-                    expr: input.call(pat_lit_expr)?,
-                })
-            } else {
-                Err(input.error("expected literal pattern"))
+            if content.peek(Token![..]) {
+                dot2_token = Some(content.parse()?);
+                comma_token = content.parse()?;
+                break;
             }
+            let value: Pat = content.parse()?;
+            front.push_value(value);
+            if content.is_empty() {
+                break;
+            }
+            let punct = content.parse()?;
+            front.push_punct(punct);
+        }
+
+        let back = if comma_token.is_some() {
+            content.parse_synom(Punctuated::parse_terminated)?
+        } else {
+            Punctuated::new()
+        };
+
+        Ok(PatTuple {
+            paren_token: paren_token,
+            front: front,
+            dot2_token: dot2_token,
+            comma_token: comma_token,
+            back: back,
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn pat_ref(input: ParseStream) -> Result<PatRef> {
+        Ok(PatRef {
+            and_token: input.parse()?,
+            mutability: input.parse()?,
+            pat: input.parse()?,
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn pat_lit(input: ParseStream) -> Result<PatLit> {
+        if input.peek(Lit) || input.peek(Token![-]) && input.peek2(Lit) {
+            Ok(PatLit {
+                expr: input.call(pat_lit_expr)?,
+            })
+        } else {
+            Err(input.error("expected literal pattern"))
         }
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatRange {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatRange {
-                lo: input.call(pat_lit_expr)?,
-                limits: input.parse()?,
-                hi: input.call(pat_lit_expr)?,
-            })
-        }
+    fn pat_range(input: ParseStream) -> Result<PatRange> {
+        Ok(PatRange {
+            lo: input.call(pat_lit_expr)?,
+            limits: input.parse()?,
+            hi: input.call(pat_lit_expr)?,
+        })
     }
 
     #[cfg(feature = "full")]
@@ -3088,7 +2875,7 @@ pub mod parsing {
 
         let lookahead = input.lookahead1();
         let expr = if lookahead.peek(Lit) {
-            Expr::Lit(input.parse()?)
+            Expr::Lit(input.call(expr_lit)?)
         } else if lookahead.peek(Ident)
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
@@ -3115,69 +2902,65 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatSlice {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            let bracket_token = bracketed!(content in input);
+    fn pat_slice(input: ParseStream) -> Result<PatSlice> {
+        let content;
+        let bracket_token = bracketed!(content in input);
 
-            let mut front = Punctuated::new();
-            let mut middle = None;
-            loop {
-                if content.is_empty() || content.peek(Token![..]) {
-                    break;
-                }
-                let value: Pat = content.parse()?;
-                if content.peek(Token![..]) {
-                    middle = Some(Box::new(value));
-                    break;
-                }
-                front.push_value(value);
-                if content.is_empty() {
-                    break;
-                }
-                let punct = content.parse()?;
-                front.push_punct(punct);
+        let mut front = Punctuated::new();
+        let mut middle = None;
+        loop {
+            if content.is_empty() || content.peek(Token![..]) {
+                break;
             }
-
-            let dot2_token: Option<Token![..]> = content.parse()?;
-            let mut comma_token = None::<Token![,]>;
-            let mut back = Punctuated::new();
-            if dot2_token.is_some() {
-                comma_token = content.parse()?;
-                if comma_token.is_some() {
-                    loop {
-                        if content.is_empty() {
-                            break;
-                        }
-                        let value: Pat = content.parse()?;
-                        back.push_value(value);
-                        if content.is_empty() {
-                            break;
-                        }
-                        let punct = content.parse()?;
-                        back.push_punct(punct);
-                    }
-                }
+            let value: Pat = content.parse()?;
+            if content.peek(Token![..]) {
+                middle = Some(Box::new(value));
+                break;
             }
-
-            Ok(PatSlice {
-                bracket_token: bracket_token,
-                front: front,
-                middle: middle,
-                dot2_token: dot2_token,
-                comma_token: comma_token,
-                back: back,
-            })
+            front.push_value(value);
+            if content.is_empty() {
+                break;
+            }
+            let punct = content.parse()?;
+            front.push_punct(punct);
         }
+
+        let dot2_token: Option<Token![..]> = content.parse()?;
+        let mut comma_token = None::<Token![,]>;
+        let mut back = Punctuated::new();
+        if dot2_token.is_some() {
+            comma_token = content.parse()?;
+            if comma_token.is_some() {
+                loop {
+                    if content.is_empty() {
+                        break;
+                    }
+                    let value: Pat = content.parse()?;
+                    back.push_value(value);
+                    if content.is_empty() {
+                        break;
+                    }
+                    let punct = content.parse()?;
+                    back.push_punct(punct);
+                }
+            }
+        }
+
+        Ok(PatSlice {
+            bracket_token: bracket_token,
+            front: front,
+            middle: middle,
+            dot2_token: dot2_token,
+            comma_token: comma_token,
+            back: back,
+        })
     }
 
     #[cfg(feature = "full")]
-    impl Parse for PatMacro {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(PatMacro {
-                mac: input.parse()?,
-            })
-        }
+    fn pat_macro(input: ParseStream) -> Result<PatMacro> {
+        Ok(PatMacro {
+            mac: input.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
