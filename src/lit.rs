@@ -15,7 +15,7 @@ use proc_macro2::Ident;
 #[cfg(feature = "parsing")]
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
-use {Error, Synom};
+use Error;
 
 use proc_macro2::TokenTree;
 
@@ -24,6 +24,8 @@ use std::hash::{Hash, Hasher};
 
 #[cfg(feature = "parsing")]
 use lookahead;
+#[cfg(feature = "parsing")]
+use parse::Parse;
 
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
@@ -125,7 +127,7 @@ impl LitStr {
     ///
     /// All spans in the syntax tree will point to the span of this `LitStr`.
     #[cfg(feature = "parsing")]
-    pub fn parse<T: Synom>(&self) -> Result<T, Error> {
+    pub fn parse<T: Parse>(&self) -> Result<T, Error> {
         use proc_macro2::Group;
 
         // Parse string literal into a token stream with every span equal to the

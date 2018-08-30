@@ -662,10 +662,7 @@ pub use error::parse_error;
     feature = "parsing",
     feature = "proc-macro"
 ))]
-pub fn parse<T>(tokens: proc_macro::TokenStream) -> Result<T, Error>
-where
-    T: Synom,
-{
+pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Error> {
     parse2(tokens.into())
 }
 
@@ -682,10 +679,7 @@ where
 ///
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
-pub fn parse2<T>(tokens: proc_macro2::TokenStream) -> Result<T, Error>
-where
-    T: Synom,
-{
+pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Error> {
     let parser = T::parse;
     parser.parse2(tokens).map_err(|err| match T::description() {
         Some(s) => Error::new(Span::call_site(), format!("failed to parse {}: {}", s, err)),
@@ -722,7 +716,7 @@ where
 /// # fn main() { run().unwrap() }
 /// ```
 #[cfg(feature = "parsing")]
-pub fn parse_str<T: Synom>(s: &str) -> Result<T, Error> {
+pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T, Error> {
     match s.parse() {
         Ok(tts) => parse2(tts),
         Err(_) => Err(Error::new(

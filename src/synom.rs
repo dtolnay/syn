@@ -313,21 +313,17 @@ pub trait Parser: Sized {
 
 impl<F, T> Parser for F
 where
-    F: FnOnce(Cursor) -> PResult<T>,
+    F: FnOnce(ParseStream) -> Result<T>,
 {
     type Output = T;
 
     fn parse2(self, tokens: TokenStream) -> Result<T> {
         let buf = TokenBuffer::new2(tokens);
-        let (t, rest) = self(buf.begin())?;
-        if rest.eof() {
-            Ok(t)
-        } else if rest == buf.begin() {
-            // parsed nothing
-            Err(Error::new(Span::call_site(), "failed to parse anything"))
-        } else {
-            Err(Error::new(Span::call_site(), "failed to parse all tokens"))
-        }
+        let unexpected = Rc::new(Cell::new(None));
+        let state = ParseBuffer::new(Span::call_site(), buf.begin(), unexpected);
+        let node = self(&state)?;
+        state.check_unexpected()?;
+        Ok(node)
     }
 }
 
