@@ -1202,11 +1202,47 @@ pub mod parsing {
         Ok(lhs)
     }
 
-    #[cfg(feature = "full")]
+    #[cfg(not(feature = "full"))]
+    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, allow_block: AllowBlock, base: Precedence) -> Result<Expr> {
+        loop {
+            if input.fork().parse::<BinOp>().ok().map_or(false, |op| Precedence::of(&op) >= base) {
+                let op: BinOp = input.parse()?;
+                let precedence = Precedence::of(&op);
+                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                loop {
+                    let next = peek_precedence(input);
+                    if next > precedence || next == precedence && precedence == Precedence::Assign {
+                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                    } else {
+                        break;
+                    }
+                }
+                lhs = Expr::Binary(ExprBinary {
+                    attrs: Vec::new(),
+                    left: Box::new(lhs),
+                    op: op,
+                    right: Box::new(rhs),
+                });
+            } else if Precedence::Cast >= base && input.peek(Token![as]) {
+                let as_token: Token![as] = input.parse()?;
+                let ty = input.call(Type::without_plus)?;
+                lhs = Expr::Cast(ExprCast {
+                    attrs: Vec::new(),
+                    expr: Box::new(lhs),
+                    as_token: as_token,
+                    ty: Box::new(ty),
+                });
+            } else {
+                break;
+            }
+        }
+        Ok(lhs)
+    }
+
     fn peek_precedence(input: ParseStream) -> Precedence {
         if let Ok(op) = input.fork().parse() {
             Precedence::of(&op)
-        } else if input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
+        } else if input.peek(Token![=]) && !input.peek(Token![=>]) {
             Precedence::Assign
         } else if input.peek(Token![<-]) {
             Precedence::Placement
@@ -1220,26 +1256,13 @@ pub mod parsing {
     }
 
     // Parse an arbitrary expression.
-    #[cfg(feature = "full")]
     fn ambiguous_expr(
         input: ParseStream,
         allow_struct: AllowStruct,
         allow_block: AllowBlock,
     ) -> Result<Expr> {
-        //assign_expr(input, allow_struct, allow_block)
         let lhs = unary_expr(input, allow_struct, allow_block)?;
         parse_expr(input, lhs, allow_struct, allow_block, Precedence::Any)
-    }
-
-    #[cfg(not(feature = "full"))]
-    fn ambiguous_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-        allow_block: AllowBlock,
-    ) -> Result<Expr> {
-        // NOTE: We intentionally skip assign_expr, placement_expr, and
-        // range_expr as they are only parsed in full mode.
-        or_expr(input, allow_struct, allow_block)
     }
 
     // <UnOp> <trailer>
@@ -1578,7 +1601,7 @@ pub mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn atom_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+    fn atom_expr(input: ParseStream, _allow_struct: AllowStruct, _allow_block: AllowBlock) -> Result<Expr> {
         if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
