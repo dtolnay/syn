@@ -88,9 +88,8 @@ macro_rules! parse_quote {
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Synom.
 
-use buffer::Cursor;
 use proc_macro2::TokenStream;
-use synom::{PResult, Parser, Synom};
+use parse::{Parse, ParseStream, Result};
 
 // Not public API.
 #[doc(hidden)]
@@ -102,30 +101,19 @@ pub fn parse<T: ParseQuote>(token_stream: TokenStream) -> T {
     let parser = T::parse;
     match parser.parse2(token_stream) {
         Ok(t) => t,
-        Err(err) => match T::description() {
-            Some(s) => panic!("failed to parse {}: {}", s, err),
-            None => panic!("{}", err),
-        },
+        Err(err) => panic!("{}", err),
     }
 }
 
 // Not public API.
 #[doc(hidden)]
 pub trait ParseQuote: Sized {
-    fn parse(input: Cursor) -> PResult<Self>;
-    fn description() -> Option<&'static str>;
+    fn parse(input: ParseStream) -> Result<Self>;
 }
 
-impl<T> ParseQuote for T
-where
-    T: Synom,
-{
-    fn parse(input: Cursor) -> PResult<Self> {
-        <T as Synom>::parse(input)
-    }
-
-    fn description() -> Option<&'static str> {
-        <T as Synom>::description()
+impl<T: Parse> ParseQuote for T {
+    fn parse(input: ParseStream) -> Result<Self> {
+        <T as Parse>::parse(input)
     }
 }
 
@@ -133,17 +121,15 @@ where
 // Any other types that we want `parse_quote!` to be able to parse.
 
 #[cfg(any(feature = "full", feature = "derive"))]
-use Attribute;
+use {attr, Attribute};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
-    named!(parse -> Self, alt!(
-        call!(Attribute::old_parse_outer)
-        |
-        call!(Attribute::old_parse_inner)
-    ));
-
-    fn description() -> Option<&'static str> {
-        Some("attribute")
+    fn parse(input: ParseStream) -> Result<Self> {
+        if input.peek(Token![#]) && input.peek2(Token![!]) {
+            attr::parsing::single_parse_inner(input)
+        } else {
+            attr::parsing::single_parse_outer(input)
+        }
     }
 }
