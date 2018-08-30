@@ -94,75 +94,78 @@ pub mod parsing {
 
     use parse::{Parse, ParseStream, Result};
 
-    impl BinOp {
-        pub fn parse_binop(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Token![&&]) {
-                input.parse().map(BinOp::And)
-            } else if lookahead.peek(Token![||]) {
-                input.parse().map(BinOp::Or)
-            } else if lookahead.peek(Token![<<]) {
-                input.parse().map(BinOp::Shl)
-            } else if lookahead.peek(Token![>>]) {
-                input.parse().map(BinOp::Shr)
-            } else if lookahead.peek(Token![==]) {
-                input.parse().map(BinOp::Eq)
-            } else if lookahead.peek(Token![<=]) {
-                input.parse().map(BinOp::Le)
-            } else if lookahead.peek(Token![!=]) {
-                input.parse().map(BinOp::Ne)
-            } else if lookahead.peek(Token![>=]) {
-                input.parse().map(BinOp::Ge)
-            } else if lookahead.peek(Token![+]) {
-                input.parse().map(BinOp::Add)
-            } else if lookahead.peek(Token![-]) {
-                input.parse().map(BinOp::Sub)
-            } else if lookahead.peek(Token![*]) {
-                input.parse().map(BinOp::Mul)
-            } else if lookahead.peek(Token![/]) {
-                input.parse().map(BinOp::Div)
-            } else if lookahead.peek(Token![%]) {
-                input.parse().map(BinOp::Rem)
-            } else if lookahead.peek(Token![^]) {
-                input.parse().map(BinOp::BitXor)
-            } else if lookahead.peek(Token![&]) {
-                input.parse().map(BinOp::BitAnd)
-            } else if lookahead.peek(Token![|]) {
-                input.parse().map(BinOp::BitOr)
-            } else if lookahead.peek(Token![<]) {
-                input.parse().map(BinOp::Lt)
-            } else if lookahead.peek(Token![>]) {
-                input.parse().map(BinOp::Gt)
-            } else {
-                Err(lookahead.error())
-            }
+    fn parse_binop(input: ParseStream) -> Result<BinOp> {
+        if input.peek(Token![&&]) {
+            input.parse().map(BinOp::And)
+        } else if input.peek(Token![||]) {
+            input.parse().map(BinOp::Or)
+        } else if input.peek(Token![<<]) {
+            input.parse().map(BinOp::Shl)
+        } else if input.peek(Token![>>]) {
+            input.parse().map(BinOp::Shr)
+        } else if input.peek(Token![==]) {
+            input.parse().map(BinOp::Eq)
+        } else if input.peek(Token![<=]) {
+            input.parse().map(BinOp::Le)
+        } else if input.peek(Token![!=]) {
+            input.parse().map(BinOp::Ne)
+        } else if input.peek(Token![>=]) {
+            input.parse().map(BinOp::Ge)
+        } else if input.peek(Token![+]) {
+            input.parse().map(BinOp::Add)
+        } else if input.peek(Token![-]) {
+            input.parse().map(BinOp::Sub)
+        } else if input.peek(Token![*]) {
+            input.parse().map(BinOp::Mul)
+        } else if input.peek(Token![/]) {
+            input.parse().map(BinOp::Div)
+        } else if input.peek(Token![%]) {
+            input.parse().map(BinOp::Rem)
+        } else if input.peek(Token![^]) {
+            input.parse().map(BinOp::BitXor)
+        } else if input.peek(Token![&]) {
+            input.parse().map(BinOp::BitAnd)
+        } else if input.peek(Token![|]) {
+            input.parse().map(BinOp::BitOr)
+        } else if input.peek(Token![<]) {
+            input.parse().map(BinOp::Lt)
+        } else if input.peek(Token![>]) {
+            input.parse().map(BinOp::Gt)
+        } else {
+            Err(input.error("expected binary operator"))
+        }
+    }
+
+    impl Parse for BinOp {
+        #[cfg(not(feature = "full"))]
+        fn parse(input: ParseStream) -> Result<Self> {
+            parse_binop(input)
         }
 
         #[cfg(feature = "full")]
-        pub fn parse_assign_op(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Token![+=]) {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Token![+=]) {
                 input.parse().map(BinOp::AddEq)
-            } else if lookahead.peek(Token![-=]) {
+            } else if input.peek(Token![-=]) {
                 input.parse().map(BinOp::SubEq)
-            } else if lookahead.peek(Token![*=]) {
+            } else if input.peek(Token![*=]) {
                 input.parse().map(BinOp::MulEq)
-            } else if lookahead.peek(Token![/=]) {
+            } else if input.peek(Token![/=]) {
                 input.parse().map(BinOp::DivEq)
-            } else if lookahead.peek(Token![%=]) {
+            } else if input.peek(Token![%=]) {
                 input.parse().map(BinOp::RemEq)
-            } else if lookahead.peek(Token![^=]) {
+            } else if input.peek(Token![^=]) {
                 input.parse().map(BinOp::BitXorEq)
-            } else if lookahead.peek(Token![&=]) {
+            } else if input.peek(Token![&=]) {
                 input.parse().map(BinOp::BitAndEq)
-            } else if lookahead.peek(Token![|=]) {
+            } else if input.peek(Token![|=]) {
                 input.parse().map(BinOp::BitOrEq)
-            } else if lookahead.peek(Token![<<=]) {
+            } else if input.peek(Token![<<=]) {
                 input.parse().map(BinOp::ShlEq)
-            } else if lookahead.peek(Token![>>=]) {
+            } else if input.peek(Token![>>=]) {
                 input.parse().map(BinOp::ShrEq)
             } else {
-                Err(lookahead.error())
+                parse_binop(input)
             }
         }
     }

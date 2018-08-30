@@ -1008,8 +1008,7 @@ ast_struct! {
 #[cfg(any(feature = "parsing", feature = "printing"))]
 #[cfg(feature = "full")]
 fn arm_expr_requires_comma(expr: &Expr) -> bool {
-    // see https://github.com/rust-lang/rust/blob/eb8f2586e
-    //                       /src/libsyntax/parse/classify.rs#L17-L37
+    // see https://github.com/rust-lang/rust/blob/eb8f2586e/src/libsyntax/parse/classify.rs#L17-L37
     match *expr {
         Expr::Unsafe(..)
         | Expr::Block(..)
@@ -1063,6 +1062,41 @@ pub mod parsing {
     #[derive(Copy, Clone)]
     pub struct AllowBlock(bool);
 
+    #[derive(Copy, Clone, PartialEq, PartialOrd)]
+    enum Precedence {
+        Any,
+        Assign,
+        Placement,
+        Range,
+        Or,
+        And,
+        Compare,
+        BitOr,
+        BitXor,
+        BitAnd,
+        Shift,
+        Arithmetic,
+        Term,
+        Cast,
+    }
+
+    impl Precedence {
+        fn of(op: &BinOp) -> Self {
+            match *op {
+                BinOp::Add(_) | BinOp::Sub(_) => Precedence::Arithmetic,
+                BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Term,
+                BinOp::And(_) => Precedence::And,
+                BinOp::Or(_) => Precedence::Or,
+                BinOp::BitXor(_) => Precedence::BitXor,
+                BinOp::BitAnd(_) => Precedence::BitAnd,
+                BinOp::BitOr(_) => Precedence::BitOr,
+                BinOp::Shl(_) | BinOp::Shr(_) => Precedence::Shift,
+                BinOp::Eq(_) | BinOp::Lt(_) | BinOp::Le(_) | BinOp::Ne(_) | BinOp::Ge(_) | BinOp::Gt(_) => Precedence::Compare,
+                BinOp::AddEq(_) | BinOp::SubEq(_) | BinOp::MulEq(_) | BinOp::DivEq(_) | BinOp::RemEq(_) | BinOp::BitXorEq(_) | BinOp::BitAndEq(_) | BinOp::BitOrEq(_) | BinOp::ShlEq(_) | BinOp::ShrEq(_) => Precedence::Assign,
+            }
+        }
+    }
+
     impl Parse for Expr {
         fn parse(input: ParseStream) -> Result<Self> {
             ambiguous_expr(input, AllowStruct(true), AllowBlock(true))
@@ -1074,6 +1108,132 @@ pub mod parsing {
         ambiguous_expr(input, AllowStruct(false), AllowBlock(true))
     }
 
+    #[cfg(feature = "full")]
+    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, allow_block: AllowBlock, base: Precedence) -> Result<Expr> {
+        loop {
+            if input.fork().parse::<BinOp>().ok().map_or(false, |op| Precedence::of(&op) >= base) {
+                let op: BinOp = input.parse()?;
+                let precedence = Precedence::of(&op);
+                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                loop {
+                    let next = peek_precedence(input);
+                    if next > precedence || next == precedence && precedence == Precedence::Assign {
+                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                    } else {
+                        break;
+                    }
+                }
+                lhs = Expr::Binary(ExprBinary {
+                    attrs: Vec::new(),
+                    left: Box::new(lhs),
+                    op: op,
+                    right: Box::new(rhs),
+                });
+            } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
+                let eq_token: Token![=] = input.parse()?;
+                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                loop {
+                    let next = peek_precedence(input);
+                    if next >= Precedence::Assign {
+                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                    } else {
+                        break;
+                    }
+                }
+                lhs = Expr::Assign(ExprAssign {
+                    attrs: Vec::new(),
+                    left: Box::new(lhs),
+                    eq_token: eq_token,
+                    right: Box::new(rhs),
+                });
+            } else if Precedence::Placement >= base && input.peek(Token![<-]) {
+                let arrow_token: Token![<-] = input.parse()?;
+                let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                loop {
+                    let next = peek_precedence(input);
+                    if next > Precedence::Placement {
+                        rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                    } else {
+                        break;
+                    }
+                }
+                lhs = Expr::InPlace(ExprInPlace {
+                    attrs: Vec::new(),
+                    place: Box::new(lhs),
+                    arrow_token: arrow_token,
+                    value: Box::new(rhs),
+                });
+            } else if Precedence::Range >= base && input.peek(Token![..]) {
+                let limits: RangeLimits = input.parse()?;
+                let rhs = if input.is_empty()
+                    || input.peek(Token![,])
+                    || input.peek(Token![;])
+                    || !allow_struct.0 && input.peek(token::Brace)
+                {
+                    None
+                } else {
+                    // We don't want to allow blocks in the rhs if we don't
+                    // allow structs.
+                    let allow_block = AllowBlock(allow_struct.0);
+                    let mut rhs = unary_expr(input, allow_struct, allow_block)?;
+                    loop {
+                        let next = peek_precedence(input);
+                        if next > Precedence::Range {
+                            rhs = parse_expr(input, rhs, allow_struct, allow_block, next)?;
+                        } else {
+                            break;
+                        }
+                    }
+                    Some(rhs)
+                };
+                lhs = Expr::Range(ExprRange {
+                    attrs: Vec::new(),
+                    from: Some(Box::new(lhs)),
+                    limits: limits,
+                    to: rhs.map(Box::new),
+                });
+            } else if Precedence::Cast >= base && input.peek(Token![as]) {
+                let as_token: Token![as] = input.parse()?;
+                let ty = input.call(Type::without_plus)?;
+                lhs = Expr::Cast(ExprCast {
+                    attrs: Vec::new(),
+                    expr: Box::new(lhs),
+                    as_token: as_token,
+                    ty: Box::new(ty),
+                });
+            } else if Precedence::Cast >= base && input.peek(Token![:]) && !input.peek(Token![::]) {
+                let colon_token: Token![:] = input.parse()?;
+                let ty = input.call(Type::without_plus)?;
+                lhs = Expr::Type(ExprType {
+                    attrs: Vec::new(),
+                    expr: Box::new(lhs),
+                    colon_token: colon_token,
+                    ty: Box::new(ty),
+                });
+            } else {
+                break;
+            }
+        }
+        Ok(lhs)
+    }
+
+    #[cfg(feature = "full")]
+    fn peek_precedence(input: ParseStream) -> Precedence {
+        if let Ok(op) = input.fork().parse() {
+            Precedence::of(&op)
+        } else if input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
+            Precedence::Assign
+        } else if input.peek(Token![<-]) {
+            Precedence::Placement
+        } else if input.peek(Token![..]) {
+            Precedence::Range
+        } else if input.peek(Token![as]) || input.peek(Token![:]) && !input.peek(Token![::]) {
+            Precedence::Cast
+        } else {
+            Precedence::Any
+        }
+    }
+
     // Parse an arbitrary expression.
     #[cfg(feature = "full")]
     fn ambiguous_expr(
@@ -1081,7 +1241,9 @@ pub mod parsing {
         allow_struct: AllowStruct,
         allow_block: AllowBlock,
     ) -> Result<Expr> {
-        assign_expr(input, allow_struct, allow_block)
+        //assign_expr(input, allow_struct, allow_block)
+        let lhs = unary_expr(input, allow_struct, allow_block)?;
+        parse_expr(input, lhs, allow_struct, allow_block, Precedence::Any)
     }
 
     #[cfg(not(feature = "full"))]
@@ -1093,313 +1255,6 @@ pub mod parsing {
         // NOTE: We intentionally skip assign_expr, placement_expr, and
         // range_expr as they are only parsed in full mode.
         or_expr(input, allow_struct, allow_block)
-    }
-
-    // Parse a left-associative binary operator.
-    macro_rules! binop {
-        ($name:ident, $next:ident, |$var:ident| $parse_op:expr) => {
-            fn $name(
-                input: ParseStream,
-                allow_struct: AllowStruct,
-                allow_block: AllowBlock,
-            ) -> Result<Expr> {
-                let $var = input;
-                let mut e: Expr = $next(input, allow_struct, allow_block)?;
-                while let Some(op) = $parse_op {
-                    e = Expr::Binary(ExprBinary {
-                        attrs: Vec::new(),
-                        left: Box::new(e),
-                        op: op,
-                        right: Box::new($next(input, allow_struct, AllowBlock(true))?),
-                    });
-                }
-                Ok(e)
-            }
-        };
-    }
-
-    // <placement> = <placement> ..
-    // <placement> += <placement> ..
-    // <placement> -= <placement> ..
-    // <placement> *= <placement> ..
-    // <placement> /= <placement> ..
-    // <placement> %= <placement> ..
-    // <placement> ^= <placement> ..
-    // <placement> &= <placement> ..
-    // <placement> |= <placement> ..
-    // <placement> <<= <placement> ..
-    // <placement> >>= <placement> ..
-    //
-    // NOTE: This operator is right-associative.
-    #[cfg(feature = "full")]
-    fn assign_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-        allow_block: AllowBlock,
-    ) -> Result<Expr> {
-        let mut e = placement_expr(input, allow_struct, allow_block)?;
-        if input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
-            e = Expr::Assign(ExprAssign {
-                attrs: Vec::new(),
-                left: Box::new(e),
-                eq_token: input.parse()?,
-                // Recurse into self to parse right-associative operator.
-                right: Box::new(assign_expr(input, allow_struct, AllowBlock(true))?),
-            });
-        } else if input.peek(Token![+=])
-            || input.peek(Token![-=])
-            || input.peek(Token![*=])
-            || input.peek(Token![/=])
-            || input.peek(Token![%=])
-            || input.peek(Token![^=])
-            || input.peek(Token![&=])
-            || input.peek(Token![|=])
-            || input.peek(Token![<<=])
-            || input.peek(Token![>>=])
-        {
-            e = Expr::AssignOp(ExprAssignOp {
-                attrs: Vec::new(),
-                left: Box::new(e),
-                op: BinOp::parse_assign_op(input)?,
-                // Recurse into self to parse right-associative operator.
-                right: Box::new(assign_expr(input, allow_struct, AllowBlock(true))?),
-            });
-        }
-        Ok(e)
-    }
-
-    // <range> <- <range> ..
-    //
-    // NOTE: The `in place { expr }` version of this syntax is parsed in
-    // `atom_expr`, not here.
-    //
-    // NOTE: This operator is right-associative.
-    #[cfg(feature = "full")]
-    fn placement_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-        allow_block: AllowBlock,
-    ) -> Result<Expr> {
-        let mut e = range_expr(input, allow_struct, allow_block)?;
-        if input.peek(Token![<-]) {
-            e = Expr::InPlace(ExprInPlace {
-                attrs: Vec::new(),
-                place: Box::new(e),
-                arrow_token: input.parse()?,
-                value: Box::new(placement_expr(input, allow_struct, AllowBlock(true))?),
-            });
-        }
-        Ok(e)
-    }
-
-    // <or> ... <or> ..
-    // <or> .. <or> ..
-    // <or> ..
-    //
-    // NOTE: This is currently parsed oddly - I'm not sure of what the exact
-    // rules are for parsing these expressions are, but this is not correct.
-    // For example, `a .. b .. c` is not a legal expression. It should not
-    // be parsed as either `(a .. b) .. c` or `a .. (b .. c)` apparently.
-    //
-    // NOTE: The form of ranges which don't include a preceding expression are
-    // parsed by `atom_expr`, rather than by this function.
-    #[cfg(feature = "full")]
-    fn range_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-        allow_block: AllowBlock,
-    ) -> Result<Expr> {
-        let mut e = or_expr(input, allow_struct, allow_block)?;
-        while input.peek(Token![..]) {
-            e = Expr::Range(ExprRange {
-                attrs: Vec::new(),
-                from: Some(Box::new(e)),
-                limits: input.parse()?,
-                to: {
-                    if input.is_empty()
-                        || input.peek(Token![,])
-                        || input.peek(Token![;])
-                        || !allow_struct.0 && input.peek(token::Brace)
-                    {
-                        None
-                    } else {
-                        // We don't want to allow blocks here if we don't allow
-                        // structs.
-                        Some(Box::new(or_expr(
-                            input,
-                            allow_struct,
-                            AllowBlock(allow_struct.0),
-                        )?))
-                    }
-                },
-            });
-        }
-        Ok(e)
-    }
-
-    // <and> || <and> ...
-    binop!(or_expr, and_expr, |input| if input.peek(Token![||]) {
-        Some(BinOp::Or(input.parse()?))
-    } else {
-        None
-    });
-
-    // <compare> && <compare> ...
-    binop!(and_expr, compare_expr, |input| if input.peek(Token![&&]) {
-        Some(BinOp::And(input.parse()?))
-    } else {
-        None
-    });
-
-    // <bitor> == <bitor> ...
-    // <bitor> != <bitor> ...
-    // <bitor> >= <bitor> ...
-    // <bitor> <= <bitor> ...
-    // <bitor> > <bitor> ...
-    // <bitor> < <bitor> ...
-    //
-    // NOTE: This operator appears to be parsed as left-associative, but errors
-    // if it is used in a non-associative manner.
-    binop!(compare_expr, bitor_expr, |input| {
-        if input.peek(Token![==]) {
-            Some(BinOp::Eq(input.parse()?))
-        } else if input.peek(Token![!=]) {
-            Some(BinOp::Ne(input.parse()?))
-        // must be before `<`
-        } else if input.peek(Token![<=]) {
-            Some(BinOp::Le(input.parse()?))
-        // must be before `>`
-        } else if input.peek(Token![>=]) {
-            Some(BinOp::Ge(input.parse()?))
-        } else if input.peek(Token![<]) && !input.peek(Token![<<]) && !input.peek(Token![<-]) {
-            Some(BinOp::Lt(input.parse()?))
-        } else if input.peek(Token![>]) && !input.peek(Token![>>]) {
-            Some(BinOp::Gt(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <bitxor> | <bitxor> ...
-    binop!(bitor_expr, bitxor_expr, |input| {
-        if input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
-            Some(BinOp::BitOr(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <bitand> ^ <bitand> ...
-    binop!(bitxor_expr, bitand_expr, |input| {
-        if input.peek(Token![^]) && !input.peek(Token![^=]) {
-            Some(BinOp::BitXor(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <shift> & <shift> ...
-    binop!(bitand_expr, shift_expr, |input| {
-        if input.peek(Token![&]) && !input.peek(Token![&&]) && !input.peek(Token![&=]) {
-            Some(BinOp::BitAnd(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <arith> << <arith> ...
-    // <arith> >> <arith> ...
-    binop!(shift_expr, arith_expr, |input| {
-        if input.peek(Token![<<]) && !input.peek(Token![<<=]) {
-            Some(BinOp::Shl(input.parse()?))
-        } else if input.peek(Token![>>]) && !input.peek(Token![>>=]) {
-            Some(BinOp::Shr(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <term> + <term> ...
-    // <term> - <term> ...
-    binop!(arith_expr, term_expr, |input| {
-        if input.peek(Token![+]) && !input.peek(Token![+=]) {
-            Some(BinOp::Add(input.parse()?))
-        } else if input.peek(Token![-]) && !input.peek(Token![-=]) {
-            Some(BinOp::Sub(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <cast> * <cast> ...
-    // <cast> / <cast> ...
-    // <cast> % <cast> ...
-    binop!(term_expr, cast_expr, |input| {
-        if input.peek(Token![*]) && !input.peek(Token![*=]) {
-            Some(BinOp::Mul(input.parse()?))
-        } else if input.peek(Token![/]) && !input.peek(Token![/=]) {
-            Some(BinOp::Div(input.parse()?))
-        } else if input.peek(Token![%]) && !input.peek(Token![%=]) {
-            Some(BinOp::Rem(input.parse()?))
-        } else {
-            None
-        }
-    });
-
-    // <unary> as <ty>
-    // <unary> : <ty>
-    #[cfg(feature = "full")]
-    fn cast_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-        allow_block: AllowBlock,
-    ) -> Result<Expr> {
-        let mut e = unary_expr(input, allow_struct, allow_block)?;
-        loop {
-            if input.peek(Token![as]) {
-                e = Expr::Cast(ExprCast {
-                    attrs: Vec::new(),
-                    expr: Box::new(e),
-                    as_token: input.parse()?,
-                    // We can't accept `A + B` in cast expressions, as it's
-                    // ambiguous with the + expression.
-                    ty: Box::new(input.call(Type::without_plus)?),
-                });
-            } else if input.peek(Token![:]) {
-                e = Expr::Type(ExprType {
-                    attrs: Vec::new(),
-                    expr: Box::new(e),
-                    colon_token: input.parse()?,
-                    // We can't accept `A + B` in cast expressions, as it's
-                    // ambiguous with the + expression.
-                    ty: Box::new(input.call(Type::without_plus)?),
-                });
-            } else {
-                break;
-            }
-        }
-        Ok(e)
-    }
-
-    // <unary> as <ty>
-    #[cfg(not(feature = "full"))]
-    fn cast_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-        allow_block: AllowBlock,
-    ) -> Result<Expr> {
-        let mut e = unary_expr(input, allow_struct, allow_block)?;
-        while input.peek(Token![as]) {
-            e = Expr::Cast(ExprCast {
-                attrs: Vec::new(),
-                expr: Box::new(e),
-                as_token: input.parse()?,
-                // We can't accept `A + B` in cast expressions, as it's
-                // ambiguous with the + expression.
-                ty: Box::new(input.call(Type::without_plus)?),
-            });
-        }
-        Ok(e)
     }
 
     // <UnOp> <trailer>
@@ -1498,6 +1353,16 @@ pub mod parsing {
         let outer_attrs = take_outer(&mut attrs);
         e.replace_attrs(attrs);
 
+        e = trailer_helper(input, e)?;
+
+        let mut attrs = outer_attrs;
+        attrs.extend(e.replace_attrs(Vec::new()));
+        e.replace_attrs(attrs);
+        Ok(e)
+    }
+
+    #[cfg(feature = "full")]
+    fn trailer_helper(input: ParseStream, mut e: Expr) -> Result<Expr> {
         loop {
             if input.peek(token::Paren) {
                 let content;
@@ -1576,10 +1441,6 @@ pub mod parsing {
                 break;
             }
         }
-
-        let mut attrs = outer_attrs;
-        attrs.extend(e.replace_attrs(Vec::new()));
-        e.replace_attrs(attrs);
         Ok(e)
     }
 
@@ -1695,36 +1556,58 @@ pub mod parsing {
     ));
 
     #[cfg(feature = "full")]
-    named2!(expr_nosemi -> Expr, do_parse!(
-        nosemi: alt!(
-            syn!(ExprIf) => { Expr::If }
-            |
-            syn!(ExprIfLet) => { Expr::IfLet }
-            |
-            syn!(ExprWhile) => { Expr::While }
-            |
-            syn!(ExprWhileLet) => { Expr::WhileLet }
-            |
-            syn!(ExprForLoop) => { Expr::ForLoop }
-            |
-            syn!(ExprLoop) => { Expr::Loop }
-            |
-            syn!(ExprMatch) => { Expr::Match }
-            |
-            syn!(ExprTryBlock) => { Expr::TryBlock }
-            |
-            syn!(ExprYield) => { Expr::Yield }
-            |
-            syn!(ExprUnsafe) => { Expr::Unsafe }
-            |
-            syn!(ExprBlock) => { Expr::Block }
-        ) >>
-        // If the next token is a `.` or a `?` it is special-cased to parse
-        // as an expression instead of a blockexpression.
-        not!(punct!(.)) >>
-        not!(punct!(?)) >>
-        (nosemi)
-    ));
+    fn expr_early(input: ParseStream) -> Result<Expr> {
+        let mut attrs = input.call(Attribute::parse_outer)?;
+        let mut expr = if input.peek(Token![if]) {
+            if input.peek2(Token![let]) {
+                Expr::IfLet(input.parse()?)
+            } else {
+                Expr::If(input.parse()?)
+            }
+        } else if input.peek(Token![while]) {
+            if input.peek2(Token![let]) {
+                Expr::WhileLet(input.parse()?)
+            } else {
+                Expr::While(input.parse()?)
+            }
+        } else if input.peek(Token![for]) {
+            Expr::ForLoop(input.parse()?)
+        } else if input.peek(Token![loop]) {
+            Expr::Loop(input.parse()?)
+        } else if input.peek(Token![match]) {
+            Expr::Match(input.parse()?)
+        } else if input.peek(Token![try]) && input.peek2(token::Brace) {
+            Expr::TryBlock(input.parse()?)
+        } else if input.peek(Token![unsafe]) {
+            Expr::Unsafe(input.parse()?)
+        } else if input.peek(token::Brace) {
+            Expr::Block(input.parse()?)
+        } else {
+            let allow_struct = AllowStruct(true);
+            let allow_block = AllowBlock(true);
+            let mut expr = unary_expr(input, allow_struct, allow_block)?;
+
+            attrs.extend(expr.replace_attrs(Vec::new()));
+            expr.replace_attrs(attrs);
+
+            return parse_expr(input, expr, allow_struct, allow_block, Precedence::Any);
+        };
+
+        if input.peek(Token![.]) || input.peek(Token![?]) {
+            expr = trailer_helper(input, expr)?;
+
+            attrs.extend(expr.replace_attrs(Vec::new()));
+            expr.replace_attrs(attrs);
+
+            let allow_struct = AllowStruct(true);
+            let allow_block = AllowBlock(true);
+            return parse_expr(input, expr, allow_struct, allow_block, Precedence::Any);
+        }
+
+        attrs.extend(expr.replace_attrs(Vec::new()));
+        expr.replace_attrs(attrs);
+        Ok(expr)
+    }
 
     impl Parse for ExprLit {
         #[cfg(not(feature = "full"))]
@@ -2084,11 +1967,7 @@ pub mod parsing {
                 },
                 fat_arrow_token: input.parse()?,
                 body: {
-                    let body = if input.fork().call(expr_nosemi).is_ok() {
-                        input.call(expr_nosemi)?
-                    } else {
-                        input.parse()?
-                    };
+                    let body = input.call(expr_early)?;
                     requires_comma = arm_expr_requires_comma(&body);
                     Box::new(body)
                 },
@@ -2629,12 +2508,8 @@ pub mod parsing {
                 || ahead.peek(Token![macro])
             {
                 input.parse().map(Stmt::Item)
-            } else if ahead.fork().call(stmt_blockexpr).is_ok() {
-                stmt_blockexpr(input)
-            } else if ahead.call(stmt_expr).is_ok() {
-                stmt_expr(input)
             } else {
-                Err(input.error("expected statement"))
+                input.call(stmt_expr)
             }
         }
     }
@@ -2701,30 +2576,33 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn stmt_blockexpr(input: ParseStream) -> Result<Stmt> {
+    fn stmt_expr(input: ParseStream) -> Result<Stmt> {
         let mut attrs = input.call(Attribute::parse_outer)?;
-        let mut e = expr_nosemi(input)?;
+        let mut e = expr_early(input)?;
 
         attrs.extend(e.replace_attrs(Vec::new()));
         e.replace_attrs(attrs);
 
         if input.peek(Token![;]) {
-            Ok(Stmt::Semi(e, input.parse()?))
-        } else {
-            Ok(Stmt::Expr(e))
+            return Ok(Stmt::Semi(e, input.parse()?));
         }
-    }
 
-    #[cfg(feature = "full")]
-    fn stmt_expr(input: ParseStream) -> Result<Stmt> {
-        let mut attrs = input.call(Attribute::parse_outer)?;
-        let mut e: Expr = input.parse()?;
-        let semi_token: Token![;] = input.parse()?;
-
-        attrs.extend(e.replace_attrs(Vec::new()));
-        e.replace_attrs(attrs);
-
-        Ok(Stmt::Semi(e, semi_token))
+        match e {
+            Expr::IfLet(_) |
+            Expr::If(_) |
+            Expr::WhileLet(_) |
+            Expr::While(_) |
+            Expr::ForLoop(_) |
+            Expr::Loop(_) |
+            Expr::Match(_) |
+            Expr::TryBlock(_) |
+            Expr::Yield(_) |
+            Expr::Unsafe(_) |
+            Expr::Block(_) => Ok(Stmt::Expr(e)),
+            _ => {
+                Err(input.error("expected semicolon"))
+            }
+        }
     }
 
     #[cfg(feature = "full")]
