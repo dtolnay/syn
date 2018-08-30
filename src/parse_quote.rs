@@ -132,22 +132,8 @@ where
 ////////////////////////////////////////////////////////////////////////////////
 // Any other types that we want `parse_quote!` to be able to parse.
 
-use punctuated::Punctuated;
-
 #[cfg(any(feature = "full", feature = "derive"))]
 use Attribute;
-
-impl<T, P> ParseQuote for Punctuated<T, P>
-where
-    T: Synom,
-    P: Synom,
-{
-    named!(parse -> Self, call!(Punctuated::parse_terminated));
-
-    fn description() -> Option<&'static str> {
-        Some("punctuated sequence")
-    }
-}
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
