@@ -1488,72 +1488,257 @@ pub mod parsing {
     // Parse all atomic expressions which don't have to worry about precedence
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
-    named2!(atom_expr(allow_struct: AllowStruct, allow_block: AllowBlock) -> Expr, alt!(
-        syn!(ExprGroup) => { Expr::Group } // must be placed first
-        |
-        syn!(ExprLit) => { Expr::Lit } // must be before expr_struct
-        |
-        // must be before ExprStruct
-        syn!(ExprAsync) => { Expr::Async }
-        |
-        // must be before ExprStruct
-        syn!(ExprTryBlock) => { Expr::TryBlock }
-        |
-        // must be before expr_path
-        cond_reduce!(allow_struct.0, syn!(ExprStruct)) => { Expr::Struct }
-        |
-        syn!(ExprParen) => { Expr::Paren } // must be before expr_tup
-        |
-        syn!(ExprMacro) => { Expr::Macro } // must be before expr_path
-        |
-        shim!(expr_break, allow_struct) => { Expr::Break } // must be before expr_path
-        |
-        syn!(ExprContinue) => { Expr::Continue } // must be before expr_path
-        |
-        shim!(expr_ret, allow_struct) => { Expr::Return } // must be before expr_path
-        |
-        syn!(ExprArray) => { Expr::Array }
-        |
-        syn!(ExprTuple) => { Expr::Tuple }
-        |
-        syn!(ExprIf) => { Expr::If }
-        |
-        syn!(ExprIfLet) => { Expr::IfLet }
-        |
-        syn!(ExprWhile) => { Expr::While }
-        |
-        syn!(ExprWhileLet) => { Expr::WhileLet }
-        |
-        syn!(ExprForLoop) => { Expr::ForLoop }
-        |
-        syn!(ExprLoop) => { Expr::Loop }
-        |
-        syn!(ExprMatch) => { Expr::Match }
-        |
-        syn!(ExprYield) => { Expr::Yield }
-        |
-        syn!(ExprUnsafe) => { Expr::Unsafe }
-        |
-        shim!(expr_closure, allow_struct) => { Expr::Closure }
-        |
-        cond_reduce!(allow_block.0, syn!(ExprBlock)) => { Expr::Block }
-        |
-        // NOTE: This is the prefix-form of range
-        shim!(expr_range, allow_struct) => { Expr::Range }
-        |
-        syn!(ExprPath) => { Expr::Path }
-        |
-        syn!(ExprRepeat) => { Expr::Repeat }
-    ));
+    fn atom_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        if input.peek(token::Group) {
+            return input.parse().map(Expr::Group);
+        }
+
+        let mut attrs = input.call(Attribute::parse_outer)?;
+
+        let mut expr = if input.peek(token::Group) {
+            Expr::Group(input.parse()?)
+        } else if input.peek(Lit) {
+            Expr::Lit(input.parse()?)
+        } else if input.peek(Token![async])
+            && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace))
+        {
+            Expr::Async(input.parse()?)
+        } else if input.peek(Token![try]) && input.peek2(token::Brace) {
+            Expr::TryBlock(input.parse()?)
+        } else if input.peek(Token![|])
+            || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
+            || input.peek(Token![static])
+            || input.peek(Token![move])
+        {
+            Expr::Closure(expr_closure(input, allow_struct)?)
+        } else if input.peek(Ident)
+            || input.peek(Token![::])
+            || input.peek(Token![<])
+            || input.peek(Token![self])
+            || input.peek(Token![Self])
+            || input.peek(Token![super])
+            || input.peek(Token![extern])
+            || input.peek(Token![crate])
+        {
+            path_or_macro_or_struct(input, allow_struct)?
+        } else if input.peek(token::Paren) {
+            paren_or_tuple(input)?
+        } else if input.peek(Token![break]) {
+            Expr::Break(expr_break(input, allow_struct)?)
+        } else if input.peek(Token![continue]) {
+            Expr::Continue(input.parse()?)
+        } else if input.peek(Token![return]) {
+            Expr::Return(expr_ret(input, allow_struct)?)
+        } else if input.peek(token::Bracket) {
+            array_or_repeat(input)?
+        } else if input.peek(Token![if]) {
+            if input.peek2(Token![let]) {
+                Expr::IfLet(input.parse()?)
+            } else {
+                Expr::If(input.parse()?)
+            }
+        } else if input.peek(Token![while]) {
+            if input.peek2(Token![let]) {
+                Expr::WhileLet(input.parse()?)
+            } else {
+                Expr::While(input.parse()?)
+            }
+        } else if input.peek(Token![for]) {
+            Expr::ForLoop(input.parse()?)
+        } else if input.peek(Token![loop]) {
+            Expr::Loop(input.parse()?)
+        } else if input.peek(Token![match]) {
+            Expr::Match(input.parse()?)
+        } else if input.peek(Token![yield]) {
+            Expr::Yield(input.parse()?)
+        } else if input.peek(Token![unsafe]) {
+            Expr::Unsafe(input.parse()?)
+        } else if allow_block.0 && input.peek(token::Brace) {
+            Expr::Block(input.parse()?)
+        } else if input.peek(Token![..]) {
+            Expr::Range(expr_range(input, allow_struct)?)
+        } else if input.peek(Lifetime) {
+            let the_label: Label = input.parse()?;
+            let mut expr = if input.peek(Token![while]) {
+                if input.peek2(Token![let]) {
+                    Expr::WhileLet(input.parse()?)
+                } else {
+                    Expr::While(input.parse()?)
+                }
+            } else if input.peek(Token![for]) {
+                Expr::ForLoop(input.parse()?)
+            } else if input.peek(Token![loop]) {
+                Expr::Loop(input.parse()?)
+            } else if input.peek(token::Brace) {
+                Expr::Block(input.parse()?)
+            } else {
+                return Err(input.error("expected loop or block expression"));
+            };
+            match expr {
+                Expr::WhileLet(ExprWhileLet { ref mut label, .. }) |
+                Expr::While(ExprWhile { ref mut label, .. }) |
+                Expr::ForLoop(ExprForLoop { ref mut label, .. }) |
+                Expr::Loop(ExprLoop { ref mut label, .. }) |
+                Expr::Block(ExprBlock { ref mut label, .. }) => *label = Some(the_label),
+                _ => unreachable!(),
+            }
+            expr
+        } else {
+            return Err(input.error("expected expression"));
+        };
+
+        attrs.extend(expr.replace_attrs(Vec::new()));
+        expr.replace_attrs(attrs);
+        Ok(expr)
+    }
 
     #[cfg(not(feature = "full"))]
-    named2!(atom_expr(_allow_struct: AllowStruct, _allow_block: AllowBlock) -> Expr, alt!(
-        syn!(ExprLit) => { Expr::Lit }
-        |
-        syn!(ExprParen) => { Expr::Paren }
-        |
-        syn!(ExprPath) => { Expr::Path }
-    ));
+    fn atom_expr(input: ParseStream, allow_struct: AllowStruct, allow_block: AllowBlock) -> Result<Expr> {
+        if input.peek(Lit) {
+            input.parse().map(Expr::Lit)
+        } else if input.peek(token::Paren) {
+            input.parse().map(Expr::Paren)
+        } else if input.peek(Ident)
+            || input.peek(Token![::])
+            || input.peek(Token![<])
+            || input.peek(Token![self])
+            || input.peek(Token![Self])
+            || input.peek(Token![super])
+            || input.peek(Token![extern])
+            || input.peek(Token![crate])
+        {
+            input.parse().map(Expr::Path)
+        } else {
+            Err(input.error("unsupported expression; enable syn's features=[\"full\"]"))
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn path_or_macro_or_struct(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+        let expr: ExprPath = input.parse()?;
+        if expr.qself.is_some() {
+            return Ok(Expr::Path(expr));
+        }
+
+        if input.peek(Token![!]) && !input.peek(Token![!=]) {
+            let mut contains_arguments = false;
+            for segment in &expr.path.segments {
+                match segment.arguments {
+                    PathArguments::None => {}
+                    PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                        contains_arguments = true;
+                    }
+                }
+            }
+
+            if !contains_arguments {
+                let bang_token: Token![!] = input.parse()?;
+                let (delimiter, tts) = mac::parse_delimiter(input)?;
+                return Ok(Expr::Macro(ExprMacro {
+                    attrs: Vec::new(),
+                    mac: Macro {
+                        path: expr.path,
+                        bang_token: bang_token,
+                        delimiter: delimiter,
+                        tts: tts,
+                    },
+                }));
+            }
+        }
+
+        if allow_struct.0 && input.peek(token::Brace) {
+            let outer_attrs = Vec::new();
+            expr_struct_helper(input, outer_attrs, expr.path).map(Expr::Struct)
+        } else {
+            Ok(Expr::Path(expr))
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn paren_or_tuple(input: ParseStream) -> Result<Expr> {
+        let content;
+        let paren_token = parenthesized!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        if content.is_empty() {
+            return Ok(Expr::Tuple(ExprTuple {
+                attrs: inner_attrs,
+                paren_token: paren_token,
+                elems: Punctuated::new(),
+            }));
+        }
+
+        let first: Expr = content.parse()?;
+        if content.is_empty() {
+            return Ok(Expr::Paren(ExprParen {
+                attrs: inner_attrs,
+                paren_token: paren_token,
+                expr: Box::new(first),
+            }));
+        }
+
+        let mut elems = Punctuated::new();
+        elems.push_value(first);
+        while !content.is_empty() {
+            let punct = content.parse()?;
+            elems.push_punct(punct);
+            if content.is_empty() {
+                break;
+            }
+            let value = content.parse()?;
+            elems.push_value(value);
+        }
+        Ok(Expr::Tuple(ExprTuple {
+            attrs: inner_attrs,
+            paren_token: paren_token,
+            elems: elems,
+        }))
+    }
+
+    #[cfg(feature = "full")]
+    fn array_or_repeat(input: ParseStream) -> Result<Expr> {
+        let content;
+        let bracket_token = bracketed!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        if content.is_empty() {
+            return Ok(Expr::Array(ExprArray {
+                attrs: inner_attrs,
+                bracket_token: bracket_token,
+                elems: Punctuated::new(),
+            }));
+        }
+
+        let first: Expr = content.parse()?;
+        if content.is_empty() || content.peek(Token![,]) {
+            let mut elems = Punctuated::new();
+            elems.push_value(first);
+            while !content.is_empty() {
+                let punct = content.parse()?;
+                elems.push_punct(punct);
+                if content.is_empty() {
+                    break;
+                }
+                let value = content.parse()?;
+                elems.push_value(value);
+            }
+            Ok(Expr::Array(ExprArray {
+                attrs: inner_attrs,
+                bracket_token: bracket_token,
+                elems: elems,
+            }))
+        } else if content.peek(Token![;]) {
+            let semi_token: Token![;] = content.parse()?;
+            let len: Expr = content.parse()?;
+            Ok(Expr::Repeat(ExprRepeat {
+                attrs: inner_attrs,
+                bracket_token: bracket_token,
+                expr: Box::new(first),
+                semi_token: semi_token,
+                len: Box::new(len),
+            }))
+        } else {
+            Err(content.error("expected `,` or `;`"))
+        }
+    }
 
     #[cfg(feature = "full")]
     fn expr_early(input: ParseStream) -> Result<Expr> {
@@ -2225,72 +2410,77 @@ pub mod parsing {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let path: Path = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
+            expr_struct_helper(input, outer_attrs, path)
+        }
+    }
 
-            let mut fields = Punctuated::new();
-            loop {
-                let attrs = content.call(Attribute::parse_outer)?;
-                if content.fork().parse::<Member>().is_err() {
-                    if attrs.is_empty() {
-                        break;
-                    } else {
-                        return Err(content.error("expected struct field"));
-                    }
-                }
+    #[cfg(feature = "full")]
+    fn expr_struct_helper(input: ParseStream, outer_attrs: Vec<Attribute>, path: Path) -> Result<ExprStruct> {
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
 
-                let member: Member = content.parse()?;
-                let (colon_token, value) = if content.peek(Token![:]) || !member.is_named() {
-                    let colon_token: Token![:] = content.parse()?;
-                    let value: Expr = content.parse()?;
-                    (Some(colon_token), value)
-                } else if let Member::Named(ref ident) = member {
-                    let value = Expr::Path(ExprPath {
-                        attrs: Vec::new(),
-                        qself: None,
-                        path: Path::from(ident.clone()),
-                    });
-                    (None, value)
-                } else {
-                    unreachable!()
-                };
-
-                fields.push(FieldValue {
-                    attrs: attrs,
-                    member: member,
-                    colon_token: colon_token,
-                    expr: value,
-                });
-
-                if !content.peek(Token![,]) {
+        let mut fields = Punctuated::new();
+        loop {
+            let attrs = content.call(Attribute::parse_outer)?;
+            if content.fork().parse::<Member>().is_err() {
+                if attrs.is_empty() {
                     break;
+                } else {
+                    return Err(content.error("expected struct field"));
                 }
-                let punct: Token![,] = content.parse()?;
-                fields.push_punct(punct);
             }
 
-            let (dot2_token, rest) = if fields.empty_or_trailing() && content.peek(Token![..]) {
-                let dot2_token: Token![..] = content.parse()?;
-                let rest: Expr = content.parse()?;
-                (Some(dot2_token), Some(Box::new(rest)))
+            let member: Member = content.parse()?;
+            let (colon_token, value) = if content.peek(Token![:]) || !member.is_named() {
+                let colon_token: Token![:] = content.parse()?;
+                let value: Expr = content.parse()?;
+                (Some(colon_token), value)
+            } else if let Member::Named(ref ident) = member {
+                let value = Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself: None,
+                    path: Path::from(ident.clone()),
+                });
+                (None, value)
             } else {
-                (None, None)
+                unreachable!()
             };
 
-            Ok(ExprStruct {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
-                brace_token: brace_token,
-                path: path,
-                fields: fields,
-                dot2_token: dot2_token,
-                rest: rest,
-            })
+            fields.push(FieldValue {
+                attrs: attrs,
+                member: member,
+                colon_token: colon_token,
+                expr: value,
+            });
+
+            if !content.peek(Token![,]) {
+                break;
+            }
+            let punct: Token![,] = content.parse()?;
+            fields.push_punct(punct);
         }
+
+        let (dot2_token, rest) = if fields.empty_or_trailing() && content.peek(Token![..]) {
+            let dot2_token: Token![..] = content.parse()?;
+            let rest: Expr = content.parse()?;
+            (Some(dot2_token), Some(Box::new(rest)))
+        } else {
+            (None, None)
+        };
+
+        Ok(ExprStruct {
+            attrs: {
+                let mut attrs = outer_attrs;
+                attrs.extend(inner_attrs);
+                attrs
+            },
+            brace_token: brace_token,
+            path: path,
+            fields: fields,
+            dot2_token: dot2_token,
+            rest: rest,
+        })
     }
 
     #[cfg(feature = "full")]
