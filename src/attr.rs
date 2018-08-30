@@ -393,23 +393,13 @@ where
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use buffer::Cursor;
     use parse::{ParseStream, Result};
-    use parse_error;
-    use proc_macro2::{Literal, Punct, Spacing, Span, TokenTree};
-    use synom::PResult;
-
-    fn eq(span: Span) -> TokenTree {
-        let mut op = Punct::new('=', Spacing::Alone);
-        op.set_span(span);
-        op.into()
-    }
 
     impl Attribute {
         pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
             while input.peek(Token![#]) {
-                attrs.push(input.parse_synom(Attribute::old_parse_outer)?);
+                attrs.push(input.call(single_parse_outer)?);
             }
             Ok(attrs)
         }
@@ -417,112 +407,32 @@ pub mod parsing {
         pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
             while input.peek(Token![#]) && input.peek2(Token![!]) {
-                attrs.push(input.parse_synom(Attribute::old_parse_inner)?);
+                attrs.push(input.call(single_parse_inner)?);
             }
             Ok(attrs)
         }
-
-        named!(pub old_parse_inner -> Self, alt!(
-            do_parse!(
-                pound: punct!(#) >>
-                bang: punct!(!) >>
-                path_and_tts: brackets!(tuple!(
-                    call!(Path::old_parse_mod_style),
-                    syn!(TokenStream),
-                )) >>
-                ({
-                    let (bracket, (path, tts)) = path_and_tts;
-
-                    Attribute {
-                        style: AttrStyle::Inner(bang),
-                        path: path,
-                        tts: tts,
-                        pound_token: pound,
-                        bracket_token: bracket,
-                    }
-                })
-            )
-            |
-            map!(
-                call!(lit_doc_comment, Comment::Inner),
-                |lit| {
-                    let span = lit.span();
-                    Attribute {
-                        style: AttrStyle::Inner(Token![!](span)),
-                        path: Ident::new("doc", span).into(),
-                        tts: vec![
-                            eq(span),
-                            lit,
-                        ].into_iter().collect(),
-                        pound_token: Token![#](span),
-                        bracket_token: token::Bracket(span),
-                    }
-                }
-            )
-        ));
-
-        named!(pub old_parse_outer -> Self, alt!(
-            do_parse!(
-                pound: punct!(#) >>
-                path_and_tts: brackets!(tuple!(
-                    call!(Path::old_parse_mod_style),
-                    syn!(TokenStream),
-                )) >>
-                ({
-                    let (bracket, (path, tts)) = path_and_tts;
-
-                    Attribute {
-                        style: AttrStyle::Outer,
-                        path: path,
-                        tts: tts,
-                        pound_token: pound,
-                        bracket_token: bracket,
-                    }
-                })
-            )
-            |
-            map!(
-                call!(lit_doc_comment, Comment::Outer),
-                |lit| {
-                    let span = lit.span();
-                    Attribute {
-                        style: AttrStyle::Outer,
-                        path: Ident::new("doc", span).into(),
-                        tts: vec![
-                            eq(span),
-                            lit,
-                        ].into_iter().collect(),
-                        pound_token: Token![#](span),
-                        bracket_token: token::Bracket(span),
-                    }
-                }
-            )
-        ));
     }
 
-    enum Comment {
-        Inner,
-        Outer,
+    pub fn single_parse_inner(input: ParseStream) -> Result<Attribute> {
+        let content;
+        Ok(Attribute {
+            pound_token: input.parse()?,
+            style: AttrStyle::Inner(input.parse()?),
+            bracket_token: bracketed!(content in input),
+            path: content.call(Path::parse_mod_style)?,
+            tts: content.parse()?,
+        })
     }
 
-    fn lit_doc_comment(input: Cursor, style: Comment) -> PResult<TokenTree> {
-        match input.literal() {
-            Some((lit, rest)) => {
-                let string = lit.to_string();
-                let ok = match style {
-                    Comment::Inner => string.starts_with("//!") || string.starts_with("/*!"),
-                    Comment::Outer => string.starts_with("///") || string.starts_with("/**"),
-                };
-                if ok {
-                    let mut new = Literal::string(&string);
-                    new.set_span(lit.span());
-                    Ok((new.into(), rest))
-                } else {
-                    parse_error()
-                }
-            }
-            _ => parse_error(),
-        }
+    pub fn single_parse_outer(input: ParseStream) -> Result<Attribute> {
+        let content;
+        Ok(Attribute {
+            pound_token: input.parse()?,
+            style: AttrStyle::Outer,
+            bracket_token: bracketed!(content in input),
+            path: content.call(Path::parse_mod_style)?,
+            tts: content.parse()?,
+        })
     }
 }
 
