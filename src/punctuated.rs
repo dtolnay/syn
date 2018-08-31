@@ -39,6 +39,8 @@ use std::vec;
 
 #[cfg(feature = "parsing")]
 use parse::{Parse, ParseStream, Result};
+#[cfg(feature = "parsing")]
+use token::Token;
 
 /// A punctuated sequence of syntax tree nodes of type `T` separated by
 /// punctuation of type `P`.
@@ -650,41 +652,68 @@ impl<T, P> IndexMut<usize> for Punctuated<T, P> {
 }
 
 #[cfg(feature = "parsing")]
-impl<T, P> Punctuated<T, P>
-where
-    T: Parse,
-    P: Parse,
-{
-    pub fn parse_terminated(input: ParseStream) -> Result<Self> {
+impl<T, P> Punctuated<T, P> {
+    pub fn parse_terminated(input: ParseStream) -> Result<Self>
+    where
+        T: Parse,
+        P: Parse,
+    {
         Self::parse_terminated_with(input, T::parse)
     }
-}
 
-#[cfg(feature = "parsing")]
-impl<T, P> Punctuated<T, P>
-where
-    P: Parse,
-{
     pub fn parse_terminated_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
-    ) -> Result<Self> {
-        let mut res = Punctuated::new();
+    ) -> Result<Self>
+    where
+        P: Parse,
+    {
+        let mut punctuated = Punctuated::new();
 
         loop {
             if input.is_empty() {
                 break;
             }
             let value = parser(input)?;
-            res.push_value(value);
+            punctuated.push_value(value);
             if input.is_empty() {
                 break;
             }
             let punct = input.parse()?;
-            res.push_punct(punct);
+            punctuated.push_punct(punct);
         }
 
-        Ok(res)
+        Ok(punctuated)
+    }
+
+    pub fn parse_separated_nonempty(input: ParseStream) -> Result<Self>
+    where
+        T: Parse,
+        P: Token + Parse,
+    {
+        Self::parse_separated_nonempty_with(input, T::parse)
+    }
+
+    pub fn parse_separated_nonempty_with(
+        input: ParseStream,
+        parser: fn(ParseStream) -> Result<T>,
+    ) -> Result<Self>
+    where
+        P: Token + Parse,
+    {
+        let mut punctuated = Punctuated::new();
+
+        loop {
+            let value = parser(input)?;
+            punctuated.push_value(value);
+            if !P::peek(&input.lookahead1()) {
+                break;
+            }
+            let punct = input.parse()?;
+            punctuated.push_punct(punct);
+        }
+
+        Ok(punctuated)
     }
 }
 
