@@ -395,11 +395,11 @@ pub mod parsing {
                     lifetimes: lifetimes,
                     path: ty.path,
                 }));
-                if allow_plus && input.peek(Token![+]) {
-                    bounds.push_punct(input.parse()?);
-                    let rest: Punctuated<TypeParamBound, Token![+]> =
-                        input.parse_synom(Punctuated::parse_terminated_nonempty)?;
-                    bounds.extend(rest);
+                if allow_plus {
+                    while input.peek(Token![+]) {
+                        bounds.push_punct(input.parse()?);
+                        bounds.push_value(input.parse()?);
+                    }
                 }
                 return Ok(Type::TraitObject(TypeTraitObject {
                     dyn_token: None,
@@ -509,7 +509,14 @@ pub mod parsing {
                 fn_token: input.parse()?,
                 paren_token: parenthesized!(args in input),
                 inputs: {
-                    let inputs = args.parse_synom(Punctuated::parse_terminated)?;
+                    let mut inputs = Punctuated::new();
+                    while !args.is_empty() && !args.peek(Token![...]) {
+                        inputs.push_value(args.parse()?);
+                        if args.is_empty() {
+                            break;
+                        }
+                        inputs.push_punct(args.parse()?);
+                    }
                     allow_variadic = inputs.empty_or_trailing();
                     inputs
                 },
@@ -625,13 +632,18 @@ pub mod parsing {
             Ok(TypeTraitObject {
                 dyn_token: input.parse()?,
                 bounds: {
-                    let bounds = if allow_plus {
-                        input.parse_synom(Punctuated::parse_terminated_nonempty)?
+                    let mut bounds = Punctuated::new();
+                    if allow_plus {
+                        loop {
+                            bounds.push_value(input.parse()?);
+                            if !input.peek(Token![+]) {
+                                break;
+                            }
+                            bounds.push_punct(input.parse()?);
+                        }
                     } else {
-                        let mut bounds = Punctuated::new();
                         bounds.push_value(input.parse()?);
-                        bounds
-                    };
+                    }
                     // Just lifetimes like `'a + 'b` is not a TraitObject.
                     if !at_least_one_type(&bounds) {
                         return Err(input.error("expected at least one type"));
@@ -648,7 +660,17 @@ pub mod parsing {
                 impl_token: input.parse()?,
                 // NOTE: rust-lang/rust#34511 includes discussion about whether
                 // or not + should be allowed in ImplTrait directly without ().
-                bounds: input.parse_synom(Punctuated::parse_terminated_nonempty)?,
+                bounds: {
+                    let mut bounds = Punctuated::new();
+                    loop {
+                        bounds.push_value(input.parse()?);
+                        if !input.peek(Token![+]) {
+                            break;
+                        }
+                        bounds.push_punct(input.parse()?);
+                    }
+                    bounds
+                },
             })
         }
     }

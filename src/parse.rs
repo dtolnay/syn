@@ -12,7 +12,6 @@ use proc_macro2::{Ident, Span};
 use buffer::Cursor;
 use error;
 use punctuated::Punctuated;
-use synom::PResult;
 use token::Token;
 
 pub use error::{Error, Result};
@@ -175,12 +174,6 @@ impl<'a> ParseBuffer<'a> {
             }
             Err(err) => Err(err),
         }
-    }
-
-    // Not public API.
-    #[doc(hidden)]
-    pub fn parse_synom<T>(&self, parse: fn(Cursor) -> PResult<T>) -> Result<T> {
-        self.step_cursor(|step| parse(step.cursor))
     }
 
     // Not public API.

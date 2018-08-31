@@ -2812,11 +2812,16 @@ pub mod parsing {
             front.push_punct(punct);
         }
 
-        let back = if comma_token.is_some() {
-            content.parse_synom(Punctuated::parse_terminated)?
-        } else {
-            Punctuated::new()
-        };
+        let mut back = Punctuated::new();
+        while !content.is_empty() {
+            let value: Pat = content.parse()?;
+            back.push_value(value);
+            if content.is_empty() {
+                break;
+            }
+            let punct = content.parse()?;
+            back.push_punct(punct);
+        }
 
         Ok(PatTuple {
             paren_token: paren_token,

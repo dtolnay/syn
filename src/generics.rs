@@ -608,7 +608,17 @@ pub mod parsing {
             Ok(BoundLifetimes {
                 for_token: input.parse()?,
                 lt_token: input.parse()?,
-                lifetimes: input.parse_synom(Punctuated::parse_terminated)?,
+                lifetimes: {
+                    let mut lifetimes = Punctuated::new();
+                    while !input.peek(Token![>]) {
+                        lifetimes.push_value(input.parse()?);
+                        if input.peek(Token![>]) {
+                            break;
+                        }
+                        lifetimes.push_punct(input.parse()?);
+                    }
+                    lifetimes
+                },
                 gt_token: input.parse()?,
             })
         }

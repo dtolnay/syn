@@ -1230,7 +1230,14 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_synom(Punctuated::parse_terminated)?;
+            let mut inputs = Punctuated::new();
+            while !content.is_empty() && !content.peek(Token![...]) {
+                inputs.push_value(content.parse()?);
+                if content.is_empty() {
+                    break;
+                }
+                inputs.push_punct(content.parse()?);
+            }
             let variadic: Option<Token![...]> = if inputs.empty_or_trailing() {
                 content.parse()?
             } else {
@@ -1338,7 +1345,16 @@ pub mod parsing {
                     generics
                 },
                 colon_token: Some(input.parse()?),
-                bounds: input.parse_synom(Punctuated::parse_separated_nonempty)?,
+                bounds: {
+                    let mut bounds = Punctuated::new();
+                    while !input.peek(Token![;]) {
+                        if !bounds.is_empty() {
+                            bounds.push_punct(input.parse()?);
+                        }
+                        bounds.push_value(input.parse()?);
+                    }
+                    bounds
+                },
                 semi_token: input.parse()?,
             })
         }
@@ -1422,11 +1438,17 @@ pub mod parsing {
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
             let colon_token: Option<Token![:]> = input.parse()?;
-            let supertraits = if colon_token.is_some() {
-                input.parse_synom(Punctuated::parse_separated_nonempty)?
-            } else {
-                Punctuated::new()
-            };
+
+            let mut supertraits = Punctuated::new();
+            if colon_token.is_some() {
+                while !input.peek(Token![where]) && !input.peek(token::Brace) {
+                    if !supertraits.is_empty() {
+                        supertraits.push_punct(input.parse()?);
+                    }
+                    supertraits.push_value(input.parse()?);
+                }
+            }
+
             generics.where_clause = input.parse()?;
 
             let content;
@@ -1585,11 +1607,17 @@ pub mod parsing {
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
             let colon_token: Option<Token![:]> = input.parse()?;
-            let bounds = if colon_token.is_some() {
-                input.parse_synom(Punctuated::parse_separated_nonempty)?
-            } else {
-                Punctuated::new()
-            };
+
+            let mut bounds = Punctuated::new();
+            if colon_token.is_some() {
+                while !input.peek(Token![where]) && !input.peek(Token![=]) && !input.peek(Token![;]) {
+                    if !bounds.is_empty() {
+                        bounds.push_punct(input.parse()?);
+                    }
+                    bounds.push_value(input.parse()?);
+                }
+            }
+
             generics.where_clause = input.parse()?;
             let default = if input.peek(Token![=]) {
                 let eq_token: Token![=] = input.parse()?;
