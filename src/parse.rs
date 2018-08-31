@@ -115,7 +115,7 @@ impl<'a> ParseBuffer<'a> {
         }
         let ahead = self.fork();
         ahead
-            .step_cursor(|cursor| Ok(cursor.token_tree().unwrap()))
+            .step(|cursor| Ok(cursor.token_tree().unwrap()))
             .unwrap();
         ahead.peek(token)
     }
@@ -126,10 +126,10 @@ impl<'a> ParseBuffer<'a> {
         }
         let ahead = self.fork();
         ahead
-            .step_cursor(|cursor| Ok(cursor.token_tree().unwrap()))
+            .step(|cursor| Ok(cursor.token_tree().unwrap()))
             .unwrap();
         ahead
-            .step_cursor(|cursor| Ok(cursor.token_tree().unwrap()))
+            .step(|cursor| Ok(cursor.token_tree().unwrap()))
             .unwrap();
         ahead.peek(token)
     }
@@ -156,9 +156,7 @@ impl<'a> ParseBuffer<'a> {
         error::new_at(self.scope, self.cursor(), message)
     }
 
-    // Not public API.
-    #[doc(hidden)]
-    pub fn step_cursor<F, R>(&self, function: F) -> Result<R>
+    pub fn step<F, R>(&self, function: F) -> Result<R>
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
     {
@@ -194,7 +192,7 @@ impl<'a> ParseBuffer<'a> {
 
 impl Parse for Ident {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| {
+        input.step(|cursor| {
             if let Some((ident, rest)) = cursor.ident() {
                 match ident.to_string().as_str() {
                     "_"

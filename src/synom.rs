@@ -168,13 +168,13 @@ use parse::{Parse, ParseBuffer, ParseStream, Result};
 
 impl Parse for TokenStream {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| Ok((cursor.token_stream(), Cursor::empty())))
+        input.step(|cursor| Ok((cursor.token_stream(), Cursor::empty())))
     }
 }
 
 impl Parse for TokenTree {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| match cursor.token_tree() {
+        input.step(|cursor| match cursor.token_tree() {
             Some((tt, rest)) => Ok((tt, rest)),
             None => Err(cursor.error("expected token tree")),
         })
@@ -183,7 +183,7 @@ impl Parse for TokenTree {
 
 impl Parse for Group {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| {
+        input.step(|cursor| {
             for delim in &[Delimiter::Parenthesis, Delimiter::Brace, Delimiter::Bracket] {
                 if let Some((inside, span, rest)) = cursor.group(*delim) {
                     let mut group = Group::new(*delim, inside.token_stream());
@@ -198,7 +198,7 @@ impl Parse for Group {
 
 impl Parse for Punct {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| match cursor.punct() {
+        input.step(|cursor| match cursor.punct() {
             Some((punct, rest)) => Ok((punct, rest)),
             None => Err(cursor.error("expected punctuation token")),
         })
@@ -207,7 +207,7 @@ impl Parse for Punct {
 
 impl Parse for Literal {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| match cursor.literal() {
+        input.step(|cursor| match cursor.literal() {
             Some((literal, rest)) => Ok((literal, rest)),
             None => Err(cursor.error("expected literal token")),
         })
@@ -316,7 +316,7 @@ pub mod ext {
 
     impl IdentExt for Ident {
         fn parse_any(input: ParseStream) -> Result<Self> {
-            input.step_cursor(|cursor| match cursor.ident() {
+            input.step(|cursor| match cursor.ident() {
                 Some((ident, rest)) => Ok((ident, rest)),
                 None => Err(cursor.error("expected ident")),
             })

@@ -26,7 +26,7 @@ pub struct Group<'a> {
 
 impl<'a> ParseBuffer<'a> {
     fn parse_delimited(&self, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
-        self.step_cursor(|cursor| {
+        self.step(|cursor| {
             if let Some((content, span, rest)) = cursor.group(delimiter) {
                 let content =
                     ParseBuffer::new(span, cursor.advance(content), self.get_unexpected());

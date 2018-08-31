@@ -436,7 +436,7 @@ pub mod parsing {
 
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {
-            input.step_cursor(|cursor| match cursor.literal() {
+            input.step(|cursor| match cursor.literal() {
                 Some((lit, rest)) => Ok((Lit::new(lit), rest)),
                 _ => match cursor.ident() {
                     Some((ident, rest)) => Ok((

@@ -430,7 +430,7 @@ impl ToTokens for Apostrophe {
 #[cfg(feature = "parsing")]
 impl Parse for Apostrophe {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| {
+        input.step(|cursor| {
             if let Some((punct, rest)) = cursor.punct() {
                 if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint {
                     return Ok((Apostrophe(punct.span()), rest));
@@ -451,7 +451,7 @@ impl ToTokens for Underscore {
 #[cfg(feature = "parsing")]
 impl Parse for Underscore {
     fn parse(input: ParseStream) -> Result<Self> {
-        input.step_cursor(|cursor| {
+        input.step(|cursor| {
             if let Some((ident, rest)) = cursor.ident() {
                 if ident == "_" {
                     return Ok((Underscore(ident.span()), rest));
@@ -738,7 +738,7 @@ mod parsing {
     use span::FromSpans;
 
     pub fn keyword(input: ParseStream, token: &str) -> Result<Span> {
-        input.step_cursor(|cursor| {
+        input.step(|cursor| {
             if let Some((ident, rest)) = cursor.ident() {
                 if ident == token {
                     return Ok((ident.span(), rest));
@@ -749,7 +749,7 @@ mod parsing {
     }
 
     pub fn punct<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
-        input.step_cursor(|cursor| {
+        input.step(|cursor| {
             let mut cursor = *cursor;
             let mut spans = [cursor.span(); 3];
             assert!(token.len() <= spans.len());

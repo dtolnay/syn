@@ -72,7 +72,7 @@ impl Hash for Macro {
 
 #[cfg(feature = "parsing")]
 pub fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStream)> {
-    input.step_cursor(|cursor| {
+    input.step(|cursor| {
         if let Some((TokenTree::Group(g), rest)) = cursor.token_tree() {
             let span = g.span();
             let delimiter = match g.delimiter() {
