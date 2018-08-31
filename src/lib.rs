@@ -458,9 +458,6 @@ pub mod parse_quote;
 #[cfg(all(feature = "parsing", feature = "printing"))]
 pub mod spanned;
 
-#[cfg(all(feature = "parsing", feature = "full"))]
-mod verbatim;
-
 mod gen {
     /// Syntax tree traversal to walk a shared borrow of a syntax tree.
     ///
