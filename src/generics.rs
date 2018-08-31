@@ -863,9 +863,12 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use attr::FilterAttrs;
+
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
+
+    use attr::FilterAttrs;
+    use print::TokensOrDefault;
 
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut TokenStream) {

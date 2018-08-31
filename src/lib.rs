@@ -582,6 +582,12 @@ pub mod parse;
 
 mod span;
 
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    feature = "printing"
+))]
+mod print;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
@@ -806,26 +812,4 @@ macro_rules! parse_macro_input {
             }
         };
     };
-}
-
-#[cfg(all(
-    any(feature = "full", feature = "derive"),
-    feature = "printing"
-))]
-struct TokensOrDefault<'a, T: 'a>(&'a Option<T>);
-
-#[cfg(all(
-    any(feature = "full", feature = "derive"),
-    feature = "printing"
-))]
-impl<'a, T> quote::ToTokens for TokensOrDefault<'a, T>
-where
-    T: quote::ToTokens + Default,
-{
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        match *self.0 {
-            Some(ref t) => t.to_tokens(tokens),
-            None => T::default().to_tokens(tokens),
-        }
-    }
 }

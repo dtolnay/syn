@@ -2997,10 +2997,14 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    #[cfg(feature = "full")]
-    use attr::FilterAttrs;
+
     use proc_macro2::{Literal, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
+
+    #[cfg(feature = "full")]
+    use attr::FilterAttrs;
+    #[cfg(feature = "full")]
+    use print::TokensOrDefault;
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `TokenStream`.
