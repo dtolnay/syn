@@ -307,11 +307,6 @@ extern crate unicode_xid;
 #[cfg(feature = "printing")]
 extern crate quote;
 
-#[cfg(feature = "parsing")]
-#[macro_use]
-#[doc(hidden)]
-pub mod parsers;
-
 #[macro_use]
 mod macros;
 
