@@ -161,7 +161,6 @@ use std::str::FromStr;
 use proc_macro;
 use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
-use error::parse_error;
 pub use error::{Error, PResult};
 
 use buffer::{Cursor, TokenBuffer};
@@ -330,7 +329,6 @@ where
 ///
 /// *This module is available if Syn is built with the `"parsing"` feature.*
 pub mod ext {
-    use super::*;
     use proc_macro2::Ident;
 
     use parse::{ParseStream, Result};
@@ -368,17 +366,11 @@ pub mod ext {
         /// #
         /// # fn main() {}
         /// ```
-        fn parse_any(input: Cursor) -> PResult<Self>;
-
-        fn parse_any2(input: ParseStream) -> Result<Self>;
+        fn parse_any(input: ParseStream) -> Result<Self>;
     }
 
     impl IdentExt for Ident {
-        fn parse_any(input: Cursor) -> PResult<Self> {
-            input.ident().map_or_else(parse_error, Ok)
-        }
-
-        fn parse_any2(input: ParseStream) -> Result<Self> {
+        fn parse_any(input: ParseStream) -> Result<Self> {
             input.step_cursor(|cursor| match cursor.ident() {
                 Some((ident, rest)) => Ok((ident, rest)),
                 None => Err(cursor.error("expected ident")),

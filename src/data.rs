@@ -286,7 +286,7 @@ pub mod parsing {
                         pub_token: pub_token,
                         paren_token: parenthesized!(content in input),
                         in_token: None,
-                        path: Box::new(Path::from(content.parse_synom(Ident::parse_any)?)),
+                        path: Box::new(Path::from(content.call(Ident::parse_any)?)),
                     }));
                 } else if content.peek(Token![in]) {
                     return Ok(Visibility::Restricted(VisRestricted {

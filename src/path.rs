@@ -316,7 +316,7 @@ pub mod parsing {
                 || input.peek(Token![crate])
                 || input.peek(Token![extern])
             {
-                let ident = input.parse_synom(Ident::parse_any)?;
+                let ident = input.call(Ident::parse_any)?;
                 return Ok(PathSegment::from(ident));
             }
 
@@ -360,7 +360,7 @@ pub mod parsing {
                         {
                             break;
                         }
-                        let ident = Ident::parse_any2(input)?;
+                        let ident = Ident::parse_any(input)?;
                         segments.push_value(PathSegment::from(ident));
                         if !input.peek(Token![::]) {
                             break;

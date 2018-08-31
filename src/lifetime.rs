@@ -130,7 +130,7 @@ pub mod parsing {
                         return Err(Error::new(err.span(), "expected lifetime"));
                     }
                 },
-                ident: input.call(Ident::parse_any2)?,
+                ident: input.call(Ident::parse_any)?,
             })
         }
     }

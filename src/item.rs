@@ -947,7 +947,7 @@ pub mod parsing {
             || lookahead.peek(Token![crate])
             || lookahead.peek(Token![extern])
         {
-            let ident = input.call(Ident::parse_any2)?;
+            let ident = input.call(Ident::parse_any)?;
             if input.peek(Token![::]) {
                 Ok(UseTree::Path(UsePath {
                     ident: ident,

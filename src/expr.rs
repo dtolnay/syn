@@ -2645,7 +2645,7 @@ pub mod parsing {
             mutability: input.parse()?,
             ident: {
                 let ident = if input.peek(Ident) || input.peek(Token![self]) {
-                    input.call(Ident::parse_any2)?
+                    input.call(Ident::parse_any)?
                 } else {
                     return Err(input.error("expected identifier or `self`"));
                 };
