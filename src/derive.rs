@@ -196,7 +196,7 @@ pub mod parsing {
 
         let content;
         let brace = braced!(content in input);
-        let variants = content.parse_terminated(<Variant as Parse>::parse)?;
+        let variants = content.parse_terminated(Variant::parse)?;
 
         Ok((where_clause, brace, variants))
     }

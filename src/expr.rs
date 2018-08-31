@@ -1366,7 +1366,7 @@ pub mod parsing {
                     attrs: Vec::new(),
                     func: Box::new(e),
                     paren_token: parenthesized!(content in input),
-                    args: content.parse_terminated(<Expr as Parse>::parse)?,
+                    args: content.parse_terminated(Expr::parse)?,
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) {
                 let dot_token: Token![.] = input.parse()?;
@@ -1407,7 +1407,7 @@ pub mod parsing {
                             method: method,
                             turbofish: turbofish,
                             paren_token: parenthesized!(content in input),
-                            args: content.parse_terminated(<Expr as Parse>::parse)?,
+                            args: content.parse_terminated(Expr::parse)?,
                         });
                         continue;
                     }
@@ -1455,7 +1455,7 @@ pub mod parsing {
                     attrs: Vec::new(),
                     func: Box::new(e),
                     paren_token: parenthesized!(content in input),
-                    args: content.parse_terminated(<Expr as Parse>::parse)?,
+                    args: content.parse_terminated(Expr::parse)?,
                 });
             } else if input.peek(Token![.]) {
                 e = Expr::Field(ExprField {

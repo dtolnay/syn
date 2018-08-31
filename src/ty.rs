@@ -553,7 +553,7 @@ pub mod parsing {
             let content;
             Ok(TypeTuple {
                 paren_token: parenthesized!(content in input),
-                elems: content.parse_terminated(<Type as Parse>::parse)?,
+                elems: content.parse_terminated(Type::parse)?,
             })
         }
     }

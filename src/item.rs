@@ -1025,7 +1025,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(<FnArg as Parse>::parse)?;
+            let inputs = content.parse_terminated(FnArg::parse)?;
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
@@ -1548,7 +1548,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(<FnArg as Parse>::parse)?;
+            let inputs = content.parse_terminated(FnArg::parse)?;
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
@@ -1802,7 +1802,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(<FnArg as Parse>::parse)?;
+            let inputs = content.parse_terminated(FnArg::parse)?;
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
