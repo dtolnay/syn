@@ -3,10 +3,10 @@
 ///
 /// [`quote!`]: https://docs.rs/quote/0.6/quote/index.html
 ///
-/// The return type can be any syntax tree node that implements the [`Synom`]
+/// The return type can be any syntax tree node that implements the [`Parse`]
 /// trait.
 ///
-/// [`Synom`]: synom/trait.Synom.html
+/// [`Parse`]: parse/trait.Parse.html
 ///
 /// ```
 /// #[macro_use]
@@ -63,7 +63,7 @@
 /// # Special cases
 ///
 /// This macro can parse the following additional types as a special case even
-/// though they do not implement the `Synom` trait.
+/// though they do not implement the `Parse` trait.
 ///
 /// - [`Attribute`] — parses one attribute, allowing either outer like `#[...]`
 ///   or inner like `#![...]`
