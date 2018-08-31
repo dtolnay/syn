@@ -2431,19 +2431,26 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Block {
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
-            while input.peek(Token![;]) {
-                input.parse::<Token![;]>()?;
-            }
-
             let mut stmts = Vec::new();
-            while !input.is_empty() {
-                let s = parse_stmt(input, true)?;
-                if let Stmt::Expr(ref s) = s {
-                    if requires_terminator(s) && !input.is_empty() {
-                        return Err(input.error("unexpected token"));
-                    }
+            loop {
+                while input.peek(Token![;]) {
+                    input.parse::<Token![;]>()?;
                 }
+                if input.is_empty() {
+                    break;
+                }
+                let s = parse_stmt(input, true)?;
+                let requires_semicolon = if let Stmt::Expr(ref s) = s {
+                    requires_terminator(s)
+                } else {
+                    false
+                };
                 stmts.push(s);
+                if input.is_empty() {
+                    break;
+                } else if requires_semicolon {
+                    return Err(input.error("unexpected token"));
+                }
             }
             Ok(stmts)
         }
