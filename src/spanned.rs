@@ -88,7 +88,7 @@ use quote::ToTokens;
 /// [`ToTokens`] from the `quote` crate. It is sealed and cannot be implemented
 /// outside of the Syn crate other than by implementing `ToTokens`.
 ///
-/// [`ToTokens`]: https://docs.rs/quote/0.4/quote/trait.ToTokens.html
+/// [`ToTokens`]: https://docs.rs/quote/0.6/quote/trait.ToTokens.html
 ///
 /// See the [module documentation] for an example.
 ///
@@ -100,7 +100,7 @@ pub trait Spanned: private::Sealed {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.
     ///
-    /// [`Span::call_site()`]: https://docs.rs/proc-macro2/0.2/proc_macro2/struct.Span.html#method.call_site
+    /// [`Span::call_site()`]: https://docs.rs/proc-macro2/0.4/proc_macro2/struct.Span.html#method.call_site
     fn span(&self) -> Span;
 }
 

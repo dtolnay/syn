@@ -1,7 +1,7 @@
 /// Quasi-quotation macro that accepts input like the [`quote!`] macro but uses
 /// type inference to figure out a return type for those tokens.
 ///
-/// [`quote!`]: https://docs.rs/quote/0.4/quote/index.html
+/// [`quote!`]: https://docs.rs/quote/0.6/quote/index.html
 ///
 /// The return type can be any syntax tree node that implements the [`Synom`]
 /// trait.
