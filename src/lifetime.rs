@@ -15,7 +15,6 @@ use unicode_xid::UnicodeXID;
 
 #[cfg(feature = "parsing")]
 use lookahead;
-use token::Apostrophe;
 
 /// A Rust lifetime: `'a`.
 ///
@@ -33,7 +32,7 @@ use token::Apostrophe;
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[derive(Clone)]
 pub struct Lifetime {
-    pub apostrophe: Apostrophe,
+    pub apostrophe: Span,
     pub ident: Ident,
 }
 
@@ -69,7 +68,7 @@ impl Lifetime {
         }
 
         Lifetime {
-            apostrophe: Apostrophe::default(),
+            apostrophe: Span::call_site(),
             ident: Ident::new(&s[1..], span),
         }
     }
@@ -119,18 +118,22 @@ pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
 pub mod parsing {
     use super::*;
 
+    use proc_macro2::Spacing;
+
     use ext::IdentExt;
-    use parse::{Error, Parse, ParseStream, Result};
+    use parse::{Parse, ParseStream, Result};
 
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Lifetime {
-                apostrophe: match input.parse() {
-                    Ok(apostrophe) => apostrophe,
-                    Err(err) => {
-                        return Err(Error::new(err.span(), "expected lifetime"));
+                apostrophe: input.step(|cursor| {
+                    if let Some((punct, rest)) = cursor.punct() {
+                        if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint {
+                            return Ok((punct.span(), rest));
+                        }
                     }
-                },
+                    Err(cursor.error("expected lifetime"))
+                })?,
                 ident: input.call(Ident::parse_any)?,
             })
         }
@@ -140,12 +143,15 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use proc_macro2::TokenStream;
-    use quote::ToTokens;
+
+    use proc_macro2::{Punct, Spacing, TokenStream};
+    use quote::{ToTokens, TokenStreamExt};
 
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.apostrophe.to_tokens(tokens);
+            let mut apostrophe = Punct::new('\'', Spacing::Joint);
+            apostrophe.set_span(self.apostrophe);
+            tokens.append(apostrophe);
             self.ident.to_tokens(tokens);
         }
     }

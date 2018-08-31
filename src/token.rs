@@ -105,11 +105,9 @@ use std::rc::Rc;
 
 #[cfg(feature = "parsing")]
 use proc_macro2::Delimiter;
-#[cfg(any(feature = "printing", feature = "parsing"))]
-use proc_macro2::Spacing;
-use proc_macro2::{Ident, Span};
 #[cfg(feature = "printing")]
-use proc_macro2::{Punct, TokenStream};
+use proc_macro2::TokenStream;
+use proc_macro2::{Ident, Span};
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 
@@ -400,39 +398,7 @@ macro_rules! define_delimiters {
 }
 
 define_punctuation_structs! {
-    "'" pub struct Apostrophe/1 /// `'`
     "_" pub struct Underscore/1 /// `_`
-}
-
-// Implement Clone anyway because it is required for cloning Lifetime.
-#[cfg(not(feature = "clone-impls"))]
-impl Clone for Apostrophe {
-    fn clone(&self) -> Self {
-        Apostrophe(self.spans)
-    }
-}
-
-#[cfg(feature = "printing")]
-impl ToTokens for Apostrophe {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let mut token = Punct::new('\'', Spacing::Joint);
-        token.set_span(self.spans[0]);
-        tokens.append(token);
-    }
-}
-
-#[cfg(feature = "parsing")]
-impl Parse for Apostrophe {
-    fn parse(input: ParseStream) -> Result<Self> {
-        input.step(|cursor| {
-            if let Some((punct, rest)) = cursor.punct() {
-                if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint {
-                    return Ok((Apostrophe(punct.span()), rest));
-                }
-            }
-            Err(cursor.error("expected `'`"))
-        })
-    }
 }
 
 #[cfg(feature = "printing")]
