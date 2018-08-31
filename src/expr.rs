@@ -2461,7 +2461,6 @@ pub mod parsing {
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
 
-        // TODO: better error messages
         if {
             let ahead = ahead.fork();
             // Only parse braces here; paren and bracket will get parsed as
