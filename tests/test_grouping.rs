@@ -56,7 +56,7 @@ fn test_grouping() {
     assert_eq!(raw.to_string(), "1i32 +  2i32 + 3i32  * 4i32");
 
     assert_eq!(
-        common::parse::syn::<Expr>(raw),
+        syn::parse2::<syn::Expr>(raw).unwrap(),
         expr(ExprBinary {
             attrs: Vec::new(),
             left: Box::new(lit(Literal::i32_suffixed(1))),

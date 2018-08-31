@@ -20,9 +20,6 @@ use self::syntax_pos::{hygiene, FileName};
 
 use std::panic;
 
-use self::syn::buffer::TokenBuffer;
-use self::syn::synom::Synom;
-
 pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
         hygiene::set_default_edition(Edition::Edition2018);
@@ -57,22 +54,5 @@ pub fn syn_expr(input: &str) -> Option<syn::Expr> {
             errorf!("syn failed to parse\n{:?}\n", msg);
             None
         }
-    }
-}
-
-pub fn syn<T: Synom>(tokens: proc_macro2::TokenStream) -> T {
-    let buf = TokenBuffer::new2(tokens);
-    let result = T::parse(buf.begin());
-    match result {
-        Ok((t, rest)) => {
-            if rest.eof() {
-                t
-            } else if rest == buf.begin() {
-                panic!("failed to parse anything")
-            } else {
-                panic!("failed to parse all tokens")
-            }
-        }
-        Err(err) => panic!("failed to parse: {}", err),
     }
 }

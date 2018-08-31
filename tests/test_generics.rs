@@ -114,7 +114,7 @@ fn test_ty_param_bound() {
     let expected = TypeParamBound::Lifetime(Lifetime::new("'a", Span::call_site()));
     assert_eq!(
         expected,
-        common::parse::syn::<TypeParamBound>(tokens.into())
+        syn::parse2::<TypeParamBound>(tokens).unwrap()
     );
 
     let tokens = quote!('_);
@@ -122,7 +122,7 @@ fn test_ty_param_bound() {
     let expected = TypeParamBound::Lifetime(Lifetime::new("'_", Span::call_site()));
     assert_eq!(
         expected,
-        common::parse::syn::<TypeParamBound>(tokens.into())
+        syn::parse2::<TypeParamBound>(tokens).unwrap()
     );
 
     let tokens = quote!(Debug);
@@ -134,7 +134,7 @@ fn test_ty_param_bound() {
     });
     assert_eq!(
         expected,
-        common::parse::syn::<TypeParamBound>(tokens.into())
+        syn::parse2::<TypeParamBound>(tokens).unwrap()
     );
 
     let tokens = quote!(?Sized);
@@ -146,7 +146,7 @@ fn test_ty_param_bound() {
     });
     assert_eq!(
         expected,
-        common::parse::syn::<TypeParamBound>(tokens.into())
+        syn::parse2::<TypeParamBound>(tokens).unwrap()
     );
 }
 
@@ -160,7 +160,7 @@ fn test_fn_precedence_in_where_clause() {
         {
         }
     };
-    let fun = common::parse::syn::<ItemFn>(sig.into());
+    let fun = syn::parse2::<ItemFn>(sig).unwrap();
     let where_clause = fun.decl.generics.where_clause.as_ref().unwrap();
     assert_eq!(where_clause.predicates.len(), 1);
     let predicate = match where_clause.predicates[0] {
