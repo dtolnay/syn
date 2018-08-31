@@ -118,23 +118,14 @@ pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
 pub mod parsing {
     use super::*;
 
-    use proc_macro2::Spacing;
-
-    use ext::IdentExt;
     use parse::{Parse, ParseStream, Result};
 
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {
-            Ok(Lifetime {
-                apostrophe: input.step(|cursor| {
-                    if let Some((punct, rest)) = cursor.punct() {
-                        if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint {
-                            return Ok((punct.span(), rest));
-                        }
-                    }
-                    Err(cursor.error("expected lifetime"))
-                })?,
-                ident: input.call(Ident::parse_any)?,
+            input.step(|cursor| {
+                cursor
+                    .lifetime()
+                    .ok_or_else(|| cursor.error("expected lifetime"))
             })
         }
     }

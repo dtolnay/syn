@@ -802,7 +802,7 @@ pub mod parsing {
 
     impl Parse for WherePredicate {
         fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Lifetime) && input.peek3(Token![:]) {
+            if input.peek(Lifetime) && input.peek2(Token![:]) {
                 Ok(WherePredicate::Lifetime(PredicateLifetime {
                     lifetime: input.parse()?,
                     colon_token: input.parse()?,

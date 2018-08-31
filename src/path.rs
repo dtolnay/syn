@@ -241,7 +241,7 @@ pub mod parsing {
 
     impl Parse for GenericArgument {
         fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Lifetime) && !input.peek3(Token![+]) {
+            if input.peek(Lifetime) && !input.peek2(Token![+]) {
                 return Ok(GenericArgument::Lifetime(input.parse()?));
             }
 

@@ -20,11 +20,12 @@
     feature = "proc-macro"
 ))]
 use proc_macro as pm;
-use proc_macro2::{Delimiter, Ident, Literal, Span, TokenStream};
-use proc_macro2::{Group, Punct, TokenTree};
+use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 
 use std::marker::PhantomData;
 use std::ptr;
+
+use Lifetime;
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.
@@ -266,7 +267,9 @@ impl<'a> Cursor<'a> {
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
         match *self.entry() {
-            Entry::Punct(ref op) => Some((op.clone(), unsafe { self.bump() })),
+            Entry::Punct(ref op) if op.as_char() != '\'' => {
+                Some((op.clone(), unsafe { self.bump() }))
+            }
             _ => None,
         }
     }
@@ -277,6 +280,28 @@ impl<'a> Cursor<'a> {
         self.ignore_none();
         match *self.entry() {
             Entry::Literal(ref lit) => Some((lit.clone(), unsafe { self.bump() })),
+            _ => None,
+        }
+    }
+
+    /// If the cursor is pointing at a `Lifetime`, returns it along with a
+    /// cursor pointing at the next `TokenTree`.
+    pub fn lifetime(mut self) -> Option<(Lifetime, Cursor<'a>)> {
+        self.ignore_none();
+        match *self.entry() {
+            Entry::Punct(ref op) if op.as_char() == '\'' && op.spacing() == Spacing::Joint => {
+                let next = unsafe { self.bump() };
+                match next.ident() {
+                    Some((ident, rest)) => {
+                        let lifetime = Lifetime {
+                            apostrophe: op.span(),
+                            ident: ident,
+                        };
+                        Some((lifetime, rest))
+                    }
+                    None => None,
+                }
+            }
             _ => None,
         }
     }

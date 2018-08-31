@@ -227,6 +227,18 @@ impl<'c, 'a> StepCursor<'c, 'a> {
     }
 }
 
+fn skip(input: ParseStream) -> bool {
+    input.step(|cursor| {
+        if let Some((_lifetime, rest)) = cursor.lifetime() {
+            Ok((true, rest))
+        } else if let Some((_token, rest)) = cursor.token_tree() {
+            Ok((true, rest))
+        } else {
+            Ok((false, *cursor))
+        }
+    }).unwrap()
+}
+
 impl<'a> ParseBuffer<'a> {
     // Not public API.
     #[doc(hidden)]
@@ -266,28 +278,13 @@ impl<'a> ParseBuffer<'a> {
     }
 
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
-        if self.is_empty() {
-            return false;
-        }
         let ahead = self.fork();
-        ahead
-            .step(|cursor| Ok(cursor.token_tree().unwrap()))
-            .unwrap();
-        ahead.peek(token)
+        skip(&ahead) && ahead.peek(token)
     }
 
     pub fn peek3<T: Peek>(&self, token: T) -> bool {
-        if self.is_empty() {
-            return false;
-        }
         let ahead = self.fork();
-        ahead
-            .step(|cursor| Ok(cursor.token_tree().unwrap()))
-            .unwrap();
-        ahead
-            .step(|cursor| Ok(cursor.token_tree().unwrap()))
-            .unwrap();
-        ahead.peek(token)
+        skip(&ahead) && skip(&ahead) && ahead.peek(token)
     }
 
     pub fn parse_terminated<T, P: Parse>(
