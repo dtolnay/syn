@@ -25,5 +25,8 @@ fn main() {
             e: "String".to_owned(),
         },
     };
-    println!("heap size = {}", heapsize::HeapSize::heap_size_of_children(&demo));
+    println!(
+        "heap size = {}",
+        heapsize::HeapSize::heap_size_of_children(&demo)
+    );
 }

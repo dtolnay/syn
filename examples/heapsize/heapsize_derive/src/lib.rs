@@ -8,7 +8,7 @@ extern crate syn;
 extern crate quote;
 
 use proc_macro2::TokenStream;
-use syn::{DeriveInput, Data, Fields, Generics, GenericParam};
+use syn::{Data, DeriveInput, Fields, GenericParam, Generics};
 
 #[proc_macro_derive(HeapSize)]
 pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

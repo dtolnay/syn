@@ -8,8 +8,8 @@ extern crate syn;
 extern crate quote;
 
 use proc_macro2::{Span, TokenStream};
-use syn::{DeriveInput, Data, Fields, Generics, GenericParam, Index};
 use syn::spanned::Spanned;
+use syn::{Data, DeriveInput, Fields, GenericParam, Generics, Index};
 
 #[proc_macro_derive(HeapSize)]
 pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -84,7 +84,10 @@ fn heap_size_sum(data: &Data, var: &TokenStream) -> TokenStream {
                     //
                     //     0 + HeapSize::heap_size(&self.0) + HeapSize::heap_size(&self.1)
                     let recurse = fields.unnamed.iter().enumerate().map(|(i, f)| {
-                        let index = Index { index: i as u32, span: call_site };
+                        let index = Index {
+                            index: i as u32,
+                            span: call_site,
+                        };
                         let access = quote_spanned!(call_site=> #var.#index);
                         quote_spanned! {f.span()=>
                             ::heapsize::HeapSize::heap_size_of_children(&#access)

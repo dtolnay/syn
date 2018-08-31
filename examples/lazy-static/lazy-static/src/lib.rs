@@ -7,10 +7,10 @@ extern crate syn;
 extern crate quote;
 extern crate proc_macro;
 
-use syn::{Visibility, Ident, Type, Expr};
+use proc_macro::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::spanned::Spanned;
-use proc_macro::TokenStream;
+use syn::{Expr, Ident, Type, Visibility};
 
 /// Parses the following syntax, which aligns with the input of the real
 /// `lazy_static` crate.
@@ -42,13 +42,23 @@ impl Parse for LazyStatic {
         input.parse::<Token![=]>()?;
         let init: Expr = input.parse()?;
         input.parse::<Token![;]>()?;
-        Ok(LazyStatic { visibility, name, ty, init })
+        Ok(LazyStatic {
+            visibility,
+            name,
+            ty,
+            init,
+        })
     }
 }
 
 #[proc_macro]
 pub fn lazy_static(input: TokenStream) -> TokenStream {
-    let LazyStatic { visibility, name, ty, init } = syn::parse(input).unwrap();
+    let LazyStatic {
+        visibility,
+        name,
+        ty,
+        init,
+    } = syn::parse(input).unwrap();
 
     // The warning looks like this.
     //
@@ -58,7 +68,8 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //     10 |     static ref FOO: String = "lazy_static".to_owned();
     //        |                ^^^
     if name == "FOO" {
-        name.span().unstable()
+        name.span()
+            .unstable()
             .warning("come on, pick a more creative name")
             .emit();
     }
@@ -72,7 +83,8 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //        |                           ^^
     if let Expr::Tuple(ref init) = init {
         if init.elems.is_empty() {
-            init.span().unstable()
+            init.span()
+                .unstable()
                 .error("I can't think of a legitimate use for lazily initializing the value `()`")
                 .emit();
             return TokenStream::new();
