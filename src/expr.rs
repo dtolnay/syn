@@ -1026,7 +1026,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     use ext::IdentExt;
-    use parse::{Parse, ParseStream, Result};
+    use parse::{Parse, ParseBuffer, ParseStream, Result};
     use path;
 
     // When we're parsing expressions which occur before blocks, like in an if
@@ -1814,11 +1814,11 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_group(input: ParseStream) -> Result<ExprGroup> {
-        let content;
+        let group = private::<ParseBuffer>::parse_group(input)?;
         Ok(ExprGroup {
             attrs: Vec::new(),
-            group_token: grouped!(content in input),
-            expr: content.parse()?,
+            group_token: group.token,
+            expr: group.content.parse()?,
         })
     }
 

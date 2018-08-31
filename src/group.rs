@@ -1,7 +1,7 @@
 use proc_macro2::{Delimiter, Span};
 
 use error::Result;
-use parse::ParseBuffer;
+use parse::{ParseBuffer, ParseStream};
 use private;
 use token;
 
@@ -74,11 +74,11 @@ impl<'a> ParseBuffer<'a> {
                 content: content,
             })
     }
+}
 
-    // Not public API.
-    #[doc(hidden)]
-    pub fn parse_group(&self) -> Result<Group<'a>> {
-        self.parse_delimited(Delimiter::None)
+impl<'a> private<ParseBuffer<'a>> {
+    pub fn parse_group(input: ParseStream) -> Result<Group> {
+        input.parse_delimited(Delimiter::None)
             .map(|(span, content)| Group {
                 token: token::Group(span),
                 content: content,
@@ -162,22 +162,6 @@ macro_rules! bracketed {
             $crate::export::Ok(brackets) => {
                 $content = brackets.content;
                 brackets.token
-            }
-            $crate::export::Err(error) => {
-                return $crate::export::Err(error);
-            }
-        }
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! grouped {
-    ($content:ident in $cursor:expr) => {
-        match $crate::parse::ParseBuffer::parse_group(&$cursor) {
-            $crate::export::Ok(group) => {
-                $content = group.content;
-                group.token
             }
             $crate::export::Err(error) => {
                 return $crate::export::Err(error);
