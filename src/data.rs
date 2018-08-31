@@ -293,7 +293,7 @@ pub mod parsing {
                         pub_token: pub_token,
                         paren_token: parenthesized!(content in input),
                         in_token: Some(content.parse()?),
-                        path: Box::new(content.parse_synom(Path::old_parse_mod_style)?),
+                        path: Box::new(content.call(Path::parse_mod_style)?),
                     }));
                 }
             }

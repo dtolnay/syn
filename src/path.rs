@@ -399,16 +399,6 @@ pub mod parsing {
                 },
             })
         }
-
-        named!(pub old_parse_mod_style -> Self, do_parse!(
-            colon: option!(punct!(::)) >>
-            segments: call!(Punctuated::parse_separated_nonempty_with,
-                            old_mod_style_path_segment) >>
-            (Path {
-                leading_colon: colon,
-                segments: segments,
-            })
-        ));
     }
 
     pub fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {
@@ -462,43 +452,6 @@ pub mod parsing {
             Ok((None, path))
         }
     }
-
-    // FIXME
-    /*
-    pub fn mod_style_path_segment(input: ParseStream) -> Result<PathSegment> {
-        let lookahead = input.lookahead1();
-        let ident = if lookahead.peek(Ident) {
-            input.parse()?
-        } else if lookahead.peek(Token![super]) {
-            Ident::from(input.parse::<Token![super]>()?)
-        } else if lookahead.peek(Token![self]) {
-            Ident::from(input.parse::<Token![self]>()?)
-        } else if lookahead.peek(Token![Self]) {
-            Ident::from(input.parse::<Token![Self]>()?)
-        } else if lookahead.peek(Token![crate]) {
-            Ident::from(input.parse::<Token![crate]>()?)
-        } else if lookahead.peek(Token![extern]) {
-            Ident::from(input.parse::<Token![extern]>()?)
-        } else {
-            return Err(lookahead.error());
-        };
-        Ok(PathSegment::from(ident))
-    }
-    */
-
-    named!(pub old_mod_style_path_segment -> PathSegment, alt!(
-        syn!(Ident) => { Into::into }
-        |
-        keyword!(super) => { Into::into }
-        |
-        keyword!(self) => { Into::into }
-        |
-        keyword!(Self) => { Into::into }
-        |
-        keyword!(crate) => { Into::into }
-        |
-        keyword!(extern) => { Into::into }
-    ));
 
     named!(pub ty_no_eq_after -> Type, do_parse!(
         ty: syn!(Type) >>
