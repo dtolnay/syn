@@ -118,6 +118,7 @@ impl<T: Parse> ParseQuote for T {
 
 #[cfg(any(feature = "full", feature = "derive"))]
 use {attr, Attribute};
+use punctuated::Punctuated;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
@@ -127,5 +128,11 @@ impl ParseQuote for Attribute {
         } else {
             attr::parsing::single_parse_outer(input)
         }
+    }
+}
+
+impl<T: Parse, P: Parse> ParseQuote for Punctuated<T, P> {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Self::parse_terminated(input)
     }
 }
