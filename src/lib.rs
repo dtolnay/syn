@@ -441,8 +441,6 @@ pub mod buffer;
 #[cfg(feature = "parsing")]
 pub mod ext;
 pub mod punctuated;
-#[cfg(feature = "parsing")]
-pub mod synom;
 #[cfg(all(
     any(feature = "full", feature = "derive"),
     feature = "extra-traits"
@@ -589,9 +587,6 @@ mod span;
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
-use synom::Parser;
-
-#[cfg(feature = "parsing")]
 mod error;
 #[cfg(feature = "parsing")]
 use error::Error;
@@ -649,7 +644,7 @@ use error::Error;
     feature = "proc-macro"
 ))]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Error> {
-    T::parse.parse(tokens)
+    parse::Parser::parse(T::parse, tokens)
 }
 
 /// Parse a proc-macro2 token stream into the chosen syntax tree node.
@@ -666,7 +661,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Erro
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Error> {
-    T::parse.parse2(tokens)
+    parse::Parser::parse2(T::parse, tokens)
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
@@ -699,7 +694,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Er
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T, Error> {
-    T::parse.parse_str(s)
+    parse::Parser::parse_str(T::parse, s)
 }
 
 // FIXME the name parse_file makes it sound like you might pass in a path to a

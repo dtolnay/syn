@@ -12,7 +12,7 @@ extern crate proc_macro2;
 extern crate syn;
 
 use proc_macro2::{Ident, Literal, Span};
-use syn::synom::Parser;
+use syn::parse::Parser;
 use syn::*;
 
 #[macro_use]
