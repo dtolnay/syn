@@ -483,6 +483,10 @@ pub trait Fold {
         fold_item_trait(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_item_trait_alias(&mut self, i: ItemTraitAlias) -> ItemTraitAlias {
+        fold_item_trait_alias(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_item_type(&mut self, i: ItemType) -> ItemType {
         fold_item_type(self, i)
     }
@@ -1986,6 +1990,9 @@ pub fn fold_item<V: Fold + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
         Item::Enum(_binding_0) => Item::Enum(_visitor.fold_item_enum(_binding_0)),
         Item::Union(_binding_0) => Item::Union(_visitor.fold_item_union(_binding_0)),
         Item::Trait(_binding_0) => Item::Trait(_visitor.fold_item_trait(_binding_0)),
+        Item::TraitAlias(_binding_0) => {
+            Item::TraitAlias(_visitor.fold_item_trait_alias(_binding_0))
+        }
         Item::Impl(_binding_0) => Item::Impl(_visitor.fold_item_impl(_binding_0)),
         Item::Macro(_binding_0) => Item::Macro(_visitor.fold_item_macro(_binding_0)),
         Item::Macro2(_binding_0) => Item::Macro2(_visitor.fold_item_macro2(_binding_0)),
@@ -2180,6 +2187,22 @@ pub fn fold_item_trait<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> Ite
         supertraits: FoldHelper::lift(_i.supertraits, |it| _visitor.fold_type_param_bound(it)),
         brace_token: Brace(tokens_helper(_visitor, &_i.brace_token.span)),
         items: FoldHelper::lift(_i.items, |it| _visitor.fold_trait_item(it)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_item_trait_alias<V: Fold + ?Sized>(
+    _visitor: &mut V,
+    _i: ItemTraitAlias,
+) -> ItemTraitAlias {
+    ItemTraitAlias {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        vis: _visitor.fold_visibility(_i.vis),
+        trait_token: Token ! [ trait ](tokens_helper(_visitor, &_i.trait_token.span)),
+        ident: _visitor.fold_ident(_i.ident),
+        generics: _visitor.fold_generics(_i.generics),
+        eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
+        bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
+        semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }
 #[cfg(feature = "full")]

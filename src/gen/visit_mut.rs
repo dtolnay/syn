@@ -487,6 +487,10 @@ pub trait VisitMut {
         visit_item_trait_mut(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_item_trait_alias_mut(&mut self, i: &mut ItemTraitAlias) {
+        visit_item_trait_alias_mut(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_item_type_mut(&mut self, i: &mut ItemType) {
         visit_item_type_mut(self, i)
     }
@@ -2167,6 +2171,9 @@ pub fn visit_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Item) {
         Item::Trait(ref mut _binding_0) => {
             _visitor.visit_item_trait_mut(_binding_0);
         }
+        Item::TraitAlias(ref mut _binding_0) => {
+            _visitor.visit_item_trait_alias_mut(_binding_0);
+        }
         Item::Impl(ref mut _binding_0) => {
             _visitor.visit_item_impl_mut(_binding_0);
         }
@@ -2410,6 +2417,22 @@ pub fn visit_item_trait_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ite
     for it in &mut _i.items {
         _visitor.visit_trait_item_mut(it)
     }
+}
+#[cfg(feature = "full")]
+pub fn visit_item_trait_alias_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemTraitAlias) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    _visitor.visit_visibility_mut(&mut _i.vis);
+    tokens_helper(_visitor, &mut _i.trait_token.span);
+    _visitor.visit_ident_mut(&mut _i.ident);
+    _visitor.visit_generics_mut(&mut _i.generics);
+    tokens_helper(_visitor, &mut _i.eq_token.spans);
+    for mut el in Punctuated::pairs_mut(&mut _i.bounds) {
+        let it = el.value_mut();
+        _visitor.visit_type_param_bound_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.semi_token.spans);
 }
 #[cfg(feature = "full")]
 pub fn visit_item_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemType) {

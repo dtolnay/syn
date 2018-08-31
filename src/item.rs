@@ -206,6 +206,20 @@ ast_enum_of_structs! {
             pub items: Vec<TraitItem>,
         }),
 
+        /// A trait alias: `pub trait SharableIterator = Iterator + Sync`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub TraitAlias(ItemTraitAlias {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub trait_token: Token![trait],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub eq_token: Token![=],
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
+            pub semi_token: Token![;],
+        }),
+
         /// An impl block providing trait or associated items: `impl<A> Trait
         /// for Data<A> { ... }`.
         ///
@@ -1478,6 +1492,43 @@ pub mod parsing {
         }
     }
 
+    impl Parse for ItemTraitAlias {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis: Visibility = input.parse()?;
+            let trait_token: Token![trait] = input.parse()?;
+            let ident: Ident = input.parse()?;
+            let mut generics: Generics = input.parse()?;
+            let eq_token: Token![=] = input.parse()?;
+
+            let mut bounds = Punctuated::new();
+            loop {
+                if input.peek(Token![where]) || input.peek(Token![;]) {
+                    break;
+                }
+                bounds.push_value(input.parse()?);
+                if input.peek(Token![where]) || input.peek(Token![;]) {
+                    break;
+                }
+                bounds.push_punct(input.parse()?);
+            }
+
+            generics.where_clause = input.parse()?;
+            let semi_token: Token![;] = input.parse()?;
+
+            Ok(ItemTraitAlias {
+                attrs: attrs,
+                vis: vis,
+                trait_token: trait_token,
+                ident: ident,
+                generics: generics,
+                eq_token: eq_token,
+                bounds: bounds,
+                semi_token: semi_token,
+            })
+        }
+    }
+
     impl Parse for TraitItem {
         fn parse(input: ParseStream) -> Result<Self> {
             let ahead = input.fork();
@@ -2128,6 +2179,20 @@ mod printing {
             self.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(&self.items);
             });
+        }
+    }
+
+    impl ToTokens for ItemTraitAlias {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.trait_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.bounds.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            self.semi_token.to_tokens(tokens);
         }
     }
 

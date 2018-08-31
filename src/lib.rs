@@ -375,9 +375,10 @@ pub use item::{
     ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
     ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
     ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
-    ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemType, ItemUnion,
-    ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod,
-    TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
+    ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
+    ItemUnion, ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
+    TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath,
+    UseRename, UseTree,
 };
 
 #[cfg(feature = "full")]
