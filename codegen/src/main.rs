@@ -209,8 +209,10 @@ mod parsing {
 
     fn peek_tag(input: ParseStream, tag: &str) -> bool {
         let ahead = input.fork();
-        ahead.parse::<Token![#]>().is_ok()
-            && ahead.parse::<Ident>().map(|ident| ident == tag).unwrap_or(false)
+        ahead.parse::<Token![#]>().is_ok() && ahead
+            .parse::<Ident>()
+            .map(|ident| ident == tag)
+            .unwrap_or(false)
     }
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
@@ -361,7 +363,7 @@ mod parsing {
             let mut items = vec![AstItem {
                 ast: enum_item,
                 features: quote!(),
-                eos_full:  false,
+                eos_full: false,
             }];
             items.extend(variants.into_iter().filter_map(|v| v.inner));
             Ok(AstEnumOfStructs(items))
@@ -374,9 +376,9 @@ mod codegen {
     use inflections::Inflect;
     use proc_macro2::{Span, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
+    use syn::ext::IdentExt;
+    use syn::parse::Parser;
     use syn::punctuated::Punctuated;
-    use syn::synom::ext::IdentExt;
-    use syn::synom::Parser;
     use syn::*;
 
     #[derive(Default)]
@@ -434,7 +436,7 @@ mod codegen {
             Type::Macro(TypeMacro { ref mac })
                 if mac.path.segments.last().unwrap().into_value().ident == "Token" =>
             {
-                let is_ident = Ident::parse_any.parse2(mac.tts.clone()).is_ok() ;
+                let is_ident = Ident::parse_any.parse2(mac.tts.clone()).is_ok();
                 let is_underscore = parse2::<Token![_]>(mac.tts.clone()).is_ok();
                 if is_ident && !is_underscore {
                     RelevantType::TokenKeyword(mac.into_token_stream())
