@@ -614,10 +614,7 @@ impl Expr {
             | Expr::Async(ExprAsync { ref mut attrs, .. })
             | Expr::TryBlock(ExprTryBlock { ref mut attrs, .. })
             | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
-            Expr::Verbatim(_) => {
-                // TODO
-                Vec::new()
-            }
+            Expr::Verbatim(_) => Vec::new(),
         }
     }
 }
