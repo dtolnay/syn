@@ -185,8 +185,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
+    use ext::IdentExt;
     use parse::{Parse, ParseStream, Result};
-    use synom::ext::IdentExt;
 
     impl Parse for Variant {
         fn parse(input: ParseStream) -> Result<Self> {

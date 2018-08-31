@@ -118,8 +118,9 @@ pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+
+    use ext::IdentExt;
     use parse::{Error, Parse, ParseStream, Result};
-    use synom::ext::IdentExt;
 
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {

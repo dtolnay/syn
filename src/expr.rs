@@ -1025,11 +1025,11 @@ fn requires_terminator(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use path;
 
-    use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
-    use synom::ext::IdentExt;
+    use ext::IdentExt;
+    use parse::{Parse, ParseStream, Result};
+    use path;
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.

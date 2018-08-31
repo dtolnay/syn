@@ -227,10 +227,11 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+
     #[cfg(feature = "full")]
     use expr;
+    use ext::IdentExt;
     use parse::{Parse, ParseStream, Result};
-    use synom::ext::IdentExt;
 
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {

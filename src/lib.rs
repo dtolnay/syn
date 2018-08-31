@@ -438,6 +438,8 @@ pub use path::{
 
 #[cfg(feature = "parsing")]
 pub mod buffer;
+#[cfg(feature = "parsing")]
+pub mod ext;
 pub mod punctuated;
 #[cfg(feature = "parsing")]
 pub mod synom;
