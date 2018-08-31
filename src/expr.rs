@@ -1029,8 +1029,6 @@ fn requires_terminator(expr: &Expr) -> bool {
 pub mod parsing {
     use super::*;
     use path;
-    #[cfg(feature = "full")]
-    use path::parsing::ty_no_eq_after;
 
     use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
@@ -1819,9 +1817,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn generic_method_argument(input: ParseStream) -> Result<GenericMethodArgument> {
         // TODO parse const generics as well
-        input
-            .parse_synom(ty_no_eq_after)
-            .map(GenericMethodArgument::Type)
+        input.parse().map(GenericMethodArgument::Type)
     }
 
     #[cfg(feature = "full")]

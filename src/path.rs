@@ -261,7 +261,7 @@ pub mod parsing {
                 }
             }
 
-            Ok(GenericArgument::Type(input.parse_synom(ty_no_eq_after)?))
+            input.parse().map(GenericArgument::Type)
         }
     }
 
@@ -452,12 +452,6 @@ pub mod parsing {
             Ok((None, path))
         }
     }
-
-    named!(pub ty_no_eq_after -> Type, do_parse!(
-        ty: syn!(Type) >>
-        not!(punct!(=)) >>
-        (ty)
-    ));
 }
 
 #[cfg(feature = "printing")]
