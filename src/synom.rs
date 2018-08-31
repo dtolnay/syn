@@ -166,61 +166,6 @@ pub use error::{Error, PResult};
 use buffer::{Cursor, TokenBuffer};
 use parse::{Parse, ParseBuffer, ParseStream, Result};
 
-/// Parsing interface implemented by all types that can be parsed in a default
-/// way from a token stream.
-///
-/// Refer to the [module documentation] for details about parsing in Syn.
-///
-/// [module documentation]: index.html
-///
-/// *This trait is available if Syn is built with the `"parsing"` feature.*
-pub trait Synom: Sized {
-    fn parse(input: Cursor) -> PResult<Self>;
-
-    /// A short name of the type being parsed.
-    ///
-    /// The description should only be used for a simple name.  It should not
-    /// contain newlines or sentence-ending punctuation, to facilitate embedding in
-    /// larger user-facing strings.  Syn will use this description when building
-    /// error messages about parse failures.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use syn::buffer::Cursor;
-    /// # use syn::synom::{Synom, PResult};
-    /// #
-    /// struct ExprMacro {
-    ///     // ...
-    /// }
-    ///
-    /// impl Synom for ExprMacro {
-    /// #   fn parse(input: Cursor) -> PResult<Self> { unimplemented!() }
-    ///     // fn parse(...) -> ... { ... }
-    ///
-    ///     fn description() -> Option<&'static str> {
-    ///         // Will result in messages like
-    ///         //
-    ///         //     "failed to parse macro invocation expression: $reason"
-    ///         Some("macro invocation expression")
-    ///     }
-    /// }
-    /// ```
-    fn description() -> Option<&'static str> {
-        None
-    }
-}
-
-impl<T: Parse> Synom for T {
-    fn parse(input: Cursor) -> PResult<Self> {
-        let unexpected = Rc::new(Cell::new(None));
-        let state = ParseBuffer::new(Span::call_site(), input, unexpected);
-        let node = <T as Parse>::parse(&state)?;
-        state.check_unexpected()?;
-        Ok((node, state.cursor()))
-    }
-}
-
 impl Parse for TokenStream {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step_cursor(|cursor| Ok((cursor.token_stream(), Cursor::empty())))
