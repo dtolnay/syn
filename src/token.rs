@@ -44,54 +44,48 @@
 //!
 //! # Parsing
 //!
-//! These tokens can be parsed using the [`Synom`] trait and the parser
-//! combinator macros [`punct!`], [`keyword!`], [`parens!`], [`braces!`], and
-//! [`brackets!`].
+//! Keywords and punctuation can be parsed through the [`ParseStream::parse`]
+//! method. Delimiter tokens are parsed using the [`parenthesized!`],
+//! [`bracketed!`] and [`braced!`] macros.
 //!
-//! [`Synom`]: ../synom/trait.Synom.html
-//! [`punct!`]: ../macro.punct.html
-//! [`keyword!`]: ../macro.keyword.html
-//! [`parens!`]: ../macro.parens.html
-//! [`braces!`]: ../macro.braces.html
-//! [`brackets!`]: ../macro.brackets.html
+//! [`ParseStream::parse`]: ../parse/struct.ParseBuffer.html#method.parse
+//! [`parenthesized!`]: ../macro.parenthesized.html
+//! [`bracketed!`]: ../macro.bracketed.html
+//! [`braced!`]: ../macro.braced.html
 //!
 //! ```
-//! #[macro_use]
 //! extern crate syn;
 //!
-//! use syn::synom::Synom;
-//! use syn::{Attribute, Visibility, Ident, Type, Expr};
+//! use syn::Attribute;
+//! use syn::parse::{Parse, ParseStream, Result};
 //! #
 //! # struct ItemStatic;
-//! # use syn::ItemStatic as SynItemStatic;
 //!
 //! // Parse the ItemStatic struct shown above.
-//! impl Synom for ItemStatic {
-//!     named!(parse -> Self, do_parse!(
-//! #       (ItemStatic)
-//! #   ));
+//! impl Parse for ItemStatic {
+//!     fn parse(input: ParseStream) -> Result<Self> {
+//! #       Ok(ItemStatic)
+//! #   }
 //! # }
 //! #
 //! # mod example {
-//! #   use super::*;
-//! #   use super::SynItemStatic as ItemStatic;
+//! #    use super::*;
+//! #    use syn::ItemStatic;
 //! #
-//! #   named!(parse -> ItemStatic, do_parse!(
-//!         attrs: many0!(Attribute::old_parse_outer) >>
-//!         vis: syn!(Visibility) >>
-//!         static_token: keyword!(static) >>
-//!         mutability: option!(keyword!(mut)) >>
-//!         ident: syn!(Ident) >>
-//!         colon_token: punct!(:) >>
-//!         ty: syn!(Type) >>
-//!         eq_token: punct!(=) >>
-//!         expr: syn!(Expr) >>
-//!         semi_token: punct!(;) >>
-//!         (ItemStatic {
-//!             attrs, vis, static_token, mutability, ident, colon_token,
-//!             ty: Box::new(ty), eq_token, expr: Box::new(expr), semi_token,
-//!         })
-//!     ));
+//! #    fn parse(input: ParseStream) -> Result<ItemStatic> {
+//!        Ok(ItemStatic {
+//!            attrs: input.call(Attribute::parse_outer)?,
+//!            vis: input.parse()?,
+//!            static_token: input.parse()?,
+//!            mutability: input.parse()?,
+//!            ident: input.parse()?,
+//!            colon_token: input.parse()?,
+//!            ty: input.parse()?,
+//!            eq_token: input.parse()?,
+//!            expr: input.parse()?,
+//!            semi_token: input.parse()?,
+//!        })
+//!    }
 //! }
 //! #
 //! # fn main() {}
