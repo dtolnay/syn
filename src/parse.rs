@@ -226,15 +226,16 @@ impl<'c, 'a> StepCursor<'c, 'a> {
 }
 
 fn skip(input: ParseStream) -> bool {
-    input.step(|cursor| {
-        if let Some((_lifetime, rest)) = cursor.lifetime() {
-            Ok((true, rest))
-        } else if let Some((_token, rest)) = cursor.token_tree() {
-            Ok((true, rest))
-        } else {
-            Ok((false, *cursor))
-        }
-    }).unwrap()
+    input
+        .step(|cursor| {
+            if let Some((_lifetime, rest)) = cursor.lifetime() {
+                Ok((true, rest))
+            } else if let Some((_token, rest)) = cursor.token_tree() {
+                Ok((true, rest))
+            } else {
+                Ok((false, *cursor))
+            }
+        }).unwrap()
 }
 
 impl<'a> private<ParseBuffer<'a>> {
@@ -375,7 +376,7 @@ impl<T: Parse + Token> Parse for Option<T> {
         }
     }
 }
- 
+
 impl Parse for TokenStream {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| Ok((cursor.token_stream(), Cursor::empty())))

@@ -30,7 +30,8 @@ impl<'a> ParseBuffer<'a> {
         self.step(|cursor| {
             if let Some((content, span, rest)) = cursor.group(delimiter) {
                 let unexpected = private::<ParseBuffer>::get_unexpected(self);
-                let content = private::<ParseBuffer>::new(span, cursor.advance(content), unexpected);
+                let content =
+                    private::<ParseBuffer>::new(span, cursor.advance(content), unexpected);
                 Ok(((span, content), rest))
             } else {
                 let message = match delimiter {

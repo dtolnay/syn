@@ -88,7 +88,7 @@ macro_rules! parse_quote {
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Synom.
 
-use parse::{Parse, Parser, ParseStream, Result};
+use parse::{Parse, ParseStream, Parser, Result};
 use proc_macro2::TokenStream;
 
 // Not public API.
