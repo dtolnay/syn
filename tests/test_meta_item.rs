@@ -11,8 +11,8 @@
 extern crate proc_macro2;
 extern crate syn;
 
-use proc_macro2::{Ident, Literal, Span, TokenStream};
-use syn::buffer::TokenBuffer;
+use proc_macro2::{Ident, Literal, Span};
+use syn::synom::Parser;
 use syn::*;
 
 #[macro_use]
@@ -168,14 +168,8 @@ fn test_meta_item_multiple() {
 }
 
 fn run_test<T: Into<Meta>>(input: &str, expected: T) {
-    let tokens = input.parse::<TokenStream>().unwrap();
-    let buf = TokenBuffer::new2(tokens);
-    let attr = match Attribute::old_parse_outer(buf.begin()) {
-        Ok((e, rest)) => {
-            assert!(rest.eof());
-            e
-        }
-        Err(err) => panic!(err.to_string()),
-    };
+    let attrs = Attribute::parse_outer.parse_str(input).unwrap();
+    assert_eq!(attrs.len(), 1);
+    let attr = attrs.into_iter().next().unwrap();
     assert_eq!(expected.into(), attr.interpret_meta().unwrap());
 }
