@@ -397,17 +397,6 @@ macro_rules! define_delimiters {
                 {
                     printing::delim($token, &self.span, tokens, f);
                 }
-
-                #[cfg(feature = "parsing")]
-                pub fn parse<F, R>(
-                    tokens: $crate::buffer::Cursor,
-                    f: F,
-                ) -> $crate::synom::PResult<($name, R)>
-                where
-                    F: FnOnce($crate::buffer::Cursor) -> $crate::synom::PResult<R>,
-                {
-                    parsing::delim($token, tokens, $name, f)
-                }
             }
 
             #[cfg(feature = "parsing")]
@@ -856,13 +845,11 @@ ident_from_token!(extern);
 
 #[cfg(feature = "parsing")]
 mod parsing {
-    use proc_macro2::{Delimiter, Spacing, Span};
+    use proc_macro2::{Spacing, Span};
 
-    use buffer::Cursor;
     use error::{Error, Result};
     use parse::ParseStream;
     use span::FromSpans;
-    use synom::PResult;
 
     pub fn keyword(input: ParseStream, token: &str) -> Result<Span> {
         input.step_cursor(|cursor| {
@@ -900,40 +887,6 @@ mod parsing {
 
             Err(Error::new(spans[0], format!("expected `{}`", token)))
         })
-    }
-
-    pub fn delim<'a, F, R, T>(
-        delim: &str,
-        tokens: Cursor<'a>,
-        new: fn(Span) -> T,
-        f: F,
-    ) -> PResult<'a, (T, R)>
-    where
-        F: FnOnce(Cursor) -> PResult<R>,
-    {
-        // NOTE: We should support none-delimited sequences here.
-        let delim = match delim {
-            "(" => Delimiter::Parenthesis,
-            "{" => Delimiter::Brace,
-            "[" => Delimiter::Bracket,
-            " " => Delimiter::None,
-            _ => panic!("unknown delimiter: {}", delim),
-        };
-
-        if let Some((inside, span, rest)) = tokens.group(delim) {
-            match f(inside) {
-                Ok((ret, remaining)) => {
-                    if remaining.eof() {
-                        Ok(((new(span), ret), rest))
-                    } else {
-                        Err(Error::new(remaining.span(), "unexpected token"))
-                    }
-                }
-                Err(err) => Err(err),
-            }
-        } else {
-            Err(Error::new(tokens.span(), "expected delimiter"))
-        }
     }
 }
 
