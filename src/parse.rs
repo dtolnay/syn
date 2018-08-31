@@ -8,21 +8,19 @@
 
 //! Parsing interface for parsing a token stream into a syntax tree node.
 //!
-//! Parsing in Syn is built on parser functions that take in a [`Cursor`] and
-//! produce a [`PResult<T>`] where `T` is some syntax tree node. `Cursor` is a
-//! cheaply copyable cursor over a range of tokens in a token stream, and
-//! `PResult` is a result that packages together a parsed syntax tree node `T`
-//! with a stream of remaining unparsed tokens after `T` represented as another
-//! `Cursor`, or an [`Error`] if parsing failed.
+//! Parsing in Syn is built on parser functions that take in a [`ParseStream`]
+//! and produce a [`Result<T>`] where `T` is some syntax tree node. Underlying
+//! these parser functions is a lower level mechanism built around the
+//! [`Cursor`] type. `Cursor` is a cheaply copyable cursor over a range of
+//! tokens in a token stream.
 //!
+//! [`ParseStream`]: type.ParseStream.html
+//! [`Result<T>`]: type.Result.html
 //! [`Cursor`]: ../buffer/index.html
-//! [`PResult<T>`]: type.PResult.html
-//! [`Error`]: struct.Error.html
 //!
-//! This `Cursor`- and `PResult`-based interface is convenient for parser
-//! combinators and parser implementations, but not necessarily when you just
-//! have some tokens that you want to parse. For that we expose the following
-//! two entry points.
+//! The `ParseStream`-based interface is convenient for parser implementations,
+//! but not necessarily when you just have some tokens that you want to parse.
+//! For that we expose the following two entry points.
 //!
 //! ## The `syn::parse*` functions
 //!
@@ -64,7 +62,7 @@
 //! [`Attribute`]: ../struct.Attribute.html
 //! [`Punctuated`]: ../punctuated/index.html
 //!
-//! The `Synom` trait is not implemented in these cases because there is no good
+//! The `Parse` trait is not implemented in these cases because there is no good
 //! behavior to consider the default.
 //!
 //! ```ignore
@@ -74,7 +72,7 @@
 //! ```
 //!
 //! In these cases the types provide a choice of parser functions rather than a
-//! single `Synom` implementation, and those parser functions can be invoked
+//! single `Parse` implementation, and those parser functions can be invoked
 //! through the [`Parser`] trait.
 //!
 //! [`Parser`]: trait.Parser.html
@@ -114,39 +112,7 @@
 //! # fn main() {}
 //! ```
 //!
-//! # Implementing a parser function
-//!
-//! Parser functions are usually implemented using the [`nom`]-style parser
-//! combinator macros provided by Syn, but may also be implemented without
-//! macros be using the low-level [`Cursor`] API directly.
-//!
-//! [`nom`]: https://github.com/Geal/nom
-//!
-//! The following parser combinator macros are available and a `Synom` parsing
-//! example is provided for each one.
-//!
-//! - [`alt!`](../macro.alt.html)
-//! - [`braces!`](../macro.braces.html)
-//! - [`brackets!`](../macro.brackets.html)
-//! - [`call!`](../macro.call.html)
-//! - [`cond!`](../macro.cond.html)
-//! - [`cond_reduce!`](../macro.cond_reduce.html)
-//! - [`custom_keyword!`](../macro.custom_keyword.html)
-//! - [`do_parse!`](../macro.do_parse.html)
-//! - [`epsilon!`](../macro.epsilon.html)
-//! - [`input_end!`](../macro.input_end.html)
-//! - [`keyword!`](../macro.keyword.html)
-//! - [`many0!`](../macro.many0.html)
-//! - [`map!`](../macro.map.html)
-//! - [`not!`](../macro.not.html)
-//! - [`option!`](../macro.option.html)
-//! - [`parens!`](../macro.parens.html)
-//! - [`punct!`](../macro.punct.html)
-//! - [`reject!`](../macro.reject.html)
-//! - [`switch!`](../macro.switch.html)
-//! - [`syn!`](../macro.syn.html)
-//! - [`tuple!`](../macro.tuple.html)
-//! - [`value!`](../macro.value.html)
+//! ---
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
