@@ -1122,12 +1122,21 @@ pub mod parsing {
                         break;
                     }
                 }
-                lhs = Expr::Binary(ExprBinary {
-                    attrs: Vec::new(),
-                    left: Box::new(lhs),
-                    op: op,
-                    right: Box::new(rhs),
-                });
+                lhs = if precedence == Precedence::Assign {
+                    Expr::AssignOp(ExprAssignOp {
+                        attrs: Vec::new(),
+                        left: Box::new(lhs),
+                        op: op,
+                        right: Box::new(rhs),
+                    })
+                } else {
+                    Expr::Binary(ExprBinary {
+                        attrs: Vec::new(),
+                        left: Box::new(lhs),
+                        op: op,
+                        right: Box::new(rhs),
+                    })
+                };
             } else if Precedence::Assign >= base
                 && input.peek(Token![=])
                 && !input.peek(Token![==])
