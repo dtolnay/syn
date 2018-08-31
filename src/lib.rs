@@ -804,7 +804,7 @@ pub fn parse_file(mut content: &str) -> Result<File, Error> {
 #[macro_export]
 macro_rules! parse_macro_input {
     ($tokenstream:ident as $ty:ty) => {
-        match $crate::next::parse::<$ty>($tokenstream) {
+        match $crate::parse::<$ty>($tokenstream) {
             $crate::export::Ok(data) => data,
             $crate::export::Err(err) => {
                 return $crate::export::TokenStream::from(err.into_compile_error());
