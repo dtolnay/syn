@@ -2573,7 +2573,7 @@ pub mod parsing {
             return Ok(Stmt::Semi(e, input.parse()?));
         }
 
-        if allow_nosemi && !requires_terminator(&e) {
+        if allow_nosemi || !requires_terminator(&e) {
             Ok(Stmt::Expr(e))
         } else {
             Err(input.error("expected semicolon"))
