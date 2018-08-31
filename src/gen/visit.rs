@@ -507,7 +507,6 @@ pub trait Visit<'ast> {
     fn visit_label(&mut self, i: &'ast Label) {
         visit_label(self, i)
     }
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_lifetime(&mut self, i: &'ast Lifetime) {
         visit_lifetime(self, i)
     }
@@ -2534,9 +2533,8 @@ pub fn visit_label<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast La
     _visitor.visit_lifetime(&_i.name);
     tokens_helper(_visitor, &_i.colon_token.spans);
 }
-#[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_lifetime<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lifetime) {
-    skip!(_i.apostrophe);
+    _visitor.visit_span(&_i.apostrophe);
     _visitor.visit_ident(&_i.ident);
 }
 #[cfg(any(feature = "full", feature = "derive"))]

@@ -507,7 +507,6 @@ pub trait Fold {
     fn fold_label(&mut self, i: Label) -> Label {
         fold_label(self, i)
     }
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_lifetime(&mut self, i: Lifetime) -> Lifetime {
         fold_lifetime(self, i)
     }
@@ -2253,10 +2252,9 @@ pub fn fold_label<V: Fold + ?Sized>(_visitor: &mut V, _i: Label) -> Label {
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
     }
 }
-#[cfg(any(feature = "full", feature = "derive"))]
 pub fn fold_lifetime<V: Fold + ?Sized>(_visitor: &mut V, _i: Lifetime) -> Lifetime {
     Lifetime {
-        apostrophe: _i.apostrophe,
+        apostrophe: _visitor.fold_span(_i.apostrophe),
         ident: _visitor.fold_ident(_i.ident),
     }
 }
