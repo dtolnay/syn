@@ -439,14 +439,7 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             input.step_cursor(|cursor| {
                 match cursor.literal() {
-                    Some((lit, rest)) => {
-                        if lit.to_string().starts_with('/') {
-                            // Doc comment literal which is not a Syn literal
-                            parse_error()
-                        } else {
-                            Ok((Lit::new(lit), rest))
-                        }
-                    }
+                    Some((lit, rest)) => Ok((Lit::new(lit), rest)),
                     _ => match cursor.ident() {
                         Some((ident, rest)) => Ok((
                             Lit::Bool(LitBool {
