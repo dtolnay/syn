@@ -1,7 +1,9 @@
 use proc_macro2::{Delimiter, Span};
 
 use error::Result;
-use parse::{ParseBuffer, ParseStream};
+use parse::ParseBuffer;
+#[cfg(any(feature = "full", feature = "derive"))]
+use parse::ParseStream;
 use private;
 use token;
 
@@ -20,6 +22,7 @@ pub struct Brackets<'a> {
     pub content: ParseBuffer<'a>,
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 pub struct Group<'a> {
     pub token: token::Group,
     pub content: ParseBuffer<'a>,
@@ -76,6 +79,7 @@ impl<'a> ParseBuffer<'a> {
     }
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 impl private {
     pub fn parse_group(input: ParseStream) -> Result<Group> {
         input.parse_delimited(Delimiter::None)

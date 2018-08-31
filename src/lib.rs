@@ -590,6 +590,7 @@ mod print;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#[cfg(any(feature = "parsing", feature = "full", feature = "derive"))]
 #[allow(non_camel_case_types)]
 struct private;
 
