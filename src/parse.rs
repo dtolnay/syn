@@ -86,11 +86,11 @@
 //! # extern crate proc_macro2;
 //! # use proc_macro2::TokenStream;
 //! #
-//! use syn::synom::Parser;
+//! use syn::parse::Parser;
 //! use syn::punctuated::Punctuated;
 //! use syn::{PathSegment, Expr, Attribute};
 //!
-//! # fn run_parsers() -> Result<(), syn::synom::Error> {
+//! # fn run_parsers() -> Result<(), syn::parse::Error> {
 //! #     let tokens = TokenStream::new().into();
 //! // Parse a nonempty sequence of path segments separated by `::` punctuation
 //! // with no trailing punctuation.
@@ -105,8 +105,8 @@
 //!
 //! #     let tokens = TokenStream::new().into();
 //! // Parse zero or more outer attributes but not inner attributes.
-//! named!(outer_attrs -> Vec<Attribute>, many0!(Attribute::old_parse_outer));
-//! let attrs = outer_attrs.parse(tokens)?;
+//! let parser = Attribute::parse_outer;
+//! let attrs = parser.parse(tokens)?;
 //! #
 //! #     Ok(())
 //! # }
