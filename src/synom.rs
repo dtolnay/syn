@@ -318,7 +318,11 @@ where
         let state = ParseBuffer::new(Span::call_site(), buf.begin(), unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;
-        Ok(node)
+        if state.is_empty() {
+            Ok(node)
+        } else {
+            Err(state.error("unexpected token"))
+        }
     }
 }
 
