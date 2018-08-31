@@ -433,7 +433,6 @@ pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
 pub mod parsing {
     use super::*;
     use parse::{Parse, ParseStream, Result};
-    use parse_error;
 
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -448,13 +447,13 @@ pub mod parsing {
                                 } else if ident == "false" {
                                     false
                                 } else {
-                                    return parse_error();
+                                    return Err(cursor.error("expected literal"));
                                 },
                                 span: ident.span(),
                             }),
                             rest,
                         )),
-                        _ => parse_error(),
+                        _ => Err(cursor.error("expected literal"))
                     },
                 }
             })

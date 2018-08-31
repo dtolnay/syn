@@ -111,10 +111,3 @@ impl From<LexError> for Error {
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
 pub type PResult<'a, O> = std::result::Result<(O, Cursor<'a>), Error>;
-
-/// An error with a default error message.
-///
-/// NOTE: We should provide better error messages in the future.
-pub fn parse_error<'a, O>() -> PResult<'a, O> {
-    Err(Error::new(Span::call_site(), "parse error"))
-}

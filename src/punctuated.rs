@@ -40,9 +40,7 @@ use std::vec;
 #[cfg(feature = "parsing")]
 use buffer::Cursor;
 #[cfg(feature = "parsing")]
-use parse::{Parse, ParseStream, Result};
-#[cfg(feature = "parsing")]
-use parse_error;
+use parse::{Error, Parse, ParseStream, Result};
 #[cfg(feature = "parsing")]
 use synom::{PResult, Synom};
 
@@ -705,7 +703,9 @@ where
         parse: fn(Cursor) -> PResult<T>,
     ) -> PResult<Self> {
         match Self::parse(input, parse, false) {
-            Ok((ref b, _)) if b.is_empty() => parse_error(),
+            Ok((ref b, rest)) if b.is_empty() => {
+                Err(Error::new(rest.span(), "unexpected token"))
+            }
             other => other,
         }
     }
@@ -723,7 +723,9 @@ where
         parse: fn(Cursor) -> PResult<T>,
     ) -> PResult<Self> {
         match Self::parse(input, parse, true) {
-            Ok((ref b, _)) if b.is_empty() => parse_error(),
+            Ok((ref b, rest)) if b.is_empty() => {
+                Err(Error::new(rest.span(), "unexpected token"))
+            }
             other => other,
         }
     }
@@ -740,7 +742,7 @@ where
             Err(_) => Ok((res, input)),
             Ok((o, i)) => {
                 if i == input {
-                    return parse_error();
+                    return Err(Error::new(input.span(), "unexpected token"));
                 }
                 input = i;
                 res.push_value(o);

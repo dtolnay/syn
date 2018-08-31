@@ -592,11 +592,6 @@ mod error;
 #[cfg(feature = "parsing")]
 use error::Error;
 
-// Not public API.
-#[cfg(feature = "parsing")]
-#[doc(hidden)]
-pub use error::parse_error;
-
 /// Parse tokens of source code into the chosen syntax tree node.
 ///
 /// This is preferred over parsing a string because tokens are able to preserve

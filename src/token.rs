@@ -861,7 +861,6 @@ mod parsing {
     use buffer::Cursor;
     use error::{Error, Result};
     use parse::ParseStream;
-    use parse_error;
     use span::FromSpans;
     use synom::PResult;
 
@@ -925,13 +924,16 @@ mod parsing {
             match f(inside) {
                 Ok((ret, remaining)) => {
                     if remaining.eof() {
-                        return Ok(((new(span), ret), rest));
+                        Ok(((new(span), ret), rest))
+                    } else {
+                        Err(Error::new(remaining.span(), "unexpected token"))
                     }
                 }
-                Err(err) => return Err(err),
+                Err(err) => Err(err),
             }
+        } else {
+            Err(Error::new(tokens.span(), "expected delimiter"))
         }
-        parse_error()
     }
 }
 
