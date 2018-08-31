@@ -38,11 +38,7 @@ use std::slice;
 use std::vec;
 
 #[cfg(feature = "parsing")]
-use buffer::Cursor;
-#[cfg(feature = "parsing")]
-use parse::{Error, Parse, ParseStream, Result};
-#[cfg(feature = "parsing")]
-use synom::{PResult, Synom};
+use parse::{Parse, ParseStream, Result};
 
 /// A punctuated sequence of syntax tree nodes of type `T` separated by
 /// punctuation of type `P`.
@@ -656,133 +652,9 @@ impl<T, P> IndexMut<usize> for Punctuated<T, P> {
 #[cfg(feature = "parsing")]
 impl<T, P> Punctuated<T, P>
 where
-    T: Synom,
-    P: Synom,
-{
-    /// Parse **zero or more** syntax tree nodes with punctuation in between and
-    /// **no trailing** punctuation.
-    pub fn parse_separated(input: Cursor) -> PResult<Self> {
-        Self::parse_separated_with(input, T::parse)
-    }
-
-    /// Parse **one or more** syntax tree nodes with punctuation in bewteen and
-    /// **no trailing** punctuation.
-    /// allowing trailing punctuation.
-    pub fn parse_separated_nonempty(input: Cursor) -> PResult<Self> {
-        Self::parse_separated_nonempty_with(input, T::parse)
-    }
-
-    /// Parse **zero or more** syntax tree nodes with punctuation in between and
-    /// **optional trailing** punctuation.
-    pub fn parse_terminated(input: Cursor) -> PResult<Self> {
-        Self::parse_terminated_with(input, T::parse)
-    }
-
-    /// Parse **one or more** syntax tree nodes with punctuation in between and
-    /// **optional trailing** punctuation.
-    pub fn parse_terminated_nonempty(input: Cursor) -> PResult<Self> {
-        Self::parse_terminated_nonempty_with(input, T::parse)
-    }
-}
-
-#[cfg(feature = "parsing")]
-impl<T, P> Punctuated<T, P>
-where
-    P: Synom,
-{
-    /// Parse **zero or more** syntax tree nodes using the given parser with
-    /// punctuation in between and **no trailing** punctuation.
-    pub fn parse_separated_with(input: Cursor, parse: fn(Cursor) -> PResult<T>) -> PResult<Self> {
-        Self::parse(input, parse, false)
-    }
-
-    /// Parse **one or more** syntax tree nodes using the given parser with
-    /// punctuation in between and **no trailing** punctuation.
-    pub fn parse_separated_nonempty_with(
-        input: Cursor,
-        parse: fn(Cursor) -> PResult<T>,
-    ) -> PResult<Self> {
-        match Self::parse(input, parse, false) {
-            Ok((ref b, rest)) if b.is_empty() => {
-                Err(Error::new(rest.span(), "unexpected token"))
-            }
-            other => other,
-        }
-    }
-
-    /// Parse **zero or more** syntax tree nodes using the given parser with
-    /// punctuation in between and **optional trailing** punctuation.
-    pub fn parse_terminated_with(input: Cursor, parse: fn(Cursor) -> PResult<T>) -> PResult<Self> {
-        Self::parse(input, parse, true)
-    }
-
-    /// Parse **one or more** syntax tree nodes using the given parser with
-    /// punctuation in between and **optional trailing** punctuation.
-    pub fn parse_terminated_nonempty_with(
-        input: Cursor,
-        parse: fn(Cursor) -> PResult<T>,
-    ) -> PResult<Self> {
-        match Self::parse(input, parse, true) {
-            Ok((ref b, rest)) if b.is_empty() => {
-                Err(Error::new(rest.span(), "unexpected token"))
-            }
-            other => other,
-        }
-    }
-
-    fn parse(
-        mut input: Cursor,
-        parse: fn(Cursor) -> PResult<T>,
-        terminated: bool,
-    ) -> PResult<Self> {
-        let mut res = Punctuated::new();
-
-        // get the first element
-        match parse(input) {
-            Err(_) => Ok((res, input)),
-            Ok((o, i)) => {
-                if i == input {
-                    return Err(Error::new(input.span(), "unexpected token"));
-                }
-                input = i;
-                res.push_value(o);
-
-                // get the separator first
-                while let Ok((s, i2)) = P::parse(input) {
-                    if i2 == input {
-                        break;
-                    }
-
-                    // get the element next
-                    if let Ok((o3, i3)) = parse(i2) {
-                        if i3 == i2 {
-                            break;
-                        }
-                        res.push_punct(s);
-                        res.push_value(o3);
-                        input = i3;
-                    } else {
-                        break;
-                    }
-                }
-                if terminated {
-                    if let Ok((sep, after)) = P::parse(input) {
-                        res.push_punct(sep);
-                        input = after;
-                    }
-                }
-                Ok((res, input))
-            }
-        }
-    }
-}
-
-#[cfg(feature = "parsing")]
-impl<T, P> Punctuated<T, P>
-where
     P: Parse,
 {
-    pub fn parse_terminated2(
+    pub fn parse_terminated(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
     ) -> Result<Self> {
