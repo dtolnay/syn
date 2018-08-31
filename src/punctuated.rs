@@ -466,8 +466,8 @@ struct PrivateIter<'a, T: 'a, P: 'a> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl<'a, T> private<Iter<'a, T>> {
-    pub fn empty() -> Iter<'a, T> {
+impl private {
+    pub fn empty_punctuated_iter<'a, T>() -> Iter<'a, T> {
         Iter {
             inner: Box::new(iter::empty()),
         }
@@ -520,8 +520,8 @@ struct PrivateIterMut<'a, T: 'a, P: 'a> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl<'a, T> private<IterMut<'a, T>> {
-    pub fn empty() -> IterMut<'a, T> {
+impl private {
+    pub fn empty_punctuated_iter_mut<'a, T>() -> IterMut<'a, T> {
         IterMut {
             inner: Box::new(iter::empty()),
         }

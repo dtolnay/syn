@@ -29,9 +29,9 @@ impl<'a> ParseBuffer<'a> {
     fn parse_delimited(&self, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
         self.step(|cursor| {
             if let Some((content, span, rest)) = cursor.group(delimiter) {
-                let unexpected = private::<ParseBuffer>::get_unexpected(self);
+                let unexpected = private::get_unexpected(self);
                 let content =
-                    private::<ParseBuffer>::new(span, cursor.advance(content), unexpected);
+                    private::new_parse_buffer(span, cursor.advance(content), unexpected);
                 Ok(((span, content), rest))
             } else {
                 let message = match delimiter {
@@ -76,7 +76,7 @@ impl<'a> ParseBuffer<'a> {
     }
 }
 
-impl<'a> private<ParseBuffer<'a>> {
+impl private {
     pub fn parse_group(input: ParseStream) -> Result<Group> {
         input.parse_delimited(Delimiter::None)
             .map(|(span, content)| Group {

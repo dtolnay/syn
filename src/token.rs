@@ -122,7 +122,7 @@ use lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
 use lookahead;
 #[cfg(feature = "parsing")]
-use parse::{Lookahead1, Parse, ParseBuffer, ParseStream};
+use parse::{Lookahead1, Parse, ParseStream};
 use span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
@@ -153,7 +153,7 @@ macro_rules! impl_token {
                 let scope = Span::call_site();
                 let cursor = lookahead.cursor();
                 let unexpected = Rc::new(Cell::new(None));
-                ::private::<ParseBuffer>::new(scope, cursor, unexpected)
+                ::private::new_parse_buffer(scope, cursor, unexpected)
                     .parse::<Self>()
                     .is_ok()
             }

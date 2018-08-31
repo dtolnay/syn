@@ -238,8 +238,8 @@ fn skip(input: ParseStream) -> bool {
         }).unwrap()
 }
 
-impl<'a> private<ParseBuffer<'a>> {
-    pub fn new(scope: Span, cursor: Cursor, unexpected: Rc<Cell<Option<Span>>>) -> ParseBuffer {
+impl private {
+    pub fn new_parse_buffer(scope: Span, cursor: Cursor, unexpected: Rc<Cell<Option<Span>>>) -> ParseBuffer {
         let extend = unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) };
         ParseBuffer {
             scope: scope,
@@ -470,7 +470,7 @@ where
     fn parse2(self, tokens: TokenStream) -> Result<T> {
         let buf = TokenBuffer::new2(tokens);
         let unexpected = Rc::new(Cell::new(None));
-        let state = private::<ParseBuffer>::new(Span::call_site(), buf.begin(), unexpected);
+        let state = private::new_parse_buffer(Span::call_site(), buf.begin(), unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;
         if state.is_empty() {

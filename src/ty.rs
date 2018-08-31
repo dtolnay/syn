@@ -250,7 +250,7 @@ ast_enum! {
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseBuffer, ParseStream, Result};
+    use parse::{Parse, ParseStream, Result};
     use path;
 
     impl Parse for Type {
@@ -677,7 +677,7 @@ pub mod parsing {
 
     impl Parse for TypeGroup {
         fn parse(input: ParseStream) -> Result<Self> {
-            let group = private::<ParseBuffer>::parse_group(input)?;
+            let group = private::parse_group(input)?;
             Ok(TypeGroup {
                 group_token: group.token,
                 elem: group.content.parse()?,
