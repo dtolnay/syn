@@ -1,5 +1,5 @@
 #![recursion_limit = "128"]
-#![feature(proc_macro)]
+#![feature(proc_macro_diagnostic)]
 
 #[macro_use]
 extern crate syn;
@@ -8,7 +8,7 @@ extern crate quote;
 extern crate proc_macro;
 
 use syn::{Visibility, Ident, Type, Expr};
-use syn::synom::Synom;
+use syn::parse::{Parse, ParseStream, Result};
 use syn::spanned::Spanned;
 use proc_macro::TokenStream;
 
@@ -31,19 +31,19 @@ struct LazyStatic {
     init: Expr,
 }
 
-impl Synom for LazyStatic {
-    named!(parse -> Self, do_parse!(
-        visibility: syn!(Visibility) >>
-        keyword!(static) >>
-        keyword!(ref) >>
-        name: syn!(Ident) >>
-        punct!(:) >>
-        ty: syn!(Type) >>
-        punct!(=) >>
-        init: syn!(Expr) >>
-        punct!(;) >>
-        (LazyStatic { visibility, name, ty, init })
-    ));
+impl Parse for LazyStatic {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let visibility: Visibility = input.parse()?;
+        input.parse::<Token![static]>()?;
+        input.parse::<Token![ref]>()?;
+        let name: Ident = input.parse()?;
+        input.parse::<Token![:]>()?;
+        let ty: Type = input.parse()?;
+        input.parse::<Token![=]>()?;
+        let init: Expr = input.parse()?;
+        input.parse::<Token![;]>()?;
+        Ok(LazyStatic { visibility, name, ty, init })
+    }
 }
 
 #[proc_macro]

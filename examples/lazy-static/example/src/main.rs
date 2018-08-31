@@ -1,5 +1,3 @@
-#![feature(proc_macro)]
-
 extern crate lazy_static;
 extern crate regex;
 
