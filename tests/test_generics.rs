@@ -112,18 +112,12 @@ fn test_split_for_impl() {
 fn test_ty_param_bound() {
     let tokens = quote!('a);
     let expected = TypeParamBound::Lifetime(Lifetime::new("'a", Span::call_site()));
-    assert_eq!(
-        expected,
-        syn::parse2::<TypeParamBound>(tokens).unwrap()
-    );
+    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
 
     let tokens = quote!('_);
     println!("{:?}", tokens);
     let expected = TypeParamBound::Lifetime(Lifetime::new("'_", Span::call_site()));
-    assert_eq!(
-        expected,
-        syn::parse2::<TypeParamBound>(tokens).unwrap()
-    );
+    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
 
     let tokens = quote!(Debug);
     let expected = TypeParamBound::Trait(TraitBound {
@@ -132,10 +126,7 @@ fn test_ty_param_bound() {
         lifetimes: None,
         path: ident("Debug").into(),
     });
-    assert_eq!(
-        expected,
-        syn::parse2::<TypeParamBound>(tokens).unwrap()
-    );
+    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
 
     let tokens = quote!(?Sized);
     let expected = TypeParamBound::Trait(TraitBound {
@@ -144,10 +135,7 @@ fn test_ty_param_bound() {
         lifetimes: None,
         path: ident("Sized").into(),
     });
-    assert_eq!(
-        expected,
-        syn::parse2::<TypeParamBound>(tokens).unwrap()
-    );
+    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
 }
 
 #[test]

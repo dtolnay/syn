@@ -1610,7 +1610,8 @@ pub mod parsing {
 
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
-                while !input.peek(Token![where]) && !input.peek(Token![=]) && !input.peek(Token![;]) {
+                while !input.peek(Token![where]) && !input.peek(Token![=]) && !input.peek(Token![;])
+                {
                     if !bounds.is_empty() {
                         bounds.push_punct(input.parse()?);
                     }

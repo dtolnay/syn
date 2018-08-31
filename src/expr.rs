@@ -1068,8 +1068,22 @@ pub mod parsing {
                 BinOp::BitAnd(_) => Precedence::BitAnd,
                 BinOp::BitOr(_) => Precedence::BitOr,
                 BinOp::Shl(_) | BinOp::Shr(_) => Precedence::Shift,
-                BinOp::Eq(_) | BinOp::Lt(_) | BinOp::Le(_) | BinOp::Ne(_) | BinOp::Ge(_) | BinOp::Gt(_) => Precedence::Compare,
-                BinOp::AddEq(_) | BinOp::SubEq(_) | BinOp::MulEq(_) | BinOp::DivEq(_) | BinOp::RemEq(_) | BinOp::BitXorEq(_) | BinOp::BitAndEq(_) | BinOp::BitOrEq(_) | BinOp::ShlEq(_) | BinOp::ShrEq(_) => Precedence::Assign,
+                BinOp::Eq(_)
+                | BinOp::Lt(_)
+                | BinOp::Le(_)
+                | BinOp::Ne(_)
+                | BinOp::Ge(_)
+                | BinOp::Gt(_) => Precedence::Compare,
+                BinOp::AddEq(_)
+                | BinOp::SubEq(_)
+                | BinOp::MulEq(_)
+                | BinOp::DivEq(_)
+                | BinOp::RemEq(_)
+                | BinOp::BitXorEq(_)
+                | BinOp::BitAndEq(_)
+                | BinOp::BitOrEq(_)
+                | BinOp::ShlEq(_)
+                | BinOp::ShrEq(_) => Precedence::Assign,
             }
         }
     }
@@ -1086,9 +1100,19 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, base: Precedence) -> Result<Expr> {
+    fn parse_expr(
+        input: ParseStream,
+        mut lhs: Expr,
+        allow_struct: AllowStruct,
+        base: Precedence,
+    ) -> Result<Expr> {
         loop {
-            if input.fork().parse::<BinOp>().ok().map_or(false, |op| Precedence::of(&op) >= base) {
+            if input
+                .fork()
+                .parse::<BinOp>()
+                .ok()
+                .map_or(false, |op| Precedence::of(&op) >= base)
+            {
                 let op: BinOp = input.parse()?;
                 let precedence = Precedence::of(&op);
                 let mut rhs = unary_expr(input, allow_struct)?;
@@ -1106,7 +1130,11 @@ pub mod parsing {
                     op: op,
                     right: Box::new(rhs),
                 });
-            } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![==]) && !input.peek(Token![=>]) {
+            } else if Precedence::Assign >= base
+                && input.peek(Token![=])
+                && !input.peek(Token![==])
+                && !input.peek(Token![=>])
+            {
                 let eq_token: Token![=] = input.parse()?;
                 let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
@@ -1192,9 +1220,19 @@ pub mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn parse_expr(input: ParseStream, mut lhs: Expr, allow_struct: AllowStruct, base: Precedence) -> Result<Expr> {
+    fn parse_expr(
+        input: ParseStream,
+        mut lhs: Expr,
+        allow_struct: AllowStruct,
+        base: Precedence,
+    ) -> Result<Expr> {
         loop {
-            if input.fork().parse::<BinOp>().ok().map_or(false, |op| Precedence::of(&op) >= base) {
+            if input
+                .fork()
+                .parse::<BinOp>()
+                .ok()
+                .map_or(false, |op| Precedence::of(&op) >= base)
+            {
                 let op: BinOp = input.parse()?;
                 let precedence = Precedence::of(&op);
                 let mut rhs = unary_expr(input, allow_struct)?;
@@ -1245,10 +1283,7 @@ pub mod parsing {
     }
 
     // Parse an arbitrary expression.
-    fn ambiguous_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-    ) -> Result<Expr> {
+    fn ambiguous_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let lhs = unary_expr(input, allow_struct)?;
         parse_expr(input, lhs, allow_struct, Precedence::Any)
     }
@@ -1258,10 +1293,7 @@ pub mod parsing {
     // &mut <trailer>
     // box <trailer>
     #[cfg(feature = "full")]
-    fn unary_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-    ) -> Result<Expr> {
+    fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![&])
@@ -1298,10 +1330,7 @@ pub mod parsing {
 
     // XXX: This duplication is ugly
     #[cfg(not(feature = "full"))]
-    fn unary_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-    ) -> Result<Expr> {
+    fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![*]) || ahead.peek(Token![!]) || ahead.peek(Token![-]) {
@@ -1336,10 +1365,7 @@ pub mod parsing {
     // <atom> [ <expr> ] ...
     // <atom> ? ...
     #[cfg(feature = "full")]
-    fn trailer_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-    ) -> Result<Expr> {
+    fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let mut e = atom_expr(input, allow_struct)?;
 
         let mut attrs = e.replace_attrs(Vec::new());
@@ -1439,10 +1465,7 @@ pub mod parsing {
 
     // XXX: Duplication == ugly
     #[cfg(not(feature = "full"))]
-    fn trailer_expr(
-        input: ParseStream,
-        allow_struct: AllowStruct,
-    ) -> Result<Expr> {
+    fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let mut e = atom_expr(input, allow_struct)?;
 
         loop {
@@ -1567,11 +1590,11 @@ pub mod parsing {
                 return Err(input.error("expected loop or block expression"));
             };
             match expr {
-                Expr::WhileLet(ExprWhileLet { ref mut label, .. }) |
-                Expr::While(ExprWhile { ref mut label, .. }) |
-                Expr::ForLoop(ExprForLoop { ref mut label, .. }) |
-                Expr::Loop(ExprLoop { ref mut label, .. }) |
-                Expr::Block(ExprBlock { ref mut label, .. }) => *label = Some(the_label),
+                Expr::WhileLet(ExprWhileLet { ref mut label, .. })
+                | Expr::While(ExprWhile { ref mut label, .. })
+                | Expr::ForLoop(ExprForLoop { ref mut label, .. })
+                | Expr::Loop(ExprLoop { ref mut label, .. })
+                | Expr::Block(ExprBlock { ref mut label, .. }) => *label = Some(the_label),
                 _ => unreachable!(),
             }
             expr
@@ -1827,10 +1850,7 @@ pub mod parsing {
                 let mut pats = Punctuated::new();
                 let value: Pat = input.parse()?;
                 pats.push_value(value);
-                while input.peek(Token![|])
-                    && !input.peek(Token![||])
-                    && !input.peek(Token![|=])
-                {
+                while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
                     let punct = input.parse()?;
                     pats.push_punct(punct);
                     let value: Pat = input.parse()?;
@@ -2249,7 +2269,11 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_struct_helper(input: ParseStream, outer_attrs: Vec<Attribute>, path: Path) -> Result<ExprStruct> {
+    fn expr_struct_helper(
+        input: ParseStream,
+        outer_attrs: Vec<Attribute>,
+        path: Path,
+    ) -> Result<ExprStruct> {
         let content;
         let brace_token = braced!(content in input);
         let inner_attrs = content.call(Attribute::parse_inner)?;
@@ -2489,8 +2513,9 @@ pub mod parsing {
             || ahead.peek(Token![union]) && ahead.peek2(Ident)
             || ahead.peek(Token![auto]) && ahead.peek2(Token![trait])
             || ahead.peek(Token![trait])
-            || ahead.peek(Token![default]) && (ahead.peek2(Token![unsafe]) || ahead.peek2(Token![impl]))
-            || ahead.peek(Token![impl])
+            || ahead.peek(Token![default])
+                && (ahead.peek2(Token![unsafe]) || ahead.peek2(Token![impl ]))
+            || ahead.peek(Token![impl ])
             || ahead.peek(Token![macro])
         {
             input.parse().map(Stmt::Item)
