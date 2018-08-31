@@ -26,9 +26,6 @@ use proc_macro2::{Group, Punct, TokenTree};
 use std::marker::PhantomData;
 use std::ptr;
 
-#[cfg(synom_verbose_trace)]
-use std::fmt::{self, Debug};
-
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.
 enum Entry {
@@ -332,18 +329,5 @@ impl<'a> Cursor<'a> {
             Entry::Punct(ref o) => o.span(),
             Entry::End(..) => Span::call_site(),
         }
-    }
-}
-
-// We do a custom implementation for `Debug` as the default implementation is
-// pretty useless.
-#[cfg(synom_verbose_trace)]
-impl<'a> Debug for Cursor<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Print what the cursor is currently looking at.
-        // This will look like Cursor("some remaining tokens here")
-        f.debug_tuple("Cursor")
-            .field(&self.token_stream().to_string())
-            .finish()
     }
 }
