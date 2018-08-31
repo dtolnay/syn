@@ -1,4 +1,4 @@
-//! Extension traits that are made available within the `call!` parser.
+//! Extension traits to provide parsing methods on foreign types.
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
@@ -22,6 +22,8 @@ pub trait IdentExt: Sized + private::Sealed {
     /// extern crate syn;
     ///
     /// use syn::Ident;
+    /// use syn::ext::IdentExt;
+    /// use syn::parse::{Error, ParseStream, Result};
     ///
     /// // Parses input that looks like `name = NAME` where `NAME` can be
     /// // any identifier.
@@ -30,12 +32,15 @@ pub trait IdentExt: Sized + private::Sealed {
     /// //
     /// //     name = anything
     /// //     name = impl
-    /// named!(parse_dsl -> Ident, do_parse!(
-    ///     custom_keyword!(name) >>
-    ///     punct!(=) >>
-    ///     name: call!(Ident::parse_any) >>
-    ///     (name)
-    /// ));
+    /// fn parse_dsl(input: ParseStream) -> Result<Ident> {
+    ///     let name_token: Ident = input.parse()?;
+    ///     if name_token != "name" {
+    ///         return Err(Error::new(name_token.span(), "expected `name`"));
+    ///     }
+    ///     input.parse::<Token![=]>()?;
+    ///     let name = input.call(Ident::parse_any)?;
+    ///     Ok(name)
+    /// }
     /// #
     /// # fn main() {}
     /// ```
