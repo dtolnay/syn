@@ -1,5 +1,3 @@
-#![feature(proc_macro)]
-
 extern crate proc_macro;
 
 #[macro_use]
@@ -12,30 +10,30 @@ use proc_macro::TokenStream;
 use quote::ToTokens;
 use std::collections::HashSet as Set;
 use syn::fold::{self, Fold};
+use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::synom::Synom;
 use syn::{Expr, Ident, ItemFn, Local, Pat, Stmt};
 
-/// Parses a parenthesized nonempty list of variable names separated by commas.
+/// Parses a list of variable names separated by commas.
 ///
-///     (a, b, c)
+///     a, b, c
 ///
 /// This is how the compiler passes in arguments to our attribute -- it is
-/// everything that comes after the attribute name.
+/// everything inside the delimiters after the attribute name.
 ///
 ///     #[trace_var(a, b, c)]
-///                ^^^^^^^^^
+///                 ^^^^^^^
 struct Args {
     vars: Set<Ident>,
 }
 
-impl Synom for Args {
-    named!(parse -> Self, map!(
-        call!(Punctuated::<Ident, Token![,]>::parse_terminated_nonempty),
-        |vars| Args {
+impl Parse for Args {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let vars = Punctuated::<Ident, Token![,]>::parse_terminated(input)?;
+        Ok(Args {
             vars: vars.into_iter().collect(),
-        }
-    ));
+        })
+    }
 }
 
 impl Args {

@@ -1,5 +1,3 @@
-#![feature(proc_macro)]
-
 extern crate trace_var;
 use trace_var::trace_var;
 
