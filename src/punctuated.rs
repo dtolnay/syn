@@ -652,9 +652,20 @@ impl<T, P> IndexMut<usize> for Punctuated<T, P> {
 #[cfg(feature = "parsing")]
 impl<T, P> Punctuated<T, P>
 where
+    T: Parse,
     P: Parse,
 {
-    pub fn parse_terminated(
+    pub fn parse_terminated(input: ParseStream) -> Result<Self> {
+        Self::parse_terminated_with(input, T::parse)
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl<T, P> Punctuated<T, P>
+where
+    P: Parse,
+{
+    pub fn parse_terminated_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
     ) -> Result<Self> {

@@ -138,7 +138,7 @@ impl<'a> ParseBuffer<'a> {
         &self,
         parser: fn(ParseStream) -> Result<T>,
     ) -> Result<Punctuated<T, P>> {
-        Punctuated::parse_terminated(self, parser)
+        Punctuated::parse_terminated_with(self, parser)
     }
 
     pub fn fork(&self) -> Self {
