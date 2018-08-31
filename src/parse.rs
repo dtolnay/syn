@@ -167,6 +167,8 @@ use proc_macro2::{self, Delimiter, Group, Ident, Literal, Punct, Span, TokenStre
 
 use buffer::{Cursor, TokenBuffer};
 use error;
+use lookahead;
+use private;
 use punctuated::Punctuated;
 use token::Token;
 
@@ -198,8 +200,6 @@ impl<'a> Drop for ParseBuffer<'a> {
     }
 }
 
-// Not public API.
-#[doc(hidden)]
 #[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
     scope: Span,
@@ -216,8 +216,6 @@ impl<'c, 'a> Deref for StepCursor<'c, 'a> {
 }
 
 impl<'c, 'a> StepCursor<'c, 'a> {
-    // Not public API.
-    #[doc(hidden)]
     pub fn advance(self, other: Cursor<'c>) -> Cursor<'a> {
         unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(other) }
     }
@@ -239,11 +237,9 @@ fn skip(input: ParseStream) -> bool {
     }).unwrap()
 }
 
-impl<'a> ParseBuffer<'a> {
-    // Not public API.
-    #[doc(hidden)]
-    pub fn new(scope: Span, cursor: Cursor<'a>, unexpected: Rc<Cell<Option<Span>>>) -> Self {
-        let extend = unsafe { mem::transmute::<Cursor<'a>, Cursor<'static>>(cursor) };
+impl<'a> private<ParseBuffer<'a>> {
+    pub fn new(scope: Span, cursor: Cursor, unexpected: Rc<Cell<Option<Span>>>) -> ParseBuffer {
+        let extend = unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) };
         ParseBuffer {
             scope: scope,
             cell: Cell::new(extend),
@@ -252,6 +248,12 @@ impl<'a> ParseBuffer<'a> {
         }
     }
 
+    pub fn get_unexpected(buffer: &ParseBuffer) -> Rc<Cell<Option<Span>>> {
+        buffer.unexpected.clone()
+    }
+}
+
+impl<'a> ParseBuffer<'a> {
     pub fn cursor(&self) -> Cursor<'a> {
         self.cell.get()
     }
@@ -261,7 +263,7 @@ impl<'a> ParseBuffer<'a> {
     }
 
     pub fn lookahead1(&self) -> Lookahead1<'a> {
-        Lookahead1::new(self.scope, self.cursor())
+        lookahead::new(self.scope, self.cursor())
     }
 
     pub fn parse<T: Parse>(&self) -> Result<T> {
@@ -327,15 +329,7 @@ impl<'a> ParseBuffer<'a> {
         }
     }
 
-    // Not public API.
-    #[doc(hidden)]
-    pub fn get_unexpected(&self) -> Rc<Cell<Option<Span>>> {
-        self.unexpected.clone()
-    }
-
-    // Not public API.
-    #[doc(hidden)]
-    pub fn check_unexpected(&self) -> Result<()> {
+    fn check_unexpected(&self) -> Result<()> {
         match self.unexpected.get() {
             Some(span) => Err(Error::new(span, "unexpected token")),
             None => Ok(()),
@@ -475,7 +469,7 @@ where
     fn parse2(self, tokens: TokenStream) -> Result<T> {
         let buf = TokenBuffer::new2(tokens);
         let unexpected = Rc::new(Cell::new(None));
-        let state = ParseBuffer::new(Span::call_site(), buf.begin(), unexpected);
+        let state = private::<ParseBuffer>::new(Span::call_site(), buf.begin(), unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;
         if state.is_empty() {

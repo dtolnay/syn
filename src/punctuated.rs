@@ -39,6 +39,8 @@ use std::vec;
 
 #[cfg(feature = "parsing")]
 use parse::{Parse, ParseStream, Result};
+#[cfg(any(feature = "full", feature = "derive"))]
+use private;
 #[cfg(feature = "parsing")]
 use token::Token;
 
@@ -464,10 +466,8 @@ struct PrivateIter<'a, T: 'a, P: 'a> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl<'a, T> Iter<'a, T> {
-    // Not public API.
-    #[doc(hidden)]
-    pub fn private_empty() -> Self {
+impl<'a, T> private<Iter<'a, T>> {
+    pub fn empty() -> Iter<'a, T> {
         Iter {
             inner: Box::new(iter::empty()),
         }
@@ -520,10 +520,8 @@ struct PrivateIterMut<'a, T: 'a, P: 'a> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl<'a, T> IterMut<'a, T> {
-    // Not public API.
-    #[doc(hidden)]
-    pub fn private_empty() -> Self {
+impl<'a, T> private<IterMut<'a, T>> {
+    pub fn empty() -> IterMut<'a, T> {
         IterMut {
             inner: Box::new(iter::empty()),
         }

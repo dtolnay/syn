@@ -75,8 +75,6 @@ impl Error {
     }
 }
 
-// Not public API.
-#[doc(hidden)]
 pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     if cursor.eof() {
         Error::new(scope, format!("unexpected end of input, {}", message))

@@ -73,7 +73,7 @@ impl Fields {
     /// [`Field`]: struct.Field.html
     pub fn iter(&self) -> punctuated::Iter<Field> {
         match *self {
-            Fields::Unit => punctuated::Iter::private_empty(),
+            Fields::Unit => private::<punctuated::Iter<Field>>::empty(),
             Fields::Named(ref f) => f.named.iter(),
             Fields::Unnamed(ref f) => f.unnamed.iter(),
         }
@@ -86,7 +86,7 @@ impl Fields {
     /// [`Field`]: struct.Field.html
     pub fn iter_mut(&mut self) -> punctuated::IterMut<Field> {
         match *self {
-            Fields::Unit => punctuated::IterMut::private_empty(),
+            Fields::Unit => private::<punctuated::IterMut<Field>>::empty(),
             Fields::Named(ref mut f) => f.named.iter_mut(),
             Fields::Unnamed(ref mut f) => f.unnamed.iter_mut(),
         }

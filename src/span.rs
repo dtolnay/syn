@@ -1,8 +1,6 @@
 use proc_macro2::Span;
 
 pub trait IntoSpans<S> {
-    // Not public API.
-    #[doc(hidden)]
     fn into_spans(self) -> S;
 }
 

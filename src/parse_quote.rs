@@ -81,7 +81,7 @@
 #[macro_export]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {
-        $crate::parse_quote::parse($crate::parse_quote::From::from(quote!($($tt)*)))
+        $crate::parse_quote::parse($crate::export::From::from(quote!($($tt)*)))
     };
 }
 
@@ -90,10 +90,6 @@ macro_rules! parse_quote {
 
 use parse::{Parse, Parser, ParseStream, Result};
 use proc_macro2::TokenStream;
-
-// Not public API.
-#[doc(hidden)]
-pub use std::convert::From;
 
 // Not public API.
 #[doc(hidden)]

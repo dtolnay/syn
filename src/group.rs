@@ -2,6 +2,7 @@ use proc_macro2::{Delimiter, Span};
 
 use error::Result;
 use parse::ParseBuffer;
+use private;
 use token;
 
 pub struct Parens<'a> {
@@ -28,8 +29,8 @@ impl<'a> ParseBuffer<'a> {
     fn parse_delimited(&self, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
         self.step(|cursor| {
             if let Some((content, span, rest)) = cursor.group(delimiter) {
-                let content =
-                    ParseBuffer::new(span, cursor.advance(content), self.get_unexpected());
+                let unexpected = private::<ParseBuffer>::get_unexpected(self);
+                let content = private::<ParseBuffer>::new(span, cursor.advance(content), unexpected);
                 Ok(((span, content), rest))
             } else {
                 let message = match delimiter {

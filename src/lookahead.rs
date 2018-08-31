@@ -18,17 +18,15 @@ pub struct Lookahead1<'a> {
     comparisons: RefCell<Vec<String>>,
 }
 
-impl<'a> Lookahead1<'a> {
-    // Not public API.
-    #[doc(hidden)]
-    pub fn new(scope: Span, cursor: Cursor<'a>) -> Self {
-        Lookahead1 {
-            scope: scope,
-            cursor: cursor,
-            comparisons: RefCell::new(Vec::new()),
-        }
+pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
+    Lookahead1 {
+        scope: scope,
+        cursor: cursor,
+        comparisons: RefCell::new(Vec::new()),
     }
+}
 
+impl<'a> Lookahead1<'a> {
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
         if T::Token::peek(self) {
@@ -58,8 +56,6 @@ impl<'a> Lookahead1<'a> {
         }
     }
 
-    // Not public API.
-    #[doc(hidden)]
     pub fn cursor(&self) -> Cursor<'a> {
         self.cursor
     }
@@ -86,8 +82,6 @@ impl<S> IntoSpans<S> for TokenMarker {
     }
 }
 
-// Not public API.
-#[doc(hidden)]
 pub fn is_delimiter(lookahead: &Lookahead1, delimiter: Delimiter) -> bool {
     lookahead.cursor.group(delimiter).is_some()
 }

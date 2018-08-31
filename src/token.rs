@@ -153,7 +153,7 @@ macro_rules! impl_token {
                 let scope = Span::call_site();
                 let cursor = lookahead.cursor();
                 let unexpected = Rc::new(Cell::new(None));
-                ParseBuffer::new(scope, cursor, unexpected)
+                ::private::<ParseBuffer>::new(scope, cursor, unexpected)
                     .parse::<Self>()
                     .is_ok()
             }

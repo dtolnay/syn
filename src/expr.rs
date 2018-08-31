@@ -569,10 +569,8 @@ impl Hash for ExprVerbatim {
 }
 
 impl Expr {
-    // Not public API.
-    #[doc(hidden)]
     #[cfg(feature = "full")]
-    pub fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
+    fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match *self {
             Expr::Box(ExprBox { ref mut attrs, .. })
             | Expr::InPlace(ExprInPlace { ref mut attrs, .. })
