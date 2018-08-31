@@ -386,9 +386,7 @@ mod file;
 #[cfg(feature = "full")]
 pub use file::File;
 
-#[cfg(any(feature = "full", feature = "derive"))]
 mod lifetime;
-#[cfg(any(feature = "full", feature = "derive"))]
 pub use lifetime::Lifetime;
 
 #[cfg(any(feature = "full", feature = "derive"))]
