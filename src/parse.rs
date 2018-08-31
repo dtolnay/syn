@@ -29,17 +29,17 @@
 //! The [`syn::parse`], [`syn::parse2`], and [`syn::parse_str`] functions serve
 //! as an entry point for parsing syntax tree nodes that can be parsed in an
 //! obvious default way. These functions can return any syntax tree node that
-//! implements the [`Synom`] trait, which includes most types in Syn.
+//! implements the [`Parse`] trait, which includes most types in Syn.
 //!
 //! [`syn::parse`]: ../fn.parse.html
 //! [`syn::parse2`]: ../fn.parse2.html
 //! [`syn::parse_str`]: ../fn.parse_str.html
-//! [`Synom`]: trait.Synom.html
+//! [`Parse`]: trait.Parse.html
 //!
 //! ```
 //! use syn::Type;
 //!
-//! # fn run_parser() -> Result<(), syn::synom::Error> {
+//! # fn run_parser() -> Result<(), syn::parse::Error> {
 //! let t: Type = syn::parse_str("std::collections::HashMap<String, Value>")?;
 //! #     Ok(())
 //! # }
