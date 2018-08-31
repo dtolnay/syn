@@ -583,9 +583,6 @@ pub use gen::*;
 pub mod export;
 
 #[cfg(feature = "parsing")]
-pub mod next;
-
-#[cfg(feature = "parsing")]
 mod lookahead;
 
 #[cfg(feature = "parsing")]
@@ -596,9 +593,7 @@ mod span;
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(feature = "parsing")]
-use proc_macro2::Span;
-#[cfg(feature = "parsing")]
-use synom::{Parser, Synom};
+use synom::Parser;
 
 #[cfg(feature = "parsing")]
 mod error;
@@ -663,7 +658,7 @@ pub use error::parse_error;
     feature = "proc-macro"
 ))]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Error> {
-    parse2(tokens.into())
+    T::parse.parse(tokens)
 }
 
 /// Parse a proc-macro2 token stream into the chosen syntax tree node.
@@ -680,11 +675,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Erro
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Error> {
-    let parser = T::parse;
-    parser.parse2(tokens).map_err(|err| match T::description() {
-        Some(s) => Error::new(Span::call_site(), format!("failed to parse {}: {}", s, err)),
-        None => err,
-    })
+    T::parse.parse2(tokens)
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
@@ -717,13 +708,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Er
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T, Error> {
-    match s.parse() {
-        Ok(tts) => parse2(tts),
-        Err(_) => Err(Error::new(
-            Span::call_site(),
-            "error while lexing input string",
-        )),
-    }
+    T::parse.parse_str(s)
 }
 
 // FIXME the name parse_file makes it sound like you might pass in a path to a
@@ -788,6 +773,55 @@ pub fn parse_file(mut content: &str) -> Result<File, Error> {
     let mut file: File = parse_str(content)?;
     file.shebang = shebang;
     Ok(file)
+}
+
+/// Parse the input TokenStream of a macro, triggering a compile error if the
+/// tokens fail to parse.
+///
+/// # Intended usage
+///
+/// ```rust
+/// # extern crate proc_macro;
+/// # extern crate syn;
+/// #
+/// use proc_macro::TokenStream;
+/// use syn::parse_macro_input;
+/// use syn::parse::{Parse, ParseStream, Result};
+///
+/// struct MyMacroInput {
+///     /* ... */
+/// }
+///
+/// impl Parse for MyMacroInput {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         /* ... */
+/// #       Ok(MyMacroInput {})
+///     }
+/// }
+///
+/// # const IGNORE: &str = stringify! {
+/// #[proc_macro]
+/// # };
+/// pub fn my_macro(tokens: TokenStream) -> TokenStream {
+///     let input = parse_macro_input!(tokens as MyMacroInput);
+///
+///     /* ... */
+/// #   "".parse().unwrap()
+/// }
+/// #
+/// # fn main() {}
+/// ```
+#[cfg(feature = "proc-macro")]
+#[macro_export]
+macro_rules! parse_macro_input {
+    ($tokenstream:ident as $ty:ty) => {
+        match $crate::next::parse::<$ty>($tokenstream) {
+            $crate::export::Ok(data) => data,
+            $crate::export::Err(err) => {
+                return $crate::export::TokenStream::from(err.into_compile_error());
+            }
+        };
+    };
 }
 
 #[cfg(all(

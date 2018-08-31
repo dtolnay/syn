@@ -152,13 +152,14 @@
 
 use std::cell::Cell;
 use std::rc::Rc;
+use std::str::FromStr;
 
 #[cfg(all(
     not(all(target_arch = "wasm32", target_os = "unknown")),
     feature = "proc-macro"
 ))]
 use proc_macro;
-use proc_macro2::{Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
+use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
 use error::parse_error;
 pub use error::{Error, PResult};
@@ -291,7 +292,7 @@ pub trait Parser: Sized {
         feature = "proc-macro"
     ))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {
-        self.parse2(tokens.into())
+        self.parse2(proc_macro2::TokenStream::from(tokens))
     }
 
     /// Parse a string of Rust code into the chosen syntax tree node.
@@ -301,13 +302,7 @@ pub trait Parser: Sized {
     /// Every span in the resulting syntax tree will be set to resolve at the
     /// macro call site.
     fn parse_str(self, s: &str) -> Result<Self::Output> {
-        match s.parse() {
-            Ok(tts) => self.parse2(tts),
-            Err(_) => Err(Error::new(
-                Span::call_site(),
-                "error while lexing input string",
-            )),
-        }
+        self.parse2(proc_macro2::TokenStream::from_str(s)?)
     }
 }
 
