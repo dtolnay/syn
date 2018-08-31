@@ -149,15 +149,15 @@ fn load_file<P: AsRef<Path>>(
                 // Try to parse the AstItem declaration out of the item.
                 let tts = &item.mac.tts;
                 let found = if path_eq(&item.mac.path, "ast_struct") {
-                    syn::parse_str::<parsing::AstStruct>(&quote!(#tts).to_string())
+                    syn::parse2::<parsing::AstStruct>(quote!(#tts))
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
                 } else if path_eq(&item.mac.path, "ast_enum") {
-                    syn::parse_str::<parsing::AstEnum>(&quote!(#tts).to_string())
+                    syn::parse2::<parsing::AstEnum>(quote!(#tts))
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
                 } else if path_eq(&item.mac.path, "ast_enum_of_structs") {
-                    syn::parse_str::<parsing::AstEnumOfStructs>(&quote!(#tts).to_string())
+                    syn::parse2::<parsing::AstEnumOfStructs>(quote!(#tts))
                         .map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
                 } else {
@@ -204,85 +204,93 @@ mod parsing {
 
     use proc_macro2::TokenStream;
     use syn;
-    use syn::synom::*;
+    use syn::parse::{Parse, ParseStream, Result};
     use syn::*;
+
+    fn peek_tag(input: ParseStream, tag: &str) -> bool {
+        let ahead = input.fork();
+        ahead.parse::<Token![#]>().is_ok()
+            && ahead.parse::<Ident>().map(|ident| ident == tag).unwrap_or(false)
+    }
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
-    named!(full -> (TokenStream, bool), map!(option!(do_parse!(
-        punct!(#) >>
-        id: syn!(Ident) >>
-        cond_reduce!(id == "full") >>
-        ()
-    )), |s| if s.is_some() {
-        (quote!(#[cfg(feature = "full")]), true)
-    } else {
-        (quote!(), false)
-    }));
+    fn full(input: ParseStream) -> (TokenStream, bool) {
+        if peek_tag(input, "full") {
+            input.parse::<Token![#]>().unwrap();
+            input.parse::<Ident>().unwrap();
+            (quote!(#[cfg(feature = "full")]), true)
+        } else {
+            (quote!(), false)
+        }
+    }
 
-    named!(manual_extra_traits -> (), do_parse!(
-        punct!(#) >>
-        id: syn!(Ident) >>
-        cond_reduce!(id == "manual_extra_traits") >>
-        ()
-    ));
+    fn skip_manual_extra_traits(input: ParseStream) {
+        if peek_tag(input, "manual_extra_traits") {
+            input.parse::<Token![#]>().unwrap();
+            input.parse::<Ident>().unwrap();
+        }
+    }
 
     // Parses a simple AstStruct without the `pub struct` prefix.
-    named!(ast_struct_inner -> AstItem, do_parse!(
-        id: syn!(Ident) >>
-        features: full >>
-        option!(manual_extra_traits) >>
-        rest: syn!(TokenStream) >>
-        (AstItem {
-            ast: syn::parse_str(&quote! {
-                pub struct #id #rest
-            }.to_string())?,
-            features: features.0,
-            eos_full: features.1,
+    fn ast_struct_inner(input: ParseStream) -> Result<AstItem> {
+        let ident: Ident = input.parse()?;
+        let (features, eos_full) = full(input);
+        skip_manual_extra_traits(input);
+        let rest: TokenStream = input.parse()?;
+        Ok(AstItem {
+            ast: syn::parse2(quote! {
+                pub struct #ident #rest
+            })?,
+            features: features,
+            eos_full: eos_full,
         })
-    ));
+    }
 
     // ast_struct! parsing
     pub struct AstStruct(pub Vec<AstItem>);
-    impl Synom for AstStruct {
-        named!(parse -> Self, do_parse!(
-            many0!(Attribute::old_parse_outer) >>
-            keyword!(pub) >>
-            keyword!(struct) >>
-            res: call!(ast_struct_inner) >>
-            (AstStruct(vec![res]))
-        ));
+    impl Parse for AstStruct {
+        fn parse(input: ParseStream) -> Result<Self> {
+            input.call(Attribute::parse_outer)?;
+            input.parse::<Token![pub]>()?;
+            input.parse::<Token![struct]>()?;
+            let res = input.call(ast_struct_inner)?;
+            Ok(AstStruct(vec![res]))
+        }
     }
 
-    named!(no_visit -> (), do_parse!(
-        punct!(#) >>
-        id: syn!(Ident) >>
-        cond_reduce!(id == "no_visit") >>
-        ()
-    ));
+    fn no_visit(input: ParseStream) -> bool {
+        if peek_tag(input, "no_visit") {
+            input.parse::<Token![#]>().unwrap();
+            input.parse::<Ident>().unwrap();
+            true
+        } else {
+            false
+        }
+    }
 
     // ast_enum! parsing
     pub struct AstEnum(pub Vec<AstItem>);
-    impl Synom for AstEnum {
-        named!(parse -> Self, do_parse!(
-            many0!(Attribute::old_parse_outer) >>
-            keyword!(pub) >>
-            keyword!(enum) >>
-            id: syn!(Ident) >>
-            no_visit: option!(no_visit) >>
-            rest: syn!(TokenStream) >>
-            (AstEnum(if no_visit.is_some() {
+    impl Parse for AstEnum {
+        fn parse(input: ParseStream) -> Result<Self> {
+            input.call(Attribute::parse_outer)?;
+            input.parse::<Token![pub]>()?;
+            input.parse::<Token![enum]>()?;
+            let ident: Ident = input.parse()?;
+            let no_visit = no_visit(input);
+            let rest: TokenStream = input.parse()?;
+            Ok(AstEnum(if no_visit {
                 vec![]
             } else {
                 vec![AstItem {
-                    ast: syn::parse_str(&quote! {
-                        pub enum #id #rest
-                    }.to_string())?,
+                    ast: syn::parse2(quote! {
+                        pub enum #ident #rest
+                    })?,
                     features: quote!(),
                     eos_full: false,
                 }]
             }))
-        ));
+        }
     }
 
     // A single variant of an ast_enum_of_structs!
@@ -291,57 +299,73 @@ mod parsing {
         member: Option<Path>,
         inner: Option<AstItem>,
     }
-    named!(eos_variant -> EosVariant, do_parse!(
-        many0!(Attribute::old_parse_outer) >>
-        keyword!(pub) >>
-        variant: syn!(Ident) >>
-        member: option!(map!(parens!(alt!(
-            call!(ast_struct_inner) => { |x: AstItem| (Path::from(x.ast.ident.clone()), Some(x)) }
-            |
-            syn!(Path) => { |x| (x, None) }
-        )), |x| x.1)) >>
-        punct!(,) >>
-        (EosVariant {
+    fn eos_variant(input: ParseStream) -> Result<EosVariant> {
+        input.call(Attribute::parse_outer)?;
+        input.parse::<Token![pub]>()?;
+        let variant: Ident = input.parse()?;
+        let (member, inner) = if input.peek(token::Paren) {
+            let content;
+            parenthesized!(content in input);
+            if content.fork().call(ast_struct_inner).is_ok() {
+                let item = content.call(ast_struct_inner)?;
+                (Some(Path::from(item.ast.ident.clone())), Some(item))
+            } else {
+                let path: Path = content.parse()?;
+                (Some(path), None)
+            }
+        } else {
+            (None, None)
+        };
+        input.parse::<Token![,]>()?;
+        Ok(EosVariant {
             name: variant,
-            member: member.clone().map(|x| x.0),
-            inner: member.map(|x| x.1).unwrap_or_default(),
+            member: member,
+            inner: inner,
         })
-    ));
+    }
 
     // ast_enum_of_structs! parsing
     pub struct AstEnumOfStructs(pub Vec<AstItem>);
-    impl Synom for AstEnumOfStructs {
-        named!(parse -> Self, do_parse!(
-            many0!(Attribute::old_parse_outer) >>
-            keyword!(pub) >>
-            keyword!(enum) >>
-            id: syn!(Ident) >>
-            variants: braces!(many0!(eos_variant)) >>
-            option!(syn!(Ident)) >> // do_not_generate_to_tokens
-            ({
-                let enum_item = {
-                    let variants = variants.1.iter().map(|v| {
-                        let name = v.name.clone();
-                        match v.member {
-                            Some(ref member) => quote!(#name(#member)),
-                            None => quote!(#name),
-                        }
-                    });
-                    parse_quote! {
-                        pub enum #id {
-                            #(#variants),*
-                        }
+    impl Parse for AstEnumOfStructs {
+        fn parse(input: ParseStream) -> Result<Self> {
+            input.call(Attribute::parse_outer)?;
+            input.parse::<Token![pub]>()?;
+            input.parse::<Token![enum]>()?;
+            let ident: Ident = input.parse()?;
+
+            let content;
+            braced!(content in input);
+            let mut variants = Vec::new();
+            while !content.is_empty() {
+                variants.push(content.call(eos_variant)?);
+            }
+
+            if let Some(ident) = input.parse::<Option<Ident>>()? {
+                assert_eq!(ident, "do_not_generate_to_tokens");
+            }
+
+            let enum_item = {
+                let variants = variants.iter().map(|v| {
+                    let name = v.name.clone();
+                    match v.member {
+                        Some(ref member) => quote!(#name(#member)),
+                        None => quote!(#name),
                     }
-                };
-                let mut items = vec![AstItem {
-                    ast: enum_item,
-                    features: quote!(),
-                    eos_full:  false,
-                }];
-                items.extend(variants.1.into_iter().filter_map(|v| v.inner));
-                AstEnumOfStructs(items)
-            })
-        ));
+                });
+                parse_quote! {
+                    pub enum #ident {
+                        #(#variants),*
+                    }
+                }
+            };
+            let mut items = vec![AstItem {
+                ast: enum_item,
+                features: quote!(),
+                eos_full:  false,
+            }];
+            items.extend(variants.into_iter().filter_map(|v| v.inner));
+            Ok(AstEnumOfStructs(items))
+        }
     }
 }
 
