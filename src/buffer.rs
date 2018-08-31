@@ -9,119 +9,7 @@
 //! A stably addressed token buffer supporting efficient traversal based on a
 //! cheaply copyable cursor.
 //!
-//! The [`Synom`] trait is implemented for syntax tree types that can be parsed
-//! from one of these token cursors.
-//!
-//! [`Synom`]: ../synom/trait.Synom.html
-//!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
-//!
-//! # Example
-//!
-//! This example shows a basic token parser for parsing a token stream without
-//! using Syn's parser combinator macros.
-//!
-//! ```
-//! #![feature(proc_macro_diagnostic)]
-//!
-//! extern crate syn;
-//! extern crate proc_macro;
-//!
-//! #[macro_use]
-//! extern crate quote;
-//!
-//! use syn::{token, ExprTuple};
-//! use syn::buffer::{Cursor, TokenBuffer};
-//! use syn::spanned::Spanned;
-//! use syn::synom::Synom;
-//! use proc_macro::{Diagnostic, Span, TokenStream};
-//!
-//! /// A basic token parser for parsing a token stream without using Syn's
-//! /// parser combinator macros.
-//! pub struct Parser<'a> {
-//!     cursor: Cursor<'a>,
-//! }
-//!
-//! impl<'a> Parser<'a> {
-//!     pub fn new(cursor: Cursor<'a>) -> Self {
-//!         Parser { cursor }
-//!     }
-//!
-//!     pub fn current_span(&self) -> Span {
-//!         self.cursor.span().unstable()
-//!     }
-//!
-//!     pub fn parse<T: Synom>(&mut self) -> Result<T, Diagnostic> {
-//!         let (val, rest) = T::parse(self.cursor)
-//!             .map_err(|e| match T::description() {
-//!                 Some(desc) => {
-//!                     self.current_span().error(format!("{}: expected {}", e, desc))
-//!                 }
-//!                 None => {
-//!                     self.current_span().error(e.to_string())
-//!                 }
-//!             })?;
-//!
-//!         self.cursor = rest;
-//!         Ok(val)
-//!     }
-//!
-//!     pub fn expect_eof(&mut self) -> Result<(), Diagnostic> {
-//!         if !self.cursor.eof() {
-//!             return Err(self.current_span().error("trailing characters; expected eof"));
-//!         }
-//!
-//!         Ok(())
-//!     }
-//! }
-//!
-//! fn eval(input: TokenStream) -> Result<TokenStream, Diagnostic> {
-//!     let buffer = TokenBuffer::new(input);
-//!     let mut parser = Parser::new(buffer.begin());
-//!
-//!     // Parse some syntax tree types out of the input tokens. In this case we
-//!     // expect something like:
-//!     //
-//!     //     (a, b, c) = (1, 2, 3)
-//!     let a = parser.parse::<ExprTuple>()?;
-//!     parser.parse::<token::Eq>()?;
-//!     let b = parser.parse::<ExprTuple>()?;
-//!     parser.expect_eof()?;
-//!
-//!     // Perform some validation and report errors.
-//!     let (a_len, b_len) = (a.elems.len(), b.elems.len());
-//!     if a_len != b_len {
-//!         let diag = b.span().unstable()
-//!             .error(format!("expected {} element(s), got {}", a_len, b_len))
-//!             .span_note(a.span().unstable(), "because of this");
-//!
-//!         return Err(diag);
-//!     }
-//!
-//!     // Build the output tokens.
-//!     let out = quote! {
-//!         println!("All good! Received two tuples of size {}", #a_len);
-//!     };
-//!
-//!     Ok(out.into())
-//! }
-//! #
-//! # extern crate proc_macro2;
-//! #
-//! # // This method exists on proc_macro2::Span but is behind the "nightly"
-//! # // feature.
-//! # trait ToUnstableSpan {
-//! #     fn unstable(&self) -> Span;
-//! # }
-//! #
-//! # impl ToUnstableSpan for proc_macro2::Span {
-//! #     fn unstable(&self) -> Span {
-//! #         unimplemented!()
-//! #     }
-//! # }
-//! #
-//! # fn main() {}
-//! ```
 
 // This module is heavily commented as it contains the only unsafe code in Syn,
 // and caution should be used when editing it. The public-facing interface is
@@ -157,10 +45,6 @@ enum Entry {
 /// A buffer that can be efficiently traversed multiple times, unlike
 /// `TokenStream` which requires a deep copy in order to traverse more than
 /// once.
-///
-/// See the [module documentation] for an example of `TokenBuffer` in action.
-///
-/// [module documentation]: index.html
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
 pub struct TokenBuffer {
@@ -258,10 +142,6 @@ impl TokenBuffer {
 ///
 /// Two cursors are equal if they have the same location in the same input
 /// stream, and have the same scope.
-///
-/// See the [module documentation] for an example of a `Cursor` in action.
-///
-/// [module documentation]: index.html
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
 #[derive(Copy, Clone, Eq, PartialEq)]
