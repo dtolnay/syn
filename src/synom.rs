@@ -161,7 +161,7 @@ use std::str::FromStr;
 use proc_macro;
 use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
-pub use error::{Error, PResult};
+pub use error::Error;
 
 use buffer::{Cursor, TokenBuffer};
 use parse::{Parse, ParseBuffer, ParseStream, Result};

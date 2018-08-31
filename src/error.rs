@@ -102,12 +102,3 @@ impl From<LexError> for Error {
         Error::new(Span::call_site(), format!("{:?}", err))
     }
 }
-
-/// The result of a `Synom` parser.
-///
-/// Refer to the [module documentation] for details about parsing in Syn.
-///
-/// [module documentation]: index.html
-///
-/// *This type is available if Syn is built with the `"parsing"` feature.*
-pub type PResult<'a, O> = std::result::Result<(O, Cursor<'a>), Error>;
