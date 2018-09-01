@@ -88,11 +88,17 @@ fn peek_impl(
 }
 
 impl<'a> Lookahead1<'a> {
+    /// Looks at the next token in the parse stream to determine whether it
+    /// matches the requested type of token.
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
         peek_impl(self, T::Token::peek, T::Token::display)
     }
 
+    /// Triggers an error at the current position of the parse stream.
+    ///
+    /// The error message will identify all of the expected token types that
+    /// have been peeked against this lookahead instance.
     pub fn error(self) -> Error {
         let comparisons = self.comparisons.borrow();
         match comparisons.len() {
