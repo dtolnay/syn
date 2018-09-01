@@ -238,7 +238,8 @@ impl<'a> ParseBuffer<'a> {
     }
 
     pub fn peek<T: Peek>(&self, token: T) -> bool {
-        self.lookahead1().peek(token)
+        let _ = token;
+        T::Token::peek(self.cursor())
     }
 
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
