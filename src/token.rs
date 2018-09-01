@@ -215,7 +215,9 @@ macro_rules! define_keywords {
 
             impl std::default::Default for $name {
                 fn default() -> Self {
-                    $name(Span::call_site())
+                    $name {
+                        span: Span::call_site(),
+                    }
                 }
             }
 
@@ -251,7 +253,9 @@ macro_rules! define_keywords {
             #[cfg(feature = "parsing")]
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
-                    parsing::keyword(input, $token).map($name)
+                    Ok($name {
+                        span: parsing::keyword(input, $token)?,
+                    })
                 }
             }
         )*
@@ -284,7 +288,9 @@ macro_rules! define_punctuation_structs {
 
             impl std::default::Default for $name {
                 fn default() -> Self {
-                    $name([Span::call_site(); $len])
+                    $name {
+                        spans: [Span::call_site(); $len],
+                    }
                 }
             }
 
@@ -330,7 +336,9 @@ macro_rules! define_punctuation {
             #[cfg(feature = "parsing")]
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
-                    parsing::punct(input, $token).map($name::<[Span; $len]>)
+                    Ok($name {
+                        spans: parsing::punct(input, $token)?,
+                    })
                 }
             }
         )*
@@ -356,7 +364,9 @@ macro_rules! define_delimiters {
 
             impl std::default::Default for $name {
                 fn default() -> Self {
-                    $name(Span::call_site())
+                    $name {
+                        span: Span::call_site(),
+                    }
                 }
             }
 
@@ -710,9 +720,14 @@ mod parsing {
     }
 
     pub fn punct<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
+        let mut spans = [input.cursor().span(); 3];
+        punct_helper(input, token, &mut spans)?;
+        Ok(S::from_spans(&spans))
+    }
+
+    fn punct_helper(input: ParseStream, token: &str, spans: &mut [Span; 3]) -> Result<()> {
         input.step(|cursor| {
             let mut cursor = *cursor;
-            let mut spans = [cursor.span(); 3];
             assert!(token.len() <= spans.len());
 
             for (i, ch) in token.chars().enumerate() {
@@ -722,7 +737,7 @@ mod parsing {
                         if punct.as_char() != ch {
                             break;
                         } else if i == token.len() - 1 {
-                            return Ok((S::from_spans(&spans), rest));
+                            return Ok(((), rest));
                         } else if punct.spacing() != Spacing::Joint {
                             break;
                         }
