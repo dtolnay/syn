@@ -2771,7 +2771,7 @@ pub mod parsing {
                     span: lit.span(),
                 })
             } else {
-                Err(input.error("expected unsuffixed integer"))
+                Err(Error::new(lit.span(), "expected unsuffixed integer"))
             }
         }
     }
