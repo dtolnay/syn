@@ -20,20 +20,6 @@ use self::walkdir::DirEntry;
 pub mod eq;
 pub mod parse;
 
-pub fn check_min_stack() {
-    let min_stack_value = match env::var("RUST_MIN_STACK") {
-        Ok(s) => s,
-        Err(_) => {
-            env::set_var("RUST_MIN_STACK", 16000000.to_string());
-            return;
-        }
-    };
-    let min_stack_value: usize = min_stack_value
-        .parse()
-        .expect("RUST_MIN_STACK env var should be set since some tests require it.");
-    assert!(min_stack_value >= 16_000_000);
-}
-
 /// Read the `ABORT_AFTER_FAILURE` environment variable, and parse it.
 pub fn abort_after() -> usize {
     match env::var("ABORT_AFTER_FAILURE") {
