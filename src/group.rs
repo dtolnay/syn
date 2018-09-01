@@ -7,87 +7,93 @@ use parse::ParseStream;
 use private;
 use token;
 
+// Not public API.
+#[doc(hidden)]
 pub struct Parens<'a> {
     pub token: token::Paren,
     pub content: ParseBuffer<'a>,
 }
 
+// Not public API.
+#[doc(hidden)]
 pub struct Braces<'a> {
     pub token: token::Brace,
     pub content: ParseBuffer<'a>,
 }
 
+// Not public API.
+#[doc(hidden)]
 pub struct Brackets<'a> {
     pub token: token::Bracket,
     pub content: ParseBuffer<'a>,
 }
 
+// Not public API.
 #[cfg(any(feature = "full", feature = "derive"))]
+#[doc(hidden)]
 pub struct Group<'a> {
     pub token: token::Group,
     pub content: ParseBuffer<'a>,
 }
 
-impl<'a> ParseBuffer<'a> {
-    fn parse_delimited(&self, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
-        self.step(|cursor| {
-            if let Some((content, span, rest)) = cursor.group(delimiter) {
-                let unexpected = private::get_unexpected(self);
-                let content =
-                    private::new_parse_buffer(span, cursor.advance(content), unexpected);
-                Ok(((span, content), rest))
-            } else {
-                let message = match delimiter {
-                    Delimiter::Parenthesis => "expected parentheses",
-                    Delimiter::Brace => "expected curly braces",
-                    Delimiter::Bracket => "expected square brackets",
-                    Delimiter::None => "expected invisible group",
-                };
-                Err(cursor.error(message))
-            }
+// Not public API.
+#[doc(hidden)]
+pub fn parse_parens(input: ParseStream) -> Result<Parens> {
+    parse_delimited(input, Delimiter::Parenthesis)
+        .map(|(span, content)| Parens {
+            token: token::Paren(span),
+            content: content,
         })
-    }
+}
 
-    // Not public API.
-    #[doc(hidden)]
-    pub fn parse_parens(&self) -> Result<Parens<'a>> {
-        self.parse_delimited(Delimiter::Parenthesis)
-            .map(|(span, content)| Parens {
-                token: token::Paren(span),
-                content: content,
-            })
-    }
+// Not public API.
+#[doc(hidden)]
+pub fn parse_braces(input: ParseStream) -> Result<Braces> {
+    parse_delimited(input, Delimiter::Brace)
+        .map(|(span, content)| Braces {
+            token: token::Brace(span),
+            content: content,
+        })
+}
 
-    // Not public API.
-    #[doc(hidden)]
-    pub fn parse_braces(&self) -> Result<Braces<'a>> {
-        self.parse_delimited(Delimiter::Brace)
-            .map(|(span, content)| Braces {
-                token: token::Brace(span),
-                content: content,
-            })
-    }
-
-    // Not public API.
-    #[doc(hidden)]
-    pub fn parse_brackets(&self) -> Result<Brackets<'a>> {
-        self.parse_delimited(Delimiter::Bracket)
-            .map(|(span, content)| Brackets {
-                token: token::Bracket(span),
-                content: content,
-            })
-    }
+// Not public API.
+#[doc(hidden)]
+pub fn parse_brackets(input: ParseStream) -> Result<Brackets> {
+    parse_delimited(input, Delimiter::Bracket)
+        .map(|(span, content)| Brackets {
+            token: token::Bracket(span),
+            content: content,
+        })
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl private {
     pub fn parse_group(input: ParseStream) -> Result<Group> {
-        input.parse_delimited(Delimiter::None)
+        parse_delimited(input, Delimiter::None)
             .map(|(span, content)| Group {
                 token: token::Group(span),
                 content: content,
             })
     }
+}
+
+fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, ParseBuffer)> {
+    input.step(|cursor| {
+        if let Some((content, span, rest)) = cursor.group(delimiter) {
+            let unexpected = private::get_unexpected(input);
+            let content =
+                private::new_parse_buffer(span, cursor.advance(content), unexpected);
+            Ok(((span, content), rest))
+        } else {
+            let message = match delimiter {
+                Delimiter::Parenthesis => "expected parentheses",
+                Delimiter::Brace => "expected curly braces",
+                Delimiter::Bracket => "expected square brackets",
+                Delimiter::None => "expected invisible group",
+            };
+            Err(cursor.error(message))
+        }
+    })
 }
 
 /// Parse a set of parentheses and expose their content to subsequent parsers.
@@ -138,7 +144,7 @@ impl private {
 #[macro_export]
 macro_rules! parenthesized {
     ($content:ident in $cursor:expr) => {
-        match $crate::parse::ParseBuffer::parse_parens(&$cursor) {
+        match $crate::group::parse_parens(&$cursor) {
             $crate::export::Ok(parens) => {
                 $content = parens.content;
                 parens.token
@@ -218,7 +224,7 @@ macro_rules! parenthesized {
 #[macro_export]
 macro_rules! braced {
     ($content:ident in $cursor:expr) => {
-        match $crate::parse::ParseBuffer::parse_braces(&$cursor) {
+        match $crate::group::parse_braces(&$cursor) {
             $crate::export::Ok(braces) => {
                 $content = braces.content;
                 braces.token
@@ -276,7 +282,7 @@ macro_rules! braced {
 #[macro_export]
 macro_rules! bracketed {
     ($content:ident in $cursor:expr) => {
-        match $crate::parse::ParseBuffer::parse_brackets(&$cursor) {
+        match $crate::group::parse_brackets(&$cursor) {
             $crate::export::Ok(brackets) => {
                 $content = brackets.content;
                 brackets.token

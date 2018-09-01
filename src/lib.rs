@@ -311,9 +311,11 @@ extern crate quote;
 #[macro_use]
 mod macros;
 
+// Not public API.
 #[cfg(feature = "parsing")]
+#[doc(hidden)]
 #[macro_use]
-mod group;
+pub mod group;
 
 #[macro_use]
 pub mod token;
