@@ -331,6 +331,66 @@ impl<'a> ParseBuffer<'a> {
     /// matches the requested type of token.
     ///
     /// Does not advance the position of the parse stream.
+    ///
+    /// # Example
+    ///
+    /// In this example we finish parsing the list of supertraits when the next
+    /// token in the input is either `where` or an opening curly brace.
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{braced, token, Generics, Ident, Token, TypeParamBound};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::punctuated::Punctuated;
+    ///
+    /// // Parses a trait definition containing no associated items.
+    /// //
+    /// //     trait Marker<'de, T>: A + B<'de> where Box<T>: Clone {}
+    /// struct MarkerTrait {
+    ///     trait_token: Token![trait],
+    ///     ident: Ident,
+    ///     generics: Generics,
+    ///     colon_token: Option<Token![:]>,
+    ///     supertraits: Punctuated<TypeParamBound, Token![+]>,
+    ///     brace_token: token::Brace,
+    /// }
+    ///
+    /// impl Parse for MarkerTrait {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         let trait_token: Token![trait] = input.parse()?;
+    ///         let ident: Ident = input.parse()?;
+    ///         let mut generics: Generics = input.parse()?;
+    ///         let colon_token: Option<Token![:]> = input.parse()?;
+    ///
+    ///         let mut supertraits = Punctuated::new();
+    ///         if colon_token.is_some() {
+    ///             loop {
+    ///                 supertraits.push_value(input.parse()?);
+    ///                 if input.peek(Token![where]) || input.peek(token::Brace) {
+    ///                     break;
+    ///                 }
+    ///                 supertraits.push_punct(input.parse()?);
+    ///             }
+    ///         }
+    ///
+    ///         generics.where_clause = input.parse()?;
+    ///         let content;
+    ///         let empty_brace_token = braced!(content in input);
+    ///
+    ///         Ok(MarkerTrait {
+    ///             trait_token: trait_token,
+    ///             ident: ident,
+    ///             generics: generics,
+    ///             colon_token: colon_token,
+    ///             supertraits: supertraits,
+    ///             brace_token: empty_brace_token,
+    ///         })
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
         T::Token::peek(self.cursor())
