@@ -399,6 +399,7 @@ pub mod parsing {
     use private;
 
     impl Attribute {
+        /// Parses zero or more outer attributes from the stream.
         pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
             while input.peek(Token![#]) {
@@ -407,6 +408,7 @@ pub mod parsing {
             Ok(attrs)
         }
 
+        /// Parses zero or more inner attributes from the stream.
         pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
             let mut attrs = Vec::new();
             while input.peek(Token![#]) && input.peek2(Token![!]) {
