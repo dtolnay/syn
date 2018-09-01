@@ -373,6 +373,35 @@ impl<'a> ParseBuffer<'a> {
     }
 
     /// Triggers an error at the current position of the parse stream.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{Expr, Token};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// // Some kind of loop: `while` or `for` or `loop`.
+    /// struct Loop {
+    ///     expr: Expr,
+    /// }
+    ///
+    /// impl Parse for Loop {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         if input.peek(Token![while])
+    ///             || input.peek(Token![for])
+    ///             || input.peek(Token![loop])
+    ///         {
+    ///             Ok(Loop {
+    ///                 expr: input.parse()?,
+    ///             })
+    ///         } else {
+    ///             Err(input.error("expected some kind of loop"))
+    ///         }
+    ///     }
+    /// }
+    /// ```
     pub fn error<T: Display>(&self, message: T) -> Error {
         error::new_at(self.scope, self.cursor(), message)
     }
