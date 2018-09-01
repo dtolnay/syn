@@ -286,17 +286,13 @@ impl<'a> ParseBuffer<'a> {
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
     {
-        match function(StepCursor {
+        let (node, rest) = function(StepCursor {
             scope: self.scope,
             cursor: self.cell.get(),
             marker: PhantomData,
-        }) {
-            Ok((ret, cursor)) => {
-                self.cell.set(cursor);
-                Ok(ret)
-            }
-            Err(err) => Err(err),
-        }
+        })?;
+        self.cell.set(rest);
+        Ok(node)
     }
 
     pub fn cursor(&self) -> Cursor<'a> {
