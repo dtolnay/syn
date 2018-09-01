@@ -13,6 +13,8 @@ use std::iter;
 
 use proc_macro2::{Delimiter, Spacing, TokenStream, TokenTree};
 
+#[cfg(feature = "parsing")]
+use parse::{ParseStream, Result};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(feature = "extra-traits")]
@@ -124,6 +126,26 @@ impl Attribute {
         }
 
         None
+    }
+
+    /// Parses zero or more outer attributes from the stream.
+    #[cfg(feature = "parsing")]
+    pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
+        let mut attrs = Vec::new();
+        while input.peek(Token![#]) {
+            attrs.push(input.call(parsing::single_parse_outer)?);
+        }
+        Ok(attrs)
+    }
+
+    /// Parses zero or more inner attributes from the stream.
+    #[cfg(feature = "parsing")]
+    pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
+        let mut attrs = Vec::new();
+        while input.peek(Token![#]) && input.peek2(Token![!]) {
+            attrs.push(input.call(parsing::single_parse_inner)?);
+        }
+        Ok(attrs)
     }
 
     fn extract_meta_list(ident: Ident, tt: &TokenTree) -> Option<Meta> {
@@ -397,26 +419,6 @@ pub mod parsing {
     use parse::{ParseStream, Result};
     #[cfg(feature = "full")]
     use private;
-
-    impl Attribute {
-        /// Parses zero or more outer attributes from the stream.
-        pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
-            let mut attrs = Vec::new();
-            while input.peek(Token![#]) {
-                attrs.push(input.call(single_parse_outer)?);
-            }
-            Ok(attrs)
-        }
-
-        /// Parses zero or more inner attributes from the stream.
-        pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
-            let mut attrs = Vec::new();
-            while input.peek(Token![#]) && input.peek2(Token![!]) {
-                attrs.push(input.call(single_parse_inner)?);
-            }
-            Ok(attrs)
-        }
-    }
 
     pub fn single_parse_inner(input: ParseStream) -> Result<Attribute> {
         let content;
