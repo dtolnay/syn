@@ -357,10 +357,103 @@ impl<'a> ParseBuffer<'a> {
     /// parse stream. Only use a fork when the amount of work performed against
     /// the fork is small and bounded.
     ///
-    /// For a lower level but generally more performant way to perform
+    /// For a lower level but occasionally more performant way to perform
     /// speculative parsing, consider using [`ParseStream::step`] instead.
     ///
     /// [`ParseStream::step`]: #method.step
+    ///
+    /// # Example
+    ///
+    /// The parse implementation shown here parses possibly restricted `pub`
+    /// visibilities.
+    ///
+    /// - `pub`
+    /// - `pub(crate)`
+    /// - `pub(self)`
+    /// - `pub(super)`
+    /// - `pub(in some::path)`
+    ///
+    /// To handle the case of visibilities inside of tuple structs, the parser
+    /// needs to distinguish parentheses that specify visibility restrictions
+    /// from parentheses that form part of a tuple type.
+    ///
+    /// ```
+    /// # struct A;
+    /// # struct B;
+    /// # struct C;
+    /// #
+    /// struct S(pub(crate) A, pub (B, C));
+    /// ```
+    ///
+    /// In this example input the first tuple struct element of `S` has
+    /// `pub(crate)` visibility while the second tuple struct element has `pub`
+    /// visibility; the parentheses around `(B, C)` are part of the type rather
+    /// than part of a visibility restriction.
+    ///
+    /// The parser uses a forked parse stream to check the first token inside of
+    /// parentheses after the `pub` keyword. This is a small bounded amount of
+    /// work performed against the forked parse stream.
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{parenthesized, token, Ident, Path, Token};
+    /// use syn::ext::IdentExt;
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// struct PubVisibility {
+    ///     pub_token: Token![pub],
+    ///     restricted: Option<Restricted>,
+    /// }
+    ///
+    /// struct Restricted {
+    ///     paren_token: token::Paren,
+    ///     in_token: Option<Token![in]>,
+    ///     path: Path,
+    /// }
+    ///
+    /// impl Parse for PubVisibility {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         let pub_token: Token![pub] = input.parse()?;
+    ///
+    ///         if input.peek(token::Paren) {
+    ///             let ahead = input.fork();
+    ///             let mut content;
+    ///             parenthesized!(content in ahead);
+    ///
+    ///             if content.peek(Token![crate])
+    ///                 || content.peek(Token![self])
+    ///                 || content.peek(Token![super])
+    ///             {
+    ///                 return Ok(PubVisibility {
+    ///                     pub_token: pub_token,
+    ///                     restricted: Some(Restricted {
+    ///                         paren_token: parenthesized!(content in input),
+    ///                         in_token: None,
+    ///                         path: Path::from(content.call(Ident::parse_any)?),
+    ///                     }),
+    ///                 });
+    ///             } else if content.peek(Token![in]) {
+    ///                 return Ok(PubVisibility {
+    ///                     pub_token: pub_token,
+    ///                     restricted: Some(Restricted {
+    ///                         paren_token: parenthesized!(content in input),
+    ///                         in_token: Some(content.parse()?),
+    ///                         path: content.call(Path::parse_mod_style)?,
+    ///                     }),
+    ///                 });
+    ///             }
+    ///         }
+    ///
+    ///         Ok(PubVisibility {
+    ///             pub_token: pub_token,
+    ///             restricted: None,
+    ///         })
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn fork(&self) -> Self {
         ParseBuffer {
             scope: self.scope,
