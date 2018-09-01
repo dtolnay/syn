@@ -60,6 +60,51 @@ ast_struct! {
     /// across most Rust libraries.
     ///
     /// [`interpret_meta`]: #method.interpret_meta
+    ///
+    /// # Parsing
+    ///
+    /// This type does not implement the [`Parse`] trait and thus cannot be
+    /// parsed directly by [`ParseStream::parse`]. Instead use
+    /// [`ParseStream::call`] with one of the two parser functions
+    /// [`Attribute::parse_outer`] or [`Attribute::parse_inner`] depending on
+    /// which you intend to parse.
+    ///
+    /// [`Parse`]: parse/trait.Parse.html
+    /// [`ParseStream::parse`]: parse/struct.ParseBuffer.html#method.parse
+    /// [`ParseStream::call`]: parse/struct.ParseBuffer.html#method.call
+    /// [`Attribute::parse_outer`]: #method.parse_outer
+    /// [`Attribute::parse_inner`]: #method.parse_inner
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{Attribute, Ident, Token};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// // Parses a unit struct with attributes.
+    /// //
+    /// //     #[path = "s.tmpl"]
+    /// //     struct S;
+    /// struct UnitStruct {
+    ///     attrs: Vec<Attribute>,
+    ///     struct_token: Token![struct],
+    ///     name: Ident,
+    ///     semi_token: Token![;],
+    /// }
+    ///
+    /// impl Parse for UnitStruct {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         Ok(UnitStruct {
+    ///             attrs: input.call(Attribute::parse_outer)?,
+    ///             struct_token: input.parse()?,
+    ///             name: input.parse()?,
+    ///             semi_token: input.parse()?,
+    ///         })
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
         pub style: AttrStyle,
