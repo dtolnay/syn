@@ -397,6 +397,43 @@ impl<'a> ParseBuffer<'a> {
     }
 
     /// Looks at the second-next token in the parse stream.
+    ///
+    /// This is commonly useful as a way to implement contextual keywords.
+    ///
+    /// # Example
+    ///
+    /// This example needs to use `peek2` because the symbol `union` is not a
+    /// keyword in Rust. We can't use just `peek` and decide to parse a union if
+    /// the very next token is `union`, because someone is free to write a `mod
+    /// union` and a macro invocation that looks like `union::some_macro! { ...
+    /// }`. In other words `union` is a contextual keyword.
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{Ident, ItemUnion, Macro, Token};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// // Parses either a union or a macro invocation.
+    /// enum UnionOrMacro {
+    ///     // union MaybeUninit<T> { uninit: (), value: T }
+    ///     Union(ItemUnion),
+    ///     // lazy_static! { ... }
+    ///     Macro(Macro),
+    /// }
+    ///
+    /// impl Parse for UnionOrMacro {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         if input.peek(Token![union]) && input.peek2(Ident) {
+    ///             input.parse().map(UnionOrMacro::Union)
+    ///         } else {
+    ///             input.parse().map(UnionOrMacro::Macro)
+    ///         }
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
         let ahead = self.fork();
         skip(&ahead) && ahead.peek(token)
