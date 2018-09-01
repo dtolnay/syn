@@ -343,7 +343,7 @@ impl<T: Parse> Parse for Box<T> {
 
 impl<T: Parse + Token> Parse for Option<T> {
     fn parse(input: ParseStream) -> Result<Self> {
-        if T::peek(&input.lookahead1()) {
+        if T::peek(input.cursor()) {
             Ok(Some(input.parse()?))
         } else {
             Ok(None)

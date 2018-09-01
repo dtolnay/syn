@@ -704,7 +704,7 @@ impl<T, P> Punctuated<T, P> {
         loop {
             let value = parser(input)?;
             punctuated.push_value(value);
-            if !P::peek(&input.lookahead1()) {
+            if !P::peek(input.cursor()) {
                 break;
             }
             let punct = input.parse()?;

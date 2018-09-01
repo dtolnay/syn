@@ -106,6 +106,8 @@ use proc_macro2::{Ident, Span};
 use quote::{ToTokens, TokenStreamExt};
 
 #[cfg(feature = "parsing")]
+use buffer::Cursor;
+#[cfg(feature = "parsing")]
 use error::Result;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
@@ -116,7 +118,7 @@ use lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
 use lookahead;
 #[cfg(feature = "parsing")]
-use parse::{Lookahead1, Parse, ParseStream};
+use parse::{Parse, ParseStream};
 use span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
@@ -126,7 +128,7 @@ use span::IntoSpans;
 pub trait Token: private::Sealed {
     // Not public API.
     #[doc(hidden)]
-    fn peek(lookahead: &Lookahead1) -> bool;
+    fn peek(cursor: Cursor) -> bool;
 
     // Not public API.
     #[doc(hidden)]
@@ -142,10 +144,9 @@ macro_rules! impl_token {
     ($name:ident $display:expr) => {
         #[cfg(feature = "parsing")]
         impl Token for $name {
-            fn peek(lookahead: &Lookahead1) -> bool {
+            fn peek(cursor: Cursor) -> bool {
                 // TODO factor out in a way that can be compiled just once
                 let scope = Span::call_site();
-                let cursor = lookahead.cursor();
                 let unexpected = Rc::new(Cell::new(None));
                 ::private::new_parse_buffer(scope, cursor, unexpected)
                     .parse::<Self>()
@@ -423,8 +424,8 @@ impl Parse for Underscore {
 
 #[cfg(feature = "parsing")]
 impl Token for Paren {
-    fn peek(lookahead: &Lookahead1) -> bool {
-        lookahead::is_delimiter(lookahead, Delimiter::Parenthesis)
+    fn peek(cursor: Cursor) -> bool {
+        lookahead::is_delimiter(cursor, Delimiter::Parenthesis)
     }
 
     fn display() -> String {
@@ -434,8 +435,8 @@ impl Token for Paren {
 
 #[cfg(feature = "parsing")]
 impl Token for Brace {
-    fn peek(lookahead: &Lookahead1) -> bool {
-        lookahead::is_delimiter(lookahead, Delimiter::Brace)
+    fn peek(cursor: Cursor) -> bool {
+        lookahead::is_delimiter(cursor, Delimiter::Brace)
     }
 
     fn display() -> String {
@@ -445,8 +446,8 @@ impl Token for Brace {
 
 #[cfg(feature = "parsing")]
 impl Token for Bracket {
-    fn peek(lookahead: &Lookahead1) -> bool {
-        lookahead::is_delimiter(lookahead, Delimiter::Bracket)
+    fn peek(cursor: Cursor) -> bool {
+        lookahead::is_delimiter(cursor, Delimiter::Bracket)
     }
 
     fn display() -> String {
@@ -456,8 +457,8 @@ impl Token for Bracket {
 
 #[cfg(feature = "parsing")]
 impl Token for Group {
-    fn peek(lookahead: &Lookahead1) -> bool {
-        lookahead::is_delimiter(lookahead, Delimiter::None)
+    fn peek(cursor: Cursor) -> bool {
+        lookahead::is_delimiter(cursor, Delimiter::None)
     }
 
     fn display() -> String {

@@ -78,7 +78,7 @@ pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
 impl<'a> Lookahead1<'a> {
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
-        if T::Token::peek(self) {
+        if T::Token::peek(self.cursor) {
             return true;
         }
         self.comparisons.borrow_mut().push(T::Token::display());
@@ -103,10 +103,6 @@ impl<'a> Lookahead1<'a> {
                 error::new_at(self.scope, self.cursor, message)
             }
         }
-    }
-
-    pub fn cursor(&self) -> Cursor<'a> {
-        self.cursor
     }
 }
 
@@ -136,8 +132,8 @@ impl<S> IntoSpans<S> for TokenMarker {
     }
 }
 
-pub fn is_delimiter(lookahead: &Lookahead1, delimiter: Delimiter) -> bool {
-    lookahead.cursor.group(delimiter).is_some()
+pub fn is_delimiter(cursor: Cursor, delimiter: Delimiter) -> bool {
+    cursor.group(delimiter).is_some()
 }
 
 mod private {
