@@ -90,6 +90,17 @@ fn peek_impl(
 impl<'a> Lookahead1<'a> {
     /// Looks at the next token in the parse stream to determine whether it
     /// matches the requested type of token.
+    ///
+    /// # Syntax
+    ///
+    /// Note that this method does not use turbofish syntax. Pass the peek type
+    /// inside of parentheses.
+    ///
+    /// - `input.peek(Token![struct])`
+    /// - `input.peek(Token![==])`
+    /// - `input.peek(Ident)`
+    /// - `input.peek(Lifetime)`
+    /// - `input.peek(token::Brace)`
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
         peek_impl(self, T::Token::peek, T::Token::display)

@@ -332,6 +332,17 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// Does not advance the position of the parse stream.
     ///
+    /// # Syntax
+    ///
+    /// Note that this method does not use turbofish syntax. Pass the peek type
+    /// inside of parentheses.
+    ///
+    /// - `input.peek(Token![struct])`
+    /// - `input.peek(Token![==])`
+    /// - `input.peek(Ident)`
+    /// - `input.peek(Lifetime)`
+    /// - `input.peek(token::Brace)`
+    ///
     /// # Example
     ///
     /// In this example we finish parsing the list of supertraits when the next
