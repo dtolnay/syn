@@ -229,29 +229,44 @@ impl private {
 }
 
 impl<'a> ParseBuffer<'a> {
+    /// Parses a syntax tree node of type `T`, advancing the position of our
+    /// parse stream past it.
     pub fn parse<T: Parse>(&self) -> Result<T> {
         T::parse(self)
     }
 
+    /// Calls the given parser function to parse a syntax tree node of type `T`
+    /// from this stream.
     pub fn call<T>(&self, function: fn(ParseStream) -> Result<T>) -> Result<T> {
         function(self)
     }
 
+    /// Looks at the next token in the parse stream to determine whether it
+    /// matches the requested type of token.
+    ///
+    /// Does not advance the position of the parse stream.
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
         T::Token::peek(self.cursor())
     }
 
+    /// Looks at the second-next token in the parse stream.
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
         let ahead = self.fork();
         skip(&ahead) && ahead.peek(token)
     }
 
+    /// Looks at the third-next token in the parse stream.
     pub fn peek3<T: Peek>(&self, token: T) -> bool {
         let ahead = self.fork();
         skip(&ahead) && skip(&ahead) && ahead.peek(token)
     }
 
+    /// Parses zero or more occurrences of `T` separated by punctuation of type
+    /// `P`, with optional trailing punctuation.
+    ///
+    /// Parsing continues until the end of this parse stream. The entire content
+    /// of this parse stream must consist of `T` and `P`.
     pub fn parse_terminated<T, P: Parse>(
         &self,
         parser: fn(ParseStream) -> Result<T>,
@@ -259,14 +274,51 @@ impl<'a> ParseBuffer<'a> {
         Punctuated::parse_terminated_with(self, parser)
     }
 
+    /// Returns whether there are tokens remaining in this stream.
+    ///
+    /// This method returns true at the end of the content of a set of
+    /// delimiters, as well as at the very end of the complete macro input.
     pub fn is_empty(&self) -> bool {
         self.cursor().eof()
     }
 
+    /// Constructs a helper for peeking at the next token in this stream and
+    /// building an error message if it is not one of a set of expected tokens.
     pub fn lookahead1(&self) -> Lookahead1<'a> {
         lookahead::new(self.scope, self.cursor())
     }
 
+    /// Forks a parse stream so that parsing tokens out of either the original
+    /// or the fork does not advance the position of the other.
+    ///
+    /// # Performance
+    ///
+    /// Forking a parse stream is a cheap fixed amount of work and does not
+    /// involve copying token buffers. Where you might hit performance problems
+    /// is if your macro ends up parsing a large amount of content more than
+    /// once.
+    ///
+    /// ```
+    /// # use syn::Expr;
+    /// # use syn::parse::{ParseStream, Result};
+    /// #
+    /// # fn bad(input: ParseStream) -> Result<Expr> {
+    /// // Do not do this.
+    /// if input.fork().parse::<Expr>().is_ok() {
+    ///     return input.parse::<Expr>();
+    /// }
+    /// # unimplemented!()
+    /// # }
+    /// ```
+    ///
+    /// As a rule, avoid parsing an unbounded amount of tokens out of a forked
+    /// parse stream. Only use a fork when the amount of work performed against
+    /// the fork is small and bounded.
+    ///
+    /// For a lower level but generally more performant way to perform
+    /// speculative parsing, consider using [`ParseStream::step`] instead.
+    ///
+    /// [`ParseStream::step`]: #method.step
     pub fn fork(&self) -> Self {
         ParseBuffer {
             scope: self.scope,
@@ -278,10 +330,13 @@ impl<'a> ParseBuffer<'a> {
         }
     }
 
+    /// Triggers an error at the current position of the parse stream.
     pub fn error<T: Display>(&self, message: T) -> Error {
         error::new_at(self.scope, self.cursor(), message)
     }
 
+    /// Speculatively parses tokens from this parse stream, advancing the
+    /// position of this stream only if parsing succeeds.
     pub fn step<F, R>(&self, function: F) -> Result<R>
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
@@ -295,6 +350,11 @@ impl<'a> ParseBuffer<'a> {
         Ok(node)
     }
 
+    /// Provides low-level access to the token representation underlying this
+    /// parse stream.
+    ///
+    /// Cursors are immutable so no operations you perform against the cursor
+    /// will affect the state of this parse stream.
     pub fn cursor(&self) -> Cursor<'a> {
         self.cell.get()
     }
