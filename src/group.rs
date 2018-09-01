@@ -91,6 +91,48 @@ impl private {
 }
 
 /// Parse a set of parentheses and expose their content to subsequent parsers.
+///
+/// ```rust
+/// # #[macro_use]
+/// # extern crate quote;
+/// #
+/// extern crate syn;
+///
+/// use syn::{parenthesized, token, Ident, Token, Type};
+/// use syn::parse::{Parse, ParseStream, Result};
+/// use syn::punctuated::Punctuated;
+///
+/// // Parse a simplified tuple struct syntax like:
+/// //
+/// //     struct S(A, B);
+/// struct TupleStruct {
+///     struct_token: Token![struct],
+///     ident: Ident,
+///     paren_token: token::Paren,
+///     fields: Punctuated<Type, Token![,]>,
+///     semi_token: Token![;],
+/// }
+///
+/// impl Parse for TupleStruct {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         let content;
+///         Ok(TupleStruct {
+///             struct_token: input.parse()?,
+///             ident: input.parse()?,
+///             paren_token: parenthesized!(content in input),
+///             fields: content.parse_terminated(Type::parse)?,
+///             semi_token: input.parse()?,
+///         })
+///     }
+/// }
+/// #
+/// # fn main() {
+/// #     let input = quote! {
+/// #         struct S(A, B);
+/// #     };
+/// #     syn::parse2::<TupleStruct>(input).unwrap();
+/// # }
+/// ```
 #[macro_export]
 macro_rules! parenthesized {
     ($content:ident in $cursor:expr) => {
