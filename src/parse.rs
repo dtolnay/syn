@@ -285,6 +285,44 @@ impl<'a> ParseBuffer<'a> {
 
     /// Calls the given parser function to parse a syntax tree node of type `T`
     /// from this stream.
+    ///
+    /// # Example
+    ///
+    /// The parser below invokes [`Attribute::parse_outer`] to parse a vector of
+    /// zero or more outer attributes.
+    ///
+    /// [`Attribute::parse_outer`]: ../struct.Attribute.html#method.parse_outer
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{Attribute, Ident, Token};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// // Parses a unit struct with attributes.
+    /// //
+    /// //     #[path = "s.tmpl"]
+    /// //     struct S;
+    /// struct UnitStruct {
+    ///     attrs: Vec<Attribute>,
+    ///     struct_token: Token![struct],
+    ///     name: Ident,
+    ///     semi_token: Token![;],
+    /// }
+    ///
+    /// impl Parse for UnitStruct {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         Ok(UnitStruct {
+    ///             attrs: input.call(Attribute::parse_outer)?,
+    ///             struct_token: input.parse()?,
+    ///             name: input.parse()?,
+    ///             semi_token: input.parse()?,
+    ///         })
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn call<T>(&self, function: fn(ParseStream) -> Result<T>) -> Result<T> {
         function(self)
     }
