@@ -116,9 +116,9 @@ impl<T: Parse> ParseQuote for T {
 ////////////////////////////////////////////////////////////////////////////////
 // Any other types that we want `parse_quote!` to be able to parse.
 
+use punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 use {attr, Attribute};
-use punctuated::Punctuated;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {

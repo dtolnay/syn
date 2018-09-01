@@ -205,7 +205,11 @@ fn skip(input: ParseStream) -> bool {
 }
 
 impl private {
-    pub fn new_parse_buffer(scope: Span, cursor: Cursor, unexpected: Rc<Cell<Option<Span>>>) -> ParseBuffer {
+    pub fn new_parse_buffer(
+        scope: Span,
+        cursor: Cursor,
+        unexpected: Rc<Cell<Option<Span>>>,
+    ) -> ParseBuffer {
         let extend = unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) };
         ParseBuffer {
             scope: scope,

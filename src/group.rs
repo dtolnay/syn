@@ -39,41 +39,37 @@ pub struct Group<'a> {
 // Not public API.
 #[doc(hidden)]
 pub fn parse_parens(input: ParseStream) -> Result<Parens> {
-    parse_delimited(input, Delimiter::Parenthesis)
-        .map(|(span, content)| Parens {
-            token: token::Paren(span),
-            content: content,
-        })
+    parse_delimited(input, Delimiter::Parenthesis).map(|(span, content)| Parens {
+        token: token::Paren(span),
+        content: content,
+    })
 }
 
 // Not public API.
 #[doc(hidden)]
 pub fn parse_braces(input: ParseStream) -> Result<Braces> {
-    parse_delimited(input, Delimiter::Brace)
-        .map(|(span, content)| Braces {
-            token: token::Brace(span),
-            content: content,
-        })
+    parse_delimited(input, Delimiter::Brace).map(|(span, content)| Braces {
+        token: token::Brace(span),
+        content: content,
+    })
 }
 
 // Not public API.
 #[doc(hidden)]
 pub fn parse_brackets(input: ParseStream) -> Result<Brackets> {
-    parse_delimited(input, Delimiter::Bracket)
-        .map(|(span, content)| Brackets {
-            token: token::Bracket(span),
-            content: content,
-        })
+    parse_delimited(input, Delimiter::Bracket).map(|(span, content)| Brackets {
+        token: token::Bracket(span),
+        content: content,
+    })
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl private {
     pub fn parse_group(input: ParseStream) -> Result<Group> {
-        parse_delimited(input, Delimiter::None)
-            .map(|(span, content)| Group {
-                token: token::Group(span),
-                content: content,
-            })
+        parse_delimited(input, Delimiter::None).map(|(span, content)| Group {
+            token: token::Group(span),
+            content: content,
+        })
     }
 }
 
@@ -81,8 +77,7 @@ fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, Pa
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
             let unexpected = private::get_unexpected(input);
-            let content =
-                private::new_parse_buffer(span, cursor.advance(content), unexpected);
+            let content = private::new_parse_buffer(span, cursor.advance(content), unexpected);
             Ok(((span, content), rest))
         } else {
             let message = match delimiter {
