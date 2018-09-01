@@ -3473,7 +3473,7 @@ mod printing {
     impl ToTokens for ExprPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            ::PathTokens(&self.qself, &self.path).to_tokens(tokens)
+            private::print_path(tokens, &self.qself, &self.path);
         }
     }
 
@@ -3669,7 +3669,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for PatPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            ::PathTokens(&self.qself, &self.path).to_tokens(tokens);
+            private::print_path(tokens, &self.qself, &self.path);
         }
     }
 

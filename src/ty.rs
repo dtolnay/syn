@@ -839,7 +839,7 @@ mod printing {
 
     impl ToTokens for TypePath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            PathTokens(&self.qself, &self.path).to_tokens(tokens);
+            private::print_path(tokens, &self.qself, &self.path);
         }
     }
 

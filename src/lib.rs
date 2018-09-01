@@ -424,11 +424,6 @@ pub use ty::{
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod path;
-#[cfg(all(
-    any(feature = "full", feature = "derive"),
-    feature = "printing"
-))]
-pub use path::PathTokens;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use path::{
     AngleBracketedGenericArguments, Binding, GenericArgument, ParenthesizedGenericArguments, Path,

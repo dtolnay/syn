@@ -20,38 +20,6 @@ ast_struct! {
     }
 }
 
-/// A helper for printing a self-type qualified path as tokens.
-///
-/// ```rust
-/// # extern crate syn;
-/// # extern crate quote;
-/// # extern crate proc_macro2;
-/// #
-/// use proc_macro2::TokenStream;
-/// use quote::ToTokens;
-/// use syn::{QSelf, Path, PathTokens};
-///
-/// struct MyNode {
-///     qself: Option<QSelf>,
-///     path: Path,
-/// }
-///
-/// impl ToTokens for MyNode {
-///     fn to_tokens(&self, tokens: &mut TokenStream) {
-///         PathTokens(&self.qself, &self.path).to_tokens(tokens);
-///     }
-/// }
-/// #
-/// # fn main() {}
-/// ```
-///
-/// *This type is available if Syn is built with the `"derive"` or `"full"`
-/// feature and the `"printing"` feature.*
-#[cfg(feature = "printing")]
-#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
-pub struct PathTokens<'a>(pub &'a Option<QSelf>, pub &'a Path);
-
 impl<T> From<T> for Path
 where
     T: Into<PathSegment>,
@@ -609,24 +577,27 @@ mod printing {
         }
     }
 
-    impl<'a> ToTokens for PathTokens<'a> {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            let qself = match *self.0 {
+    impl private {
+        pub fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
+            let qself = match *qself {
                 Some(ref qself) => qself,
-                None => return self.1.to_tokens(tokens),
+                None => {
+                    path.to_tokens(tokens);
+                    return;
+                }
             };
             qself.lt_token.to_tokens(tokens);
             qself.ty.to_tokens(tokens);
 
-            let pos = if qself.position > 0 && qself.position >= self.1.segments.len() {
-                self.1.segments.len() - 1
+            let pos = if qself.position > 0 && qself.position >= path.segments.len() {
+                path.segments.len() - 1
             } else {
                 qself.position
             };
-            let mut segments = self.1.segments.pairs();
+            let mut segments = path.segments.pairs();
             if pos > 0 {
                 TokensOrDefault(&qself.as_token).to_tokens(tokens);
-                self.1.leading_colon.to_tokens(tokens);
+                path.leading_colon.to_tokens(tokens);
                 for (i, segment) in segments.by_ref().take(pos).enumerate() {
                     if i + 1 == pos {
                         segment.value().to_tokens(tokens);
@@ -638,7 +609,7 @@ mod printing {
                 }
             } else {
                 qself.gt_token.to_tokens(tokens);
-                self.1.leading_colon.to_tokens(tokens);
+                path.leading_colon.to_tokens(tokens);
             }
             for segment in segments {
                 segment.to_tokens(tokens);
