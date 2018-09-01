@@ -393,7 +393,10 @@ where
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+
     use parse::{ParseStream, Result};
+    #[cfg(feature = "full")]
+    use private;
 
     impl Attribute {
         pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -433,6 +436,15 @@ pub mod parsing {
             path: content.call(Path::parse_mod_style)?,
             tts: content.parse()?,
         })
+    }
+
+    #[cfg(feature = "full")]
+    impl private {
+        pub fn attrs(outer: Vec<Attribute>, inner: Vec<Attribute>) -> Vec<Attribute> {
+            let mut attrs = outer;
+            attrs.extend(inner);
+            attrs
+        }
     }
 }
 

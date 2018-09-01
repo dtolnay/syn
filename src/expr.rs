@@ -2335,11 +2335,7 @@ pub mod parsing {
         };
 
         Ok(ExprStruct {
-            attrs: {
-                let mut attrs = outer_attrs;
-                attrs.extend(inner_attrs);
-                attrs
-            },
+            attrs: private::attrs(outer_attrs, inner_attrs),
             brace_token: brace_token,
             path: path,
             fields: fields,

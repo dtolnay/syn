@@ -1050,11 +1050,7 @@ pub mod parsing {
             let stmts = content.call(Block::parse_within)?;
 
             Ok(ItemFn {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 vis: vis,
                 constness: constness,
                 unsafety: unsafety,
@@ -1163,11 +1159,7 @@ pub mod parsing {
                 }
 
                 Ok(ItemMod {
-                    attrs: {
-                        let mut attrs = outer_attrs;
-                        attrs.extend(inner_attrs);
-                        attrs
-                    },
+                    attrs: private::attrs(outer_attrs, inner_attrs),
                     vis: vis,
                     mod_token: mod_token,
                     ident: ident,
@@ -1194,11 +1186,7 @@ pub mod parsing {
             }
 
             Ok(ItemForeignMod {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 abi: abi,
                 brace_token: brace_token,
                 items: items,
@@ -1623,11 +1611,7 @@ pub mod parsing {
             };
 
             Ok(TraitItemMethod {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 sig: MethodSig {
                     constness: constness,
                     unsafety: unsafety,
@@ -1748,11 +1732,7 @@ pub mod parsing {
             }
 
             Ok(ItemImpl {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 defaultness: defaultness,
                 unsafety: unsafety,
                 impl_token: impl_token,
@@ -1869,11 +1849,7 @@ pub mod parsing {
             let stmts = content.call(Block::parse_within)?;
 
             Ok(ImplItemMethod {
-                attrs: {
-                    let mut attrs = outer_attrs;
-                    attrs.extend(inner_attrs);
-                    attrs
-                },
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 vis: vis,
                 defaultness: defaultness,
                 sig: MethodSig {
