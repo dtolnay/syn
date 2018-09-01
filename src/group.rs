@@ -75,7 +75,8 @@ fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, Pa
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
             let unexpected = private::get_unexpected(input);
-            let content = private::new_parse_buffer(span, cursor.advance(content), unexpected);
+            let nested = private::advance_step_cursor(cursor, content);
+            let content = private::new_parse_buffer(span, nested, unexpected);
             Ok(((span, content), rest))
         } else {
             let message = match delimiter {
