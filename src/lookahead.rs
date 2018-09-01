@@ -9,8 +9,14 @@ use token::Token;
 
 /// Support for checking the next token in a stream to decide how to parse.
 ///
+/// An important advantage over [`ParseStream::peek`] is that here we
+/// automatically construct an appropriate error message based on the token
+/// alternatives that get peeked. If you are producing your own error message,
+/// go ahead and use `ParseStream::peek` instead.
+///
 /// Use [`ParseStream::lookahead1`] to construct this object.
 ///
+/// [`ParseStream::peek`]: struct.ParseBuffer.html#method.peek
 /// [`ParseStream::lookahead1`]: struct.ParseBuffer.html#method.lookahead1
 pub struct Lookahead1<'a> {
     scope: Span,
