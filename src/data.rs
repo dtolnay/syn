@@ -380,7 +380,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pub_token.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
-                // XXX: If we have a path which is not "self" or "super" or
+                // TODO: If we have a path which is not "self" or "super" or
                 // "crate", automatically add the "in" token.
                 self.in_token.to_tokens(tokens);
                 self.path.to_tokens(tokens);

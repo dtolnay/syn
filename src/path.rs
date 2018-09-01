@@ -587,7 +587,6 @@ mod printing {
             qself.lt_token.to_tokens(tokens);
             qself.ty.to_tokens(tokens);
 
-            // XXX: Gross.
             let pos = if qself.position > 0 && qself.position >= self.1.segments.len() {
                 self.1.segments.len() - 1
             } else {

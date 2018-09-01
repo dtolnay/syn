@@ -1335,7 +1335,6 @@ pub mod parsing {
         }
     }
 
-    // XXX: This duplication is ugly
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let ahead = input.fork();
@@ -1457,7 +1456,6 @@ pub mod parsing {
         Ok(e)
     }
 
-    // XXX: Duplication == ugly
     #[cfg(not(feature = "full"))]
     fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let mut e = atom_expr(input, allow_struct)?;
@@ -3686,8 +3684,6 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            // XXX: This is a mess, and it will be so easy to screw it up. How
-            // do we make this correct itself better?
             self.bracket_token.surround(tokens, |tokens| {
                 self.front.to_tokens(tokens);
 
