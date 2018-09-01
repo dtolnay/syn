@@ -132,7 +132,7 @@ pub trait Token: private::Sealed {
 
     // Not public API.
     #[doc(hidden)]
-    fn display() -> String;
+    fn display() -> &'static str;
 }
 
 #[cfg(feature = "parsing")]
@@ -153,8 +153,8 @@ macro_rules! impl_token {
                     .is_ok()
             }
 
-            fn display() -> String {
-                $display.to_owned()
+            fn display() -> &'static str {
+                $display
             }
         }
 
@@ -428,8 +428,8 @@ impl Token for Paren {
         lookahead::is_delimiter(cursor, Delimiter::Parenthesis)
     }
 
-    fn display() -> String {
-        "parentheses".to_owned()
+    fn display() -> &'static str {
+        "parentheses"
     }
 }
 
@@ -439,8 +439,8 @@ impl Token for Brace {
         lookahead::is_delimiter(cursor, Delimiter::Brace)
     }
 
-    fn display() -> String {
-        "curly braces".to_owned()
+    fn display() -> &'static str {
+        "curly braces"
     }
 }
 
@@ -450,8 +450,8 @@ impl Token for Bracket {
         lookahead::is_delimiter(cursor, Delimiter::Bracket)
     }
 
-    fn display() -> String {
-        "square brackets".to_owned()
+    fn display() -> &'static str {
+        "square brackets"
     }
 }
 
@@ -461,8 +461,8 @@ impl Token for Group {
         lookahead::is_delimiter(cursor, Delimiter::None)
     }
 
-    fn display() -> String {
-        "invisible group".to_owned()
+    fn display() -> &'static str {
+        "invisible group"
     }
 }
 

@@ -64,7 +64,7 @@ use token::Token;
 pub struct Lookahead1<'a> {
     scope: Span,
     cursor: Cursor<'a>,
-    comparisons: RefCell<Vec<String>>,
+    comparisons: RefCell<Vec<&'static str>>,
 }
 
 pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
