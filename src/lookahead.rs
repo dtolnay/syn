@@ -75,14 +75,22 @@ pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
     }
 }
 
+fn peek_impl(
+    lookahead: &Lookahead1,
+    peek: fn(Cursor) -> bool,
+    display: fn() -> &'static str,
+) -> bool {
+    if peek(lookahead.cursor) {
+        return true;
+    }
+    lookahead.comparisons.borrow_mut().push(display());
+    false
+}
+
 impl<'a> Lookahead1<'a> {
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
-        if T::Token::peek(self.cursor) {
-            return true;
-        }
-        self.comparisons.borrow_mut().push(T::Token::display());
-        false
+        peek_impl(self, T::Token::peek, T::Token::display)
     }
 
     pub fn error(self) -> Error {
