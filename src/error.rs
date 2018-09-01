@@ -33,6 +33,41 @@ pub struct Error {
 }
 
 impl Error {
+    /// Usually the [`ParseStream::error`] method will be used instead, which
+    /// automatically uses the correct span from the current position of the
+    /// parse stream.
+    ///
+    /// Use `Error::new` when the error needs to be triggered on some span other
+    /// than where the parse stream is currently positioned.
+    ///
+    /// [`ParseStream::error`]: struct.ParseBuffer.html#method.error
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate syn;
+    ///
+    /// use syn::{Ident, LitStr};
+    /// use syn::parse::{Error, ParseStream, Result};
+    ///
+    /// // Parses input that looks like `name = "string"` where the key must be
+    /// // the identifier `name` and the value may be any string literal.
+    /// // Returns the string literal.
+    /// fn parse_name(input: ParseStream) -> Result<LitStr> {
+    ///     let name_token: Ident = input.parse()?;
+    ///     if name_token != "name" {
+    ///         // Trigger an error not on the current position of the stream,
+    ///         // but on the position of the unexpected identifier.
+    ///         return Err(Error::new(name_token.span(), "expected `name`"));
+    ///     }
+    ///     input.parse::<Token![=]>()?;
+    ///     let s: LitStr = input.parse()?;
+    ///     Ok(s)
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn new<T: Display>(span: Span, message: T) -> Self {
         Error {
             span: span,
