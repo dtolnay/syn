@@ -270,6 +270,7 @@
         eval_order_dependence,
         large_enum_variant,
         match_bool,
+        never_loop,
         redundant_closure,
         needless_pass_by_value,
         redundant_field_names,
