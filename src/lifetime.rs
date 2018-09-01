@@ -37,20 +37,37 @@ pub struct Lifetime {
 }
 
 impl Lifetime {
-    pub fn new(s: &str, span: Span) -> Self {
-        if !s.starts_with('\'') {
+    /// # Panics
+    ///
+    /// Panics if the lifetime does not conform to the bulleted rules above.
+    ///
+    /// # Invocation
+    ///
+    /// ```
+    /// # extern crate proc_macro2;
+    /// # extern crate syn;
+    /// #
+    /// # use proc_macro2::Span;
+    /// # use syn::Lifetime;
+    /// #
+    /// # fn f() -> Lifetime {
+    /// Lifetime::new("'a", Span::call_site())
+    /// # }
+    /// ```
+    pub fn new(symbol: &str, span: Span) -> Self {
+        if !symbol.starts_with('\'') {
             panic!(
                 "lifetime name must start with apostrophe as in \"'a\", got {:?}",
-                s
+                symbol
             );
         }
 
-        if s == "'" {
+        if symbol == "'" {
             panic!("lifetime name must not be empty");
         }
 
-        fn xid_ok(s: &str) -> bool {
-            let mut chars = s.chars();
+        fn xid_ok(symbol: &str) -> bool {
+            let mut chars = symbol.chars();
             let first = chars.next().unwrap();
             if !(UnicodeXID::is_xid_start(first) || first == '_') {
                 return false;
@@ -63,13 +80,13 @@ impl Lifetime {
             true
         }
 
-        if !xid_ok(&s[1..]) {
-            panic!("{:?} is not a valid lifetime name", s);
+        if !xid_ok(&symbol[1..]) {
+            panic!("{:?} is not a valid lifetime name", symbol);
         }
 
         Lifetime {
             apostrophe: span,
-            ident: Ident::new(&s[1..], span),
+            ident: Ident::new(&symbol[1..], span),
         }
     }
 }
