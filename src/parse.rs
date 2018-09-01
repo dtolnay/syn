@@ -309,6 +309,50 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// Parsing continues until the end of this parse stream. The entire content
     /// of this parse stream must consist of `T` and `P`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # extern crate quote;
+    /// # extern crate syn;
+    /// #
+    /// # use quote::quote;
+    /// #
+    /// use syn::{parenthesized, token, Ident, Token, Type};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::punctuated::Punctuated;
+    ///
+    /// // Parse a simplified tuple struct syntax like:
+    /// //
+    /// //     struct S(A, B);
+    /// struct TupleStruct {
+    ///     struct_token: Token![struct],
+    ///     ident: Ident,
+    ///     paren_token: token::Paren,
+    ///     fields: Punctuated<Type, Token![,]>,
+    ///     semi_token: Token![;],
+    /// }
+    ///
+    /// impl Parse for TupleStruct {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         let content;
+    ///         Ok(TupleStruct {
+    ///             struct_token: input.parse()?,
+    ///             ident: input.parse()?,
+    ///             paren_token: parenthesized!(content in input),
+    ///             fields: content.parse_terminated(Type::parse)?,
+    ///             semi_token: input.parse()?,
+    ///         })
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {
+    /// #     let input = quote! {
+    /// #         struct S(A, B);
+    /// #     };
+    /// #     syn::parse2::<TupleStruct>(input).unwrap();
+    /// # }
+    /// ```
     pub fn parse_terminated<T, P: Parse>(
         &self,
         parser: fn(ParseStream) -> Result<T>,
