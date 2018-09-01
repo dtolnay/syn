@@ -109,13 +109,14 @@ macro_rules! parenthesized {
 /// Parse a set of curly braces and expose their content to subsequent parsers.
 ///
 /// ```rust
-/// # extern crate syn;
+/// # extern crate quote;
+/// # use quote::quote;
 /// #
-/// use syn::{braced, token, Ident, Token};
+/// extern crate syn;
+///
+/// use syn::{braced, token, Ident, Token, Type};
 /// use syn::parse::{Parse, ParseStream, Result};
 /// use syn::punctuated::Punctuated;
-/// #
-/// # type Field = Ident;
 ///
 /// // Parse a simplified struct syntax like:
 /// //
@@ -124,10 +125,16 @@ macro_rules! parenthesized {
 /// //         b: B,
 /// //     }
 /// struct Struct {
-///     pub struct_token: Token![struct],
-///     pub ident: Ident,
-///     pub brace_token: token::Brace,
-///     pub fields: Punctuated<Field, Token![,]>,
+///     struct_token: Token![struct],
+///     ident: Ident,
+///     brace_token: token::Brace,
+///     fields: Punctuated<Field, Token![,]>,
+/// }
+///
+/// struct Field {
+///     name: Ident,
+///     colon_token: Token![:],
+///     ty: Type,
 /// }
 ///
 /// impl Parse for Struct {
@@ -141,6 +148,26 @@ macro_rules! parenthesized {
 ///         })
 ///     }
 /// }
+///
+/// impl Parse for Field {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         Ok(Field {
+///             name: input.parse()?,
+///             colon_token: input.parse()?,
+///             ty: input.parse()?,
+///         })
+///     }
+/// }
+/// #
+/// # fn main() {
+/// #     let input = quote! {
+/// #         struct S {
+/// #             a: A,
+/// #             b: B,
+/// #         }
+/// #     };
+/// #     syn::parse2::<Struct>(input).unwrap();
+/// # }
 /// ```
 #[macro_export]
 macro_rules! braced {
