@@ -326,6 +326,49 @@ impl<'a> ParseBuffer<'a> {
 
     /// Constructs a helper for peeking at the next token in this stream and
     /// building an error message if it is not one of a set of expected tokens.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate syn;
+    /// #
+    /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Token, TypeParam};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// // A generic parameter, a single one of the comma-separated elements inside
+    /// // angle brackets in:
+    /// //
+    /// //     fn f<T: Clone, 'a, 'b: 'a, const N: usize>() { ... }
+    /// //
+    /// // On invalid input, lookahead gives us a reasonable error message.
+    /// //
+    /// //     error: expected one of: identifier, lifetime, `const`
+    /// //       |
+    /// //     5 |     fn f<!Sized>() {}
+    /// //       |          ^
+    /// enum GenericParam {
+    ///     Type(TypeParam),
+    ///     Lifetime(LifetimeDef),
+    ///     Const(ConstParam),
+    /// }
+    ///
+    /// impl Parse for GenericParam {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         let lookahead = input.lookahead1();
+    ///         if lookahead.peek(Ident) {
+    ///             input.parse().map(GenericParam::Type)
+    ///         } else if lookahead.peek(Lifetime) {
+    ///             input.parse().map(GenericParam::Lifetime)
+    ///         } else if lookahead.peek(Token![const]) {
+    ///             input.parse().map(GenericParam::Const)
+    ///         } else {
+    ///             Err(lookahead.error())
+    ///         }
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn lookahead1(&self) -> Lookahead1<'a> {
         lookahead::new(self.scope, self.cursor())
     }
