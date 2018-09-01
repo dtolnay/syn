@@ -128,7 +128,7 @@ use std::str::FromStr;
     feature = "proc-macro"
 ))]
 use proc_macro;
-use proc_macro2::{self, Delimiter, Group, Ident, Literal, Punct, Span, TokenStream, TokenTree};
+use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
 use buffer::{Cursor, TokenBuffer};
 use error;
@@ -304,29 +304,6 @@ impl<'a> ParseBuffer<'a> {
             Some(span) => Err(Error::new(span, "unexpected token")),
             None => Ok(()),
         }
-    }
-}
-
-impl Parse for Ident {
-    fn parse(input: ParseStream) -> Result<Self> {
-        input.step(|cursor| {
-            if let Some((ident, rest)) = cursor.ident() {
-                match ident.to_string().as_str() {
-                    "_"
-                    // Based on https://doc.rust-lang.org/grammar.html#keywords
-                    // and https://github.com/rust-lang/rfcs/blob/master/text/2421-unreservations-2018.md
-                    | "abstract" | "as" | "become" | "box" | "break" | "const"
-                    | "continue" | "crate" | "do" | "else" | "enum" | "extern" | "false" | "final"
-                    | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match"
-                    | "mod" | "move" | "mut" | "override" | "priv" | "proc" | "pub"
-                    | "ref" | "return" | "Self" | "self" | "static" | "struct"
-                    | "super" | "trait" | "true" | "type" | "typeof" | "unsafe" | "unsized" | "use"
-                    | "virtual" | "where" | "while" | "yield" => {}
-                    _ => return Ok((ident, rest)),
-                }
-            }
-            Err(cursor.error("expected identifier"))
-        })
     }
 }
 
