@@ -1,9 +1,7 @@
 use proc_macro2::{Delimiter, Span};
 
 use error::Result;
-use parse::ParseBuffer;
-#[cfg(any(feature = "full", feature = "derive"))]
-use parse::ParseStream;
+use parse::{ParseBuffer, ParseStream};
 use private;
 use token;
 
