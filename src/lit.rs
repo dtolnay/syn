@@ -436,24 +436,25 @@ pub mod parsing {
 
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {
-            input.step(|cursor| match cursor.literal() {
-                Some((lit, rest)) => Ok((Lit::new(lit), rest)),
-                _ => match cursor.ident() {
-                    Some((ident, rest)) => Ok((
-                        Lit::Bool(LitBool {
-                            value: if ident == "true" {
-                                true
-                            } else if ident == "false" {
-                                false
-                            } else {
-                                return Err(cursor.error("expected literal"));
-                            },
-                            span: ident.span(),
-                        }),
-                        rest,
-                    )),
-                    _ => Err(cursor.error("expected literal")),
-                },
+            input.step(|cursor| {
+                if let Some((lit, rest)) = cursor.literal() {
+                    return Ok((Lit::new(lit), rest));
+                }
+                while let Some((ident, rest)) = cursor.ident() {
+                    let value = if ident == "true" {
+                        true
+                    } else if ident == "false" {
+                        false
+                    } else {
+                        break;
+                    };
+                    let lit_bool = LitBool {
+                        value: value,
+                        span: ident.span(),
+                    };
+                    return Ok((Lit::Bool(lit_bool), rest));
+                }
+                Err(cursor.error("expected literal"))
             })
         }
     }
