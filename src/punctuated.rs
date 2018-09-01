@@ -208,18 +208,16 @@ impl<T, P> Punctuated<T, P> {
     pub fn empty_or_trailing(&self) -> bool {
         self.last.is_none()
     }
-}
 
-impl<T, P> Punctuated<T, P>
-where
-    P: Default,
-{
     /// Appends a syntax tree node onto the end of this punctuated sequence.
     ///
     /// If there is not a trailing punctuation in this sequence when this method
     /// is called, the default value of punctuation type `P` is inserted before
     /// the given value of type `T`.
-    pub fn push(&mut self, value: T) {
+    pub fn push(&mut self, value: T)
+    where
+        P: Default,
+    {
         if !self.empty_or_trailing() {
             self.push_punct(Default::default());
         }
@@ -232,7 +230,10 @@ where
     ///
     /// Panics if `index` is greater than the number of elements previously in
     /// this punctuated sequence.
-    pub fn insert(&mut self, index: usize, value: T) {
+    pub fn insert(&mut self, index: usize, value: T)
+    where
+        P: Default,
+    {
         assert!(index <= self.len());
 
         if index == self.len() {
@@ -240,6 +241,73 @@ where
         } else {
             self.inner.insert(index, (value, Default::default()));
         }
+    }
+
+    #[cfg(feature = "parsing")]
+    pub fn parse_terminated(input: ParseStream) -> Result<Self>
+    where
+        T: Parse,
+        P: Parse,
+    {
+        Self::parse_terminated_with(input, T::parse)
+    }
+
+    #[cfg(feature = "parsing")]
+    pub fn parse_terminated_with(
+        input: ParseStream,
+        parser: fn(ParseStream) -> Result<T>,
+    ) -> Result<Self>
+    where
+        P: Parse,
+    {
+        let mut punctuated = Punctuated::new();
+
+        loop {
+            if input.is_empty() {
+                break;
+            }
+            let value = parser(input)?;
+            punctuated.push_value(value);
+            if input.is_empty() {
+                break;
+            }
+            let punct = input.parse()?;
+            punctuated.push_punct(punct);
+        }
+
+        Ok(punctuated)
+    }
+
+    #[cfg(feature = "parsing")]
+    pub fn parse_separated_nonempty(input: ParseStream) -> Result<Self>
+    where
+        T: Parse,
+        P: Token + Parse,
+    {
+        Self::parse_separated_nonempty_with(input, T::parse)
+    }
+
+    #[cfg(feature = "parsing")]
+    pub fn parse_separated_nonempty_with(
+        input: ParseStream,
+        parser: fn(ParseStream) -> Result<T>,
+    ) -> Result<Self>
+    where
+        P: Token + Parse,
+    {
+        let mut punctuated = Punctuated::new();
+
+        loop {
+            let value = parser(input)?;
+            punctuated.push_value(value);
+            if !P::peek(input.cursor()) {
+                break;
+            }
+            let punct = input.parse()?;
+            punctuated.push_punct(punct);
+        }
+
+        Ok(punctuated)
     }
 }
 
@@ -646,72 +714,6 @@ impl<T, P> IndexMut<usize> for Punctuated<T, P> {
         } else {
             &mut self.inner[index].0
         }
-    }
-}
-
-#[cfg(feature = "parsing")]
-impl<T, P> Punctuated<T, P> {
-    pub fn parse_terminated(input: ParseStream) -> Result<Self>
-    where
-        T: Parse,
-        P: Parse,
-    {
-        Self::parse_terminated_with(input, T::parse)
-    }
-
-    pub fn parse_terminated_with(
-        input: ParseStream,
-        parser: fn(ParseStream) -> Result<T>,
-    ) -> Result<Self>
-    where
-        P: Parse,
-    {
-        let mut punctuated = Punctuated::new();
-
-        loop {
-            if input.is_empty() {
-                break;
-            }
-            let value = parser(input)?;
-            punctuated.push_value(value);
-            if input.is_empty() {
-                break;
-            }
-            let punct = input.parse()?;
-            punctuated.push_punct(punct);
-        }
-
-        Ok(punctuated)
-    }
-
-    pub fn parse_separated_nonempty(input: ParseStream) -> Result<Self>
-    where
-        T: Parse,
-        P: Token + Parse,
-    {
-        Self::parse_separated_nonempty_with(input, T::parse)
-    }
-
-    pub fn parse_separated_nonempty_with(
-        input: ParseStream,
-        parser: fn(ParseStream) -> Result<T>,
-    ) -> Result<Self>
-    where
-        P: Token + Parse,
-    {
-        let mut punctuated = Punctuated::new();
-
-        loop {
-            let value = parser(input)?;
-            punctuated.push_value(value);
-            if !P::peek(input.cursor()) {
-                break;
-            }
-            let punct = input.parse()?;
-            punctuated.push_punct(punct);
-        }
-
-        Ok(punctuated)
     }
 }
 
