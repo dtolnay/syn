@@ -148,6 +148,11 @@ pub trait Parse: Sized {
 }
 
 /// Input to a Syn parser function.
+///
+/// See the methods of this type under the documentation of [`ParseBuffer`]. For
+/// an overview of parsing in Syn, refer to the [module documentation].
+///
+/// [module documentation]: index.html
 pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 
 /// Cursor position within a buffered token stream.
