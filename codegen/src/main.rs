@@ -54,13 +54,9 @@ const EXTRA_TYPES: &[&str] = &["Lifetime"];
 const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
 fn path_eq(a: &syn::Path, b: &str) -> bool {
-    if a.global() {
-        return false;
-    }
-    if a.segments.len() != 1 {
-        return false;
-    }
-    a.segments[0].ident == b
+    a.leading_colon.is_none()
+        && a.segments.len() == 1
+        && a.segments[0].ident == b
 }
 
 fn get_features(attrs: &[Attribute], mut features: TokenStream) -> TokenStream {
