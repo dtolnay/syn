@@ -320,6 +320,42 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// This method returns true at the end of the content of a set of
     /// delimiters, as well as at the very end of the complete macro input.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # extern crate syn;
+    /// #
+    /// use syn::{braced, token, Ident, Item, Token};
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// // Parses a Rust `mod m { ... }` containing zero or more items.
+    /// struct Mod {
+    ///     mod_token: Token![mod],
+    ///     name: Ident,
+    ///     brace_token: token::Brace,
+    ///     items: Vec<Item>,
+    /// }
+    ///
+    /// impl Parse for Mod {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         let content;
+    ///         Ok(Mod {
+    ///             mod_token: input.parse()?,
+    ///             name: input.parse()?,
+    ///             brace_token: braced!(content in input),
+    ///             items: {
+    ///                 let mut items = Vec::new();
+    ///                 while !content.is_empty() {
+    ///                     items.push(content.parse()?);
+    ///                 }
+    ///                 items
+    ///             },
+    ///         })
+    ///     }
+    /// }
+    /// #
+    /// # fn main() {}
     pub fn is_empty(&self) -> bool {
         self.cursor().eof()
     }
