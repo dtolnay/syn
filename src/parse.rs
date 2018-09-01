@@ -230,18 +230,6 @@ impl private {
 }
 
 impl<'a> ParseBuffer<'a> {
-    pub fn cursor(&self) -> Cursor<'a> {
-        self.cell.get()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.cursor().eof()
-    }
-
-    pub fn lookahead1(&self) -> Lookahead1<'a> {
-        lookahead::new(self.scope, self.cursor())
-    }
-
     pub fn parse<T: Parse>(&self) -> Result<T> {
         self.check_unexpected()?;
         T::parse(self)
@@ -270,6 +258,14 @@ impl<'a> ParseBuffer<'a> {
         parser: fn(ParseStream) -> Result<T>,
     ) -> Result<Punctuated<T, P>> {
         Punctuated::parse_terminated_with(self, parser)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cursor().eof()
+    }
+
+    pub fn lookahead1(&self) -> Lookahead1<'a> {
+        lookahead::new(self.scope, self.cursor())
     }
 
     pub fn fork(&self) -> Self {
@@ -303,6 +299,10 @@ impl<'a> ParseBuffer<'a> {
             }
             Err(err) => Err(err),
         }
+    }
+
+    pub fn cursor(&self) -> Cursor<'a> {
+        self.cell.get()
     }
 
     fn check_unexpected(&self) -> Result<()> {
