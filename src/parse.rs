@@ -170,6 +170,11 @@ impl<'a> Drop for ParseBuffer<'a> {
     }
 }
 
+/// Cursor state associated with speculative parsing.
+///
+/// This type is the input of the closure provided to [`ParseStream::step`].
+///
+/// [`ParseStream::step`]: struct.ParseBuffer.html#method.step
 #[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
     scope: Span,
@@ -186,10 +191,21 @@ impl<'c, 'a> Deref for StepCursor<'c, 'a> {
 }
 
 impl<'c, 'a> StepCursor<'c, 'a> {
-    pub fn advance(self, other: Cursor<'c>) -> Cursor<'a> {
-        unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(other) }
+    /// Produces a cursor suitable for returning within the `R` return value of
+    /// a `ParseStream::step` invocation.
+    ///
+    /// # Performance
+    ///
+    /// This method performs a very small fixed amount of work independent of
+    /// the distance between `to` and the prior position of the stream.
+    pub fn advance(self, to: Cursor<'c>) -> Cursor<'a> {
+        unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(to) }
     }
 
+    /// Triggers an error at the current position of the parse stream.
+    ///
+    /// The `ParseStream::step` invocation will return this same error without
+    /// advancing the stream state.
     pub fn error<T: Display>(self, message: T) -> Error {
         error::new_at(self.scope, self.cursor, message)
     }
