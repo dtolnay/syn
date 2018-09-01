@@ -21,10 +21,9 @@
 //! [`ItemStatic`]: ../struct.ItemStatic.html
 //!
 //! ```
-//! # #[macro_use]
 //! # extern crate syn;
 //! #
-//! # use syn::{Attribute, Visibility, Ident, Type, Expr};
+//! # use syn::{Attribute, Expr, Ident, Token, Type, Visibility};
 //! #
 //! pub struct ItemStatic {
 //!     pub attrs: Vec<Attribute>,
@@ -54,38 +53,33 @@
 //! [`braced!`]: ../macro.braced.html
 //!
 //! ```
-//! extern crate syn;
-//!
+//! # extern crate syn;
+//! #
 //! use syn::Attribute;
 //! use syn::parse::{Parse, ParseStream, Result};
 //! #
-//! # struct ItemStatic;
+//! # enum ItemStatic {}
 //!
 //! // Parse the ItemStatic struct shown above.
 //! impl Parse for ItemStatic {
 //!     fn parse(input: ParseStream) -> Result<Self> {
-//! #       Ok(ItemStatic)
-//! #   }
-//! # }
-//! #
-//! # mod example {
-//! #    use super::*;
-//! #    use syn::ItemStatic;
-//! #
-//! #    fn parse(input: ParseStream) -> Result<ItemStatic> {
-//!        Ok(ItemStatic {
-//!            attrs: input.call(Attribute::parse_outer)?,
-//!            vis: input.parse()?,
-//!            static_token: input.parse()?,
-//!            mutability: input.parse()?,
-//!            ident: input.parse()?,
-//!            colon_token: input.parse()?,
-//!            ty: input.parse()?,
-//!            eq_token: input.parse()?,
-//!            expr: input.parse()?,
-//!            semi_token: input.parse()?,
-//!        })
-//!    }
+//!         # use syn::ItemStatic;
+//!         # fn parse(input: ParseStream) -> Result<ItemStatic> {
+//!         Ok(ItemStatic {
+//!             attrs: input.call(Attribute::parse_outer)?,
+//!             vis: input.parse()?,
+//!             static_token: input.parse()?,
+//!             mutability: input.parse()?,
+//!             ident: input.parse()?,
+//!             colon_token: input.parse()?,
+//!             ty: input.parse()?,
+//!             eq_token: input.parse()?,
+//!             expr: input.parse()?,
+//!             semi_token: input.parse()?,
+//!         })
+//!         # }
+//!         # unimplemented!()
+//!     }
 //! }
 //! #
 //! # fn main() {}

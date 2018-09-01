@@ -19,8 +19,8 @@ ast_struct! {
     /// representation of the syntax tree.
     ///
     /// ```
-    /// extern crate syn;
-    ///
+    /// # extern crate syn;
+    /// #
     /// use std::env;
     /// use std::fs::File;
     /// use std::io::Read;

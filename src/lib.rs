@@ -76,13 +76,12 @@
 //! ```
 //!
 //! ```rust
-//! extern crate proc_macro;
-//! extern crate syn;
-//!
-//! #[macro_use]
-//! extern crate quote;
-//!
+//! # extern crate proc_macro;
+//! # extern crate quote;
+//! # extern crate syn;
+//! #
 //! use proc_macro::TokenStream;
+//! use quote::quote;
 //! use syn::DeriveInput;
 //!
 //! # const IGNORE_TOKENS: &str = stringify! {
@@ -622,14 +621,12 @@ use error::Error;
 /// # Examples
 ///
 /// ```rust
-/// extern crate proc_macro;
+/// # extern crate proc_macro;
+/// # extern crate quote;
+/// # extern crate syn;
+/// #
 /// use proc_macro::TokenStream;
-///
-/// extern crate syn;
-///
-/// #[macro_use]
-/// extern crate quote;
-///
+/// use quote::quote;
 /// use syn::DeriveInput;
 ///
 /// # const IGNORE_TOKENS: &str = stringify! {
@@ -688,12 +685,10 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Er
 /// # Examples
 ///
 /// ```rust
-/// extern crate syn;
+/// # extern crate syn;
 /// #
-/// #
-/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
-///
 /// use syn::Expr;
+/// use syn::parse::Result;
 ///
 /// fn run() -> Result<()> {
 ///     let code = "assert_eq!(u8::max_value(), 255)";
@@ -725,15 +720,13 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T, Error> {
 /// # Examples
 ///
 /// ```rust,no_run
-/// extern crate syn;
+/// # extern crate syn;
 /// #
-/// #
-/// # type Result<T> = std::result::Result<T, Box<std::error::Error>>;
-///
+/// use std::error::Error;
 /// use std::fs::File;
 /// use std::io::Read;
 ///
-/// fn run() -> Result<()> {
+/// fn run() -> Result<(), Box<Error>> {
 ///     let mut file = File::open("path/to/code.rs")?;
 ///     let mut content = String::new();
 ///     file.read_to_string(&mut content)?;

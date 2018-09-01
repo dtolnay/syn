@@ -29,13 +29,13 @@ impl Path {
 /// A helper for printing a self-type qualified path as tokens.
 ///
 /// ```rust
-/// extern crate syn;
-/// extern crate quote;
-/// extern crate proc_macro2;
-///
-/// use syn::{QSelf, Path, PathTokens};
+/// # extern crate syn;
+/// # extern crate quote;
+/// # extern crate proc_macro2;
+/// #
 /// use proc_macro2::TokenStream;
 /// use quote::ToTokens;
+/// use syn::{QSelf, Path, PathTokens};
 ///
 /// struct MyNode {
 ///     qself: Option<QSelf>,

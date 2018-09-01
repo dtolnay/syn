@@ -78,7 +78,6 @@
 //! [`Parser`]: trait.Parser.html
 //!
 //! ```
-//! # #[macro_use]
 //! # extern crate syn;
 //! #
 //! # extern crate proc_macro2;
@@ -86,7 +85,7 @@
 //! #
 //! use syn::parse::Parser;
 //! use syn::punctuated::Punctuated;
-//! use syn::{PathSegment, Expr, Attribute};
+//! use syn::{Attribute, Expr, PathSegment, Token};
 //!
 //! # fn run_parsers() -> Result<(), syn::parse::Error> {
 //! #     let tokens = TokenStream::new().into();

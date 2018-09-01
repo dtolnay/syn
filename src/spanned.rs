@@ -29,17 +29,16 @@
 //! static assertion that `Sync` is implemented for that type.
 //!
 //! ```
-//! #[macro_use]
-//! extern crate quote;
-//!
-//! extern crate syn;
-//! extern crate proc_macro;
-//! extern crate proc_macro2;
-//!
-//! use syn::Type;
-//! use syn::spanned::Spanned;
+//! # extern crate proc_macro;
+//! # extern crate proc_macro2;
+//! # extern crate quote;
+//! # extern crate syn;
+//! #
 //! use proc_macro::TokenStream;
 //! use proc_macro2::Span;
+//! use quote::quote_spanned;
+//! use syn::Type;
+//! use syn::spanned::Spanned;
 //!
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[proc_macro_derive(MyMacro)]
