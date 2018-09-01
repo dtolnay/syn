@@ -68,7 +68,7 @@ impl Lifetime {
         }
 
         Lifetime {
-            apostrophe: Span::call_site(),
+            apostrophe: span,
             ident: Ident::new(&s[1..], span),
         }
     }
