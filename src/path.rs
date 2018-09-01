@@ -20,12 +20,6 @@ ast_struct! {
     }
 }
 
-impl Path {
-    pub fn global(&self) -> bool {
-        self.leading_colon.is_some()
-    }
-}
-
 /// A helper for printing a self-type qualified path as tokens.
 ///
 /// ```rust
