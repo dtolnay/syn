@@ -1351,20 +1351,6 @@ pub mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
-    fn take_outer(attrs: &mut Vec<Attribute>) -> Vec<Attribute> {
-        let mut outer = Vec::new();
-        let mut inner = Vec::new();
-        for attr in mem::replace(attrs, Vec::new()) {
-            match attr.style {
-                AttrStyle::Outer => outer.push(attr),
-                AttrStyle::Inner(_) => inner.push(attr),
-            }
-        }
-        *attrs = inner;
-        outer
-    }
-
     // <atom> (..<args>) ...
     // <atom> . <ident> (..<args>) ...
     // <atom> . <ident> ...
@@ -1373,16 +1359,17 @@ pub mod parsing {
     // <atom> ? ...
     #[cfg(feature = "full")]
     fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let mut e = atom_expr(input, allow_struct)?;
+        if input.peek(token::Group) {
+            return input.call(expr_group).map(Expr::Group);
+        }
 
-        let mut attrs = e.replace_attrs(Vec::new());
-        let outer_attrs = take_outer(&mut attrs);
-        e.replace_attrs(attrs);
+        let outer_attrs = input.call(Attribute::parse_outer)?;
 
-        e = trailer_helper(input, e)?;
+        let atom = atom_expr(input, allow_struct)?;
+        let mut e = trailer_helper(input, atom)?;
 
-        let mut attrs = outer_attrs;
-        attrs.extend(e.replace_attrs(Vec::new()));
+        let inner_attrs = e.replace_attrs(Vec::new());
+        let attrs = private::attrs(outer_attrs, inner_attrs);
         e.replace_attrs(attrs);
         Ok(e)
     }
@@ -1512,27 +1499,21 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn atom_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         if input.peek(token::Group) {
-            return input.call(expr_group).map(Expr::Group);
-        }
-
-        let mut attrs = input.call(Attribute::parse_outer)?;
-
-        let mut expr = if input.peek(token::Group) {
-            Expr::Group(input.call(expr_group)?)
+            input.call(expr_group).map(Expr::Group)
         } else if input.peek(Lit) {
-            Expr::Lit(input.call(expr_lit)?)
+            input.call(expr_lit).map(Expr::Lit)
         } else if input.peek(Token![async])
             && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace))
         {
-            Expr::Async(input.call(expr_async)?)
+            input.call(expr_async).map(Expr::Async)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
-            Expr::TryBlock(input.call(expr_try_block)?)
+            input.call(expr_try_block).map(Expr::TryBlock)
         } else if input.peek(Token![|])
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
             || input.peek(Token![static])
             || input.peek(Token![move])
         {
-            Expr::Closure(expr_closure(input, allow_struct)?)
+            expr_closure(input, allow_struct).map(Expr::Closure)
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -1542,43 +1523,43 @@ pub mod parsing {
             || input.peek(Token![extern])
             || input.peek(Token![crate])
         {
-            path_or_macro_or_struct(input, allow_struct)?
+            path_or_macro_or_struct(input, allow_struct)
         } else if input.peek(token::Paren) {
-            paren_or_tuple(input)?
+            paren_or_tuple(input)
         } else if input.peek(Token![break]) {
-            Expr::Break(expr_break(input, allow_struct)?)
+            expr_break(input, allow_struct).map(Expr::Break)
         } else if input.peek(Token![continue]) {
-            Expr::Continue(input.call(expr_continue)?)
+            input.call(expr_continue).map(Expr::Continue)
         } else if input.peek(Token![return]) {
-            Expr::Return(expr_ret(input, allow_struct)?)
+            expr_ret(input, allow_struct).map(Expr::Return)
         } else if input.peek(token::Bracket) {
-            array_or_repeat(input)?
+            array_or_repeat(input)
         } else if input.peek(Token![if]) {
             if input.peek2(Token![let]) {
-                Expr::IfLet(input.call(expr_if_let)?)
+                input.call(expr_if_let).map(Expr::IfLet)
             } else {
-                Expr::If(input.call(expr_if)?)
+                input.call(expr_if).map(Expr::If)
             }
         } else if input.peek(Token![while]) {
             if input.peek2(Token![let]) {
-                Expr::WhileLet(input.call(expr_while_let)?)
+                input.call(expr_while_let).map(Expr::WhileLet)
             } else {
-                Expr::While(input.call(expr_while)?)
+                input.call(expr_while).map(Expr::While)
             }
         } else if input.peek(Token![for]) {
-            Expr::ForLoop(input.call(expr_for_loop)?)
+            input.call(expr_for_loop).map(Expr::ForLoop)
         } else if input.peek(Token![loop]) {
-            Expr::Loop(input.call(expr_loop)?)
+            input.call(expr_loop).map(Expr::Loop)
         } else if input.peek(Token![match]) {
-            Expr::Match(input.call(expr_match)?)
+            input.call(expr_match).map(Expr::Match)
         } else if input.peek(Token![yield]) {
-            Expr::Yield(input.call(expr_yield)?)
+            input.call(expr_yield).map(Expr::Yield)
         } else if input.peek(Token![unsafe]) {
-            Expr::Unsafe(input.call(expr_unsafe)?)
+            input.call(expr_unsafe).map(Expr::Unsafe)
         } else if input.peek(token::Brace) {
-            Expr::Block(input.call(expr_block)?)
+            input.call(expr_block).map(Expr::Block)
         } else if input.peek(Token![..]) {
-            Expr::Range(expr_range(input, allow_struct)?)
+            expr_range(input, allow_struct).map(Expr::Range)
         } else if input.peek(Lifetime) {
             let the_label: Label = input.parse()?;
             let mut expr = if input.peek(Token![while]) {
@@ -1604,14 +1585,10 @@ pub mod parsing {
                 | Expr::Block(ExprBlock { ref mut label, .. }) => *label = Some(the_label),
                 _ => unreachable!(),
             }
-            expr
+            Ok(expr)
         } else {
-            return Err(input.error("expected expression"));
-        };
-
-        attrs.extend(expr.replace_attrs(Vec::new()));
-        expr.replace_attrs(attrs);
-        Ok(expr)
+            Err(input.error("expected expression"))
+        }
     }
 
     #[cfg(not(feature = "full"))]
