@@ -140,17 +140,23 @@ mod private {
     pub trait Sealed {}
 }
 
+#[cfg(feature = "parsing")]
+fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
+    let scope = Span::call_site();
+    let unexpected = Rc::new(Cell::new(None));
+    let buffer = ::private::new_parse_buffer(scope, cursor, unexpected);
+    peek(&buffer)
+}
+
 macro_rules! impl_token {
     ($name:ident $display:expr) => {
         #[cfg(feature = "parsing")]
         impl Token for $name {
             fn peek(cursor: Cursor) -> bool {
-                // TODO factor out in a way that can be compiled just once
-                let scope = Span::call_site();
-                let unexpected = Rc::new(Cell::new(None));
-                ::private::new_parse_buffer(scope, cursor, unexpected)
-                    .parse::<Self>()
-                    .is_ok()
+                fn peek(input: ParseStream) -> bool {
+                    <$name as Parse>::parse(input).is_ok()
+                }
+                peek_impl(cursor, peek)
             }
 
             fn display() -> &'static str {
