@@ -11,7 +11,7 @@ use proc_macro2::{Span, TokenStream};
 use punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "full")]
+#[cfg(all(feature = "parsing", feature = "full"))]
 use std::mem;
 #[cfg(feature = "extra-traits")]
 use tt::TokenStreamHelper;
@@ -569,7 +569,7 @@ impl Hash for ExprVerbatim {
 }
 
 impl Expr {
-    #[cfg(feature = "full")]
+    #[cfg(all(feature = "parsing", feature = "full"))]
     fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match *self {
             Expr::Box(ExprBox { ref mut attrs, .. })
