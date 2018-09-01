@@ -92,6 +92,8 @@ impl private {
 
 /// Parse a set of parentheses and expose their content to subsequent parsers.
 ///
+/// # Example
+///
 /// ```rust
 /// # #[macro_use]
 /// # extern crate quote;
@@ -149,6 +151,8 @@ macro_rules! parenthesized {
 }
 
 /// Parse a set of curly braces and expose their content to subsequent parsers.
+///
+/// # Example
 ///
 /// ```rust
 /// # extern crate quote;
@@ -228,6 +232,8 @@ macro_rules! braced {
 
 /// Parse a set of square brackets and expose their content to subsequent
 /// parsers.
+///
+/// # Example
 ///
 /// ```rust
 /// # #[macro_use]
