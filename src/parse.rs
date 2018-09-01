@@ -380,6 +380,10 @@ impl<'a> ParseBuffer<'a> {
     /// Speculatively parses tokens from this parse stream, advancing the
     /// position of this stream only if parsing succeeds.
     ///
+    /// This is a powerful low-level API used for defining the `Parse` impls of
+    /// the basic built-in token types. It is not something that will be used
+    /// widely outside of the Syn codebase.
+    ///
     /// # Example
     ///
     /// ```
