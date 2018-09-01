@@ -230,7 +230,6 @@ impl private {
 
 impl<'a> ParseBuffer<'a> {
     pub fn parse<T: Parse>(&self) -> Result<T> {
-        self.check_unexpected()?;
         T::parse(self)
     }
 
@@ -286,7 +285,6 @@ impl<'a> ParseBuffer<'a> {
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
     {
-        self.check_unexpected()?;
         match function(StepCursor {
             scope: self.scope,
             cursor: self.cell.get(),
