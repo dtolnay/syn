@@ -348,6 +348,9 @@ pub mod parsing {
     impl Path {
         /// Parse a `Path` containing no path arguments on any of its segments.
         ///
+        /// *This function is available if Syn is built with the `"parsing"`
+        /// feature.*
+        ///
         /// # Example
         ///
         /// ```

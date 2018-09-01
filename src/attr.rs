@@ -129,6 +129,9 @@ impl Attribute {
     }
 
     /// Parses zero or more outer attributes from the stream.
+    ///
+    /// *This function is available if Syn is built with the `"parsing"`
+    /// feature.*
     #[cfg(feature = "parsing")]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
@@ -139,6 +142,9 @@ impl Attribute {
     }
 
     /// Parses zero or more inner attributes from the stream.
+    ///
+    /// *This function is available if Syn is built with the `"parsing"`
+    /// feature.*
     #[cfg(feature = "parsing")]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();

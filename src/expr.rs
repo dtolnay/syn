@@ -2428,6 +2428,9 @@ pub mod parsing {
         /// Parse the body of a block as zero or more statements, possibly
         /// including one trailing expression.
         ///
+        /// *This function is available if Syn is built with the `"parsing"`
+        /// feature.*
+        ///
         /// # Example
         ///
         /// ```
