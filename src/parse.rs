@@ -175,6 +175,36 @@ impl<'a> Drop for ParseBuffer<'a> {
 /// This type is the input of the closure provided to [`ParseStream::step`].
 ///
 /// [`ParseStream::step`]: struct.ParseBuffer.html#method.step
+///
+/// # Example
+///
+/// ```
+/// # extern crate proc_macro2;
+/// # extern crate syn;
+/// #
+/// use proc_macro2::TokenTree;
+/// use syn::parse::{ParseStream, Result};
+///
+/// // This function advances the stream past the next occurrence of `@`. If
+/// // no `@` is present in the stream, the stream position is unchanged and
+/// // an error is returned.
+/// fn skip_past_next_at(input: ParseStream) -> Result<()> {
+///     input.step(|cursor| {
+///         let mut rest = *cursor;
+///         while let Some((tt, next)) = cursor.token_tree() {
+///             match tt {
+///                 TokenTree::Punct(ref punct) if punct.as_char() == '@' => {
+///                     return Ok(((), next));
+///                 }
+///                 _ => rest = next,
+///             }
+///         }
+///         Err(cursor.error("no `@` was found after this point"))
+///     })
+/// }
+/// #
+/// # fn main() {}
+/// ```
 #[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
     scope: Span,
@@ -353,6 +383,36 @@ impl<'a> ParseBuffer<'a> {
 
     /// Speculatively parses tokens from this parse stream, advancing the
     /// position of this stream only if parsing succeeds.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate proc_macro2;
+    /// # extern crate syn;
+    /// #
+    /// use proc_macro2::TokenTree;
+    /// use syn::parse::{ParseStream, Result};
+    ///
+    /// // This function advances the stream past the next occurrence of `@`. If
+    /// // no `@` is present in the stream, the stream position is unchanged and
+    /// // an error is returned.
+    /// fn skip_past_next_at(input: ParseStream) -> Result<()> {
+    ///     input.step(|cursor| {
+    ///         let mut rest = *cursor;
+    ///         while let Some((tt, next)) = cursor.token_tree() {
+    ///             match tt {
+    ///                 TokenTree::Punct(ref punct) if punct.as_char() == '@' => {
+    ///                     return Ok(((), next));
+    ///                 }
+    ///                 _ => rest = next,
+    ///             }
+    ///         }
+    ///         Err(cursor.error("no `@` was found after this point"))
+    ///     })
+    /// }
+    /// #
+    /// # fn main() {}
+    /// ```
     pub fn step<F, R>(&self, function: F) -> Result<R>
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
