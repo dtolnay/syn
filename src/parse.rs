@@ -433,6 +433,13 @@ pub trait Parser: Sized {
     }
 }
 
+fn tokens_to_parse_buffer(tokens: &TokenBuffer) -> ParseBuffer {
+    let scope = Span::call_site();
+    let cursor = tokens.begin();
+    let unexpected = Rc::new(Cell::new(None));
+    private::new_parse_buffer(scope, cursor, unexpected)
+}
+
 impl<F, T> Parser for F
 where
     F: FnOnce(ParseStream) -> Result<T>,
@@ -441,8 +448,7 @@ where
 
     fn parse2(self, tokens: TokenStream) -> Result<T> {
         let buf = TokenBuffer::new2(tokens);
-        let unexpected = Rc::new(Cell::new(None));
-        let state = private::new_parse_buffer(Span::call_site(), buf.begin(), unexpected);
+        let state = tokens_to_parse_buffer(&buf);
         let node = self(&state)?;
         state.check_unexpected()?;
         if state.is_empty() {
