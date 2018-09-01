@@ -2425,6 +2425,53 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     impl Block {
+        /// Parse the body of a block as zero or more statements, possibly
+        /// including one trailing expression.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// # extern crate syn;
+        /// #
+        /// use syn::{braced, token, Attribute, Block, Ident, Stmt, Token};
+        /// use syn::parse::{Parse, ParseStream, Result};
+        ///
+        /// // Parse a function with no generics or parameter list.
+        /// struct MiniFunction {
+        ///     attrs: Vec<Attribute>,
+        ///     fn_token: Token![fn],
+        ///     name: Ident,
+        ///     brace_token: token::Brace,
+        ///     stmts: Vec<Stmt>,
+        /// }
+        ///
+        /// impl Parse for MiniFunction {
+        ///     fn parse(input: ParseStream) -> Result<Self> {
+        ///         let outer_attrs = input.call(Attribute::parse_outer)?;
+        ///         let fn_token: Token![fn] = input.parse()?;
+        ///         let name: Ident = input.parse()?;
+        ///
+        ///         let content;
+        ///         let brace_token = braced!(content in input);
+        ///         let inner_attrs = content.call(Attribute::parse_inner)?;
+        ///         let stmts = content.call(Block::parse_within)?;
+        ///
+        ///         Ok(MiniFunction {
+        ///             attrs: {
+        ///                 let mut attrs = outer_attrs;
+        ///                 attrs.extend(inner_attrs);
+        ///                 attrs
+        ///             },
+        ///             fn_token: fn_token,
+        ///             name: name,
+        ///             brace_token: brace_token,
+        ///             stmts: stmts,
+        ///         })
+        ///     }
+        /// }
+        /// #
+        /// # fn main() {}
+        /// ```
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
             let mut stmts = Vec::new();
             loop {
