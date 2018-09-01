@@ -155,6 +155,12 @@ pub trait Parse: Sized {
 pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 
 /// Cursor position within a buffered token stream.
+///
+/// This type is more commonly used through the type alias [`ParseStream`] which
+/// is an alias for `&ParseBuffer`.
+///
+/// `ParseStream` is the input type for all parser functions in Syn. They have
+/// the signature `fn(ParseStream) -> Result<T>`.
 pub struct ParseBuffer<'a> {
     scope: Span,
     cell: Cell<Cursor<'static>>,
