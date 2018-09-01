@@ -228,6 +228,45 @@ macro_rules! braced {
 
 /// Parse a set of square brackets and expose their content to subsequent
 /// parsers.
+///
+/// ```rust
+/// # #[macro_use]
+/// # extern crate quote;
+/// #
+/// extern crate proc_macro2;
+/// extern crate syn;
+///
+/// use proc_macro2::TokenStream;
+/// use syn::{bracketed, token, Token};
+/// use syn::parse::{Parse, ParseStream, Result};
+///
+/// // Parse an outer attribute like:
+/// //
+/// //     #[repr(C, packed)]
+/// struct OuterAttribute {
+///     pound_token: Token![#],
+///     bracket_token: token::Bracket,
+///     content: TokenStream,
+/// }
+///
+/// impl Parse for OuterAttribute {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         let content;
+///         Ok(OuterAttribute {
+///             pound_token: input.parse()?,
+///             bracket_token: bracketed!(content in input),
+///             content: content.parse()?,
+///         })
+///     }
+/// }
+/// #
+/// # fn main() {
+/// #     let input = quote! {
+/// #         #[repr(C, packed)]
+/// #     };
+/// #     syn::parse2::<OuterAttribute>(input).unwrap();
+/// # }
+/// ```
 #[macro_export]
 macro_rules! bracketed {
     ($content:ident in $cursor:expr) => {
