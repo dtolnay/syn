@@ -771,7 +771,8 @@ pub mod parsing {
                 predicates: {
                     let mut predicates = Punctuated::new();
                     loop {
-                        if input.peek(token::Brace)
+                        if input.is_empty()
+                            || input.peek(token::Brace)
                             || input.peek(Token![,])
                             || input.peek(Token![;])
                             || input.peek(Token![:]) && !input.peek(Token![::])

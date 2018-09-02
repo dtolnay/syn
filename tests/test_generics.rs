@@ -161,3 +161,12 @@ fn test_fn_precedence_in_where_clause() {
     let second_bound = &predicate.bounds[1];
     assert_eq!(quote!(#second_bound).to_string(), "Send");
 }
+
+#[test]
+fn test_where_clause_at_end_of_input() {
+    let tokens = quote! {
+        where
+    };
+    let where_clause = syn::parse2::<WhereClause>(tokens).unwrap();
+    assert_eq!(where_clause.predicates.len(), 0);
+}
