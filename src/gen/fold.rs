@@ -195,17 +195,17 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
-    fn fold_expr_if_let(&mut self, i: ExprIfLet) -> ExprIfLet {
-        fold_expr_if_let(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_in_place(&mut self, i: ExprInPlace) -> ExprInPlace {
         fold_expr_in_place(self, i)
     }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_index(&mut self, i: ExprIndex) -> ExprIndex {
         fold_expr_index(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn fold_expr_let(&mut self, i: ExprLet) -> ExprLet {
+        fold_expr_let(self, i)
     }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_lit(&mut self, i: ExprLit) -> ExprLit {
@@ -301,11 +301,6 @@ pub trait Fold {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_expr_while(&mut self, i: ExprWhile) -> ExprWhile {
         fold_expr_while(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
-    fn fold_expr_while_let(&mut self, i: ExprWhileLet) -> ExprWhileLet {
-        fold_expr_while_let(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
@@ -1188,12 +1183,9 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         Expr::Lit(_binding_0) => Expr::Lit(_visitor.fold_expr_lit(_binding_0)),
         Expr::Cast(_binding_0) => Expr::Cast(_visitor.fold_expr_cast(_binding_0)),
         Expr::Type(_binding_0) => Expr::Type(full!(_visitor.fold_expr_type(_binding_0))),
+        Expr::Let(_binding_0) => Expr::Let(full!(_visitor.fold_expr_let(_binding_0))),
         Expr::If(_binding_0) => Expr::If(full!(_visitor.fold_expr_if(_binding_0))),
-        Expr::IfLet(_binding_0) => Expr::IfLet(full!(_visitor.fold_expr_if_let(_binding_0))),
         Expr::While(_binding_0) => Expr::While(full!(_visitor.fold_expr_while(_binding_0))),
-        Expr::WhileLet(_binding_0) => {
-            Expr::WhileLet(full!(_visitor.fold_expr_while_let(_binding_0)))
-        }
         Expr::ForLoop(_binding_0) => Expr::ForLoop(full!(_visitor.fold_expr_for_loop(_binding_0))),
         Expr::Loop(_binding_0) => Expr::Loop(full!(_visitor.fold_expr_loop(_binding_0))),
         Expr::Match(_binding_0) => Expr::Match(full!(_visitor.fold_expr_match(_binding_0))),
@@ -1397,25 +1389,6 @@ pub fn fold_expr_if<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf {
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn fold_expr_if_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprIfLet) -> ExprIfLet {
-    ExprIfLet {
-        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        if_token: Token ! [ if ](tokens_helper(_visitor, &_i.if_token.span)),
-        let_token: Token ! [ let ](tokens_helper(_visitor, &_i.let_token.span)),
-        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
-        eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
-        expr: Box::new(_visitor.fold_expr(*_i.expr)),
-        then_branch: _visitor.fold_block(_i.then_branch),
-        else_branch: (_i.else_branch).map(|it| {
-            (
-                Token ! [ else ](tokens_helper(_visitor, &(it).0.span)),
-                Box::new(_visitor.fold_expr(*(it).1)),
-            )
-        }),
-    }
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
 pub fn fold_expr_in_place<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprInPlace) -> ExprInPlace {
     ExprInPlace {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
@@ -1431,6 +1404,17 @@ pub fn fold_expr_index<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprIndex) -> Exp
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
         bracket_token: Bracket(tokens_helper(_visitor, &_i.bracket_token.span)),
         index: Box::new(_visitor.fold_expr(*_i.index)),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn fold_expr_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprLet) -> ExprLet {
+    ExprLet {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        let_token: Token ! [ let ](tokens_helper(_visitor, &_i.let_token.span)),
+        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
+        eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
+        expr: Box::new(_visitor.fold_expr(*_i.expr)),
     }
 }
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1619,20 +1603,6 @@ pub fn fold_expr_while<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> Exp
         label: (_i.label).map(|it| _visitor.fold_label(it)),
         while_token: Token ! [ while ](tokens_helper(_visitor, &_i.while_token.span)),
         cond: Box::new(_visitor.fold_expr(*_i.cond)),
-        body: _visitor.fold_block(_i.body),
-    }
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
-pub fn fold_expr_while_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprWhileLet) -> ExprWhileLet {
-    ExprWhileLet {
-        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        label: (_i.label).map(|it| _visitor.fold_label(it)),
-        while_token: Token ! [ while ](tokens_helper(_visitor, &_i.while_token.span)),
-        let_token: Token ! [ let ](tokens_helper(_visitor, &_i.let_token.span)),
-        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
-        eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
-        expr: Box::new(_visitor.fold_expr(*_i.expr)),
         body: _visitor.fold_block(_i.body),
     }
 }

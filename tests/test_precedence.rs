@@ -303,7 +303,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             match expr {
                 Expr::Group(_) => unreachable!(),
-                Expr::If(..) | Expr::Unsafe(..) | Expr::Block(..) | Expr::IfLet(..) => {
+                Expr::If(..) | Expr::Unsafe(..) | Expr::Block(..) | Expr::Let(..) => {
                     fold_expr(self, expr)
                 }
                 node => Expr::Paren(ExprParen {

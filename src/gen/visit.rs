@@ -195,17 +195,17 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
-    fn visit_expr_if_let(&mut self, i: &'ast ExprIfLet) {
-        visit_expr_if_let(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_in_place(&mut self, i: &'ast ExprInPlace) {
         visit_expr_in_place(self, i)
     }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_index(&mut self, i: &'ast ExprIndex) {
         visit_expr_index(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn visit_expr_let(&mut self, i: &'ast ExprLet) {
+        visit_expr_let(self, i)
     }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_lit(&mut self, i: &'ast ExprLit) {
@@ -301,11 +301,6 @@ pub trait Visit<'ast> {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_while(&mut self, i: &'ast ExprWhile) {
         visit_expr_while(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
-    fn visit_expr_while_let(&mut self, i: &'ast ExprWhileLet) {
-        visit_expr_while_let(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
@@ -1194,17 +1189,14 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
         Expr::Type(ref _binding_0) => {
             full!(_visitor.visit_expr_type(_binding_0));
         }
+        Expr::Let(ref _binding_0) => {
+            full!(_visitor.visit_expr_let(_binding_0));
+        }
         Expr::If(ref _binding_0) => {
             full!(_visitor.visit_expr_if(_binding_0));
         }
-        Expr::IfLet(ref _binding_0) => {
-            full!(_visitor.visit_expr_if_let(_binding_0));
-        }
         Expr::While(ref _binding_0) => {
             full!(_visitor.visit_expr_while(_binding_0));
-        }
-        Expr::WhileLet(ref _binding_0) => {
-            full!(_visitor.visit_expr_while_let(_binding_0));
         }
         Expr::ForLoop(ref _binding_0) => {
             full!(_visitor.visit_expr_for_loop(_binding_0));
@@ -1484,26 +1476,6 @@ pub fn visit_expr_if<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_expr_if_let<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprIfLet) {
-    for it in &_i.attrs {
-        _visitor.visit_attribute(it)
-    }
-    tokens_helper(_visitor, &_i.if_token.span);
-    tokens_helper(_visitor, &_i.let_token.span);
-    for el in Punctuated::pairs(&_i.pats) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
-    tokens_helper(_visitor, &_i.eq_token.spans);
-    _visitor.visit_expr(&*_i.expr);
-    _visitor.visit_block(&_i.then_branch);
-    if let Some(ref it) = _i.else_branch {
-        tokens_helper(_visitor, &(it).0.span);
-        _visitor.visit_expr(&*(it).1);
-    };
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_expr_in_place<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprInPlace) {
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
@@ -1520,6 +1492,20 @@ pub fn visit_expr_index<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     _visitor.visit_expr(&*_i.expr);
     tokens_helper(_visitor, &_i.bracket_token.span);
     _visitor.visit_expr(&*_i.index);
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn visit_expr_let<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprLet) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    tokens_helper(_visitor, &_i.let_token.span);
+    for el in Punctuated::pairs(&_i.pats) {
+        let it = el.value();
+        _visitor.visit_pat(it)
+    }
+    tokens_helper(_visitor, &_i.eq_token.spans);
+    _visitor.visit_expr(&*_i.expr);
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_expr_lit<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprLit) {
@@ -1748,28 +1734,6 @@ pub fn visit_expr_while<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     };
     tokens_helper(_visitor, &_i.while_token.span);
     _visitor.visit_expr(&*_i.cond);
-    _visitor.visit_block(&_i.body);
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_expr_while_let<'ast, V: Visit<'ast> + ?Sized>(
-    _visitor: &mut V,
-    _i: &'ast ExprWhileLet,
-) {
-    for it in &_i.attrs {
-        _visitor.visit_attribute(it)
-    }
-    if let Some(ref it) = _i.label {
-        _visitor.visit_label(it)
-    };
-    tokens_helper(_visitor, &_i.while_token.span);
-    tokens_helper(_visitor, &_i.let_token.span);
-    for el in Punctuated::pairs(&_i.pats) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
-    tokens_helper(_visitor, &_i.eq_token.spans);
-    _visitor.visit_expr(&*_i.expr);
     _visitor.visit_block(&_i.body);
 }
 #[cfg(feature = "full")]

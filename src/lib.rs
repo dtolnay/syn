@@ -342,10 +342,10 @@ mod expr;
 pub use expr::{
     Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprBinary, ExprBlock, ExprBox,
     ExprBreak, ExprCall, ExprCast, ExprClosure, ExprContinue, ExprField, ExprForLoop, ExprGroup,
-    ExprIf, ExprIfLet, ExprInPlace, ExprIndex, ExprLit, ExprLoop, ExprMacro, ExprMatch,
+    ExprIf, ExprInPlace, ExprIndex, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch,
     ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn,
     ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprType, ExprUnary, ExprUnsafe, ExprVerbatim,
-    ExprWhile, ExprWhileLet, ExprYield, Index, Member,
+    ExprWhile, ExprYield, Index, Member,
 };
 
 #[cfg(feature = "full")]

@@ -199,17 +199,17 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
-    fn visit_expr_if_let_mut(&mut self, i: &mut ExprIfLet) {
-        visit_expr_if_let_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_in_place_mut(&mut self, i: &mut ExprInPlace) {
         visit_expr_in_place_mut(self, i)
     }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_index_mut(&mut self, i: &mut ExprIndex) {
         visit_expr_index_mut(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn visit_expr_let_mut(&mut self, i: &mut ExprLet) {
+        visit_expr_let_mut(self, i)
     }
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_lit_mut(&mut self, i: &mut ExprLit) {
@@ -305,11 +305,6 @@ pub trait VisitMut {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_expr_while_mut(&mut self, i: &mut ExprWhile) {
         visit_expr_while_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg(any(feature = "full", feature = "derive"))]
-    fn visit_expr_while_let_mut(&mut self, i: &mut ExprWhileLet) {
-        visit_expr_while_let_mut(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg(any(feature = "full", feature = "derive"))]
@@ -1192,17 +1187,14 @@ pub fn visit_expr_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Expr) {
         Expr::Type(ref mut _binding_0) => {
             full!(_visitor.visit_expr_type_mut(_binding_0));
         }
+        Expr::Let(ref mut _binding_0) => {
+            full!(_visitor.visit_expr_let_mut(_binding_0));
+        }
         Expr::If(ref mut _binding_0) => {
             full!(_visitor.visit_expr_if_mut(_binding_0));
         }
-        Expr::IfLet(ref mut _binding_0) => {
-            full!(_visitor.visit_expr_if_let_mut(_binding_0));
-        }
         Expr::While(ref mut _binding_0) => {
             full!(_visitor.visit_expr_while_mut(_binding_0));
-        }
-        Expr::WhileLet(ref mut _binding_0) => {
-            full!(_visitor.visit_expr_while_let_mut(_binding_0));
         }
         Expr::ForLoop(ref mut _binding_0) => {
             full!(_visitor.visit_expr_for_loop_mut(_binding_0));
@@ -1476,26 +1468,6 @@ pub fn visit_expr_if_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIf
 }
 #[cfg(feature = "full")]
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_expr_if_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprIfLet) {
-    for it in &mut _i.attrs {
-        _visitor.visit_attribute_mut(it)
-    }
-    tokens_helper(_visitor, &mut _i.if_token.span);
-    tokens_helper(_visitor, &mut _i.let_token.span);
-    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
-    tokens_helper(_visitor, &mut _i.eq_token.spans);
-    _visitor.visit_expr_mut(&mut *_i.expr);
-    _visitor.visit_block_mut(&mut _i.then_branch);
-    if let Some(ref mut it) = _i.else_branch {
-        tokens_helper(_visitor, &mut (it).0.span);
-        _visitor.visit_expr_mut(&mut *(it).1);
-    };
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_expr_in_place_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprInPlace) {
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
@@ -1512,6 +1484,20 @@ pub fn visit_expr_index_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
     _visitor.visit_expr_mut(&mut *_i.expr);
     tokens_helper(_visitor, &mut _i.bracket_token.span);
     _visitor.visit_expr_mut(&mut *_i.index);
+}
+#[cfg(feature = "full")]
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn visit_expr_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprLet) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.let_token.span);
+    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
+        let it = el.value_mut();
+        _visitor.visit_pat_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.eq_token.spans);
+    _visitor.visit_expr_mut(&mut *_i.expr);
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_expr_lit_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprLit) {
@@ -1728,25 +1714,6 @@ pub fn visit_expr_while_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Exp
     };
     tokens_helper(_visitor, &mut _i.while_token.span);
     _visitor.visit_expr_mut(&mut *_i.cond);
-    _visitor.visit_block_mut(&mut _i.body);
-}
-#[cfg(feature = "full")]
-#[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_expr_while_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprWhileLet) {
-    for it in &mut _i.attrs {
-        _visitor.visit_attribute_mut(it)
-    }
-    if let Some(ref mut it) = _i.label {
-        _visitor.visit_label_mut(it)
-    };
-    tokens_helper(_visitor, &mut _i.while_token.span);
-    tokens_helper(_visitor, &mut _i.let_token.span);
-    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
-    tokens_helper(_visitor, &mut _i.eq_token.spans);
-    _visitor.visit_expr_mut(&mut *_i.expr);
     _visitor.visit_block_mut(&mut _i.body);
 }
 #[cfg(feature = "full")]

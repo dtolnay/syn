@@ -41,7 +41,7 @@ ast_enum_of_structs! {
     ///     Expr::Cast(expr) => {
     ///         /* ... */
     ///     }
-    ///     Expr::IfLet(expr) => {
+    ///     Expr::If(expr) => {
     ///         /* ... */
     ///     }
     ///     /* ... */
@@ -55,8 +55,8 @@ ast_enum_of_structs! {
     /// with the same name `expr` we effectively imbue our variable with all of
     /// the data fields provided by the variant that it turned out to be. So for
     /// example above if we ended up in the `MethodCall` case then we get to use
-    /// `expr.receiver`, `expr.args` etc; if we ended up in the `IfLet` case we
-    /// get to use `expr.pat`, `expr.then_branch`, `expr.else_branch`.
+    /// `expr.receiver`, `expr.args` etc; if we ended up in the `If` case we get
+    /// to use `expr.cond`, `expr.then_branch`, `expr.else_branch`.
     ///
     /// The pattern is similar if the input expression is borrowed:
     ///
@@ -216,35 +216,28 @@ ast_enum_of_structs! {
             pub ty: Box<Type>,
         }),
 
+        /// A `let` guard: `let Some(x) = opt`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Let(ExprLet #full {
+            pub attrs: Vec<Attribute>,
+            pub let_token: Token![let],
+            pub pats: Punctuated<Pat, Token![|]>,
+            pub eq_token: Token![=],
+            pub expr: Box<Expr>,
+        }),
+
         /// An `if` expression with an optional `else` block: `if expr { ... }
         /// else { ... }`.
         ///
-        /// The `else` branch expression may only be an `If`, `IfLet`, or
-        /// `Block` expression, not any of the other types of expression.
+        /// The `else` branch expression may only be an `If` or `Block`
+        /// expression, not any of the other types of expression.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub If(ExprIf #full {
             pub attrs: Vec<Attribute>,
             pub if_token: Token![if],
             pub cond: Box<Expr>,
-            pub then_branch: Block,
-            pub else_branch: Option<(Token![else], Box<Expr>)>,
-        }),
-
-        /// An `if let` expression with an optional `else` block: `if let pat =
-        /// expr { ... } else { ... }`.
-        ///
-        /// The `else` branch expression may only be an `If`, `IfLet`, or
-        /// `Block` expression, not any of the other types of expression.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub IfLet(ExprIfLet #full {
-            pub attrs: Vec<Attribute>,
-            pub if_token: Token![if],
-            pub let_token: Token![let],
-            pub pats: Punctuated<Pat, Token![|]>,
-            pub eq_token: Token![=],
-            pub expr: Box<Expr>,
             pub then_branch: Block,
             pub else_branch: Option<(Token![else], Box<Expr>)>,
         }),
@@ -257,20 +250,6 @@ ast_enum_of_structs! {
             pub label: Option<Label>,
             pub while_token: Token![while],
             pub cond: Box<Expr>,
-            pub body: Block,
-        }),
-
-        /// A while-let loop: `while let pat = expr { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub WhileLet(ExprWhileLet #full {
-            pub attrs: Vec<Attribute>,
-            pub label: Option<Label>,
-            pub while_token: Token![while],
-            pub let_token: Token![let],
-            pub pats: Punctuated<Pat, Token![|]>,
-            pub eq_token: Token![=],
-            pub expr: Box<Expr>,
             pub body: Block,
         }),
 
@@ -583,10 +562,9 @@ impl Expr {
             | Expr::Lit(ExprLit { ref mut attrs, .. })
             | Expr::Cast(ExprCast { ref mut attrs, .. })
             | Expr::Type(ExprType { ref mut attrs, .. })
+            | Expr::Let(ExprLet { ref mut attrs, .. })
             | Expr::If(ExprIf { ref mut attrs, .. })
-            | Expr::IfLet(ExprIfLet { ref mut attrs, .. })
             | Expr::While(ExprWhile { ref mut attrs, .. })
-            | Expr::WhileLet(ExprWhileLet { ref mut attrs, .. })
             | Expr::ForLoop(ExprForLoop { ref mut attrs, .. })
             | Expr::Loop(ExprLoop { ref mut attrs, .. })
             | Expr::Match(ExprMatch { ref mut attrs, .. })
@@ -1008,10 +986,8 @@ fn requires_terminator(expr: &Expr) -> bool {
         Expr::Unsafe(..)
         | Expr::Block(..)
         | Expr::If(..)
-        | Expr::IfLet(..)
         | Expr::Match(..)
         | Expr::While(..)
-        | Expr::WhileLet(..)
         | Expr::Loop(..)
         | Expr::ForLoop(..)
         | Expr::Async(..)
@@ -1532,18 +1508,12 @@ pub mod parsing {
             expr_ret(input, allow_struct).map(Expr::Return)
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
+        } else if input.peek(Token![let]) {
+            input.call(expr_let).map(Expr::Let)
         } else if input.peek(Token![if]) {
-            if input.peek2(Token![let]) {
-                input.call(expr_if_let).map(Expr::IfLet)
-            } else {
-                input.call(expr_if).map(Expr::If)
-            }
+            input.call(expr_if).map(Expr::If)
         } else if input.peek(Token![while]) {
-            if input.peek2(Token![let]) {
-                input.call(expr_while_let).map(Expr::WhileLet)
-            } else {
-                input.call(expr_while).map(Expr::While)
-            }
+            input.call(expr_while).map(Expr::While)
         } else if input.peek(Token![for]) {
             input.call(expr_for_loop).map(Expr::ForLoop)
         } else if input.peek(Token![loop]) {
@@ -1561,11 +1531,7 @@ pub mod parsing {
         } else if input.peek(Lifetime) {
             let the_label: Label = input.parse()?;
             let mut expr = if input.peek(Token![while]) {
-                if input.peek2(Token![let]) {
-                    Expr::WhileLet(input.call(expr_while_let)?)
-                } else {
-                    Expr::While(input.call(expr_while)?)
-                }
+                Expr::While(input.call(expr_while)?)
             } else if input.peek(Token![for]) {
                 Expr::ForLoop(input.call(expr_for_loop)?)
             } else if input.peek(Token![loop]) {
@@ -1576,8 +1542,7 @@ pub mod parsing {
                 return Err(input.error("expected loop or block expression"));
             };
             match expr {
-                Expr::WhileLet(ExprWhileLet { ref mut label, .. })
-                | Expr::While(ExprWhile { ref mut label, .. })
+                Expr::While(ExprWhile { ref mut label, .. })
                 | Expr::ForLoop(ExprForLoop { ref mut label, .. })
                 | Expr::Loop(ExprLoop { ref mut label, .. })
                 | Expr::Block(ExprBlock { ref mut label, .. }) => *label = Some(the_label),
@@ -1741,17 +1706,9 @@ pub mod parsing {
     fn expr_early(input: ParseStream) -> Result<Expr> {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let mut expr = if input.peek(Token![if]) {
-            if input.peek2(Token![let]) {
-                Expr::IfLet(input.call(expr_if_let)?)
-            } else {
-                Expr::If(input.call(expr_if)?)
-            }
+            Expr::If(input.call(expr_if)?)
         } else if input.peek(Token![while]) {
-            if input.peek2(Token![let]) {
-                Expr::WhileLet(input.call(expr_while_let)?)
-            } else {
-                Expr::While(input.call(expr_while)?)
-            }
+            Expr::While(input.call(expr_while)?)
         } else if input.peek(Token![for]) {
             Expr::ForLoop(input.call(expr_for_loop)?)
         } else if input.peek(Token![loop]) {
@@ -1823,10 +1780,9 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_if_let(input: ParseStream) -> Result<ExprIfLet> {
-        Ok(ExprIfLet {
+    fn expr_let(input: ParseStream) -> Result<ExprLet> {
+        Ok(ExprLet {
             attrs: Vec::new(),
-            if_token: input.parse()?,
             let_token: input.parse()?,
             pats: {
                 let mut pats = Punctuated::new();
@@ -1842,14 +1798,6 @@ pub mod parsing {
             },
             eq_token: input.parse()?,
             expr: Box::new(input.call(expr_no_struct)?),
-            then_branch: input.parse()?,
-            else_branch: {
-                if input.peek(Token![else]) {
-                    Some(input.call(else_block)?)
-                } else {
-                    None
-                }
-            },
         })
     }
 
@@ -1876,11 +1824,7 @@ pub mod parsing {
 
         let lookahead = input.lookahead1();
         let else_branch = if input.peek(Token![if]) {
-            if input.peek2(Token![let]) {
-                input.call(expr_if_let).map(Expr::IfLet)?
-            } else {
-                input.call(expr_if).map(Expr::If)?
-            }
+            input.call(expr_if).map(Expr::If)?
         } else if input.peek(token::Brace) {
             Expr::Block(ExprBlock {
                 attrs: Vec::new(),
@@ -2132,45 +2076,6 @@ pub mod parsing {
             label: label,
             while_token: while_token,
             cond: Box::new(cond),
-            body: Block {
-                brace_token: brace_token,
-                stmts: stmts,
-            },
-        })
-    }
-
-    #[cfg(feature = "full")]
-    fn expr_while_let(input: ParseStream) -> Result<ExprWhileLet> {
-        let label: Option<Label> = input.parse()?;
-        let while_token: Token![while] = input.parse()?;
-        let let_token: Token![let] = input.parse()?;
-
-        let mut pats = Punctuated::new();
-        let value: Pat = input.parse()?;
-        pats.push_value(value);
-        while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
-            let punct = input.parse()?;
-            pats.push_punct(punct);
-            let value: Pat = input.parse()?;
-            pats.push_value(value);
-        }
-
-        let eq_token: Token![=] = input.parse()?;
-        let expr = expr_no_struct(input)?;
-
-        let content;
-        let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
-        let stmts = content.call(Block::parse_within)?;
-
-        Ok(ExprWhileLet {
-            attrs: inner_attrs,
-            label: label,
-            while_token: while_token,
-            let_token: let_token,
-            pats: pats,
-            eq_token: eq_token,
-            expr: Box::new(expr),
             body: Block {
                 brace_token: brace_token,
                 stmts: stmts,
@@ -3204,7 +3109,7 @@ mod printing {
             // If we are not one of the valid expressions to exist in an else
             // clause, wrap ourselves in a block.
             match **else_ {
-                Expr::If(_) | Expr::IfLet(_) | Expr::Block(_) => {
+                Expr::If(_) | Expr::Block(_) => {
                     else_.to_tokens(tokens);
                 }
                 _ => {
@@ -3213,6 +3118,17 @@ mod printing {
                     });
                 }
             }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for ExprLet {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.let_token.to_tokens(tokens);
+            self.pats.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.expr);
         }
     }
 
@@ -3228,43 +3144,12 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for ExprIfLet {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.if_token.to_tokens(tokens);
-            self.let_token.to_tokens(tokens);
-            self.pats.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.expr);
-            self.then_branch.to_tokens(tokens);
-            maybe_wrap_else(tokens, &self.else_branch);
-        }
-    }
-
-    #[cfg(feature = "full")]
     impl ToTokens for ExprWhile {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
-            self.body.brace_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
-                tokens.append_all(&self.body.stmts);
-            });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl ToTokens for ExprWhileLet {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.label.to_tokens(tokens);
-            self.while_token.to_tokens(tokens);
-            self.let_token.to_tokens(tokens);
-            self.pats.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.expr);
             self.body.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
