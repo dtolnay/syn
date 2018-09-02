@@ -236,7 +236,8 @@ pub mod parsing {
     }
 
     impl Field {
-        fn parse_named(input: ParseStream) -> Result<Self> {
+        /// Parses a named (braced struct) field.
+        pub fn parse_named(input: ParseStream) -> Result<Self> {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
@@ -246,7 +247,8 @@ pub mod parsing {
             })
         }
 
-        fn parse_unnamed(input: ParseStream) -> Result<Self> {
+        /// Parses an unnamed (tuple struct) field.
+        pub fn parse_unnamed(input: ParseStream) -> Result<Self> {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
