@@ -35,3 +35,19 @@ impl Parse for Ident {
         })
     }
 }
+
+macro_rules! ident_from_token {
+    ($token:ident) => {
+        impl From<Token![$token]> for Ident {
+            fn from(token: Token![$token]) -> Ident {
+                Ident::new(stringify!($token), token.span)
+            }
+        }
+    };
+}
+
+ident_from_token!(self);
+ident_from_token!(Self);
+ident_from_token!(super);
+ident_from_token!(crate);
+ident_from_token!(extern);
