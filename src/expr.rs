@@ -2345,6 +2345,12 @@ pub mod parsing {
         /// use syn::parse::{Parse, ParseStream, Result};
         ///
         /// // Parse a function with no generics or parameter list.
+        /// //
+        /// //     fn playground {
+        /// //         let mut x = 1;
+        /// //         x += 1;
+        /// //         println!("{}", x);
+        /// //     }
         /// struct MiniFunction {
         ///     attrs: Vec<Attribute>,
         ///     fn_token: Token![fn],
