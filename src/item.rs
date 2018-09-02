@@ -972,7 +972,15 @@ pub mod parsing {
                 Ok(UseTree::Rename(UseRename {
                     ident: ident,
                     as_token: input.parse()?,
-                    rename: input.parse()?,
+                    rename: {
+                        if input.peek(Ident) {
+                            input.parse()?
+                        } else if input.peek(Token![_]) {
+                            Ident::from(input.parse::<Token![_]>()?)
+                        } else {
+                            return Err(input.error("expected identifier or underscore"));
+                        }
+                    },
                 }))
             } else {
                 Ok(UseTree::Name(UseName { ident: ident }))

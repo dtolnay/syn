@@ -51,3 +51,9 @@ ident_from_token!(Self);
 ident_from_token!(super);
 ident_from_token!(crate);
 ident_from_token!(extern);
+
+impl From<Token![_]> for Ident {
+    fn from(token: Token![_]) -> Ident {
+        Ident::new("_", token.spans[0])
+    }
+}
