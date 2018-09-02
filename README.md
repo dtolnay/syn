@@ -100,7 +100,7 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
     };
 
     // Hand the output tokens back to the compiler
-    expanded.into()
+    TokenStream::from(expanded)
 }
 ```
 

@@ -35,7 +35,7 @@ pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     };
 
     // Hand the output tokens back to the compiler.
-    expanded.into()
+    proc_macro::TokenStream::from(expanded)
 }
 
 // Add a bound `T: HeapSize` to every type parameter T.

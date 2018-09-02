@@ -94,7 +94,7 @@
 //!     };
 //!
 //!     // Hand the output tokens back to the compiler
-//!     expanded.into()
+//!     TokenStream::from(expanded)
 //! }
 //! #
 //! # fn main() {}

@@ -192,5 +192,5 @@ pub fn trace_var(args: TokenStream, input: TokenStream) -> TokenStream {
     let output = args.fold_item_fn(input);
 
     // Hand the resulting function body back to the compiler.
-    quote!(#output).into()
+    TokenStream::from(quote!(#output))
 }

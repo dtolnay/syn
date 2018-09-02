@@ -142,5 +142,5 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
         }
     };
 
-    expanded.into()
+    TokenStream::from(expanded)
 }
