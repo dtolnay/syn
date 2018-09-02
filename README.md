@@ -9,8 +9,8 @@ Nom parser for Rust source code
 Syn is a parsing library for parsing a stream of Rust tokens into a syntax tree
 of Rust source code.
 
-Currently this library is geared toward the [custom derive] use case but
-contains some APIs that may be useful for Rust procedural macros more generally.
+Currently this library is geared toward use in Rust procedural macros, but
+contains some APIs that may be useful more generally.
 
 [custom derive]: https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md
 
@@ -25,12 +25,11 @@ contains some APIs that may be useful for Rust procedural macros more generally.
   macro. An example below shows using this type in a library that can derive
   implementations of a trait of your own.
 
-- **Parser combinators** — Parsing in Syn is built on a suite of public parser
-  combinator macros that you can use for parsing any token-based syntax you
-  dream up within a `functionlike!(...)` procedural macro. Every syntax tree
-  node defined by Syn is individually parsable and may be used as a building
-  block for custom syntaxes, or you may do it all yourself working from the most
-  primitive tokens.
+- **Parsing** — Parsing in Syn is built around [parser functions] with the
+  signature `fn(ParseStream) -> Result<T>`. Every syntax tree node defined by
+  Syn is individually parsable and may be used as a building block for custom
+  syntaxes, or you may dream up your own brand new syntax without involving any
+  of our syntax tree types.
 
 - **Location information** — Every token parsed by Syn is associated with a
   `Span` that tracks line and column information back to the source of that
@@ -47,6 +46,7 @@ contains some APIs that may be useful for Rust procedural macros more generally.
 [`syn::Expr`]: https://docs.rs/syn/0.14/syn/enum.Expr.html
 [`syn::Type`]: https://docs.rs/syn/0.14/syn/enum.Type.html
 [`syn::DeriveInput`]: https://docs.rs/syn/0.14/syn/struct.DeriveInput.html
+[parser functions]: https://docs.rs/syn/0.14/syn/parse/index.html
 
 If you get stuck with anything involving procedural macros in Rust I am happy to
 provide help even if the issue is not related to Syn. Please file a ticket in
@@ -87,12 +87,12 @@ extern crate syn;
 extern crate quote;
 
 use proc_macro::TokenStream;
-use syn::DeriveInput;
+use syn::{parse_macro_input, DeriveInput};
 
 #[proc_macro_derive(MyMacro)]
 pub fn my_macro(input: TokenStream) -> TokenStream {
     // Parse the input tokens into a syntax tree
-    let input: DeriveInput = syn::parse(input).unwrap();
+    let input = parse_macro_input!(input as DeriveInput);
 
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
@@ -176,14 +176,13 @@ error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
 ```
 
-## Parsing a custom syntax using combinators
+## Parsing a custom syntax
 
 The [`lazy-static`] example directory shows the implementation of a
 `functionlike!(...)` procedural macro in which the input tokens are parsed using
-[`nom`]-style parser combinators.
+Syn's parsing API.
 
 [`lazy-static`]: examples/lazy-static
-[`nom`]: https://github.com/Geal/nom
 
 The example reimplements the popular `lazy_static` crate from crates.io as a
 procedural macro.
