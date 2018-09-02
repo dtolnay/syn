@@ -14,7 +14,7 @@ use self::syntax::ast::{
     BinOpKind, BindingMode, Block, BlockCheckMode, CaptureBy, Constness, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat, FnDecl, FnHeader, ForeignItem,
     ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplItem, ImplItemKind,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, Guard, Ident, ImplItem, ImplItemKind,
     ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label,
     Lifetime, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac_, MacroDef, MethodSig,
     Mod, Movability, MutTy, Mutability, NodeId, ParenthesisedArgs, Pat, PatKind, Path, PathSegment,
@@ -188,6 +188,7 @@ macro_rules! spanless_eq_enum {
                         $name::$variant { .. } => {}
                     )*
                 }
+                #[allow(unreachable_patterns)]
                 match (self, other) {
                     $(
                         (
@@ -326,6 +327,7 @@ spanless_eq_enum!(GenericArg; Lifetime(0) Type(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default));
+spanless_eq_enum!(Guard; If(0));
 spanless_eq_enum!(ImplItemKind; Const(0 1) Method(0 1) Type(0) Existential(0) Macro(0));
 spanless_eq_enum!(ImplPolarity; Positive Negative);
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
