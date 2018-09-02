@@ -914,6 +914,23 @@ impl<'a> ParseBuffer<'a> {
     where
         F: for<'c> FnOnce(StepCursor<'c, 'a>) -> Result<(R, Cursor<'c>)>,
     {
+        // Since the user's function is required to work for any 'c, we know
+        // that the Cursor<'c> they return is either derived from the input
+        // StepCursor<'c, 'a> or from a Cursor<'static>.
+        //
+        // It would not be legal to write this function without the invariant
+        // lifetime 'c in StepCursor<'c, 'a>. If this function were written only
+        // in terms of 'a, the user could take our ParseBuffer<'a>, upcast it to
+        // a ParseBuffer<'short> which some shorter lifetime than 'a, invoke
+        // `step` on their ParseBuffer<'short> with a closure that returns
+        // Cursor<'short>, and we would wrongly write that Cursor<'short> into
+        // the Cell intended to hold Cursor<'a>.
+        //
+        // In some cases it may be necessary for R to contain a Cursor<'a>.
+        // Within Syn we solve this using `private::advance_step_cursor` which
+        // uses the existence of a StepCursor<'c, 'a> as proof that it is safe
+        // to cast from Cursor<'c> to Cursor<'a>. If needed outside of Syn, it
+        // would be safe to expose that API as a method on StepCursor.
         let (node, rest) = function(StepCursor {
             scope: self.scope,
             cursor: self.cell.get(),
