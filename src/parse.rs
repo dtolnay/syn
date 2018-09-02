@@ -239,6 +239,17 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 /// the signature `fn(ParseStream) -> Result<T>`.
 pub struct ParseBuffer<'a> {
     scope: Span,
+    // Instead of Cell<Cursor<'a>> so that ParseBuffer<'a> is covariant in 'a.
+    // The rest of the code in this module needs to be careful that only a
+    // cursor derived from this `cell` is ever assigned to this `cell`.
+    //
+    // Cell<Cursor<'a>> cannot be covariant in 'a because then we could take a
+    // ParseBuffer<'a>, upcast to ParseBuffer<'short> for some lifetime shorter
+    // than 'a, and then assign a Cursor<'short> into the Cell.
+    //
+    // By extension, it would not be safe to expose an API that accepts a
+    // Cursor<'a> and trusts that it lives as long as the cursor currently in
+    // the cell.
     cell: Cell<Cursor<'static>>,
     marker: PhantomData<Cursor<'a>>,
     unexpected: Rc<Cell<Option<Span>>>,
@@ -338,10 +349,10 @@ impl private {
         cursor: Cursor,
         unexpected: Rc<Cell<Option<Span>>>,
     ) -> ParseBuffer {
-        let extend = unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) };
         ParseBuffer {
             scope: scope,
-            cell: Cell::new(extend),
+            // See comment on `cell` in the struct definition.
+            cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
             marker: PhantomData,
             unexpected: unexpected,
         }
