@@ -2156,6 +2156,34 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
+    impl Parse for FieldValue {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let member: Member = input.parse()?;
+            let (colon_token, value) = if input.peek(Token![:]) || !member.is_named() {
+                let colon_token: Token![:] = input.parse()?;
+                let value: Expr = input.parse()?;
+                (Some(colon_token), value)
+            } else if let Member::Named(ref ident) = member {
+                let value = Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself: None,
+                    path: Path::from(ident.clone()),
+                });
+                (None, value)
+            } else {
+                unreachable!()
+            };
+
+            Ok(FieldValue {
+                attrs: Vec::new(),
+                member: member,
+                colon_token: colon_token,
+                expr: value,
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
     fn expr_struct_helper(
         input: ParseStream,
         outer_attrs: Vec<Attribute>,
@@ -2176,27 +2204,9 @@ pub mod parsing {
                 }
             }
 
-            let member: Member = content.parse()?;
-            let (colon_token, value) = if content.peek(Token![:]) || !member.is_named() {
-                let colon_token: Token![:] = content.parse()?;
-                let value: Expr = content.parse()?;
-                (Some(colon_token), value)
-            } else if let Member::Named(ref ident) = member {
-                let value = Expr::Path(ExprPath {
-                    attrs: Vec::new(),
-                    qself: None,
-                    path: Path::from(ident.clone()),
-                });
-                (None, value)
-            } else {
-                unreachable!()
-            };
-
             fields.push(FieldValue {
                 attrs: attrs,
-                member: member,
-                colon_token: colon_token,
-                expr: value,
+                ..content.parse()?
             });
 
             if !content.peek(Token![,]) {
