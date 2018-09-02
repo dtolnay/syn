@@ -301,7 +301,16 @@ impl<'a> Drop for ParseBuffer<'a> {
 #[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
     scope: Span,
+    // This field is covariant in 'c.
     cursor: Cursor<'c>,
+    // This field is contravariant in 'c. Together these make StepCursor
+    // invariant in 'c. Also covariant in 'a. The user cannot cast 'c to a
+    // different lifetime but can upcast into a StepCursor with a shorter
+    // lifetime 'a.
+    //
+    // As long as we only ever construct a StepCursor for which 'c outlives 'a,
+    // this means if ever a StepCursor<'c, 'a> exists we are guaranteed that 'c
+    // outlives 'a.
     marker: PhantomData<fn(Cursor<'c>) -> Cursor<'a>>,
 }
 
@@ -325,6 +334,10 @@ impl<'c, 'a> StepCursor<'c, 'a> {
 
 impl private {
     pub fn advance_step_cursor<'c, 'a>(proof: StepCursor<'c, 'a>, to: Cursor<'c>) -> Cursor<'a> {
+        // Refer to the comments within the StepCursor definition. We use the
+        // fact that a StepCursor<'c, 'a> exists as proof that 'c outlives 'a.
+        // Cursor is covariant in its lifetime parameter so we can cast a
+        // Cursor<'c> to one with the shorter lifetime Cursor<'a>.
         let _ = proof;
         unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(to) }
     }

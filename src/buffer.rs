@@ -144,13 +144,13 @@ impl TokenBuffer {
 /// *This type is available if Syn is built with the `"parsing"` feature.*
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Cursor<'a> {
-    /// The current entry which the `Cursor` is pointing at.
+    // The current entry which the `Cursor` is pointing at.
     ptr: *const Entry,
-    /// This is the only `Entry::End(..)` object which this cursor is allowed to
-    /// point at. All other `End` objects are skipped over in `Cursor::create`.
+    // This is the only `Entry::End(..)` object which this cursor is allowed to
+    // point at. All other `End` objects are skipped over in `Cursor::create`.
     scope: *const Entry,
-    /// This uses the &'a reference which guarantees that these pointers are
-    /// still valid.
+    // Cursor is covariant in 'a. This field ensures that our pointers are still
+    // valid.
     marker: PhantomData<&'a Entry>,
 }
 
