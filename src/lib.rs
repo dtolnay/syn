@@ -427,8 +427,8 @@ pub use ty::{
 mod path;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use path::{
-    AngleBracketedGenericArguments, Binding, GenericArgument, ParenthesizedGenericArguments, Path,
-    PathArguments, PathSegment, QSelf,
+    AngleBracketedGenericArguments, Binding, Constraint, GenericArgument,
+    ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf,
 };
 
 #[cfg(feature = "parsing")]

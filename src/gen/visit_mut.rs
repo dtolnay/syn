@@ -97,6 +97,10 @@ pub trait VisitMut {
     fn visit_const_param_mut(&mut self, i: &mut ConstParam) {
         visit_const_param_mut(self, i)
     }
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn visit_constraint_mut(&mut self, i: &mut Constraint) {
+        visit_constraint_mut(self, i)
+    }
     #[cfg(feature = "derive")]
     fn visit_data_mut(&mut self, i: &mut Data) {
         visit_data_mut(self, i)
@@ -1105,6 +1109,15 @@ pub fn visit_const_param_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Co
         _visitor.visit_expr_mut(it)
     };
 }
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn visit_constraint_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Constraint) {
+    _visitor.visit_ident_mut(&mut _i.ident);
+    tokens_helper(_visitor, &mut _i.colon_token.spans);
+    for mut el in Punctuated::pairs_mut(&mut _i.bounds) {
+        let it = el.value_mut();
+        _visitor.visit_type_param_bound_mut(it)
+    }
+}
 #[cfg(feature = "derive")]
 pub fn visit_data_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Data) {
     match *_i {
@@ -1932,6 +1945,9 @@ pub fn visit_generic_argument_mut<V: VisitMut + ?Sized>(
         }
         GenericArgument::Binding(ref mut _binding_0) => {
             _visitor.visit_binding_mut(_binding_0);
+        }
+        GenericArgument::Constraint(ref mut _binding_0) => {
+            _visitor.visit_constraint_mut(_binding_0);
         }
         GenericArgument::Const(ref mut _binding_0) => {
             _visitor.visit_expr_mut(_binding_0);

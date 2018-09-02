@@ -93,6 +93,10 @@ pub trait Fold {
     fn fold_const_param(&mut self, i: ConstParam) -> ConstParam {
         fold_const_param(self, i)
     }
+    #[cfg(any(feature = "full", feature = "derive"))]
+    fn fold_constraint(&mut self, i: Constraint) -> Constraint {
+        fold_constraint(self, i)
+    }
     #[cfg(feature = "derive")]
     fn fold_data(&mut self, i: Data) -> Data {
         fold_data(self, i)
@@ -1126,6 +1130,14 @@ pub fn fold_const_param<V: Fold + ?Sized>(_visitor: &mut V, _i: ConstParam) -> C
         default: (_i.default).map(|it| _visitor.fold_expr(it)),
     }
 }
+#[cfg(any(feature = "full", feature = "derive"))]
+pub fn fold_constraint<V: Fold + ?Sized>(_visitor: &mut V, _i: Constraint) -> Constraint {
+    Constraint {
+        ident: _visitor.fold_ident(_i.ident),
+        colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
+        bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
+    }
+}
 #[cfg(feature = "derive")]
 pub fn fold_data<V: Fold + ?Sized>(_visitor: &mut V, _i: Data) -> Data {
     match _i {
@@ -1786,6 +1798,9 @@ pub fn fold_generic_argument<V: Fold + ?Sized>(
         GenericArgument::Type(_binding_0) => GenericArgument::Type(_visitor.fold_type(_binding_0)),
         GenericArgument::Binding(_binding_0) => {
             GenericArgument::Binding(_visitor.fold_binding(_binding_0))
+        }
+        GenericArgument::Constraint(_binding_0) => {
+            GenericArgument::Constraint(_visitor.fold_constraint(_binding_0))
         }
         GenericArgument::Const(_binding_0) => {
             GenericArgument::Const(_visitor.fold_expr(_binding_0))

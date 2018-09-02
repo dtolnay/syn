@@ -108,6 +108,8 @@ ast_enum! {
         /// A binding (equality constraint) on an associated type: the `Item =
         /// u8` in `Iterator<Item = u8>`.
         Binding(Binding),
+        /// An associated type bound: `Iterator<Item: Display>`.
+        Constraint(Constraint),
         /// A const expression. Must be inside of a block.
         ///
         /// NOTE: Identity expressions are represented as Type arguments, as
@@ -139,6 +141,18 @@ ast_struct! {
         pub ident: Ident,
         pub eq_token: Token![=],
         pub ty: Type,
+    }
+}
+
+ast_struct! {
+    /// An associated type bound: `Iterator<Item: Display>`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// feature.*
+    pub struct Constraint {
+        pub ident: Ident,
+        pub colon_token: Token![:],
+        pub bounds: Punctuated<TypeParamBound, Token![+]>,
     }
 }
 
@@ -213,6 +227,10 @@ pub mod parsing {
 
             #[cfg(feature = "full")]
             {
+                if input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::]) {
+                    return Ok(GenericArgument::Constraint(input.parse()?));
+                }
+
                 if input.peek(Lit) {
                     let lit = input.call(expr::parsing::expr_lit)?;
                     return Ok(GenericArgument::Const(Expr::Lit(lit)));
@@ -303,6 +321,32 @@ pub mod parsing {
                 ident: input.parse()?,
                 eq_token: input.parse()?,
                 ty: input.parse()?,
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl Parse for Constraint {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(Constraint {
+                ident: input.parse()?,
+                colon_token: input.parse()?,
+                bounds: {
+                    let mut bounds = Punctuated::new();
+                    loop {
+                        if input.peek(Token![,]) || input.peek(Token![>]) {
+                            break;
+                        }
+                        let value = input.parse()?;
+                        bounds.push_value(value);
+                        if !input.peek(Token![+]) {
+                            break;
+                        }
+                        let punct = input.parse()?;
+                        bounds.push_punct(punct);
+                    }
+                    bounds
+                },
             })
         }
     }
@@ -498,6 +542,7 @@ mod printing {
                 GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
                 GenericArgument::Binding(ref tb) => tb.to_tokens(tokens),
+                GenericArgument::Constraint(ref tc) => tc.to_tokens(tokens),
                 GenericArgument::Const(ref e) => match *e {
                     Expr::Lit(_) => e.to_tokens(tokens),
 
@@ -529,9 +574,15 @@ mod printing {
             // not been settled yet. https://github.com/rust-lang/rust/issues/44580
             let mut trailing_or_empty = true;
             for param in self.args.pairs() {
-                if let GenericArgument::Lifetime(_) = **param.value() {
-                    param.to_tokens(tokens);
-                    trailing_or_empty = param.punct().is_some();
+                match **param.value() {
+                    GenericArgument::Lifetime(_) => {
+                        param.to_tokens(tokens);
+                        trailing_or_empty = param.punct().is_some();
+                    }
+                    GenericArgument::Type(_)
+                    | GenericArgument::Binding(_)
+                    | GenericArgument::Constraint(_)
+                    | GenericArgument::Const(_) => {}
                 }
             }
             for param in self.args.pairs() {
@@ -543,16 +594,23 @@ mod printing {
                         param.to_tokens(tokens);
                         trailing_or_empty = param.punct().is_some();
                     }
-                    GenericArgument::Lifetime(_) | GenericArgument::Binding(_) => {}
+                    GenericArgument::Lifetime(_)
+                    | GenericArgument::Binding(_)
+                    | GenericArgument::Constraint(_) => {}
                 }
             }
             for param in self.args.pairs() {
-                if let GenericArgument::Binding(_) = **param.value() {
-                    if !trailing_or_empty {
-                        <Token![,]>::default().to_tokens(tokens);
-                        trailing_or_empty = true;
+                match **param.value() {
+                    GenericArgument::Binding(_) | GenericArgument::Constraint(_) => {
+                        if !trailing_or_empty {
+                            <Token![,]>::default().to_tokens(tokens);
+                            trailing_or_empty = true;
+                        }
+                        param.to_tokens(tokens);
                     }
-                    param.to_tokens(tokens);
+                    GenericArgument::Lifetime(_)
+                    | GenericArgument::Type(_)
+                    | GenericArgument::Const(_) => {}
                 }
             }
 
@@ -565,6 +623,14 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for Constraint {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.ident.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.bounds.to_tokens(tokens);
         }
     }
 
