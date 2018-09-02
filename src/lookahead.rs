@@ -122,6 +122,10 @@ impl<'a> Lookahead1<'a> {
                 let message = format!("expected {}", comparisons[0]);
                 error::new_at(self.scope, self.cursor, message)
             }
+            2 => {
+                let message = format!("expected {} or {}", comparisons[0], comparisons[1]);
+                error::new_at(self.scope, self.cursor, message)
+            }
             _ => {
                 let join = comparisons.join(", ");
                 let message = format!("expected one of: {}", join);
