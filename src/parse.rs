@@ -18,11 +18,67 @@
 //! [`Result<T>`]: type.Result.html
 //! [`Cursor`]: ../buffer/index.html
 //!
-//! The `ParseStream`-based interface is convenient for parser implementations,
-//! but not necessarily when you just have some tokens that you want to parse.
-//! For that we expose the following two entry points.
+//! # Example
 //!
-//! ## The `syn::parse*` functions
+//! Here is a snippet of parsing code to get a feel for the style of the
+//! library. We define data structures for a subset of Rust syntax including
+//! enums (not shown) and structs, then provide implementations of the [`Parse`]
+//! trait to parse these syntax tree data structures from a token stream.
+//!
+//! ```
+//! # extern crate syn;
+//! #
+//! use syn::{braced, token, Field, Ident, Token};
+//! use syn::parse::{Parse, ParseStream, Result};
+//! use syn::punctuated::Punctuated;
+//!
+//! enum Item {
+//!     Struct(ItemStruct),
+//!     Enum(ItemEnum),
+//! }
+//!
+//! struct ItemStruct {
+//!     struct_token: Token![struct],
+//!     ident: Ident,
+//!     brace_token: token::Brace,
+//!     fields: Punctuated<Field, Token![,]>,
+//! }
+//! #
+//! # enum ItemEnum {}
+//!
+//! impl Parse for Item {
+//!     fn parse(input: ParseStream) -> Result<Self> {
+//!         let lookahead = input.lookahead1();
+//!         if lookahead.peek(Token![struct]) {
+//!             input.parse().map(Item::Struct)
+//!         } else if lookahead.peek(Token![enum]) {
+//!             input.parse().map(Item::Enum)
+//!         } else {
+//!             Err(lookahead.error())
+//!         }
+//!     }
+//! }
+//!
+//! impl Parse for ItemStruct {
+//!     fn parse(input: ParseStream) -> Result<Self> {
+//!         let content;
+//!         Ok(ItemStruct {
+//!             struct_token: input.parse()?,
+//!             ident: input.parse()?,
+//!             brace_token: braced!(content in input),
+//!             fields: content.parse_terminated(Field::parse_named)?,
+//!         })
+//!     }
+//! }
+//! #
+//! # impl Parse for ItemEnum {
+//! #     fn parse(input: ParseStream) -> Result<Self> {
+//! #         unimplemented!()
+//! #     }
+//! # }
+//! ```
+//!
+//! # The `syn::parse*` functions
 //!
 //! The [`syn::parse`], [`syn::parse2`], and [`syn::parse_str`] functions serve
 //! as an entry point for parsing syntax tree nodes that can be parsed in an
@@ -51,7 +107,7 @@
 //!
 //! [`parse_quote!`]: ../macro.parse_quote.html
 //!
-//! ## The `Parser` trait
+//! # The `Parser` trait
 //!
 //! Some types can be parsed in several ways depending on context. For example
 //! an [`Attribute`] can be either "outer" like `#[...]` or "inner" like
