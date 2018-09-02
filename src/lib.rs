@@ -765,6 +765,11 @@ pub fn parse_file(mut content: &str) -> Result<File, Error> {
 /// Parse the input TokenStream of a macro, triggering a compile error if the
 /// tokens fail to parse.
 ///
+/// Refer to the [`parse` module] documentation for more details about parsing
+/// in Syn.
+///
+/// [`parse` module]: parse/index.html
+///
 /// # Intended usage
 ///
 /// ```rust
