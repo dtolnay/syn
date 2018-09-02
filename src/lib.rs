@@ -9,11 +9,8 @@
 //! Syn is a parsing library for parsing a stream of Rust tokens into a syntax
 //! tree of Rust source code.
 //!
-//! Currently this library is geared toward the [custom derive] use case but
-//! contains some APIs that may be useful for Rust procedural macros more
-//! generally.
-//!
-//! [custom derive]: https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md
+//! Currently this library is geared toward use in Rust procedural macros, but
+//! contains some APIs that may be useful more generally.
 //!
 //! - **Data structures** — Syn provides a complete syntax tree that can
 //!   represent any valid Rust source code. The syntax tree is rooted at
@@ -26,12 +23,11 @@
 //!   derive macro. An example below shows using this type in a library that can
 //!   derive implementations of a trait of your own.
 //!
-//! - **Parser combinators** — Parsing in Syn is built on a suite of public
-//!   parser combinator macros that you can use for parsing any token-based
-//!   syntax you dream up within a `functionlike!(...)` procedural macro. Every
-//!   syntax tree node defined by Syn is individually parsable and may be used
-//!   as a building block for custom syntaxes, or you may do it all yourself
-//!   working from the most primitive tokens.
+//! - **Parsing** — Parsing in Syn is built around [parser functions] with the
+//!   signature `fn(ParseStream) -> Result<T>`. Every syntax tree node defined
+//!   by Syn is individually parsable and may be used as a building block for
+//!   custom syntaxes, or you may dream up your own brand new syntax without
+//!   involving any of our syntax tree types.
 //!
 //! - **Location information** — Every token parsed by Syn is associated with a
 //!   `Span` that tracks line and column information back to the source of that
@@ -48,6 +44,7 @@
 //! [`syn::Expr`]: enum.Expr.html
 //! [`syn::Type`]: enum.Type.html
 //! [`syn::DeriveInput`]: struct.DeriveInput.html
+//! [parser functions]: parse/index.html
 //!
 //! *Version requirement: Syn supports any compiler version back to Rust's very
 //! first support for procedural macros in Rust 1.15.0. Some features especially
@@ -82,14 +79,14 @@
 //! #
 //! use proc_macro::TokenStream;
 //! use quote::quote;
-//! use syn::DeriveInput;
+//! use syn::{parse_macro_input, DeriveInput};
 //!
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[proc_macro_derive(MyMacro)]
 //! # };
 //! pub fn my_macro(input: TokenStream) -> TokenStream {
 //!     // Parse the input tokens into a syntax tree
-//!     let input: DeriveInput = syn::parse(input).unwrap();
+//!     let input = parse_macro_input!(input as DeriveInput);
 //!
 //!     // Build the output, possibly using quasi-quotation
 //!     let expanded = quote! {
@@ -180,14 +177,13 @@
 //!   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `Thread`
 //! ```
 //!
-//! ## Parsing a custom syntax using combinators
+//! ## Parsing a custom syntax
 //!
 //! The [`lazy-static`] example directory shows the implementation of a
 //! `functionlike!(...)` procedural macro in which the input tokens are parsed
-//! using [`nom`]-style parser combinators.
+//! using Syn's parsing API.
 //!
 //! [`lazy-static`]: https://github.com/dtolnay/syn/tree/master/examples/lazy-static
-//! [`nom`]: https://github.com/Geal/nom
 //!
 //! The example reimplements the popular `lazy_static` crate from crates.io as a
 //! procedural macro.
