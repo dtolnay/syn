@@ -2546,31 +2546,37 @@ pub mod parsing {
     #[cfg(feature = "full")]
     impl Parse for Pat {
         fn parse(input: ParseStream) -> Result<Self> {
-            // TODO: better error messages
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![_]) {
                 input.call(pat_wild).map(Pat::Wild)
             } else if lookahead.peek(Token![box]) {
                 input.call(pat_box).map(Pat::Box)
-            } else if input.fork().call(pat_range).is_ok() {
-                // must be before Pat::Lit
-                input.call(pat_range).map(Pat::Range)
-            } else if input.fork().call(pat_tuple_struct).is_ok() {
-                // must be before Pat::Ident
-                input.call(pat_tuple_struct).map(Pat::TupleStruct)
-            } else if input.fork().call(pat_struct).is_ok() {
-                // must be before Pat::Ident
-                input.call(pat_struct).map(Pat::Struct)
-            } else if input.fork().call(pat_macro).is_ok() {
-                // must be before Pat::Ident
-                input.call(pat_macro).map(Pat::Macro)
-            } else if input.fork().call(pat_lit).is_ok() {
-                // must be before Pat::Ident
-                input.call(pat_lit).map(Pat::Lit)
-            } else if input.fork().call(pat_ident).is_ok() {
+            } else if lookahead.peek(Token![-]) || lookahead.peek(Lit) {
+                pat_lit_or_range(input)
+            } else if input.peek(Ident)
+                && ({
+                    input.peek2(Token![::])
+                        || input.peek2(Token![!])
+                        || input.peek2(token::Brace)
+                        || input.peek2(token::Paren)
+                        || input.peek2(Token![..]) && !{
+                            let ahead = input.fork();
+                            ahead.parse::<Ident>()?;
+                            ahead.parse::<RangeLimits>()?;
+                            ahead.is_empty() || ahead.peek(Token![,])
+                        }
+                })
+                || input.peek(Token![::])
+                || input.peek(Token![<])
+                || input.peek(Token![self])
+                || input.peek(Token![Self])
+                || input.peek(Token![super])
+                || input.peek(Token![extern])
+                || input.peek(Token![crate])
+            {
+                pat_path_or_macro_or_struct_or_range(input)
+            } else if input.peek(Token![ref]) || input.peek(Token![mut]) || input.peek(Ident) {
                 input.call(pat_ident).map(Pat::Ident)
-            } else if input.fork().call(pat_path).is_ok() {
-                input.call(pat_path).map(Pat::Path)
             } else if lookahead.peek(token::Paren) {
                 input.call(pat_tuple).map(Pat::Tuple)
             } else if lookahead.peek(Token![&]) {
@@ -2580,6 +2586,60 @@ pub mod parsing {
             } else {
                 Err(lookahead.error())
             }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
+        let (qself, path) = path::parsing::qpath(input, true)?;
+
+        if input.peek(Token![..]) {
+            return pat_range(input, qself, path).map(Pat::Range);
+        }
+
+        if qself.is_some() {
+            return Ok(Pat::Path(PatPath {
+                qself: qself,
+                path: path,
+            }));
+        }
+
+        if input.peek(Token![!]) && !input.peek(Token![!=]) {
+            let mut contains_arguments = false;
+            for segment in &path.segments {
+                match segment.arguments {
+                    PathArguments::None => {}
+                    PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                        contains_arguments = true;
+                    }
+                }
+            }
+
+            if !contains_arguments {
+                let bang_token: Token![!] = input.parse()?;
+                let (delimiter, tts) = mac::parse_delimiter(input)?;
+                return Ok(Pat::Macro(PatMacro {
+                    mac: Macro {
+                        path: path,
+                        bang_token: bang_token,
+                        delimiter: delimiter,
+                        tts: tts,
+                    },
+                }));
+            }
+        }
+
+        if input.peek(token::Brace) {
+            pat_struct(input, path).map(Pat::Struct)
+        } else if input.peek(token::Paren) {
+            pat_tuple_struct(input, path).map(Pat::TupleStruct)
+        } else if input.peek(Token![..]) {
+            pat_range(input, qself, path).map(Pat::Range)
+        } else {
+            Ok(Pat::Path(PatPath {
+                qself: qself,
+                path: path,
+            }))
         }
     }
 
@@ -2603,17 +2663,7 @@ pub mod parsing {
         Ok(PatIdent {
             by_ref: input.parse()?,
             mutability: input.parse()?,
-            ident: {
-                let ident = if input.peek(Ident) || input.peek(Token![self]) {
-                    input.call(Ident::parse_any)?
-                } else {
-                    return Err(input.error("expected identifier or `self`"));
-                };
-                if input.peek(Token![<]) || input.peek(Token![::]) {
-                    return Err(input.error("unexpected token"));
-                }
-                ident
-            },
+            ident: input.call(Ident::parse_any)?,
             subpat: {
                 if input.peek(Token![@]) {
                     let at_token: Token![@] = input.parse()?;
@@ -2627,17 +2677,15 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn pat_tuple_struct(input: ParseStream) -> Result<PatTupleStruct> {
+    fn pat_tuple_struct(input: ParseStream, path: Path) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
-            path: input.parse()?,
+            path: path,
             pat: input.call(pat_tuple)?,
         })
     }
 
     #[cfg(feature = "full")]
-    fn pat_struct(input: ParseStream) -> Result<PatStruct> {
-        let path: Path = input.parse()?;
-
+    fn pat_struct(input: ParseStream, path: Path) -> Result<PatStruct> {
         let content;
         let brace_token = braced!(content in input);
 
@@ -2738,11 +2786,15 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn pat_path(input: ParseStream) -> Result<PatPath> {
-        let p: ExprPath = input.parse()?;
-        Ok(PatPath {
-            qself: p.qself,
-            path: p.path,
+    fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatRange> {
+        Ok(PatRange {
+            lo: Box::new(Expr::Path(ExprPath {
+                attrs: Vec::new(),
+                qself: qself,
+                path: path,
+            })),
+            limits: input.parse()?,
+            hi: input.call(pat_lit_expr)?,
         })
     }
 
@@ -2802,23 +2854,17 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn pat_lit(input: ParseStream) -> Result<PatLit> {
-        if input.peek(Lit) || input.peek(Token![-]) && input.peek2(Lit) {
-            Ok(PatLit {
-                expr: input.call(pat_lit_expr)?,
-            })
+    fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
+        let lo = input.call(pat_lit_expr)?;
+        if input.peek(Token![..]) {
+            Ok(Pat::Range(PatRange {
+                lo: lo,
+                limits: input.parse()?,
+                hi: input.call(pat_lit_expr)?,
+            }))
         } else {
-            Err(input.error("expected literal pattern"))
+            Ok(Pat::Lit(PatLit { expr: lo }))
         }
-    }
-
-    #[cfg(feature = "full")]
-    fn pat_range(input: ParseStream) -> Result<PatRange> {
-        Ok(PatRange {
-            lo: input.call(pat_lit_expr)?,
-            limits: input.parse()?,
-            hi: input.call(pat_lit_expr)?,
-        })
     }
 
     #[cfg(feature = "full")]
@@ -2905,13 +2951,6 @@ pub mod parsing {
             dot2_token: dot2_token,
             comma_token: comma_token,
             back: back,
-        })
-    }
-
-    #[cfg(feature = "full")]
-    fn pat_macro(input: ParseStream) -> Result<PatMacro> {
-        Ok(PatMacro {
-            mac: input.parse()?,
         })
     }
 
