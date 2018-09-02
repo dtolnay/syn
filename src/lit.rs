@@ -126,6 +126,47 @@ impl LitStr {
     /// Parse a syntax tree node from the content of this string literal.
     ///
     /// All spans in the syntax tree will point to the span of this `LitStr`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate proc_macro2;
+    /// # extern crate syn;
+    /// #
+    /// use proc_macro2::Span;
+    /// use syn::{Attribute, Ident, Lit, Meta, MetaNameValue, Path};
+    /// use syn::parse::{Error, Result};
+    ///
+    /// // Parses the path from an attribute that looks like:
+    /// //
+    /// //     #[path = "a::b::c"]
+    /// //
+    /// // or returns the path `Self` as a default if the attribute is not of
+    /// // that form.
+    /// fn get_path(attr: &Attribute) -> Result<Path> {
+    ///     let default = || Path::from(Ident::new("Self", Span::call_site()));
+    ///
+    ///     let meta = match attr.interpret_meta() {
+    ///         Some(meta) => meta,
+    ///         None => return Ok(default()),
+    ///     };
+    ///
+    ///     if meta.name() != "path" {
+    ///         return Ok(default());
+    ///     }
+    ///
+    ///     match meta {
+    ///         Meta::NameValue(MetaNameValue { lit: Lit::Str(lit_str), .. }) => {
+    ///             lit_str.parse()
+    ///         }
+    ///         _ => {
+    ///             let error_span = attr.bracket_token.span;
+    ///             let message = "expected #[path = \"...\"]";
+    ///             Err(Error::new(error_span, message))
+    ///         }
+    ///     }
+    /// }
+    /// ```
     #[cfg(feature = "parsing")]
     pub fn parse<T: Parse>(&self) -> Result<T, Error> {
         use proc_macro2::Group;
