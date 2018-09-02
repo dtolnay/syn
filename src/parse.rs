@@ -25,10 +25,18 @@
 //! enums (not shown) and structs, then provide implementations of the [`Parse`]
 //! trait to parse these syntax tree data structures from a token stream.
 //!
+//! Once `Parse` impls have been defined, they can be called conveniently from a
+//! procedural macro as shown at the bottom of the snippet. If the caller
+//! provides syntactically invalid input to the procedural macro, they will
+//! receive a helpful compiler error message pointing out the exact token that
+//! triggered the failure to parse.
+//!
 //! ```
+//! # extern crate proc_macro;
 //! # extern crate syn;
 //! #
-//! use syn::{braced, token, Field, Ident, Token};
+//! use proc_macro::TokenStream;
+//! use syn::{braced, parse_macro_input, token, Field, Ident, Token};
 //! use syn::parse::{Parse, ParseStream, Result};
 //! use syn::punctuated::Punctuated;
 //!
@@ -76,6 +84,18 @@
 //! #         unimplemented!()
 //! #     }
 //! # }
+//!
+//! # const IGNORE: &str = stringify! {
+//! #[proc_macro]
+//! # };
+//! pub fn my_macro(tokens: TokenStream) -> TokenStream {
+//!     let input = parse_macro_input!(tokens as Item);
+//!
+//!     /* ... */
+//! #   "".parse().unwrap()
+//! }
+//! #
+//! # fn main() {}
 //! ```
 //!
 //! # The `syn::parse*` functions
