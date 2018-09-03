@@ -141,6 +141,9 @@ mod private {
 }
 
 #[cfg(feature = "parsing")]
+impl private::Sealed for Ident {}
+
+#[cfg(feature = "parsing")]
 fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
     let scope = Span::call_site();
     let unexpected = Rc::new(Cell::new(None));
@@ -169,7 +172,6 @@ macro_rules! impl_token {
     };
 }
 
-impl_token!(Ident "identifier");
 #[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(Lifetime "lifetime");
 #[cfg(any(feature = "full", feature = "derive"))]
