@@ -211,8 +211,6 @@ macro_rules! define_keywords {
                 }
             }
 
-            impl_token!($name concat!("`", $token, "`"));
-
             impl std::default::Default for $name {
                 fn default() -> Self {
                     $name {
@@ -258,6 +256,20 @@ macro_rules! define_keywords {
                     })
                 }
             }
+
+            #[cfg(feature = "parsing")]
+            impl Token for $name {
+                fn peek(cursor: Cursor) -> bool {
+                    parsing::peek_keyword(cursor, $token)
+                }
+
+                fn display() -> &'static str {
+                    concat!("`", $token, "`")
+                }
+            }
+
+            #[cfg(feature = "parsing")]
+            impl private::Sealed for $name {}
         )*
     };
 }
@@ -283,8 +295,6 @@ macro_rules! define_punctuation_structs {
                     spans: spans.into_spans(),
                 }
             }
-
-            impl_token!($name concat!("`", $token, "`"));
 
             impl std::default::Default for $name {
                 fn default() -> Self {
@@ -341,6 +351,20 @@ macro_rules! define_punctuation {
                     })
                 }
             }
+
+            #[cfg(feature = "parsing")]
+            impl Token for $name {
+                fn peek(cursor: Cursor) -> bool {
+                    parsing::peek_punct(cursor, $token)
+                }
+
+                fn display() -> &'static str {
+                    concat!("`", $token, "`")
+                }
+            }
+
+            #[cfg(feature = "parsing")]
+            impl private::Sealed for $name {}
         )*
     };
 }
@@ -437,6 +461,26 @@ impl Parse for Underscore {
         })
     }
 }
+
+#[cfg(feature = "parsing")]
+impl Token for Underscore {
+    fn peek(cursor: Cursor) -> bool {
+        if let Some((ident, _rest)) = cursor.ident() {
+            return ident == "_";
+        }
+        if let Some((punct, _rest)) = cursor.punct() {
+            return punct.as_char() == '_'
+        }
+        false
+    }
+
+    fn display() -> &'static str {
+        "`_`"
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl private::Sealed for Underscore {}
 
 #[cfg(feature = "parsing")]
 impl Token for Paren {
@@ -688,6 +732,7 @@ macro_rules! Token {
 mod parsing {
     use proc_macro2::{Spacing, Span};
 
+    use buffer::Cursor;
     use error::{Error, Result};
     use parse::ParseStream;
     use span::FromSpans;
@@ -701,6 +746,14 @@ mod parsing {
             }
             Err(cursor.error(format!("expected `{}`", token)))
         })
+    }
+
+    pub fn peek_keyword(cursor: Cursor, token: &str) -> bool {
+        if let Some((ident, _rest)) = cursor.ident() {
+            ident == token
+        } else {
+            false
+        }
     }
 
     pub fn punct<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
@@ -733,6 +786,25 @@ mod parsing {
 
             Err(Error::new(spans[0], format!("expected `{}`", token)))
         })
+    }
+
+    pub fn peek_punct(mut cursor: Cursor, token: &str) -> bool {
+        for (i, ch) in token.chars().enumerate() {
+            match cursor.punct() {
+                Some((punct, rest)) => {
+                    if punct.as_char() != ch {
+                        break;
+                    } else if i == token.len() - 1 {
+                        return true;
+                    } else if punct.spacing() != Spacing::Joint {
+                        break;
+                    }
+                    cursor = rest;
+                }
+                None => break,
+            }
+        }
+        false
     }
 }
 
