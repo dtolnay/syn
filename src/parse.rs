@@ -214,7 +214,8 @@ use punctuated::Punctuated;
 use token::Token;
 
 pub use error::{Error, Result};
-pub use lookahead::{Lookahead1, Peek};
+pub use lookahead::{Lookahead1, Peek, TokenMarker};
+pub use keyword::Keyword;
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.

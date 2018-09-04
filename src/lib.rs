@@ -571,6 +571,9 @@ pub mod export;
 mod lookahead;
 
 #[cfg(feature = "parsing")]
+mod keyword;
+
+#[cfg(feature = "parsing")]
 pub mod parse;
 
 mod span;

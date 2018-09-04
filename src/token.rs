@@ -118,7 +118,7 @@ use lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
 use lookahead;
 #[cfg(feature = "parsing")]
-use parse::{Parse, ParseStream};
+use parse::{Keyword, Parse, ParseStream};
 use span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
@@ -142,6 +142,9 @@ mod private {
 
 #[cfg(feature = "parsing")]
 impl private::Sealed for Ident {}
+
+#[cfg(feature = "parsing")]
+impl<K: Keyword> private::Sealed for K {}
 
 #[cfg(feature = "parsing")]
 fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
