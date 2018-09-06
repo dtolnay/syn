@@ -253,7 +253,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn-next/0.15.0-rc3")]
+#![doc(html_root_url = "https://docs.rs/syn-next/0.15.0-rc4")]
 #![cfg_attr(feature = "cargo-clippy", deny(clippy, clippy_pedantic))]
 // Ignored clippy lints.
 #![cfg_attr(
