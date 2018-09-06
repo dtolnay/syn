@@ -26,10 +26,12 @@
 //! trait to parse these syntax tree data structures from a token stream.
 //!
 //! Once `Parse` impls have been defined, they can be called conveniently from a
-//! procedural macro as shown at the bottom of the snippet. If the caller
-//! provides syntactically invalid input to the procedural macro, they will
-//! receive a helpful compiler error message pointing out the exact token that
-//! triggered the failure to parse.
+//! procedural macro through [`parse_macro_input!`] as shown at the bottom of
+//! the snippet. If the caller provides syntactically invalid input to the
+//! procedural macro, they will receive a helpful compiler error message
+//! pointing out the exact token that triggered the failure to parse.
+//!
+//! [`parse_macro_input!`]: ../macro.parse_macro_input.html
 //!
 //! ```
 //! # extern crate proc_macro;
