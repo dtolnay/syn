@@ -191,6 +191,28 @@ impl_token!(LitFloat "floating point literal");
 #[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitBool "boolean literal");
 
+// Not public API.
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+pub trait CustomKeyword {
+    fn ident() -> &'static str;
+    fn display() -> &'static str;
+}
+
+#[cfg(feature = "parsing")]
+impl<K: CustomKeyword> private::Sealed for K {}
+
+#[cfg(feature = "parsing")]
+impl<K: CustomKeyword> Token for K {
+    fn peek(cursor: Cursor) -> bool {
+        parsing::peek_keyword(cursor, K::ident())
+    }
+
+    fn display() -> &'static str {
+        K::display()
+    }
+}
+
 macro_rules! define_keywords {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
         $(

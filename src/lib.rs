@@ -567,6 +567,8 @@ pub use gen::*;
 #[doc(hidden)]
 pub mod export;
 
+mod keyword;
+
 #[cfg(feature = "parsing")]
 mod lookahead;
 
