@@ -567,11 +567,10 @@ pub use gen::*;
 #[doc(hidden)]
 pub mod export;
 
-#[cfg(feature = "parsing")]
-mod lookahead;
+mod keyword;
 
 #[cfg(feature = "parsing")]
-mod keyword;
+mod lookahead;
 
 #[cfg(feature = "parsing")]
 pub mod parse;
