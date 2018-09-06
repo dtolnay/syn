@@ -8,12 +8,14 @@
 /// prefix.
 ///
 /// ```
+/// # #[macro_use]
 /// # extern crate syn;
 /// #
 /// mod kw {
-///     # use syn;
-///     syn::custom_keyword!(whatever);
+///     custom_keyword!(whatever);
 /// }
+/// #
+/// # fn main() {}
 /// ```
 ///
 /// The generated syntax tree node supports the following operations just like
@@ -47,15 +49,15 @@
 /// by crates that need to use them as such.
 ///
 /// ```
-/// # extern crate syn;
-/// #
-/// use syn::{LitBool, LitStr, Token};
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::{LitBool, LitStr};
 /// use syn::parse::{Parse, ParseStream, Result};
 ///
 /// mod kw {
-///     # use syn;
-///     syn::custom_keyword!(bool);
-///     syn::custom_keyword!(str);
+///     custom_keyword!(bool);
+///     custom_keyword!(str);
 /// }
 ///
 /// enum Argument {

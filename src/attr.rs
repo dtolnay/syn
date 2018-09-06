@@ -76,9 +76,10 @@ ast_struct! {
     /// [`Attribute::parse_inner`]: #method.parse_inner
     ///
     /// ```
-    /// # extern crate syn;
-    /// #
-    /// use syn::{Attribute, Ident, Token};
+    /// #[macro_use]
+    /// extern crate syn;
+    ///
+    /// use syn::{Attribute, Ident};
     /// use syn::parse::{Parse, ParseStream, Result};
     ///
     /// // Parses a unit struct with attributes.

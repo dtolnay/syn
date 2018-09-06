@@ -21,9 +21,10 @@
 //! [`ItemStatic`]: ../struct.ItemStatic.html
 //!
 //! ```
+//! # #[macro_use]
 //! # extern crate syn;
 //! #
-//! # use syn::{Attribute, Expr, Ident, Token, Type, Visibility};
+//! # use syn::{Attribute, Expr, Ident, Type, Visibility};
 //! #
 //! pub struct ItemStatic {
 //!     pub attrs: Vec<Attribute>,

@@ -22,9 +22,10 @@ use token::Token;
 /// # Example
 ///
 /// ```
-/// # extern crate syn;
-/// #
-/// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Token, TypeParam};
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, TypeParam};
 /// use syn::parse::{Parse, ParseStream, Result};
 ///
 /// // A generic parameter, a single one of the comma-separated elements inside

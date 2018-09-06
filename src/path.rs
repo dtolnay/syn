@@ -360,9 +360,10 @@ pub mod parsing {
         /// # Example
         ///
         /// ```
-        /// # extern crate syn;
-        /// #
-        /// use syn::{Path, Token};
+        /// #[macro_use]
+        /// extern crate syn;
+        ///
+        /// use syn::Path;
         /// use syn::parse::{Parse, ParseStream, Result};
         ///
         /// // A simplified single `use` statement like:

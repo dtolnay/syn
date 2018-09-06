@@ -9,11 +9,12 @@
 /// [`Parse`]: parse/trait.Parse.html
 ///
 /// ```
-/// # extern crate syn;
-/// # extern crate quote;
-/// #
-/// use quote::quote;
-/// use syn::{parse_quote, Stmt};
+/// #[macro_use]
+/// extern crate quote;
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Stmt;
 ///
 /// fn main() {
 ///     let name = quote!(v);
@@ -37,12 +38,11 @@
 /// parameter `T` in the input generics.
 ///
 /// ```
-/// # extern crate quote;
-/// # extern crate syn;
-/// #
-/// # use quote::quote;
-/// # use syn::parse_quote;
-/// #
+/// #[macro_use]
+/// extern crate quote;
+/// #[macro_use]
+/// extern crate syn;
+///
 /// use syn::{Generics, GenericParam};
 ///
 /// // Add a bound `T: HeapSize` to every type parameter T.

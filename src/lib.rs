@@ -73,13 +73,15 @@
 //! ```
 //!
 //! ```rust
-//! # extern crate proc_macro;
-//! # extern crate quote;
-//! # extern crate syn;
-//! #
+//! #[macro_use]
+//! extern crate quote;
+//! #[macro_use]
+//! extern crate syn;
+//!
+//! extern crate proc_macro;
+//!
 //! use proc_macro::TokenStream;
-//! use quote::quote;
-//! use syn::{parse_macro_input, DeriveInput};
+//! use syn::DeriveInput;
 //!
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[proc_macro_derive(MyMacro)]
@@ -615,12 +617,13 @@ use error::Error;
 /// # Examples
 ///
 /// ```rust
-/// # extern crate proc_macro;
-/// # extern crate quote;
-/// # extern crate syn;
-/// #
+/// #[macro_use]
+/// extern crate quote;
+///
+/// extern crate proc_macro;
+/// extern crate syn;
+///
 /// use proc_macro::TokenStream;
-/// use quote::quote;
 /// use syn::DeriveInput;
 ///
 /// # const IGNORE_TOKENS: &str = stringify! {
@@ -771,11 +774,12 @@ pub fn parse_file(mut content: &str) -> Result<File, Error> {
 /// # Intended usage
 ///
 /// ```rust
-/// # extern crate proc_macro;
-/// # extern crate syn;
-/// #
+/// #[macro_use]
+/// extern crate syn;
+///
+/// extern crate proc_macro;
+///
 /// use proc_macro::TokenStream;
-/// use syn::parse_macro_input;
 /// use syn::parse::{Parse, ParseStream, Result};
 ///
 /// struct MyMacroInput {

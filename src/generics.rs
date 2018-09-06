@@ -301,12 +301,13 @@ impl Generics {
     /// for that type.
     ///
     /// ```
-    /// # extern crate proc_macro2;
-    /// # extern crate syn;
+    /// # #[macro_use]
     /// # extern crate quote;
     /// #
+    /// # extern crate proc_macro2;
+    /// # extern crate syn;
+    /// #
     /// # use proc_macro2::{Span, Ident};
-    /// # use quote::quote;
     /// #
     /// # fn main() {
     /// #     let generics: syn::Generics = Default::default();

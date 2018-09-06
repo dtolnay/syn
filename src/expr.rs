@@ -2349,9 +2349,10 @@ pub mod parsing {
         /// # Example
         ///
         /// ```
-        /// # extern crate syn;
-        /// #
-        /// use syn::{braced, token, Attribute, Block, Ident, Stmt, Token};
+        /// #[macro_use]
+        /// extern crate syn;
+        ///
+        /// use syn::{token, Attribute, Block, Ident, Stmt};
         /// use syn::parse::{Parse, ParseStream, Result};
         ///
         /// // Parse a function with no generics or parameter list.

@@ -18,9 +18,10 @@ pub trait IdentExt: Sized + private::Sealed {
     /// identifiers.
     ///
     /// ```rust
-    /// # extern crate syn;
-    /// #
-    /// use syn::{Ident, Token};
+    /// #[macro_use]
+    /// extern crate syn;
+    ///
+    /// use syn::Ident;
     /// use syn::ext::IdentExt;
     /// use syn::parse::{Error, ParseStream, Result};
     ///

@@ -45,9 +45,10 @@ impl Error {
     /// # Example
     ///
     /// ```
-    /// # extern crate syn;
-    /// #
-    /// use syn::{Ident, LitStr, Token};
+    /// #[macro_use]
+    /// extern crate syn;
+    ///
+    /// use syn::{Ident, LitStr};
     /// use syn::parse::{Error, ParseStream, Result};
     ///
     /// // Parses input that looks like `name = "string"` where the key must be

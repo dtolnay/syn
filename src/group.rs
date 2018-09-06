@@ -95,12 +95,13 @@ fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, Pa
 /// # Example
 ///
 /// ```rust
+/// # #[macro_use]
 /// # extern crate quote;
-/// # extern crate syn;
 /// #
-/// # use quote::quote;
-/// #
-/// use syn::{parenthesized, token, Ident, Token, Type};
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::{token, Ident, Type};
 /// use syn::parse::{Parse, ParseStream, Result};
 /// use syn::punctuated::Punctuated;
 ///
@@ -155,12 +156,12 @@ macro_rules! parenthesized {
 /// # Example
 ///
 /// ```rust
+/// # #[macro_use]
 /// # extern crate quote;
-/// # extern crate syn;
 /// #
-/// # use quote::quote;
-/// #
-/// use syn::{braced, token, Ident, Token, Type};
+/// #[macro_use]
+/// extern crate syn;
+/// use syn::{token, Ident, Type};
 /// use syn::parse::{Parse, ParseStream, Result};
 /// use syn::punctuated::Punctuated;
 ///
@@ -236,14 +237,16 @@ macro_rules! braced {
 /// # Example
 ///
 /// ```rust
-/// # extern crate proc_macro2;
+/// # #[macro_use]
 /// # extern crate quote;
-/// # extern crate syn;
 /// #
-/// # use quote::quote;
-/// #
+/// #[macro_use]
+/// extern crate syn;
+///
+/// extern crate proc_macro2;
+///
 /// use proc_macro2::TokenStream;
-/// use syn::{bracketed, token, Token};
+/// use syn::token;
 /// use syn::parse::{Parse, ParseStream, Result};
 ///
 /// // Parse an outer attribute like:
