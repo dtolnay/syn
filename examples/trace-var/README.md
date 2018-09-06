@@ -42,7 +42,7 @@ n = 1
 The procedural macro uses a syntax tree [`Fold`] to rewrite every `let`
 statement and assignment expression in the following way:
 
-[`Fold`]: https://docs.rs/syn/0.14/syn/fold/trait.Fold.html
+[`Fold`]: https://docs.rs/syn/0.15/syn/fold/trait.Fold.html
 
 ```rust
 // Before

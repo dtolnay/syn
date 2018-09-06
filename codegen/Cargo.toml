@@ -6,7 +6,7 @@ authors = ["Nika Layzell <nika@thelayzells.com>"]
 publish = false # this is an internal crate which should never be published
 
 [dependencies]
-syn-next = { path = "..", features = ["full", "extra-traits"] }
+syn = { path = "..", features = ["full", "extra-traits"] }
 quote = "0.6"
 failure = "0.1"
 inflections = "1.1"

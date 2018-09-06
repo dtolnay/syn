@@ -3,7 +3,7 @@ Parser for Rust source code
 
 [![Build Status](https://api.travis-ci.org/dtolnay/syn.svg?branch=master)](https://travis-ci.org/dtolnay/syn)
 [![Latest Version](https://img.shields.io/crates/v/syn.svg)](https://crates.io/crates/syn)
-[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/syn/0.14/syn/)
+[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/syn/0.15/syn/)
 [![Rustc Version 1.15+](https://img.shields.io/badge/rustc-1.15+-lightgray.svg)](https://blog.rust-lang.org/2017/02/02/Rust-1.15.html)
 
 Syn is a parsing library for parsing a stream of Rust tokens into a syntax tree
@@ -41,12 +41,12 @@ contains some APIs that may be useful more generally.
   procedural macros enable only what they need, and do not pay in compile time
   for all the rest.
 
-[`syn::File`]: https://docs.rs/syn/0.14/syn/struct.File.html
-[`syn::Item`]: https://docs.rs/syn/0.14/syn/enum.Item.html
-[`syn::Expr`]: https://docs.rs/syn/0.14/syn/enum.Expr.html
-[`syn::Type`]: https://docs.rs/syn/0.14/syn/enum.Type.html
-[`syn::DeriveInput`]: https://docs.rs/syn/0.14/syn/struct.DeriveInput.html
-[parser functions]: https://docs.rs/syn/0.14/syn/parse/index.html
+[`syn::File`]: https://docs.rs/syn/0.15/syn/struct.File.html
+[`syn::Item`]: https://docs.rs/syn/0.15/syn/enum.Item.html
+[`syn::Expr`]: https://docs.rs/syn/0.15/syn/enum.Expr.html
+[`syn::Type`]: https://docs.rs/syn/0.15/syn/enum.Type.html
+[`syn::DeriveInput`]: https://docs.rs/syn/0.15/syn/struct.DeriveInput.html
+[parser functions]: https://docs.rs/syn/0.15/syn/parse/index.html
 
 If you get stuck with anything involving procedural macros in Rust I am happy to
 provide help even if the issue is not related to Syn. Please file a ticket in
@@ -72,7 +72,7 @@ tokens back to the compiler to compile into the user's crate.
 
 ```toml
 [dependencies]
-syn = "0.14"
+syn = "0.15"
 quote = "0.6"
 
 [lib]
@@ -261,7 +261,7 @@ On a nightly compiler, to eliminate the stable shim and use the compiler's
 
 ```toml
 [dependencies]
-syn = "0.14"
+syn = "0.15"
 proc-macro2 = { version = "0.4", features = ["nightly"] }
 ```
 
