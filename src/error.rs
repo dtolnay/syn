@@ -26,7 +26,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// [module documentation]: index.html
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Error {
     span: Span,
     message: String,
