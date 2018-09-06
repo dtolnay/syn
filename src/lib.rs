@@ -808,7 +808,7 @@ macro_rules! parse_macro_input {
         match $crate::parse::<$ty>($tokenstream) {
             $crate::export::Ok(data) => data,
             $crate::export::Err(err) => {
-                return $crate::export::TokenStream::from(err.into_compile_error());
+                return $crate::export::TokenStream::from(err.to_compile_error());
             }
         };
     };

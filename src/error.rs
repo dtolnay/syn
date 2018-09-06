@@ -85,7 +85,7 @@ impl Error {
     ///
     /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
     /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
-    pub fn into_compile_error(self) -> TokenStream {
+    pub fn to_compile_error(&self) -> TokenStream {
         // compile_error!($message)
         TokenStream::from_iter(vec![
             TokenTree::Ident(Ident::new("compile_error", self.span)),
