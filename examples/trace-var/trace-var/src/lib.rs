@@ -178,15 +178,10 @@ impl Fold for Args {
 /// ```
 #[proc_macro_attribute]
 pub fn trace_var(args: TokenStream, input: TokenStream) -> TokenStream {
-    // Return the input unchanged if it failed to parse. The compiler will show
-    // the right diagnostics.
-    let input: ItemFn = match syn::parse(input.clone()) {
-        Ok(input) => input,
-        Err(_) => return input,
-    };
+    let input = parse_macro_input!(input as ItemFn);
 
     // Parse the list of variables the user wanted to print.
-    let mut args: Args = syn::parse(args).unwrap();
+    let mut args = parse_macro_input!(args as Args);
 
     // Use a syntax tree traversal to transform the function body.
     let output = args.fold_item_fn(input);

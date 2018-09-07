@@ -58,7 +58,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
         name,
         ty,
         init,
-    } = syn::parse(input).unwrap();
+    } = parse_macro_input!(input as LazyStatic);
 
     // The warning looks like this.
     //
