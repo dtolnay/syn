@@ -289,7 +289,7 @@ impl<'a> Drop for ParseBuffer<'a> {
 /// fn skip_past_next_at(input: ParseStream) -> Result<()> {
 ///     input.step(|cursor| {
 ///         let mut rest = *cursor;
-///         while let Some((tt, next)) = cursor.token_tree() {
+///         while let Some((tt, next)) = rest.token_tree() {
 ///             match tt {
 ///                 TokenTree::Punct(ref punct) if punct.as_char() == '@' => {
 ///                     return Ok(((), next));
