@@ -17,6 +17,7 @@ use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenS
 use std::marker::PhantomData;
 use std::ptr;
 
+use private;
 use Lifetime;
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
@@ -342,6 +343,24 @@ impl<'a> Cursor<'a> {
             Entry::Ident(ref t) => t.span(),
             Entry::Punct(ref o) => o.span(),
             Entry::End(..) => Span::call_site(),
+        }
+    }
+}
+
+impl private {
+    #[cfg(procmacro2_semver_exempt)]
+    pub fn open_span_of_group(cursor: Cursor) -> Span {
+        match *cursor.entry() {
+            Entry::Group(ref group, _) => group.span_open(),
+            _ => cursor.span(),
+        }
+    }
+
+    #[cfg(procmacro2_semver_exempt)]
+    pub fn close_span_of_group(cursor: Cursor) -> Span {
+        match *cursor.entry() {
+            Entry::Group(ref group, _) => group.span_close(),
+            _ => cursor.span(),
         }
     }
 }

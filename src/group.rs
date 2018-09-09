@@ -74,9 +74,13 @@ impl private {
 fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, ParseBuffer)> {
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
-            let unexpected = private::get_unexpected(input);
+            #[cfg(procmacro2_semver_exempt)]
+            let scope = private::close_span_of_group(*cursor);
+            #[cfg(not(procmacro2_semver_exempt))]
+            let scope = span;
             let nested = private::advance_step_cursor(cursor, content);
-            let content = private::new_parse_buffer(span, nested, unexpected);
+            let unexpected = private::get_unexpected(input);
+            let content = private::new_parse_buffer(scope, nested, unexpected);
             Ok(((span, content), rest))
         } else {
             let message = match delimiter {
