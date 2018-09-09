@@ -672,9 +672,11 @@ define_delimiters! {
 #[macro_export]
 #[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! Token {
+    (abstract)    => { $crate::token::Abstract };
     (as)          => { $crate::token::As };
     (async)       => { $crate::token::Async };
     (auto)        => { $crate::token::Auto };
+    (become)      => { $crate::token::Become };
     (box)         => { $crate::token::Box };
     (break)       => { $crate::token::Break };
     (Self)        => { $crate::token::CapSelf };
@@ -682,11 +684,13 @@ macro_rules! Token {
     (continue)    => { $crate::token::Continue };
     (crate)       => { $crate::token::Crate };
     (default)     => { $crate::token::Default };
+    (do)          => { $crate::token::Do };
     (dyn)         => { $crate::token::Dyn };
     (else)        => { $crate::token::Else };
     (enum)        => { $crate::token::Enum };
     (existential) => { $crate::token::Existential };
     (extern)      => { $crate::token::Extern };
+    (final)       => { $crate::token::Final };
     (fn)          => { $crate::token::Fn };
     (for)         => { $crate::token::For };
     (if)          => { $crate::token::If };
@@ -699,6 +703,8 @@ macro_rules! Token {
     (mod)         => { $crate::token::Mod };
     (move)        => { $crate::token::Move };
     (mut)         => { $crate::token::Mut };
+    (override)    => { $crate::token::Override };
+    (priv)        => { $crate::token::Priv };
     (pub)         => { $crate::token::Pub };
     (ref)         => { $crate::token::Ref };
     (return)      => { $crate::token::Return };
@@ -709,9 +715,12 @@ macro_rules! Token {
     (trait)       => { $crate::token::Trait };
     (try)         => { $crate::token::Try };
     (type)        => { $crate::token::Type };
+    (typeof)      => { $crate::token::Typeof };
     (union)       => { $crate::token::Union };
     (unsafe)      => { $crate::token::Unsafe };
+    (unsized)     => { $crate::token::Unsized };
     (use)         => { $crate::token::Use };
+    (virtual)     => { $crate::token::Virtual };
     (where)       => { $crate::token::Where };
     (while)       => { $crate::token::While };
     (yield)       => { $crate::token::Yield };
