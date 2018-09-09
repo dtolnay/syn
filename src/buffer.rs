@@ -31,7 +31,7 @@ use Lifetime;
 /// within a `TokenBuffer`.
 enum Entry {
     // Mimicking types from proc-macro.
-    Group(Span, Delimiter, TokenBuffer),
+    Group(Group, TokenBuffer),
     Ident(Ident),
     Punct(Punct),
     Literal(Literal),
@@ -74,7 +74,7 @@ impl TokenBuffer {
                 TokenTree::Group(g) => {
                     // Record the index of the interesting entry, and store an
                     // `End(null)` there temporarially.
-                    seqs.push((entries.len(), g.span(), g.delimiter(), g.stream().clone()));
+                    seqs.push((entries.len(), g));
                     entries.push(Entry::End(ptr::null()));
                 }
             }
@@ -88,7 +88,7 @@ impl TokenBuffer {
         // constant address after this point, as we are going to store a raw
         // pointer into it.
         let mut entries = entries.into_boxed_slice();
-        for (idx, span, delim, seq_stream) in seqs {
+        for (idx, group) in seqs {
             // We know that this index refers to one of the temporary
             // `End(null)` entries, and we know that the last entry is
             // `End(up)`, so the next index is also valid.
@@ -96,8 +96,8 @@ impl TokenBuffer {
 
             // The end entry stored at the end of this Entry::Group should
             // point to the Entry which follows the Group in the list.
-            let inner = Self::inner_new(seq_stream, seq_up);
-            entries[idx] = Entry::Group(span, delim, inner);
+            let inner = Self::inner_new(group.stream(), seq_up);
+            entries[idx] = Entry::Group(group, inner);
         }
 
         TokenBuffer { data: entries }
@@ -215,12 +215,14 @@ impl<'a> Cursor<'a> {
     ///
     /// WARNING: This mutates its argument.
     fn ignore_none(&mut self) {
-        if let Entry::Group(_, Delimiter::None, ref buf) = *self.entry() {
-            // NOTE: We call `Cursor::create` here to make sure that situations
-            // where we should immediately exit the span after entering it are
-            // handled correctly.
-            unsafe {
-                *self = Cursor::create(&buf.data[0], self.scope);
+        if let Entry::Group(ref group, ref buf) = *self.entry() {
+            if group.delimiter() == Delimiter::None {
+                // NOTE: We call `Cursor::create` here to make sure that
+                // situations where we should immediately exit the span after
+                // entering it are handled correctly.
+                unsafe {
+                    *self = Cursor::create(&buf.data[0], self.scope);
+                }
             }
         }
     }
@@ -243,9 +245,9 @@ impl<'a> Cursor<'a> {
             self.ignore_none();
         }
 
-        if let Entry::Group(span, group_delim, ref buf) = *self.entry() {
-            if group_delim == delim {
-                return Some((buf.begin(), span, unsafe { self.bump() }));
+        if let Entry::Group(ref group, ref buf) = *self.entry() {
+            if group.delimiter() == delim {
+                return Some((buf.begin(), group.span(), unsafe { self.bump() }));
             }
         }
 
@@ -327,12 +329,7 @@ impl<'a> Cursor<'a> {
     /// will return a `Group(None, ..)` if the cursor is looking at one.
     pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
         let tree = match *self.entry() {
-            Entry::Group(span, delim, ref buf) => {
-                let stream = buf.begin().token_stream();
-                let mut g = Group::new(delim, stream);
-                g.set_span(span);
-                TokenTree::from(g)
-            }
+            Entry::Group(ref group, _) => group.clone().into(),
             Entry::Literal(ref lit) => lit.clone().into(),
             Entry::Ident(ref ident) => ident.clone().into(),
             Entry::Punct(ref op) => op.clone().into(),
@@ -348,7 +345,7 @@ impl<'a> Cursor<'a> {
     /// cursor points to eof.
     pub fn span(self) -> Span {
         match *self.entry() {
-            Entry::Group(span, ..) => span,
+            Entry::Group(ref group, _) => group.span(),
             Entry::Literal(ref l) => l.span(),
             Entry::Ident(ref t) => t.span(),
             Entry::Punct(ref o) => o.span(),
