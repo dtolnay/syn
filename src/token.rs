@@ -552,9 +552,11 @@ impl Token for Group {
 }
 
 define_keywords! {
+    "abstract"    pub struct Abstract     /// `abstract`
     "as"          pub struct As           /// `as`
     "async"       pub struct Async        /// `async`
     "auto"        pub struct Auto         /// `auto`
+    "become"      pub struct Become       /// `become`
     "box"         pub struct Box          /// `box`
     "break"       pub struct Break        /// `break`
     "Self"        pub struct CapSelf      /// `Self`
@@ -562,11 +564,13 @@ define_keywords! {
     "continue"    pub struct Continue     /// `continue`
     "crate"       pub struct Crate        /// `crate`
     "default"     pub struct Default      /// `default`
+    "do"          pub struct Do           /// `do`
     "dyn"         pub struct Dyn          /// `dyn`
     "else"        pub struct Else         /// `else`
     "enum"        pub struct Enum         /// `enum`
     "existential" pub struct Existential  /// `existential`
     "extern"      pub struct Extern       /// `extern`
+    "final"       pub struct Final        /// `final`
     "fn"          pub struct Fn           /// `fn`
     "for"         pub struct For          /// `for`
     "if"          pub struct If           /// `if`
@@ -579,6 +583,8 @@ define_keywords! {
     "mod"         pub struct Mod          /// `mod`
     "move"        pub struct Move         /// `move`
     "mut"         pub struct Mut          /// `mut`
+    "override"    pub struct Override     /// `override`
+    "priv"        pub struct Priv         /// `priv`
     "pub"         pub struct Pub          /// `pub`
     "ref"         pub struct Ref          /// `ref`
     "return"      pub struct Return       /// `return`
@@ -589,9 +595,12 @@ define_keywords! {
     "trait"       pub struct Trait        /// `trait`
     "try"         pub struct Try          /// `try`
     "type"        pub struct Type         /// `type`
+    "typeof"      pub struct Typeof       /// `typeof`
     "union"       pub struct Union        /// `union`
     "unsafe"      pub struct Unsafe       /// `unsafe`
+    "unsized"     pub struct Unsized      /// `unsized`
     "use"         pub struct Use          /// `use`
+    "virtual"     pub struct Virtual      /// `virtual`
     "where"       pub struct Where        /// `where`
     "while"       pub struct While        /// `while`
     "yield"       pub struct Yield        /// `yield`
