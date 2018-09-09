@@ -2,7 +2,6 @@ sudo: false
 language: rust
 
 cache:
-  cargo: true
   directories:
     - tests/rust
 
