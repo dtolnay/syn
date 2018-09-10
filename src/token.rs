@@ -494,7 +494,7 @@ impl Token for Underscore {
             return ident == "_";
         }
         if let Some((punct, _rest)) = cursor.punct() {
-            return punct.as_char() == '_'
+            return punct.as_char() == '_';
         }
         false
     }

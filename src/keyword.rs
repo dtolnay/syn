@@ -105,7 +105,9 @@ macro_rules! custom_keyword {
 
         #[doc(hidden)]
         #[allow(non_snake_case)]
-        pub fn $ident<__S: $crate::export::IntoSpans<[$crate::export::Span; 1]>>(span: __S) -> $ident {
+        pub fn $ident<__S: $crate::export::IntoSpans<[$crate::export::Span; 1]>>(
+            span: __S,
+        ) -> $ident {
             $ident {
                 span: $crate::export::IntoSpans::into_spans(span)[0],
             }
@@ -123,7 +125,7 @@ macro_rules! custom_keyword {
         impl_to_tokens_for_custom_keyword!($ident);
         impl_clone_for_custom_keyword!($ident);
         impl_extra_traits_for_custom_keyword!($ident);
-    }
+    };
 }
 
 // Not public API.
@@ -151,7 +153,11 @@ macro_rules! impl_parse_for_custom_keyword {
                             return $crate::export::Ok(($ident { span: ident.span() }, rest));
                         }
                     }
-                    $crate::export::Err(cursor.error(concat!("expected `", stringify!($ident), "`")))
+                    $crate::export::Err(cursor.error(concat!(
+                        "expected `",
+                        stringify!($ident),
+                        "`"
+                    )))
                 })
             }
         }
