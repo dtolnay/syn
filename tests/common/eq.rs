@@ -29,7 +29,7 @@ use self::syntax::parse::token::{DelimToken, Lit, Token};
 use self::syntax::ptr::P;
 use self::syntax::source_map::Spanned;
 use self::syntax::symbol::Symbol;
-use self::syntax::tokenstream::{Delimited, ThinTokenStream, TokenStream, TokenTree};
+use self::syntax::tokenstream::{DelimSpan, Delimited, ThinTokenStream, TokenStream, TokenTree};
 use self::syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
@@ -104,6 +104,7 @@ macro_rules! spanless_eq_true {
 }
 
 spanless_eq_true!(Span);
+spanless_eq_true!(DelimSpan);
 spanless_eq_true!(AttrId);
 spanless_eq_true!(NodeId);
 spanless_eq_true!(SyntaxContext);
@@ -447,7 +448,7 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
             TokenTree::Token(DUMMY_SP, Token::Literal(lit, None)),
         ];
         tokens.push(TokenTree::Delimited(
-            DUMMY_SP,
+            DelimSpan::dummy(),
             Delimited {
                 delim: DelimToken::Bracket,
                 tts: tts.into_iter().collect::<TokenStream>().into(),
