@@ -167,6 +167,23 @@ fn test_meta_item_multiple() {
     )
 }
 
+#[test]
+fn test_bool_lit() {
+    run_test(
+        "#[foo(true)]",
+        MetaList {
+            ident: ident("foo").into(),
+            paren_token: Default::default(),
+            nested: punctuated![
+                NestedMeta::Literal(Lit::Bool(LitBool {
+                    value: true,
+                    span: Span::call_site(),
+                })),
+            ],
+        },
+    )
+}
+
 fn run_test<T: Into<Meta>>(input: &str, expected: T) {
     let attrs = Attribute::parse_outer.parse_str(input).unwrap();
     assert_eq!(attrs.len(), 1);
