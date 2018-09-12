@@ -282,7 +282,15 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
                 }
             }
 
-            Some((Meta::Word(ident.clone()).into(), &tts[1..]))
+            let nested_meta = if ident == "true" || ident == "false" {
+                NestedMeta::Literal(Lit::Bool(LitBool {
+                    value: ident == "true",
+                    span: ident.span(),
+                }))
+            } else {
+                NestedMeta::Meta(Meta::Word(ident.clone()))
+            };
+            Some((nested_meta, &tts[1..]))
         }
 
         _ => None,
