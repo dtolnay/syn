@@ -15,20 +15,22 @@ before_script:
   - set -o errexit
 
 script:
-  - cargo build --no-default-features
-  - cargo build
-  - cargo build --features full
-  - cargo build --features 'fold visit visit-mut'
-  - cargo build --features 'full fold visit visit-mut'
-  - cargo build --no-default-features --features derive
-  - cargo build --no-default-features --features 'derive parsing'
-  - cargo build --no-default-features --features 'derive printing'
-  - cargo build --no-default-features --features full
-  - cargo build --no-default-features --features 'full parsing'
-  - cargo build --no-default-features --features 'full printing'
-  - cargo build --no-default-features --features 'full parsing printing'
-  - cargo build --no-default-features --features 'fold visit visit-mut parsing printing'
-  - cargo build --no-default-features --features 'full fold visit visit-mut parsing printing'
+  - shopt -s expand_aliases
+  - alias build="cargo build ${TARGET+--target=$TARGET}"
+  - build --no-default-features
+  - build
+  - build --features full
+  - build --features 'fold visit visit-mut'
+  - build --features 'full fold visit visit-mut'
+  - build --no-default-features --features derive
+  - build --no-default-features --features 'derive parsing'
+  - build --no-default-features --features 'derive printing'
+  - build --no-default-features --features full
+  - build --no-default-features --features 'full parsing'
+  - build --no-default-features --features 'full printing'
+  - build --no-default-features --features 'full parsing printing'
+  - build --no-default-features --features 'fold visit visit-mut parsing printing'
+  - build --no-default-features --features 'full fold visit visit-mut parsing printing'
 
 matrix:
   include:
@@ -51,6 +53,10 @@ matrix:
       script:
         - rustup component add clippy-preview
         - cargo clippy --all-features -- -Dclippy
+    - rust: nightly
+      env: TARGET=wasm32-unknown-unknown
+      install:
+        - rustup target add "${TARGET}"
   allow_failures:
     - rust: nightly
       env: ROLE=clippy
