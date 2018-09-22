@@ -100,11 +100,11 @@ use std::rc::Rc;
 
 #[cfg(feature = "parsing")]
 use proc_macro2::Delimiter;
-#[cfg(feature = "printing")]
-use proc_macro2::TokenStream;
 #[cfg(any(feature = "parsing", feature = "printing"))]
 use proc_macro2::Ident;
 use proc_macro2::Span;
+#[cfg(feature = "printing")]
+use proc_macro2::TokenStream;
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 

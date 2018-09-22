@@ -106,7 +106,7 @@ fn test_meta_item_list_name_value() {
                     eq_token: Default::default(),
                     lit: lit(Literal::i32_unsuffixed(5)),
                 }.into(),
-            ),],
+            )],
         },
     )
 }
@@ -127,7 +127,7 @@ fn test_meta_item_list_bool_value() {
                         span: Span::call_site()
                     }),
                 }.into(),
-            ),],
+            )],
         },
     )
 }
@@ -158,7 +158,7 @@ fn test_meta_item_multiple() {
                                 eq_token: Default::default(),
                                 lit: lit(Literal::i32_unsuffixed(6)),
                             }.into(),
-                        ),],
+                        )],
                     }.into(),
                 ),
                 NestedMeta::Meta(Meta::Word(ident("word2").into())),
@@ -174,12 +174,10 @@ fn test_bool_lit() {
         MetaList {
             ident: ident("foo").into(),
             paren_token: Default::default(),
-            nested: punctuated![
-                NestedMeta::Literal(Lit::Bool(LitBool {
-                    value: true,
-                    span: Span::call_site(),
-                })),
-            ],
+            nested: punctuated![NestedMeta::Literal(Lit::Bool(LitBool {
+                value: true,
+                span: Span::call_site(),
+            }))],
         },
     )
 }
