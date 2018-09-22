@@ -61,9 +61,3 @@ matrix:
     - rust: nightly
       env: ROLE=clippy
   fast_finish: true
-
-env:
-  matrix:
-    - ROLE=build
-  global:
-    - RUST_MIN_STACK=20000000
