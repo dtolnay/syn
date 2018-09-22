@@ -102,7 +102,9 @@ use std::rc::Rc;
 use proc_macro2::Delimiter;
 #[cfg(feature = "printing")]
 use proc_macro2::TokenStream;
-use proc_macro2::{Ident, Span};
+#[cfg(any(feature = "parsing", feature = "printing"))]
+use proc_macro2::Ident;
+use proc_macro2::Span;
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 
@@ -152,6 +154,7 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
     peek(&buffer)
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! impl_token {
     ($name:ident $display:expr) => {
         #[cfg(feature = "parsing")]
