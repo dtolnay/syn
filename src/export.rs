@@ -12,7 +12,10 @@ pub use proc_macro2::{Span, TokenStream as TokenStream2};
 
 pub use span::IntoSpans;
 
-#[cfg(feature = "proc-macro")]
+#[cfg(all(
+    not(all(target_arch = "wasm32", target_os = "unknown")),
+    feature = "proc-macro"
+))]
 pub use proc_macro::TokenStream;
 
 #[cfg(feature = "printing")]
