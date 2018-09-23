@@ -63,8 +63,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
         // not actually test cases
-        "tests/rust/src/test/run-pass/auxiliary/macro-comma-support.rs" |
-        "tests/rust/src/test/run-pass/auxiliary/macro-include-items-expr.rs" |
+        "tests/rust/src/test/ui/run-pass/macros/auxiliary/macro-comma-support.rs" |
+        "tests/rust/src/test/ui/run-pass/macros/auxiliary/macro-include-items-expr.rs" |
         "tests/rust/src/test/ui/issues/auxiliary/issue-21146-inc.rs" => false,
         _ => true,
     }
