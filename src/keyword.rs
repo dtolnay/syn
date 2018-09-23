@@ -4,8 +4,8 @@
 /// # Usage
 ///
 /// As a convention, it is recommended that this macro be invoked within a
-/// module called `kw` and that the resulting parser be invoked with a `kw::`
-/// prefix.
+/// module called `kw` or `keyword` and that the resulting parser be invoked
+/// with a `kw::` or `keyword::` prefix.
 ///
 /// ```
 /// # #[macro_use]
