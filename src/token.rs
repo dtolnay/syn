@@ -655,6 +655,7 @@ define_punctuation! {
     "*"           pub struct Star/1       /// `*`
     "-"           pub struct Sub/1        /// `-`
     "-="          pub struct SubEq/2      /// `-=`
+    "~"           pub struct Tilde/1      /// `~`
 }
 
 define_delimiters! {
@@ -771,6 +772,7 @@ macro_rules! Token {
     (*)           => { $crate::token::Star };
     (-)           => { $crate::token::Sub };
     (-=)          => { $crate::token::SubEq };
+    (~)           => { $crate::token::Tilde };
     (_)           => { $crate::token::Underscore };
 }
 
