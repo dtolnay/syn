@@ -27,6 +27,8 @@ extern crate quote;
 extern crate rayon;
 extern crate regex;
 extern crate rustc_data_structures;
+#[macro_use]
+extern crate smallvec;
 extern crate syn;
 extern crate syntax;
 extern crate walkdir;
@@ -215,8 +217,8 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 ///
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
-    use rustc_data_structures::small_vec::OneVector;
     use rustc_data_structures::thin_vec::ThinVec;
+    use smallvec::SmallVec;
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::ext::quote::rt::DUMMY_SP;
     use syntax::fold::{self, Folder};
@@ -261,7 +263,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
             ty
         }
 
-        fn fold_stmt(&mut self, stmt: Stmt) -> OneVector<Stmt> {
+        fn fold_stmt(&mut self, stmt: Stmt) -> SmallVec<[Stmt; 1]> {
             let node = match stmt.node {
                 // Don't wrap toplevel expressions in statements.
                 StmtKind::Expr(e) => StmtKind::Expr(e.map(|e| fold::noop_fold_expr(e, self))),
@@ -269,7 +271,7 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                 s => s,
             };
 
-            OneVector::from_vec(vec![Stmt { node, ..stmt }])
+            smallvec![Stmt { node, ..stmt }]
         }
 
         fn fold_mac(&mut self, mac: Mac) -> Mac {
