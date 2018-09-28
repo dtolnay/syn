@@ -139,7 +139,7 @@ pub trait Token: private::Sealed {
 }
 
 #[cfg(feature = "parsing")]
-mod private {
+pub(crate) mod private {
     pub trait Sealed {}
 }
 
@@ -194,28 +194,6 @@ impl_token!(LitInt "integer literal");
 impl_token!(LitFloat "floating point literal");
 #[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitBool "boolean literal");
-
-// Not public API.
-#[cfg(feature = "parsing")]
-#[doc(hidden)]
-pub trait CustomKeyword {
-    fn ident() -> &'static str;
-    fn display() -> &'static str;
-}
-
-#[cfg(feature = "parsing")]
-impl<K: CustomKeyword> private::Sealed for K {}
-
-#[cfg(feature = "parsing")]
-impl<K: CustomKeyword> Token for K {
-    fn peek(cursor: Cursor) -> bool {
-        parsing::peek_keyword(cursor, K::ident())
-    }
-
-    fn display() -> &'static str {
-        K::display()
-    }
-}
 
 macro_rules! define_keywords {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
@@ -777,7 +755,7 @@ macro_rules! Token {
 }
 
 #[cfg(feature = "parsing")]
-mod parsing {
+pub(crate) mod parsing {
     use proc_macro2::{Spacing, Span};
 
     use buffer::Cursor;
@@ -857,7 +835,7 @@ mod parsing {
 }
 
 #[cfg(feature = "printing")]
-mod printing {
+pub(crate) mod printing {
     use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream};
     use quote::TokenStreamExt;
 
