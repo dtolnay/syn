@@ -209,24 +209,24 @@ impl_token!(LitFloat "floating point literal");
 impl_token!(LitBool "boolean literal");
 
 // Not public API.
-#[cfg(feature = "parsing")]
 #[doc(hidden)]
-pub trait CustomKeyword {
-    fn ident() -> &'static str;
+#[cfg(feature = "parsing")]
+pub trait CustomToken {
+    fn peek(cursor: Cursor) -> bool;
     fn display() -> &'static str;
 }
 
 #[cfg(feature = "parsing")]
-impl<K: CustomKeyword> private::Sealed for K {}
+impl<T: CustomToken> private::Sealed for T {}
 
 #[cfg(feature = "parsing")]
-impl<K: CustomKeyword> Token for K {
+impl<T: CustomToken> Token for T {
     fn peek(cursor: Cursor) -> bool {
-        parsing::peek_keyword(cursor, K::ident())
+        <Self as CustomToken>::peek(cursor)
     }
 
     fn display() -> &'static str {
-        K::display()
+        <Self as CustomToken>::display()
     }
 }
 
@@ -819,8 +819,10 @@ pub use self::SelfType as CapSelf;
 #[doc(hidden)]
 pub use self::SelfValue as Self_;
 
+// Not public API.
+#[doc(hidden)]
 #[cfg(feature = "parsing")]
-mod parsing {
+pub mod parsing {
     use proc_macro2::{Spacing, Span};
 
     use buffer::Cursor;
@@ -899,8 +901,10 @@ mod parsing {
     }
 }
 
+// Not public API.
+#[doc(hidden)]
 #[cfg(feature = "printing")]
-mod printing {
+pub mod printing {
     use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream};
     use quote::TokenStreamExt;
 
