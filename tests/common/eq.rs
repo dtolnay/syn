@@ -292,7 +292,7 @@ spanless_eq_struct!(Local; pat ty init id span attrs);
 spanless_eq_struct!(Mac_; path delim tts);
 spanless_eq_struct!(MacroDef; tokens legacy);
 spanless_eq_struct!(MethodSig; header decl);
-spanless_eq_struct!(Mod; inner items);
+spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(ParenthesisedArgs; span inputs output);
 spanless_eq_struct!(Pat; id node span);
