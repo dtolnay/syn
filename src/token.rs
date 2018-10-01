@@ -754,8 +754,10 @@ macro_rules! Token {
     (_)           => { $crate::token::Underscore };
 }
 
+// Not public API.
+#[doc(hidden)]
 #[cfg(feature = "parsing")]
-pub(crate) mod parsing {
+pub mod parsing {
     use proc_macro2::{Spacing, Span};
 
     use buffer::Cursor;
@@ -834,8 +836,10 @@ pub(crate) mod parsing {
     }
 }
 
+// Not public API.
+#[doc(hidden)]
 #[cfg(feature = "printing")]
-pub(crate) mod printing {
+pub mod printing {
     use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream};
     use quote::TokenStreamExt;
 

@@ -2,15 +2,9 @@
 #![doc(hidden)]
 
 #[cfg(feature = "parsing")]
-use proc_macro2::{Span, TokenStream};
-#[cfg(feature = "parsing")]
-use parse::{ParseStream, Result};
-#[cfg(feature = "parsing")]
 use token;
 #[cfg(feature = "parsing")]
 use buffer::Cursor;
-#[cfg(feature = "parsing")]
-use span::FromSpans;
 
 #[cfg(feature = "parsing")]
 pub trait CustomToken {
@@ -28,24 +22,6 @@ impl<T: CustomToken> token::Token for T {
 
     fn display() -> &'static str {
         <Self as CustomToken>::display()
-    }
-}
-
-#[cfg(feature = "parsing")]
-pub mod punct {
-    use super::*;
-
-    pub fn peek(cursor: Cursor, token: &str) -> bool {
-        token::parsing::peek_punct(cursor, token)
-    }
-
-    pub fn parse<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
-        token::parsing::punct(input, token)
-    }
-
-    #[cfg(feature = "printing")]
-    pub fn print(tokens: &mut TokenStream, token: &str, spans: &[Span]) {
-        token::printing::punct(token, spans, tokens)
     }
 }
 
@@ -449,7 +425,7 @@ macro_rules! impl_parsing_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
         impl $crate::custom_token::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> bool {
-                $crate::custom_token::punct::peek(cursor, stringify_punct!($($tt)*))
+                $crate::token::parsing::peek_punct(cursor, stringify_punct!($($tt)*))
             }
 
             fn display() -> &'static $crate::export::str {
@@ -460,7 +436,7 @@ macro_rules! impl_parsing_for_custom_punctuation {
         impl $crate::parse::Parse for $ident {
             fn parse(input: $crate::parse::ParseStream) -> $crate::parse::Result<$ident> {
                 let spans: [$crate::export::Span; punct_len!($($tt)*)] =
-                    $crate::custom_token::punct::parse(input, stringify_punct!($($tt)*))?;
+                    $crate::token::parsing::punct(input, stringify_punct!($($tt)*))?;
                 Ok($ident(spans))
             }
         }
@@ -483,7 +459,7 @@ macro_rules! impl_printing_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
         impl $crate::export::ToTokens for $ident {
             fn to_tokens(&self, tokens: &mut $crate::export::TokenStream2) {
-                $crate::custom_token::punct::print(tokens, stringify_punct!($($tt)*), &self.spans)
+                $crate::token::printing::punct(stringify_punct!($($tt)*), &self.spans, tokens)
             }
         }
     };
@@ -554,3 +530,5 @@ macro_rules! impl_extra_traits_for_custom_punctuation {
 macro_rules! impl_extra_traits_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {};
 }
+
+custom_punctuation!(PathSep, </>);
