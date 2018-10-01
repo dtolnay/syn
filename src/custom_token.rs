@@ -359,7 +359,35 @@ macro_rules! impl_extra_traits_for_custom_keyword {
 /// [`Span`]: struct.Span.html
 ///
 /// # Example
-// TODO: actual example
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// use syn::Expr;
+/// use syn::punctuated::Punctuated;
+/// use syn::parse::{Parse, ParseStream, Result};
+///
+/// mod punct {
+///     custom_punctuation!(PathSeparator, </>);
+/// }
+///
+/// // expr </> expr </> expr ...
+/// struct PathSegments {
+///     segments: Punctuated<Expr, punct::PathSeparator>,
+/// }
+///
+/// impl Parse for PathSegments {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         PathSegments {
+///             segments: Punctuated::parse_separated_nonempty(input)?,
+///         }
+///     }
+/// }
+/// #
+/// # fn main() {}
+/// ```
+///
 #[macro_export(local_inner_macros)]
 macro_rules! custom_punctuation {
     ($ident:ident, $($tt:tt)*) => {
