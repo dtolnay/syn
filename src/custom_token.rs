@@ -1,6 +1,6 @@
 // Not public API.
 #[doc(hidden)]
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! punct_len {
     (+)      => ( 1usize );
     (+=)     => ( 2usize );
@@ -56,6 +56,14 @@ macro_rules! punct_len {
 #[macro_export]
 macro_rules! stringify_punct {
     ($($tt:tt)*) => ( concat!($(stringify!($tt)),*) );
+}
+
+// Not public API.
+// Without this, local_inner_macros breaks when looking for concat!
+#[doc(hidden)]
+#[macro_export]
+macro_rules! my_concat {
+    ($($tt:tt)*) => ( concat!($($tt)*) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -430,7 +438,7 @@ macro_rules! impl_parsing_for_custom_punctuation {
             }
 
             fn display() -> &'static $crate::export::str {
-                concat!("`", stringify_punct!($($tt)*), "`")
+                my_concat!("`", stringify_punct!($($tt)*), "`")
             }
         }
 
