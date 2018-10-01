@@ -570,9 +570,7 @@ pub use gen::*;
 #[doc(hidden)]
 pub mod export;
 
-// Not public API.
-#[doc(hidden)]
-pub mod custom_token;
+mod custom_token;
 
 #[cfg(feature = "parsing")]
 mod lookahead;

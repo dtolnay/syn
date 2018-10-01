@@ -1,35 +1,7 @@
-// Not public API, but #[macro_export] _is_ documented
-#![doc(hidden)]
-
-#[cfg(feature = "parsing")]
-use token;
-#[cfg(feature = "parsing")]
-use buffer::Cursor;
-
-#[cfg(feature = "parsing")]
-pub trait CustomToken {
-    fn peek(cursor: Cursor) -> bool;
-    fn display() -> &'static str;
-}
-
-#[cfg(feature = "parsing")]
-impl<T: CustomToken> token::private::Sealed for T {}
-#[cfg(feature = "parsing")]
-impl<T: CustomToken> token::Token for T {
-    fn peek(cursor: Cursor) -> bool {
-        <Self as CustomToken>::peek(cursor)
-    }
-
-    fn display() -> &'static str {
-        <Self as CustomToken>::display()
-    }
-}
-
 // Not public API.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! punct_len {
-    ()       => ( 0usize );
     (+)      => ( 1usize );
     (+=)     => ( 2usize );
     (&)      => ( 1usize );
@@ -75,9 +47,8 @@ macro_rules! punct_len {
     (-)      => ( 1usize );
     (-=)     => ( 2usize );
     (~)      => ( 1usize );
-    (_)      => ( 1usize );
     ($tt:tt) => ( compile_error!("Punctuation `{}` is not supported", stringify!($tt)) );
-    ($head:tt $($tail:tt)+) => ( punct_len!($head) + punct_len!($($tail)+) );
+    ($head:tt $($tail:tt)+) => ( punct_len!($head) $(+ punct_len!($tail))+ );
 }
 
 // Not public API.
@@ -223,7 +194,7 @@ macro_rules! custom_keyword {
 #[macro_export]
 macro_rules! impl_parsing_for_custom_keyword {
     ($ident:ident) => {
-        impl $crate::custom_token::CustomToken for $ident {
+        impl $crate::token::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> $crate::export::bool {
                 if let Some((ident, _rest)) = cursor.ident() {
                     ident == stringify!($ident)
@@ -374,11 +345,13 @@ macro_rules! impl_extra_traits_for_custom_keyword {
 ///
 /// - [Parsing] — `input.parse::<punct::LeftRightArrow>()?`
 ///
-/// - [Printing] — `quote!( ... #path_separator_token ... )`
+/// - [Printing] — `quote!( ... #left_right_arrow ... )`
 ///
-/// - Construction from (a) [`Span`]\(s) — `let path_separator_token = punct::LeftRightArrow(sp)`
+/// - Construction from a [`Span`] — `let left_right_arrow = punct::LeftRightArrow(sp)`
 ///
-/// - Field access to its spans — `let spans = path_separator_token.spans`
+/// - Construction from multiple [`Span`] — `let left_right_arrow = punct::LeftRightArrow([sp, sp, sp])`
+///
+/// - Field access to its spans — `let spans = left_right_arrow.spans`
 ///
 /// [Peeking]: parse/struct.ParseBuffer.html#method.peek
 /// [Parsing]: parse/struct.ParseBuffer.html#method.parse
@@ -420,10 +393,10 @@ macro_rules! custom_punctuation {
 // Not public API.
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! impl_parsing_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
-        impl $crate::custom_token::CustomToken for $ident {
+        impl $crate::token::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> bool {
                 $crate::token::parsing::peek_punct(cursor, stringify_punct!($($tt)*))
             }
@@ -454,7 +427,7 @@ macro_rules! impl_parsing_for_custom_punctuation {
 // Not public API.
 #[cfg(feature = "printing")]
 #[doc(hidden)]
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! impl_printing_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
         impl $crate::export::ToTokens for $ident {
@@ -500,7 +473,7 @@ macro_rules! impl_clone_for_custom_punctuation {
 // Not public API.
 #[cfg(feature = "extra-traits")]
 #[doc(hidden)]
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! impl_extra_traits_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
         impl $crate::export::Debug for $ident {
@@ -530,5 +503,3 @@ macro_rules! impl_extra_traits_for_custom_punctuation {
 macro_rules! impl_extra_traits_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {};
 }
-
-custom_punctuation!(PathSep, </>);

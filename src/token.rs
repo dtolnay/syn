@@ -139,7 +139,7 @@ pub trait Token: private::Sealed {
 }
 
 #[cfg(feature = "parsing")]
-pub(crate) mod private {
+mod private {
     pub trait Sealed {}
 }
 
@@ -194,6 +194,28 @@ impl_token!(LitInt "integer literal");
 impl_token!(LitFloat "floating point literal");
 #[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(LitBool "boolean literal");
+
+// Not public API.
+#[doc(hidden)]
+#[cfg(feature = "parsing")]
+pub trait CustomToken {
+    fn peek(cursor: Cursor) -> bool;
+    fn display() -> &'static str;
+}
+
+#[cfg(feature = "parsing")]
+impl<T: CustomToken> private::Sealed for T {}
+
+#[cfg(feature = "parsing")]
+impl<T: CustomToken> Token for T {
+    fn peek(cursor: Cursor) -> bool {
+        <Self as CustomToken>::peek(cursor)
+    }
+
+    fn display() -> &'static str {
+        <Self as CustomToken>::display()
+    }
+}
 
 macro_rules! define_keywords {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
