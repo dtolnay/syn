@@ -110,6 +110,18 @@ mod private {
     impl<T: ToTokens> Sealed for T {}
 }
 
+// FIXME: This shouldn't be required, since optimally
+// spans should never be invalid. This can probably be removed when
+// https://github.com/rust-lang/rust/issues/43081 is resolved.
+fn check_invalid_span(span: Span) -> Option<Span> {
+    let debug = format!("{:?}", span);
+    if debug.ends_with("bytes(0..0)") {
+        None
+    } else {
+        Some(span)
+    }
+}
+
 impl<T> Spanned for T
 where
     T: ToTokens,
@@ -118,32 +130,21 @@ where
     fn span(&self) -> Span {
         let mut tokens = TokenStream::new();
         self.to_tokens(&mut tokens);
-        let mut iter = tokens.into_iter();
-        let mut span = match iter.next() {
-            Some(tt) => tt.span(),
-            None => {
-                return Span::call_site();
-            }
-        };
-        for tt in iter {
-            if let Some(joined) = span.join(tt.span()) {
-                span = joined;
-            }
-        }
-        span
+        tokens.into_iter().fold(None::<Span>, |span, tt| {
+            check_invalid_span(tt.span()).map_or(span, |new_span| {
+                span.map(|span| span.join(new_span).unwrap_or(span))
+            })
+        }).unwrap_or(Span::call_site())
     }
 
     #[cfg(not(procmacro2_semver_exempt))]
     fn span(&self) -> Span {
         let mut tokens = TokenStream::new();
         self.to_tokens(&mut tokens);
-        let mut iter = tokens.into_iter();
 
         // We can't join spans without procmacro2_semver_exempt so just grab the
         // first one.
-        match iter.next() {
-            Some(tt) => tt.span(),
-            None => Span::call_site(),
-        }
+        tokens.into_iter().next().and_then(|tt| check_invalid_span(tt.span()))
+            .unwrap_or(Span::call_site())
     }
 }
