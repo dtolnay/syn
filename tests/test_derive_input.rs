@@ -102,7 +102,8 @@ fn test_struct() {
                         ty: TypePath {
                             qself: None,
                             path: ident("Ident").into(),
-                        }.into(),
+                        }
+                        .into(),
                     },
                     Field {
                         ident: Some(ident("attrs")),
@@ -132,7 +133,8 @@ fn test_struct() {
                                     ),
                                 },],
                             },
-                        }.into(),
+                        }
+                        .into(),
                     },
                 ],
             }),
@@ -150,7 +152,8 @@ fn test_struct() {
             NestedMeta::Meta(Meta::Word(ident("Debug"))),
             NestedMeta::Meta(Meta::Word(ident("Clone"))),
         ],
-    }.into();
+    }
+    .into();
 
     assert_eq!(
         expected_meta_item,
@@ -197,7 +200,8 @@ fn test_union() {
                         ty: TypeTuple {
                             paren_token: Default::default(),
                             elems: Punctuated::new(),
-                        }.into(),
+                        }
+                        .into(),
                     },
                     Field {
                         ident: Some(ident("value")),
@@ -207,7 +211,8 @@ fn test_union() {
                         ty: TypePath {
                             qself: None,
                             path: ident("T").into(),
-                        }.into(),
+                        }
+                        .into(),
                     },
                 ],
             },
@@ -300,7 +305,8 @@ fn test_enum() {
                             ty: TypePath {
                                 qself: None,
                                 path: ident("T").into(),
-                            }.into(),
+                            }
+                            .into(),
                         },],
                     }),
                     discriminant: None,
@@ -318,7 +324,8 @@ fn test_enum() {
                             ty: TypePath {
                                 qself: None,
                                 path: ident("E").into(),
-                            }.into(),
+                            }
+                            .into(),
                         },],
                     }),
                     discriminant: None,
@@ -387,7 +394,8 @@ fn test_enum() {
                 " See the std::result module documentation for details.",
                 Span::call_site(),
             )),
-        }.into(),
+        }
+        .into(),
         Meta::Word(ident("must_use")),
     ];
 
@@ -572,7 +580,8 @@ fn test_pub_restricted() {
                     ty: TypePath {
                         qself: None,
                         path: ident("u8").into(),
-                    }.into(),
+                    }
+                    .into(),
                 },],
             }),
             semi_token: Some(Default::default()),

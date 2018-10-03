@@ -656,20 +656,24 @@ mod value {
                     _ => {}
                 },
                 b'\'' => return Lit::Char(LitChar { token: token }),
-                b'0'...b'9' => if number_is_int(&value) {
-                    return Lit::Int(LitInt { token: token });
-                } else if number_is_float(&value) {
-                    return Lit::Float(LitFloat { token: token });
-                } else {
-                    // number overflow
-                    return Lit::Verbatim(LitVerbatim { token: token });
-                },
-                _ => if value == "true" || value == "false" {
-                    return Lit::Bool(LitBool {
-                        value: value == "true",
-                        span: token.span(),
-                    });
-                },
+                b'0'...b'9' => {
+                    if number_is_int(&value) {
+                        return Lit::Int(LitInt { token: token });
+                    } else if number_is_float(&value) {
+                        return Lit::Float(LitFloat { token: token });
+                    } else {
+                        // number overflow
+                        return Lit::Verbatim(LitVerbatim { token: token });
+                    }
+                }
+                _ => {
+                    if value == "true" || value == "false" {
+                        return Lit::Bool(LitBool {
+                            value: value == "true",
+                            span: token.span(),
+                        });
+                    }
+                }
             }
 
             panic!("Unrecognized literal: {}", value);

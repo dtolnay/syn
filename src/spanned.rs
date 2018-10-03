@@ -130,11 +130,14 @@ where
     fn span(&self) -> Span {
         let mut tokens = TokenStream::new();
         self.to_tokens(&mut tokens);
-        tokens.into_iter().fold(None::<Span>, |span, tt| {
-            check_invalid_span(tt.span()).map_or(span, |new_span| {
-                span.map(|span| span.join(new_span).unwrap_or(span))
+        tokens
+            .into_iter()
+            .fold(None::<Span>, |span, tt| {
+                check_invalid_span(tt.span()).map_or(span, |new_span| {
+                    span.map(|span| span.join(new_span).unwrap_or(span))
+                })
             })
-        }).unwrap_or(Span::call_site())
+            .unwrap_or(Span::call_site())
     }
 
     #[cfg(not(procmacro2_semver_exempt))]
@@ -144,7 +147,10 @@ where
 
         // We can't join spans without procmacro2_semver_exempt so just grab the
         // first one.
-        tokens.into_iter().next().and_then(|tt| check_invalid_span(tt.span()))
+        tokens
+            .into_iter()
+            .next()
+            .and_then(|tt| check_invalid_span(tt.span()))
             .unwrap_or(Span::call_site())
     }
 }

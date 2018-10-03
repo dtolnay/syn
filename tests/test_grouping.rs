@@ -45,12 +45,14 @@ fn test_grouping() {
                 TokenTree::Literal(Literal::i32_suffixed(2)),
                 TokenTree::Punct(Punct::new('+', Spacing::Alone)),
                 TokenTree::Literal(Literal::i32_suffixed(3)),
-            ].into_iter()
+            ]
+            .into_iter()
             .collect(),
         )),
         TokenTree::Punct(Punct::new('*', Spacing::Alone)),
         TokenTree::Literal(Literal::i32_suffixed(4)),
-    ].into_iter()
+    ]
+    .into_iter()
     .collect();
 
     assert_eq!(raw.to_string(), "1i32 +  2i32 + 3i32  * 4i32");

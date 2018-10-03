@@ -358,7 +358,8 @@ fn skip(input: ParseStream) -> bool {
             } else {
                 Ok((false, *cursor))
             }
-        }).unwrap()
+        })
+        .unwrap()
 }
 
 impl private {

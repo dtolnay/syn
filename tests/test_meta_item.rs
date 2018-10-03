@@ -105,7 +105,8 @@ fn test_meta_item_list_name_value() {
                     ident: ident("bar").into(),
                     eq_token: Default::default(),
                     lit: lit(Literal::i32_unsuffixed(5)),
-                }.into(),
+                }
+                .into(),
             )],
         },
     )
@@ -126,7 +127,8 @@ fn test_meta_item_list_bool_value() {
                         value: true,
                         span: Span::call_site()
                     }),
-                }.into(),
+                }
+                .into(),
             )],
         },
     )
@@ -146,7 +148,8 @@ fn test_meta_item_multiple() {
                         ident: ident("name").into(),
                         eq_token: Default::default(),
                         lit: lit(Literal::i32_unsuffixed(5)),
-                    }.into(),
+                    }
+                    .into(),
                 ),
                 NestedMeta::Meta(
                     MetaList {
@@ -157,9 +160,11 @@ fn test_meta_item_multiple() {
                                 ident: ident("name2").into(),
                                 eq_token: Default::default(),
                                 lit: lit(Literal::i32_unsuffixed(6)),
-                            }.into(),
+                            }
+                            .into(),
                         )],
-                    }.into(),
+                    }
+                    .into(),
                 ),
                 NestedMeta::Meta(Meta::Word(ident("word2").into())),
             ],

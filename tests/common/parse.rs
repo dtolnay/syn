@@ -29,7 +29,8 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
             &sess,
             FileName::Custom("test_precedence".to_string()),
             input.to_string(),
-        ).parse_expr();
+        )
+        .parse_expr();
         match e {
             Ok(expr) => Some(expr),
             Err(mut diagnostic) => {

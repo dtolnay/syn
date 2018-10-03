@@ -64,7 +64,8 @@ fn test_split_for_impl() {
                     TypeTuple {
                         elems: Default::default(),
                         paren_token: Default::default(),
-                    }.into(),
+                    }
+                    .into(),
                 ),
                 colon_token: Some(Default::default()),
                 eq_token: Default::default(),
@@ -78,7 +79,8 @@ fn test_split_for_impl() {
                 bounded_ty: TypePath {
                     qself: None,
                     path: ident("T").into(),
-                }.into(),
+                }
+                .into(),
                 bounds: punctuated![TypeParamBound::Trait(TraitBound {
                     paren_token: None,
                     modifier: TraitBoundModifier::None,
