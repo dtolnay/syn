@@ -48,7 +48,7 @@ matrix:
       env: ROLE=clippy
       script:
         - rustup component add clippy-preview
-        - cargo clippy --all-features -- -Dclippy
+        - cargo clippy --all-features
     - rust: nightly
       env: TARGET=wasm32-unknown-unknown
       install:
