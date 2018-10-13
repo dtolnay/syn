@@ -120,20 +120,18 @@ where
 }
 
 fn join_spans(tokens: TokenStream) -> Span {
-    let mut iter = tokens
-        .into_iter()
-        .filter_map(|tt| {
-            // FIXME: This shouldn't be required, since optimally spans should
-            // never be invalid. This filter_map can probably be removed when
-            // https://github.com/rust-lang/rust/issues/43081 is resolved.
-            let span = tt.span();
-            let debug = format!("{:?}", span);
-            if debug.ends_with("bytes(0..0)") {
-                None
-            } else {
-                Some(span)
-            }
-        });
+    let mut iter = tokens.into_iter().filter_map(|tt| {
+        // FIXME: This shouldn't be required, since optimally spans should
+        // never be invalid. This filter_map can probably be removed when
+        // https://github.com/rust-lang/rust/issues/43081 is resolved.
+        let span = tt.span();
+        let debug = format!("{:?}", span);
+        if debug.ends_with("bytes(0..0)") {
+            None
+        } else {
+            Some(span)
+        }
+    });
 
     let mut joined = match iter.next() {
         Some(span) => span,

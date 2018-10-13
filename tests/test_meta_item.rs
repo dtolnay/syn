@@ -9,8 +9,8 @@
 #![cfg(feature = "extra-traits")]
 
 extern crate proc_macro2;
-extern crate syn;
 extern crate quote;
+extern crate syn;
 
 use proc_macro2::{Ident, Literal, Span};
 use syn::parse::Parser;

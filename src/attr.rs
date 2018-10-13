@@ -11,9 +11,9 @@ use punctuated::Punctuated;
 
 use std::iter;
 
+use proc_macro2::TokenStream;
 #[cfg(not(feature = "parsing"))]
 use proc_macro2::{Delimiter, Spacing, TokenTree};
-use proc_macro2::TokenStream;
 
 #[cfg(feature = "parsing")]
 use parse::{ParseStream, Result};
@@ -195,7 +195,11 @@ impl Attribute {
             return Err(Error::new(colon.spans[0], "expected meta identifier"));
         }
 
-        let first_segment = self.path.segments.first().expect("paths have at least one segment");
+        let first_segment = self
+            .path
+            .segments
+            .first()
+            .expect("paths have at least one segment");
         if let Some(colon) = first_segment.punct() {
             return Err(Error::new(colon.spans[0], "expected meta value"));
         }
@@ -643,7 +647,10 @@ pub mod parsing {
         })
     }
 
-    fn parse_meta_name_value_after_ident(ident: Ident, input: ParseStream) -> Result<MetaNameValue> {
+    fn parse_meta_name_value_after_ident(
+        ident: Ident,
+        input: ParseStream,
+    ) -> Result<MetaNameValue> {
         Ok(MetaNameValue {
             ident: ident,
             eq_token: input.parse()?,
