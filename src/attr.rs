@@ -11,7 +11,9 @@ use punctuated::Punctuated;
 
 use std::iter;
 
-use proc_macro2::{Delimiter, Spacing, TokenStream, TokenTree};
+#[cfg(not(feature = "parsing"))]
+use proc_macro2::{Delimiter, Spacing, TokenTree};
+use proc_macro2::TokenStream;
 
 #[cfg(feature = "parsing")]
 use parse::{ParseStream, Result};
@@ -146,32 +148,43 @@ impl Hash for Attribute {
 impl Attribute {
     /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
     /// possible.
+    ///
+    /// Deprecated; use `parse_meta` instead.
+    #[doc(hidden)]
     pub fn interpret_meta(&self) -> Option<Meta> {
-        let name = if self.path.segments.len() == 1 {
-            &self.path.segments.first().unwrap().value().ident
-        } else {
-            return None;
-        };
-
-        if self.tts.is_empty() {
-            return Some(Meta::Word(name.clone()));
+        #[cfg(feature = "parsing")]
+        {
+            self.parse_meta().ok()
         }
 
-        let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
+        #[cfg(not(feature = "parsing"))]
+        {
+            let name = if self.path.segments.len() == 1 {
+                &self.path.segments.first().unwrap().value().ident
+            } else {
+                return None;
+            };
 
-        if tts.len() == 1 {
-            if let Some(meta) = Attribute::extract_meta_list(name.clone(), &tts[0]) {
-                return Some(meta);
+            if self.tts.is_empty() {
+                return Some(Meta::Word(name.clone()));
             }
-        }
 
-        if tts.len() == 2 {
-            if let Some(meta) = Attribute::extract_name_value(name.clone(), &tts[0], &tts[1]) {
-                return Some(meta);
+            let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
+
+            if tts.len() == 1 {
+                if let Some(meta) = Attribute::extract_meta_list(name.clone(), &tts[0]) {
+                    return Some(meta);
+                }
             }
-        }
 
-        None
+            if tts.len() == 2 {
+                if let Some(meta) = Attribute::extract_name_value(name.clone(), &tts[0], &tts[1]) {
+                    return Some(meta);
+                }
+            }
+
+            None
+        }
     }
 
     /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
@@ -218,6 +231,7 @@ impl Attribute {
         Ok(attrs)
     }
 
+    #[cfg(not(feature = "parsing"))]
     fn extract_meta_list(ident: Ident, tt: &TokenTree) -> Option<Meta> {
         let g = match *tt {
             TokenTree::Group(ref g) => g,
@@ -238,6 +252,7 @@ impl Attribute {
         }))
     }
 
+    #[cfg(not(feature = "parsing"))]
     fn extract_name_value(ident: Ident, a: &TokenTree, b: &TokenTree) -> Option<Meta> {
         let a = match *a {
             TokenTree::Punct(ref o) => o,
@@ -274,6 +289,7 @@ impl Attribute {
     }
 }
 
+#[cfg(not(feature = "parsing"))]
 fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[TokenTree])> {
     assert!(!tts.is_empty());
 
@@ -315,6 +331,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
     }
 }
 
+#[cfg(not(feature = "parsing"))]
 fn list_of_nested_meta_items_from_tokens(
     mut tts: &[TokenTree],
 ) -> Option<Punctuated<NestedMeta, Token![,]>> {
