@@ -180,8 +180,10 @@ impl Attribute {
     pub fn parse_meta(&self) -> Result<Meta> {
         use quote::ToTokens;
 
-        let mut tts = self.path.clone().into_token_stream();
-        tts.extend(self.tts.clone());
+        let mut tts = TokenStream::new();
+
+        self.path.to_tokens(&mut tts);
+        self.tts.to_tokens(&mut tts);
 
         ::parse2(tts)
     }
