@@ -325,7 +325,7 @@ pub use ident::Ident;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod attr;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue, NestedMeta};
+pub use attr::{AttrStyle, Attribute, AttributeArgs, Meta, MetaList, MetaNameValue, NestedMeta};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod data;

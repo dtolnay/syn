@@ -473,6 +473,48 @@ ast_enum_of_structs! {
     }
 }
 
+/// Conventional argument type associated with an invocation of an attribute
+/// macro.
+///
+/// For example if we are developing an attribute macro that is intended to be
+/// invoked on function items as follows:
+///
+/// ```rust
+/// # const IGNORE: &str = stringify! {
+/// #[my_attribute(path = "/v1/refresh")]
+/// # };
+/// pub fn refresh() {
+///     /* ... */
+/// }
+/// ```
+///
+/// The implementation of this macro would want to parse its attribute arguments
+/// as type `AttributeArgs`.
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate syn;
+///
+/// extern crate proc_macro;
+///
+/// use proc_macro::TokenStream;
+/// use syn::{AttributeArgs, ItemFn};
+///
+/// # const IGNORE: &str = stringify! {
+/// #[proc_macro_attribute]
+/// # };
+/// pub fn my_attribute(args: TokenStream, input: TokenStream) -> TokenStream {
+///     let args = parse_macro_input!(args as AttributeArgs);
+///     let input = parse_macro_input!(input as ItemFn);
+///
+///     /* ... */
+/// #   "".parse().unwrap()
+/// }
+/// #
+/// # fn main() {}
+/// ```
+pub type AttributeArgs = Vec<NestedMeta>;
+
 pub trait FilterAttrs<'a> {
     type Ret: Iterator<Item = &'a Attribute>;
 

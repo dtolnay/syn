@@ -79,9 +79,9 @@ impl<T: Parse> ParseMacroInput for T {
 ////////////////////////////////////////////////////////////////////////////////
 // Any other types that we want `parse_macro_input!` to be able to parse.
 
-use NestedMeta;
+use AttributeArgs;
 
-impl ParseMacroInput for Vec<NestedMeta> {
+impl ParseMacroInput for AttributeArgs {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut metas = Vec::new();
 
