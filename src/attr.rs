@@ -174,6 +174,18 @@ impl Attribute {
         None
     }
 
+    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
+    /// possible.
+    #[cfg(feature = "parsing")]
+    pub fn parse_meta(&self) -> Result<Meta> {
+        use quote::ToTokens;
+
+        let mut tts = self.path.clone().into_token_stream();
+        tts.extend(self.tts.clone());
+
+        ::parse2(tts)
+    }
+
     /// Parses zero or more outer attributes from the stream.
     ///
     /// *This function is available if Syn is built with the `"parsing"`

@@ -290,5 +290,7 @@ fn run_test<T: Into<Meta>>(input: &str, expected: T) {
     let attrs = Attribute::parse_outer.parse_str(input).unwrap();
     assert_eq!(attrs.len(), 1);
     let attr = attrs.into_iter().next().unwrap();
-    assert_eq!(expected.into(), attr.interpret_meta().unwrap());
+    let expected = expected.into();
+    assert_eq!(expected, attr.interpret_meta().unwrap());
+    assert_eq!(expected, attr.parse_meta().unwrap());
 }
