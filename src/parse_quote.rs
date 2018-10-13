@@ -139,9 +139,7 @@ impl<T: Parse> ParseQuote for T {
 ////////////////////////////////////////////////////////////////////////////////
 // Any other types that we want `parse_quote!` to be able to parse.
 
-use NestedMeta;
 use punctuated::Punctuated;
-use token;
 #[cfg(any(feature = "full", feature = "derive"))]
 use {attr, Attribute};
 
@@ -159,15 +157,5 @@ impl ParseQuote for Attribute {
 impl<T: Parse, P: Parse> ParseQuote for Punctuated<T, P> {
     fn parse(input: ParseStream) -> Result<Self> {
         Self::parse_terminated(input)
-    }
-}
-
-impl ParseQuote for Vec<NestedMeta> {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let items = input.parse_terminated::<_, token::Comma>(<NestedMeta as Parse>::parse)?
-            .into_iter()
-            .collect();
-
-        Ok(items)
     }
 }

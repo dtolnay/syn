@@ -446,6 +446,15 @@ mod tt;
 #[doc(hidden)]
 pub mod parse_quote;
 
+// Not public API except the `parse_macro_input!` macro.
+#[cfg(all(
+    not(all(target_arch = "wasm32", target_os = "unknown")),
+    feature = "parsing",
+    feature = "proc-macro"
+))]
+#[doc(hidden)]
+pub mod parse_macro_input;
+
 #[cfg(all(feature = "parsing", feature = "printing"))]
 pub mod spanned;
 
@@ -762,59 +771,4 @@ pub fn parse_file(mut content: &str) -> Result<File, Error> {
     let mut file: File = parse_str(content)?;
     file.shebang = shebang;
     Ok(file)
-}
-
-/// Parse the input TokenStream of a macro, triggering a compile error if the
-/// tokens fail to parse.
-///
-/// Refer to the [`parse` module] documentation for more details about parsing
-/// in Syn.
-///
-/// [`parse` module]: parse/index.html
-///
-/// # Intended usage
-///
-/// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
-/// extern crate proc_macro;
-///
-/// use proc_macro::TokenStream;
-/// use syn::parse::{Parse, ParseStream, Result};
-///
-/// struct MyMacroInput {
-///     /* ... */
-/// }
-///
-/// impl Parse for MyMacroInput {
-///     fn parse(input: ParseStream) -> Result<Self> {
-///         /* ... */
-/// #       Ok(MyMacroInput {})
-///     }
-/// }
-///
-/// # const IGNORE: &str = stringify! {
-/// #[proc_macro]
-/// # };
-/// pub fn my_macro(tokens: TokenStream) -> TokenStream {
-///     let input = parse_macro_input!(tokens as MyMacroInput);
-///
-///     /* ... */
-/// #   "".parse().unwrap()
-/// }
-/// #
-/// # fn main() {}
-/// ```
-#[cfg(feature = "proc-macro")]
-#[macro_export]
-macro_rules! parse_macro_input {
-    ($tokenstream:ident as $ty:ty) => {
-        match $crate::parse::<$ty>($tokenstream) {
-            $crate::export::Ok(data) => data,
-            $crate::export::Err(err) => {
-                return $crate::export::TokenStream::from(err.to_compile_error());
-            }
-        };
-    };
 }
