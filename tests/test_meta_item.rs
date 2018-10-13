@@ -10,6 +10,7 @@
 
 extern crate proc_macro2;
 extern crate syn;
+extern crate quote;
 
 use proc_macro2::{Ident, Literal, Span};
 use syn::parse::Parser;
@@ -187,9 +188,126 @@ fn test_bool_lit() {
     )
 }
 
+#[test]
+fn test_parse_meta_item_word() {
+    let raw = "hello";
+
+    let expected = Meta::Word(ident("hello"));
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_name_value() {
+    let raw = "foo = 5";
+
+    let expected = MetaNameValue {
+        ident: ident("foo").into(),
+        eq_token: Default::default(),
+        lit: lit(Literal::i32_unsuffixed(5)),
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::NameValue(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_item_list_lit() {
+    let raw = "foo(5)";
+
+    let expected = MetaList {
+        ident: ident("foo").into(),
+        paren_token: Default::default(),
+        nested: punctuated![NestedMeta::Literal(lit(Literal::i32_unsuffixed(5)))],
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::List(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_item_multiple() {
+    let raw = "foo(word, name = 5, list(name2 = 6), word2)";
+
+    let expected = MetaList {
+        ident: ident("foo").into(),
+        paren_token: Default::default(),
+        nested: punctuated![
+            NestedMeta::Meta(Meta::Word(ident("word").into())),
+            NestedMeta::Meta(
+                MetaNameValue {
+                    ident: ident("name").into(),
+                    eq_token: Default::default(),
+                    lit: lit(Literal::i32_unsuffixed(5)),
+                }
+                .into(),
+            ),
+            NestedMeta::Meta(
+                MetaList {
+                    ident: ident("list").into(),
+                    paren_token: Default::default(),
+                    nested: punctuated![NestedMeta::Meta(
+                        MetaNameValue {
+                            ident: ident("name2").into(),
+                            eq_token: Default::default(),
+                            lit: lit(Literal::i32_unsuffixed(6)),
+                        }
+                        .into(),
+                    )],
+                }
+                .into(),
+            ),
+            NestedMeta::Meta(Meta::Word(ident("word2").into())),
+        ],
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::List(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_nested_meta() {
+    let raw = "5";
+
+    let expected = NestedMeta::Literal(lit(Literal::i32_unsuffixed(5)));
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let raw = "list(name2 = 6)";
+
+    let expected = NestedMeta::Meta(
+        MetaList {
+            ident: ident("list").into(),
+            paren_token: Default::default(),
+            nested: punctuated![NestedMeta::Meta(
+                MetaNameValue {
+                    ident: ident("name2").into(),
+                    eq_token: Default::default(),
+                    lit: lit(Literal::i32_unsuffixed(6)),
+                }
+                .into(),
+            )],
+        }
+        .into(),
+    );
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
 fn run_test<T: Into<Meta>>(input: &str, expected: T) {
     let attrs = Attribute::parse_outer.parse_str(input).unwrap();
     assert_eq!(attrs.len(), 1);
     let attr = attrs.into_iter().next().unwrap();
-    assert_eq!(expected.into(), attr.interpret_meta().unwrap());
+    let expected = expected.into();
+    assert_eq!(expected, attr.interpret_meta().unwrap());
+    assert_eq!(expected, attr.parse_meta().unwrap());
 }
