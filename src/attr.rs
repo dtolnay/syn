@@ -490,6 +490,7 @@ where
 pub mod parsing {
     use super::*;
 
+    use ext::IdentExt;
     use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
     use private;
@@ -531,30 +532,25 @@ pub mod parsing {
             let ahead = input.fork();
 
             // The first token must be an identifier
-            ahead.parse::<Ident>()?;
+            ahead.call(Ident::parse_any)?;
 
             if ahead.peek(token::Paren) {
-                Ok(Meta::List(input.parse()?))
-            } else if ahead.peek(token::Eq) {
-                Ok(Meta::NameValue(input.parse()?))
+                input.parse().map(Meta::List)
+            } else if ahead.peek(Token![=]) {
+                input.parse().map(Meta::NameValue)
             } else {
-                Ok(Meta::Word(input.parse()?))
+                input.call(Ident::parse_any).map(Meta::Word)
             }
         }
     }
 
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.parse()?;
-
             let content;
-            let paren_token = parenthesized!(content in input);
-            let nested = content.parse_terminated(NestedMeta::parse)?;
-
             Ok(MetaList {
-                ident: ident,
-                paren_token: paren_token,
-                nested: nested,
+                ident: input.call(Ident::parse_any)?,
+                paren_token: parenthesized!(content in input),
+                nested: content.parse_terminated(NestedMeta::parse)?,
             })
         }
     }
@@ -562,7 +558,7 @@ pub mod parsing {
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(MetaNameValue {
-                ident: input.parse()?,
+                ident: input.call(Ident::parse_any)?,
                 eq_token: input.parse()?,
                 lit: input.parse()?,
             })
@@ -571,11 +567,14 @@ pub mod parsing {
 
     impl Parse for NestedMeta {
         fn parse(input: ParseStream) -> Result<Self> {
-            // If it starts with an Ident then it is parsed as a `Meta` item.
-            if input.peek(Ident) {
-                Ok(NestedMeta::Meta(input.parse()?))
+            let ahead = input.fork();
+
+            if ahead.peek(Lit) {
+                input.parse().map(NestedMeta::Literal)
+            } else if ahead.call(Ident::parse_any).is_ok() {
+                input.parse().map(NestedMeta::Meta)
             } else {
-                Ok(NestedMeta::Literal(input.parse()?))
+                Err(input.error("expected identifier or literal"))
             }
         }
     }
