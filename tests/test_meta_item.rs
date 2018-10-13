@@ -10,6 +10,8 @@
 
 extern crate proc_macro2;
 extern crate syn;
+#[macro_use]
+extern crate quote;
 
 use proc_macro2::{Ident, Literal, Span};
 use syn::parse::Parser;
@@ -277,13 +279,83 @@ fn test_parse_meta_item_multiple() {
 fn test_parse_nested_meta() {
     let raw = "5";
 
-    let expected = lit(Literal::i32_unsuffixed(5));
+    let expected = NestedMeta::Literal(lit(Literal::i32_unsuffixed(5)));
 
     assert_eq!(expected, syn::parse_str(raw).unwrap());
 
-    let expected = NestedMeta::Literal(expected);
+    let raw = "list(name2 = 6)";
+
+    let expected = NestedMeta::Meta(
+        MetaList {
+            ident: ident("list").into(),
+            paren_token: Default::default(),
+            nested: punctuated![NestedMeta::Meta(
+                MetaNameValue {
+                    ident: ident("name2").into(),
+                    eq_token: Default::default(),
+                    lit: lit(Literal::i32_unsuffixed(6)),
+                }
+                .into(),
+            )],
+        }
+        .into(),
+    );
 
     assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_quote_nested_meta() {
+    let actual: Vec<NestedMeta> = parse_quote!(5);
+
+    let expected = vec![
+        NestedMeta::Literal(lit(Literal::i32_unsuffixed(5)))
+    ];
+
+    assert_eq!(expected, actual);
+
+    let actual: Vec<NestedMeta> = parse_quote!(list(name2 = 6));
+
+    let expected = vec![
+        NestedMeta::Meta(
+            MetaList {
+                ident: ident("list").into(),
+                paren_token: Default::default(),
+                nested: punctuated![NestedMeta::Meta(
+                    MetaNameValue {
+                        ident: ident("name2").into(),
+                        eq_token: Default::default(),
+                        lit: lit(Literal::i32_unsuffixed(6)),
+                    }
+                    .into(),
+                )],
+            }
+            .into(),
+        )
+    ];
+
+    assert_eq!(expected, actual);
+
+    let actual: Vec<NestedMeta> = parse_quote!(5, list(name2 = 6));
+
+    let expected = vec![
+        NestedMeta::Literal(lit(Literal::i32_unsuffixed(5))),
+        NestedMeta::Meta(
+            MetaList {
+                ident: ident("list").into(),
+                paren_token: Default::default(),
+                nested: punctuated![NestedMeta::Meta(
+                    MetaNameValue {
+                        ident: ident("name2").into(),
+                        eq_token: Default::default(),
+                        lit: lit(Literal::i32_unsuffixed(6)),
+                    }
+                    .into(),
+                )],
+            }
+            .into(),
+        )
+    ];
 }
 
 fn run_test<T: Into<Meta>>(input: &str, expected: T) {
