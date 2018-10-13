@@ -295,6 +295,8 @@
         used_underscore_binding
     )
 )]
+// False positive: https://github.com/rust-lang-nursery/rust-clippy/issues/3274
+#![cfg_attr(feature = "cargo-clippy", allow(map_clone))]
 
 #[cfg(all(
     not(all(target_arch = "wasm32", target_os = "unknown")),
