@@ -187,6 +187,105 @@ fn test_bool_lit() {
     )
 }
 
+#[test]
+fn test_parse_meta_item_word() {
+    let raw = "hello";
+
+    let expected = Meta::Word(ident("hello"));
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_name_value() {
+    let raw = "foo = 5";
+
+    let expected = MetaNameValue {
+        ident: ident("foo").into(),
+        eq_token: Default::default(),
+        lit: lit(Literal::i32_unsuffixed(5)),
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::NameValue(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_item_list_lit() {
+    let raw = "foo(5)";
+
+    let expected = MetaList {
+        ident: ident("foo").into(),
+        paren_token: Default::default(),
+        nested: punctuated![NestedMeta::Literal(lit(Literal::i32_unsuffixed(5)))],
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::List(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_item_multiple() {
+    let raw = "foo(word, name = 5, list(name2 = 6), word2)";
+
+    let expected = MetaList {
+        ident: ident("foo").into(),
+        paren_token: Default::default(),
+        nested: punctuated![
+            NestedMeta::Meta(Meta::Word(ident("word").into())),
+            NestedMeta::Meta(
+                MetaNameValue {
+                    ident: ident("name").into(),
+                    eq_token: Default::default(),
+                    lit: lit(Literal::i32_unsuffixed(5)),
+                }
+                .into(),
+            ),
+            NestedMeta::Meta(
+                MetaList {
+                    ident: ident("list").into(),
+                    paren_token: Default::default(),
+                    nested: punctuated![NestedMeta::Meta(
+                        MetaNameValue {
+                            ident: ident("name2").into(),
+                            eq_token: Default::default(),
+                            lit: lit(Literal::i32_unsuffixed(6)),
+                        }
+                        .into(),
+                    )],
+                }
+                .into(),
+            ),
+            NestedMeta::Meta(Meta::Word(ident("word2").into())),
+        ],
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::List(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_nested_meta() {
+    let raw = "5";
+
+    let expected = lit(Literal::i32_unsuffixed(5));
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = NestedMeta::Literal(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
 fn run_test<T: Into<Meta>>(input: &str, expected: T) {
     let attrs = Attribute::parse_outer.parse_str(input).unwrap();
     assert_eq!(attrs.len(), 1);

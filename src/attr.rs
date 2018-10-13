@@ -476,7 +476,7 @@ where
 pub mod parsing {
     use super::*;
 
-    use parse::{ParseStream, Result};
+    use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
     use private;
 
@@ -508,6 +508,61 @@ pub mod parsing {
             let mut attrs = outer;
             attrs.extend(inner);
             attrs
+        }
+    }
+
+    impl Parse for Meta {
+        fn parse(input: ParseStream) -> Result<Self> {
+            // Detect what kind of meta this is.
+            let ahead = input.fork();
+
+            // The first token must be an identifier
+            ahead.parse::<Ident>()?;
+
+            if ahead.peek(token::Paren) {
+                Ok(Meta::List(input.parse()?))
+            } else if ahead.peek(token::Eq) {
+                Ok(Meta::NameValue(input.parse()?))
+            } else {
+                Ok(Meta::Word(input.parse()?))
+            }
+        }
+    }
+
+    impl Parse for MetaList {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let ident = input.parse()?;
+
+            let content;
+            let paren_token = parenthesized!(content in input);
+            let nested = content.parse_terminated(NestedMeta::parse)?;
+
+            Ok(MetaList {
+                ident,
+                paren_token,
+                nested,
+            })
+        }
+    }
+
+    impl Parse for MetaNameValue {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(MetaNameValue {
+                ident: input.parse()?,
+                eq_token: input.parse()?,
+                lit: input.parse()?,
+            })
+        }
+    }
+
+    impl Parse for NestedMeta {
+        fn parse(input: ParseStream) -> Result<Self> {
+            // If it starts with an Ident then it is parsed as a `Meta` item.
+            if input.peek(Ident) {
+                Ok(NestedMeta::Meta(input.parse()?))
+            } else {
+                Ok(NestedMeta::Literal(input.parse()?))
+            }
         }
     }
 }
