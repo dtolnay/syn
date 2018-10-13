@@ -178,14 +178,18 @@ impl Attribute {
     /// possible.
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
-        use quote::ToTokens;
+        if let Some(ref colon) = self.path.leading_colon {
+            return Err(Error::new(colon.spans[0], "expected meta identifier"));
+        }
 
-        let mut tts = TokenStream::new();
+        let first_segment = self.path.segments.first().expect("paths have at least one segment");
+        if let Some(colon) = first_segment.punct() {
+            return Err(Error::new(colon.spans[0], "expected meta value"));
+        }
+        let ident = first_segment.value().ident.clone();
 
-        self.path.to_tokens(&mut tts);
-        self.tts.to_tokens(&mut tts);
-
-        ::parse2(tts)
+        let parser = |input: ParseStream| parsing::parse_meta_after_ident(ident, input);
+        parse::Parser::parse2(parser, self.tts.clone())
     }
 
     /// Parses zero or more outer attributes from the stream.
@@ -528,40 +532,22 @@ pub mod parsing {
 
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
-            // Detect what kind of meta this is.
-            let ahead = input.fork();
-
-            // The first token must be an identifier
-            ahead.call(Ident::parse_any)?;
-
-            if ahead.peek(token::Paren) {
-                input.parse().map(Meta::List)
-            } else if ahead.peek(Token![=]) {
-                input.parse().map(Meta::NameValue)
-            } else {
-                input.call(Ident::parse_any).map(Meta::Word)
-            }
+            let ident = input.call(Ident::parse_any)?;
+            parse_meta_after_ident(ident, input)
         }
     }
 
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            Ok(MetaList {
-                ident: input.call(Ident::parse_any)?,
-                paren_token: parenthesized!(content in input),
-                nested: content.parse_terminated(NestedMeta::parse)?,
-            })
+            let ident = input.call(Ident::parse_any)?;
+            parse_meta_list_after_ident(ident, input)
         }
     }
 
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            Ok(MetaNameValue {
-                ident: input.call(Ident::parse_any)?,
-                eq_token: input.parse()?,
-                lit: input.parse()?,
-            })
+            let ident = input.call(Ident::parse_any)?;
+            parse_meta_name_value_after_ident(ident, input)
         }
     }
 
@@ -577,6 +563,33 @@ pub mod parsing {
                 Err(input.error("expected identifier or literal"))
             }
         }
+    }
+
+    pub fn parse_meta_after_ident(ident: Ident, input: ParseStream) -> Result<Meta> {
+        if input.peek(token::Paren) {
+            parse_meta_list_after_ident(ident, input).map(Meta::List)
+        } else if input.peek(Token![=]) {
+            parse_meta_name_value_after_ident(ident, input).map(Meta::NameValue)
+        } else {
+            Ok(Meta::Word(ident))
+        }
+    }
+
+    fn parse_meta_list_after_ident(ident: Ident, input: ParseStream) -> Result<MetaList> {
+        let content;
+        Ok(MetaList {
+            ident: ident,
+            paren_token: parenthesized!(content in input),
+            nested: content.parse_terminated(NestedMeta::parse)?,
+        })
+    }
+
+    fn parse_meta_name_value_after_ident(ident: Ident, input: ParseStream) -> Result<MetaNameValue> {
+        Ok(MetaNameValue {
+            ident: ident,
+            eq_token: input.parse()?,
+            lit: input.parse()?,
+        })
     }
 }
 
