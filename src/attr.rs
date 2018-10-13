@@ -550,9 +550,9 @@ pub mod parsing {
             let nested = content.parse_terminated(NestedMeta::parse)?;
 
             Ok(MetaList {
-                ident,
-                paren_token,
-                nested,
+                ident: ident,
+                paren_token: paren_token,
+                nested: nested,
             })
         }
     }
