@@ -618,7 +618,7 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let ahead = input.fork();
 
-            if ahead.peek(Lit) {
+            if ahead.peek(Lit) && !(ahead.peek(LitBool) && ahead.peek2(Token![=])) {
                 input.parse().map(NestedMeta::Literal)
             } else if ahead.call(Ident::parse_any).is_ok() {
                 input.parse().map(NestedMeta::Meta)

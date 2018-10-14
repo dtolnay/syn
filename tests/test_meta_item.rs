@@ -215,6 +215,40 @@ fn test_parse_meta_name_value() {
 }
 
 #[test]
+fn test_parse_meta_name_value_with_keyword() {
+    let raw = "static = 5";
+
+    let expected = MetaNameValue {
+        ident: ident("static").into(),
+        eq_token: Default::default(),
+        lit: lit(Literal::i32_unsuffixed(5)),
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::NameValue(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
+fn test_parse_meta_name_value_with_bool() {
+    let raw = "true = 5";
+
+    let expected = MetaNameValue {
+        ident: ident("true").into(),
+        eq_token: Default::default(),
+        lit: lit(Literal::i32_unsuffixed(5)),
+    };
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+
+    let expected = Meta::NameValue(expected);
+
+    assert_eq!(expected, syn::parse_str(raw).unwrap());
+}
+
+#[test]
 fn test_parse_meta_item_list_lit() {
     let raw = "foo(5)";
 
