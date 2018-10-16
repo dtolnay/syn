@@ -1897,7 +1897,7 @@ pub mod parsing {
 
         let mut arms = Vec::new();
         while !content.is_empty() {
-            arms.push(content.call(match_arm)?);
+            arms.push(content.call(Arm::parse)?);
         }
 
         Ok(ExprMatch {
@@ -1928,52 +1928,6 @@ pub mod parsing {
                     Some(input.parse()?)
                 } else {
                     None
-                }
-            },
-        })
-    }
-
-    #[cfg(feature = "full")]
-    fn match_arm(input: ParseStream) -> Result<Arm> {
-        let requires_comma;
-        Ok(Arm {
-            attrs: input.call(Attribute::parse_outer)?,
-            leading_vert: input.parse()?,
-            pats: {
-                let mut pats = Punctuated::new();
-                let value: Pat = input.parse()?;
-                pats.push_value(value);
-                loop {
-                    if !input.peek(Token![|]) {
-                        break;
-                    }
-                    let punct = input.parse()?;
-                    pats.push_punct(punct);
-                    let value: Pat = input.parse()?;
-                    pats.push_value(value);
-                }
-                pats
-            },
-            guard: {
-                if input.peek(Token![if]) {
-                    let if_token: Token![if] = input.parse()?;
-                    let guard: Expr = input.parse()?;
-                    Some((if_token, Box::new(guard)))
-                } else {
-                    None
-                }
-            },
-            fat_arrow_token: input.parse()?,
-            body: {
-                let body = input.call(expr_early)?;
-                requires_comma = requires_terminator(&body);
-                Box::new(body)
-            },
-            comma: {
-                if requires_comma && !input.is_empty() {
-                    Some(input.parse()?)
-                } else {
-                    input.parse()?
                 }
             },
         })
@@ -2779,6 +2733,54 @@ pub mod parsing {
             } else {
                 Err(input.error("expected identifier or integer"))
             }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl Parse for Arm {
+        fn parse(input: ParseStream) -> Result<Arm> {
+            let requires_comma;
+            Ok(Arm {
+                attrs: input.call(Attribute::parse_outer)?,
+                leading_vert: input.parse()?,
+                pats: {
+                    let mut pats = Punctuated::new();
+                    let value: Pat = input.parse()?;
+                    pats.push_value(value);
+                    loop {
+                        if !input.peek(Token![|]) {
+                            break;
+                        }
+                        let punct = input.parse()?;
+                        pats.push_punct(punct);
+                        let value: Pat = input.parse()?;
+                        pats.push_value(value);
+                    }
+                    pats
+                },
+                guard: {
+                    if input.peek(Token![if]) {
+                        let if_token: Token![if] = input.parse()?;
+                        let guard: Expr = input.parse()?;
+                        Some((if_token, Box::new(guard)))
+                    } else {
+                        None
+                    }
+                },
+                fat_arrow_token: input.parse()?,
+                body: {
+                    let body = input.call(expr_early)?;
+                    requires_comma = requires_terminator(&body);
+                    Box::new(body)
+                },
+                comma: {
+                    if requires_comma && !input.is_empty() {
+                        Some(input.parse()?)
+                    } else {
+                        input.parse()?
+                    }
+                },
+            })
         }
     }
 
