@@ -2531,16 +2531,20 @@ pub mod parsing {
                             ahead.is_empty() || ahead.peek(Token![,])
                         }
                 })
+                || input.peek(Token![self]) && input.peek2(Token![::])
                 || input.peek(Token![::])
                 || input.peek(Token![<])
-                || input.peek(Token![self])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
                 || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
                 pat_path_or_macro_or_struct_or_range(input)
-            } else if input.peek(Token![ref]) || input.peek(Token![mut]) || input.peek(Ident) {
+            } else if input.peek(Token![ref])
+                || input.peek(Token![mut])
+                || input.peek(Token![self])
+                || input.peek(Ident)
+            {
                 input.call(pat_ident).map(Pat::Ident)
             } else if lookahead.peek(token::Paren) {
                 input.call(pat_tuple).map(Pat::Tuple)
