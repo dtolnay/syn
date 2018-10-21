@@ -148,9 +148,7 @@ impl Hash for Attribute {
 impl Attribute {
     /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
     /// possible.
-    ///
-    /// Deprecated; use `parse_meta` instead.
-    #[doc(hidden)]
+    #[deprecated(since = "0.15.10", note = "use `parse_meta` instead")]
     pub fn interpret_meta(&self) -> Option<Meta> {
         #[cfg(feature = "parsing")]
         {
