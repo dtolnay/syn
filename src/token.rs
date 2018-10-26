@@ -87,16 +87,12 @@
 //! ```
 
 use std;
-#[cfg(feature = "parsing")]
-use std::cell::Cell;
 #[cfg(feature = "extra-traits")]
 use std::cmp;
 #[cfg(feature = "extra-traits")]
 use std::fmt::{self, Debug};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "parsing")]
-use std::rc::Rc;
 
 #[cfg(feature = "parsing")]
 use proc_macro2::Delimiter;
@@ -146,8 +142,12 @@ mod private {
 #[cfg(feature = "parsing")]
 impl private::Sealed for Ident {}
 
+#[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
 fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
+    use std::cell::Cell;
+    use std::rc::Rc;
+
     let scope = Span::call_site();
     let unexpected = Rc::new(Cell::new(None));
     let buffer = ::private::new_parse_buffer(scope, cursor, unexpected);
