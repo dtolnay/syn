@@ -313,7 +313,10 @@ pub mod parsing {
                     dyn_token: None,
                     bounds: {
                         let mut bounds = Punctuated::new();
-                        bounds.push_value(content.parse()?);
+                        bounds.push_value(TypeParamBound::Trait(TraitBound {
+                            paren_token: Some(paren_token),
+                            ..content.parse()?
+                        }));
                         while let Some(plus) = input.parse()? {
                             bounds.push_punct(plus);
                             bounds.push_value(input.parse()?);
@@ -357,7 +360,15 @@ pub mod parsing {
                             }
                             match first {
                                 Type::TraitObject(TypeTraitObject { bounds, .. }) => {
-                                    bounds.into_iter().next().unwrap()
+                                    match bounds.into_iter().next().unwrap() {
+                                        TypeParamBound::Trait(trait_bound) => {
+                                            TypeParamBound::Trait(TraitBound {
+                                                paren_token: Some(paren_token),
+                                                ..trait_bound
+                                            })
+                                        }
+                                        other => other,
+                                    }
                                 }
                                 _ => unreachable!(),
                             }
