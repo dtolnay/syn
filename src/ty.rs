@@ -338,17 +338,34 @@ pub mod parsing {
                 }));
             }
             if allow_plus && input.peek(Token![+]) {
-                if let Type::Path(TypePath { qself: None, path }) = first {
-                    return Ok(Type::TraitObject(TypeTraitObject {
-                        dyn_token: None,
-                        bounds: {
-                            let mut bounds = Punctuated::new();
-                            bounds.push_value(TypeParamBound::Trait(TraitBound {
+                loop {
+                    let first = match first {
+                        Type::Path(TypePath { qself: None, path }) => {
+                            TypeParamBound::Trait(TraitBound {
                                 paren_token: Some(paren_token),
                                 modifier: TraitBoundModifier::None,
                                 lifetimes: None,
                                 path: path,
-                            }));
+                            })
+                        }
+                        Type::TraitObject(TypeTraitObject { dyn_token: None, ref bounds }) => {
+                            if bounds.len() > 1 || bounds.trailing_punct() {
+                                break;
+                            }
+                            match first {
+                                Type::TraitObject(TypeTraitObject { bounds, .. }) => {
+                                    bounds.into_iter().next().unwrap()
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        _ => break,
+                    };
+                    return Ok(Type::TraitObject(TypeTraitObject {
+                        dyn_token: None,
+                        bounds: {
+                            let mut bounds = Punctuated::new();
+                            bounds.push_value(first);
                             while let Some(plus) = input.parse()? {
                                 bounds.push_punct(plus);
                                 bounds.push_value(input.parse()?);
