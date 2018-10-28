@@ -807,7 +807,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) {
+                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
                     input.parse().map(Item::Const)
                 } else if lookahead.peek(Token![unsafe])
                     || lookahead.peek(Token![async])
@@ -1023,7 +1023,14 @@ pub mod parsing {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
                 const_token: input.parse()?,
-                ident: input.parse()?,
+                ident: {
+                    let lookahead = input.lookahead1();
+                    if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                        input.call(Ident::parse_any)?
+                    } else {
+                        return Err(lookahead.error());
+                    }
+                },
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,
