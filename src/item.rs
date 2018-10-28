@@ -1719,7 +1719,19 @@ pub mod parsing {
             let defaultness: Option<Token![default]> = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
             let impl_token: Token![impl ] = input.parse()?;
-            let generics: Generics = input.parse()?;
+
+            let has_generics = input.peek(Token![<])
+                && (input.peek2(Token![>])
+                    || input.peek2(Token![#])
+                    || (input.peek2(Ident) || input.peek2(Lifetime))
+                        && (input.peek3(Token![:]) || input.peek3(Token![,]) || input.peek3(Token![>]))
+                );
+            let generics: Generics = if has_generics {
+                input.parse()?
+            } else {
+                Generics::default()
+            };
+
             let trait_ = {
                 let ahead = input.fork();
                 if ahead.parse::<Option<Token![!]>>().is_ok()
