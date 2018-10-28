@@ -308,6 +308,20 @@ pub mod parsing {
                     elem: Box::new(Type::TraitObject(content.parse()?)),
                 }));
             }
+            if content.peek(Token![?]) {
+                return Ok(Type::TraitObject(TypeTraitObject {
+                    dyn_token: None,
+                    bounds: {
+                        let mut bounds = Punctuated::new();
+                        bounds.push_value(content.parse()?);
+                        while let Some(plus) = input.parse()? {
+                            bounds.push_punct(plus);
+                            bounds.push_value(input.parse()?);
+                        }
+                        bounds
+                    },
+                }));
+            }
             let first: Type = content.parse()?;
             if content.peek(Token![,]) {
                 return Ok(Type::Tuple(TypeTuple {
