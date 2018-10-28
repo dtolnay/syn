@@ -958,12 +958,13 @@ mod value {
         let mut ch = 0;
         let b0 = byte(s, 0);
         let b1 = byte(s, 1);
-        ch += 0x10 * match b0 {
-            b'0'...b'9' => b0 - b'0',
-            b'a'...b'f' => 10 + (b0 - b'a'),
-            b'A'...b'F' => 10 + (b0 - b'A'),
-            _ => panic!("unexpected non-hex character after \\x"),
-        };
+        ch += 0x10
+            * match b0 {
+                b'0'...b'9' => b0 - b'0',
+                b'a'...b'f' => 10 + (b0 - b'a'),
+                b'A'...b'F' => 10 + (b0 - b'A'),
+                _ => panic!("unexpected non-hex character after \\x"),
+            };
         ch += match b1 {
             b'0'...b'9' => b1 - b'0',
             b'a'...b'f' => 10 + (b1 - b'a'),

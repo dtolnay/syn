@@ -39,10 +39,7 @@
 ///
 /// ```
 #[cfg_attr(not(syn_can_call_macro_by_path), doc = " #[macro_use]")]
-#[cfg_attr(
-    not(syn_can_call_macro_by_path),
-    doc = " extern crate quote;"
-)]
+#[cfg_attr(not(syn_can_call_macro_by_path), doc = " extern crate quote;")]
 /// #[macro_use]
 /// extern crate syn;
 ///

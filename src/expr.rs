@@ -2524,12 +2524,13 @@ pub mod parsing {
                         || input.peek2(Token![!])
                         || input.peek2(token::Brace)
                         || input.peek2(token::Paren)
-                        || input.peek2(Token![..]) && !{
-                            let ahead = input.fork();
-                            ahead.parse::<Ident>()?;
-                            ahead.parse::<RangeLimits>()?;
-                            ahead.is_empty() || ahead.peek(Token![,])
-                        }
+                        || input.peek2(Token![..])
+                            && !{
+                                let ahead = input.fork();
+                                ahead.parse::<Ident>()?;
+                                ahead.parse::<RangeLimits>()?;
+                                ahead.is_empty() || ahead.peek(Token![,])
+                            }
                 })
                 || input.peek(Token![self]) && input.peek2(Token![::])
                 || input.peek(Token![::])

@@ -1724,8 +1724,9 @@ pub mod parsing {
                 && (input.peek2(Token![>])
                     || input.peek2(Token![#])
                     || (input.peek2(Ident) || input.peek2(Lifetime))
-                        && (input.peek3(Token![:]) || input.peek3(Token![,]) || input.peek3(Token![>]))
-                );
+                        && (input.peek3(Token![:])
+                            || input.peek3(Token![,])
+                            || input.peek3(Token![>])));
             let generics: Generics = if has_generics {
                 input.parse()?
             } else {

@@ -364,10 +364,7 @@ pub use generics::{
     PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound,
     WhereClause, WherePredicate,
 };
-#[cfg(all(
-    any(feature = "full", feature = "derive"),
-    feature = "printing"
-))]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 #[cfg(feature = "full")]
@@ -437,10 +434,7 @@ pub mod buffer;
 #[cfg(feature = "parsing")]
 pub mod ext;
 pub mod punctuated;
-#[cfg(all(
-    any(feature = "full", feature = "derive"),
-    feature = "extra-traits"
-))]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "extra-traits"))]
 mod tt;
 
 // Not public API except the `parse_quote!` macro.
@@ -591,10 +585,7 @@ pub mod parse;
 
 mod span;
 
-#[cfg(all(
-    any(feature = "full", feature = "derive"),
-    feature = "printing"
-))]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
 
 ////////////////////////////////////////////////////////////////////////////////

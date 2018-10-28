@@ -66,10 +66,11 @@ impl<T: SpanlessEq> SpanlessEq for Vec<T> {
 
 impl<T: SpanlessEq> SpanlessEq for ThinVec<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.len() == other.len() && self
-            .iter()
-            .zip(other.iter())
-            .all(|(a, b)| SpanlessEq::eq(a, b))
+        self.len() == other.len()
+            && self
+                .iter()
+                .zip(other.iter())
+                .all(|(a, b)| SpanlessEq::eq(a, b))
     }
 }
 

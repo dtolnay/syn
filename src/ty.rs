@@ -348,7 +348,10 @@ pub mod parsing {
                                 path: path,
                             })
                         }
-                        Type::TraitObject(TypeTraitObject { dyn_token: None, ref bounds }) => {
+                        Type::TraitObject(TypeTraitObject {
+                            dyn_token: None,
+                            ref bounds,
+                        }) => {
                             if bounds.len() > 1 || bounds.trailing_punct() {
                                 break;
                             }
