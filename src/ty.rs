@@ -418,6 +418,9 @@ pub mod parsing {
                 if allow_plus {
                     while input.peek(Token![+]) {
                         bounds.push_punct(input.parse()?);
+                        if input.peek(Token![>]) {
+                            break;
+                        }
                         bounds.push_value(input.parse()?);
                     }
                 }
@@ -660,6 +663,9 @@ pub mod parsing {
                                 break;
                             }
                             bounds.push_punct(input.parse()?);
+                            if input.peek(Token![>]) {
+                                break;
+                            }
                         }
                     } else {
                         bounds.push_value(input.parse()?);
