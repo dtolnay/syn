@@ -658,7 +658,7 @@ pub mod parsing {
                     let mut bounds = Punctuated::new();
                     if has_colon {
                         loop {
-                            if input.peek(Token![,]) || input.peek(Token![>]) {
+                            if input.peek(Token![,]) || input.peek(Token![>]) || input.peek(Token![=]) {
                                 break;
                             }
                             let value = input.parse()?;
