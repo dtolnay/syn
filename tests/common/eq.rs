@@ -297,7 +297,7 @@ spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(ParenthesisedArgs; span inputs output);
 spanless_eq_struct!(Pat; id node span);
 spanless_eq_struct!(Path; span segments);
-spanless_eq_struct!(PathSegment; ident args);
+spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
 spanless_eq_struct!(QSelf; ty path_span position);
 spanless_eq_struct!(Stmt; id node span);
