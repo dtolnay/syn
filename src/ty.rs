@@ -310,7 +310,7 @@ pub mod parsing {
             }
             let first: Type = content.parse()?;
             if content.peek(Token![,]) {
-                Ok(Type::Tuple(TypeTuple {
+                return Ok(Type::Tuple(TypeTuple {
                     paren_token: paren_token,
                     elems: {
                         let mut elems = Punctuated::new();
@@ -321,13 +321,33 @@ pub mod parsing {
                         elems.extend(rest);
                         elems
                     },
-                }))
-            } else {
-                Ok(Type::Paren(TypeParen {
-                    paren_token: paren_token,
-                    elem: Box::new(first),
-                }))
+                }));
             }
+            if allow_plus && input.peek(Token![+]) {
+                if let Type::Path(TypePath { qself: None, path }) = first {
+                    return Ok(Type::TraitObject(TypeTraitObject {
+                        dyn_token: None,
+                        bounds: {
+                            let mut bounds = Punctuated::new();
+                            bounds.push_value(TypeParamBound::Trait(TraitBound {
+                                paren_token: Some(paren_token),
+                                modifier: TraitBoundModifier::None,
+                                lifetimes: None,
+                                path: path,
+                            }));
+                            while let Some(plus) = input.parse()? {
+                                bounds.push_punct(plus);
+                                bounds.push_value(input.parse()?);
+                            }
+                            bounds
+                        },
+                    }));
+                }
+            }
+            Ok(Type::Paren(TypeParen {
+                paren_token: paren_token,
+                elem: Box::new(first),
+            }))
         } else if lookahead.peek(Token![fn])
             || lookahead.peek(Token![unsafe])
             || lookahead.peek(Token![extern]) && !input.peek2(Token![::])
