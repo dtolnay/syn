@@ -1,5 +1,4 @@
 use heapsize::HeapSize;
-use heapsize_derive::HeapSize;
 
 #[derive(HeapSize)]
 struct Demo<'a, T: ?Sized> {

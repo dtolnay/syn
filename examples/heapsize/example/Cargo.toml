@@ -7,4 +7,3 @@ publish = false
 
 [dependencies]
 heapsize = { path = "../heapsize" }
-heapsize_derive = { path = "../heapsize_derive" }
