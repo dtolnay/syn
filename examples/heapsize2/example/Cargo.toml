@@ -1,9 +1,0 @@
-[package]
-name = "heapsize_example"
-version = "0.0.0"
-authors = ["David Tolnay <dtolnay@gmail.com>"]
-publish = false
-
-[dependencies]
-heapsize = { path = "../heapsize" }
-heapsize_derive = { path = "../heapsize_derive" }

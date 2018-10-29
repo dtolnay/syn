@@ -1,5 +1,5 @@
-A complete working Macros 1.1 implementation of a custom derive. Works on any
-Rust compiler >=1.15.0.
+A complete working implementation of a custom derive. Works on any Rust compiler
+\>=1.15.0.
 
 - [`heapsize/src/lib.rs`](heapsize/src/lib.rs)
 - [`heapsize_derive/src/lib.rs`](heapsize_derive/src/lib.rs)
@@ -39,4 +39,35 @@ impl<'a, T: ?Sized + ::heapsize::HeapSize> ::heapsize::HeapSize for Demo<'a, T> 
             + ::heapsize::HeapSize::heap_size_of_children(&self.d)
     }
 }
+```
+
+The implementation of `heapsize_derive` demonstrates some attention to "spans"
+of error messages. For each subexpression in the generated code we apply the
+span of the input fragment under which we would want to trigger a compiler error
+if the subexpression fails to compile. In this example, each recursive call to
+`heap_size_of_children` is associated with the span of the corresponding struct
+field. Thus we get errors in the right place if any of the field types do not
+implement the `HeapSize` trait.
+
+```
+error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
+ --> src/main.rs:7:5
+  |
+7 |     bad: std::thread::Thread,
+  |     ^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
+```
+
+Some unstable APIs in the `proc-macro2` crate let us improve this further by
+joining together the span of the field name and the field type. There is no
+difference in our code -- everything is as shown in this directory -- but
+building the example crate with `cargo build` shows errors like the one above
+and building with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo build` is
+able to show errors like the following.
+
+```
+error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
+ --> src/main.rs:7:5
+  |
+7 |     bad: std::thread::Thread,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
 ```

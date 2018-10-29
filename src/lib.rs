@@ -133,13 +133,6 @@
 //!
 //! ## Spans and error reporting
 //!
-//! The [`heapsize2`] example directory is an extension of the `heapsize`
-//! example that demonstrates some of the hygiene and error reporting properties
-//! of Macros 2.0. This example currently requires a nightly Rust compiler
-//! \>=1.24.0-nightly but we are working to stabilize all of the APIs involved.
-//!
-//! [`heapsize2`]: https://github.com/dtolnay/syn/tree/master/examples/heapsize2
-//!
 //! The token-based procedural macro API provides great control over where the
 //! compiler's error messages are displayed in user code. Consider the error the
 //! user sees if one of their field types does not implement `HeapSize`.
@@ -154,20 +147,8 @@
 //! }
 //! ```
 //!
-//! In the Macros 1.1 string-based procedural macro world, the resulting error
-//! would point unhelpfully to the invocation of the derive macro and not to the
-//! actual problematic field.
-//!
-//! ```text
-//! error[E0599]: no method named `heap_size_of_children` found for type `std::thread::Thread` in the current scope
-//!  --> src/main.rs:4:10
-//!   |
-//! 4 | #[derive(HeapSize)]
-//!   |          ^^^^^^^^
-//! ```
-//!
 //! By tracking span information all the way through the expansion of a
-//! procedural macro as shown in the `heapsize2` example, token-based macros in
+//! procedural macro as shown in the `heapsize` example, token-based macros in
 //! Syn are able to trigger errors that directly pinpoint the source of the
 //! problem.
 //!
