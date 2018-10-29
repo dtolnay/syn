@@ -99,6 +99,7 @@ impl Args {
         };
         parse_quote! {
             let #pat #ty = {
+                #[allow(unused_mut)]
                 let #pat = #init;
                 println!(concat!(stringify!(#ident), " = {:?}"), #ident);
                 #ident
