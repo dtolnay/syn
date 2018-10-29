@@ -246,24 +246,19 @@ available.
 - **`proc-macro`** *(enabled by default)* — Runtime dependency on the dynamic
   library libproc_macro from rustc toolchain.
 
-## Nightly features
+## Proc macro shim
 
-By default Syn uses the [`proc-macro2`] crate to emulate the nightly compiler's
-procedural macro API in a stable way that works all the way back to Rust 1.15.0.
-This shim makes it possible to write code without regard for whether the current
-compiler version supports the features we use.
+Syn uses the [proc-macro2] crate to emulate the compiler's procedural macro API
+in a stable way that works all the way back to Rust 1.15.0. This shim makes it
+possible to write code without regard for whether the current compiler version
+supports the features we use.
 
-[`proc-macro2`]: https://github.com/alexcrichton/proc-macro2
+In general all of your code should be written against proc-macro2 rather than
+proc-macro. The one exception is in the signatures of procedural macro entry
+points, which are required by the language to use `proc_macro::TokenStream`.
 
-On a nightly compiler, to eliminate the stable shim and use the compiler's
-`proc-macro` directly, add `proc-macro2` to your Cargo.toml and set its
-`"nightly"` feature which bypasses the stable shim.
-
-```toml
-[dependencies]
-syn = "0.15"
-proc-macro2 = { version = "0.4", features = ["nightly"] }
-```
+The proc-macro2 crate will automatically detect and use the compiler's data
+structures on sufficiently new compilers.
 
 ## License
 
