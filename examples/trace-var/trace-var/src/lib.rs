@@ -1,18 +1,12 @@
 extern crate proc_macro;
+use self::proc_macro::TokenStream;
 
-#[macro_use]
-extern crate syn;
-
-#[macro_use]
-extern crate quote;
-
-use proc_macro::TokenStream;
-use quote::ToTokens;
+use quote::{quote, ToTokens};
 use std::collections::HashSet as Set;
 use syn::fold::{self, Fold};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::{Expr, Ident, ItemFn, Local, Pat, Stmt};
+use syn::{parse_macro_input, parse_quote, Expr, Ident, ItemFn, Local, Pat, Stmt, Token};
 
 /// Parses a list of variable names separated by commas.
 ///

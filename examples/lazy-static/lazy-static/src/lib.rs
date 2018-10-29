@@ -1,16 +1,13 @@
 #![recursion_limit = "128"]
 #![feature(proc_macro_diagnostic)]
 
-#[macro_use]
-extern crate syn;
-#[macro_use]
-extern crate quote;
 extern crate proc_macro;
+use self::proc_macro::TokenStream;
 
-use proc_macro::TokenStream;
+use quote::{quote, quote_spanned};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::spanned::Spanned;
-use syn::{Expr, Ident, Type, Visibility};
+use syn::{parse_macro_input, Expr, Ident, Token, Type, Visibility};
 
 /// Parses the following syntax, which aligns with the input of the real
 /// `lazy_static` crate.

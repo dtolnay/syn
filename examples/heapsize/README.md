@@ -1,5 +1,5 @@
-A complete working implementation of a custom derive. Works on any Rust compiler
-1.15+.
+A complete working implementation of a custom derive. Written in Rust 2018 style
+but otherwise works on any Rust compiler 1.15+.
 
 - [`heapsize/src/lib.rs`](heapsize/src/lib.rs)
 - [`heapsize_derive/src/lib.rs`](heapsize_derive/src/lib.rs)

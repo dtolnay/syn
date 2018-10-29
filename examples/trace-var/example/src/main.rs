@@ -1,4 +1,3 @@
-extern crate trace_var;
 use trace_var::trace_var;
 
 fn main() {

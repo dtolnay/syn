@@ -1,8 +1,5 @@
-#[macro_use]
-extern crate heapsize_derive;
-
-extern crate heapsize;
 use heapsize::HeapSize;
+use heapsize_derive::HeapSize;
 
 #[derive(HeapSize)]
 struct Demo<'a, T: ?Sized> {
