@@ -6,7 +6,7 @@ debug representation of the syntax tree.
 ### [`heapsize`](heapsize)
 
 A complete working implementation of a custom derive. Works on any Rust compiler
->=1.15.0.
+1.15+.
 
 ### [`lazy-static`](lazy-static)
 

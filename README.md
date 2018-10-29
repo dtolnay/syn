@@ -105,7 +105,7 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
 ```
 
 The [`heapsize`] example directory shows a complete working Macros 1.1
-implementation of a custom derive. It works on any Rust compiler \>=1.15.0. The
+implementation of a custom derive. It works on any Rust compiler 1.15+. The
 example derives a `HeapSize` trait which computes an estimate of the amount of
 heap memory owned by a value.
 
