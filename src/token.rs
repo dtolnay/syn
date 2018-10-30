@@ -562,7 +562,7 @@ define_keywords! {
     "become"      pub struct Become       /// `become`
     "box"         pub struct Box          /// `box`
     "break"       pub struct Break        /// `break`
-    "Self"        pub struct CapSelf      /// `Self`
+    "Self"        pub struct SelfType     /// `Self`
     "const"       pub struct Const        /// `const`
     "continue"    pub struct Continue     /// `continue`
     "crate"       pub struct Crate        /// `crate`
@@ -591,7 +591,7 @@ define_keywords! {
     "pub"         pub struct Pub          /// `pub`
     "ref"         pub struct Ref          /// `ref`
     "return"      pub struct Return       /// `return`
-    "self"        pub struct Self_        /// `self`
+    "self"        pub struct SelfValue    /// `self`
     "static"      pub struct Static       /// `static`
     "struct"      pub struct Struct       /// `struct`
     "super"       pub struct Super        /// `super`
@@ -683,7 +683,7 @@ macro_rules! Token {
     (become)      => { $crate::token::Become };
     (box)         => { $crate::token::Box };
     (break)       => { $crate::token::Break };
-    (Self)        => { $crate::token::CapSelf };
+    (Self)        => { $crate::token::SelfType };
     (const)       => { $crate::token::Const };
     (continue)    => { $crate::token::Continue };
     (crate)       => { $crate::token::Crate };
@@ -712,7 +712,7 @@ macro_rules! Token {
     (pub)         => { $crate::token::Pub };
     (ref)         => { $crate::token::Ref };
     (return)      => { $crate::token::Return };
-    (self)        => { $crate::token::Self_ };
+    (self)        => { $crate::token::SelfValue };
     (static)      => { $crate::token::Static };
     (struct)      => { $crate::token::Struct };
     (super)       => { $crate::token::Super };
