@@ -21,6 +21,7 @@ script:
   - build --no-default-features --features derive
   - build --no-default-features --features 'derive parsing'
   - build --no-default-features --features 'derive printing'
+  - build --no-default-features --features 'proc-macro parsing printing'
   - build --no-default-features --features full
   - build --no-default-features --features 'full parsing'
   - build --no-default-features --features 'full printing'

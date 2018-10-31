@@ -82,8 +82,10 @@ impl<T: Parse> ParseMacroInput for T {
 ////////////////////////////////////////////////////////////////////////////////
 // Any other types that we want `parse_macro_input!` to be able to parse.
 
+#[cfg(any(feature = "full", feature = "derive"))]
 use AttributeArgs;
 
+#[cfg(any(feature = "full", feature = "derive"))]
 impl ParseMacroInput for AttributeArgs {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut metas = Vec::new();
