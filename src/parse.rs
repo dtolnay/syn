@@ -197,7 +197,7 @@
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
 use std::cell::Cell;
-use std::fmt::Display;
+use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::Deref;
@@ -265,6 +265,18 @@ impl<'a> Drop for ParseBuffer<'a> {
         if !self.is_empty() && self.unexpected.get().is_none() {
             self.unexpected.set(Some(self.cursor().span()));
         }
+    }
+}
+
+impl<'a> Display for ParseBuffer<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Display::fmt(&self.cursor().token_stream(), f)
+    }
+}
+
+impl<'a> Debug for ParseBuffer<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Debug::fmt(&self.cursor().token_stream(), f)
     }
 }
 
