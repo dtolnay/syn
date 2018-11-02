@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg(all(feature = "extra-traits", feature = "full"))]
-
 extern crate proc_macro2;
 extern crate syn;
+
+mod features;
 
 use proc_macro2::Span;
 use syn::punctuated::Punctuated;

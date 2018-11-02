@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg(feature = "extra-traits")]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
@@ -23,6 +22,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 mod macros;
 
 mod common;
+mod features;
 
 fn ident(s: &str) -> Ident {
     Ident::new(s, Span::call_site())

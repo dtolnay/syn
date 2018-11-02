@@ -6,12 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg(feature = "extra-traits")]
-
 extern crate proc_macro2;
 #[macro_use]
 extern crate quote;
 extern crate syn;
+
+mod features;
 
 use proc_macro2::Delimiter::*;
 use proc_macro2::*;

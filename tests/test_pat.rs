@@ -10,6 +10,8 @@
 extern crate quote;
 extern crate syn;
 
+mod features;
+
 #[test]
 fn test_pat_ident() {
     match syn::parse2(quote!(self)).unwrap() {

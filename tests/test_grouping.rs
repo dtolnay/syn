@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg(all(feature = "extra-traits", feature = "full"))]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
@@ -22,6 +21,7 @@ use proc_macro2::*;
 mod macros;
 
 mod common;
+mod features;
 
 fn expr<T: Into<Expr>>(t: T) -> Expr {
     t.into()

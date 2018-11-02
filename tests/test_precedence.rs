@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg(all(feature = "full", feature = "fold"))]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
@@ -32,6 +31,8 @@ extern crate smallvec;
 extern crate syn;
 extern crate syntax;
 extern crate walkdir;
+
+mod features;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;

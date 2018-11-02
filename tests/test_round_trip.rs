@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg(feature = "full")]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
@@ -17,6 +16,8 @@ extern crate syn;
 extern crate syntax;
 extern crate syntax_pos;
 extern crate walkdir;
+
+mod features;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;

@@ -10,6 +10,8 @@ extern crate proc_macro2;
 extern crate quote;
 extern crate syn;
 
+mod features;
+
 use proc_macro2::{TokenStream, TokenTree};
 use quote::ToTokens;
 use std::str::FromStr;
