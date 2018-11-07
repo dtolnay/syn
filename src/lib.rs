@@ -255,7 +255,7 @@
         redundant_closure,
         needless_pass_by_value,
         redundant_field_names,
-        trivially_copy_pass_by_ref
+        trivially_copy_pass_by_ref,
     )
 )]
 // Ignored clippy_pedantic lints.
@@ -274,7 +274,7 @@
         stutter,
         unseparated_literal_suffix,
         use_self,
-        used_underscore_binding
+        used_underscore_binding,
     )
 )]
 // False positive: https://github.com/rust-lang-nursery/rust-clippy/issues/3274
