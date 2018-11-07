@@ -145,10 +145,22 @@
 //! The `Parse` trait is not implemented in these cases because there is no good
 //! behavior to consider the default.
 //!
-//! ```ignore
+//! ```compile_fail
+//! # extern crate proc_macro;
+//! # extern crate syn;
+//! #
+//! # use syn::parse::Result;
+//! # use syn::punctuated::Punctuated;
+//! # use syn::{PathSegment, Token};
+//! #
+//! # fn f(tokens: proc_macro::TokenStream) -> Result<()> {
+//! #
 //! // Can't parse `Punctuated` without knowing whether trailing punctuation
 //! // should be allowed in this context.
 //! let path: Punctuated<PathSegment, Token![::]> = syn::parse(tokens)?;
+//! #
+//! #     Ok(())
+//! # }
 //! ```
 //!
 //! In these cases the types provide a choice of parser functions rather than a
