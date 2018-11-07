@@ -313,7 +313,21 @@ impl<'a> Debug for ParseBuffer<'a> {
 ///     })
 /// }
 /// #
-/// # fn main() {}
+/// #
+/// # fn remainder_after_skipping_past_next_at(
+/// #     input: ParseStream,
+/// # ) -> Result<proc_macro2::TokenStream> {
+/// #     skip_past_next_at(input)?;
+/// #     input.parse()
+/// # }
+/// #
+/// # fn main() {
+/// #     use syn::parse::Parser;
+/// #     let remainder = remainder_after_skipping_past_next_at
+/// #         .parse_str("a @ b c")
+/// #         .unwrap();
+/// #     assert_eq!(remainder.to_string(), "b c");
+/// # }
 /// ```
 #[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
@@ -924,7 +938,7 @@ impl<'a> ParseBuffer<'a> {
     /// fn skip_past_next_at(input: ParseStream) -> Result<()> {
     ///     input.step(|cursor| {
     ///         let mut rest = *cursor;
-    ///         while let Some((tt, next)) = cursor.token_tree() {
+    ///         while let Some((tt, next)) = rest.token_tree() {
     ///             match tt {
     ///                 TokenTree::Punct(ref punct) if punct.as_char() == '@' => {
     ///                     return Ok(((), next));
@@ -936,7 +950,20 @@ impl<'a> ParseBuffer<'a> {
     ///     })
     /// }
     /// #
-    /// # fn main() {}
+    /// # fn remainder_after_skipping_past_next_at(
+    /// #     input: ParseStream,
+    /// # ) -> Result<proc_macro2::TokenStream> {
+    /// #     skip_past_next_at(input)?;
+    /// #     input.parse()
+    /// # }
+    /// #
+    /// # fn main() {
+    /// #     use syn::parse::Parser;
+    /// #     let remainder = remainder_after_skipping_past_next_at
+    /// #         .parse_str("a @ b c")
+    /// #         .unwrap();
+    /// #     assert_eq!(remainder.to_string(), "b c");
+    /// # }
     /// ```
     pub fn step<F, R>(&self, function: F) -> Result<R>
     where
