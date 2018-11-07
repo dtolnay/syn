@@ -246,6 +246,7 @@
         block_in_if_condition_stmt,
         const_static_lifetime,
         cyclomatic_complexity,
+        deprecated_cfg_attr,
         doc_markdown,
         eval_order_dependence,
         large_enum_variant,
