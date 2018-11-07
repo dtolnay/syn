@@ -1,6 +1,7 @@
+#[allow(unused_macros)]
 macro_rules! hide_from_rustfmt {
-    ($($tt:tt)*) => {
-        $($tt)*
+    ($mod:item) => {
+        $mod
     };
 }
 
