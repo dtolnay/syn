@@ -689,6 +689,7 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// #
     /// # fn main() {}
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.cursor().eof()
     }
