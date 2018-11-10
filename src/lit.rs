@@ -146,9 +146,9 @@ impl LitStr {
     /// fn get_path(attr: &Attribute) -> Result<Path> {
     ///     let default = || Path::from(Ident::new("Self", Span::call_site()));
     ///
-    ///     let meta = match attr.interpret_meta() {
-    ///         Some(meta) => meta,
-    ///         None => return Ok(default()),
+    ///     let meta = match attr.parse_meta() {
+    ///         Ok(meta) => meta,
+    ///         Err(_) => return Ok(default()),
     ///     };
     ///
     ///     if meta.name() != "path" {
