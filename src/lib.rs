@@ -251,10 +251,11 @@
         eval_order_dependence,
         large_enum_variant,
         match_bool,
+        needless_pass_by_value,
         never_loop,
         redundant_closure,
-        needless_pass_by_value,
         redundant_field_names,
+        too_many_arguments,
         trivially_copy_pass_by_ref,
     )
 )]
