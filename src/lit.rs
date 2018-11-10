@@ -141,23 +141,15 @@ impl LitStr {
     /// //
     /// //     #[path = "a::b::c"]
     /// //
-    /// // or returns the path `Self` as a default if the attribute is not of
-    /// // that form.
-    /// fn get_path(attr: &Attribute) -> Result<Path> {
-    ///     let default = || Path::from(Ident::new("Self", Span::call_site()));
-    ///
-    ///     let meta = match attr.parse_meta() {
-    ///         Ok(meta) => meta,
-    ///         Err(_) => return Ok(default()),
-    ///     };
-    ///
-    ///     if meta.name() != "path" {
-    ///         return Ok(default());
+    /// // or returns `None` if the input is some other attribute.
+    /// fn get_path(attr: &Attribute) -> Result<Option<Path>> {
+    ///     if !attr.path.is_ident("path") {
+    ///         return Ok(None);
     ///     }
     ///
-    ///     match meta {
+    ///     match attr.parse_meta()? {
     ///         Meta::NameValue(MetaNameValue { lit: Lit::Str(lit_str), .. }) => {
-    ///             lit_str.parse()
+    ///             lit_str.parse().map(Some)
     ///         }
     ///         _ => {
     ///             let error_span = attr.bracket_token.span;

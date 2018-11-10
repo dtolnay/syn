@@ -57,9 +57,9 @@ ast_struct! {
     ///    path  tts                   path         tts
     /// ```
     ///
-    /// Use the [`parse_meta`] method to try parsing the tokens of an
-    /// attribute into the structured representation that is used by convention
-    /// across most Rust libraries.
+    /// Use the [`parse_meta`] method to try parsing the tokens of an attribute
+    /// into the structured representation that is used by convention across
+    /// most Rust libraries.
     ///
     /// [`parse_meta`]: #method.parse_meta
     ///
