@@ -59,6 +59,16 @@ mod thread_id {
     thread_local! {
         static THREAD_ID: usize = {
             static NEXT_THREAD_ID: AtomicUsize = ATOMIC_USIZE_INIT;
+
+            // Ordering::Relaxed because our only requirement for the ids is
+            // that they are unique. It is okay for the compiler to rearrange
+            // other memory reads around this fetch. It's still an atomic
+            // fetch_add, so no two threads will be able to read the same value
+            // from it.
+            //
+            // The main thing which these orderings affect is other memory reads
+            // around the atomic read, which for our case are irrelevant as this
+            // atomic guards nothing.
             NEXT_THREAD_ID.fetch_add(1, Ordering::Relaxed)
         };
     }
