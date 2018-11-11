@@ -84,6 +84,11 @@ impl Error {
         }
     }
 
+    /// The source location of the error.
+    ///
+    /// Spans are not thread-safe so this function returns `Span::call_site()`
+    /// if called from a different thread than the one on which the `Error` was
+    /// originally created.
     pub fn span(&self) -> Span {
         match self.span.get() {
             Some(span) => *span,
