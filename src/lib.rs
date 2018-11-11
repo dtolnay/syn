@@ -569,6 +569,9 @@ mod span;
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
 
+#[cfg(feature = "parsing")]
+mod thread;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(any(feature = "parsing", feature = "full", feature = "derive"))]

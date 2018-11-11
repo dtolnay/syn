@@ -15,6 +15,7 @@ use proc_macro2::{
 };
 
 use buffer::Cursor;
+use thread::ThreadBound;
 
 /// The result of a Syn parser.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -26,11 +27,19 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// [module documentation]: index.html
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Error {
-    span: Span,
+    // Span is implemented as an index into a thread-local interner to keep the
+    // size small. It is not safe to access from a different thread. We want
+    // errors to be Send and Sync to play nicely with the Failure crate, so pin
+    // the span we're given to its original thread and assume it is
+    // Span::call_site if accessed from any other thread.
+    span: ThreadBound<Span>,
     message: String,
 }
+
+#[cfg(test)]
+struct _Test where Error: Send + Sync;
 
 impl Error {
     /// Usually the [`ParseStream::error`] method will be used instead, which
@@ -70,13 +79,16 @@ impl Error {
     /// ```
     pub fn new<T: Display>(span: Span, message: T) -> Self {
         Error {
-            span: span,
+            span: ThreadBound::new(span),
             message: message.to_string(),
         }
     }
 
     pub fn span(&self) -> Span {
-        self.span
+        match self.span.get() {
+            Some(span) => *span,
+            None => Span::call_site(),
+        }
     }
 
     /// Render the error as an invocation of [`compile_error!`].
@@ -87,23 +99,25 @@ impl Error {
     /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
     /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
     pub fn to_compile_error(&self) -> TokenStream {
+        let span = self.span();
+
         // compile_error!($message)
         TokenStream::from_iter(vec![
-            TokenTree::Ident(Ident::new("compile_error", self.span)),
+            TokenTree::Ident(Ident::new("compile_error", span)),
             TokenTree::Punct({
                 let mut punct = Punct::new('!', Spacing::Alone);
-                punct.set_span(self.span);
+                punct.set_span(span);
                 punct
             }),
             TokenTree::Group({
                 let mut group = Group::new(Delimiter::Brace, {
                     TokenStream::from_iter(vec![TokenTree::Literal({
                         let mut string = Literal::string(&self.message);
-                        string.set_span(self.span);
+                        string.set_span(span);
                         string
                     })])
                 });
-                group.set_span(self.span);
+                group.set_span(span);
                 group
             }),
         ])
@@ -121,6 +135,15 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str(&self.message)
+    }
+}
+
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        Error {
+            span: ThreadBound::new(self.span()),
+            message: self.message.clone(),
+        }
     }
 }
 

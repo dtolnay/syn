@@ -11,6 +11,10 @@ fn main() {
         None => return,
     };
 
+    if minor >= 19 {
+        println!("cargo:rustc-cfg=syn_can_use_thread_id");
+    }
+
     // Macro modularization allows re-exporting the `quote!` macro in 1.30+.
     if minor >= 30 {
         println!("cargo:rustc-cfg=syn_can_call_macro_by_path");
