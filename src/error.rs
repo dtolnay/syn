@@ -103,7 +103,7 @@ impl Error {
     #[cfg(feature = "printing")]
     pub fn new_spanned<T: ToTokens, U: Display>(tokens: T, message: U) -> Self {
         let mut iter = tokens.into_token_stream().into_iter();
-        let start = iter.next().map(|t| t.span()).unwrap_or(Span::call_site());
+        let start = iter.next().map(|t| t.span()).unwrap_or_else(Span::call_site);
         let end = iter.last().map(|t| t.span()).unwrap_or(start);
         Error {
             start_span: ThreadBound::new(start),
@@ -145,8 +145,8 @@ impl Error {
     /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
     /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
     pub fn to_compile_error(&self) -> TokenStream {
-        let start = self.start_span.get().cloned().unwrap_or(Span::call_site());
-        let end = self.end_span.get().cloned().unwrap_or(Span::call_site());
+        let start = self.start_span.get().cloned().unwrap_or_else(Span::call_site);
+        let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
 
         // compile_error!($message)
         TokenStream::from_iter(vec![
@@ -187,8 +187,8 @@ impl Display for Error {
 
 impl Clone for Error {
     fn clone(&self) -> Self {
-        let start = self.start_span.get().cloned().unwrap_or(Span::call_site());
-        let end = self.end_span.get().cloned().unwrap_or(Span::call_site());
+        let start = self.start_span.get().cloned().unwrap_or_else(Span::call_site);
+        let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
         Error {
             start_span: ThreadBound::new(start),
             end_span: ThreadBound::new(end),
