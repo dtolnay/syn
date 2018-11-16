@@ -104,7 +104,7 @@ impl Error {
     pub fn new_spanned<T: ToTokens, U: Display>(tokens: T, message: U) -> Self {
         let mut iter = tokens.into_token_stream().into_iter();
         let start = iter.next().map(|t| t.span()).unwrap_or(Span::call_site());
-        let end = iter.last().map(|t| t.span()).unwrap_or(Span::call_site());
+        let end = iter.last().map(|t| t.span()).unwrap_or(start);
         Error {
             start_span: ThreadBound::new(start),
             end_span: ThreadBound::new(end),
