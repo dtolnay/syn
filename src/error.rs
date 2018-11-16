@@ -88,15 +88,16 @@ impl Error {
         }
     }
 
-    /// Creates an error which spans the items provided with the specified
-    /// message.
+    /// Creates an error with the specified message spanning the given syntax
+    /// tree node.
     ///
-    /// Unlike the `new` constructor this constructors takes a spanned item (the
-    /// first argument here). This allows the `Error` returned to attempt to
-    /// ensure it spans all the tokens inside of `tokens`. While you typically
-    /// can use the `Spanned` trait with the above `new` constructor
-    /// implementation limitations today mean that this constructor may provide
-    /// a higher-quality error message on stable Rust.
+    /// Unlike the `Error::new` constructor, this constructor takes an argument
+    /// `tokens` which is a syntax tree node. This allows the resulting `Error`
+    /// to attempt to span all tokens inside of `tokens`. While you would
+    /// typically be able to use the `Spanned` trait with the above `Error::new`
+    /// constructor, implementation limitations today mean that
+    /// `Error::new_spanned` may provide a higher-quality error message on
+    /// stable Rust.
     ///
     /// When in doubt it's recommended to stick to `Error::new` (or
     /// `ParseStream::error`)!
