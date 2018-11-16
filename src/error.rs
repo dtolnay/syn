@@ -13,6 +13,8 @@ use std::iter::FromIterator;
 use proc_macro2::{
     Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
 };
+#[cfg(feature = "printing")]
+use quote::ToTokens;
 
 use buffer::Cursor;
 use thread::ThreadBound;
@@ -34,7 +36,8 @@ pub struct Error {
     // errors to be Send and Sync to play nicely with the Failure crate, so pin
     // the span we're given to its original thread and assume it is
     // Span::call_site if accessed from any other thread.
-    span: ThreadBound<Span>,
+    start_span: ThreadBound<Span>,
+    end_span: ThreadBound<Span>,
     message: String,
 }
 
@@ -79,7 +82,32 @@ impl Error {
     /// ```
     pub fn new<T: Display>(span: Span, message: T) -> Self {
         Error {
-            span: ThreadBound::new(span),
+            start_span: ThreadBound::new(span),
+            end_span: ThreadBound::new(span),
+            message: message.to_string(),
+        }
+    }
+
+    /// Creates an error which spans the items provided with the specified
+    /// message.
+    ///
+    /// Unlike the `new` constructor this constructors takes a spanned item (the
+    /// first argument here). This allows the `Error` returned to attempt to
+    /// ensure it spans all the tokens inside of `tokens`. While you typically
+    /// can use the `Spanned` trait with the above `new` constructor
+    /// implementation limitations today mean that this constructor may provide
+    /// a higher-quality error message on stable Rust.
+    ///
+    /// When in doubt it's recommended to stick to `Error::new` (or
+    /// `ParseStream::error`)!
+    #[cfg(feature = "printing")]
+    pub fn new_spanned<T: ToTokens, U: Display>(tokens: T, message: U) -> Self {
+        let mut iter = tokens.into_token_stream().into_iter();
+        let start = iter.next().map(|t| t.span()).unwrap_or(Span::call_site());
+        let end = iter.last().map(|t| t.span()).unwrap_or(Span::call_site());
+        Error {
+            start_span: ThreadBound::new(start),
+            end_span: ThreadBound::new(end),
             message: message.to_string(),
         }
     }
@@ -90,9 +118,23 @@ impl Error {
     /// if called from a different thread than the one on which the `Error` was
     /// originally created.
     pub fn span(&self) -> Span {
-        match self.span.get() {
+        let start = match self.start_span.get() {
             Some(span) => *span,
-            None => Span::call_site(),
+            None => return Span::call_site(),
+        };
+
+        #[cfg(procmacro2_semver_exempt)]
+        {
+            let end = match self.end_span.get() {
+                Some(span) => *span,
+                None => return Span::call_site(),
+            };
+            return start.join(end).unwrap_or(start)
+
+        }
+        #[cfg(not(procmacro2_semver_exempt))]
+        {
+            return start;
         }
     }
 
@@ -104,25 +146,26 @@ impl Error {
     /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
     /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
     pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
+        let start = self.start_span.get().cloned().unwrap_or(Span::call_site());
+        let end = self.end_span.get().cloned().unwrap_or(Span::call_site());
 
         // compile_error!($message)
         TokenStream::from_iter(vec![
-            TokenTree::Ident(Ident::new("compile_error", span)),
+            TokenTree::Ident(Ident::new("compile_error", start)),
             TokenTree::Punct({
                 let mut punct = Punct::new('!', Spacing::Alone);
-                punct.set_span(span);
+                punct.set_span(start);
                 punct
             }),
             TokenTree::Group({
                 let mut group = Group::new(Delimiter::Brace, {
                     TokenStream::from_iter(vec![TokenTree::Literal({
                         let mut string = Literal::string(&self.message);
-                        string.set_span(span);
+                        string.set_span(end);
                         string
                     })])
                 });
-                group.set_span(span);
+                group.set_span(end);
                 group
             }),
         ])
@@ -145,8 +188,11 @@ impl Display for Error {
 
 impl Clone for Error {
     fn clone(&self) -> Self {
+        let start = self.start_span.get().cloned().unwrap_or(Span::call_site());
+        let end = self.end_span.get().cloned().unwrap_or(Span::call_site());
         Error {
-            span: ThreadBound::new(self.span()),
+            start_span: ThreadBound::new(start),
+            end_span: ThreadBound::new(end),
             message: self.message.clone(),
         }
     }
