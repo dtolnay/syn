@@ -129,12 +129,11 @@ impl Error {
                 Some(span) => *span,
                 None => return Span::call_site(),
             };
-            return start.join(end).unwrap_or(start)
-
+            start.join(end).unwrap_or(start)
         }
         #[cfg(not(procmacro2_semver_exempt))]
         {
-            return start;
+            start
         }
     }
 
