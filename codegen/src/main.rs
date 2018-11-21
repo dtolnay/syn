@@ -23,7 +23,6 @@ extern crate inflections;
 extern crate proc_macro2;
 #[macro_use]
 extern crate quote;
-#[macro_use]
 extern crate syn;
 extern crate rustfmt_nightly as rustfmt;
 
@@ -237,8 +236,8 @@ mod parsing {
             ast: syn::parse2(quote! {
                 pub struct #ident #rest
             })?,
-            features: features,
-            eos_full: eos_full,
+            features,
+            eos_full,
         })
     }
 
@@ -314,8 +313,8 @@ mod parsing {
         input.parse::<Token![,]>()?;
         Ok(EosVariant {
             name: variant,
-            member: member,
-            inner: inner,
+            member,
+            inner,
         })
     }
 
