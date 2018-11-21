@@ -250,10 +250,8 @@
         doc_markdown,
         eval_order_dependence,
         large_enum_variant,
-        match_bool,
         needless_pass_by_value,
         never_loop,
-        redundant_closure,
         redundant_field_names,
         too_many_arguments,
     )
@@ -266,7 +264,6 @@
         cast_possible_wrap,
         empty_enum,
         if_not_else,
-        indexing_slicing,
         items_after_statements,
         shadow_unrelated,
         similar_names,

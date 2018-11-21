@@ -11,11 +11,7 @@
 //! 3. The path to `syn` is hardcoded.
 
 #![recursion_limit = "128"]
-#![allow(
-    clippy::needless_pass_by_value,
-    clippy::redundant_closure,
-    clippy::write_with_newline,
-)]
+#![allow(clippy::needless_pass_by_value)]
 
 #[macro_use]
 extern crate failure;
@@ -1074,7 +1070,6 @@ fn main() {
         quote! {
             // Unreachable code is generated sometimes without the full feature.
             #![allow(unreachable_code)]
-            #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
             use *;
             #[cfg(any(feature = "full", feature = "derive"))]
@@ -1129,10 +1124,7 @@ fn main() {
     write_file(
         VISIT_SRC,
         quote! {
-            #![cfg_attr(
-                feature = "cargo-clippy",
-                allow(match_same_arms, trivially_copy_pass_by_ref)
-            )]
+            #![cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
 
             use *;
             #[cfg(any(feature = "full", feature = "derive"))]
@@ -1164,8 +1156,6 @@ fn main() {
     write_file(
         VISIT_MUT_SRC,
         quote! {
-            #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
-
             use *;
             #[cfg(any(feature = "full", feature = "derive"))]
             use punctuated::Punctuated;
