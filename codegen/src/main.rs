@@ -1129,7 +1129,10 @@ fn main() {
     write_file(
         VISIT_SRC,
         quote! {
-            #![cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
+            #![cfg_attr(
+                feature = "cargo-clippy",
+                allow(match_same_arms, trivially_copy_pass_by_ref)
+            )]
 
             use *;
             #[cfg(any(feature = "full", feature = "derive"))]
