@@ -241,6 +241,8 @@ points, which are required by the language to use `proc_macro::TokenStream`.
 The proc-macro2 crate will automatically detect and use the compiler's data
 structures on sufficiently new compilers.
 
+[proc-macro2]: https://github.com/alexcrichton/proc-macro2
+
 ## License
 
 Licensed under either of
