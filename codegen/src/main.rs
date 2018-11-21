@@ -11,13 +11,10 @@
 //! 3. The path to `syn` is hardcoded.
 
 #![recursion_limit = "128"]
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(
-        needless_pass_by_value,
-        redundant_closure,
-        write_with_newline,
-    )
+#![allow(
+    clippy::needless_pass_by_value,
+    clippy::redundant_closure,
+    clippy::write_with_newline,
 )]
 
 #[macro_use]
