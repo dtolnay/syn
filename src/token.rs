@@ -272,7 +272,7 @@ macro_rules! define_keywords {
             #[cfg(feature = "printing")]
             impl ToTokens for $name {
                 fn to_tokens(&self, tokens: &mut TokenStream) {
-                    printing::keyword($token, &self.span, tokens);
+                    printing::keyword($token, self.span, tokens);
                 }
             }
 
@@ -450,7 +450,7 @@ macro_rules! define_delimiters {
                 where
                     F: FnOnce(&mut TokenStream),
                 {
-                    printing::delim($token, &self.span, tokens, f);
+                    printing::delim($token, self.span, tokens, f);
                 }
             }
 
@@ -886,11 +886,11 @@ mod printing {
         tokens.append(op);
     }
 
-    pub fn keyword(s: &str, span: &Span, tokens: &mut TokenStream) {
-        tokens.append(Ident::new(s, *span));
+    pub fn keyword(s: &str, span: Span, tokens: &mut TokenStream) {
+        tokens.append(Ident::new(s, span));
     }
 
-    pub fn delim<F>(s: &str, span: &Span, tokens: &mut TokenStream, f: F)
+    pub fn delim<F>(s: &str, span: Span, tokens: &mut TokenStream, f: F)
     where
         F: FnOnce(&mut TokenStream),
     {
@@ -904,7 +904,7 @@ mod printing {
         let mut inner = TokenStream::new();
         f(&mut inner);
         let mut g = Group::new(delim, inner);
-        g.set_span(*span);
+        g.set_span(span);
         tokens.append(g);
     }
 }

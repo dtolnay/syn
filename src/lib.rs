@@ -256,7 +256,6 @@
         redundant_closure,
         redundant_field_names,
         too_many_arguments,
-        trivially_copy_pass_by_ref,
     )
 )]
 // Ignored clippy_pedantic lints.
