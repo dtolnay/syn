@@ -15,7 +15,8 @@
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;
-/// use syn::parse::{Parse, ParseStream, Result};
+/// use syn::Result;
+/// use syn::parse::{Parse, ParseStream};
 ///
 /// struct MyMacroInput {
 ///     /* ... */

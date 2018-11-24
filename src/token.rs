@@ -56,8 +56,8 @@
 //! ```
 //! # extern crate syn;
 //! #
-//! use syn::Attribute;
-//! use syn::parse::{Parse, ParseStream, Result};
+//! use syn::{Attribute, Result};
+//! use syn::parse::{Parse, ParseStream};
 //! #
 //! # enum ItemStatic {}
 //!

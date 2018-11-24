@@ -664,8 +664,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 /// ```rust
 /// # extern crate syn;
 /// #
-/// use syn::Expr;
-/// use syn::parse::Result;
+/// use syn::{Expr, Result};
 ///
 /// fn run() -> Result<()> {
 ///     let code = "assert_eq!(u8::max_value(), 255)";

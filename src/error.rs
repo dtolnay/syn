@@ -61,8 +61,8 @@ impl Error {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{Ident, LitStr};
-    /// use syn::parse::{Error, ParseStream, Result};
+    /// use syn::{Error, Ident, LitStr, Result};
+    /// use syn::parse::ParseStream;
     ///
     /// // Parses input that looks like `name = "string"` where the key must be
     /// // the identifier `name` and the value may be any string literal.

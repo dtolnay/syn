@@ -40,8 +40,8 @@
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
-//! use syn::{token, Field, Ident};
-//! use syn::parse::{Parse, ParseStream, Result};
+//! use syn::{token, Field, Ident, Result};
+//! use syn::parse::{Parse, ParseStream};
 //! use syn::punctuated::Punctuated;
 //!
 //! enum Item {
@@ -117,7 +117,7 @@
 //! ```
 //! use syn::Type;
 //!
-//! # fn run_parser() -> Result<(), syn::parse::Error> {
+//! # fn run_parser() -> syn::Result<()> {
 //! let t: Type = syn::parse_str("std::collections::HashMap<String, Value>")?;
 //! #     Ok(())
 //! # }
@@ -149,9 +149,8 @@
 //! # extern crate proc_macro;
 //! # extern crate syn;
 //! #
-//! # use syn::parse::Result;
 //! # use syn::punctuated::Punctuated;
-//! # use syn::{PathSegment, Token};
+//! # use syn::{PathSegment, Result, Token};
 //! #
 //! # fn f(tokens: proc_macro::TokenStream) -> Result<()> {
 //! #
@@ -180,7 +179,7 @@
 //! use syn::punctuated::Punctuated;
 //! use syn::{Attribute, Expr, PathSegment};
 //!
-//! # fn run_parsers() -> Result<(), syn::parse::Error> {
+//! # fn run_parsers() -> syn::Result<()> {
 //! #     let tokens = TokenStream::new().into();
 //! // Parse a nonempty sequence of path segments separated by `::` punctuation
 //! // with no trailing punctuation.
@@ -305,7 +304,8 @@ impl<'a> Debug for ParseBuffer<'a> {
 /// # extern crate syn;
 /// #
 /// use proc_macro2::TokenTree;
-/// use syn::parse::{ParseStream, Result};
+/// use syn::Result;
+/// use syn::parse::ParseStream;
 ///
 /// // This function advances the stream past the next occurrence of `@`. If
 /// // no `@` is present in the stream, the stream position is unchanged and
@@ -441,8 +441,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{Attribute, Ident};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{Attribute, Ident, Result};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses a unit struct with attributes.
     /// //
@@ -497,8 +497,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{token, Generics, Ident, TypeParamBound};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{token, Generics, Ident, Result, TypeParamBound};
+    /// use syn::parse::{Parse, ParseStream};
     /// use syn::punctuated::Punctuated;
     ///
     /// // Parses a trait definition containing no associated items.
@@ -569,8 +569,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{Ident, ItemUnion, Macro};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{Ident, ItemUnion, Macro, Result};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses either a union or a macro invocation.
     /// enum UnionOrMacro {
@@ -618,8 +618,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{token, Ident, Type};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{token, Ident, Result, Type};
+    /// use syn::parse::{Parse, ParseStream};
     /// use syn::punctuated::Punctuated;
     ///
     /// // Parse a simplified tuple struct syntax like:
@@ -671,8 +671,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{token, Ident, Item};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{token, Ident, Item, Result};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses a Rust `mod m { ... }` containing zero or more items.
     /// struct Mod {
@@ -715,8 +715,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, TypeParam};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, TypeParam};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// // A generic parameter, a single one of the comma-separated elements inside
     /// // angle brackets in:
@@ -767,8 +767,8 @@ impl<'a> ParseBuffer<'a> {
     /// once.
     ///
     /// ```
-    /// # use syn::Expr;
-    /// # use syn::parse::{ParseStream, Result};
+    /// # use syn::{Expr, Result};
+    /// # use syn::parse::ParseStream;
     /// #
     /// # fn bad(input: ParseStream) -> Result<Expr> {
     /// // Do not do this.
@@ -824,9 +824,9 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{token, Ident, Path};
+    /// use syn::{token, Ident, Path, Result};
     /// use syn::ext::IdentExt;
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// struct PubVisibility {
     ///     pub_token: Token![pub],
@@ -900,8 +900,8 @@ impl<'a> ParseBuffer<'a> {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::Expr;
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{Expr, Result};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Some kind of loop: `while` or `for` or `loop`.
     /// struct Loop {
@@ -943,7 +943,8 @@ impl<'a> ParseBuffer<'a> {
     /// # extern crate syn;
     /// #
     /// use proc_macro2::TokenTree;
-    /// use syn::parse::{ParseStream, Result};
+    /// use syn::Result;
+    /// use syn::parse::ParseStream;
     ///
     /// // This function advances the stream past the next occurrence of `@`. If
     /// // no `@` is present in the stream, the stream position is unchanged and

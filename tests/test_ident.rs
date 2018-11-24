@@ -13,9 +13,9 @@ mod features;
 
 use proc_macro2::{Ident, Span, TokenStream};
 use std::str::FromStr;
-use syn::parse::Error;
+use syn::Result;
 
-fn parse(s: &str) -> Result<Ident, Error> {
+fn parse(s: &str) -> Result<Ident> {
     syn::parse2(TokenStream::from_str(s).unwrap())
 }
 
