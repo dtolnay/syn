@@ -32,29 +32,29 @@ script:
 matrix:
   include:
     - rust: nightly
-      env: ROLE=test
       script:
         - cargo test --all-features --release
     - rust: nightly
-      env: ROLE=codegen
+      name: Codegen
       script:
         - (cd codegen && cargo run)
         - git diff --exit-code
     - rust: nightly
-      env: ROLE=minimal
+      name: Minimal versions
       script:
         - cargo update -Z minimal-versions
         - cargo build --all-features
     - rust: nightly
-      env: ROLE=clippy
+      name: Clippy
       script:
         - rustup component add clippy-preview
         - cargo clippy --all-features
     - rust: nightly
+      name: WebAssembly
       env: TARGET=wasm32-unknown-unknown
       install:
         - rustup target add "${TARGET}"
   allow_failures:
     - rust: nightly
-      env: ROLE=clippy
+      name: Clippy
   fast_finish: true
