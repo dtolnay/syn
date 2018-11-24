@@ -579,7 +579,7 @@ struct private;
 #[cfg(feature = "parsing")]
 mod error;
 #[cfg(feature = "parsing")]
-use error::Error;
+pub use error::{Error, Result};
 
 /// Parse tokens of source code into the chosen syntax tree node.
 ///
@@ -632,7 +632,7 @@ use error::Error;
     feature = "parsing",
     feature = "proc-macro"
 ))]
-pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Error> {
+pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
     parse::Parser::parse(T::parse, tokens)
 }
 
@@ -649,7 +649,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T, Erro
 ///
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
-pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Error> {
+pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
     parse::Parser::parse2(T::parse, tokens)
 }
 
@@ -680,7 +680,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T, Er
 /// # fn main() { run().unwrap() }
 /// ```
 #[cfg(feature = "parsing")]
-pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T, Error> {
+pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
     parse::Parser::parse_str(T::parse, s)
 }
 
@@ -723,7 +723,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T, Error> {
 /// # fn main() { run().unwrap() }
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
-pub fn parse_file(mut content: &str) -> Result<File, Error> {
+pub fn parse_file(mut content: &str) -> Result<File> {
     // Strip the BOM if it is present
     const BOM: &'static str = "\u{feff}";
     if content.starts_with(BOM) {
