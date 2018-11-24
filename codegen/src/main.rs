@@ -45,13 +45,9 @@ const EXTRA_TYPES: &[&str] = &["Lifetime"];
 
 const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
-fn path_eq(a: &syn::Path, b: &str) -> bool {
-    a.leading_colon.is_none() && a.segments.len() == 1 && a.segments[0].ident == b
-}
-
 fn get_features(attrs: &[Attribute], mut features: TokenStream) -> TokenStream {
     for attr in attrs {
-        if path_eq(&attr.path, "cfg") {
+        if attr.path.is_ident("cfg") {
             attr.to_tokens(&mut features);
         }
     }
@@ -134,15 +130,15 @@ fn load_file<P: AsRef<Path>>(
 
                 // Try to parse the AstItem declaration out of the item.
                 let tts = &item.mac.tts;
-                let found = if path_eq(&item.mac.path, "ast_struct") {
+                let found = if item.mac.path.is_ident("ast_struct") {
                     syn::parse2::<parsing::AstStruct>(quote!(#tts))
                         .map_err(|_| err_msg("failed to parse ast_struct"))?
                         .0
-                } else if path_eq(&item.mac.path, "ast_enum") {
+                } else if item.mac.path.is_ident("ast_enum") {
                     syn::parse2::<parsing::AstEnum>(quote!(#tts))
                         .map_err(|_| err_msg("failed to parse ast_enum"))?
                         .0
-                } else if path_eq(&item.mac.path, "ast_enum_of_structs") {
+                } else if item.mac.path.is_ident("ast_enum_of_structs") {
                     syn::parse2::<parsing::AstEnumOfStructs>(quote!(#tts))
                         .map_err(|_| err_msg("failed to parse ast_enum_of_structs"))?
                         .0
