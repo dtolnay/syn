@@ -42,7 +42,9 @@ pub struct Error {
 }
 
 #[cfg(test)]
-struct _Test where Error: Send + Sync;
+struct _Test
+where
+    Error: Send + Sync;
 
 impl Error {
     /// Usually the [`ParseStream::error`] method will be used instead, which
@@ -146,7 +148,11 @@ impl Error {
     /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
     /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
     pub fn to_compile_error(&self) -> TokenStream {
-        let start = self.start_span.get().cloned().unwrap_or_else(Span::call_site);
+        let start = self
+            .start_span
+            .get()
+            .cloned()
+            .unwrap_or_else(Span::call_site);
         let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
 
         // compile_error!($message)
@@ -188,7 +194,11 @@ impl Display for Error {
 
 impl Clone for Error {
     fn clone(&self) -> Self {
-        let start = self.start_span.get().cloned().unwrap_or_else(Span::call_site);
+        let start = self
+            .start_span
+            .get()
+            .cloned()
+            .unwrap_or_else(Span::call_site);
         let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
         Error {
             start_span: ThreadBound::new(start),
