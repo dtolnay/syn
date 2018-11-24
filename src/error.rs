@@ -16,6 +16,7 @@ use proc_macro2::{
 #[cfg(feature = "printing")]
 use quote::ToTokens;
 
+#[cfg(feature = "parsing")]
 use buffer::Cursor;
 use thread::ThreadBound;
 
@@ -172,6 +173,7 @@ impl Error {
     }
 }
 
+#[cfg(feature = "parsing")]
 pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     if cursor.eof() {
         Error::new(scope, format!("unexpected end of input, {}", message))

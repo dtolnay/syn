@@ -565,7 +565,6 @@ mod span;
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
 
-#[cfg(feature = "parsing")]
 mod thread;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -576,9 +575,7 @@ struct private;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#[cfg(feature = "parsing")]
 mod error;
-#[cfg(feature = "parsing")]
 pub use error::{Error, Result};
 
 /// Parse tokens of source code into the chosen syntax tree node.
