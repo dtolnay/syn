@@ -81,8 +81,8 @@ ast_struct! {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{Attribute, Ident};
-    /// use syn::parse::{Parse, ParseStream, Result};
+    /// use syn::{Attribute, Ident, Result};
+    /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses a unit struct with attributes.
     /// //

@@ -134,8 +134,7 @@ impl LitStr {
     /// # extern crate syn;
     /// #
     /// use proc_macro2::Span;
-    /// use syn::{Attribute, Ident, Lit, Meta, MetaNameValue, Path};
-    /// use syn::parse::{Error, Result};
+    /// use syn::{Attribute, Error, Ident, Lit, Meta, MetaNameValue, Path, Result};
     ///
     /// // Parses the path from an attribute that looks like:
     /// //

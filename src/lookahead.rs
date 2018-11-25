@@ -25,8 +25,8 @@ use token::Token;
 /// #[macro_use]
 /// extern crate syn;
 ///
-/// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, TypeParam};
-/// use syn::parse::{Parse, ParseStream, Result};
+/// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, TypeParam};
+/// use syn::parse::{Parse, ParseStream};
 ///
 /// // A generic parameter, a single one of the comma-separated elements inside
 /// // angle brackets in:

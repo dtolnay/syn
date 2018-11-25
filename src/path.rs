@@ -370,8 +370,8 @@ pub mod parsing {
         /// #[macro_use]
         /// extern crate syn;
         ///
-        /// use syn::Path;
-        /// use syn::parse::{Parse, ParseStream, Result};
+        /// use syn::{Path, Result};
+        /// use syn::parse::{Parse, ParseStream};
         ///
         /// // A simplified single `use` statement like:
         /// //

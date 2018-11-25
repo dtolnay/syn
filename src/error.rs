@@ -16,6 +16,7 @@ use proc_macro2::{
 #[cfg(feature = "printing")]
 use quote::ToTokens;
 
+#[cfg(feature = "parsing")]
 use buffer::Cursor;
 use thread::ThreadBound;
 
@@ -62,8 +63,8 @@ impl Error {
     /// #[macro_use]
     /// extern crate syn;
     ///
-    /// use syn::{Ident, LitStr};
-    /// use syn::parse::{Error, ParseStream, Result};
+    /// use syn::{Error, Ident, LitStr, Result};
+    /// use syn::parse::ParseStream;
     ///
     /// // Parses input that looks like `name = "string"` where the key must be
     /// // the identifier `name` and the value may be any string literal.
@@ -178,6 +179,7 @@ impl Error {
     }
 }
 
+#[cfg(feature = "parsing")]
 pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     if cursor.eof() {
         Error::new(scope, format!("unexpected end of input, {}", message))
