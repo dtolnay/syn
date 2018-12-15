@@ -917,7 +917,13 @@ pub mod parsing {
                 vis: input.parse()?,
                 extern_token: input.parse()?,
                 crate_token: input.parse()?,
-                ident: input.parse()?,
+                ident: {
+                    if input.peek(Token![self]) {
+                        input.call(Ident::parse_any)?
+                    } else {
+                        input.parse()?
+                    }
+                },
                 rename: {
                     if input.peek(Token![as]) {
                         let as_token: Token![as] = input.parse()?;
