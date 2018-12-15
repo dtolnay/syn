@@ -29,7 +29,7 @@ use self::syntax::parse::token::{DelimToken, Lit, Token};
 use self::syntax::ptr::P;
 use self::syntax::source_map::Spanned;
 use self::syntax::symbol::Symbol;
-use self::syntax::tokenstream::{DelimSpan, Delimited, ThinTokenStream, TokenStream, TokenTree};
+use self::syntax::tokenstream::{DelimSpan, ThinTokenStream, TokenStream, TokenTree};
 use self::syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
@@ -271,7 +271,6 @@ spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span recovered);
 spanless_eq_struct!(Crate; module attrs span);
-spanless_eq_struct!(Delimited; delim tts);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id node span attrs);
 spanless_eq_struct!(Field; ident expr span is_shorthand attrs);
@@ -344,7 +343,7 @@ spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
 spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Mac(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
-spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1));
+spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2));
 spanless_eq_enum!(TraitBoundModifier; None Maybe);
 spanless_eq_enum!(TraitItemKind; Const(0 1) Method(0 1) Type(0 1) Macro(0));
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
@@ -450,10 +449,8 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
         ];
         tokens.push(TokenTree::Delimited(
             DelimSpan::dummy(),
-            Delimited {
-                delim: DelimToken::Bracket,
-                tts: tts.into_iter().collect::<TokenStream>().into(),
-            },
+            DelimToken::Bracket,
+            tts.into_iter().collect::<TokenStream>().into(),
         ));
     }
     tokens
