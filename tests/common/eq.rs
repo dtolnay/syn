@@ -269,7 +269,7 @@ spanless_eq_struct!(Arg; ty pat id);
 spanless_eq_struct!(Arm; attrs pats guard body);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
-spanless_eq_struct!(Block; stmts id rules span recovered);
+spanless_eq_struct!(Block; stmts id rules span);
 spanless_eq_struct!(Crate; module attrs span);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id node span attrs);
@@ -361,7 +361,7 @@ spanless_eq_enum!(ExprKind; Box(0) ObsoleteInPlace(0 1) Array(0) Call(0 1)
     Loop(0 1) Match(0 1) Closure(0 1 2 3 4 5) Block(0 1) Async(0 1 2) TryBlock(0)
     Assign(0 1) AssignOp(0 1 2) Field(0 1) Index(0 1) Range(0 1 2) Path(0 1)
     AddrOf(0 1) Break(0 1) Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2)
-    Repeat(0 1) Paren(0) Try(0) Yield(0));
+    Repeat(0 1) Paren(0) Try(0) Yield(0) Err);
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
     Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) Ty(0 1) Existential(0 1)
     Enum(0 1) Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
