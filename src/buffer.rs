@@ -3,9 +3,9 @@
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
-// This module is heavily commented as it contains the only unsafe code in Syn,
-// and caution should be used when editing it. The public-facing interface is
-// 100% safe but the implementation is fragile internally.
+// This module is heavily commented as it contains most of the unsafe code in
+// Syn, and caution should be used when editing it. The public-facing interface
+// is 100% safe but the implementation is fragile internally.
 
 #[cfg(all(
     not(all(target_arch = "wasm32", target_os = "unknown")),
