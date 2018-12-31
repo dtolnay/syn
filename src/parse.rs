@@ -12,10 +12,51 @@
 //!
 //! # Example
 //!
-//! Here is a snippet of parsing code to get a feel for the style of the
-//! library. We define data structures for a subset of Rust syntax including
-//! enums (not shown) and structs, then provide implementations of the [`Parse`]
-//! trait to parse these syntax tree data structures from a token stream.
+//! Simple parsers can be written as a closure using the generic
+//! [implementation of `Parser` for closures]. You can the use the methods on
+//! [`Parser`] to parse your data from a `TokenStream` or a string.
+//!
+//! [implementation of `Parser` for closures]: trait.Parser.html#impl-Parser
+//!
+//! ```
+//! # #[macro_use]
+//! # extern crate syn;
+//! #
+//! # extern crate proc_macro;
+//! #
+//! # use proc_macro::TokenStream;
+//! # use syn::*;
+//! use syn::parse::{ParseStream, Parser};
+//!
+//! # const IGNORE: &str = stringify! {
+//! #[proc_macro]
+//! # };
+//! pub fn my_macro(tokens: TokenStream) -> TokenStream {
+//!     // parse the equivalent of `$id1:ident, $id2:ident`.
+//!     let result = (|stream: ParseStream| {
+//!         let id1: Ident = stream.parse()?;
+//!         let _: Token![,] = stream.parse()?;
+//!         let id2: Ident = stream.parse()?;
+//!         Ok((id1, id2))
+//!     }).parse(tokens);
+//!
+//!     let (id1, id2) = match result {
+//!         Err(e) => return e.to_compile_error().into(),
+//!         Ok(v) => v,
+//!     };
+//!
+//!     /* ... */
+//! #   "".parse().unwrap()
+//! }
+//! #
+//! # fn main() {}
+//! ```
+//!
+//! For more complicated syntax, you can implement the [`Parse`] trait. In the,
+//! following example we define data structures for a subset of Rust syntax
+//! including enums (not shown) and structs, then provide implementations of
+//! the [`Parse`] trait to parse these syntax tree data structures from a token
+//! stream.
 //!
 //! Once `Parse` impls have been defined, they can be called conveniently from a
 //! procedural macro through [`parse_macro_input!`] as shown at the bottom of
@@ -231,6 +272,8 @@ pub trait Parse: Sized {
 }
 
 /// Input to a Syn parser function.
+///
+/// The easiest way to create a `ParseStream` is to use the [`Parser`] trait.
 ///
 /// See the methods of this type under the documentation of [`ParseBuffer`]. For
 /// an overview of parsing in Syn, refer to the [module documentation].
@@ -1093,9 +1136,15 @@ pub trait Parser: Sized {
     type Output;
 
     /// Parse a proc-macro2 token stream into the chosen syntax tree node.
+    ///
+    /// This function will check that the input is fully parsed. If there are
+    /// any unused tokens at the end of the stream, an error is returned.
     fn parse2(self, tokens: TokenStream) -> Result<Self::Output>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
+    ///
+    /// This function will check that the input is fully parsed. If there are
+    /// any unused tokens at the end of the stream, an error is returned.
     ///
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
@@ -1108,6 +1157,9 @@ pub trait Parser: Sized {
     }
 
     /// Parse a string of Rust code into the chosen syntax tree node.
+    ///
+    /// This function will check that the input is fully parsed. If there are
+    /// any unused tokens at the end of the string, an error is returned.
     ///
     /// # Hygiene
     ///
