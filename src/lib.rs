@@ -65,15 +65,13 @@
 //! ```
 //!
 //! ```rust
-//! #[macro_use]
-//! extern crate quote;
-//! #[macro_use]
-//! extern crate syn;
-//!
+//! # extern crate quote;
+//! #
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
-//! use syn::DeriveInput;
+//! use quote::quote;
+//! use syn::{parse_macro_input, DeriveInput};
 //!
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[proc_macro_derive(MyMacro)]
@@ -90,8 +88,6 @@
 //!     // Hand the output tokens back to the compiler
 //!     TokenStream::from(expanded)
 //! }
-//! #
-//! # fn main() {}
 //! ```
 //!
 //! The [`heapsize`] example directory shows a complete working Macros 1.1
@@ -589,13 +585,12 @@ pub use error::{Error, Result};
 /// # Examples
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate quote;
-///
+/// # extern crate quote;
+/// #
 /// extern crate proc_macro;
-/// extern crate syn;
 ///
 /// use proc_macro::TokenStream;
+/// use quote::quote;
 /// use syn::DeriveInput;
 ///
 /// # const IGNORE_TOKENS: &str = stringify! {
@@ -613,8 +608,6 @@ pub use error::{Error, Result};
 ///     // Convert into a token stream and return it
 ///     expanded.into()
 /// }
-/// #
-/// # fn main() {}
 /// ```
 #[cfg(all(
     not(all(target_arch = "wasm32", target_os = "unknown")),
@@ -654,8 +647,6 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 /// # Examples
 ///
 /// ```rust
-/// # extern crate syn;
-/// #
 /// use syn::{Expr, Result};
 ///
 /// fn run() -> Result<()> {
@@ -665,7 +656,9 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 ///     Ok(())
 /// }
 /// #
-/// # fn main() { run().unwrap() }
+/// # fn main() {
+/// #     run().unwrap();
+/// # }
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
@@ -688,8 +681,6 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// # Examples
 ///
 /// ```rust,no_run
-/// # extern crate syn;
-/// #
 /// use std::error::Error;
 /// use std::fs::File;
 /// use std::io::Read;
@@ -708,7 +699,9 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///     Ok(())
 /// }
 /// #
-/// # fn main() { run().unwrap() }
+/// # fn main() {
+/// #     run().unwrap();
+/// # }
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
 pub fn parse_file(mut content: &str) -> Result<File> {

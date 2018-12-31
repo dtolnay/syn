@@ -8,14 +8,9 @@
 /// with a `kw::` or `keyword::` prefix.
 ///
 /// ```
-/// # #[macro_use]
-/// # extern crate syn;
-/// #
 /// mod kw {
-///     custom_keyword!(whatever);
+///     syn::custom_keyword!(whatever);
 /// }
-/// #
-/// # fn main() {}
 /// ```
 ///
 /// The generated syntax tree node supports the following operations just like
@@ -49,15 +44,12 @@
 /// by crates that need to use them as such.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate syn;
-///
-/// use syn::{LitBool, LitStr, Result};
+/// use syn::{LitBool, LitStr, Result, Token};
 /// use syn::parse::{Parse, ParseStream};
 ///
 /// mod kw {
-///     custom_keyword!(bool);
-///     custom_keyword!(str);
+///     syn::custom_keyword!(bool);
+///     syn::custom_keyword!(str);
 /// }
 ///
 /// enum Argument {
@@ -93,8 +85,6 @@
 ///         }
 ///     }
 /// }
-/// #
-/// # fn main() {}
 /// ```
 #[macro_export(local_inner_macros)]
 macro_rules! custom_keyword {

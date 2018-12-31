@@ -26,13 +26,10 @@
 //! [`parse_macro_input!`]: ../macro.parse_macro_input.html
 //!
 //! ```
-//! #[macro_use]
-//! extern crate syn;
-//!
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
-//! use syn::{token, Field, Ident, Result};
+//! use syn::{braced, parse_macro_input, token, Field, Ident, Result, Token};
 //! use syn::parse::{Parse, ParseStream};
 //! use syn::punctuated::Punctuated;
 //!
@@ -90,8 +87,6 @@
 //!     /* ... */
 //! #   "".parse().unwrap()
 //! }
-//! #
-//! # fn main() {}
 //! ```
 //!
 //! # The `syn::parse*` functions
@@ -139,7 +134,6 @@
 //!
 //! ```compile_fail
 //! # extern crate proc_macro;
-//! # extern crate syn;
 //! #
 //! # use syn::punctuated::Punctuated;
 //! # use syn::{PathSegment, Result, Token};
@@ -161,15 +155,12 @@
 //! [`Parser`]: trait.Parser.html
 //!
 //! ```
-//! #[macro_use]
-//! extern crate syn;
-//!
-//! extern crate proc_macro2;
-//!
+//! # extern crate proc_macro2;
+//! #
 //! use proc_macro2::TokenStream;
 //! use syn::parse::Parser;
 //! use syn::punctuated::Punctuated;
-//! use syn::{Attribute, Expr, PathSegment};
+//! use syn::{Attribute, Expr, PathSegment, Token};
 //!
 //! # fn run_parsers() -> syn::Result<()> {
 //! #     let tokens = TokenStream::new().into();
@@ -191,8 +182,6 @@
 //! #
 //! #     Ok(())
 //! # }
-//! #
-//! # fn main() {}
 //! ```
 //!
 //! ---
@@ -306,7 +295,6 @@ impl<'a> Debug for ParseBuffer<'a> {
 ///
 /// ```
 /// # extern crate proc_macro2;
-/// # extern crate syn;
 /// #
 /// use proc_macro2::TokenTree;
 /// use syn::Result;
@@ -329,7 +317,6 @@ impl<'a> Debug for ParseBuffer<'a> {
 ///         Err(cursor.error("no `@` was found after this point"))
 ///     })
 /// }
-/// #
 /// #
 /// # fn remainder_after_skipping_past_next_at(
 /// #     input: ParseStream,
@@ -443,10 +430,7 @@ impl<'a> ParseBuffer<'a> {
     /// [`Attribute::parse_outer`]: ../struct.Attribute.html#method.parse_outer
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{Attribute, Ident, Result};
+    /// use syn::{Attribute, Ident, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses a unit struct with attributes.
@@ -470,8 +454,6 @@ impl<'a> ParseBuffer<'a> {
     ///         })
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn call<T>(&self, function: fn(ParseStream) -> Result<T>) -> Result<T> {
         function(self)
@@ -499,10 +481,7 @@ impl<'a> ParseBuffer<'a> {
     /// token in the input is either `where` or an opening curly brace.
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{token, Generics, Ident, Result, TypeParamBound};
+    /// use syn::{braced, token, Generics, Ident, Result, Token, TypeParamBound};
     /// use syn::parse::{Parse, ParseStream};
     /// use syn::punctuated::Punctuated;
     ///
@@ -550,8 +529,6 @@ impl<'a> ParseBuffer<'a> {
     ///         })
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
@@ -571,10 +548,7 @@ impl<'a> ParseBuffer<'a> {
     /// }`. In other words `union` is a contextual keyword.
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{Ident, ItemUnion, Macro, Result};
+    /// use syn::{Ident, ItemUnion, Macro, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses either a union or a macro invocation.
@@ -594,8 +568,6 @@ impl<'a> ParseBuffer<'a> {
     ///         }
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
         let ahead = self.fork();
@@ -617,13 +589,10 @@ impl<'a> ParseBuffer<'a> {
     /// # Example
     ///
     /// ```rust
-    /// # #[macro_use]
     /// # extern crate quote;
+    /// # use quote::quote;
     /// #
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{token, Ident, Result, Type};
+    /// use syn::{parenthesized, token, Ident, Result, Token, Type};
     /// use syn::parse::{Parse, ParseStream};
     /// use syn::punctuated::Punctuated;
     ///
@@ -673,10 +642,7 @@ impl<'a> ParseBuffer<'a> {
     /// # Example
     ///
     /// ```rust
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{token, Ident, Item, Result};
+    /// use syn::{braced, token, Ident, Item, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses a Rust `mod m { ... }` containing zero or more items.
@@ -704,8 +670,6 @@ impl<'a> ParseBuffer<'a> {
     ///         })
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn is_empty(&self) -> bool {
         self.cursor().eof()
@@ -717,10 +681,7 @@ impl<'a> ParseBuffer<'a> {
     /// # Example
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, TypeParam};
+    /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, Token, TypeParam};
     /// use syn::parse::{Parse, ParseStream};
     ///
     /// // A generic parameter, a single one of the comma-separated elements inside
@@ -754,8 +715,6 @@ impl<'a> ParseBuffer<'a> {
     ///         }
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn lookahead1(&self) -> Lookahead1<'a> {
         lookahead::new(self.scope, self.cursor())
@@ -826,10 +785,7 @@ impl<'a> ParseBuffer<'a> {
     /// work performed against the forked parse stream.
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{token, Ident, Path, Result};
+    /// use syn::{parenthesized, token, Ident, Path, Result, Token};
     /// use syn::ext::IdentExt;
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -883,8 +839,6 @@ impl<'a> ParseBuffer<'a> {
     ///         })
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn fork(&self) -> Self {
         ParseBuffer {
@@ -902,10 +856,7 @@ impl<'a> ParseBuffer<'a> {
     /// # Example
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{Expr, Result};
+    /// use syn::{Expr, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Some kind of loop: `while` or `for` or `loop`.
@@ -927,8 +878,6 @@ impl<'a> ParseBuffer<'a> {
     ///         }
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn error<T: Display>(&self, message: T) -> Error {
         error::new_at(self.scope, self.cursor(), message)
@@ -945,7 +894,6 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// ```
     /// # extern crate proc_macro2;
-    /// # extern crate syn;
     /// #
     /// use proc_macro2::TokenTree;
     /// use syn::Result;

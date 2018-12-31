@@ -81,12 +81,9 @@ proc-macro = true
 
 ```rust
 extern crate proc_macro;
-extern crate syn;
-
-#[macro_use]
-extern crate quote;
 
 use proc_macro::TokenStream;
+use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
 
 #[proc_macro_derive(MyMacro)]

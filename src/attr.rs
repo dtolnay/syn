@@ -70,10 +70,7 @@ ast_struct! {
     /// [`Attribute::parse_inner`]: #method.parse_inner
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{Attribute, Ident, Result};
+    /// use syn::{Attribute, Ident, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
     /// // Parses a unit struct with attributes.
@@ -97,8 +94,6 @@ ast_struct! {
     ///         })
     ///     }
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
@@ -488,13 +483,10 @@ ast_enum_of_structs! {
 /// as type `AttributeArgs`.
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;
-/// use syn::{AttributeArgs, ItemFn};
+/// use syn::{parse_macro_input, AttributeArgs, ItemFn};
 ///
 /// # const IGNORE: &str = stringify! {
 /// #[proc_macro_attribute]
@@ -506,8 +498,6 @@ ast_enum_of_structs! {
 ///     /* ... */
 /// #   "".parse().unwrap()
 /// }
-/// #
-/// # fn main() {}
 /// ```
 pub type AttributeArgs = Vec<NestedMeta>;
 

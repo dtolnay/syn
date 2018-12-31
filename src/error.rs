@@ -52,10 +52,7 @@ impl Error {
     /// # Example
     ///
     /// ```
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{Error, Ident, LitStr, Result};
+    /// use syn::{Error, Ident, LitStr, Result, Token};
     /// use syn::parse::ParseStream;
     ///
     /// // Parses input that looks like `name = "string"` where the key must be
@@ -72,8 +69,6 @@ impl Error {
     ///     let s: LitStr = input.parse()?;
     ///     Ok(s)
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     pub fn new<T: Display>(span: Span, message: T) -> Self {
         Error {

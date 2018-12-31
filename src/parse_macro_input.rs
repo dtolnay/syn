@@ -9,13 +9,10 @@
 /// # Intended usage
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate syn;
-///
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;
-/// use syn::Result;
+/// use syn::{parse_macro_input, Result};
 /// use syn::parse::{Parse, ParseStream};
 ///
 /// struct MyMacroInput {
@@ -38,8 +35,6 @@
 ///     /* ... */
 /// #   "".parse().unwrap()
 /// }
-/// #
-/// # fn main() {}
 /// ```
 #[macro_export(local_inner_macros)]
 macro_rules! parse_macro_input {

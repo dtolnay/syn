@@ -2292,10 +2292,7 @@ pub mod parsing {
         /// # Example
         ///
         /// ```
-        /// #[macro_use]
-        /// extern crate syn;
-        ///
-        /// use syn::{token, Attribute, Block, Ident, Result, Stmt};
+        /// use syn::{braced, token, Attribute, Block, Ident, Result, Stmt, Token};
         /// use syn::parse::{Parse, ParseStream};
         ///
         /// // Parse a function with no generics or parameter list.
@@ -2337,8 +2334,6 @@ pub mod parsing {
         ///         })
         ///     }
         /// }
-        /// #
-        /// # fn main() {}
         /// ```
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
             let mut stmts = Vec::new();

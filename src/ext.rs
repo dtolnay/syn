@@ -18,10 +18,7 @@ pub trait IdentExt: Sized + private::Sealed {
     /// identifiers.
     ///
     /// ```rust
-    /// #[macro_use]
-    /// extern crate syn;
-    ///
-    /// use syn::{Error, Ident, Result};
+    /// use syn::{Error, Ident, Result, Token};
     /// use syn::ext::IdentExt;
     /// use syn::parse::ParseStream;
     ///
@@ -41,8 +38,6 @@ pub trait IdentExt: Sized + private::Sealed {
     ///     let name = input.call(Ident::parse_any)?;
     ///     Ok(name)
     /// }
-    /// #
-    /// # fn main() {}
     /// ```
     fn parse_any(input: ParseStream) -> Result<Self>;
 }

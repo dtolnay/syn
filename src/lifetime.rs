@@ -37,7 +37,6 @@ impl Lifetime {
     ///
     /// ```
     /// # extern crate proc_macro2;
-    /// # extern crate syn;
     /// #
     /// # use proc_macro2::Span;
     /// # use syn::Lifetime;

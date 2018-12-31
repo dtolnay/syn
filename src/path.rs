@@ -359,10 +359,7 @@ pub mod parsing {
         /// # Example
         ///
         /// ```
-        /// #[macro_use]
-        /// extern crate syn;
-        ///
-        /// use syn::{Path, Result};
+        /// use syn::{Path, Result, Token};
         /// use syn::parse::{Parse, ParseStream};
         ///
         /// // A simplified single `use` statement like:
@@ -386,8 +383,6 @@ pub mod parsing {
         ///         })
         ///     }
         /// }
-        /// #
-        /// # fn main() {}
         /// ```
         pub fn parse_mod_style(input: ParseStream) -> Result<Self> {
             Ok(Path {
