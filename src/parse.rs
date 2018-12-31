@@ -245,6 +245,19 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 ///
 /// `ParseStream` is the input type for all parser functions in Syn. They have
 /// the signature `fn(ParseStream) -> Result<T>`.
+///
+/// ## Calling a parser function
+///
+/// There is no public way to construct a `ParseBuffer`. Instead, if you are
+/// looking to invoke a parser function that requires `ParseStream` as input,
+/// you will need to go through one of the public parsing entry points.
+///
+/// - The [`parse_macro_input!`] macro if parsing input of a procedural macro;
+/// - One of [the `syn::parse*` functions][syn-parse]; or
+/// - A method of the [`Parser`] trait.
+///
+/// [`parse_macro_input!`]: ../macro.parse_macro_input.html
+/// [syn-parse]: index.html#the-synparse-functions
 pub struct ParseBuffer<'a> {
     scope: Span,
     // Instead of Cell<Cursor<'a>> so that ParseBuffer<'a> is covariant in 'a.
