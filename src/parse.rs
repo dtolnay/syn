@@ -155,33 +155,33 @@
 //! [`Parser`]: trait.Parser.html
 //!
 //! ```
-//! # extern crate proc_macro2;
-//! #
-//! use proc_macro2::TokenStream;
+//! extern crate proc_macro;
+//!
+//! use proc_macro::TokenStream;
 //! use syn::parse::Parser;
 //! use syn::punctuated::Punctuated;
-//! use syn::{Attribute, Expr, PathSegment, Token};
+//! use syn::{Attribute, Expr, PathSegment, Result, Token};
 //!
-//! # fn run_parsers() -> syn::Result<()> {
-//! #     let tokens = TokenStream::new().into();
-//! // Parse a nonempty sequence of path segments separated by `::` punctuation
-//! // with no trailing punctuation.
-//! let parser = Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty;
-//! let path = parser.parse(tokens)?;
+//! fn call_some_parser_methods(input: TokenStream) -> Result<()> {
+//!     // Parse a nonempty sequence of path segments separated by `::` punctuation
+//!     // with no trailing punctuation.
+//!     let tokens = input.clone();
+//!     let parser = Punctuated::<PathSegment, Token![::]>::parse_separated_nonempty;
+//!     let _path = parser.parse(tokens)?;
 //!
-//! #     let tokens = TokenStream::new().into();
-//! // Parse a possibly empty sequence of expressions terminated by commas with
-//! // an optional trailing punctuation.
-//! let parser = Punctuated::<Expr, Token![,]>::parse_terminated;
-//! let args = parser.parse(tokens)?;
+//!     // Parse a possibly empty sequence of expressions terminated by commas with
+//!     // an optional trailing punctuation.
+//!     let tokens = input.clone();
+//!     let parser = Punctuated::<Expr, Token![,]>::parse_terminated;
+//!     let _args = parser.parse(tokens)?;
 //!
-//! #     let tokens = TokenStream::new().into();
-//! // Parse zero or more outer attributes but not inner attributes.
-//! let parser = Attribute::parse_outer;
-//! let attrs = parser.parse(tokens)?;
-//! #
-//! #     Ok(())
-//! # }
+//!     // Parse zero or more outer attributes but not inner attributes.
+//!     let tokens = input.clone();
+//!     let parser = Attribute::parse_outer;
+//!     let _attrs = parser.parse(tokens)?;
+//!
+//!     Ok(())
+//! }
 //! ```
 //!
 //! ---
