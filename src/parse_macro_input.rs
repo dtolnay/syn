@@ -1,6 +1,25 @@
 /// Parse the input TokenStream of a macro, triggering a compile error if the
 /// tokens fail to parse.
 ///
+/// Possible invocations:
+/// ```ignore
+/// parse_macro_input!(tokenstream as Ty)
+/// ```
+///
+/// `Ty` should implement `Parse`. Returns `Ty`.
+///
+/// ```ignore
+/// parse_macro_input!(tokenstream)
+/// ```
+///
+/// Like above, except the type is inferred from context.
+///
+/// ```ignore
+/// parse_macro_input!(tokenstream with f)
+/// ```
+///
+/// `f` should be a closure `|stream: ParseStream| -> Result<T>`. Returns `T`.
+///
 /// Refer to the [`parse` module] documentation for more details about parsing
 /// in Syn.
 ///
@@ -54,6 +73,14 @@ macro_rules! parse_macro_input {
     ($tokenstream:ident) => {
         parse_macro_input!($tokenstream as _)
     };
+    ($tokenstream:ident with $f:expr) => {
+        match $crate::parse_macro_input::parse_closure($f, $tokenstream) {
+            $crate::export::Ok(data) => data,
+            $crate::export::Err(err) => {
+                return $crate::export::TokenStream::from(err.to_compile_error());
+            }
+        }
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +93,12 @@ use proc_macro::TokenStream;
 #[doc(hidden)]
 pub fn parse<T: ParseMacroInput>(token_stream: TokenStream) -> Result<T> {
     T::parse.parse(token_stream)
+}
+
+// Not public API.
+#[doc(hidden)]
+pub fn parse_closure<F: FnOnce(ParseStream) -> Result<T>, T>(f: F, token_stream: TokenStream) -> Result<T> {
+    f.parse(token_stream)
 }
 
 // Not public API.

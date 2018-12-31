@@ -12,11 +12,8 @@
 //!
 //! # Example
 //!
-//! Simple parsers can be written as a closure using the generic
-//! [implementation of `Parser` for closures]. You can the use the methods on
-//! [`Parser`] to parse your data from a `TokenStream` or a string.
-//!
-//! [implementation of `Parser` for closures]: trait.Parser.html#impl-Parser
+//! Simple parsers can be written by passing a closure to
+//! [`parse_macro_input!`].
 //!
 //! ```
 //! # #[macro_use]
@@ -26,24 +23,18 @@
 //! #
 //! # use proc_macro::TokenStream;
 //! # use syn::*;
-//! use syn::parse::{ParseStream, Parser};
-//!
+//! #
 //! # const IGNORE: &str = stringify! {
 //! #[proc_macro]
 //! # };
 //! pub fn my_macro(tokens: TokenStream) -> TokenStream {
 //!     // parse the equivalent of `$id1:ident, $id2:ident`.
-//!     let result = (|stream: ParseStream| {
+//!     let (id1, id2) = parse_macro_input!(tokens with |stream| {
 //!         let id1: Ident = stream.parse()?;
 //!         let _: Token![,] = stream.parse()?;
 //!         let id2: Ident = stream.parse()?;
 //!         Ok((id1, id2))
-//!     }).parse(tokens);
-//!
-//!     let (id1, id2) = match result {
-//!         Err(e) => return e.to_compile_error().into(),
-//!         Ok(v) => v,
-//!     };
+//!     });
 //!
 //!     /* ... */
 //! #   "".parse().unwrap()
@@ -273,7 +264,8 @@ pub trait Parse: Sized {
 
 /// Input to a Syn parser function.
 ///
-/// The easiest way to create a `ParseStream` is to use the [`Parser`] trait.
+/// The easiest way to create a `ParseStream` is to use the
+/// [`parse_macro_input!`] macro. Alternatively, use the [`Parser`] trait.
 ///
 /// See the methods of this type under the documentation of [`ParseBuffer`]. For
 /// an overview of parsing in Syn, refer to the [module documentation].
