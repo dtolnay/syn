@@ -1093,9 +1093,15 @@ pub trait Parser: Sized {
     type Output;
 
     /// Parse a proc-macro2 token stream into the chosen syntax tree node.
+    ///
+    /// This function will check that the input is fully parsed. If there are
+    /// any unparsed tokens at the end of the stream, an error is returned.
     fn parse2(self, tokens: TokenStream) -> Result<Self::Output>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
+    ///
+    /// This function will check that the input is fully parsed. If there are
+    /// any unparsed tokens at the end of the stream, an error is returned.
     ///
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
@@ -1108,6 +1114,9 @@ pub trait Parser: Sized {
     }
 
     /// Parse a string of Rust code into the chosen syntax tree node.
+    ///
+    /// This function will check that the input is fully parsed. If there are
+    /// any unparsed tokens at the end of the string, an error is returned.
     ///
     /// # Hygiene
     ///
