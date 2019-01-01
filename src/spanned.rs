@@ -22,8 +22,6 @@
 //!
 //! ```edition2018
 //! # extern crate proc_macro;
-//! # extern crate proc_macro2;
-//! # extern crate quote;
 //! #
 //! use proc_macro::TokenStream;
 //! use proc_macro2::Span;

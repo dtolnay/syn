@@ -9,8 +9,6 @@
 /// [`Parse`]: parse/trait.Parse.html
 ///
 /// ```edition2018
-/// # extern crate quote;
-/// #
 /// use quote::quote;
 /// use syn::{parse_quote, Stmt};
 ///

@@ -293,9 +293,6 @@ impl Generics {
     /// for that type.
     ///
     /// ```edition2018
-    /// # extern crate proc_macro2;
-    /// # extern crate quote;
-    /// #
     /// # use proc_macro2::{Span, Ident};
     /// # use quote::quote;
     /// #

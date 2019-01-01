@@ -65,8 +65,6 @@
 //! ```
 //!
 //! ```edition2018
-//! # extern crate quote;
-//! #
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
@@ -585,8 +583,6 @@ pub use error::{Error, Result};
 /// # Examples
 ///
 /// ```edition2018
-/// # extern crate quote;
-/// #
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;

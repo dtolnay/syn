@@ -294,8 +294,6 @@ impl<'a> Debug for ParseBuffer<'a> {
 /// # Example
 ///
 /// ```edition2018
-/// # extern crate proc_macro2;
-/// #
 /// use proc_macro2::TokenTree;
 /// use syn::Result;
 /// use syn::parse::ParseStream;
@@ -589,7 +587,6 @@ impl<'a> ParseBuffer<'a> {
     /// # Example
     ///
     /// ```edition2018
-    /// # extern crate quote;
     /// # use quote::quote;
     /// #
     /// use syn::{parenthesized, token, Ident, Result, Token, Type};
@@ -893,8 +890,6 @@ impl<'a> ParseBuffer<'a> {
     /// # Example
     ///
     /// ```edition2018
-    /// # extern crate proc_macro2;
-    /// #
     /// use proc_macro2::TokenTree;
     /// use syn::Result;
     /// use syn::parse::ParseStream;
