@@ -21,7 +21,7 @@ use token::Token;
 ///
 /// # Example
 ///
-/// ```
+/// ```edition2018
 /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, Token, TypeParam};
 /// use syn::parse::{Parse, ParseStream};
 ///

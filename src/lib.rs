@@ -64,7 +64,7 @@
 //! proc-macro = true
 //! ```
 //!
-//! ```rust
+//! ```edition2018
 //! # extern crate quote;
 //! #
 //! extern crate proc_macro;
@@ -97,7 +97,7 @@
 //!
 //! [`heapsize`]: https://github.com/dtolnay/syn/tree/master/examples/heapsize
 //!
-//! ```rust
+//! ```edition2018
 //! pub trait HeapSize {
 //!     /// Total number of bytes of heap memory owned by `self`.
 //!     fn heap_size_of_children(&self) -> usize;
@@ -107,7 +107,7 @@
 //! The custom derive allows users to write `#[derive(HeapSize)]` on data
 //! structures in their program.
 //!
-//! ```rust
+//! ```edition2018
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[derive(HeapSize)]
 //! # };
@@ -125,7 +125,7 @@
 //! compiler's error messages are displayed in user code. Consider the error the
 //! user sees if one of their field types does not implement `HeapSize`.
 //!
-//! ```rust
+//! ```edition2018
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[derive(HeapSize)]
 //! # };
@@ -159,7 +159,7 @@
 //! The example reimplements the popular `lazy_static` crate from crates.io as a
 //! procedural macro.
 //!
-//! ```
+//! ```edition2018
 //! # macro_rules! lazy_static {
 //! #     ($($tt:tt)*) => {}
 //! # }
@@ -429,7 +429,7 @@ mod gen {
     ///
     /// [`Visit`]: trait.Visit.html
     ///
-    /// ```rust
+    /// ```edition2018
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
     /// #
     /// pub trait Visit<'ast> {
@@ -465,7 +465,7 @@ mod gen {
     ///
     /// [`VisitMut`]: trait.VisitMut.html
     ///
-    /// ```rust
+    /// ```edition2018
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
     /// #
     /// pub trait VisitMut {
@@ -501,7 +501,7 @@ mod gen {
     ///
     /// [`Fold`]: trait.Fold.html
     ///
-    /// ```rust
+    /// ```edition2018
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
     /// #
     /// pub trait Fold {
@@ -584,7 +584,7 @@ pub use error::{Error, Result};
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```edition2018
 /// # extern crate quote;
 /// #
 /// extern crate proc_macro;
@@ -646,7 +646,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```edition2018
 /// use syn::{Expr, Result};
 ///
 /// fn run() -> Result<()> {
@@ -680,7 +680,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///
 /// # Examples
 ///
-/// ```rust,no_run
+/// ```edition2018,no_run
 /// use std::error::Error;
 /// use std::fs::File;
 /// use std::io::Read;

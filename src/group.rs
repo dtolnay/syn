@@ -94,7 +94,7 @@ fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, Pa
 ///
 /// # Example
 ///
-/// ```rust
+/// ```edition2018
 /// # extern crate quote;
 /// # use quote::quote;
 /// #
@@ -152,7 +152,7 @@ macro_rules! parenthesized {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```edition2018
 /// # extern crate quote;
 /// # use quote::quote;
 /// #
@@ -231,7 +231,7 @@ macro_rules! braced {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```edition2018
 /// # extern crate proc_macro2;
 /// # extern crate quote;
 /// #

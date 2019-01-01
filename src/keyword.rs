@@ -7,7 +7,7 @@
 /// module called `kw` or `keyword` and that the resulting parser be invoked
 /// with a `kw::` or `keyword::` prefix.
 ///
-/// ```
+/// ```edition2018
 /// mod kw {
 ///     syn::custom_keyword!(whatever);
 /// }
@@ -43,7 +43,7 @@
 /// identifier that is not a keyword, these can be declared as custom keywords
 /// by crates that need to use them as such.
 ///
-/// ```
+/// ```edition2018
 /// use syn::{LitBool, LitStr, Result, Token};
 /// use syn::parse::{Parse, ParseStream};
 ///

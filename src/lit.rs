@@ -121,7 +121,7 @@ impl LitStr {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```edition2018
     /// # extern crate proc_macro2;
     /// #
     /// use proc_macro2::Span;

@@ -17,7 +17,7 @@ pub trait IdentExt: Sized + private::Sealed {
     /// This is useful when parsing a DSL which allows Rust keywords as
     /// identifiers.
     ///
-    /// ```rust
+    /// ```edition2018
     /// use syn::{Error, Ident, Result, Token};
     /// use syn::ext::IdentExt;
     /// use syn::parse::ParseStream;

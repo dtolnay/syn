@@ -358,7 +358,7 @@ pub mod parsing {
         ///
         /// # Example
         ///
-        /// ```
+        /// ```edition2018
         /// use syn::{Path, Result, Token};
         /// use syn::parse::{Parse, ParseStream};
         ///

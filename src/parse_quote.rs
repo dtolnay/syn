@@ -8,7 +8,7 @@
 ///
 /// [`Parse`]: parse/trait.Parse.html
 ///
-/// ```
+/// ```edition2018
 /// # extern crate quote;
 /// #
 /// use quote::quote;
@@ -35,7 +35,7 @@
 /// The following helper function adds a bound `T: HeapSize` to every type
 /// parameter `T` in the input generics.
 ///
-/// ```
+/// ```edition2018
 /// use syn::{parse_quote, Generics, GenericParam};
 ///
 /// // Add a bound `T: HeapSize` to every type parameter T.

@@ -292,7 +292,7 @@ impl Generics {
     /// Split a type's generics into the pieces required for impl'ing a trait
     /// for that type.
     ///
-    /// ```
+    /// ```edition2018
     /// # extern crate proc_macro2;
     /// # extern crate quote;
     /// #

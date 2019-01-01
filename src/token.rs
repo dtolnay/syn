@@ -12,7 +12,7 @@
 //!
 //! [`ItemStatic`]: ../struct.ItemStatic.html
 //!
-//! ```
+//! ```edition2018
 //! # use syn::{Attribute, Expr, Ident, Token, Type, Visibility};
 //! #
 //! pub struct ItemStatic {
@@ -40,7 +40,7 @@
 //! [`bracketed!`]: ../macro.bracketed.html
 //! [`braced!`]: ../macro.braced.html
 //!
-//! ```
+//! ```edition2018
 //! use syn::{Attribute, Result};
 //! use syn::parse::{Parse, ParseStream};
 //! #
