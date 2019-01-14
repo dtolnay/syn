@@ -89,6 +89,7 @@
 #[macro_export(local_inner_macros)]
 macro_rules! custom_keyword {
     ($ident:ident) => {
+        #[allow(non_camel_case_types)]
         pub struct $ident {
             pub span: $crate::export::Span,
         }
