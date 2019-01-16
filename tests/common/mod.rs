@@ -51,6 +51,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
+        // Until rustc has implemented RFC 2544
+        "tests/rust/src/test/ui/bastion-of-the-turbofish.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |

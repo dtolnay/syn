@@ -210,7 +210,25 @@ pub mod parsing {
 
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {
-            Self::parse_helper(input, false)
+            if input.peek(Token![dyn]) {
+                return Err(input.error("expected path"));
+            }
+
+            Ok(Path {
+                leading_colon: input.parse()?,
+                segments: {
+                    let mut segments = Punctuated::new();
+                    let value: PathSegment = input.parse()?;
+                    segments.push_value(value);
+                    while input.peek(Token![::]) {
+                        let punct: Token![::] = input.parse()?;
+                        segments.push_punct(punct);
+                        let value: PathSegment = input.parse()?;
+                        segments.push_value(value);
+                    }
+                    segments
+                },
+            })
         }
     }
 
@@ -284,12 +302,6 @@ pub mod parsing {
 
     impl Parse for PathSegment {
         fn parse(input: ParseStream) -> Result<Self> {
-            Self::parse_helper(input, false)
-        }
-    }
-
-    impl PathSegment {
-        fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
             if input.peek(Token![super])
                 || input.peek(Token![self])
                 || input.peek(Token![Self])
@@ -301,7 +313,12 @@ pub mod parsing {
             }
 
             let ident = input.parse()?;
-            if !expr_style && input.peek(Token![<]) && !input.peek(Token![<=])
+            if input.peek(Token![<])
+                && !input.peek(Token![<=])
+                && input
+                    .fork()
+                    .parse::<AngleBracketedGenericArguments>()
+                    .is_ok()
                 || input.peek(Token![::]) && input.peek3(Token![<])
             {
                 Ok(PathSegment {
@@ -436,31 +453,9 @@ pub mod parsing {
                 && self.segments[0].arguments.is_none()
                 && self.segments[0].ident == ident
         }
-
-        fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
-            if input.peek(Token![dyn]) {
-                return Err(input.error("expected path"));
-            }
-
-            Ok(Path {
-                leading_colon: input.parse()?,
-                segments: {
-                    let mut segments = Punctuated::new();
-                    let value = PathSegment::parse_helper(input, expr_style)?;
-                    segments.push_value(value);
-                    while input.peek(Token![::]) {
-                        let punct: Token![::] = input.parse()?;
-                        segments.push_punct(punct);
-                        let value = PathSegment::parse_helper(input, expr_style)?;
-                        segments.push_value(value);
-                    }
-                    segments
-                },
-            })
-        }
     }
 
-    pub fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {
+    pub fn qpath(input: ParseStream) -> Result<(Option<QSelf>, Path)> {
         if input.peek(Token![<]) {
             let lt_token: Token![<] = input.parse()?;
             let this: Type = input.parse()?;
@@ -475,7 +470,7 @@ pub mod parsing {
             let colon2_token: Token![::] = input.parse()?;
             let mut rest = Punctuated::new();
             loop {
-                let path = PathSegment::parse_helper(input, expr_style)?;
+                let path: PathSegment = input.parse()?;
                 rest.push_value(path);
                 if !input.peek(Token![::]) {
                     break;
@@ -507,7 +502,7 @@ pub mod parsing {
             };
             Ok((Some(qself), path))
         } else {
-            let path = Path::parse_helper(input, expr_style)?;
+            let path: Path = input.parse()?;
             Ok((None, path))
         }
     }

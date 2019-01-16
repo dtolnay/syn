@@ -628,7 +628,7 @@ pub mod parsing {
 
     impl Parse for TypePath {
         fn parse(input: ParseStream) -> Result<Self> {
-            let (qself, mut path) = path::parsing::qpath(input, false)?;
+            let (qself, mut path) = path::parsing::qpath(input)?;
 
             if path.segments.last().unwrap().value().arguments.is_empty()
                 && input.peek(token::Paren)

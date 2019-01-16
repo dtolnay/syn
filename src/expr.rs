@@ -2261,7 +2261,7 @@ pub mod parsing {
             #[cfg(feature = "full")]
             let attrs = input.call(Attribute::parse_outer)?;
 
-            let (qself, path) = path::parsing::qpath(input, true)?;
+            let (qself, path) = path::parsing::qpath(input)?;
 
             Ok(ExprPath {
                 attrs: attrs,
@@ -2546,7 +2546,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
-        let (qself, path) = path::parsing::qpath(input, true)?;
+        let (qself, path) = path::parsing::qpath(input)?;
 
         if input.peek(Token![..]) {
             return pat_range(input, qself, path).map(Pat::Range);
