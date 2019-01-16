@@ -1775,6 +1775,7 @@ pub mod parsing {
             let_token: input.parse()?,
             pats: {
                 let mut pats = Punctuated::new();
+                input.parse::<Option<Token![|]>>()?;
                 let value: Pat = input.parse()?;
                 pats.push_value(value);
                 while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
