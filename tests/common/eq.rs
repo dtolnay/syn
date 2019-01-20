@@ -29,7 +29,7 @@ use self::syntax::parse::token::{DelimToken, Lit, Token};
 use self::syntax::ptr::P;
 use self::syntax::source_map::Spanned;
 use self::syntax::symbol::Symbol;
-use self::syntax::tokenstream::{DelimSpan, ThinTokenStream, TokenStream, TokenTree};
+use self::syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use self::syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
@@ -413,15 +413,6 @@ impl SpanlessEq for Token {
 impl SpanlessEq for TokenStream {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&expand_tts(self), &expand_tts(other))
-    }
-}
-
-impl SpanlessEq for ThinTokenStream {
-    fn eq(&self, other: &Self) -> bool {
-        SpanlessEq::eq(
-            &TokenStream::from(self.clone()),
-            &TokenStream::from(other.clone()),
-        )
     }
 }
 
