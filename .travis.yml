@@ -58,3 +58,7 @@ matrix:
     - rust: nightly
       name: Clippy
   fast_finish: true
+
+env:
+  global:
+    - RUST_MIN_STACK=20000000
