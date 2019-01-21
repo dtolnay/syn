@@ -248,7 +248,11 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
 /// [syn-parse]: index.html#the-synparse-functions
 pub struct ParseBuffer<'a> {
-    scope: Span,
+    // For join, the identity of this Rc tracks the origin of forks.
+    // That is, any Rc which is Rc::ptr_eq are derived from the same cursor,
+    // and thus the cursor may be copied between them safely.
+    // Thus a new Rc must be created for a new buffer, and only be cloned on fork.
+    scope: Rc<Span>,
     // Instead of Cell<Cursor<'a>> so that ParseBuffer<'a> is covariant in 'a.
     // The rest of the code in this module needs to be careful that only a
     // cursor derived from this `cell` is ever assigned to this `cell`.
@@ -397,7 +401,7 @@ impl private {
         unexpected: Rc<Cell<Option<Span>>>,
     ) -> ParseBuffer {
         ParseBuffer {
-            scope: scope,
+            scope: Rc::new(scope),
             // See comment on `cell` in the struct definition.
             cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
             marker: PhantomData,
@@ -714,7 +718,7 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn lookahead1(&self) -> Lookahead1<'a> {
-        lookahead::new(self.scope, self.cursor())
+        lookahead::new(*self.scope, self.cursor())
     }
 
     /// Forks a parse stream so that parsing tokens out of either the original
@@ -839,7 +843,7 @@ impl<'a> ParseBuffer<'a> {
     /// ```
     pub fn fork(&self) -> Self {
         ParseBuffer {
-            scope: self.scope,
+            scope: Rc::clone(&self.scope),
             cell: self.cell.clone(),
             marker: PhantomData,
             // Not the parent's unexpected. Nothing cares whether the clone
@@ -897,8 +901,7 @@ impl<'a> ParseBuffer<'a> {
     ///             restricted: {
     ///                 let fork = input.fork();
     ///                 if let Ok(restricted) = fork.parse() {
-    ///                     // guarantee fork is derived from input
-    ///                     unsafe { input.join(&fork) };
+    ///                     input.join(&fork);
     ///                     Some(restricted)
     ///                 } else {
     ///                     None
@@ -937,31 +940,19 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     ///
-    /// # Safety
+    /// # Panics
     ///
     /// The forked stream that this joins with must be derived by forking this parse stream.
-    /// This _will_ be checked in the future by a panic.
     ///
     /// [`ParseStream::fork`]: #method.fork
-    pub unsafe fn join(&self, fork: &Self) {
-        #[cfg(procmacro2_semver_exempt)]
-        {
-            // This guarantees that the fork is derived from this parse stream,
-            // but is not a stable method. Instead, we leave the method unsafe
-            // and require the user to ensure that this holds.
-            //
-            // SAFETY TODO(CAD97): does this actually hold?
-            //
-            // It's definitely true that `self.scope.eq(&fork.scope)` follows from
-            // fork was derived from self. Is the reverse implication true,
-            // especially in face of `parse_from_str`?
-            assert!(
-                self.scope.eq(&fork.scope),
-                "Fork was not derived from parse stream it was joined to"
-            );
-        };
+    pub fn join(&self, fork: &Self) {
+        // See comment on `scope` in the struct definition.
+        assert!(
+            Rc::ptr_eq(&self.scope, &fork.scope),
+            "Fork was not derived from parse stream it was joined to"
+        );
         // See comment on `cell` in the struct definition.
-        self.cell.set(mem::transmute::<Cursor, Cursor<'static>>(fork.cursor()))
+        self.cell.set(unsafe { mem::transmute::<Cursor, Cursor<'static>>(fork.cursor()) })
     }
 
     /// Triggers an error at the current position of the parse stream.
@@ -993,7 +984,7 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn error<T: Display>(&self, message: T) -> Error {
-        error::new_at(self.scope, self.cursor(), message)
+        error::new_at(*self.scope, self.cursor(), message)
     }
 
     /// Speculatively parses tokens from this parse stream, advancing the
@@ -1065,7 +1056,7 @@ impl<'a> ParseBuffer<'a> {
         // to cast from Cursor<'c> to Cursor<'a>. If needed outside of Syn, it
         // would be safe to expose that API as a method on StepCursor.
         let (node, rest) = function(StepCursor {
-            scope: self.scope,
+            scope: *self.scope,
             cursor: self.cell.get(),
             marker: PhantomData,
         })?;
