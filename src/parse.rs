@@ -947,8 +947,9 @@ impl<'a> ParseBuffer<'a> {
     /// [`ParseStream::fork`]: #method.fork
     pub fn join(&self, fork: &Self) {
         // See comment on `scope` in the struct definition.
-        assert!(
-            Rc::ptr_eq(&self.scope, &fork.scope),
+        assert_eq!(
+            // Rc::ptr_eq for rustc < 1.17.0
+            &*self.scope as *const _, &*fork.scope as *const _,
             "Fork was not derived from parse stream it was joined to"
         );
         // See comment on `cell` in the struct definition.
