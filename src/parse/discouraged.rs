@@ -19,84 +19,75 @@ pub trait Speculative {
     /// an `A`, or that the `A`s are finished and its time to start parsing `B`s.
     /// Use with care.
     ///
+    /// Also note that if `A` is a subset of `B`, `A* B*` can be parsed by parsing
+    /// `B*` and removing the leading members of `A` from the repetition, bypassing
+    /// the need to involve the downsides associated with speculative parsing.
+    ///
+    /// [`ParseStream::fork`]: ../struct.ParseBuffer.html#method.fork
+    ///
     /// # Example
     ///
-    /// Let's show the example from [`ParseStream::fork`] of `pub(restricted)`
-    /// syntax, but using the fork for the speculative parsing instead of just
-    /// using it to peek at what's coming.
+    /// Let's [kill the turbofish][RFC#2544]! Specifically, according to [RFC#2544],
+    /// [`PathSegment`] parsing should always try to consume a following `<` token
+    /// as the start of generic arguments, and reset to the `<` if that fails
+    /// (e.g. the token is acting as a less-than operator).
     ///
-    /// The fork will speculatively attempt to parse the `(restricted)` part of
-    /// `pub(restricted)`. If successful, the main stream will be joined up;
-    /// otherwise, control flow returns to the main parse stream without the
-    /// speculative parsing committed to the main stream.
+    /// This is the exact kind of parsing behavior which requires the "fork, try,
+    /// commit" behavior that [`ParseStream::fork`] discourages. With `advance_to`,
+    /// we can avoid having to parse the speculatively parsed content a second time.
+    ///
+    /// This change in behavior can be implemented in syn by replacing just the
+    /// `Parse` implementation for `PathSegment`:
     ///
     /// ```edition2018
-    /// use syn::{parenthesized, token, Ident, Path, Result, Token};
-    /// use syn::ext::IdentExt;
-    /// use syn::parse::{Parse, ParseStream};
+    /// # use syn::{Ident, PathArguments, Result, Error};
+    /// # use syn::parse::{Parse, ParseStream};
+    /// use syn::parse::discouraged::Speculative;
     ///
-    /// struct PubVisibility {
-    ///     pub_token: Token![pub],
-    ///     restricted: Option<Restricted>,
+    /// pub struct PathSegment {
+    ///     pub ident: Ident,
+    ///     pub arguments: PathArguments;
     /// }
     ///
-    /// struct Restricted {
-    ///     paren_token: token::Paren,
-    ///     in_token: Option<Token![in]>,
-    ///     path: Path,
-    /// }
-    ///
-    /// impl Parse for PubVisibility {
+    /// impl Parse for PathSegment {
     ///     fn parse(input: ParseStream) -> Result<Self> {
-    ///         Ok(PubVisibility {
-    ///             pub_token: input.parse()?,
-    ///             restricted: {
-    ///                 let fork = input.fork();
-    ///                 if let Ok(restricted) = fork.parse() {
-    ///                     input.join(&fork);
-    ///                     Some(restricted)
-    ///                 } else {
-    ///                     None
-    ///                 }
-    ///             }
-    ///         })
-    ///     }
-    /// }
-    ///
-    /// impl Parse for Restricted {
-    ///     fn parse(input: ParseStream) -> Result<Self> {
-    ///         let content;
-    ///         let paren_token = parenthesized!(content in input);
-    ///
-    ///         let la = content.lookahead1();
-    ///         if la.peek(Token![crate])
-    ///             || la.peek(Token![self])
-    ///             || la.peek(Token![super])
+    ///         if input.peek(Token![super])
+    ///             || input.peek(Token![self])
+    ///             || input.peek(Token![Self])
+    ///             || input.peek(Token![crate])
+    ///             || input.peek(Token![extern])
     ///         {
-    ///             Ok(Restricted {
-    ///                 paren_token: paren_token,
-    ///                 in_token: None,
-    ///                 path: Path::from(content.call(Ident::parse_any)?),
-    ///             })
-    ///         } else if la.peek(Token![in]) {
-    ///             Ok(Restricted {
-    ///                 paren_token: paren_token,
-    ///                 in_token: Some(content.parse()?),
-    ///                 path: content.call(Path::parse_mod_style)?,
-    ///             })
-    ///         } else {
-    ///             // never seen due to if let in <Parse for PubVisibility>
-    ///             Err(la.error())
+    ///             let ident = input.call(Ident::parse_any)?;
+    ///             return Ok(PathSegment::from(ident));
     ///         }
+    ///
+    ///         let ident = input.parse()?;
+    ///         if input.peek(Token![::]) && input.peek3(Token![<]) {
+    ///             return Ok(PathSegment {
+    ///                 ident: ident,
+    ///                 arguments: PathArguments::AngleBracketed(input.parse()?),
+    ///             });
+    ///         }
+    ///         if input.peek(Token![<]) && !input.peek(Token![<=]) {
+    ///             let fork = input.fork();
+    ///             if let Ok(arguments) = fork.parse() {
+    ///                 return Ok(PathSegment {
+    ///                     ident: ident,
+    ///                     arugments: PathArguments::AngleBracketed(arguments),
+    ///                 });
+    ///             }
+    ///         }
+    ///         Ok(PathSegment::from(ident))
     ///     }
     /// }
     /// ```
     ///
+    /// [RFC#2544]: https://github.com/rust-lang/rfcs/pull/2544
+    /// [`PathSegment`]: ../../struct.PathSegment.html
+    ///
     /// # Panics
     ///
     /// The forked stream that this joins with must be derived by forking this parse stream.
-    ///
-    /// [`ParseStream::fork`]: ../struct.ParseBuffer.html#method.fork
     fn advance_to(&self, fork: &Self);
 }
 
