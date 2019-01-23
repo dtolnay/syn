@@ -17,7 +17,7 @@ use self::syntax::ast::{
     GenericParam, GenericParamKind, Generics, GlobalAsm, Guard, Ident, ImplItem, ImplItemKind,
     ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label,
     Lifetime, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac_, MacroDef, MethodSig,
-    Mod, Movability, MutTy, Mutability, NodeId, ParenthesisedArgs, Pat, PatKind, Path, PathSegment,
+    Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat, PatKind, Path, PathSegment,
     PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrStyle, StructField,
     TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind,
     TypeBinding, UintTy, UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, VariantData, Variant_,
@@ -294,7 +294,7 @@ spanless_eq_struct!(MacroDef; tokens legacy);
 spanless_eq_struct!(MethodSig; header decl);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
-spanless_eq_struct!(ParenthesisedArgs; span inputs output);
+spanless_eq_struct!(ParenthesizedArgs; span inputs output);
 spanless_eq_struct!(Pat; id node span);
 spanless_eq_struct!(Path; span segments);
 spanless_eq_struct!(PathSegment; ident id args);
