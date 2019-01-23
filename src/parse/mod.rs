@@ -756,6 +756,7 @@ impl<'a> ParseBuffer<'a> {
     /// speculative parsing, consider using [`ParseStream::step`] instead.
     ///
     /// [`ParseStream::step`]: #method.step
+    /// [`parse::discouraged::Speculative`]: ./discouraged/trait.Speculative.html
     ///
     /// # Example
     ///

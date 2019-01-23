@@ -96,7 +96,7 @@ pub trait Speculative {
     ///
     /// The forked stream that this joins with must be derived by forking this parse stream.
     ///
-    /// [`ParseStream::fork`]: #method.fork
+    /// [`ParseStream::fork`]: ../struct.ParseBuffer.html#method.fork
     fn advance_to(&self, fork: &Self);
 }
 
