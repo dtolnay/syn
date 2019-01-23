@@ -250,7 +250,7 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
 /// [syn-parse]: index.html#the-synparse-functions
 pub struct ParseBuffer<'a> {
-    // For join, the identity of this Rc tracks the origin of forks.
+    // The identity of this Rc tracks the origin of forks.
     // That is, any Rc which is Rc::ptr_eq are derived from the same cursor,
     // and thus the cursor may be copied between them safely.
     // Thus a new Rc must be created for a new buffer, and only be cloned on fork.
@@ -750,6 +750,8 @@ impl<'a> ParseBuffer<'a> {
     /// parse stream. Only use a fork when the amount of work performed against
     /// the fork is small and bounded.
     ///
+    /// For higher level speculative parsing, [`parse::discouraged::Speculative`]
+    /// is provided alongside matching tradeoffs to enable the pattern.
     /// For a lower level but occasionally more performant way to perform
     /// speculative parsing, consider using [`ParseStream::step`] instead.
     ///

@@ -4,7 +4,7 @@ use super::*;
 
 /// Extensions to the `ParseStream` API to support speculative parsing.
 pub trait Speculative {
-    /// Join this parse stream up with a forked parse stream.
+    /// Advance this parse stream to the position of a forked parse stream.
     ///
     /// This is the opposite operation to [`ParseStream::fork`].
     /// You can fork a parse stream, perform some speculative parsing, then join
@@ -97,11 +97,11 @@ pub trait Speculative {
     /// The forked stream that this joins with must be derived by forking this parse stream.
     ///
     /// [`ParseStream::fork`]: #method.fork
-    fn join(&self, fork: &Self);
+    fn advance_to(&self, fork: &Self);
 }
 
-impl Speculative for ParseBuffer {
-    fn join(&self, fork: &Self) {
+impl<'a> Speculative for ParseBuffer<'a> {
+    fn advance_to(&self, fork: &Self) {
         // See comment on `scope` in the struct definition.
         assert_eq!(
             // Rc::ptr_eq for rustc < 1.17.0
