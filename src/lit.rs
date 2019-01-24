@@ -252,6 +252,35 @@ impl LitChar {
 }
 
 impl LitInt {
+    #[cfg(feature = "u128")]
+    pub fn new(value: u64, suffix: IntSuffix, span: Span) -> Self {
+        LitInt::new_u128(u128::from(value), suffix, span)
+    }
+
+    #[cfg(feature = "u128")]
+    pub fn new_u128(value: u128, suffix: IntSuffix, span: Span) -> Self {
+        let mut token = match suffix {
+            IntSuffix::Isize => Literal::isize_suffixed(value as isize),
+            IntSuffix::I8 => Literal::i8_suffixed(value as i8),
+            IntSuffix::I16 => Literal::i16_suffixed(value as i16),
+            IntSuffix::I32 => Literal::i32_suffixed(value as i32),
+            IntSuffix::I64 => Literal::i64_suffixed(value as i64),
+            IntSuffix::I128 => value::to_literal(&format!("{}i128", value)),
+            IntSuffix::Usize => Literal::usize_suffixed(value as usize),
+            IntSuffix::U8 => Literal::u8_suffixed(value as u8),
+            IntSuffix::U16 => Literal::u16_suffixed(value as u16),
+            IntSuffix::U32 => Literal::u32_suffixed(value as u32),
+            IntSuffix::U64 => Literal::u64_suffixed(value as u64),
+            IntSuffix::U128 => value::to_literal(&format!("{}u128", value)),
+            IntSuffix::None => value::to_literal(&format!("{}", value)),
+        };
+        token.set_span(span);
+        LitInt { token: token }
+    }
+
+
+
+    #[cfg(not(feature = "u128"))]
     pub fn new(value: u64, suffix: IntSuffix, span: Span) -> Self {
         let mut token = match suffix {
             IntSuffix::Isize => Literal::isize_suffixed(value as isize),
@@ -264,14 +293,25 @@ impl LitInt {
             IntSuffix::U8 => Literal::u8_suffixed(value as u8),
             IntSuffix::U16 => Literal::u16_suffixed(value as u16),
             IntSuffix::U32 => Literal::u32_suffixed(value as u32),
-            IntSuffix::U64 => Literal::u64_suffixed(value),
+            IntSuffix::U64 => Literal::u64_suffixed(value as u64),
             IntSuffix::U128 => value::to_literal(&format!("{}u128", value)),
-            IntSuffix::None => Literal::u64_unsuffixed(value),
+            IntSuffix::None => value::to_literal(&format!("{}", value)),
         };
         token.set_span(span);
         LitInt { token: token }
     }
 
+    #[cfg(feature = "u128")]
+    pub fn value(&self) -> u64 {
+        value::parse_lit_int(&self.token.to_string()).unwrap() as u64
+    }
+
+    #[cfg(feature = "u128")]
+    pub fn value_u128(&self) -> u128 {
+        value::parse_lit_int(&self.token.to_string()).unwrap()
+    }
+
+    #[cfg(not(feature = "u128"))]
     pub fn value(&self) -> u64 {
         value::parse_lit_int(&self.token.to_string()).unwrap()
     }
@@ -993,7 +1033,13 @@ mod value {
         }
     }
 
-    pub fn parse_lit_int(mut s: &str) -> Option<u64> {
+    #[cfg(feature = "u128")]
+    pub type IntValue = u128;
+
+    #[cfg(not(feature = "u128"))]
+    pub type IntValue = u64;
+
+    pub fn parse_lit_int(mut s: &str) -> Option<IntValue> {
         let base = match (byte(s, 0), byte(s, 1)) {
             (b'0', b'x') => {
                 s = &s[2..];
@@ -1011,13 +1057,13 @@ mod value {
             _ => unreachable!(),
         };
 
-        let mut value = 0u64;
+        let mut value: IntValue = 0;
         loop {
             let b = byte(s, 0);
             let digit = match b {
-                b'0'...b'9' => u64::from(b - b'0'),
-                b'a'...b'f' if base > 10 => 10 + u64::from(b - b'a'),
-                b'A'...b'F' if base > 10 => 10 + u64::from(b - b'A'),
+                b'0'...b'9' => IntValue::from(b - b'0'),
+                b'a'...b'f' if base > 10 => 10 + IntValue::from(b - b'a'),
+                b'A'...b'F' if base > 10 => 10 + IntValue::from(b - b'A'),
                 b'_' => {
                     s = &s[1..];
                     continue;
