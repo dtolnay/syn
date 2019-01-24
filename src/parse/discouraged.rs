@@ -42,14 +42,28 @@ pub trait Speculative {
     /// `Parse` implementation for `PathSegment`:
     ///
     /// ```edition2018
-    /// # use syn::{Ident, PathArguments, Result, Error};
-    /// # use syn::parse::{Parse, ParseStream};
+    /// # use syn::ext::IdentExt;
     /// use syn::parse::discouraged::Speculative;
+    /// # use syn::parse::{Parse, ParseStream};
+    /// # use syn::{Ident, PathArguments, Result, Token};
     ///
     /// pub struct PathSegment {
     ///     pub ident: Ident,
-    ///     pub arguments: PathArguments;
+    ///     pub arguments: PathArguments,
     /// }
+    ///
+    /// # impl<T> From<T> for PathSegment
+    /// # where
+    /// #     T: Into<Ident>,
+    /// # {
+    /// #     fn from(ident: T) -> Self {
+    /// #         PathSegment {
+    /// #             ident: ident.into(),
+    /// #             arguments: PathArguments::None,
+    /// #         }
+    /// #     }
+    /// # }
+    ///
     ///
     /// impl Parse for PathSegment {
     ///     fn parse(input: ParseStream) -> Result<Self> {
@@ -83,6 +97,8 @@ pub trait Speculative {
     ///         Ok(PathSegment::from(ident))
     ///     }
     /// }
+    ///
+    /// # syn::parse_str::<PathSegment>("a<b,c>").unwrap();
     /// ```
     ///
     /// [RFC#2544]: https://github.com/rust-lang/rfcs/pull/2544
