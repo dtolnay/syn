@@ -27,7 +27,9 @@ pub trait Speculative {
     ///
     /// # Example
     ///
-    /// Let's [kill the turbofish][RFC#2544]! Specifically, according to [RFC#2544],
+    /// There has been chatter about the possibility of making the colons in the
+    /// turbofish syntax like `path::to::<T>` no longer required by accepting
+    /// `path::to<T>` in expression position. Specifically, according to [RFC#2544],
     /// [`PathSegment`] parsing should always try to consume a following `<` token
     /// as the start of generic arguments, and reset to the `<` if that fails
     /// (e.g. the token is acting as a less-than operator).
@@ -71,9 +73,10 @@ pub trait Speculative {
     ///         if input.peek(Token![<]) && !input.peek(Token![<=]) {
     ///             let fork = input.fork();
     ///             if let Ok(arguments) = fork.parse() {
+    ///                 input.advance_to(&fork);
     ///                 return Ok(PathSegment {
     ///                     ident: ident,
-    ///                     arugments: PathArguments::AngleBracketed(arguments),
+    ///                     arguments: PathArguments::AngleBracketed(arguments),
     ///                 });
     ///             }
     ///         }
