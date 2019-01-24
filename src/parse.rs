@@ -188,6 +188,7 @@
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
+#[path = "discouraged.rs"]
 pub mod discouraged;
 
 use std::cell::Cell;
