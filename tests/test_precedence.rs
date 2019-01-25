@@ -22,6 +22,7 @@ extern crate rustc_data_structures;
 extern crate smallvec;
 extern crate syn;
 extern crate syntax;
+extern crate syntax_pos;
 extern crate walkdir;
 
 mod features;
@@ -214,8 +215,8 @@ fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_data_structures::thin_vec::ThinVec;
     use smallvec::SmallVec;
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
-    use syntax::ext::quote::rt::DUMMY_SP;
     use syntax::fold::{self, Folder};
+    use syntax_pos::DUMMY_SP;
 
     struct BracketsFolder {
         failed: bool,
