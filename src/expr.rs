@@ -799,8 +799,8 @@ ast_enum_of_structs! {
         /// A path pattern like `Color::Red`, optionally qualified with a
         /// self-type.
         ///
-        /// Unquailfied path patterns can legally refer to variants, structs,
-        /// constants or associated constants. Quailfied path patterns like
+        /// Unqualified path patterns can legally refer to variants, structs,
+        /// constants or associated constants. Qualified path patterns like
         /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
         /// associated constants.
         ///
