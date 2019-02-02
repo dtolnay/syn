@@ -68,6 +68,25 @@
 //!     }
 //! }
 //! ```
+//!
+//! # Other operations
+//!
+//! Every keyword and punctuation token supports the following operations.
+//!
+//! - [Peeking] — `input.peek(Token![...])`
+//!
+//! - [Parsing] — `input.parse::<Token![...]>()?`
+//!
+//! - [Printing] — `quote!( ... #the_token ... )`
+//!
+//! - Construction from a [`Span`] — `let the_token = Token![...](sp)`
+//!
+//! - Field access to its span — `let sp = the_token.span`
+//!
+//! [Peeking]: ../parse/struct.ParseBuffer.html#method.peek
+//! [Parsing]: ../parse/struct.ParseBuffer.html#method.parse
+//! [Printing]: https://docs.rs/quote/0.6/quote/trait.ToTokens.html
+//! [`Span`]: ../struct.Span.html
 
 use std;
 #[cfg(feature = "extra-traits")]
