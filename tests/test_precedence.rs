@@ -211,80 +211,89 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// form of the resulting expression.
 ///
 /// This method operates on libsyntax objects.
-fn libsyntax_brackets(libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
+fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_data_structures::thin_vec::ThinVec;
     use smallvec::SmallVec;
+    use std::mem;
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
-    use syntax::fold::{self, Folder};
+    use syntax::mut_visit::{self, MutVisitor};
     use syntax_pos::DUMMY_SP;
 
-    struct BracketsFolder {
+    struct BracketsVisitor {
         failed: bool,
     };
-    impl Folder for BracketsFolder {
-        fn fold_expr(&mut self, e: P<Expr>) -> P<Expr> {
-            e.map(|e| match e.node {
-                ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {
-                    fold::noop_fold_expr(e, self)
+    impl MutVisitor for BracketsVisitor {
+        fn visit_expr(&mut self, e: &mut P<Expr>) {
+            mut_visit::noop_visit_expr(e, self);
+            match e.node {
+                ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {}
+                _ => {
+                    let inner = mem::replace(
+                        e,
+                        P(Expr {
+                            id: ast::DUMMY_NODE_ID,
+                            node: ExprKind::Err,
+                            span: DUMMY_SP,
+                            attrs: ThinVec::new(),
+                        }),
+                    );
+                    e.node = ExprKind::Paren(inner);
                 }
-                _ => Expr {
-                    id: ast::DUMMY_NODE_ID,
-                    node: ExprKind::Paren(P(fold::noop_fold_expr(e, self))),
-                    span: DUMMY_SP,
-                    attrs: ThinVec::new(),
-                },
-            })
+            }
         }
 
-        fn fold_field(&mut self, f: Field) -> Field {
-            Field {
-                expr: if f.is_shorthand {
-                    f.expr.map(|e| fold::noop_fold_expr(e, self))
-                } else {
-                    self.fold_expr(f.expr)
-                },
-                ..f
+        fn visit_field(&mut self, f: &mut Field) {
+            if f.is_shorthand {
+                mut_visit::noop_visit_expr(&mut f.expr, self);
+            } else {
+                self.visit_expr(&mut f.expr);
             }
         }
 
         // We don't want to look at expressions that might appear in patterns or
         // types yet. We'll look into comparing those in the future. For now
         // focus on expressions appearing in other places.
-        fn fold_pat(&mut self, pat: P<Pat>) -> P<Pat> {
-            pat
+        fn visit_pat(&mut self, pat: &mut P<Pat>) {
+            let _ = pat;
         }
 
-        fn fold_ty(&mut self, ty: P<Ty>) -> P<Ty> {
-            ty
+        fn visit_ty(&mut self, ty: &mut P<Ty>) {
+            let _ = ty;
         }
 
-        fn fold_stmt(&mut self, stmt: Stmt) -> SmallVec<[Stmt; 1]> {
+        fn flat_map_stmt(&mut self, stmt: Stmt) -> SmallVec<[Stmt; 1]> {
             let node = match stmt.node {
                 // Don't wrap toplevel expressions in statements.
-                StmtKind::Expr(e) => StmtKind::Expr(e.map(|e| fold::noop_fold_expr(e, self))),
-                StmtKind::Semi(e) => StmtKind::Semi(e.map(|e| fold::noop_fold_expr(e, self))),
+                StmtKind::Expr(mut e) => {
+                    mut_visit::noop_visit_expr(&mut e, self);
+                    StmtKind::Expr(e)
+                }
+                StmtKind::Semi(mut e) => {
+                    mut_visit::noop_visit_expr(&mut e, self);
+                    StmtKind::Semi(e)
+                }
                 s => s,
             };
 
             smallvec![Stmt { node, ..stmt }]
         }
 
-        fn fold_mac(&mut self, mac: Mac) -> Mac {
+        fn visit_mac(&mut self, mac: &mut Mac) {
             // By default when folding over macros, libsyntax panics. This is
             // because it's usually not what you want, you want to run after
             // macro expansion. We do want to do that (syn doesn't do macro
-            // expansion), so we implement fold_mac to just return the macro
+            // expansion), so we implement visit_mac to just return the macro
             // unchanged.
-            mac
+            let _ = mac;
         }
     }
 
-    let mut folder = BracketsFolder { failed: false };
-    let e = folder.fold_expr(libsyntax_expr);
+    let mut folder = BracketsVisitor { failed: false };
+    folder.visit_expr(&mut libsyntax_expr);
     if folder.failed {
         None
     } else {
-        Some(e)
+        Some(libsyntax_expr)
     }
 }
 
