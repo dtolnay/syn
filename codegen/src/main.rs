@@ -996,6 +996,7 @@ fn write_file(path: &str, content: TokenStream) {
     config.set().emit_mode(rustfmt::EmitMode::Stdout);
     config.set().verbose(rustfmt::Verbosity::Quiet);
     config.set().format_macro_matchers(true);
+    config.set().normalize_doc_attributes(true);
     let mut session = rustfmt::Session::new(config, Some(&mut file));
     session
         .format(rustfmt::Input::Text(content.to_string()))

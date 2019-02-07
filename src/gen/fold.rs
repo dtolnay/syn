@@ -19,13 +19,13 @@ macro_rules! full {
         unreachable!()
     };
 }
-#[doc = r" Syntax tree traversal to transform the nodes of an owned syntax tree."]
-#[doc = r""]
-#[doc = r" See the [module documentation] for details."]
-#[doc = r""]
-#[doc = r" [module documentation]: index.html"]
-#[doc = r""]
-#[doc = r#" *This trait is available if Syn is built with the `"fold"` feature.*"#]
+/// Syntax tree traversal to transform the nodes of an owned syntax tree.
+///
+/// See the [module documentation] for details.
+///
+/// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `"fold"` feature.*
 pub trait Fold {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_abi(&mut self, i: Abi) -> Abi {

@@ -22,14 +22,14 @@ macro_rules! full {
 macro_rules! skip {
     ($($tt:tt)*) => {};
 }
-#[doc = r" Syntax tree traversal to mutate an exclusive borrow of a syntax tree in"]
-#[doc = r" place."]
-#[doc = r""]
-#[doc = r" See the [module documentation] for details."]
-#[doc = r""]
-#[doc = r" [module documentation]: index.html"]
-#[doc = r""]
-#[doc = r#" *This trait is available if Syn is built with the `"visit-mut"` feature.*"#]
+/// Syntax tree traversal to mutate an exclusive borrow of a syntax tree in
+/// place.
+///
+/// See the [module documentation] for details.
+///
+/// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `"visit-mut"` feature.*
 pub trait VisitMut {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_abi_mut(&mut self, i: &mut Abi) {

@@ -23,13 +23,13 @@ macro_rules! full {
 macro_rules! skip {
     ($($tt:tt)*) => {};
 }
-#[doc = r" Syntax tree traversal to walk a shared borrow of a syntax tree."]
-#[doc = r""]
-#[doc = r" See the [module documentation] for details."]
-#[doc = r""]
-#[doc = r" [module documentation]: index.html"]
-#[doc = r""]
-#[doc = r#" *This trait is available if Syn is built with the `"visit"` feature.*"#]
+/// Syntax tree traversal to walk a shared borrow of a syntax tree.
+///
+/// See the [module documentation] for details.
+///
+/// [module documentation]: index.html
+///
+/// *This trait is available if Syn is built with the `"visit"` feature.*
 pub trait Visit<'ast> {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_abi(&mut self, i: &'ast Abi) {
