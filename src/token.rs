@@ -86,7 +86,7 @@
 //! [Peeking]: ../parse/struct.ParseBuffer.html#method.peek
 //! [Parsing]: ../parse/struct.ParseBuffer.html#method.parse
 //! [Printing]: https://docs.rs/quote/0.6/quote/trait.ToTokens.html
-/// [`Span`]: https://docs.rs/proc-macro2/0.4/proc_macro2/struct.Span.html
+//! [`Span`]: https://docs.rs/proc-macro2/0.4/proc_macro2/struct.Span.html
 
 use std;
 #[cfg(feature = "extra-traits")]
