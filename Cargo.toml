@@ -49,3 +49,6 @@ all-features = true
 
 [badges]
 travis-ci = { repository = "dtolnay/syn" }
+
+[workspace]
+members = ["dev"]
