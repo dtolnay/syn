@@ -926,7 +926,7 @@ pub fn fold_arg_captured<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgCaptured) ->
 #[cfg(feature = "full")]
 pub fn fold_arg_self<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgSelf) -> ArgSelf {
     ArgSelf {
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         self_token: Token![self](tokens_helper(_visitor, &_i.self_token.span)),
     }
 }
@@ -935,7 +935,7 @@ pub fn fold_arg_self_ref<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -> 
     ArgSelfRef {
         and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
         lifetime: (_i.lifetime).map(|it| _visitor.fold_lifetime(it)),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         self_token: Token![self](tokens_helper(_visitor, &_i.self_token.span)),
     }
 }
@@ -948,7 +948,7 @@ pub fn fold_arm<V: Fold + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
         pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
         guard: (_i.guard).map(|it| {
             (
-                Token ! [ if ](tokens_helper(_visitor, &(it).0.span)),
+                Token![if](tokens_helper(_visitor, &(it).0.span)),
                 Box::new(_visitor.fold_expr(*(it).1)),
             )
         }),
@@ -1111,7 +1111,7 @@ pub fn fold_bound_lifetimes<V: Fold + ?Sized>(
     _i: BoundLifetimes,
 ) -> BoundLifetimes {
     BoundLifetimes {
-        for_token: Token ! [ for ](tokens_helper(_visitor, &_i.for_token.span)),
+        for_token: Token![for](tokens_helper(_visitor, &_i.for_token.span)),
         lt_token: Token ! [ < ](tokens_helper(_visitor, &_i.lt_token.spans)),
         lifetimes: FoldHelper::lift(_i.lifetimes, |it| _visitor.fold_lifetime_def(it)),
         gt_token: Token ! [ > ](tokens_helper(_visitor, &_i.gt_token.spans)),
@@ -1121,7 +1121,7 @@ pub fn fold_bound_lifetimes<V: Fold + ?Sized>(
 pub fn fold_const_param<V: Fold + ?Sized>(_visitor: &mut V, _i: ConstParam) -> ConstParam {
     ConstParam {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        const_token: Token ! [ const ](tokens_helper(_visitor, &_i.const_token.span)),
+        const_token: Token![const](tokens_helper(_visitor, &_i.const_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: _visitor.fold_type(_i.ty),
@@ -1148,7 +1148,7 @@ pub fn fold_data<V: Fold + ?Sized>(_visitor: &mut V, _i: Data) -> Data {
 #[cfg(feature = "derive")]
 pub fn fold_data_enum<V: Fold + ?Sized>(_visitor: &mut V, _i: DataEnum) -> DataEnum {
     DataEnum {
-        enum_token: Token ! [ enum ](tokens_helper(_visitor, &_i.enum_token.span)),
+        enum_token: Token![enum](tokens_helper(_visitor, &_i.enum_token.span)),
         brace_token: Brace(tokens_helper(_visitor, &_i.brace_token.span)),
         variants: FoldHelper::lift(_i.variants, |it| _visitor.fold_variant(it)),
     }
@@ -1156,7 +1156,7 @@ pub fn fold_data_enum<V: Fold + ?Sized>(_visitor: &mut V, _i: DataEnum) -> DataE
 #[cfg(feature = "derive")]
 pub fn fold_data_struct<V: Fold + ?Sized>(_visitor: &mut V, _i: DataStruct) -> DataStruct {
     DataStruct {
-        struct_token: Token ! [ struct ](tokens_helper(_visitor, &_i.struct_token.span)),
+        struct_token: Token![struct](tokens_helper(_visitor, &_i.struct_token.span)),
         fields: _visitor.fold_fields(_i.fields),
         semi_token: (_i.semi_token).map(|it| Token ! [ ; ](tokens_helper(_visitor, &it.spans))),
     }
@@ -1268,7 +1268,7 @@ pub fn fold_expr_async<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprAsync) -> Exp
     ExprAsync {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         async_token: Token![async](tokens_helper(_visitor, &_i.async_token.span)),
-        capture: (_i.capture).map(|it| Token ! [ move ](tokens_helper(_visitor, &it.span))),
+        capture: (_i.capture).map(|it| Token![move](tokens_helper(_visitor, &it.span))),
         block: _visitor.fold_block(_i.block),
     }
 }
@@ -1295,7 +1295,7 @@ pub fn fold_expr_block<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprBlock) -> Exp
 pub fn fold_expr_box<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprBox) -> ExprBox {
     ExprBox {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        box_token: Token ! [ box ](tokens_helper(_visitor, &_i.box_token.span)),
+        box_token: Token![box](tokens_helper(_visitor, &_i.box_token.span)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
     }
 }
@@ -1323,7 +1323,7 @@ pub fn fold_expr_cast<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprCast) -> ExprC
     ExprCast {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
-        as_token: Token ! [ as ](tokens_helper(_visitor, &_i.as_token.span)),
+        as_token: Token![as](tokens_helper(_visitor, &_i.as_token.span)),
         ty: Box::new(_visitor.fold_type(*_i.ty)),
     }
 }
@@ -1333,8 +1333,8 @@ pub fn fold_expr_closure<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprClosure) ->
     ExprClosure {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
-        movability: (_i.movability).map(|it| Token ! [ static ](tokens_helper(_visitor, &it.span))),
-        capture: (_i.capture).map(|it| Token ! [ move ](tokens_helper(_visitor, &it.span))),
+        movability: (_i.movability).map(|it| Token![static](tokens_helper(_visitor, &it.span))),
+        capture: (_i.capture).map(|it| Token![move](tokens_helper(_visitor, &it.span))),
         or1_token: Token ! [ | ](tokens_helper(_visitor, &_i.or1_token.spans)),
         inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_fn_arg(it)),
         or2_token: Token ! [ | ](tokens_helper(_visitor, &_i.or2_token.spans)),
@@ -1366,9 +1366,9 @@ pub fn fold_expr_for_loop<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprForLoop) -
     ExprForLoop {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         label: (_i.label).map(|it| _visitor.fold_label(it)),
-        for_token: Token ! [ for ](tokens_helper(_visitor, &_i.for_token.span)),
+        for_token: Token![for](tokens_helper(_visitor, &_i.for_token.span)),
         pat: Box::new(_visitor.fold_pat(*_i.pat)),
-        in_token: Token ! [ in ](tokens_helper(_visitor, &_i.in_token.span)),
+        in_token: Token![in](tokens_helper(_visitor, &_i.in_token.span)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
         body: _visitor.fold_block(_i.body),
     }
@@ -1387,12 +1387,12 @@ pub fn fold_expr_group<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprGroup) -> Exp
 pub fn fold_expr_if<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprIf) -> ExprIf {
     ExprIf {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        if_token: Token ! [ if ](tokens_helper(_visitor, &_i.if_token.span)),
+        if_token: Token![if](tokens_helper(_visitor, &_i.if_token.span)),
         cond: Box::new(_visitor.fold_expr(*_i.cond)),
         then_branch: _visitor.fold_block(_i.then_branch),
         else_branch: (_i.else_branch).map(|it| {
             (
-                Token ! [ else ](tokens_helper(_visitor, &(it).0.span)),
+                Token![else](tokens_helper(_visitor, &(it).0.span)),
                 Box::new(_visitor.fold_expr(*(it).1)),
             )
         }),
@@ -1422,7 +1422,7 @@ pub fn fold_expr_index<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprIndex) -> Exp
 pub fn fold_expr_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprLet) -> ExprLet {
     ExprLet {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        let_token: Token ! [ let ](tokens_helper(_visitor, &_i.let_token.span)),
+        let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
         pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
@@ -1441,7 +1441,7 @@ pub fn fold_expr_loop<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprLoop) -> ExprL
     ExprLoop {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         label: (_i.label).map(|it| _visitor.fold_label(it)),
-        loop_token: Token ! [ loop ](tokens_helper(_visitor, &_i.loop_token.span)),
+        loop_token: Token![loop](tokens_helper(_visitor, &_i.loop_token.span)),
         body: _visitor.fold_block(_i.body),
     }
 }
@@ -1458,7 +1458,7 @@ pub fn fold_expr_macro<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprMacro) -> Exp
 pub fn fold_expr_match<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprMatch) -> ExprMatch {
     ExprMatch {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        match_token: Token ! [ match ](tokens_helper(_visitor, &_i.match_token.span)),
+        match_token: Token![match](tokens_helper(_visitor, &_i.match_token.span)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
         brace_token: Brace(tokens_helper(_visitor, &_i.brace_token.span)),
         arms: FoldHelper::lift(_i.arms, |it| _visitor.fold_arm(it)),
@@ -1512,7 +1512,7 @@ pub fn fold_expr_reference<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprReference
     ExprReference {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
     }
 }
@@ -1598,7 +1598,7 @@ pub fn fold_expr_unary<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprUnary) -> Exp
 pub fn fold_expr_unsafe<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprUnsafe) -> ExprUnsafe {
     ExprUnsafe {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        unsafe_token: Token ! [ unsafe ](tokens_helper(_visitor, &_i.unsafe_token.span)),
+        unsafe_token: Token![unsafe](tokens_helper(_visitor, &_i.unsafe_token.span)),
         block: _visitor.fold_block(_i.block),
     }
 }
@@ -1612,7 +1612,7 @@ pub fn fold_expr_while<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> Exp
     ExprWhile {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         label: (_i.label).map(|it| _visitor.fold_label(it)),
-        while_token: Token ! [ while ](tokens_helper(_visitor, &_i.while_token.span)),
+        while_token: Token![while](tokens_helper(_visitor, &_i.while_token.span)),
         cond: Box::new(_visitor.fold_expr(*_i.cond)),
         body: _visitor.fold_block(_i.body),
     }
@@ -1699,7 +1699,7 @@ pub fn fold_fn_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
 #[cfg(feature = "full")]
 pub fn fold_fn_decl<V: Fold + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl {
     FnDecl {
-        fn_token: Token ! [ fn ](tokens_helper(_visitor, &_i.fn_token.span)),
+        fn_token: Token![fn](tokens_helper(_visitor, &_i.fn_token.span)),
         generics: _visitor.fold_generics(_i.generics),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
         inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_fn_arg(it)),
@@ -1757,8 +1757,8 @@ pub fn fold_foreign_item_static<V: Fold + ?Sized>(
     ForeignItemStatic {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        static_token: Token ! [ static ](tokens_helper(_visitor, &_i.static_token.span)),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        static_token: Token![static](tokens_helper(_visitor, &_i.static_token.span)),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         ident: _visitor.fold_ident(_i.ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: Box::new(_visitor.fold_type(*_i.ty)),
@@ -1773,7 +1773,7 @@ pub fn fold_foreign_item_type<V: Fold + ?Sized>(
     ForeignItemType {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        type_token: Token![type](tokens_helper(_visitor, &_i.type_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
@@ -1874,7 +1874,7 @@ pub fn fold_impl_item_const<V: Fold + ?Sized>(
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
         defaultness: (_i.defaultness).map(|it| Token![default](tokens_helper(_visitor, &it.span))),
-        const_token: Token ! [ const ](tokens_helper(_visitor, &_i.const_token.span)),
+        const_token: Token![const](tokens_helper(_visitor, &_i.const_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: _visitor.fold_type(_i.ty),
@@ -1891,7 +1891,7 @@ pub fn fold_impl_item_existential<V: Fold + ?Sized>(
     ImplItemExistential {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         existential_token: Token![existential](tokens_helper(_visitor, &_i.existential_token.span)),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        type_token: Token![type](tokens_helper(_visitor, &_i.type_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
@@ -1929,7 +1929,7 @@ pub fn fold_impl_item_type<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItemType)
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
         defaultness: (_i.defaultness).map(|it| Token![default](tokens_helper(_visitor, &it.span))),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        type_token: Token![type](tokens_helper(_visitor, &_i.type_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
@@ -1987,7 +1987,7 @@ pub fn fold_item_const<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemConst) -> Ite
     ItemConst {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        const_token: Token ! [ const ](tokens_helper(_visitor, &_i.const_token.span)),
+        const_token: Token![const](tokens_helper(_visitor, &_i.const_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: Box::new(_visitor.fold_type(*_i.ty)),
@@ -2001,7 +2001,7 @@ pub fn fold_item_enum<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemEnum) -> ItemE
     ItemEnum {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        enum_token: Token ! [ enum ](tokens_helper(_visitor, &_i.enum_token.span)),
+        enum_token: Token![enum](tokens_helper(_visitor, &_i.enum_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         brace_token: Brace(tokens_helper(_visitor, &_i.brace_token.span)),
@@ -2017,7 +2017,7 @@ pub fn fold_item_existential<V: Fold + ?Sized>(
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
         existential_token: Token![existential](tokens_helper(_visitor, &_i.existential_token.span)),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        type_token: Token![type](tokens_helper(_visitor, &_i.type_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
@@ -2038,7 +2038,7 @@ pub fn fold_item_extern_crate<V: Fold + ?Sized>(
         ident: _visitor.fold_ident(_i.ident),
         rename: (_i.rename).map(|it| {
             (
-                Token ! [ as ](tokens_helper(_visitor, &(it).0.span)),
+                Token![as](tokens_helper(_visitor, &(it).0.span)),
                 _visitor.fold_ident((it).1),
             )
         }),
@@ -2050,8 +2050,8 @@ pub fn fold_item_fn<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn {
     ItemFn {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        constness: (_i.constness).map(|it| Token ! [ const ](tokens_helper(_visitor, &it.span))),
-        unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        constness: (_i.constness).map(|it| Token![const](tokens_helper(_visitor, &it.span))),
+        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
         asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
         abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
         ident: _visitor.fold_ident(_i.ident),
@@ -2076,14 +2076,14 @@ pub fn fold_item_impl<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> ItemI
     ItemImpl {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         defaultness: (_i.defaultness).map(|it| Token![default](tokens_helper(_visitor, &it.span))),
-        unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
         impl_token: Token![impl ](tokens_helper(_visitor, &_i.impl_token.span)),
         generics: _visitor.fold_generics(_i.generics),
         trait_: (_i.trait_).map(|it| {
             (
                 ((it).0).map(|it| Token![!](tokens_helper(_visitor, &it.spans))),
                 _visitor.fold_path((it).1),
-                Token ! [ for ](tokens_helper(_visitor, &(it).2.span)),
+                Token![for](tokens_helper(_visitor, &(it).2.span)),
             )
         }),
         self_ty: Box::new(_visitor.fold_type(*_i.self_ty)),
@@ -2105,7 +2105,7 @@ pub fn fold_item_macro2<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemMacro2) -> I
     ItemMacro2 {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        macro_token: Token ! [ macro ](tokens_helper(_visitor, &_i.macro_token.span)),
+        macro_token: Token![macro](tokens_helper(_visitor, &_i.macro_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
         args: _i.args,
@@ -2118,7 +2118,7 @@ pub fn fold_item_mod<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemMod
     ItemMod {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        mod_token: Token ! [ mod ](tokens_helper(_visitor, &_i.mod_token.span)),
+        mod_token: Token![mod](tokens_helper(_visitor, &_i.mod_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         content: (_i.content).map(|it| {
             (
@@ -2134,8 +2134,8 @@ pub fn fold_item_static<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemStatic) -> I
     ItemStatic {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        static_token: Token ! [ static ](tokens_helper(_visitor, &_i.static_token.span)),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        static_token: Token![static](tokens_helper(_visitor, &_i.static_token.span)),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         ident: _visitor.fold_ident(_i.ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: Box::new(_visitor.fold_type(*_i.ty)),
@@ -2149,7 +2149,7 @@ pub fn fold_item_struct<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemStruct) -> I
     ItemStruct {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        struct_token: Token ! [ struct ](tokens_helper(_visitor, &_i.struct_token.span)),
+        struct_token: Token![struct](tokens_helper(_visitor, &_i.struct_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         fields: _visitor.fold_fields(_i.fields),
@@ -2161,9 +2161,9 @@ pub fn fold_item_trait<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemTrait) -> Ite
     ItemTrait {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
         auto_token: (_i.auto_token).map(|it| Token![auto](tokens_helper(_visitor, &it.span))),
-        trait_token: Token ! [ trait ](tokens_helper(_visitor, &_i.trait_token.span)),
+        trait_token: Token![trait](tokens_helper(_visitor, &_i.trait_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
@@ -2180,7 +2180,7 @@ pub fn fold_item_trait_alias<V: Fold + ?Sized>(
     ItemTraitAlias {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        trait_token: Token ! [ trait ](tokens_helper(_visitor, &_i.trait_token.span)),
+        trait_token: Token![trait](tokens_helper(_visitor, &_i.trait_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
@@ -2193,7 +2193,7 @@ pub fn fold_item_type<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemType) -> ItemT
     ItemType {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        type_token: Token![type](tokens_helper(_visitor, &_i.type_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
@@ -2217,7 +2217,7 @@ pub fn fold_item_use<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemUse
     ItemUse {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        use_token: Token ! [ use ](tokens_helper(_visitor, &_i.use_token.span)),
+        use_token: Token![use](tokens_helper(_visitor, &_i.use_token.span)),
         leading_colon: (_i.leading_colon)
             .map(|it| Token ! [ :: ](tokens_helper(_visitor, &it.spans))),
         tree: _visitor.fold_use_tree(_i.tree),
@@ -2280,7 +2280,7 @@ pub fn fold_lit_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: LitVerbatim) ->
 pub fn fold_local<V: Fold + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
     Local {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        let_token: Token ! [ let ](tokens_helper(_visitor, &_i.let_token.span)),
+        let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
         pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
         ty: (_i.ty).map(|it| {
             (
@@ -2360,8 +2360,8 @@ pub fn fold_meta_name_value<V: Fold + ?Sized>(
 #[cfg(feature = "full")]
 pub fn fold_method_sig<V: Fold + ?Sized>(_visitor: &mut V, _i: MethodSig) -> MethodSig {
     MethodSig {
-        constness: (_i.constness).map(|it| Token ! [ const ](tokens_helper(_visitor, &it.span))),
-        unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        constness: (_i.constness).map(|it| Token![const](tokens_helper(_visitor, &it.span))),
+        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
         asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
         abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
         ident: _visitor.fold_ident(_i.ident),
@@ -2424,7 +2424,7 @@ pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
 #[cfg(feature = "full")]
 pub fn fold_pat_box<V: Fold + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox {
     PatBox {
-        box_token: Token ! [ box ](tokens_helper(_visitor, &_i.box_token.span)),
+        box_token: Token![box](tokens_helper(_visitor, &_i.box_token.span)),
         pat: Box::new(_visitor.fold_pat(*_i.pat)),
     }
 }
@@ -2432,8 +2432,8 @@ pub fn fold_pat_box<V: Fold + ?Sized>(_visitor: &mut V, _i: PatBox) -> PatBox {
 #[cfg(feature = "full")]
 pub fn fold_pat_ident<V: Fold + ?Sized>(_visitor: &mut V, _i: PatIdent) -> PatIdent {
     PatIdent {
-        by_ref: (_i.by_ref).map(|it| Token ! [ ref ](tokens_helper(_visitor, &it.span))),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        by_ref: (_i.by_ref).map(|it| Token![ref](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         ident: _visitor.fold_ident(_i.ident),
         subpat: (_i.subpat).map(|it| {
             (
@@ -2479,7 +2479,7 @@ pub fn fold_pat_range<V: Fold + ?Sized>(_visitor: &mut V, _i: PatRange) -> PatRa
 pub fn fold_pat_ref<V: Fold + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef {
     PatRef {
         and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         pat: Box::new(_visitor.fold_pat(*_i.pat)),
     }
 }
@@ -2600,7 +2600,7 @@ pub fn fold_qself<V: Fold + ?Sized>(_visitor: &mut V, _i: QSelf) -> QSelf {
         lt_token: Token ! [ < ](tokens_helper(_visitor, &_i.lt_token.spans)),
         ty: Box::new(_visitor.fold_type(*_i.ty)),
         position: _i.position,
-        as_token: (_i.as_token).map(|it| Token ! [ as ](tokens_helper(_visitor, &it.span))),
+        as_token: (_i.as_token).map(|it| Token![as](tokens_helper(_visitor, &it.span))),
         gt_token: Token ! [ > ](tokens_helper(_visitor, &_i.gt_token.spans)),
     }
 }
@@ -2688,7 +2688,7 @@ pub fn fold_trait_item_const<V: Fold + ?Sized>(
 ) -> TraitItemConst {
     TraitItemConst {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        const_token: Token ! [ const ](tokens_helper(_visitor, &_i.const_token.span)),
+        const_token: Token![const](tokens_helper(_visitor, &_i.const_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: _visitor.fold_type(_i.ty),
@@ -2731,7 +2731,7 @@ pub fn fold_trait_item_type<V: Fold + ?Sized>(
 ) -> TraitItemType {
     TraitItemType {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        type_token: Token ! [ type ](tokens_helper(_visitor, &_i.type_token.span)),
+        type_token: Token![type](tokens_helper(_visitor, &_i.type_token.span)),
         ident: _visitor.fold_ident(_i.ident),
         generics: _visitor.fold_generics(_i.generics),
         colon_token: (_i.colon_token).map(|it| Token ! [ : ](tokens_helper(_visitor, &it.spans))),
@@ -2787,9 +2787,9 @@ pub fn fold_type_array<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeArray) -> Typ
 pub fn fold_type_bare_fn<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeBareFn) -> TypeBareFn {
     TypeBareFn {
         lifetimes: (_i.lifetimes).map(|it| _visitor.fold_bound_lifetimes(it)),
-        unsafety: (_i.unsafety).map(|it| Token ! [ unsafe ](tokens_helper(_visitor, &it.span))),
+        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
         abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
-        fn_token: Token ! [ fn ](tokens_helper(_visitor, &_i.fn_token.span)),
+        fn_token: Token![fn](tokens_helper(_visitor, &_i.fn_token.span)),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
         inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_bare_fn_arg(it)),
         variadic: (_i.variadic).map(|it| Token ! [ ... ](tokens_helper(_visitor, &it.spans))),
@@ -2874,9 +2874,8 @@ pub fn fold_type_path<V: Fold + ?Sized>(_visitor: &mut V, _i: TypePath) -> TypeP
 pub fn fold_type_ptr<V: Fold + ?Sized>(_visitor: &mut V, _i: TypePtr) -> TypePtr {
     TypePtr {
         star_token: Token ! [ * ](tokens_helper(_visitor, &_i.star_token.spans)),
-        const_token: (_i.const_token)
-            .map(|it| Token ! [ const ](tokens_helper(_visitor, &it.span))),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        const_token: (_i.const_token).map(|it| Token![const](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         elem: Box::new(_visitor.fold_type(*_i.elem)),
     }
 }
@@ -2885,7 +2884,7 @@ pub fn fold_type_reference<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeReference
     TypeReference {
         and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
         lifetime: (_i.lifetime).map(|it| _visitor.fold_lifetime(it)),
-        mutability: (_i.mutability).map(|it| Token ! [ mut ](tokens_helper(_visitor, &it.span))),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         elem: Box::new(_visitor.fold_type(*_i.elem)),
     }
 }
@@ -2960,7 +2959,7 @@ pub fn fold_use_path<V: Fold + ?Sized>(_visitor: &mut V, _i: UsePath) -> UsePath
 pub fn fold_use_rename<V: Fold + ?Sized>(_visitor: &mut V, _i: UseRename) -> UseRename {
     UseRename {
         ident: _visitor.fold_ident(_i.ident),
-        as_token: Token ! [ as ](tokens_helper(_visitor, &_i.as_token.span)),
+        as_token: Token![as](tokens_helper(_visitor, &_i.as_token.span)),
         rename: _visitor.fold_ident(_i.rename),
     }
 }
@@ -2997,15 +2996,15 @@ pub fn fold_vis_crate<V: Fold + ?Sized>(_visitor: &mut V, _i: VisCrate) -> VisCr
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn fold_vis_public<V: Fold + ?Sized>(_visitor: &mut V, _i: VisPublic) -> VisPublic {
     VisPublic {
-        pub_token: Token ! [ pub ](tokens_helper(_visitor, &_i.pub_token.span)),
+        pub_token: Token![pub](tokens_helper(_visitor, &_i.pub_token.span)),
     }
 }
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn fold_vis_restricted<V: Fold + ?Sized>(_visitor: &mut V, _i: VisRestricted) -> VisRestricted {
     VisRestricted {
-        pub_token: Token ! [ pub ](tokens_helper(_visitor, &_i.pub_token.span)),
+        pub_token: Token![pub](tokens_helper(_visitor, &_i.pub_token.span)),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
-        in_token: (_i.in_token).map(|it| Token ! [ in ](tokens_helper(_visitor, &it.span))),
+        in_token: (_i.in_token).map(|it| Token![in](tokens_helper(_visitor, &it.span))),
         path: Box::new(_visitor.fold_path(*_i.path)),
     }
 }
@@ -3023,7 +3022,7 @@ pub fn fold_visibility<V: Fold + ?Sized>(_visitor: &mut V, _i: Visibility) -> Vi
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn fold_where_clause<V: Fold + ?Sized>(_visitor: &mut V, _i: WhereClause) -> WhereClause {
     WhereClause {
-        where_token: Token ! [ where ](tokens_helper(_visitor, &_i.where_token.span)),
+        where_token: Token![where](tokens_helper(_visitor, &_i.where_token.span)),
         predicates: FoldHelper::lift(_i.predicates, |it| _visitor.fold_where_predicate(it)),
     }
 }

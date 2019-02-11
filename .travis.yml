@@ -38,8 +38,6 @@ matrix:
       name: Codegen
       script:
         - (cd codegen && cargo run)
-          # https://github.com/rust-lang/rustfmt/issues/3331
-        - sed -i 's/Token ! \[ extern \]/Token![extern]/' src/gen/*.rs
         - git diff --exit-code
     - rust: nightly
       name: Minimal versions
