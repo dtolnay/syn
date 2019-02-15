@@ -1,19 +1,20 @@
 use std::collections::BTreeMap;
 use std::ops;
 
+#[derive(Debug, Clone)]
 pub struct Definitions {
     pub types: Vec<Node>,
     pub tokens: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(tag = "node", rename_all = "lowercase")]
 pub enum Node {
     Struct(Struct),
     Enum(Enum),
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Struct {
     ident: String,
     features: Features,
@@ -21,27 +22,27 @@ pub struct Struct {
     all_fields_pub: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Enum {
     ident: String,
     features: Features,
     variants: Vec<Variant>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Variant {
     ident: String,
     fields: Vec<Type>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Field {
     ident: String,
     #[serde(rename = "type")]
     ty: Type,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Type defined by `syn`
@@ -69,7 +70,7 @@ pub enum Type {
     Tuple(Vec<Type>),
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Punctuated {
     element: Box<Type>,
     punct: String,
@@ -78,6 +79,12 @@ pub struct Punctuated {
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Features {
     any: Vec<String>,
+}
+
+impl Definitions {
+    pub fn insert(&mut self, node: Node) {
+        self.types.push(node);
+    }
 }
 
 impl Node {

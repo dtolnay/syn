@@ -361,7 +361,7 @@
           "ident": "Named",
           "fields": [
             {
-              "syn": "Ident"
+              "proc_macro2": "Ident"
             }
           ]
         },
@@ -624,7 +624,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -737,7 +737,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -784,7 +784,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -959,7 +959,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -2334,7 +2334,7 @@
         {
           "ident": "method",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -3011,7 +3011,7 @@
           "ident": "ident",
           "type": {
             "option": {
-              "syn": "Ident"
+              "proc_macro2": "Ident"
             }
           }
         },
@@ -3425,7 +3425,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -3519,7 +3519,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -3577,7 +3577,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -3771,15 +3771,6 @@
       "all_fields_pub": true
     },
     {
-      "node": "struct",
-      "ident": "Ident",
-      "features": {
-        "any": []
-      },
-      "fields": [],
-      "all_fields_pub": true
-    },
-    {
       "node": "enum",
       "ident": "ImplItem",
       "features": {
@@ -3878,7 +3869,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -3946,7 +3937,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4103,7 +4094,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4170,7 +4161,7 @@
         {
           "ident": "span",
           "type": {
-            "syn": "Span"
+            "proc_macro2": "Span"
           }
         }
       ],
@@ -4363,7 +4354,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4435,7 +4426,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4502,7 +4493,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4577,7 +4568,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4589,7 +4580,7 @@
                   "token": "As"
                 },
                 {
-                  "syn": "Ident"
+                  "proc_macro2": "Ident"
                 }
               ]
             }
@@ -4662,7 +4653,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4835,7 +4826,7 @@
           "ident": "ident",
           "type": {
             "option": {
-              "syn": "Ident"
+              "proc_macro2": "Ident"
             }
           }
         },
@@ -4888,7 +4879,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -4950,7 +4941,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5021,7 +5012,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5093,7 +5084,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5167,7 +5158,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5244,7 +5235,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5311,7 +5302,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5375,7 +5366,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -5497,13 +5488,13 @@
         {
           "ident": "apostrophe",
           "type": {
-            "syn": "Span"
+            "proc_macro2": "Span"
           }
         },
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         }
       ],
@@ -5650,7 +5641,7 @@
         {
           "ident": "span",
           "type": {
-            "syn": "Span"
+            "proc_macro2": "Span"
           }
         }
       ],
@@ -5953,7 +5944,7 @@
           "ident": "Named",
           "fields": [
             {
-              "syn": "Ident"
+              "proc_macro2": "Ident"
             }
           ]
         },
@@ -5981,7 +5972,7 @@
           "ident": "Word",
           "fields": [
             {
-              "syn": "Ident"
+              "proc_macro2": "Ident"
             }
           ]
         },
@@ -6016,7 +6007,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -6052,7 +6043,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -6114,7 +6105,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -6400,7 +6391,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -6857,7 +6848,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -7084,15 +7075,6 @@
       ]
     },
     {
-      "node": "struct",
-      "ident": "Span",
-      "features": {
-        "any": []
-      },
-      "fields": [],
-      "all_fields_pub": true
-    },
-    {
       "node": "enum",
       "ident": "Stmt",
       "features": {
@@ -7280,7 +7262,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -7421,7 +7403,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -7871,7 +7853,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -8283,7 +8265,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         }
       ],
@@ -8301,7 +8283,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -8333,7 +8315,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
@@ -8345,7 +8327,7 @@
         {
           "ident": "rename",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         }
       ],
@@ -8423,7 +8405,7 @@
         {
           "ident": "ident",
           "type": {
-            "syn": "Ident"
+            "proc_macro2": "Ident"
           }
         },
         {
