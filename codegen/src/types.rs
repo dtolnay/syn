@@ -1,12 +1,13 @@
 use std::ops;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum TypeDef {
     Struct(Struct),
     Enum(Enum),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Struct {
     ident: String,
     features: Features,
@@ -14,26 +15,27 @@ pub struct Struct {
     all_fields_pub: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Enum {
     ident: String,
     features: Features,
     variants: Vec<Variant>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Variant {
     ident: String,
     fields: Vec<Type>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Field {
     ident: String,
     ty: Type,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Type {
     /// Type defined by `syn`
     Item(String),
@@ -58,13 +60,13 @@ pub enum Type {
     Tuple(Vec<Type>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Token {
     repr: String,
     ty: String,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Features {
     any: Vec<String>,
 }
@@ -167,10 +169,6 @@ impl Token {
 
     pub fn repr(&self) -> &str {
         &self.repr
-    }
-
-    pub fn ty(&self) -> &str {
-        &self.ty
     }
 }
 
