@@ -29,7 +29,10 @@ pub fn parse() -> types::Definitions {
         .map(|item| introspect_item(item, &item_lookup, &token_lookup))
         .collect();
 
-    let tokens = token_lookup.into_iter().map(|(name, ty)| (ty, name)).collect();
+    let tokens = token_lookup
+        .into_iter()
+        .map(|(name, ty)| (ty, name))
+        .collect();
 
     types::Definitions { types, tokens }
 }
@@ -154,7 +157,9 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 "Brace" | "Bracket" | "Paren" | "Group" => {
                     types::Type::Group(last.ident.to_string())
                 }
-                "TokenStream" | "Literal" | "Ident" | "Span"  => types::Type::Ext(last.ident.to_string()),
+                "TokenStream" | "Literal" | "Ident" | "Span" => {
+                    types::Type::Ext(last.ident.to_string())
+                }
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(last.ident.to_string()),
                 _ => {
                     if items.get(&last.ident).is_some() {

@@ -16,11 +16,15 @@ pub fn generate(defs: &types::Definitions) {
 
     let f = ::std::fs::File::create(codegen_root.join("../syn.json")).unwrap();
 
-    serde_json::to_writer_pretty(f, &Introspect {
-        version: &manifest.package.version,
-        types: &defs.types,
-        tokens: &defs.tokens,
-    }).unwrap();
+    serde_json::to_writer_pretty(
+        f,
+        &Introspect {
+            version: &manifest.package.version,
+            types: &defs.types,
+            tokens: &defs.tokens,
+        },
+    )
+    .unwrap();
 }
 
 #[derive(Debug, Deserialize)]

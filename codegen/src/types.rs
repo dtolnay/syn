@@ -99,11 +99,7 @@ impl Node {
 }
 
 impl Struct {
-    pub fn new(
-        ident: String,
-        features: Features,
-        fields: IndexMap<String, Type>,
-    ) -> Struct {
+    pub fn new(ident: String, features: Features, fields: IndexMap<String, Type>) -> Struct {
         Struct {
             ident,
             features,
@@ -150,7 +146,10 @@ impl Variant {
 
 impl Punctuated {
     pub fn new(element: Type, punct: String) -> Self {
-        Punctuated { element: Box::new(element), punct }
+        Punctuated {
+            element: Box::new(element),
+            punct,
+        }
     }
 
     pub fn element(&self) -> &Type {

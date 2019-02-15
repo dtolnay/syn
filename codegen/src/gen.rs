@@ -341,9 +341,7 @@ mod codegen {
         match ty {
             types::Type::Box(t) => box_visit(&*t, features, defs, kind, name),
             types::Type::Vec(t) => vec_visit(&*t, features, defs, kind, name),
-            types::Type::Punctuated(p) => {
-                punctuated_visit(p.element(), features, defs, kind, name)
-            }
+            types::Type::Punctuated(p) => punctuated_visit(p.element(), features, defs, kind, name),
             types::Type::Option(t) => option_visit(&*t, features, defs, kind, name),
             types::Type::Tuple(t) => tuple_visit(t, features, defs, kind, name),
             types::Type::Token(t) => {
@@ -525,9 +523,8 @@ mod codegen {
                     visit_impl.append_all(quote! {
                         #visit_field;
                     });
-                    let visit_mut_field =
-                        visit(ty, v.features(), defs, VisitMut, &ref_toks)
-                            .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
+                    let visit_mut_field = visit(ty, v.features(), defs, VisitMut, &ref_toks)
+                        .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
                     visit_mut_impl.append_all(quote! {
                         #visit_mut_field;
                     });
@@ -644,10 +641,10 @@ pub fn generate(defs: &types::Definitions) {
 
     for &tt in TERMINAL_TYPES {
         defs.insert(types::Node::Struct(types::Struct::new(
-                    tt.to_string(),
-                    types::Features::default(),
-                    IndexMap::new())
-        ));
+            tt.to_string(),
+            types::Features::default(),
+            IndexMap::new(),
+        )));
     }
 
     let mut state = codegen::State::default();
