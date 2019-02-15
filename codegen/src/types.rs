@@ -1,3 +1,5 @@
+use indexmap::IndexMap;
+
 use std::collections::BTreeMap;
 use std::ops;
 
@@ -18,7 +20,7 @@ pub enum Node {
 pub struct Struct {
     ident: String,
     features: Features,
-    fields: Vec<Field>,
+    fields: IndexMap<String, Type>,
     all_fields_pub: bool,
 }
 
@@ -33,13 +35,6 @@ pub struct Enum {
 pub struct Variant {
     ident: String,
     fields: Vec<Type>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct Field {
-    ident: String,
-    #[serde(rename = "type")]
-    ty: Type,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -107,7 +102,7 @@ impl Struct {
     pub fn new(
         ident: String,
         features: Features,
-        fields: Vec<Field>,
+        fields: IndexMap<String, Type>,
         all_fields_pub: bool,
     ) -> Struct {
         Struct {
@@ -122,7 +117,7 @@ impl Struct {
         &self.features
     }
 
-    pub fn fields(&self) -> &[Field] {
+    pub fn fields(&self) -> &IndexMap<String, Type> {
         &self.fields
     }
 
@@ -156,20 +151,6 @@ impl Variant {
 
     pub fn fields(&self) -> &[Type] {
         &self.fields
-    }
-}
-
-impl Field {
-    pub fn new(ident: String, ty: Type) -> Field {
-        Field { ident, ty }
-    }
-
-    pub fn ident(&self) -> &str {
-        &self.ident
-    }
-
-    pub fn ty(&self) -> &Type {
-        &self.ty
     }
 }
 

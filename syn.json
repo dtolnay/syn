@@ -10,22 +10,16 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "extern_token",
-          "type": {
-            "token": "Extern"
-          }
+      "fields": {
+        "extern_token": {
+          "token": "Extern"
         },
-        {
-          "ident": "name",
-          "type": {
-            "option": {
-              "syn": "LitStr"
-            }
+        "name": {
+          "option": {
+            "syn": "LitStr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -37,39 +31,27 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "colon2_token",
-          "type": {
-            "option": {
-              "token": "Colon2"
-            }
+      "fields": {
+        "colon2_token": {
+          "option": {
+            "token": "Colon2"
           }
         },
-        {
-          "ident": "lt_token",
-          "type": {
-            "token": "Lt"
+        "lt_token": {
+          "token": "Lt"
+        },
+        "args": {
+          "punctuated": {
+            "element": {
+              "syn": "GenericArgument"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "args",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "GenericArgument"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "gt_token",
-          "type": {
-            "token": "Gt"
-          }
+        "gt_token": {
+          "token": "Gt"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -80,26 +62,17 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "pat",
-          "type": {
-            "syn": "Pat"
-          }
+      "fields": {
+        "pat": {
+          "syn": "Pat"
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "colon_token": {
+          "token": "Colon"
         },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
+        "ty": {
+          "syn": "Type"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -110,22 +83,16 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
+      "fields": {
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "self_token",
-          "type": {
-            "token": "SelfValue"
-          }
+        "self_token": {
+          "token": "SelfValue"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -136,36 +103,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "and_token",
-          "type": {
-            "token": "And"
+      "fields": {
+        "and_token": {
+          "token": "And"
+        },
+        "lifetime": {
+          "option": {
+            "syn": "Lifetime"
           }
         },
-        {
-          "ident": "lifetime",
-          "type": {
-            "option": {
-              "syn": "Lifetime"
-            }
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
-          }
-        },
-        {
-          "ident": "self_token",
-          "type": {
-            "token": "SelfValue"
-          }
+        "self_token": {
+          "token": "SelfValue"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -176,74 +131,53 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "leading_vert",
-          "type": {
-            "option": {
-              "token": "Or"
-            }
+        "leading_vert": {
+          "option": {
+            "token": "Or"
           }
         },
-        {
-          "ident": "pats",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
+        "pats": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Or"
+          }
+        },
+        "guard": {
+          "option": {
+            "tuple": [
+              {
+                "token": "If"
               },
-              "punct": "Or"
-            }
-          }
-        },
-        {
-          "ident": "guard",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "If"
-                },
-                {
-                  "box": {
-                    "syn": "Expr"
-                  }
+              {
+                "box": {
+                  "syn": "Expr"
                 }
-              ]
-            }
+              }
+            ]
           }
         },
-        {
-          "ident": "fat_arrow_token",
-          "type": {
-            "token": "FatArrow"
+        "fat_arrow_token": {
+          "token": "FatArrow"
+        },
+        "body": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "body",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "comma",
-          "type": {
-            "option": {
-              "token": "Comma"
-            }
+        "comma": {
+          "option": {
+            "token": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -279,38 +213,23 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "pound_token",
-          "type": {
-            "token": "Pound"
-          }
+      "fields": {
+        "pound_token": {
+          "token": "Pound"
         },
-        {
-          "ident": "style",
-          "type": {
-            "syn": "AttrStyle"
-          }
+        "style": {
+          "syn": "AttrStyle"
         },
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
-          }
+        "bracket_token": {
+          "group": "Bracket"
         },
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+        "path": {
+          "syn": "Path"
         },
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -322,29 +241,23 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "name",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "syn": "BareFnArgName"
-                },
-                {
-                  "token": "Colon"
-                }
-              ]
-            }
+      "fields": {
+        "name": {
+          "option": {
+            "tuple": [
+              {
+                "syn": "BareFnArgName"
+              },
+              {
+                "token": "Colon"
+              }
+            ]
           }
         },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
+        "ty": {
+          "syn": "Type"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -620,26 +533,17 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
+        "ty": {
+          "syn": "Type"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -650,22 +554,16 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+      "fields": {
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "stmts",
-          "type": {
-            "vec": {
-              "syn": "Stmt"
-            }
+        "stmts": {
+          "vec": {
+            "syn": "Stmt"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -677,37 +575,25 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "for_token",
-          "type": {
-            "token": "For"
+      "fields": {
+        "for_token": {
+          "token": "For"
+        },
+        "lt_token": {
+          "token": "Lt"
+        },
+        "lifetimes": {
+          "punctuated": {
+            "element": {
+              "syn": "LifetimeDef"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "lt_token",
-          "type": {
-            "token": "Lt"
-          }
-        },
-        {
-          "ident": "lifetimes",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "LifetimeDef"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "gt_token",
-          "type": {
-            "token": "Gt"
-          }
+        "gt_token": {
+          "token": "Gt"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -719,56 +605,35 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "const_token",
-          "type": {
-            "token": "Const"
+        "const_token": {
+          "token": "Const"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "colon_token": {
+          "token": "Colon"
+        },
+        "ty": {
+          "syn": "Type"
+        },
+        "eq_token": {
+          "option": {
+            "token": "Eq"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
-        },
-        {
-          "ident": "eq_token",
-          "type": {
-            "option": {
-              "token": "Eq"
-            }
-          }
-        },
-        {
-          "ident": "default",
-          "type": {
-            "option": {
-              "syn": "Expr"
-            }
+        "default": {
+          "option": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -780,31 +645,22 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "colon_token": {
+          "token": "Colon"
         },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -850,31 +706,22 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "enum_token",
-          "type": {
-            "token": "Enum"
-          }
+      "fields": {
+        "enum_token": {
+          "token": "Enum"
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "variants",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Variant"
-              },
-              "punct": "Comma"
-            }
+        "variants": {
+          "punctuated": {
+            "element": {
+              "syn": "Variant"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -885,28 +732,19 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "struct_token",
-          "type": {
-            "token": "Struct"
-          }
+      "fields": {
+        "struct_token": {
+          "token": "Struct"
         },
-        {
-          "ident": "fields",
-          "type": {
-            "syn": "Fields"
-          }
+        "fields": {
+          "syn": "Fields"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -917,20 +755,14 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "union_token",
-          "type": {
-            "token": "Union"
-          }
+      "fields": {
+        "union_token": {
+          "token": "Union"
         },
-        {
-          "ident": "fields",
-          "type": {
-            "syn": "FieldsNamed"
-          }
+        "fields": {
+          "syn": "FieldsNamed"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -941,40 +773,25 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
+        "generics": {
+          "syn": "Generics"
         },
-        {
-          "ident": "data",
-          "type": {
-            "syn": "Data"
-          }
+        "data": {
+          "syn": "Data"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1317,33 +1134,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
-          }
+        "bracket_token": {
+          "group": "Bracket"
         },
-        {
-          "ident": "elems",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Expr"
-              },
-              "punct": "Comma"
-            }
+        "elems": {
+          "punctuated": {
+            "element": {
+              "syn": "Expr"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1354,38 +1162,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "left",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "left": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "right",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "right": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1396,38 +1192,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "left",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "left": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "op",
-          "type": {
-            "syn": "BinOp"
-          }
+        "op": {
+          "syn": "BinOp"
         },
-        {
-          "ident": "right",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "right": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1438,36 +1222,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "async_token",
-          "type": {
-            "token": "Async"
+        "async_token": {
+          "token": "Async"
+        },
+        "capture": {
+          "option": {
+            "token": "Move"
           }
         },
-        {
-          "ident": "capture",
-          "type": {
-            "option": {
-              "token": "Move"
-            }
-          }
-        },
-        {
-          "ident": "block",
-          "type": {
-            "syn": "Block"
-          }
+        "block": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1479,38 +1251,26 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "left",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "left": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "op",
-          "type": {
-            "syn": "BinOp"
-          }
+        "op": {
+          "syn": "BinOp"
         },
-        {
-          "ident": "right",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "right": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1521,30 +1281,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "label",
-          "type": {
-            "option": {
-              "syn": "Label"
-            }
+        "label": {
+          "option": {
+            "syn": "Label"
           }
         },
-        {
-          "ident": "block",
-          "type": {
-            "syn": "Block"
-          }
+        "block": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1555,30 +1306,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "box_token",
-          "type": {
-            "token": "Box"
-          }
+        "box_token": {
+          "token": "Box"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1589,40 +1331,28 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "break_token",
-          "type": {
-            "token": "Break"
+        "break_token": {
+          "token": "Break"
+        },
+        "label": {
+          "option": {
+            "syn": "Lifetime"
           }
         },
-        {
-          "ident": "label",
-          "type": {
-            "option": {
-              "syn": "Lifetime"
-            }
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Expr"
-              }
+        "expr": {
+          "option": {
+            "box": {
+              "syn": "Expr"
             }
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1634,41 +1364,29 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "func",
-          "type": {
-            "box": {
+        "func": {
+          "box": {
+            "syn": "Expr"
+          }
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "args": {
+          "punctuated": {
+            "element": {
               "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
-        },
-        {
-          "ident": "args",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Expr"
-              },
-              "punct": "Comma"
-            }
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1680,38 +1398,26 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "as_token",
-          "type": {
-            "token": "As"
-          }
+        "as_token": {
+          "token": "As"
         },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1722,77 +1428,50 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "asyncness",
-          "type": {
-            "option": {
-              "token": "Async"
-            }
+        "asyncness": {
+          "option": {
+            "token": "Async"
           }
         },
-        {
-          "ident": "movability",
-          "type": {
-            "option": {
-              "token": "Static"
-            }
+        "movability": {
+          "option": {
+            "token": "Static"
           }
         },
-        {
-          "ident": "capture",
-          "type": {
-            "option": {
-              "token": "Move"
-            }
+        "capture": {
+          "option": {
+            "token": "Move"
           }
         },
-        {
-          "ident": "or1_token",
-          "type": {
-            "token": "Or"
+        "or1_token": {
+          "token": "Or"
+        },
+        "inputs": {
+          "punctuated": {
+            "element": {
+              "syn": "FnArg"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "inputs",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "FnArg"
-              },
-              "punct": "Comma"
-            }
-          }
+        "or2_token": {
+          "token": "Or"
         },
-        {
-          "ident": "or2_token",
-          "type": {
-            "token": "Or"
-          }
+        "output": {
+          "syn": "ReturnType"
         },
-        {
-          "ident": "output",
-          "type": {
-            "syn": "ReturnType"
-          }
-        },
-        {
-          "ident": "body",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "body": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1803,30 +1482,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "continue_token",
-          "type": {
-            "token": "Continue"
-          }
+        "continue_token": {
+          "token": "Continue"
         },
-        {
-          "ident": "label",
-          "type": {
-            "option": {
-              "syn": "Lifetime"
-            }
+        "label": {
+          "option": {
+            "syn": "Lifetime"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1838,36 +1508,24 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "base",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "base": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "dot_token",
-          "type": {
-            "token": "Dot"
-          }
+        "dot_token": {
+          "token": "Dot"
         },
-        {
-          "ident": "member",
-          "type": {
-            "syn": "Member"
-          }
+        "member": {
+          "syn": "Member"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1878,58 +1536,37 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "label",
-          "type": {
-            "option": {
-              "syn": "Label"
-            }
+        "label": {
+          "option": {
+            "syn": "Label"
           }
         },
-        {
-          "ident": "for_token",
-          "type": {
-            "token": "For"
+        "for_token": {
+          "token": "For"
+        },
+        "pat": {
+          "box": {
+            "syn": "Pat"
           }
         },
-        {
-          "ident": "pat",
-          "type": {
-            "box": {
-              "syn": "Pat"
-            }
+        "in_token": {
+          "token": "In"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "in_token",
-          "type": {
-            "token": "In"
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "body",
-          "type": {
-            "syn": "Block"
-          }
+        "body": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1940,30 +1577,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "group_token",
-          "type": {
-            "group": "Group"
-          }
+        "group_token": {
+          "group": "Group"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -1974,53 +1602,38 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "if_token",
-          "type": {
-            "token": "If"
+        "if_token": {
+          "token": "If"
+        },
+        "cond": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "cond",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
+        "then_branch": {
+          "syn": "Block"
         },
-        {
-          "ident": "then_branch",
-          "type": {
-            "syn": "Block"
-          }
-        },
-        {
-          "ident": "else_branch",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "Else"
-                },
-                {
-                  "box": {
-                    "syn": "Expr"
-                  }
+        "else_branch": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Else"
+              },
+              {
+                "box": {
+                  "syn": "Expr"
                 }
-              ]
-            }
+              }
+            ]
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2031,38 +1644,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "place",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "place": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "arrow_token",
-          "type": {
-            "token": "LArrow"
-          }
+        "arrow_token": {
+          "token": "LArrow"
         },
-        {
-          "ident": "value",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "value": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2074,38 +1675,26 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
-          }
+        "bracket_token": {
+          "group": "Bracket"
         },
-        {
-          "ident": "index",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "index": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2116,47 +1705,32 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "let_token",
-          "type": {
-            "token": "Let"
+        "let_token": {
+          "token": "Let"
+        },
+        "pats": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Or"
           }
         },
-        {
-          "ident": "pats",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
-              },
-              "punct": "Or"
-            }
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2168,22 +1742,16 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "lit",
-          "type": {
-            "syn": "Lit"
-          }
+        "lit": {
+          "syn": "Lit"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2194,36 +1762,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "label",
-          "type": {
-            "option": {
-              "syn": "Label"
-            }
+        "label": {
+          "option": {
+            "syn": "Label"
           }
         },
-        {
-          "ident": "loop_token",
-          "type": {
-            "token": "Loop"
-          }
+        "loop_token": {
+          "token": "Loop"
         },
-        {
-          "ident": "body",
-          "type": {
-            "syn": "Block"
-          }
+        "body": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2234,22 +1790,16 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+        "mac": {
+          "syn": "Macro"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2260,44 +1810,29 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "match_token",
-          "type": {
-            "token": "Match"
+        "match_token": {
+          "token": "Match"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
-        },
-        {
-          "ident": "arms",
-          "type": {
-            "vec": {
-              "syn": "Arm"
-            }
+        "arms": {
+          "vec": {
+            "syn": "Arm"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2308,61 +1843,40 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "receiver",
-          "type": {
-            "box": {
+        "receiver": {
+          "box": {
+            "syn": "Expr"
+          }
+        },
+        "dot_token": {
+          "token": "Dot"
+        },
+        "method": {
+          "proc_macro2": "Ident"
+        },
+        "turbofish": {
+          "option": {
+            "syn": "MethodTurbofish"
+          }
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "args": {
+          "punctuated": {
+            "element": {
               "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "dot_token",
-          "type": {
-            "token": "Dot"
-          }
-        },
-        {
-          "ident": "method",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "turbofish",
-          "type": {
-            "option": {
-              "syn": "MethodTurbofish"
-            }
-          }
-        },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
-        },
-        {
-          "ident": "args",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Expr"
-              },
-              "punct": "Comma"
-            }
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2374,30 +1888,21 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2409,30 +1914,21 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "qself",
-          "type": {
-            "option": {
-              "syn": "QSelf"
-            }
+        "qself": {
+          "option": {
+            "syn": "QSelf"
           }
         },
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+        "path": {
+          "syn": "Path"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2443,42 +1939,30 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "from": {
+          "option": {
+            "box": {
+              "syn": "Expr"
             }
           }
         },
-        {
-          "ident": "from",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Expr"
-              }
-            }
-          }
+        "limits": {
+          "syn": "RangeLimits"
         },
-        {
-          "ident": "limits",
-          "type": {
-            "syn": "RangeLimits"
-          }
-        },
-        {
-          "ident": "to",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Expr"
-              }
+        "to": {
+          "option": {
+            "box": {
+              "syn": "Expr"
             }
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2489,38 +1973,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "and_token",
-          "type": {
-            "token": "And"
+        "and_token": {
+          "token": "And"
+        },
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2531,44 +2003,29 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
+        "bracket_token": {
+          "group": "Bracket"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
+        "semi_token": {
+          "token": "Semi"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
-        },
-        {
-          "ident": "len",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "len": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2579,32 +2036,23 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "return_token",
-          "type": {
-            "token": "Return"
-          }
+        "return_token": {
+          "token": "Return"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Expr"
-              }
+        "expr": {
+          "option": {
+            "box": {
+              "syn": "Expr"
             }
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2615,57 +2063,39 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
+        "path": {
+          "syn": "Path"
+        },
+        "brace_token": {
+          "group": "Brace"
+        },
+        "fields": {
+          "punctuated": {
+            "element": {
+              "syn": "FieldValue"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
+        "dot2_token": {
+          "option": {
+            "token": "Dot2"
           }
         },
-        {
-          "ident": "fields",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "FieldValue"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "dot2_token",
-          "type": {
-            "option": {
-              "token": "Dot2"
-            }
-          }
-        },
-        {
-          "ident": "rest",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Expr"
-              }
+        "rest": {
+          "option": {
+            "box": {
+              "syn": "Expr"
             }
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2676,30 +2106,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "question_token",
-          "type": {
-            "token": "Question"
-          }
+        "question_token": {
+          "token": "Question"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2710,28 +2131,19 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "try_token",
-          "type": {
-            "token": "Try"
-          }
+        "try_token": {
+          "token": "Try"
         },
-        {
-          "ident": "block",
-          "type": {
-            "syn": "Block"
-          }
+        "block": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2742,33 +2154,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "elems",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Expr"
-              },
-              "punct": "Comma"
-            }
+        "elems": {
+          "punctuated": {
+            "element": {
+              "syn": "Expr"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2779,38 +2182,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "colon_token": {
+          "token": "Colon"
         },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2822,30 +2213,21 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "op",
-          "type": {
-            "syn": "UnOp"
-          }
+        "op": {
+          "syn": "UnOp"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2856,28 +2238,19 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "unsafe_token",
-          "type": {
-            "token": "Unsafe"
-          }
+        "unsafe_token": {
+          "token": "Unsafe"
         },
-        {
-          "ident": "block",
-          "type": {
-            "syn": "Block"
-          }
+        "block": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2889,14 +2262,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2907,44 +2277,29 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "label",
-          "type": {
-            "option": {
-              "syn": "Label"
-            }
+        "label": {
+          "option": {
+            "syn": "Label"
           }
         },
-        {
-          "ident": "while_token",
-          "type": {
-            "token": "While"
+        "while_token": {
+          "token": "While"
+        },
+        "cond": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "cond",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "body",
-          "type": {
-            "syn": "Block"
-          }
+        "body": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2955,32 +2310,23 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "yield_token",
-          "type": {
-            "token": "Yield"
-          }
+        "yield_token": {
+          "token": "Yield"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Expr"
-              }
+        "expr": {
+          "option": {
+            "box": {
+              "syn": "Expr"
             }
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -2992,44 +2338,29 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "ident": {
+          "option": {
+            "proc_macro2": "Ident"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "option": {
-              "proc_macro2": "Ident"
-            }
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
+        "ty": {
+          "syn": "Type"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3040,38 +2371,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "member",
-          "type": {
-            "syn": "Member"
+        "member": {
+          "syn": "Member"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "pat",
-          "type": {
-            "box": {
-              "syn": "Pat"
-            }
+        "pat": {
+          "box": {
+            "syn": "Pat"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3082,36 +2401,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "member",
-          "type": {
-            "syn": "Member"
+        "member": {
+          "syn": "Member"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "syn": "Expr"
-          }
+        "expr": {
+          "syn": "Expr"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3155,25 +2462,19 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+      "fields": {
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "named",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Field"
-              },
-              "punct": "Comma"
-            }
+        "named": {
+          "punctuated": {
+            "element": {
+              "syn": "Field"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3185,25 +2486,19 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+      "fields": {
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "unnamed",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Field"
-              },
-              "punct": "Comma"
-            }
+        "unnamed": {
+          "punctuated": {
+            "element": {
+              "syn": "Field"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3214,32 +2509,23 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "shebang",
-          "type": {
-            "option": {
-              "std": "String"
-            }
+      "fields": {
+        "shebang": {
+          "option": {
+            "std": "String"
           }
         },
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "items",
-          "type": {
-            "vec": {
-              "syn": "Item"
-            }
+        "items": {
+          "vec": {
+            "syn": "Item"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3301,51 +2587,33 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "fn_token",
-          "type": {
-            "token": "Fn"
+      "fields": {
+        "fn_token": {
+          "token": "Fn"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "inputs": {
+          "punctuated": {
+            "element": {
+              "syn": "FnArg"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
+        "variadic": {
+          "option": {
+            "token": "Dot3"
           }
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
-        },
-        {
-          "ident": "inputs",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "FnArg"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "variadic",
-          "type": {
-            "option": {
-              "token": "Dot3"
-            }
-          }
-        },
-        {
-          "ident": "output",
-          "type": {
-            "syn": "ReturnType"
-          }
+        "output": {
+          "syn": "ReturnType"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3407,42 +2675,27 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "decl": {
+          "box": {
+            "syn": "FnDecl"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "decl",
-          "type": {
-            "box": {
-              "syn": "FnDecl"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3453,30 +2706,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+        "mac": {
+          "syn": "Macro"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3487,62 +2731,38 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "static_token": {
+          "token": "Static"
+        },
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "static_token",
-          "type": {
-            "token": "Static"
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "colon_token": {
+          "token": "Colon"
+        },
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
-          }
-        },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3553,40 +2773,25 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "type_token",
-          "type": {
-            "token": "Type"
-          }
+        "type_token": {
+          "token": "Type"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3597,14 +2802,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3731,43 +2933,31 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "lt_token",
-          "type": {
-            "option": {
-              "token": "Lt"
-            }
+      "fields": {
+        "lt_token": {
+          "option": {
+            "token": "Lt"
           }
         },
-        {
-          "ident": "params",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "GenericParam"
-              },
-              "punct": "Comma"
-            }
+        "params": {
+          "punctuated": {
+            "element": {
+              "syn": "GenericParam"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "gt_token",
-          "type": {
-            "option": {
-              "token": "Gt"
-            }
+        "gt_token": {
+          "option": {
+            "token": "Gt"
           }
         },
-        {
-          "ident": "where_clause",
-          "type": {
-            "option": {
-              "syn": "WhereClause"
-            }
+        "where_clause": {
+          "option": {
+            "syn": "WhereClause"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3837,72 +3027,42 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "defaultness": {
+          "option": {
+            "token": "Default"
           }
         },
-        {
-          "ident": "defaultness",
-          "type": {
-            "option": {
-              "token": "Default"
-            }
-          }
+        "const_token": {
+          "token": "Const"
         },
-        {
-          "ident": "const_token",
-          "type": {
-            "token": "Const"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "colon_token": {
+          "token": "Colon"
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "ty": {
+          "syn": "Type"
         },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
+        "expr": {
+          "syn": "Expr"
         },
-        {
-          "ident": "expr",
-          "type": {
-            "syn": "Expr"
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3913,65 +3073,41 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "existential_token",
-          "type": {
-            "token": "Existential"
+        "existential_token": {
+          "token": "Existential"
+        },
+        "type_token": {
+          "token": "Type"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "type_token",
-          "type": {
-            "token": "Type"
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -3982,30 +3118,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+        "mac": {
+          "syn": "Macro"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4016,42 +3143,27 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "defaultness": {
+          "option": {
+            "token": "Default"
           }
         },
-        {
-          "ident": "defaultness",
-          "type": {
-            "option": {
-              "token": "Default"
-            }
-          }
+        "sig": {
+          "syn": "MethodSig"
         },
-        {
-          "ident": "sig",
-          "type": {
-            "syn": "MethodSig"
-          }
-        },
-        {
-          "ident": "block",
-          "type": {
-            "syn": "Block"
-          }
+        "block": {
+          "syn": "Block"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4062,66 +3174,39 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "defaultness": {
+          "option": {
+            "token": "Default"
           }
         },
-        {
-          "ident": "defaultness",
-          "type": {
-            "option": {
-              "token": "Default"
-            }
-          }
+        "type_token": {
+          "token": "Type"
         },
-        {
-          "ident": "type_token",
-          "type": {
-            "token": "Type"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "generics": {
+          "syn": "Generics"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
+        "ty": {
+          "syn": "Type"
         },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4132,14 +3217,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4151,20 +3233,14 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "index",
-          "type": {
-            "std": "u32"
-          }
+      "fields": {
+        "index": {
+          "std": "u32"
         },
-        {
-          "ident": "span",
-          "type": {
-            "proc_macro2": "Span"
-          }
+        "span": {
+          "proc_macro2": "Span"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4330,68 +3406,41 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "const_token": {
+          "token": "Const"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "colon_token": {
+          "token": "Colon"
+        },
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "const_token",
-          "type": {
-            "token": "Const"
+        "eq_token": {
+          "token": "Eq"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
-          }
-        },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4402,57 +3451,36 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "enum_token",
-          "type": {
-            "token": "Enum"
-          }
+        "enum_token": {
+          "token": "Enum"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
+        "generics": {
+          "syn": "Generics"
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "variants",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Variant"
-              },
-              "punct": "Comma"
-            }
+        "variants": {
+          "punctuated": {
+            "element": {
+              "syn": "Variant"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4463,71 +3491,44 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "existential_token": {
+          "token": "Existential"
+        },
+        "type_token": {
+          "token": "Type"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "existential_token",
-          "type": {
-            "token": "Existential"
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         },
-        {
-          "ident": "type_token",
-          "type": {
-            "token": "Type"
-          }
-        },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4538,61 +3539,40 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "extern_token": {
+          "token": "Extern"
+        },
+        "crate_token": {
+          "token": "Crate"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "rename": {
+          "option": {
+            "tuple": [
+              {
+                "token": "As"
+              },
+              {
+                "proc_macro2": "Ident"
+              }
+            ]
           }
         },
-        {
-          "ident": "extern_token",
-          "type": {
-            "token": "Extern"
-          }
-        },
-        {
-          "ident": "crate_token",
-          "type": {
-            "token": "Crate"
-          }
-        },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "rename",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "As"
-                },
-                {
-                  "proc_macro2": "Ident"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4603,76 +3583,49 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "constness": {
+          "option": {
+            "token": "Const"
           }
         },
-        {
-          "ident": "constness",
-          "type": {
-            "option": {
-              "token": "Const"
-            }
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
-        {
-          "ident": "unsafety",
-          "type": {
-            "option": {
-              "token": "Unsafe"
-            }
+        "asyncness": {
+          "option": {
+            "token": "Async"
           }
         },
-        {
-          "ident": "asyncness",
-          "type": {
-            "option": {
-              "token": "Async"
-            }
+        "abi": {
+          "option": {
+            "syn": "Abi"
           }
         },
-        {
-          "ident": "abi",
-          "type": {
-            "option": {
-              "syn": "Abi"
-            }
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "decl": {
+          "box": {
+            "syn": "FnDecl"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "decl",
-          "type": {
-            "box": {
-              "syn": "FnDecl"
-            }
-          }
-        },
-        {
-          "ident": "block",
-          "type": {
-            "box": {
-              "syn": "Block"
-            }
+        "block": {
+          "box": {
+            "syn": "Block"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4683,36 +3636,24 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "abi",
-          "type": {
-            "syn": "Abi"
-          }
+        "abi": {
+          "syn": "Abi"
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "items",
-          "type": {
-            "vec": {
-              "syn": "ForeignItem"
-            }
+        "items": {
+          "vec": {
+            "syn": "ForeignItem"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4723,86 +3664,59 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "defaultness",
-          "type": {
-            "option": {
-              "token": "Default"
-            }
+        "defaultness": {
+          "option": {
+            "token": "Default"
           }
         },
-        {
-          "ident": "unsafety",
-          "type": {
-            "option": {
-              "token": "Unsafe"
-            }
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
-        {
-          "ident": "impl_token",
-          "type": {
-            "token": "Impl"
-          }
+        "impl_token": {
+          "token": "Impl"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
+        "generics": {
+          "syn": "Generics"
         },
-        {
-          "ident": "trait_",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "option": {
-                    "token": "Bang"
-                  }
-                },
-                {
-                  "syn": "Path"
-                },
-                {
-                  "token": "For"
+        "trait_": {
+          "option": {
+            "tuple": [
+              {
+                "option": {
+                  "token": "Bang"
                 }
-              ]
-            }
+              },
+              {
+                "syn": "Path"
+              },
+              {
+                "token": "For"
+              }
+            ]
           }
         },
-        {
-          "ident": "self_ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "self_ty": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "items",
-          "type": {
-            "vec": {
-              "syn": "ImplItem"
-            }
+        "items": {
+          "vec": {
+            "syn": "ImplItem"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4813,38 +3727,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "option": {
-              "proc_macro2": "Ident"
-            }
+        "ident": {
+          "option": {
+            "proc_macro2": "Ident"
           }
         },
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+        "mac": {
+          "syn": "Macro"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4855,58 +3757,34 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "macro_token",
-          "type": {
-            "token": "Macro"
-          }
+        "macro_token": {
+          "token": "Macro"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "args",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+        "args": {
+          "proc_macro2": "TokenStream"
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "body",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+        "body": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4917,59 +3795,41 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "mod_token",
-          "type": {
-            "token": "Mod"
-          }
+        "mod_token": {
+          "token": "Mod"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "content",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "group": "Brace"
-                },
-                {
-                  "vec": {
-                    "syn": "Item"
-                  }
+        "content": {
+          "option": {
+            "tuple": [
+              {
+                "group": "Brace"
+              },
+              {
+                "vec": {
+                  "syn": "Item"
                 }
-              ]
-            }
+              }
+            ]
           }
         },
-        {
-          "ident": "semi",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -4980,76 +3840,46 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "static_token": {
+          "token": "Static"
+        },
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "static_token",
-          "type": {
-            "token": "Static"
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "colon_token": {
+          "token": "Colon"
+        },
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
+        "eq_token": {
+          "token": "Eq"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
-          }
-        },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
-        },
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5060,54 +3890,33 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "struct_token",
-          "type": {
-            "token": "Struct"
-          }
+        "struct_token": {
+          "token": "Struct"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
+        "generics": {
+          "syn": "Generics"
         },
-        {
-          "ident": "fields",
-          "type": {
-            "syn": "Fields"
-          }
+        "fields": {
+          "syn": "Fields"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5118,89 +3927,56 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
-        {
-          "ident": "unsafety",
-          "type": {
-            "option": {
-              "token": "Unsafe"
-            }
+        "auto_token": {
+          "option": {
+            "token": "Auto"
           }
         },
-        {
-          "ident": "auto_token",
-          "type": {
-            "option": {
-              "token": "Auto"
-            }
+        "trait_token": {
+          "token": "Trait"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "trait_token",
-          "type": {
-            "token": "Trait"
+        "supertraits": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "supertraits",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
-          }
-        },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
-        },
-        {
-          "ident": "items",
-          "type": {
-            "vec": {
-              "syn": "TraitItem"
-            }
+        "items": {
+          "vec": {
+            "syn": "TraitItem"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5211,63 +3987,39 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "trait_token": {
+          "token": "Trait"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "eq_token": {
+          "token": "Eq"
+        },
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         },
-        {
-          "ident": "trait_token",
-          "type": {
-            "token": "Trait"
-          }
-        },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
-        },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
-        },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5278,60 +4030,36 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "type_token": {
+          "token": "Type"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "eq_token": {
+          "token": "Eq"
+        },
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "type_token",
-          "type": {
-            "token": "Type"
-          }
-        },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
-        },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5342,46 +4070,28 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
-          }
+        "vis": {
+          "syn": "Visibility"
         },
-        {
-          "ident": "union_token",
-          "type": {
-            "token": "Union"
-          }
+        "union_token": {
+          "token": "Union"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
+        "generics": {
+          "syn": "Generics"
         },
-        {
-          "ident": "fields",
-          "type": {
-            "syn": "FieldsNamed"
-          }
+        "fields": {
+          "syn": "FieldsNamed"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5392,48 +4102,30 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "vis",
-          "type": {
-            "syn": "Visibility"
+        "vis": {
+          "syn": "Visibility"
+        },
+        "use_token": {
+          "token": "Use"
+        },
+        "leading_colon": {
+          "option": {
+            "token": "Colon2"
           }
         },
-        {
-          "ident": "use_token",
-          "type": {
-            "token": "Use"
-          }
+        "tree": {
+          "syn": "UseTree"
         },
-        {
-          "ident": "leading_colon",
-          "type": {
-            "option": {
-              "token": "Colon2"
-            }
-          }
-        },
-        {
-          "ident": "tree",
-          "type": {
-            "syn": "UseTree"
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5444,14 +4136,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5462,20 +4151,14 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "name",
-          "type": {
-            "syn": "Lifetime"
-          }
+      "fields": {
+        "name": {
+          "syn": "Lifetime"
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "colon_token": {
+          "token": "Colon"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5484,20 +4167,14 @@
       "features": {
         "any": []
       },
-      "fields": [
-        {
-          "ident": "apostrophe",
-          "type": {
-            "proc_macro2": "Span"
-          }
+      "fields": {
+        "apostrophe": {
+          "proc_macro2": "Span"
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5509,41 +4186,29 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "lifetime",
-          "type": {
-            "syn": "Lifetime"
+        "lifetime": {
+          "syn": "Lifetime"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Lifetime"
-              },
-              "punct": "Add"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "Lifetime"
+            },
+            "punct": "Add"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5631,20 +4296,14 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "value",
-          "type": {
-            "std": "bool"
-          }
+      "fields": {
+        "value": {
+          "std": "bool"
         },
-        {
-          "ident": "span",
-          "type": {
-            "proc_macro2": "Span"
-          }
+        "span": {
+          "proc_macro2": "Span"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5656,14 +4315,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": false
     },
     {
@@ -5675,14 +4331,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": false
     },
     {
@@ -5694,14 +4347,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": false
     },
     {
@@ -5713,14 +4363,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": false
     },
     {
@@ -5732,14 +4379,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": false
     },
     {
@@ -5751,14 +4395,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": false
     },
     {
@@ -5770,14 +4411,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "token",
-          "type": {
-            "proc_macro2": "Literal"
-          }
+      "fields": {
+        "token": {
+          "proc_macro2": "Literal"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5788,73 +4426,55 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "let_token",
-          "type": {
-            "token": "Let"
+        "let_token": {
+          "token": "Let"
+        },
+        "pats": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Or"
           }
         },
-        {
-          "ident": "pats",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
+        "ty": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Colon"
               },
-              "punct": "Or"
-            }
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "Colon"
-                },
-                {
-                  "box": {
-                    "syn": "Type"
-                  }
+              {
+                "box": {
+                  "syn": "Type"
                 }
-              ]
-            }
+              }
+            ]
           }
         },
-        {
-          "ident": "init",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "Eq"
-                },
-                {
-                  "box": {
-                    "syn": "Expr"
-                  }
+        "init": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "box": {
+                  "syn": "Expr"
                 }
-              ]
-            }
+              }
+            ]
           }
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -5866,32 +4486,20 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+      "fields": {
+        "path": {
+          "syn": "Path"
         },
-        {
-          "ident": "bang_token",
-          "type": {
-            "token": "Bang"
-          }
+        "bang_token": {
+          "token": "Bang"
         },
-        {
-          "ident": "delimiter",
-          "type": {
-            "syn": "MacroDelimiter"
-          }
+        "delimiter": {
+          "syn": "MacroDelimiter"
         },
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6003,31 +4611,22 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "nested",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "NestedMeta"
-              },
-              "punct": "Comma"
-            }
+        "nested": {
+          "punctuated": {
+            "element": {
+              "syn": "NestedMeta"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6039,26 +4638,17 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "lit",
-          "type": {
-            "syn": "Lit"
-          }
+        "lit": {
+          "syn": "Lit"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6069,52 +4659,34 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "constness",
-          "type": {
-            "option": {
-              "token": "Const"
-            }
+      "fields": {
+        "constness": {
+          "option": {
+            "token": "Const"
           }
         },
-        {
-          "ident": "unsafety",
-          "type": {
-            "option": {
-              "token": "Unsafe"
-            }
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
-        {
-          "ident": "asyncness",
-          "type": {
-            "option": {
-              "token": "Async"
-            }
+        "asyncness": {
+          "option": {
+            "token": "Async"
           }
         },
-        {
-          "ident": "abi",
-          "type": {
-            "option": {
-              "syn": "Abi"
-            }
+        "abi": {
+          "option": {
+            "syn": "Abi"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "decl",
-          "type": {
-            "syn": "FnDecl"
-          }
+        "decl": {
+          "syn": "FnDecl"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6125,37 +4697,25 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "colon2_token",
-          "type": {
-            "token": "Colon2"
+      "fields": {
+        "colon2_token": {
+          "token": "Colon2"
+        },
+        "lt_token": {
+          "token": "Lt"
+        },
+        "args": {
+          "punctuated": {
+            "element": {
+              "syn": "GenericMethodArgument"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "lt_token",
-          "type": {
-            "token": "Lt"
-          }
-        },
-        {
-          "ident": "args",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "GenericMethodArgument"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "gt_token",
-          "type": {
-            "token": "Gt"
-          }
+        "gt_token": {
+          "token": "Gt"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6195,31 +4755,22 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
+      "fields": {
+        "paren_token": {
+          "group": "Paren"
+        },
+        "inputs": {
+          "punctuated": {
+            "element": {
+              "syn": "Type"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "inputs",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Type"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "output",
-          "type": {
-            "syn": "ReturnType"
-          }
+        "output": {
+          "syn": "ReturnType"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6345,22 +4896,16 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "box_token",
-          "type": {
-            "token": "Box"
-          }
+      "fields": {
+        "box_token": {
+          "token": "Box"
         },
-        {
-          "ident": "pat",
-          "type": {
-            "box": {
-              "syn": "Pat"
-            }
+        "pat": {
+          "box": {
+            "syn": "Pat"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6371,47 +4916,35 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "by_ref",
-          "type": {
-            "option": {
-              "token": "Ref"
-            }
+      "fields": {
+        "by_ref": {
+          "option": {
+            "token": "Ref"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "subpat",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "At"
-                },
-                {
-                  "box": {
-                    "syn": "Pat"
-                  }
+        "subpat": {
+          "option": {
+            "tuple": [
+              {
+                "token": "At"
+              },
+              {
+                "box": {
+                  "syn": "Pat"
                 }
-              ]
-            }
+              }
+            ]
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6422,16 +4955,13 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "expr",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+      "fields": {
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6442,14 +4972,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+      "fields": {
+        "mac": {
+          "syn": "Macro"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6460,22 +4987,16 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "qself",
-          "type": {
-            "option": {
-              "syn": "QSelf"
-            }
+      "fields": {
+        "qself": {
+          "option": {
+            "syn": "QSelf"
           }
         },
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+        "path": {
+          "syn": "Path"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6486,30 +5007,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "lo",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+      "fields": {
+        "lo": {
+          "box": {
+            "syn": "Expr"
           }
         },
-        {
-          "ident": "limits",
-          "type": {
-            "syn": "RangeLimits"
-          }
+        "limits": {
+          "syn": "RangeLimits"
         },
-        {
-          "ident": "hi",
-          "type": {
-            "box": {
-              "syn": "Expr"
-            }
+        "hi": {
+          "box": {
+            "syn": "Expr"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6520,30 +5032,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "and_token",
-          "type": {
-            "token": "And"
+      "fields": {
+        "and_token": {
+          "token": "And"
+        },
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
-          }
-        },
-        {
-          "ident": "pat",
-          "type": {
-            "box": {
-              "syn": "Pat"
-            }
+        "pat": {
+          "box": {
+            "syn": "Pat"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6554,62 +5057,44 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
+      "fields": {
+        "bracket_token": {
+          "group": "Bracket"
+        },
+        "front": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "front",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
-              },
-              "punct": "Comma"
+        "middle": {
+          "option": {
+            "box": {
+              "syn": "Pat"
             }
           }
         },
-        {
-          "ident": "middle",
-          "type": {
-            "option": {
-              "box": {
-                "syn": "Pat"
-              }
-            }
+        "dot2_token": {
+          "option": {
+            "token": "Dot2"
           }
         },
-        {
-          "ident": "dot2_token",
-          "type": {
-            "option": {
-              "token": "Dot2"
-            }
+        "comma_token": {
+          "option": {
+            "token": "Comma"
           }
         },
-        {
-          "ident": "comma_token",
-          "type": {
-            "option": {
-              "token": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "back",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
-              },
-              "punct": "Comma"
-            }
+        "back": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6620,39 +5105,27 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
+      "fields": {
+        "path": {
+          "syn": "Path"
+        },
+        "brace_token": {
+          "group": "Brace"
+        },
+        "fields": {
+          "punctuated": {
+            "element": {
+              "syn": "FieldPat"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
-        },
-        {
-          "ident": "fields",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "FieldPat"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "dot2_token",
-          "type": {
-            "option": {
-              "token": "Dot2"
-            }
+        "dot2_token": {
+          "option": {
+            "token": "Dot2"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6663,52 +5136,37 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
+      "fields": {
+        "paren_token": {
+          "group": "Paren"
+        },
+        "front": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "front",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
-              },
-              "punct": "Comma"
-            }
+        "dot2_token": {
+          "option": {
+            "token": "Dot2"
           }
         },
-        {
-          "ident": "dot2_token",
-          "type": {
-            "option": {
-              "token": "Dot2"
-            }
+        "comma_token": {
+          "option": {
+            "token": "Comma"
           }
         },
-        {
-          "ident": "comma_token",
-          "type": {
-            "option": {
-              "token": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "back",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Pat"
-              },
-              "punct": "Comma"
-            }
+        "back": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6719,20 +5177,14 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+      "fields": {
+        "path": {
+          "syn": "Path"
         },
-        {
-          "ident": "pat",
-          "type": {
-            "syn": "PatTuple"
-          }
+        "pat": {
+          "syn": "PatTuple"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6743,14 +5195,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6761,14 +5210,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "underscore_token",
-          "type": {
-            "token": "Underscore"
-          }
+      "fields": {
+        "underscore_token": {
+          "token": "Underscore"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6780,27 +5226,21 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "leading_colon",
-          "type": {
-            "option": {
-              "token": "Colon2"
-            }
+      "fields": {
+        "leading_colon": {
+          "option": {
+            "token": "Colon2"
           }
         },
-        {
-          "ident": "segments",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "PathSegment"
-              },
-              "punct": "Colon2"
-            }
+        "segments": {
+          "punctuated": {
+            "element": {
+              "syn": "PathSegment"
+            },
+            "punct": "Colon2"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6844,20 +5284,14 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "arguments",
-          "type": {
-            "syn": "PathArguments"
-          }
+        "arguments": {
+          "syn": "PathArguments"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6869,26 +5303,17 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "lhs_ty",
-          "type": {
-            "syn": "Type"
-          }
+      "fields": {
+        "lhs_ty": {
+          "syn": "Type"
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "token": "Eq"
-          }
+        "eq_token": {
+          "token": "Eq"
         },
-        {
-          "ident": "rhs_ty",
-          "type": {
-            "syn": "Type"
-          }
+        "rhs_ty": {
+          "syn": "Type"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6900,31 +5325,22 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "lifetime",
-          "type": {
-            "syn": "Lifetime"
-          }
+      "fields": {
+        "lifetime": {
+          "syn": "Lifetime"
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "colon_token": {
+          "token": "Colon"
         },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Lifetime"
-              },
-              "punct": "Add"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "Lifetime"
+            },
+            "punct": "Add"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6936,39 +5352,27 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "lifetimes",
-          "type": {
-            "option": {
-              "syn": "BoundLifetimes"
-            }
+      "fields": {
+        "lifetimes": {
+          "option": {
+            "syn": "BoundLifetimes"
           }
         },
-        {
-          "ident": "bounded_ty",
-          "type": {
-            "syn": "Type"
-          }
+        "bounded_ty": {
+          "syn": "Type"
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
+        "colon_token": {
+          "token": "Colon"
         },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -6980,42 +5384,27 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "lt_token",
-          "type": {
-            "token": "Lt"
+      "fields": {
+        "lt_token": {
+          "token": "Lt"
+        },
+        "ty": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "ty",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "position": {
+          "std": "usize"
+        },
+        "as_token": {
+          "option": {
+            "token": "As"
           }
         },
-        {
-          "ident": "position",
-          "type": {
-            "std": "usize"
-          }
-        },
-        {
-          "ident": "as_token",
-          "type": {
-            "option": {
-              "token": "As"
-            }
-          }
-        },
-        {
-          "ident": "gt_token",
-          "type": {
-            "token": "Gt"
-          }
+        "gt_token": {
+          "token": "Gt"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7129,36 +5518,24 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "paren_token",
-          "type": {
-            "option": {
-              "group": "Paren"
-            }
+      "fields": {
+        "paren_token": {
+          "option": {
+            "group": "Paren"
           }
         },
-        {
-          "ident": "modifier",
-          "type": {
-            "syn": "TraitBoundModifier"
+        "modifier": {
+          "syn": "TraitBoundModifier"
+        },
+        "lifetimes": {
+          "option": {
+            "syn": "BoundLifetimes"
           }
         },
-        {
-          "ident": "lifetimes",
-          "type": {
-            "option": {
-              "syn": "BoundLifetimes"
-            }
-          }
-        },
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+        "path": {
+          "syn": "Path"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7244,61 +5621,40 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "const_token",
-          "type": {
-            "token": "Const"
+        "const_token": {
+          "token": "Const"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "colon_token": {
+          "token": "Colon"
+        },
+        "ty": {
+          "syn": "Type"
+        },
+        "default": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Expr"
+              }
+            ]
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "token": "Colon"
-          }
-        },
-        {
-          "ident": "ty",
-          "type": {
-            "syn": "Type"
-          }
-        },
-        {
-          "ident": "default",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "Eq"
-                },
-                {
-                  "syn": "Expr"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7309,30 +5665,21 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+        "mac": {
+          "syn": "Macro"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7343,38 +5690,26 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "sig",
-          "type": {
-            "syn": "MethodSig"
+        "sig": {
+          "syn": "MethodSig"
+        },
+        "default": {
+          "option": {
+            "syn": "Block"
           }
         },
-        {
-          "ident": "default",
-          "type": {
-            "option": {
-              "syn": "Block"
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "option": {
-              "token": "Semi"
-            }
+        "semi_token": {
+          "option": {
+            "token": "Semi"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7385,74 +5720,50 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "type_token",
-          "type": {
-            "token": "Type"
+        "type_token": {
+          "token": "Type"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         },
-        {
-          "ident": "generics",
-          "type": {
-            "syn": "Generics"
-          }
-        },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
-          }
-        },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
+        "default": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
               },
-              "punct": "Add"
-            }
+              {
+                "syn": "Type"
+              }
+            ]
           }
         },
-        {
-          "ident": "default",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "Eq"
-                },
-                {
-                  "syn": "Type"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
+        "semi_token": {
+          "token": "Semi"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7463,14 +5774,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7614,34 +5922,22 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
+      "fields": {
+        "bracket_token": {
+          "group": "Bracket"
+        },
+        "elem": {
+          "box": {
+            "syn": "Type"
           }
         },
-        {
-          "ident": "elem",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
-          }
+        "semi_token": {
+          "token": "Semi"
         },
-        {
-          "ident": "semi_token",
-          "type": {
-            "token": "Semi"
-          }
-        },
-        {
-          "ident": "len",
-          "type": {
-            "syn": "Expr"
-          }
+        "len": {
+          "syn": "Expr"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7653,69 +5949,45 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "lifetimes",
-          "type": {
-            "option": {
-              "syn": "BoundLifetimes"
-            }
+      "fields": {
+        "lifetimes": {
+          "option": {
+            "syn": "BoundLifetimes"
           }
         },
-        {
-          "ident": "unsafety",
-          "type": {
-            "option": {
-              "token": "Unsafe"
-            }
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
-        {
-          "ident": "abi",
-          "type": {
-            "option": {
-              "syn": "Abi"
-            }
+        "abi": {
+          "option": {
+            "syn": "Abi"
           }
         },
-        {
-          "ident": "fn_token",
-          "type": {
-            "token": "Fn"
+        "fn_token": {
+          "token": "Fn"
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "inputs": {
+          "punctuated": {
+            "element": {
+              "syn": "BareFnArg"
+            },
+            "punct": "Comma"
           }
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
+        "variadic": {
+          "option": {
+            "token": "Dot3"
           }
         },
-        {
-          "ident": "inputs",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "BareFnArg"
-              },
-              "punct": "Comma"
-            }
-          }
-        },
-        {
-          "ident": "variadic",
-          "type": {
-            "option": {
-              "token": "Dot3"
-            }
-          }
-        },
-        {
-          "ident": "output",
-          "type": {
-            "syn": "ReturnType"
-          }
+        "output": {
+          "syn": "ReturnType"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7727,22 +5999,16 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "group_token",
-          "type": {
-            "group": "Group"
-          }
+      "fields": {
+        "group_token": {
+          "group": "Group"
         },
-        {
-          "ident": "elem",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "elem": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7754,25 +6020,19 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "impl_token",
-          "type": {
-            "token": "Impl"
-          }
+      "fields": {
+        "impl_token": {
+          "token": "Impl"
         },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7784,14 +6044,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "underscore_token",
-          "type": {
-            "token": "Underscore"
-          }
+      "fields": {
+        "underscore_token": {
+          "token": "Underscore"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7803,14 +6060,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "mac",
-          "type": {
-            "syn": "Macro"
-          }
+      "fields": {
+        "mac": {
+          "syn": "Macro"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7822,14 +6076,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "bang_token",
-          "type": {
-            "token": "Bang"
-          }
+      "fields": {
+        "bang_token": {
+          "token": "Bang"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7841,57 +6092,39 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
           }
         },
-        {
-          "ident": "colon_token",
-          "type": {
-            "option": {
-              "token": "Colon"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
+        "eq_token": {
+          "option": {
+            "token": "Eq"
           }
         },
-        {
-          "ident": "eq_token",
-          "type": {
-            "option": {
-              "token": "Eq"
-            }
-          }
-        },
-        {
-          "ident": "default",
-          "type": {
-            "option": {
-              "syn": "Type"
-            }
+        "default": {
+          "option": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7931,22 +6164,16 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+      "fields": {
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "elem",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "elem": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7958,22 +6185,16 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "qself",
-          "type": {
-            "option": {
-              "syn": "QSelf"
-            }
+      "fields": {
+        "qself": {
+          "option": {
+            "syn": "QSelf"
           }
         },
-        {
-          "ident": "path",
-          "type": {
-            "syn": "Path"
-          }
+        "path": {
+          "syn": "Path"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -7985,38 +6206,26 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "star_token",
-          "type": {
-            "token": "Star"
+      "fields": {
+        "star_token": {
+          "token": "Star"
+        },
+        "const_token": {
+          "option": {
+            "token": "Const"
           }
         },
-        {
-          "ident": "const_token",
-          "type": {
-            "option": {
-              "token": "Const"
-            }
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
-          }
-        },
-        {
-          "ident": "elem",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "elem": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8028,38 +6237,26 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "and_token",
-          "type": {
-            "token": "And"
+      "fields": {
+        "and_token": {
+          "token": "And"
+        },
+        "lifetime": {
+          "option": {
+            "syn": "Lifetime"
           }
         },
-        {
-          "ident": "lifetime",
-          "type": {
-            "option": {
-              "syn": "Lifetime"
-            }
+        "mutability": {
+          "option": {
+            "token": "Mut"
           }
         },
-        {
-          "ident": "mutability",
-          "type": {
-            "option": {
-              "token": "Mut"
-            }
-          }
-        },
-        {
-          "ident": "elem",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "elem": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8071,22 +6268,16 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "bracket_token",
-          "type": {
-            "group": "Bracket"
-          }
+      "fields": {
+        "bracket_token": {
+          "group": "Bracket"
         },
-        {
-          "ident": "elem",
-          "type": {
-            "box": {
-              "syn": "Type"
-            }
+        "elem": {
+          "box": {
+            "syn": "Type"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8098,27 +6289,21 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "dyn_token",
-          "type": {
-            "option": {
-              "token": "Dyn"
-            }
+      "fields": {
+        "dyn_token": {
+          "option": {
+            "token": "Dyn"
           }
         },
-        {
-          "ident": "bounds",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "TypeParamBound"
-              },
-              "punct": "Add"
-            }
+        "bounds": {
+          "punctuated": {
+            "element": {
+              "syn": "TypeParamBound"
+            },
+            "punct": "Add"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8130,25 +6315,19 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
+      "fields": {
+        "paren_token": {
+          "group": "Paren"
         },
-        {
-          "ident": "elems",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "Type"
-              },
-              "punct": "Comma"
-            }
+        "elems": {
+          "punctuated": {
+            "element": {
+              "syn": "Type"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8160,14 +6339,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "tts",
-          "type": {
-            "proc_macro2": "TokenStream"
-          }
+      "fields": {
+        "tts": {
+          "proc_macro2": "TokenStream"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8214,14 +6390,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "star_token",
-          "type": {
-            "token": "Star"
-          }
+      "fields": {
+        "star_token": {
+          "token": "Star"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8232,25 +6405,19 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "brace_token",
-          "type": {
-            "group": "Brace"
-          }
+      "fields": {
+        "brace_token": {
+          "group": "Brace"
         },
-        {
-          "ident": "items",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "UseTree"
-              },
-              "punct": "Comma"
-            }
+        "items": {
+          "punctuated": {
+            "element": {
+              "syn": "UseTree"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8261,14 +6428,11 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8279,28 +6443,19 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "colon2_token",
-          "type": {
-            "token": "Colon2"
-          }
+        "colon2_token": {
+          "token": "Colon2"
         },
-        {
-          "ident": "tree",
-          "type": {
-            "box": {
-              "syn": "UseTree"
-            }
+        "tree": {
+          "box": {
+            "syn": "UseTree"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8311,26 +6466,17 @@
           "full"
         ]
       },
-      "fields": [
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "as_token",
-          "type": {
-            "token": "As"
-          }
+        "as_token": {
+          "token": "As"
         },
-        {
-          "ident": "rename",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "rename": {
+          "proc_macro2": "Ident"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8393,43 +6539,31 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "attrs",
-          "type": {
-            "vec": {
-              "syn": "Attribute"
-            }
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
           }
         },
-        {
-          "ident": "ident",
-          "type": {
-            "proc_macro2": "Ident"
-          }
+        "ident": {
+          "proc_macro2": "Ident"
         },
-        {
-          "ident": "fields",
-          "type": {
-            "syn": "Fields"
-          }
+        "fields": {
+          "syn": "Fields"
         },
-        {
-          "ident": "discriminant",
-          "type": {
-            "option": {
-              "tuple": [
-                {
-                  "token": "Eq"
-                },
-                {
-                  "syn": "Expr"
-                }
-              ]
-            }
+        "discriminant": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Expr"
+              }
+            ]
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8441,14 +6575,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "crate_token",
-          "type": {
-            "token": "Crate"
-          }
+      "fields": {
+        "crate_token": {
+          "token": "Crate"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8460,14 +6591,11 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "pub_token",
-          "type": {
-            "token": "Pub"
-          }
+      "fields": {
+        "pub_token": {
+          "token": "Pub"
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8479,36 +6607,24 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "pub_token",
-          "type": {
-            "token": "Pub"
+      "fields": {
+        "pub_token": {
+          "token": "Pub"
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "in_token": {
+          "option": {
+            "token": "In"
           }
         },
-        {
-          "ident": "paren_token",
-          "type": {
-            "group": "Paren"
-          }
-        },
-        {
-          "ident": "in_token",
-          "type": {
-            "option": {
-              "token": "In"
-            }
-          }
-        },
-        {
-          "ident": "path",
-          "type": {
-            "box": {
-              "syn": "Path"
-            }
+        "path": {
+          "box": {
+            "syn": "Path"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {
@@ -8560,25 +6676,19 @@
           "derive"
         ]
       },
-      "fields": [
-        {
-          "ident": "where_token",
-          "type": {
-            "token": "Where"
-          }
+      "fields": {
+        "where_token": {
+          "token": "Where"
         },
-        {
-          "ident": "predicates",
-          "type": {
-            "punctuated": {
-              "element": {
-                "syn": "WherePredicate"
-              },
-              "punct": "Comma"
-            }
+        "predicates": {
+          "punctuated": {
+            "element": {
+              "syn": "WherePredicate"
+            },
+            "punct": "Comma"
           }
         }
-      ],
+      },
       "all_fields_pub": true
     },
     {

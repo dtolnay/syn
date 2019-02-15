@@ -1,5 +1,6 @@
 use crate::types;
 
+use indexmap::IndexMap;
 use syn::{Data, DataStruct, DeriveInput, Ident, Item};
 
 use std::collections::BTreeMap;
@@ -107,13 +108,13 @@ fn introspect_struct(
                     all_fields_pub = false;
                 }
 
-                types::Field::new(
+                (
                     field.ident.as_ref().unwrap().to_string(),
                     introspect_type(&field.ty, items, tokens),
                 )
             })
             .collect(),
-        syn::Fields::Unit => vec![],
+        syn::Fields::Unit => IndexMap::new(),
         _ => panic!("Struct representation not supported"),
     };
 

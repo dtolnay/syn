@@ -9,6 +9,7 @@ publish = false # this is an internal crate which should never be published
 syn = { path = "..", features = ["full", "extra-traits"] }
 quote = "0.6"
 failure = "0.1"
+indexmap = { version = "1.0", features = ["serde-1"] }
 inflections = "1.1"
 proc-macro2 = "0.4"
 rustfmt-nightly = { git = "https://github.com/rust-lang-nursery/rustfmt" }

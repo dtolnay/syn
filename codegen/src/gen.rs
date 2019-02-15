@@ -11,6 +11,7 @@
 //! 3. The path to `syn` is hardcoded.
 
 use crate::types;
+use indexmap::IndexMap;
 use proc_macro2::TokenStream;
 
 use std::fs::File;
@@ -516,21 +517,21 @@ mod codegen {
             types::Node::Struct(ref v) => {
                 let mut fold_fields = TokenStream::new();
 
-                for field in v.fields() {
-                    let id = Ident::new(field.ident(), Span::call_site());
+                for (field, ty) in v.fields() {
+                    let id = Ident::new(field, Span::call_site());
                     let ref_toks = Owned(quote!(_i.#id));
-                    let visit_field = visit(field.ty(), v.features(), defs, Visit, &ref_toks)
+                    let visit_field = visit(ty, v.features(), defs, Visit, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
                     visit_impl.append_all(quote! {
                         #visit_field;
                     });
                     let visit_mut_field =
-                        visit(field.ty(), v.features(), defs, VisitMut, &ref_toks)
+                        visit(ty, v.features(), defs, VisitMut, &ref_toks)
                             .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
                     visit_mut_impl.append_all(quote! {
                         #visit_mut_field;
                     });
-                    let fold = visit(field.ty(), v.features(), defs, Fold, &ref_toks)
+                    let fold = visit(ty, v.features(), defs, Fold, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
 
                     fold_fields.append_all(quote! {
@@ -645,7 +646,7 @@ pub fn generate(defs: &types::Definitions) {
         defs.insert(types::Node::Struct(types::Struct::new(
                     tt.to_string(),
                     types::Features::default(),
-                    vec![],
+                    IndexMap::new(),
                     true)
         ));
     }

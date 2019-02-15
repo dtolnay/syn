@@ -13,6 +13,7 @@
 #![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
 
+extern crate indexmap;
 extern crate inflections;
 extern crate proc_macro2;
 #[macro_use]
