@@ -18,23 +18,23 @@ pub enum Node {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Struct {
-    ident: String,
-    features: Features,
+    pub ident: String,
+    pub features: Features,
     #[serde(skip_serializing_if = "IndexMap::is_empty")]
-    fields: IndexMap<String, Type>,
+    pub fields: IndexMap<String, Type>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Enum {
-    ident: String,
-    features: Features,
-    variants: Vec<Variant>,
+    pub ident: String,
+    pub features: Features,
+    pub variants: Vec<Variant>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Variant {
-    ident: String,
-    fields: Vec<Type>,
+    pub ident: String,
+    pub fields: Vec<Type>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -67,19 +67,13 @@ pub enum Type {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Punctuated {
-    element: Box<Type>,
-    punct: String,
+    pub element: Box<Type>,
+    pub punct: String,
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Features {
     any: Vec<String>,
-}
-
-impl Definitions {
-    pub fn insert(&mut self, node: Node) {
-        self.types.push(node);
-    }
 }
 
 impl Node {
@@ -106,14 +100,6 @@ impl Struct {
             fields,
         }
     }
-
-    pub fn features(&self) -> &Features {
-        &self.features
-    }
-
-    pub fn fields(&self) -> &IndexMap<String, Type> {
-        &self.fields
-    }
 }
 
 impl Enum {
@@ -124,23 +110,11 @@ impl Enum {
             variants,
         }
     }
-
-    pub fn variants(&self) -> &[Variant] {
-        &self.variants
-    }
 }
 
 impl Variant {
     pub fn new(ident: String, fields: Vec<Type>) -> Variant {
         Variant { ident, fields }
-    }
-
-    pub fn ident(&self) -> &str {
-        &self.ident
-    }
-
-    pub fn fields(&self) -> &[Type] {
-        &self.fields
     }
 }
 
@@ -150,10 +124,6 @@ impl Punctuated {
             element: Box::new(element),
             punct,
         }
-    }
-
-    pub fn element(&self) -> &Type {
-        &self.element
     }
 }
 

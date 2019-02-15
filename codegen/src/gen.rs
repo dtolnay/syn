@@ -341,7 +341,7 @@ mod codegen {
         match ty {
             types::Type::Box(t) => box_visit(&*t, features, defs, kind, name),
             types::Type::Vec(t) => vec_visit(&*t, features, defs, kind, name),
-            types::Type::Punctuated(p) => punctuated_visit(p.element(), features, defs, kind, name),
+            types::Type::Punctuated(p) => punctuated_visit(&p.element, features, defs, kind, name),
             types::Type::Option(t) => option_visit(&*t, features, defs, kind, name),
             types::Type::Tuple(t) => tuple_visit(t, features, defs, kind, name),
             types::Type::Token(t) => {
@@ -413,10 +413,10 @@ mod codegen {
                 let mut visit_mut_variants = TokenStream::new();
                 let mut fold_variants = TokenStream::new();
 
-                for variant in e.variants() {
-                    let variant_ident = Ident::new(variant.ident(), Span::call_site());
+                for variant in &e.variants {
+                    let variant_ident = Ident::new(&variant.ident, Span::call_site());
 
-                    if variant.fields().is_empty() {
+                    if variant.fields.is_empty() {
                         visit_variants.append_all(quote! {
                             #ty::#variant_ident => {}
                         });
@@ -437,7 +437,7 @@ mod codegen {
                         let mut visit_mut_fields = TokenStream::new();
                         let mut fold_fields = TokenStream::new();
 
-                        for (idx, ty) in variant.fields().iter().enumerate() {
+                        for (idx, ty) in variant.fields.iter().enumerate() {
                             let name = format!("_binding_{}", idx);
                             let binding = Ident::new(&name, Span::call_site());
 
@@ -515,20 +515,20 @@ mod codegen {
             types::Node::Struct(ref v) => {
                 let mut fold_fields = TokenStream::new();
 
-                for (field, ty) in v.fields() {
-                    let id = Ident::new(field, Span::call_site());
+                for (field, ty) in &v.fields {
+                    let id = Ident::new(&field, Span::call_site());
                     let ref_toks = Owned(quote!(_i.#id));
-                    let visit_field = visit(ty, v.features(), defs, Visit, &ref_toks)
+                    let visit_field = visit(&ty, &v.features, defs, Visit, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
                     visit_impl.append_all(quote! {
                         #visit_field;
                     });
-                    let visit_mut_field = visit(ty, v.features(), defs, VisitMut, &ref_toks)
+                    let visit_mut_field = visit(&ty, &v.features, defs, VisitMut, &ref_toks)
                         .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
                     visit_mut_impl.append_all(quote! {
                         #visit_mut_field;
                     });
-                    let fold = visit(ty, v.features(), defs, Fold, &ref_toks)
+                    let fold = visit(&ty, &v.features, defs, Fold, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
 
                     fold_fields.append_all(quote! {
@@ -536,7 +536,7 @@ mod codegen {
                     });
                 }
 
-                if !v.fields().is_empty() {
+                if !v.fields.is_empty() {
                     fold_impl.append_all(quote! {
                         #ty {
                             #fold_fields
@@ -559,7 +559,7 @@ mod codegen {
 
         let mut include_fold_impl = true;
         if let types::Node::Struct(ref data) = s {
-            if data.fields().is_empty() && !super::TERMINAL_TYPES.contains(&&s.ident()) {
+            if data.fields.is_empty() && !super::TERMINAL_TYPES.contains(&&s.ident()) {
                 include_fold_impl = false;
             }
         }
@@ -640,7 +640,7 @@ pub fn generate(defs: &types::Definitions) {
     let mut defs = defs.clone();
 
     for &tt in TERMINAL_TYPES {
-        defs.insert(types::Node::Struct(types::Struct::new(
+        defs.types.push(types::Node::Struct(types::Struct::new(
             tt.to_string(),
             types::Features::default(),
             IndexMap::new(),
