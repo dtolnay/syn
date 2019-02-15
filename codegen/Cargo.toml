@@ -12,6 +12,10 @@ failure = "0.1"
 inflections = "1.1"
 proc-macro2 = "0.4"
 rustfmt-nightly = { git = "https://github.com/rust-lang-nursery/rustfmt" }
+serde = "1.0.87"
+serde_derive = "1.0.87"
+serde_json = "1.0.38"
+toml = "0.4.10"
 
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of

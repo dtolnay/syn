@@ -20,12 +20,19 @@ extern crate quote;
 extern crate rustfmt_nightly as rustfmt;
 #[macro_use]
 extern crate syn;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
+extern crate toml;
 
 mod gen;
+mod json;
 mod parse;
 mod types;
 
 fn main() {
     let types = parse::parse();
     gen::generate(&types);
+    json::generate(&types);
 }
