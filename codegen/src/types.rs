@@ -54,7 +54,7 @@ pub enum Type {
     Ext(String),
 
     /// Token type
-    Token(Token),
+    Token(String),
 
     /// Token group
     Group(String),
@@ -68,17 +68,10 @@ pub enum Type {
     Tuple(Vec<Type>),
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub struct Token {
-    repr: String,
-    #[serde(rename = "type")]
-    ty: String,
-}
-
 #[derive(Debug, Serialize)]
 pub struct Punctuated {
     element: Box<Type>,
-    punct: Token,
+    punct: String,
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -172,23 +165,8 @@ impl Field {
     }
 }
 
-impl Token {
-    pub fn new(repr: String, ty: String) -> Token {
-        Token { repr, ty }
-    }
-
-    pub fn is_keyword(&self) -> bool {
-        let c = self.repr.chars().next().unwrap();
-        c.is_alphabetic()
-    }
-
-    pub fn repr(&self) -> &str {
-        &self.repr
-    }
-}
-
 impl Punctuated {
-    pub fn new(element: Type, punct: Token) -> Self {
+    pub fn new(element: Type, punct: String) -> Self {
         Punctuated { element: Box::new(element), punct }
     }
 

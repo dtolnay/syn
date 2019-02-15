@@ -14,10 +14,7 @@
         {
           "ident": "extern_token",
           "type": {
-            "token": {
-              "repr": "extern",
-              "type": "Extern"
-            }
+            "token": "Extern"
           }
         },
         {
@@ -45,20 +42,14 @@
           "ident": "colon2_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "::",
-                "type": "Colon2"
-              }
+              "token": "Colon2"
             }
           }
         },
         {
           "ident": "lt_token",
           "type": {
-            "token": {
-              "repr": "<",
-              "type": "Lt"
-            }
+            "token": "Lt"
           }
         },
         {
@@ -68,20 +59,14 @@
               "element": {
                 "item": "GenericArgument"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
         {
           "ident": "gt_token",
           "type": {
-            "token": {
-              "repr": ">",
-              "type": "Gt"
-            }
+            "token": "Gt"
           }
         }
       ],
@@ -105,10 +90,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -133,20 +115,14 @@
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
         {
           "ident": "self_token",
           "type": {
-            "token": {
-              "repr": "self",
-              "type": "SelfValue"
-            }
+            "token": "SelfValue"
           }
         }
       ],
@@ -164,10 +140,7 @@
         {
           "ident": "and_token",
           "type": {
-            "token": {
-              "repr": "&",
-              "type": "And"
-            }
+            "token": "And"
           }
         },
         {
@@ -182,20 +155,14 @@
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
         {
           "ident": "self_token",
           "type": {
-            "token": {
-              "repr": "self",
-              "type": "SelfValue"
-            }
+            "token": "SelfValue"
           }
         }
       ],
@@ -222,10 +189,7 @@
           "ident": "leading_vert",
           "type": {
             "option": {
-              "token": {
-                "repr": "|",
-                "type": "Or"
-              }
+              "token": "Or"
             }
           }
         },
@@ -236,10 +200,7 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": "|",
-                "type": "Or"
-              }
+              "punct": "Or"
             }
           }
         },
@@ -249,10 +210,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "if",
-                    "type": "If"
-                  }
+                  "token": "If"
                 },
                 {
                   "box": {
@@ -266,10 +224,7 @@
         {
           "ident": "fat_arrow_token",
           "type": {
-            "token": {
-              "repr": "=>",
-              "type": "FatArrow"
-            }
+            "token": "FatArrow"
           }
         },
         {
@@ -284,10 +239,7 @@
           "ident": "comma",
           "type": {
             "option": {
-              "token": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "token": "Comma"
             }
           }
         }
@@ -312,10 +264,7 @@
           "ident": "Inner",
           "fields": [
             {
-              "token": {
-                "repr": "!",
-                "type": "Bang"
-              }
+              "token": "Bang"
             }
           ]
         }
@@ -334,10 +283,7 @@
         {
           "ident": "pound_token",
           "type": {
-            "token": {
-              "repr": "#",
-              "type": "Pound"
-            }
+            "token": "Pound"
           }
         },
         {
@@ -386,10 +332,7 @@
                   "item": "BareFnArgName"
                 },
                 {
-                  "token": {
-                    "repr": ":",
-                    "type": "Colon"
-                  }
+                  "token": "Colon"
                 }
               ]
             }
@@ -426,10 +369,7 @@
           "ident": "Wild",
           "fields": [
             {
-              "token": {
-                "repr": "_",
-                "type": "Underscore"
-              }
+              "token": "Underscore"
             }
           ]
         }
@@ -449,10 +389,7 @@
           "ident": "Add",
           "fields": [
             {
-              "token": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "token": "Add"
             }
           ]
         },
@@ -460,10 +397,7 @@
           "ident": "Sub",
           "fields": [
             {
-              "token": {
-                "repr": "-",
-                "type": "Sub"
-              }
+              "token": "Sub"
             }
           ]
         },
@@ -471,10 +405,7 @@
           "ident": "Mul",
           "fields": [
             {
-              "token": {
-                "repr": "*",
-                "type": "Star"
-              }
+              "token": "Star"
             }
           ]
         },
@@ -482,10 +413,7 @@
           "ident": "Div",
           "fields": [
             {
-              "token": {
-                "repr": "/",
-                "type": "Div"
-              }
+              "token": "Div"
             }
           ]
         },
@@ -493,10 +421,7 @@
           "ident": "Rem",
           "fields": [
             {
-              "token": {
-                "repr": "%",
-                "type": "Rem"
-              }
+              "token": "Rem"
             }
           ]
         },
@@ -504,10 +429,7 @@
           "ident": "And",
           "fields": [
             {
-              "token": {
-                "repr": "&&",
-                "type": "AndAnd"
-              }
+              "token": "AndAnd"
             }
           ]
         },
@@ -515,10 +437,7 @@
           "ident": "Or",
           "fields": [
             {
-              "token": {
-                "repr": "||",
-                "type": "OrOr"
-              }
+              "token": "OrOr"
             }
           ]
         },
@@ -526,10 +445,7 @@
           "ident": "BitXor",
           "fields": [
             {
-              "token": {
-                "repr": "^",
-                "type": "Caret"
-              }
+              "token": "Caret"
             }
           ]
         },
@@ -537,10 +453,7 @@
           "ident": "BitAnd",
           "fields": [
             {
-              "token": {
-                "repr": "&",
-                "type": "And"
-              }
+              "token": "And"
             }
           ]
         },
@@ -548,10 +461,7 @@
           "ident": "BitOr",
           "fields": [
             {
-              "token": {
-                "repr": "|",
-                "type": "Or"
-              }
+              "token": "Or"
             }
           ]
         },
@@ -559,10 +469,7 @@
           "ident": "Shl",
           "fields": [
             {
-              "token": {
-                "repr": "<<",
-                "type": "Shl"
-              }
+              "token": "Shl"
             }
           ]
         },
@@ -570,10 +477,7 @@
           "ident": "Shr",
           "fields": [
             {
-              "token": {
-                "repr": ">>",
-                "type": "Shr"
-              }
+              "token": "Shr"
             }
           ]
         },
@@ -581,10 +485,7 @@
           "ident": "Eq",
           "fields": [
             {
-              "token": {
-                "repr": "==",
-                "type": "EqEq"
-              }
+              "token": "EqEq"
             }
           ]
         },
@@ -592,10 +493,7 @@
           "ident": "Lt",
           "fields": [
             {
-              "token": {
-                "repr": "<",
-                "type": "Lt"
-              }
+              "token": "Lt"
             }
           ]
         },
@@ -603,10 +501,7 @@
           "ident": "Le",
           "fields": [
             {
-              "token": {
-                "repr": "<=",
-                "type": "Le"
-              }
+              "token": "Le"
             }
           ]
         },
@@ -614,10 +509,7 @@
           "ident": "Ne",
           "fields": [
             {
-              "token": {
-                "repr": "!=",
-                "type": "Ne"
-              }
+              "token": "Ne"
             }
           ]
         },
@@ -625,10 +517,7 @@
           "ident": "Ge",
           "fields": [
             {
-              "token": {
-                "repr": ">=",
-                "type": "Ge"
-              }
+              "token": "Ge"
             }
           ]
         },
@@ -636,10 +525,7 @@
           "ident": "Gt",
           "fields": [
             {
-              "token": {
-                "repr": ">",
-                "type": "Gt"
-              }
+              "token": "Gt"
             }
           ]
         },
@@ -647,10 +533,7 @@
           "ident": "AddEq",
           "fields": [
             {
-              "token": {
-                "repr": "+=",
-                "type": "AddEq"
-              }
+              "token": "AddEq"
             }
           ]
         },
@@ -658,10 +541,7 @@
           "ident": "SubEq",
           "fields": [
             {
-              "token": {
-                "repr": "-=",
-                "type": "SubEq"
-              }
+              "token": "SubEq"
             }
           ]
         },
@@ -669,10 +549,7 @@
           "ident": "MulEq",
           "fields": [
             {
-              "token": {
-                "repr": "*=",
-                "type": "MulEq"
-              }
+              "token": "MulEq"
             }
           ]
         },
@@ -680,10 +557,7 @@
           "ident": "DivEq",
           "fields": [
             {
-              "token": {
-                "repr": "/=",
-                "type": "DivEq"
-              }
+              "token": "DivEq"
             }
           ]
         },
@@ -691,10 +565,7 @@
           "ident": "RemEq",
           "fields": [
             {
-              "token": {
-                "repr": "%=",
-                "type": "RemEq"
-              }
+              "token": "RemEq"
             }
           ]
         },
@@ -702,10 +573,7 @@
           "ident": "BitXorEq",
           "fields": [
             {
-              "token": {
-                "repr": "^=",
-                "type": "CaretEq"
-              }
+              "token": "CaretEq"
             }
           ]
         },
@@ -713,10 +581,7 @@
           "ident": "BitAndEq",
           "fields": [
             {
-              "token": {
-                "repr": "&=",
-                "type": "AndEq"
-              }
+              "token": "AndEq"
             }
           ]
         },
@@ -724,10 +589,7 @@
           "ident": "BitOrEq",
           "fields": [
             {
-              "token": {
-                "repr": "|=",
-                "type": "OrEq"
-              }
+              "token": "OrEq"
             }
           ]
         },
@@ -735,10 +597,7 @@
           "ident": "ShlEq",
           "fields": [
             {
-              "token": {
-                "repr": "<<=",
-                "type": "ShlEq"
-              }
+              "token": "ShlEq"
             }
           ]
         },
@@ -746,10 +605,7 @@
           "ident": "ShrEq",
           "fields": [
             {
-              "token": {
-                "repr": ">>=",
-                "type": "ShrEq"
-              }
+              "token": "ShrEq"
             }
           ]
         }
@@ -774,10 +630,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -828,19 +681,13 @@
         {
           "ident": "for_token",
           "type": {
-            "token": {
-              "repr": "for",
-              "type": "For"
-            }
+            "token": "For"
           }
         },
         {
           "ident": "lt_token",
           "type": {
-            "token": {
-              "repr": "<",
-              "type": "Lt"
-            }
+            "token": "Lt"
           }
         },
         {
@@ -850,20 +697,14 @@
               "element": {
                 "item": "LifetimeDef"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
         {
           "ident": "gt_token",
           "type": {
-            "token": {
-              "repr": ">",
-              "type": "Gt"
-            }
+            "token": "Gt"
           }
         }
       ],
@@ -890,10 +731,7 @@
         {
           "ident": "const_token",
           "type": {
-            "token": {
-              "repr": "const",
-              "type": "Const"
-            }
+            "token": "Const"
           }
         },
         {
@@ -905,10 +743,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -921,10 +756,7 @@
           "ident": "eq_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "=",
-                "type": "Eq"
-              }
+              "token": "Eq"
             }
           }
         },
@@ -958,10 +790,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -971,10 +800,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         }
@@ -1028,10 +854,7 @@
         {
           "ident": "enum_token",
           "type": {
-            "token": {
-              "repr": "enum",
-              "type": "Enum"
-            }
+            "token": "Enum"
           }
         },
         {
@@ -1047,10 +870,7 @@
               "element": {
                 "item": "Variant"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -1069,10 +889,7 @@
         {
           "ident": "struct_token",
           "type": {
-            "token": {
-              "repr": "struct",
-              "type": "Struct"
-            }
+            "token": "Struct"
           }
         },
         {
@@ -1085,10 +902,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -1107,10 +921,7 @@
         {
           "ident": "union_token",
           "type": {
-            "token": {
-              "repr": "union",
-              "type": "Union"
-            }
+            "token": "Union"
           }
         },
         {
@@ -1528,10 +1339,7 @@
               "element": {
                 "item": "Expr"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -1566,10 +1374,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -1645,20 +1450,14 @@
         {
           "ident": "async_token",
           "type": {
-            "token": {
-              "repr": "async",
-              "type": "Async"
-            }
+            "token": "Async"
           }
         },
         {
           "ident": "capture",
           "type": {
             "option": {
-              "token": {
-                "repr": "move",
-                "type": "Move"
-              }
+              "token": "Move"
             }
           }
         },
@@ -1768,10 +1567,7 @@
         {
           "ident": "box_token",
           "type": {
-            "token": {
-              "repr": "box",
-              "type": "Box"
-            }
+            "token": "Box"
           }
         },
         {
@@ -1805,10 +1601,7 @@
         {
           "ident": "break_token",
           "type": {
-            "token": {
-              "repr": "break",
-              "type": "Break"
-            }
+            "token": "Break"
           }
         },
         {
@@ -1871,10 +1664,7 @@
               "element": {
                 "item": "Expr"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -1910,10 +1700,7 @@
         {
           "ident": "as_token",
           "type": {
-            "token": {
-              "repr": "as",
-              "type": "As"
-            }
+            "token": "As"
           }
         },
         {
@@ -1948,10 +1735,7 @@
           "ident": "asyncness",
           "type": {
             "option": {
-              "token": {
-                "repr": "async",
-                "type": "Async"
-              }
+              "token": "Async"
             }
           }
         },
@@ -1959,10 +1743,7 @@
           "ident": "movability",
           "type": {
             "option": {
-              "token": {
-                "repr": "static",
-                "type": "Static"
-              }
+              "token": "Static"
             }
           }
         },
@@ -1970,20 +1751,14 @@
           "ident": "capture",
           "type": {
             "option": {
-              "token": {
-                "repr": "move",
-                "type": "Move"
-              }
+              "token": "Move"
             }
           }
         },
         {
           "ident": "or1_token",
           "type": {
-            "token": {
-              "repr": "|",
-              "type": "Or"
-            }
+            "token": "Or"
           }
         },
         {
@@ -1993,20 +1768,14 @@
               "element": {
                 "item": "FnArg"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
         {
           "ident": "or2_token",
           "type": {
-            "token": {
-              "repr": "|",
-              "type": "Or"
-            }
+            "token": "Or"
           }
         },
         {
@@ -2046,10 +1815,7 @@
         {
           "ident": "continue_token",
           "type": {
-            "token": {
-              "repr": "continue",
-              "type": "Continue"
-            }
+            "token": "Continue"
           }
         },
         {
@@ -2092,10 +1858,7 @@
         {
           "ident": "dot_token",
           "type": {
-            "token": {
-              "repr": ".",
-              "type": "Dot"
-            }
+            "token": "Dot"
           }
         },
         {
@@ -2135,10 +1898,7 @@
         {
           "ident": "for_token",
           "type": {
-            "token": {
-              "repr": "for",
-              "type": "For"
-            }
+            "token": "For"
           }
         },
         {
@@ -2152,10 +1912,7 @@
         {
           "ident": "in_token",
           "type": {
-            "token": {
-              "repr": "in",
-              "type": "In"
-            }
+            "token": "In"
           }
         },
         {
@@ -2229,10 +1986,7 @@
         {
           "ident": "if_token",
           "type": {
-            "token": {
-              "repr": "if",
-              "type": "If"
-            }
+            "token": "If"
           }
         },
         {
@@ -2255,10 +2009,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "else",
-                    "type": "Else"
-                  }
+                  "token": "Else"
                 },
                 {
                   "box": {
@@ -2300,10 +2051,7 @@
         {
           "ident": "arrow_token",
           "type": {
-            "token": {
-              "repr": "<-",
-              "type": "LArrow"
-            }
+            "token": "LArrow"
           }
         },
         {
@@ -2380,10 +2128,7 @@
         {
           "ident": "let_token",
           "type": {
-            "token": {
-              "repr": "let",
-              "type": "Let"
-            }
+            "token": "Let"
           }
         },
         {
@@ -2393,20 +2138,14 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": "|",
-                "type": "Or"
-              }
+              "punct": "Or"
             }
           }
         },
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -2475,10 +2214,7 @@
         {
           "ident": "loop_token",
           "type": {
-            "token": {
-              "repr": "loop",
-              "type": "Loop"
-            }
+            "token": "Loop"
           }
         },
         {
@@ -2536,10 +2272,7 @@
         {
           "ident": "match_token",
           "type": {
-            "token": {
-              "repr": "match",
-              "type": "Match"
-            }
+            "token": "Match"
           }
         },
         {
@@ -2595,10 +2328,7 @@
         {
           "ident": "dot_token",
           "type": {
-            "token": {
-              "repr": ".",
-              "type": "Dot"
-            }
+            "token": "Dot"
           }
         },
         {
@@ -2628,10 +2358,7 @@
               "element": {
                 "item": "Expr"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -2774,20 +2501,14 @@
         {
           "ident": "and_token",
           "type": {
-            "token": {
-              "repr": "&",
-              "type": "And"
-            }
+            "token": "And"
           }
         },
         {
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -2836,10 +2557,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         },
         {
@@ -2873,10 +2591,7 @@
         {
           "ident": "return_token",
           "type": {
-            "token": {
-              "repr": "return",
-              "type": "Return"
-            }
+            "token": "Return"
           }
         },
         {
@@ -2928,10 +2643,7 @@
               "element": {
                 "item": "FieldValue"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -2939,10 +2651,7 @@
           "ident": "dot2_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "..",
-                "type": "Dot2"
-              }
+              "token": "Dot2"
             }
           }
         },
@@ -2987,10 +2696,7 @@
         {
           "ident": "question_token",
           "type": {
-            "token": {
-              "repr": "?",
-              "type": "Question"
-            }
+            "token": "Question"
           }
         }
       ],
@@ -3016,10 +2722,7 @@
         {
           "ident": "try_token",
           "type": {
-            "token": {
-              "repr": "try",
-              "type": "Try"
-            }
+            "token": "Try"
           }
         },
         {
@@ -3061,10 +2764,7 @@
               "element": {
                 "item": "Expr"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -3099,10 +2799,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -3171,10 +2868,7 @@
         {
           "ident": "unsafe_token",
           "type": {
-            "token": {
-              "repr": "unsafe",
-              "type": "Unsafe"
-            }
+            "token": "Unsafe"
           }
         },
         {
@@ -3233,10 +2927,7 @@
         {
           "ident": "while_token",
           "type": {
-            "token": {
-              "repr": "while",
-              "type": "While"
-            }
+            "token": "While"
           }
         },
         {
@@ -3276,10 +2967,7 @@
         {
           "ident": "yield_token",
           "type": {
-            "token": {
-              "repr": "yield",
-              "type": "Yield"
-            }
+            "token": "Yield"
           }
         },
         {
@@ -3331,10 +3019,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -3374,10 +3059,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -3419,10 +3101,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -3490,10 +3169,7 @@
               "element": {
                 "item": "Field"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -3523,10 +3199,7 @@
               "element": {
                 "item": "Field"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -3632,10 +3305,7 @@
         {
           "ident": "fn_token",
           "type": {
-            "token": {
-              "repr": "fn",
-              "type": "Fn"
-            }
+            "token": "Fn"
           }
         },
         {
@@ -3657,10 +3327,7 @@
               "element": {
                 "item": "FnArg"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -3668,10 +3335,7 @@
           "ident": "variadic",
           "type": {
             "option": {
-              "token": {
-                "repr": "...",
-                "type": "Dot3"
-              }
+              "token": "Dot3"
             }
           }
         },
@@ -3775,10 +3439,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -3811,10 +3472,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -3847,20 +3505,14 @@
         {
           "ident": "static_token",
           "type": {
-            "token": {
-              "repr": "static",
-              "type": "Static"
-            }
+            "token": "Static"
           }
         },
         {
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -3873,10 +3525,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -3890,10 +3539,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -3925,10 +3571,7 @@
         {
           "ident": "type_token",
           "type": {
-            "token": {
-              "repr": "type",
-              "type": "Type"
-            }
+            "token": "Type"
           }
         },
         {
@@ -3940,10 +3583,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -4096,10 +3736,7 @@
           "ident": "lt_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "<",
-                "type": "Lt"
-              }
+              "token": "Lt"
             }
           }
         },
@@ -4110,10 +3747,7 @@
               "element": {
                 "item": "GenericParam"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -4121,10 +3755,7 @@
           "ident": "gt_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ">",
-                "type": "Gt"
-              }
+              "token": "Gt"
             }
           }
         },
@@ -4234,20 +3865,14 @@
           "ident": "defaultness",
           "type": {
             "option": {
-              "token": {
-                "repr": "default",
-                "type": "Default"
-              }
+              "token": "Default"
             }
           }
         },
         {
           "ident": "const_token",
           "type": {
-            "token": {
-              "repr": "const",
-              "type": "Const"
-            }
+            "token": "Const"
           }
         },
         {
@@ -4259,10 +3884,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -4274,10 +3896,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -4289,10 +3908,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -4318,19 +3934,13 @@
         {
           "ident": "existential_token",
           "type": {
-            "token": {
-              "repr": "existential",
-              "type": "Existential"
-            }
+            "token": "Existential"
           }
         },
         {
           "ident": "type_token",
           "type": {
-            "token": {
-              "repr": "type",
-              "type": "Type"
-            }
+            "token": "Type"
           }
         },
         {
@@ -4349,10 +3959,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -4363,20 +3970,14 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         },
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -4409,10 +4010,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -4446,10 +4044,7 @@
           "ident": "defaultness",
           "type": {
             "option": {
-              "token": {
-                "repr": "default",
-                "type": "Default"
-              }
+              "token": "Default"
             }
           }
         },
@@ -4495,20 +4090,14 @@
           "ident": "defaultness",
           "type": {
             "option": {
-              "token": {
-                "repr": "default",
-                "type": "Default"
-              }
+              "token": "Default"
             }
           }
         },
         {
           "ident": "type_token",
           "type": {
-            "token": {
-              "repr": "type",
-              "type": "Type"
-            }
+            "token": "Type"
           }
         },
         {
@@ -4526,10 +4115,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -4541,10 +4127,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -4774,10 +4357,7 @@
         {
           "ident": "const_token",
           "type": {
-            "token": {
-              "repr": "const",
-              "type": "Const"
-            }
+            "token": "Const"
           }
         },
         {
@@ -4789,10 +4369,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -4806,10 +4383,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -4823,10 +4397,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -4858,10 +4429,7 @@
         {
           "ident": "enum_token",
           "type": {
-            "token": {
-              "repr": "enum",
-              "type": "Enum"
-            }
+            "token": "Enum"
           }
         },
         {
@@ -4889,10 +4457,7 @@
               "element": {
                 "item": "Variant"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -4925,19 +4490,13 @@
         {
           "ident": "existential_token",
           "type": {
-            "token": {
-              "repr": "existential",
-              "type": "Existential"
-            }
+            "token": "Existential"
           }
         },
         {
           "ident": "type_token",
           "type": {
-            "token": {
-              "repr": "type",
-              "type": "Type"
-            }
+            "token": "Type"
           }
         },
         {
@@ -4956,10 +4515,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -4970,20 +4526,14 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         },
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -5015,19 +4565,13 @@
         {
           "ident": "extern_token",
           "type": {
-            "token": {
-              "repr": "extern",
-              "type": "Extern"
-            }
+            "token": "Extern"
           }
         },
         {
           "ident": "crate_token",
           "type": {
-            "token": {
-              "repr": "crate",
-              "type": "Crate"
-            }
+            "token": "Crate"
           }
         },
         {
@@ -5042,10 +4586,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "as",
-                    "type": "As"
-                  }
+                  "token": "As"
                 },
                 {
                   "item": "Ident"
@@ -5057,10 +4598,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -5093,10 +4631,7 @@
           "ident": "constness",
           "type": {
             "option": {
-              "token": {
-                "repr": "const",
-                "type": "Const"
-              }
+              "token": "Const"
             }
           }
         },
@@ -5104,10 +4639,7 @@
           "ident": "unsafety",
           "type": {
             "option": {
-              "token": {
-                "repr": "unsafe",
-                "type": "Unsafe"
-              }
+              "token": "Unsafe"
             }
           }
         },
@@ -5115,10 +4647,7 @@
           "ident": "asyncness",
           "type": {
             "option": {
-              "token": {
-                "repr": "async",
-                "type": "Async"
-              }
+              "token": "Async"
             }
           }
         },
@@ -5216,10 +4745,7 @@
           "ident": "defaultness",
           "type": {
             "option": {
-              "token": {
-                "repr": "default",
-                "type": "Default"
-              }
+              "token": "Default"
             }
           }
         },
@@ -5227,20 +4753,14 @@
           "ident": "unsafety",
           "type": {
             "option": {
-              "token": {
-                "repr": "unsafe",
-                "type": "Unsafe"
-              }
+              "token": "Unsafe"
             }
           }
         },
         {
           "ident": "impl_token",
           "type": {
-            "token": {
-              "repr": "impl",
-              "type": "Impl"
-            }
+            "token": "Impl"
           }
         },
         {
@@ -5256,20 +4776,14 @@
               "tuple": [
                 {
                   "option": {
-                    "token": {
-                      "repr": "!",
-                      "type": "Bang"
-                    }
+                    "token": "Bang"
                   }
                 },
                 {
                   "item": "Path"
                 },
                 {
-                  "token": {
-                    "repr": "for",
-                    "type": "For"
-                  }
+                  "token": "For"
                 }
               ]
             }
@@ -5335,10 +4849,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -5371,10 +4882,7 @@
         {
           "ident": "macro_token",
           "type": {
-            "token": {
-              "repr": "macro",
-              "type": "Macro"
-            }
+            "token": "Macro"
           }
         },
         {
@@ -5436,10 +4944,7 @@
         {
           "ident": "mod_token",
           "type": {
-            "token": {
-              "repr": "mod",
-              "type": "Mod"
-            }
+            "token": "Mod"
           }
         },
         {
@@ -5469,10 +4974,7 @@
           "ident": "semi",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -5505,20 +5007,14 @@
         {
           "ident": "static_token",
           "type": {
-            "token": {
-              "repr": "static",
-              "type": "Static"
-            }
+            "token": "Static"
           }
         },
         {
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -5531,10 +5027,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -5548,10 +5041,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -5565,10 +5055,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -5600,10 +5087,7 @@
         {
           "ident": "struct_token",
           "type": {
-            "token": {
-              "repr": "struct",
-              "type": "Struct"
-            }
+            "token": "Struct"
           }
         },
         {
@@ -5628,10 +5112,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -5665,10 +5146,7 @@
           "ident": "unsafety",
           "type": {
             "option": {
-              "token": {
-                "repr": "unsafe",
-                "type": "Unsafe"
-              }
+              "token": "Unsafe"
             }
           }
         },
@@ -5676,20 +5154,14 @@
           "ident": "auto_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "auto",
-                "type": "Auto"
-              }
+              "token": "Auto"
             }
           }
         },
         {
           "ident": "trait_token",
           "type": {
-            "token": {
-              "repr": "trait",
-              "type": "Trait"
-            }
+            "token": "Trait"
           }
         },
         {
@@ -5708,10 +5180,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -5722,10 +5191,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         },
@@ -5772,10 +5238,7 @@
         {
           "ident": "trait_token",
           "type": {
-            "token": {
-              "repr": "trait",
-              "type": "Trait"
-            }
+            "token": "Trait"
           }
         },
         {
@@ -5793,10 +5256,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -5806,20 +5266,14 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         },
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -5851,10 +5305,7 @@
         {
           "ident": "type_token",
           "type": {
-            "token": {
-              "repr": "type",
-              "type": "Type"
-            }
+            "token": "Type"
           }
         },
         {
@@ -5872,10 +5323,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -5889,10 +5337,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -5924,10 +5369,7 @@
         {
           "ident": "union_token",
           "type": {
-            "token": {
-              "repr": "union",
-              "type": "Union"
-            }
+            "token": "Union"
           }
         },
         {
@@ -5977,20 +5419,14 @@
         {
           "ident": "use_token",
           "type": {
-            "token": {
-              "repr": "use",
-              "type": "Use"
-            }
+            "token": "Use"
           }
         },
         {
           "ident": "leading_colon",
           "type": {
             "option": {
-              "token": {
-                "repr": "::",
-                "type": "Colon2"
-              }
+              "token": "Colon2"
             }
           }
         },
@@ -6003,10 +5439,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -6048,10 +5481,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         }
       ],
@@ -6107,10 +5537,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -6121,10 +5548,7 @@
               "element": {
                 "item": "Lifetime"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         }
@@ -6385,10 +5809,7 @@
         {
           "ident": "let_token",
           "type": {
-            "token": {
-              "repr": "let",
-              "type": "Let"
-            }
+            "token": "Let"
           }
         },
         {
@@ -6398,10 +5819,7 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": "|",
-                "type": "Or"
-              }
+              "punct": "Or"
             }
           }
         },
@@ -6411,10 +5829,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": ":",
-                    "type": "Colon"
-                  }
+                  "token": "Colon"
                 },
                 {
                   "box": {
@@ -6431,10 +5846,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "=",
-                    "type": "Eq"
-                  }
+                  "token": "Eq"
                 },
                 {
                   "box": {
@@ -6448,10 +5860,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -6476,10 +5885,7 @@
         {
           "ident": "bang_token",
           "type": {
-            "token": {
-              "repr": "!",
-              "type": "Bang"
-            }
+            "token": "Bang"
           }
         },
         {
@@ -6626,10 +6032,7 @@
               "element": {
                 "item": "NestedMeta"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -6655,10 +6058,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -6683,10 +6083,7 @@
           "ident": "constness",
           "type": {
             "option": {
-              "token": {
-                "repr": "const",
-                "type": "Const"
-              }
+              "token": "Const"
             }
           }
         },
@@ -6694,10 +6091,7 @@
           "ident": "unsafety",
           "type": {
             "option": {
-              "token": {
-                "repr": "unsafe",
-                "type": "Unsafe"
-              }
+              "token": "Unsafe"
             }
           }
         },
@@ -6705,10 +6099,7 @@
           "ident": "asyncness",
           "type": {
             "option": {
-              "token": {
-                "repr": "async",
-                "type": "Async"
-              }
+              "token": "Async"
             }
           }
         },
@@ -6747,19 +6138,13 @@
         {
           "ident": "colon2_token",
           "type": {
-            "token": {
-              "repr": "::",
-              "type": "Colon2"
-            }
+            "token": "Colon2"
           }
         },
         {
           "ident": "lt_token",
           "type": {
-            "token": {
-              "repr": "<",
-              "type": "Lt"
-            }
+            "token": "Lt"
           }
         },
         {
@@ -6769,20 +6154,14 @@
               "element": {
                 "item": "GenericMethodArgument"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
         {
           "ident": "gt_token",
           "type": {
-            "token": {
-              "repr": ">",
-              "type": "Gt"
-            }
+            "token": "Gt"
           }
         }
       ],
@@ -6839,10 +6218,7 @@
               "element": {
                 "item": "Type"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -6982,10 +6358,7 @@
         {
           "ident": "box_token",
           "type": {
-            "token": {
-              "repr": "box",
-              "type": "Box"
-            }
+            "token": "Box"
           }
         },
         {
@@ -7012,10 +6385,7 @@
           "ident": "by_ref",
           "type": {
             "option": {
-              "token": {
-                "repr": "ref",
-                "type": "Ref"
-              }
+              "token": "Ref"
             }
           }
         },
@@ -7023,10 +6393,7 @@
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -7042,10 +6409,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "@",
-                    "type": "At"
-                  }
+                  "token": "At"
                 },
                 {
                   "box": {
@@ -7169,20 +6533,14 @@
         {
           "ident": "and_token",
           "type": {
-            "token": {
-              "repr": "&",
-              "type": "And"
-            }
+            "token": "And"
           }
         },
         {
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -7219,10 +6577,7 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -7240,10 +6595,7 @@
           "ident": "dot2_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "..",
-                "type": "Dot2"
-              }
+              "token": "Dot2"
             }
           }
         },
@@ -7251,10 +6603,7 @@
           "ident": "comma_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "token": "Comma"
             }
           }
         },
@@ -7265,10 +6614,7 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -7303,10 +6649,7 @@
               "element": {
                 "item": "FieldPat"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -7314,10 +6657,7 @@
           "ident": "dot2_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "..",
-                "type": "Dot2"
-              }
+              "token": "Dot2"
             }
           }
         }
@@ -7346,10 +6686,7 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -7357,10 +6694,7 @@
           "ident": "dot2_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "..",
-                "type": "Dot2"
-              }
+              "token": "Dot2"
             }
           }
         },
@@ -7368,10 +6702,7 @@
           "ident": "comma_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "token": "Comma"
             }
           }
         },
@@ -7382,10 +6713,7 @@
               "element": {
                 "item": "Pat"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -7446,10 +6774,7 @@
         {
           "ident": "underscore_token",
           "type": {
-            "token": {
-              "repr": "_",
-              "type": "Underscore"
-            }
+            "token": "Underscore"
           }
         }
       ],
@@ -7469,10 +6794,7 @@
           "ident": "leading_colon",
           "type": {
             "option": {
-              "token": {
-                "repr": "::",
-                "type": "Colon2"
-              }
+              "token": "Colon2"
             }
           }
         },
@@ -7483,10 +6805,7 @@
               "element": {
                 "item": "PathSegment"
               },
-              "punct": {
-                "repr": "::",
-                "type": "Colon2"
-              }
+              "punct": "Colon2"
             }
           }
         }
@@ -7569,10 +6888,7 @@
         {
           "ident": "eq_token",
           "type": {
-            "token": {
-              "repr": "=",
-              "type": "Eq"
-            }
+            "token": "Eq"
           }
         },
         {
@@ -7603,10 +6919,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -7616,10 +6929,7 @@
               "element": {
                 "item": "Lifetime"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         }
@@ -7653,10 +6963,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -7666,10 +6973,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         }
@@ -7689,10 +6993,7 @@
         {
           "ident": "lt_token",
           "type": {
-            "token": {
-              "repr": "<",
-              "type": "Lt"
-            }
+            "token": "Lt"
           }
         },
         {
@@ -7713,20 +7014,14 @@
           "ident": "as_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "as",
-                "type": "As"
-              }
+              "token": "As"
             }
           }
         },
         {
           "ident": "gt_token",
           "type": {
-            "token": {
-              "repr": ">",
-              "type": "Gt"
-            }
+            "token": "Gt"
           }
         }
       ],
@@ -7745,10 +7040,7 @@
           "ident": "HalfOpen",
           "fields": [
             {
-              "token": {
-                "repr": "..",
-                "type": "Dot2"
-              }
+              "token": "Dot2"
             }
           ]
         },
@@ -7756,10 +7048,7 @@
           "ident": "Closed",
           "fields": [
             {
-              "token": {
-                "repr": "..=",
-                "type": "DotDotEq"
-              }
+              "token": "DotDotEq"
             }
           ]
         }
@@ -7783,10 +7072,7 @@
           "ident": "Type",
           "fields": [
             {
-              "token": {
-                "repr": "->",
-                "type": "RArrow"
-              }
+              "token": "RArrow"
             },
             {
               "box": {
@@ -7846,10 +7132,7 @@
               "item": "Expr"
             },
             {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           ]
         }
@@ -7914,10 +7197,7 @@
           "ident": "Maybe",
           "fields": [
             {
-              "token": {
-                "repr": "?",
-                "type": "Question"
-              }
+              "token": "Question"
             }
           ]
         }
@@ -7994,10 +7274,7 @@
         {
           "ident": "const_token",
           "type": {
-            "token": {
-              "repr": "const",
-              "type": "Const"
-            }
+            "token": "Const"
           }
         },
         {
@@ -8009,10 +7286,7 @@
         {
           "ident": "colon_token",
           "type": {
-            "token": {
-              "repr": ":",
-              "type": "Colon"
-            }
+            "token": "Colon"
           }
         },
         {
@@ -8027,10 +7301,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "=",
-                    "type": "Eq"
-                  }
+                  "token": "Eq"
                 },
                 {
                   "item": "Expr"
@@ -8042,10 +7313,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -8078,10 +7346,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -8123,10 +7388,7 @@
           "ident": "semi_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ";",
-                "type": "Semi"
-              }
+              "token": "Semi"
             }
           }
         }
@@ -8153,10 +7415,7 @@
         {
           "ident": "type_token",
           "type": {
-            "token": {
-              "repr": "type",
-              "type": "Type"
-            }
+            "token": "Type"
           }
         },
         {
@@ -8175,10 +7434,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -8189,10 +7445,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         },
@@ -8202,10 +7455,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "=",
-                    "type": "Eq"
-                  }
+                  "token": "Eq"
                 },
                 {
                   "item": "Type"
@@ -8217,10 +7467,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         }
       ],
@@ -8403,10 +7650,7 @@
         {
           "ident": "semi_token",
           "type": {
-            "token": {
-              "repr": ";",
-              "type": "Semi"
-            }
+            "token": "Semi"
           }
         },
         {
@@ -8440,10 +7684,7 @@
           "ident": "unsafety",
           "type": {
             "option": {
-              "token": {
-                "repr": "unsafe",
-                "type": "Unsafe"
-              }
+              "token": "Unsafe"
             }
           }
         },
@@ -8458,10 +7699,7 @@
         {
           "ident": "fn_token",
           "type": {
-            "token": {
-              "repr": "fn",
-              "type": "Fn"
-            }
+            "token": "Fn"
           }
         },
         {
@@ -8477,10 +7715,7 @@
               "element": {
                 "item": "BareFnArg"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         },
@@ -8488,10 +7723,7 @@
           "ident": "variadic",
           "type": {
             "option": {
-              "token": {
-                "repr": "...",
-                "type": "Dot3"
-              }
+              "token": "Dot3"
             }
           }
         },
@@ -8544,10 +7776,7 @@
         {
           "ident": "impl_token",
           "type": {
-            "token": {
-              "repr": "impl",
-              "type": "Impl"
-            }
+            "token": "Impl"
           }
         },
         {
@@ -8557,10 +7786,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         }
@@ -8580,10 +7806,7 @@
         {
           "ident": "underscore_token",
           "type": {
-            "token": {
-              "repr": "_",
-              "type": "Underscore"
-            }
+            "token": "Underscore"
           }
         }
       ],
@@ -8621,10 +7844,7 @@
         {
           "ident": "bang_token",
           "type": {
-            "token": {
-              "repr": "!",
-              "type": "Bang"
-            }
+            "token": "Bang"
           }
         }
       ],
@@ -8658,10 +7878,7 @@
           "ident": "colon_token",
           "type": {
             "option": {
-              "token": {
-                "repr": ":",
-                "type": "Colon"
-              }
+              "token": "Colon"
             }
           }
         },
@@ -8672,10 +7889,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         },
@@ -8683,10 +7897,7 @@
           "ident": "eq_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "=",
-                "type": "Eq"
-              }
+              "token": "Eq"
             }
           }
         },
@@ -8796,20 +8007,14 @@
         {
           "ident": "star_token",
           "type": {
-            "token": {
-              "repr": "*",
-              "type": "Star"
-            }
+            "token": "Star"
           }
         },
         {
           "ident": "const_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "const",
-                "type": "Const"
-              }
+              "token": "Const"
             }
           }
         },
@@ -8817,10 +8022,7 @@
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -8848,10 +8050,7 @@
         {
           "ident": "and_token",
           "type": {
-            "token": {
-              "repr": "&",
-              "type": "And"
-            }
+            "token": "And"
           }
         },
         {
@@ -8866,10 +8065,7 @@
           "ident": "mutability",
           "type": {
             "option": {
-              "token": {
-                "repr": "mut",
-                "type": "Mut"
-              }
+              "token": "Mut"
             }
           }
         },
@@ -8925,10 +8121,7 @@
           "ident": "dyn_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "dyn",
-                "type": "Dyn"
-              }
+              "token": "Dyn"
             }
           }
         },
@@ -8939,10 +8132,7 @@
               "element": {
                 "item": "TypeParamBound"
               },
-              "punct": {
-                "repr": "+",
-                "type": "Add"
-              }
+              "punct": "Add"
             }
           }
         }
@@ -8972,10 +8162,7 @@
               "element": {
                 "item": "Type"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -9015,10 +8202,7 @@
           "ident": "Deref",
           "fields": [
             {
-              "token": {
-                "repr": "*",
-                "type": "Star"
-              }
+              "token": "Star"
             }
           ]
         },
@@ -9026,10 +8210,7 @@
           "ident": "Not",
           "fields": [
             {
-              "token": {
-                "repr": "!",
-                "type": "Bang"
-              }
+              "token": "Bang"
             }
           ]
         },
@@ -9037,10 +8218,7 @@
           "ident": "Neg",
           "fields": [
             {
-              "token": {
-                "repr": "-",
-                "type": "Sub"
-              }
+              "token": "Sub"
             }
           ]
         }
@@ -9058,10 +8236,7 @@
         {
           "ident": "star_token",
           "type": {
-            "token": {
-              "repr": "*",
-              "type": "Star"
-            }
+            "token": "Star"
           }
         }
       ],
@@ -9089,10 +8264,7 @@
               "element": {
                 "item": "UseTree"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }
@@ -9135,10 +8307,7 @@
         {
           "ident": "colon2_token",
           "type": {
-            "token": {
-              "repr": "::",
-              "type": "Colon2"
-            }
+            "token": "Colon2"
           }
         },
         {
@@ -9170,10 +8339,7 @@
         {
           "ident": "as_token",
           "type": {
-            "token": {
-              "repr": "as",
-              "type": "As"
-            }
+            "token": "As"
           }
         },
         {
@@ -9272,10 +8438,7 @@
             "option": {
               "tuple": [
                 {
-                  "token": {
-                    "repr": "=",
-                    "type": "Eq"
-                  }
+                  "token": "Eq"
                 },
                 {
                   "item": "Expr"
@@ -9300,10 +8463,7 @@
         {
           "ident": "crate_token",
           "type": {
-            "token": {
-              "repr": "crate",
-              "type": "Crate"
-            }
+            "token": "Crate"
           }
         }
       ],
@@ -9322,10 +8482,7 @@
         {
           "ident": "pub_token",
           "type": {
-            "token": {
-              "repr": "pub",
-              "type": "Pub"
-            }
+            "token": "Pub"
           }
         }
       ],
@@ -9344,10 +8501,7 @@
         {
           "ident": "pub_token",
           "type": {
-            "token": {
-              "repr": "pub",
-              "type": "Pub"
-            }
+            "token": "Pub"
           }
         },
         {
@@ -9360,10 +8514,7 @@
           "ident": "in_token",
           "type": {
             "option": {
-              "token": {
-                "repr": "in",
-                "type": "In"
-              }
+              "token": "In"
             }
           }
         },
@@ -9431,10 +8582,7 @@
         {
           "ident": "where_token",
           "type": {
-            "token": {
-              "repr": "where",
-              "type": "Where"
-            }
+            "token": "Where"
           }
         },
         {
@@ -9444,10 +8592,7 @@
               "element": {
                 "item": "WherePredicate"
               },
-              "punct": {
-                "repr": ",",
-                "type": "Comma"
-              }
+              "punct": "Comma"
             }
           }
         }

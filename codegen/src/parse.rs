@@ -203,7 +203,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
             let content = mac.tts.to_string();
             let ty = tokens.get(&content).unwrap().to_string();
 
-            types::Type::Token(types::Token::new(content, ty))
+            types::Type::Token(ty)
         }
         _ => panic!("{}", quote!(#item).to_string()),
     }

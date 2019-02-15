@@ -116,12 +116,12 @@ mod codegen {
     fn box_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::Node],
+        defs: &types::Definitions,
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
         let name = name.owned_tokens();
-        let res = visit(elem, features, types, kind, &Owned(quote!(*#name)))?;
+        let res = visit(elem, features, defs, kind, &Owned(quote!(*#name)))?;
         Some(match kind {
             Fold => quote! {
                 Box::new(#res)
@@ -133,7 +133,7 @@ mod codegen {
     fn vec_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::Node],
+        defs: &types::Definitions,
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -141,7 +141,7 @@ mod codegen {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
-        let val = visit(elem, features, types, kind, &operand)?;
+        let val = visit(elem, features, defs, kind, &operand)?;
         Some(match kind {
             Visit => {
                 let name = name.ref_tokens();
@@ -171,7 +171,7 @@ mod codegen {
     fn punctuated_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::Node],
+        defs: &types::Definitions,
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -179,7 +179,7 @@ mod codegen {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
-        let val = visit(elem, features, types, kind, &operand)?;
+        let val = visit(elem, features, defs, kind, &operand)?;
         Some(match kind {
             Visit => {
                 let name = name.ref_tokens();
@@ -211,7 +211,7 @@ mod codegen {
     fn option_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::Node],
+        defs: &types::Definitions,
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -219,7 +219,7 @@ mod codegen {
             Visit | VisitMut => Borrowed(quote!(it)),
             Fold => Owned(quote!(it)),
         };
-        let val = visit(elem, features, types, kind, &it)?;
+        let val = visit(elem, features, defs, kind, &it)?;
         let name = name.owned_tokens();
         Some(match kind {
             Visit => quote! {
@@ -241,7 +241,7 @@ mod codegen {
     fn tuple_visit(
         elems: &[types::Type],
         features: &types::Features,
-        types: &[types::Node],
+        defs: &types::Definitions,
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -255,7 +255,7 @@ mod codegen {
             let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
             let val =
-                visit(elem, features, types, kind, &it).unwrap_or_else(|| noop_visit(kind, &it));
+                visit(elem, features, defs, kind, &it).unwrap_or_else(|| noop_visit(kind, &it));
             code.append_all(val);
             match kind {
                 Fold => code.append_all(quote!(,)),
@@ -270,8 +270,8 @@ mod codegen {
         })
     }
 
-    fn token_punct_visit(token: &types::Token, kind: Kind, name: &Operand) -> TokenStream {
-        let ty: TokenStream = syn::parse_str(&format!("Token![{}]", token.repr())).unwrap();
+    fn token_punct_visit(repr: &str, kind: Kind, name: &Operand) -> TokenStream {
+        let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
         let name = name.tokens();
         match kind {
             Fold => quote! {
@@ -286,8 +286,8 @@ mod codegen {
         }
     }
 
-    fn token_keyword_visit(token: &types::Token, kind: Kind, name: &Operand) -> TokenStream {
-        let ty: TokenStream = syn::parse_str(&format!("Token![{}]", token.repr())).unwrap();
+    fn token_keyword_visit(repr: &str, kind: Kind, name: &Operand) -> TokenStream {
+        let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
         let name = name.tokens();
         match kind {
             Fold => quote! {
@@ -333,23 +333,25 @@ mod codegen {
     fn visit(
         ty: &types::Type,
         features: &types::Features,
-        types: &[types::Node],
+        defs: &types::Definitions,
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
         match ty {
-            types::Type::Box(t) => box_visit(&*t, features, types, kind, name),
-            types::Type::Vec(t) => vec_visit(&*t, features, types, kind, name),
+            types::Type::Box(t) => box_visit(&*t, features, defs, kind, name),
+            types::Type::Vec(t) => vec_visit(&*t, features, defs, kind, name),
             types::Type::Punctuated(p) => {
-                punctuated_visit(p.element(), features, types, kind, name)
+                punctuated_visit(p.element(), features, defs, kind, name)
             }
-            types::Type::Option(t) => option_visit(&*t, features, types, kind, name),
-            types::Type::Tuple(t) => tuple_visit(t, features, types, kind, name),
+            types::Type::Option(t) => option_visit(&*t, features, defs, kind, name),
+            types::Type::Tuple(t) => tuple_visit(t, features, defs, kind, name),
             types::Type::Token(t) => {
-                if t.is_keyword() {
-                    Some(token_keyword_visit(t, kind, name))
+                let repr = &defs.tokens[t];
+                let is_keyword = repr.chars().next().unwrap().is_alphabetic();
+                if is_keyword {
+                    Some(token_keyword_visit(repr, kind, name))
                 } else {
-                    Some(token_punct_visit(t, kind, name))
+                    Some(token_punct_visit(repr, kind, name))
                 }
             }
             types::Type::Group(t) => Some(token_group_visit(&t[..], kind, name)),
@@ -360,7 +362,7 @@ mod codegen {
 
                 let mut res = simple_visit(t, kind, name);
 
-                let target = types.iter().find(|ty| ty.ident() == t).unwrap();
+                let target = defs.types.iter().find(|ty| ty.ident() == t).unwrap();
 
                 Some(
                     if requires_full(target.features()) && !requires_full(features) {
@@ -391,7 +393,7 @@ mod codegen {
         }
     }
 
-    pub fn generate(state: &mut State, s: &types::Node, types: &[types::Node]) {
+    pub fn generate(state: &mut State, s: &types::Node, defs: &types::Definitions) {
         let features = visit_features(s.features());
         let under_name = under_name(s.ident());
         let ty = Ident::new(s.ident(), Span::call_site());
@@ -451,15 +453,15 @@ mod codegen {
                             let owned_binding = Owned(quote!(#binding));
 
                             visit_fields.append_all(
-                                visit(ty, s.features(), types, Visit, &borrowed_binding)
+                                visit(ty, s.features(), defs, Visit, &borrowed_binding)
                                     .unwrap_or_else(|| noop_visit(Visit, &borrowed_binding)),
                             );
                             visit_mut_fields.append_all(
-                                visit(ty, s.features(), types, VisitMut, &borrowed_binding)
+                                visit(ty, s.features(), defs, VisitMut, &borrowed_binding)
                                     .unwrap_or_else(|| noop_visit(VisitMut, &borrowed_binding)),
                             );
                             fold_fields.append_all(
-                                visit(ty, s.features(), types, Fold, &owned_binding)
+                                visit(ty, s.features(), defs, Fold, &owned_binding)
                                     .unwrap_or_else(|| noop_visit(Fold, &owned_binding)),
                             );
 
@@ -514,18 +516,18 @@ mod codegen {
                 for field in v.fields() {
                     let id = Ident::new(field.ident(), Span::call_site());
                     let ref_toks = Owned(quote!(_i.#id));
-                    let visit_field = visit(field.ty(), v.features(), types, Visit, &ref_toks)
+                    let visit_field = visit(field.ty(), v.features(), defs, Visit, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
                     visit_impl.append_all(quote! {
                         #visit_field;
                     });
                     let visit_mut_field =
-                        visit(field.ty(), v.features(), types, VisitMut, &ref_toks)
+                        visit(field.ty(), v.features(), defs, VisitMut, &ref_toks)
                             .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
                     visit_mut_impl.append_all(quote! {
                         #visit_mut_field;
                     });
-                    let fold = visit(field.ty(), v.features(), types, Fold, &ref_toks)
+                    let fold = visit(field.ty(), v.features(), defs, Fold, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
 
                     fold_fields.append_all(quote! {
@@ -634,7 +636,7 @@ fn write_file(path: &str, content: TokenStream) {
 pub fn generate(defs: &types::Definitions) {
     let mut state = codegen::State::default();
     for s in &defs.types {
-        codegen::generate(&mut state, s, &defs.types);
+        codegen::generate(&mut state, s, defs);
     }
 
     let full_macro = quote! {
