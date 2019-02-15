@@ -355,7 +355,7 @@ mod codegen {
                 }
             }
             types::Type::Group(t) => Some(token_group_visit(&t[..], kind, name)),
-            types::Type::Item(t) => {
+            types::Type::Syn(t) => {
                 fn requires_full(features: &types::Features) -> bool {
                     features.contains("full") && features.len() == 1
                 }

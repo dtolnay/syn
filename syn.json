@@ -21,7 +21,7 @@
           "ident": "name",
           "type": {
             "option": {
-              "item": "LitStr"
+              "syn": "LitStr"
             }
           }
         }
@@ -57,7 +57,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "GenericArgument"
+                "syn": "GenericArgument"
               },
               "punct": "Comma"
             }
@@ -84,7 +84,7 @@
         {
           "ident": "pat",
           "type": {
-            "item": "Pat"
+            "syn": "Pat"
           }
         },
         {
@@ -96,7 +96,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         }
       ],
@@ -147,7 +147,7 @@
           "ident": "lifetime",
           "type": {
             "option": {
-              "item": "Lifetime"
+              "syn": "Lifetime"
             }
           }
         },
@@ -181,7 +181,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -198,7 +198,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Or"
             }
@@ -214,7 +214,7 @@
                 },
                 {
                   "box": {
-                    "item": "Expr"
+                    "syn": "Expr"
                   }
                 }
               ]
@@ -231,7 +231,7 @@
           "ident": "body",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -289,7 +289,7 @@
         {
           "ident": "style",
           "type": {
-            "item": "AttrStyle"
+            "syn": "AttrStyle"
           }
         },
         {
@@ -301,13 +301,13 @@
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         },
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -329,7 +329,7 @@
             "option": {
               "tuple": [
                 {
-                  "item": "BareFnArgName"
+                  "syn": "BareFnArgName"
                 },
                 {
                   "token": "Colon"
@@ -341,7 +341,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         }
       ],
@@ -361,7 +361,7 @@
           "ident": "Named",
           "fields": [
             {
-              "item": "Ident"
+              "syn": "Ident"
             }
           ]
         },
@@ -624,7 +624,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -636,7 +636,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         }
       ],
@@ -661,7 +661,7 @@
           "ident": "stmts",
           "type": {
             "vec": {
-              "item": "Stmt"
+              "syn": "Stmt"
             }
           }
         }
@@ -695,7 +695,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "LifetimeDef"
+                "syn": "LifetimeDef"
               },
               "punct": "Comma"
             }
@@ -724,7 +724,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -737,7 +737,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -749,7 +749,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         },
         {
@@ -764,7 +764,7 @@
           "ident": "default",
           "type": {
             "option": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -784,7 +784,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -798,7 +798,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -820,7 +820,7 @@
           "ident": "Struct",
           "fields": [
             {
-              "item": "DataStruct"
+              "syn": "DataStruct"
             }
           ]
         },
@@ -828,7 +828,7 @@
           "ident": "Enum",
           "fields": [
             {
-              "item": "DataEnum"
+              "syn": "DataEnum"
             }
           ]
         },
@@ -836,7 +836,7 @@
           "ident": "Union",
           "fields": [
             {
-              "item": "DataUnion"
+              "syn": "DataUnion"
             }
           ]
         }
@@ -868,7 +868,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Variant"
+                "syn": "Variant"
               },
               "punct": "Comma"
             }
@@ -895,7 +895,7 @@
         {
           "ident": "fields",
           "type": {
-            "item": "Fields"
+            "syn": "Fields"
           }
         },
         {
@@ -927,7 +927,7 @@
         {
           "ident": "fields",
           "type": {
-            "item": "FieldsNamed"
+            "syn": "FieldsNamed"
           }
         }
       ],
@@ -946,32 +946,32 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
           "ident": "data",
           "type": {
-            "item": "Data"
+            "syn": "Data"
           }
         }
       ],
@@ -991,7 +991,7 @@
           "ident": "Box",
           "fields": [
             {
-              "item": "ExprBox"
+              "syn": "ExprBox"
             }
           ]
         },
@@ -999,7 +999,7 @@
           "ident": "InPlace",
           "fields": [
             {
-              "item": "ExprInPlace"
+              "syn": "ExprInPlace"
             }
           ]
         },
@@ -1007,7 +1007,7 @@
           "ident": "Array",
           "fields": [
             {
-              "item": "ExprArray"
+              "syn": "ExprArray"
             }
           ]
         },
@@ -1015,7 +1015,7 @@
           "ident": "Call",
           "fields": [
             {
-              "item": "ExprCall"
+              "syn": "ExprCall"
             }
           ]
         },
@@ -1023,7 +1023,7 @@
           "ident": "MethodCall",
           "fields": [
             {
-              "item": "ExprMethodCall"
+              "syn": "ExprMethodCall"
             }
           ]
         },
@@ -1031,7 +1031,7 @@
           "ident": "Tuple",
           "fields": [
             {
-              "item": "ExprTuple"
+              "syn": "ExprTuple"
             }
           ]
         },
@@ -1039,7 +1039,7 @@
           "ident": "Binary",
           "fields": [
             {
-              "item": "ExprBinary"
+              "syn": "ExprBinary"
             }
           ]
         },
@@ -1047,7 +1047,7 @@
           "ident": "Unary",
           "fields": [
             {
-              "item": "ExprUnary"
+              "syn": "ExprUnary"
             }
           ]
         },
@@ -1055,7 +1055,7 @@
           "ident": "Lit",
           "fields": [
             {
-              "item": "ExprLit"
+              "syn": "ExprLit"
             }
           ]
         },
@@ -1063,7 +1063,7 @@
           "ident": "Cast",
           "fields": [
             {
-              "item": "ExprCast"
+              "syn": "ExprCast"
             }
           ]
         },
@@ -1071,7 +1071,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "ExprType"
+              "syn": "ExprType"
             }
           ]
         },
@@ -1079,7 +1079,7 @@
           "ident": "Let",
           "fields": [
             {
-              "item": "ExprLet"
+              "syn": "ExprLet"
             }
           ]
         },
@@ -1087,7 +1087,7 @@
           "ident": "If",
           "fields": [
             {
-              "item": "ExprIf"
+              "syn": "ExprIf"
             }
           ]
         },
@@ -1095,7 +1095,7 @@
           "ident": "While",
           "fields": [
             {
-              "item": "ExprWhile"
+              "syn": "ExprWhile"
             }
           ]
         },
@@ -1103,7 +1103,7 @@
           "ident": "ForLoop",
           "fields": [
             {
-              "item": "ExprForLoop"
+              "syn": "ExprForLoop"
             }
           ]
         },
@@ -1111,7 +1111,7 @@
           "ident": "Loop",
           "fields": [
             {
-              "item": "ExprLoop"
+              "syn": "ExprLoop"
             }
           ]
         },
@@ -1119,7 +1119,7 @@
           "ident": "Match",
           "fields": [
             {
-              "item": "ExprMatch"
+              "syn": "ExprMatch"
             }
           ]
         },
@@ -1127,7 +1127,7 @@
           "ident": "Closure",
           "fields": [
             {
-              "item": "ExprClosure"
+              "syn": "ExprClosure"
             }
           ]
         },
@@ -1135,7 +1135,7 @@
           "ident": "Unsafe",
           "fields": [
             {
-              "item": "ExprUnsafe"
+              "syn": "ExprUnsafe"
             }
           ]
         },
@@ -1143,7 +1143,7 @@
           "ident": "Block",
           "fields": [
             {
-              "item": "ExprBlock"
+              "syn": "ExprBlock"
             }
           ]
         },
@@ -1151,7 +1151,7 @@
           "ident": "Assign",
           "fields": [
             {
-              "item": "ExprAssign"
+              "syn": "ExprAssign"
             }
           ]
         },
@@ -1159,7 +1159,7 @@
           "ident": "AssignOp",
           "fields": [
             {
-              "item": "ExprAssignOp"
+              "syn": "ExprAssignOp"
             }
           ]
         },
@@ -1167,7 +1167,7 @@
           "ident": "Field",
           "fields": [
             {
-              "item": "ExprField"
+              "syn": "ExprField"
             }
           ]
         },
@@ -1175,7 +1175,7 @@
           "ident": "Index",
           "fields": [
             {
-              "item": "ExprIndex"
+              "syn": "ExprIndex"
             }
           ]
         },
@@ -1183,7 +1183,7 @@
           "ident": "Range",
           "fields": [
             {
-              "item": "ExprRange"
+              "syn": "ExprRange"
             }
           ]
         },
@@ -1191,7 +1191,7 @@
           "ident": "Path",
           "fields": [
             {
-              "item": "ExprPath"
+              "syn": "ExprPath"
             }
           ]
         },
@@ -1199,7 +1199,7 @@
           "ident": "Reference",
           "fields": [
             {
-              "item": "ExprReference"
+              "syn": "ExprReference"
             }
           ]
         },
@@ -1207,7 +1207,7 @@
           "ident": "Break",
           "fields": [
             {
-              "item": "ExprBreak"
+              "syn": "ExprBreak"
             }
           ]
         },
@@ -1215,7 +1215,7 @@
           "ident": "Continue",
           "fields": [
             {
-              "item": "ExprContinue"
+              "syn": "ExprContinue"
             }
           ]
         },
@@ -1223,7 +1223,7 @@
           "ident": "Return",
           "fields": [
             {
-              "item": "ExprReturn"
+              "syn": "ExprReturn"
             }
           ]
         },
@@ -1231,7 +1231,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "ExprMacro"
+              "syn": "ExprMacro"
             }
           ]
         },
@@ -1239,7 +1239,7 @@
           "ident": "Struct",
           "fields": [
             {
-              "item": "ExprStruct"
+              "syn": "ExprStruct"
             }
           ]
         },
@@ -1247,7 +1247,7 @@
           "ident": "Repeat",
           "fields": [
             {
-              "item": "ExprRepeat"
+              "syn": "ExprRepeat"
             }
           ]
         },
@@ -1255,7 +1255,7 @@
           "ident": "Paren",
           "fields": [
             {
-              "item": "ExprParen"
+              "syn": "ExprParen"
             }
           ]
         },
@@ -1263,7 +1263,7 @@
           "ident": "Group",
           "fields": [
             {
-              "item": "ExprGroup"
+              "syn": "ExprGroup"
             }
           ]
         },
@@ -1271,7 +1271,7 @@
           "ident": "Try",
           "fields": [
             {
-              "item": "ExprTry"
+              "syn": "ExprTry"
             }
           ]
         },
@@ -1279,7 +1279,7 @@
           "ident": "Async",
           "fields": [
             {
-              "item": "ExprAsync"
+              "syn": "ExprAsync"
             }
           ]
         },
@@ -1287,7 +1287,7 @@
           "ident": "TryBlock",
           "fields": [
             {
-              "item": "ExprTryBlock"
+              "syn": "ExprTryBlock"
             }
           ]
         },
@@ -1295,7 +1295,7 @@
           "ident": "Yield",
           "fields": [
             {
-              "item": "ExprYield"
+              "syn": "ExprYield"
             }
           ]
         },
@@ -1303,7 +1303,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "ExprVerbatim"
+              "syn": "ExprVerbatim"
             }
           ]
         }
@@ -1322,7 +1322,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1337,7 +1337,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Expr"
+                "syn": "Expr"
               },
               "punct": "Comma"
             }
@@ -1359,7 +1359,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1367,7 +1367,7 @@
           "ident": "left",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -1381,7 +1381,7 @@
           "ident": "right",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -1401,7 +1401,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1409,21 +1409,21 @@
           "ident": "left",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
         {
           "ident": "op",
           "type": {
-            "item": "BinOp"
+            "syn": "BinOp"
           }
         },
         {
           "ident": "right",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -1443,7 +1443,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1464,7 +1464,7 @@
         {
           "ident": "block",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -1484,7 +1484,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1492,21 +1492,21 @@
           "ident": "left",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
         {
           "ident": "op",
           "type": {
-            "item": "BinOp"
+            "syn": "BinOp"
           }
         },
         {
           "ident": "right",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -1526,7 +1526,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1534,14 +1534,14 @@
           "ident": "label",
           "type": {
             "option": {
-              "item": "Label"
+              "syn": "Label"
             }
           }
         },
         {
           "ident": "block",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -1560,7 +1560,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1574,7 +1574,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -1594,7 +1594,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1608,7 +1608,7 @@
           "ident": "label",
           "type": {
             "option": {
-              "item": "Lifetime"
+              "syn": "Lifetime"
             }
           }
         },
@@ -1617,7 +1617,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Expr"
+                "syn": "Expr"
               }
             }
           }
@@ -1639,7 +1639,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1647,7 +1647,7 @@
           "ident": "func",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -1662,7 +1662,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Expr"
+                "syn": "Expr"
               },
               "punct": "Comma"
             }
@@ -1685,7 +1685,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1693,7 +1693,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -1707,7 +1707,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -1727,7 +1727,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1766,7 +1766,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "FnArg"
+                "syn": "FnArg"
               },
               "punct": "Comma"
             }
@@ -1781,14 +1781,14 @@
         {
           "ident": "output",
           "type": {
-            "item": "ReturnType"
+            "syn": "ReturnType"
           }
         },
         {
           "ident": "body",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -1808,7 +1808,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1822,7 +1822,7 @@
           "ident": "label",
           "type": {
             "option": {
-              "item": "Lifetime"
+              "syn": "Lifetime"
             }
           }
         }
@@ -1843,7 +1843,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1851,7 +1851,7 @@
           "ident": "base",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -1864,7 +1864,7 @@
         {
           "ident": "member",
           "type": {
-            "item": "Member"
+            "syn": "Member"
           }
         }
       ],
@@ -1883,7 +1883,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1891,7 +1891,7 @@
           "ident": "label",
           "type": {
             "option": {
-              "item": "Label"
+              "syn": "Label"
             }
           }
         },
@@ -1905,7 +1905,7 @@
           "ident": "pat",
           "type": {
             "box": {
-              "item": "Pat"
+              "syn": "Pat"
             }
           }
         },
@@ -1919,14 +1919,14 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
         {
           "ident": "body",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -1945,7 +1945,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1959,7 +1959,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -1979,7 +1979,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -1993,14 +1993,14 @@
           "ident": "cond",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
         {
           "ident": "then_branch",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         },
         {
@@ -2013,7 +2013,7 @@
                 },
                 {
                   "box": {
-                    "item": "Expr"
+                    "syn": "Expr"
                   }
                 }
               ]
@@ -2036,7 +2036,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2044,7 +2044,7 @@
           "ident": "place",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2058,7 +2058,7 @@
           "ident": "value",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2079,7 +2079,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2087,7 +2087,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2101,7 +2101,7 @@
           "ident": "index",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2121,7 +2121,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2136,7 +2136,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Or"
             }
@@ -2152,7 +2152,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2173,14 +2173,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "lit",
           "type": {
-            "item": "Lit"
+            "syn": "Lit"
           }
         }
       ],
@@ -2199,7 +2199,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2207,7 +2207,7 @@
           "ident": "label",
           "type": {
             "option": {
-              "item": "Label"
+              "syn": "Label"
             }
           }
         },
@@ -2220,7 +2220,7 @@
         {
           "ident": "body",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -2239,14 +2239,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         }
       ],
@@ -2265,7 +2265,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2279,7 +2279,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2293,7 +2293,7 @@
           "ident": "arms",
           "type": {
             "vec": {
-              "item": "Arm"
+              "syn": "Arm"
             }
           }
         }
@@ -2313,7 +2313,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2321,7 +2321,7 @@
           "ident": "receiver",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2334,14 +2334,14 @@
         {
           "ident": "method",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "turbofish",
           "type": {
             "option": {
-              "item": "MethodTurbofish"
+              "syn": "MethodTurbofish"
             }
           }
         },
@@ -2356,7 +2356,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Expr"
+                "syn": "Expr"
               },
               "punct": "Comma"
             }
@@ -2379,7 +2379,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2393,7 +2393,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2414,7 +2414,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2422,14 +2422,14 @@
           "ident": "qself",
           "type": {
             "option": {
-              "item": "QSelf"
+              "syn": "QSelf"
             }
           }
         },
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         }
       ],
@@ -2448,7 +2448,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2457,7 +2457,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Expr"
+                "syn": "Expr"
               }
             }
           }
@@ -2465,7 +2465,7 @@
         {
           "ident": "limits",
           "type": {
-            "item": "RangeLimits"
+            "syn": "RangeLimits"
           }
         },
         {
@@ -2473,7 +2473,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Expr"
+                "syn": "Expr"
               }
             }
           }
@@ -2494,7 +2494,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2516,7 +2516,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2536,7 +2536,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2550,7 +2550,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2564,7 +2564,7 @@
           "ident": "len",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2584,7 +2584,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2599,7 +2599,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Expr"
+                "syn": "Expr"
               }
             }
           }
@@ -2620,14 +2620,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         },
         {
@@ -2641,7 +2641,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "FieldValue"
+                "syn": "FieldValue"
               },
               "punct": "Comma"
             }
@@ -2660,7 +2660,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Expr"
+                "syn": "Expr"
               }
             }
           }
@@ -2681,7 +2681,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2689,7 +2689,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2715,7 +2715,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2728,7 +2728,7 @@
         {
           "ident": "block",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -2747,7 +2747,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2762,7 +2762,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Expr"
+                "syn": "Expr"
               },
               "punct": "Comma"
             }
@@ -2784,7 +2784,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2792,7 +2792,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -2806,7 +2806,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -2827,21 +2827,21 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "op",
           "type": {
-            "item": "UnOp"
+            "syn": "UnOp"
           }
         },
         {
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -2861,7 +2861,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2874,7 +2874,7 @@
         {
           "ident": "block",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -2893,7 +2893,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -2912,7 +2912,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2920,7 +2920,7 @@
           "ident": "label",
           "type": {
             "option": {
-              "item": "Label"
+              "syn": "Label"
             }
           }
         },
@@ -2934,14 +2934,14 @@
           "ident": "cond",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
         {
           "ident": "body",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -2960,7 +2960,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -2975,7 +2975,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Expr"
+                "syn": "Expr"
               }
             }
           }
@@ -2997,21 +2997,21 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
           "ident": "ident",
           "type": {
             "option": {
-              "item": "Ident"
+              "syn": "Ident"
             }
           }
         },
@@ -3026,7 +3026,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         }
       ],
@@ -3045,14 +3045,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "member",
           "type": {
-            "item": "Member"
+            "syn": "Member"
           }
         },
         {
@@ -3067,7 +3067,7 @@
           "ident": "pat",
           "type": {
             "box": {
-              "item": "Pat"
+              "syn": "Pat"
             }
           }
         }
@@ -3087,14 +3087,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "member",
           "type": {
-            "item": "Member"
+            "syn": "Member"
           }
         },
         {
@@ -3108,7 +3108,7 @@
         {
           "ident": "expr",
           "type": {
-            "item": "Expr"
+            "syn": "Expr"
           }
         }
       ],
@@ -3128,7 +3128,7 @@
           "ident": "Named",
           "fields": [
             {
-              "item": "FieldsNamed"
+              "syn": "FieldsNamed"
             }
           ]
         },
@@ -3136,7 +3136,7 @@
           "ident": "Unnamed",
           "fields": [
             {
-              "item": "FieldsUnnamed"
+              "syn": "FieldsUnnamed"
             }
           ]
         },
@@ -3167,7 +3167,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Field"
+                "syn": "Field"
               },
               "punct": "Comma"
             }
@@ -3197,7 +3197,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Field"
+                "syn": "Field"
               },
               "punct": "Comma"
             }
@@ -3227,7 +3227,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -3235,7 +3235,7 @@
           "ident": "items",
           "type": {
             "vec": {
-              "item": "Item"
+              "syn": "Item"
             }
           }
         }
@@ -3255,7 +3255,7 @@
           "ident": "SelfRef",
           "fields": [
             {
-              "item": "ArgSelfRef"
+              "syn": "ArgSelfRef"
             }
           ]
         },
@@ -3263,7 +3263,7 @@
           "ident": "SelfValue",
           "fields": [
             {
-              "item": "ArgSelf"
+              "syn": "ArgSelf"
             }
           ]
         },
@@ -3271,7 +3271,7 @@
           "ident": "Captured",
           "fields": [
             {
-              "item": "ArgCaptured"
+              "syn": "ArgCaptured"
             }
           ]
         },
@@ -3279,7 +3279,7 @@
           "ident": "Inferred",
           "fields": [
             {
-              "item": "Pat"
+              "syn": "Pat"
             }
           ]
         },
@@ -3287,7 +3287,7 @@
           "ident": "Ignored",
           "fields": [
             {
-              "item": "Type"
+              "syn": "Type"
             }
           ]
         }
@@ -3311,7 +3311,7 @@
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -3325,7 +3325,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "FnArg"
+                "syn": "FnArg"
               },
               "punct": "Comma"
             }
@@ -3342,7 +3342,7 @@
         {
           "ident": "output",
           "type": {
-            "item": "ReturnType"
+            "syn": "ReturnType"
           }
         }
       ],
@@ -3361,7 +3361,7 @@
           "ident": "Fn",
           "fields": [
             {
-              "item": "ForeignItemFn"
+              "syn": "ForeignItemFn"
             }
           ]
         },
@@ -3369,7 +3369,7 @@
           "ident": "Static",
           "fields": [
             {
-              "item": "ForeignItemStatic"
+              "syn": "ForeignItemStatic"
             }
           ]
         },
@@ -3377,7 +3377,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "ForeignItemType"
+              "syn": "ForeignItemType"
             }
           ]
         },
@@ -3385,7 +3385,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "ForeignItemMacro"
+              "syn": "ForeignItemMacro"
             }
           ]
         },
@@ -3393,7 +3393,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "ForeignItemVerbatim"
+              "syn": "ForeignItemVerbatim"
             }
           ]
         }
@@ -3412,27 +3412,27 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "decl",
           "type": {
             "box": {
-              "item": "FnDecl"
+              "syn": "FnDecl"
             }
           }
         },
@@ -3458,14 +3458,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         },
         {
@@ -3492,14 +3492,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -3519,7 +3519,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -3532,7 +3532,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -3558,14 +3558,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -3577,7 +3577,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -3601,7 +3601,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -3621,7 +3621,7 @@
           "ident": "Lifetime",
           "fields": [
             {
-              "item": "Lifetime"
+              "syn": "Lifetime"
             }
           ]
         },
@@ -3629,7 +3629,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "Type"
+              "syn": "Type"
             }
           ]
         },
@@ -3637,7 +3637,7 @@
           "ident": "Binding",
           "fields": [
             {
-              "item": "Binding"
+              "syn": "Binding"
             }
           ]
         },
@@ -3645,7 +3645,7 @@
           "ident": "Constraint",
           "fields": [
             {
-              "item": "Constraint"
+              "syn": "Constraint"
             }
           ]
         },
@@ -3653,7 +3653,7 @@
           "ident": "Const",
           "fields": [
             {
-              "item": "Expr"
+              "syn": "Expr"
             }
           ]
         }
@@ -3672,7 +3672,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "Type"
+              "syn": "Type"
             }
           ]
         },
@@ -3680,7 +3680,7 @@
           "ident": "Const",
           "fields": [
             {
-              "item": "Expr"
+              "syn": "Expr"
             }
           ]
         }
@@ -3700,7 +3700,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "TypeParam"
+              "syn": "TypeParam"
             }
           ]
         },
@@ -3708,7 +3708,7 @@
           "ident": "Lifetime",
           "fields": [
             {
-              "item": "LifetimeDef"
+              "syn": "LifetimeDef"
             }
           ]
         },
@@ -3716,7 +3716,7 @@
           "ident": "Const",
           "fields": [
             {
-              "item": "ConstParam"
+              "syn": "ConstParam"
             }
           ]
         }
@@ -3745,7 +3745,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "GenericParam"
+                "syn": "GenericParam"
               },
               "punct": "Comma"
             }
@@ -3763,7 +3763,7 @@
           "ident": "where_clause",
           "type": {
             "option": {
-              "item": "WhereClause"
+              "syn": "WhereClause"
             }
           }
         }
@@ -3792,7 +3792,7 @@
           "ident": "Const",
           "fields": [
             {
-              "item": "ImplItemConst"
+              "syn": "ImplItemConst"
             }
           ]
         },
@@ -3800,7 +3800,7 @@
           "ident": "Method",
           "fields": [
             {
-              "item": "ImplItemMethod"
+              "syn": "ImplItemMethod"
             }
           ]
         },
@@ -3808,7 +3808,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "ImplItemType"
+              "syn": "ImplItemType"
             }
           ]
         },
@@ -3816,7 +3816,7 @@
           "ident": "Existential",
           "fields": [
             {
-              "item": "ImplItemExistential"
+              "syn": "ImplItemExistential"
             }
           ]
         },
@@ -3824,7 +3824,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "ImplItemMacro"
+              "syn": "ImplItemMacro"
             }
           ]
         },
@@ -3832,7 +3832,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "ImplItemVerbatim"
+              "syn": "ImplItemVerbatim"
             }
           ]
         }
@@ -3851,14 +3851,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -3878,7 +3878,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -3890,7 +3890,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         },
         {
@@ -3902,7 +3902,7 @@
         {
           "ident": "expr",
           "type": {
-            "item": "Expr"
+            "syn": "Expr"
           }
         },
         {
@@ -3927,7 +3927,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -3946,13 +3946,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -3968,7 +3968,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -3996,14 +3996,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         },
         {
@@ -4030,14 +4030,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4051,13 +4051,13 @@
         {
           "ident": "sig",
           "type": {
-            "item": "MethodSig"
+            "syn": "MethodSig"
           }
         },
         {
           "ident": "block",
           "type": {
-            "item": "Block"
+            "syn": "Block"
           }
         }
       ],
@@ -4076,14 +4076,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4103,13 +4103,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -4121,7 +4121,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         },
         {
@@ -4145,7 +4145,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -4170,7 +4170,7 @@
         {
           "ident": "span",
           "type": {
-            "item": "Span"
+            "syn": "Span"
           }
         }
       ],
@@ -4189,7 +4189,7 @@
           "ident": "ExternCrate",
           "fields": [
             {
-              "item": "ItemExternCrate"
+              "syn": "ItemExternCrate"
             }
           ]
         },
@@ -4197,7 +4197,7 @@
           "ident": "Use",
           "fields": [
             {
-              "item": "ItemUse"
+              "syn": "ItemUse"
             }
           ]
         },
@@ -4205,7 +4205,7 @@
           "ident": "Static",
           "fields": [
             {
-              "item": "ItemStatic"
+              "syn": "ItemStatic"
             }
           ]
         },
@@ -4213,7 +4213,7 @@
           "ident": "Const",
           "fields": [
             {
-              "item": "ItemConst"
+              "syn": "ItemConst"
             }
           ]
         },
@@ -4221,7 +4221,7 @@
           "ident": "Fn",
           "fields": [
             {
-              "item": "ItemFn"
+              "syn": "ItemFn"
             }
           ]
         },
@@ -4229,7 +4229,7 @@
           "ident": "Mod",
           "fields": [
             {
-              "item": "ItemMod"
+              "syn": "ItemMod"
             }
           ]
         },
@@ -4237,7 +4237,7 @@
           "ident": "ForeignMod",
           "fields": [
             {
-              "item": "ItemForeignMod"
+              "syn": "ItemForeignMod"
             }
           ]
         },
@@ -4245,7 +4245,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "ItemType"
+              "syn": "ItemType"
             }
           ]
         },
@@ -4253,7 +4253,7 @@
           "ident": "Existential",
           "fields": [
             {
-              "item": "ItemExistential"
+              "syn": "ItemExistential"
             }
           ]
         },
@@ -4261,7 +4261,7 @@
           "ident": "Struct",
           "fields": [
             {
-              "item": "ItemStruct"
+              "syn": "ItemStruct"
             }
           ]
         },
@@ -4269,7 +4269,7 @@
           "ident": "Enum",
           "fields": [
             {
-              "item": "ItemEnum"
+              "syn": "ItemEnum"
             }
           ]
         },
@@ -4277,7 +4277,7 @@
           "ident": "Union",
           "fields": [
             {
-              "item": "ItemUnion"
+              "syn": "ItemUnion"
             }
           ]
         },
@@ -4285,7 +4285,7 @@
           "ident": "Trait",
           "fields": [
             {
-              "item": "ItemTrait"
+              "syn": "ItemTrait"
             }
           ]
         },
@@ -4293,7 +4293,7 @@
           "ident": "TraitAlias",
           "fields": [
             {
-              "item": "ItemTraitAlias"
+              "syn": "ItemTraitAlias"
             }
           ]
         },
@@ -4301,7 +4301,7 @@
           "ident": "Impl",
           "fields": [
             {
-              "item": "ItemImpl"
+              "syn": "ItemImpl"
             }
           ]
         },
@@ -4309,7 +4309,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "ItemMacro"
+              "syn": "ItemMacro"
             }
           ]
         },
@@ -4317,7 +4317,7 @@
           "ident": "Macro2",
           "fields": [
             {
-              "item": "ItemMacro2"
+              "syn": "ItemMacro2"
             }
           ]
         },
@@ -4325,7 +4325,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "ItemVerbatim"
+              "syn": "ItemVerbatim"
             }
           ]
         }
@@ -4344,14 +4344,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4363,7 +4363,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -4376,7 +4376,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -4390,7 +4390,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -4416,14 +4416,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4435,13 +4435,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -4455,7 +4455,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Variant"
+                "syn": "Variant"
               },
               "punct": "Comma"
             }
@@ -4477,14 +4477,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4502,13 +4502,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -4524,7 +4524,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -4552,14 +4552,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4577,7 +4577,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -4589,7 +4589,7 @@
                   "token": "As"
                 },
                 {
-                  "item": "Ident"
+                  "syn": "Ident"
                 }
               ]
             }
@@ -4617,14 +4617,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4655,21 +4655,21 @@
           "ident": "abi",
           "type": {
             "option": {
-              "item": "Abi"
+              "syn": "Abi"
             }
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "decl",
           "type": {
             "box": {
-              "item": "FnDecl"
+              "syn": "FnDecl"
             }
           }
         },
@@ -4677,7 +4677,7 @@
           "ident": "block",
           "type": {
             "box": {
-              "item": "Block"
+              "syn": "Block"
             }
           }
         }
@@ -4697,14 +4697,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "abi",
           "type": {
-            "item": "Abi"
+            "syn": "Abi"
           }
         },
         {
@@ -4717,7 +4717,7 @@
           "ident": "items",
           "type": {
             "vec": {
-              "item": "ForeignItem"
+              "syn": "ForeignItem"
             }
           }
         }
@@ -4737,7 +4737,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -4766,7 +4766,7 @@
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -4780,7 +4780,7 @@
                   }
                 },
                 {
-                  "item": "Path"
+                  "syn": "Path"
                 },
                 {
                   "token": "For"
@@ -4793,7 +4793,7 @@
           "ident": "self_ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -4807,7 +4807,7 @@
           "ident": "items",
           "type": {
             "vec": {
-              "item": "ImplItem"
+              "syn": "ImplItem"
             }
           }
         }
@@ -4827,7 +4827,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -4835,14 +4835,14 @@
           "ident": "ident",
           "type": {
             "option": {
-              "item": "Ident"
+              "syn": "Ident"
             }
           }
         },
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         },
         {
@@ -4869,14 +4869,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4888,7 +4888,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -4900,7 +4900,7 @@
         {
           "ident": "args",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         },
         {
@@ -4912,7 +4912,7 @@
         {
           "ident": "body",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -4931,14 +4931,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -4950,7 +4950,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -4963,7 +4963,7 @@
                 },
                 {
                   "vec": {
-                    "item": "Item"
+                    "syn": "Item"
                   }
                 }
               ]
@@ -4994,14 +4994,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5021,7 +5021,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -5034,7 +5034,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -5048,7 +5048,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
@@ -5074,14 +5074,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5093,19 +5093,19 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
           "ident": "fields",
           "type": {
-            "item": "Fields"
+            "syn": "Fields"
           }
         },
         {
@@ -5132,14 +5132,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5167,13 +5167,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -5189,7 +5189,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -5205,7 +5205,7 @@
           "ident": "items",
           "type": {
             "vec": {
-              "item": "TraitItem"
+              "syn": "TraitItem"
             }
           }
         }
@@ -5225,14 +5225,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5244,13 +5244,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -5264,7 +5264,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -5292,14 +5292,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5311,13 +5311,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -5330,7 +5330,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -5356,14 +5356,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5375,19 +5375,19 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
           "ident": "fields",
           "type": {
-            "item": "FieldsNamed"
+            "syn": "FieldsNamed"
           }
         }
       ],
@@ -5406,14 +5406,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "vis",
           "type": {
-            "item": "Visibility"
+            "syn": "Visibility"
           }
         },
         {
@@ -5433,7 +5433,7 @@
         {
           "ident": "tree",
           "type": {
-            "item": "UseTree"
+            "syn": "UseTree"
           }
         },
         {
@@ -5457,7 +5457,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -5475,7 +5475,7 @@
         {
           "ident": "name",
           "type": {
-            "item": "Lifetime"
+            "syn": "Lifetime"
           }
         },
         {
@@ -5497,13 +5497,13 @@
         {
           "ident": "apostrophe",
           "type": {
-            "item": "Span"
+            "syn": "Span"
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         }
       ],
@@ -5523,14 +5523,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "lifetime",
           "type": {
-            "item": "Lifetime"
+            "syn": "Lifetime"
           }
         },
         {
@@ -5546,7 +5546,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Lifetime"
+                "syn": "Lifetime"
               },
               "punct": "Add"
             }
@@ -5569,7 +5569,7 @@
           "ident": "Str",
           "fields": [
             {
-              "item": "LitStr"
+              "syn": "LitStr"
             }
           ]
         },
@@ -5577,7 +5577,7 @@
           "ident": "ByteStr",
           "fields": [
             {
-              "item": "LitByteStr"
+              "syn": "LitByteStr"
             }
           ]
         },
@@ -5585,7 +5585,7 @@
           "ident": "Byte",
           "fields": [
             {
-              "item": "LitByte"
+              "syn": "LitByte"
             }
           ]
         },
@@ -5593,7 +5593,7 @@
           "ident": "Char",
           "fields": [
             {
-              "item": "LitChar"
+              "syn": "LitChar"
             }
           ]
         },
@@ -5601,7 +5601,7 @@
           "ident": "Int",
           "fields": [
             {
-              "item": "LitInt"
+              "syn": "LitInt"
             }
           ]
         },
@@ -5609,7 +5609,7 @@
           "ident": "Float",
           "fields": [
             {
-              "item": "LitFloat"
+              "syn": "LitFloat"
             }
           ]
         },
@@ -5617,7 +5617,7 @@
           "ident": "Bool",
           "fields": [
             {
-              "item": "LitBool"
+              "syn": "LitBool"
             }
           ]
         },
@@ -5625,7 +5625,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "LitVerbatim"
+              "syn": "LitVerbatim"
             }
           ]
         }
@@ -5650,7 +5650,7 @@
         {
           "ident": "span",
           "type": {
-            "item": "Span"
+            "syn": "Span"
           }
         }
       ],
@@ -5669,7 +5669,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5688,7 +5688,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5707,7 +5707,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5726,7 +5726,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5745,7 +5745,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5764,7 +5764,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5783,7 +5783,7 @@
         {
           "ident": "token",
           "type": {
-            "ext": "Literal"
+            "proc_macro2": "Literal"
           }
         }
       ],
@@ -5802,7 +5802,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -5817,7 +5817,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Or"
             }
@@ -5833,7 +5833,7 @@
                 },
                 {
                   "box": {
-                    "item": "Type"
+                    "syn": "Type"
                   }
                 }
               ]
@@ -5850,7 +5850,7 @@
                 },
                 {
                   "box": {
-                    "item": "Expr"
+                    "syn": "Expr"
                   }
                 }
               ]
@@ -5879,7 +5879,7 @@
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         },
         {
@@ -5891,13 +5891,13 @@
         {
           "ident": "delimiter",
           "type": {
-            "item": "MacroDelimiter"
+            "syn": "MacroDelimiter"
           }
         },
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -5953,7 +5953,7 @@
           "ident": "Named",
           "fields": [
             {
-              "item": "Ident"
+              "syn": "Ident"
             }
           ]
         },
@@ -5961,7 +5961,7 @@
           "ident": "Unnamed",
           "fields": [
             {
-              "item": "Index"
+              "syn": "Index"
             }
           ]
         }
@@ -5981,7 +5981,7 @@
           "ident": "Word",
           "fields": [
             {
-              "item": "Ident"
+              "syn": "Ident"
             }
           ]
         },
@@ -5989,7 +5989,7 @@
           "ident": "List",
           "fields": [
             {
-              "item": "MetaList"
+              "syn": "MetaList"
             }
           ]
         },
@@ -5997,7 +5997,7 @@
           "ident": "NameValue",
           "fields": [
             {
-              "item": "MetaNameValue"
+              "syn": "MetaNameValue"
             }
           ]
         }
@@ -6016,7 +6016,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -6030,7 +6030,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "NestedMeta"
+                "syn": "NestedMeta"
               },
               "punct": "Comma"
             }
@@ -6052,7 +6052,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -6064,7 +6064,7 @@
         {
           "ident": "lit",
           "type": {
-            "item": "Lit"
+            "syn": "Lit"
           }
         }
       ],
@@ -6107,20 +6107,20 @@
           "ident": "abi",
           "type": {
             "option": {
-              "item": "Abi"
+              "syn": "Abi"
             }
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "decl",
           "type": {
-            "item": "FnDecl"
+            "syn": "FnDecl"
           }
         }
       ],
@@ -6152,7 +6152,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "GenericMethodArgument"
+                "syn": "GenericMethodArgument"
               },
               "punct": "Comma"
             }
@@ -6181,7 +6181,7 @@
           "ident": "Meta",
           "fields": [
             {
-              "item": "Meta"
+              "syn": "Meta"
             }
           ]
         },
@@ -6189,7 +6189,7 @@
           "ident": "Literal",
           "fields": [
             {
-              "item": "Lit"
+              "syn": "Lit"
             }
           ]
         }
@@ -6216,7 +6216,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Type"
+                "syn": "Type"
               },
               "punct": "Comma"
             }
@@ -6225,7 +6225,7 @@
         {
           "ident": "output",
           "type": {
-            "item": "ReturnType"
+            "syn": "ReturnType"
           }
         }
       ],
@@ -6244,7 +6244,7 @@
           "ident": "Wild",
           "fields": [
             {
-              "item": "PatWild"
+              "syn": "PatWild"
             }
           ]
         },
@@ -6252,7 +6252,7 @@
           "ident": "Ident",
           "fields": [
             {
-              "item": "PatIdent"
+              "syn": "PatIdent"
             }
           ]
         },
@@ -6260,7 +6260,7 @@
           "ident": "Struct",
           "fields": [
             {
-              "item": "PatStruct"
+              "syn": "PatStruct"
             }
           ]
         },
@@ -6268,7 +6268,7 @@
           "ident": "TupleStruct",
           "fields": [
             {
-              "item": "PatTupleStruct"
+              "syn": "PatTupleStruct"
             }
           ]
         },
@@ -6276,7 +6276,7 @@
           "ident": "Path",
           "fields": [
             {
-              "item": "PatPath"
+              "syn": "PatPath"
             }
           ]
         },
@@ -6284,7 +6284,7 @@
           "ident": "Tuple",
           "fields": [
             {
-              "item": "PatTuple"
+              "syn": "PatTuple"
             }
           ]
         },
@@ -6292,7 +6292,7 @@
           "ident": "Box",
           "fields": [
             {
-              "item": "PatBox"
+              "syn": "PatBox"
             }
           ]
         },
@@ -6300,7 +6300,7 @@
           "ident": "Ref",
           "fields": [
             {
-              "item": "PatRef"
+              "syn": "PatRef"
             }
           ]
         },
@@ -6308,7 +6308,7 @@
           "ident": "Lit",
           "fields": [
             {
-              "item": "PatLit"
+              "syn": "PatLit"
             }
           ]
         },
@@ -6316,7 +6316,7 @@
           "ident": "Range",
           "fields": [
             {
-              "item": "PatRange"
+              "syn": "PatRange"
             }
           ]
         },
@@ -6324,7 +6324,7 @@
           "ident": "Slice",
           "fields": [
             {
-              "item": "PatSlice"
+              "syn": "PatSlice"
             }
           ]
         },
@@ -6332,7 +6332,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "PatMacro"
+              "syn": "PatMacro"
             }
           ]
         },
@@ -6340,7 +6340,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "PatVerbatim"
+              "syn": "PatVerbatim"
             }
           ]
         }
@@ -6365,7 +6365,7 @@
           "ident": "pat",
           "type": {
             "box": {
-              "item": "Pat"
+              "syn": "Pat"
             }
           }
         }
@@ -6400,7 +6400,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -6413,7 +6413,7 @@
                 },
                 {
                   "box": {
-                    "item": "Pat"
+                    "syn": "Pat"
                   }
                 }
               ]
@@ -6436,7 +6436,7 @@
           "ident": "expr",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -6455,7 +6455,7 @@
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         }
       ],
@@ -6474,14 +6474,14 @@
           "ident": "qself",
           "type": {
             "option": {
-              "item": "QSelf"
+              "syn": "QSelf"
             }
           }
         },
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         }
       ],
@@ -6500,21 +6500,21 @@
           "ident": "lo",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         },
         {
           "ident": "limits",
           "type": {
-            "item": "RangeLimits"
+            "syn": "RangeLimits"
           }
         },
         {
           "ident": "hi",
           "type": {
             "box": {
-              "item": "Expr"
+              "syn": "Expr"
             }
           }
         }
@@ -6548,7 +6548,7 @@
           "ident": "pat",
           "type": {
             "box": {
-              "item": "Pat"
+              "syn": "Pat"
             }
           }
         }
@@ -6575,7 +6575,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Comma"
             }
@@ -6586,7 +6586,7 @@
           "type": {
             "option": {
               "box": {
-                "item": "Pat"
+                "syn": "Pat"
               }
             }
           }
@@ -6612,7 +6612,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Comma"
             }
@@ -6633,7 +6633,7 @@
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         },
         {
@@ -6647,7 +6647,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "FieldPat"
+                "syn": "FieldPat"
               },
               "punct": "Comma"
             }
@@ -6684,7 +6684,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Comma"
             }
@@ -6711,7 +6711,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Pat"
+                "syn": "Pat"
               },
               "punct": "Comma"
             }
@@ -6732,13 +6732,13 @@
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         },
         {
           "ident": "pat",
           "type": {
-            "item": "PatTuple"
+            "syn": "PatTuple"
           }
         }
       ],
@@ -6756,7 +6756,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -6803,7 +6803,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "PathSegment"
+                "syn": "PathSegment"
               },
               "punct": "Colon2"
             }
@@ -6830,7 +6830,7 @@
           "ident": "AngleBracketed",
           "fields": [
             {
-              "item": "AngleBracketedGenericArguments"
+              "syn": "AngleBracketedGenericArguments"
             }
           ]
         },
@@ -6838,7 +6838,7 @@
           "ident": "Parenthesized",
           "fields": [
             {
-              "item": "ParenthesizedGenericArguments"
+              "syn": "ParenthesizedGenericArguments"
             }
           ]
         }
@@ -6857,13 +6857,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "arguments",
           "type": {
-            "item": "PathArguments"
+            "syn": "PathArguments"
           }
         }
       ],
@@ -6882,7 +6882,7 @@
         {
           "ident": "lhs_ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         },
         {
@@ -6894,7 +6894,7 @@
         {
           "ident": "rhs_ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         }
       ],
@@ -6913,7 +6913,7 @@
         {
           "ident": "lifetime",
           "type": {
-            "item": "Lifetime"
+            "syn": "Lifetime"
           }
         },
         {
@@ -6927,7 +6927,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Lifetime"
+                "syn": "Lifetime"
               },
               "punct": "Add"
             }
@@ -6950,14 +6950,14 @@
           "ident": "lifetimes",
           "type": {
             "option": {
-              "item": "BoundLifetimes"
+              "syn": "BoundLifetimes"
             }
           }
         },
         {
           "ident": "bounded_ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         },
         {
@@ -6971,7 +6971,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -7000,7 +7000,7 @@
           "ident": "ty",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -7076,7 +7076,7 @@
             },
             {
               "box": {
-                "item": "Type"
+                "syn": "Type"
               }
             }
           ]
@@ -7105,7 +7105,7 @@
           "ident": "Local",
           "fields": [
             {
-              "item": "Local"
+              "syn": "Local"
             }
           ]
         },
@@ -7113,7 +7113,7 @@
           "ident": "Item",
           "fields": [
             {
-              "item": "Item"
+              "syn": "Item"
             }
           ]
         },
@@ -7121,7 +7121,7 @@
           "ident": "Expr",
           "fields": [
             {
-              "item": "Expr"
+              "syn": "Expr"
             }
           ]
         },
@@ -7129,7 +7129,7 @@
           "ident": "Semi",
           "fields": [
             {
-              "item": "Expr"
+              "syn": "Expr"
             },
             {
               "token": "Semi"
@@ -7159,21 +7159,21 @@
         {
           "ident": "modifier",
           "type": {
-            "item": "TraitBoundModifier"
+            "syn": "TraitBoundModifier"
           }
         },
         {
           "ident": "lifetimes",
           "type": {
             "option": {
-              "item": "BoundLifetimes"
+              "syn": "BoundLifetimes"
             }
           }
         },
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         }
       ],
@@ -7216,7 +7216,7 @@
           "ident": "Const",
           "fields": [
             {
-              "item": "TraitItemConst"
+              "syn": "TraitItemConst"
             }
           ]
         },
@@ -7224,7 +7224,7 @@
           "ident": "Method",
           "fields": [
             {
-              "item": "TraitItemMethod"
+              "syn": "TraitItemMethod"
             }
           ]
         },
@@ -7232,7 +7232,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "TraitItemType"
+              "syn": "TraitItemType"
             }
           ]
         },
@@ -7240,7 +7240,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "TraitItemMacro"
+              "syn": "TraitItemMacro"
             }
           ]
         },
@@ -7248,7 +7248,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "TraitItemVerbatim"
+              "syn": "TraitItemVerbatim"
             }
           ]
         }
@@ -7267,7 +7267,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -7280,7 +7280,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -7292,7 +7292,7 @@
         {
           "ident": "ty",
           "type": {
-            "item": "Type"
+            "syn": "Type"
           }
         },
         {
@@ -7304,7 +7304,7 @@
                   "token": "Eq"
                 },
                 {
-                  "item": "Expr"
+                  "syn": "Expr"
                 }
               ]
             }
@@ -7332,14 +7332,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         },
         {
@@ -7366,21 +7366,21 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "sig",
           "type": {
-            "item": "MethodSig"
+            "syn": "MethodSig"
           }
         },
         {
           "ident": "default",
           "type": {
             "option": {
-              "item": "Block"
+              "syn": "Block"
             }
           }
         },
@@ -7408,7 +7408,7 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
@@ -7421,13 +7421,13 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "generics",
           "type": {
-            "item": "Generics"
+            "syn": "Generics"
           }
         },
         {
@@ -7443,7 +7443,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -7458,7 +7458,7 @@
                   "token": "Eq"
                 },
                 {
-                  "item": "Type"
+                  "syn": "Type"
                 }
               ]
             }
@@ -7485,7 +7485,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -7505,7 +7505,7 @@
           "ident": "Slice",
           "fields": [
             {
-              "item": "TypeSlice"
+              "syn": "TypeSlice"
             }
           ]
         },
@@ -7513,7 +7513,7 @@
           "ident": "Array",
           "fields": [
             {
-              "item": "TypeArray"
+              "syn": "TypeArray"
             }
           ]
         },
@@ -7521,7 +7521,7 @@
           "ident": "Ptr",
           "fields": [
             {
-              "item": "TypePtr"
+              "syn": "TypePtr"
             }
           ]
         },
@@ -7529,7 +7529,7 @@
           "ident": "Reference",
           "fields": [
             {
-              "item": "TypeReference"
+              "syn": "TypeReference"
             }
           ]
         },
@@ -7537,7 +7537,7 @@
           "ident": "BareFn",
           "fields": [
             {
-              "item": "TypeBareFn"
+              "syn": "TypeBareFn"
             }
           ]
         },
@@ -7545,7 +7545,7 @@
           "ident": "Never",
           "fields": [
             {
-              "item": "TypeNever"
+              "syn": "TypeNever"
             }
           ]
         },
@@ -7553,7 +7553,7 @@
           "ident": "Tuple",
           "fields": [
             {
-              "item": "TypeTuple"
+              "syn": "TypeTuple"
             }
           ]
         },
@@ -7561,7 +7561,7 @@
           "ident": "Path",
           "fields": [
             {
-              "item": "TypePath"
+              "syn": "TypePath"
             }
           ]
         },
@@ -7569,7 +7569,7 @@
           "ident": "TraitObject",
           "fields": [
             {
-              "item": "TypeTraitObject"
+              "syn": "TypeTraitObject"
             }
           ]
         },
@@ -7577,7 +7577,7 @@
           "ident": "ImplTrait",
           "fields": [
             {
-              "item": "TypeImplTrait"
+              "syn": "TypeImplTrait"
             }
           ]
         },
@@ -7585,7 +7585,7 @@
           "ident": "Paren",
           "fields": [
             {
-              "item": "TypeParen"
+              "syn": "TypeParen"
             }
           ]
         },
@@ -7593,7 +7593,7 @@
           "ident": "Group",
           "fields": [
             {
-              "item": "TypeGroup"
+              "syn": "TypeGroup"
             }
           ]
         },
@@ -7601,7 +7601,7 @@
           "ident": "Infer",
           "fields": [
             {
-              "item": "TypeInfer"
+              "syn": "TypeInfer"
             }
           ]
         },
@@ -7609,7 +7609,7 @@
           "ident": "Macro",
           "fields": [
             {
-              "item": "TypeMacro"
+              "syn": "TypeMacro"
             }
           ]
         },
@@ -7617,7 +7617,7 @@
           "ident": "Verbatim",
           "fields": [
             {
-              "item": "TypeVerbatim"
+              "syn": "TypeVerbatim"
             }
           ]
         }
@@ -7643,7 +7643,7 @@
           "ident": "elem",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         },
@@ -7656,7 +7656,7 @@
         {
           "ident": "len",
           "type": {
-            "item": "Expr"
+            "syn": "Expr"
           }
         }
       ],
@@ -7676,7 +7676,7 @@
           "ident": "lifetimes",
           "type": {
             "option": {
-              "item": "BoundLifetimes"
+              "syn": "BoundLifetimes"
             }
           }
         },
@@ -7692,7 +7692,7 @@
           "ident": "abi",
           "type": {
             "option": {
-              "item": "Abi"
+              "syn": "Abi"
             }
           }
         },
@@ -7713,7 +7713,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "BareFnArg"
+                "syn": "BareFnArg"
               },
               "punct": "Comma"
             }
@@ -7730,7 +7730,7 @@
         {
           "ident": "output",
           "type": {
-            "item": "ReturnType"
+            "syn": "ReturnType"
           }
         }
       ],
@@ -7756,7 +7756,7 @@
           "ident": "elem",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -7784,7 +7784,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -7825,7 +7825,7 @@
         {
           "ident": "mac",
           "type": {
-            "item": "Macro"
+            "syn": "Macro"
           }
         }
       ],
@@ -7864,14 +7864,14 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -7887,7 +7887,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -7905,7 +7905,7 @@
           "ident": "default",
           "type": {
             "option": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -7926,7 +7926,7 @@
           "ident": "Trait",
           "fields": [
             {
-              "item": "TraitBound"
+              "syn": "TraitBound"
             }
           ]
         },
@@ -7934,7 +7934,7 @@
           "ident": "Lifetime",
           "fields": [
             {
-              "item": "Lifetime"
+              "syn": "Lifetime"
             }
           ]
         }
@@ -7960,7 +7960,7 @@
           "ident": "elem",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -7981,14 +7981,14 @@
           "ident": "qself",
           "type": {
             "option": {
-              "item": "QSelf"
+              "syn": "QSelf"
             }
           }
         },
         {
           "ident": "path",
           "type": {
-            "item": "Path"
+            "syn": "Path"
           }
         }
       ],
@@ -8030,7 +8030,7 @@
           "ident": "elem",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -8057,7 +8057,7 @@
           "ident": "lifetime",
           "type": {
             "option": {
-              "item": "Lifetime"
+              "syn": "Lifetime"
             }
           }
         },
@@ -8073,7 +8073,7 @@
           "ident": "elem",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -8100,7 +8100,7 @@
           "ident": "elem",
           "type": {
             "box": {
-              "item": "Type"
+              "syn": "Type"
             }
           }
         }
@@ -8130,7 +8130,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "TypeParamBound"
+                "syn": "TypeParamBound"
               },
               "punct": "Add"
             }
@@ -8160,7 +8160,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "Type"
+                "syn": "Type"
               },
               "punct": "Comma"
             }
@@ -8182,7 +8182,7 @@
         {
           "ident": "tts",
           "type": {
-            "ext": "TokenStream"
+            "proc_macro2": "TokenStream"
           }
         }
       ],
@@ -8262,7 +8262,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "UseTree"
+                "syn": "UseTree"
               },
               "punct": "Comma"
             }
@@ -8283,7 +8283,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         }
       ],
@@ -8301,7 +8301,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -8314,7 +8314,7 @@
           "ident": "tree",
           "type": {
             "box": {
-              "item": "UseTree"
+              "syn": "UseTree"
             }
           }
         }
@@ -8333,7 +8333,7 @@
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
@@ -8345,7 +8345,7 @@
         {
           "ident": "rename",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         }
       ],
@@ -8364,7 +8364,7 @@
           "ident": "Path",
           "fields": [
             {
-              "item": "UsePath"
+              "syn": "UsePath"
             }
           ]
         },
@@ -8372,7 +8372,7 @@
           "ident": "Name",
           "fields": [
             {
-              "item": "UseName"
+              "syn": "UseName"
             }
           ]
         },
@@ -8380,7 +8380,7 @@
           "ident": "Rename",
           "fields": [
             {
-              "item": "UseRename"
+              "syn": "UseRename"
             }
           ]
         },
@@ -8388,7 +8388,7 @@
           "ident": "Glob",
           "fields": [
             {
-              "item": "UseGlob"
+              "syn": "UseGlob"
             }
           ]
         },
@@ -8396,7 +8396,7 @@
           "ident": "Group",
           "fields": [
             {
-              "item": "UseGroup"
+              "syn": "UseGroup"
             }
           ]
         }
@@ -8416,20 +8416,20 @@
           "ident": "attrs",
           "type": {
             "vec": {
-              "item": "Attribute"
+              "syn": "Attribute"
             }
           }
         },
         {
           "ident": "ident",
           "type": {
-            "item": "Ident"
+            "syn": "Ident"
           }
         },
         {
           "ident": "fields",
           "type": {
-            "item": "Fields"
+            "syn": "Fields"
           }
         },
         {
@@ -8441,7 +8441,7 @@
                   "token": "Eq"
                 },
                 {
-                  "item": "Expr"
+                  "syn": "Expr"
                 }
               ]
             }
@@ -8522,7 +8522,7 @@
           "ident": "path",
           "type": {
             "box": {
-              "item": "Path"
+              "syn": "Path"
             }
           }
         }
@@ -8543,7 +8543,7 @@
           "ident": "Public",
           "fields": [
             {
-              "item": "VisPublic"
+              "syn": "VisPublic"
             }
           ]
         },
@@ -8551,7 +8551,7 @@
           "ident": "Crate",
           "fields": [
             {
-              "item": "VisCrate"
+              "syn": "VisCrate"
             }
           ]
         },
@@ -8559,7 +8559,7 @@
           "ident": "Restricted",
           "fields": [
             {
-              "item": "VisRestricted"
+              "syn": "VisRestricted"
             }
           ]
         },
@@ -8590,7 +8590,7 @@
           "type": {
             "punctuated": {
               "element": {
-                "item": "WherePredicate"
+                "syn": "WherePredicate"
               },
               "punct": "Comma"
             }
@@ -8613,7 +8613,7 @@
           "ident": "Type",
           "fields": [
             {
-              "item": "PredicateType"
+              "syn": "PredicateType"
             }
           ]
         },
@@ -8621,7 +8621,7 @@
           "ident": "Lifetime",
           "fields": [
             {
-              "item": "PredicateLifetime"
+              "syn": "PredicateLifetime"
             }
           ]
         },
@@ -8629,7 +8629,7 @@
           "ident": "Eq",
           "fields": [
             {
-              "item": "PredicateEq"
+              "syn": "PredicateEq"
             }
           ]
         }

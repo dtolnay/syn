@@ -183,7 +183,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(last.ident.to_string()),
                 _ => {
                     if items.get(&last.ident).is_some() {
-                        types::Type::Item(last.ident.to_string())
+                        types::Type::Syn(last.ident.to_string())
                     } else {
                         unimplemented!("{}", last.ident.to_string());
                     }

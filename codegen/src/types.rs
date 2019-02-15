@@ -45,12 +45,13 @@ pub struct Field {
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Type defined by `syn`
-    Item(String),
+    Syn(String),
 
     /// Type defined in `std`.
     Std(String),
 
     /// Type external to `syn`
+    #[serde(rename = "proc_macro2")]
     Ext(String),
 
     /// Token type
