@@ -2475,29 +2475,17 @@ pub fn visit_lit_bool<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     _visitor.visit_span(&_i.span);
 }
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_lit_byte<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitByte) {
-    skip!(_i.token);
-}
+pub fn visit_lit_byte<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitByte) {}
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_lit_byte_str<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitByteStr) {
-    skip!(_i.token);
-}
+pub fn visit_lit_byte_str<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitByteStr) {}
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_lit_char<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitChar) {
-    skip!(_i.token);
-}
+pub fn visit_lit_char<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitChar) {}
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_lit_float<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitFloat) {
-    skip!(_i.token);
-}
+pub fn visit_lit_float<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitFloat) {}
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_lit_int<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitInt) {
-    skip!(_i.token);
-}
+pub fn visit_lit_int<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitInt) {}
 #[cfg(any(feature = "full", feature = "derive"))]
-pub fn visit_lit_str<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitStr) {
-    skip!(_i.token);
-}
+pub fn visit_lit_str<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitStr) {}
 #[cfg(any(feature = "full", feature = "derive"))]
 pub fn visit_lit_verbatim<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast LitVerbatim) {
     skip!(_i.token);

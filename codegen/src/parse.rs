@@ -98,16 +98,16 @@ fn introspect_struct(
     items: &ItemLookup,
     tokens: &TokenLookup,
 ) -> types::Struct {
-    let mut all_fields_pub = true;
+    let all_fields_pub = item.fields.iter().all(|field| is_pub(&field.vis));
+    if !all_fields_pub {
+        return types::Struct::new(ident.to_string(), features, IndexMap::new());
+    }
+
     let fields = match &item.fields {
         syn::Fields::Named(fields) => fields
             .named
             .iter()
             .map(|field| {
-                if !is_pub(&field.vis) {
-                    all_fields_pub = false;
-                }
-
                 (
                     field.ident.as_ref().unwrap().to_string(),
                     introspect_type(&field.ty, items, tokens),
@@ -118,7 +118,7 @@ fn introspect_struct(
         _ => panic!("Struct representation not supported"),
     };
 
-    types::Struct::new(ident.to_string(), features, fields, all_fields_pub)
+    types::Struct::new(ident.to_string(), features, fields)
 }
 
 fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -> types::Type {

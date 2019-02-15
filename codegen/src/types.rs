@@ -20,8 +20,8 @@ pub enum Node {
 pub struct Struct {
     ident: String,
     features: Features,
+    #[serde(skip_serializing_if = "IndexMap::is_empty")]
     fields: IndexMap<String, Type>,
-    all_fields_pub: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -103,13 +103,11 @@ impl Struct {
         ident: String,
         features: Features,
         fields: IndexMap<String, Type>,
-        all_fields_pub: bool,
     ) -> Struct {
         Struct {
             ident,
             features,
             fields,
-            all_fields_pub,
         }
     }
 
@@ -119,10 +117,6 @@ impl Struct {
 
     pub fn fields(&self) -> &IndexMap<String, Type> {
         &self.fields
-    }
-
-    pub fn all_fields_pub(&self) -> bool {
-        self.all_fields_pub
     }
 }
 

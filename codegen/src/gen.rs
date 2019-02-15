@@ -562,7 +562,7 @@ mod codegen {
 
         let mut include_fold_impl = true;
         if let types::Node::Struct(ref data) = s {
-            if !data.all_fields_pub() {
+            if data.fields().is_empty() && !super::TERMINAL_TYPES.contains(&&s.ident()) {
                 include_fold_impl = false;
             }
         }
@@ -646,8 +646,7 @@ pub fn generate(defs: &types::Definitions) {
         defs.insert(types::Node::Struct(types::Struct::new(
                     tt.to_string(),
                     types::Features::default(),
-                    IndexMap::new(),
-                    true)
+                    IndexMap::new())
         ));
     }
 
