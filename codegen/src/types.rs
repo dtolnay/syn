@@ -1,8 +1,14 @@
+use std::collections::BTreeMap;
 use std::ops;
+
+pub struct Definitions {
+    pub types: Vec<Node>,
+    pub tokens: BTreeMap<String, String>,
+}
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "node", rename_all = "lowercase")]
-pub enum TypeDef {
+pub enum Node {
     Struct(Struct),
     Enum(Enum),
 }
@@ -80,18 +86,18 @@ pub struct Features {
     any: Vec<String>,
 }
 
-impl TypeDef {
+impl Node {
     pub fn ident(&self) -> &str {
         match self {
-            TypeDef::Struct(i) => &i.ident,
-            TypeDef::Enum(i) => &i.ident,
+            Node::Struct(i) => &i.ident,
+            Node::Enum(i) => &i.ident,
         }
     }
 
     pub fn features(&self) -> &Features {
         match self {
-            TypeDef::Struct(i) => &i.features,
-            TypeDef::Enum(i) => &i.features,
+            Node::Struct(i) => &i.features,
+            Node::Enum(i) => &i.features,
         }
     }
 }

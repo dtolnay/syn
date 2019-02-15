@@ -1,10 +1,11 @@
 use crate::types;
 
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-pub fn generate(types: &[types::TypeDef]) {
+pub fn generate(defs: &types::Definitions) {
     let codegen_root = Path::new(env!("CARGO_MANIFEST_DIR"));
 
     let mut f = File::open(codegen_root.join("../Cargo.toml")).unwrap();
@@ -17,7 +18,8 @@ pub fn generate(types: &[types::TypeDef]) {
 
     serde_json::to_writer_pretty(f, &Introspect {
         version: &manifest.package.version,
-        types,
+        types: &defs.types,
+        tokens: &defs.tokens,
     }).unwrap();
 }
 
@@ -35,5 +37,6 @@ struct Package {
 struct Introspect<'a> {
     /// The `syn` version used to generate the introspection file
     version: &'a str,
-    types: &'a [types::TypeDef],
+    types: &'a [types::Node],
+    tokens: &'a BTreeMap<String, String>,
 }

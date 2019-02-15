@@ -116,7 +116,7 @@ mod codegen {
     fn box_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::TypeDef],
+        types: &[types::Node],
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -133,7 +133,7 @@ mod codegen {
     fn vec_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::TypeDef],
+        types: &[types::Node],
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -171,7 +171,7 @@ mod codegen {
     fn punctuated_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::TypeDef],
+        types: &[types::Node],
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -211,7 +211,7 @@ mod codegen {
     fn option_visit(
         elem: &types::Type,
         features: &types::Features,
-        types: &[types::TypeDef],
+        types: &[types::Node],
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -241,7 +241,7 @@ mod codegen {
     fn tuple_visit(
         elems: &[types::Type],
         features: &types::Features,
-        types: &[types::TypeDef],
+        types: &[types::Node],
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -333,7 +333,7 @@ mod codegen {
     fn visit(
         ty: &types::Type,
         features: &types::Features,
-        types: &[types::TypeDef],
+        types: &[types::Node],
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
@@ -391,7 +391,7 @@ mod codegen {
         }
     }
 
-    pub fn generate(state: &mut State, s: &types::TypeDef, types: &[types::TypeDef]) {
+    pub fn generate(state: &mut State, s: &types::Node, types: &[types::Node]) {
         let features = visit_features(s.features());
         let under_name = under_name(s.ident());
         let ty = Ident::new(s.ident(), Span::call_site());
@@ -404,7 +404,7 @@ mod codegen {
         let mut fold_impl = TokenStream::new();
 
         match s {
-            types::TypeDef::Enum(ref e) => {
+            types::Node::Enum(ref e) => {
                 let mut visit_variants = TokenStream::new();
                 let mut visit_mut_variants = TokenStream::new();
                 let mut fold_variants = TokenStream::new();
@@ -508,7 +508,7 @@ mod codegen {
                     }
                 });
             }
-            types::TypeDef::Struct(ref v) => {
+            types::Node::Struct(ref v) => {
                 let mut fold_fields = TokenStream::new();
 
                 for field in v.fields() {
@@ -555,7 +555,7 @@ mod codegen {
         }
 
         let mut include_fold_impl = true;
-        if let types::TypeDef::Struct(ref data) = s {
+        if let types::Node::Struct(ref data) = s {
             if !data.all_fields_pub() {
                 include_fold_impl = false;
             }
@@ -631,10 +631,10 @@ fn write_file(path: &str, content: TokenStream) {
         .unwrap();
 }
 
-pub fn generate(types: &[types::TypeDef]) {
+pub fn generate(defs: &types::Definitions) {
     let mut state = codegen::State::default();
-    for s in types {
-        codegen::generate(&mut state, s, types);
+    for s in &defs.types {
+        codegen::generate(&mut state, s, &defs.types);
     }
 
     let full_macro = quote! {

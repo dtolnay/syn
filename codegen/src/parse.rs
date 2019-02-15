@@ -19,7 +19,7 @@ type ItemLookup = BTreeMap<Ident, AstItem>;
 type TokenLookup = BTreeMap<String, String>;
 
 /// Parse the contents of `src` and return a list of AST types.
-pub fn parse() -> Vec<types::TypeDef> {
+pub fn parse() -> types::Definitions {
     let mut item_lookup = BTreeMap::new();
     load_file(SYN_CRATE_ROOT, &[], &mut item_lookup).unwrap();
 
@@ -49,10 +49,14 @@ pub fn parse() -> Vec<types::TypeDef> {
         );
     }
 
-    item_lookup
+    let types = item_lookup
         .values()
         .map(|item| introspect_item(item, &item_lookup, &token_lookup))
-        .collect()
+        .collect();
+
+    let tokens = token_lookup.into_iter().map(|(name, ty)| (ty, name)).collect();
+
+    types::Definitions { types, tokens }
 }
 
 /// Data extracted from syn source
@@ -62,18 +66,18 @@ pub struct AstItem {
     features: Vec<syn::Attribute>,
 }
 
-fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> types::TypeDef {
+fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> types::Node {
     let features = introspect_features(&item.features);
 
     match &item.ast.data {
-        Data::Enum(ref data) => types::TypeDef::Enum(introspect_enum(
+        Data::Enum(ref data) => types::Node::Enum(introspect_enum(
             &item.ast.ident,
             features,
             data,
             items,
             tokens,
         )),
-        Data::Struct(ref data) => types::TypeDef::Struct(introspect_struct(
+        Data::Struct(ref data) => types::Node::Struct(introspect_struct(
             &item.ast.ident,
             features,
             data,
