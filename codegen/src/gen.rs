@@ -374,6 +374,9 @@ mod codegen {
                     },
                 )
             }
+            types::Type::Ext(t) if super::TERMINAL_TYPES.contains(&&t[..]) => {
+                Some(simple_visit(t, kind, name))
+            }
             types::Type::Ext(_) | types::Type::Std(_) => None,
         }
     }
@@ -633,10 +636,23 @@ fn write_file(path: &str, content: TokenStream) {
         .unwrap();
 }
 
+const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
+
 pub fn generate(defs: &types::Definitions) {
+    let mut defs = defs.clone();
+
+    for &tt in TERMINAL_TYPES {
+        defs.insert(types::Node::Struct(types::Struct::new(
+                    tt.to_string(),
+                    types::Features::default(),
+                    vec![],
+                    true)
+        ));
+    }
+
     let mut state = codegen::State::default();
     for s in &defs.types {
-        codegen::generate(&mut state, s, defs);
+        codegen::generate(&mut state, s, &defs);
     }
 
     let full_macro = quote! {

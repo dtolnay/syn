@@ -1,6 +1,5 @@
 use crate::types;
 
-use proc_macro2::Span;
 use syn::{Data, DataStruct, DeriveInput, Ident, Item};
 
 use std::collections::BTreeMap;
@@ -12,7 +11,6 @@ const SYN_CRATE_ROOT: &str = "../src/lib.rs";
 const TOKEN_SRC: &str = "../src/token.rs";
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 const EXTRA_TYPES: &[&str] = &["Lifetime"];
-const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
 // NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
 type ItemLookup = BTreeMap<Ident, AstItem>;
@@ -24,30 +22,6 @@ pub fn parse() -> types::Definitions {
     load_file(SYN_CRATE_ROOT, &[], &mut item_lookup).unwrap();
 
     let token_lookup = load_token_file(TOKEN_SRC).unwrap();
-
-    // Load in any terminal types
-    for &tt in TERMINAL_TYPES {
-        use syn::*;
-        item_lookup.insert(
-            Ident::new(&tt, Span::call_site()),
-            AstItem {
-                ast: DeriveInput {
-                    ident: Ident::new(tt, Span::call_site()),
-                    vis: Visibility::Public(VisPublic {
-                        pub_token: <Token![pub]>::default(),
-                    }),
-                    attrs: vec![],
-                    generics: Generics::default(),
-                    data: Data::Struct(DataStruct {
-                        fields: Fields::Unit,
-                        struct_token: <Token![struct]>::default(),
-                        semi_token: None,
-                    }),
-                },
-                features: vec![],
-            },
-        );
-    }
 
     let types = item_lookup
         .values()
@@ -179,7 +153,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 "Brace" | "Bracket" | "Paren" | "Group" => {
                     types::Type::Group(last.ident.to_string())
                 }
-                "TokenStream" | "Literal" => types::Type::Ext(last.ident.to_string()),
+                "TokenStream" | "Literal" | "Ident" | "Span"  => types::Type::Ext(last.ident.to_string()),
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(last.ident.to_string()),
                 _ => {
                     if items.get(&last.ident).is_some() {

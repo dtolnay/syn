@@ -355,9 +355,6 @@ pub trait Visit<'ast> {
     fn visit_generics(&mut self, i: &'ast Generics) {
         visit_generics(self, i)
     }
-    fn visit_ident(&mut self, i: &'ast Ident) {
-        visit_ident(self, i)
-    }
     #[cfg(feature = "full")]
     fn visit_impl_item(&mut self, i: &'ast ImplItem) {
         visit_impl_item(self, i)
@@ -649,9 +646,6 @@ pub trait Visit<'ast> {
     fn visit_return_type(&mut self, i: &'ast ReturnType) {
         visit_return_type(self, i)
     }
-    fn visit_span(&mut self, i: &'ast Span) {
-        visit_span(self, i)
-    }
     #[cfg(feature = "full")]
     fn visit_stmt(&mut self, i: &'ast Stmt) {
         visit_stmt(self, i)
@@ -815,6 +809,12 @@ pub trait Visit<'ast> {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn visit_where_predicate(&mut self, i: &'ast WherePredicate) {
         visit_where_predicate(self, i)
+    }
+    fn visit_span(&mut self, i: &'ast Span) {
+        visit_span(self, i)
+    }
+    fn visit_ident(&mut self, i: &'ast Ident) {
+        visit_ident(self, i)
     }
 }
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1939,7 +1939,6 @@ pub fn visit_generics<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
         _visitor.visit_where_clause(it)
     };
 }
-pub fn visit_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {}
 #[cfg(feature = "full")]
 pub fn visit_impl_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItem) {
     match *_i {
@@ -2896,7 +2895,6 @@ pub fn visit_return_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         }
     }
 }
-pub fn visit_span<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Span) {}
 #[cfg(feature = "full")]
 pub fn visit_stmt<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stmt) {
     match *_i {
@@ -3381,3 +3379,5 @@ pub fn visit_where_predicate<'ast, V: Visit<'ast> + ?Sized>(
         }
     }
 }
+pub fn visit_span<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Span) {}
+pub fn visit_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {}

@@ -354,9 +354,6 @@ pub trait Fold {
     fn fold_generics(&mut self, i: Generics) -> Generics {
         fold_generics(self, i)
     }
-    fn fold_ident(&mut self, i: Ident) -> Ident {
-        fold_ident(self, i)
-    }
     #[cfg(feature = "full")]
     fn fold_impl_item(&mut self, i: ImplItem) -> ImplItem {
         fold_impl_item(self, i)
@@ -651,9 +648,6 @@ pub trait Fold {
     fn fold_return_type(&mut self, i: ReturnType) -> ReturnType {
         fold_return_type(self, i)
     }
-    fn fold_span(&mut self, i: Span) -> Span {
-        fold_span(self, i)
-    }
     #[cfg(feature = "full")]
     fn fold_stmt(&mut self, i: Stmt) -> Stmt {
         fold_stmt(self, i)
@@ -817,6 +811,12 @@ pub trait Fold {
     #[cfg(any(feature = "full", feature = "derive"))]
     fn fold_where_predicate(&mut self, i: WherePredicate) -> WherePredicate {
         fold_where_predicate(self, i)
+    }
+    fn fold_span(&mut self, i: Span) -> Span {
+        fold_span(self, i)
+    }
+    fn fold_ident(&mut self, i: Ident) -> Ident {
+        fold_ident(self, i)
     }
 }
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -1753,12 +1753,6 @@ pub fn fold_generics<V: Fold + ?Sized>(_visitor: &mut V, _i: Generics) -> Generi
         where_clause: (_i.where_clause).map(|it| _visitor.fold_where_clause(it)),
     }
 }
-pub fn fold_ident<V: Fold + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
-    let mut _i = _i;
-    let span = _visitor.fold_span(_i.span());
-    _i.set_span(span);
-    _i
-}
 #[cfg(feature = "full")]
 pub fn fold_impl_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplItem {
     match _i {
@@ -2519,9 +2513,6 @@ pub fn fold_return_type<V: Fold + ?Sized>(_visitor: &mut V, _i: ReturnType) -> R
         ),
     }
 }
-pub fn fold_span<V: Fold + ?Sized>(_visitor: &mut V, _i: Span) -> Span {
-    _i
-}
 #[cfg(feature = "full")]
 pub fn fold_stmt<V: Fold + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
     match _i {
@@ -2934,4 +2925,13 @@ pub fn fold_where_predicate<V: Fold + ?Sized>(
             WherePredicate::Eq(_visitor.fold_predicate_eq(_binding_0))
         }
     }
+}
+pub fn fold_span<V: Fold + ?Sized>(_visitor: &mut V, _i: Span) -> Span {
+    _i
+}
+pub fn fold_ident<V: Fold + ?Sized>(_visitor: &mut V, _i: Ident) -> Ident {
+    let mut _i = _i;
+    let span = _visitor.fold_span(_i.span());
+    _i.set_span(span);
+    _i
 }
