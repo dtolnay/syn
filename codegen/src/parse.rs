@@ -162,7 +162,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                         _ => panic!(),
                     };
 
-                    types::Type::Punctuated(Box::new(nested), punct)
+                    types::Type::Punctuated(types::Punctuated::new(nested, punct))
                 }
                 "Vec" => {
                     let nested = introspect_type(first_arg(&last.arguments), items, tokens);
@@ -173,7 +173,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                     types::Type::Box(Box::new(nested))
                 }
                 "Brace" | "Bracket" | "Paren" | "Group" => {
-                    types::Type::TokenGroup(last.ident.to_string())
+                    types::Type::Group(last.ident.to_string())
                 }
                 "TokenStream" | "Literal" => types::Type::Ext(last.ident.to_string()),
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(last.ident.to_string()),

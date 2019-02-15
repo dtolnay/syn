@@ -1,7 +1,7 @@
 use std::ops;
 
 #[derive(Debug, Serialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(tag = "node", rename_all = "lowercase")]
 pub enum TypeDef {
     Struct(Struct),
     Enum(Enum),
@@ -31,11 +31,12 @@ pub struct Variant {
 #[derive(Debug, Serialize)]
 pub struct Field {
     ident: String,
+    #[serde(rename = "type")]
     ty: Type,
 }
 
 #[derive(Debug, Serialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Type defined by `syn`
     Item(String),
@@ -50,10 +51,11 @@ pub enum Type {
     Token(Token),
 
     /// Token group
-    TokenGroup(String),
+    Group(String),
 
     /// Punctuated list
-    Punctuated(Box<Type>, Token),
+    Punctuated(Punctuated),
+
     Option(Box<Type>),
     Box(Box<Type>),
     Vec(Box<Type>),
@@ -63,7 +65,14 @@ pub enum Type {
 #[derive(Debug, Clone, Serialize)]
 pub struct Token {
     repr: String,
+    #[serde(rename = "type")]
     ty: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Punctuated {
+    element: Box<Type>,
+    punct: Token,
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -169,6 +178,16 @@ impl Token {
 
     pub fn repr(&self) -> &str {
         &self.repr
+    }
+}
+
+impl Punctuated {
+    pub fn new(element: Type, punct: Token) -> Self {
+        Punctuated { element: Box::new(element), punct }
+    }
+
+    pub fn element(&self) -> &Type {
+        &self.element
     }
 }
 

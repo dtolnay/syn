@@ -340,7 +340,9 @@ mod codegen {
         match ty {
             types::Type::Box(t) => box_visit(&*t, features, types, kind, name),
             types::Type::Vec(t) => vec_visit(&*t, features, types, kind, name),
-            types::Type::Punctuated(t, _) => punctuated_visit(&*t, features, types, kind, name),
+            types::Type::Punctuated(p) => {
+                punctuated_visit(p.element(), features, types, kind, name)
+            }
             types::Type::Option(t) => option_visit(&*t, features, types, kind, name),
             types::Type::Tuple(t) => tuple_visit(t, features, types, kind, name),
             types::Type::Token(t) => {
@@ -350,7 +352,7 @@ mod codegen {
                     Some(token_punct_visit(t, kind, name))
                 }
             }
-            types::Type::TokenGroup(t) => Some(token_group_visit(&t[..], kind, name)),
+            types::Type::Group(t) => Some(token_group_visit(&t[..], kind, name)),
             types::Type::Item(t) => {
                 fn requires_full(features: &types::Features) -> bool {
                     features.contains("full") && features.len() == 1
