@@ -73,29 +73,10 @@ pub struct Punctuated {
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Features {
-    any: Vec<String>,
-}
-
-impl Variant {
-    pub fn new(ident: String, fields: Vec<Type>) -> Variant {
-        Variant { ident, fields }
-    }
-}
-
-impl Punctuated {
-    pub fn new(element: Type, punct: String) -> Self {
-        Punctuated {
-            element: Box::new(element),
-            punct,
-        }
-    }
+    pub any: Vec<String>,
 }
 
 impl Features {
-    pub fn new(any: Vec<String>) -> Features {
-        Features { any }
-    }
-
     pub fn join(&mut self, other: &Features) {
         if self.any.is_empty() {
             self.any = other.any.clone();

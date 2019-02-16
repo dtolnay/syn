@@ -86,7 +86,10 @@ fn introspect_enum(
                 _ => panic!("Enum representation not supported"),
             };
 
-            types::Variant::new(variant.ident.to_string(), fields)
+            types::Variant {
+                ident: variant.ident.to_string(),
+                fields,
+            }
         })
         .collect()
 }
@@ -132,7 +135,10 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                         _ => panic!(),
                     };
 
-                    types::Type::Punctuated(types::Punctuated::new(nested, punct))
+                    types::Type::Punctuated(types::Punctuated {
+                        element: Box::new(nested),
+                        punct,
+                    })
                 }
                 "Vec" => {
                     let nested = introspect_type(first_arg(&last.arguments), items, tokens);
@@ -468,7 +474,7 @@ mod parsing {
 
             assert!(input.is_empty());
 
-            Ok(types::Features::new(features))
+            Ok(types::Features { any: features })
         }
     }
 }
