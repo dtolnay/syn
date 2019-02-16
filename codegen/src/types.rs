@@ -19,7 +19,7 @@ pub struct Node {
     #[serde(
         flatten,
         skip_serializing_if = "is_private",
-        deserialize_with = "de_data"
+        deserialize_with = "private_if_absent"
     )]
     pub data: Data,
 }
@@ -82,7 +82,7 @@ fn is_private(data: &Data) -> bool {
     }
 }
 
-fn de_data<'de, D>(deserializer: D) -> Result<Data, D::Error>
+fn private_if_absent<'de, D>(deserializer: D) -> Result<Data, D::Error>
 where
     D: Deserializer<'de>,
 {
