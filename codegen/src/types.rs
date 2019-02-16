@@ -4,13 +4,13 @@ use serde::{Deserialize, Deserializer};
 use std::collections::BTreeMap;
 use std::ops;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Definitions {
     pub types: Vec<Node>,
     pub tokens: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Node {
     pub ident: String,
     pub features: Features,
@@ -22,7 +22,7 @@ pub struct Node {
     pub data: Data,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Data {
     Private,
     #[serde(rename = "fields")]
@@ -31,13 +31,13 @@ pub enum Data {
     Enum(Vec<Variant>),
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Variant {
     pub ident: String,
     pub fields: Vec<Type>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Type defined by `syn`
@@ -65,13 +65,13 @@ pub enum Type {
     Tuple(Vec<Type>),
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Punctuated {
     pub element: Box<Type>,
     pub punct: String,
 }
 
-#[derive(Debug, Default, Clone, Serialize)]
+#[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Features {
     any: Vec<String>,
 }
