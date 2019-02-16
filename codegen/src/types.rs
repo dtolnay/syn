@@ -25,16 +25,13 @@ pub struct Node {
 pub enum Data {
     Private,
     #[serde(rename = "fields")]
-    Struct(IndexMap<String, Type>),
+    Struct(Fields),
     #[serde(rename = "variants")]
-    Enum(Vec<Variant>),
+    Enum(Variants),
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Variant {
-    pub ident: String,
-    pub fields: Vec<Type>,
-}
+pub type Fields = IndexMap<String, Type>;
+pub type Variants = IndexMap<String, Vec<Type>>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -176,20 +176,14 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Outer",
-          "fields": []
-        },
-        {
-          "ident": "Inner",
-          "fields": [
-            {
-              "token": "Bang"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Outer": [],
+        "Inner": [
+          {
+            "token": "Bang"
+          }
+        ]
+      }
     },
     {
       "ident": "Attribute",
@@ -251,24 +245,18 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Named",
-          "fields": [
-            {
-              "proc_macro2": "Ident"
-            }
-          ]
-        },
-        {
-          "ident": "Wild",
-          "fields": [
-            {
-              "token": "Underscore"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Named": [
+          {
+            "proc_macro2": "Ident"
+          }
+        ],
+        "Wild": [
+          {
+            "token": "Underscore"
+          }
+        ]
+      }
     },
     {
       "ident": "BinOp",
@@ -278,232 +266,148 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Add",
-          "fields": [
-            {
-              "token": "Add"
-            }
-          ]
-        },
-        {
-          "ident": "Sub",
-          "fields": [
-            {
-              "token": "Sub"
-            }
-          ]
-        },
-        {
-          "ident": "Mul",
-          "fields": [
-            {
-              "token": "Star"
-            }
-          ]
-        },
-        {
-          "ident": "Div",
-          "fields": [
-            {
-              "token": "Div"
-            }
-          ]
-        },
-        {
-          "ident": "Rem",
-          "fields": [
-            {
-              "token": "Rem"
-            }
-          ]
-        },
-        {
-          "ident": "And",
-          "fields": [
-            {
-              "token": "AndAnd"
-            }
-          ]
-        },
-        {
-          "ident": "Or",
-          "fields": [
-            {
-              "token": "OrOr"
-            }
-          ]
-        },
-        {
-          "ident": "BitXor",
-          "fields": [
-            {
-              "token": "Caret"
-            }
-          ]
-        },
-        {
-          "ident": "BitAnd",
-          "fields": [
-            {
-              "token": "And"
-            }
-          ]
-        },
-        {
-          "ident": "BitOr",
-          "fields": [
-            {
-              "token": "Or"
-            }
-          ]
-        },
-        {
-          "ident": "Shl",
-          "fields": [
-            {
-              "token": "Shl"
-            }
-          ]
-        },
-        {
-          "ident": "Shr",
-          "fields": [
-            {
-              "token": "Shr"
-            }
-          ]
-        },
-        {
-          "ident": "Eq",
-          "fields": [
-            {
-              "token": "EqEq"
-            }
-          ]
-        },
-        {
-          "ident": "Lt",
-          "fields": [
-            {
-              "token": "Lt"
-            }
-          ]
-        },
-        {
-          "ident": "Le",
-          "fields": [
-            {
-              "token": "Le"
-            }
-          ]
-        },
-        {
-          "ident": "Ne",
-          "fields": [
-            {
-              "token": "Ne"
-            }
-          ]
-        },
-        {
-          "ident": "Ge",
-          "fields": [
-            {
-              "token": "Ge"
-            }
-          ]
-        },
-        {
-          "ident": "Gt",
-          "fields": [
-            {
-              "token": "Gt"
-            }
-          ]
-        },
-        {
-          "ident": "AddEq",
-          "fields": [
-            {
-              "token": "AddEq"
-            }
-          ]
-        },
-        {
-          "ident": "SubEq",
-          "fields": [
-            {
-              "token": "SubEq"
-            }
-          ]
-        },
-        {
-          "ident": "MulEq",
-          "fields": [
-            {
-              "token": "MulEq"
-            }
-          ]
-        },
-        {
-          "ident": "DivEq",
-          "fields": [
-            {
-              "token": "DivEq"
-            }
-          ]
-        },
-        {
-          "ident": "RemEq",
-          "fields": [
-            {
-              "token": "RemEq"
-            }
-          ]
-        },
-        {
-          "ident": "BitXorEq",
-          "fields": [
-            {
-              "token": "CaretEq"
-            }
-          ]
-        },
-        {
-          "ident": "BitAndEq",
-          "fields": [
-            {
-              "token": "AndEq"
-            }
-          ]
-        },
-        {
-          "ident": "BitOrEq",
-          "fields": [
-            {
-              "token": "OrEq"
-            }
-          ]
-        },
-        {
-          "ident": "ShlEq",
-          "fields": [
-            {
-              "token": "ShlEq"
-            }
-          ]
-        },
-        {
-          "ident": "ShrEq",
-          "fields": [
-            {
-              "token": "ShrEq"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Add": [
+          {
+            "token": "Add"
+          }
+        ],
+        "Sub": [
+          {
+            "token": "Sub"
+          }
+        ],
+        "Mul": [
+          {
+            "token": "Star"
+          }
+        ],
+        "Div": [
+          {
+            "token": "Div"
+          }
+        ],
+        "Rem": [
+          {
+            "token": "Rem"
+          }
+        ],
+        "And": [
+          {
+            "token": "AndAnd"
+          }
+        ],
+        "Or": [
+          {
+            "token": "OrOr"
+          }
+        ],
+        "BitXor": [
+          {
+            "token": "Caret"
+          }
+        ],
+        "BitAnd": [
+          {
+            "token": "And"
+          }
+        ],
+        "BitOr": [
+          {
+            "token": "Or"
+          }
+        ],
+        "Shl": [
+          {
+            "token": "Shl"
+          }
+        ],
+        "Shr": [
+          {
+            "token": "Shr"
+          }
+        ],
+        "Eq": [
+          {
+            "token": "EqEq"
+          }
+        ],
+        "Lt": [
+          {
+            "token": "Lt"
+          }
+        ],
+        "Le": [
+          {
+            "token": "Le"
+          }
+        ],
+        "Ne": [
+          {
+            "token": "Ne"
+          }
+        ],
+        "Ge": [
+          {
+            "token": "Ge"
+          }
+        ],
+        "Gt": [
+          {
+            "token": "Gt"
+          }
+        ],
+        "AddEq": [
+          {
+            "token": "AddEq"
+          }
+        ],
+        "SubEq": [
+          {
+            "token": "SubEq"
+          }
+        ],
+        "MulEq": [
+          {
+            "token": "MulEq"
+          }
+        ],
+        "DivEq": [
+          {
+            "token": "DivEq"
+          }
+        ],
+        "RemEq": [
+          {
+            "token": "RemEq"
+          }
+        ],
+        "BitXorEq": [
+          {
+            "token": "CaretEq"
+          }
+        ],
+        "BitAndEq": [
+          {
+            "token": "AndEq"
+          }
+        ],
+        "BitOrEq": [
+          {
+            "token": "OrEq"
+          }
+        ],
+        "ShlEq": [
+          {
+            "token": "ShlEq"
+          }
+        ],
+        "ShrEq": [
+          {
+            "token": "ShrEq"
+          }
+        ]
+      }
     },
     {
       "ident": "Binding",
@@ -641,32 +545,23 @@
           "derive"
         ]
       },
-      "variants": [
-        {
-          "ident": "Struct",
-          "fields": [
-            {
-              "syn": "DataStruct"
-            }
-          ]
-        },
-        {
-          "ident": "Enum",
-          "fields": [
-            {
-              "syn": "DataEnum"
-            }
-          ]
-        },
-        {
-          "ident": "Union",
-          "fields": [
-            {
-              "syn": "DataUnion"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Struct": [
+          {
+            "syn": "DataStruct"
+          }
+        ],
+        "Enum": [
+          {
+            "syn": "DataEnum"
+          }
+        ],
+        "Union": [
+          {
+            "syn": "DataUnion"
+          }
+        ]
+      }
     },
     {
       "ident": "DataEnum",
@@ -764,328 +659,208 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Box",
-          "fields": [
-            {
-              "syn": "ExprBox"
-            }
-          ]
-        },
-        {
-          "ident": "InPlace",
-          "fields": [
-            {
-              "syn": "ExprInPlace"
-            }
-          ]
-        },
-        {
-          "ident": "Array",
-          "fields": [
-            {
-              "syn": "ExprArray"
-            }
-          ]
-        },
-        {
-          "ident": "Call",
-          "fields": [
-            {
-              "syn": "ExprCall"
-            }
-          ]
-        },
-        {
-          "ident": "MethodCall",
-          "fields": [
-            {
-              "syn": "ExprMethodCall"
-            }
-          ]
-        },
-        {
-          "ident": "Tuple",
-          "fields": [
-            {
-              "syn": "ExprTuple"
-            }
-          ]
-        },
-        {
-          "ident": "Binary",
-          "fields": [
-            {
-              "syn": "ExprBinary"
-            }
-          ]
-        },
-        {
-          "ident": "Unary",
-          "fields": [
-            {
-              "syn": "ExprUnary"
-            }
-          ]
-        },
-        {
-          "ident": "Lit",
-          "fields": [
-            {
-              "syn": "ExprLit"
-            }
-          ]
-        },
-        {
-          "ident": "Cast",
-          "fields": [
-            {
-              "syn": "ExprCast"
-            }
-          ]
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "ExprType"
-            }
-          ]
-        },
-        {
-          "ident": "Let",
-          "fields": [
-            {
-              "syn": "ExprLet"
-            }
-          ]
-        },
-        {
-          "ident": "If",
-          "fields": [
-            {
-              "syn": "ExprIf"
-            }
-          ]
-        },
-        {
-          "ident": "While",
-          "fields": [
-            {
-              "syn": "ExprWhile"
-            }
-          ]
-        },
-        {
-          "ident": "ForLoop",
-          "fields": [
-            {
-              "syn": "ExprForLoop"
-            }
-          ]
-        },
-        {
-          "ident": "Loop",
-          "fields": [
-            {
-              "syn": "ExprLoop"
-            }
-          ]
-        },
-        {
-          "ident": "Match",
-          "fields": [
-            {
-              "syn": "ExprMatch"
-            }
-          ]
-        },
-        {
-          "ident": "Closure",
-          "fields": [
-            {
-              "syn": "ExprClosure"
-            }
-          ]
-        },
-        {
-          "ident": "Unsafe",
-          "fields": [
-            {
-              "syn": "ExprUnsafe"
-            }
-          ]
-        },
-        {
-          "ident": "Block",
-          "fields": [
-            {
-              "syn": "ExprBlock"
-            }
-          ]
-        },
-        {
-          "ident": "Assign",
-          "fields": [
-            {
-              "syn": "ExprAssign"
-            }
-          ]
-        },
-        {
-          "ident": "AssignOp",
-          "fields": [
-            {
-              "syn": "ExprAssignOp"
-            }
-          ]
-        },
-        {
-          "ident": "Field",
-          "fields": [
-            {
-              "syn": "ExprField"
-            }
-          ]
-        },
-        {
-          "ident": "Index",
-          "fields": [
-            {
-              "syn": "ExprIndex"
-            }
-          ]
-        },
-        {
-          "ident": "Range",
-          "fields": [
-            {
-              "syn": "ExprRange"
-            }
-          ]
-        },
-        {
-          "ident": "Path",
-          "fields": [
-            {
-              "syn": "ExprPath"
-            }
-          ]
-        },
-        {
-          "ident": "Reference",
-          "fields": [
-            {
-              "syn": "ExprReference"
-            }
-          ]
-        },
-        {
-          "ident": "Break",
-          "fields": [
-            {
-              "syn": "ExprBreak"
-            }
-          ]
-        },
-        {
-          "ident": "Continue",
-          "fields": [
-            {
-              "syn": "ExprContinue"
-            }
-          ]
-        },
-        {
-          "ident": "Return",
-          "fields": [
-            {
-              "syn": "ExprReturn"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "ExprMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Struct",
-          "fields": [
-            {
-              "syn": "ExprStruct"
-            }
-          ]
-        },
-        {
-          "ident": "Repeat",
-          "fields": [
-            {
-              "syn": "ExprRepeat"
-            }
-          ]
-        },
-        {
-          "ident": "Paren",
-          "fields": [
-            {
-              "syn": "ExprParen"
-            }
-          ]
-        },
-        {
-          "ident": "Group",
-          "fields": [
-            {
-              "syn": "ExprGroup"
-            }
-          ]
-        },
-        {
-          "ident": "Try",
-          "fields": [
-            {
-              "syn": "ExprTry"
-            }
-          ]
-        },
-        {
-          "ident": "Async",
-          "fields": [
-            {
-              "syn": "ExprAsync"
-            }
-          ]
-        },
-        {
-          "ident": "TryBlock",
-          "fields": [
-            {
-              "syn": "ExprTryBlock"
-            }
-          ]
-        },
-        {
-          "ident": "Yield",
-          "fields": [
-            {
-              "syn": "ExprYield"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "ExprVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Box": [
+          {
+            "syn": "ExprBox"
+          }
+        ],
+        "InPlace": [
+          {
+            "syn": "ExprInPlace"
+          }
+        ],
+        "Array": [
+          {
+            "syn": "ExprArray"
+          }
+        ],
+        "Call": [
+          {
+            "syn": "ExprCall"
+          }
+        ],
+        "MethodCall": [
+          {
+            "syn": "ExprMethodCall"
+          }
+        ],
+        "Tuple": [
+          {
+            "syn": "ExprTuple"
+          }
+        ],
+        "Binary": [
+          {
+            "syn": "ExprBinary"
+          }
+        ],
+        "Unary": [
+          {
+            "syn": "ExprUnary"
+          }
+        ],
+        "Lit": [
+          {
+            "syn": "ExprLit"
+          }
+        ],
+        "Cast": [
+          {
+            "syn": "ExprCast"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "ExprType"
+          }
+        ],
+        "Let": [
+          {
+            "syn": "ExprLet"
+          }
+        ],
+        "If": [
+          {
+            "syn": "ExprIf"
+          }
+        ],
+        "While": [
+          {
+            "syn": "ExprWhile"
+          }
+        ],
+        "ForLoop": [
+          {
+            "syn": "ExprForLoop"
+          }
+        ],
+        "Loop": [
+          {
+            "syn": "ExprLoop"
+          }
+        ],
+        "Match": [
+          {
+            "syn": "ExprMatch"
+          }
+        ],
+        "Closure": [
+          {
+            "syn": "ExprClosure"
+          }
+        ],
+        "Unsafe": [
+          {
+            "syn": "ExprUnsafe"
+          }
+        ],
+        "Block": [
+          {
+            "syn": "ExprBlock"
+          }
+        ],
+        "Assign": [
+          {
+            "syn": "ExprAssign"
+          }
+        ],
+        "AssignOp": [
+          {
+            "syn": "ExprAssignOp"
+          }
+        ],
+        "Field": [
+          {
+            "syn": "ExprField"
+          }
+        ],
+        "Index": [
+          {
+            "syn": "ExprIndex"
+          }
+        ],
+        "Range": [
+          {
+            "syn": "ExprRange"
+          }
+        ],
+        "Path": [
+          {
+            "syn": "ExprPath"
+          }
+        ],
+        "Reference": [
+          {
+            "syn": "ExprReference"
+          }
+        ],
+        "Break": [
+          {
+            "syn": "ExprBreak"
+          }
+        ],
+        "Continue": [
+          {
+            "syn": "ExprContinue"
+          }
+        ],
+        "Return": [
+          {
+            "syn": "ExprReturn"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "ExprMacro"
+          }
+        ],
+        "Struct": [
+          {
+            "syn": "ExprStruct"
+          }
+        ],
+        "Repeat": [
+          {
+            "syn": "ExprRepeat"
+          }
+        ],
+        "Paren": [
+          {
+            "syn": "ExprParen"
+          }
+        ],
+        "Group": [
+          {
+            "syn": "ExprGroup"
+          }
+        ],
+        "Try": [
+          {
+            "syn": "ExprTry"
+          }
+        ],
+        "Async": [
+          {
+            "syn": "ExprAsync"
+          }
+        ],
+        "TryBlock": [
+          {
+            "syn": "ExprTryBlock"
+          }
+        ],
+        "Yield": [
+          {
+            "syn": "ExprYield"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "ExprVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "ExprArray",
@@ -2304,28 +2079,19 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Named",
-          "fields": [
-            {
-              "syn": "FieldsNamed"
-            }
-          ]
-        },
-        {
-          "ident": "Unnamed",
-          "fields": [
-            {
-              "syn": "FieldsUnnamed"
-            }
-          ]
-        },
-        {
-          "ident": "Unit",
-          "fields": []
-        }
-      ]
+      "variants": {
+        "Named": [
+          {
+            "syn": "FieldsNamed"
+          }
+        ],
+        "Unnamed": [
+          {
+            "syn": "FieldsUnnamed"
+          }
+        ],
+        "Unit": []
+      }
     },
     {
       "ident": "FieldsNamed",
@@ -2403,48 +2169,33 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "SelfRef",
-          "fields": [
-            {
-              "syn": "ArgSelfRef"
-            }
-          ]
-        },
-        {
-          "ident": "SelfValue",
-          "fields": [
-            {
-              "syn": "ArgSelf"
-            }
-          ]
-        },
-        {
-          "ident": "Captured",
-          "fields": [
-            {
-              "syn": "ArgCaptured"
-            }
-          ]
-        },
-        {
-          "ident": "Inferred",
-          "fields": [
-            {
-              "syn": "Pat"
-            }
-          ]
-        },
-        {
-          "ident": "Ignored",
-          "fields": [
-            {
-              "syn": "Type"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "SelfRef": [
+          {
+            "syn": "ArgSelfRef"
+          }
+        ],
+        "SelfValue": [
+          {
+            "syn": "ArgSelf"
+          }
+        ],
+        "Captured": [
+          {
+            "syn": "ArgCaptured"
+          }
+        ],
+        "Inferred": [
+          {
+            "syn": "Pat"
+          }
+        ],
+        "Ignored": [
+          {
+            "syn": "Type"
+          }
+        ]
+      }
     },
     {
       "ident": "FnDecl",
@@ -2488,48 +2239,33 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Fn",
-          "fields": [
-            {
-              "syn": "ForeignItemFn"
-            }
-          ]
-        },
-        {
-          "ident": "Static",
-          "fields": [
-            {
-              "syn": "ForeignItemStatic"
-            }
-          ]
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "ForeignItemType"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "ForeignItemMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "ForeignItemVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Fn": [
+          {
+            "syn": "ForeignItemFn"
+          }
+        ],
+        "Static": [
+          {
+            "syn": "ForeignItemStatic"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "ForeignItemType"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "ForeignItemMacro"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "ForeignItemVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "ForeignItemFn",
@@ -2671,48 +2407,33 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Lifetime",
-          "fields": [
-            {
-              "syn": "Lifetime"
-            }
-          ]
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "Type"
-            }
-          ]
-        },
-        {
-          "ident": "Binding",
-          "fields": [
-            {
-              "syn": "Binding"
-            }
-          ]
-        },
-        {
-          "ident": "Constraint",
-          "fields": [
-            {
-              "syn": "Constraint"
-            }
-          ]
-        },
-        {
-          "ident": "Const",
-          "fields": [
-            {
-              "syn": "Expr"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Lifetime": [
+          {
+            "syn": "Lifetime"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "Type"
+          }
+        ],
+        "Binding": [
+          {
+            "syn": "Binding"
+          }
+        ],
+        "Constraint": [
+          {
+            "syn": "Constraint"
+          }
+        ],
+        "Const": [
+          {
+            "syn": "Expr"
+          }
+        ]
+      }
     },
     {
       "ident": "GenericMethodArgument",
@@ -2721,24 +2442,18 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "Type"
-            }
-          ]
-        },
-        {
-          "ident": "Const",
-          "fields": [
-            {
-              "syn": "Expr"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Type": [
+          {
+            "syn": "Type"
+          }
+        ],
+        "Const": [
+          {
+            "syn": "Expr"
+          }
+        ]
+      }
     },
     {
       "ident": "GenericParam",
@@ -2748,32 +2463,23 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "TypeParam"
-            }
-          ]
-        },
-        {
-          "ident": "Lifetime",
-          "fields": [
-            {
-              "syn": "LifetimeDef"
-            }
-          ]
-        },
-        {
-          "ident": "Const",
-          "fields": [
-            {
-              "syn": "ConstParam"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Type": [
+          {
+            "syn": "TypeParam"
+          }
+        ],
+        "Lifetime": [
+          {
+            "syn": "LifetimeDef"
+          }
+        ],
+        "Const": [
+          {
+            "syn": "ConstParam"
+          }
+        ]
+      }
     },
     {
       "ident": "Generics",
@@ -2816,56 +2522,38 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Const",
-          "fields": [
-            {
-              "syn": "ImplItemConst"
-            }
-          ]
-        },
-        {
-          "ident": "Method",
-          "fields": [
-            {
-              "syn": "ImplItemMethod"
-            }
-          ]
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "ImplItemType"
-            }
-          ]
-        },
-        {
-          "ident": "Existential",
-          "fields": [
-            {
-              "syn": "ImplItemExistential"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "ImplItemMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "ImplItemVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Const": [
+          {
+            "syn": "ImplItemConst"
+          }
+        ],
+        "Method": [
+          {
+            "syn": "ImplItemMethod"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "ImplItemType"
+          }
+        ],
+        "Existential": [
+          {
+            "syn": "ImplItemExistential"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "ImplItemMacro"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "ImplItemVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "ImplItemConst",
@@ -3084,152 +2772,98 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "ExternCrate",
-          "fields": [
-            {
-              "syn": "ItemExternCrate"
-            }
-          ]
-        },
-        {
-          "ident": "Use",
-          "fields": [
-            {
-              "syn": "ItemUse"
-            }
-          ]
-        },
-        {
-          "ident": "Static",
-          "fields": [
-            {
-              "syn": "ItemStatic"
-            }
-          ]
-        },
-        {
-          "ident": "Const",
-          "fields": [
-            {
-              "syn": "ItemConst"
-            }
-          ]
-        },
-        {
-          "ident": "Fn",
-          "fields": [
-            {
-              "syn": "ItemFn"
-            }
-          ]
-        },
-        {
-          "ident": "Mod",
-          "fields": [
-            {
-              "syn": "ItemMod"
-            }
-          ]
-        },
-        {
-          "ident": "ForeignMod",
-          "fields": [
-            {
-              "syn": "ItemForeignMod"
-            }
-          ]
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "ItemType"
-            }
-          ]
-        },
-        {
-          "ident": "Existential",
-          "fields": [
-            {
-              "syn": "ItemExistential"
-            }
-          ]
-        },
-        {
-          "ident": "Struct",
-          "fields": [
-            {
-              "syn": "ItemStruct"
-            }
-          ]
-        },
-        {
-          "ident": "Enum",
-          "fields": [
-            {
-              "syn": "ItemEnum"
-            }
-          ]
-        },
-        {
-          "ident": "Union",
-          "fields": [
-            {
-              "syn": "ItemUnion"
-            }
-          ]
-        },
-        {
-          "ident": "Trait",
-          "fields": [
-            {
-              "syn": "ItemTrait"
-            }
-          ]
-        },
-        {
-          "ident": "TraitAlias",
-          "fields": [
-            {
-              "syn": "ItemTraitAlias"
-            }
-          ]
-        },
-        {
-          "ident": "Impl",
-          "fields": [
-            {
-              "syn": "ItemImpl"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "ItemMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Macro2",
-          "fields": [
-            {
-              "syn": "ItemMacro2"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "ItemVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "ExternCrate": [
+          {
+            "syn": "ItemExternCrate"
+          }
+        ],
+        "Use": [
+          {
+            "syn": "ItemUse"
+          }
+        ],
+        "Static": [
+          {
+            "syn": "ItemStatic"
+          }
+        ],
+        "Const": [
+          {
+            "syn": "ItemConst"
+          }
+        ],
+        "Fn": [
+          {
+            "syn": "ItemFn"
+          }
+        ],
+        "Mod": [
+          {
+            "syn": "ItemMod"
+          }
+        ],
+        "ForeignMod": [
+          {
+            "syn": "ItemForeignMod"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "ItemType"
+          }
+        ],
+        "Existential": [
+          {
+            "syn": "ItemExistential"
+          }
+        ],
+        "Struct": [
+          {
+            "syn": "ItemStruct"
+          }
+        ],
+        "Enum": [
+          {
+            "syn": "ItemEnum"
+          }
+        ],
+        "Union": [
+          {
+            "syn": "ItemUnion"
+          }
+        ],
+        "Trait": [
+          {
+            "syn": "ItemTrait"
+          }
+        ],
+        "TraitAlias": [
+          {
+            "syn": "ItemTraitAlias"
+          }
+        ],
+        "Impl": [
+          {
+            "syn": "ItemImpl"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "ItemMacro"
+          }
+        ],
+        "Macro2": [
+          {
+            "syn": "ItemMacro2"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "ItemVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "ItemConst",
@@ -4010,72 +3644,48 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Str",
-          "fields": [
-            {
-              "syn": "LitStr"
-            }
-          ]
-        },
-        {
-          "ident": "ByteStr",
-          "fields": [
-            {
-              "syn": "LitByteStr"
-            }
-          ]
-        },
-        {
-          "ident": "Byte",
-          "fields": [
-            {
-              "syn": "LitByte"
-            }
-          ]
-        },
-        {
-          "ident": "Char",
-          "fields": [
-            {
-              "syn": "LitChar"
-            }
-          ]
-        },
-        {
-          "ident": "Int",
-          "fields": [
-            {
-              "syn": "LitInt"
-            }
-          ]
-        },
-        {
-          "ident": "Float",
-          "fields": [
-            {
-              "syn": "LitFloat"
-            }
-          ]
-        },
-        {
-          "ident": "Bool",
-          "fields": [
-            {
-              "syn": "LitBool"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "LitVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Str": [
+          {
+            "syn": "LitStr"
+          }
+        ],
+        "ByteStr": [
+          {
+            "syn": "LitByteStr"
+          }
+        ],
+        "Byte": [
+          {
+            "syn": "LitByte"
+          }
+        ],
+        "Char": [
+          {
+            "syn": "LitChar"
+          }
+        ],
+        "Int": [
+          {
+            "syn": "LitInt"
+          }
+        ],
+        "Float": [
+          {
+            "syn": "LitFloat"
+          }
+        ],
+        "Bool": [
+          {
+            "syn": "LitBool"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "LitVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "LitBool",
@@ -4250,32 +3860,23 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Paren",
-          "fields": [
-            {
-              "group": "Paren"
-            }
-          ]
-        },
-        {
-          "ident": "Brace",
-          "fields": [
-            {
-              "group": "Brace"
-            }
-          ]
-        },
-        {
-          "ident": "Bracket",
-          "fields": [
-            {
-              "group": "Bracket"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Paren": [
+          {
+            "group": "Paren"
+          }
+        ],
+        "Brace": [
+          {
+            "group": "Brace"
+          }
+        ],
+        "Bracket": [
+          {
+            "group": "Bracket"
+          }
+        ]
+      }
     },
     {
       "ident": "Member",
@@ -4285,24 +3886,18 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Named",
-          "fields": [
-            {
-              "proc_macro2": "Ident"
-            }
-          ]
-        },
-        {
-          "ident": "Unnamed",
-          "fields": [
-            {
-              "syn": "Index"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Named": [
+          {
+            "proc_macro2": "Ident"
+          }
+        ],
+        "Unnamed": [
+          {
+            "syn": "Index"
+          }
+        ]
+      }
     },
     {
       "ident": "Meta",
@@ -4312,32 +3907,23 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Word",
-          "fields": [
-            {
-              "proc_macro2": "Ident"
-            }
-          ]
-        },
-        {
-          "ident": "List",
-          "fields": [
-            {
-              "syn": "MetaList"
-            }
-          ]
-        },
-        {
-          "ident": "NameValue",
-          "fields": [
-            {
-              "syn": "MetaNameValue"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Word": [
+          {
+            "proc_macro2": "Ident"
+          }
+        ],
+        "List": [
+          {
+            "syn": "MetaList"
+          }
+        ],
+        "NameValue": [
+          {
+            "syn": "MetaNameValue"
+          }
+        ]
+      }
     },
     {
       "ident": "MetaList",
@@ -4455,24 +4041,18 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Meta",
-          "fields": [
-            {
-              "syn": "Meta"
-            }
-          ]
-        },
-        {
-          "ident": "Literal",
-          "fields": [
-            {
-              "syn": "Lit"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Meta": [
+          {
+            "syn": "Meta"
+          }
+        ],
+        "Literal": [
+          {
+            "syn": "Lit"
+          }
+        ]
+      }
     },
     {
       "ident": "ParenthesizedGenericArguments",
@@ -4506,112 +4086,73 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Wild",
-          "fields": [
-            {
-              "syn": "PatWild"
-            }
-          ]
-        },
-        {
-          "ident": "Ident",
-          "fields": [
-            {
-              "syn": "PatIdent"
-            }
-          ]
-        },
-        {
-          "ident": "Struct",
-          "fields": [
-            {
-              "syn": "PatStruct"
-            }
-          ]
-        },
-        {
-          "ident": "TupleStruct",
-          "fields": [
-            {
-              "syn": "PatTupleStruct"
-            }
-          ]
-        },
-        {
-          "ident": "Path",
-          "fields": [
-            {
-              "syn": "PatPath"
-            }
-          ]
-        },
-        {
-          "ident": "Tuple",
-          "fields": [
-            {
-              "syn": "PatTuple"
-            }
-          ]
-        },
-        {
-          "ident": "Box",
-          "fields": [
-            {
-              "syn": "PatBox"
-            }
-          ]
-        },
-        {
-          "ident": "Ref",
-          "fields": [
-            {
-              "syn": "PatRef"
-            }
-          ]
-        },
-        {
-          "ident": "Lit",
-          "fields": [
-            {
-              "syn": "PatLit"
-            }
-          ]
-        },
-        {
-          "ident": "Range",
-          "fields": [
-            {
-              "syn": "PatRange"
-            }
-          ]
-        },
-        {
-          "ident": "Slice",
-          "fields": [
-            {
-              "syn": "PatSlice"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "PatMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "PatVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Wild": [
+          {
+            "syn": "PatWild"
+          }
+        ],
+        "Ident": [
+          {
+            "syn": "PatIdent"
+          }
+        ],
+        "Struct": [
+          {
+            "syn": "PatStruct"
+          }
+        ],
+        "TupleStruct": [
+          {
+            "syn": "PatTupleStruct"
+          }
+        ],
+        "Path": [
+          {
+            "syn": "PatPath"
+          }
+        ],
+        "Tuple": [
+          {
+            "syn": "PatTuple"
+          }
+        ],
+        "Box": [
+          {
+            "syn": "PatBox"
+          }
+        ],
+        "Ref": [
+          {
+            "syn": "PatRef"
+          }
+        ],
+        "Lit": [
+          {
+            "syn": "PatLit"
+          }
+        ],
+        "Range": [
+          {
+            "syn": "PatRange"
+          }
+        ],
+        "Slice": [
+          {
+            "syn": "PatSlice"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "PatMacro"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "PatVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "PatBox",
@@ -4948,28 +4489,19 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "None",
-          "fields": []
-        },
-        {
-          "ident": "AngleBracketed",
-          "fields": [
-            {
-              "syn": "AngleBracketedGenericArguments"
-            }
-          ]
-        },
-        {
-          "ident": "Parenthesized",
-          "fields": [
-            {
-              "syn": "ParenthesizedGenericArguments"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "None": [],
+        "AngleBracketed": [
+          {
+            "syn": "AngleBracketedGenericArguments"
+          }
+        ],
+        "Parenthesized": [
+          {
+            "syn": "ParenthesizedGenericArguments"
+          }
+        ]
+      }
     },
     {
       "ident": "PathSegment",
@@ -5100,24 +4632,18 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "HalfOpen",
-          "fields": [
-            {
-              "token": "Dot2"
-            }
-          ]
-        },
-        {
-          "ident": "Closed",
-          "fields": [
-            {
-              "token": "DotDotEq"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "HalfOpen": [
+          {
+            "token": "Dot2"
+          }
+        ],
+        "Closed": [
+          {
+            "token": "DotDotEq"
+          }
+        ]
+      }
     },
     {
       "ident": "ReturnType",
@@ -5127,25 +4653,19 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Default",
-          "fields": []
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "token": "RArrow"
-            },
-            {
-              "box": {
-                "syn": "Type"
-              }
+      "variants": {
+        "Default": [],
+        "Type": [
+          {
+            "token": "RArrow"
+          },
+          {
+            "box": {
+              "syn": "Type"
             }
-          ]
-        }
-      ]
+          }
+        ]
+      }
     },
     {
       "ident": "Stmt",
@@ -5154,43 +4674,31 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Local",
-          "fields": [
-            {
-              "syn": "Local"
-            }
-          ]
-        },
-        {
-          "ident": "Item",
-          "fields": [
-            {
-              "syn": "Item"
-            }
-          ]
-        },
-        {
-          "ident": "Expr",
-          "fields": [
-            {
-              "syn": "Expr"
-            }
-          ]
-        },
-        {
-          "ident": "Semi",
-          "fields": [
-            {
-              "syn": "Expr"
-            },
-            {
-              "token": "Semi"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Local": [
+          {
+            "syn": "Local"
+          }
+        ],
+        "Item": [
+          {
+            "syn": "Item"
+          }
+        ],
+        "Expr": [
+          {
+            "syn": "Expr"
+          }
+        ],
+        "Semi": [
+          {
+            "syn": "Expr"
+          },
+          {
+            "token": "Semi"
+          }
+        ]
+      }
     },
     {
       "ident": "TraitBound",
@@ -5227,20 +4735,14 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "None",
-          "fields": []
-        },
-        {
-          "ident": "Maybe",
-          "fields": [
-            {
-              "token": "Question"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "None": [],
+        "Maybe": [
+          {
+            "token": "Question"
+          }
+        ]
+      }
     },
     {
       "ident": "TraitItem",
@@ -5249,48 +4751,33 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Const",
-          "fields": [
-            {
-              "syn": "TraitItemConst"
-            }
-          ]
-        },
-        {
-          "ident": "Method",
-          "fields": [
-            {
-              "syn": "TraitItemMethod"
-            }
-          ]
-        },
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "TraitItemType"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "TraitItemMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "TraitItemVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Const": [
+          {
+            "syn": "TraitItemConst"
+          }
+        ],
+        "Method": [
+          {
+            "syn": "TraitItemMethod"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "TraitItemType"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "TraitItemMacro"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "TraitItemVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "TraitItemConst",
@@ -5458,128 +4945,83 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Slice",
-          "fields": [
-            {
-              "syn": "TypeSlice"
-            }
-          ]
-        },
-        {
-          "ident": "Array",
-          "fields": [
-            {
-              "syn": "TypeArray"
-            }
-          ]
-        },
-        {
-          "ident": "Ptr",
-          "fields": [
-            {
-              "syn": "TypePtr"
-            }
-          ]
-        },
-        {
-          "ident": "Reference",
-          "fields": [
-            {
-              "syn": "TypeReference"
-            }
-          ]
-        },
-        {
-          "ident": "BareFn",
-          "fields": [
-            {
-              "syn": "TypeBareFn"
-            }
-          ]
-        },
-        {
-          "ident": "Never",
-          "fields": [
-            {
-              "syn": "TypeNever"
-            }
-          ]
-        },
-        {
-          "ident": "Tuple",
-          "fields": [
-            {
-              "syn": "TypeTuple"
-            }
-          ]
-        },
-        {
-          "ident": "Path",
-          "fields": [
-            {
-              "syn": "TypePath"
-            }
-          ]
-        },
-        {
-          "ident": "TraitObject",
-          "fields": [
-            {
-              "syn": "TypeTraitObject"
-            }
-          ]
-        },
-        {
-          "ident": "ImplTrait",
-          "fields": [
-            {
-              "syn": "TypeImplTrait"
-            }
-          ]
-        },
-        {
-          "ident": "Paren",
-          "fields": [
-            {
-              "syn": "TypeParen"
-            }
-          ]
-        },
-        {
-          "ident": "Group",
-          "fields": [
-            {
-              "syn": "TypeGroup"
-            }
-          ]
-        },
-        {
-          "ident": "Infer",
-          "fields": [
-            {
-              "syn": "TypeInfer"
-            }
-          ]
-        },
-        {
-          "ident": "Macro",
-          "fields": [
-            {
-              "syn": "TypeMacro"
-            }
-          ]
-        },
-        {
-          "ident": "Verbatim",
-          "fields": [
-            {
-              "syn": "TypeVerbatim"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Slice": [
+          {
+            "syn": "TypeSlice"
+          }
+        ],
+        "Array": [
+          {
+            "syn": "TypeArray"
+          }
+        ],
+        "Ptr": [
+          {
+            "syn": "TypePtr"
+          }
+        ],
+        "Reference": [
+          {
+            "syn": "TypeReference"
+          }
+        ],
+        "BareFn": [
+          {
+            "syn": "TypeBareFn"
+          }
+        ],
+        "Never": [
+          {
+            "syn": "TypeNever"
+          }
+        ],
+        "Tuple": [
+          {
+            "syn": "TypeTuple"
+          }
+        ],
+        "Path": [
+          {
+            "syn": "TypePath"
+          }
+        ],
+        "TraitObject": [
+          {
+            "syn": "TypeTraitObject"
+          }
+        ],
+        "ImplTrait": [
+          {
+            "syn": "TypeImplTrait"
+          }
+        ],
+        "Paren": [
+          {
+            "syn": "TypeParen"
+          }
+        ],
+        "Group": [
+          {
+            "syn": "TypeGroup"
+          }
+        ],
+        "Infer": [
+          {
+            "syn": "TypeInfer"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "TypeMacro"
+          }
+        ],
+        "Verbatim": [
+          {
+            "syn": "TypeVerbatim"
+          }
+        ]
+      }
     },
     {
       "ident": "TypeArray",
@@ -5787,24 +5229,18 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Trait",
-          "fields": [
-            {
-              "syn": "TraitBound"
-            }
-          ]
-        },
-        {
-          "ident": "Lifetime",
-          "fields": [
-            {
-              "syn": "Lifetime"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Trait": [
+          {
+            "syn": "TraitBound"
+          }
+        ],
+        "Lifetime": [
+          {
+            "syn": "Lifetime"
+          }
+        ]
+      }
     },
     {
       "ident": "TypeParen",
@@ -5989,32 +5425,23 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Deref",
-          "fields": [
-            {
-              "token": "Star"
-            }
-          ]
-        },
-        {
-          "ident": "Not",
-          "fields": [
-            {
-              "token": "Bang"
-            }
-          ]
-        },
-        {
-          "ident": "Neg",
-          "fields": [
-            {
-              "token": "Sub"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Deref": [
+          {
+            "token": "Star"
+          }
+        ],
+        "Not": [
+          {
+            "token": "Bang"
+          }
+        ],
+        "Neg": [
+          {
+            "token": "Sub"
+          }
+        ]
+      }
     },
     {
       "ident": "UseGlob",
@@ -6110,48 +5537,33 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Path",
-          "fields": [
-            {
-              "syn": "UsePath"
-            }
-          ]
-        },
-        {
-          "ident": "Name",
-          "fields": [
-            {
-              "syn": "UseName"
-            }
-          ]
-        },
-        {
-          "ident": "Rename",
-          "fields": [
-            {
-              "syn": "UseRename"
-            }
-          ]
-        },
-        {
-          "ident": "Glob",
-          "fields": [
-            {
-              "syn": "UseGlob"
-            }
-          ]
-        },
-        {
-          "ident": "Group",
-          "fields": [
-            {
-              "syn": "UseGroup"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Path": [
+          {
+            "syn": "UsePath"
+          }
+        ],
+        "Name": [
+          {
+            "syn": "UseName"
+          }
+        ],
+        "Rename": [
+          {
+            "syn": "UseRename"
+          }
+        ],
+        "Glob": [
+          {
+            "syn": "UseGlob"
+          }
+        ],
+        "Group": [
+          {
+            "syn": "UseGroup"
+          }
+        ]
+      }
     },
     {
       "ident": "Variant",
@@ -6250,36 +5662,24 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Public",
-          "fields": [
-            {
-              "syn": "VisPublic"
-            }
-          ]
-        },
-        {
-          "ident": "Crate",
-          "fields": [
-            {
-              "syn": "VisCrate"
-            }
-          ]
-        },
-        {
-          "ident": "Restricted",
-          "fields": [
-            {
-              "syn": "VisRestricted"
-            }
-          ]
-        },
-        {
-          "ident": "Inherited",
-          "fields": []
-        }
-      ]
+      "variants": {
+        "Public": [
+          {
+            "syn": "VisPublic"
+          }
+        ],
+        "Crate": [
+          {
+            "syn": "VisCrate"
+          }
+        ],
+        "Restricted": [
+          {
+            "syn": "VisRestricted"
+          }
+        ],
+        "Inherited": []
+      }
     },
     {
       "ident": "WhereClause",
@@ -6311,32 +5711,23 @@
           "full"
         ]
       },
-      "variants": [
-        {
-          "ident": "Type",
-          "fields": [
-            {
-              "syn": "PredicateType"
-            }
-          ]
-        },
-        {
-          "ident": "Lifetime",
-          "fields": [
-            {
-              "syn": "PredicateLifetime"
-            }
-          ]
-        },
-        {
-          "ident": "Eq",
-          "fields": [
-            {
-              "syn": "PredicateEq"
-            }
-          ]
-        }
-      ]
+      "variants": {
+        "Type": [
+          {
+            "syn": "PredicateType"
+          }
+        ],
+        "Lifetime": [
+          {
+            "syn": "PredicateLifetime"
+          }
+        ],
+        "Eq": [
+          {
+            "syn": "PredicateEq"
+          }
+        ]
+      }
     }
   ],
   "tokens": {

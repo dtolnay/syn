@@ -406,10 +406,10 @@ mod codegen {
                 let mut visit_mut_variants = TokenStream::new();
                 let mut fold_variants = TokenStream::new();
 
-                for variant in variants {
-                    let variant_ident = Ident::new(&variant.ident, Span::call_site());
+                for (variant, fields) in variants {
+                    let variant_ident = Ident::new(variant, Span::call_site());
 
-                    if variant.fields.is_empty() {
+                    if fields.is_empty() {
                         visit_variants.append_all(quote! {
                             #ty::#variant_ident => {}
                         });
@@ -430,7 +430,7 @@ mod codegen {
                         let mut visit_mut_fields = TokenStream::new();
                         let mut fold_fields = TokenStream::new();
 
-                        for (idx, ty) in variant.fields.iter().enumerate() {
+                        for (idx, ty) in fields.iter().enumerate() {
                             let name = format!("_binding_{}", idx);
                             let binding = Ident::new(&name, Span::call_site());
 

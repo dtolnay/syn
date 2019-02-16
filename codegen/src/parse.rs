@@ -72,7 +72,7 @@ fn introspect_enum(
     item: &syn::DataEnum,
     items: &ItemLookup,
     tokens: &TokenLookup,
-) -> Vec<types::Variant> {
+) -> types::Variants {
     item.variants
         .iter()
         .map(|variant| {
@@ -86,10 +86,7 @@ fn introspect_enum(
                 _ => panic!("Enum representation not supported"),
             };
 
-            types::Variant {
-                ident: variant.ident.to_string(),
-                fields,
-            }
+            (variant.ident.to_string(), fields)
         })
         .collect()
 }
@@ -98,7 +95,7 @@ fn introspect_struct(
     item: &syn::DataStruct,
     items: &ItemLookup,
     tokens: &TokenLookup,
-) -> IndexMap<String, types::Type> {
+) -> types::Fields {
     match &item.fields {
         syn::Fields::Named(fields) => fields
             .named
