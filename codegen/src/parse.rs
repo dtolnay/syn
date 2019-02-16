@@ -1,7 +1,8 @@
 use crate::types;
 
 use indexmap::IndexMap;
-use syn::{Data, DataStruct, DeriveInput, Ident, Item};
+use quote::quote;
+use syn::{parse_quote, Data, DataStruct, DeriveInput, Ident, Item};
 
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -246,6 +247,7 @@ mod parsing {
     use crate::types;
 
     use proc_macro2::TokenStream;
+    use quote::quote;
     use syn;
     use syn::parse::{Parse, ParseStream, Result};
     use syn::*;

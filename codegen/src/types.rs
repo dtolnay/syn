@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use serde::{Deserialize, Deserializer};
+use serde::{Serialize, Deserialize, Deserializer};
 
 use std::collections::{BTreeMap, BTreeSet};
 

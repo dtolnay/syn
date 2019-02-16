@@ -13,20 +13,6 @@
 #![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
 
-extern crate indexmap;
-extern crate inflections;
-extern crate proc_macro2;
-#[macro_use]
-extern crate quote;
-extern crate rustfmt_nightly as rustfmt;
-#[macro_use]
-extern crate syn;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate toml;
-
 mod gen;
 mod json;
 mod parse;

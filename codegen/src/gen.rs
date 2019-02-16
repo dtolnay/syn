@@ -12,6 +12,8 @@
 
 use crate::types;
 use proc_macro2::TokenStream;
+use quote::quote;
+use rustfmt_nightly as rustfmt;
 
 use std::fs::File;
 use std::io::Write;
@@ -24,7 +26,7 @@ mod codegen {
     use crate::types;
     use inflections::Inflect;
     use proc_macro2::{Span, TokenStream};
-    use quote::TokenStreamExt;
+    use quote::{quote, TokenStreamExt};
     use syn::*;
 
     #[derive(Default)]
@@ -358,7 +360,7 @@ mod codegen {
                     features.any.contains("full") && features.any.len() == 1
                 }
 
-                let mut res = simple_visit(t, kind, name);
+                let res = simple_visit(t, kind, name);
 
                 let target = defs.types.iter().find(|ty| ty.ident == *t).unwrap();
 
