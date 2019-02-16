@@ -17,9 +17,10 @@ mod gen;
 mod json;
 mod parse;
 mod types;
+mod version;
 
 fn main() {
-    let types = parse::parse();
-    gen::generate(&types);
-    json::generate(&types);
+    let defs = parse::parse();
+    gen::generate(&defs);
+    json::generate(&defs);
 }

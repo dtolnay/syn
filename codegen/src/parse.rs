@@ -1,4 +1,4 @@
-use crate::types;
+use crate::{types, version};
 
 use indexmap::IndexMap;
 use quote::quote;
@@ -25,6 +25,8 @@ pub fn parse() -> types::Definitions {
 
     let token_lookup = load_token_file(TOKEN_SRC).unwrap();
 
+    let version = version::get();
+
     let types = item_lookup
         .values()
         .map(|item| introspect_item(item, &item_lookup, &token_lookup))
@@ -35,7 +37,11 @@ pub fn parse() -> types::Definitions {
         .map(|(name, ty)| (ty, name))
         .collect();
 
-    types::Definitions { types, tokens }
+    types::Definitions {
+        version,
+        types,
+        tokens,
+    }
 }
 
 /// Data extracted from syn source
