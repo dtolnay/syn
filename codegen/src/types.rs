@@ -1,4 +1,5 @@
 use indexmap::IndexMap;
+use semver::Version;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -6,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Definitions {
     /// The Syn version used to generate the introspection file.
-    pub version: String,
+    pub version: Version,
     pub types: Vec<Node>,
     pub tokens: BTreeMap<String, String>,
 }
