@@ -642,19 +642,17 @@ fn write_file(path: &str, content: TokenStream) {
 const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 
 pub fn generate(defs: &types::Definitions) {
-    let mut defs = defs.clone();
-
-    for &tt in TERMINAL_TYPES {
-        defs.types.push(types::Node {
+    let mut state = codegen::State::default();
+    for s in &defs.types {
+        codegen::generate(&mut state, s, defs);
+    }
+    for tt in TERMINAL_TYPES {
+        let s = types::Node {
             ident: tt.to_string(),
             features: types::Features::default(),
             data: types::Data::Private,
-        });
-    }
-
-    let mut state = codegen::State::default();
-    for s in &defs.types {
-        codegen::generate(&mut state, s, &defs);
+        };
+        codegen::generate(&mut state, &s, defs);
     }
 
     let full_macro = quote! {

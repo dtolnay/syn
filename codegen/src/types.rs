@@ -3,7 +3,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 use std::collections::{BTreeMap, BTreeSet};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Definitions {
     /// The Syn version used to generate the introspection file.
     pub version: String,
@@ -11,7 +11,7 @@ pub struct Definitions {
     pub tokens: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Node {
     pub ident: String,
     pub features: Features,
@@ -23,7 +23,7 @@ pub struct Node {
     pub data: Data,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Data {
     Private,
     #[serde(rename = "fields")]
@@ -35,7 +35,7 @@ pub enum Data {
 pub type Fields = IndexMap<String, Type>;
 pub type Variants = IndexMap<String, Vec<Type>>;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Type defined by `syn`
@@ -63,13 +63,13 @@ pub enum Type {
     Tuple(Vec<Type>),
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Punctuated {
     pub element: Box<Type>,
     pub punct: String,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Features {
     pub any: BTreeSet<String>,
 }
