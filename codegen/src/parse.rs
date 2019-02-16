@@ -119,8 +119,9 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
             ref path,
         }) => {
             let last = path.segments.last().unwrap().into_value();
+            let string = last.ident.to_string();
 
-            match &last.ident.to_string()[..] {
+            match string.as_str() {
                 "Option" => {
                     let nested = introspect_type(first_arg(&last.arguments), items, tokens);
                     types::Type::Option(Box::new(nested))
@@ -145,18 +146,14 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                     let nested = introspect_type(first_arg(&last.arguments), items, tokens);
                     types::Type::Box(Box::new(nested))
                 }
-                "Brace" | "Bracket" | "Paren" | "Group" => {
-                    types::Type::Group(last.ident.to_string())
-                }
-                "TokenStream" | "Literal" | "Ident" | "Span" => {
-                    types::Type::Ext(last.ident.to_string())
-                }
-                "String" | "u32" | "usize" | "bool" => types::Type::Std(last.ident.to_string()),
+                "Brace" | "Bracket" | "Paren" | "Group" => types::Type::Group(string),
+                "TokenStream" | "Literal" | "Ident" | "Span" => types::Type::Ext(string),
+                "String" | "u32" | "usize" | "bool" => types::Type::Std(string),
                 _ => {
                     if items.get(&last.ident).is_some() {
-                        types::Type::Syn(last.ident.to_string())
+                        types::Type::Syn(string)
                     } else {
-                        unimplemented!("{}", last.ident.to_string());
+                        unimplemented!("{}", string);
                     }
                 }
             }
