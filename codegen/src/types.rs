@@ -1,8 +1,7 @@
 use indexmap::IndexMap;
 use serde::{Deserialize, Deserializer};
 
-use std::collections::BTreeMap;
-use std::ops;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Definitions {
@@ -73,41 +72,7 @@ pub struct Punctuated {
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Features {
-    pub any: Vec<String>,
-}
-
-impl Features {
-    pub fn join(&mut self, other: &Features) {
-        if self.any.is_empty() {
-            self.any = other.any.clone();
-        } else if self.any.len() < other.any.len() {
-            assert!(self.any.iter().all(|f| other.any.contains(f)));
-        } else {
-            assert!(other.any.iter().all(|f| self.any.contains(f)));
-
-            self.any = other.any.clone();
-        }
-    }
-
-    pub fn len(&self) -> usize {
-        self.any.len()
-    }
-
-    pub fn contains(&self, tag: &str) -> bool {
-        self.iter().any(|s| s == tag)
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &str> {
-        self.any.iter().map(|s| &s[..])
-    }
-}
-
-impl ops::Index<usize> for Features {
-    type Output = str;
-
-    fn index(&self, index: usize) -> &str {
-        self.any.index(index)
-    }
+    pub any: BTreeSet<String>,
 }
 
 fn is_private(data: &Data) -> bool {

@@ -5,8 +5,8 @@
       "ident": "Abi",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -24,8 +24,8 @@
       "ident": "AngleBracketedGenericArguments",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -172,8 +172,8 @@
       "ident": "AttrStyle",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -195,8 +195,8 @@
       "ident": "Attribute",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -221,8 +221,8 @@
       "ident": "BareFnArg",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -247,8 +247,8 @@
       "ident": "BareFnArgName",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -274,8 +274,8 @@
       "ident": "BinOp",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -509,8 +509,8 @@
       "ident": "Binding",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -547,8 +547,8 @@
       "ident": "BoundLifetimes",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -575,8 +575,8 @@
       "ident": "ConstParam",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -613,8 +613,8 @@
       "ident": "Constraint",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -760,8 +760,8 @@
       "ident": "Expr",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -1199,8 +1199,8 @@
       "ident": "ExprBinary",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1304,8 +1304,8 @@
       "ident": "ExprCall",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1336,8 +1336,8 @@
       "ident": "ExprCast",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1440,8 +1440,8 @@
       "ident": "ExprField",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1597,8 +1597,8 @@
       "ident": "ExprIndex",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1660,8 +1660,8 @@
       "ident": "ExprLit",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1796,8 +1796,8 @@
       "ident": "ExprParen",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -1820,8 +1820,8 @@
       "ident": "ExprPath",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -2099,8 +2099,8 @@
       "ident": "ExprUnary",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -2144,8 +2144,8 @@
       "ident": "ExprVerbatim",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -2214,8 +2214,8 @@
       "ident": "Field",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -2300,8 +2300,8 @@
       "ident": "Fields",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -2331,8 +2331,8 @@
       "ident": "FieldsNamed",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -2353,8 +2353,8 @@
       "ident": "FieldsUnnamed",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -2667,8 +2667,8 @@
       "ident": "GenericArgument",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -2744,8 +2744,8 @@
       "ident": "GenericParam",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -2779,8 +2779,8 @@
       "ident": "Generics",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -3064,8 +3064,8 @@
       "ident": "Index",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -3974,8 +3974,8 @@
       "ident": "LifetimeDef",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4006,8 +4006,8 @@
       "ident": "Lit",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -4081,8 +4081,8 @@
       "ident": "LitBool",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4098,8 +4098,8 @@
       "ident": "LitByte",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       }
     },
@@ -4107,8 +4107,8 @@
       "ident": "LitByteStr",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       }
     },
@@ -4116,8 +4116,8 @@
       "ident": "LitChar",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       }
     },
@@ -4125,8 +4125,8 @@
       "ident": "LitFloat",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       }
     },
@@ -4134,8 +4134,8 @@
       "ident": "LitInt",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       }
     },
@@ -4143,8 +4143,8 @@
       "ident": "LitStr",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       }
     },
@@ -4152,8 +4152,8 @@
       "ident": "LitVerbatim",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4223,8 +4223,8 @@
       "ident": "Macro",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4246,8 +4246,8 @@
       "ident": "MacroDelimiter",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -4281,8 +4281,8 @@
       "ident": "Member",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -4308,8 +4308,8 @@
       "ident": "Meta",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -4343,8 +4343,8 @@
       "ident": "MetaList",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4368,8 +4368,8 @@
       "ident": "MetaNameValue",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4451,8 +4451,8 @@
       "ident": "NestedMeta",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -4478,8 +4478,8 @@
       "ident": "ParenthesizedGenericArguments",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4920,8 +4920,8 @@
       "ident": "Path",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4944,8 +4944,8 @@
       "ident": "PathArguments",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -4975,8 +4975,8 @@
       "ident": "PathSegment",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -4992,8 +4992,8 @@
       "ident": "PredicateEq",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5012,8 +5012,8 @@
       "ident": "PredicateLifetime",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5037,8 +5037,8 @@
       "ident": "PredicateType",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5067,8 +5067,8 @@
       "ident": "QSelf",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5123,8 +5123,8 @@
       "ident": "ReturnType",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -5196,8 +5196,8 @@
       "ident": "TraitBound",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5223,8 +5223,8 @@
       "ident": "TraitBoundModifier",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -5454,8 +5454,8 @@
       "ident": "Type",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -5585,8 +5585,8 @@
       "ident": "TypeArray",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5610,8 +5610,8 @@
       "ident": "TypeBareFn",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5658,8 +5658,8 @@
       "ident": "TypeGroup",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5677,8 +5677,8 @@
       "ident": "TypeImplTrait",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5699,8 +5699,8 @@
       "ident": "TypeInfer",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5713,8 +5713,8 @@
       "ident": "TypeMacro",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5727,8 +5727,8 @@
       "ident": "TypeNever",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5741,8 +5741,8 @@
       "ident": "TypeParam",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5783,8 +5783,8 @@
       "ident": "TypeParamBound",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -5810,8 +5810,8 @@
       "ident": "TypeParen",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5829,8 +5829,8 @@
       "ident": "TypePath",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5848,8 +5848,8 @@
       "ident": "TypePtr",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5877,8 +5877,8 @@
       "ident": "TypeReference",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5906,8 +5906,8 @@
       "ident": "TypeSlice",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5925,8 +5925,8 @@
       "ident": "TypeTraitObject",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5949,8 +5949,8 @@
       "ident": "TypeTuple",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5971,8 +5971,8 @@
       "ident": "TypeVerbatim",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -5985,8 +5985,8 @@
       "ident": "UnOp",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -6157,8 +6157,8 @@
       "ident": "Variant",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -6191,8 +6191,8 @@
       "ident": "VisCrate",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -6205,8 +6205,8 @@
       "ident": "VisPublic",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -6219,8 +6219,8 @@
       "ident": "VisRestricted",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -6246,8 +6246,8 @@
       "ident": "Visibility",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [
@@ -6285,8 +6285,8 @@
       "ident": "WhereClause",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "fields": {
@@ -6307,8 +6307,8 @@
       "ident": "WherePredicate",
       "features": {
         "any": [
-          "full",
-          "derive"
+          "derive",
+          "full"
         ]
       },
       "variants": [

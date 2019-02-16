@@ -192,7 +192,15 @@ fn introspect_features(attrs: &[syn::Attribute]) -> types::Features {
         }
 
         let features: types::Features = syn::parse2(attr.tts.clone()).unwrap();
-        ret.join(&features);
+
+        if ret.any.is_empty() {
+            ret = features;
+        } else if ret.any.len() < features.any.len() {
+            assert!(ret.any.iter().all(|f| features.any.contains(f)));
+        } else {
+            assert!(features.any.iter().all(|f| ret.any.contains(f)));
+            ret = features;
+        }
     }
 
     ret
@@ -248,7 +256,7 @@ mod parsing {
     use syn::parse::{Parse, ParseStream, Result};
     use syn::*;
 
-    use std::collections::BTreeMap;
+    use std::collections::{BTreeMap, BTreeSet};
 
     fn peek_tag(input: ParseStream, tag: &str) -> bool {
         let ahead = input.fork();
@@ -445,7 +453,7 @@ mod parsing {
 
     impl Parse for types::Features {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut features = vec![];
+            let mut features = BTreeSet::new();
 
             let level_1;
             parenthesized!(level_1 in input);
@@ -459,14 +467,14 @@ mod parsing {
                 parenthesized!(level_2 in level_1);
 
                 while !level_2.is_empty() {
-                    features.push(parse_feature(&level_2)?);
+                    features.insert(parse_feature(&level_2)?);
 
                     if !level_2.is_empty() {
                         level_2.parse::<Token![,]>()?;
                     }
                 }
             } else if i == "feature" {
-                features.push(parse_feature(&level_1)?);
+                features.insert(parse_feature(&level_1)?);
                 assert!(level_1.is_empty());
             } else {
                 panic!("{:?}", i);

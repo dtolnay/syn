@@ -355,7 +355,7 @@ mod codegen {
             types::Type::Group(t) => Some(token_group_visit(&t[..], kind, name)),
             types::Type::Syn(t) => {
                 fn requires_full(features: &types::Features) -> bool {
-                    features.contains("full") && features.len() == 1
+                    features.any.contains("full") && features.any.len() == 1
                 }
 
                 let mut res = simple_visit(t, kind, name);
@@ -380,17 +380,11 @@ mod codegen {
     }
 
     fn visit_features(features: &types::Features) -> TokenStream {
+        let features = &features.any;
         match features.len() {
             0 => quote!(),
-            1 => {
-                let feature = &features[0];
-                quote!(#[cfg(feature = #feature)])
-            }
-            _ => {
-                let features = features.iter().map(|feature| quote!(feature = #feature));
-
-                quote!(#[cfg(any( #(#features),* ))])
-            }
+            1 => quote!(#[cfg(feature = #(#features)*)]),
+            _ => quote!(#[cfg(any(#(feature = #features),*))]),
         }
     }
 
