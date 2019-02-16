@@ -48,33 +48,32 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
     let features = introspect_features(&item.features);
 
     match &item.ast.data {
-        Data::Enum(ref data) => types::Node::Enum(introspect_enum(
-            &item.ast.ident,
+        Data::Enum(ref data) => types::Node {
+            ident: item.ast.ident.to_string(),
             features,
-            data,
-            items,
-            tokens,
-        )),
-        Data::Struct(ref data) => types::Node::Struct(introspect_struct(
-            &item.ast.ident,
+            data: types::Data::Enum(introspect_enum(data, items, tokens)),
+        },
+        Data::Struct(ref data) => types::Node {
+            ident: item.ast.ident.to_string(),
             features,
-            data,
-            items,
-            tokens,
-        )),
+            data: {
+                if data.fields.iter().all(|f| is_pub(&f.vis)) {
+                    types::Data::Struct(introspect_struct(data, items, tokens))
+                } else {
+                    types::Data::Private
+                }
+            },
+        },
         Data::Union(..) => panic!("Union not supported"),
     }
 }
 
 fn introspect_enum(
-    ident: &Ident,
-    features: types::Features,
     item: &syn::DataEnum,
     items: &ItemLookup,
     tokens: &TokenLookup,
-) -> types::Enum {
-    let variants = item
-        .variants
+) -> Vec<types::Variant> {
+    item.variants
         .iter()
         .map(|variant| {
             let fields = match &variant.fields {
@@ -89,24 +88,15 @@ fn introspect_enum(
 
             types::Variant::new(variant.ident.to_string(), fields)
         })
-        .collect();
-
-    types::Enum::new(ident.to_string(), features, variants)
+        .collect()
 }
 
 fn introspect_struct(
-    ident: &Ident,
-    features: types::Features,
     item: &syn::DataStruct,
     items: &ItemLookup,
     tokens: &TokenLookup,
-) -> types::Struct {
-    let all_fields_pub = item.fields.iter().all(|field| is_pub(&field.vis));
-    if !all_fields_pub {
-        return types::Struct::new(ident.to_string(), features, IndexMap::new());
-    }
-
-    let fields = match &item.fields {
+) -> IndexMap<String, types::Type> {
+    match &item.fields {
         syn::Fields::Named(fields) => fields
             .named
             .iter()
@@ -119,9 +109,7 @@ fn introspect_struct(
             .collect(),
         syn::Fields::Unit => IndexMap::new(),
         _ => panic!("Struct representation not supported"),
-    };
-
-    types::Struct::new(ident.to_string(), features, fields)
+    }
 }
 
 fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -> types::Type {

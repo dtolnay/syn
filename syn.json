@@ -2,7 +2,6 @@
   "version": "0.15.26",
   "types": [
     {
-      "node": "struct",
       "ident": "Abi",
       "features": {
         "any": [
@@ -22,7 +21,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "AngleBracketedGenericArguments",
       "features": {
         "any": [
@@ -53,7 +51,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ArgCaptured",
       "features": {
         "any": [
@@ -73,7 +70,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ArgSelf",
       "features": {
         "any": [
@@ -92,7 +88,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ArgSelfRef",
       "features": {
         "any": [
@@ -119,7 +114,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Arm",
       "features": {
         "any": [
@@ -175,7 +169,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "AttrStyle",
       "features": {
         "any": [
@@ -199,7 +192,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "Attribute",
       "features": {
         "any": [
@@ -226,7 +218,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "BareFnArg",
       "features": {
         "any": [
@@ -253,7 +244,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "BareFnArgName",
       "features": {
         "any": [
@@ -281,7 +271,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "BinOp",
       "features": {
         "any": [
@@ -517,7 +506,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "Binding",
       "features": {
         "any": [
@@ -538,7 +526,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Block",
       "features": {
         "any": [
@@ -557,7 +544,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "BoundLifetimes",
       "features": {
         "any": [
@@ -586,7 +572,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ConstParam",
       "features": {
         "any": [
@@ -625,7 +610,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Constraint",
       "features": {
         "any": [
@@ -651,7 +635,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Data",
       "features": {
         "any": [
@@ -686,7 +669,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "DataEnum",
       "features": {
         "any": [
@@ -711,7 +693,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "DataStruct",
       "features": {
         "any": [
@@ -733,7 +714,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "DataUnion",
       "features": {
         "any": [
@@ -750,7 +730,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "DeriveInput",
       "features": {
         "any": [
@@ -778,7 +757,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Expr",
       "features": {
         "any": [
@@ -1110,7 +1088,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "ExprArray",
       "features": {
         "any": [
@@ -1137,7 +1114,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprAssign",
       "features": {
         "any": [
@@ -1166,7 +1142,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprAssignOp",
       "features": {
         "any": [
@@ -1195,7 +1170,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprAsync",
       "features": {
         "any": [
@@ -1222,7 +1196,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprBinary",
       "features": {
         "any": [
@@ -1252,7 +1225,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprBlock",
       "features": {
         "any": [
@@ -1276,7 +1248,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprBox",
       "features": {
         "any": [
@@ -1300,7 +1271,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprBreak",
       "features": {
         "any": [
@@ -1331,7 +1301,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprCall",
       "features": {
         "any": [
@@ -1364,7 +1333,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprCast",
       "features": {
         "any": [
@@ -1394,7 +1362,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprClosure",
       "features": {
         "any": [
@@ -1447,7 +1414,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprContinue",
       "features": {
         "any": [
@@ -1471,7 +1437,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprField",
       "features": {
         "any": [
@@ -1499,7 +1464,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprForLoop",
       "features": {
         "any": [
@@ -1539,7 +1503,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprGroup",
       "features": {
         "any": [
@@ -1563,7 +1526,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprIf",
       "features": {
         "any": [
@@ -1604,7 +1566,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprInPlace",
       "features": {
         "any": [
@@ -1633,7 +1594,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprIndex",
       "features": {
         "any": [
@@ -1663,7 +1623,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprLet",
       "features": {
         "any": [
@@ -1698,7 +1657,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprLit",
       "features": {
         "any": [
@@ -1718,7 +1676,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprLoop",
       "features": {
         "any": [
@@ -1745,7 +1702,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprMacro",
       "features": {
         "any": [
@@ -1764,7 +1720,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprMatch",
       "features": {
         "any": [
@@ -1796,7 +1751,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprMethodCall",
       "features": {
         "any": [
@@ -1839,7 +1793,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprParen",
       "features": {
         "any": [
@@ -1864,7 +1817,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprPath",
       "features": {
         "any": [
@@ -1889,7 +1841,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprRange",
       "features": {
         "any": [
@@ -1922,7 +1873,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprReference",
       "features": {
         "any": [
@@ -1951,7 +1901,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprRepeat",
       "features": {
         "any": [
@@ -1983,7 +1932,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprReturn",
       "features": {
         "any": [
@@ -2009,7 +1957,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprStruct",
       "features": {
         "any": [
@@ -2051,7 +1998,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprTry",
       "features": {
         "any": [
@@ -2075,7 +2021,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprTryBlock",
       "features": {
         "any": [
@@ -2097,7 +2042,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprTuple",
       "features": {
         "any": [
@@ -2124,7 +2068,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprType",
       "features": {
         "any": [
@@ -2153,7 +2096,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprUnary",
       "features": {
         "any": [
@@ -2178,7 +2120,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprUnsafe",
       "features": {
         "any": [
@@ -2200,7 +2141,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprVerbatim",
       "features": {
         "any": [
@@ -2215,7 +2155,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprWhile",
       "features": {
         "any": [
@@ -2247,7 +2186,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ExprYield",
       "features": {
         "any": [
@@ -2273,7 +2211,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Field",
       "features": {
         "any": [
@@ -2306,7 +2243,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "FieldPat",
       "features": {
         "any": [
@@ -2335,7 +2271,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "FieldValue",
       "features": {
         "any": [
@@ -2362,7 +2297,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Fields",
       "features": {
         "any": [
@@ -2394,7 +2328,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "FieldsNamed",
       "features": {
         "any": [
@@ -2417,7 +2350,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "FieldsUnnamed",
       "features": {
         "any": [
@@ -2440,7 +2372,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "File",
       "features": {
         "any": [
@@ -2466,7 +2397,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "FnArg",
       "features": {
         "any": [
@@ -2517,7 +2447,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "FnDecl",
       "features": {
         "any": [
@@ -2553,7 +2482,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "ForeignItem",
       "features": {
         "any": [
@@ -2604,7 +2532,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "ForeignItemFn",
       "features": {
         "any": [
@@ -2634,7 +2561,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ForeignItemMacro",
       "features": {
         "any": [
@@ -2658,7 +2584,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ForeignItemStatic",
       "features": {
         "any": [
@@ -2699,7 +2624,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ForeignItemType",
       "features": {
         "any": [
@@ -2727,7 +2651,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ForeignItemVerbatim",
       "features": {
         "any": [
@@ -2741,7 +2664,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "GenericArgument",
       "features": {
         "any": [
@@ -2793,7 +2715,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "GenericMethodArgument",
       "features": {
         "any": [
@@ -2820,7 +2741,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "GenericParam",
       "features": {
         "any": [
@@ -2856,7 +2776,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "Generics",
       "features": {
         "any": [
@@ -2891,7 +2810,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "ImplItem",
       "features": {
         "any": [
@@ -2950,7 +2868,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "ImplItemConst",
       "features": {
         "any": [
@@ -2995,7 +2912,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ImplItemExistential",
       "features": {
         "any": [
@@ -3039,7 +2955,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ImplItemMacro",
       "features": {
         "any": [
@@ -3063,7 +2978,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ImplItemMethod",
       "features": {
         "any": [
@@ -3093,7 +3007,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ImplItemType",
       "features": {
         "any": [
@@ -3135,7 +3048,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ImplItemVerbatim",
       "features": {
         "any": [
@@ -3149,7 +3061,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Index",
       "features": {
         "any": [
@@ -3167,7 +3078,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Item",
       "features": {
         "any": [
@@ -3322,7 +3232,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "ItemConst",
       "features": {
         "any": [
@@ -3366,7 +3275,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemEnum",
       "features": {
         "any": [
@@ -3405,7 +3313,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemExistential",
       "features": {
         "any": [
@@ -3452,7 +3359,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemExternCrate",
       "features": {
         "any": [
@@ -3495,7 +3401,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemFn",
       "features": {
         "any": [
@@ -3547,7 +3452,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemForeignMod",
       "features": {
         "any": [
@@ -3574,7 +3478,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemImpl",
       "features": {
         "any": [
@@ -3636,7 +3539,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemMacro",
       "features": {
         "any": [
@@ -3665,7 +3567,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemMacro2",
       "features": {
         "any": [
@@ -3702,7 +3603,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemMod",
       "features": {
         "any": [
@@ -3746,7 +3646,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemStatic",
       "features": {
         "any": [
@@ -3795,7 +3694,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemStruct",
       "features": {
         "any": [
@@ -3831,7 +3729,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemTrait",
       "features": {
         "any": [
@@ -3890,7 +3787,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemTraitAlias",
       "features": {
         "any": [
@@ -3932,7 +3828,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemType",
       "features": {
         "any": [
@@ -3971,7 +3866,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemUnion",
       "features": {
         "any": [
@@ -4002,7 +3896,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemUse",
       "features": {
         "any": [
@@ -4035,7 +3928,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "ItemVerbatim",
       "features": {
         "any": [
@@ -4049,7 +3941,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Label",
       "features": {
         "any": [
@@ -4066,7 +3957,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Lifetime",
       "features": {
         "any": []
@@ -4081,7 +3971,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LifetimeDef",
       "features": {
         "any": [
@@ -4114,7 +4003,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Lit",
       "features": {
         "any": [
@@ -4190,7 +4078,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "LitBool",
       "features": {
         "any": [
@@ -4208,7 +4095,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitByte",
       "features": {
         "any": [
@@ -4218,7 +4104,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitByteStr",
       "features": {
         "any": [
@@ -4228,7 +4113,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitChar",
       "features": {
         "any": [
@@ -4238,7 +4122,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitFloat",
       "features": {
         "any": [
@@ -4248,7 +4131,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitInt",
       "features": {
         "any": [
@@ -4258,7 +4140,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitStr",
       "features": {
         "any": [
@@ -4268,7 +4149,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "LitVerbatim",
       "features": {
         "any": [
@@ -4283,7 +4163,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Local",
       "features": {
         "any": [
@@ -4341,7 +4220,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Macro",
       "features": {
         "any": [
@@ -4365,7 +4243,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "MacroDelimiter",
       "features": {
         "any": [
@@ -4401,7 +4278,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "Member",
       "features": {
         "any": [
@@ -4429,7 +4305,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "Meta",
       "features": {
         "any": [
@@ -4465,7 +4340,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "MetaList",
       "features": {
         "any": [
@@ -4491,7 +4365,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "MetaNameValue",
       "features": {
         "any": [
@@ -4512,7 +4385,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "MethodSig",
       "features": {
         "any": [
@@ -4549,7 +4421,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "MethodTurbofish",
       "features": {
         "any": [
@@ -4577,7 +4448,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "NestedMeta",
       "features": {
         "any": [
@@ -4605,7 +4475,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "ParenthesizedGenericArguments",
       "features": {
         "any": [
@@ -4631,7 +4500,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Pat",
       "features": {
         "any": [
@@ -4746,7 +4614,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "PatBox",
       "features": {
         "any": [
@@ -4765,7 +4632,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatIdent",
       "features": {
         "any": [
@@ -4803,7 +4669,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatLit",
       "features": {
         "any": [
@@ -4819,7 +4684,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatMacro",
       "features": {
         "any": [
@@ -4833,7 +4697,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatPath",
       "features": {
         "any": [
@@ -4852,7 +4715,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatRange",
       "features": {
         "any": [
@@ -4876,7 +4738,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatRef",
       "features": {
         "any": [
@@ -4900,7 +4761,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatSlice",
       "features": {
         "any": [
@@ -4947,7 +4807,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatStruct",
       "features": {
         "any": [
@@ -4977,7 +4836,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatTuple",
       "features": {
         "any": [
@@ -5017,7 +4875,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatTupleStruct",
       "features": {
         "any": [
@@ -5034,7 +4891,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatVerbatim",
       "features": {
         "any": [
@@ -5048,7 +4904,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PatWild",
       "features": {
         "any": [
@@ -5062,7 +4917,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "Path",
       "features": {
         "any": [
@@ -5087,7 +4941,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "PathArguments",
       "features": {
         "any": [
@@ -5119,7 +4972,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "PathSegment",
       "features": {
         "any": [
@@ -5137,7 +4989,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PredicateEq",
       "features": {
         "any": [
@@ -5158,7 +5009,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PredicateLifetime",
       "features": {
         "any": [
@@ -5184,7 +5034,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "PredicateType",
       "features": {
         "any": [
@@ -5215,7 +5064,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "QSelf",
       "features": {
         "any": [
@@ -5246,7 +5094,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "RangeLimits",
       "features": {
         "any": [
@@ -5273,7 +5120,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "ReturnType",
       "features": {
         "any": [
@@ -5302,7 +5148,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "Stmt",
       "features": {
         "any": [
@@ -5348,7 +5193,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "TraitBound",
       "features": {
         "any": [
@@ -5376,7 +5220,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "TraitBoundModifier",
       "features": {
         "any": [
@@ -5400,7 +5243,6 @@
       ]
     },
     {
-      "node": "enum",
       "ident": "TraitItem",
       "features": {
         "any": [
@@ -5451,7 +5293,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "TraitItemConst",
       "features": {
         "any": [
@@ -5494,7 +5335,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TraitItemMacro",
       "features": {
         "any": [
@@ -5518,7 +5358,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TraitItemMethod",
       "features": {
         "any": [
@@ -5547,7 +5386,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TraitItemType",
       "features": {
         "any": [
@@ -5600,7 +5438,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TraitItemVerbatim",
       "features": {
         "any": [
@@ -5614,7 +5451,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Type",
       "features": {
         "any": [
@@ -5746,7 +5582,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "TypeArray",
       "features": {
         "any": [
@@ -5772,7 +5607,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeBareFn",
       "features": {
         "any": [
@@ -5821,7 +5655,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeGroup",
       "features": {
         "any": [
@@ -5841,7 +5674,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeImplTrait",
       "features": {
         "any": [
@@ -5864,7 +5696,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeInfer",
       "features": {
         "any": [
@@ -5879,7 +5710,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeMacro",
       "features": {
         "any": [
@@ -5894,7 +5724,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeNever",
       "features": {
         "any": [
@@ -5909,7 +5738,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeParam",
       "features": {
         "any": [
@@ -5952,7 +5780,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "TypeParamBound",
       "features": {
         "any": [
@@ -5980,7 +5807,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "TypeParen",
       "features": {
         "any": [
@@ -6000,7 +5826,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypePath",
       "features": {
         "any": [
@@ -6020,7 +5845,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypePtr",
       "features": {
         "any": [
@@ -6050,7 +5874,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeReference",
       "features": {
         "any": [
@@ -6080,7 +5903,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeSlice",
       "features": {
         "any": [
@@ -6100,7 +5922,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeTraitObject",
       "features": {
         "any": [
@@ -6125,7 +5946,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeTuple",
       "features": {
         "any": [
@@ -6148,7 +5968,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "TypeVerbatim",
       "features": {
         "any": [
@@ -6163,7 +5982,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "UnOp",
       "features": {
         "any": [
@@ -6199,7 +6017,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "UseGlob",
       "features": {
         "any": [
@@ -6213,7 +6030,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "UseGroup",
       "features": {
         "any": [
@@ -6235,7 +6051,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "UseName",
       "features": {
         "any": [
@@ -6249,7 +6064,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "UsePath",
       "features": {
         "any": [
@@ -6271,7 +6085,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "UseRename",
       "features": {
         "any": [
@@ -6291,7 +6104,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "UseTree",
       "features": {
         "any": [
@@ -6342,7 +6154,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "Variant",
       "features": {
         "any": [
@@ -6377,7 +6188,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "VisCrate",
       "features": {
         "any": [
@@ -6392,7 +6202,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "VisPublic",
       "features": {
         "any": [
@@ -6407,7 +6216,6 @@
       }
     },
     {
-      "node": "struct",
       "ident": "VisRestricted",
       "features": {
         "any": [
@@ -6435,7 +6243,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "Visibility",
       "features": {
         "any": [
@@ -6475,7 +6282,6 @@
       ]
     },
     {
-      "node": "struct",
       "ident": "WhereClause",
       "features": {
         "any": [
@@ -6498,7 +6304,6 @@
       }
     },
     {
-      "node": "enum",
       "ident": "WherePredicate",
       "features": {
         "any": [

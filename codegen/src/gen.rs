@@ -11,7 +11,6 @@
 //! 3. The path to `syn` is hardcoded.
 
 use crate::types;
-use indexmap::IndexMap;
 use proc_macro2::TokenStream;
 
 use std::fs::File;
@@ -361,10 +360,10 @@ mod codegen {
 
                 let mut res = simple_visit(t, kind, name);
 
-                let target = defs.types.iter().find(|ty| ty.ident() == t).unwrap();
+                let target = defs.types.iter().find(|ty| ty.ident == *t).unwrap();
 
                 Some(
-                    if requires_full(target.features()) && !requires_full(features) {
+                    if requires_full(&target.features) && !requires_full(features) {
                         quote! {
                             full!(#res)
                         }
@@ -396,9 +395,9 @@ mod codegen {
     }
 
     pub fn generate(state: &mut State, s: &types::Node, defs: &types::Definitions) {
-        let features = visit_features(s.features());
-        let under_name = under_name(s.ident());
-        let ty = Ident::new(s.ident(), Span::call_site());
+        let features = visit_features(&s.features);
+        let under_name = under_name(&s.ident);
+        let ty = Ident::new(&s.ident, Span::call_site());
         let visit_fn = Ident::new(&format!("visit_{}", under_name), Span::call_site());
         let visit_mut_fn = Ident::new(&format!("visit_{}_mut", under_name), Span::call_site());
         let fold_fn = Ident::new(&format!("fold_{}", under_name), Span::call_site());
@@ -407,13 +406,13 @@ mod codegen {
         let mut visit_mut_impl = TokenStream::new();
         let mut fold_impl = TokenStream::new();
 
-        match s {
-            types::Node::Enum(ref e) => {
+        match &s.data {
+            types::Data::Enum(variants) => {
                 let mut visit_variants = TokenStream::new();
                 let mut visit_mut_variants = TokenStream::new();
                 let mut fold_variants = TokenStream::new();
 
-                for variant in &e.variants {
+                for variant in variants {
                     let variant_ident = Ident::new(&variant.ident, Span::call_site());
 
                     if variant.fields.is_empty() {
@@ -455,15 +454,15 @@ mod codegen {
                             let owned_binding = Owned(quote!(#binding));
 
                             visit_fields.append_all(
-                                visit(ty, s.features(), defs, Visit, &borrowed_binding)
+                                visit(ty, &s.features, defs, Visit, &borrowed_binding)
                                     .unwrap_or_else(|| noop_visit(Visit, &borrowed_binding)),
                             );
                             visit_mut_fields.append_all(
-                                visit(ty, s.features(), defs, VisitMut, &borrowed_binding)
+                                visit(ty, &s.features, defs, VisitMut, &borrowed_binding)
                                     .unwrap_or_else(|| noop_visit(VisitMut, &borrowed_binding)),
                             );
                             fold_fields.append_all(
-                                visit(ty, s.features(), defs, Fold, &owned_binding)
+                                visit(ty, &s.features, defs, Fold, &owned_binding)
                                     .unwrap_or_else(|| noop_visit(Fold, &owned_binding)),
                             );
 
@@ -512,23 +511,23 @@ mod codegen {
                     }
                 });
             }
-            types::Node::Struct(ref v) => {
+            types::Data::Struct(fields) => {
                 let mut fold_fields = TokenStream::new();
 
-                for (field, ty) in &v.fields {
+                for (field, ty) in fields {
                     let id = Ident::new(&field, Span::call_site());
                     let ref_toks = Owned(quote!(_i.#id));
-                    let visit_field = visit(&ty, &v.features, defs, Visit, &ref_toks)
+                    let visit_field = visit(&ty, &s.features, defs, Visit, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
                     visit_impl.append_all(quote! {
                         #visit_field;
                     });
-                    let visit_mut_field = visit(&ty, &v.features, defs, VisitMut, &ref_toks)
+                    let visit_mut_field = visit(&ty, &s.features, defs, VisitMut, &ref_toks)
                         .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
                     visit_mut_impl.append_all(quote! {
                         #visit_mut_field;
                     });
-                    let fold = visit(&ty, &v.features, defs, Fold, &ref_toks)
+                    let fold = visit(&ty, &s.features, defs, Fold, &ref_toks)
                         .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
 
                     fold_fields.append_all(quote! {
@@ -536,7 +535,7 @@ mod codegen {
                     });
                 }
 
-                if !v.fields.is_empty() {
+                if !fields.is_empty() {
                     fold_impl.append_all(quote! {
                         #ty {
                             #fold_fields
@@ -555,14 +554,24 @@ mod codegen {
                     });
                 }
             }
-        }
-
-        let mut include_fold_impl = true;
-        if let types::Node::Struct(ref data) = s {
-            if data.fields.is_empty() && !super::TERMINAL_TYPES.contains(&&s.ident()) {
-                include_fold_impl = false;
+            types::Data::Private => {
+                if ty == "Ident" {
+                    fold_impl.append_all(quote! {
+                        let mut _i = _i;
+                        let span = _visitor.fold_span(_i.span());
+                        _i.set_span(span);
+                    });
+                }
+                fold_impl.append_all(quote! {
+                    _i
+                });
             }
         }
+
+        let include_fold_impl = match &s.data {
+            types::Data::Private => super::TERMINAL_TYPES.contains(&s.ident.as_str()),
+            types::Data::Struct(_) | types::Data::Enum(_) => true,
+        };
 
         state.visit_trait.append_all(quote! {
             #features
@@ -640,11 +649,11 @@ pub fn generate(defs: &types::Definitions) {
     let mut defs = defs.clone();
 
     for &tt in TERMINAL_TYPES {
-        defs.types.push(types::Node::Struct(types::Struct::new(
-            tt.to_string(),
-            types::Features::default(),
-            IndexMap::new(),
-        )));
+        defs.types.push(types::Node {
+            ident: tt.to_string(),
+            features: types::Features::default(),
+            data: types::Data::Private,
+        });
     }
 
     let mut state = codegen::State::default();

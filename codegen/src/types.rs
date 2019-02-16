@@ -1,4 +1,5 @@
 use indexmap::IndexMap;
+use serde::{Deserialize, Deserializer};
 
 use std::collections::BTreeMap;
 use std::ops;
@@ -10,25 +11,24 @@ pub struct Definitions {
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(tag = "node", rename_all = "lowercase")]
-pub enum Node {
-    Struct(Struct),
-    Enum(Enum),
+pub struct Node {
+    pub ident: String,
+    pub features: Features,
+    #[serde(
+        flatten,
+        skip_serializing_if = "is_private",
+        deserialize_with = "de_data"
+    )]
+    pub data: Data,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Struct {
-    pub ident: String,
-    pub features: Features,
-    #[serde(skip_serializing_if = "IndexMap::is_empty")]
-    pub fields: IndexMap<String, Type>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct Enum {
-    pub ident: String,
-    pub features: Features,
-    pub variants: Vec<Variant>,
+pub enum Data {
+    Private,
+    #[serde(rename = "fields")]
+    Struct(IndexMap<String, Type>),
+    #[serde(rename = "variants")]
+    Enum(Vec<Variant>),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -74,42 +74,6 @@ pub struct Punctuated {
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Features {
     any: Vec<String>,
-}
-
-impl Node {
-    pub fn ident(&self) -> &str {
-        match self {
-            Node::Struct(i) => &i.ident,
-            Node::Enum(i) => &i.ident,
-        }
-    }
-
-    pub fn features(&self) -> &Features {
-        match self {
-            Node::Struct(i) => &i.features,
-            Node::Enum(i) => &i.features,
-        }
-    }
-}
-
-impl Struct {
-    pub fn new(ident: String, features: Features, fields: IndexMap<String, Type>) -> Struct {
-        Struct {
-            ident,
-            features,
-            fields,
-        }
-    }
-}
-
-impl Enum {
-    pub fn new(ident: String, features: Features, variants: Vec<Variant>) -> Enum {
-        Enum {
-            ident,
-            features,
-            variants,
-        }
-    }
 }
 
 impl Variant {
@@ -163,4 +127,19 @@ impl ops::Index<usize> for Features {
     fn index(&self, index: usize) -> &str {
         self.any.index(index)
     }
+}
+
+fn is_private(data: &Data) -> bool {
+    match data {
+        Data::Private => true,
+        Data::Struct(_) | Data::Enum(_) => false,
+    }
+}
+
+fn de_data<'de, D>(deserializer: D) -> Result<Data, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let option = Option::deserialize(deserializer)?;
+    Ok(option.unwrap_or(Data::Private))
 }
