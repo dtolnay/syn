@@ -19,6 +19,7 @@ should_parse!(generic_associated_type, {
     }
 });
 
+#[rustfmt::skip]
 should_parse!(const_generics_use, {
     type X = Foo<5>;
     type Y = Foo<"foo">;
