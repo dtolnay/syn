@@ -4,7 +4,9 @@ use std::fs;
 use std::path::Path;
 
 pub fn generate(defs: &Definitions) {
-    let j = serde_json::to_string_pretty(&defs).unwrap();
+    let mut j = serde_json::to_string_pretty(&defs).unwrap();
+    j.push('\n');
+
     let check: Definitions = serde_json::from_str(&j).unwrap();
     assert_eq!(*defs, check);
 
