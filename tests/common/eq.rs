@@ -275,7 +275,7 @@ spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id node span attrs);
 spanless_eq_struct!(Field; ident expr span is_shorthand attrs);
 spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs);
-spanless_eq_struct!(FnDecl; inputs output variadic);
+spanless_eq_struct!(FnDecl; inputs output c_variadic);
 spanless_eq_struct!(FnHeader; unsafety asyncness constness abi);
 spanless_eq_struct!(ForeignItem; ident attrs node id span vis);
 spanless_eq_struct!(ForeignMod; abi items);
@@ -373,7 +373,7 @@ spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2) TupleStruct(0 1 2)
     Paren(0) Mac(0));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Rptr(0 1) BareFn(0) Never
     Tup(0) Path(0 1) TraitObject(0 1) ImplTrait(0 1) Paren(0) Typeof(0) Infer
-    ImplicitSelf Mac(0) Err);
+    ImplicitSelf Mac(0) Err CVarArgs);
 
 impl SpanlessEq for Ident {
     fn eq(&self, other: &Self) -> bool {
