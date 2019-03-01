@@ -1094,11 +1094,10 @@ pub mod parsing {
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic: Option<Token![...]> = match inputs.last() {
                 Some(punctuated::Pair::End(&FnArg::Captured(ArgCaptured {
-                    ty: Type::Verbatim(TypeVerbatim { ref tts }), ..
-                }))) => {
-                    parse2(tts.clone()).ok()
-                }
-                _ => None
+                    ty: Type::Verbatim(TypeVerbatim { ref tts }),
+                    ..
+                }))) => parse2(tts.clone()).ok(),
+                _ => None,
             };
 
             let output: ReturnType = input.parse()?;
@@ -1194,19 +1193,15 @@ pub mod parsing {
                         TokenTree::Punct(Punct::new('.', Spacing::Joint)),
                         TokenTree::Punct(Punct::new('.', Spacing::Alone)),
                     ];
-                    let tokens = TokenStream::from_iter(
-                        args.into_iter().zip(&dot3.spans).map(|(mut arg, span)| {
+                    let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
+                        |(mut arg, span)| {
                             arg.set_span(*span);
                             arg
-                        }
+                        },
                     ));
-                    Type::Verbatim(TypeVerbatim {
-                        tts: tokens
-                    })
+                    Type::Verbatim(TypeVerbatim { tts: tokens })
                 }
-                Err(_) => {
-                   input.parse()?
-                }
+                Err(_) => input.parse()?,
             },
         })
     }
@@ -2621,7 +2616,8 @@ mod printing {
 
     impl ToTokens for ForeignItemVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens); }
+            self.tts.to_tokens(tokens);
+        }
     }
 
     impl ToTokens for MethodSig {
