@@ -18,9 +18,10 @@
 //!     }
 
 use std::env;
-use std::fmt::{self, Debug};
+use std::fmt::{self, Display};
 use std::fs;
-use std::io;
+use std::io::{self, Write};
+use std::process;
 
 enum Error {
     IncorrectUsage,
@@ -28,7 +29,7 @@ enum Error {
     ParseFile(syn::Error),
 }
 
-impl Debug for Error {
+impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::Error::*;
 
@@ -40,7 +41,14 @@ impl Debug for Error {
     }
 }
 
-fn main() -> Result<(), Error> {
+fn main() {
+    if let Err(error) = try_main() {
+        let _ = writeln!(io::stderr(), "{}", error);
+        process::exit(1);
+    }
+}
+
+fn try_main() -> Result<(), Error> {
     let mut args = env::args();
     let _ = args.next(); // executable name
 
