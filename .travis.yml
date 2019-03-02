@@ -36,6 +36,13 @@ matrix:
       script:
         - cargo test --all-features --release
     - rust: nightly
+      name: Examples
+      script:
+        - cargo check --manifest-path examples/dump-syntax/Cargo.toml
+        - cargo check --manifest-path examples/heapsize/example/Cargo.toml
+        - cargo check --manifest-path examples/lazy-static/example/Cargo.toml
+        - cargo check --manifest-path examples/trace-var/example/Cargo.toml
+    - rust: nightly
       name: Codegen
       script:
         - (cd codegen && cargo run)
