@@ -18,23 +18,40 @@
 //!     }
 
 use std::env;
+use std::fmt::{self, Debug};
 use std::fs;
-use std::process;
+use std::io;
 
-fn main() {
+enum Error {
+    IncorrectUsage,
+    ReadFile(io::Error),
+    ParseFile(syn::Error),
+}
+
+impl Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::Error::*;
+
+        match self {
+            IncorrectUsage => write!(f, "Usage: dump-syntax path/to/filename.rs"),
+            ReadFile(e) => write!(f, "Unable to read file: {}", e),
+            ParseFile(e) => write!(f, "Unable to parse file: {}", e),
+        }
+    }
+}
+
+fn main() -> Result<(), Error> {
     let mut args = env::args();
     let _ = args.next(); // executable name
 
     let filename = match (args.next(), args.next()) {
         (Some(filename), None) => filename,
-        _ => {
-            eprintln!("Usage: dump-syntax path/to/filename.rs");
-            process::exit(1);
-        }
+        _ => return Err(Error::IncorrectUsage),
     };
 
-    let src = fs::read_to_string(filename).expect("Unable to read file");
-
-    let syntax = syn::parse_file(&src).expect("Unable to parse file");
+    let src = fs::read_to_string(filename).map_err(Error::ReadFile)?;
+    let syntax = syn::parse_file(&src).map_err(Error::ParseFile)?;
     println!("{:#?}", syntax);
+
+    Ok(())
 }
