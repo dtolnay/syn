@@ -13,11 +13,6 @@ include = ["/Cargo.toml", "/src/**/*.rs", "/README.md", "/LICENSE-APACHE", "/LIC
 [lib]
 name = "syn"
 
-[[example]]
-name = "dump-syntax"
-path = "examples/dump-syntax/main.rs"
-required-features = ["full", "parsing", "extra-traits"]
-
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
 derive = []
