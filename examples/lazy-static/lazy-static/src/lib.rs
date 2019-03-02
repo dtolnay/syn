@@ -66,7 +66,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //        |                ^^^
     if name == "FOO" {
         name.span()
-            .unstable()
+            .unwrap()
             .warning("come on, pick a more creative name")
             .emit();
     }
@@ -81,7 +81,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     if let Expr::Tuple(ref init) = init {
         if init.elems.is_empty() {
             init.span()
-                .unstable()
+                .unwrap()
                 .error("I can't think of a legitimate use for lazily initializing the value `()`")
                 .emit();
             return TokenStream::new();
