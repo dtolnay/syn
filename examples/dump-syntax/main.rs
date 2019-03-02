@@ -23,6 +23,8 @@ use std::fs;
 use std::io::{self, Write};
 use std::process;
 
+use proc_macro2::Span;
+
 enum Error {
     IncorrectUsage,
     ReadFile(io::Error),
@@ -58,8 +60,42 @@ fn try_main() -> Result<(), Error> {
     };
 
     let src = fs::read_to_string(filename).map_err(Error::ReadFile)?;
-    let syntax = syn::parse_file(&src).map_err(Error::ParseFile)?;
+
+    let syntax = match syn::parse_file(&src) {
+        Ok(syntax) => syntax,
+        Err(parse_error) => {
+            let span = parse_error.span();
+            show_location(span, src);
+            return Err(Error::ParseFile(parse_error));
+        }
+    };
+
     println!("{:#?}", syntax);
 
     Ok(())
+}
+
+fn show_location(span: Span, src: String) {
+    let start = span.start();
+    let mut end = span.end();
+
+    if start.line == end.line && start.column == end.column {
+        return;
+    }
+
+    let src_line = match src.lines().nth(start.line - 1) {
+        Some(line) => line,
+        None => return,
+    };
+
+    if end.line > start.line {
+        end.line = start.line;
+        end.column = src_line.len();
+    }
+
+    let underline = " ".repeat(start.column) + &"^".repeat(end.column - start.column);
+
+    let stderr = io::stderr();
+    let mut stderr = stderr.lock();
+    let _ = writeln!(stderr, "\n{}\n{}\n", src_line, underline);
 }

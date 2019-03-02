@@ -10,6 +10,10 @@ path = "../.."
 default-features = false
 features = ["parsing", "full", "extra-traits"]
 
+[dependencies.proc-macro2]
+version = "0.4.27"
+features = ["span-locations"]
+
 [[bin]]
 name = "dump-syntax"
 path = "main.rs"
