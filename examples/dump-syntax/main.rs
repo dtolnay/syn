@@ -23,12 +23,10 @@ use std::fs;
 use std::io::{self, Write};
 use std::process;
 
-use proc_macro2::Span;
-
 enum Error {
     IncorrectUsage,
     ReadFile(io::Error),
-    ParseFile(syn::Error),
+    ParseFile(syn::Error, String),
 }
 
 impl Display for Error {
@@ -37,8 +35,8 @@ impl Display for Error {
 
         match self {
             IncorrectUsage => write!(f, "Usage: dump-syntax path/to/filename.rs"),
-            ReadFile(e) => write!(f, "Unable to read file: {}", e),
-            ParseFile(e) => write!(f, "Unable to parse file: {}", e),
+            ReadFile(err) => write!(f, "Unable to read file: {}", err),
+            ParseFile(err, code) => render_location(f, err, code),
         }
     }
 }
@@ -60,42 +58,46 @@ fn try_main() -> Result<(), Error> {
     };
 
     let src = fs::read_to_string(filename).map_err(Error::ReadFile)?;
-
-    let syntax = match syn::parse_file(&src) {
-        Ok(syntax) => syntax,
-        Err(parse_error) => {
-            let span = parse_error.span();
-            show_location(span, src);
-            return Err(Error::ParseFile(parse_error));
-        }
-    };
-
+    let syntax = syn::parse_file(&src).map_err(|parse_error| Error::ParseFile(parse_error, src))?;
     println!("{:#?}", syntax);
 
     Ok(())
 }
 
-fn show_location(span: Span, src: String) {
-    let start = span.start();
-    let mut end = span.end();
+fn render_location(formatter: &mut fmt::Formatter, err: &syn::Error, code: &str) -> fmt::Result {
+    let start = err.span().start();
+    let mut end = err.span().end();
 
     if start.line == end.line && start.column == end.column {
-        return;
+        return Ok(());
     }
 
-    let src_line = match src.lines().nth(start.line - 1) {
+    let code_line = match code.lines().nth(start.line - 1) {
         Some(line) => line,
-        None => return,
+        None => return Ok(()),
     };
 
     if end.line > start.line {
         end.line = start.line;
-        end.column = src_line.len();
+        end.column = code_line.len();
     }
 
-    let underline = " ".repeat(start.column) + &"^".repeat(end.column - start.column);
-
-    let stderr = io::stderr();
-    let mut stderr = stderr.lock();
-    let _ = writeln!(stderr, "\n{}\n{}\n", src_line, underline);
+    write!(
+        formatter,
+        "\n\
+         error: Syn unable to parse file\n\
+         {indent}--> {filename}:{linenum}:{colnum}\n\
+         {indent} | \n\
+         {linenum} | {code}\n\
+         {indent} | {offset}{underline} {message}\n\
+         ",
+        filename = "main.rs",
+        linenum = start.line,
+        colnum = start.column,
+        indent = " ".repeat(start.line.to_string().len()),
+        code = code_line,
+        offset = " ".repeat(start.column),
+        underline = "^".repeat(end.column - start.column),
+        message = err,
+    )
 }
