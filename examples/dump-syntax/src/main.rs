@@ -91,12 +91,12 @@ fn render_location(
     let mut end = err.span().end();
 
     if start.line == end.line && start.column == end.column {
-        return Ok(());
+        return render_fallback(formatter, err);
     }
 
     let code_line = match code.lines().nth(start.line - 1) {
         Some(line) => line,
-        None => return Ok(()),
+        None => return render_fallback(formatter, err),
     };
 
     if end.line > start.line {
@@ -127,4 +127,8 @@ fn render_location(
         underline = "^".repeat(end.column - start.column),
         message = err,
     )
+}
+
+fn render_fallback(formatter: &mut fmt::Formatter, err: &syn::Error) -> fmt::Result {
+    write!(formatter, "Unable to parse file: {}", err)
 }
