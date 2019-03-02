@@ -14,8 +14,4 @@ features = ["parsing", "full", "extra-traits"]
 version = "0.4.27"
 features = ["span-locations"]
 
-[[bin]]
-name = "dump-syntax"
-path = "main.rs"
-
 [workspace]
