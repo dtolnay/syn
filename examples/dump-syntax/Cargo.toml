@@ -13,3 +13,5 @@ features = ["parsing", "full", "extra-traits"]
 [[bin]]
 name = "dump-syntax"
 path = "main.rs"
+
+[workspace]
