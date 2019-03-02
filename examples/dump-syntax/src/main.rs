@@ -26,6 +26,8 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process;
 
+use colored::Colorize;
+
 enum Error {
     IncorrectUsage,
     ReadFile(io::Error),
@@ -112,20 +114,25 @@ fn render_location(
     write!(
         formatter,
         "\n\
-         error: Syn unable to parse file\n\
-         {indent}--> {filename}:{linenum}:{colnum}\n\
-         {indent} | \n\
-         {linenum} | {code}\n\
-         {indent} | {offset}{underline} {message}\n\
+         {error}{header}\n\
+         {indent}{arrow} {filename}:{linenum}:{colnum}\n\
+         {indent} {pipe} \n\
+         {label} {pipe} {code}\n\
+         {indent} {pipe} {offset}{underline} {message}\n\
          ",
+        error = "error".red().bold(),
+        header = ": Syn unable to parse file".bold(),
+        indent = " ".repeat(start.line.to_string().len()),
+        arrow = "-->".blue().bold(),
         filename = filename,
         linenum = start.line,
         colnum = start.column,
-        indent = " ".repeat(start.line.to_string().len()),
+        pipe = "|".blue().bold(),
+        label = start.line.to_string().blue().bold(),
         code = code_line.trim_end(),
         offset = " ".repeat(start.column),
-        underline = "^".repeat(end.column - start.column),
-        message = err,
+        underline = "^".repeat(end.column - start.column).red().bold(),
+        message = err.to_string().red(),
     )
 }
 

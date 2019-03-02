@@ -5,13 +5,13 @@ authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 publish = false
 
+[dependencies]
+proc-macro2 = { version = "0.4.27", features = ["span-locations"] }
+colored = "1.7"
+
 [dependencies.syn]
 path = "../.."
 default-features = false
 features = ["parsing", "full", "extra-traits"]
-
-[dependencies.proc-macro2]
-version = "0.4.27"
-features = ["span-locations"]
 
 [workspace]
