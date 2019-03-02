@@ -17,16 +17,23 @@
 //!         ...
 //!     }
 
+use std::borrow::Cow;
 use std::env;
+use std::ffi::OsStr;
 use std::fmt::{self, Display};
 use std::fs;
 use std::io::{self, Write};
+use std::path::{Path, PathBuf};
 use std::process;
 
 enum Error {
     IncorrectUsage,
     ReadFile(io::Error),
-    ParseFile(syn::Error, String),
+    ParseFile {
+        error: syn::Error,
+        filepath: PathBuf,
+        source_code: String,
+    },
 }
 
 impl Display for Error {
@@ -35,8 +42,12 @@ impl Display for Error {
 
         match self {
             IncorrectUsage => write!(f, "Usage: dump-syntax path/to/filename.rs"),
-            ReadFile(err) => write!(f, "Unable to read file: {}", err),
-            ParseFile(err, code) => render_location(f, err, code),
+            ReadFile(error) => write!(f, "Unable to read file: {}", error),
+            ParseFile {
+                error,
+                filepath,
+                source_code,
+            } => render_location(f, error, filepath, source_code),
         }
     }
 }
@@ -49,22 +60,33 @@ fn main() {
 }
 
 fn try_main() -> Result<(), Error> {
-    let mut args = env::args();
+    let mut args = env::args_os();
     let _ = args.next(); // executable name
 
-    let filename = match (args.next(), args.next()) {
-        (Some(filename), None) => filename,
+    let filepath = match (args.next(), args.next()) {
+        (Some(arg), None) => PathBuf::from(arg),
         _ => return Err(Error::IncorrectUsage),
     };
 
-    let src = fs::read_to_string(filename).map_err(Error::ReadFile)?;
-    let syntax = syn::parse_file(&src).map_err(|parse_error| Error::ParseFile(parse_error, src))?;
+    let code = fs::read_to_string(&filepath).map_err(Error::ReadFile)?;
+    let syntax = syn::parse_file(&code).map_err({
+        |error| Error::ParseFile {
+            error,
+            filepath,
+            source_code: code,
+        }
+    })?;
     println!("{:#?}", syntax);
 
     Ok(())
 }
 
-fn render_location(formatter: &mut fmt::Formatter, err: &syn::Error, code: &str) -> fmt::Result {
+fn render_location(
+    formatter: &mut fmt::Formatter,
+    err: &syn::Error,
+    filepath: &Path,
+    code: &str,
+) -> fmt::Result {
     let start = err.span().start();
     let mut end = err.span().end();
 
@@ -82,6 +104,11 @@ fn render_location(formatter: &mut fmt::Formatter, err: &syn::Error, code: &str)
         end.column = code_line.len();
     }
 
+    let filename = filepath
+        .file_name()
+        .map(OsStr::to_string_lossy)
+        .unwrap_or(Cow::Borrowed("main.rs"));
+
     write!(
         formatter,
         "\n\
@@ -91,7 +118,7 @@ fn render_location(formatter: &mut fmt::Formatter, err: &syn::Error, code: &str)
          {linenum} | {code}\n\
          {indent} | {offset}{underline} {message}\n\
          ",
-        filename = "main.rs",
+        filename = filename,
         linenum = start.line,
         colnum = start.column,
         indent = " ".repeat(start.line.to_string().len()),
