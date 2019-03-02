@@ -122,7 +122,7 @@ fn render_location(
         linenum = start.line,
         colnum = start.column,
         indent = " ".repeat(start.line.to_string().len()),
-        code = code_line,
+        code = code_line.trim_end(),
         offset = " ".repeat(start.column),
         underline = "^".repeat(end.column - start.column),
         message = err,
