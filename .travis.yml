@@ -47,7 +47,7 @@ matrix:
     - rust: nightly
       name: Clippy
       script:
-        - rustup component add clippy-preview
+        - rustup component add clippy || travis_terminate 0
         - cargo clippy --all-features
     - rust: nightly
       name: WebAssembly
