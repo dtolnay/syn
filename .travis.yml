@@ -32,6 +32,7 @@ script:
 matrix:
   include:
     - rust: nightly
+      name: Tests
       script:
         - cargo test --all-features --release
     - rust: nightly
