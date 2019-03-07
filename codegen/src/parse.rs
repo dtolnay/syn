@@ -530,9 +530,10 @@ fn load_file<P: AsRef<Path>>(
                 // We don't want to try to load the generated rust files and
                 // parse them, so we ignore them here.
                 for name in IGNORED_MODS {
-                    if item.ident == name {
-                        continue 'items;
-                    }
+                    match item.ident {
+                        Some(ref ident) if ident == name => continue 'items,
+                        _ => (),
+                    };
                 }
 
                 // Lookup any #[cfg()] attributes on the module and add them to
@@ -540,15 +541,19 @@ fn load_file<P: AsRef<Path>>(
                 //
                 // The derive module is weird because it is built with either
                 // `full` or `derive` but exported only under `derive`.
-                let features = if item.ident == "derive" {
-                    vec![parse_quote!(#[cfg(feature = "derive")])]
-                } else {
-                    get_features(&item.attrs, features)
+                let features = match item.ident {
+                    Some(ref ident) if ident == "debug" => {
+                        vec![parse_quote!(#[cfg(feature = "derive")])]
+                    }
+                    _ => get_features(&item.attrs, features),
                 };
 
                 // Look up the submodule file, and recursively parse it.
                 // XXX: Only handles same-directory .rs file submodules.
-                let path = parent.join(&format!("{}.rs", item.ident));
+                let path = parent.join(match item.ident {
+                    Some(ref ident) => format!("{}.rs", ident),
+                    None => "mod.rs".to_string(),
+                });
                 load_file(path, &features, lookup)?;
             }
             Item::Macro(item) => {
