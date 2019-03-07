@@ -2024,7 +2024,7 @@ pub fn fold_item_mod<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemMod) -> ItemMod
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
         mod_token: Token![mod](tokens_helper(_visitor, &_i.mod_token.span)),
-        ident: _visitor.fold_ident(_i.ident),
+        ident: _i.ident.map(|ident| _visitor.fold_ident(ident)),
         content: (_i.content).map(|it| {
             (
                 Brace(tokens_helper(_visitor, &(it).0.span)),

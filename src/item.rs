@@ -99,7 +99,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub mod_token: Token![mod],
-            pub ident: Ident,
+            pub ident: Option<Ident>,
             pub content: Option<(token::Brace, Vec<Item>)>,
             pub semi: Option<Token![;]>,
         }),
@@ -1211,7 +1211,7 @@ pub mod parsing {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let mod_token: Token![mod] = input.parse()?;
-            let ident: Ident = input.parse()?;
+            let ident: Option<Ident> = input.parse().ok();
 
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![;]) {

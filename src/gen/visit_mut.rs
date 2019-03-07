@@ -2240,7 +2240,7 @@ pub fn visit_item_mod_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemM
     }
     _visitor.visit_visibility_mut(&mut _i.vis);
     tokens_helper(_visitor, &mut _i.mod_token.span);
-    _visitor.visit_ident_mut(&mut _i.ident);
+    _i.ident.as_mut().map(|ident| _visitor.visit_ident_mut(ident));
     if let Some(ref mut it) = _i.content {
         tokens_helper(_visitor, &mut (it).0.span);
         for it in &mut (it).1 {

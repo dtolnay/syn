@@ -2285,7 +2285,7 @@ pub fn visit_item_mod<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     }
     _visitor.visit_visibility(&_i.vis);
     tokens_helper(_visitor, &_i.mod_token.span);
-    _visitor.visit_ident(&_i.ident);
+    _i.ident.as_ref().map(|ident| _visitor.visit_ident(ident));
     if let Some(ref it) = _i.content {
         tokens_helper(_visitor, &(it).0.span);
         for it in &(it).1 {
