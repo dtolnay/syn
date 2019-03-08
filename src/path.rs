@@ -86,6 +86,7 @@ impl PathArguments {
         }
     }
 
+    #[cfg(feature = "parsing")]
     fn is_none(&self) -> bool {
         match *self {
             PathArguments::None => true,
