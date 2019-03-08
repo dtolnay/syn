@@ -140,9 +140,8 @@ impl LitStr {
     ///             lit_str.parse().map(Some)
     ///         }
     ///         _ => {
-    ///             let error_span = attr.bracket_token.span;
     ///             let message = "expected #[path = \"...\"]";
-    ///             Err(Error::new(error_span, message))
+    ///             Err(Error::new_spanned(attr, message))
     ///         }
     ///     }
     /// }
