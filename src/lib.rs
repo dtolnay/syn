@@ -672,7 +672,8 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///
 /// If present, either of these would be an error using `from_str`.
 ///
-/// *This function is available if Syn is built with the `"parsing"` and `"full"` features.*
+/// *This function is available if Syn is built with the `"parsing"` and
+/// `"full"` features.*
 ///
 /// # Examples
 ///

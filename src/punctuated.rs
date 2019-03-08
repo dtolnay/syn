@@ -4,7 +4,8 @@
 //!
 //! - The fields of a struct are `Punctuated<Field, Token![,]>`.
 //! - The segments of a path are `Punctuated<PathSegment, Token![::]>`.
-//! - The bounds on a generic parameter are `Punctuated<TypeParamBound, Token![+]>`.
+//! - The bounds on a generic parameter are `Punctuated<TypeParamBound,
+//!   Token![+]>`.
 //! - The arguments to a function call are `Punctuated<Expr, Token![,]>`.
 //!
 //! This module provides a common representation for these punctuated sequences

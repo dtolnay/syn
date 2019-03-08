@@ -134,7 +134,8 @@ fn test_ty_param_bound() {
 
 #[test]
 fn test_fn_precedence_in_where_clause() {
-    // This should parse as two separate bounds, `FnOnce() -> i32` and `Send` - not `FnOnce() -> (i32 + Send)`.
+    // This should parse as two separate bounds, `FnOnce() -> i32` and `Send` - not
+    // `FnOnce() -> (i32 + Send)`.
     let sig = quote! {
         fn f<G>()
         where
