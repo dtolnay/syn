@@ -6,22 +6,31 @@ use std::str::{self, FromStr};
 // opening a GitHub issue if your build environment requires some way to enable
 // these cfgs other than by executing our build script.
 fn main() {
-    let minor = match rustc_minor_version() {
-        Some(minor) => minor,
+    let compiler = match rustc_version() {
+        Some(compiler) => compiler,
         None => return,
     };
 
-    if minor >= 19 {
+    if compiler.minor >= 19 {
         println!("cargo:rustc-cfg=syn_can_use_thread_id");
     }
 
     // Macro modularization allows re-exporting the `quote!` macro in 1.30+.
-    if minor >= 30 {
+    if compiler.minor >= 30 {
         println!("cargo:rustc-cfg=syn_can_call_macro_by_path");
+    }
+
+    if !compiler.nightly {
+        println!("cargo:rustc-cfg=syn_disable_nightly_tests");
     }
 }
 
-fn rustc_minor_version() -> Option<u32> {
+struct Compiler {
+    minor: u32,
+    nightly: bool,
+}
+
+fn rustc_version() -> Option<Compiler> {
     let rustc = match env::var_os("RUSTC") {
         Some(rustc) => rustc,
         None => return None,
@@ -47,5 +56,13 @@ fn rustc_minor_version() -> Option<u32> {
         None => return None,
     };
 
-    u32::from_str(next).ok()
+    let minor = match u32::from_str(next) {
+        Ok(minor) => minor,
+        Err(_) => return None,
+    };
+
+    Some(Compiler {
+        minor: minor,
+        nightly: version.contains("nightly"),
+    })
 }
