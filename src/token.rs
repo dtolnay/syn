@@ -95,6 +95,7 @@ use std::cmp;
 use std::fmt::{self, Debug};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
+use std::ops::{Deref, DerefMut};
 
 #[cfg(feature = "parsing")]
 use proc_macro2::Delimiter;
@@ -106,6 +107,7 @@ use proc_macro2::TokenStream;
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 
+use self::private::WithSpan;
 #[cfg(feature = "parsing")]
 use buffer::Cursor;
 #[cfg(feature = "parsing")]
@@ -136,9 +138,18 @@ pub trait Token: private::Sealed {
     fn display() -> &'static str;
 }
 
-#[cfg(feature = "parsing")]
 mod private {
+    use proc_macro2::Span;
+
+    #[cfg(feature = "parsing")]
     pub trait Sealed {}
+
+    /// Support writing `token.span` rather than `token.spans[0]` on tokens that
+    /// hold a single span.
+    #[repr(C)]
+    pub struct WithSpan {
+        pub span: Span,
+    }
 }
 
 #[cfg(feature = "parsing")]
@@ -304,10 +315,31 @@ macro_rules! define_keywords {
     };
 }
 
+macro_rules! impl_deref_if_len_is_1 {
+    ($name:ident/1) => {
+        impl Deref for $name {
+            type Target = WithSpan;
+
+            fn deref(&self) -> &Self::Target {
+                unsafe { &*(self as *const Self as *const WithSpan) }
+            }
+        }
+
+        impl DerefMut for $name {
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                unsafe { &mut *(self as *mut Self as *mut WithSpan) }
+            }
+        }
+    };
+
+    ($name:ident/$len:tt) => {};
+}
+
 macro_rules! define_punctuation_structs {
     ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
             #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
+            #[repr(C)]
             #[$doc]
             ///
             /// Don't try to remember the name of this type -- use the [`Token!`]
@@ -355,6 +387,8 @@ macro_rules! define_punctuation_structs {
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
+
+            impl_deref_if_len_is_1!($name/$len);
         )*
     };
 }
