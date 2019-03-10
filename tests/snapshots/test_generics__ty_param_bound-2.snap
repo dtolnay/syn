@@ -1,0 +1,14 @@
+---
+created: "2019-03-11T05:40:10.830456179Z"
+creator: insta@0.7.1
+source: tests/test_generics.rs
+expression: syntax_tree
+---
+Lifetime(
+    Lifetime {
+        apostrophe: Span,
+        ident: Ident(
+            _
+        )
+    }
+)

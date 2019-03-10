@@ -1,0 +1,93 @@
+---
+created: "2019-03-11T05:40:04.829920492Z"
+creator: insta@0.7.1
+source: tests/test_derive_input.rs
+expression: syntax_tree
+---
+DeriveInput {
+    attrs: [],
+    vis: Inherited,
+    ident: Ident(
+        MaybeUninit
+    ),
+    generics: Generics {
+        lt_token: Some(
+            Lt
+        ),
+        params: [
+            Type(
+                TypeParam {
+                    attrs: [],
+                    ident: Ident(
+                        T
+                    ),
+                    colon_token: None,
+                    bounds: [],
+                    eq_token: None,
+                    default: None
+                }
+            )
+        ],
+        gt_token: Some(
+            Gt
+        ),
+        where_clause: None
+    },
+    data: Union(
+        DataUnion {
+            union_token: Union,
+            fields: FieldsNamed {
+                brace_token: Brace,
+                named: [
+                    Field {
+                        attrs: [],
+                        vis: Inherited,
+                        ident: Some(
+                            Ident(
+                                uninit
+                            )
+                        ),
+                        colon_token: Some(
+                            Colon
+                        ),
+                        ty: Tuple(
+                            TypeTuple {
+                                paren_token: Paren,
+                                elems: []
+                            }
+                        )
+                    },
+                    Comma,
+                    Field {
+                        attrs: [],
+                        vis: Inherited,
+                        ident: Some(
+                            Ident(
+                                value
+                            )
+                        ),
+                        colon_token: Some(
+                            Colon
+                        ),
+                        ty: Path(
+                            TypePath {
+                                qself: None,
+                                path: Path {
+                                    leading_colon: None,
+                                    segments: [
+                                        PathSegment {
+                                            ident: Ident(
+                                                T
+                                            ),
+                                            arguments: None
+                                        }
+                                    ]
+                                }
+                            }
+                        )
+                    }
+                ]
+            }
+        }
+    )
+}

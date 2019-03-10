@@ -1,0 +1,94 @@
+---
+created: "2019-03-11T05:40:49.182513206Z"
+creator: insta@0.7.1
+source: tests/test_token_trees.rs
+expression: syntax_tree
+---
+TokenStream [
+    Punct {
+        op: '#',
+        spacing: Alone
+    },
+    Group {
+        delimiter: Bracket,
+        stream: TokenStream [
+            Ident {
+                sym: derive
+            },
+            Group {
+                delimiter: Parenthesis,
+                stream: TokenStream [
+                    Ident {
+                        sym: Debug
+                    },
+                    Punct {
+                        op: ',',
+                        spacing: Alone
+                    },
+                    Ident {
+                        sym: Clone
+                    }
+                ]
+            }
+        ]
+    },
+    Ident {
+        sym: pub
+    },
+    Ident {
+        sym: struct
+    },
+    Ident {
+        sym: Item
+    },
+    Group {
+        delimiter: Brace,
+        stream: TokenStream [
+            Ident {
+                sym: pub
+            },
+            Ident {
+                sym: ident
+            },
+            Punct {
+                op: ':',
+                spacing: Alone
+            },
+            Ident {
+                sym: Ident
+            },
+            Punct {
+                op: ',',
+                spacing: Alone
+            },
+            Ident {
+                sym: pub
+            },
+            Ident {
+                sym: attrs
+            },
+            Punct {
+                op: ':',
+                spacing: Alone
+            },
+            Ident {
+                sym: Vec
+            },
+            Punct {
+                op: '<',
+                spacing: Alone
+            },
+            Ident {
+                sym: Attribute
+            },
+            Punct {
+                op: '>',
+                spacing: Joint
+            },
+            Punct {
+                op: ',',
+                spacing: Alone
+            }
+        ]
+    }
+]

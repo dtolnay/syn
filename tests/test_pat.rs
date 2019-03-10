@@ -1,13 +1,15 @@
-#[macro_use]
 extern crate quote;
 extern crate syn;
 
 mod features;
 
+use quote::quote;
+use syn::Pat;
+
 #[test]
 fn test_pat_ident() {
     match syn::parse2(quote!(self)).unwrap() {
-        syn::Pat::Ident(_) => (),
+        Pat::Ident(_) => (),
         value => panic!("expected PatIdent, got {:?}", value),
     }
 }
@@ -15,7 +17,7 @@ fn test_pat_ident() {
 #[test]
 fn test_pat_path() {
     match syn::parse2(quote!(self::CONST)).unwrap() {
-        syn::Pat::Path(_) => (),
+        Pat::Path(_) => (),
         value => panic!("expected PatPath, got {:?}", value),
     }
 }

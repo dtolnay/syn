@@ -1,0 +1,38 @@
+---
+created: "2019-03-11T05:39:50.464009531Z"
+creator: insta@0.7.1
+source: tests/test_asyncness.rs
+expression: syntax_tree
+---
+Fn(
+    ItemFn {
+        attrs: [],
+        vis: Inherited,
+        constness: None,
+        unsafety: None,
+        asyncness: Some(
+            Async
+        ),
+        abi: None,
+        ident: Ident(
+            process
+        ),
+        decl: FnDecl {
+            fn_token: Fn,
+            generics: Generics {
+                lt_token: None,
+                params: [],
+                gt_token: None,
+                where_clause: None
+            },
+            paren_token: Paren,
+            inputs: [],
+            variadic: None,
+            output: Default
+        },
+        block: Block {
+            brace_token: Brace,
+            stmts: []
+        }
+    }
+)

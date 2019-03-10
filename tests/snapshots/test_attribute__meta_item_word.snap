@@ -1,0 +1,11 @@
+---
+created: "2019-03-11T05:39:56.788344806Z"
+creator: insta@0.7.1
+source: tests/test_attribute.rs
+expression: syntax_tree
+---
+Word(
+    Ident(
+        foo
+    )
+)

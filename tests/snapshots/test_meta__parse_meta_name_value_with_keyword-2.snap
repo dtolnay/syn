@@ -1,0 +1,21 @@
+---
+created: "2019-03-11T05:40:21.687855159Z"
+creator: insta@0.7.1
+source: tests/test_meta.rs
+expression: syntax_tree
+---
+NameValue(
+    MetaNameValue {
+        ident: Ident(
+            static
+        ),
+        eq_token: Eq,
+        lit: Int(
+            LitInt {
+                token: Literal {
+                    lit: 5
+                }
+            }
+        )
+    }
+)

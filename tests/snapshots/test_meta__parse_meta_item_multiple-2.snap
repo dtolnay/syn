@@ -1,0 +1,79 @@
+---
+created: "2019-03-11T05:40:21.675850965Z"
+creator: insta@0.7.1
+source: tests/test_meta.rs
+expression: syntax_tree
+---
+List(
+    MetaList {
+        ident: Ident(
+            foo
+        ),
+        paren_token: Paren,
+        nested: [
+            Meta(
+                Word(
+                    Ident(
+                        word
+                    )
+                )
+            ),
+            Comma,
+            Meta(
+                NameValue(
+                    MetaNameValue {
+                        ident: Ident(
+                            name
+                        ),
+                        eq_token: Eq,
+                        lit: Int(
+                            LitInt {
+                                token: Literal {
+                                    lit: 5
+                                }
+                            }
+                        )
+                    }
+                )
+            ),
+            Comma,
+            Meta(
+                List(
+                    MetaList {
+                        ident: Ident(
+                            list
+                        ),
+                        paren_token: Paren,
+                        nested: [
+                            Meta(
+                                NameValue(
+                                    MetaNameValue {
+                                        ident: Ident(
+                                            name2
+                                        ),
+                                        eq_token: Eq,
+                                        lit: Int(
+                                            LitInt {
+                                                token: Literal {
+                                                    lit: 6
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                            )
+                        ]
+                    }
+                )
+            ),
+            Comma,
+            Meta(
+                Word(
+                    Ident(
+                        word2
+                    )
+                )
+            )
+        ]
+    }
+)

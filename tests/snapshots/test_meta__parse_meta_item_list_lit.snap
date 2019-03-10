@@ -1,0 +1,23 @@
+---
+created: "2019-03-11T05:40:19.682551683Z"
+creator: insta@0.7.1
+source: tests/test_meta.rs
+expression: syntax_tree
+---
+MetaList {
+    ident: Ident(
+        foo
+    ),
+    paren_token: Paren,
+    nested: [
+        Literal(
+            Int(
+                LitInt {
+                    token: Literal {
+                        lit: 5
+                    }
+                }
+            )
+        )
+    ]
+}

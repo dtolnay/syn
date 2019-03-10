@@ -1,0 +1,28 @@
+---
+created: "2019-03-11T05:40:04.807218906Z"
+creator: insta@0.7.1
+source: tests/test_derive_input.rs
+expression: syntax_tree
+---
+DeriveInput {
+    attrs: [],
+    vis: Inherited,
+    ident: Ident(
+        S
+    ),
+    generics: Generics {
+        lt_token: None,
+        params: [],
+        gt_token: None,
+        where_clause: None
+    },
+    data: Struct(
+        DataStruct {
+            struct_token: Struct,
+            fields: Unit,
+            semi_token: Some(
+                Semi
+            )
+        }
+    )
+}

@@ -1,0 +1,84 @@
+---
+created: "2019-03-11T05:40:17.391725505Z"
+creator: insta@0.7.1
+source: tests/test_grouping.rs
+expression: syntax_tree
+---
+Binary(
+    ExprBinary {
+        attrs: [],
+        left: Lit(
+            ExprLit {
+                attrs: [],
+                lit: Int(
+                    LitInt {
+                        token: Literal {
+                            lit: 1i32
+                        }
+                    }
+                )
+            }
+        ),
+        op: Add(
+            Add
+        ),
+        right: Binary(
+            ExprBinary {
+                attrs: [],
+                left: Group(
+                    ExprGroup {
+                        attrs: [],
+                        group_token: Group,
+                        expr: Binary(
+                            ExprBinary {
+                                attrs: [],
+                                left: Lit(
+                                    ExprLit {
+                                        attrs: [],
+                                        lit: Int(
+                                            LitInt {
+                                                token: Literal {
+                                                    lit: 2i32
+                                                }
+                                            }
+                                        )
+                                    }
+                                ),
+                                op: Add(
+                                    Add
+                                ),
+                                right: Lit(
+                                    ExprLit {
+                                        attrs: [],
+                                        lit: Int(
+                                            LitInt {
+                                                token: Literal {
+                                                    lit: 3i32
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    }
+                ),
+                op: Mul(
+                    Star
+                ),
+                right: Lit(
+                    ExprLit {
+                        attrs: [],
+                        lit: Int(
+                            LitInt {
+                                token: Literal {
+                                    lit: 4i32
+                                }
+                            }
+                        )
+                    }
+                )
+            }
+        )
+    }
+)

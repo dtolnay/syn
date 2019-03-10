@@ -1,156 +1,89 @@
-#![recursion_limit = "1024"]
-
-extern crate syn;
-use syn::*;
-
-#[macro_use]
 extern crate quote;
+extern crate syn;
 
-extern crate proc_macro2;
-use proc_macro2::{Ident, Span, TokenStream};
+mod features;
 
 #[macro_use]
 mod macros;
 
-mod features;
-
-fn ident(s: &str) -> Ident {
-    Ident::new(s, Span::call_site())
-}
+use quote::quote;
+use syn::{DeriveInput, ItemFn, TypeParamBound, WhereClause, WherePredicate};
 
 #[test]
 fn test_split_for_impl() {
-    // <'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug
-    let generics = Generics {
-        gt_token: Some(Default::default()),
-        lt_token: Some(Default::default()),
-        params: punctuated![
-            GenericParam::Lifetime(LifetimeDef {
-                attrs: Default::default(),
-                lifetime: Lifetime::new("'a", Span::call_site()),
-                bounds: Default::default(),
-                colon_token: None,
-            }),
-            GenericParam::Lifetime(LifetimeDef {
-                attrs: Default::default(),
-                lifetime: Lifetime::new("'b", Span::call_site()),
-                bounds: punctuated![Lifetime::new("'a", Span::call_site())],
-                colon_token: Some(token::Colon::default()),
-            }),
-            GenericParam::Type(TypeParam {
-                attrs: vec![Attribute {
-                    bracket_token: Default::default(),
-                    pound_token: Default::default(),
-                    style: AttrStyle::Outer,
-                    path: ident("may_dangle").into(),
-                    tts: TokenStream::new(),
-                }],
-                ident: ident("T"),
-                bounds: punctuated![TypeParamBound::Lifetime(Lifetime::new(
-                    "'a",
-                    Span::call_site()
-                )),],
-                default: Some(
-                    TypeTuple {
-                        elems: Default::default(),
-                        paren_token: Default::default(),
-                    }
-                    .into(),
-                ),
-                colon_token: Some(Default::default()),
-                eq_token: Default::default(),
-            }),
-        ],
-        where_clause: Some(WhereClause {
-            where_token: Default::default(),
-            predicates: punctuated![WherePredicate::Type(PredicateType {
-                lifetimes: None,
-                colon_token: Default::default(),
-                bounded_ty: TypePath {
-                    qself: None,
-                    path: ident("T").into(),
-                }
-                .into(),
-                bounds: punctuated![TypeParamBound::Trait(TraitBound {
-                    paren_token: None,
-                    modifier: TraitBoundModifier::None,
-                    lifetimes: None,
-                    path: ident("Debug").into(),
-                }),],
-            }),],
-        }),
+    let code = quote! {
+        struct S<'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug;
     };
 
+    let actual = snapshot!(code as DeriveInput);
+
+    let generics = actual.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let tokens = quote! {
+
+    let generated = quote! {
         impl #impl_generics MyTrait for Test #ty_generics #where_clause {}
     };
-    let expected = concat!(
-        "impl < 'a , 'b : 'a , # [ may_dangle ] T : 'a > ",
-        "MyTrait for Test < 'a , 'b , T > ",
-        "where T : Debug { }"
-    );
-    assert_eq!(expected, tokens.to_string());
+    let expected = quote! {
+        impl<'a, 'b: 'a, #[may_dangle] T: 'a> MyTrait
+        for Test<'a, 'b, T>
+        where
+            T: Debug
+        {}
+    };
+    assert_eq!(generated.to_string(), expected.to_string());
 
     let turbofish = ty_generics.as_turbofish();
-    let tokens = quote! {
+    let generated = quote! {
         Test #turbofish
     };
-    let expected = "Test :: < 'a , 'b , T >";
-    assert_eq!(expected, tokens.to_string());
+    let expected = quote! {
+        Test::<'a, 'b, T>
+    };
+    assert_eq!(generated.to_string(), expected.to_string());
 }
 
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    let expected = TypeParamBound::Lifetime(Lifetime::new("'a", Span::call_site()));
-    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
+    snapshot!(tokens as TypeParamBound);
 
     let tokens = quote!('_);
-    println!("{:?}", tokens);
-    let expected = TypeParamBound::Lifetime(Lifetime::new("'_", Span::call_site()));
-    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
+    snapshot!(tokens as TypeParamBound);
 
     let tokens = quote!(Debug);
-    let expected = TypeParamBound::Trait(TraitBound {
-        paren_token: None,
-        modifier: TraitBoundModifier::None,
-        lifetimes: None,
-        path: ident("Debug").into(),
-    });
-    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
+    snapshot!(tokens as TypeParamBound);
 
     let tokens = quote!(?Sized);
-    let expected = TypeParamBound::Trait(TraitBound {
-        paren_token: None,
-        modifier: TraitBoundModifier::Maybe(Default::default()),
-        lifetimes: None,
-        path: ident("Sized").into(),
-    });
-    assert_eq!(expected, syn::parse2::<TypeParamBound>(tokens).unwrap());
+    snapshot!(tokens as TypeParamBound);
 }
 
 #[test]
 fn test_fn_precedence_in_where_clause() {
     // This should parse as two separate bounds, `FnOnce() -> i32` and `Send` - not
     // `FnOnce() -> (i32 + Send)`.
-    let sig = quote! {
+    let code = quote! {
         fn f<G>()
         where
             G: FnOnce() -> i32 + Send,
         {
         }
     };
-    let fun = syn::parse2::<ItemFn>(sig).unwrap();
-    let where_clause = fun.decl.generics.where_clause.as_ref().unwrap();
+
+    let actual = snapshot!(code as ItemFn);
+
+    let where_clause = actual.decl.generics.where_clause.as_ref().unwrap();
     assert_eq!(where_clause.predicates.len(), 1);
-    let predicate = match where_clause.predicates[0] {
-        WherePredicate::Type(ref pred) => pred,
+
+    let predicate = match &where_clause.predicates[0] {
+        WherePredicate::Type(pred) => pred,
         _ => panic!("wrong predicate kind"),
     };
+
     assert_eq!(predicate.bounds.len(), 2, "{:#?}", predicate.bounds);
+
     let first_bound = &predicate.bounds[0];
     assert_eq!(quote!(#first_bound).to_string(), "FnOnce ( ) -> i32");
+
     let second_bound = &predicate.bounds[1];
     assert_eq!(quote!(#second_bound).to_string(), "Send");
 }
@@ -160,6 +93,7 @@ fn test_where_clause_at_end_of_input() {
     let tokens = quote! {
         where
     };
-    let where_clause = syn::parse2::<WhereClause>(tokens).unwrap();
+
+    let where_clause = snapshot!(tokens as WhereClause);
     assert_eq!(where_clause.predicates.len(), 0);
 }

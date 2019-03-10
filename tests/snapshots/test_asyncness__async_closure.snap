@@ -1,0 +1,30 @@
+---
+created: "2019-03-11T05:39:50.464048036Z"
+creator: insta@0.7.1
+source: tests/test_asyncness.rs
+expression: syntax_tree
+---
+Closure(
+    ExprClosure {
+        attrs: [],
+        asyncness: Some(
+            Async
+        ),
+        movability: None,
+        capture: None,
+        or1_token: Or,
+        inputs: [],
+        or2_token: Or,
+        output: Default,
+        body: Block(
+            ExprBlock {
+                attrs: [],
+                label: None,
+                block: Block {
+                    brace_token: Brace,
+                    stmts: []
+                }
+            }
+        )
+    }
+)

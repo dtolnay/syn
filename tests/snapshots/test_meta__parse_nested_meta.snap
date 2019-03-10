@@ -1,0 +1,15 @@
+---
+created: "2019-03-11T05:40:19.695971093Z"
+creator: insta@0.7.1
+source: tests/test_meta.rs
+expression: syntax_tree
+---
+Literal(
+    Int(
+        LitInt {
+            token: Literal {
+                lit: 5
+            }
+        }
+    )
+)

@@ -1,0 +1,94 @@
+---
+created: "2019-03-11T05:40:04.804489373Z"
+creator: insta@0.7.1
+source: tests/test_derive_input.rs
+expression: syntax_tree
+---
+DeriveInput {
+    attrs: [],
+    vis: Inherited,
+    ident: Ident(
+        S
+    ),
+    generics: Generics {
+        lt_token: None,
+        params: [],
+        gt_token: None,
+        where_clause: None
+    },
+    data: Struct(
+        DataStruct {
+            struct_token: Struct,
+            fields: Named(
+                FieldsNamed {
+                    brace_token: Brace,
+                    named: [
+                        Field {
+                            attrs: [],
+                            vis: Inherited,
+                            ident: Some(
+                                Ident(
+                                    foo
+                                )
+                            ),
+                            colon_token: Some(
+                                Colon
+                            ),
+                            ty: Path(
+                                TypePath {
+                                    qself: None,
+                                    path: Path {
+                                        leading_colon: None,
+                                        segments: [
+                                            PathSegment {
+                                                ident: Ident(
+                                                    i32
+                                                ),
+                                                arguments: None
+                                            }
+                                        ]
+                                    }
+                                }
+                            )
+                        },
+                        Comma,
+                        Field {
+                            attrs: [],
+                            vis: Public(
+                                VisPublic {
+                                    pub_token: Pub
+                                }
+                            ),
+                            ident: Some(
+                                Ident(
+                                    bar
+                                )
+                            ),
+                            colon_token: Some(
+                                Colon
+                            ),
+                            ty: Path(
+                                TypePath {
+                                    qself: None,
+                                    path: Path {
+                                        leading_colon: None,
+                                        segments: [
+                                            PathSegment {
+                                                ident: Ident(
+                                                    String
+                                                ),
+                                                arguments: None
+                                            }
+                                        ]
+                                    }
+                                }
+                            )
+                        },
+                        Comma
+                    ]
+                }
+            ),
+            semi_token: None
+        }
+    )
+}

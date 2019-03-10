@@ -1,0 +1,32 @@
+---
+created: "2019-03-11T05:40:04.843066396Z"
+creator: insta@0.7.1
+source: tests/test_derive_input.rs
+expression: syntax_tree
+---
+DeriveInput {
+    attrs: [],
+    vis: Crate(
+        VisCrate {
+            crate_token: Crate
+        }
+    ),
+    ident: Ident(
+        S
+    ),
+    generics: Generics {
+        lt_token: None,
+        params: [],
+        gt_token: None,
+        where_clause: None
+    },
+    data: Struct(
+        DataStruct {
+            struct_token: Struct,
+            fields: Unit,
+            semi_token: Some(
+                Semi
+            )
+        }
+    )
+}
