@@ -83,6 +83,14 @@ fn try_main() -> Result<(), Error> {
     Ok(())
 }
 
+// Render a rustc-style error message, including colors.
+//
+//     error: Syn unable to parse file
+//       --> main.rs:40:17
+//        |
+//     40 |     fn fmt(&self formatter: &mut fmt::Formatter) -> fmt::Result {
+//        |                  ^^^^^^^^^ expected `,`
+//
 fn render_location(
     formatter: &mut fmt::Formatter,
     err: &syn::Error,
@@ -116,7 +124,7 @@ fn render_location(
         "\n\
          {error}{header}\n\
          {indent}{arrow} {filename}:{linenum}:{colnum}\n\
-         {indent} {pipe} \n\
+         {indent} {pipe}\n\
          {label} {pipe} {code}\n\
          {indent} {pipe} {offset}{underline} {message}\n\
          ",
