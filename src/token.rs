@@ -503,7 +503,7 @@ define_punctuation_structs! {
 #[cfg(feature = "printing")]
 impl ToTokens for Underscore {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        tokens.append(Ident::new("_", self.spans[0]));
+        tokens.append(Ident::new("_", self.span));
     }
 }
 
