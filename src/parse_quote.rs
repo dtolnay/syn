@@ -77,8 +77,7 @@ macro_rules! parse_quote {
 #[macro_export]
 macro_rules! quote_impl {
     ($($tt:tt)*) => {
-        // Require caller to have their own `#[macro_use] extern crate quote`.
-        quote!($($tt)*)
+        crate::quote::quote!($($tt)*)
     };
 }
 
