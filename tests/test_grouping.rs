@@ -1,6 +1,4 @@
-#![cfg(not(syn_disable_nightly_tests))]
 #![recursion_limit = "1024"]
-#![feature(rustc_private)]
 
 #[macro_use]
 extern crate syn;
@@ -10,10 +8,6 @@ use syn::{BinOp, Expr, ExprBinary, ExprGroup, ExprLit, Lit};
 extern crate proc_macro2;
 use proc_macro2::*;
 
-#[macro_use]
-mod macros;
-
-mod common;
 mod features;
 
 fn expr<T: Into<Expr>>(t: T) -> Expr {
