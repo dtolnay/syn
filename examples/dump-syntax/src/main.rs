@@ -4,7 +4,7 @@
 //! Use the following command from this directory to test this program by
 //! running it on its own source code:
 //!
-//!     cargo run -- main.rs
+//!     cargo run -- src/main.rs
 //!
 //! The output will begin with:
 //!
