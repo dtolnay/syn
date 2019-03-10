@@ -1,5 +1,4 @@
 #![recursion_limit = "1024"]
-#![feature(rustc_private)]
 
 extern crate syn;
 use syn::*;
@@ -13,7 +12,6 @@ use proc_macro2::{Ident, Span, TokenStream};
 #[macro_use]
 mod macros;
 
-mod common;
 mod features;
 
 fn ident(s: &str) -> Ident {
