@@ -2,7 +2,6 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
-#[macro_use]
 extern crate quote;
 extern crate rayon;
 extern crate syn;
@@ -12,6 +11,7 @@ extern crate walkdir;
 
 mod features;
 
+use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
 use syntax::parse::{self, PResult, ParseSess};

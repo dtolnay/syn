@@ -14,12 +14,10 @@
 //!    spans.
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
-#[macro_use]
 extern crate quote;
 extern crate rayon;
 extern crate regex;
 extern crate rustc_data_structures;
-#[macro_use]
 extern crate smallvec;
 extern crate syn;
 extern crate syntax;
@@ -28,8 +26,10 @@ extern crate walkdir;
 
 mod features;
 
+use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
+use smallvec::smallvec;
 use syntax::ast;
 use syntax::ptr::P;
 use walkdir::{DirEntry, WalkDir};
