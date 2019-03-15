@@ -3913,6 +3913,11 @@
             "proc_macro2": "Ident"
           }
         ],
+        "Path": [
+          {
+            "syn": "Path"
+          }
+        ],
         "List": [
           {
             "syn": "MetaList"
