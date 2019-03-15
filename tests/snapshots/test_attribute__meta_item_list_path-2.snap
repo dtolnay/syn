@@ -1,0 +1,38 @@
+---
+created: "2019-03-15T08:17:20.455754900Z"
+creator: insta@0.7.1
+source: tests/test_attribute.rs
+expression: syntax_tree
+---
+List(
+    MetaList {
+        ident: Ident(
+            foo
+        ),
+        paren_token: Paren,
+        nested: [
+            Meta(
+                Path(
+                    Path {
+                        leading_colon: None,
+                        segments: [
+                            PathSegment {
+                                ident: Ident(
+                                    bar
+                                ),
+                                arguments: None
+                            },
+                            Colon2,
+                            PathSegment {
+                                ident: Ident(
+                                    Baz
+                                ),
+                                arguments: None
+                            }
+                        ]
+                    }
+                )
+            )
+        ]
+    }
+)

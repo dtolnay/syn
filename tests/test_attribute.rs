@@ -35,6 +35,11 @@ fn test_meta_item_list_word() {
 }
 
 #[test]
+fn test_meta_item_list_path() {
+    test("#[foo(bar::Baz)]")
+}
+
+#[test]
 fn test_meta_item_list_name_value() {
     test("#[foo(bar = 5)]")
 }
