@@ -2237,6 +2237,7 @@ pub fn fold_member<V: Fold + ?Sized>(_visitor: &mut V, _i: Member) -> Member {
 pub fn fold_meta<V: Fold + ?Sized>(_visitor: &mut V, _i: Meta) -> Meta {
     match _i {
         Meta::Word(_binding_0) => Meta::Word(_visitor.fold_ident(_binding_0)),
+        Meta::Path(_binding_0) => Meta::Path(_visitor.fold_path(_binding_0)),
         Meta::List(_binding_0) => Meta::List(_visitor.fold_meta_list(_binding_0)),
         Meta::NameValue(_binding_0) => Meta::NameValue(_visitor.fold_meta_name_value(_binding_0)),
     }

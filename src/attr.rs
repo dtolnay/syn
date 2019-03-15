@@ -414,6 +414,11 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Meta {
         pub Word(Ident),
+        /// A path within an attribute, like `serde::Serialize`.
+        ///
+        /// For compatibility reasons, if there is only a single segment the
+        /// `Meta::Word` variant will be returned.
+        pub Path(Path),
         /// A structured list within an attribute, like `derive(Copy, Clone)`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
@@ -438,11 +443,24 @@ ast_enum_of_structs! {
 impl Meta {
     /// Returns the identifier that begins this structured meta item.
     ///
-    /// For example this would return the `test` in `#[test]`, the `derive` in
-    /// `#[derive(Copy)]`, and the `path` in `#[path = "sys/windows.rs"]`.
+    /// For example this would return:
+    ///
+    /// * `test` in `#[test]`
+    /// * `derive` in `#[derive(Copy)]`
+    /// * `Copy` in `Copy`
+    /// * `serde` in `serde::Serialize`
+    /// * `path` in `#[path = "sys/windows.rs"]`.
     pub fn name(&self) -> Ident {
         match *self {
             Meta::Word(ref meta) => meta.clone(),
+            Meta::Path(ref path) => {
+                path.segments
+                    .first()
+                    .expect("paths have at least one segment")
+                    .value()
+                    .ident
+                    .clone()
+            }
             Meta::List(ref meta) => meta.ident.clone(),
             Meta::NameValue(ref meta) => meta.ident.clone(),
         }
@@ -456,7 +474,8 @@ ast_enum_of_structs! {
     /// feature.*
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
-        /// would be a nested `Meta::Word`.
+        /// would be a nested `Meta::Word`, and `serde::Serialize` in
+        /// `#[derive(serde::Serialize)]` would be a nested `Meta::Path`.
         pub Meta(Meta),
 
         /// A Rust literal, like the `"new_name"` in `#[rename("new_name")]`.
@@ -578,9 +597,30 @@ pub mod parsing {
     }
 
     impl Parse for Meta {
+        /// Attempts to parse tokens as a `Meta`.
+        ///
+        /// Historically this assumed the first token encountered is an `Ident`.
+        /// However, derive attributes such as `#[derive(serde::Serialize)]`
+        /// have been valid since Rust 1.30:
+        ///
+        /// <https://github.com/rust-lang/rust/blob/stable/RELEASES.md#version-1300-2018-10-25>
+        ///
+        /// Therefore, we need to accept `Path`s as well, while erring on
+        /// invalid usages of `Path`s.
+        ///
+        /// For backward compatibility, we will treat single segment paths as
+        /// `Meta::Word`s.
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.call(Ident::parse_any)?;
-            parse_meta_after_ident(ident, input)
+            // We assume `Path` values to contain `::` as single words are parsed as `Meta::Word`
+            // for backward compatibility.
+            if input.peek(Token![::]) || input.peek2(Token![::]) {
+                let path = input.call(Path::parse_mod_style)?;
+                Ok(Meta::Path(path))
+            } else {
+                let ident = input.call(Ident::parse_any)?;
+                parse_meta_after_ident(ident, input)
+            }
+
         }
     }
 

@@ -2551,6 +2551,9 @@ pub fn visit_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Met
         Meta::Word(ref _binding_0) => {
             _visitor.visit_ident(_binding_0);
         }
+        Meta::Path(ref _binding_0) => {
+            _visitor.visit_path(_binding_0);
+        }
         Meta::List(ref _binding_0) => {
             _visitor.visit_meta_list(_binding_0);
         }

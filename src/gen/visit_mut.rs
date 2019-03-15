@@ -2497,6 +2497,9 @@ pub fn visit_meta_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Meta) {
         Meta::Word(ref mut _binding_0) => {
             _visitor.visit_ident_mut(_binding_0);
         }
+        Meta::Path(ref mut _binding_0) => {
+            _visitor.visit_path_mut(_binding_0);
+        }
         Meta::List(ref mut _binding_0) => {
             _visitor.visit_meta_list_mut(_binding_0);
         }
