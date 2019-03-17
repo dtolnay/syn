@@ -1,29 +1,53 @@
 ---
-created: "2019-03-11T05:40:06.919215869Z"
+created: "2019-03-17T20:01:48.968342400Z"
 creator: insta@0.7.1
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
 List(
     MetaList {
-        ident: Ident(
-            derive
-        ),
+        path: Path {
+            leading_colon: None,
+            segments: [
+                PathSegment {
+                    ident: Ident(
+                        derive
+                    ),
+                    arguments: None
+                }
+            ]
+        },
         paren_token: Paren,
         nested: [
             Meta(
-                Word(
-                    Ident(
-                        Debug
-                    )
+                Path(
+                    Path {
+                        leading_colon: None,
+                        segments: [
+                            PathSegment {
+                                ident: Ident(
+                                    Debug
+                                ),
+                                arguments: None
+                            }
+                        ]
+                    }
                 )
             ),
             Comma,
             Meta(
-                Word(
-                    Ident(
-                        Clone
-                    )
+                Path(
+                    Path {
+                        leading_colon: None,
+                        segments: [
+                            PathSegment {
+                                ident: Ident(
+                                    Clone
+                                ),
+                                arguments: None
+                            }
+                        ]
+                    }
                 )
             )
         ]

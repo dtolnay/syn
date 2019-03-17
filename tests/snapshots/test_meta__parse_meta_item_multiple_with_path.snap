@@ -1,0 +1,155 @@
+---
+created: "2019-03-17T21:23:15.802756500Z"
+creator: insta@0.7.1
+source: tests/test_meta.rs
+expression: syntax_tree
+---
+MetaList {
+    path: Path {
+        leading_colon: None,
+        segments: [
+            PathSegment {
+                ident: Ident(
+                    foo
+                ),
+                arguments: None
+            },
+            Colon2,
+            PathSegment {
+                ident: Ident(
+                    bar
+                ),
+                arguments: None
+            }
+        ]
+    },
+    paren_token: Paren,
+    nested: [
+        Meta(
+            Path(
+                Path {
+                    leading_colon: None,
+                    segments: [
+                        PathSegment {
+                            ident: Ident(
+                                word
+                            ),
+                            arguments: None
+                        }
+                    ]
+                }
+            )
+        ),
+        Comma,
+        Meta(
+            NameValue(
+                MetaNameValue {
+                    path: Path {
+                        leading_colon: None,
+                        segments: [
+                            PathSegment {
+                                ident: Ident(
+                                    name
+                                ),
+                                arguments: None
+                            }
+                        ]
+                    },
+                    eq_token: Eq,
+                    lit: Int(
+                        LitInt {
+                            token: Literal {
+                                lit: 5
+                            }
+                        }
+                    )
+                }
+            )
+        ),
+        Comma,
+        Meta(
+            List(
+                MetaList {
+                    path: Path {
+                        leading_colon: None,
+                        segments: [
+                            PathSegment {
+                                ident: Ident(
+                                    list
+                                ),
+                                arguments: None
+                            }
+                        ]
+                    },
+                    paren_token: Paren,
+                    nested: [
+                        Meta(
+                            NameValue(
+                                MetaNameValue {
+                                    path: Path {
+                                        leading_colon: None,
+                                        segments: [
+                                            PathSegment {
+                                                ident: Ident(
+                                                    name2
+                                                ),
+                                                arguments: None
+                                            }
+                                        ]
+                                    },
+                                    eq_token: Eq,
+                                    lit: Int(
+                                        LitInt {
+                                            token: Literal {
+                                                lit: 6
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        )
+                    ]
+                }
+            )
+        ),
+        Comma,
+        Meta(
+            Path(
+                Path {
+                    leading_colon: None,
+                    segments: [
+                        PathSegment {
+                            ident: Ident(
+                                word2
+                            ),
+                            arguments: None
+                        }
+                    ]
+                }
+            )
+        ),
+        Comma,
+        Meta(
+            Path(
+                Path {
+                    leading_colon: None,
+                    segments: [
+                        PathSegment {
+                            ident: Ident(
+                                path
+                            ),
+                            arguments: None
+                        },
+                        Colon2,
+                        PathSegment {
+                            ident: Ident(
+                                true
+                            ),
+                            arguments: None
+                        }
+                    ]
+                }
+            )
+        )
+    ]
+}

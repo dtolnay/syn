@@ -40,6 +40,8 @@ pub trait IdentExt: Sized + private::Sealed {
     /// }
     /// ```
     fn parse_any(input: ParseStream) -> Result<Self>;
+    /// Peeks for any identifier including keywords.
+    fn peek_any(input: ParseStream) -> bool;
 }
 
 impl IdentExt for Ident {
@@ -48,6 +50,11 @@ impl IdentExt for Ident {
             Some((ident, rest)) => Ok((ident, rest)),
             None => Err(cursor.error("expected ident")),
         })
+    }
+
+    fn peek_any(input: ParseStream) -> bool {
+        let ahead = input.fork();
+        Self::parse_any(&ahead).is_ok()
     }
 }
 

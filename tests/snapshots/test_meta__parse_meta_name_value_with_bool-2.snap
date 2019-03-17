@@ -1,14 +1,22 @@
 ---
-created: "2019-03-11T05:40:21.676510552Z"
+created: "2019-03-17T21:23:40.461664300Z"
 creator: insta@0.7.1
 source: tests/test_meta.rs
 expression: syntax_tree
 ---
 NameValue(
     MetaNameValue {
-        ident: Ident(
-            true
-        ),
+        path: Path {
+            leading_colon: None,
+            segments: [
+                PathSegment {
+                    ident: Ident(
+                        true
+                    ),
+                    arguments: None
+                }
+            ]
+        },
         eq_token: Eq,
         lit: Int(
             LitInt {

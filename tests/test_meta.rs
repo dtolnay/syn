@@ -22,8 +22,18 @@ fn test_parse_meta_name_value() {
 }
 
 #[test]
+fn test_parse_meta_name_value_with_path() {
+    test::<MetaNameValue>("foo::bar = 5");
+}
+
+#[test]
 fn test_parse_meta_name_value_with_keyword() {
     test::<MetaNameValue>("static = 5");
+}
+
+#[test]
+fn test_parse_meta_name_value_with_keyword_and_path() {
+    test::<MetaNameValue>("extern::static = 5");
 }
 
 #[test]
@@ -37,8 +47,18 @@ fn test_parse_meta_item_list_lit() {
 }
 
 #[test]
+fn test_parse_meta_item_list_with_path() {
+    test::<MetaList>("foo::bar(5)");
+}
+
+#[test]
 fn test_parse_meta_item_multiple() {
     test::<MetaList>("foo(word, name = 5, list(name2 = 6), word2)");
+}
+
+#[test]
+fn test_parse_meta_item_multiple_with_path() {
+    test::<MetaList>("foo::bar(word, name = 5, list(name2 = 6), word2, path::true)");
 }
 
 #[test]

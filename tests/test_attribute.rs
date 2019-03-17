@@ -9,8 +9,18 @@ use syn::parse::Parser;
 use syn::Attribute;
 
 #[test]
-fn test_meta_item_word() {
+fn test_meta_item_path() {
     test("#[foo]")
+}
+
+#[test]
+fn test_meta_item_path_multiple_segments() {
+    test("#[foo::bar]")
+}
+
+#[test]
+fn test_meta_item_path_leading_colon() {
+    test("#[::foo::bar]")
 }
 
 #[test]
@@ -25,13 +35,18 @@ fn test_meta_item_bool_value() {
 }
 
 #[test]
-fn test_meta_item_list_lit() {
-    test("#[foo(5)]")
+fn test_meta_item_name_value_multiple_segments() {
+    test("#[foo::bar = 5]")
 }
 
 #[test]
-fn test_meta_item_list_word() {
-    test("#[foo(bar)]")
+fn test_meta_item_name_value_leading_colon() {
+    test("#[::foo::bar = 5]")
+}
+
+#[test]
+fn test_meta_item_list_lit() {
+    test("#[foo(5)]")
 }
 
 #[test]
@@ -40,8 +55,23 @@ fn test_meta_item_list_path() {
 }
 
 #[test]
+fn test_meta_item_list_path_multiple_segments() {
+    test("#[foo::bar(baz::Qux)]")
+}
+
+#[test]
+fn test_meta_item_list_path_leading_colon() {
+    test("#[::foo::bar(::baz::Qux)]")
+}
+
+#[test]
 fn test_meta_item_list_name_value() {
     test("#[foo(bar = 5)]")
+}
+
+#[test]
+fn test_meta_item_list_name_value_multiple_segments() {
+    test("#[foo(bar::baz = 5)]")
 }
 
 #[test]
@@ -50,8 +80,18 @@ fn test_meta_item_list_bool_value() {
 }
 
 #[test]
+fn test_meta_item_list_bool_value_multiple_segments() {
+    test("#[foo(bar::baz = true)]")
+}
+
+#[test]
 fn test_meta_item_multiple() {
     test("#[foo(word, name = 5, list(name2 = 6), word2)]")
+}
+
+#[test]
+fn test_meta_item_multiple_with_path() {
+    test("#[foo::bar(word, name = 5, list(name2 = 6), word2, ::path::true)]")
 }
 
 #[test]

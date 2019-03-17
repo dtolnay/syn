@@ -1,11 +1,19 @@
 ---
-created: "2019-03-11T05:39:56.788344806Z"
+created: "2019-03-17T19:07:57.590003700Z"
 creator: insta@0.7.1
 source: tests/test_attribute.rs
 expression: syntax_tree
 ---
-Word(
-    Ident(
-        foo
-    )
+Path(
+    Path {
+        leading_colon: None,
+        segments: [
+            PathSegment {
+                ident: Ident(
+                    foo
+                ),
+                arguments: None
+            }
+        ]
+    }
 )

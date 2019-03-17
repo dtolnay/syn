@@ -1,0 +1,36 @@
+---
+created: "2019-03-17T21:23:40.462661Z"
+creator: insta@0.7.1
+source: tests/test_meta.rs
+expression: syntax_tree
+---
+NameValue(
+    MetaNameValue {
+        path: Path {
+            leading_colon: None,
+            segments: [
+                PathSegment {
+                    ident: Ident(
+                        extern
+                    ),
+                    arguments: None
+                },
+                Colon2,
+                PathSegment {
+                    ident: Ident(
+                        static
+                    ),
+                    arguments: None
+                }
+            ]
+        },
+        eq_token: Eq,
+        lit: Int(
+            LitInt {
+                token: Literal {
+                    lit: 5
+                }
+            }
+        )
+    }
+)

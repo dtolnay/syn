@@ -146,26 +146,20 @@ impl Attribute {
 
         #[cfg(not(feature = "parsing"))]
         {
-            let name = if self.path.segments.len() == 1 {
-                &self.path.segments.first().unwrap().value().ident
-            } else {
-                return None;
-            };
-
             if self.tts.is_empty() {
-                return Some(Meta::Word(name.clone()));
+                return Some(Meta::Path(self.path.clone()));
             }
 
             let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
 
             if tts.len() == 1 {
-                if let Some(meta) = Attribute::extract_meta_list(name.clone(), &tts[0]) {
+                if let Some(meta) = Attribute::extract_meta_list(self.path.clone(), &tts[0]) {
                     return Some(meta);
                 }
             }
 
             if tts.len() == 2 {
-                if let Some(meta) = Attribute::extract_name_value(name.clone(), &tts[0], &tts[1]) {
+                if let Some(meta) = Attribute::extract_name_value(self.path.clone(), &tts[0], &tts[1]) {
                     return Some(meta);
                 }
             }
@@ -178,21 +172,7 @@ impl Attribute {
     /// possible.
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
-        if let Some(ref colon) = self.path.leading_colon {
-            return Err(Error::new(colon.spans[0], "expected meta identifier"));
-        }
-
-        let first_segment = self
-            .path
-            .segments
-            .first()
-            .expect("paths have at least one segment");
-        if let Some(colon) = first_segment.punct() {
-            return Err(Error::new(colon.spans[0], "expected meta value"));
-        }
-        let ident = first_segment.value().ident.clone();
-
-        let parser = |input: ParseStream| parsing::parse_meta_after_ident(ident, input);
+        let parser = |input: ParseStream| parsing::parse_meta_after_path(self.path.clone(), input);
         parse::Parser::parse2(parser, self.tts.clone())
     }
 
@@ -223,7 +203,7 @@ impl Attribute {
     }
 
     #[cfg(not(feature = "parsing"))]
-    fn extract_meta_list(ident: Ident, tt: &TokenTree) -> Option<Meta> {
+    fn extract_meta_list(path: Path, tt: &TokenTree) -> Option<Meta> {
         let g = match *tt {
             TokenTree::Group(ref g) => g,
             _ => return None,
@@ -238,13 +218,13 @@ impl Attribute {
         };
         Some(Meta::List(MetaList {
             paren_token: token::Paren(g.span()),
-            ident: ident,
+            path: path,
             nested: nested,
         }))
     }
 
     #[cfg(not(feature = "parsing"))]
-    fn extract_name_value(ident: Ident, a: &TokenTree, b: &TokenTree) -> Option<Meta> {
+    fn extract_name_value(path: Path, a: &TokenTree, b: &TokenTree) -> Option<Meta> {
         let a = match *a {
             TokenTree::Punct(ref o) => o,
             _ => return None,
@@ -259,14 +239,14 @@ impl Attribute {
         match *b {
             TokenTree::Literal(ref l) if !l.to_string().starts_with('/') => {
                 Some(Meta::NameValue(MetaNameValue {
-                    ident: ident,
+                    path: path,
                     eq_token: Token![=]([a.span()]),
                     lit: Lit::new(l.clone()),
                 }))
             }
             TokenTree::Ident(ref v) => match &v.to_string()[..] {
                 v @ "true" | v @ "false" => Some(Meta::NameValue(MetaNameValue {
-                    ident: ident,
+                    path: path,
                     eq_token: Token![=]([a.span()]),
                     lit: Lit::Bool(LitBool {
                         value: v == "true",
@@ -294,15 +274,16 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
             }
         }
 
+        // FIXME: Need to parse `Path`, not just one token.
         TokenTree::Ident(ref ident) => {
             if tts.len() >= 3 {
-                if let Some(meta) = Attribute::extract_name_value(ident.clone(), &tts[1], &tts[2]) {
+                if let Some(meta) = Attribute::extract_name_value(ident.clone().into(), &tts[1], &tts[2]) {
                     return Some((NestedMeta::Meta(meta), &tts[3..]));
                 }
             }
 
             if tts.len() >= 2 {
-                if let Some(meta) = Attribute::extract_meta_list(ident.clone(), &tts[1]) {
+                if let Some(meta) = Attribute::extract_meta_list(ident.clone().into(), &tts[1]) {
                     return Some((NestedMeta::Meta(meta), &tts[2..]));
                 }
             }
@@ -313,7 +294,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
                     span: ident.span(),
                 }))
             } else {
-                NestedMeta::Meta(Meta::Word(ident.clone()))
+                NestedMeta::Meta(Meta::Path(ident.clone().into()))
             };
             Some((nested_meta, &tts[1..]))
         }
@@ -413,18 +394,14 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Meta {
-        pub Word(Ident),
         /// A path within an attribute, like `serde::Serialize`.
-        ///
-        /// For compatibility reasons, if there is only a single segment the
-        /// `Meta::Word` variant will be returned.
         pub Path(Path),
         /// A structured list within an attribute, like `derive(Copy, Clone)`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub List(MetaList {
-            pub ident: Ident,
+            pub path: Path,
             pub paren_token: token::Paren,
             pub nested: Punctuated<NestedMeta, Token![,]>,
         }),
@@ -433,7 +410,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub NameValue(MetaNameValue {
-            pub ident: Ident,
+            pub path: Path,
             pub eq_token: Token![=],
             pub lit: Lit,
         }),
@@ -448,21 +425,13 @@ impl Meta {
     /// * `test` in `#[test]`
     /// * `derive` in `#[derive(Copy)]`
     /// * `Copy` in `Copy`
-    /// * `serde` in `serde::Serialize`
+    /// * `serde::Serialize` in `serde::Serialize`
     /// * `path` in `#[path = "sys/windows.rs"]`.
-    pub fn name(&self) -> Ident {
+    pub fn name(&self) -> Path {
         match *self {
-            Meta::Word(ref meta) => meta.clone(),
-            Meta::Path(ref path) => {
-                path.segments
-                    .first()
-                    .expect("paths have at least one segment")
-                    .value()
-                    .ident
-                    .clone()
-            }
-            Meta::List(ref meta) => meta.ident.clone(),
-            Meta::NameValue(ref meta) => meta.ident.clone(),
+            Meta::Path(ref path) => path.clone(),
+            Meta::List(ref meta) => meta.path.clone(),
+            Meta::NameValue(ref meta) => meta.path.clone(),
         }
     }
 }
@@ -474,7 +443,7 @@ ast_enum_of_structs! {
     /// feature.*
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
-        /// would be a nested `Meta::Word`, and `serde::Serialize` in
+        /// would be a nested `Meta::Path`, and `serde::Serialize` in
         /// `#[derive(serde::Serialize)]` would be a nested `Meta::Path`.
         pub Meta(Meta),
 
@@ -560,7 +529,6 @@ where
 pub mod parsing {
     use super::*;
 
-    use ext::IdentExt;
     use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
     use private;
@@ -571,7 +539,7 @@ pub mod parsing {
             pound_token: input.parse()?,
             style: AttrStyle::Inner(input.parse()?),
             bracket_token: bracketed!(content in input),
-            path: content.call(Path::parse_mod_style)?,
+            path: content.call(Path::parse_meta)?,
             tts: content.parse()?,
         })
     }
@@ -582,7 +550,7 @@ pub mod parsing {
             pound_token: input.parse()?,
             style: AttrStyle::Outer,
             bracket_token: bracketed!(content in input),
-            path: content.call(Path::parse_mod_style)?,
+            path: content.call(Path::parse_meta)?,
             tts: content.parse()?,
         })
     }
@@ -607,34 +575,23 @@ pub mod parsing {
         ///
         /// Therefore, we need to accept `Path`s as well, while erring on
         /// invalid usages of `Path`s.
-        ///
-        /// For backward compatibility, we will treat single segment paths as
-        /// `Meta::Word`s.
         fn parse(input: ParseStream) -> Result<Self> {
-            // We assume `Path` values to contain `::` as single words are parsed as `Meta::Word`
-            // for backward compatibility.
-            if input.peek(Token![::]) || input.peek2(Token![::]) {
-                let path = input.call(Path::parse_mod_style)?;
-                Ok(Meta::Path(path))
-            } else {
-                let ident = input.call(Ident::parse_any)?;
-                parse_meta_after_ident(ident, input)
-            }
-
+            let path = input.call(Path::parse_meta)?;
+            parse_meta_after_path(path, input)
         }
     }
 
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.call(Ident::parse_any)?;
-            parse_meta_list_after_ident(ident, input)
+            let path = input.call(Path::parse_meta)?;
+            parse_meta_list_after_path(path, input)
         }
     }
 
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.call(Ident::parse_any)?;
-            parse_meta_name_value_after_ident(ident, input)
+            let path = input.call(Path::parse_meta)?;
+            parse_meta_name_value_after_path(path, input)
         }
     }
 
@@ -644,39 +601,39 @@ pub mod parsing {
 
             if ahead.peek(Lit) && !(ahead.peek(LitBool) && ahead.peek2(Token![=])) {
                 input.parse().map(NestedMeta::Literal)
-            } else if ahead.call(Ident::parse_any).is_ok() {
+            } else if ahead.call(Path::parse_meta).is_ok() {
                 input.parse().map(NestedMeta::Meta)
             } else {
-                Err(input.error("expected identifier or literal"))
+                Err(input.error("expected path or literal"))
             }
         }
     }
 
-    pub fn parse_meta_after_ident(ident: Ident, input: ParseStream) -> Result<Meta> {
+    pub fn parse_meta_after_path(path: Path, input: ParseStream) -> Result<Meta> {
         if input.peek(token::Paren) {
-            parse_meta_list_after_ident(ident, input).map(Meta::List)
+            parse_meta_list_after_path(path, input).map(Meta::List)
         } else if input.peek(Token![=]) {
-            parse_meta_name_value_after_ident(ident, input).map(Meta::NameValue)
+            parse_meta_name_value_after_path(path, input).map(Meta::NameValue)
         } else {
-            Ok(Meta::Word(ident))
+            Ok(Meta::Path(path))
         }
     }
 
-    fn parse_meta_list_after_ident(ident: Ident, input: ParseStream) -> Result<MetaList> {
+    fn parse_meta_list_after_path(path: Path, input: ParseStream) -> Result<MetaList> {
         let content;
         Ok(MetaList {
-            ident: ident,
+            path: path,
             paren_token: parenthesized!(content in input),
             nested: content.parse_terminated(NestedMeta::parse)?,
         })
     }
 
-    fn parse_meta_name_value_after_ident(
-        ident: Ident,
+    fn parse_meta_name_value_after_path(
+        path: Path,
         input: ParseStream,
     ) -> Result<MetaNameValue> {
         Ok(MetaNameValue {
-            ident: ident,
+            path: path,
             eq_token: input.parse()?,
             lit: input.parse()?,
         })
@@ -704,7 +661,7 @@ mod printing {
 
     impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.ident.to_tokens(tokens);
+            self.path.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.nested.to_tokens(tokens);
             })
@@ -713,7 +670,7 @@ mod printing {
 
     impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.ident.to_tokens(tokens);
+            self.path.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.lit.to_tokens(tokens);
         }

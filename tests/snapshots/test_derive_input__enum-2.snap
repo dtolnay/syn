@@ -1,5 +1,5 @@
 ---
-created: "2019-03-11T05:40:06.910167896Z"
+created: "2019-03-17T20:01:48.967344100Z"
 creator: insta@0.7.1
 source: tests/test_derive_input.rs
 expression: syntax_tree
@@ -7,9 +7,17 @@ expression: syntax_tree
 [
     NameValue(
         MetaNameValue {
-            ident: Ident(
-                doc
-            ),
+            path: Path {
+                leading_colon: None,
+                segments: [
+                    PathSegment {
+                        ident: Ident(
+                            doc
+                        ),
+                        arguments: None
+                    }
+                ]
+            },
             eq_token: Eq,
             lit: Str(
                 LitStr {
@@ -20,9 +28,17 @@ expression: syntax_tree
             )
         }
     ),
-    Word(
-        Ident(
-            must_use
-        )
+    Path(
+        Path {
+            leading_colon: None,
+            segments: [
+                PathSegment {
+                    ident: Ident(
+                        must_use
+                    ),
+                    arguments: None
+                }
+            ]
+        }
     )
 ]

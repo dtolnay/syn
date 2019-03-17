@@ -1,5 +1,5 @@
 ---
-created: "2019-03-11T05:40:21.688020363Z"
+created: "2019-03-17T20:26:22.508944900Z"
 creator: insta@0.7.1
 source: tests/test_meta.rs
 expression: syntax_tree
@@ -7,17 +7,33 @@ expression: syntax_tree
 Meta(
     List(
         MetaList {
-            ident: Ident(
-                list
-            ),
+            path: Path {
+                leading_colon: None,
+                segments: [
+                    PathSegment {
+                        ident: Ident(
+                            list
+                        ),
+                        arguments: None
+                    }
+                ]
+            },
             paren_token: Paren,
             nested: [
                 Meta(
                     NameValue(
                         MetaNameValue {
-                            ident: Ident(
-                                name2
-                            ),
+                            path: Path {
+                                leading_colon: None,
+                                segments: [
+                                    PathSegment {
+                                        ident: Ident(
+                                            name2
+                                        ),
+                                        arguments: None
+                                    }
+                                ]
+                            },
                             eq_token: Eq,
                             lit: Int(
                                 LitInt {

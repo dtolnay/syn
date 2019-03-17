@@ -1,14 +1,22 @@
 ---
-created: "2019-03-11T05:40:21.675781063Z"
+created: "2019-03-17T20:28:26.050832100Z"
 creator: insta@0.7.1
 source: tests/test_meta.rs
 expression: syntax_tree
 ---
 List(
     MetaList {
-        ident: Ident(
-            foo
-        ),
+        path: Path {
+            leading_colon: None,
+            segments: [
+                PathSegment {
+                    ident: Ident(
+                        foo
+                    ),
+                    arguments: None
+                }
+            ]
+        },
         paren_token: Paren,
         nested: [
             Literal(

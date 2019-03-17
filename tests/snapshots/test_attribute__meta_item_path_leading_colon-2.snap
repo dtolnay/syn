@@ -1,0 +1,28 @@
+---
+created: "2019-03-17T19:29:17.514338300Z"
+creator: insta@0.7.1
+source: tests/test_attribute.rs
+expression: syntax_tree
+---
+Path(
+    Path {
+        leading_colon: Some(
+            Colon2
+        ),
+        segments: [
+            PathSegment {
+                ident: Ident(
+                    foo
+                ),
+                arguments: None
+            },
+            Colon2,
+            PathSegment {
+                ident: Ident(
+                    bar
+                ),
+                arguments: None
+            }
+        ]
+    }
+)

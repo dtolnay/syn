@@ -2548,9 +2548,6 @@ pub fn visit_member<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast M
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Meta) {
     match *_i {
-        Meta::Word(ref _binding_0) => {
-            _visitor.visit_ident(_binding_0);
-        }
         Meta::Path(ref _binding_0) => {
             _visitor.visit_path(_binding_0);
         }
@@ -2564,7 +2561,7 @@ pub fn visit_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Met
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta_list<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MetaList) {
-    _visitor.visit_ident(&_i.ident);
+    _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.nested) {
         let it = el.value();
@@ -2576,7 +2573,7 @@ pub fn visit_meta_name_value<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast MetaNameValue,
 ) {
-    _visitor.visit_ident(&_i.ident);
+    _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.eq_token.spans);
     _visitor.visit_lit(&_i.lit);
 }

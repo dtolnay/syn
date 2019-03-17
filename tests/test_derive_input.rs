@@ -107,7 +107,7 @@ fn test_attr_with_mod_style_path_with_self() {
 
     let actual = snapshot!(code as DeriveInput);
 
-    assert!(actual.attrs[0].interpret_meta().is_none());
+    assert!(actual.attrs[0].interpret_meta().is_some());
 }
 
 #[test]
