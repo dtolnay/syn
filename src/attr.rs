@@ -146,20 +146,24 @@ impl Attribute {
 
         #[cfg(not(feature = "parsing"))]
         {
+            let path = Self::clone_ident_path(&self.path);
+            if path.is_none() {
+                return None;
+            }
+            let path = path.unwrap();
+
             if self.tts.is_empty() {
-                return Some(Meta::Path(self.path.clone()));
+                return Some(Meta::Path(path));
             }
 
             let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
 
             if tts.len() == 1 {
-                if let Some(meta) = Attribute::extract_meta_list(self.path.clone(), &tts[0]) {
+                if let Some(meta) = Attribute::extract_meta_list(path, &tts[0]) {
                     return Some(meta);
                 }
-            }
-
-            if tts.len() == 2 {
-                if let Some(meta) = Attribute::extract_name_value(self.path.clone(), &tts[0], &tts[1]) {
+            } else if tts.len() == 2 {
+                if let Some(meta) = Attribute::extract_name_value(path, &tts[0], &tts[1]) {
                     return Some(meta);
                 }
             }
@@ -170,9 +174,30 @@ impl Attribute {
 
     /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
     /// possible.
-    #[cfg(feature = "parsing")]
+    #[cfg(all(feature = "parsing", feature = "clone-impls"))]
     pub fn parse_meta(&self) -> Result<Meta> {
         let parser = |input: ParseStream| parsing::parse_meta_after_path(self.path.clone(), input);
+        parse::Parser::parse2(parser, self.tts.clone())
+    }
+
+    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
+    /// possible.
+    #[cfg(all(feature = "parsing", not(feature = "clone-impls")))]
+    pub fn parse_meta(&self) -> Result<Meta> {
+        let path = Self::clone_ident_path(&self.path)
+            .ok_or_else(|| {
+                #[cfg(all(feature = "parsing", feature = "printing"))]
+                let span = {
+                    use spanned::Spanned;
+                    self.path.span()
+                };
+                #[cfg(all(feature = "parsing", not(feature = "printing")))]
+                let span = proc_macro2::Span::call_site();
+
+                Error::new(span, "path contained more than one segment")
+            })?;
+
+        let parser = |input: ParseStream| parsing::parse_meta_after_path(path, input);
         parse::Parser::parse2(parser, self.tts.clone())
     }
 
@@ -258,6 +283,19 @@ impl Attribute {
             _ => None,
         }
     }
+
+    /// Returns an owned `Path` if the given `Path` comprises of a single `Ident`.
+    #[cfg(any(
+        all(feature = "parsing", not(feature = "clone-impls")),
+        not(feature = "parsing")
+    ))]
+    fn clone_ident_path(path: &Path) -> Option<Path> {
+        if path.segments.len() == 1 {
+            path.segments.first().map(|pair| pair.value().ident.clone().into())
+        } else {
+            return None;
+        }
+    }
 }
 
 #[cfg(not(feature = "parsing"))]
@@ -274,7 +312,8 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
             }
         }
 
-        // FIXME: Need to parse `Path`, not just one token.
+        // This function is only called by the deprecated `interpret_meta(..)` function.
+        // It does not cater for path Meta items with more than one segment.
         TokenTree::Ident(ref ident) => {
             if tts.len() >= 3 {
                 if let Some(meta) = Attribute::extract_name_value(ident.clone().into(), &tts[1], &tts[2]) {
@@ -427,6 +466,10 @@ impl Meta {
     /// * `Copy` in `Copy`
     /// * `serde::Serialize` in `serde::Serialize`
     /// * `path` in `#[path = "sys/windows.rs"]`.
+    ///
+    /// *This type is available if Syn is built with the `"clone-impls"`
+    /// feature.*
+    #[cfg(feature = "clone-impls")]
     pub fn name(&self) -> Path {
         match *self {
             Meta::Path(ref path) => path.clone(),
