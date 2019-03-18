@@ -5,6 +5,8 @@
 use proc_macro2::Ident;
 
 use parse::{ParseStream, Result};
+use path::{Path, PathSegment};
+use punctuated::Punctuated;
 
 /// Additional parsing methods for `Ident`.
 ///
@@ -58,10 +60,56 @@ impl IdentExt for Ident {
     }
 }
 
+/// Additional parsing methods for `Path`.
+///
+/// This trait is sealed and cannot be implemented for types outside of Syn.
+///
+/// *This trait is available if Syn is built with the `"parsing"` feature.*
+pub trait PathExt: Sized + private::Sealed {
+    /// Parse a `Path` in mod style, while accepting keywords.
+    ///
+    /// This function is only available within `syn` to parse meta items.
+    ///
+    /// *This function is available if Syn is built with the `"parsing"`
+    /// feature.*
+    fn parse_meta(input: ParseStream) -> Result<Self>;
+}
+
+impl PathExt for Path {
+    fn parse_meta(input: ParseStream) -> Result<Self> {
+        Ok(Path {
+            leading_colon: input.parse()?,
+            segments: {
+                let mut segments = Punctuated::new();
+                loop {
+                    if !Ident::peek_any(input) {
+                        break;
+                    }
+                    let ident = Ident::parse_any(input)?;
+                    segments.push_value(PathSegment::from(ident));
+                    if !input.peek(Token![::]) {
+                        break;
+                    }
+                    let punct = input.parse()?;
+                    segments.push_punct(punct);
+                }
+                if segments.is_empty() {
+                    return Err(input.error("expected path"));
+                } else if segments.trailing_punct() {
+                    return Err(input.error("expected path segment"));
+                }
+                segments
+            },
+        })
+    }
+}
+
 mod private {
     use proc_macro2::Ident;
+    use path::Path;
 
     pub trait Sealed {}
 
     impl Sealed for Ident {}
+    impl Sealed for Path {}
 }

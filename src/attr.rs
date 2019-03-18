@@ -529,6 +529,7 @@ where
 pub mod parsing {
     use super::*;
 
+    use ext::PathExt;
     use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
     use private;
