@@ -5,8 +5,9 @@
 use proc_macro2::Ident;
 
 use parse::{ParseStream, Result};
-use path::{Path, PathSegment};
 use punctuated::Punctuated;
+#[cfg(any(feature = "full", feature = "derive"))]
+use path::{Path, PathSegment};
 
 /// Additional parsing methods for `Ident`.
 ///
@@ -60,6 +61,7 @@ impl IdentExt for Ident {
     }
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 /// Additional parsing methods for `Path`.
 ///
 /// This trait is sealed and cannot be implemented for types outside of Syn.
@@ -75,6 +77,7 @@ pub trait PathExt: Sized + private::Sealed {
     fn parse_meta(input: ParseStream) -> Result<Self>;
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 impl PathExt for Path {
     fn parse_meta(input: ParseStream) -> Result<Self> {
         Ok(Path {
@@ -106,10 +109,14 @@ impl PathExt for Path {
 
 mod private {
     use proc_macro2::Ident;
+
+    #[cfg(any(feature = "full", feature = "derive"))]
     use path::Path;
 
     pub trait Sealed {}
 
     impl Sealed for Ident {}
+
+    #[cfg(any(feature = "full", feature = "derive"))]
     impl Sealed for Path {}
 }
