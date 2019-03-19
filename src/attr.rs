@@ -184,18 +184,17 @@ impl Attribute {
     /// possible.
     #[cfg(all(feature = "parsing", not(feature = "clone-impls")))]
     pub fn parse_meta(&self) -> Result<Meta> {
-        let path = Self::clone_ident_path(&self.path)
-            .ok_or_else(|| {
-                #[cfg(all(feature = "parsing", feature = "printing"))]
-                let span = {
-                    use spanned::Spanned;
-                    self.path.span()
-                };
-                #[cfg(all(feature = "parsing", not(feature = "printing")))]
-                let span = proc_macro2::Span::call_site();
+        let path = Self::clone_ident_path(&self.path).ok_or_else(|| {
+            #[cfg(all(feature = "parsing", feature = "printing"))]
+            let span = {
+                use spanned::Spanned;
+                self.path.span()
+            };
+            #[cfg(all(feature = "parsing", not(feature = "printing")))]
+            let span = proc_macro2::Span::call_site();
 
-                Error::new(span, "path contained more than one segment")
-            })?;
+            Error::new(span, "path contained more than one segment")
+        })?;
 
         let parser = |input: ParseStream| parsing::parse_meta_after_path(path, input);
         parse::Parser::parse2(parser, self.tts.clone())
@@ -291,7 +290,9 @@ impl Attribute {
     ))]
     fn clone_ident_path(path: &Path) -> Option<Path> {
         if path.segments.len() == 1 {
-            path.segments.first().map(|pair| pair.value().ident.clone().into())
+            path.segments
+                .first()
+                .map(|pair| pair.value().ident.clone().into())
         } else {
             return None;
         }
@@ -316,7 +317,9 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
         // It does not cater for path Meta items with more than one segment.
         TokenTree::Ident(ref ident) => {
             if tts.len() >= 3 {
-                if let Some(meta) = Attribute::extract_name_value(ident.clone().into(), &tts[1], &tts[2]) {
+                if let Some(meta) =
+                    Attribute::extract_name_value(ident.clone().into(), &tts[1], &tts[2])
+                {
                     return Some((NestedMeta::Meta(meta), &tts[3..]));
                 }
             }
@@ -572,7 +575,7 @@ where
 pub mod parsing {
     use super::*;
 
-    use ext::PathExt;
+    use ext::IdentExt;
     use parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
     use private;
@@ -583,7 +586,7 @@ pub mod parsing {
             pound_token: input.parse()?,
             style: AttrStyle::Inner(input.parse()?),
             bracket_token: bracketed!(content in input),
-            path: content.call(Path::parse_meta)?,
+            path: content.call(parse_meta_path)?,
             tts: content.parse()?,
         })
     }
@@ -594,7 +597,7 @@ pub mod parsing {
             pound_token: input.parse()?,
             style: AttrStyle::Outer,
             bracket_token: bracketed!(content in input),
-            path: content.call(Path::parse_meta)?,
+            path: content.call(parse_meta_path)?,
             tts: content.parse()?,
         })
     }
@@ -620,21 +623,21 @@ pub mod parsing {
         /// Therefore, we need to accept `Path`s as well, while erring on
         /// invalid usages of `Path`s.
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_meta)?;
+            let path = input.call(parse_meta_path)?;
             parse_meta_after_path(path, input)
         }
     }
 
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_meta)?;
+            let path = input.call(parse_meta_path)?;
             parse_meta_list_after_path(path, input)
         }
     }
 
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_meta)?;
+            let path = input.call(parse_meta_path)?;
             parse_meta_name_value_after_path(path, input)
         }
     }
@@ -645,7 +648,7 @@ pub mod parsing {
 
             if ahead.peek(Lit) && !(ahead.peek(LitBool) && ahead.peek2(Token![=])) {
                 input.parse().map(NestedMeta::Literal)
-            } else if ahead.call(Path::parse_meta).is_ok() {
+            } else if ahead.call(parse_meta_path).is_ok() {
                 input.parse().map(NestedMeta::Meta)
             } else {
                 Err(input.error("expected path or literal"))
@@ -672,14 +675,39 @@ pub mod parsing {
         })
     }
 
-    fn parse_meta_name_value_after_path(
-        path: Path,
-        input: ParseStream,
-    ) -> Result<MetaNameValue> {
+    fn parse_meta_name_value_after_path(path: Path, input: ParseStream) -> Result<MetaNameValue> {
         Ok(MetaNameValue {
             path: path,
             eq_token: input.parse()?,
             lit: input.parse()?,
+        })
+    }
+
+    /// Parse a `Path` in mod style, while accepting keywords.
+    fn parse_meta_path(input: ParseStream) -> Result<Path> {
+        Ok(Path {
+            leading_colon: input.parse()?,
+            segments: {
+                let mut segments = Punctuated::new();
+                loop {
+                    if !Ident::peek_any(input) {
+                        break;
+                    }
+                    let ident = Ident::parse_any(input)?;
+                    segments.push_value(PathSegment::from(ident));
+                    if !input.peek(Token![::]) {
+                        break;
+                    }
+                    let punct = input.parse()?;
+                    segments.push_punct(punct);
+                }
+                if segments.is_empty() {
+                    return Err(input.error("expected path"));
+                } else if segments.trailing_punct() {
+                    return Err(input.error("expected path segment"));
+                }
+                segments
+            },
         })
     }
 }
