@@ -460,7 +460,7 @@ ast_enum_of_structs! {
 }
 
 impl Meta {
-    /// Returns the identifier that begins this structured meta item.
+    /// Returns the path that begins this structured meta item.
     ///
     /// For example this would return:
     ///
@@ -469,15 +469,11 @@ impl Meta {
     /// * `Copy` in `Copy`
     /// * `serde::Serialize` in `serde::Serialize`
     /// * `path` in `#[path = "sys/windows.rs"]`.
-    ///
-    /// *This type is available if Syn is built with the `"clone-impls"`
-    /// feature.*
-    #[cfg(feature = "clone-impls")]
-    pub fn name(&self) -> Path {
+    pub fn name(&self) -> &Path {
         match *self {
-            Meta::Path(ref path) => path.clone(),
-            Meta::List(ref meta) => meta.path.clone(),
-            Meta::NameValue(ref meta) => meta.path.clone(),
+            Meta::Path(ref path) => &path,
+            Meta::List(ref meta) => &meta.path,
+            Meta::NameValue(ref meta) => &meta.path,
         }
     }
 }
