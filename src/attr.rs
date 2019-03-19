@@ -1,7 +1,7 @@
 use super::*;
 use punctuated::Punctuated;
 
-use std::iter;
+use std::iter::{self, FromIterator};
 
 use proc_macro2::TokenStream;
 #[cfg(not(feature = "parsing"))]
@@ -146,11 +146,7 @@ impl Attribute {
 
         #[cfg(not(feature = "parsing"))]
         {
-            let path = Self::clone_ident_path(&self.path);
-            if path.is_none() {
-                return None;
-            }
-            let path = path.unwrap();
+            let path = Self::clone_attribute_path(&self.path);
 
             if self.tts.is_empty() {
                 return Some(Meta::Path(path));
@@ -174,29 +170,11 @@ impl Attribute {
 
     /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
     /// possible.
-    #[cfg(all(feature = "parsing", feature = "clone-impls"))]
+    #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
-        let parser = |input: ParseStream| parsing::parse_meta_after_path(self.path.clone(), input);
-        parse::Parser::parse2(parser, self.tts.clone())
-    }
-
-    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
-    /// possible.
-    #[cfg(all(feature = "parsing", not(feature = "clone-impls")))]
-    pub fn parse_meta(&self) -> Result<Meta> {
-        let path = Self::clone_ident_path(&self.path).ok_or_else(|| {
-            #[cfg(all(feature = "parsing", feature = "printing"))]
-            let span = {
-                use spanned::Spanned;
-                self.path.span()
-            };
-            #[cfg(all(feature = "parsing", not(feature = "printing")))]
-            let span = proc_macro2::Span::call_site();
-
-            Error::new(span, "path contained more than one segment")
-        })?;
-
-        let parser = |input: ParseStream| parsing::parse_meta_after_path(path, input);
+        let parser = |input: ParseStream| {
+            parsing::parse_meta_after_path(Self::clone_attribute_path(&self.path), input)
+        };
         parse::Parser::parse2(parser, self.tts.clone())
     }
 
@@ -283,18 +261,19 @@ impl Attribute {
         }
     }
 
-    /// Returns an owned `Path` if the given `Path` comprises of a single `Ident`.
-    #[cfg(any(
-        all(feature = "parsing", not(feature = "clone-impls")),
-        not(feature = "parsing")
-    ))]
-    fn clone_ident_path(path: &Path) -> Option<Path> {
-        if path.segments.len() == 1 {
-            path.segments
-                .first()
-                .map(|pair| pair.value().ident.clone().into())
-        } else {
-            return None;
+    fn clone_attribute_path(path: &Path) -> Path {
+        let path_segments_iter = path.segments.iter().map(|segment| PathSegment {
+            ident: segment.ident.clone(),
+            arguments: PathArguments::None,
+        });
+        let segments = Punctuated::<PathSegment, Token![::]>::from_iter(path_segments_iter);
+        Path {
+            leading_colon: if path.leading_colon.is_some() {
+                Some(<Token![::]>::default())
+            } else {
+                None
+            },
+            segments: segments,
         }
     }
 }
