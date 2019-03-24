@@ -352,7 +352,7 @@ spanless_eq_enum!(UnOp; Deref Not Neg);
 spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
 spanless_eq_enum!(Unsafety; Unsafe Normal);
 spanless_eq_enum!(UseTreeKind; Simple(0 1 2) Nested(0) Glob);
-spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
+spanless_eq_enum!(VariantData; Struct(0 1 2) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Crate(0) Restricted(path id) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(ExprKind; Box(0) ObsoleteInPlace(0 1) Array(0) Call(0 1)
