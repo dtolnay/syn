@@ -1982,7 +1982,7 @@ pub fn fold_item_impl<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemImpl) -> ItemI
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         defaultness: (_i.defaultness).map(|it| Token![default](tokens_helper(_visitor, &it.span))),
         unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
-        impl_token: Token![impl ](tokens_helper(_visitor, &_i.impl_token.span)),
+        impl_token: Token![impl](tokens_helper(_visitor, &_i.impl_token.span)),
         generics: _visitor.fold_generics(_i.generics),
         trait_: (_i.trait_).map(|it| {
             (
@@ -2692,7 +2692,7 @@ pub fn fold_type_impl_trait<V: Fold + ?Sized>(
     _i: TypeImplTrait,
 ) -> TypeImplTrait {
     TypeImplTrait {
-        impl_token: Token![impl ](tokens_helper(_visitor, &_i.impl_token.span)),
+        impl_token: Token![impl](tokens_helper(_visitor, &_i.impl_token.span)),
         bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
     }
 }
