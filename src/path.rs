@@ -232,7 +232,7 @@ pub mod parsing {
                 }
 
                 if input.peek(Lit) {
-                    let lit = input.call(expr::parsing::expr_lit)?;
+                    let lit = input.parse()?;
                     return Ok(GenericArgument::Const(Expr::Lit(lit)));
                 }
 

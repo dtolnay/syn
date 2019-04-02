@@ -1464,7 +1464,7 @@ pub mod parsing {
         if input.peek(token::Group) {
             input.call(expr_group).map(Expr::Group)
         } else if input.peek(Lit) {
-            input.call(expr_lit).map(Expr::Lit)
+            input.parse().map(Expr::Lit)
         } else if input.peek(Token![async])
             && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace))
         {
@@ -1500,13 +1500,13 @@ pub mod parsing {
         } else if input.peek(Token![let]) {
             input.call(expr_let).map(Expr::Let)
         } else if input.peek(Token![if]) {
-            input.call(expr_if).map(Expr::If)
+            input.parse().map(Expr::If)
         } else if input.peek(Token![while]) {
-            input.call(expr_while).map(Expr::While)
+            input.parse().map(Expr::While)
         } else if input.peek(Token![for]) {
-            input.call(expr_for_loop).map(Expr::ForLoop)
+            input.parse().map(Expr::ForLoop)
         } else if input.peek(Token![loop]) {
-            input.call(expr_loop).map(Expr::Loop)
+            input.parse().map(Expr::Loop)
         } else if input.peek(Token![match]) {
             input.parse().map(Expr::Match)
         } else if input.peek(Token![yield]) {
@@ -1520,11 +1520,11 @@ pub mod parsing {
         } else if input.peek(Lifetime) {
             let the_label: Label = input.parse()?;
             let mut expr = if input.peek(Token![while]) {
-                Expr::While(input.call(expr_while)?)
+                Expr::While(input.parse()?)
             } else if input.peek(Token![for]) {
-                Expr::ForLoop(input.call(expr_for_loop)?)
+                Expr::ForLoop(input.parse()?)
             } else if input.peek(Token![loop]) {
-                Expr::Loop(input.call(expr_loop)?)
+                Expr::Loop(input.parse()?)
             } else if input.peek(token::Brace) {
                 Expr::Block(input.call(expr_block)?)
             } else {
@@ -1546,7 +1546,7 @@ pub mod parsing {
     #[cfg(not(feature = "full"))]
     fn atom_expr(input: ParseStream, _allow_struct: AllowStruct) -> Result<Expr> {
         if input.peek(Lit) {
-            input.call(expr_lit).map(Expr::Lit)
+            input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
             input.call(expr_paren).map(Expr::Paren)
         } else if input.peek(Ident)
@@ -1695,13 +1695,13 @@ pub mod parsing {
     fn expr_early(input: ParseStream) -> Result<Expr> {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let mut expr = if input.peek(Token![if]) {
-            Expr::If(input.call(expr_if)?)
+            Expr::If(input.parse()?)
         } else if input.peek(Token![while]) {
-            Expr::While(input.call(expr_while)?)
+            Expr::While(input.parse()?)
         } else if input.peek(Token![for]) {
-            Expr::ForLoop(input.call(expr_for_loop)?)
+            Expr::ForLoop(input.parse()?)
         } else if input.peek(Token![loop]) {
-            Expr::Loop(input.call(expr_loop)?)
+            Expr::Loop(input.parse()?)
         } else if input.peek(Token![match]) {
             Expr::Match(input.parse()?)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
@@ -1735,11 +1735,13 @@ pub mod parsing {
         Ok(expr)
     }
 
-    pub fn expr_lit(input: ParseStream) -> Result<ExprLit> {
-        Ok(ExprLit {
-            attrs: Vec::new(),
-            lit: input.parse()?,
-        })
+    impl Parse for ExprLit {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprLit {
+                attrs: Vec::new(),
+                lit: input.parse()?,
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1792,20 +1794,22 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_if(input: ParseStream) -> Result<ExprIf> {
-        Ok(ExprIf {
-            attrs: Vec::new(),
-            if_token: input.parse()?,
-            cond: Box::new(input.call(expr_no_struct)?),
-            then_branch: input.parse()?,
-            else_branch: {
-                if input.peek(Token![else]) {
-                    Some(input.call(else_block)?)
-                } else {
-                    None
-                }
-            },
-        })
+    impl Parse for ExprIf {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprIf {
+                attrs: Vec::new(),
+                if_token: input.parse()?,
+                cond: Box::new(input.call(expr_no_struct)?),
+                then_branch: input.parse()?,
+                else_branch: {
+                    if input.peek(Token![else]) {
+                        Some(input.call(else_block)?)
+                    } else {
+                        None
+                    }
+                },
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -1814,7 +1818,7 @@ pub mod parsing {
 
         let lookahead = input.lookahead1();
         let else_branch = if input.peek(Token![if]) {
-            input.call(expr_if).map(Expr::If)?
+            input.parse().map(Expr::If)?
         } else if input.peek(token::Brace) {
             Expr::Block(ExprBlock {
                 attrs: Vec::new(),
@@ -1829,51 +1833,55 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_for_loop(input: ParseStream) -> Result<ExprForLoop> {
-        let label: Option<Label> = input.parse()?;
-        let for_token: Token![for] = input.parse()?;
-        let pat: Pat = input.parse()?;
-        let in_token: Token![in] = input.parse()?;
-        let expr: Expr = input.call(expr_no_struct)?;
+    impl Parse for ExprForLoop {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let label: Option<Label> = input.parse()?;
+            let for_token: Token![for] = input.parse()?;
+            let pat: Pat = input.parse()?;
+            let in_token: Token![in] = input.parse()?;
+            let expr: Expr = input.call(expr_no_struct)?;
 
-        let content;
-        let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
-        let stmts = content.call(Block::parse_within)?;
+            let content;
+            let brace_token = braced!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let stmts = content.call(Block::parse_within)?;
 
-        Ok(ExprForLoop {
-            attrs: inner_attrs,
-            label: label,
-            for_token: for_token,
-            pat: Box::new(pat),
-            in_token: in_token,
-            expr: Box::new(expr),
-            body: Block {
-                brace_token: brace_token,
-                stmts: stmts,
-            },
-        })
+            Ok(ExprForLoop {
+                attrs: inner_attrs,
+                label: label,
+                for_token: for_token,
+                pat: Box::new(pat),
+                in_token: in_token,
+                expr: Box::new(expr),
+                body: Block {
+                    brace_token: brace_token,
+                    stmts: stmts,
+                },
+            })
+        }
     }
 
     #[cfg(feature = "full")]
-    fn expr_loop(input: ParseStream) -> Result<ExprLoop> {
-        let label: Option<Label> = input.parse()?;
-        let loop_token: Token![loop] = input.parse()?;
+    impl Parse for ExprLoop {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let label: Option<Label> = input.parse()?;
+            let loop_token: Token![loop] = input.parse()?;
 
-        let content;
-        let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
-        let stmts = content.call(Block::parse_within)?;
+            let content;
+            let brace_token = braced!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let stmts = content.call(Block::parse_within)?;
 
-        Ok(ExprLoop {
-            attrs: inner_attrs,
-            label: label,
-            loop_token: loop_token,
-            body: Block {
-                brace_token: brace_token,
-                stmts: stmts,
-            },
-        })
+            Ok(ExprLoop {
+                attrs: inner_attrs,
+                label: label,
+                loop_token: loop_token,
+                body: Block {
+                    brace_token: brace_token,
+                    stmts: stmts,
+                },
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2006,27 +2014,30 @@ pub mod parsing {
         }
     }
 
+
     #[cfg(feature = "full")]
-    fn expr_while(input: ParseStream) -> Result<ExprWhile> {
-        let label: Option<Label> = input.parse()?;
-        let while_token: Token![while] = input.parse()?;
-        let cond = expr_no_struct(input)?;
+    impl Parse for ExprWhile {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let label: Option<Label> = input.parse()?;
+            let while_token: Token![while] = input.parse()?;
+            let cond = expr_no_struct(input)?;
 
-        let content;
-        let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
-        let stmts = content.call(Block::parse_within)?;
+            let content;
+            let brace_token = braced!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let stmts = content.call(Block::parse_within)?;
 
-        Ok(ExprWhile {
-            attrs: inner_attrs,
-            label: label,
-            while_token: while_token,
-            cond: Box::new(cond),
-            body: Block {
-                brace_token: brace_token,
-                stmts: stmts,
-            },
-        })
+            Ok(ExprWhile {
+                attrs: inner_attrs,
+                label: label,
+                while_token: while_token,
+                cond: Box::new(cond),
+                body: Block {
+                    brace_token: brace_token,
+                    stmts: stmts,
+                },
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2878,7 +2889,7 @@ pub mod parsing {
 
         let lookahead = input.lookahead1();
         let expr = if lookahead.peek(Lit) {
-            Expr::Lit(input.call(expr_lit)?)
+            Expr::Lit(input.parse()?)
         } else if lookahead.peek(Ident)
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
