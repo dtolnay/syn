@@ -491,7 +491,7 @@ pub mod parsing {
             input.parse().map(Type::Reference)
         } else if lookahead.peek(Token![!]) && !input.peek(Token![=]) {
             input.parse().map(Type::Never)
-        } else if lookahead.peek(Token![impl ]) {
+        } else if lookahead.peek(Token![impl]) {
             input.parse().map(Type::ImplTrait)
         } else if lookahead.peek(Token![_]) {
             input.parse().map(Type::Infer)

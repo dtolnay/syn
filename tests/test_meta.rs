@@ -5,9 +5,9 @@ mod features;
 #[macro_use]
 mod macros;
 
+use std::fmt::Debug;
 use syn::parse::Parse;
 use syn::{Meta, MetaList, MetaNameValue, NestedMeta};
-use std::fmt::Debug;
 
 #[test]
 fn test_parse_meta_item_word() {

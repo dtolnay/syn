@@ -2014,7 +2014,6 @@ pub mod parsing {
         }
     }
 
-
     #[cfg(feature = "full")]
     impl Parse for ExprWhile {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -2416,8 +2415,8 @@ pub mod parsing {
             || ahead.peek(Token![auto]) && ahead.peek2(Token![trait])
             || ahead.peek(Token![trait])
             || ahead.peek(Token![default])
-                && (ahead.peek2(Token![unsafe]) || ahead.peek2(Token![impl ]))
-            || ahead.peek(Token![impl ])
+                && (ahead.peek2(Token![unsafe]) || ahead.peek2(Token![impl]))
+            || ahead.peek(Token![impl])
             || ahead.peek(Token![macro])
         {
             input.parse().map(Stmt::Item)

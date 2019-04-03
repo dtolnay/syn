@@ -819,7 +819,7 @@ pub mod parsing {
                     || lookahead.peek(Token![auto]) && ahead.peek2(Token![trait])
                 {
                     input.parse().map(Item::Trait)
-                } else if lookahead.peek(Token![impl ]) {
+                } else if lookahead.peek(Token![impl]) {
                     input.parse().map(Item::Impl)
                 } else if lookahead.peek(Token![async])
                     || lookahead.peek(Token![extern])
@@ -847,7 +847,7 @@ pub mod parsing {
                 input.call(parse_trait_or_trait_alias)
             } else if lookahead.peek(Token![auto]) && ahead.peek2(Token![trait]) {
                 input.parse().map(Item::Trait)
-            } else if lookahead.peek(Token![impl ])
+            } else if lookahead.peek(Token![impl])
                 || lookahead.peek(Token![default]) && !ahead.peek2(Token![!])
             {
                 input.parse().map(Item::Impl)
@@ -1846,7 +1846,7 @@ pub mod parsing {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let defaultness: Option<Token![default]> = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let impl_token: Token![impl ] = input.parse()?;
+            let impl_token: Token![impl] = input.parse()?;
 
             let has_generics = input.peek(Token![<])
                 && (input.peek2(Token![>])
