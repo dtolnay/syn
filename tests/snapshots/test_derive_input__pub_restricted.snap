@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:04.817527335Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.356852227Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -11,29 +11,29 @@ DeriveInput {
             pub_token: Pub,
             paren_token: Paren,
             in_token: Some(
-                In
+                In,
             ),
             path: Path {
                 leading_colon: None,
                 segments: [
                     PathSegment {
                         ident: Ident(
-                            m
+                            m,
                         ),
-                        arguments: None
-                    }
-                ]
-            }
-        }
+                        arguments: None,
+                    },
+                ],
+            },
+        },
     ),
     ident: Ident(
-        Z
+        Z,
     ),
     generics: Generics {
         lt_token: None,
         params: [],
         gt_token: None,
-        where_clause: None
+        where_clause: None,
     },
     data: Struct(
         DataStruct {
@@ -49,27 +49,27 @@ DeriveInput {
                                     pub_token: Pub,
                                     paren_token: Paren,
                                     in_token: Some(
-                                        In
+                                        In,
                                     ),
                                     path: Path {
                                         leading_colon: None,
                                         segments: [
                                             PathSegment {
                                                 ident: Ident(
-                                                    m
+                                                    m,
                                                 ),
-                                                arguments: None
+                                                arguments: None,
                                             },
                                             Colon2,
                                             PathSegment {
                                                 ident: Ident(
-                                                    n
+                                                    n,
                                                 ),
-                                                arguments: None
-                                            }
-                                        ]
-                                    }
-                                }
+                                                arguments: None,
+                                            },
+                                        ],
+                                    },
+                                },
                             ),
                             ident: None,
                             colon_token: None,
@@ -81,21 +81,21 @@ DeriveInput {
                                         segments: [
                                             PathSegment {
                                                 ident: Ident(
-                                                    u8
+                                                    u8,
                                                 ),
-                                                arguments: None
-                                            }
-                                        ]
-                                    }
-                                }
-                            )
-                        }
-                    ]
-                }
+                                                arguments: None,
+                                            },
+                                        ],
+                                    },
+                                },
+                            ),
+                        },
+                    ],
+                },
             ),
             semi_token: Some(
-                Semi
-            )
-        }
-    )
+                Semi,
+            ),
+        },
+    ),
 }

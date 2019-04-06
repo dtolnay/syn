@@ -1,23 +1,23 @@
 ---
-created: "2019-03-11T05:39:56.777566785Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.281142396Z"
+creator: insta@0.7.4
 source: tests/test_attribute.rs
 expression: syntax_tree
 ---
 List(
     MetaList {
         ident: Ident(
-            foo
+            foo,
         ),
         paren_token: Paren,
         nested: [
             Meta(
                 Word(
                     Ident(
-                        bar
-                    )
-                )
-            )
-        ]
-    }
+                        bar,
+                    ),
+                ),
+            ),
+        ],
+    },
 )

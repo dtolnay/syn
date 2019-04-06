@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:04.829338243Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.372588353Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -15,44 +15,44 @@ DeriveInput {
                 segments: [
                     PathSegment {
                         ident: Ident(
-                            derive
+                            derive,
                         ),
-                        arguments: None
-                    }
-                ]
+                        arguments: None,
+                    },
+                ],
             },
             tts: TokenStream [
                 Group {
                     delimiter: Parenthesis,
                     stream: TokenStream [
                         Ident {
-                            sym: Debug
+                            sym: Debug,
                         },
                         Punct {
                             op: ',',
-                            spacing: Alone
+                            spacing: Alone,
                         },
                         Ident {
-                            sym: Clone
-                        }
-                    ]
-                }
-            ]
-        }
+                            sym: Clone,
+                        },
+                    ],
+                },
+            ],
+        },
     ],
     vis: Public(
         VisPublic {
-            pub_token: Pub
-        }
+            pub_token: Pub,
+        },
     ),
     ident: Ident(
-        Item
+        Item,
     ),
     generics: Generics {
         lt_token: None,
         params: [],
         gt_token: None,
-        where_clause: None
+        where_clause: None,
     },
     data: Struct(
         DataStruct {
@@ -65,16 +65,16 @@ DeriveInput {
                             attrs: [],
                             vis: Public(
                                 VisPublic {
-                                    pub_token: Pub
-                                }
+                                    pub_token: Pub,
+                                },
                             ),
                             ident: Some(
                                 Ident(
-                                    ident
-                                )
+                                    ident,
+                                ),
                             ),
                             colon_token: Some(
-                                Colon
+                                Colon,
                             ),
                             ty: Path(
                                 TypePath {
@@ -84,30 +84,30 @@ DeriveInput {
                                         segments: [
                                             PathSegment {
                                                 ident: Ident(
-                                                    Ident
+                                                    Ident,
                                                 ),
-                                                arguments: None
-                                            }
-                                        ]
-                                    }
-                                }
-                            )
+                                                arguments: None,
+                                            },
+                                        ],
+                                    },
+                                },
+                            ),
                         },
                         Comma,
                         Field {
                             attrs: [],
                             vis: Public(
                                 VisPublic {
-                                    pub_token: Pub
-                                }
+                                    pub_token: Pub,
+                                },
                             ),
                             ident: Some(
                                 Ident(
-                                    attrs
-                                )
+                                    attrs,
+                                ),
                             ),
                             colon_token: Some(
-                                Colon
+                                Colon,
                             ),
                             ty: Path(
                                 TypePath {
@@ -117,7 +117,7 @@ DeriveInput {
                                         segments: [
                                             PathSegment {
                                                 ident: Ident(
-                                                    Vec
+                                                    Vec,
                                                 ),
                                                 arguments: AngleBracketed(
                                                     AngleBracketedGenericArguments {
@@ -133,29 +133,29 @@ DeriveInput {
                                                                             segments: [
                                                                                 PathSegment {
                                                                                     ident: Ident(
-                                                                                        Attribute
+                                                                                        Attribute,
                                                                                     ),
-                                                                                    arguments: None
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    }
-                                                                )
-                                                            )
+                                                                                    arguments: None,
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            ),
                                                         ],
-                                                        gt_token: Gt
-                                                    }
-                                                )
-                                            }
-                                        ]
-                                    }
-                                }
-                            )
-                        }
-                    ]
-                }
+                                                        gt_token: Gt,
+                                                    },
+                                                ),
+                                            },
+                                        ],
+                                    },
+                                },
+                            ),
+                        },
+                    ],
+                },
             ),
-            semi_token: None
-        }
-    )
+            semi_token: None,
+        },
+    ),
 }

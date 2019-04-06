@@ -1,94 +1,94 @@
 ---
-created: "2019-03-11T05:40:49.182513206Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:23.184384152Z"
+creator: insta@0.7.4
 source: tests/test_token_trees.rs
 expression: syntax_tree
 ---
 TokenStream [
     Punct {
         op: '#',
-        spacing: Alone
+        spacing: Alone,
     },
     Group {
         delimiter: Bracket,
         stream: TokenStream [
             Ident {
-                sym: derive
+                sym: derive,
             },
             Group {
                 delimiter: Parenthesis,
                 stream: TokenStream [
                     Ident {
-                        sym: Debug
+                        sym: Debug,
                     },
                     Punct {
                         op: ',',
-                        spacing: Alone
+                        spacing: Alone,
                     },
                     Ident {
-                        sym: Clone
-                    }
-                ]
-            }
-        ]
+                        sym: Clone,
+                    },
+                ],
+            },
+        ],
     },
     Ident {
-        sym: pub
+        sym: pub,
     },
     Ident {
-        sym: struct
+        sym: struct,
     },
     Ident {
-        sym: Item
+        sym: Item,
     },
     Group {
         delimiter: Brace,
         stream: TokenStream [
             Ident {
-                sym: pub
+                sym: pub,
             },
             Ident {
-                sym: ident
+                sym: ident,
             },
             Punct {
                 op: ':',
-                spacing: Alone
+                spacing: Alone,
             },
             Ident {
-                sym: Ident
+                sym: Ident,
             },
             Punct {
                 op: ',',
-                spacing: Alone
+                spacing: Alone,
             },
             Ident {
-                sym: pub
+                sym: pub,
             },
             Ident {
-                sym: attrs
+                sym: attrs,
             },
             Punct {
                 op: ':',
-                spacing: Alone
+                spacing: Alone,
             },
             Ident {
-                sym: Vec
+                sym: Vec,
             },
             Punct {
                 op: '<',
-                spacing: Alone
+                spacing: Alone,
             },
             Ident {
-                sym: Attribute
+                sym: Attribute,
             },
             Punct {
                 op: '>',
-                spacing: Joint
+                spacing: Joint,
             },
             Punct {
                 op: ',',
-                spacing: Alone
-            }
-        ]
-    }
+                spacing: Alone,
+            },
+        ],
+    },
 ]

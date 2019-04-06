@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:13.064709777Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.423193566Z"
+creator: insta@0.7.4
 source: tests/test_generics.rs
 expression: syntax_tree
 ---
@@ -14,11 +14,11 @@ Trait(
             segments: [
                 PathSegment {
                     ident: Ident(
-                        Debug
+                        Debug,
                     ),
-                    arguments: None
-                }
-            ]
-        }
-    }
+                    arguments: None,
+                },
+            ],
+        },
+    },
 )

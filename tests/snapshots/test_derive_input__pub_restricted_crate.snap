@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:04.817465809Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.367396988Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -16,30 +16,30 @@ DeriveInput {
                 segments: [
                     PathSegment {
                         ident: Ident(
-                            crate
+                            crate,
                         ),
-                        arguments: None
-                    }
-                ]
-            }
-        }
+                        arguments: None,
+                    },
+                ],
+            },
+        },
     ),
     ident: Ident(
-        S
+        S,
     ),
     generics: Generics {
         lt_token: None,
         params: [],
         gt_token: None,
-        where_clause: None
+        where_clause: None,
     },
     data: Struct(
         DataStruct {
             struct_token: Struct,
             fields: Unit,
             semi_token: Some(
-                Semi
-            )
-        }
-    )
+                Semi,
+            ),
+        },
+    ),
 }

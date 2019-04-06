@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:04.843066396Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.382583229Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -8,25 +8,25 @@ DeriveInput {
     attrs: [],
     vis: Crate(
         VisCrate {
-            crate_token: Crate
-        }
+            crate_token: Crate,
+        },
     ),
     ident: Ident(
-        S
+        S,
     ),
     generics: Generics {
         lt_token: None,
         params: [],
         gt_token: None,
-        where_clause: None
+        where_clause: None,
     },
     data: Struct(
         DataStruct {
             struct_token: Struct,
             fields: Unit,
             semi_token: Some(
-                Semi
-            )
-        }
-    )
+                Semi,
+            ),
+        },
+    ),
 }

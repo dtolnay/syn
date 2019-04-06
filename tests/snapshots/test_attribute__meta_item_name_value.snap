@@ -1,21 +1,21 @@
 ---
-created: "2019-03-11T05:39:56.782341532Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.299637357Z"
+creator: insta@0.7.4
 source: tests/test_attribute.rs
 expression: syntax_tree
 ---
 NameValue(
     MetaNameValue {
         ident: Ident(
-            foo
+            foo,
         ),
         eq_token: Eq,
         lit: Int(
             LitInt {
                 token: Literal {
-                    lit: 5
-                }
-            }
-        )
-    }
+                    lit: 5,
+                },
+            },
+        ),
+    },
 )

@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:04.803840235Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.344659106Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -15,21 +15,21 @@ DeriveInput {
                 segments: [
                     PathSegment {
                         ident: Ident(
-                            doc
+                            doc,
                         ),
-                        arguments: None
-                    }
-                ]
+                        arguments: None,
+                    },
+                ],
             },
             tts: TokenStream [
                 Punct {
                     op: '=',
-                    spacing: Alone
+                    spacing: Alone,
                 },
                 Literal {
-                    lit: r" See the std::result module documentation for details."
-                }
-            ]
+                    lit: r" See the std::result module documentation for details.",
+                },
+            ],
         },
         Attribute {
             pound_token: Pound,
@@ -40,58 +40,58 @@ DeriveInput {
                 segments: [
                     PathSegment {
                         ident: Ident(
-                            must_use
+                            must_use,
                         ),
-                        arguments: None
-                    }
-                ]
+                        arguments: None,
+                    },
+                ],
             },
-            tts: TokenStream []
-        }
+            tts: TokenStream [],
+        },
     ],
     vis: Public(
         VisPublic {
-            pub_token: Pub
-        }
+            pub_token: Pub,
+        },
     ),
     ident: Ident(
-        Result
+        Result,
     ),
     generics: Generics {
         lt_token: Some(
-            Lt
+            Lt,
         ),
         params: [
             Type(
                 TypeParam {
                     attrs: [],
                     ident: Ident(
-                        T
+                        T,
                     ),
                     colon_token: None,
                     bounds: [],
                     eq_token: None,
-                    default: None
-                }
+                    default: None,
+                },
             ),
             Comma,
             Type(
                 TypeParam {
                     attrs: [],
                     ident: Ident(
-                        E
+                        E,
                     ),
                     colon_token: None,
                     bounds: [],
                     eq_token: None,
-                    default: None
-                }
-            )
+                    default: None,
+                },
+            ),
         ],
         gt_token: Some(
-            Gt
+            Gt,
         ),
-        where_clause: None
+        where_clause: None,
     },
     data: Enum(
         DataEnum {
@@ -101,7 +101,7 @@ DeriveInput {
                 Variant {
                     attrs: [],
                     ident: Ident(
-                        Ok
+                        Ok,
                     ),
                     fields: Unnamed(
                         FieldsUnnamed {
@@ -120,25 +120,25 @@ DeriveInput {
                                                 segments: [
                                                     PathSegment {
                                                         ident: Ident(
-                                                            T
+                                                            T,
                                                         ),
-                                                        arguments: None
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    )
-                                }
-                            ]
-                        }
+                                                        arguments: None,
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ),
+                                },
+                            ],
+                        },
                     ),
-                    discriminant: None
+                    discriminant: None,
                 },
                 Comma,
                 Variant {
                     attrs: [],
                     ident: Ident(
-                        Err
+                        Err,
                     ),
                     fields: Unnamed(
                         FieldsUnnamed {
@@ -157,25 +157,25 @@ DeriveInput {
                                                 segments: [
                                                     PathSegment {
                                                         ident: Ident(
-                                                            E
+                                                            E,
                                                         ),
-                                                        arguments: None
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    )
-                                }
-                            ]
-                        }
+                                                        arguments: None,
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ),
+                                },
+                            ],
+                        },
                     ),
-                    discriminant: None
+                    discriminant: None,
                 },
                 Comma,
                 Variant {
                     attrs: [],
                     ident: Ident(
-                        Surprise
+                        Surprise,
                     ),
                     fields: Unit,
                     discriminant: Some(
@@ -187,20 +187,20 @@ DeriveInput {
                                     lit: Int(
                                         LitInt {
                                             token: Literal {
-                                                lit: 0isize
-                                            }
-                                        }
-                                    )
-                                }
-                            )
-                        )
-                    )
+                                                lit: 0isize,
+                                            },
+                                        },
+                                    ),
+                                },
+                            ),
+                        ),
+                    ),
                 },
                 Comma,
                 Variant {
                     attrs: [],
                     ident: Ident(
-                        ProcMacroHack
+                        ProcMacroHack,
                     ),
                     fields: Unit,
                     discriminant: Some(
@@ -220,11 +220,11 @@ DeriveInput {
                                                         lit: Int(
                                                             LitInt {
                                                                 token: Literal {
-                                                                    lit: 0
-                                                                }
-                                                            }
-                                                        )
-                                                    }
+                                                                    lit: 0,
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
                                                 ),
                                                 Comma,
                                                 Lit(
@@ -233,28 +233,28 @@ DeriveInput {
                                                         lit: Str(
                                                             LitStr {
                                                                 token: Literal {
-                                                                    lit: "data"
-                                                                }
-                                                            }
-                                                        )
-                                                    }
-                                                )
-                                            ]
-                                        }
+                                                                    lit: "data",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            ],
+                                        },
                                     ),
                                     dot_token: Dot,
                                     member: Unnamed(
                                         Index {
                                             index: 0,
-                                            span: Span
-                                        }
-                                    )
-                                }
-                            )
-                        )
-                    )
-                }
-            ]
-        }
-    )
+                                            span: Span,
+                                        },
+                                    ),
+                                },
+                            ),
+                        ),
+                    ),
+                },
+            ],
+        },
+    ),
 }

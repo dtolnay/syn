@@ -1,31 +1,31 @@
 ---
-created: "2019-03-11T05:40:06.919215869Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.385565379Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
 List(
     MetaList {
         ident: Ident(
-            derive
+            derive,
         ),
         paren_token: Paren,
         nested: [
             Meta(
                 Word(
                     Ident(
-                        Debug
-                    )
-                )
+                        Debug,
+                    ),
+                ),
             ),
             Comma,
             Meta(
                 Word(
                     Ident(
-                        Clone
-                    )
-                )
-            )
-        ]
-    }
+                        Clone,
+                    ),
+                ),
+            ),
+        ],
+    },
 )

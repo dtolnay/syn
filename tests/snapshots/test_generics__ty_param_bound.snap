@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:08.879701944Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.403649410Z"
+creator: insta@0.7.4
 source: tests/test_generics.rs
 expression: syntax_tree
 ---
@@ -8,7 +8,7 @@ Lifetime(
     Lifetime {
         apostrophe: Span,
         ident: Ident(
-            a
-        )
-    }
+            a,
+        ),
+    },
 )

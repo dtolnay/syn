@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:17.391725505Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.447914316Z"
+creator: insta@0.7.4
 source: tests/test_grouping.rs
 expression: syntax_tree
 ---
@@ -13,14 +13,14 @@ Binary(
                 lit: Int(
                     LitInt {
                         token: Literal {
-                            lit: 1i32
-                        }
-                    }
-                )
-            }
+                            lit: 1i32,
+                        },
+                    },
+                ),
+            },
         ),
         op: Add(
-            Add
+            Add,
         ),
         right: Binary(
             ExprBinary {
@@ -38,14 +38,14 @@ Binary(
                                         lit: Int(
                                             LitInt {
                                                 token: Literal {
-                                                    lit: 2i32
-                                                }
-                                            }
-                                        )
-                                    }
+                                                    lit: 2i32,
+                                                },
+                                            },
+                                        ),
+                                    },
                                 ),
                                 op: Add(
-                                    Add
+                                    Add,
                                 ),
                                 right: Lit(
                                     ExprLit {
@@ -53,18 +53,18 @@ Binary(
                                         lit: Int(
                                             LitInt {
                                                 token: Literal {
-                                                    lit: 3i32
-                                                }
-                                            }
-                                        )
-                                    }
-                                )
-                            }
-                        )
-                    }
+                                                    lit: 3i32,
+                                                },
+                                            },
+                                        ),
+                                    },
+                                ),
+                            },
+                        ),
+                    },
                 ),
                 op: Mul(
-                    Star
+                    Star,
                 ),
                 right: Lit(
                     ExprLit {
@@ -72,13 +72,13 @@ Binary(
                         lit: Int(
                             LitInt {
                                 token: Literal {
-                                    lit: 4i32
-                                }
-                            }
-                        )
-                    }
-                )
-            }
-        )
-    }
+                                    lit: 4i32,
+                                },
+                            },
+                        ),
+                    },
+                ),
+            },
+        ),
+    },
 )

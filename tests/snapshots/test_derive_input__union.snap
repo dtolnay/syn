@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:04.829920492Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.379296830Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -8,30 +8,30 @@ DeriveInput {
     attrs: [],
     vis: Inherited,
     ident: Ident(
-        MaybeUninit
+        MaybeUninit,
     ),
     generics: Generics {
         lt_token: Some(
-            Lt
+            Lt,
         ),
         params: [
             Type(
                 TypeParam {
                     attrs: [],
                     ident: Ident(
-                        T
+                        T,
                     ),
                     colon_token: None,
                     bounds: [],
                     eq_token: None,
-                    default: None
-                }
-            )
+                    default: None,
+                },
+            ),
         ],
         gt_token: Some(
-            Gt
+            Gt,
         ),
-        where_clause: None
+        where_clause: None,
     },
     data: Union(
         DataUnion {
@@ -44,18 +44,18 @@ DeriveInput {
                         vis: Inherited,
                         ident: Some(
                             Ident(
-                                uninit
-                            )
+                                uninit,
+                            ),
                         ),
                         colon_token: Some(
-                            Colon
+                            Colon,
                         ),
                         ty: Tuple(
                             TypeTuple {
                                 paren_token: Paren,
-                                elems: []
-                            }
-                        )
+                                elems: [],
+                            },
+                        ),
                     },
                     Comma,
                     Field {
@@ -63,11 +63,11 @@ DeriveInput {
                         vis: Inherited,
                         ident: Some(
                             Ident(
-                                value
-                            )
+                                value,
+                            ),
                         ),
                         colon_token: Some(
-                            Colon
+                            Colon,
                         ),
                         ty: Path(
                             TypePath {
@@ -77,17 +77,17 @@ DeriveInput {
                                     segments: [
                                         PathSegment {
                                             ident: Ident(
-                                                T
+                                                T,
                                             ),
-                                            arguments: None
-                                        }
-                                    ]
-                                }
-                            }
-                        )
-                    }
-                ]
-            }
-        }
-    )
+                                            arguments: None,
+                                        },
+                                    ],
+                                },
+                            },
+                        ),
+                    },
+                ],
+            },
+        },
+    ),
 }

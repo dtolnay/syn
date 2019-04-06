@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:39:50.464009531Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.237747494Z"
+creator: insta@0.7.4
 source: tests/test_asyncness.rs
 expression: syntax_tree
 ---
@@ -11,11 +11,11 @@ Fn(
         constness: None,
         unsafety: None,
         asyncness: Some(
-            Async
+            Async,
         ),
         abi: None,
         ident: Ident(
-            process
+            process,
         ),
         decl: FnDecl {
             fn_token: Fn,
@@ -23,16 +23,16 @@ Fn(
                 lt_token: None,
                 params: [],
                 gt_token: None,
-                where_clause: None
+                where_clause: None,
             },
             paren_token: Paren,
             inputs: [],
             variadic: None,
-            output: Default
+            output: Default,
         },
         block: Block {
             brace_token: Brace,
-            stmts: []
-        }
-    }
+            stmts: [],
+        },
+    },
 )

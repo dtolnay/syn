@@ -1,47 +1,47 @@
 ---
-created: "2019-03-11T05:39:58.913038051Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.299496452Z"
+creator: insta@0.7.4
 source: tests/test_attribute.rs
 expression: syntax_tree
 ---
 List(
     MetaList {
         ident: Ident(
-            foo
+            foo,
         ),
         paren_token: Paren,
         nested: [
             Meta(
                 Word(
                     Ident(
-                        word
-                    )
-                )
+                        word,
+                    ),
+                ),
             ),
             Comma,
             Meta(
                 NameValue(
                     MetaNameValue {
                         ident: Ident(
-                            name
+                            name,
                         ),
                         eq_token: Eq,
                         lit: Int(
                             LitInt {
                                 token: Literal {
-                                    lit: 5
-                                }
-                            }
-                        )
-                    }
-                )
+                                    lit: 5,
+                                },
+                            },
+                        ),
+                    },
+                ),
             ),
             Comma,
             Meta(
                 List(
                     MetaList {
                         ident: Ident(
-                            list
+                            list,
                         ),
                         paren_token: Paren,
                         nested: [
@@ -49,31 +49,31 @@ List(
                                 NameValue(
                                     MetaNameValue {
                                         ident: Ident(
-                                            name2
+                                            name2,
                                         ),
                                         eq_token: Eq,
                                         lit: Int(
                                             LitInt {
                                                 token: Literal {
-                                                    lit: 6
-                                                }
-                                            }
-                                        )
-                                    }
-                                )
-                            )
-                        ]
-                    }
-                )
+                                                    lit: 6,
+                                                },
+                                            },
+                                        ),
+                                    },
+                                ),
+                            ),
+                        ],
+                    },
+                ),
             ),
             Comma,
             Meta(
                 Word(
                     Ident(
-                        word2
-                    )
-                )
-            )
-        ]
-    }
+                        word2,
+                    ),
+                ),
+            ),
+        ],
+    },
 )

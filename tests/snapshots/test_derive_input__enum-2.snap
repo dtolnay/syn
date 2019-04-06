@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:06.910167896Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.356798327Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -8,21 +8,21 @@ expression: syntax_tree
     NameValue(
         MetaNameValue {
             ident: Ident(
-                doc
+                doc,
             ),
             eq_token: Eq,
             lit: Str(
                 LitStr {
                     token: Literal {
-                        lit: r" See the std::result module documentation for details."
-                    }
-                }
-            )
-        }
+                        lit: r" See the std::result module documentation for details.",
+                    },
+                },
+            ),
+        },
     ),
     Word(
         Ident(
-            must_use
-        )
-    )
+            must_use,
+        ),
+    ),
 ]

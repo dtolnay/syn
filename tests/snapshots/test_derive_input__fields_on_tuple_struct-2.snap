@@ -1,6 +1,6 @@
 ---
-created: "2019-03-11T05:40:06.909622097Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.356076965Z"
+creator: insta@0.7.4
 source: tests/test_derive_input.rs
 expression: syntax_tree
 ---
@@ -18,21 +18,21 @@ expression: syntax_tree
                     segments: [
                         PathSegment {
                             ident: Ident(
-                                i32
+                                i32,
                             ),
-                            arguments: None
-                        }
-                    ]
-                }
-            }
-        )
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+        ),
     },
     Field {
         attrs: [],
         vis: Public(
             VisPublic {
-                pub_token: Pub
-            }
+                pub_token: Pub,
+            },
         ),
         ident: None,
         colon_token: None,
@@ -44,13 +44,13 @@ expression: syntax_tree
                     segments: [
                         PathSegment {
                             ident: Ident(
-                                String
+                                String,
                             ),
-                            arguments: None
-                        }
-                    ]
-                }
-            }
-        )
-    }
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+        ),
+    },
 ]

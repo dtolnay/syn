@@ -1,13 +1,13 @@
 ---
-created: "2019-03-11T05:39:56.764179861Z"
-creator: insta@0.7.1
+created: "2019-04-06T05:46:03.255671860Z"
+creator: insta@0.7.4
 source: tests/test_attribute.rs
 expression: syntax_tree
 ---
 List(
     MetaList {
         ident: Ident(
-            foo
+            foo,
         ),
         paren_token: Paren,
         nested: [
@@ -15,18 +15,18 @@ List(
                 NameValue(
                     MetaNameValue {
                         ident: Ident(
-                            bar
+                            bar,
                         ),
                         eq_token: Eq,
                         lit: Bool(
                             LitBool {
                                 value: true,
-                                span: Span
-                            }
-                        )
-                    }
-                )
-            )
-        ]
-    }
+                                span: Span,
+                            },
+                        ),
+                    },
+                ),
+            ),
+        ],
+    },
 )
