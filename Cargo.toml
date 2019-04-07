@@ -17,9 +17,6 @@ include = [
     "/src/**/*.rs",
 ]
 
-[lib]
-name = "syn"
-
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
 derive = []
