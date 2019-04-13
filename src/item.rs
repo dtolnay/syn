@@ -984,56 +984,58 @@ pub mod parsing {
                 vis: input.parse()?,
                 use_token: input.parse()?,
                 leading_colon: input.parse()?,
-                tree: input.call(use_tree)?,
+                tree: input.parse()?,
                 semi_token: input.parse()?,
             })
         }
     }
 
-    fn use_tree(input: ParseStream) -> Result<UseTree> {
-        let lookahead = input.lookahead1();
-        if lookahead.peek(Ident)
-            || lookahead.peek(Token![self])
-            || lookahead.peek(Token![super])
-            || lookahead.peek(Token![crate])
-            || lookahead.peek(Token![extern])
-        {
-            let ident = input.call(Ident::parse_any)?;
-            if input.peek(Token![::]) {
-                Ok(UseTree::Path(UsePath {
-                    ident: ident,
-                    colon2_token: input.parse()?,
-                    tree: Box::new(input.call(use_tree)?),
+    impl Parse for UseTree {
+        fn parse(input: ParseStream) -> Result<UseTree> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(Ident)
+                || lookahead.peek(Token![self])
+                || lookahead.peek(Token![super])
+                || lookahead.peek(Token![crate])
+                || lookahead.peek(Token![extern])
+            {
+                let ident = input.call(Ident::parse_any)?;
+                if input.peek(Token![::]) {
+                    Ok(UseTree::Path(UsePath {
+                        ident: ident,
+                        colon2_token: input.parse()?,
+                        tree: Box::new(input.parse()?),
+                    }))
+                } else if input.peek(Token![as]) {
+                    Ok(UseTree::Rename(UseRename {
+                        ident: ident,
+                        as_token: input.parse()?,
+                        rename: {
+                            if input.peek(Ident) {
+                                input.parse()?
+                            } else if input.peek(Token![_]) {
+                                Ident::from(input.parse::<Token![_]>()?)
+                            } else {
+                                return Err(input.error("expected identifier or underscore"));
+                            }
+                        },
+                    }))
+                } else {
+                    Ok(UseTree::Name(UseName { ident: ident }))
+                }
+            } else if lookahead.peek(Token![*]) {
+                Ok(UseTree::Glob(UseGlob {
+                    star_token: input.parse()?,
                 }))
-            } else if input.peek(Token![as]) {
-                Ok(UseTree::Rename(UseRename {
-                    ident: ident,
-                    as_token: input.parse()?,
-                    rename: {
-                        if input.peek(Ident) {
-                            input.parse()?
-                        } else if input.peek(Token![_]) {
-                            Ident::from(input.parse::<Token![_]>()?)
-                        } else {
-                            return Err(input.error("expected identifier or underscore"));
-                        }
-                    },
+            } else if lookahead.peek(token::Brace) {
+                let content;
+                Ok(UseTree::Group(UseGroup {
+                    brace_token: braced!(content in input),
+                    items: content.parse_terminated(UseTree::parse)?,
                 }))
             } else {
-                Ok(UseTree::Name(UseName { ident: ident }))
+                Err(lookahead.error())
             }
-        } else if lookahead.peek(Token![*]) {
-            Ok(UseTree::Glob(UseGlob {
-                star_token: input.parse()?,
-            }))
-        } else if lookahead.peek(token::Brace) {
-            let content;
-            Ok(UseTree::Group(UseGroup {
-                brace_token: braced!(content in input),
-                items: content.parse_terminated(use_tree)?,
-            }))
-        } else {
-            Err(lookahead.error())
         }
     }
 
