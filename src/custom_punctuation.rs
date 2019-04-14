@@ -1,85 +1,3 @@
-// Not public API.
-#[doc(hidden)]
-#[macro_export(local_inner_macros)]
-macro_rules! punct_len {
-    ($mode:ident, +)     => { 1 };
-    ($mode:ident, +=)    => { 2 };
-    ($mode:ident, &)     => { 1 };
-    ($mode:ident, &&)    => { 2 };
-    ($mode:ident, &=)    => { 2 };
-    ($mode:ident, @)     => { 1 };
-    ($mode:ident, !)     => { 1 };
-    ($mode:ident, ^)     => { 1 };
-    ($mode:ident, ^=)    => { 2 };
-    ($mode:ident, :)     => { 1 };
-    ($mode:ident, ::)    => { 2 };
-    ($mode:ident, ,)     => { 1 };
-    ($mode:ident, /)     => { 1 };
-    ($mode:ident, /=)    => { 2 };
-    ($mode:ident, .)     => { 1 };
-    ($mode:ident, ..)    => { 2 };
-    ($mode:ident, ...)   => { 3 };
-    ($mode:ident, ..=)   => { 3 };
-    ($mode:ident, =)     => { 1 };
-    ($mode:ident, ==)    => { 2 };
-    ($mode:ident, >=)    => { 2 };
-    ($mode:ident, >)     => { 1 };
-    ($mode:ident, <=)    => { 2 };
-    ($mode:ident, <)     => { 1 };
-    ($mode:ident, *=)    => { 2 };
-    ($mode:ident, !=)    => { 2 };
-    ($mode:ident, |)     => { 1 };
-    ($mode:ident, |=)    => { 2 };
-    ($mode:ident, ||)    => { 2 };
-    ($mode:ident, #)     => { 1 };
-    ($mode:ident, ?)     => { 1 };
-    ($mode:ident, ->)    => { 2 };
-    ($mode:ident, <-)    => { 2 };
-    ($mode:ident, %)     => { 1 };
-    ($mode:ident, %=)    => { 2 };
-    ($mode:ident, =>)    => { 2 };
-    ($mode:ident, ;)     => { 1 };
-    ($mode:ident, <<)    => { 2 };
-    ($mode:ident, <<=)   => { 3 };
-    ($mode:ident, >>)    => { 2 };
-    ($mode:ident, >>=)   => { 3 };
-    ($mode:ident, *)     => { 1 };
-    ($mode:ident, -)     => { 1 };
-    ($mode:ident, -=)    => { 2 };
-    ($mode:ident, ~)     => { 1 };
-    (lenient, $tt:tt)    => { 0 };
-    (strict, $tt:tt)     => {{ unexpected!($tt); 0 }};
-    ($mode:ident, $head:tt $($tail:tt)+) => {
-        punct_len!($mode, $head) $(+ punct_len!($mode, $tail))+
-    };
-}
-
-// Not public API.
-#[doc(hidden)]
-#[macro_export]
-macro_rules! unexpected {
-    () => {};
-}
-
-// Not public API.
-#[doc(hidden)]
-#[macro_export]
-macro_rules! stringify_punct {
-    ($($tt:tt)+) => {
-        concat!($(stringify!($tt)),+)
-    };
-}
-
-// Not public API.
-// Without this, local_inner_macros breaks when looking for concat!
-#[doc(hidden)]
-#[macro_export]
-macro_rules! my_concat {
-    ($($tt:tt)*) => {
-        concat!($($tt)*)
-    };
-}
-
 /// Define a type that supports parsing and printing a multi-character symbol
 /// as if it were a token.
 ///
@@ -304,4 +222,86 @@ macro_rules! impl_extra_traits_for_custom_punctuation {
 #[macro_export]
 macro_rules! impl_extra_traits_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {};
+}
+
+// Not public API.
+#[doc(hidden)]
+#[macro_export(local_inner_macros)]
+macro_rules! punct_len {
+    ($mode:ident, +)     => { 1 };
+    ($mode:ident, +=)    => { 2 };
+    ($mode:ident, &)     => { 1 };
+    ($mode:ident, &&)    => { 2 };
+    ($mode:ident, &=)    => { 2 };
+    ($mode:ident, @)     => { 1 };
+    ($mode:ident, !)     => { 1 };
+    ($mode:ident, ^)     => { 1 };
+    ($mode:ident, ^=)    => { 2 };
+    ($mode:ident, :)     => { 1 };
+    ($mode:ident, ::)    => { 2 };
+    ($mode:ident, ,)     => { 1 };
+    ($mode:ident, /)     => { 1 };
+    ($mode:ident, /=)    => { 2 };
+    ($mode:ident, .)     => { 1 };
+    ($mode:ident, ..)    => { 2 };
+    ($mode:ident, ...)   => { 3 };
+    ($mode:ident, ..=)   => { 3 };
+    ($mode:ident, =)     => { 1 };
+    ($mode:ident, ==)    => { 2 };
+    ($mode:ident, >=)    => { 2 };
+    ($mode:ident, >)     => { 1 };
+    ($mode:ident, <=)    => { 2 };
+    ($mode:ident, <)     => { 1 };
+    ($mode:ident, *=)    => { 2 };
+    ($mode:ident, !=)    => { 2 };
+    ($mode:ident, |)     => { 1 };
+    ($mode:ident, |=)    => { 2 };
+    ($mode:ident, ||)    => { 2 };
+    ($mode:ident, #)     => { 1 };
+    ($mode:ident, ?)     => { 1 };
+    ($mode:ident, ->)    => { 2 };
+    ($mode:ident, <-)    => { 2 };
+    ($mode:ident, %)     => { 1 };
+    ($mode:ident, %=)    => { 2 };
+    ($mode:ident, =>)    => { 2 };
+    ($mode:ident, ;)     => { 1 };
+    ($mode:ident, <<)    => { 2 };
+    ($mode:ident, <<=)   => { 3 };
+    ($mode:ident, >>)    => { 2 };
+    ($mode:ident, >>=)   => { 3 };
+    ($mode:ident, *)     => { 1 };
+    ($mode:ident, -)     => { 1 };
+    ($mode:ident, -=)    => { 2 };
+    ($mode:ident, ~)     => { 1 };
+    (lenient, $tt:tt)    => { 0 };
+    (strict, $tt:tt)     => {{ unexpected!($tt); 0 }};
+    ($mode:ident, $head:tt $($tail:tt)+) => {
+        punct_len!($mode, $head) $(+ punct_len!($mode, $tail))+
+    };
+}
+
+// Not public API.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! unexpected {
+    () => {};
+}
+
+// Not public API.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! stringify_punct {
+    ($($tt:tt)+) => {
+        concat!($(stringify!($tt)),+)
+    };
+}
+
+// Not public API.
+// Without this, local_inner_macros breaks when looking for concat!
+#[doc(hidden)]
+#[macro_export]
+macro_rules! my_concat {
+    ($($tt:tt)*) => {
+        concat!($($tt)*)
+    };
 }
