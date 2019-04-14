@@ -231,6 +231,7 @@ macro_rules! custom_punctuation_repr {
 // Not public API.
 #[doc(hidden)]
 #[macro_export(local_inner_macros)]
+#[cfg_attr(rustfmt, rustfmt_skip)]
 macro_rules! custom_punctuation_len {
     ($mode:ident, +)     => { 1 };
     ($mode:ident, +=)    => { 2 };
