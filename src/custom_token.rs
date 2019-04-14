@@ -47,7 +47,7 @@ macro_rules! punct_len {
     (-)      => ( 1usize );
     (-=)     => ( 2usize );
     (~)      => ( 1usize );
-    ($tt:tt) => ( my_compile_error!("Punctuation `{}` is not supported", stringify!($tt)) );
+    ($tt:tt) => ( my_compile_error!("This punctuation is not supported") );
     ($head:tt $($tail:tt)+) => ( punct_len!($head) $(+ punct_len!($tail))+ );
 }
 
