@@ -366,7 +366,7 @@ macro_rules! impl_extra_traits_for_custom_keyword {
 /// # Example
 ///
 /// ```edition2018
-/// use syn::Expr;
+/// use syn::{Expr, ExprParen, parenthesized};
 /// use syn::punctuated::Punctuated;
 /// use syn::parse::{Parse, ParseStream, Result};
 /// use syn::token::Paren;
@@ -386,21 +386,27 @@ macro_rules! impl_extra_traits_for_custom_keyword {
 ///
 ///         let la = input.lookahead1();
 ///         if la.peek(Paren) {
-///             segments.push_value(input.parse()?);
+///             let content;
+///             let paren_token = parenthesized!(content in input);
+///             let expr = Box::new(content.parse()?);
+///             segments.push_value(Expr::Paren(ExprParen { attrs: vec![], paren_token, expr }));
 ///         } else {
 ///             return Err(la.error());
 ///         }
 ///
 ///         while input.peek(punct::PathSeparator) {
 ///             segments.push_punct(input.parse()?);
-///             segments.push_value(input.parse()?);
+///             let content;
+///             let paren_token = parenthesized!(content in input);
+///             let expr = Box::new(content.parse()?);
+///             segments.push_value(Expr::Paren(ExprParen { attrs: vec![], paren_token, expr }));
 ///         }
 ///
 ///         Ok(PathSegments { segments })
 ///     }
 /// }
 ///
-/// let _: PathSegments = syn::parse_str(stringify!(("five") </> ("hundred"))).unwrap();
+/// let _: PathSegments = syn::parse_str(r#"("five") </> ("hundred")"#).unwrap();
 /// ```
 ///
 #[macro_export(local_inner_macros)]
