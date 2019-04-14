@@ -1,32 +1,26 @@
 /// Define a type that supports parsing and printing a multi-character symbol
-/// as if it were a token.
+/// as if it were a punctuation token.
 ///
 /// # Usage
 ///
-/// As a convention, it is recommended that this macro be invoked within a
-/// module called `punct` or `punctuation` and that the resulting parser be invoked
-/// with a `punct::` or `punctuation::` prefix.
-///
 /// ```edition2018
-/// mod punct {
-///     syn::custom_punctuation!(LeftRightArrow, <=>);
-/// }
+/// syn::custom_punctuation!(LeftRightArrow, <=>);
 /// ```
 ///
 /// The generated syntax tree node supports the following operations just like
 /// any built-in punctuation token.
 ///
-/// - [Peeking] — `input.peek(punct::LeftRightArrow)`
+/// - [Peeking] — `input.peek(LeftRightArrow)`
 ///
-/// - [Parsing] — `input.parse::<punct::LeftRightArrow>()?`
+/// - [Parsing] — `input.parse::<LeftRightArrow>()?`
 ///
-/// - [Printing] — `quote!( ... #left_right_arrow ... )`
+/// - [Printing] — `quote!( ... #lrarrow ... )`
 ///
-/// - Construction from a [`Span`] — `let left_right_arrow = punct::LeftRightArrow(sp)`
+/// - Construction from a [`Span`] — `let lrarrow = LeftRightArrow(sp)`
 ///
-/// - Construction from multiple [`Span`] — `let left_right_arrow = punct::LeftRightArrow([sp, sp, sp])`
+/// - Construction from multiple [`Span`] — `let lrarrow = LeftRightArrow([sp, sp, sp])`
 ///
-/// - Field access to its spans — `let spans = left_right_arrow.spans`
+/// - Field access to its spans — `let spans = lrarrow.spans`
 ///
 /// [Peeking]: parse/struct.ParseBuffer.html#method.peek
 /// [Parsing]: parse/struct.ParseBuffer.html#method.parse
@@ -36,18 +30,16 @@
 /// # Example
 ///
 /// ```edition2018
-/// use syn::{Expr, ExprParen, parenthesized};
-/// use syn::punctuated::Punctuated;
 /// use syn::parse::{Parse, ParseStream, Result};
+/// use syn::punctuated::Punctuated;
 /// use syn::token::Paren;
+/// use syn::{parenthesized, Expr, ExprParen};
 ///
-/// mod punct {
-///     syn::custom_punctuation!(PathSeparator, </>);
-/// }
+/// syn::custom_punctuation!(PathSeparator, </>);
 ///
 /// // (expr) </> (expr) </> (expr) ...
 /// struct PathSegments {
-///     segments: Punctuated<Expr, punct::PathSeparator>,
+///     segments: Punctuated<Expr, PathSeparator>,
 /// }
 ///
 /// impl Parse for PathSegments {
@@ -64,7 +56,7 @@
 ///             return Err(la.error());
 ///         }
 ///
-///         while input.peek(punct::PathSeparator) {
+///         while input.peek(PathSeparator) {
 ///             segments.push_punct(input.parse()?);
 ///             let content;
 ///             let paren_token = parenthesized!(content in input);
@@ -76,9 +68,11 @@
 ///     }
 /// }
 ///
-/// let _: PathSegments = syn::parse_str(r#"("five") </> ("hundred")"#).unwrap();
+/// fn main() {
+///     let input = r#" ("five") </> ("hundred") "#;
+///     let _: PathSegments = syn::parse_str(input).unwrap();
+/// }
 /// ```
-///
 #[macro_export(local_inner_macros)]
 macro_rules! custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
