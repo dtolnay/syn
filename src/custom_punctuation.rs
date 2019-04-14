@@ -30,14 +30,14 @@
 /// # Example
 ///
 /// ```edition2018
-/// use syn::parse::{Parse, ParseStream, Result};
+/// use proc_macro2::{TokenStream, TokenTree};
+/// use syn::parse::{Parse, ParseStream, Peek, Result};
 /// use syn::punctuated::Punctuated;
-/// use syn::token::Paren;
-/// use syn::{parenthesized, Expr, ExprParen};
+/// use syn::Expr;
 ///
 /// syn::custom_punctuation!(PathSeparator, </>);
 ///
-/// // (expr) </> (expr) </> (expr) ...
+/// // expr </> expr </> expr ...
 /// struct PathSegments {
 ///     segments: Punctuated<Expr, PathSeparator>,
 /// }
@@ -46,30 +46,31 @@
 ///     fn parse(input: ParseStream) -> Result<Self> {
 ///         let mut segments = Punctuated::new();
 ///
-///         let la = input.lookahead1();
-///         if la.peek(Paren) {
-///             let content;
-///             let paren_token = parenthesized!(content in input);
-///             let expr = Box::new(content.parse()?);
-///             segments.push_value(Expr::Paren(ExprParen { attrs: vec![], paren_token, expr }));
-///         } else {
-///             return Err(la.error());
-///         }
+///         let first = parse_until(input, PathSeparator)?;
+///         segments.push_value(syn::parse2(first)?);
 ///
 ///         while input.peek(PathSeparator) {
 ///             segments.push_punct(input.parse()?);
-///             let content;
-///             let paren_token = parenthesized!(content in input);
-///             let expr = Box::new(content.parse()?);
-///             segments.push_value(Expr::Paren(ExprParen { attrs: vec![], paren_token, expr }));
+///
+///             let next = parse_until(input, PathSeparator)?;
+///             segments.push_value(syn::parse2(next)?);
 ///         }
 ///
 ///         Ok(PathSegments { segments })
 ///     }
 /// }
 ///
+/// fn parse_until<E: Peek>(input: ParseStream, end: E) -> Result<TokenStream> {
+///     let mut tokens = TokenStream::new();
+///     while !input.is_empty() && !input.peek(end) {
+///         let next: TokenTree = input.parse()?;
+///         tokens.extend(Some(next));
+///     }
+///     Ok(tokens)
+/// }
+///
 /// fn main() {
-///     let input = r#" ("five") </> ("hundred") "#;
+///     let input = r#" a::b </> c::d::e "#;
 ///     let _: PathSegments = syn::parse_str(input).unwrap();
 /// }
 /// ```
