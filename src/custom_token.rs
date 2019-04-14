@@ -47,7 +47,7 @@ macro_rules! punct_len {
     (-)      => ( 1usize );
     (-=)     => ( 2usize );
     (~)      => ( 1usize );
-    ($tt:tt) => ( compile_error!("Punctuation `{}` is not supported", stringify!($tt)) );
+    ($tt:tt) => ( my_compile_error!("Punctuation `{}` is not supported", stringify!($tt)) );
     ($head:tt $($tail:tt)+) => ( punct_len!($head) $(+ punct_len!($tail))+ );
 }
 
@@ -64,6 +64,14 @@ macro_rules! stringify_punct {
 #[macro_export]
 macro_rules! my_concat {
     ($($tt:tt)*) => ( concat!($($tt)*) );
+}
+
+// Not public API.
+// Without this, local_inner_macros breaks when looking for compile_error!
+#[doc(hidden)]
+#[macro_export]
+macro_rules! my_compile_error {
+    ($($tt:tt)*) => ( compile_error!($($tt)*) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -196,9 +204,13 @@ macro_rules! custom_keyword {
 macro_rules! impl_parse_for_custom_keyword {
     ($ident:ident) => {
         // For peek.
-        impl $crate::token::CustomKeyword for $ident {
-            fn ident() -> &'static $crate::export::str {
-                stringify!($ident)
+        impl $crate::token::CustomToken for $ident {
+            fn peek(cursor: $crate::buffer::Cursor) -> $crate::export::bool {
+                if let Some((ident, _rest)) = cursor.ident() {
+                    ident == stringify!($ident)
+                } else {
+                    false
+                }
             }
 
             fn display() -> &'static $crate::export::str {
@@ -414,8 +426,8 @@ macro_rules! custom_punctuation {
             }
         }
 
-        impl_parsing_for_custom_punctuation!($ident, $($tt)*);
-        impl_printing_for_custom_punctuation!($ident, $($tt)*);
+        impl_parse_for_custom_punctuation!($ident, $($tt)*);
+        impl_to_tokens_for_custom_punctuation!($ident, $($tt)*);
         impl_clone_for_custom_punctuation!($ident, $($tt)*);
         impl_extra_traits_for_custom_punctuation!($ident, $($tt)*);
     };
@@ -425,7 +437,7 @@ macro_rules! custom_punctuation {
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
 #[macro_export(local_inner_macros)]
-macro_rules! impl_parsing_for_custom_punctuation {
+macro_rules! impl_parse_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
         impl $crate::token::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> bool {
@@ -451,7 +463,7 @@ macro_rules! impl_parsing_for_custom_punctuation {
 #[cfg(not(feature = "parsing"))]
 #[doc(hidden)]
 #[macro_export]
-macro_rules! impl_parsing_for_custom_punctuation {
+macro_rules! impl_parse_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {};
 }
 
@@ -459,7 +471,7 @@ macro_rules! impl_parsing_for_custom_punctuation {
 #[cfg(feature = "printing")]
 #[doc(hidden)]
 #[macro_export(local_inner_macros)]
-macro_rules! impl_printing_for_custom_punctuation {
+macro_rules! impl_to_tokens_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {
         impl $crate::export::ToTokens for $ident {
             fn to_tokens(&self, tokens: &mut $crate::export::TokenStream2) {
@@ -473,7 +485,7 @@ macro_rules! impl_printing_for_custom_punctuation {
 #[cfg(not(feature = "printing"))]
 #[doc(hidden)]
 #[macro_export]
-macro_rules! impl_printing_for_custom_punctuation {
+macro_rules! impl_to_tokens_for_custom_punctuation {
     ($ident: ident, $($tt:tt)*) => {};
 }
 
