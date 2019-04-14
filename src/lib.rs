@@ -538,7 +538,7 @@ pub use gen::*;
 #[doc(hidden)]
 pub mod export;
 
-mod keyword;
+mod custom_token;
 
 #[cfg(feature = "parsing")]
 mod lookahead;
