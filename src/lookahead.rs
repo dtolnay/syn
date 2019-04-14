@@ -147,7 +147,7 @@ pub trait Peek: private::Sealed {
     type Token: Token;
 }
 
-impl<F: FnOnce(TokenMarker) -> T, T: Token> Peek for F {
+impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Peek for F {
     type Token = T;
 }
 
@@ -165,6 +165,6 @@ pub fn is_delimiter(cursor: Cursor, delimiter: Delimiter) -> bool {
 
 mod private {
     use super::{Token, TokenMarker};
-    pub trait Sealed {}
-    impl<F: FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
+    pub trait Sealed: Copy {}
+    impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
 }
