@@ -83,15 +83,15 @@
 macro_rules! custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         pub struct $ident {
-            pub spans: [$crate::export::Span; punct_len!(lenient, $($tt)+)],
+            pub spans: custom_punctuation_repr!($($tt)+),
         }
 
         #[doc(hidden)]
         #[allow(non_snake_case)]
-        pub fn $ident<__S: $crate::export::IntoSpans<[$crate::export::Span; punct_len!(lenient, $($tt)+)]>>(
+        pub fn $ident<__S: $crate::export::IntoSpans<custom_punctuation_repr!($($tt)+)>>(
             spans: __S,
         ) -> $ident {
-            let _punct_len = punct_len!(strict, $($tt)+);
+            let _validate_len = 0 $(+ custom_punctuation_len!(strict, $tt))*;
             $ident {
                 spans: $crate::export::IntoSpans::into_spans(spans)
             }
@@ -128,7 +128,7 @@ macro_rules! impl_parse_for_custom_punctuation {
 
         impl $crate::parse::Parse for $ident {
             fn parse(input: $crate::parse::ParseStream) -> $crate::parse::Result<$ident> {
-                let spans: [$crate::export::Span; punct_len!(lenient, $($tt)+)] =
+                let spans: custom_punctuation_repr!($($tt)+) =
                     $crate::token::parsing::punct(input, stringify_punct!($($tt)+))?;
                 Ok($ident(spans))
             }
@@ -227,7 +227,16 @@ macro_rules! impl_extra_traits_for_custom_punctuation {
 // Not public API.
 #[doc(hidden)]
 #[macro_export(local_inner_macros)]
-macro_rules! punct_len {
+macro_rules! custom_punctuation_repr {
+    ($($tt:tt)+) => {
+        [$crate::export::Span; 0 $(+ custom_punctuation_len!(lenient, $tt))+]
+    };
+}
+
+// Not public API.
+#[doc(hidden)]
+#[macro_export(local_inner_macros)]
+macro_rules! custom_punctuation_len {
     ($mode:ident, +)     => { 1 };
     ($mode:ident, +=)    => { 2 };
     ($mode:ident, &)     => { 1 };
@@ -275,9 +284,6 @@ macro_rules! punct_len {
     ($mode:ident, ~)     => { 1 };
     (lenient, $tt:tt)    => { 0 };
     (strict, $tt:tt)     => {{ unexpected!($tt); 0 }};
-    ($mode:ident, $head:tt $($tail:tt)+) => {
-        punct_len!($mode, $head) $(+ punct_len!($mode, $tail))+
-    };
 }
 
 // Not public API.
