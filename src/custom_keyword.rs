@@ -222,7 +222,10 @@ macro_rules! impl_extra_traits_for_custom_keyword {
     ($ident:ident) => {
         impl $crate::export::Debug for $ident {
             fn fmt(&self, f: &mut $crate::export::Formatter) -> $crate::export::fmt::Result {
-                $crate::export::Formatter::write_str(f, stringify!($ident))
+                $crate::export::Formatter::write_str(
+                    f,
+                    concat!("Keyword [", stringify!($ident), "]"),
+                )
             }
         }
 

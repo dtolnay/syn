@@ -188,12 +188,12 @@ macro_rules! impl_clone_for_custom_punctuation {
 // Not public API.
 #[cfg(feature = "extra-traits")]
 #[doc(hidden)]
-#[macro_export(local_inner_macros)]
+#[macro_export]
 macro_rules! impl_extra_traits_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         impl $crate::export::Debug for $ident {
             fn fmt(&self, f: &mut $crate::export::Formatter) -> $crate::export::fmt::Result {
-                $crate::export::Formatter::write_str(f, stringify_punct!($($tt)+))
+                $crate::export::Formatter::write_str(f, stringify!($ident))
             }
         }
 
