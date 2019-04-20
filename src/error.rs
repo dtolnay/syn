@@ -1,5 +1,5 @@
 use std;
-use std::fmt::{self, Display};
+use std::fmt::{self, Debug, Display};
 use std::iter::FromIterator;
 
 use proc_macro2::{
@@ -24,7 +24,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// [module documentation]: index.html
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
-#[derive(Debug)]
 pub struct Error {
     // Span is implemented as an index into a thread-local interner to keep the
     // size small. It is not safe to access from a different thread. We want
@@ -178,6 +177,12 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
         #[cfg(not(procmacro2_semver_exempt))]
         let span = cursor.span();
         Error::new(span, message)
+    }
+}
+
+impl Debug for Error {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.debug_tuple("Error").field(&self.message).finish()
     }
 }
 
