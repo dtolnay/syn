@@ -4,6 +4,7 @@ use proc_macro2::{Delimiter, Span};
 
 use buffer::Cursor;
 use error::{self, Error};
+use sealed::lookahead::Sealed;
 use span::IntoSpans;
 use token::Token;
 
@@ -94,7 +95,8 @@ impl<'a> Lookahead1<'a> {
     ///
     /// - `input.peek(Token![struct])`
     /// - `input.peek(Token![==])`
-    /// - `input.peek(Ident)`
+    /// - `input.peek(Ident)`&emsp;*(does not accept keywords)*
+    /// - `input.peek(Ident::peek_any)`
     /// - `input.peek(Lifetime)`
     /// - `input.peek(token::Brace)`
     pub fn peek<T: Peek>(&self, token: T) -> bool {
@@ -141,7 +143,7 @@ impl<'a> Lookahead1<'a> {
 /// This trait is sealed and cannot be implemented for types outside of Syn.
 ///
 /// [`ParseStream::peek`]: struct.ParseBuffer.html#method.peek
-pub trait Peek: private::Sealed {
+pub trait Peek: Sealed {
     // Not public API.
     #[doc(hidden)]
     type Token: Token;
@@ -163,8 +165,4 @@ pub fn is_delimiter(cursor: Cursor, delimiter: Delimiter) -> bool {
     cursor.group(delimiter).is_some()
 }
 
-mod private {
-    use super::{Token, TokenMarker};
-    pub trait Sealed: Copy {}
-    impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
-}
+impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
