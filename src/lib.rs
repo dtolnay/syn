@@ -540,6 +540,7 @@ pub mod export;
 
 mod custom_keyword;
 mod custom_punctuation;
+mod sealed;
 
 #[cfg(feature = "parsing")]
 mod lookahead;

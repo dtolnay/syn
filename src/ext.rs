@@ -4,7 +4,10 @@
 
 use proc_macro2::Ident;
 
-use parse::{ParseStream, Result};
+use buffer::Cursor;
+use parse::{ParseStream, Peek, Result};
+use sealed::lookahead;
+use token::CustomToken;
 
 /// Additional methods for `Ident` not provided by proc-macro2 or libproc_macro.
 ///
@@ -15,7 +18,7 @@ use parse::{ParseStream, Result};
 pub trait IdentExt: Sized + private::Sealed {
     /// Parses any identifier including keywords.
     ///
-    /// This is useful when parsing a DSL which allows Rust keywords as
+    /// This is useful when parsing macro input which allows Rust keywords as
     /// identifiers.
     ///
     /// # Example
@@ -25,6 +28,10 @@ pub trait IdentExt: Sized + private::Sealed {
     /// use syn::ext::IdentExt;
     /// use syn::parse::ParseStream;
     ///
+    /// mod kw {
+    ///     syn::custom_keyword!(name);
+    /// }
+    ///
     /// // Parses input that looks like `name = NAME` where `NAME` can be
     /// // any identifier.
     /// //
@@ -33,16 +40,21 @@ pub trait IdentExt: Sized + private::Sealed {
     /// //     name = anything
     /// //     name = impl
     /// fn parse_dsl(input: ParseStream) -> Result<Ident> {
-    ///     let name_token: Ident = input.parse()?;
-    ///     if name_token != "name" {
-    ///         return Err(Error::new(name_token.span(), "expected `name`"));
-    ///     }
+    ///     input.parse::<kw::name>()?;
     ///     input.parse::<Token![=]>()?;
     ///     let name = input.call(Ident::parse_any)?;
     ///     Ok(name)
     /// }
     /// ```
     fn parse_any(input: ParseStream) -> Result<Self>;
+
+    /// Peeks any identifier including keywords. Usage:
+    /// `input.peek(Ident::peek_any)`
+    ///
+    /// This is different from `input.peek(Ident)` which only returns true in
+    /// the case of an ident which is not a Rust keyword.
+    #[allow(non_upper_case_globals)]
+    const peek_any: private::PeekFn = private::PeekFn;
 
     /// Strips the raw marker `r#`, if any, from the beginning of an ident.
     ///
@@ -92,10 +104,30 @@ impl IdentExt for Ident {
     }
 }
 
+impl Peek for private::PeekFn {
+    type Token = private::IdentAny;
+}
+
+impl CustomToken for private::IdentAny {
+    fn peek(cursor: Cursor) -> bool {
+        cursor.ident().is_some()
+    }
+
+    fn display() -> &'static str {
+        "identifier"
+    }
+}
+
+impl lookahead::Sealed for private::PeekFn {}
+
 mod private {
     use proc_macro2::Ident;
 
     pub trait Sealed {}
 
     impl Sealed for Ident {}
+
+    #[derive(Copy, Clone)]
+    pub struct PeekFn;
+    pub struct IdentAny;
 }
