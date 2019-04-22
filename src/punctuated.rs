@@ -25,6 +25,7 @@ use std::fmt::{self, Debug};
 #[cfg(any(feature = "full", feature = "derive"))]
 use std::iter;
 use std::iter::FromIterator;
+use std::marker::PhantomData;
 use std::ops::{Index, IndexMut};
 use std::option;
 use std::slice;
@@ -413,9 +414,13 @@ impl<T, P> IntoIterator for Punctuated<T, P> {
     type IntoIter = IntoIter<T, P>;
 
     fn into_iter(self) -> Self::IntoIter {
+        let mut elements = Vec::with_capacity(self.len());
+        elements.extend(self.inner.into_iter().map(|pair| pair.0));
+        elements.extend(self.last.map(|t| *t));
+
         IntoIter {
-            inner: self.inner.into_iter(),
-            last: self.last.map(|t| *t).into_iter(),
+            inner: elements.into_iter(),
+            marker: PhantomData,
         }
     }
 }
@@ -543,24 +548,23 @@ impl<T, P> ExactSizeIterator for IntoPairs<T, P> {
 /// [module documentation]: index.html
 #[derive(Clone)]
 pub struct IntoIter<T, P> {
-    inner: vec::IntoIter<(T, P)>,
-    last: option::IntoIter<T>,
+    inner: vec::IntoIter<T>,
+
+    // TODO: remove P type parameter in the next breaking change
+    marker: PhantomData<P>,
 }
 
 impl<T, P> Iterator for IntoIter<T, P> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner
-            .next()
-            .map(|pair| pair.0)
-            .or_else(|| self.last.next())
+        self.inner.next()
     }
 }
 
 impl<T, P> ExactSizeIterator for IntoIter<T, P> {
     fn len(&self) -> usize {
-        self.inner.len() + self.last.len()
+        self.inner.len()
     }
 }
 
