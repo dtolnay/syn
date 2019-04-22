@@ -4,9 +4,15 @@
 
 use proc_macro2::Ident;
 
+use parse::{ParseStream, Result};
+
+#[cfg(syn_can_use_associated_constants)]
 use buffer::Cursor;
-use parse::{ParseStream, Peek, Result};
+#[cfg(syn_can_use_associated_constants)]
+use parse::Peek;
+#[cfg(syn_can_use_associated_constants)]
 use sealed::lookahead;
+#[cfg(syn_can_use_associated_constants)]
 use token::CustomToken;
 
 /// Additional methods for `Ident` not provided by proc-macro2 or libproc_macro.
@@ -53,6 +59,7 @@ pub trait IdentExt: Sized + private::Sealed {
     ///
     /// This is different from `input.peek(Ident)` which only returns true in
     /// the case of an ident which is not a Rust keyword.
+    #[cfg(syn_can_use_associated_constants)]
     #[allow(non_upper_case_globals)]
     const peek_any: private::PeekFn = private::PeekFn;
 
@@ -104,10 +111,12 @@ impl IdentExt for Ident {
     }
 }
 
+#[cfg(syn_can_use_associated_constants)]
 impl Peek for private::PeekFn {
     type Token = private::IdentAny;
 }
 
+#[cfg(syn_can_use_associated_constants)]
 impl CustomToken for private::IdentAny {
     fn peek(cursor: Cursor) -> bool {
         cursor.ident().is_some()
@@ -118,6 +127,7 @@ impl CustomToken for private::IdentAny {
     }
 }
 
+#[cfg(syn_can_use_associated_constants)]
 impl lookahead::Sealed for private::PeekFn {}
 
 mod private {
@@ -127,7 +137,9 @@ mod private {
 
     impl Sealed for Ident {}
 
+    #[cfg(syn_can_use_associated_constants)]
     #[derive(Copy, Clone)]
     pub struct PeekFn;
+    #[cfg(syn_can_use_associated_constants)]
     pub struct IdentAny;
 }
