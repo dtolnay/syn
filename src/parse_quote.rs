@@ -39,7 +39,7 @@
 /// // Add a bound `T: HeapSize` to every type parameter T.
 /// fn add_trait_bounds(mut generics: Generics) -> Generics {
 ///     for param in &mut generics.params {
-///         if let GenericParam::Type(ref mut type_param) = *param {
+///         if let GenericParam::Type(type_param) = param {
 ///             type_param.bounds.push(parse_quote!(HeapSize));
 ///         }
 ///     }

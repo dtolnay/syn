@@ -36,9 +36,10 @@ ast_enum_of_structs! {
     ///     Expr::If(expr) => {
     ///         /* ... */
     ///     }
+    ///
     ///     /* ... */
     ///     # _ => {}
-    /// }
+    /// # }
     /// # }
     /// ```
     ///
@@ -50,28 +51,15 @@ ast_enum_of_structs! {
     /// `expr.receiver`, `expr.args` etc; if we ended up in the `If` case we get
     /// to use `expr.cond`, `expr.then_branch`, `expr.else_branch`.
     ///
-    /// The pattern is similar if the input expression is borrowed:
-    ///
-    /// ```edition2018
-    /// # use syn::Expr;
-    /// #
-    /// # fn example(expr: &Expr) {
-    /// match *expr {
-    ///     Expr::MethodCall(ref expr) => {
-    /// #   }
-    /// #   _ => {}
-    /// # }
-    /// # }
-    /// ```
-    ///
     /// This approach avoids repeating the variant names twice on every line.
     ///
     /// ```edition2018
     /// # use syn::{Expr, ExprMethodCall};
     /// #
     /// # fn example(expr: Expr) {
-    /// # match expr {
-    /// Expr::MethodCall(ExprMethodCall { method, args, .. }) => { // repetitive
+    /// // Repetitive; recommend not doing this.
+    /// match expr {
+    ///     Expr::MethodCall(ExprMethodCall { method, args, .. }) => {
     /// # }
     /// # _ => {}
     /// # }
@@ -84,10 +72,10 @@ ast_enum_of_structs! {
     /// ```edition2018
     /// # use syn::{Expr, ExprField};
     /// #
-    /// # fn example(discriminant: &ExprField) {
+    /// # fn example(discriminant: ExprField) {
     /// // Binding is called `base` which is the name I would use if I were
     /// // assigning `*discriminant.base` without an `if let`.
-    /// if let Expr::Tuple(ref base) = *discriminant.base {
+    /// if let Expr::Tuple(base) = *discriminant.base {
     /// # }
     /// # }
     /// ```
