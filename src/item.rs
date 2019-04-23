@@ -1190,7 +1190,7 @@ pub mod parsing {
             colon_token: input.parse()?,
             ty: match input.parse::<Token![...]>() {
                 Ok(dot3) => {
-                    let mut args = vec![
+                    let args = vec![
                         TokenTree::Punct(Punct::new('.', Spacing::Joint)),
                         TokenTree::Punct(Punct::new('.', Spacing::Joint)),
                         TokenTree::Punct(Punct::new('.', Spacing::Alone)),
