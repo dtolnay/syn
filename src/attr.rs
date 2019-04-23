@@ -133,8 +133,8 @@ impl Hash for Attribute {
 }
 
 impl Attribute {
-    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
-    /// possible.
+    /// Parses the content of the attribute, consisting of the path and tts, as
+    /// a [`Meta`](enum.Meta.html) if possible.
     ///
     /// Deprecated; use `parse_meta` instead.
     #[doc(hidden)]
@@ -174,8 +174,8 @@ impl Attribute {
         }
     }
 
-    /// Parses the tokens after the path as a [`Meta`](enum.Meta.html) if
-    /// possible.
+    /// Parses the content of the attribute, consisting of the path and tts, as
+    /// a [`Meta`](enum.Meta.html) if possible.
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
         if let Some(ref colon) = self.path.leading_colon {
