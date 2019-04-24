@@ -436,7 +436,7 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
             tokens.push(TokenTree::Token(DUMMY_SP, Token::Not));
         }
         let lit = Lit::Str_(Symbol::intern(&contents));
-        let mut tts = vec![
+        let tts = vec![
             TokenTree::Token(DUMMY_SP, Token::Ident(Ident::from_str("doc"), false)),
             TokenTree::Token(DUMMY_SP, Token::Eq),
             TokenTree::Token(DUMMY_SP, Token::Literal(lit, None)),
