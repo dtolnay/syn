@@ -22,7 +22,7 @@ pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
     let expanded = quote! {
         // The generated impl.
-        impl #impl_generics ::heapsize::HeapSize for #name #ty_generics #where_clause {
+        impl #impl_generics heapsize::HeapSize for #name #ty_generics #where_clause {
             fn heap_size_of_children(&self) -> usize {
                 #sum
             }
@@ -37,7 +37,7 @@ pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 fn add_trait_bounds(mut generics: Generics) -> Generics {
     for param in &mut generics.params {
         if let GenericParam::Type(ref mut type_param) = *param {
-            type_param.bounds.push(parse_quote!(::heapsize::HeapSize));
+            type_param.bounds.push(parse_quote!(heapsize::HeapSize));
         }
     }
     generics
@@ -64,7 +64,7 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                     let recurse = fields.named.iter().map(|f| {
                         let name = &f.ident;
                         quote_spanned! {f.span()=>
-                            ::heapsize::HeapSize::heap_size_of_children(&self.#name)
+                            heapsize::HeapSize::heap_size_of_children(&self.#name)
                         }
                     });
                     quote! {
@@ -78,7 +78,7 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                     let recurse = fields.unnamed.iter().enumerate().map(|(i, f)| {
                         let index = Index::from(i);
                         quote_spanned! {f.span()=>
-                            ::heapsize::HeapSize::heap_size_of_children(&self.#index)
+                            heapsize::HeapSize::heap_size_of_children(&self.#index)
                         }
                     });
                     quote! {

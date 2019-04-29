@@ -98,7 +98,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //     10 |     static ref PTR: *const () = &();
     //        |                     ^^^^^^^^^ `*const ()` cannot be shared between threads safely
     let assert_sync = quote_spanned! {ty.span()=>
-        struct _AssertSync where #ty: ::std::marker::Sync;
+        struct _AssertSync where #ty: std::marker::Sync;
     };
 
     // Check for Sized. Not vital to check here, but the error message is less
@@ -111,7 +111,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //     10 |     static ref A: str = "";
     //        |                   ^^^ `str` does not have a constant size known at compile-time
     let assert_sized = quote_spanned! {ty.span()=>
-        struct _AssertSized where #ty: ::std::marker::Sized;
+        struct _AssertSized where #ty: std::marker::Sized;
     };
 
     let init_ptr = quote_spanned! {init.span()=>
@@ -121,14 +121,14 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #visibility struct #name;
 
-        impl ::std::ops::Deref for #name {
+        impl std::ops::Deref for #name {
             type Target = #ty;
 
             fn deref(&self) -> &#ty {
                 #assert_sync
                 #assert_sized
 
-                static ONCE: ::std::sync::Once = ::std::sync::ONCE_INIT;
+                static ONCE: std::sync::Once = std::sync::ONCE_INIT;
                 static mut VALUE: *mut #ty = 0 as *mut #ty;
 
                 unsafe {
