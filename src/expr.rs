@@ -1910,6 +1910,17 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
+    impl Parse for ExprRange {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let expr: Expr = input.parse()?;
+            match expr {
+                Expr::Range(expr_range) => Ok(expr_range),
+                _ => Err(input.error("expected range expression"))
+            }
+        }
+    }
+
+    #[cfg(feature = "full")]
     fn expr_try_block(input: ParseStream) -> Result<ExprTryBlock> {
         Ok(ExprTryBlock {
             attrs: Vec::new(),
