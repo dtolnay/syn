@@ -1911,7 +1911,7 @@ pub mod parsing {
 
     macro_rules! impl_trivial_parse {
         ($expr_type:ty, $variant:ident, $msg:expr) => (
-            #[cfg(feature = "full")]
+            #[cfg(all(feature = "full", feature = "printing"))]
             impl Parse for $expr_type {
                 fn parse(input: ParseStream) -> Result<Self> {
                     let expr: Expr = input.parse()?;
