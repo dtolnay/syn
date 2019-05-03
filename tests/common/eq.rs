@@ -267,7 +267,7 @@ spanless_eq_struct!(AngleBracketedArgs; span args bindings);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arg; ty pat id source);
 spanless_eq_struct!(Arm; attrs pats guard body);
-spanless_eq_struct!(AsyncArgument; ident arg stmt);
+spanless_eq_struct!(AsyncArgument; ident arg move_stmt pat_stmt);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span);
