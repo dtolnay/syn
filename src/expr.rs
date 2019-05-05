@@ -1914,10 +1914,13 @@ pub mod parsing {
             #[cfg(all(feature = "full", feature = "printing"))]
             impl Parse for $expr_type {
                 fn parse(input: ParseStream) -> Result<Self> {
-                    let expr: Expr = input.parse()?;
-                    match expr {
-                        Expr::$variant(inner) => Ok(inner),
-                        _ => Err(Error::new_spanned(expr, $msg))
+                    let mut expr: Expr = input.parse()?;
+                    loop {
+                        match expr {
+                            Expr::$variant(inner) => return Ok(inner),
+                            Expr::Group(ExprGroup { expr: next, .. }) => expr = *next,
+                            _ => return Err(Error::new_spanned(expr, $msg))
+                        }
                     }
                 }
             }
