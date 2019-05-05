@@ -1909,7 +1909,7 @@ pub mod parsing {
         }
     }
 
-    macro_rules! impl_trivial_parse {
+    macro_rules! impl_by_parsing_expr {
         ($expr_type:ty, $variant:ident, $msg:expr) => (
             #[cfg(all(feature = "full", feature = "printing"))]
             impl Parse for $expr_type {
@@ -1924,44 +1924,37 @@ pub mod parsing {
         )
     }
 
-    impl_trivial_parse!(ExprBox, Box, "expected box expression");
-    impl_trivial_parse!(ExprInPlace, InPlace, "expected placement expression");
-    impl_trivial_parse!(ExprArray, Array, "expected slice literal expression");
-    impl_trivial_parse!(ExprCall, Call, "expected function call expression");
-    impl_trivial_parse!(ExprMethodCall, MethodCall, "expected method call expression");
-    impl_trivial_parse!(ExprTuple, Tuple, "expected tuple expression");
-    impl_trivial_parse!(ExprBinary, Binary, "expected binary operation");
-    impl_trivial_parse!(ExprUnary, Unary, "expected unary operation");
-    //impl_trivial_parse!(ExprLit, Lit, "expected literal in place of an expression");
-    impl_trivial_parse!(ExprCast, Cast, "expected cast expression");
-    impl_trivial_parse!(ExprType, Type, "expected type ascription expression");
-    impl_trivial_parse!(ExprLet, Let, "expected let guard");
-    //impl_trivial_parse!(ExprIf, If, "expected if expression");
-    //impl_trivial_parse!(ExprWhile, While, "expected while loop");
-    //impl_trivial_parse!(ExprForLoop, ForLoop, "expected for loop");
-    //impl_trivial_parse!(ExprLoop, Loop, "expected conditionless loop");
-    impl_trivial_parse!(ExprClosure, Closure, "expected closure expression");
-    impl_trivial_parse!(ExprUnsafe, Unsafe, "expected unsafe block");
-    impl_trivial_parse!(ExprBlock, Block, "expected blocked scope");
-    impl_trivial_parse!(ExprAssign, Assign, "expected assignment expression");
-    impl_trivial_parse!(ExprAssignOp, AssignOp, "expected compound assignment expression");
-    impl_trivial_parse!(ExprField, Field, "expected struct field access");
-    impl_trivial_parse!(ExprIndex, Index, "expected indexing expression");
-    impl_trivial_parse!(ExprRange, Range, "expected range expression");
-    impl_trivial_parse!(ExprReference, Reference, "expected referencing operation");
-    impl_trivial_parse!(ExprBreak, Break, "expected break expression");
-    impl_trivial_parse!(ExprContinue, Continue, "expected continue expression");
-    impl_trivial_parse!(ExprReturn, Return, "expected return expression");
-    impl_trivial_parse!(ExprMacro, Macro, "expected macro invocation expression");
-    impl_trivial_parse!(ExprStruct, Struct, "expected struct literal expression");
-    impl_trivial_parse!(ExprRepeat, Repeat, "expected array literal constructed from one repeated element");
-    impl_trivial_parse!(ExprParen, Paren, "expected parenthesized expression");
-    impl_trivial_parse!(ExprGroup, Group, "expected ExprGroup");
-    impl_trivial_parse!(ExprTry, Try, "expected try expression");
-    impl_trivial_parse!(ExprAsync, Async, "expected async block");
-    impl_trivial_parse!(ExprTryBlock, TryBlock, "expected try block");
-    impl_trivial_parse!(ExprYield, Yield, "expected yield expression");
-    impl_trivial_parse!(ExprVerbatim, Verbatim, "expected ExprVerbatim");
+    impl_by_parsing_expr!(ExprBox, Box, "expected box expression");
+    impl_by_parsing_expr!(ExprInPlace, InPlace, "expected placement expression");
+    impl_by_parsing_expr!(ExprArray, Array, "expected slice literal expression");
+    impl_by_parsing_expr!(ExprCall, Call, "expected function call expression");
+    impl_by_parsing_expr!(ExprMethodCall, MethodCall, "expected method call expression");
+    impl_by_parsing_expr!(ExprTuple, Tuple, "expected tuple expression");
+    impl_by_parsing_expr!(ExprBinary, Binary, "expected binary operation");
+    impl_by_parsing_expr!(ExprUnary, Unary, "expected unary operation");
+    impl_by_parsing_expr!(ExprCast, Cast, "expected cast expression");
+    impl_by_parsing_expr!(ExprType, Type, "expected type ascription expression");
+    impl_by_parsing_expr!(ExprLet, Let, "expected let guard");
+    impl_by_parsing_expr!(ExprClosure, Closure, "expected closure expression");
+    impl_by_parsing_expr!(ExprUnsafe, Unsafe, "expected unsafe block");
+    impl_by_parsing_expr!(ExprBlock, Block, "expected blocked scope");
+    impl_by_parsing_expr!(ExprAssign, Assign, "expected assignment expression");
+    impl_by_parsing_expr!(ExprAssignOp, AssignOp, "expected compound assignment expression");
+    impl_by_parsing_expr!(ExprField, Field, "expected struct field access");
+    impl_by_parsing_expr!(ExprIndex, Index, "expected indexing expression");
+    impl_by_parsing_expr!(ExprRange, Range, "expected range expression");
+    impl_by_parsing_expr!(ExprReference, Reference, "expected referencing operation");
+    impl_by_parsing_expr!(ExprBreak, Break, "expected break expression");
+    impl_by_parsing_expr!(ExprContinue, Continue, "expected continue expression");
+    impl_by_parsing_expr!(ExprReturn, Return, "expected return expression");
+    impl_by_parsing_expr!(ExprMacro, Macro, "expected macro invocation expression");
+    impl_by_parsing_expr!(ExprStruct, Struct, "expected struct literal expression");
+    impl_by_parsing_expr!(ExprRepeat, Repeat, "expected array literal constructed from one repeated element");
+    impl_by_parsing_expr!(ExprParen, Paren, "expected parenthesized expression");
+    impl_by_parsing_expr!(ExprTry, Try, "expected try expression");
+    impl_by_parsing_expr!(ExprAsync, Async, "expected async block");
+    impl_by_parsing_expr!(ExprTryBlock, TryBlock, "expected try block");
+    impl_by_parsing_expr!(ExprYield, Yield, "expected yield expression");
 
     #[cfg(feature = "full")]
     fn expr_try_block(input: ParseStream) -> Result<ExprTryBlock> {
