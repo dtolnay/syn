@@ -15,7 +15,30 @@ fn test_unit() {
         struct Unit;
     };
 
-    snapshot!(code as DeriveInput);
+    snapshot!(code as DeriveInput, @r###"
+   ⋮DeriveInput {
+   ⋮    attrs: [],
+   ⋮    vis: Inherited,
+   ⋮    ident: Ident(
+   ⋮        Unit,
+   ⋮    ),
+   ⋮    generics: Generics {
+   ⋮        lt_token: None,
+   ⋮        params: [],
+   ⋮        gt_token: None,
+   ⋮        where_clause: None,
+   ⋮    },
+   ⋮    data: Struct(
+   ⋮        DataStruct {
+   ⋮            struct_token: Struct,
+   ⋮            fields: Unit,
+   ⋮            semi_token: Some(
+   ⋮                Semi,
+   ⋮            ),
+   ⋮        },
+   ⋮    ),
+   ⋮}
+    "###);
 }
 
 #[test]
@@ -28,9 +51,193 @@ fn test_struct() {
         }
     };
 
-    let actual = snapshot!(code as DeriveInput);
+    let actual = {
+        snapshot!(code as DeriveInput, @r###"
+       ⋮DeriveInput {
+       ⋮    attrs: [
+       ⋮        Attribute {
+       ⋮            pound_token: Pound,
+       ⋮            style: Outer,
+       ⋮            bracket_token: Bracket,
+       ⋮            path: Path {
+       ⋮                leading_colon: None,
+       ⋮                segments: [
+       ⋮                    PathSegment {
+       ⋮                        ident: Ident(
+       ⋮                            derive,
+       ⋮                        ),
+       ⋮                        arguments: None,
+       ⋮                    },
+       ⋮                ],
+       ⋮            },
+       ⋮            tts: TokenStream [
+       ⋮                Group {
+       ⋮                    delimiter: Parenthesis,
+       ⋮                    stream: TokenStream [
+       ⋮                        Ident {
+       ⋮                            sym: Debug,
+       ⋮                        },
+       ⋮                        Punct {
+       ⋮                            op: ',',
+       ⋮                            spacing: Alone,
+       ⋮                        },
+       ⋮                        Ident {
+       ⋮                            sym: Clone,
+       ⋮                        },
+       ⋮                    ],
+       ⋮                },
+       ⋮            ],
+       ⋮        },
+       ⋮    ],
+       ⋮    vis: Public(
+       ⋮        VisPublic {
+       ⋮            pub_token: Pub,
+       ⋮        },
+       ⋮    ),
+       ⋮    ident: Ident(
+       ⋮        Item,
+       ⋮    ),
+       ⋮    generics: Generics {
+       ⋮        lt_token: None,
+       ⋮        params: [],
+       ⋮        gt_token: None,
+       ⋮        where_clause: None,
+       ⋮    },
+       ⋮    data: Struct(
+       ⋮        DataStruct {
+       ⋮            struct_token: Struct,
+       ⋮            fields: Named(
+       ⋮                FieldsNamed {
+       ⋮                    brace_token: Brace,
+       ⋮                    named: [
+       ⋮                        Field {
+       ⋮                            attrs: [],
+       ⋮                            vis: Public(
+       ⋮                                VisPublic {
+       ⋮                                    pub_token: Pub,
+       ⋮                                },
+       ⋮                            ),
+       ⋮                            ident: Some(
+       ⋮                                Ident(
+       ⋮                                    ident,
+       ⋮                                ),
+       ⋮                            ),
+       ⋮                            colon_token: Some(
+       ⋮                                Colon,
+       ⋮                            ),
+       ⋮                            ty: Path(
+       ⋮                                TypePath {
+       ⋮                                    qself: None,
+       ⋮                                    path: Path {
+       ⋮                                        leading_colon: None,
+       ⋮                                        segments: [
+       ⋮                                            PathSegment {
+       ⋮                                                ident: Ident(
+       ⋮                                                    Ident,
+       ⋮                                                ),
+       ⋮                                                arguments: None,
+       ⋮                                            },
+       ⋮                                        ],
+       ⋮                                    },
+       ⋮                                },
+       ⋮                            ),
+       ⋮                        },
+       ⋮                        Comma,
+       ⋮                        Field {
+       ⋮                            attrs: [],
+       ⋮                            vis: Public(
+       ⋮                                VisPublic {
+       ⋮                                    pub_token: Pub,
+       ⋮                                },
+       ⋮                            ),
+       ⋮                            ident: Some(
+       ⋮                                Ident(
+       ⋮                                    attrs,
+       ⋮                                ),
+       ⋮                            ),
+       ⋮                            colon_token: Some(
+       ⋮                                Colon,
+       ⋮                            ),
+       ⋮                            ty: Path(
+       ⋮                                TypePath {
+       ⋮                                    qself: None,
+       ⋮                                    path: Path {
+       ⋮                                        leading_colon: None,
+       ⋮                                        segments: [
+       ⋮                                            PathSegment {
+       ⋮                                                ident: Ident(
+       ⋮                                                    Vec,
+       ⋮                                                ),
+       ⋮                                                arguments: AngleBracketed(
+       ⋮                                                    AngleBracketedGenericArguments {
+       ⋮                                                        colon2_token: None,
+       ⋮                                                        lt_token: Lt,
+       ⋮                                                        args: [
+       ⋮                                                            Type(
+       ⋮                                                                Path(
+       ⋮                                                                    TypePath {
+       ⋮                                                                        qself: None,
+       ⋮                                                                        path: Path {
+       ⋮                                                                            leading_colon: None,
+       ⋮                                                                            segments: [
+       ⋮                                                                                PathSegment {
+       ⋮                                                                                    ident: Ident(
+       ⋮                                                                                        Attribute,
+       ⋮                                                                                    ),
+       ⋮                                                                                    arguments: None,
+       ⋮                                                                                },
+       ⋮                                                                            ],
+       ⋮                                                                        },
+       ⋮                                                                    },
+       ⋮                                                                ),
+       ⋮                                                            ),
+       ⋮                                                        ],
+       ⋮                                                        gt_token: Gt,
+       ⋮                                                    },
+       ⋮                                                ),
+       ⋮                                            },
+       ⋮                                        ],
+       ⋮                                    },
+       ⋮                                },
+       ⋮                            ),
+       ⋮                        },
+       ⋮                    ],
+       ⋮                },
+       ⋮            ),
+       ⋮            semi_token: None,
+       ⋮        },
+       ⋮    ),
+       ⋮}
+        "###)
+    };
 
-    snapshot!(actual.attrs[0].interpret_meta().unwrap());
+    snapshot!(actual.attrs[0].interpret_meta().unwrap(), @r###"
+   ⋮List(
+   ⋮    MetaList {
+   ⋮        ident: Ident(
+   ⋮            derive,
+   ⋮        ),
+   ⋮        paren_token: Paren,
+   ⋮        nested: [
+   ⋮            Meta(
+   ⋮                Word(
+   ⋮                    Ident(
+   ⋮                        Debug,
+   ⋮                    ),
+   ⋮                ),
+   ⋮            ),
+   ⋮            Comma,
+   ⋮            Meta(
+   ⋮                Word(
+   ⋮                    Ident(
+   ⋮                        Clone,
+   ⋮                    ),
+   ⋮                ),
+   ⋮            ),
+   ⋮        ],
+   ⋮    },
+   ⋮)
+    "###);
 }
 
 #[test]
