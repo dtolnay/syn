@@ -1,0 +1,15 @@
+[package]
+name = "syn-codegen"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Syntax tree describing Syn's syntax tree"
+repository = "https://github.com/dtolnay/syn"
+documentation = "https://docs.rs/syn-codegen"
+categories = ["development-tools::procedural-macro-helpers"]
+
+[dependencies]
+indexmap = { version = "1.0", features = ["serde-1"] }
+semver = { version = "0.9", features = ["serde"] }
+serde = { version = "1.0.88", features = ["derive"] }

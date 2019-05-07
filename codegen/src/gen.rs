@@ -10,10 +10,10 @@
 //!    - only submodules located in the same directory.
 //! 3. The path to `syn` is hardcoded.
 
-use crate::types;
 use proc_macro2::TokenStream;
 use quote::quote;
 use rustfmt_nightly as rustfmt;
+use syn_codegen as types;
 
 use std::fs::File;
 use std::io::Write;
@@ -23,11 +23,11 @@ const VISIT_SRC: &str = "../src/gen/visit.rs";
 const VISIT_MUT_SRC: &str = "../src/gen/visit_mut.rs";
 
 mod codegen {
-    use crate::types;
     use inflections::Inflect;
     use proc_macro2::{Span, TokenStream};
     use quote::{quote, TokenStreamExt};
     use syn::*;
+    use syn_codegen as types;
 
     #[derive(Default)]
     pub struct State {

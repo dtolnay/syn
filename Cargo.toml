@@ -52,4 +52,4 @@ all-features = true
 travis-ci = { repository = "dtolnay/syn" }
 
 [workspace]
-members = ["dev"]
+members = ["dev", "json"]

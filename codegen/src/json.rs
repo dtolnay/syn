@@ -1,4 +1,4 @@
-use crate::types::Definitions;
+use syn_codegen::Definitions;
 
 use std::fs;
 use std::path::Path;

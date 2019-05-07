@@ -1,8 +1,10 @@
-use crate::{types, version};
+use crate::version;
 
 use indexmap::IndexMap;
 use quote::quote;
+use syn::parse::Parser;
 use syn::{parse_quote, Data, DataStruct, DeriveInput, Ident, Item};
+use syn_codegen as types;
 
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -192,7 +194,7 @@ fn introspect_features(attrs: &[syn::Attribute]) -> types::Features {
             continue;
         }
 
-        let features: types::Features = syn::parse2(attr.tts.clone()).unwrap();
+        let features = parsing::parse_features.parse2(attr.tts.clone()).unwrap();
 
         if ret.any.is_empty() {
             ret = features;
@@ -250,13 +252,13 @@ fn last_arg(params: &syn::PathArguments) -> &syn::Type {
 
 mod parsing {
     use super::{AstItem, TokenLookup};
-    use crate::types;
 
     use proc_macro2::TokenStream;
     use quote::quote;
     use syn;
     use syn::parse::{Parse, ParseStream, Result};
     use syn::*;
+    use syn_codegen as types;
 
     use std::collections::{BTreeMap, BTreeSet};
 
@@ -453,39 +455,37 @@ mod parsing {
         Ok(s.value())
     }
 
-    impl Parse for types::Features {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let mut features = BTreeSet::new();
+    pub fn parse_features(input: ParseStream) -> Result<types::Features> {
+        let mut features = BTreeSet::new();
 
-            let level_1;
-            parenthesized!(level_1 in input);
+        let level_1;
+        parenthesized!(level_1 in input);
 
-            let i: syn::Ident = level_1.fork().parse()?;
+        let i: syn::Ident = level_1.fork().parse()?;
 
-            if i == "any" {
-                level_1.parse::<syn::Ident>()?;
+        if i == "any" {
+            level_1.parse::<syn::Ident>()?;
 
-                let level_2;
-                parenthesized!(level_2 in level_1);
+            let level_2;
+            parenthesized!(level_2 in level_1);
 
-                while !level_2.is_empty() {
-                    features.insert(parse_feature(&level_2)?);
+            while !level_2.is_empty() {
+                features.insert(parse_feature(&level_2)?);
 
-                    if !level_2.is_empty() {
-                        level_2.parse::<Token![,]>()?;
-                    }
+                if !level_2.is_empty() {
+                    level_2.parse::<Token![,]>()?;
                 }
-            } else if i == "feature" {
-                features.insert(parse_feature(&level_1)?);
-                assert!(level_1.is_empty());
-            } else {
-                panic!("{:?}", i);
             }
-
-            assert!(input.is_empty());
-
-            Ok(types::Features { any: features })
+        } else if i == "feature" {
+            features.insert(parse_feature(&level_1)?);
+            assert!(level_1.is_empty());
+        } else {
+            panic!("{:?}", i);
         }
+
+        assert!(input.is_empty());
+
+        Ok(types::Features { any: features })
     }
 }
 

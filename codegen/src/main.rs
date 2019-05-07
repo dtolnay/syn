@@ -16,7 +16,6 @@
 mod gen;
 mod json;
 mod parse;
-mod types;
 mod version;
 
 fn main() {
