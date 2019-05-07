@@ -41,9 +41,19 @@ macro_rules! snapshot_impl {
         insta::assert_debug_snapshot_matches!(syntax_tree);
         syntax_tree
     }};
+    (($($expr:tt)*) as $t:ty, @$snapshot:literal) => {{
+        let syntax_tree = ::macros::Tokens::parse::<$t>($($expr)*).unwrap();
+        insta::assert_debug_snapshot_matches!(syntax_tree, @$snapshot);
+        syntax_tree
+    }};
     (($($expr:tt)*)) => {{
         let syntax_tree = $($expr)*;
         insta::assert_debug_snapshot_matches!(syntax_tree);
+        syntax_tree
+    }};
+    (($($expr:tt)*) , @$snapshot:literal) => {{
+        let syntax_tree = $($expr)*;
+        insta::assert_debug_snapshot_matches!(syntax_tree, @$snapshot);
         syntax_tree
     }};
     (($($expr:tt)*) $next:tt $($rest:tt)*) => {
