@@ -1,4 +1,4 @@
-use crate::file;
+use crate::{file, full};
 use quote::quote;
 use syn_codegen as types;
 
@@ -328,22 +328,7 @@ pub fn generate(defs: &types::Definitions) {
         codegen::generate(&mut state, &s, defs);
     }
 
-    let full_macro = quote! {
-        #[cfg(feature = "full")]
-        macro_rules! full {
-            ($e:expr) => {
-                $e
-            };
-        }
-
-        #[cfg(all(feature = "derive", not(feature = "full")))]
-        macro_rules! full {
-            ($e:expr) => {
-                unreachable!()
-            };
-        }
-    };
-
+    let full_macro = full::get_macro();
     let fold_trait = state.fold_trait;
     let fold_impl = state.fold_impl;
     file::write(

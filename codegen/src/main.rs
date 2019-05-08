@@ -14,6 +14,7 @@
 
 mod file;
 mod fold;
+mod full;
 mod json;
 mod parse;
 mod version;

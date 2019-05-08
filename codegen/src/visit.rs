@@ -1,4 +1,4 @@
-use crate::file;
+use crate::{file, full};
 use quote::quote;
 use syn_codegen as types;
 
@@ -329,29 +329,7 @@ pub fn generate(defs: &types::Definitions) {
         codegen::generate(&mut state, &s, defs);
     }
 
-    let full_macro = quote! {
-        #[cfg(feature = "full")]
-        macro_rules! full {
-            ($e:expr) => {
-                $e
-            };
-        }
-
-        #[cfg(all(feature = "derive", not(feature = "full")))]
-        macro_rules! full {
-            ($e:expr) => {
-                unreachable!()
-            };
-        }
-    };
-
-    let skip_macro = quote! {
-        #[cfg(any(feature = "full", feature = "derive"))]
-        macro_rules! skip {
-            ($($tt:tt)*) => {};
-        }
-    };
-
+    let full_macro = full::get_macro();
     let visit_trait = state.visit_trait;
     let visit_impl = state.visit_impl;
     file::write(
@@ -367,7 +345,11 @@ pub fn generate(defs: &types::Definitions) {
             use gen::helper::visit::*;
 
             #full_macro
-            #skip_macro
+
+            #[cfg(any(feature = "full", feature = "derive"))]
+            macro_rules! skip {
+                ($($tt:tt)*) => {};
+            }
 
             /// Syntax tree traversal to walk a shared borrow of a syntax tree.
             ///
