@@ -1,8 +1,9 @@
 use proc_macro2::TokenStream;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 
-pub fn write(path: &str, content: TokenStream) {
+pub fn write<P: AsRef<Path>>(path: P, content: TokenStream) {
     let mut file = File::create(path).unwrap();
     write!(
         file,
