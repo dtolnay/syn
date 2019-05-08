@@ -38,6 +38,7 @@ unicode-xid = "0.1"
 [dev-dependencies]
 insta = "0.8"
 rayon = "1.0"
+ref-cast = "0.2"
 regex = "1.0"
 termcolor = "1.0"
 walkdir = "2.1"

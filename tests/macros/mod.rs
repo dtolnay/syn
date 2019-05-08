@@ -1,5 +1,8 @@
 extern crate proc_macro2;
 
+#[path = "../debug/mod.rs"]
+pub mod debug;
+
 use syn;
 use syn::parse::{Parse, Result};
 
@@ -43,7 +46,8 @@ macro_rules! snapshot_impl {
     }};
     (($($expr:tt)*) as $t:ty, @$snapshot:literal) => {{
         let syntax_tree = ::macros::Tokens::parse::<$t>($($expr)*).unwrap();
-        insta::assert_debug_snapshot_matches!(syntax_tree, @$snapshot);
+        let debug = crate::macros::debug::Lite(&syntax_tree);
+        insta::assert_debug_snapshot_matches!(debug, @$snapshot);
         syntax_tree
     }};
     (($($expr:tt)*)) => {{
@@ -53,7 +57,8 @@ macro_rules! snapshot_impl {
     }};
     (($($expr:tt)*) , @$snapshot:literal) => {{
         let syntax_tree = $($expr)*;
-        insta::assert_debug_snapshot_matches!(syntax_tree, @$snapshot);
+        let debug = crate::macros::debug::Lite(&syntax_tree);
+        insta::assert_debug_snapshot_matches!(debug, @$snapshot);
         syntax_tree
     }};
     (($($expr:tt)*) $next:tt $($rest:tt)*) => {

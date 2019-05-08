@@ -19,9 +19,7 @@ fn test_unit() {
    ⋮DeriveInput {
    ⋮    attrs: [],
    ⋮    vis: Inherited,
-   ⋮    ident: Ident(
-   ⋮        Unit,
-   ⋮    ),
+   ⋮    ident: "Unit",
    ⋮    generics: Generics {
    ⋮        lt_token: None,
    ⋮        params: [],
@@ -30,11 +28,8 @@ fn test_unit() {
    ⋮    },
    ⋮    data: Struct(
    ⋮        DataStruct {
-   ⋮            struct_token: Struct,
    ⋮            fields: Unit,
-   ⋮            semi_token: Some(
-   ⋮                Semi,
-   ⋮            ),
+   ⋮            semi_token: Some,
    ⋮        },
    ⋮    ),
    ⋮}
@@ -56,47 +51,23 @@ fn test_struct() {
        ⋮DeriveInput {
        ⋮    attrs: [
        ⋮        Attribute {
-       ⋮            pound_token: Pound,
        ⋮            style: Outer,
-       ⋮            bracket_token: Bracket,
        ⋮            path: Path {
        ⋮                leading_colon: None,
        ⋮                segments: [
        ⋮                    PathSegment {
-       ⋮                        ident: Ident(
-       ⋮                            derive,
-       ⋮                        ),
+       ⋮                        ident: "derive",
        ⋮                        arguments: None,
        ⋮                    },
        ⋮                ],
        ⋮            },
-       ⋮            tts: TokenStream [
-       ⋮                Group {
-       ⋮                    delimiter: Parenthesis,
-       ⋮                    stream: TokenStream [
-       ⋮                        Ident {
-       ⋮                            sym: Debug,
-       ⋮                        },
-       ⋮                        Punct {
-       ⋮                            op: ',',
-       ⋮                            spacing: Alone,
-       ⋮                        },
-       ⋮                        Ident {
-       ⋮                            sym: Clone,
-       ⋮                        },
-       ⋮                    ],
-       ⋮                },
-       ⋮            ],
+       ⋮            tts: `( Debug , Clone )`,
        ⋮        },
        ⋮    ],
        ⋮    vis: Public(
-       ⋮        VisPublic {
-       ⋮            pub_token: Pub,
-       ⋮        },
+       ⋮        VisPublic,
        ⋮    ),
-       ⋮    ident: Ident(
-       ⋮        Item,
-       ⋮    ),
+       ⋮    ident: "Item",
        ⋮    generics: Generics {
        ⋮        lt_token: None,
        ⋮        params: [],
@@ -105,26 +76,16 @@ fn test_struct() {
        ⋮    },
        ⋮    data: Struct(
        ⋮        DataStruct {
-       ⋮            struct_token: Struct,
        ⋮            fields: Named(
        ⋮                FieldsNamed {
-       ⋮                    brace_token: Brace,
        ⋮                    named: [
        ⋮                        Field {
        ⋮                            attrs: [],
        ⋮                            vis: Public(
-       ⋮                                VisPublic {
-       ⋮                                    pub_token: Pub,
-       ⋮                                },
+       ⋮                                VisPublic,
        ⋮                            ),
-       ⋮                            ident: Some(
-       ⋮                                Ident(
-       ⋮                                    ident,
-       ⋮                                ),
-       ⋮                            ),
-       ⋮                            colon_token: Some(
-       ⋮                                Colon,
-       ⋮                            ),
+       ⋮                            ident: Some("ident"),
+       ⋮                            colon_token: Some,
        ⋮                            ty: Path(
        ⋮                                TypePath {
        ⋮                                    qself: None,
@@ -132,9 +93,7 @@ fn test_struct() {
        ⋮                                        leading_colon: None,
        ⋮                                        segments: [
        ⋮                                            PathSegment {
-       ⋮                                                ident: Ident(
-       ⋮                                                    Ident,
-       ⋮                                                ),
+       ⋮                                                ident: "Ident",
        ⋮                                                arguments: None,
        ⋮                                            },
        ⋮                                        ],
@@ -142,22 +101,13 @@ fn test_struct() {
        ⋮                                },
        ⋮                            ),
        ⋮                        },
-       ⋮                        Comma,
        ⋮                        Field {
        ⋮                            attrs: [],
        ⋮                            vis: Public(
-       ⋮                                VisPublic {
-       ⋮                                    pub_token: Pub,
-       ⋮                                },
+       ⋮                                VisPublic,
        ⋮                            ),
-       ⋮                            ident: Some(
-       ⋮                                Ident(
-       ⋮                                    attrs,
-       ⋮                                ),
-       ⋮                            ),
-       ⋮                            colon_token: Some(
-       ⋮                                Colon,
-       ⋮                            ),
+       ⋮                            ident: Some("attrs"),
+       ⋮                            colon_token: Some,
        ⋮                            ty: Path(
        ⋮                                TypePath {
        ⋮                                    qself: None,
@@ -165,13 +115,10 @@ fn test_struct() {
        ⋮                                        leading_colon: None,
        ⋮                                        segments: [
        ⋮                                            PathSegment {
-       ⋮                                                ident: Ident(
-       ⋮                                                    Vec,
-       ⋮                                                ),
+       ⋮                                                ident: "Vec",
        ⋮                                                arguments: AngleBracketed(
        ⋮                                                    AngleBracketedGenericArguments {
        ⋮                                                        colon2_token: None,
-       ⋮                                                        lt_token: Lt,
        ⋮                                                        args: [
        ⋮                                                            Type(
        ⋮                                                                Path(
@@ -181,9 +128,7 @@ fn test_struct() {
        ⋮                                                                            leading_colon: None,
        ⋮                                                                            segments: [
        ⋮                                                                                PathSegment {
-       ⋮                                                                                    ident: Ident(
-       ⋮                                                                                        Attribute,
-       ⋮                                                                                    ),
+       ⋮                                                                                    ident: "Attribute",
        ⋮                                                                                    arguments: None,
        ⋮                                                                                },
        ⋮                                                                            ],
@@ -192,7 +137,6 @@ fn test_struct() {
        ⋮                                                                ),
        ⋮                                                            ),
        ⋮                                                        ],
-       ⋮                                                        gt_token: Gt,
        ⋮                                                    },
        ⋮                                                ),
        ⋮                                            },
@@ -214,24 +158,16 @@ fn test_struct() {
     snapshot!(actual.attrs[0].interpret_meta().unwrap(), @r###"
    ⋮List(
    ⋮    MetaList {
-   ⋮        ident: Ident(
-   ⋮            derive,
-   ⋮        ),
-   ⋮        paren_token: Paren,
+   ⋮        ident: "derive",
    ⋮        nested: [
    ⋮            Meta(
    ⋮                Word(
-   ⋮                    Ident(
-   ⋮                        Debug,
-   ⋮                    ),
+   ⋮                    "Debug",
    ⋮                ),
    ⋮            ),
-   ⋮            Comma,
    ⋮            Meta(
    ⋮                Word(
-   ⋮                    Ident(
-   ⋮                        Clone,
-   ⋮                    ),
+   ⋮                    "Clone",
    ⋮                ),
    ⋮            ),
    ⋮        ],
