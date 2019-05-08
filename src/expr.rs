@@ -1898,7 +1898,7 @@ pub mod parsing {
     }
 
     macro_rules! impl_by_parsing_expr {
-        ($expr_type:ty, $variant:ident, $msg:expr) => (
+        ($expr_type:ty, $variant:ident, $msg:expr) => {
             #[cfg(all(feature = "full", feature = "printing"))]
             impl Parse for $expr_type {
                 fn parse(input: ParseStream) -> Result<Self> {
@@ -1907,12 +1907,12 @@ pub mod parsing {
                         match expr {
                             Expr::$variant(inner) => return Ok(inner),
                             Expr::Group(ExprGroup { expr: next, .. }) => expr = *next,
-                            _ => return Err(Error::new_spanned(expr, $msg))
+                            _ => return Err(Error::new_spanned(expr, $msg)),
                         }
                     }
                 }
             }
-        )
+        };
     }
 
     impl_by_parsing_expr!(ExprBox, Box, "expected box expression");
