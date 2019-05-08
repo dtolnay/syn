@@ -26,22 +26,22 @@ use self::Operand::*;
 
 impl Operand {
     fn tokens(&self) -> &TokenStream {
-        match *self {
-            Borrowed(ref n) | Owned(ref n) => n,
+        match self {
+            Borrowed(n) | Owned(n) => n,
         }
     }
 
     fn ref_mut_tokens(&self) -> TokenStream {
-        match *self {
-            Borrowed(ref n) => n.clone(),
-            Owned(ref n) => quote!(&mut #n),
+        match self {
+            Borrowed(n) => n.clone(),
+            Owned(n) => quote!(&mut #n),
         }
     }
 
     fn owned_tokens(&self) -> TokenStream {
-        match *self {
-            Borrowed(ref n) => quote!(*#n),
-            Owned(ref n) => n.clone(),
+        match self {
+            Borrowed(n) => quote!(*#n),
+            Owned(n) => n.clone(),
         }
     }
 }
