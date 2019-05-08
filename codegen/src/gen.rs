@@ -2,7 +2,6 @@ use crate::file;
 use quote::quote;
 use syn_codegen as types;
 
-const FOLD_SRC: &str = "../src/gen/fold.rs";
 const VISIT_SRC: &str = "../src/gen/visit.rs";
 const VISIT_MUT_SRC: &str = "../src/gen/visit_mut.rs";
 
@@ -19,8 +18,6 @@ mod codegen {
         pub visit_impl: TokenStream,
         pub visit_mut_trait: TokenStream,
         pub visit_mut_impl: TokenStream,
-        pub fold_trait: TokenStream,
-        pub fold_impl: TokenStream,
     }
 
     fn under_name(name: &str) -> Ident {
@@ -31,7 +28,6 @@ mod codegen {
     enum Kind {
         Visit,
         VisitMut,
-        Fold,
     }
 
     enum Operand {
@@ -89,13 +85,6 @@ mod codegen {
                     _visitor.#method(#name)
                 }
             }
-            Fold => {
-                let method = Ident::new(&format!("fold_{}", ident), Span::call_site());
-                let name = name.owned_tokens();
-                quote! {
-                    _visitor.#method(#name)
-                }
-            }
         }
     }
 
@@ -108,12 +97,7 @@ mod codegen {
     ) -> Option<TokenStream> {
         let name = name.owned_tokens();
         let res = visit(elem, features, defs, kind, &Owned(quote!(*#name)))?;
-        Some(match kind {
-            Fold => quote! {
-                Box::new(#res)
-            },
-            Visit | VisitMut => res,
-        })
+        Some(res)
     }
 
     fn vec_visit(
@@ -123,10 +107,7 @@ mod codegen {
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
-        let operand = match kind {
-            Visit | VisitMut => Borrowed(quote!(it)),
-            Fold => Owned(quote!(it)),
-        };
+        let operand = Borrowed(quote!(it));
         let val = visit(elem, features, defs, kind, &operand)?;
         Some(match kind {
             Visit => {
@@ -145,12 +126,6 @@ mod codegen {
                     }
                 }
             }
-            Fold => {
-                let name = name.owned_tokens();
-                quote! {
-                    FoldHelper::lift(#name, |it| { #val })
-                }
-            }
         })
     }
 
@@ -161,10 +136,7 @@ mod codegen {
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
-        let operand = match kind {
-            Visit | VisitMut => Borrowed(quote!(it)),
-            Fold => Owned(quote!(it)),
-        };
+        let operand = Borrowed(quote!(it));
         let val = visit(elem, features, defs, kind, &operand)?;
         Some(match kind {
             Visit => {
@@ -185,12 +157,6 @@ mod codegen {
                     }
                 }
             }
-            Fold => {
-                let name = name.owned_tokens();
-                quote! {
-                    FoldHelper::lift(#name, |it| { #val })
-                }
-            }
         })
     }
 
@@ -201,10 +167,7 @@ mod codegen {
         kind: Kind,
         name: &Operand,
     ) -> Option<TokenStream> {
-        let it = match kind {
-            Visit | VisitMut => Borrowed(quote!(it)),
-            Fold => Owned(quote!(it)),
-        };
+        let it = Borrowed(quote!(it));
         let val = visit(elem, features, defs, kind, &it)?;
         let name = name.owned_tokens();
         Some(match kind {
@@ -217,9 +180,6 @@ mod codegen {
                 if let Some(ref mut it) = #name {
                     #val
                 }
-            },
-            Fold => quote! {
-                (#name).map(|it| { #val })
             },
         })
     }
@@ -240,29 +200,16 @@ mod codegen {
             let name = name.tokens();
             let i = Index::from(i);
             let it = Owned(quote!((#name).#i));
-            let val =
-                visit(elem, features, defs, kind, &it).unwrap_or_else(|| noop_visit(kind, &it));
+            let val = visit(elem, features, defs, kind, &it).unwrap_or_else(|| noop_visit(&it));
             code.append_all(val);
-            match kind {
-                Fold => code.append_all(quote!(,)),
-                Visit | VisitMut => code.append_all(quote!(;)),
-            }
+            code.append_all(quote!(;));
         }
-        Some(match kind {
-            Fold => quote! {
-                (#code)
-            },
-            Visit | VisitMut => code,
-        })
+        Some(code)
     }
 
-    fn token_punct_visit(repr: &str, kind: Kind, name: &Operand) -> TokenStream {
-        let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
+    fn token_punct_visit(kind: Kind, name: &Operand) -> TokenStream {
         let name = name.tokens();
         match kind {
-            Fold => quote! {
-                #ty(tokens_helper(_visitor, &#name.spans))
-            },
             Visit => quote! {
                 tokens_helper(_visitor, &#name.spans)
             },
@@ -272,13 +219,9 @@ mod codegen {
         }
     }
 
-    fn token_keyword_visit(repr: &str, kind: Kind, name: &Operand) -> TokenStream {
-        let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
+    fn token_keyword_visit(kind: Kind, name: &Operand) -> TokenStream {
         let name = name.tokens();
         match kind {
-            Fold => quote! {
-                #ty(tokens_helper(_visitor, &#name.span))
-            },
             Visit => quote! {
                 tokens_helper(_visitor, &#name.span)
             },
@@ -288,13 +231,9 @@ mod codegen {
         }
     }
 
-    fn token_group_visit(ty: &str, kind: Kind, name: &Operand) -> TokenStream {
-        let ty = Ident::new(ty, Span::call_site());
+    fn token_group_visit(kind: Kind, name: &Operand) -> TokenStream {
         let name = name.tokens();
         match kind {
-            Fold => quote! {
-                #ty(tokens_helper(_visitor, &#name.span))
-            },
             Visit => quote! {
                 tokens_helper(_visitor, &#name.span)
             },
@@ -304,15 +243,10 @@ mod codegen {
         }
     }
 
-    fn noop_visit(kind: Kind, name: &Operand) -> TokenStream {
-        match kind {
-            Fold => name.owned_tokens(),
-            Visit | VisitMut => {
-                let name = name.tokens();
-                quote! {
-                    skip!(#name)
-                }
-            }
+    fn noop_visit(name: &Operand) -> TokenStream {
+        let name = name.tokens();
+        quote! {
+            skip!(#name)
         }
     }
 
@@ -333,12 +267,12 @@ mod codegen {
                 let repr = &defs.tokens[t];
                 let is_keyword = repr.chars().next().unwrap().is_alphabetic();
                 if is_keyword {
-                    Some(token_keyword_visit(repr, kind, name))
+                    Some(token_keyword_visit(kind, name))
                 } else {
-                    Some(token_punct_visit(repr, kind, name))
+                    Some(token_punct_visit(kind, name))
                 }
             }
-            types::Type::Group(t) => Some(token_group_visit(&t[..], kind, name)),
+            types::Type::Group(_) => Some(token_group_visit(kind, name)),
             types::Type::Syn(t) => {
                 fn requires_full(features: &types::Features) -> bool {
                     features.any.contains("full") && features.any.len() == 1
@@ -380,17 +314,14 @@ mod codegen {
         let ty = Ident::new(&s.ident, Span::call_site());
         let visit_fn = Ident::new(&format!("visit_{}", under_name), Span::call_site());
         let visit_mut_fn = Ident::new(&format!("visit_{}_mut", under_name), Span::call_site());
-        let fold_fn = Ident::new(&format!("fold_{}", under_name), Span::call_site());
 
         let mut visit_impl = TokenStream::new();
         let mut visit_mut_impl = TokenStream::new();
-        let mut fold_impl = TokenStream::new();
 
         match &s.data {
             types::Data::Enum(variants) => {
                 let mut visit_variants = TokenStream::new();
                 let mut visit_mut_variants = TokenStream::new();
-                let mut fold_variants = TokenStream::new();
 
                 for (variant, fields) in variants {
                     let variant_ident = Ident::new(variant, Span::call_site());
@@ -402,19 +333,12 @@ mod codegen {
                         visit_mut_variants.append_all(quote! {
                             #ty::#variant_ident => {}
                         });
-                        fold_variants.append_all(quote! {
-                            #ty::#variant_ident => {
-                                #ty::#variant_ident
-                            }
-                        });
                     } else {
                         let mut bind_visit_fields = TokenStream::new();
                         let mut bind_visit_mut_fields = TokenStream::new();
-                        let mut bind_fold_fields = TokenStream::new();
 
                         let mut visit_fields = TokenStream::new();
                         let mut visit_mut_fields = TokenStream::new();
-                        let mut fold_fields = TokenStream::new();
 
                         for (idx, ty) in fields.iter().enumerate() {
                             let name = format!("_binding_{}", idx);
@@ -426,29 +350,20 @@ mod codegen {
                             bind_visit_mut_fields.append_all(quote! {
                                 ref mut #binding,
                             });
-                            bind_fold_fields.append_all(quote! {
-                                #binding,
-                            });
 
                             let borrowed_binding = Borrowed(quote!(#binding));
-                            let owned_binding = Owned(quote!(#binding));
 
                             visit_fields.append_all(
                                 visit(ty, &s.features, defs, Visit, &borrowed_binding)
-                                    .unwrap_or_else(|| noop_visit(Visit, &borrowed_binding)),
+                                    .unwrap_or_else(|| noop_visit(&borrowed_binding)),
                             );
                             visit_mut_fields.append_all(
                                 visit(ty, &s.features, defs, VisitMut, &borrowed_binding)
-                                    .unwrap_or_else(|| noop_visit(VisitMut, &borrowed_binding)),
-                            );
-                            fold_fields.append_all(
-                                visit(ty, &s.features, defs, Fold, &owned_binding)
-                                    .unwrap_or_else(|| noop_visit(Fold, &owned_binding)),
+                                    .unwrap_or_else(|| noop_visit(&borrowed_binding)),
                             );
 
                             visit_fields.append_all(quote!(;));
                             visit_mut_fields.append_all(quote!(;));
-                            fold_fields.append_all(quote!(,));
                         }
 
                         visit_variants.append_all(quote! {
@@ -460,14 +375,6 @@ mod codegen {
                         visit_mut_variants.append_all(quote! {
                             #ty::#variant_ident(#bind_visit_mut_fields) => {
                                 #visit_mut_fields
-                            }
-                        });
-
-                        fold_variants.append_all(quote! {
-                            #ty::#variant_ident(#bind_fold_fields) => {
-                                #ty::#variant_ident(
-                                    #fold_fields
-                                )
                             }
                         });
                     }
@@ -484,74 +391,25 @@ mod codegen {
                         #visit_mut_variants
                     }
                 });
-
-                fold_impl.append_all(quote! {
-                    match _i {
-                        #fold_variants
-                    }
-                });
             }
             types::Data::Struct(fields) => {
-                let mut fold_fields = TokenStream::new();
-
                 for (field, ty) in fields {
                     let id = Ident::new(&field, Span::call_site());
                     let ref_toks = Owned(quote!(_i.#id));
                     let visit_field = visit(&ty, &s.features, defs, Visit, &ref_toks)
-                        .unwrap_or_else(|| noop_visit(Visit, &ref_toks));
+                        .unwrap_or_else(|| noop_visit(&ref_toks));
                     visit_impl.append_all(quote! {
                         #visit_field;
                     });
                     let visit_mut_field = visit(&ty, &s.features, defs, VisitMut, &ref_toks)
-                        .unwrap_or_else(|| noop_visit(VisitMut, &ref_toks));
+                        .unwrap_or_else(|| noop_visit(&ref_toks));
                     visit_mut_impl.append_all(quote! {
                         #visit_mut_field;
                     });
-                    let fold = visit(&ty, &s.features, defs, Fold, &ref_toks)
-                        .unwrap_or_else(|| noop_visit(Fold, &ref_toks));
-
-                    fold_fields.append_all(quote! {
-                        #id: #fold,
-                    });
-                }
-
-                if !fields.is_empty() {
-                    fold_impl.append_all(quote! {
-                        #ty {
-                            #fold_fields
-                        }
-                    })
-                } else {
-                    if ty == "Ident" {
-                        fold_impl.append_all(quote! {
-                            let mut _i = _i;
-                            let span = _visitor.fold_span(_i.span());
-                            _i.set_span(span);
-                        });
-                    }
-                    fold_impl.append_all(quote! {
-                        _i
-                    });
                 }
             }
-            types::Data::Private => {
-                if ty == "Ident" {
-                    fold_impl.append_all(quote! {
-                        let mut _i = _i;
-                        let span = _visitor.fold_span(_i.span());
-                        _i.set_span(span);
-                    });
-                }
-                fold_impl.append_all(quote! {
-                    _i
-                });
-            }
+            types::Data::Private => {}
         }
-
-        let include_fold_impl = match &s.data {
-            types::Data::Private => super::TERMINAL_TYPES.contains(&s.ident.as_str()),
-            types::Data::Struct(_) | types::Data::Enum(_) => true,
-        };
 
         state.visit_trait.append_all(quote! {
             #features
@@ -584,24 +442,6 @@ mod codegen {
                 #visit_mut_impl
             }
         });
-
-        state.fold_trait.append_all(quote! {
-            #features
-            fn #fold_fn(&mut self, i: #ty) -> #ty {
-                #fold_fn(self, i)
-            }
-        });
-
-        if include_fold_impl {
-            state.fold_impl.append_all(quote! {
-                #features
-                pub fn #fold_fn<V: Fold + ?Sized>(
-                    _visitor: &mut V, _i: #ty
-                ) -> #ty {
-                    #fold_impl
-                }
-            });
-        }
     }
 }
 
@@ -643,62 +483,6 @@ pub fn generate(defs: &types::Definitions) {
             ($($tt:tt)*) => {};
         }
     };
-
-    let fold_trait = state.fold_trait;
-    let fold_impl = state.fold_impl;
-    file::write(
-        FOLD_SRC,
-        quote! {
-            // Unreachable code is generated sometimes without the full feature.
-            #![allow(unreachable_code)]
-
-            use *;
-            #[cfg(any(feature = "full", feature = "derive"))]
-            use token::{Brace, Bracket, Paren, Group};
-            use proc_macro2::Span;
-            #[cfg(any(feature = "full", feature = "derive"))]
-            use gen::helper::fold::*;
-
-            #full_macro
-
-            /// Syntax tree traversal to transform the nodes of an owned syntax tree.
-            ///
-            /// See the [module documentation] for details.
-            ///
-            /// [module documentation]: index.html
-            ///
-            /// *This trait is available if Syn is built with the `"fold"` feature.*
-            pub trait Fold {
-                #fold_trait
-            }
-
-            #[cfg(any(feature = "full", feature = "derive"))]
-            macro_rules! fold_span_only {
-                ($f:ident : $t:ident) => {
-                    pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
-                        let span = _visitor.fold_span(_i.span());
-                        _i.set_span(span);
-                        _i
-                    }
-                }
-            }
-
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_byte: LitByte);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_byte_str: LitByteStr);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_char: LitChar);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_float: LitFloat);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_int: LitInt);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_str: LitStr);
-
-            #fold_impl
-        },
-    );
 
     let visit_trait = state.visit_trait;
     let visit_impl = state.visit_impl;

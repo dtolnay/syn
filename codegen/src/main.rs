@@ -13,6 +13,7 @@
 #![allow(clippy::needless_pass_by_value)]
 
 mod file;
+mod fold;
 mod gen;
 mod json;
 mod parse;
@@ -22,4 +23,5 @@ fn main() {
     let defs = parse::parse();
     json::generate(&defs);
     gen::generate(&defs);
+    fold::generate(&defs);
 }
