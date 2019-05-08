@@ -1,5 +1,4 @@
 use proc_macro2::TokenStream;
-use rustfmt_nightly as rustfmt;
 use std::fs::File;
 use std::io::Write;
 
