@@ -12,6 +12,7 @@
 #![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
 
+mod file;
 mod gen;
 mod json;
 mod parse;
