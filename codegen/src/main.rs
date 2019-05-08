@@ -1,14 +1,13 @@
-//! This crate automatically generates the definition of the `Visit`,
-//! `VisitMut`, and `Fold` traits in `syn` based on the `syn` source. It
-//! discovers structs and enums declared with the `ast_*` macros and generates
-//! the functions for those types.
-//!
-//! It makes a few assumptions about the target crate:
-//! 1. All structs which are discovered must be re-exported in the root of the
-//!    crate, even if they were declared in a submodule.
-//! 2. This code cannot discover submodules which are located in subdirectories
-//!    - only submodules located in the same directory.
-//! 3. The path to `syn` is hardcoded.
+// This crate crawls the Syn source directory to find all structs and enums that
+// form the Syn syntax tree.
+//
+// A machine-readable representation of the syntax tree is saved to syn.json in
+// the repo root for other code generation tools to consume. The syn-codegen
+// crate (https://docs.rs/syn-codegen/) provides the data structures for parsing
+// and making use of syn.json from Rust code.
+//
+// Finally this crate generates the Visit, VisitMut, and Fold traits in Syn
+// programmatically from the syntax tree description.
 
 #![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
@@ -20,6 +19,6 @@ mod version;
 
 fn main() {
     let defs = parse::parse();
-    gen::generate(&defs);
     json::generate(&defs);
+    gen::generate(&defs);
 }

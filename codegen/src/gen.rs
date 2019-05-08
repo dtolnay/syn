@@ -1,15 +1,3 @@
-//! This crate automatically generates the definition of the `Visit`,
-//! `VisitMut`, and `Fold` traits in `syn` based on the `syn` source. It
-//! discovers structs and enums declared with the `ast_*` macros and generates
-//! the functions for those types.
-//!
-//! It makes a few assumptions about the target crate:
-//! 1. All structs which are discovered must be re-exported in the root of the
-//!    crate, even if they were declared in a submodule.
-//! 2. This code cannot discover submodules which are located in subdirectories
-//!    - only submodules located in the same directory.
-//! 3. The path to `syn` is hardcoded.
-
 use proc_macro2::TokenStream;
 use quote::quote;
 use rustfmt_nightly as rustfmt;
