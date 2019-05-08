@@ -19,105 +19,9 @@ fn under_name(name: &str) -> Ident {
 
 fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
     let ident = under_name(item);
-
     let method = Ident::new(&format!("fold_{}", ident), Span::call_site());
     quote! {
         _visitor.#method(#name)
-    }
-}
-
-fn box_visit(
-    elem: &types::Type,
-    features: &types::Features,
-    defs: &types::Definitions,
-    name: &TokenStream,
-) -> Option<TokenStream> {
-    let res = visit(elem, features, defs, &quote!(*#name))?;
-    Some(quote! {
-        Box::new(#res)
-    })
-}
-
-fn vec_visit(
-    elem: &types::Type,
-    features: &types::Features,
-    defs: &types::Definitions,
-    name: &TokenStream,
-) -> Option<TokenStream> {
-    let operand = quote!(it);
-    let val = visit(elem, features, defs, &operand)?;
-    Some(quote! {
-        FoldHelper::lift(#name, |it| { #val })
-    })
-}
-
-fn punctuated_visit(
-    elem: &types::Type,
-    features: &types::Features,
-    defs: &types::Definitions,
-    name: &TokenStream,
-) -> Option<TokenStream> {
-    let operand = quote!(it);
-    let val = visit(elem, features, defs, &operand)?;
-    Some(quote! {
-        FoldHelper::lift(#name, |it| { #val })
-    })
-}
-
-fn option_visit(
-    elem: &types::Type,
-    features: &types::Features,
-    defs: &types::Definitions,
-    name: &TokenStream,
-) -> Option<TokenStream> {
-    let it = quote!(it);
-    let val = visit(elem, features, defs, &it)?;
-    Some(quote! {
-        (#name).map(|it| { #val })
-    })
-}
-
-fn tuple_visit(
-    elems: &[types::Type],
-    features: &types::Features,
-    defs: &types::Definitions,
-    name: &TokenStream,
-) -> Option<TokenStream> {
-    if elems.is_empty() {
-        return None;
-    }
-
-    let mut code = TokenStream::new();
-    for (i, elem) in elems.iter().enumerate() {
-        let i = Index::from(i);
-        let it = quote!((#name).#i);
-        let val = visit(elem, features, defs, &it).unwrap_or(it);
-        code.append_all(val);
-        code.append_all(quote!(,));
-    }
-    Some(quote! {
-        (#code)
-    })
-}
-
-fn token_punct_visit(repr: &str, name: &TokenStream) -> TokenStream {
-    let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
-    quote! {
-        #ty(tokens_helper(_visitor, &#name.spans))
-    }
-}
-
-fn token_keyword_visit(repr: &str, name: &TokenStream) -> TokenStream {
-    let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
-    quote! {
-        #ty(tokens_helper(_visitor, &#name.span))
-    }
-}
-
-fn token_group_visit(ty: &str, name: &TokenStream) -> TokenStream {
-    let ty = Ident::new(ty, Span::call_site());
-    quote! {
-        #ty(tokens_helper(_visitor, &#name.span))
     }
 }
 
@@ -128,39 +32,75 @@ fn visit(
     name: &TokenStream,
 ) -> Option<TokenStream> {
     match ty {
-        types::Type::Box(t) => box_visit(&*t, features, defs, name),
-        types::Type::Vec(t) => vec_visit(&*t, features, defs, name),
-        types::Type::Punctuated(p) => punctuated_visit(&p.element, features, defs, name),
-        types::Type::Option(t) => option_visit(&*t, features, defs, name),
-        types::Type::Tuple(t) => tuple_visit(t, features, defs, name),
+        types::Type::Box(t) => {
+            let res = visit(t, features, defs, &quote!(*#name))?;
+            Some(quote! {
+                Box::new(#res)
+            })
+        }
+        types::Type::Vec(t) => {
+            let operand = quote!(it);
+            let val = visit(t, features, defs, &operand)?;
+            Some(quote! {
+                FoldHelper::lift(#name, |it| { #val })
+            })
+        }
+        types::Type::Punctuated(p) => {
+            let operand = quote!(it);
+            let val = visit(&p.element, features, defs, &operand)?;
+            Some(quote! {
+                FoldHelper::lift(#name, |it| { #val })
+            })
+        }
+        types::Type::Option(t) => {
+            let it = quote!(it);
+            let val = visit(t, features, defs, &it)?;
+            Some(quote! {
+                (#name).map(|it| { #val })
+            })
+        }
+        types::Type::Tuple(t) => {
+            let mut code = TokenStream::new();
+            for (i, elem) in t.iter().enumerate() {
+                let i = Index::from(i);
+                let it = quote!((#name).#i);
+                let val = visit(elem, features, defs, &it).unwrap_or(it);
+                code.append_all(val);
+                code.append_all(quote!(,));
+            }
+            Some(quote! {
+                (#code)
+            })
+        }
         types::Type::Token(t) => {
             let repr = &defs.tokens[t];
             let is_keyword = repr.chars().next().unwrap().is_alphabetic();
-            if is_keyword {
-                Some(token_keyword_visit(repr, name))
+            let spans = if is_keyword {
+                quote!(span)
             } else {
-                Some(token_punct_visit(repr, name))
-            }
+                quote!(spans)
+            };
+            let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
+            Some(quote! {
+                #ty(tokens_helper(_visitor, &#name.#spans))
+            })
         }
-        types::Type::Group(t) => Some(token_group_visit(&t[..], name)),
+        types::Type::Group(t) => {
+            let ty = Ident::new(t, Span::call_site());
+            Some(quote! {
+                #ty(tokens_helper(_visitor, &#name.span))
+            })
+        }
         types::Type::Syn(t) => {
             fn requires_full(features: &types::Features) -> bool {
                 features.any.contains("full") && features.any.len() == 1
             }
-
-            let res = simple_visit(t, name);
-
+            let mut res = simple_visit(t, name);
             let target = defs.types.iter().find(|ty| ty.ident == *t).unwrap();
-
-            Some(
-                if requires_full(&target.features) && !requires_full(features) {
-                    quote! {
-                        full!(#res)
-                    }
-                } else {
-                    res
-                },
-            )
+            if requires_full(&target.features) && !requires_full(features) {
+                res = quote!(full!(#res));
+            }
+            Some(res)
         }
         types::Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
         types::Type::Ext(_) | types::Type::Std(_) => None,
