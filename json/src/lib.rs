@@ -1,3 +1,30 @@
+//! # Data structures that describe Syn's syntax tree.
+//!
+//! The Syn syntax tree is made up of more than 200 types. Occasionally it can
+//! come up that you need to implement some behavior across them all.
+//!
+//! - For example [the Rust integration for AST Explorer][astexplorer] wants to
+//!   turn a syntax tree from Syn into a JavaScript value understood by the
+//!   platform's existing cross-language syntax tree visualization code.
+//!
+//!   [astexplorer]: https://astexplorer.net/#/gist/388150a52f74d45a355d2b5e865ded96/0c6d563f28d900472f699c21a1845ad20ae9927f
+//!
+//! - As another example from within Syn itself, the traits and implementations
+//!   of the [`visit`], [`visit_mut`], and [`fold`] modules can be generated
+//!   programmatically from a description of the syntax tree.
+//!
+//!   [`visit`]: https://docs.rs/syn/0.15/syn/visit/index.html
+//!   [`visit_mut`]: https://docs.rs/syn/0.15/syn/visit_mut/index.html
+//!   [`fold`]: https://docs.rs/syn/0.15/syn/fold/index.html
+//!
+//! To make this type of code as easy as possible to implement in any language,
+//! every Syn release comes with a machine-readable description of that version
+//! of the syntax tree as a JSON file [syn.json]. This `syn-codegen` crate
+//! provides the canonical data structures for parsing and making use of the
+//! representation in syn.json from Rust code.
+//!
+//! [syn.json]: https://raw.githubusercontent.com/dtolnay/syn/master/syn.json
+
 use indexmap::IndexMap;
 use semver::Version;
 use serde::{Deserialize, Deserializer, Serialize};
