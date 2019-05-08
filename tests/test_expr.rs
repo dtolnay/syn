@@ -10,7 +10,7 @@ use syn::{Expr, ExprRange};
 fn test_expr_parse() {
     let code = "..100u32";
     let tt = TokenStream::from_str(code).unwrap();
-    let ast1: Expr = syn::parse2(tt.clone()).unwrap();
-    let ast2: ExprRange = syn::parse2(tt).unwrap();
-    assert_eq!(ast1, Expr::Range(ast2));
+    let expr: Expr = syn::parse2(tt.clone()).unwrap();
+    let expr_range: ExprRange = syn::parse2(tt).unwrap();
+    assert_eq!(expr, Expr::Range(expr_range));
 }
