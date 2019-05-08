@@ -24,6 +24,25 @@
 //! representation in syn.json from Rust code.
 //!
 //! [syn.json]: https://raw.githubusercontent.com/dtolnay/syn/master/syn.json
+//!
+//! ## Example
+//!
+//! ```
+//! use syn_codegen::Definitions;
+//!
+//! # const IGNORE: &str = stringify! {
+//! const SYN: &str = include_str!("syn.json");
+//! # };
+//! # const SYN: &str = include_str!("../../syn.json");
+//!
+//! fn main() {
+//!     let defs: Definitions = serde_json::from_str(SYN).unwrap();
+//!
+//!     for node in &defs.types {
+//!         println!("syn::{}", node.ident);
+//!     }
+//! }
+//! ```
 
 use indexmap::IndexMap;
 use semver::Version;
