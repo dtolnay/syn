@@ -17,6 +17,7 @@ mod fold;
 mod full;
 mod gen;
 mod json;
+mod operand;
 mod parse;
 mod version;
 mod visit;

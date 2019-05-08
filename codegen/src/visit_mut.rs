@@ -1,3 +1,4 @@
+use crate::operand::*;
 use crate::{file, full, gen};
 use inflections::Inflect;
 use proc_macro2::{Span, TokenStream};
@@ -15,35 +16,6 @@ struct State {
 
 fn under_name(name: &str) -> Ident {
     Ident::new(&name.to_snake_case(), Span::call_site())
-}
-
-enum Operand {
-    Borrowed(TokenStream),
-    Owned(TokenStream),
-}
-
-use self::Operand::*;
-
-impl Operand {
-    fn tokens(&self) -> &TokenStream {
-        match self {
-            Borrowed(n) | Owned(n) => n,
-        }
-    }
-
-    fn ref_mut_tokens(&self) -> TokenStream {
-        match self {
-            Borrowed(n) => n.clone(),
-            Owned(n) => quote!(&mut #n),
-        }
-    }
-
-    fn owned_tokens(&self) -> TokenStream {
-        match self {
-            Borrowed(n) => quote!(*#n),
-            Owned(n) => n.clone(),
-        }
-    }
 }
 
 fn simple_visit(item: &str, name: &Operand) -> TokenStream {
