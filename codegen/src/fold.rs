@@ -1,10 +1,11 @@
-use crate::{file, full};
+use crate::{file, full, gen};
 use quote::quote;
 use syn_codegen as types;
 
 const FOLD_SRC: &str = "../src/gen/fold.rs";
 
 mod codegen {
+    use crate::gen;
     use inflections::Inflect;
     use proc_macro2::{Span, TokenStream};
     use quote::{quote, TokenStreamExt};
@@ -166,7 +167,7 @@ mod codegen {
                     },
                 )
             }
-            types::Type::Ext(t) if super::TERMINAL_TYPES.contains(&&t[..]) => {
+            types::Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => {
                 Some(simple_visit(t, name))
             }
             types::Type::Ext(_) | types::Type::Std(_) => None,
@@ -288,7 +289,7 @@ mod codegen {
         }
 
         let include_fold_impl = match &s.data {
-            types::Data::Private => super::TERMINAL_TYPES.contains(&s.ident.as_str()),
+            types::Data::Private => gen::TERMINAL_TYPES.contains(&s.ident.as_str()),
             types::Data::Struct(_) | types::Data::Enum(_) => true,
         };
 
@@ -312,22 +313,8 @@ mod codegen {
     }
 }
 
-const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
-
 pub fn generate(defs: &types::Definitions) {
-    let mut state = codegen::State::default();
-    for s in &defs.types {
-        codegen::generate(&mut state, s, defs);
-    }
-    for tt in TERMINAL_TYPES {
-        let s = types::Node {
-            ident: tt.to_string(),
-            features: types::Features::default(),
-            data: types::Data::Private,
-        };
-        codegen::generate(&mut state, &s, defs);
-    }
-
+    let state = gen::traverse(defs, codegen::generate);
     let full_macro = full::get_macro();
     let fold_trait = state.fold_trait;
     let fold_impl = state.fold_impl;

@@ -15,6 +15,7 @@
 mod file;
 mod fold;
 mod full;
+mod gen;
 mod json;
 mod parse;
 mod version;

@@ -1,10 +1,11 @@
-use crate::{file, full};
+use crate::{file, full, gen};
 use quote::quote;
 use syn_codegen as types;
 
 const VISIT_SRC: &str = "../src/gen/visit.rs";
 
 mod codegen {
+    use crate::gen;
     use inflections::Inflect;
     use proc_macro2::{Span, TokenStream};
     use quote::{quote, TokenStreamExt};
@@ -210,7 +211,7 @@ mod codegen {
                     },
                 )
             }
-            types::Type::Ext(t) if super::TERMINAL_TYPES.contains(&&t[..]) => {
+            types::Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => {
                 Some(simple_visit(t, name))
             }
             types::Type::Ext(_) | types::Type::Std(_) => None,
@@ -313,22 +314,8 @@ mod codegen {
     }
 }
 
-const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
-
 pub fn generate(defs: &types::Definitions) {
-    let mut state = codegen::State::default();
-    for s in &defs.types {
-        codegen::generate(&mut state, s, defs);
-    }
-    for tt in TERMINAL_TYPES {
-        let s = types::Node {
-            ident: tt.to_string(),
-            features: types::Features::default(),
-            data: types::Data::Private,
-        };
-        codegen::generate(&mut state, &s, defs);
-    }
-
+    let state = gen::traverse(defs, codegen::generate);
     let full_macro = full::get_macro();
     let visit_trait = state.visit_trait;
     let visit_impl = state.visit_impl;
