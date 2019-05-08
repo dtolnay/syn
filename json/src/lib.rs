@@ -31,18 +31,37 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 use std::collections::{BTreeMap, BTreeSet};
 
+/// Top-level content of the syntax tree description.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Definitions {
-    /// The Syn version used to generate the introspection file.
+    /// The Syn version whose syntax tree is described by this data.
     pub version: Version,
+
+    /// Syntax tree types defined by Syn.
     pub types: Vec<Node>,
+
+    /// Token types defined by Syn (keywords as well as punctuation).
+    ///
+    /// The keys in the map are the Rust type name for the token. The values in
+    /// the map are the printed token representation.
+    ///
+    /// These tokens are accessible in the Syn public API as `syn::token::#name`
+    /// or alternatively `syn::Token![#repr]`.
     pub tokens: BTreeMap<String, String>,
 }
 
+/// Syntax tree type defined by Syn.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Node {
+    /// Name of the type.
+    ///
+    /// This type is accessible in the Syn public API as `syn::#name`.
     pub ident: String,
+
+    /// Features behind which this type is cfg gated.
     pub features: Features,
+
+    /// Content of the data structure.
     #[serde(
         flatten,
         skip_serializing_if = "is_private",
@@ -51,54 +70,101 @@ pub struct Node {
     pub data: Data,
 }
 
+/// Content of a syntax tree data structure.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Data {
+    /// This is an opaque type with no publicy accessible structure.
     Private,
+
+    /// This type is a braced struct with named fields.
     #[serde(rename = "fields")]
     Struct(Fields),
+
+    /// This type is an enum.
     #[serde(rename = "variants")]
     Enum(Variants),
 }
 
+/// Fields of a braced struct syntax tree node with named fields.
+///
+/// The keys in the map are the field names.
 pub type Fields = IndexMap<String, Type>;
+
+/// Variants of an enum syntax tree node.
+///
+/// The keys in the map are the variant names.
+///
+/// Variants are unit variants if they hold no data and tuple variants
+/// otherwise. The Syn syntax tree does not make use of braced variants.
 pub type Variants = IndexMap<String, Vec<Type>>;
 
+/// Type of a struct field or tuple variant field in the syntax tree.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
-    /// Type defined by `syn`
+    /// Syntax tree type defined by Syn.
+    ///
+    /// This name will match the ident of some `Node`.
     Syn(String),
 
-    /// Type defined in `std`.
+    /// Type defined by the Rust language or standard library.
+    ///
+    /// All such types used by Syn are accessible in the Rust prelude and can be
+    /// used without a qualifying path in most Rust code.
     Std(String),
 
-    /// Type external to `syn`
+    /// Type defined by proc-macro2.
+    ///
+    /// The type is accessible in the proc-macro2 public API as
+    /// `proc_macro2::#name`.
     #[serde(rename = "proc_macro2")]
     Ext(String),
 
-    /// Token type
+    /// Keyword or punctuation token type defined by Syn.
+    ///
+    /// This name will match one of the keys in the `tokens` map.
     Token(String),
 
-    /// Token group
+    /// Grouping token defined by Syn.
+    ///
+    /// The type is accessible in the Syn public API as `syn::token::#name`.
     Group(String),
 
-    /// Punctuated list
+    /// Punctuated list.
+    ///
+    /// This refers to `syn::punctuated::Punctuated<T, P>` with the specified
+    /// element type and punctuation.
     Punctuated(Punctuated),
 
+    /// `std::option::Option`
     Option(Box<Type>),
+
+    /// `std::boxed::Box`
     Box(Box<Type>),
+
+    /// `std::vec::Vec`
     Vec(Box<Type>),
+
+    /// Rust tuple with two or more fields.
     Tuple(Vec<Type>),
 }
 
+/// Type of a punctuated list.
+///
+/// This refers to `syn::punctuated::Punctuated<#element, #punct>`.
+///
+/// The punct string will match one of the keys in the `tokens` map.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Punctuated {
     pub element: Box<Type>,
     pub punct: String,
 }
 
+/// Features behind which a syntax tree type is cfg gated.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Features {
+    /// Type is accessible if at least one of these features is enabled against
+    /// the Syn dependency.
     pub any: BTreeSet<String>,
 }
 
