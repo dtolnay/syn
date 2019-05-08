@@ -178,6 +178,19 @@
 //!    |                ^^^
 //! ```
 //!
+//! ## Testing
+//!
+//! When testing macros, we often care not just that the macro can be used
+//! successfully but also that when the macro is provided with invalid input it
+//! produces maximally helpful error messages. Consider using the [`trybuild`]
+//! crate to write tests for errors that are emitted by your macro or errors
+//! detected by the Rust compiler in the expanded code following misuse of the
+//! macro. Such tests help avoid regressions from later refactors that
+//! mistakenly make an error no longer trigger or be less helpful than it used
+//! to be.
+//!
+//! [`trybuild`]: https://github.com/dtolnay/trybuild
+//!
 //! ## Debugging
 //!
 //! When developing a procedural macro it can be helpful to look at what the
