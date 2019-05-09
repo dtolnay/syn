@@ -1,7 +1,7 @@
 use inflections::Inflect;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use syn_codegen::{Data, Features, Definitions, Node};
+use syn_codegen::{Data, Definitions, Features, Node};
 
 pub const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
 

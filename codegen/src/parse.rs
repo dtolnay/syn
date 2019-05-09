@@ -1,3 +1,4 @@
+use crate::error::Result;
 use crate::version;
 
 use indexmap::IndexMap;
@@ -21,13 +22,13 @@ type ItemLookup = BTreeMap<Ident, AstItem>;
 type TokenLookup = BTreeMap<String, String>;
 
 /// Parse the contents of `src` and return a list of AST types.
-pub fn parse() -> types::Definitions {
+pub fn parse() -> Result<types::Definitions> {
     let mut item_lookup = BTreeMap::new();
-    load_file(SYN_CRATE_ROOT, &[], &mut item_lookup).unwrap();
+    load_file(SYN_CRATE_ROOT, &[], &mut item_lookup)?;
 
-    let token_lookup = load_token_file(TOKEN_SRC).unwrap();
+    let token_lookup = load_token_file(TOKEN_SRC)?;
 
-    let version = version::get();
+    let version = version::get()?;
 
     let types = item_lookup
         .values()
@@ -39,11 +40,11 @@ pub fn parse() -> types::Definitions {
         .map(|(name, ty)| (ty, name))
         .collect();
 
-    types::Definitions {
+    Ok(types::Definitions {
         version,
         types,
         tokens,
-    }
+    })
 }
 
 /// Data extracted from syn source
@@ -501,15 +502,13 @@ fn get_features(attrs: &[syn::Attribute], base: &[syn::Attribute]) -> Vec<syn::A
     ret
 }
 
-type Error = Box<::std::error::Error>;
-
 fn load_file<P: AsRef<Path>>(
     name: P,
     features: &[syn::Attribute],
     lookup: &mut ItemLookup,
-) -> Result<(), Error> {
+) -> Result<()> {
     let name = name.as_ref();
-    let parent = name.parent().ok_or("no parent path")?;
+    let parent = name.parent().expect("no parent path");
 
     let mut f = File::open(name)?;
     let mut src = String::new();
@@ -602,7 +601,7 @@ fn load_file<P: AsRef<Path>>(
     Ok(())
 }
 
-fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup, Error> {
+fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup> {
     let name = name.as_ref();
     let mut f = File::open(name)?;
     let mut src = String::new();
@@ -623,5 +622,5 @@ fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup, Error> {
         }
     }
 
-    Err("failed to parse Token macro".into())
+    panic!("failed to parse Token macro")
 }

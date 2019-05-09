@@ -1,3 +1,4 @@
+use crate::error::Result;
 use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
 use proc_macro2::{Ident, Span, TokenStream};
@@ -195,7 +196,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     });
 }
 
-pub fn generate(defs: &Definitions) {
+pub fn generate(defs: &Definitions) -> Result<()> {
     let (traits, impls) = gen::traverse(defs, node);
     let full_macro = full::get_macro();
     file::write(
@@ -229,5 +230,6 @@ pub fn generate(defs: &Definitions) {
 
             #impls
         },
-    );
+    )?;
+    Ok(())
 }

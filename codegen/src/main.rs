@@ -12,6 +12,7 @@
 #![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
 
+mod error;
 mod file;
 mod fold;
 mod full;
@@ -23,10 +24,21 @@ mod version;
 mod visit;
 mod visit_mut;
 
+use crate::error::Result;
+use std::process;
+
 fn main() {
-    let defs = parse::parse();
-    json::generate(&defs);
-    fold::generate(&defs);
-    visit::generate(&defs);
-    visit_mut::generate(&defs);
+    if let Err(err) = do_main() {
+        let _ = eprintln!("error: {}", err);
+        process::exit(1);
+    }
+}
+
+fn do_main() -> Result<()> {
+    let defs = parse::parse()?;
+    json::generate(&defs)?;
+    fold::generate(&defs)?;
+    visit::generate(&defs)?;
+    visit_mut::generate(&defs)?;
+    Ok(())
 }
