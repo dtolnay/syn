@@ -215,10 +215,16 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         }
     }
 
-    let include_fold_impl = match &s.data {
-        Data::Private => gen::TERMINAL_TYPES.contains(&s.ident.as_str()),
-        Data::Struct(_) | Data::Enum(_) => true,
-    };
+    let fold_span_only =
+        s.data == Data::Private && !gen::TERMINAL_TYPES.contains(&s.ident.as_str());
+    if fold_span_only {
+        fold_impl = quote! {
+            let span = _visitor.fold_span(_i.span());
+            let mut _i = _i;
+            _i.set_span(span);
+            _i
+        };
+    }
 
     state.fold_trait.extend(quote! {
         #features
@@ -227,16 +233,14 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         }
     });
 
-    if include_fold_impl {
-        state.fold_impl.extend(quote! {
-            #features
-            pub fn #fold_fn<V: Fold + ?Sized>(
-                _visitor: &mut V, _i: #ty
-            ) -> #ty {
-                #fold_impl
-            }
-        });
-    }
+    state.fold_impl.extend(quote! {
+        #features
+        pub fn #fold_fn<V: Fold + ?Sized>(
+            _visitor: &mut V, _i: #ty
+        ) -> #ty {
+            #fold_impl
+        }
+    });
 }
 
 pub fn generate(defs: &Definitions) {
@@ -269,30 +273,6 @@ pub fn generate(defs: &Definitions) {
             pub trait Fold {
                 #fold_trait
             }
-
-            #[cfg(any(feature = "full", feature = "derive"))]
-            macro_rules! fold_span_only {
-                ($f:ident : $t:ident) => {
-                    pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
-                        let span = _visitor.fold_span(_i.span());
-                        _i.set_span(span);
-                        _i
-                    }
-                }
-            }
-
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_byte: LitByte);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_byte_str: LitByteStr);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_char: LitChar);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_float: LitFloat);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_int: LitInt);
-            #[cfg(any(feature = "full", feature = "derive"))]
-            fold_span_only!(fold_lit_str: LitStr);
 
             #fold_impl
         },
