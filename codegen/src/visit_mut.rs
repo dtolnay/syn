@@ -1,6 +1,5 @@
 use crate::operand::*;
 use crate::{file, full, gen};
-use inflections::Inflect;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, TokenStreamExt};
 use syn::*;
@@ -14,12 +13,8 @@ struct State {
     visit_mut_impl: TokenStream,
 }
 
-fn under_name(name: &str) -> Ident {
-    Ident::new(&name.to_snake_case(), Span::call_site())
-}
-
 fn simple_visit(item: &str, name: &Operand) -> TokenStream {
-    let ident = under_name(item);
+    let ident = gen::under_name(item);
     let method = Ident::new(&format!("visit_{}_mut", ident), Span::call_site());
     let name = name.ref_mut_tokens();
     quote! {
@@ -134,7 +129,7 @@ fn visit_features(features: &types::Features) -> TokenStream {
 
 fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
     let features = visit_features(&s.features);
-    let under_name = under_name(&s.ident);
+    let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
     let visit_mut_fn = Ident::new(&format!("visit_{}_mut", under_name), Span::call_site());
 

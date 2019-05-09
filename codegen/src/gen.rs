@@ -1,6 +1,12 @@
+use inflections::Inflect;
+use proc_macro2::{Ident, Span};
 use syn_codegen as types;
 
 pub const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
+
+pub fn under_name(name: &str) -> Ident {
+    Ident::new(&name.to_snake_case(), Span::call_site())
+}
 
 pub fn traverse<S, F>(defs: &types::Definitions, node: F) -> S
 where
