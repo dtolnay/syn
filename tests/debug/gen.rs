@@ -5786,19 +5786,29 @@ impl Debug for Lite<syn::Visibility> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Visibility::Public(_v0) => {
-                let mut formatter = formatter.debug_tuple("Public");
-                formatter.field(Lite(_v0));
+            syn::Visibility::Public(_val) => {
+                let mut formatter = formatter.debug_struct("Visibility::Public");
                 formatter.finish()
             }
-            syn::Visibility::Crate(_v0) => {
-                let mut formatter = formatter.debug_tuple("Crate");
-                formatter.field(Lite(_v0));
+            syn::Visibility::Crate(_val) => {
+                let mut formatter = formatter.debug_struct("Visibility::Crate");
                 formatter.finish()
             }
-            syn::Visibility::Restricted(_v0) => {
-                let mut formatter = formatter.debug_tuple("Restricted");
-                formatter.field(Lite(_v0));
+            syn::Visibility::Restricted(_val) => {
+                let mut formatter = formatter.debug_struct("Visibility::Restricted");
+                if let Some(val) = &_val.in_token {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::In);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("in_token", Print::ref_cast(val));
+                }
+                formatter.field("path", Lite(&_val.path));
                 formatter.finish()
             }
             syn::Visibility::Inherited => formatter.write_str("Inherited"),

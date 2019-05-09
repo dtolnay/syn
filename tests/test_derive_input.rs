@@ -55,18 +55,14 @@ fn test_struct() {
        ⋮            tts: `( Debug , Clone )`,
        ⋮        },
        ⋮    ],
-       ⋮    vis: Public(
-       ⋮        VisPublic,
-       ⋮    ),
+       ⋮    vis: Visibility::Public,
        ⋮    ident: "Item",
        ⋮    generics: Generics,
        ⋮    data: Data::Struct {
        ⋮        fields: Fields::Named {
        ⋮            named: [
        ⋮                Field {
-       ⋮                    vis: Public(
-       ⋮                        VisPublic,
-       ⋮                    ),
+       ⋮                    vis: Visibility::Public,
        ⋮                    ident: Some("ident"),
        ⋮                    colon_token: Some,
        ⋮                    ty: Type::Path {
@@ -81,9 +77,7 @@ fn test_struct() {
        ⋮                    },
        ⋮                },
        ⋮                Field {
-       ⋮                    vis: Public(
-       ⋮                        VisPublic,
-       ⋮                    ),
+       ⋮                    vis: Visibility::Public,
        ⋮                    ident: Some("attrs"),
        ⋮                    colon_token: Some,
        ⋮                    ty: Type::Path {
