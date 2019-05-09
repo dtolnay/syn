@@ -446,10 +446,6 @@ pub mod parsing {
         }
 
         fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
-            if input.peek(Token![dyn]) {
-                return Err(input.error("expected path"));
-            }
-
             Ok(Path {
                 leading_colon: input.parse()?,
                 segments: {
