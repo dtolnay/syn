@@ -11,11 +11,11 @@ use syn::{Data, DeriveInput};
 
 #[test]
 fn test_unit() {
-    let code = quote! {
+    let input = quote! {
         struct Unit;
     };
 
-    snapshot!(code as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r###"
    ⋮DeriveInput {
    ⋮    vis: Inherited,
    ⋮    ident: "Unit",
@@ -30,7 +30,7 @@ fn test_unit() {
 
 #[test]
 fn test_struct() {
-    let code = quote! {
+    let input = quote! {
         #[derive(Debug, Clone)]
         pub struct Item {
             pub ident: Ident,
@@ -38,80 +38,78 @@ fn test_struct() {
         }
     };
 
-    let actual = {
-        snapshot!(code as DeriveInput, @r###"
-       ⋮DeriveInput {
-       ⋮    attrs: [
-       ⋮        Attribute {
-       ⋮            style: Outer,
-       ⋮            path: Path {
-       ⋮                segments: [
-       ⋮                    PathSegment {
-       ⋮                        ident: "derive",
-       ⋮                        arguments: None,
-       ⋮                    },
-       ⋮                ],
-       ⋮            },
-       ⋮            tts: `( Debug , Clone )`,
-       ⋮        },
-       ⋮    ],
-       ⋮    vis: Visibility::Public,
-       ⋮    ident: "Item",
-       ⋮    generics: Generics,
-       ⋮    data: Data::Struct {
-       ⋮        fields: Fields::Named {
-       ⋮            named: [
-       ⋮                Field {
-       ⋮                    vis: Visibility::Public,
-       ⋮                    ident: Some("ident"),
-       ⋮                    colon_token: Some,
-       ⋮                    ty: Type::Path {
-       ⋮                        path: Path {
-       ⋮                            segments: [
-       ⋮                                PathSegment {
-       ⋮                                    ident: "Ident",
-       ⋮                                    arguments: None,
-       ⋮                                },
-       ⋮                            ],
-       ⋮                        },
-       ⋮                    },
-       ⋮                },
-       ⋮                Field {
-       ⋮                    vis: Visibility::Public,
-       ⋮                    ident: Some("attrs"),
-       ⋮                    colon_token: Some,
-       ⋮                    ty: Type::Path {
-       ⋮                        path: Path {
-       ⋮                            segments: [
-       ⋮                                PathSegment {
-       ⋮                                    ident: "Vec",
-       ⋮                                    arguments: PathArguments::AngleBracketed {
-       ⋮                                        args: [
-       ⋮                                            Type(Type::Path {
-       ⋮                                                path: Path {
-       ⋮                                                    segments: [
-       ⋮                                                        PathSegment {
-       ⋮                                                            ident: "Attribute",
-       ⋮                                                            arguments: None,
-       ⋮                                                        },
-       ⋮                                                    ],
-       ⋮                                                },
-       ⋮                                            }),
-       ⋮                                        ],
-       ⋮                                    },
-       ⋮                                },
-       ⋮                            ],
-       ⋮                        },
-       ⋮                    },
-       ⋮                },
-       ⋮            ],
-       ⋮        },
-       ⋮    },
-       ⋮}
-        "###)
-    };
+    snapshot!(input as DeriveInput, @r###"
+   ⋮DeriveInput {
+   ⋮    attrs: [
+   ⋮        Attribute {
+   ⋮            style: Outer,
+   ⋮            path: Path {
+   ⋮                segments: [
+   ⋮                    PathSegment {
+   ⋮                        ident: "derive",
+   ⋮                        arguments: None,
+   ⋮                    },
+   ⋮                ],
+   ⋮            },
+   ⋮            tts: `( Debug , Clone )`,
+   ⋮        },
+   ⋮    ],
+   ⋮    vis: Visibility::Public,
+   ⋮    ident: "Item",
+   ⋮    generics: Generics,
+   ⋮    data: Data::Struct {
+   ⋮        fields: Fields::Named {
+   ⋮            named: [
+   ⋮                Field {
+   ⋮                    vis: Visibility::Public,
+   ⋮                    ident: Some("ident"),
+   ⋮                    colon_token: Some,
+   ⋮                    ty: Type::Path {
+   ⋮                        path: Path {
+   ⋮                            segments: [
+   ⋮                                PathSegment {
+   ⋮                                    ident: "Ident",
+   ⋮                                    arguments: None,
+   ⋮                                },
+   ⋮                            ],
+   ⋮                        },
+   ⋮                    },
+   ⋮                },
+   ⋮                Field {
+   ⋮                    vis: Visibility::Public,
+   ⋮                    ident: Some("attrs"),
+   ⋮                    colon_token: Some,
+   ⋮                    ty: Type::Path {
+   ⋮                        path: Path {
+   ⋮                            segments: [
+   ⋮                                PathSegment {
+   ⋮                                    ident: "Vec",
+   ⋮                                    arguments: PathArguments::AngleBracketed {
+   ⋮                                        args: [
+   ⋮                                            Type(Type::Path {
+   ⋮                                                path: Path {
+   ⋮                                                    segments: [
+   ⋮                                                        PathSegment {
+   ⋮                                                            ident: "Attribute",
+   ⋮                                                            arguments: None,
+   ⋮                                                        },
+   ⋮                                                    ],
+   ⋮                                                },
+   ⋮                                            }),
+   ⋮                                        ],
+   ⋮                                    },
+   ⋮                                },
+   ⋮                            ],
+   ⋮                        },
+   ⋮                    },
+   ⋮                },
+   ⋮            ],
+   ⋮        },
+   ⋮    },
+   ⋮}
+    "###);
 
-    snapshot!(actual.attrs[0].interpret_meta().unwrap(), @r###"
+    snapshot!(input.attrs[0].interpret_meta().unwrap(), @r###"
    ⋮Meta::List {
    ⋮    ident: "derive",
    ⋮    nested: [
