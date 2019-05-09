@@ -21,10 +21,7 @@ fn test_unit() {
    ⋮    vis: Inherited,
    ⋮    ident: "Unit",
    ⋮    generics: Generics {
-   ⋮        lt_token: None,
    ⋮        params: [],
-   ⋮        gt_token: None,
-   ⋮        where_clause: None,
    ⋮    },
    ⋮    data: Struct(
    ⋮        DataStruct {
@@ -53,7 +50,6 @@ fn test_struct() {
        ⋮        Attribute {
        ⋮            style: Outer,
        ⋮            path: Path {
-       ⋮                leading_colon: None,
        ⋮                segments: [
        ⋮                    PathSegment {
        ⋮                        ident: "derive",
@@ -69,10 +65,7 @@ fn test_struct() {
        ⋮    ),
        ⋮    ident: "Item",
        ⋮    generics: Generics {
-       ⋮        lt_token: None,
        ⋮        params: [],
-       ⋮        gt_token: None,
-       ⋮        where_clause: None,
        ⋮    },
        ⋮    data: Struct(
        ⋮        DataStruct {
@@ -88,9 +81,7 @@ fn test_struct() {
        ⋮                            colon_token: Some,
        ⋮                            ty: Path(
        ⋮                                TypePath {
-       ⋮                                    qself: None,
        ⋮                                    path: Path {
-       ⋮                                        leading_colon: None,
        ⋮                                        segments: [
        ⋮                                            PathSegment {
        ⋮                                                ident: "Ident",
@@ -110,22 +101,17 @@ fn test_struct() {
        ⋮                            colon_token: Some,
        ⋮                            ty: Path(
        ⋮                                TypePath {
-       ⋮                                    qself: None,
        ⋮                                    path: Path {
-       ⋮                                        leading_colon: None,
        ⋮                                        segments: [
        ⋮                                            PathSegment {
        ⋮                                                ident: "Vec",
        ⋮                                                arguments: AngleBracketed(
        ⋮                                                    AngleBracketedGenericArguments {
-       ⋮                                                        colon2_token: None,
        ⋮                                                        args: [
        ⋮                                                            Type(
        ⋮                                                                Path(
        ⋮                                                                    TypePath {
-       ⋮                                                                        qself: None,
        ⋮                                                                        path: Path {
-       ⋮                                                                            leading_colon: None,
        ⋮                                                                            segments: [
        ⋮                                                                                PathSegment {
        ⋮                                                                                    ident: "Attribute",
@@ -148,7 +134,6 @@ fn test_struct() {
        ⋮                    ],
        ⋮                },
        ⋮            ),
-       ⋮            semi_token: None,
        ⋮        },
        ⋮    ),
        ⋮}

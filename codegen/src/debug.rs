@@ -157,11 +157,39 @@ fn expand_impl(node: &Node) -> TokenStream {
         Data::Struct(fields) => {
             let fields = fields.iter().filter_map(|(f, ty)| {
                 let ident = Ident::new(f, Span::call_site());
-                let val = quote!(&self.value.#ident);
-                let format = format_field(&val, ty)?;
-                Some(quote! {
-                    formatter.field(#f, #format);
-                })
+                if let Type::Option(ty) = ty {
+                    let inner = quote!(_val);
+                    let format = format_field(&inner, ty).map(|format| {
+                        quote! {
+                            let #inner = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(#format, formatter)?;
+                            formatter.write_str(")")?;
+                        }
+                    });
+                    let ty = rust_type(ty);
+                    Some(quote! {
+                        if let Some(val) = &self.value.#ident {
+                            #[derive(RefCast)]
+                            #[repr(transparent)]
+                            struct Print(#ty);
+                            impl Debug for Print {
+                                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                                    formatter.write_str("Some")?;
+                                    #format
+                                    Ok(())
+                                }
+                            }
+                            formatter.field(#f, Print::ref_cast(val));
+                        }
+                    })
+                } else {
+                    let val = quote!(&self.value.#ident);
+                    let format = format_field(&val, ty)?;
+                    Some(quote! {
+                        formatter.field(#f, #format);
+                    })
+                }
             });
             quote! {
                 let mut formatter = formatter.debug_struct(#name);
