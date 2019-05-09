@@ -12,6 +12,7 @@
 #![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
 
+mod debug;
 mod error;
 mod file;
 mod fold;
@@ -40,5 +41,6 @@ fn do_main() -> Result<()> {
     fold::generate(&defs)?;
     visit::generate(&defs)?;
     visit_mut::generate(&defs)?;
+    debug::generate(&defs)?;
     Ok(())
 }

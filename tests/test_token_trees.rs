@@ -13,7 +13,7 @@ use syn::Lit;
 
 #[test]
 fn test_struct() {
-    let code = "
+    let input = "
         #[derive(Debug, Clone)]
         pub struct Item {
             pub ident: Ident,
@@ -21,7 +21,7 @@ fn test_struct() {
         }
     ";
 
-    snapshot!(code as TokenStream);
+    snapshot!(input as TokenStream, @"`# [ derive ( Debug , Clone ) ] pub struct Item { pub ident : Ident , pub attrs : Vec < Attribute >, }`");
 }
 
 #[test]
