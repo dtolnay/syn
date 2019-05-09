@@ -112,17 +112,7 @@ fn visit(
     }
 }
 
-fn visit_features(features: &Features) -> TokenStream {
-    let features = &features.any;
-    match features.len() {
-        0 => quote!(),
-        1 => quote!(#[cfg(feature = #(#features)*)]),
-        _ => quote!(#[cfg(any(#(feature = #features),*))]),
-    }
-}
-
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
-    let features = visit_features(&s.features);
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
     let visit_mut_fn = Ident::new(&format!("visit_{}_mut", under_name), Span::call_site());
@@ -191,14 +181,12 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     }
 
     traits.extend(quote! {
-        #features
         fn #visit_mut_fn(&mut self, i: &mut #ty) {
             #visit_mut_fn(self, i)
         }
     });
 
     impls.extend(quote! {
-        #features
         pub fn #visit_mut_fn<V: VisitMut + ?Sized>(
             _visitor: &mut V, _i: &mut #ty
         ) {
