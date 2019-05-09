@@ -216,16 +216,29 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     use rustc_data_structures::thin_vec::ThinVec;
     use smallvec::SmallVec;
     use std::mem;
-    use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
+    use syntax::ast::{AwaitOrigin, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::mut_visit::{self, MutVisitor};
     use syntax_pos::DUMMY_SP;
 
     struct BracketsVisitor {
         failed: bool,
     };
+
+    impl BracketsVisitor {
+        fn recurse_expr(&mut self, e: &mut Expr) {
+            match e.node {
+                ExprKind::Await(AwaitOrigin::MacroLike, _) => {
+                    // Syn sees await!() as macro and doesn't recurse inside, so
+                    // skip it here too.
+                }
+                _ => mut_visit::noop_visit_expr(e, self),
+            }
+        }
+    }
+
     impl MutVisitor for BracketsVisitor {
         fn visit_expr(&mut self, e: &mut P<Expr>) {
-            mut_visit::noop_visit_expr(e, self);
+            self.recurse_expr(e);
             match e.node {
                 ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {}
                 _ => {
@@ -245,7 +258,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
 
         fn visit_field(&mut self, f: &mut Field) {
             if f.is_shorthand {
-                mut_visit::noop_visit_expr(&mut f.expr, self);
+                self.recurse_expr(&mut f.expr);
             } else {
                 self.visit_expr(&mut f.expr);
             }
@@ -266,11 +279,11 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
             let node = match stmt.node {
                 // Don't wrap toplevel expressions in statements.
                 StmtKind::Expr(mut e) => {
-                    mut_visit::noop_visit_expr(&mut e, self);
+                    self.recurse_expr(&mut e);
                     StmtKind::Expr(e)
                 }
                 StmtKind::Semi(mut e) => {
-                    mut_visit::noop_visit_expr(&mut e, self);
+                    self.recurse_expr(&mut e);
                     StmtKind::Semi(e)
                 }
                 s => s,
