@@ -170,9 +170,9 @@ impl Debug for Lite<syn::AttrStyle> {
         let _val = &self.value;
         match _val {
             syn::AttrStyle::Outer => formatter.write_str("Outer"),
-            syn::AttrStyle::Inner(_v0) => {
-                let mut formatter = formatter.debug_tuple("Inner");
-                formatter.finish()
+            syn::AttrStyle::Inner(_val) => {
+                formatter.write_str("Inner")?;
+                Ok(())
             }
         }
     }
@@ -215,14 +215,16 @@ impl Debug for Lite<syn::BareFnArgName> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::BareFnArgName::Named(_v0) => {
-                let mut formatter = formatter.debug_tuple("Named");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::BareFnArgName::Named(_val) => {
+                formatter.write_str("Named")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::BareFnArgName::Wild(_v0) => {
-                let mut formatter = formatter.debug_tuple("Wild");
-                formatter.finish()
+            syn::BareFnArgName::Wild(_val) => {
+                formatter.write_str("Wild")?;
+                Ok(())
             }
         }
     }
@@ -231,117 +233,117 @@ impl Debug for Lite<syn::BinOp> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::BinOp::Add(_v0) => {
-                let mut formatter = formatter.debug_tuple("Add");
-                formatter.finish()
+            syn::BinOp::Add(_val) => {
+                formatter.write_str("Add")?;
+                Ok(())
             }
-            syn::BinOp::Sub(_v0) => {
-                let mut formatter = formatter.debug_tuple("Sub");
-                formatter.finish()
+            syn::BinOp::Sub(_val) => {
+                formatter.write_str("Sub")?;
+                Ok(())
             }
-            syn::BinOp::Mul(_v0) => {
-                let mut formatter = formatter.debug_tuple("Mul");
-                formatter.finish()
+            syn::BinOp::Mul(_val) => {
+                formatter.write_str("Mul")?;
+                Ok(())
             }
-            syn::BinOp::Div(_v0) => {
-                let mut formatter = formatter.debug_tuple("Div");
-                formatter.finish()
+            syn::BinOp::Div(_val) => {
+                formatter.write_str("Div")?;
+                Ok(())
             }
-            syn::BinOp::Rem(_v0) => {
-                let mut formatter = formatter.debug_tuple("Rem");
-                formatter.finish()
+            syn::BinOp::Rem(_val) => {
+                formatter.write_str("Rem")?;
+                Ok(())
             }
-            syn::BinOp::And(_v0) => {
-                let mut formatter = formatter.debug_tuple("And");
-                formatter.finish()
+            syn::BinOp::And(_val) => {
+                formatter.write_str("And")?;
+                Ok(())
             }
-            syn::BinOp::Or(_v0) => {
-                let mut formatter = formatter.debug_tuple("Or");
-                formatter.finish()
+            syn::BinOp::Or(_val) => {
+                formatter.write_str("Or")?;
+                Ok(())
             }
-            syn::BinOp::BitXor(_v0) => {
-                let mut formatter = formatter.debug_tuple("BitXor");
-                formatter.finish()
+            syn::BinOp::BitXor(_val) => {
+                formatter.write_str("BitXor")?;
+                Ok(())
             }
-            syn::BinOp::BitAnd(_v0) => {
-                let mut formatter = formatter.debug_tuple("BitAnd");
-                formatter.finish()
+            syn::BinOp::BitAnd(_val) => {
+                formatter.write_str("BitAnd")?;
+                Ok(())
             }
-            syn::BinOp::BitOr(_v0) => {
-                let mut formatter = formatter.debug_tuple("BitOr");
-                formatter.finish()
+            syn::BinOp::BitOr(_val) => {
+                formatter.write_str("BitOr")?;
+                Ok(())
             }
-            syn::BinOp::Shl(_v0) => {
-                let mut formatter = formatter.debug_tuple("Shl");
-                formatter.finish()
+            syn::BinOp::Shl(_val) => {
+                formatter.write_str("Shl")?;
+                Ok(())
             }
-            syn::BinOp::Shr(_v0) => {
-                let mut formatter = formatter.debug_tuple("Shr");
-                formatter.finish()
+            syn::BinOp::Shr(_val) => {
+                formatter.write_str("Shr")?;
+                Ok(())
             }
-            syn::BinOp::Eq(_v0) => {
-                let mut formatter = formatter.debug_tuple("Eq");
-                formatter.finish()
+            syn::BinOp::Eq(_val) => {
+                formatter.write_str("Eq")?;
+                Ok(())
             }
-            syn::BinOp::Lt(_v0) => {
-                let mut formatter = formatter.debug_tuple("Lt");
-                formatter.finish()
+            syn::BinOp::Lt(_val) => {
+                formatter.write_str("Lt")?;
+                Ok(())
             }
-            syn::BinOp::Le(_v0) => {
-                let mut formatter = formatter.debug_tuple("Le");
-                formatter.finish()
+            syn::BinOp::Le(_val) => {
+                formatter.write_str("Le")?;
+                Ok(())
             }
-            syn::BinOp::Ne(_v0) => {
-                let mut formatter = formatter.debug_tuple("Ne");
-                formatter.finish()
+            syn::BinOp::Ne(_val) => {
+                formatter.write_str("Ne")?;
+                Ok(())
             }
-            syn::BinOp::Ge(_v0) => {
-                let mut formatter = formatter.debug_tuple("Ge");
-                formatter.finish()
+            syn::BinOp::Ge(_val) => {
+                formatter.write_str("Ge")?;
+                Ok(())
             }
-            syn::BinOp::Gt(_v0) => {
-                let mut formatter = formatter.debug_tuple("Gt");
-                formatter.finish()
+            syn::BinOp::Gt(_val) => {
+                formatter.write_str("Gt")?;
+                Ok(())
             }
-            syn::BinOp::AddEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("AddEq");
-                formatter.finish()
+            syn::BinOp::AddEq(_val) => {
+                formatter.write_str("AddEq")?;
+                Ok(())
             }
-            syn::BinOp::SubEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("SubEq");
-                formatter.finish()
+            syn::BinOp::SubEq(_val) => {
+                formatter.write_str("SubEq")?;
+                Ok(())
             }
-            syn::BinOp::MulEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("MulEq");
-                formatter.finish()
+            syn::BinOp::MulEq(_val) => {
+                formatter.write_str("MulEq")?;
+                Ok(())
             }
-            syn::BinOp::DivEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("DivEq");
-                formatter.finish()
+            syn::BinOp::DivEq(_val) => {
+                formatter.write_str("DivEq")?;
+                Ok(())
             }
-            syn::BinOp::RemEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("RemEq");
-                formatter.finish()
+            syn::BinOp::RemEq(_val) => {
+                formatter.write_str("RemEq")?;
+                Ok(())
             }
-            syn::BinOp::BitXorEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("BitXorEq");
-                formatter.finish()
+            syn::BinOp::BitXorEq(_val) => {
+                formatter.write_str("BitXorEq")?;
+                Ok(())
             }
-            syn::BinOp::BitAndEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("BitAndEq");
-                formatter.finish()
+            syn::BinOp::BitAndEq(_val) => {
+                formatter.write_str("BitAndEq")?;
+                Ok(())
             }
-            syn::BinOp::BitOrEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("BitOrEq");
-                formatter.finish()
+            syn::BinOp::BitOrEq(_val) => {
+                formatter.write_str("BitOrEq")?;
+                Ok(())
             }
-            syn::BinOp::ShlEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("ShlEq");
-                formatter.finish()
+            syn::BinOp::ShlEq(_val) => {
+                formatter.write_str("ShlEq")?;
+                Ok(())
             }
-            syn::BinOp::ShrEq(_v0) => {
-                let mut formatter = formatter.debug_tuple("ShrEq");
-                formatter.finish()
+            syn::BinOp::ShrEq(_val) => {
+                formatter.write_str("ShrEq")?;
+                Ok(())
             }
         }
     }
@@ -2134,30 +2136,40 @@ impl Debug for Lite<syn::FnArg> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::FnArg::SelfRef(_v0) => {
-                let mut formatter = formatter.debug_tuple("SelfRef");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::FnArg::SelfRef(_val) => {
+                formatter.write_str("SelfRef")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::FnArg::SelfValue(_v0) => {
-                let mut formatter = formatter.debug_tuple("SelfValue");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::FnArg::SelfValue(_val) => {
+                formatter.write_str("SelfValue")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::FnArg::Captured(_v0) => {
-                let mut formatter = formatter.debug_tuple("Captured");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::FnArg::Captured(_val) => {
+                formatter.write_str("Captured")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::FnArg::Inferred(_v0) => {
-                let mut formatter = formatter.debug_tuple("Inferred");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::FnArg::Inferred(_val) => {
+                formatter.write_str("Inferred")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::FnArg::Ignored(_v0) => {
-                let mut formatter = formatter.debug_tuple("Ignored");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::FnArg::Ignored(_val) => {
+                formatter.write_str("Ignored")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -2344,30 +2356,40 @@ impl Debug for Lite<syn::GenericArgument> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::GenericArgument::Lifetime(_v0) => {
-                let mut formatter = formatter.debug_tuple("Lifetime");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericArgument::Lifetime(_val) => {
+                formatter.write_str("Lifetime")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericArgument::Type(_v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericArgument::Type(_val) => {
+                formatter.write_str("Type")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericArgument::Binding(_v0) => {
-                let mut formatter = formatter.debug_tuple("Binding");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericArgument::Binding(_val) => {
+                formatter.write_str("Binding")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericArgument::Constraint(_v0) => {
-                let mut formatter = formatter.debug_tuple("Constraint");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericArgument::Constraint(_val) => {
+                formatter.write_str("Constraint")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericArgument::Const(_v0) => {
-                let mut formatter = formatter.debug_tuple("Const");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericArgument::Const(_val) => {
+                formatter.write_str("Const")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -2376,15 +2398,19 @@ impl Debug for Lite<syn::GenericMethodArgument> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::GenericMethodArgument::Type(_v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericMethodArgument::Type(_val) => {
+                formatter.write_str("Type")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericMethodArgument::Const(_v0) => {
-                let mut formatter = formatter.debug_tuple("Const");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericMethodArgument::Const(_val) => {
+                formatter.write_str("Const")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -2393,20 +2419,26 @@ impl Debug for Lite<syn::GenericParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::GenericParam::Type(_v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericParam::Type(_val) => {
+                formatter.write_str("Type")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericParam::Lifetime(_v0) => {
-                let mut formatter = formatter.debug_tuple("Lifetime");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericParam::Lifetime(_val) => {
+                formatter.write_str("Lifetime")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::GenericParam::Const(_v0) => {
-                let mut formatter = formatter.debug_tuple("Const");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::GenericParam::Const(_val) => {
+                formatter.write_str("Const")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -3899,17 +3931,17 @@ impl Debug for Lite<syn::MacroDelimiter> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::MacroDelimiter::Paren(_v0) => {
-                let mut formatter = formatter.debug_tuple("Paren");
-                formatter.finish()
+            syn::MacroDelimiter::Paren(_val) => {
+                formatter.write_str("Paren")?;
+                Ok(())
             }
-            syn::MacroDelimiter::Brace(_v0) => {
-                let mut formatter = formatter.debug_tuple("Brace");
-                formatter.finish()
+            syn::MacroDelimiter::Brace(_val) => {
+                formatter.write_str("Brace")?;
+                Ok(())
             }
-            syn::MacroDelimiter::Bracket(_v0) => {
-                let mut formatter = formatter.debug_tuple("Bracket");
-                formatter.finish()
+            syn::MacroDelimiter::Bracket(_val) => {
+                formatter.write_str("Bracket")?;
+                Ok(())
             }
         }
     }
@@ -3918,15 +3950,19 @@ impl Debug for Lite<syn::Member> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Member::Named(_v0) => {
-                let mut formatter = formatter.debug_tuple("Named");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::Member::Named(_val) => {
+                formatter.write_str("Named")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::Member::Unnamed(_v0) => {
-                let mut formatter = formatter.debug_tuple("Unnamed");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::Member::Unnamed(_val) => {
+                formatter.write_str("Unnamed")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -3935,10 +3971,12 @@ impl Debug for Lite<syn::Meta> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Meta::Word(_v0) => {
-                let mut formatter = formatter.debug_tuple("Word");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::Meta::Word(_val) => {
+                formatter.write_str("Word")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Meta::List(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::List");
@@ -4052,15 +4090,19 @@ impl Debug for Lite<syn::NestedMeta> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::NestedMeta::Meta(_v0) => {
-                let mut formatter = formatter.debug_tuple("Meta");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::NestedMeta::Meta(_val) => {
+                formatter.write_str("Meta")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::NestedMeta::Literal(_v0) => {
-                let mut formatter = formatter.debug_tuple("Literal");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::NestedMeta::Literal(_val) => {
+                formatter.write_str("Literal")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -4708,13 +4750,13 @@ impl Debug for Lite<syn::RangeLimits> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::RangeLimits::HalfOpen(_v0) => {
-                let mut formatter = formatter.debug_tuple("HalfOpen");
-                formatter.finish()
+            syn::RangeLimits::HalfOpen(_val) => {
+                formatter.write_str("HalfOpen")?;
+                Ok(())
             }
-            syn::RangeLimits::Closed(_v0) => {
-                let mut formatter = formatter.debug_tuple("Closed");
-                formatter.finish()
+            syn::RangeLimits::Closed(_val) => {
+                formatter.write_str("Closed")?;
+                Ok(())
             }
         }
     }
@@ -4736,20 +4778,26 @@ impl Debug for Lite<syn::Stmt> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Stmt::Local(_v0) => {
-                let mut formatter = formatter.debug_tuple("Local");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::Stmt::Local(_val) => {
+                formatter.write_str("Local")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::Stmt::Item(_v0) => {
-                let mut formatter = formatter.debug_tuple("Item");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::Stmt::Item(_val) => {
+                formatter.write_str("Item")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::Stmt::Expr(_v0) => {
-                let mut formatter = formatter.debug_tuple("Expr");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::Stmt::Expr(_val) => {
+                formatter.write_str("Expr")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Stmt::Semi(_v0, _v1) => {
                 let mut formatter = formatter.debug_tuple("Semi");
@@ -4801,9 +4849,9 @@ impl Debug for Lite<syn::TraitBoundModifier> {
         let _val = &self.value;
         match _val {
             syn::TraitBoundModifier::None => formatter.write_str("None"),
-            syn::TraitBoundModifier::Maybe(_v0) => {
-                let mut formatter = formatter.debug_tuple("Maybe");
-                formatter.finish()
+            syn::TraitBoundModifier::Maybe(_val) => {
+                formatter.write_str("Maybe")?;
+                Ok(())
             }
         }
     }
@@ -5482,15 +5530,19 @@ impl Debug for Lite<syn::TypeParamBound> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::TypeParamBound::Trait(_v0) => {
-                let mut formatter = formatter.debug_tuple("Trait");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::TypeParamBound::Trait(_val) => {
+                formatter.write_str("Trait")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::TypeParamBound::Lifetime(_v0) => {
-                let mut formatter = formatter.debug_tuple("Lifetime");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::TypeParamBound::Lifetime(_val) => {
+                formatter.write_str("Lifetime")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -5647,17 +5699,17 @@ impl Debug for Lite<syn::UnOp> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::UnOp::Deref(_v0) => {
-                let mut formatter = formatter.debug_tuple("Deref");
-                formatter.finish()
+            syn::UnOp::Deref(_val) => {
+                formatter.write_str("Deref")?;
+                Ok(())
             }
-            syn::UnOp::Not(_v0) => {
-                let mut formatter = formatter.debug_tuple("Not");
-                formatter.finish()
+            syn::UnOp::Not(_val) => {
+                formatter.write_str("Not")?;
+                Ok(())
             }
-            syn::UnOp::Neg(_v0) => {
-                let mut formatter = formatter.debug_tuple("Neg");
-                formatter.finish()
+            syn::UnOp::Neg(_val) => {
+                formatter.write_str("Neg")?;
+                Ok(())
             }
         }
     }
@@ -5709,30 +5761,40 @@ impl Debug for Lite<syn::UseTree> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::UseTree::Path(_v0) => {
-                let mut formatter = formatter.debug_tuple("Path");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::UseTree::Path(_val) => {
+                formatter.write_str("Path")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::UseTree::Name(_v0) => {
-                let mut formatter = formatter.debug_tuple("Name");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::UseTree::Name(_val) => {
+                formatter.write_str("Name")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::UseTree::Rename(_v0) => {
-                let mut formatter = formatter.debug_tuple("Rename");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::UseTree::Rename(_val) => {
+                formatter.write_str("Rename")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::UseTree::Glob(_v0) => {
-                let mut formatter = formatter.debug_tuple("Glob");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::UseTree::Glob(_val) => {
+                formatter.write_str("Glob")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::UseTree::Group(_v0) => {
-                let mut formatter = formatter.debug_tuple("Group");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::UseTree::Group(_val) => {
+                formatter.write_str("Group")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -5846,20 +5908,26 @@ impl Debug for Lite<syn::WherePredicate> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::WherePredicate::Type(_v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::WherePredicate::Type(_val) => {
+                formatter.write_str("Type")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::WherePredicate::Lifetime(_v0) => {
-                let mut formatter = formatter.debug_tuple("Lifetime");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::WherePredicate::Lifetime(_val) => {
+                formatter.write_str("Lifetime")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
-            syn::WherePredicate::Eq(_v0) => {
-                let mut formatter = formatter.debug_tuple("Eq");
-                formatter.field(Lite(_v0));
-                formatter.finish()
+            syn::WherePredicate::Eq(_val) => {
+                formatter.write_str("Eq")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }

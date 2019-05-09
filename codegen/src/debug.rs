@@ -155,6 +155,23 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                             #format
                         }
                     }
+                } else if fields.len() == 1 {
+                    let ty = &fields[0];
+                    let val = quote!(_val);
+                    let format = format_field(&val, ty).map(|format| {
+                        quote! {
+                            formatter.write_str("(")?;
+                            Debug::fmt(#format, formatter)?;
+                            formatter.write_str(")")?;
+                        }
+                    });
+                    quote! {
+                        syn::#ident::#variant(_val) => {
+                            formatter.write_str(#v)?;
+                            #format
+                            Ok(())
+                        }
+                    }
                 } else {
                     let pats = (0..fields.len())
                         .map(|i| Ident::new(&format!("_v{}", i), Span::call_site()));

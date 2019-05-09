@@ -87,18 +87,16 @@ fn test_struct() {
        ⋮                                    ident: "Vec",
        ⋮                                    arguments: PathArguments::AngleBracketed {
        ⋮                                        args: [
-       ⋮                                            Type(
-       ⋮                                                Type::Path {
-       ⋮                                                    path: Path {
-       ⋮                                                        segments: [
-       ⋮                                                            PathSegment {
-       ⋮                                                                ident: "Attribute",
-       ⋮                                                                arguments: None,
-       ⋮                                                            },
-       ⋮                                                        ],
-       ⋮                                                    },
+       ⋮                                            Type(Type::Path {
+       ⋮                                                path: Path {
+       ⋮                                                    segments: [
+       ⋮                                                        PathSegment {
+       ⋮                                                            ident: "Attribute",
+       ⋮                                                            arguments: None,
+       ⋮                                                        },
+       ⋮                                                    ],
        ⋮                                                },
-       ⋮                                            ),
+       ⋮                                            }),
        ⋮                                        ],
        ⋮                                    },
        ⋮                                },
@@ -117,16 +115,8 @@ fn test_struct() {
    ⋮Meta::List {
    ⋮    ident: "derive",
    ⋮    nested: [
-   ⋮        Meta(
-   ⋮            Word(
-   ⋮                "Debug",
-   ⋮            ),
-   ⋮        ),
-   ⋮        Meta(
-   ⋮            Word(
-   ⋮                "Clone",
-   ⋮            ),
-   ⋮        ),
+   ⋮        Meta(Word("Debug")),
+   ⋮        Meta(Word("Clone")),
    ⋮    ],
    ⋮}
     "###);
