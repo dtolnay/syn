@@ -2,7 +2,7 @@
 name = "syn"
 version = "0.15.34" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 description = "Parser for Rust source code"
 repository = "https://github.com/dtolnay/syn"
 documentation = "https://docs.rs/syn"
