@@ -1,7 +1,7 @@
 use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, TokenStreamExt};
+use quote::quote;
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
@@ -78,8 +78,8 @@ fn visit(
                 let i = Index::from(i);
                 let it = Owned(quote!((#name).#i));
                 let val = visit(elem, features, defs, &it).unwrap_or_else(|| noop_visit(&it));
-                code.append_all(val);
-                code.append_all(quote!(;));
+                code.extend(val);
+                code.extend(quote!(;));
             }
             Some(code)
         }
@@ -143,7 +143,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 let variant_ident = Ident::new(variant, Span::call_site());
 
                 if fields.is_empty() {
-                    visit_mut_variants.append_all(quote! {
+                    visit_mut_variants.extend(quote! {
                         #ty::#variant_ident => {}
                     });
                 } else {
@@ -154,21 +154,21 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                         let name = format!("_binding_{}", idx);
                         let binding = Ident::new(&name, Span::call_site());
 
-                        bind_visit_mut_fields.append_all(quote! {
+                        bind_visit_mut_fields.extend(quote! {
                             ref mut #binding,
                         });
 
                         let borrowed_binding = Borrowed(quote!(#binding));
 
-                        visit_mut_fields.append_all(
+                        visit_mut_fields.extend(
                             visit(ty, &s.features, defs, &borrowed_binding)
                                 .unwrap_or_else(|| noop_visit(&borrowed_binding)),
                         );
 
-                        visit_mut_fields.append_all(quote!(;));
+                        visit_mut_fields.extend(quote!(;));
                     }
 
-                    visit_mut_variants.append_all(quote! {
+                    visit_mut_variants.extend(quote! {
                         #ty::#variant_ident(#bind_visit_mut_fields) => {
                             #visit_mut_fields
                         }
@@ -176,7 +176,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 }
             }
 
-            visit_mut_impl.append_all(quote! {
+            visit_mut_impl.extend(quote! {
                 match *_i {
                     #visit_mut_variants
                 }
@@ -188,7 +188,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 let ref_toks = Owned(quote!(_i.#id));
                 let visit_mut_field = visit(&ty, &s.features, defs, &ref_toks)
                     .unwrap_or_else(|| noop_visit(&ref_toks));
-                visit_mut_impl.append_all(quote! {
+                visit_mut_impl.extend(quote! {
                     #visit_mut_field;
                 });
             }
@@ -196,14 +196,14 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         Data::Private => {}
     }
 
-    state.visit_mut_trait.append_all(quote! {
+    state.visit_mut_trait.extend(quote! {
         #features
         fn #visit_mut_fn(&mut self, i: &mut #ty) {
             #visit_mut_fn(self, i)
         }
     });
 
-    state.visit_mut_impl.append_all(quote! {
+    state.visit_mut_impl.extend(quote! {
         #features
         pub fn #visit_mut_fn<V: VisitMut + ?Sized>(
             _visitor: &mut V, _i: &mut #ty

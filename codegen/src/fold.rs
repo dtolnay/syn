@@ -1,6 +1,6 @@
 use crate::{file, full, gen};
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, TokenStreamExt};
+use quote::quote;
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
@@ -60,8 +60,8 @@ fn visit(
                 let i = Index::from(i);
                 let it = quote!((#name).#i);
                 let val = visit(elem, features, defs, &it).unwrap_or(it);
-                code.append_all(val);
-                code.append_all(quote!(,));
+                code.extend(val);
+                code.extend(quote!(,));
             }
             Some(quote! {
                 (#code)
@@ -127,7 +127,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 let variant_ident = Ident::new(variant, Span::call_site());
 
                 if fields.is_empty() {
-                    fold_variants.append_all(quote! {
+                    fold_variants.extend(quote! {
                         #ty::#variant_ident => {
                             #ty::#variant_ident
                         }
@@ -140,20 +140,20 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                         let name = format!("_binding_{}", idx);
                         let binding = Ident::new(&name, Span::call_site());
 
-                        bind_fold_fields.append_all(quote! {
+                        bind_fold_fields.extend(quote! {
                             #binding,
                         });
 
                         let owned_binding = quote!(#binding);
 
-                        fold_fields.append_all(
+                        fold_fields.extend(
                             visit(ty, &s.features, defs, &owned_binding).unwrap_or(owned_binding),
                         );
 
-                        fold_fields.append_all(quote!(,));
+                        fold_fields.extend(quote!(,));
                     }
 
-                    fold_variants.append_all(quote! {
+                    fold_variants.extend(quote! {
                         #ty::#variant_ident(#bind_fold_fields) => {
                             #ty::#variant_ident(
                                 #fold_fields
@@ -163,7 +163,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 }
             }
 
-            fold_impl.append_all(quote! {
+            fold_impl.extend(quote! {
                 match _i {
                     #fold_variants
                 }
@@ -177,39 +177,39 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 let ref_toks = quote!(_i.#id);
                 let fold = visit(&ty, &s.features, defs, &ref_toks).unwrap_or(ref_toks);
 
-                fold_fields.append_all(quote! {
+                fold_fields.extend(quote! {
                     #id: #fold,
                 });
             }
 
             if !fields.is_empty() {
-                fold_impl.append_all(quote! {
+                fold_impl.extend(quote! {
                     #ty {
                         #fold_fields
                     }
                 })
             } else {
                 if ty == "Ident" {
-                    fold_impl.append_all(quote! {
+                    fold_impl.extend(quote! {
                         let mut _i = _i;
                         let span = _visitor.fold_span(_i.span());
                         _i.set_span(span);
                     });
                 }
-                fold_impl.append_all(quote! {
+                fold_impl.extend(quote! {
                     _i
                 });
             }
         }
         Data::Private => {
             if ty == "Ident" {
-                fold_impl.append_all(quote! {
+                fold_impl.extend(quote! {
                     let mut _i = _i;
                     let span = _visitor.fold_span(_i.span());
                     _i.set_span(span);
                 });
             }
-            fold_impl.append_all(quote! {
+            fold_impl.extend(quote! {
                 _i
             });
         }
@@ -220,7 +220,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         Data::Struct(_) | Data::Enum(_) => true,
     };
 
-    state.fold_trait.append_all(quote! {
+    state.fold_trait.extend(quote! {
         #features
         fn #fold_fn(&mut self, i: #ty) -> #ty {
             #fold_fn(self, i)
@@ -228,7 +228,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
     });
 
     if include_fold_impl {
-        state.fold_impl.append_all(quote! {
+        state.fold_impl.extend(quote! {
             #features
             pub fn #fold_fn<V: Fold + ?Sized>(
                 _visitor: &mut V, _i: #ty

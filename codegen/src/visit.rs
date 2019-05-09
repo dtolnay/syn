@@ -1,7 +1,7 @@
 use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, TokenStreamExt};
+use quote::quote;
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
@@ -78,8 +78,8 @@ fn visit(
                 let i = Index::from(i);
                 let it = Owned(quote!((#name).#i));
                 let val = visit(elem, features, defs, &it).unwrap_or_else(|| noop_visit(&it));
-                code.append_all(val);
-                code.append_all(quote!(;));
+                code.extend(val);
+                code.extend(quote!(;));
             }
             Some(code)
         }
@@ -143,7 +143,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 let variant_ident = Ident::new(variant, Span::call_site());
 
                 if fields.is_empty() {
-                    visit_variants.append_all(quote! {
+                    visit_variants.extend(quote! {
                         #ty::#variant_ident => {}
                     });
                 } else {
@@ -154,21 +154,21 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                         let name = format!("_binding_{}", idx);
                         let binding = Ident::new(&name, Span::call_site());
 
-                        bind_visit_fields.append_all(quote! {
+                        bind_visit_fields.extend(quote! {
                             ref #binding,
                         });
 
                         let borrowed_binding = Borrowed(quote!(#binding));
 
-                        visit_fields.append_all(
+                        visit_fields.extend(
                             visit(ty, &s.features, defs, &borrowed_binding)
                                 .unwrap_or_else(|| noop_visit(&borrowed_binding)),
                         );
 
-                        visit_fields.append_all(quote!(;));
+                        visit_fields.extend(quote!(;));
                     }
 
-                    visit_variants.append_all(quote! {
+                    visit_variants.extend(quote! {
                         #ty::#variant_ident(#bind_visit_fields) => {
                             #visit_fields
                         }
@@ -176,7 +176,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 }
             }
 
-            visit_impl.append_all(quote! {
+            visit_impl.extend(quote! {
                 match *_i {
                     #visit_variants
                 }
@@ -188,7 +188,7 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
                 let ref_toks = Owned(quote!(_i.#id));
                 let visit_field = visit(&ty, &s.features, defs, &ref_toks)
                     .unwrap_or_else(|| noop_visit(&ref_toks));
-                visit_impl.append_all(quote! {
+                visit_impl.extend(quote! {
                     #visit_field;
                 });
             }
@@ -196,14 +196,14 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         Data::Private => {}
     }
 
-    state.visit_trait.append_all(quote! {
+    state.visit_trait.extend(quote! {
         #features
         fn #visit_fn(&mut self, i: &'ast #ty) {
             #visit_fn(self, i)
         }
     });
 
-    state.visit_impl.append_all(quote! {
+    state.visit_impl.extend(quote! {
         #features
         pub fn #visit_fn<'ast, V: Visit<'ast> + ?Sized>(
             _visitor: &mut V, _i: &'ast #ty
