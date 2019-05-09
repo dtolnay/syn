@@ -13,13 +13,20 @@
 #![allow(clippy::needless_pass_by_value)]
 
 mod file;
+mod fold;
+mod full;
 mod gen;
 mod json;
+mod operand;
 mod parse;
 mod version;
+mod visit;
+mod visit_mut;
 
 fn main() {
     let defs = parse::parse();
     json::generate(&defs);
-    gen::generate(&defs);
+    fold::generate(&defs);
+    visit::generate(&defs);
+    visit_mut::generate(&defs);
 }

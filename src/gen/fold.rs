@@ -819,28 +819,6 @@ pub trait Fold {
         fold_ident(self, i)
     }
 }
-#[cfg(any(feature = "full", feature = "derive"))]
-macro_rules! fold_span_only {
-    ($f:ident : $t:ident) => {
-        pub fn $f<V: Fold + ?Sized>(_visitor: &mut V, mut _i: $t) -> $t {
-            let span = _visitor.fold_span(_i.span());
-            _i.set_span(span);
-            _i
-        }
-    };
-}
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lit_byte: LitByte);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lit_byte_str: LitByteStr);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lit_char: LitChar);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lit_float: LitFloat);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lit_int: LitInt);
-#[cfg(any(feature = "full", feature = "derive"))]
-fold_span_only!(fold_lit_str: LitStr);
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_abi<V: Fold + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
     Abi {
@@ -2174,6 +2152,48 @@ pub fn fold_lit_bool<V: Fold + ?Sized>(_visitor: &mut V, _i: LitBool) -> LitBool
         value: _i.value,
         span: _visitor.fold_span(_i.span),
     }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_lit_byte<V: Fold + ?Sized>(_visitor: &mut V, _i: LitByte) -> LitByte {
+    let span = _visitor.fold_span(_i.span());
+    let mut _i = _i;
+    _i.set_span(span);
+    _i
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_lit_byte_str<V: Fold + ?Sized>(_visitor: &mut V, _i: LitByteStr) -> LitByteStr {
+    let span = _visitor.fold_span(_i.span());
+    let mut _i = _i;
+    _i.set_span(span);
+    _i
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_lit_char<V: Fold + ?Sized>(_visitor: &mut V, _i: LitChar) -> LitChar {
+    let span = _visitor.fold_span(_i.span());
+    let mut _i = _i;
+    _i.set_span(span);
+    _i
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_lit_float<V: Fold + ?Sized>(_visitor: &mut V, _i: LitFloat) -> LitFloat {
+    let span = _visitor.fold_span(_i.span());
+    let mut _i = _i;
+    _i.set_span(span);
+    _i
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_lit_int<V: Fold + ?Sized>(_visitor: &mut V, _i: LitInt) -> LitInt {
+    let span = _visitor.fold_span(_i.span());
+    let mut _i = _i;
+    _i.set_span(span);
+    _i
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_lit_str<V: Fold + ?Sized>(_visitor: &mut V, _i: LitStr) -> LitStr {
+    let span = _visitor.fold_span(_i.span());
+    let mut _i = _i;
+    _i.set_span(span);
+    _i
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_lit_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: LitVerbatim) -> LitVerbatim {
