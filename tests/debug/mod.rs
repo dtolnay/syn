@@ -70,6 +70,15 @@ impl Debug for Lite<TokenStream> {
     }
 }
 
+impl<'a, T> Debug for Lite<&'a T>
+where
+    Lite<T>: Debug,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        Debug::fmt(Lite(&*self.value), formatter)
+    }
+}
+
 impl<T> Debug for Lite<Box<T>>
 where
     Lite<T>: Debug,
