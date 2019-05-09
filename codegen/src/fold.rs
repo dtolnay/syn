@@ -6,12 +6,6 @@ use syn_codegen::{Data, Definitions, Features, Node, Type};
 
 const FOLD_SRC: &str = "../src/gen/fold.rs";
 
-#[derive(Default)]
-struct State {
-    fold_trait: TokenStream,
-    fold_impl: TokenStream,
-}
-
 fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
     let ident = gen::under_name(item);
     let method = Ident::new(&format!("fold_{}", ident), Span::call_site());
@@ -111,7 +105,7 @@ fn visit_features(features: &Features) -> TokenStream {
     }
 }
 
-fn node(state: &mut State, s: &Node, defs: &Definitions) {
+fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let features = visit_features(&s.features);
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
@@ -226,14 +220,14 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         };
     }
 
-    state.fold_trait.extend(quote! {
+    traits.extend(quote! {
         #features
         fn #fold_fn(&mut self, i: #ty) -> #ty {
             #fold_fn(self, i)
         }
     });
 
-    state.fold_impl.extend(quote! {
+    impls.extend(quote! {
         #features
         pub fn #fold_fn<V: Fold + ?Sized>(
             _visitor: &mut V, _i: #ty
@@ -244,10 +238,8 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
 }
 
 pub fn generate(defs: &Definitions) {
-    let state = gen::traverse(defs, node);
+    let (traits, impls) = gen::traverse(defs, node);
     let full_macro = full::get_macro();
-    let fold_trait = state.fold_trait;
-    let fold_impl = state.fold_impl;
     file::write(
         FOLD_SRC,
         quote! {
@@ -271,10 +263,10 @@ pub fn generate(defs: &Definitions) {
             ///
             /// *This trait is available if Syn is built with the `"fold"` feature.*
             pub trait Fold {
-                #fold_trait
+                #traits
             }
 
-            #fold_impl
+            #impls
         },
     );
 }

@@ -7,12 +7,6 @@ use syn_codegen::{Data, Definitions, Features, Node, Type};
 
 const VISIT_SRC: &str = "../src/gen/visit.rs";
 
-#[derive(Default)]
-struct State {
-    visit_trait: TokenStream,
-    visit_impl: TokenStream,
-}
-
 fn simple_visit(item: &str, name: &Operand) -> TokenStream {
     let ident = gen::under_name(item);
     let method = Ident::new(&format!("visit_{}", ident), Span::call_site());
@@ -127,7 +121,7 @@ fn visit_features(features: &Features) -> TokenStream {
     }
 }
 
-fn node(state: &mut State, s: &Node, defs: &Definitions) {
+fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let features = visit_features(&s.features);
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
@@ -196,14 +190,14 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
         Data::Private => {}
     }
 
-    state.visit_trait.extend(quote! {
+    traits.extend(quote! {
         #features
         fn #visit_fn(&mut self, i: &'ast #ty) {
             #visit_fn(self, i)
         }
     });
 
-    state.visit_impl.extend(quote! {
+    impls.extend(quote! {
         #features
         pub fn #visit_fn<'ast, V: Visit<'ast> + ?Sized>(
             _visitor: &mut V, _i: &'ast #ty
@@ -214,10 +208,8 @@ fn node(state: &mut State, s: &Node, defs: &Definitions) {
 }
 
 pub fn generate(defs: &Definitions) {
-    let state = gen::traverse(defs, node);
+    let (traits, impls) = gen::traverse(defs, node);
     let full_macro = full::get_macro();
-    let visit_trait = state.visit_trait;
-    let visit_impl = state.visit_impl;
     file::write(
         VISIT_SRC,
         quote! {
@@ -245,10 +237,10 @@ pub fn generate(defs: &Definitions) {
             ///
             /// *This trait is available if Syn is built with the `"visit"` feature.*
             pub trait Visit<'ast> {
-                #visit_trait
+                #traits
             }
 
-            #visit_impl
+            #impls
         },
     );
 }
