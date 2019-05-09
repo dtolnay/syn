@@ -42,7 +42,9 @@ impl Debug for Lite<syn::AngleBracketedGenericArguments> {
             }
             formatter.field("colon2_token", Print::ref_cast(val));
         }
-        formatter.field("args", Lite(&_val.args));
+        if !_val.args.is_empty() {
+            formatter.field("args", Lite(&_val.args));
+        }
         formatter.finish()
     }
 }
@@ -113,7 +115,9 @@ impl Debug for Lite<syn::Arm> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Arm");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.leading_vert {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -126,7 +130,9 @@ impl Debug for Lite<syn::Arm> {
             }
             formatter.field("leading_vert", Print::ref_cast(val));
         }
-        formatter.field("pats", Lite(&_val.pats));
+        if !_val.pats.is_empty() {
+            formatter.field("pats", Lite(&_val.pats));
+        }
         if let Some(val) = &_val.guard {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -353,7 +359,9 @@ impl Debug for Lite<syn::Block> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Block");
-        formatter.field("stmts", Lite(&_val.stmts));
+        if !_val.stmts.is_empty() {
+            formatter.field("stmts", Lite(&_val.stmts));
+        }
         formatter.finish()
     }
 }
@@ -361,7 +369,9 @@ impl Debug for Lite<syn::BoundLifetimes> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("BoundLifetimes");
-        formatter.field("lifetimes", Lite(&_val.lifetimes));
+        if !_val.lifetimes.is_empty() {
+            formatter.field("lifetimes", Lite(&_val.lifetimes));
+        }
         formatter.finish()
     }
 }
@@ -369,7 +379,9 @@ impl Debug for Lite<syn::ConstParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ConstParam");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("ty", Lite(&_val.ty));
         if let Some(val) = &_val.eq_token {
@@ -408,7 +420,9 @@ impl Debug for Lite<syn::Constraint> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Constraint");
         formatter.field("ident", Lite(&_val.ident));
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -435,7 +449,9 @@ impl Debug for Lite<syn::Data> {
             }
             syn::Data::Enum(_val) => {
                 let mut formatter = formatter.debug_struct("Data::Enum");
-                formatter.field("variants", Lite(&_val.variants));
+                if !_val.variants.is_empty() {
+                    formatter.field("variants", Lite(&_val.variants));
+                }
                 formatter.finish()
             }
             syn::Data::Union(_val) => {
@@ -450,7 +466,9 @@ impl Debug for Lite<syn::DataEnum> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("DataEnum");
-        formatter.field("variants", Lite(&_val.variants));
+        if !_val.variants.is_empty() {
+            formatter.field("variants", Lite(&_val.variants));
+        }
         formatter.finish()
     }
 }
@@ -486,7 +504,9 @@ impl Debug for Lite<syn::DeriveInput> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("DeriveInput");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
@@ -500,33 +520,47 @@ impl Debug for Lite<syn::Expr> {
         match _val {
             syn::Expr::Box(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Box");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Expr::InPlace(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::InPlace");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("place", Lite(&_val.place));
                 formatter.field("value", Lite(&_val.value));
                 formatter.finish()
             }
             syn::Expr::Array(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Array");
-                formatter.field("attrs", Lite(&_val.attrs));
-                formatter.field("elems", Lite(&_val.elems));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if !_val.elems.is_empty() {
+                    formatter.field("elems", Lite(&_val.elems));
+                }
                 formatter.finish()
             }
             syn::Expr::Call(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Call");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("func", Lite(&_val.func));
-                formatter.field("args", Lite(&_val.args));
+                if !_val.args.is_empty() {
+                    formatter.field("args", Lite(&_val.args));
+                }
                 formatter.finish()
             }
             syn::Expr::MethodCall(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::MethodCall");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("receiver", Lite(&_val.receiver));
                 formatter.field("method", Lite(&_val.method));
                 if let Some(val) = &_val.turbofish {
@@ -545,18 +579,26 @@ impl Debug for Lite<syn::Expr> {
                     }
                     formatter.field("turbofish", Print::ref_cast(val));
                 }
-                formatter.field("args", Lite(&_val.args));
+                if !_val.args.is_empty() {
+                    formatter.field("args", Lite(&_val.args));
+                }
                 formatter.finish()
             }
             syn::Expr::Tuple(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Tuple");
-                formatter.field("attrs", Lite(&_val.attrs));
-                formatter.field("elems", Lite(&_val.elems));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if !_val.elems.is_empty() {
+                    formatter.field("elems", Lite(&_val.elems));
+                }
                 formatter.finish()
             }
             syn::Expr::Binary(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Binary");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("left", Lite(&_val.left));
                 formatter.field("op", Lite(&_val.op));
                 formatter.field("right", Lite(&_val.right));
@@ -564,41 +606,55 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Unary(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Unary");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("op", Lite(&_val.op));
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Expr::Lit(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Lit");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("lit", Lite(&_val.lit));
                 formatter.finish()
             }
             syn::Expr::Cast(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Cast");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.field("ty", Lite(&_val.ty));
                 formatter.finish()
             }
             syn::Expr::Type(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Type");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.field("ty", Lite(&_val.ty));
                 formatter.finish()
             }
             syn::Expr::Let(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Let");
-                formatter.field("attrs", Lite(&_val.attrs));
-                formatter.field("pats", Lite(&_val.pats));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if !_val.pats.is_empty() {
+                    formatter.field("pats", Lite(&_val.pats));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Expr::If(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::If");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("cond", Lite(&_val.cond));
                 formatter.field("then_branch", Lite(&_val.then_branch));
                 if let Some(val) = &_val.else_branch {
@@ -621,7 +677,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::While(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::While");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.label {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -644,7 +702,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::ForLoop(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::ForLoop");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.label {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -668,7 +728,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Loop(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Loop");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.label {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -690,14 +752,20 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Match(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Match");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
-                formatter.field("arms", Lite(&_val.arms));
+                if !_val.arms.is_empty() {
+                    formatter.field("arms", Lite(&_val.arms));
+                }
                 formatter.finish()
             }
             syn::Expr::Closure(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Closure");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.asyncness {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -734,20 +802,26 @@ impl Debug for Lite<syn::Expr> {
                     }
                     formatter.field("capture", Print::ref_cast(val));
                 }
-                formatter.field("inputs", Lite(&_val.inputs));
+                if !_val.inputs.is_empty() {
+                    formatter.field("inputs", Lite(&_val.inputs));
+                }
                 formatter.field("output", Lite(&_val.output));
                 formatter.field("body", Lite(&_val.body));
                 formatter.finish()
             }
             syn::Expr::Unsafe(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Unsafe");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
             syn::Expr::Block(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Block");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.label {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -769,14 +843,18 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Assign(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Assign");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("left", Lite(&_val.left));
                 formatter.field("right", Lite(&_val.right));
                 formatter.finish()
             }
             syn::Expr::AssignOp(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::AssignOp");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("left", Lite(&_val.left));
                 formatter.field("op", Lite(&_val.op));
                 formatter.field("right", Lite(&_val.right));
@@ -784,21 +862,27 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Field(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Field");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("base", Lite(&_val.base));
                 formatter.field("member", Lite(&_val.member));
                 formatter.finish()
             }
             syn::Expr::Index(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Index");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.field("index", Lite(&_val.index));
                 formatter.finish()
             }
             syn::Expr::Range(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Range");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.from {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -836,7 +920,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Path(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Path");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.qself {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -858,7 +944,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Reference(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Reference");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.mutability {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -876,7 +964,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Break(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Break");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.label {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -913,7 +1003,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Continue(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Continue");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.label {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -934,7 +1026,9 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Return(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Return");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.expr {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -955,15 +1049,21 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Macro");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("mac", Lite(&_val.mac));
                 formatter.finish()
             }
             syn::Expr::Struct(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Struct");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("path", Lite(&_val.path));
-                formatter.field("fields", Lite(&_val.fields));
+                if !_val.fields.is_empty() {
+                    formatter.field("fields", Lite(&_val.fields));
+                }
                 if let Some(val) = &_val.dot2_token {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -996,32 +1096,42 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::Repeat(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Repeat");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.field("len", Lite(&_val.len));
                 formatter.finish()
             }
             syn::Expr::Paren(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Paren");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Expr::Group(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Group");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Expr::Try(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Try");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Expr::Async(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Async");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.capture {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -1039,13 +1149,17 @@ impl Debug for Lite<syn::Expr> {
             }
             syn::Expr::TryBlock(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::TryBlock");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
             syn::Expr::Yield(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Yield");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.expr {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -1076,8 +1190,12 @@ impl Debug for Lite<syn::ExprArray> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprArray");
-        formatter.field("attrs", Lite(&_val.attrs));
-        formatter.field("elems", Lite(&_val.elems));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if !_val.elems.is_empty() {
+            formatter.field("elems", Lite(&_val.elems));
+        }
         formatter.finish()
     }
 }
@@ -1085,7 +1203,9 @@ impl Debug for Lite<syn::ExprAssign> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprAssign");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("left", Lite(&_val.left));
         formatter.field("right", Lite(&_val.right));
         formatter.finish()
@@ -1095,7 +1215,9 @@ impl Debug for Lite<syn::ExprAssignOp> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprAssignOp");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("left", Lite(&_val.left));
         formatter.field("op", Lite(&_val.op));
         formatter.field("right", Lite(&_val.right));
@@ -1106,7 +1228,9 @@ impl Debug for Lite<syn::ExprAsync> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprAsync");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.capture {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1127,7 +1251,9 @@ impl Debug for Lite<syn::ExprBinary> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprBinary");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("left", Lite(&_val.left));
         formatter.field("op", Lite(&_val.op));
         formatter.field("right", Lite(&_val.right));
@@ -1138,7 +1264,9 @@ impl Debug for Lite<syn::ExprBlock> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprBlock");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.label {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1163,7 +1291,9 @@ impl Debug for Lite<syn::ExprBox> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprBox");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -1172,7 +1302,9 @@ impl Debug for Lite<syn::ExprBreak> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprBreak");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.label {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1212,9 +1344,13 @@ impl Debug for Lite<syn::ExprCall> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprCall");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("func", Lite(&_val.func));
-        formatter.field("args", Lite(&_val.args));
+        if !_val.args.is_empty() {
+            formatter.field("args", Lite(&_val.args));
+        }
         formatter.finish()
     }
 }
@@ -1222,7 +1358,9 @@ impl Debug for Lite<syn::ExprCast> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprCast");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.field("ty", Lite(&_val.ty));
         formatter.finish()
@@ -1232,7 +1370,9 @@ impl Debug for Lite<syn::ExprClosure> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprClosure");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.asyncness {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1269,7 +1409,9 @@ impl Debug for Lite<syn::ExprClosure> {
             }
             formatter.field("capture", Print::ref_cast(val));
         }
-        formatter.field("inputs", Lite(&_val.inputs));
+        if !_val.inputs.is_empty() {
+            formatter.field("inputs", Lite(&_val.inputs));
+        }
         formatter.field("output", Lite(&_val.output));
         formatter.field("body", Lite(&_val.body));
         formatter.finish()
@@ -1279,7 +1421,9 @@ impl Debug for Lite<syn::ExprContinue> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprContinue");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.label {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1303,7 +1447,9 @@ impl Debug for Lite<syn::ExprField> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprField");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("base", Lite(&_val.base));
         formatter.field("member", Lite(&_val.member));
         formatter.finish()
@@ -1313,7 +1459,9 @@ impl Debug for Lite<syn::ExprForLoop> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprForLoop");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.label {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1340,7 +1488,9 @@ impl Debug for Lite<syn::ExprGroup> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprGroup");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -1349,7 +1499,9 @@ impl Debug for Lite<syn::ExprIf> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprIf");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("cond", Lite(&_val.cond));
         formatter.field("then_branch", Lite(&_val.then_branch));
         if let Some(val) = &_val.else_branch {
@@ -1375,7 +1527,9 @@ impl Debug for Lite<syn::ExprInPlace> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprInPlace");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("place", Lite(&_val.place));
         formatter.field("value", Lite(&_val.value));
         formatter.finish()
@@ -1385,7 +1539,9 @@ impl Debug for Lite<syn::ExprIndex> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprIndex");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.field("index", Lite(&_val.index));
         formatter.finish()
@@ -1395,8 +1551,12 @@ impl Debug for Lite<syn::ExprLet> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprLet");
-        formatter.field("attrs", Lite(&_val.attrs));
-        formatter.field("pats", Lite(&_val.pats));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if !_val.pats.is_empty() {
+            formatter.field("pats", Lite(&_val.pats));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -1405,7 +1565,9 @@ impl Debug for Lite<syn::ExprLit> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprLit");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("lit", Lite(&_val.lit));
         formatter.finish()
     }
@@ -1414,7 +1576,9 @@ impl Debug for Lite<syn::ExprLoop> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprLoop");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.label {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1439,7 +1603,9 @@ impl Debug for Lite<syn::ExprMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprMacro");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("mac", Lite(&_val.mac));
         formatter.finish()
     }
@@ -1448,9 +1614,13 @@ impl Debug for Lite<syn::ExprMatch> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprMatch");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
-        formatter.field("arms", Lite(&_val.arms));
+        if !_val.arms.is_empty() {
+            formatter.field("arms", Lite(&_val.arms));
+        }
         formatter.finish()
     }
 }
@@ -1458,7 +1628,9 @@ impl Debug for Lite<syn::ExprMethodCall> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprMethodCall");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("receiver", Lite(&_val.receiver));
         formatter.field("method", Lite(&_val.method));
         if let Some(val) = &_val.turbofish {
@@ -1477,7 +1649,9 @@ impl Debug for Lite<syn::ExprMethodCall> {
             }
             formatter.field("turbofish", Print::ref_cast(val));
         }
-        formatter.field("args", Lite(&_val.args));
+        if !_val.args.is_empty() {
+            formatter.field("args", Lite(&_val.args));
+        }
         formatter.finish()
     }
 }
@@ -1485,7 +1659,9 @@ impl Debug for Lite<syn::ExprParen> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprParen");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -1494,7 +1670,9 @@ impl Debug for Lite<syn::ExprPath> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprPath");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.qself {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1519,7 +1697,9 @@ impl Debug for Lite<syn::ExprRange> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprRange");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.from {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1560,7 +1740,9 @@ impl Debug for Lite<syn::ExprReference> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprReference");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.mutability {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1581,7 +1763,9 @@ impl Debug for Lite<syn::ExprRepeat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprRepeat");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.field("len", Lite(&_val.len));
         formatter.finish()
@@ -1591,7 +1775,9 @@ impl Debug for Lite<syn::ExprReturn> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprReturn");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.expr {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1615,9 +1801,13 @@ impl Debug for Lite<syn::ExprStruct> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprStruct");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("path", Lite(&_val.path));
-        formatter.field("fields", Lite(&_val.fields));
+        if !_val.fields.is_empty() {
+            formatter.field("fields", Lite(&_val.fields));
+        }
         if let Some(val) = &_val.dot2_token {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1653,7 +1843,9 @@ impl Debug for Lite<syn::ExprTry> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprTry");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -1662,7 +1854,9 @@ impl Debug for Lite<syn::ExprTryBlock> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprTryBlock");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("block", Lite(&_val.block));
         formatter.finish()
     }
@@ -1671,8 +1865,12 @@ impl Debug for Lite<syn::ExprTuple> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprTuple");
-        formatter.field("attrs", Lite(&_val.attrs));
-        formatter.field("elems", Lite(&_val.elems));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if !_val.elems.is_empty() {
+            formatter.field("elems", Lite(&_val.elems));
+        }
         formatter.finish()
     }
 }
@@ -1680,7 +1878,9 @@ impl Debug for Lite<syn::ExprType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprType");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.field("ty", Lite(&_val.ty));
         formatter.finish()
@@ -1690,7 +1890,9 @@ impl Debug for Lite<syn::ExprUnary> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprUnary");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("op", Lite(&_val.op));
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
@@ -1700,7 +1902,9 @@ impl Debug for Lite<syn::ExprUnsafe> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprUnsafe");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("block", Lite(&_val.block));
         formatter.finish()
     }
@@ -1717,7 +1921,9 @@ impl Debug for Lite<syn::ExprWhile> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprWhile");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.label {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1743,7 +1949,9 @@ impl Debug for Lite<syn::ExprYield> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ExprYield");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.expr {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1767,7 +1975,9 @@ impl Debug for Lite<syn::Field> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Field");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.ident {
             #[derive(RefCast)]
@@ -1805,7 +2015,9 @@ impl Debug for Lite<syn::FieldPat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("FieldPat");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("member", Lite(&_val.member));
         if let Some(val) = &_val.colon_token {
             #[derive(RefCast)]
@@ -1827,7 +2039,9 @@ impl Debug for Lite<syn::FieldValue> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("FieldValue");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("member", Lite(&_val.member));
         if let Some(val) = &_val.colon_token {
             #[derive(RefCast)]
@@ -1851,12 +2065,16 @@ impl Debug for Lite<syn::Fields> {
         match _val {
             syn::Fields::Named(_val) => {
                 let mut formatter = formatter.debug_struct("Fields::Named");
-                formatter.field("named", Lite(&_val.named));
+                if !_val.named.is_empty() {
+                    formatter.field("named", Lite(&_val.named));
+                }
                 formatter.finish()
             }
             syn::Fields::Unnamed(_val) => {
                 let mut formatter = formatter.debug_struct("Fields::Unnamed");
-                formatter.field("unnamed", Lite(&_val.unnamed));
+                if !_val.unnamed.is_empty() {
+                    formatter.field("unnamed", Lite(&_val.unnamed));
+                }
                 formatter.finish()
             }
             syn::Fields::Unit => formatter.write_str("Unit"),
@@ -1867,7 +2085,9 @@ impl Debug for Lite<syn::FieldsNamed> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("FieldsNamed");
-        formatter.field("named", Lite(&_val.named));
+        if !_val.named.is_empty() {
+            formatter.field("named", Lite(&_val.named));
+        }
         formatter.finish()
     }
 }
@@ -1875,7 +2095,9 @@ impl Debug for Lite<syn::FieldsUnnamed> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("FieldsUnnamed");
-        formatter.field("unnamed", Lite(&_val.unnamed));
+        if !_val.unnamed.is_empty() {
+            formatter.field("unnamed", Lite(&_val.unnamed));
+        }
         formatter.finish()
     }
 }
@@ -1899,8 +2121,12 @@ impl Debug for Lite<syn::File> {
             }
             formatter.field("shebang", Print::ref_cast(val));
         }
-        formatter.field("attrs", Lite(&_val.attrs));
-        formatter.field("items", Lite(&_val.items));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if !_val.items.is_empty() {
+            formatter.field("items", Lite(&_val.items));
+        }
         formatter.finish()
     }
 }
@@ -1941,7 +2167,9 @@ impl Debug for Lite<syn::FnDecl> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("FnDecl");
         formatter.field("generics", Lite(&_val.generics));
-        formatter.field("inputs", Lite(&_val.inputs));
+        if !_val.inputs.is_empty() {
+            formatter.field("inputs", Lite(&_val.inputs));
+        }
         if let Some(val) = &_val.variadic {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1964,7 +2192,9 @@ impl Debug for Lite<syn::ForeignItem> {
         match _val {
             syn::ForeignItem::Fn(_val) => {
                 let mut formatter = formatter.debug_struct("ForeignItem::Fn");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("decl", Lite(&_val.decl));
@@ -1972,7 +2202,9 @@ impl Debug for Lite<syn::ForeignItem> {
             }
             syn::ForeignItem::Static(_val) => {
                 let mut formatter = formatter.debug_struct("ForeignItem::Static");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.mutability {
                     #[derive(RefCast)]
@@ -1992,14 +2224,18 @@ impl Debug for Lite<syn::ForeignItem> {
             }
             syn::ForeignItem::Type(_val) => {
                 let mut formatter = formatter.debug_struct("ForeignItem::Type");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.finish()
             }
             syn::ForeignItem::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("ForeignItem::Macro");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("mac", Lite(&_val.mac));
                 if let Some(val) = &_val.semi_token {
                     #[derive(RefCast)]
@@ -2027,7 +2263,9 @@ impl Debug for Lite<syn::ForeignItemFn> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ForeignItemFn");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("decl", Lite(&_val.decl));
@@ -2038,7 +2276,9 @@ impl Debug for Lite<syn::ForeignItemMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ForeignItemMacro");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("mac", Lite(&_val.mac));
         if let Some(val) = &_val.semi_token {
             #[derive(RefCast)]
@@ -2059,7 +2299,9 @@ impl Debug for Lite<syn::ForeignItemStatic> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ForeignItemStatic");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.mutability {
             #[derive(RefCast)]
@@ -2082,7 +2324,9 @@ impl Debug for Lite<syn::ForeignItemType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ForeignItemType");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.finish()
@@ -2183,7 +2427,9 @@ impl Debug for Lite<syn::Generics> {
             }
             formatter.field("lt_token", Print::ref_cast(val));
         }
-        formatter.field("params", Lite(&_val.params));
+        if !_val.params.is_empty() {
+            formatter.field("params", Lite(&_val.params));
+        }
         if let Some(val) = &_val.gt_token {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -2221,7 +2467,9 @@ impl Debug for Lite<syn::ImplItem> {
         match _val {
             syn::ImplItem::Const(_val) => {
                 let mut formatter = formatter.debug_struct("ImplItem::Const");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.defaultness {
                     #[derive(RefCast)]
@@ -2242,7 +2490,9 @@ impl Debug for Lite<syn::ImplItem> {
             }
             syn::ImplItem::Method(_val) => {
                 let mut formatter = formatter.debug_struct("ImplItem::Method");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.defaultness {
                     #[derive(RefCast)]
@@ -2262,7 +2512,9 @@ impl Debug for Lite<syn::ImplItem> {
             }
             syn::ImplItem::Type(_val) => {
                 let mut formatter = formatter.debug_struct("ImplItem::Type");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.defaultness {
                     #[derive(RefCast)]
@@ -2283,7 +2535,9 @@ impl Debug for Lite<syn::ImplItem> {
             }
             syn::ImplItem::Existential(_val) => {
                 let mut formatter = formatter.debug_struct("ImplItem::Existential");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 if let Some(val) = &_val.colon_token {
@@ -2298,12 +2552,16 @@ impl Debug for Lite<syn::ImplItem> {
                     }
                     formatter.field("colon_token", Print::ref_cast(val));
                 }
-                formatter.field("bounds", Lite(&_val.bounds));
+                if !_val.bounds.is_empty() {
+                    formatter.field("bounds", Lite(&_val.bounds));
+                }
                 formatter.finish()
             }
             syn::ImplItem::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("ImplItem::Macro");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("mac", Lite(&_val.mac));
                 if let Some(val) = &_val.semi_token {
                     #[derive(RefCast)]
@@ -2331,7 +2589,9 @@ impl Debug for Lite<syn::ImplItemConst> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ImplItemConst");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.defaultness {
             #[derive(RefCast)]
@@ -2355,7 +2615,9 @@ impl Debug for Lite<syn::ImplItemExistential> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ImplItemExistential");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
         if let Some(val) = &_val.colon_token {
@@ -2370,7 +2632,9 @@ impl Debug for Lite<syn::ImplItemExistential> {
             }
             formatter.field("colon_token", Print::ref_cast(val));
         }
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -2378,7 +2642,9 @@ impl Debug for Lite<syn::ImplItemMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ImplItemMacro");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("mac", Lite(&_val.mac));
         if let Some(val) = &_val.semi_token {
             #[derive(RefCast)]
@@ -2399,7 +2665,9 @@ impl Debug for Lite<syn::ImplItemMethod> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ImplItemMethod");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.defaultness {
             #[derive(RefCast)]
@@ -2422,7 +2690,9 @@ impl Debug for Lite<syn::ImplItemType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ImplItemType");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.defaultness {
             #[derive(RefCast)]
@@ -2464,7 +2734,9 @@ impl Debug for Lite<syn::Item> {
         match _val {
             syn::Item::ExternCrate(_val) => {
                 let mut formatter = formatter.debug_struct("Item::ExternCrate");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 if let Some(val) = &_val.rename {
@@ -2487,7 +2759,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Use(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Use");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.leading_colon {
                     #[derive(RefCast)]
@@ -2506,7 +2780,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Static(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Static");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.mutability {
                     #[derive(RefCast)]
@@ -2527,7 +2803,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Const(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Const");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("ty", Lite(&_val.ty));
@@ -2536,7 +2814,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Fn(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Fn");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.constness {
                     #[derive(RefCast)]
@@ -2597,7 +2877,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Mod(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Mod");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 if let Some(val) = &_val.content {
@@ -2632,14 +2914,20 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::ForeignMod(_val) => {
                 let mut formatter = formatter.debug_struct("Item::ForeignMod");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("abi", Lite(&_val.abi));
-                formatter.field("items", Lite(&_val.items));
+                if !_val.items.is_empty() {
+                    formatter.field("items", Lite(&_val.items));
+                }
                 formatter.finish()
             }
             syn::Item::Type(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Type");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
@@ -2648,7 +2936,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Existential(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Existential");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
@@ -2664,12 +2954,16 @@ impl Debug for Lite<syn::Item> {
                     }
                     formatter.field("colon_token", Print::ref_cast(val));
                 }
-                formatter.field("bounds", Lite(&_val.bounds));
+                if !_val.bounds.is_empty() {
+                    formatter.field("bounds", Lite(&_val.bounds));
+                }
                 formatter.finish()
             }
             syn::Item::Struct(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Struct");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
@@ -2690,16 +2984,22 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Enum(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Enum");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
-                formatter.field("variants", Lite(&_val.variants));
+                if !_val.variants.is_empty() {
+                    formatter.field("variants", Lite(&_val.variants));
+                }
                 formatter.finish()
             }
             syn::Item::Union(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Union");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
@@ -2708,7 +3008,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Trait(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Trait");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 if let Some(val) = &_val.unsafety {
                     #[derive(RefCast)]
@@ -2748,22 +3050,32 @@ impl Debug for Lite<syn::Item> {
                     }
                     formatter.field("colon_token", Print::ref_cast(val));
                 }
-                formatter.field("supertraits", Lite(&_val.supertraits));
-                formatter.field("items", Lite(&_val.items));
+                if !_val.supertraits.is_empty() {
+                    formatter.field("supertraits", Lite(&_val.supertraits));
+                }
+                if !_val.items.is_empty() {
+                    formatter.field("items", Lite(&_val.items));
+                }
                 formatter.finish()
             }
             syn::Item::TraitAlias(_val) => {
                 let mut formatter = formatter.debug_struct("Item::TraitAlias");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
-                formatter.field("bounds", Lite(&_val.bounds));
+                if !_val.bounds.is_empty() {
+                    formatter.field("bounds", Lite(&_val.bounds));
+                }
                 formatter.finish()
             }
             syn::Item::Impl(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Impl");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.defaultness {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -2832,12 +3144,16 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("trait_", Print::ref_cast(val));
                 }
                 formatter.field("self_ty", Lite(&_val.self_ty));
-                formatter.field("items", Lite(&_val.items));
+                if !_val.items.is_empty() {
+                    formatter.field("items", Lite(&_val.items));
+                }
                 formatter.finish()
             }
             syn::Item::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Macro");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.ident {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -2871,7 +3187,9 @@ impl Debug for Lite<syn::Item> {
             }
             syn::Item::Macro2(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Macro2");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("args", Lite(&_val.args));
@@ -2890,7 +3208,9 @@ impl Debug for Lite<syn::ItemConst> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemConst");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("ty", Lite(&_val.ty));
@@ -2902,11 +3222,15 @@ impl Debug for Lite<syn::ItemEnum> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemEnum");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
-        formatter.field("variants", Lite(&_val.variants));
+        if !_val.variants.is_empty() {
+            formatter.field("variants", Lite(&_val.variants));
+        }
         formatter.finish()
     }
 }
@@ -2914,7 +3238,9 @@ impl Debug for Lite<syn::ItemExistential> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemExistential");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
@@ -2930,7 +3256,9 @@ impl Debug for Lite<syn::ItemExistential> {
             }
             formatter.field("colon_token", Print::ref_cast(val));
         }
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -2938,7 +3266,9 @@ impl Debug for Lite<syn::ItemExternCrate> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemExternCrate");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         if let Some(val) = &_val.rename {
@@ -2964,7 +3294,9 @@ impl Debug for Lite<syn::ItemFn> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemFn");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.constness {
             #[derive(RefCast)]
@@ -3028,9 +3360,13 @@ impl Debug for Lite<syn::ItemForeignMod> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemForeignMod");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("abi", Lite(&_val.abi));
-        formatter.field("items", Lite(&_val.items));
+        if !_val.items.is_empty() {
+            formatter.field("items", Lite(&_val.items));
+        }
         formatter.finish()
     }
 }
@@ -3038,7 +3374,9 @@ impl Debug for Lite<syn::ItemImpl> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemImpl");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.defaultness {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -3103,7 +3441,9 @@ impl Debug for Lite<syn::ItemImpl> {
             formatter.field("trait_", Print::ref_cast(val));
         }
         formatter.field("self_ty", Lite(&_val.self_ty));
-        formatter.field("items", Lite(&_val.items));
+        if !_val.items.is_empty() {
+            formatter.field("items", Lite(&_val.items));
+        }
         formatter.finish()
     }
 }
@@ -3111,7 +3451,9 @@ impl Debug for Lite<syn::ItemMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemMacro");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.ident {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -3148,7 +3490,9 @@ impl Debug for Lite<syn::ItemMacro2> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemMacro2");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("args", Lite(&_val.args));
@@ -3160,7 +3504,9 @@ impl Debug for Lite<syn::ItemMod> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemMod");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         if let Some(val) = &_val.content {
@@ -3198,7 +3544,9 @@ impl Debug for Lite<syn::ItemStatic> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemStatic");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.mutability {
             #[derive(RefCast)]
@@ -3222,7 +3570,9 @@ impl Debug for Lite<syn::ItemStruct> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemStruct");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
@@ -3246,7 +3596,9 @@ impl Debug for Lite<syn::ItemTrait> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemTrait");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.unsafety {
             #[derive(RefCast)]
@@ -3286,8 +3638,12 @@ impl Debug for Lite<syn::ItemTrait> {
             }
             formatter.field("colon_token", Print::ref_cast(val));
         }
-        formatter.field("supertraits", Lite(&_val.supertraits));
-        formatter.field("items", Lite(&_val.items));
+        if !_val.supertraits.is_empty() {
+            formatter.field("supertraits", Lite(&_val.supertraits));
+        }
+        if !_val.items.is_empty() {
+            formatter.field("items", Lite(&_val.items));
+        }
         formatter.finish()
     }
 }
@@ -3295,11 +3651,15 @@ impl Debug for Lite<syn::ItemTraitAlias> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemTraitAlias");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -3307,7 +3667,9 @@ impl Debug for Lite<syn::ItemType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemType");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
@@ -3319,7 +3681,9 @@ impl Debug for Lite<syn::ItemUnion> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemUnion");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
@@ -3331,7 +3695,9 @@ impl Debug for Lite<syn::ItemUse> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ItemUse");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("vis", Lite(&_val.vis));
         if let Some(val) = &_val.leading_colon {
             #[derive(RefCast)]
@@ -3377,7 +3743,9 @@ impl Debug for Lite<syn::LifetimeDef> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("LifetimeDef");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("lifetime", Lite(&_val.lifetime));
         if let Some(val) = &_val.colon_token {
             #[derive(RefCast)]
@@ -3391,7 +3759,9 @@ impl Debug for Lite<syn::LifetimeDef> {
             }
             formatter.field("colon_token", Print::ref_cast(val));
         }
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -3474,8 +3844,12 @@ impl Debug for Lite<syn::Local> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Local");
-        formatter.field("attrs", Lite(&_val.attrs));
-        formatter.field("pats", Lite(&_val.pats));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if !_val.pats.is_empty() {
+            formatter.field("pats", Lite(&_val.pats));
+        }
         if let Some(val) = &_val.ty {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -3569,7 +3943,9 @@ impl Debug for Lite<syn::Meta> {
             syn::Meta::List(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::List");
                 formatter.field("ident", Lite(&_val.ident));
-                formatter.field("nested", Lite(&_val.nested));
+                if !_val.nested.is_empty() {
+                    formatter.field("nested", Lite(&_val.nested));
+                }
                 formatter.finish()
             }
             syn::Meta::NameValue(_val) => {
@@ -3586,7 +3962,9 @@ impl Debug for Lite<syn::MetaList> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("MetaList");
         formatter.field("ident", Lite(&_val.ident));
-        formatter.field("nested", Lite(&_val.nested));
+        if !_val.nested.is_empty() {
+            formatter.field("nested", Lite(&_val.nested));
+        }
         formatter.finish()
     }
 }
@@ -3664,7 +4042,9 @@ impl Debug for Lite<syn::MethodTurbofish> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("MethodTurbofish");
-        formatter.field("args", Lite(&_val.args));
+        if !_val.args.is_empty() {
+            formatter.field("args", Lite(&_val.args));
+        }
         formatter.finish()
     }
 }
@@ -3689,7 +4069,9 @@ impl Debug for Lite<syn::ParenthesizedGenericArguments> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("ParenthesizedGenericArguments");
-        formatter.field("inputs", Lite(&_val.inputs));
+        if !_val.inputs.is_empty() {
+            formatter.field("inputs", Lite(&_val.inputs));
+        }
         formatter.field("output", Lite(&_val.output));
         formatter.finish()
     }
@@ -3750,7 +4132,9 @@ impl Debug for Lite<syn::Pat> {
             syn::Pat::Struct(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Struct");
                 formatter.field("path", Lite(&_val.path));
-                formatter.field("fields", Lite(&_val.fields));
+                if !_val.fields.is_empty() {
+                    formatter.field("fields", Lite(&_val.fields));
+                }
                 if let Some(val) = &_val.dot2_token {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -3794,7 +4178,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Tuple(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Tuple");
-                formatter.field("front", Lite(&_val.front));
+                if !_val.front.is_empty() {
+                    formatter.field("front", Lite(&_val.front));
+                }
                 if let Some(val) = &_val.dot2_token {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -3819,7 +4205,9 @@ impl Debug for Lite<syn::Pat> {
                     }
                     formatter.field("comma_token", Print::ref_cast(val));
                 }
-                formatter.field("back", Lite(&_val.back));
+                if !_val.back.is_empty() {
+                    formatter.field("back", Lite(&_val.back));
+                }
                 formatter.finish()
             }
             syn::Pat::Box(_val) => {
@@ -3858,7 +4246,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Slice(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Slice");
-                formatter.field("front", Lite(&_val.front));
+                if !_val.front.is_empty() {
+                    formatter.field("front", Lite(&_val.front));
+                }
                 if let Some(val) = &_val.middle {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -3899,7 +4289,9 @@ impl Debug for Lite<syn::Pat> {
                     }
                     formatter.field("comma_token", Print::ref_cast(val));
                 }
-                formatter.field("back", Lite(&_val.back));
+                if !_val.back.is_empty() {
+                    formatter.field("back", Lite(&_val.back));
+                }
                 formatter.finish()
             }
             syn::Pat::Macro(_val) => {
@@ -4045,7 +4437,9 @@ impl Debug for Lite<syn::PatSlice> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatSlice");
-        formatter.field("front", Lite(&_val.front));
+        if !_val.front.is_empty() {
+            formatter.field("front", Lite(&_val.front));
+        }
         if let Some(val) = &_val.middle {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4086,7 +4480,9 @@ impl Debug for Lite<syn::PatSlice> {
             }
             formatter.field("comma_token", Print::ref_cast(val));
         }
-        formatter.field("back", Lite(&_val.back));
+        if !_val.back.is_empty() {
+            formatter.field("back", Lite(&_val.back));
+        }
         formatter.finish()
     }
 }
@@ -4095,7 +4491,9 @@ impl Debug for Lite<syn::PatStruct> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatStruct");
         formatter.field("path", Lite(&_val.path));
-        formatter.field("fields", Lite(&_val.fields));
+        if !_val.fields.is_empty() {
+            formatter.field("fields", Lite(&_val.fields));
+        }
         if let Some(val) = &_val.dot2_token {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4115,7 +4513,9 @@ impl Debug for Lite<syn::PatTuple> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatTuple");
-        formatter.field("front", Lite(&_val.front));
+        if !_val.front.is_empty() {
+            formatter.field("front", Lite(&_val.front));
+        }
         if let Some(val) = &_val.dot2_token {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4140,7 +4540,9 @@ impl Debug for Lite<syn::PatTuple> {
             }
             formatter.field("comma_token", Print::ref_cast(val));
         }
-        formatter.field("back", Lite(&_val.back));
+        if !_val.back.is_empty() {
+            formatter.field("back", Lite(&_val.back));
+        }
         formatter.finish()
     }
 }
@@ -4184,7 +4586,9 @@ impl Debug for Lite<syn::Path> {
             }
             formatter.field("leading_colon", Print::ref_cast(val));
         }
-        formatter.field("segments", Lite(&_val.segments));
+        if !_val.segments.is_empty() {
+            formatter.field("segments", Lite(&_val.segments));
+        }
         formatter.finish()
     }
 }
@@ -4229,7 +4633,9 @@ impl Debug for Lite<syn::PredicateLifetime> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PredicateLifetime");
         formatter.field("lifetime", Lite(&_val.lifetime));
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -4254,7 +4660,9 @@ impl Debug for Lite<syn::PredicateType> {
             formatter.field("lifetimes", Print::ref_cast(val));
         }
         formatter.field("bounded_ty", Lite(&_val.bounded_ty));
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -4389,7 +4797,9 @@ impl Debug for Lite<syn::TraitItem> {
         match _val {
             syn::TraitItem::Const(_val) => {
                 let mut formatter = formatter.debug_struct("TraitItem::Const");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("ty", Lite(&_val.ty));
                 if let Some(val) = &_val.default {
@@ -4412,7 +4822,9 @@ impl Debug for Lite<syn::TraitItem> {
             }
             syn::TraitItem::Method(_val) => {
                 let mut formatter = formatter.debug_struct("TraitItem::Method");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("sig", Lite(&_val.sig));
                 if let Some(val) = &_val.default {
                     #[derive(RefCast)]
@@ -4446,7 +4858,9 @@ impl Debug for Lite<syn::TraitItem> {
             }
             syn::TraitItem::Type(_val) => {
                 let mut formatter = formatter.debug_struct("TraitItem::Type");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 if let Some(val) = &_val.colon_token {
@@ -4461,7 +4875,9 @@ impl Debug for Lite<syn::TraitItem> {
                     }
                     formatter.field("colon_token", Print::ref_cast(val));
                 }
-                formatter.field("bounds", Lite(&_val.bounds));
+                if !_val.bounds.is_empty() {
+                    formatter.field("bounds", Lite(&_val.bounds));
+                }
                 if let Some(val) = &_val.default {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -4482,7 +4898,9 @@ impl Debug for Lite<syn::TraitItem> {
             }
             syn::TraitItem::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("TraitItem::Macro");
-                formatter.field("attrs", Lite(&_val.attrs));
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("mac", Lite(&_val.mac));
                 if let Some(val) = &_val.semi_token {
                     #[derive(RefCast)]
@@ -4510,7 +4928,9 @@ impl Debug for Lite<syn::TraitItemConst> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TraitItemConst");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("ty", Lite(&_val.ty));
         if let Some(val) = &_val.default {
@@ -4536,7 +4956,9 @@ impl Debug for Lite<syn::TraitItemMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TraitItemMacro");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("mac", Lite(&_val.mac));
         if let Some(val) = &_val.semi_token {
             #[derive(RefCast)]
@@ -4557,7 +4979,9 @@ impl Debug for Lite<syn::TraitItemMethod> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TraitItemMethod");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("sig", Lite(&_val.sig));
         if let Some(val) = &_val.default {
             #[derive(RefCast)]
@@ -4594,7 +5018,9 @@ impl Debug for Lite<syn::TraitItemType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TraitItemType");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
         if let Some(val) = &_val.colon_token {
@@ -4609,7 +5035,9 @@ impl Debug for Lite<syn::TraitItemType> {
             }
             formatter.field("colon_token", Print::ref_cast(val));
         }
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         if let Some(val) = &_val.default {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4760,7 +5188,9 @@ impl Debug for Lite<syn::Type> {
                     }
                     formatter.field("abi", Print::ref_cast(val));
                 }
-                formatter.field("inputs", Lite(&_val.inputs));
+                if !_val.inputs.is_empty() {
+                    formatter.field("inputs", Lite(&_val.inputs));
+                }
                 if let Some(val) = &_val.variadic {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -4782,7 +5212,9 @@ impl Debug for Lite<syn::Type> {
             }
             syn::Type::Tuple(_val) => {
                 let mut formatter = formatter.debug_struct("Type::Tuple");
-                formatter.field("elems", Lite(&_val.elems));
+                if !_val.elems.is_empty() {
+                    formatter.field("elems", Lite(&_val.elems));
+                }
                 formatter.finish()
             }
             syn::Type::Path(_val) => {
@@ -4820,12 +5252,16 @@ impl Debug for Lite<syn::Type> {
                     }
                     formatter.field("dyn_token", Print::ref_cast(val));
                 }
-                formatter.field("bounds", Lite(&_val.bounds));
+                if !_val.bounds.is_empty() {
+                    formatter.field("bounds", Lite(&_val.bounds));
+                }
                 formatter.finish()
             }
             syn::Type::ImplTrait(_val) => {
                 let mut formatter = formatter.debug_struct("Type::ImplTrait");
-                formatter.field("bounds", Lite(&_val.bounds));
+                if !_val.bounds.is_empty() {
+                    formatter.field("bounds", Lite(&_val.bounds));
+                }
                 formatter.finish()
             }
             syn::Type::Paren(_val) => {
@@ -4912,7 +5348,9 @@ impl Debug for Lite<syn::TypeBareFn> {
             }
             formatter.field("abi", Print::ref_cast(val));
         }
-        formatter.field("inputs", Lite(&_val.inputs));
+        if !_val.inputs.is_empty() {
+            formatter.field("inputs", Lite(&_val.inputs));
+        }
         if let Some(val) = &_val.variadic {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4941,7 +5379,9 @@ impl Debug for Lite<syn::TypeImplTrait> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TypeImplTrait");
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -4971,7 +5411,9 @@ impl Debug for Lite<syn::TypeParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TypeParam");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("ident", Lite(&_val.ident));
         if let Some(val) = &_val.colon_token {
             #[derive(RefCast)]
@@ -4985,7 +5427,9 @@ impl Debug for Lite<syn::TypeParam> {
             }
             formatter.field("colon_token", Print::ref_cast(val));
         }
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         if let Some(val) = &_val.eq_token {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -5158,7 +5602,9 @@ impl Debug for Lite<syn::TypeTraitObject> {
             }
             formatter.field("dyn_token", Print::ref_cast(val));
         }
-        formatter.field("bounds", Lite(&_val.bounds));
+        if !_val.bounds.is_empty() {
+            formatter.field("bounds", Lite(&_val.bounds));
+        }
         formatter.finish()
     }
 }
@@ -5166,7 +5612,9 @@ impl Debug for Lite<syn::TypeTuple> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("TypeTuple");
-        formatter.field("elems", Lite(&_val.elems));
+        if !_val.elems.is_empty() {
+            formatter.field("elems", Lite(&_val.elems));
+        }
         formatter.finish()
     }
 }
@@ -5208,7 +5656,9 @@ impl Debug for Lite<syn::UseGroup> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("UseGroup");
-        formatter.field("items", Lite(&_val.items));
+        if !_val.items.is_empty() {
+            formatter.field("items", Lite(&_val.items));
+        }
         formatter.finish()
     }
 }
@@ -5274,7 +5724,9 @@ impl Debug for Lite<syn::Variant> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Variant");
-        formatter.field("attrs", Lite(&_val.attrs));
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("fields", Lite(&_val.fields));
         if let Some(val) = &_val.discriminant {
@@ -5357,7 +5809,9 @@ impl Debug for Lite<syn::WhereClause> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("WhereClause");
-        formatter.field("predicates", Lite(&_val.predicates));
+        if !_val.predicates.is_empty() {
+            formatter.field("predicates", Lite(&_val.predicates));
+        }
         formatter.finish()
     }
 }

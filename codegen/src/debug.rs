@@ -212,9 +212,17 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                 } else {
                     let val = quote!(&_val.#ident);
                     let format = format_field(&val, ty)?;
-                    Some(quote! {
+                    let mut call = quote! {
                         formatter.field(#f, #format);
-                    })
+                    };
+                    if let Type::Vec(_) | Type::Punctuated(_) = ty {
+                        call = quote! {
+                            if !_val.#ident.is_empty() {
+                                #call
+                            }
+                        };
+                    }
+                    Some(call)
                 }
             });
             quote! {

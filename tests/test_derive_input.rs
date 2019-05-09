@@ -17,12 +17,9 @@ fn test_unit() {
 
     snapshot!(code as DeriveInput, @r###"
    ⋮DeriveInput {
-   ⋮    attrs: [],
    ⋮    vis: Inherited,
    ⋮    ident: "Unit",
-   ⋮    generics: Generics {
-   ⋮        params: [],
-   ⋮    },
+   ⋮    generics: Generics,
    ⋮    data: Data::Struct {
    ⋮        fields: Unit,
    ⋮        semi_token: Some,
@@ -62,14 +59,11 @@ fn test_struct() {
        ⋮        VisPublic,
        ⋮    ),
        ⋮    ident: "Item",
-       ⋮    generics: Generics {
-       ⋮        params: [],
-       ⋮    },
+       ⋮    generics: Generics,
        ⋮    data: Data::Struct {
        ⋮        fields: Fields::Named {
        ⋮            named: [
        ⋮                Field {
-       ⋮                    attrs: [],
        ⋮                    vis: Public(
        ⋮                        VisPublic,
        ⋮                    ),
@@ -87,7 +81,6 @@ fn test_struct() {
        ⋮                    },
        ⋮                },
        ⋮                Field {
-       ⋮                    attrs: [],
        ⋮                    vis: Public(
        ⋮                        VisPublic,
        ⋮                    ),
