@@ -23,12 +23,10 @@ fn test_unit() {
    ⋮    generics: Generics {
    ⋮        params: [],
    ⋮    },
-   ⋮    data: Struct(
-   ⋮        DataStruct {
-   ⋮            fields: Unit,
-   ⋮            semi_token: Some,
-   ⋮        },
-   ⋮    ),
+   ⋮    data: Data::Struct {
+   ⋮        fields: Unit,
+   ⋮        semi_token: Some,
+   ⋮    },
    ⋮}
     "###);
 }
@@ -67,97 +65,85 @@ fn test_struct() {
        ⋮    generics: Generics {
        ⋮        params: [],
        ⋮    },
-       ⋮    data: Struct(
-       ⋮        DataStruct {
-       ⋮            fields: Named(
-       ⋮                FieldsNamed {
-       ⋮                    named: [
-       ⋮                        Field {
-       ⋮                            attrs: [],
-       ⋮                            vis: Public(
-       ⋮                                VisPublic,
-       ⋮                            ),
-       ⋮                            ident: Some("ident"),
-       ⋮                            colon_token: Some,
-       ⋮                            ty: Path(
-       ⋮                                TypePath {
-       ⋮                                    path: Path {
-       ⋮                                        segments: [
-       ⋮                                            PathSegment {
-       ⋮                                                ident: "Ident",
-       ⋮                                                arguments: None,
-       ⋮                                            },
-       ⋮                                        ],
-       ⋮                                    },
+       ⋮    data: Data::Struct {
+       ⋮        fields: Fields::Named {
+       ⋮            named: [
+       ⋮                Field {
+       ⋮                    attrs: [],
+       ⋮                    vis: Public(
+       ⋮                        VisPublic,
+       ⋮                    ),
+       ⋮                    ident: Some("ident"),
+       ⋮                    colon_token: Some,
+       ⋮                    ty: Type::Path {
+       ⋮                        path: Path {
+       ⋮                            segments: [
+       ⋮                                PathSegment {
+       ⋮                                    ident: "Ident",
+       ⋮                                    arguments: None,
        ⋮                                },
-       ⋮                            ),
+       ⋮                            ],
        ⋮                        },
-       ⋮                        Field {
-       ⋮                            attrs: [],
-       ⋮                            vis: Public(
-       ⋮                                VisPublic,
-       ⋮                            ),
-       ⋮                            ident: Some("attrs"),
-       ⋮                            colon_token: Some,
-       ⋮                            ty: Path(
-       ⋮                                TypePath {
-       ⋮                                    path: Path {
-       ⋮                                        segments: [
-       ⋮                                            PathSegment {
-       ⋮                                                ident: "Vec",
-       ⋮                                                arguments: AngleBracketed(
-       ⋮                                                    AngleBracketedGenericArguments {
-       ⋮                                                        args: [
-       ⋮                                                            Type(
-       ⋮                                                                Path(
-       ⋮                                                                    TypePath {
-       ⋮                                                                        path: Path {
-       ⋮                                                                            segments: [
-       ⋮                                                                                PathSegment {
-       ⋮                                                                                    ident: "Attribute",
-       ⋮                                                                                    arguments: None,
-       ⋮                                                                                },
-       ⋮                                                                            ],
-       ⋮                                                                        },
-       ⋮                                                                    },
-       ⋮                                                                ),
-       ⋮                                                            ),
-       ⋮                                                        ],
+       ⋮                    },
+       ⋮                },
+       ⋮                Field {
+       ⋮                    attrs: [],
+       ⋮                    vis: Public(
+       ⋮                        VisPublic,
+       ⋮                    ),
+       ⋮                    ident: Some("attrs"),
+       ⋮                    colon_token: Some,
+       ⋮                    ty: Type::Path {
+       ⋮                        path: Path {
+       ⋮                            segments: [
+       ⋮                                PathSegment {
+       ⋮                                    ident: "Vec",
+       ⋮                                    arguments: AngleBracketed(
+       ⋮                                        AngleBracketedGenericArguments {
+       ⋮                                            args: [
+       ⋮                                                Type(
+       ⋮                                                    Type::Path {
+       ⋮                                                        path: Path {
+       ⋮                                                            segments: [
+       ⋮                                                                PathSegment {
+       ⋮                                                                    ident: "Attribute",
+       ⋮                                                                    arguments: None,
+       ⋮                                                                },
+       ⋮                                                            ],
+       ⋮                                                        },
        ⋮                                                    },
        ⋮                                                ),
-       ⋮                                            },
-       ⋮                                        ],
-       ⋮                                    },
+       ⋮                                            ],
+       ⋮                                        },
+       ⋮                                    ),
        ⋮                                },
-       ⋮                            ),
+       ⋮                            ],
        ⋮                        },
-       ⋮                    ],
+       ⋮                    },
        ⋮                },
-       ⋮            ),
+       ⋮            ],
        ⋮        },
-       ⋮    ),
+       ⋮    },
        ⋮}
         "###)
     };
 
     snapshot!(actual.attrs[0].interpret_meta().unwrap(), @r###"
-   ⋮List(
-   ⋮    MetaList {
-   ⋮        ident: "derive",
-   ⋮        nested: [
-   ⋮            Meta(
-   ⋮                Word(
-   ⋮                    "Debug",
-   ⋮                ),
+   ⋮Meta::List {
+   ⋮    ident: "derive",
+   ⋮    nested: [
+   ⋮        Meta(
+   ⋮            Word(
+   ⋮                "Debug",
    ⋮            ),
-   ⋮            Meta(
-   ⋮                Word(
-   ⋮                    "Clone",
-   ⋮                ),
+   ⋮        ),
+   ⋮        Meta(
+   ⋮            Word(
+   ⋮                "Clone",
    ⋮            ),
-   ⋮        ],
-   ⋮    },
-   ⋮)
+   ⋮        ),
+   ⋮    ],
+   ⋮}
     "###);
 }
 

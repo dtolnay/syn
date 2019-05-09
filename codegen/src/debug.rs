@@ -116,17 +116,43 @@ fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
     Some(format)
 }
 
-fn expand_impl(node: &Node) -> TokenStream {
-    let name = &node.ident;
+fn syntax_tree_enum<'a>(outer: &str, inner: &str, fields: &'a [Type]) -> Option<&'a str> {
+    if fields.len() != 1 {
+        return None;
+    }
+    match &fields[0] {
+        Type::Syn(ty) if outer.to_owned() + inner == *ty => Some(ty),
+        _ => None
+    }
+}
+
+fn lookup<'a>(defs: &'a Definitions, name: &str) -> &'a Node {
+    for node in &defs.types {
+        if node.ident == name {
+            return node;
+        }
+    }
+    panic!("not found: {}", name)
+}
+
+fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream {
     let ident = Ident::new(&node.ident, Span::call_site());
 
-    let body = match &node.data {
+    match &node.data {
         Data::Enum(variants) => {
             let arms = variants.iter().map(|(v, fields)| {
                 let variant = Ident::new(v, Span::call_site());
                 if fields.is_empty() {
                     quote! {
                         syn::#ident::#variant => formatter.write_str(#v),
+                    }
+                } else if let Some(inner) = syntax_tree_enum(name, v, fields) {
+                    let path = format!("{}::{}", name, v);
+                    let format = expand_impl_body(defs, lookup(defs, inner), &path);
+                    quote! {
+                        syn::#ident::#variant(_val) => {
+                            #format
+                        }
                     }
                 } else {
                     let pats = (0..fields.len())
@@ -149,7 +175,7 @@ fn expand_impl(node: &Node) -> TokenStream {
                 }
             });
             quote! {
-                match &self.value {
+                match _val {
                     #(#arms)*
                 }
             }
@@ -169,7 +195,7 @@ fn expand_impl(node: &Node) -> TokenStream {
                     });
                     let ty = rust_type(ty);
                     Some(quote! {
-                        if let Some(val) = &self.value.#ident {
+                        if let Some(val) = &_val.#ident {
                             #[derive(RefCast)]
                             #[repr(transparent)]
                             struct Print(#ty);
@@ -184,7 +210,7 @@ fn expand_impl(node: &Node) -> TokenStream {
                         }
                     })
                 } else {
-                    let val = quote!(&self.value.#ident);
+                    let val = quote!(&_val.#ident);
                     let format = format_field(&val, ty)?;
                     Some(quote! {
                         formatter.field(#f, #format);
@@ -199,14 +225,20 @@ fn expand_impl(node: &Node) -> TokenStream {
         }
         Data::Private => {
             quote! {
-                write!(formatter, "{:?}", self.value())
+                write!(formatter, "{:?}", _val.value())
             }
         }
-    };
+    }
+}
+
+fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
+    let ident = Ident::new(&node.ident, Span::call_site());
+    let body = expand_impl_body(defs, node, &node.ident);
 
     quote! {
         impl Debug for Lite<syn::#ident> {
             fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                let _val = &self.value;
                 #body
             }
         }
@@ -216,7 +248,7 @@ fn expand_impl(node: &Node) -> TokenStream {
 pub fn generate(defs: &Definitions) -> Result<()> {
     let mut impls = TokenStream::new();
     for node in &defs.types {
-        impls.extend(expand_impl(node));
+        impls.extend(expand_impl(&defs, node));
     }
 
     file::write(
