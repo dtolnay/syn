@@ -1,8 +1,8 @@
 use crate::{file, full, gen};
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, TokenStreamExt};
-use syn::*;
-use syn_codegen as types;
+use syn::Index;
+use syn_codegen::{Data, Definitions, Features, Node, Type};
 
 const FOLD_SRC: &str = "../src/gen/fold.rs";
 
@@ -21,40 +21,40 @@ fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
 }
 
 fn visit(
-    ty: &types::Type,
-    features: &types::Features,
-    defs: &types::Definitions,
+    ty: &Type,
+    features: &Features,
+    defs: &Definitions,
     name: &TokenStream,
 ) -> Option<TokenStream> {
     match ty {
-        types::Type::Box(t) => {
+        Type::Box(t) => {
             let res = visit(t, features, defs, &quote!(*#name))?;
             Some(quote! {
                 Box::new(#res)
             })
         }
-        types::Type::Vec(t) => {
+        Type::Vec(t) => {
             let operand = quote!(it);
             let val = visit(t, features, defs, &operand)?;
             Some(quote! {
                 FoldHelper::lift(#name, |it| { #val })
             })
         }
-        types::Type::Punctuated(p) => {
+        Type::Punctuated(p) => {
             let operand = quote!(it);
             let val = visit(&p.element, features, defs, &operand)?;
             Some(quote! {
                 FoldHelper::lift(#name, |it| { #val })
             })
         }
-        types::Type::Option(t) => {
+        Type::Option(t) => {
             let it = quote!(it);
             let val = visit(t, features, defs, &it)?;
             Some(quote! {
                 (#name).map(|it| { #val })
             })
         }
-        types::Type::Tuple(t) => {
+        Type::Tuple(t) => {
             let mut code = TokenStream::new();
             for (i, elem) in t.iter().enumerate() {
                 let i = Index::from(i);
@@ -67,7 +67,7 @@ fn visit(
                 (#code)
             })
         }
-        types::Type::Token(t) => {
+        Type::Token(t) => {
             let repr = &defs.tokens[t];
             let is_keyword = repr.chars().next().unwrap().is_alphabetic();
             let spans = if is_keyword {
@@ -80,14 +80,14 @@ fn visit(
                 #ty(tokens_helper(_visitor, &#name.#spans))
             })
         }
-        types::Type::Group(t) => {
+        Type::Group(t) => {
             let ty = Ident::new(t, Span::call_site());
             Some(quote! {
                 #ty(tokens_helper(_visitor, &#name.span))
             })
         }
-        types::Type::Syn(t) => {
-            fn requires_full(features: &types::Features) -> bool {
+        Type::Syn(t) => {
+            fn requires_full(features: &Features) -> bool {
                 features.any.contains("full") && features.any.len() == 1
             }
             let mut res = simple_visit(t, name);
@@ -97,12 +97,12 @@ fn visit(
             }
             Some(res)
         }
-        types::Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
-        types::Type::Ext(_) | types::Type::Std(_) => None,
+        Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
+        Type::Ext(_) | Type::Std(_) => None,
     }
 }
 
-fn visit_features(features: &types::Features) -> TokenStream {
+fn visit_features(features: &Features) -> TokenStream {
     let features = &features.any;
     match features.len() {
         0 => quote!(),
@@ -111,7 +111,7 @@ fn visit_features(features: &types::Features) -> TokenStream {
     }
 }
 
-fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
+fn node(state: &mut State, s: &Node, defs: &Definitions) {
     let features = visit_features(&s.features);
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
@@ -120,7 +120,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
     let mut fold_impl = TokenStream::new();
 
     match &s.data {
-        types::Data::Enum(variants) => {
+        Data::Enum(variants) => {
             let mut fold_variants = TokenStream::new();
 
             for (variant, fields) in variants {
@@ -169,7 +169,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
                 }
             });
         }
-        types::Data::Struct(fields) => {
+        Data::Struct(fields) => {
             let mut fold_fields = TokenStream::new();
 
             for (field, ty) in fields {
@@ -201,7 +201,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
                 });
             }
         }
-        types::Data::Private => {
+        Data::Private => {
             if ty == "Ident" {
                 fold_impl.append_all(quote! {
                     let mut _i = _i;
@@ -216,8 +216,8 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
     }
 
     let include_fold_impl = match &s.data {
-        types::Data::Private => gen::TERMINAL_TYPES.contains(&s.ident.as_str()),
-        types::Data::Struct(_) | types::Data::Enum(_) => true,
+        Data::Private => gen::TERMINAL_TYPES.contains(&s.ident.as_str()),
+        Data::Struct(_) | Data::Enum(_) => true,
     };
 
     state.fold_trait.append_all(quote! {
@@ -239,7 +239,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
     }
 }
 
-pub fn generate(defs: &types::Definitions) {
+pub fn generate(defs: &Definitions) {
     let state = gen::traverse(defs, node);
     let full_macro = full::get_macro();
     let fold_trait = state.fold_trait;

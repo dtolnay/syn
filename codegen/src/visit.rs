@@ -1,9 +1,9 @@
-use crate::operand::*;
+use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, TokenStreamExt};
-use syn::*;
-use syn_codegen as types;
+use syn::Index;
+use syn_codegen::{Data, Definitions, Features, Node, Type};
 
 const VISIT_SRC: &str = "../src/gen/visit.rs";
 
@@ -30,17 +30,17 @@ fn noop_visit(name: &Operand) -> TokenStream {
 }
 
 fn visit(
-    ty: &types::Type,
-    features: &types::Features,
-    defs: &types::Definitions,
+    ty: &Type,
+    features: &Features,
+    defs: &Definitions,
     name: &Operand,
 ) -> Option<TokenStream> {
     match ty {
-        types::Type::Box(t) => {
+        Type::Box(t) => {
             let name = name.owned_tokens();
             visit(t, features, defs, &Owned(quote!(*#name)))
         }
-        types::Type::Vec(t) => {
+        Type::Vec(t) => {
             let operand = Borrowed(quote!(it));
             let val = visit(t, features, defs, &operand)?;
             let name = name.ref_tokens();
@@ -50,7 +50,7 @@ fn visit(
                 }
             })
         }
-        types::Type::Punctuated(p) => {
+        Type::Punctuated(p) => {
             let operand = Borrowed(quote!(it));
             let val = visit(&p.element, features, defs, &operand)?;
             let name = name.ref_tokens();
@@ -61,7 +61,7 @@ fn visit(
                 }
             })
         }
-        types::Type::Option(t) => {
+        Type::Option(t) => {
             let it = Borrowed(quote!(it));
             let val = visit(t, features, defs, &it)?;
             let name = name.owned_tokens();
@@ -71,7 +71,7 @@ fn visit(
                 }
             })
         }
-        types::Type::Tuple(t) => {
+        Type::Tuple(t) => {
             let mut code = TokenStream::new();
             for (i, elem) in t.iter().enumerate() {
                 let name = name.tokens();
@@ -83,7 +83,7 @@ fn visit(
             }
             Some(code)
         }
-        types::Type::Token(t) => {
+        Type::Token(t) => {
             let name = name.tokens();
             let repr = &defs.tokens[t];
             let is_keyword = repr.chars().next().unwrap().is_alphabetic();
@@ -96,14 +96,14 @@ fn visit(
                 tokens_helper(_visitor, &#name.#spans)
             })
         }
-        types::Type::Group(_) => {
+        Type::Group(_) => {
             let name = name.tokens();
             Some(quote! {
                 tokens_helper(_visitor, &#name.span)
             })
         }
-        types::Type::Syn(t) => {
-            fn requires_full(features: &types::Features) -> bool {
+        Type::Syn(t) => {
+            fn requires_full(features: &Features) -> bool {
                 features.any.contains("full") && features.any.len() == 1
             }
             let mut res = simple_visit(t, name);
@@ -113,12 +113,12 @@ fn visit(
             }
             Some(res)
         }
-        types::Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
-        types::Type::Ext(_) | types::Type::Std(_) => None,
+        Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
+        Type::Ext(_) | Type::Std(_) => None,
     }
 }
 
-fn visit_features(features: &types::Features) -> TokenStream {
+fn visit_features(features: &Features) -> TokenStream {
     let features = &features.any;
     match features.len() {
         0 => quote!(),
@@ -127,7 +127,7 @@ fn visit_features(features: &types::Features) -> TokenStream {
     }
 }
 
-fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
+fn node(state: &mut State, s: &Node, defs: &Definitions) {
     let features = visit_features(&s.features);
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
@@ -136,7 +136,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
     let mut visit_impl = TokenStream::new();
 
     match &s.data {
-        types::Data::Enum(variants) => {
+        Data::Enum(variants) => {
             let mut visit_variants = TokenStream::new();
 
             for (variant, fields) in variants {
@@ -182,7 +182,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
                 }
             });
         }
-        types::Data::Struct(fields) => {
+        Data::Struct(fields) => {
             for (field, ty) in fields {
                 let id = Ident::new(&field, Span::call_site());
                 let ref_toks = Owned(quote!(_i.#id));
@@ -193,7 +193,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
                 });
             }
         }
-        types::Data::Private => {}
+        Data::Private => {}
     }
 
     state.visit_trait.append_all(quote! {
@@ -213,7 +213,7 @@ fn node(state: &mut State, s: &types::Node, defs: &types::Definitions) {
     });
 }
 
-pub fn generate(defs: &types::Definitions) {
+pub fn generate(defs: &Definitions) {
     let state = gen::traverse(defs, node);
     let full_macro = full::get_macro();
     let visit_trait = state.visit_trait;
