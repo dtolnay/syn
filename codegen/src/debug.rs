@@ -120,13 +120,10 @@ fn syntax_tree_enum<'a>(outer: &str, inner: &str, fields: &'a [Type]) -> Option<
     if fields.len() != 1 {
         return None;
     }
-    let mut outer = outer;
-    if outer == "Visibility" {
-        outer = "Vis";
-    }
+    const WHITELIST: &[&str] = &["PathArguments", "Visibility"];
     match &fields[0] {
-        Type::Syn(ty) if outer.to_owned() + inner == *ty => Some(ty),
-        _ => None
+        Type::Syn(ty) if WHITELIST.contains(&outer) || outer.to_owned() + inner == *ty => Some(ty),
+        _ => None,
     }
 }
 

@@ -4597,14 +4597,31 @@ impl Debug for Lite<syn::PathArguments> {
         let _val = &self.value;
         match _val {
             syn::PathArguments::None => formatter.write_str("None"),
-            syn::PathArguments::AngleBracketed(_v0) => {
-                let mut formatter = formatter.debug_tuple("AngleBracketed");
-                formatter.field(Lite(_v0));
+            syn::PathArguments::AngleBracketed(_val) => {
+                let mut formatter = formatter.debug_struct("PathArguments::AngleBracketed");
+                if let Some(val) = &_val.colon2_token {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Colon2);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("colon2_token", Print::ref_cast(val));
+                }
+                if !_val.args.is_empty() {
+                    formatter.field("args", Lite(&_val.args));
+                }
                 formatter.finish()
             }
-            syn::PathArguments::Parenthesized(_v0) => {
-                let mut formatter = formatter.debug_tuple("Parenthesized");
-                formatter.field(Lite(_v0));
+            syn::PathArguments::Parenthesized(_val) => {
+                let mut formatter = formatter.debug_struct("PathArguments::Parenthesized");
+                if !_val.inputs.is_empty() {
+                    formatter.field("inputs", Lite(&_val.inputs));
+                }
+                formatter.field("output", Lite(&_val.output));
                 formatter.finish()
             }
         }

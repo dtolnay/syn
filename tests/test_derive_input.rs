@@ -85,24 +85,22 @@ fn test_struct() {
        ⋮                            segments: [
        ⋮                                PathSegment {
        ⋮                                    ident: "Vec",
-       ⋮                                    arguments: AngleBracketed(
-       ⋮                                        AngleBracketedGenericArguments {
-       ⋮                                            args: [
-       ⋮                                                Type(
-       ⋮                                                    Type::Path {
-       ⋮                                                        path: Path {
-       ⋮                                                            segments: [
-       ⋮                                                                PathSegment {
-       ⋮                                                                    ident: "Attribute",
-       ⋮                                                                    arguments: None,
-       ⋮                                                                },
-       ⋮                                                            ],
-       ⋮                                                        },
+       ⋮                                    arguments: PathArguments::AngleBracketed {
+       ⋮                                        args: [
+       ⋮                                            Type(
+       ⋮                                                Type::Path {
+       ⋮                                                    path: Path {
+       ⋮                                                        segments: [
+       ⋮                                                            PathSegment {
+       ⋮                                                                ident: "Attribute",
+       ⋮                                                                arguments: None,
+       ⋮                                                            },
+       ⋮                                                        ],
        ⋮                                                    },
-       ⋮                                                ),
-       ⋮                                            ],
-       ⋮                                        },
-       ⋮                                    ),
+       ⋮                                                },
+       ⋮                                            ),
+       ⋮                                        ],
+       ⋮                                    },
        ⋮                                },
        ⋮                            ],
        ⋮                        },
