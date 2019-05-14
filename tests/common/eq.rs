@@ -16,16 +16,16 @@ use self::syntax::ast::{
     FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg,
     GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Guard, Ident,
     ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item,
-    ItemKind, Label, Lifetime, LitIntType, LitKind, Local, LocalSource, MacDelimiter, MacStmtStyle,
-    Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat,
-    PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
-    StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind,
-    TraitObjectSyntax, TraitRef, Ty, TyKind, TypeBinding, UintTy, UnOp, UnsafeSource, Unsafety,
-    UseTree, UseTreeKind, VariantData, Variant_, VisibilityKind, WhereBoundPredicate, WhereClause,
-    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, LocalSource, MacDelimiter,
+    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId,
+    ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
+    RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
+    TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, TypeBinding, UintTy, UnOp,
+    UnsafeSource, Unsafety, UseTree, UseTreeKind, VariantData, Variant_, VisibilityKind,
+    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;
-use self::syntax::parse::token::{DelimToken, Lit, Token};
+use self::syntax::parse::token::{self, DelimToken, Token};
 use self::syntax::ptr::P;
 use self::syntax::source_map::Spanned;
 use self::syntax::symbol::Symbol;
@@ -289,6 +289,7 @@ spanless_eq_struct!(InlineAsmOutput; constraint expr is_rw is_indirect);
 spanless_eq_struct!(Item; ident attrs id node vis span !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
+spanless_eq_struct!(Lit; token suffix node span);
 spanless_eq_struct!(Local; pat ty init id span attrs source);
 spanless_eq_struct!(Mac_; path delim tts);
 spanless_eq_struct!(MacroDef; tokens legacy);
@@ -387,7 +388,7 @@ impl SpanlessEq for Ident {
 
 // Give up on comparing literals inside of macros because there are so many
 // equivalent representations of the same literal; they are tested elsewhere
-impl SpanlessEq for Lit {
+impl SpanlessEq for token::Lit {
     fn eq(&self, other: &Self) -> bool {
         mem::discriminant(self) == mem::discriminant(other)
     }
@@ -436,7 +437,7 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
         if style == AttrStyle::Inner {
             tokens.push(TokenTree::Token(DUMMY_SP, Token::Not));
         }
-        let lit = Lit::Str_(Symbol::intern(&contents));
+        let lit = token::Lit::Str_(Symbol::intern(&contents));
         let tts = vec![
             TokenTree::Token(DUMMY_SP, Token::Ident(Ident::from_str("doc"), false)),
             TokenTree::Token(DUMMY_SP, Token::Eq),
