@@ -65,6 +65,8 @@ matrix:
   allow_failures:
     - rust: nightly
       name: Clippy
+    - rust: nightly # rustfmt bug: https://github.com/rust-lang/rustfmt/issues/3575
+      name: Codegen
   fast_finish: true
 
 env:
