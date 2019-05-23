@@ -32,6 +32,7 @@ use regex::Regex;
 use smallvec::smallvec;
 use syntax::ast;
 use syntax::ptr::P;
+use syntax_pos::edition::Edition;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
@@ -170,7 +171,7 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    syntax::with_globals(|| {
+    syntax::with_globals(Edition::Edition2018, || {
         for expr in exprs {
             let raw = quote!(#expr).to_string();
 
