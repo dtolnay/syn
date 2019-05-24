@@ -266,7 +266,7 @@ macro_rules! spanless_eq_enum {
 spanless_eq_struct!(AngleBracketedArgs; span args bindings);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arg; ty pat id source);
-spanless_eq_struct!(Arm; attrs pats guard body);
+spanless_eq_struct!(Arm; attrs pats guard body span);
 spanless_eq_struct!(AsyncArgument; ident arg move_stmt pat_stmt);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
@@ -289,7 +289,7 @@ spanless_eq_struct!(InlineAsmOutput; constraint expr is_rw is_indirect);
 spanless_eq_struct!(Item; ident attrs id node vis span !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
-spanless_eq_struct!(Lit; token suffix node span);
+spanless_eq_struct!(Lit; token node span);
 spanless_eq_struct!(Local; pat ty init id span attrs source);
 spanless_eq_struct!(Mac_; path delim tts);
 spanless_eq_struct!(MacroDef; tokens legacy);
@@ -405,7 +405,7 @@ impl SpanlessEq for RangeSyntax {
 impl SpanlessEq for Token {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Token::Literal(this, _), Token::Literal(other, _)) => SpanlessEq::eq(this, other),
+            (Token::Literal(this), Token::Literal(other)) => SpanlessEq::eq(this, other),
             (Token::DotDotEq, _) | (Token::DotDotDot, _) => match other {
                 Token::DotDotEq | Token::DotDotDot => true,
                 _ => false,
@@ -437,11 +437,15 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
         if style == AttrStyle::Inner {
             tokens.push(TokenTree::Token(DUMMY_SP, Token::Not));
         }
-        let lit = token::Lit::Str_(Symbol::intern(&contents));
+        let lit = token::Lit {
+            kind: token::LitKind::Str,
+            symbol: Symbol::intern(&contents),
+            suffix: None,
+        };
         let tts = vec![
             TokenTree::Token(DUMMY_SP, Token::Ident(Ident::from_str("doc"), false)),
             TokenTree::Token(DUMMY_SP, Token::Eq),
-            TokenTree::Token(DUMMY_SP, Token::Literal(lit, None)),
+            TokenTree::Token(DUMMY_SP, Token::Literal(lit)),
         ];
         tokens.push(TokenTree::Delimited(
             DelimSpan::dummy(),
