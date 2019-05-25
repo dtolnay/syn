@@ -994,7 +994,6 @@ pub mod parsing {
     enum Precedence {
         Any,
         Assign,
-        Placement,
         Range,
         Or,
         And,
@@ -1111,23 +1110,6 @@ pub mod parsing {
                     eq_token: eq_token,
                     right: Box::new(rhs),
                 });
-            } else if Precedence::Placement >= base && input.peek(Token![<-]) {
-                let arrow_token: Token![<-] = input.parse()?;
-                let mut rhs = unary_expr(input, allow_struct)?;
-                loop {
-                    let next = peek_precedence(input);
-                    if next > Precedence::Placement {
-                        rhs = parse_expr(input, rhs, allow_struct, next)?;
-                    } else {
-                        break;
-                    }
-                }
-                lhs = Expr::InPlace(ExprInPlace {
-                    attrs: Vec::new(),
-                    place: Box::new(lhs),
-                    arrow_token: arrow_token,
-                    value: Box::new(rhs),
-                });
             } else if Precedence::Range >= base && input.peek(Token![..]) {
                 let limits: RangeLimits = input.parse()?;
                 let rhs = if input.is_empty()
@@ -1231,8 +1213,6 @@ pub mod parsing {
             Precedence::of(&op)
         } else if input.peek(Token![=]) && !input.peek(Token![=>]) {
             Precedence::Assign
-        } else if input.peek(Token![<-]) {
-            Precedence::Placement
         } else if input.peek(Token![..]) {
             Precedence::Range
         } else if input.peek(Token![as]) || input.peek(Token![:]) && !input.peek(Token![::]) {
@@ -1897,6 +1877,14 @@ pub mod parsing {
         }
     }
 
+    #[cfg(all(feature = "full", feature = "printing"))]
+    impl Parse for ExprInPlace {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let msg = "placement expression has been removed from Rust and is no longer parsed";
+            Err(input.error(msg))
+        }
+    }
+
     macro_rules! impl_by_parsing_expr {
         (
             $(
@@ -1923,7 +1911,6 @@ pub mod parsing {
 
     impl_by_parsing_expr! {
         ExprBox, Box, "expected box expression",
-        ExprInPlace, InPlace, "expected placement expression",
         ExprArray, Array, "expected slice literal expression",
         ExprCall, Call, "expected function call expression",
         ExprMethodCall, MethodCall, "expected method call expression",
