@@ -10,19 +10,19 @@ use self::rustc_data_structures::thin_vec::ThinVec;
 use self::rustc_target::abi::FloatTy;
 use self::rustc_target::spec::abi::Abi;
 use self::syntax::ast::{
-    AngleBracketedArgs, AnonConst, Arg, ArgSource, Arm, AsmDialect, AsyncArgument, AttrId,
-    AttrStyle, Attribute, AwaitOrigin, BareFnTy, BinOpKind, BindingMode, Block, BlockCheckMode,
-    CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat,
-    FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg,
-    GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Guard, Ident,
-    ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item,
-    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, LocalSource, MacDelimiter,
-    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId,
-    ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
-    RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
-    TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, TypeBinding, UintTy, UnOp,
-    UnsafeSource, Unsafety, UseTree, UseTreeKind, VariantData, Variant_, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    AngleBracketedArgs, AnonConst, Arg, Arm, AsmDialect, AttrId, AttrStyle, Attribute, AwaitOrigin,
+    BareFnTy, BinOpKind, BindingMode, Block, BlockCheckMode, CaptureBy, Constness, Crate,
+    CrateSugar, Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat, FnDecl, FnHeader,
+    ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, Guard, Ident, ImplItem, ImplItemKind,
+    ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label,
+    Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac_, MacroDef,
+    MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat, PatKind, Path,
+    PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrStyle,
+    StructField, TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax, TraitRef, Ty,
+    TyKind, TypeBinding, UintTy, UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, VariantData,
+    Variant_, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
+    WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;
 use self::syntax::parse::token::{self, DelimToken, Token};
@@ -265,9 +265,8 @@ macro_rules! spanless_eq_enum {
 
 spanless_eq_struct!(AngleBracketedArgs; span args bindings);
 spanless_eq_struct!(AnonConst; id value);
-spanless_eq_struct!(Arg; ty pat id source);
+spanless_eq_struct!(Arg; ty pat id);
 spanless_eq_struct!(Arm; attrs pats guard body span);
-spanless_eq_struct!(AsyncArgument; ident arg move_stmt pat_stmt);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span);
@@ -290,7 +289,7 @@ spanless_eq_struct!(Item; ident attrs id node vis span !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token node span);
-spanless_eq_struct!(Local; pat ty init id span attrs source);
+spanless_eq_struct!(Local; pat ty init id span attrs);
 spanless_eq_struct!(Mac_; path delim tts);
 spanless_eq_struct!(MacroDef; tokens legacy);
 spanless_eq_struct!(MethodSig; header decl);
@@ -314,7 +313,6 @@ spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bo
 spanless_eq_struct!(WhereClause; id predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
-spanless_eq_enum!(ArgSource; Normal AsyncFn(0));
 spanless_eq_enum!(AsmDialect; Att Intel);
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(AwaitOrigin; FieldLike MacroLike);
@@ -336,10 +334,9 @@ spanless_eq_enum!(Guard; If(0));
 spanless_eq_enum!(ImplItemKind; Const(0 1) Method(0 1) Type(0) Existential(0) Macro(0));
 spanless_eq_enum!(ImplPolarity; Positive Negative);
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
-spanless_eq_enum!(IsAsync; Async(closure_id return_impl_trait_id arguments) NotAsync);
+spanless_eq_enum!(IsAsync; Async(closure_id return_impl_trait_id) NotAsync);
 spanless_eq_enum!(IsAuto; Yes No);
 spanless_eq_enum!(LitIntType; Signed(0) Unsigned(0) Unsuffixed);
-spanless_eq_enum!(LocalSource; Normal AsyncFn);
 spanless_eq_enum!(MacDelimiter; Parenthesis Bracket Brace);
 spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
 spanless_eq_enum!(Movability; Static Movable);
