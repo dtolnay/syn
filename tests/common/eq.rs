@@ -10,19 +10,19 @@ use self::rustc_data_structures::thin_vec::ThinVec;
 use self::rustc_target::abi::FloatTy;
 use self::rustc_target::spec::abi::Abi;
 use self::syntax::ast::{
-    AngleBracketedArgs, AnonConst, Arg, Arm, AsmDialect, AttrId, AttrStyle, Attribute, AwaitOrigin,
-    BareFnTy, BinOpKind, BindingMode, Block, BlockCheckMode, CaptureBy, Constness, Crate,
-    CrateSugar, Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat, FnDecl, FnHeader,
-    ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, GlobalAsm, Guard, Ident, ImplItem, ImplItemKind,
-    ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label,
-    Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac_, MacroDef,
-    MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat, PatKind, Path,
-    PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrStyle,
-    StructField, TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax, TraitRef, Ty,
-    TyKind, TypeBinding, UintTy, UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, VariantData,
-    Variant_, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
-    WhereRegionPredicate,
+    AngleBracketedArgs, AnonConst, Arg, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
+    AttrId, AttrStyle, Attribute, AwaitOrigin, BareFnTy, BinOpKind, BindingMode, Block,
+    BlockCheckMode, CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind,
+    Field, FieldPat, FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy,
+    GenericArg, GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm,
+    Guard, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync,
+    IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter,
+    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId,
+    ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
+    RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
+    TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety,
+    UseTree, UseTreeKind, VariantData, Variant_, VisibilityKind, WhereBoundPredicate, WhereClause,
+    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;
 use self::syntax::parse::token::{self, DelimToken, Token};
@@ -263,10 +263,11 @@ macro_rules! spanless_eq_enum {
     };
 }
 
-spanless_eq_struct!(AngleBracketedArgs; span args bindings);
+spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arg; ty pat id);
 spanless_eq_struct!(Arm; attrs pats guard body span);
+spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span);
@@ -306,7 +307,6 @@ spanless_eq_struct!(StructField; span ident vis id ty attrs);
 spanless_eq_struct!(TraitItem; id ident attrs generics node span !tokens);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id node span);
-spanless_eq_struct!(TypeBinding; id ident ty span);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant_; ident attrs id data disr_expr);
 spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bounds);
@@ -314,6 +314,7 @@ spanless_eq_struct!(WhereClause; id predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
+spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(AwaitOrigin; FieldLike MacroLike);
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
