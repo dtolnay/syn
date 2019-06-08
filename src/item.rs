@@ -1084,8 +1084,8 @@ pub mod parsing {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let constness: Option<Token![const]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
             let ident: Ident = input.parse()?;
@@ -2178,8 +2178,8 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
