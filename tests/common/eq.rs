@@ -277,7 +277,7 @@ spanless_eq_struct!(Expr; id node span attrs);
 spanless_eq_struct!(Field; ident expr span is_shorthand attrs);
 spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs);
 spanless_eq_struct!(FnDecl; inputs output c_variadic);
-spanless_eq_struct!(FnHeader; unsafety asyncness constness abi);
+spanless_eq_struct!(FnHeader; constness asyncness unsafety abi);
 spanless_eq_struct!(ForeignItem; ident attrs node id span vis);
 spanless_eq_struct!(ForeignMod; abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds kind);

@@ -3055,14 +3055,14 @@
             "token": "Const"
           }
         },
-        "unsafety": {
-          "option": {
-            "token": "Unsafe"
-          }
-        },
         "asyncness": {
           "option": {
             "token": "Async"
+          }
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
         "abi": {
@@ -3983,14 +3983,14 @@
             "token": "Const"
           }
         },
-        "unsafety": {
-          "option": {
-            "token": "Unsafe"
-          }
-        },
         "asyncness": {
           "option": {
             "token": "Async"
+          }
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
           }
         },
         "abi": {
