@@ -17,7 +17,7 @@ use self::syntax::ast::{
     GenericArg, GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm,
     Guard, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter,
-    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, Name, NodeId,
+    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId,
     ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
     RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
     TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety,
@@ -28,7 +28,7 @@ use self::syntax::parse::lexer::comments;
 use self::syntax::parse::token::{self, DelimToken, Token, TokenKind};
 use self::syntax::ptr::P;
 use self::syntax::source_map::Spanned;
-use self::syntax::symbol::Symbol;
+use self::syntax::symbol::{sym, Symbol};
 use self::syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use self::syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
@@ -445,7 +445,7 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
             suffix: None,
         };
         let tts = vec![
-            TokenTree::token(TokenKind::Ident(Name::intern("doc"), false), DUMMY_SP),
+            TokenTree::token(TokenKind::Ident(sym::doc, false), DUMMY_SP),
             TokenTree::token(TokenKind::Eq, DUMMY_SP),
             TokenTree::token(TokenKind::Literal(lit), DUMMY_SP),
         ];
