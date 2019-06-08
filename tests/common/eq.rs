@@ -17,7 +17,7 @@ use self::syntax::ast::{
     GenericArg, GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm,
     Guard, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter,
-    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId,
+    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, Name, NodeId,
     ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
     RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
     TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety,
@@ -25,7 +25,7 @@ use self::syntax::ast::{
     WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;
-use self::syntax::parse::token::{self, DelimToken, Token};
+use self::syntax::parse::token::{self, DelimToken, Token, TokenKind};
 use self::syntax::ptr::P;
 use self::syntax::source_map::Spanned;
 use self::syntax::symbol::Symbol;
@@ -304,6 +304,7 @@ spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
 spanless_eq_struct!(QSelf; ty path_span position);
 spanless_eq_struct!(Stmt; id node span);
 spanless_eq_struct!(StructField; span ident vis id ty attrs);
+spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(TraitItem; id ident attrs generics node span !tokens);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id node span);
@@ -346,7 +347,7 @@ spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
 spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Mac(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
-spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2));
+spanless_eq_enum!(TokenTree; Token(0) Delimited(0 1 2));
 spanless_eq_enum!(TraitBoundModifier; None Maybe);
 spanless_eq_enum!(TraitItemKind; Const(0 1) Method(0 1) Type(0 1) Macro(0));
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
@@ -400,12 +401,12 @@ impl SpanlessEq for RangeSyntax {
     }
 }
 
-impl SpanlessEq for Token {
+impl SpanlessEq for TokenKind {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Token::Literal(this), Token::Literal(other)) => SpanlessEq::eq(this, other),
-            (Token::DotDotEq, _) | (Token::DotDotDot, _) => match other {
-                Token::DotDotEq | Token::DotDotDot => true,
+            (TokenKind::Literal(this), TokenKind::Literal(other)) => SpanlessEq::eq(this, other),
+            (TokenKind::DotDotEq, _) | (TokenKind::DotDotDot, _) => match other {
+                TokenKind::DotDotEq | TokenKind::DotDotDot => true,
                 _ => false,
             },
             _ => self == other,
@@ -423,7 +424,10 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
     let mut tokens = Vec::new();
     for tt in tts.clone().into_trees() {
         let c = match tt {
-            TokenTree::Token(_, Token::DocComment(c)) => c,
+            TokenTree::Token(Token {
+                kind: TokenKind::DocComment(c),
+                ..
+            }) => c,
             _ => {
                 tokens.push(tt);
                 continue;
@@ -431,9 +435,9 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
         };
         let contents = comments::strip_doc_comment_decoration(&c.as_str());
         let style = comments::doc_comment_style(&c.as_str());
-        tokens.push(TokenTree::Token(DUMMY_SP, Token::Pound));
+        tokens.push(TokenTree::token(TokenKind::Pound, DUMMY_SP));
         if style == AttrStyle::Inner {
-            tokens.push(TokenTree::Token(DUMMY_SP, Token::Not));
+            tokens.push(TokenTree::token(TokenKind::Not, DUMMY_SP));
         }
         let lit = token::Lit {
             kind: token::LitKind::Str,
@@ -441,9 +445,9 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
             suffix: None,
         };
         let tts = vec![
-            TokenTree::Token(DUMMY_SP, Token::Ident(Ident::from_str("doc"), false)),
-            TokenTree::Token(DUMMY_SP, Token::Eq),
-            TokenTree::Token(DUMMY_SP, Token::Literal(lit)),
+            TokenTree::token(TokenKind::Ident(Name::intern("doc"), false), DUMMY_SP),
+            TokenTree::token(TokenKind::Eq, DUMMY_SP),
+            TokenTree::token(TokenKind::Literal(lit), DUMMY_SP),
         ];
         tokens.push(TokenTree::Delimited(
             DelimSpan::dummy(),
