@@ -14,4 +14,9 @@ path = "main.rs"
 name = "syn-dev"
 
 [dependencies]
-syn = { path = "..", features = ["full", "extra-traits"] }
+quote = "0.6"
+
+[dependencies.syn]
+path = ".."
+default-features = false
+features = ["parsing", "full", "extra-traits", "proc-macro"]
