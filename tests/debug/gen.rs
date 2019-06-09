@@ -2862,18 +2862,6 @@ impl Debug for Lite<syn::Item> {
                     }
                     formatter.field("constness", Print::ref_cast(val));
                 }
-                if let Some(val) = &_val.unsafety {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Unsafe);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("unsafety", Print::ref_cast(val));
-                }
                 if let Some(val) = &_val.asyncness {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -2885,6 +2873,18 @@ impl Debug for Lite<syn::Item> {
                         }
                     }
                     formatter.field("asyncness", Print::ref_cast(val));
+                }
+                if let Some(val) = &_val.unsafety {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Unsafe);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("unsafety", Print::ref_cast(val));
                 }
                 if let Some(val) = &_val.abi {
                     #[derive(RefCast)]
@@ -3342,18 +3342,6 @@ impl Debug for Lite<syn::ItemFn> {
             }
             formatter.field("constness", Print::ref_cast(val));
         }
-        if let Some(val) = &_val.unsafety {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Unsafe);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("unsafety", Print::ref_cast(val));
-        }
         if let Some(val) = &_val.asyncness {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -3365,6 +3353,18 @@ impl Debug for Lite<syn::ItemFn> {
                 }
             }
             formatter.field("asyncness", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Unsafe);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
         }
         if let Some(val) = &_val.abi {
             #[derive(RefCast)]
@@ -4031,18 +4031,6 @@ impl Debug for Lite<syn::MethodSig> {
             }
             formatter.field("constness", Print::ref_cast(val));
         }
-        if let Some(val) = &_val.unsafety {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Unsafe);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("unsafety", Print::ref_cast(val));
-        }
         if let Some(val) = &_val.asyncness {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4054,6 +4042,18 @@ impl Debug for Lite<syn::MethodSig> {
                 }
             }
             formatter.field("asyncness", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Unsafe);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
         }
         if let Some(val) = &_val.abi {
             #[derive(RefCast)]
