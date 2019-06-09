@@ -84,8 +84,8 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub constness: Option<Token![const]>,
-            pub unsafety: Option<Token![unsafe]>,
             pub asyncness: Option<Token![async]>,
+            pub unsafety: Option<Token![unsafe]>,
             pub abi: Option<Abi>,
             pub ident: Ident,
             pub decl: Box<FnDecl>,
@@ -687,8 +687,8 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct MethodSig {
         pub constness: Option<Token![const]>,
-        pub unsafety: Option<Token![unsafe]>,
         pub asyncness: Option<Token![async]>,
+        pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
         pub ident: Ident,
         pub decl: FnDecl,
@@ -1114,8 +1114,8 @@ pub mod parsing {
                 attrs: private::attrs(outer_attrs, inner_attrs),
                 vis: vis,
                 constness: constness,
-                unsafety: unsafety,
                 asyncness: asyncness,
+                unsafety: unsafety,
                 abi: abi,
                 ident: ident,
                 decl: Box::new(FnDecl {
@@ -1759,8 +1759,8 @@ pub mod parsing {
                 attrs: private::attrs(outer_attrs, inner_attrs),
                 sig: MethodSig {
                     constness: constness,
-                    unsafety: unsafety,
                     asyncness: None,
+                    unsafety: unsafety,
                     abi: abi,
                     ident: ident,
                     decl: FnDecl {
@@ -1987,8 +1987,8 @@ pub mod parsing {
             let vis: Visibility = input.parse()?;
             let defaultness: Option<Token![default]> = input.parse()?;
             let constness: Option<Token![const]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
             let ident: Ident = input.parse()?;
@@ -2012,8 +2012,8 @@ pub mod parsing {
                 defaultness: defaultness,
                 sig: MethodSig {
                     constness: constness,
-                    unsafety: unsafety,
                     asyncness: asyncness,
+                    unsafety: unsafety,
                     abi: abi,
                     ident: ident,
                     decl: FnDecl {
@@ -2625,8 +2625,8 @@ mod printing {
     impl ToTokens for MethodSig {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
         }
