@@ -1091,6 +1091,13 @@ pub trait Parser: Sized {
     fn parse_str(self, s: &str) -> Result<Self::Output> {
         self.parse2(proc_macro2::TokenStream::from_str(s)?)
     }
+
+    // Not public API.
+    #[doc(hidden)]
+    fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
+        let _ = scope;
+        self.parse2(tokens)
+    }
 }
 
 fn tokens_to_parse_buffer(tokens: &TokenBuffer) -> ParseBuffer {
@@ -1116,5 +1123,26 @@ where
         } else {
             Err(state.error("unexpected token"))
         }
+    }
+
+    #[doc(hidden)]
+    fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
+        let buf = TokenBuffer::new2(tokens);
+        let cursor = buf.begin();
+        let unexpected = Rc::new(Cell::new(None));
+        let state = private::new_parse_buffer(scope, cursor, unexpected);
+        let node = self(&state)?;
+        state.check_unexpected()?;
+        if state.is_empty() {
+            Ok(node)
+        } else {
+            Err(state.error("unexpected token"))
+        }
+    }
+}
+
+impl private {
+    pub fn parse_scoped<F: Parser>(f: F, scope: Span, tokens: TokenStream) -> Result<F::Output> {
+        f.__parse_scoped(scope, tokens)
     }
 }
