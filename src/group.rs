@@ -1,7 +1,7 @@
 use proc_macro2::{Delimiter, Span};
 
 use error::Result;
-use parse::{ParseBuffer, ParseStream};
+use parse::ParseBuffer;
 use private;
 use token;
 
@@ -36,7 +36,7 @@ pub struct Group<'a> {
 
 // Not public API.
 #[doc(hidden)]
-pub fn parse_parens(input: ParseStream) -> Result<Parens> {
+pub fn parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<Parens<'a>> {
     parse_delimited(input, Delimiter::Parenthesis).map(|(span, content)| Parens {
         token: token::Paren(span),
         content: content,
@@ -45,7 +45,7 @@ pub fn parse_parens(input: ParseStream) -> Result<Parens> {
 
 // Not public API.
 #[doc(hidden)]
-pub fn parse_braces(input: ParseStream) -> Result<Braces> {
+pub fn parse_braces<'a>(input: &ParseBuffer<'a>) -> Result<Braces<'a>> {
     parse_delimited(input, Delimiter::Brace).map(|(span, content)| Braces {
         token: token::Brace(span),
         content: content,
@@ -54,7 +54,7 @@ pub fn parse_braces(input: ParseStream) -> Result<Braces> {
 
 // Not public API.
 #[doc(hidden)]
-pub fn parse_brackets(input: ParseStream) -> Result<Brackets> {
+pub fn parse_brackets<'a>(input: &ParseBuffer<'a>) -> Result<Brackets<'a>> {
     parse_delimited(input, Delimiter::Bracket).map(|(span, content)| Brackets {
         token: token::Bracket(span),
         content: content,
@@ -63,7 +63,7 @@ pub fn parse_brackets(input: ParseStream) -> Result<Brackets> {
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl private {
-    pub fn parse_group(input: ParseStream) -> Result<Group> {
+    pub fn parse_group<'a>(input: &ParseBuffer<'a>) -> Result<Group<'a>> {
         parse_delimited(input, Delimiter::None).map(|(span, content)| Group {
             token: token::Group(span),
             content: content,
@@ -71,7 +71,7 @@ impl private {
     }
 }
 
-fn parse_delimited(input: ParseStream, delimiter: Delimiter) -> Result<(Span, ParseBuffer)> {
+fn parse_delimited<'a>(input: &ParseBuffer<'a>, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
             #[cfg(procmacro2_semver_exempt)]
