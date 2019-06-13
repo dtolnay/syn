@@ -265,7 +265,7 @@ macro_rules! spanless_eq_enum {
 
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
-spanless_eq_struct!(Arg; ty pat id);
+spanless_eq_struct!(Arg; attrs ty pat id);
 spanless_eq_struct!(Arm; attrs pats guard body span);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
