@@ -47,3 +47,19 @@ fn smuggled_speculative_cursor_between_brackets() {
 
     syn::parse_str::<BreakRules>("()()").unwrap();
 }
+
+#[test]
+#[should_panic(expected = "Fork was not derived from the advancing parse stream")]
+fn smuggled_speculative_cursor_into_brackets() {
+    struct BreakRules;
+    impl Parse for BreakRules {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let a;
+            parenthesized!(a in input);
+            input.advance_to(&a);
+            Ok(Self)
+        }
+    }
+
+    syn::parse_str::<BreakRules>("()").unwrap();
+}
