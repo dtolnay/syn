@@ -101,6 +101,46 @@ pub trait Speculative {
     /// # syn::parse_str::<PathSegment>("a<b,c>").unwrap();
     /// ```
     ///
+    /// # Drawbacks
+    ///
+    /// The main drawback of this style of speculative parsing is in error
+    /// presentation. Even if the lookahead is the "correct" parse, the error
+    /// that is shown is that of the "fallback" parse. To use the same example
+    /// as the turbofish above, take the following unfinished "turbofish":
+    ///
+    /// ```text
+    /// let _ = f<&'a fn(), for<'a> serde::>();
+    /// ```
+    ///
+    /// If this is parsed as generic arguments, we can provide the error message
+    ///
+    /// ```text
+    /// error: expected identifier
+    ///  --> src.rs:L:C
+    ///   |
+    /// L | let _ = f<&'a fn(), for<'a> serde::>();
+    ///   |                                    ^
+    /// ```
+    ///
+    /// but if parsed using the above speculative parsing, it falls back to
+    /// assuming that the `<` is a less-than when it fails to parse the
+    /// generic arguments, and tries to interpret the `&'a` as the start of a
+    /// labelled loop, resulting in the much less helpful error
+    ///
+    /// ```text
+    /// error: expected `:`
+    ///  --> src.rs:L:C
+    ///   |
+    /// L | let _ = f<&'a fn(), for<'a> serde::>();
+    ///   |               ^^
+    /// ```
+    ///
+    /// This can be mitigated with various heuristics (two examples: show both
+    /// forks' parse errors, or show the one that consumed more tokens), but
+    /// when you can control the grammar, sticking to something that can be
+    /// parsed LL(3) and without the LL(*) speculative parsing this makes
+    /// possible, displaying reasonable errors becomes much more simple.
+    ///
     /// [RFC#2544]: https://github.com/rust-lang/rfcs/pull/2544
     /// [`PathSegment`]: ../../struct.PathSegment.html
     ///
