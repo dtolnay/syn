@@ -3703,7 +3703,7 @@ mod printing {
             self.lo.to_tokens(tokens);
             match self.limits {
                 RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
-                RangeLimits::Closed(ref t) => Token![...](t.spans).to_tokens(tokens),
+                RangeLimits::Closed(ref t) => t.to_tokens(tokens),
             }
             self.hi.to_tokens(tokens);
         }
