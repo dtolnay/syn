@@ -71,7 +71,10 @@ impl private {
     }
 }
 
-fn parse_delimited<'a>(input: &ParseBuffer<'a>, delimiter: Delimiter) -> Result<(Span, ParseBuffer<'a>)> {
+fn parse_delimited<'a>(
+    input: &ParseBuffer<'a>,
+    delimiter: Delimiter,
+) -> Result<(Span, ParseBuffer<'a>)> {
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
             #[cfg(procmacro2_semver_exempt)]
