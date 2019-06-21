@@ -245,7 +245,6 @@
     allow(
         block_in_if_condition_stmt,
         cognitive_complexity,
-        const_static_lifetime,
         deprecated_cfg_attr,
         doc_markdown,
         eval_order_dependence,
@@ -253,6 +252,7 @@
         needless_pass_by_value,
         never_loop,
         redundant_field_names,
+        redundant_static_lifetimes,
         too_many_arguments,
     )
 )]
