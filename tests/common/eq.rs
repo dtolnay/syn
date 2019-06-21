@@ -311,7 +311,7 @@ spanless_eq_struct!(Ty; id node span);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant_; ident attrs id data disr_expr);
 spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bounds);
-spanless_eq_struct!(WhereClause; id predicates span);
+spanless_eq_struct!(WhereClause; predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
