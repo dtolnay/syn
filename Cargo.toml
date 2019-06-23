@@ -43,6 +43,12 @@ regex = "1.0"
 termcolor = "1.0"
 walkdir = "2.1"
 
+[[bench]]
+name = "rust"
+edition = "2018"
+harness = false
+required-features = ["full", "parsing"]
+
 [package.metadata.docs.rs]
 all-features = true
 
