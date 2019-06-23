@@ -53,7 +53,7 @@ pub trait Speculative {
     ///     pub ident: Ident,
     ///     pub arguments: PathArguments,
     /// }
-    ///
+    /// #
     /// # impl<T> From<T> for PathSegment
     /// # where
     /// #     T: Into<Ident>,
@@ -65,7 +65,6 @@ pub trait Speculative {
     /// #         }
     /// #     }
     /// # }
-    ///
     ///
     /// impl Parse for PathSegment {
     ///     fn parse(input: ParseStream) -> Result<Self> {
