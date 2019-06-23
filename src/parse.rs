@@ -251,11 +251,7 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
 /// [syn-parse]: index.html#the-synparse-functions
 pub struct ParseBuffer<'a> {
-    // The identity of this Rc tracks the origin of forks.
-    // That is, any Rc which is Rc::ptr_eq are derived from the same cursor,
-    // and thus the cursor may be copied between them safely.
-    // Thus a new Rc must be created for a new buffer, and only be cloned on fork.
-    scope: Rc<Span>,
+    scope: Span,
     // Instead of Cell<Cursor<'a>> so that ParseBuffer<'a> is covariant in 'a.
     // The rest of the code in this module needs to be careful that only a
     // cursor derived from this `cell` is ever assigned to this `cell`.
@@ -404,7 +400,7 @@ impl private {
         unexpected: Rc<Cell<Option<Span>>>,
     ) -> ParseBuffer {
         ParseBuffer {
-            scope: Rc::new(scope),
+            scope: scope,
             // See comment on `cell` in the struct definition.
             cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
             marker: PhantomData,
@@ -722,7 +718,7 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn lookahead1(&self) -> Lookahead1<'a> {
-        lookahead::new(*self.scope, self.cursor())
+        lookahead::new(self.scope, self.cursor())
     }
 
     /// Forks a parse stream so that parsing tokens out of either the original
@@ -850,7 +846,7 @@ impl<'a> ParseBuffer<'a> {
     /// ```
     pub fn fork(&self) -> Self {
         ParseBuffer {
-            scope: Rc::clone(&self.scope),
+            scope: self.scope,
             cell: self.cell.clone(),
             marker: PhantomData,
             // Not the parent's unexpected. Nothing cares whether the clone
@@ -888,7 +884,7 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn error<T: Display>(&self, message: T) -> Error {
-        error::new_at(*self.scope, self.cursor(), message)
+        error::new_at(self.scope, self.cursor(), message)
     }
 
     /// Speculatively parses tokens from this parse stream, advancing the
@@ -960,7 +956,7 @@ impl<'a> ParseBuffer<'a> {
         // to cast from Cursor<'c> to Cursor<'a>. If needed outside of Syn, it
         // would be safe to expose that API as a method on StepCursor.
         let (node, rest) = function(StepCursor {
-            scope: *self.scope,
+            scope: self.scope,
             cursor: self.cell.get(),
             marker: PhantomData,
         })?;

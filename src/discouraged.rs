@@ -152,13 +152,10 @@ pub trait Speculative {
 
 impl<'a> Speculative for ParseBuffer<'a> {
     fn advance_to(&self, fork: &Self) {
-        // See comment on `scope` in the struct definition.
-        assert_eq!(
-            // Rc::ptr_eq for rustc < 1.17.0
-            &*self.scope as *const _,
-            &*fork.scope as *const _,
-            "Fork was not derived from the advancing parse stream"
-        );
+        if !private::same_scope(self.cursor(), fork.cursor()) {
+            panic!("Fork was not derived from the advancing parse stream");
+        }
+
         // See comment on `cell` in the struct definition.
         self.cell
             .set(unsafe { mem::transmute::<Cursor, Cursor<'static>>(fork.cursor()) })
