@@ -748,13 +748,16 @@ impl<'a> ParseBuffer<'a> {
     /// parse stream. Only use a fork when the amount of work performed against
     /// the fork is small and bounded.
     ///
-    /// For higher level speculative parsing, [`parse::discouraged::Speculative`]
-    /// is provided alongside matching tradeoffs to enable the pattern.
-    /// For a lower level but occasionally more performant way to perform
-    /// speculative parsing, consider using [`ParseStream::step`] instead.
+    /// When complex speculative parsing against the forked stream is
+    /// unavoidable, use [`parse::discouraged::Speculative`] to advance the
+    /// original stream once the fork's parse is determined to have been
+    /// successful.
     ///
-    /// [`ParseStream::step`]: #method.step
+    /// For a lower level way to perform speculative parsing at the token level,
+    /// consider using [`ParseStream::step`] instead.
+    ///
     /// [`parse::discouraged::Speculative`]: ./discouraged/trait.Speculative.html
+    /// [`ParseStream::step`]: #method.step
     ///
     /// # Example
     ///
