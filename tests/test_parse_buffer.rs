@@ -2,8 +2,8 @@
 extern crate syn;
 
 use syn::{
-    parse::{Parse, ParseStream},
     parse::discouraged::Speculative,
+    parse::{Parse, ParseStream},
     Result,
 };
 

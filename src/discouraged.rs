@@ -155,10 +155,12 @@ impl<'a> Speculative for ParseBuffer<'a> {
         // See comment on `scope` in the struct definition.
         assert_eq!(
             // Rc::ptr_eq for rustc < 1.17.0
-            &*self.scope as *const _, &*fork.scope as *const _,
+            &*self.scope as *const _,
+            &*fork.scope as *const _,
             "Fork was not derived from the advancing parse stream"
         );
         // See comment on `cell` in the struct definition.
-        self.cell.set(unsafe { mem::transmute::<Cursor, Cursor<'static>>(fork.cursor()) })
+        self.cell
+            .set(unsafe { mem::transmute::<Cursor, Cursor<'static>>(fork.cursor()) })
     }
 }
