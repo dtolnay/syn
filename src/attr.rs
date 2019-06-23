@@ -600,11 +600,9 @@ pub mod parsing {
 
     impl Parse for NestedMeta {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ahead = input.fork();
-
-            if ahead.peek(Lit) && !(ahead.peek(LitBool) && ahead.peek2(Token![=])) {
+            if input.peek(Lit) && !(input.peek(LitBool) && input.peek2(Token![=])) {
                 input.parse().map(NestedMeta::Literal)
-            } else if ahead.call(Ident::parse_any).is_ok() {
+            } else if input.peek(Ident::peek_any) {
                 input.parse().map(NestedMeta::Meta)
             } else {
                 Err(input.error("expected identifier or literal"))
