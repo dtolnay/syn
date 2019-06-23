@@ -1,11 +1,11 @@
 #[cfg(feature = "parsing")]
 use buffer::Cursor;
 #[cfg(feature = "parsing")]
-use {lookahead, private};
-#[cfg(feature = "parsing")]
 use parse::{Parse, ParseStream, Result};
 #[cfg(feature = "parsing")]
 use token::Token;
+#[cfg(feature = "parsing")]
+use {lookahead, private};
 
 pub use proc_macro2::Ident;
 
