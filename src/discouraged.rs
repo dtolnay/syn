@@ -144,6 +144,11 @@ pub trait Speculative {
     /// [RFC#2544]: https://github.com/rust-lang/rfcs/pull/2544
     /// [`PathSegment`]: ../../struct.PathSegment.html
     ///
+    /// # Performance
+    ///
+    /// This method performs a cheap fixed amount of work that does not depend
+    /// on how far apart the two streams are positioned.
+    ///
     /// # Panics
     ///
     /// The forked stream that this joins with must be derived by forking this parse stream.
