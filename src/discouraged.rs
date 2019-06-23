@@ -151,7 +151,9 @@ pub trait Speculative {
     ///
     /// # Panics
     ///
-    /// The forked stream that this joins with must be derived by forking this parse stream.
+    /// The forked stream in the argument of `advance_to` must have been
+    /// obtained by forking `self`. Attempting to advance to any other stream
+    /// will cause a panic.
     fn advance_to(&self, fork: &Self);
 }
 
