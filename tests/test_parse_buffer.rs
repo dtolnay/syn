@@ -1,29 +1,19 @@
 #[macro_use]
 extern crate syn;
 
-use syn::{
-    parse::discouraged::Speculative,
-    parse::{Parse, ParseStream},
-    Result,
-};
+use syn::parse::{discouraged::Speculative, Parse, ParseStream, Parser, Result};
 
 #[test]
 #[should_panic(expected = "Fork was not derived from the advancing parse stream")]
 fn smuggled_speculative_cursor_between_sources() {
-    // don't do this ever this is very unsafe and fails anyway
-    struct Smuggled(ParseStream<'static>);
-    impl Parse for Smuggled {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(Smuggled(unsafe { std::mem::transmute_copy(input) }))
-        }
-    }
-
     struct BreakRules;
     impl Parse for BreakRules {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let Smuggled(fork) = syn::parse_str("").unwrap();
-            input.advance_to(fork);
-            Ok(Self)
+        fn parse(input1: ParseStream) -> Result<Self> {
+            let nested = |input2: ParseStream| {
+                input1.advance_to(&input2);
+                Ok(Self)
+            };
+            nested.parse_str("")
         }
     }
 
