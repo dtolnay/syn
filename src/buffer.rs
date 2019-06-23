@@ -348,6 +348,10 @@ impl<'a> Cursor<'a> {
 }
 
 impl private {
+    pub fn same_scope(a: Cursor, b: Cursor) -> bool {
+        a.scope == b.scope
+    }
+
     #[cfg(procmacro2_semver_exempt)]
     pub fn open_span_of_group(cursor: Cursor) -> Span {
         match *cursor.entry() {

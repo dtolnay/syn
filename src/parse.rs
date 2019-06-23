@@ -188,6 +188,9 @@
 //!
 //! *This module is available if Syn is built with the `"parsing"` feature.*
 
+#[path = "discouraged.rs"]
+pub mod discouraged;
+
 use std::cell::Cell;
 use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
@@ -745,10 +748,13 @@ impl<'a> ParseBuffer<'a> {
     /// parse stream. Only use a fork when the amount of work performed against
     /// the fork is small and bounded.
     ///
+    /// For higher level speculative parsing, [`parse::discouraged::Speculative`]
+    /// is provided alongside matching tradeoffs to enable the pattern.
     /// For a lower level but occasionally more performant way to perform
     /// speculative parsing, consider using [`ParseStream::step`] instead.
     ///
     /// [`ParseStream::step`]: #method.step
+    /// [`parse::discouraged::Speculative`]: ./discouraged/trait.Speculative.html
     ///
     /// # Example
     ///
