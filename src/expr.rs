@@ -1234,6 +1234,7 @@ pub mod parsing {
     // box <trailer>
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+        // TODO: optimize using advance_to
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![&])
@@ -1270,6 +1271,7 @@ pub mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+        // TODO: optimize using advance_to
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![*]) || ahead.peek(Token![!]) || ahead.peek(Token![-]) {
@@ -2185,6 +2187,7 @@ pub mod parsing {
         let mut fields = Punctuated::new();
         loop {
             let attrs = content.call(Attribute::parse_outer)?;
+            // TODO: optimize using advance_to
             if content.fork().parse::<Member>().is_err() {
                 if attrs.is_empty() {
                     break;
@@ -2416,6 +2419,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     fn parse_stmt(input: ParseStream, allow_nosemi: bool) -> Result<Stmt> {
+        // TODO: optimize using advance_to
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
 

@@ -767,6 +767,7 @@ pub mod parsing {
 
     impl Parse for Item {
         fn parse(input: ParseStream) -> Result<Self> {
+            // TODO: optimize using advance_to
             let ahead = input.fork();
             ahead.call(Attribute::parse_outer)?;
             let vis: Visibility = ahead.parse()?;
@@ -1139,6 +1140,8 @@ pub mod parsing {
 
     impl Parse for FnArg {
         fn parse(input: ParseStream) -> Result<Self> {
+            // TODO: optimize using advance_to
+
             if input.peek(Token![&]) {
                 let ahead = input.fork();
                 if ahead.call(arg_self_ref).is_ok() && !ahead.peek(Token![:]) {
@@ -1273,6 +1276,7 @@ pub mod parsing {
 
     impl Parse for ForeignItem {
         fn parse(input: ParseStream) -> Result<Self> {
+            // TODO: optimize using advance_to
             let ahead = input.fork();
             ahead.call(Attribute::parse_outer)?;
             let vis: Visibility = ahead.parse()?;
@@ -1664,6 +1668,7 @@ pub mod parsing {
 
     impl Parse for TraitItem {
         fn parse(input: ParseStream) -> Result<Self> {
+            // TODO: optimize using advance_to
             let ahead = input.fork();
             ahead.call(Attribute::parse_outer)?;
 
@@ -1864,6 +1869,7 @@ pub mod parsing {
             };
 
             let trait_ = {
+                // TODO: optimize using advance_to
                 let ahead = input.fork();
                 if ahead.parse::<Option<Token![!]>>().is_ok()
                     && ahead.parse::<Path>().is_ok()
@@ -1908,6 +1914,7 @@ pub mod parsing {
 
     impl Parse for ImplItem {
         fn parse(input: ParseStream) -> Result<Self> {
+            // TODO: optimize using advance_to
             let ahead = input.fork();
             ahead.call(Attribute::parse_outer)?;
             let vis: Visibility = ahead.parse()?;

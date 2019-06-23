@@ -268,6 +268,7 @@ pub mod parsing {
             let pub_token = input.parse::<Token![pub]>()?;
 
             if input.peek(token::Paren) {
+                // TODO: optimize using advance_to
                 let ahead = input.fork();
                 let mut content;
                 parenthesized!(content in ahead);
