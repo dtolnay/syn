@@ -29,7 +29,7 @@ pub trait Speculative {
     ///
     /// There has been chatter about the possibility of making the colons in the
     /// turbofish syntax like `path::to::<T>` no longer required by accepting
-    /// `path::to<T>` in expression position. Specifically, according to [RFC#2544],
+    /// `path::to<T>` in expression position. Specifically, according to [RFC 2544],
     /// [`PathSegment`] parsing should always try to consume a following `<` token
     /// as the start of generic arguments, and reset to the `<` if that fails
     /// (e.g. the token is acting as a less-than operator).
@@ -141,7 +141,7 @@ pub trait Speculative {
     /// parsed LL(3) and without the LL(*) speculative parsing this makes
     /// possible, displaying reasonable errors becomes much more simple.
     ///
-    /// [RFC#2544]: https://github.com/rust-lang/rfcs/pull/2544
+    /// [RFC 2544]: https://github.com/rust-lang/rfcs/pull/2544
     /// [`PathSegment`]: ../../struct.PathSegment.html
     ///
     /// # Performance
