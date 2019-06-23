@@ -6,22 +6,23 @@ use super::*;
 pub trait Speculative {
     /// Advance this parse stream to the position of a forked parse stream.
     ///
-    /// This is the opposite operation to [`ParseStream::fork`].
-    /// You can fork a parse stream, perform some speculative parsing, then join
-    /// the original stream to the fork to "commit" the parsing from the fork to
-    /// the main stream.
+    /// This is the opposite operation to [`ParseStream::fork`]. You can fork a
+    /// parse stream, perform some speculative parsing, then join the original
+    /// stream to the fork to "commit" the parsing from the fork to the main
+    /// stream.
     ///
     /// If you can avoid doing this, you should, as it limits the ability to
     /// generate useful errors. That said, it is often the only way to parse
     /// syntax of the form `A* B*` for arbitrary syntax `A` and `B`. The problem
     /// is that when the fork fails to parse an `A`, it's impossible to tell
     /// whether that was because of a syntax error and the user meant to provide
-    /// an `A`, or that the `A`s are finished and its time to start parsing `B`s.
-    /// Use with care.
+    /// an `A`, or that the `A`s are finished and its time to start parsing
+    /// `B`s. Use with care.
     ///
-    /// Also note that if `A` is a subset of `B`, `A* B*` can be parsed by parsing
-    /// `B*` and removing the leading members of `A` from the repetition, bypassing
-    /// the need to involve the downsides associated with speculative parsing.
+    /// Also note that if `A` is a subset of `B`, `A* B*` can be parsed by
+    /// parsing `B*` and removing the leading members of `A` from the
+    /// repetition, bypassing the need to involve the downsides associated with
+    /// speculative parsing.
     ///
     /// [`ParseStream::fork`]: ../struct.ParseBuffer.html#method.fork
     ///
@@ -29,14 +30,15 @@ pub trait Speculative {
     ///
     /// There has been chatter about the possibility of making the colons in the
     /// turbofish syntax like `path::to::<T>` no longer required by accepting
-    /// `path::to<T>` in expression position. Specifically, according to [RFC 2544],
-    /// [`PathSegment`] parsing should always try to consume a following `<` token
-    /// as the start of generic arguments, and reset to the `<` if that fails
-    /// (e.g. the token is acting as a less-than operator).
+    /// `path::to<T>` in expression position. Specifically, according to [RFC
+    /// 2544], [`PathSegment`] parsing should always try to consume a following
+    /// `<` token as the start of generic arguments, and reset to the `<` if
+    /// that fails (e.g. the token is acting as a less-than operator).
     ///
-    /// This is the exact kind of parsing behavior which requires the "fork, try,
-    /// commit" behavior that [`ParseStream::fork`] discourages. With `advance_to`,
-    /// we can avoid having to parse the speculatively parsed content a second time.
+    /// This is the exact kind of parsing behavior which requires the "fork,
+    /// try, commit" behavior that [`ParseStream::fork`] discourages. With
+    /// `advance_to`, we can avoid having to parse the speculatively parsed
+    /// content a second time.
     ///
     /// This change in behavior can be implemented in syn by replacing just the
     /// `Parse` implementation for `PathSegment`:
@@ -123,9 +125,9 @@ pub trait Speculative {
     /// ```
     ///
     /// but if parsed using the above speculative parsing, it falls back to
-    /// assuming that the `<` is a less-than when it fails to parse the
-    /// generic arguments, and tries to interpret the `&'a` as the start of a
-    /// labelled loop, resulting in the much less helpful error
+    /// assuming that the `<` is a less-than when it fails to parse the generic
+    /// arguments, and tries to interpret the `&'a` as the start of a labelled
+    /// loop, resulting in the much less helpful error
     ///
     /// ```text
     /// error: expected `:`
