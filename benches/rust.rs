@@ -1,4 +1,4 @@
-// $ cargo bench --features full
+// $ cargo bench --features full --bench rust
 
 #![recursion_limit = "256"]
 #![feature(rustc_private)]
@@ -16,6 +16,7 @@ mod common;
 
 use proc_macro2::TokenStream;
 use rustc_data_structures::sync::Lrc;
+use std::fs;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
 use syntax::edition::Edition;
@@ -70,7 +71,7 @@ fn exec(codepath: fn(&str) -> Result<(), ()>) -> Duration {
             if path.is_dir() {
                 return;
             }
-            let content = std::fs::read_to_string(path).unwrap();
+            let content = fs::read_to_string(path).unwrap();
             let ok = codepath(&content).is_ok();
             success += ok as usize;
             total += 1;
@@ -100,7 +101,11 @@ fn main() {
     for (name, f) in testcases!(tokenstream_parse, syn_parse, libsyntax_parse) {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);
-        eprintln!("elapsed={}.{:03}s", elapsed.as_secs(), elapsed.subsec_millis());
+        eprintln!(
+            "elapsed={}.{:03}s",
+            elapsed.as_secs(),
+            elapsed.subsec_millis(),
+        );
     }
     eprintln!();
 }
