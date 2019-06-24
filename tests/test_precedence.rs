@@ -241,7 +241,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
         fn visit_expr(&mut self, e: &mut P<Expr>) {
             self.recurse_expr(e);
             match e.node {
-                ExprKind::If(..) | ExprKind::Block(..) | ExprKind::IfLet(..) => {}
+                ExprKind::If(..) | ExprKind::Block(..) | ExprKind::Let(..) => {}
                 _ => {
                     let inner = mem::replace(
                         e,
