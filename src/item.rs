@@ -767,13 +767,12 @@ pub mod parsing {
 
     impl Parse for Item {
         fn parse(input: ParseStream) -> Result<Self> {
-            // TODO: optimize using advance_to
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
-            ahead.call(Attribute::parse_outer)?;
             let vis: Visibility = ahead.parse()?;
 
             let lookahead = ahead.lookahead1();
-            if lookahead.peek(Token![extern]) {
+            let mut item = if lookahead.peek(Token![extern]) {
                 ahead.parse::<Token![extern]>()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Token![crate]) {
@@ -865,7 +864,34 @@ pub mod parsing {
                 input.parse().map(Item::Macro)
             } else {
                 Err(lookahead.error())
+            }?;
+
+            {
+                let item_attrs = match item {
+                    Item::ExternCrate(ref mut item) => &mut item.attrs,
+                    Item::Use(ref mut item) => &mut item.attrs,
+                    Item::Static(ref mut item) => &mut item.attrs,
+                    Item::Const(ref mut item) => &mut item.attrs,
+                    Item::Fn(ref mut item) => &mut item.attrs,
+                    Item::Mod(ref mut item) => &mut item.attrs,
+                    Item::ForeignMod(ref mut item) => &mut item.attrs,
+                    Item::Type(ref mut item) => &mut item.attrs,
+                    Item::Existential(ref mut item) => &mut item.attrs,
+                    Item::Struct(ref mut item) => &mut item.attrs,
+                    Item::Enum(ref mut item) => &mut item.attrs,
+                    Item::Union(ref mut item) => &mut item.attrs,
+                    Item::Trait(ref mut item) => &mut item.attrs,
+                    Item::TraitAlias(ref mut item) => &mut item.attrs,
+                    Item::Impl(ref mut item) => &mut item.attrs,
+                    Item::Macro(ref mut item) => &mut item.attrs,
+                    Item::Macro2(ref mut item) => &mut item.attrs,
+                    Item::Verbatim(_) => unreachable!(),
+                };
+                attrs.extend(item_attrs.drain(..));
+                *item_attrs = attrs;
             }
+
+            Ok(item)
         }
     }
 
@@ -1276,13 +1302,12 @@ pub mod parsing {
 
     impl Parse for ForeignItem {
         fn parse(input: ParseStream) -> Result<Self> {
-            // TODO: optimize using advance_to
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
-            ahead.call(Attribute::parse_outer)?;
             let vis: Visibility = ahead.parse()?;
 
             let lookahead = ahead.lookahead1();
-            if lookahead.peek(Token![fn]) {
+            let mut item = if lookahead.peek(Token![fn]) {
                 input.parse().map(ForeignItem::Fn)
             } else if lookahead.peek(Token![static]) {
                 input.parse().map(ForeignItem::Static)
@@ -1299,7 +1324,21 @@ pub mod parsing {
                 input.parse().map(ForeignItem::Macro)
             } else {
                 Err(lookahead.error())
+            }?;
+
+            {
+                let item_attrs = match item {
+                    ForeignItem::Fn(ref mut item) => &mut item.attrs,
+                    ForeignItem::Static(ref mut item) => &mut item.attrs,
+                    ForeignItem::Type(ref mut item) => &mut item.attrs,
+                    ForeignItem::Macro(ref mut item) => &mut item.attrs,
+                    ForeignItem::Verbatim(_) => unreachable!(),
+                };
+                attrs.extend(item_attrs.drain(..));
+                *item_attrs = attrs;
             }
+
+            Ok(item)
         }
     }
 
@@ -1668,12 +1707,11 @@ pub mod parsing {
 
     impl Parse for TraitItem {
         fn parse(input: ParseStream) -> Result<Self> {
-            // TODO: optimize using advance_to
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
-            ahead.call(Attribute::parse_outer)?;
 
             let lookahead = ahead.lookahead1();
-            if lookahead.peek(Token![const]) {
+            let mut item = if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) {
@@ -1703,7 +1741,21 @@ pub mod parsing {
                 input.parse().map(TraitItem::Macro)
             } else {
                 Err(lookahead.error())
+            }?;
+
+            {
+                let item_attrs = match item {
+                    TraitItem::Const(ref mut item) => &mut item.attrs,
+                    TraitItem::Method(ref mut item) => &mut item.attrs,
+                    TraitItem::Type(ref mut item) => &mut item.attrs,
+                    TraitItem::Macro(ref mut item) => &mut item.attrs,
+                    TraitItem::Verbatim(_) => unreachable!(),
+                };
+                attrs.extend(item_attrs.drain(..));
+                *item_attrs = attrs;
             }
+
+            Ok(item)
         }
     }
 
@@ -1914,9 +1966,8 @@ pub mod parsing {
 
     impl Parse for ImplItem {
         fn parse(input: ParseStream) -> Result<Self> {
-            // TODO: optimize using advance_to
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
-            ahead.call(Attribute::parse_outer)?;
             let vis: Visibility = ahead.parse()?;
 
             let mut lookahead = ahead.lookahead1();
@@ -1928,7 +1979,7 @@ pub mod parsing {
                 None
             };
 
-            if lookahead.peek(Token![const]) {
+            let mut item = if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) {
@@ -1967,7 +2018,22 @@ pub mod parsing {
                 input.parse().map(ImplItem::Macro)
             } else {
                 Err(lookahead.error())
+            }?;
+
+            {
+                let item_attrs = match item {
+                    ImplItem::Const(ref mut item) => &mut item.attrs,
+                    ImplItem::Method(ref mut item) => &mut item.attrs,
+                    ImplItem::Type(ref mut item) => &mut item.attrs,
+                    ImplItem::Existential(ref mut item) => &mut item.attrs,
+                    ImplItem::Macro(ref mut item) => &mut item.attrs,
+                    ImplItem::Verbatim(_) => unreachable!(),
+                };
+                attrs.extend(item_attrs.drain(..));
+                *item_attrs = attrs;
             }
+
+            Ok(item)
         }
     }
 
