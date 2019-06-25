@@ -12,10 +12,10 @@ mod macros;
 #[path = "../tests/common/mod.rs"]
 mod common;
 
-use test::Bencher;
 use proc_macro2::TokenStream;
 use std::fs;
 use std::str::FromStr;
+use test::Bencher;
 
 const FILE: &str = "tests/rust/src/libcore/str/mod.rs";
 
