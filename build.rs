@@ -11,6 +11,10 @@ fn main() {
         None => return,
     };
 
+    if compiler.minor >= 17 {
+        println!("cargo:rustc-cfg=syn_can_match_trailing_dollar");
+    }
+
     if compiler.minor >= 19 {
         println!("cargo:rustc-cfg=syn_can_use_thread_id");
     }
