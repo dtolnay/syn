@@ -57,6 +57,11 @@ fn libsyntax_parse(content: &str) -> Result<(), ()> {
     })
 }
 
+fn read_from_disk(content: &str) -> Result<(), ()> {
+    let _ = content;
+    Ok(())
+}
+
 fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
     let begin = Instant::now();
     let mut success = 0;
@@ -88,7 +93,7 @@ fn main() {
     common::clone_rust();
 
     macro_rules! testcases {
-        ($($name:ident),*) => {
+        ($($name:ident,)*) => {
             vec![
                 $(
                     (stringify!($name), $name as fn(&str) -> Result<(), ()>),
@@ -104,7 +109,12 @@ fn main() {
     });
     eprintln!("\n{} lines", lines);
 
-    for (name, f) in testcases!(tokenstream_parse, syn_parse, libsyntax_parse) {
+    for (name, f) in testcases!(
+        read_from_disk,
+        tokenstream_parse,
+        syn_parse,
+        libsyntax_parse,
+    ) {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);
         eprintln!(
