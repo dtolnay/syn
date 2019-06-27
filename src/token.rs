@@ -701,18 +701,25 @@ define_delimiters! {
     " "           pub struct Group        /// None-delimited group
 }
 
-/// A type-macro that expands to the name of the Rust type representation of a
-/// given token.
-///
-/// See the [token module] documentation for details and examples.
-///
-/// [token module]: token/index.html
-// Unfortunate duplication due to a rustdoc bug.
-// https://github.com/rust-lang/rust/issues/45939
+macro_rules! export_token_macro {
+    ($($rules:tt)*) => {
+        /// A type-macro that expands to the name of the Rust type representation of a
+        /// given token.
+        ///
+        /// See the [token module] documentation for details and examples.
+        ///
+        /// [token module]: token/index.html
+        // Unfortunate duplication due to a rustdoc bug.
+        // https://github.com/rust-lang/rust/issues/45939
+        #[macro_export]
+        macro_rules! Token {
+            $($rules)*
+        }
+    };
+}
+
 #[cfg(syn_can_match_trailing_dollar)]
-#[macro_export]
-#[cfg_attr(rustfmt, rustfmt_skip)]
-macro_rules! Token {
+export_token_macro! {
     (abstract)    => { $crate::token::Abstract };
     (as)          => { $crate::token::As };
     (async)       => { $crate::token::Async };
@@ -814,16 +821,8 @@ macro_rules! Token {
     (_)           => { $crate::token::Underscore };
 }
 
-/// A type-macro that expands to the name of the Rust type representation of a
-/// given token.
-///
-/// See the [token module] documentation for details and examples.
-///
-/// [token module]: token/index.html
 #[cfg(not(syn_can_match_trailing_dollar))]
-#[macro_export]
-#[cfg_attr(rustfmt, rustfmt_skip)]
-macro_rules! Token {
+export_token_macro! {
     (abstract)    => { $crate::token::Abstract };
     (as)          => { $crate::token::As };
     (async)       => { $crate::token::Async };
