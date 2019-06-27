@@ -57,7 +57,7 @@ fn libsyntax_parse(content: &str) -> Result<(), ()> {
     })
 }
 
-fn exec(codepath: fn(&str) -> Result<(), ()>) -> Duration {
+fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
     let begin = Instant::now();
     let mut success = 0;
     let mut total = 0;
@@ -97,7 +97,13 @@ fn main() {
         };
     }
 
-    eprintln!();
+    let mut lines = 0;
+    exec(|content| {
+        lines += content.lines().count();
+        Ok(())
+    });
+    eprintln!("\n{} lines", lines);
+
     for (name, f) in testcases!(tokenstream_parse, syn_parse, libsyntax_parse) {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);
