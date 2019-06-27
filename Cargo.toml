@@ -9,12 +9,14 @@ documentation = "https://docs.rs/syn"
 categories = ["development-tools::procedural-macro-helpers"]
 readme = "README.md"
 include = [
+    "/benches/**",
     "/build.rs",
     "/Cargo.toml",
     "/LICENSE-APACHE",
     "/LICENSE-MIT",
     "/README.md",
-    "/src/**/*.rs",
+    "/src/**",
+    "/tests/**",
 ]
 
 [features]
