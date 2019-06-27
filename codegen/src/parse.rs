@@ -437,7 +437,7 @@ mod parsing {
                 let content;
                 braced!(content in input);
                 input.parse::<Token![;]>()?;
-                content.parse::<token::Dollar>()?;
+                content.parse::<Token![$]>()?;
                 let path: Path = content.parse()?;
                 let ty = path.segments.last().unwrap().into_value().ident.to_string();
                 tokens.insert(token, ty.to_string());
