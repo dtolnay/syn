@@ -103,11 +103,13 @@ fn main() {
     }
 
     let mut lines = 0;
+    let mut files = 0;
     exec(|content| {
         lines += content.lines().count();
+        files += 1;
         Ok(())
     });
-    eprintln!("\n{} lines", lines);
+    eprintln!("\n{} lines in {} files", lines, files);
 
     for (name, f) in testcases!(
         read_from_disk,
