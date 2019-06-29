@@ -94,24 +94,38 @@ macro_rules! ast_struct {
 
 #[cfg(not(syn_can_match_ident_after_attrs))]
 macro_rules! ast_enum {
+    // Drop the `#no_visit` attribute, if present.
     (
         $(#[$enum_attr:meta])*
-        pub enum $name:ident $(# $tags:ident)* { $($variants:tt)* }
+        pub enum $name:ident #no_visit $($rest:tt)*
+    ) => (
+        ast_enum! { $(#[$enum_attr])* pub enum $name $($rest)* }
+    );
+
+    (
+        $(#[$enum_attr:meta])*
+        pub enum $name:ident $($rest:tt)*
     ) => (
         $(#[$enum_attr])*
-            #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub enum $name {
-            $($variants)*
-        }
-    )
+        pub enum $name $($rest)*
+    );
 }
 
 #[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! ast_enum {
+    // Drop the `#no_visit` attribute, if present.
     (
         $(#[$enum_attr:meta])*
-        $pub:ident $enum:ident $name:ident $(# $tags:ident)* { $($variants:tt)* }
+        $pub:ident $enum:ident $name:ident #no_visit $($rest:tt)*
+    ) => (
+        ast_enum! { $(#[$enum_attr])* $pub $enum $name $($rest)* }
+    );
+
+    (
+        $(#[$enum_attr:meta])*
+        $pub:ident $enum:ident $name:ident $($rest:tt)*
     ) => (
         check_keyword_matches!(pub $pub);
         check_keyword_matches!(enum $enum);
@@ -119,10 +133,8 @@ macro_rules! ast_enum {
         $(#[$enum_attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $pub $enum $name {
-            $($variants)*
-        }
-    )
+        $pub $enum $name $($rest)*
+    );
 }
 
 #[cfg(not(syn_can_match_ident_after_attrs))]
