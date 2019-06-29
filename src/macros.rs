@@ -187,6 +187,23 @@ macro_rules! ast_enum_of_structs {
     )
 }
 
+// Unfortunately, at this time, we can't make the generated enum here have the
+// correct span. The way that the span for the overall enum decl is calculated
+// is using `lo.to(prev_span)` [1].
+//
+// If the beginning and ending spans of the enum item don't have the same macro
+// context, fallback code is run [2]. This code chooses the span within the
+// macro context to avoid firing spurious diagnostics [3].
+//
+// This means `[src]` links in rustdoc will point to the macro, instead of the
+// actual declaration, if either the first or last token of our declaration has
+// a span from the macro. With `macro_rules!` there is no way to preserve the
+// span of a `{}` block while changing its contents, so we're forced to have the
+// span of our final token point to our macro.
+//
+// [1]: https://github.com/rust-lang/rust/blob/9a90d03ad171856dc016c2dcc19292ec49a8a26f/src/libsyntax/parse/parser.rs#L7377
+// [2]: https://github.com/rust-lang/rust/blob/9a90d03ad171856dc016c2dcc19292ec49a8a26f/src/libsyntax_pos/lib.rs#L467-L478
+// [3]: https://github.com/rust-lang/rust/pull/47942
 #[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! ast_enum_of_structs {
     (
