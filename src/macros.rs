@@ -1,4 +1,46 @@
-#[cfg(any(feature = "full", feature = "derive"))]
+#[cfg(not(syn_can_match_ident_after_attrs))]
+macro_rules! ast_struct {
+    (
+        $(#[$attr:meta])*
+        pub struct $name:ident #full $($rest:tt)*
+    ) => {
+        #[cfg(feature = "full")]
+        $(#[$attr])*
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name $($rest)*
+
+        #[cfg(not(feature = "full"))]
+        $(#[$attr])*
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name {
+            _noconstruct: (),
+        }
+    };
+
+    (
+        $(#[$attr:meta])*
+        pub struct $name:ident #manual_extra_traits $($rest:tt)*
+    ) => {
+        $(#[$attr])*
+        #[cfg_attr(feature = "extra-traits", derive(Debug))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name $($rest)*
+    };
+
+    (
+        $(#[$attr:meta])*
+        pub struct $name:ident $($rest:tt)*
+    ) => {
+        $(#[$attr])*
+        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub struct $name $($rest)*
+    };
+}
+
+#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
@@ -49,7 +91,23 @@ macro_rules! ast_struct {
     };
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
+
+#[cfg(not(syn_can_match_ident_after_attrs))]
+macro_rules! ast_enum {
+    (
+        $(#[$enum_attr:meta])*
+        pub enum $name:ident $(# $tags:ident)* { $($variants:tt)* }
+    ) => (
+        $(#[$enum_attr])*
+            #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        pub enum $name {
+            $($variants)*
+        }
+    )
+}
+
+#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! ast_enum {
     (
         $(#[$enum_attr:meta])*
@@ -67,7 +125,57 @@ macro_rules! ast_enum {
     )
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
+#[cfg(not(syn_can_match_ident_after_attrs))]
+macro_rules! ast_enum_of_structs {
+    (
+        $(#[$enum_attr:meta])*
+        pub enum $name:ident {
+            $(
+                $(#[$variant_attr:meta])*
+                pub $variant:ident $( ($member:ident $($rest:tt)*) )*,
+            )*
+        }
+
+        $($remaining:tt)*
+    ) => (
+        ast_enum! {
+            $(#[$enum_attr])*
+            pub enum $name {
+                $(
+                    $(#[$variant_attr])*
+                    $variant $( ($member) )*,
+                )*
+            }
+        }
+
+        $(
+            maybe_ast_struct! {
+                $(#[$variant_attr])*
+                $(
+                    pub struct $member $($rest)*
+                )*
+            }
+
+            $(
+                impl From<$member> for $name {
+                    fn from(e: $member) -> $name {
+                        $name::$variant(e)
+                    }
+                }
+            )*
+        )*
+
+        #[cfg(feature = "printing")]
+        generate_to_tokens! {
+            $($remaining)*
+            ()
+            tokens
+            $name { $($variant $( [$($rest)*] )*,)* }
+        }
+    )
+}
+
+#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
@@ -121,7 +229,7 @@ macro_rules! ast_enum_of_structs {
     )
 }
 
-#[cfg(all(feature = "printing", any(feature = "full", feature = "derive")))]
+#[cfg(feature = "printing")]
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
@@ -168,7 +276,6 @@ macro_rules! to_tokens_call {
     };
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! maybe_ast_struct {
     (
         $(#[$attr:meta])*
@@ -180,7 +287,7 @@ macro_rules! maybe_ast_struct {
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
+#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! check_keyword_matches {
     (struct struct) => {};
     (enum enum) => {};
