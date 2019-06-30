@@ -1,140 +1,65 @@
-#[cfg(not(syn_can_match_ident_after_attrs))]
 macro_rules! ast_struct {
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident #full $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        struct $name:ident #full $($rest:tt)*
     ) => {
         #[cfg(feature = "full")]
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
 
         #[cfg(not(feature = "full"))]
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name {
+        $($attrs_pub)* struct $name {
             _noconstruct: (),
         }
     };
 
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident #manual_extra_traits $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        struct $name:ident #manual_extra_traits $($rest:tt)*
     ) => {
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
     };
 
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        struct $name:ident $($rest:tt)*
     ) => {
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
+    };
+
+    ($($t:tt)*) => {
+        strip_attrs_pub!(ast_struct!($($t)*));
     };
 }
 
-#[cfg(syn_can_match_ident_after_attrs)]
-macro_rules! ast_struct {
-    (
-        $(#[$attr:meta])*
-        $pub:ident $struct:ident $name:ident #full $($rest:tt)*
-    ) => {
-        check_keyword_matches!(pub $pub);
-        check_keyword_matches!(struct $struct);
-
-        #[cfg(feature = "full")]
-        $(#[$attr])*
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $pub $struct $name $($rest)*
-
-        #[cfg(not(feature = "full"))]
-        $(#[$attr])*
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $pub $struct $name {
-            _noconstruct: (),
-        }
-    };
-
-    (
-        $(#[$attr:meta])*
-        $pub:ident $struct:ident $name:ident #manual_extra_traits $($rest:tt)*
-    ) => {
-        check_keyword_matches!(pub $pub);
-        check_keyword_matches!(struct $struct);
-
-        $(#[$attr])*
-        #[cfg_attr(feature = "extra-traits", derive(Debug))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $pub $struct $name $($rest)*
-    };
-
-    (
-        $(#[$attr:meta])*
-        $pub:ident $struct:ident $name:ident $($rest:tt)*
-    ) => {
-        check_keyword_matches!(pub $pub);
-        check_keyword_matches!(struct $struct);
-
-        $(#[$attr])*
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $pub $struct $name $($rest)*
-    };
-}
-
-
-#[cfg(not(syn_can_match_ident_after_attrs))]
 macro_rules! ast_enum {
     // Drop the `#no_visit` attribute, if present.
     (
-        $(#[$enum_attr:meta])*
-        pub enum $name:ident #no_visit $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        enum $name:ident #no_visit $($rest:tt)*
     ) => (
-        ast_enum! { $(#[$enum_attr])* pub enum $name $($rest)* }
+        ast_enum!(@@ [$($attrs_pub)*] enum $name $($rest)*);
     );
 
     (
-        $(#[$enum_attr:meta])*
-        pub enum $name:ident $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        enum $name:ident $($rest:tt)*
     ) => (
-        $(#[$enum_attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub enum $name $($rest)*
-    );
-}
-
-#[cfg(syn_can_match_ident_after_attrs)]
-macro_rules! ast_enum {
-    // Drop the `#no_visit` attribute, if present.
-    (
-        $(#[$enum_attr:meta])*
-        $pub:ident $enum:ident $name:ident #no_visit $($rest:tt)*
-    ) => (
-        ast_enum! { $(#[$enum_attr])* $pub $enum $name $($rest)* }
+        $($attrs_pub)* enum $name $($rest)*
     );
 
-    (
-        $(#[$enum_attr:meta])*
-        $pub:ident $enum:ident $name:ident $($rest:tt)*
-    ) => (
-        check_keyword_matches!(pub $pub);
-        check_keyword_matches!(enum $enum);
-
-        $(#[$enum_attr])*
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $pub $enum $name $($rest)*
-    );
+    ($($t:tt)*) => {
+        strip_attrs_pub!(ast_enum!($($t)*));
+    };
 }
 
 #[cfg(not(syn_can_match_ident_after_attrs))]
@@ -314,6 +239,22 @@ macro_rules! maybe_ast_struct {
     ) => ();
 
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
+}
+
+#[cfg(not(syn_can_match_ident_after_attrs))]
+macro_rules! strip_attrs_pub {
+    ($mac:ident!($(#[$m:meta])* pub $($t:tt)*)) => {
+        $mac!(@@ [$(#[$m])* pub] $($t)*);
+    };
+}
+
+#[cfg(syn_can_match_ident_after_attrs)]
+macro_rules! strip_attrs_pub {
+    ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
+        check_keyword_matches!(pub $pub);
+
+        $mac!(@@ [$(#[$m])* $pub] $($t)*);
+    };
 }
 
 #[cfg(syn_can_match_ident_after_attrs)]
