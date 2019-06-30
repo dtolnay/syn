@@ -1,25 +1,41 @@
 // $ cargo bench --features full --bench rust
+//
+// Syn only, useful for profiling:
+// $ RUSTFLAGS='--cfg syn_only' cargo build --release --features full --bench rust
 
-#![feature(rustc_private)]
+#![cfg_attr(not(syn_only), feature(rustc_private))]
 
+#[cfg(not(syn_only))]
 extern crate rustc_data_structures;
+#[cfg(not(syn_only))]
 extern crate syntax;
+#[cfg(not(syn_only))]
 extern crate syntax_pos;
 
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
+#[cfg(not(syn_only))]
 use proc_macro2::TokenStream;
+#[cfg(not(syn_only))]
 use rustc_data_structures::sync::Lrc;
-use std::fs;
+#[cfg(not(syn_only))]
 use std::str::FromStr;
-use std::time::{Duration, Instant};
+#[cfg(not(syn_only))]
 use syntax::edition::Edition;
+#[cfg(not(syn_only))]
 use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
+#[cfg(not(syn_only))]
 use syntax::parse::ParseSess;
+#[cfg(not(syn_only))]
 use syntax::source_map::{FilePathMapping, SourceMap};
+#[cfg(not(syn_only))]
 use syntax_pos::FileName;
 
+use std::fs;
+use std::time::{Duration, Instant};
+
+#[cfg(not(syn_only))]
 fn tokenstream_parse(content: &str) -> Result<(), ()> {
     TokenStream::from_str(content).map(drop).map_err(drop)
 }
@@ -28,6 +44,7 @@ fn syn_parse(content: &str) -> Result<(), ()> {
     syn::parse_file(content).map(drop).map_err(drop)
 }
 
+#[cfg(not(syn_only))]
 fn libsyntax_parse(content: &str) -> Result<(), ()> {
     struct SilentEmitter;
 
@@ -52,6 +69,7 @@ fn libsyntax_parse(content: &str) -> Result<(), ()> {
     })
 }
 
+#[cfg(not(syn_only))]
 fn read_from_disk(content: &str) -> Result<(), ()> {
     let _ = content;
     Ok(())
@@ -88,28 +106,35 @@ fn main() {
     repo::clone_rust();
 
     macro_rules! testcases {
-        ($($name:ident,)*) => {
+        ($($(#[$cfg:meta])* $name:ident,)*) => {
             vec![
                 $(
+                    $(#[$cfg])*
                     (stringify!($name), $name as fn(&str) -> Result<(), ()>),
                 )*
             ]
         };
     }
 
-    let mut lines = 0;
-    let mut files = 0;
-    exec(|content| {
-        lines += content.lines().count();
-        files += 1;
-        Ok(())
-    });
-    eprintln!("\n{} lines in {} files", lines, files);
+    #[cfg(not(syn_only))]
+    {
+        let mut lines = 0;
+        let mut files = 0;
+        exec(|content| {
+            lines += content.lines().count();
+            files += 1;
+            Ok(())
+        });
+        eprintln!("\n{} lines in {} files", lines, files);
+    }
 
     for (name, f) in testcases!(
+        #[cfg(not(syn_only))]
         read_from_disk,
+        #[cfg(not(syn_only))]
         tokenstream_parse,
         syn_parse,
+        #[cfg(not(syn_only))]
         libsyntax_parse,
     ) {
         eprint!("{:20}", format!("{}:", name));
