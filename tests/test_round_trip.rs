@@ -33,12 +33,14 @@ mod macros;
 #[allow(dead_code)]
 mod common;
 
+mod repo;
+
 use common::eq::SpanlessEq;
 
 #[test]
 #[cfg_attr(target_os = "windows", ignore = "requires nix .sh")]
 fn test_round_trip() {
-    common::clone_rust();
+    repo::clone_rust();
     let abort_after = common::abort_after();
     if abort_after == 0 {
         panic!("Skipping all round_trip tests");
@@ -49,7 +51,7 @@ fn test_round_trip() {
     WalkDir::new("tests/rust")
         .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
-        .filter_entry(common::base_dir_filter)
+        .filter_entry(repo::base_dir_filter)
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
         .unwrap()
         .into_par_iter()

@@ -1,18 +1,13 @@
 // $ cargo bench --features full --bench rust
 
-#![recursion_limit = "256"]
 #![feature(rustc_private)]
 
 extern crate rustc_data_structures;
 extern crate syntax;
 extern crate syntax_pos;
 
-#[macro_use]
-#[path = "../tests/macros/mod.rs"]
-mod macros;
-
-#[path = "../tests/common/mod.rs"]
-mod common;
+#[path = "../tests/repo/mod.rs"]
+mod repo;
 
 use proc_macro2::TokenStream;
 use rustc_data_structures::sync::Lrc;
@@ -69,7 +64,7 @@ fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
 
     walkdir::WalkDir::new("tests/rust/src")
         .into_iter()
-        .filter_entry(common::base_dir_filter)
+        .filter_entry(repo::base_dir_filter)
         .for_each(|entry| {
             let entry = entry.unwrap();
             let path = entry.path();
@@ -90,7 +85,7 @@ fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
 }
 
 fn main() {
-    common::clone_rust();
+    repo::clone_rust();
 
     macro_rules! testcases {
         ($($name:ident,)*) => {

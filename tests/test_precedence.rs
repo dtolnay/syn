@@ -49,6 +49,8 @@ mod macros;
 #[allow(dead_code)]
 mod common;
 
+mod repo;
+
 /// Test some pre-set expressions chosen by us.
 #[test]
 fn test_simple_precedence() {
@@ -91,7 +93,7 @@ fn test_simple_precedence() {
 #[test]
 #[cfg_attr(target_os = "windows", ignore = "requires nix .sh")]
 fn test_rustc_precedence() {
-    common::clone_rust();
+    repo::clone_rust();
     let abort_after = common::abort_after();
     if abort_after == 0 {
         panic!("Skipping all precedence tests");
@@ -106,7 +108,7 @@ fn test_rustc_precedence() {
     WalkDir::new("tests/rust")
         .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
-        .filter_entry(common::base_dir_filter)
+        .filter_entry(repo::base_dir_filter)
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
         .unwrap()
         .into_par_iter()
