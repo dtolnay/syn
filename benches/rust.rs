@@ -5,32 +5,27 @@
 
 #![cfg_attr(not(syn_only), feature(rustc_private))]
 
-#[cfg(not(syn_only))]
-extern crate rustc_data_structures;
-#[cfg(not(syn_only))]
-extern crate syntax;
-#[cfg(not(syn_only))]
-extern crate syntax_pos;
-
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
 #[cfg(not(syn_only))]
-use proc_macro2::TokenStream;
+mod imports {
+    pub extern crate rustc_data_structures;
+    pub extern crate syntax;
+    pub extern crate syntax_pos;
+
+    pub use proc_macro2::TokenStream;
+    pub use rustc_data_structures::sync::Lrc;
+    pub use std::str::FromStr;
+    pub use syntax::edition::Edition;
+    pub use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
+    pub use syntax::parse::ParseSess;
+    pub use syntax::source_map::{FilePathMapping, SourceMap};
+    pub use syntax_pos::FileName;
+}
+
 #[cfg(not(syn_only))]
-use rustc_data_structures::sync::Lrc;
-#[cfg(not(syn_only))]
-use std::str::FromStr;
-#[cfg(not(syn_only))]
-use syntax::edition::Edition;
-#[cfg(not(syn_only))]
-use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
-#[cfg(not(syn_only))]
-use syntax::parse::ParseSess;
-#[cfg(not(syn_only))]
-use syntax::source_map::{FilePathMapping, SourceMap};
-#[cfg(not(syn_only))]
-use syntax_pos::FileName;
+use imports::*;
 
 use std::fs;
 use std::time::{Duration, Instant};
