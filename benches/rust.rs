@@ -8,66 +8,69 @@
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
-#[cfg(not(syn_only))]
-mod imports {
-    pub extern crate rustc_data_structures;
-    pub extern crate syntax;
-    pub extern crate syntax_pos;
-
-    pub use proc_macro2::TokenStream;
-    pub use rustc_data_structures::sync::Lrc;
-    pub use std::str::FromStr;
-    pub use syntax::edition::Edition;
-    pub use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
-    pub use syntax::parse::ParseSess;
-    pub use syntax::source_map::{FilePathMapping, SourceMap};
-    pub use syntax_pos::FileName;
-}
-
-#[cfg(not(syn_only))]
-use imports::*;
-
 use std::fs;
 use std::time::{Duration, Instant};
 
 #[cfg(not(syn_only))]
-fn tokenstream_parse(content: &str) -> Result<(), ()> {
-    TokenStream::from_str(content).map(drop).map_err(drop)
-}
+mod tokenstream_parse {
+    use proc_macro2::TokenStream;
+    use std::str::FromStr;
 
-fn syn_parse(content: &str) -> Result<(), ()> {
-    syn::parse_file(content).map(drop).map_err(drop)
-}
-
-#[cfg(not(syn_only))]
-fn libsyntax_parse(content: &str) -> Result<(), ()> {
-    struct SilentEmitter;
-
-    impl Emitter for SilentEmitter {
-        fn emit_diagnostic(&mut self, _db: &DiagnosticBuilder) {}
+    pub fn bench(content: &str) -> Result<(), ()> {
+        TokenStream::from_str(content).map(drop).map_err(drop)
     }
+}
 
-    syntax::with_globals(Edition::Edition2018, || {
-        let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
-        let emitter = Box::new(SilentEmitter);
-        let handler = Handler::with_emitter(false, None, emitter);
-        let sess = ParseSess::with_span_handler(handler, cm);
-        if let Err(mut diagnostic) = syntax::parse::parse_crate_from_source_str(
-            FileName::Custom("bench".to_owned()),
-            content.to_owned(),
-            &sess,
-        ) {
-            diagnostic.cancel();
-            return Err(());
-        };
-        Ok(())
-    })
+mod syn_parse {
+    pub fn bench(content: &str) -> Result<(), ()> {
+        syn::parse_file(content).map(drop).map_err(drop)
+    }
 }
 
 #[cfg(not(syn_only))]
-fn read_from_disk(content: &str) -> Result<(), ()> {
-    let _ = content;
-    Ok(())
+mod libsyntax_parse {
+    extern crate rustc_data_structures;
+    extern crate syntax;
+    extern crate syntax_pos;
+
+    use rustc_data_structures::sync::Lrc;
+    use syntax::edition::Edition;
+    use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
+    use syntax::parse::ParseSess;
+    use syntax::source_map::{FilePathMapping, SourceMap};
+    use syntax_pos::FileName;
+
+    pub fn bench(content: &str) -> Result<(), ()> {
+        struct SilentEmitter;
+
+        impl Emitter for SilentEmitter {
+            fn emit_diagnostic(&mut self, _db: &DiagnosticBuilder) {}
+        }
+
+        syntax::with_globals(Edition::Edition2018, || {
+            let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
+            let emitter = Box::new(SilentEmitter);
+            let handler = Handler::with_emitter(false, None, emitter);
+            let sess = ParseSess::with_span_handler(handler, cm);
+            if let Err(mut diagnostic) = syntax::parse::parse_crate_from_source_str(
+                FileName::Custom("bench".to_owned()),
+                content.to_owned(),
+                &sess,
+            ) {
+                diagnostic.cancel();
+                return Err(());
+            };
+            Ok(())
+        })
+    }
+}
+
+#[cfg(not(syn_only))]
+mod read_from_disk {
+    pub fn bench(content: &str) -> Result<(), ()> {
+        let _ = content;
+        Ok(())
+    }
 }
 
 fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
@@ -101,7 +104,7 @@ fn main() {
     repo::clone_rust();
 
     macro_rules! testcases {
-        ($($(#[$cfg:meta])* $name:ident,)*) => {
+        ($($(#[$cfg:meta])* $name:path,)*) => {
             vec![
                 $(
                     $(#[$cfg])*
@@ -125,12 +128,12 @@ fn main() {
 
     for (name, f) in testcases!(
         #[cfg(not(syn_only))]
-        read_from_disk,
+        read_from_disk::bench,
         #[cfg(not(syn_only))]
-        tokenstream_parse,
-        syn_parse,
+        tokenstream_parse::bench,
+        syn_parse::bench,
         #[cfg(not(syn_only))]
-        libsyntax_parse,
+        libsyntax_parse::bench,
     ) {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);
