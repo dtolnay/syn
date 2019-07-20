@@ -53,7 +53,7 @@ ast_struct! {
     /// into the structured representation that is used by convention across
     /// most Rust libraries.
     ///
-    /// [`parse_meta`]: #method.parse_meta
+    /// [`parse_meta`]: Attribute::parse_meta
     ///
     /// # Parsing
     ///
@@ -63,11 +63,9 @@ ast_struct! {
     /// [`Attribute::parse_outer`] or [`Attribute::parse_inner`] depending on
     /// which you intend to parse.
     ///
-    /// [`Parse`]: parse/trait.Parse.html
-    /// [`ParseStream::parse`]: parse/struct.ParseBuffer.html#method.parse
-    /// [`ParseStream::call`]: parse/struct.ParseBuffer.html#method.call
-    /// [`Attribute::parse_outer`]: #method.parse_outer
-    /// [`Attribute::parse_inner`]: #method.parse_inner
+    /// [`Parse`]: parse::Parse
+    /// [`ParseStream::parse`]: parse::ParseBuffer::parse
+    /// [`ParseStream::call`]: parse::ParseBuffer::call
     ///
     /// ```edition2018
     /// use syn::{Attribute, Ident, Result, Token};
@@ -134,7 +132,7 @@ impl Hash for Attribute {
 
 impl Attribute {
     /// Parses the content of the attribute, consisting of the path and tts, as
-    /// a [`Meta`](enum.Meta.html) if possible.
+    /// a [`Meta`] if possible.
     ///
     /// Deprecated; use `parse_meta` instead.
     #[doc(hidden)]
@@ -175,7 +173,7 @@ impl Attribute {
     }
 
     /// Parses the content of the attribute, consisting of the path and tts, as
-    /// a [`Meta`](enum.Meta.html) if possible.
+    /// a [`Meta`] if possible.
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
         if let Some(ref colon) = self.path.leading_colon {
@@ -412,6 +410,9 @@ ast_enum_of_structs! {
     /// This type is a [syntax tree enum].
     ///
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
+    //
+    // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
+    // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Meta {
         pub Word(Ident),
         /// A structured list within an attribute, like `derive(Copy, Clone)`.

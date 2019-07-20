@@ -439,7 +439,7 @@ mod gen {
     /// default, every method recursively visits the substructure of the input
     /// by invoking the right visitor method of each of its fields.
     ///
-    /// [`Visit`]: trait.Visit.html
+    /// [`Visit`]: visit::Visit
     ///
     /// ```edition2018
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
@@ -475,7 +475,7 @@ mod gen {
     /// By default, every method recursively visits the substructure of the
     /// input by invoking the right visitor method of each of its fields.
     ///
-    /// [`VisitMut`]: trait.VisitMut.html
+    /// [`VisitMut`]: visit_mut::VisitMut
     ///
     /// ```edition2018
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
@@ -511,7 +511,7 @@ mod gen {
     /// By default, every method recursively visits the substructure of the
     /// input by invoking the right visitor method of each of its fields.
     ///
-    /// [`Fold`]: trait.Fold.html
+    /// [`Fold`]: fold::Fold
     ///
     /// ```edition2018
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
@@ -591,7 +591,7 @@ pub use error::{Error, Result};
 /// interop with the compiler in a procedural macro. To parse a
 /// `proc_macro2::TokenStream`, use [`syn::parse2`] instead.
 ///
-/// [`syn::parse2`]: fn.parse2.html
+/// [`syn::parse2`]: parse2
 ///
 /// *This function is available if Syn is built with both the `"parsing"` and
 /// `"proc-macro"` features.*
@@ -638,8 +638,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 /// `proc_macro::TokenStream` provided by the compiler, use [`syn::parse`]
 /// instead.
 ///
-/// [`Macro`]: struct.Macro.html
-/// [`syn::parse`]: fn.parse.html
+/// [`syn::parse`]: parse()
 ///
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]

@@ -24,7 +24,7 @@ pub trait Speculative {
     /// repetition, bypassing the need to involve the downsides associated with
     /// speculative parsing.
     ///
-    /// [`ParseStream::fork`]: ../struct.ParseBuffer.html#method.fork
+    /// [`ParseStream::fork`]: ParseBuffer::fork
     ///
     /// # Example
     ///
@@ -143,7 +143,7 @@ pub trait Speculative {
     /// possible, displaying reasonable errors becomes much more simple.
     ///
     /// [RFC 2544]: https://github.com/rust-lang/rfcs/pull/2544
-    /// [`PathSegment`]: ../../struct.PathSegment.html
+    /// [`PathSegment`]: crate::PathSegment
     ///
     /// # Performance
     ///
