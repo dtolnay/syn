@@ -24,6 +24,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// [module documentation]: index.html
 ///
 /// *This type is available if Syn is built with the `"parsing"` feature.*
+//
+// TODO: change the parse module link to an intra rustdoc link, currently
+// blocked on https://github.com/rust-lang/rust/issues/62830
 pub struct Error {
     // Span is implemented as an index into a thread-local interner to keep the
     // size small. It is not safe to access from a different thread. We want
@@ -48,7 +51,7 @@ impl Error {
     /// Use `Error::new` when the error needs to be triggered on some span other
     /// than where the parse stream is currently positioned.
     ///
-    /// [`ParseStream::error`]: struct.ParseBuffer.html#method.error
+    /// [`ParseStream::error`]: crate::parse::ParseBuffer::error
     ///
     /// # Example
     ///
@@ -135,7 +138,6 @@ impl Error {
     /// this method correctly in a procedural macro.
     ///
     /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
-    /// [`parse_macro_input!`]: ../macro.parse_macro_input.html
     pub fn to_compile_error(&self) -> TokenStream {
         let start = self
             .start_span

@@ -17,8 +17,8 @@ use token::Token;
 ///
 /// Use [`ParseStream::lookahead1`] to construct this object.
 ///
-/// [`ParseStream::peek`]: struct.ParseBuffer.html#method.peek
-/// [`ParseStream::lookahead1`]: struct.ParseBuffer.html#method.lookahead1
+/// [`ParseStream::peek`]: crate::parse::ParseBuffer::peek
+/// [`ParseStream::lookahead1`]: crate::parse::ParseBuffer::lookahead1
 ///
 /// # Example
 ///
@@ -142,7 +142,7 @@ impl<'a> Lookahead1<'a> {
 ///
 /// This trait is sealed and cannot be implemented for types outside of Syn.
 ///
-/// [`ParseStream::peek`]: struct.ParseBuffer.html#method.peek
+/// [`ParseStream::peek`]: crate::parse::ParseBuffer::peek
 pub trait Peek: Sealed {
     // Not public API.
     #[doc(hidden)]

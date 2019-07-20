@@ -227,7 +227,7 @@ pub trait Parse: Sized {
 /// See the methods of this type under the documentation of [`ParseBuffer`]. For
 /// an overview of parsing in Syn, refer to the [module documentation].
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 
 /// Cursor position within a buffered token stream.
@@ -248,7 +248,6 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 /// - One of [the `syn::parse*` functions][syn-parse]; or
 /// - A method of the [`Parser`] trait.
 ///
-/// [`parse_macro_input!`]: ../macro.parse_macro_input.html
 /// [syn-parse]: index.html#the-synparse-functions
 pub struct ParseBuffer<'a> {
     scope: Span,
@@ -292,7 +291,7 @@ impl<'a> Debug for ParseBuffer<'a> {
 ///
 /// This type is the input of the closure provided to [`ParseStream::step`].
 ///
-/// [`ParseStream::step`]: struct.ParseBuffer.html#method.step
+/// [`ParseStream::step`]: ParseBuffer::step
 ///
 /// # Example
 ///
@@ -428,7 +427,7 @@ impl<'a> ParseBuffer<'a> {
     /// The parser below invokes [`Attribute::parse_outer`] to parse a vector of
     /// zero or more outer attributes.
     ///
-    /// [`Attribute::parse_outer`]: ../struct.Attribute.html#method.parse_outer
+    /// [`Attribute::parse_outer`]: crate::Attribute::parse_outer
     ///
     /// ```edition2018
     /// use syn::{Attribute, Ident, Result, Token};
@@ -756,8 +755,8 @@ impl<'a> ParseBuffer<'a> {
     /// For a lower level way to perform speculative parsing at the token level,
     /// consider using [`ParseStream::step`] instead.
     ///
-    /// [`parse::discouraged::Speculative`]: ./discouraged/trait.Speculative.html
-    /// [`ParseStream::step`]: #method.step
+    /// [`parse::discouraged::Speculative`]: discouraged::Speculative
+    /// [`ParseStream::step`]: ParseBuffer::step
     ///
     /// # Example
     ///
@@ -1052,7 +1051,7 @@ impl Parse for Literal {
 ///
 /// Refer to the [module documentation] for details about parsing in Syn.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 ///
 /// *This trait is available if Syn is built with the `"parsing"` feature.*
 pub trait Parser: Sized {

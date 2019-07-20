@@ -32,6 +32,9 @@ ast_enum_of_structs! {
     /// This type is a [syntax tree enum].
     ///
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
+    //
+    // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
+    // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
@@ -61,8 +64,6 @@ impl Fields {
     /// Get an iterator over the borrowed [`Field`] items in this object. This
     /// iterator can be used to iterate over a named or unnamed struct or
     /// variant's fields uniformly.
-    ///
-    /// [`Field`]: struct.Field.html
     pub fn iter(&self) -> punctuated::Iter<Field> {
         match *self {
             Fields::Unit => private::empty_punctuated_iter(),
@@ -74,8 +75,6 @@ impl Fields {
     /// Get an iterator over the mutably borrowed [`Field`] items in this
     /// object. This iterator can be used to iterate over a named or unnamed
     /// struct or variant's fields uniformly.
-    ///
-    /// [`Field`]: struct.Field.html
     pub fn iter_mut(&mut self) -> punctuated::IterMut<Field> {
         match *self {
             Fields::Unit => private::empty_punctuated_iter_mut(),
@@ -139,6 +138,9 @@ ast_enum_of_structs! {
     /// This type is a [syntax tree enum].
     ///
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
+    //
+    // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
+    // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Visibility {
         /// A public visibility level: `pub`.
         ///

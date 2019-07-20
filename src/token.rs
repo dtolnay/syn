@@ -239,7 +239,7 @@ macro_rules! define_keywords {
             /// Don't try to remember the name of this type -- use the [`Token!`]
             /// macro instead.
             ///
-            /// [`Token!`]: index.html
+            /// [`Token!`]: crate::token
             pub struct $name {
                 pub span: Span,
             }
@@ -345,7 +345,7 @@ macro_rules! define_punctuation_structs {
             /// Don't try to remember the name of this type -- use the [`Token!`]
             /// macro instead.
             ///
-            /// [`Token!`]: index.html
+            /// [`Token!`]: crate::token
             pub struct $name {
                 pub spans: [Span; $len],
             }
@@ -708,7 +708,7 @@ macro_rules! export_token_macro {
         ///
         /// See the [token module] documentation for details and examples.
         ///
-        /// [token module]: token/index.html
+        /// [token module]: crate::token
         // Unfortunate duplication due to a rustdoc bug.
         // https://github.com/rust-lang/rust/issues/45939
         #[macro_export]

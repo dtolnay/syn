@@ -248,7 +248,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             ///
             /// See the [module documentation] for details.
             ///
-            /// [module documentation]: index.html
+            /// [module documentation]: self
             ///
             /// *This trait is available if Syn is built with the `"fold"` feature.*
             pub trait Fold {

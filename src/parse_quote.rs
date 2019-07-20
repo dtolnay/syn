@@ -6,7 +6,7 @@
 /// The return type can be any syntax tree node that implements the [`Parse`]
 /// trait.
 ///
-/// [`Parse`]: parse/trait.Parse.html
+/// [`Parse`]: parse::Parse
 ///
 /// ```edition2018
 /// use quote::quote;
@@ -57,14 +57,16 @@
 /// - [`Punctuated<T, P>`] — parses zero or more `T` separated by punctuation
 ///   `P` with optional trailing punctuation
 ///
-/// [`Attribute`]: struct.Attribute.html
-/// [`Punctuated<T, P>`]: punctuated/struct.Punctuated.html
+/// [`Punctuated<T, P>`]: punctuated::Punctuated
 ///
 /// # Panics
 ///
 /// Panics if the tokens fail to parse as the expected syntax tree type. The
 /// caller is responsible for ensuring that the input tokens are syntactically
 /// valid.
+//
+// TODO: allow Punctuated to be inferred as intra doc link, currently blocked on
+// https://github.com/rust-lang/rust/issues/62834
 #[macro_export(local_inner_macros)]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {

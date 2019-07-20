@@ -43,7 +43,7 @@ use token::Token;
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Punctuated<T, P> {
@@ -155,7 +155,7 @@ impl<T, P> Punctuated<T, P> {
     /// Use [`push`] instead if the punctuated sequence may or may not already
     /// have trailing punctuation.
     ///
-    /// [`push`]: #method.push
+    /// [`push`]: Punctuated::push
     ///
     /// # Panics
     ///
@@ -261,7 +261,7 @@ impl<T, P> Punctuated<T, P> {
     /// Like [`parse_terminated`], the entire content of this stream is expected
     /// to be parsed.
     ///
-    /// [`parse_terminated`]: #method.parse_terminated
+    /// [`parse_terminated`]: Punctuated::parse_terminated
     ///
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
@@ -317,7 +317,7 @@ impl<T, P> Punctuated<T, P> {
     /// Like [`parse_separated_nonempty`], may complete early without parsing
     /// the entire content of this stream.
     ///
-    /// [`parse_separated_nonempty`]: #method.parse_separated_nonempty
+    /// [`parse_separated_nonempty`]: Punctuated::parse_separated_nonempty
     ///
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
@@ -453,7 +453,7 @@ impl<T, P> Default for Punctuated<T, P> {
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 pub struct Pairs<'a, T: 'a, P: 'a> {
     inner: slice::Iter<'a, (T, P)>,
     last: option::IntoIter<&'a T>,
@@ -490,7 +490,7 @@ impl<'a, T, P> Clone for Pairs<'a, T, P> {
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 pub struct PairsMut<'a, T: 'a, P: 'a> {
     inner: slice::IterMut<'a, (T, P)>,
     last: option::IntoIter<&'a mut T>,
@@ -517,7 +517,7 @@ impl<'a, T, P> ExactSizeIterator for PairsMut<'a, T, P> {
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 #[derive(Clone)]
 pub struct IntoPairs<T, P> {
     inner: vec::IntoIter<(T, P)>,
@@ -545,7 +545,7 @@ impl<T, P> ExactSizeIterator for IntoPairs<T, P> {
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 #[derive(Clone)]
 pub struct IntoIter<T, P> {
     inner: vec::IntoIter<T>,
@@ -572,7 +572,7 @@ impl<T, P> ExactSizeIterator for IntoIter<T, P> {
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 pub struct Iter<'a, T: 'a> {
     // The `Item = &'a T` needs to be specified to support rustc 1.31 and older.
     // On modern compilers we would be able to write just IterTrait<'a, T> where
@@ -661,7 +661,7 @@ where
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 pub struct IterMut<'a, T: 'a> {
     inner: Box<ExactSizeIterator<Item = &'a mut T> + 'a>,
 }
@@ -716,7 +716,7 @@ impl<'a, T, P> ExactSizeIterator for PrivateIterMut<'a, T, P> {
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
-/// [module documentation]: index.html
+/// [module documentation]: self
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub enum Pair<T, P> {
     Punctuated(T, P),
