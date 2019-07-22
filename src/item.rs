@@ -1735,6 +1735,7 @@ pub mod parsing {
                 if lookahead.peek(Ident) {
                     input.parse().map(TraitItem::Const)
                 } else if lookahead.peek(Token![unsafe])
+                    || lookahead.peek(Token![async])
                     || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![fn])
                 {
@@ -1743,6 +1744,7 @@ pub mod parsing {
                     Err(lookahead.error())
                 }
             } else if lookahead.peek(Token![unsafe])
+                || lookahead.peek(Token![async])
                 || lookahead.peek(Token![extern])
                 || lookahead.peek(Token![fn])
             {
@@ -1804,6 +1806,7 @@ pub mod parsing {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let constness: Option<Token![const]> = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
+            let asyncness: Option<Token![async]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
             let ident: Ident = input.parse()?;
@@ -1834,7 +1837,7 @@ pub mod parsing {
                 attrs: private::attrs(outer_attrs, inner_attrs),
                 sig: MethodSig {
                     constness: constness,
-                    asyncness: None,
+                    asyncness: asyncness,
                     unsafety: unsafety,
                     abi: abi,
                     ident: ident,
