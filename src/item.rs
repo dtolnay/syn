@@ -1734,8 +1734,8 @@ pub mod parsing {
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) {
                     input.parse().map(TraitItem::Const)
-                } else if lookahead.peek(Token![unsafe])
-                    || lookahead.peek(Token![async])
+                } else if lookahead.peek(Token![async])
+                    || lookahead.peek(Token![unsafe])
                     || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![fn])
                 {
@@ -1743,8 +1743,8 @@ pub mod parsing {
                 } else {
                     Err(lookahead.error())
                 }
-            } else if lookahead.peek(Token![unsafe])
-                || lookahead.peek(Token![async])
+            } else if lookahead.peek(Token![async])
+                || lookahead.peek(Token![unsafe])
                 || lookahead.peek(Token![extern])
                 || lookahead.peek(Token![fn])
             {
@@ -1805,8 +1805,8 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let constness: Option<Token![const]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
             let ident: Ident = input.parse()?;
