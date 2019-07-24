@@ -812,7 +812,8 @@ pub mod parsing {
                     bounds: {
                         let mut bounds = Punctuated::new();
                         loop {
-                            if input.peek(token::Brace)
+                            if input.is_empty()
+                                || input.peek(token::Brace)
                                 || input.peek(Token![,])
                                 || input.peek(Token![;])
                                 || input.peek(Token![:])
@@ -839,7 +840,8 @@ pub mod parsing {
                     bounds: {
                         let mut bounds = Punctuated::new();
                         loop {
-                            if input.peek(token::Brace)
+                            if input.is_empty()
+                                || input.peek(token::Brace)
                                 || input.peek(Token![,])
                                 || input.peek(Token![;])
                                 || input.peek(Token![:]) && !input.peek(Token![::])
