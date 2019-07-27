@@ -128,7 +128,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
                 #assert_sync
                 #assert_sized
 
-                static ONCE: std::sync::Once = std::sync::ONCE_INIT;
+                static ONCE: std::sync::Once = std::sync::Once::new();
                 static mut VALUE: *mut #ty = 0 as *mut #ty;
 
                 unsafe {
