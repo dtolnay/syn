@@ -5,7 +5,7 @@ rust:
   - nightly
   - stable
   - beta
-  - 1.15.1
+  - 1.31.0
 
 before_script:
   - set -o errexit
