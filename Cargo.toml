@@ -1,5 +1,5 @@
 [package]
-name = "syn"
+name = "syn-next"
 version = "0.15.42" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT OR Apache-2.0"
@@ -18,6 +18,10 @@ include = [
     "/src/**",
     "/tests/**",
 ]
+publish = false # contains breaking changes
+
+[lib]
+name = "syn"
 
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
