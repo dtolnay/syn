@@ -28,17 +28,17 @@ default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
 derive = []
 full = []
 parsing = []
-printing = ["quote"]
+printing = ["quote-next"]
 visit = []
 visit-mut = []
 fold = []
 clone-impls = []
 extra-traits = []
-proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
+proc-macro = ["proc-macro2-next/proc-macro", "quote-next/proc-macro"]
 
 [dependencies]
-proc-macro2 = { version = "0.4.4", default-features = false }
-quote = { version = "0.6", optional = true, default-features = false }
+proc-macro2-next = { version = "0.4.4", default-features = false }
+quote-next = { version = "0.6", optional = true, default-features = false }
 unicode-xid = "0.1"
 
 [dev-dependencies]
@@ -71,3 +71,7 @@ travis-ci = { repository = "dtolnay/syn" }
 
 [workspace]
 members = ["dev", "json"]
+
+[patch.crates-io]
+proc-macro2-next = { git = "https://github.com/alexcrichton/proc-macro2", branch = "next" }
+quote-next = { git = "https://github.com/dtolnay/quote" }
