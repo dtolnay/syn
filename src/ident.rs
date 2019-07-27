@@ -1,11 +1,11 @@
 #[cfg(feature = "parsing")]
-use buffer::Cursor;
+use crate::buffer::Cursor;
 #[cfg(feature = "parsing")]
-use parse::{Parse, ParseStream, Result};
+use crate::parse::{Parse, ParseStream, Result};
 #[cfg(feature = "parsing")]
-use token::Token;
+use crate::token::Token;
 #[cfg(feature = "parsing")]
-use {lookahead, private};
+use crate::{lookahead, private};
 
 pub use proc_macro2::Ident;
 
@@ -89,7 +89,7 @@ impl From<Token![_]> for Ident {
 impl private {
     #[cfg(syn_can_use_associated_constants)]
     pub fn peek_any_ident(input: ParseStream) -> bool {
-        use ext::IdentExt;
+        use crate::ext::IdentExt;
         input.peek(Ident::peek_any)
     }
 

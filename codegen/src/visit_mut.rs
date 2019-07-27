@@ -202,12 +202,12 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         VISIT_MUT_SRC,
         quote! {
-            use *;
+            use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]
-            use punctuated::Punctuated;
+            use crate::punctuated::Punctuated;
             use proc_macro2::Span;
             #[cfg(any(feature = "full", feature = "derive"))]
-            use gen::helper::visit_mut::*;
+            use crate::gen::helper::visit_mut::*;
 
             #full_macro
 

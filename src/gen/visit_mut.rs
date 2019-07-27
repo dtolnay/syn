@@ -2,11 +2,11 @@
 // It is not intended for manual editing.
 
 #[cfg(any(feature = "full", feature = "derive"))]
-use gen::helper::visit_mut::*;
-use proc_macro2::Span;
+use crate::gen::helper::visit_mut::*;
 #[cfg(any(feature = "full", feature = "derive"))]
-use punctuated::Punctuated;
-use *;
+use crate::punctuated::Punctuated;
+use crate::*;
+use proc_macro2::Span;
 #[cfg(feature = "full")]
 macro_rules! full {
     ($e:expr) => {

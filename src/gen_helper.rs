@@ -1,8 +1,8 @@
 #[cfg(feature = "fold")]
 pub mod fold {
-    use fold::Fold;
+    use crate::fold::Fold;
+    use crate::punctuated::{Pair, Punctuated};
     use proc_macro2::Span;
-    use punctuated::{Pair, Punctuated};
 
     pub trait FoldHelper {
         type Item;
@@ -73,8 +73,8 @@ pub mod fold {
 
 #[cfg(feature = "visit")]
 pub mod visit {
+    use crate::visit::Visit;
     use proc_macro2::Span;
-    use visit::Visit;
 
     pub fn tokens_helper<'ast, V: Visit<'ast> + ?Sized, S: Spans>(visitor: &mut V, spans: &'ast S) {
         spans.visit(visitor);
@@ -114,8 +114,8 @@ pub mod visit {
 
 #[cfg(feature = "visit-mut")]
 pub mod visit_mut {
+    use crate::visit_mut::VisitMut;
     use proc_macro2::Span;
-    use visit_mut::VisitMut;
 
     pub fn tokens_helper<V: VisitMut + ?Sized, S: Spans>(visitor: &mut V, spans: &mut S) {
         spans.visit_mut(visitor);

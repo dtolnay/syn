@@ -9,10 +9,10 @@ use proc_macro2::{
 use quote::ToTokens;
 
 #[cfg(feature = "parsing")]
-use buffer::Cursor;
+use crate::buffer::Cursor;
 #[cfg(all(procmacro2_semver_exempt, feature = "parsing"))]
-use private;
-use thread::ThreadBound;
+use crate::private;
+use crate::thread::ThreadBound;
 
 /// The result of a Syn parser.
 pub type Result<T> = std::result::Result<T, Error>;

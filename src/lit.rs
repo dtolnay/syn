@@ -13,9 +13,9 @@ use proc_macro2::TokenTree;
 use std::hash::{Hash, Hasher};
 
 #[cfg(feature = "parsing")]
-use lookahead;
+use crate::lookahead;
 #[cfg(feature = "parsing")]
-use parse::{Parse, Parser, Result};
+use crate::parse::{Parse, Parser, Result};
 
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
@@ -203,7 +203,7 @@ impl LitStr {
 
         // Parse string literal into a token stream with every span equal to the
         // original literal's span.
-        let mut tokens = ::parse_str(&self.value())?;
+        let mut tokens = crate::parse_str(&self.value())?;
         tokens = respan_token_stream(tokens, self.span());
 
         parser.parse2(tokens)
@@ -480,7 +480,7 @@ pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {

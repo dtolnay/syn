@@ -578,7 +578,7 @@ struct private;
 ////////////////////////////////////////////////////////////////////////////////
 
 mod error;
-pub use error::{Error, Result};
+pub use crate::error::{Error, Result};
 
 /// Parse tokens of source code into the chosen syntax tree node.
 ///

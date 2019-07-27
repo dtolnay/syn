@@ -32,11 +32,11 @@ use std::slice;
 use std::vec;
 
 #[cfg(feature = "parsing")]
-use parse::{Parse, ParseStream, Result};
+use crate::parse::{Parse, ParseStream, Result};
 #[cfg(any(feature = "full", feature = "derive"))]
-use private;
+use crate::private;
 #[cfg(feature = "parsing")]
-use token::Token;
+use crate::token::Token;
 
 /// A punctuated sequence of syntax tree nodes of type `T` separated by
 /// punctuation of type `P`.

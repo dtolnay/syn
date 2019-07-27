@@ -3,11 +3,11 @@
 
 #![cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
 #[cfg(any(feature = "full", feature = "derive"))]
-use gen::helper::visit::*;
-use proc_macro2::Span;
+use crate::gen::helper::visit::*;
 #[cfg(any(feature = "full", feature = "derive"))]
-use punctuated::Punctuated;
-use *;
+use crate::punctuated::Punctuated;
+use crate::*;
+use proc_macro2::Span;
 #[cfg(feature = "full")]
 macro_rules! full {
     ($e:expr) => {

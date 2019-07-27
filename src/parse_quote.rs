@@ -96,7 +96,7 @@ macro_rules! quote_impl {
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Parse.
 
-use parse::{Parse, ParseStream, Parser, Result};
+use crate::parse::{Parse, ParseStream, Parser, Result};
 use proc_macro2::TokenStream;
 
 // Not public API.
@@ -124,9 +124,9 @@ impl<T: Parse> ParseQuote for T {
 ////////////////////////////////////////////////////////////////////////////////
 // Any other types that we want `parse_quote!` to be able to parse.
 
-use punctuated::Punctuated;
+use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
-use {attr, Attribute};
+use crate::{attr, Attribute};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {

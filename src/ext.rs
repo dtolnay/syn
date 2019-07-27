@@ -4,16 +4,16 @@
 
 use proc_macro2::Ident;
 
-use parse::{ParseStream, Result};
+use crate::parse::{ParseStream, Result};
 
 #[cfg(syn_can_use_associated_constants)]
-use buffer::Cursor;
+use crate::buffer::Cursor;
 #[cfg(syn_can_use_associated_constants)]
-use parse::Peek;
+use crate::parse::Peek;
 #[cfg(syn_can_use_associated_constants)]
-use sealed::lookahead;
+use crate::sealed::lookahead;
 #[cfg(syn_can_use_associated_constants)]
-use token::CustomToken;
+use crate::token::CustomToken;
 
 /// Additional methods for `Ident` not provided by proc-macro2 or libproc_macro.
 ///

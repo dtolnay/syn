@@ -206,15 +206,15 @@ use std::str::FromStr;
 use proc_macro;
 use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
-use buffer::{Cursor, TokenBuffer};
-use error;
-use lookahead;
-use private;
-use punctuated::Punctuated;
-use token::Token;
+use crate::buffer::{Cursor, TokenBuffer};
+use crate::error;
+use crate::lookahead;
+use crate::private;
+use crate::punctuated::Punctuated;
+use crate::token::Token;
 
-pub use error::{Error, Result};
-pub use lookahead::{Lookahead1, Peek};
+pub use crate::error::{Error, Result};
+pub use crate::lookahead::{Lookahead1, Peek};
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.

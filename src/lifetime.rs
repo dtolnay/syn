@@ -6,7 +6,7 @@ use proc_macro2::{Ident, Span};
 use unicode_xid::UnicodeXID;
 
 #[cfg(feature = "parsing")]
-use lookahead;
+use crate::lookahead;
 
 /// A Rust lifetime: `'a`.
 ///
@@ -124,7 +124,7 @@ pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {

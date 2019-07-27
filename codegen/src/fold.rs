@@ -235,12 +235,12 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             // Unreachable code is generated sometimes without the full feature.
             #![allow(unreachable_code)]
 
-            use *;
+            use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]
-            use token::{Brace, Bracket, Paren, Group};
+            use crate::token::{Brace, Bracket, Paren, Group};
             use proc_macro2::Span;
             #[cfg(any(feature = "full", feature = "derive"))]
-            use gen::helper::fold::*;
+            use crate::gen::helper::fold::*;
 
             #full_macro
 

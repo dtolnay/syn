@@ -204,12 +204,12 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             #![cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
 
-            use *;
+            use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]
-            use punctuated::Punctuated;
+            use crate::punctuated::Punctuated;
             use proc_macro2::Span;
             #[cfg(any(feature = "full", feature = "derive"))]
-            use gen::helper::visit::*;
+            use crate::gen::helper::visit::*;
 
             #full_macro
 

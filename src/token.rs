@@ -109,20 +109,20 @@ use quote::{ToTokens, TokenStreamExt};
 
 use self::private::WithSpan;
 #[cfg(feature = "parsing")]
-use buffer::Cursor;
+use crate::buffer::Cursor;
 #[cfg(feature = "parsing")]
-use error::Result;
+use crate::error::Result;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
-use lifetime::Lifetime;
+use crate::lifetime::Lifetime;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
-use lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
+use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
-use lookahead;
+use crate::lookahead;
 #[cfg(feature = "parsing")]
-use parse::{Parse, ParseStream};
-use span::IntoSpans;
+use crate::parse::{Parse, ParseStream};
+use crate::span::IntoSpans;
 
 /// Marker trait for types that represent single tokens.
 ///
@@ -163,7 +163,7 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
 
     let scope = Span::call_site();
     let unexpected = Rc::new(Cell::new(None));
-    let buffer = ::private::new_parse_buffer(scope, cursor, unexpected);
+    let buffer = crate::private::new_parse_buffer(scope, cursor, unexpected);
     peek(&buffer)
 }
 
@@ -836,10 +836,10 @@ pub use self::SelfValue as Self_;
 pub mod parsing {
     use proc_macro2::{Spacing, Span};
 
-    use buffer::Cursor;
-    use error::{Error, Result};
-    use parse::ParseStream;
-    use span::FromSpans;
+    use crate::buffer::Cursor;
+    use crate::error::{Error, Result};
+    use crate::parse::ParseStream;
+    use crate::span::FromSpans;
 
     pub fn keyword(input: ParseStream, token: &str) -> Result<Span> {
         input.step(|cursor| {

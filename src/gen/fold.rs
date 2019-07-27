@@ -3,11 +3,11 @@
 
 #![allow(unreachable_code)]
 #[cfg(any(feature = "full", feature = "derive"))]
-use gen::helper::fold::*;
-use proc_macro2::Span;
+use crate::gen::helper::fold::*;
 #[cfg(any(feature = "full", feature = "derive"))]
-use token::{Brace, Bracket, Group, Paren};
-use *;
+use crate::token::{Brace, Bracket, Group, Paren};
+use crate::*;
+use proc_macro2::Span;
 #[cfg(feature = "full")]
 macro_rules! full {
     ($e:expr) => {

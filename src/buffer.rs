@@ -17,8 +17,8 @@ use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenS
 use std::marker::PhantomData;
 use std::ptr;
 
-use private;
-use Lifetime;
+use crate::private;
+use crate::Lifetime;
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.

@@ -57,7 +57,7 @@ macro_rules! parse_macro_input {
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Parse.
 
-use parse::{Parse, ParseStream, Parser, Result};
+use crate::parse::{Parse, ParseStream, Parser, Result};
 use proc_macro::TokenStream;
 
 // Not public API.
@@ -82,7 +82,7 @@ impl<T: Parse> ParseMacroInput for T {
 // Any other types that we want `parse_macro_input!` to be able to parse.
 
 #[cfg(any(feature = "full", feature = "derive"))]
-use AttributeArgs;
+use crate::AttributeArgs;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseMacroInput for AttributeArgs {

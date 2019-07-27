@@ -1,9 +1,9 @@
 use proc_macro2::{Delimiter, Span};
 
-use error::Result;
-use parse::ParseBuffer;
-use private;
-use token;
+use crate::error::Result;
+use crate::parse::ParseBuffer;
+use crate::private;
+use crate::token;
 
 // Not public API.
 #[doc(hidden)]
