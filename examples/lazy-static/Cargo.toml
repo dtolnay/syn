@@ -1,2 +1,6 @@
 [workspace]
 members = ["example", "lazy-static"]
+
+[patch.crates-io]
+proc-macro2-next = { git = "https://github.com/alexcrichton/proc-macro2", branch = "next" }
+quote-next = { git = "https://github.com/dtolnay/quote" }

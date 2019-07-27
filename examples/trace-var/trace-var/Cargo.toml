@@ -9,6 +9,6 @@ publish = false
 proc-macro = true
 
 [dependencies]
-syn = { path = "../../../", features = ["full", "fold"] }
-quote = "0.6"
-proc-macro2 = { version = "0.4", features = ["nightly"] }
+syn-next = { path = "../../../", features = ["full", "fold"] }
+quote-next = "0.6"
+proc-macro2-next = { version = "0.4", features = ["nightly"] }

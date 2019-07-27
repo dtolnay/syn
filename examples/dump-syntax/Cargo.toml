@@ -6,12 +6,15 @@ edition = "2018"
 publish = false
 
 [dependencies]
-proc-macro2 = { version = "0.4.27", features = ["span-locations"] }
+proc-macro2-next = { version = "0.4.27", features = ["span-locations"] }
 colored = "1.7"
 
-[dependencies.syn]
+[dependencies.syn-next]
 path = "../.."
 default-features = false
 features = ["parsing", "full", "extra-traits"]
 
 [workspace]
+
+[patch.crates-io]
+proc-macro2-next = { git = "https://github.com/alexcrichton/proc-macro2", branch = "next" }
