@@ -23,3 +23,7 @@ syn-codegen = { path = "../json" }
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of
 # rustfmt in the codegen directory.
+
+[patch.crates-io]
+proc-macro2-next = { git = "https://github.com/alexcrichton/proc-macro2", branch = "next" }
+quote-next = { git = "https://github.com/dtolnay/quote" }
