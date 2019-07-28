@@ -2659,44 +2659,44 @@ pub fn visit_parenthesized_generic_arguments<'ast, V: Visit<'ast> + ?Sized>(
 #[cfg(feature = "full")]
 pub fn visit_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat) {
     match *_i {
-        Pat::Wild(ref _binding_0) => {
-            _visitor.visit_pat_wild(_binding_0);
+        Pat::Box(ref _binding_0) => {
+            _visitor.visit_pat_box(_binding_0);
         }
         Pat::Ident(ref _binding_0) => {
             _visitor.visit_pat_ident(_binding_0);
         }
-        Pat::Struct(ref _binding_0) => {
-            _visitor.visit_pat_struct(_binding_0);
-        }
-        Pat::TupleStruct(ref _binding_0) => {
-            _visitor.visit_pat_tuple_struct(_binding_0);
-        }
-        Pat::Path(ref _binding_0) => {
-            _visitor.visit_pat_path(_binding_0);
-        }
-        Pat::Tuple(ref _binding_0) => {
-            _visitor.visit_pat_tuple(_binding_0);
-        }
-        Pat::Box(ref _binding_0) => {
-            _visitor.visit_pat_box(_binding_0);
-        }
-        Pat::Ref(ref _binding_0) => {
-            _visitor.visit_pat_ref(_binding_0);
-        }
         Pat::Lit(ref _binding_0) => {
             _visitor.visit_pat_lit(_binding_0);
-        }
-        Pat::Range(ref _binding_0) => {
-            _visitor.visit_pat_range(_binding_0);
-        }
-        Pat::Slice(ref _binding_0) => {
-            _visitor.visit_pat_slice(_binding_0);
         }
         Pat::Macro(ref _binding_0) => {
             _visitor.visit_pat_macro(_binding_0);
         }
+        Pat::Path(ref _binding_0) => {
+            _visitor.visit_pat_path(_binding_0);
+        }
+        Pat::Range(ref _binding_0) => {
+            _visitor.visit_pat_range(_binding_0);
+        }
+        Pat::Ref(ref _binding_0) => {
+            _visitor.visit_pat_ref(_binding_0);
+        }
+        Pat::Slice(ref _binding_0) => {
+            _visitor.visit_pat_slice(_binding_0);
+        }
+        Pat::Struct(ref _binding_0) => {
+            _visitor.visit_pat_struct(_binding_0);
+        }
+        Pat::Tuple(ref _binding_0) => {
+            _visitor.visit_pat_tuple(_binding_0);
+        }
+        Pat::TupleStruct(ref _binding_0) => {
+            _visitor.visit_pat_tuple_struct(_binding_0);
+        }
         Pat::Verbatim(ref _binding_0) => {
             _visitor.visit_pat_verbatim(_binding_0);
+        }
+        Pat::Wild(ref _binding_0) => {
+            _visitor.visit_pat_wild(_binding_0);
         }
     }
 }

@@ -766,11 +766,12 @@ ast_enum_of_structs! {
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Pat {
-        /// A pattern that matches any value: `_`.
+        /// A box pattern: `box v`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Wild(PatWild {
-            pub underscore_token: Token![_],
+        pub Box(PatBox {
+            pub box_token: Token![box],
+            pub pat: Box<Pat>,
         }),
 
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
@@ -783,22 +784,21 @@ ast_enum_of_structs! {
             pub subpat: Option<(Token![@], Box<Pat>)>,
         }),
 
-        /// A struct or struct variant pattern: `Variant { x, y, .. }`.
+        /// A literal pattern: `0`.
+        ///
+        /// This holds an `Expr` rather than a `Lit` because negative numbers
+        /// are represented as an `Expr::Unary`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Struct(PatStruct {
-            pub path: Path,
-            pub brace_token: token::Brace,
-            pub fields: Punctuated<FieldPat, Token![,]>,
-            pub dot2_token: Option<Token![..]>,
+        pub Lit(PatLit {
+            pub expr: Box<Expr>,
         }),
 
-        /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
+        /// A macro in expression position.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub TupleStruct(PatTupleStruct {
-            pub path: Path,
-            pub pat: PatTuple,
+        pub Macro(PatMacro {
+            pub mac: Macro,
         }),
 
         /// A path pattern like `Color::Red`, optionally qualified with a
@@ -815,23 +815,13 @@ ast_enum_of_structs! {
             pub path: Path,
         }),
 
-        /// A tuple pattern: `(a, b)`.
+        /// A range pattern: `1..=2`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Tuple(PatTuple {
-            pub paren_token: token::Paren,
-            pub front: Punctuated<Pat, Token![,]>,
-            pub dot2_token: Option<Token![..]>,
-            pub comma_token: Option<Token![,]>,
-            pub back: Punctuated<Pat, Token![,]>,
-        }),
-
-        /// A box pattern: `box v`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Box(PatBox {
-            pub box_token: Token![box],
-            pub pat: Box<Pat>,
+        pub Range(PatRange {
+            pub lo: Box<Expr>,
+            pub limits: RangeLimits,
+            pub hi: Box<Expr>,
         }),
 
         /// A reference pattern: `&mut (first, second)`.
@@ -841,25 +831,6 @@ ast_enum_of_structs! {
             pub and_token: Token![&],
             pub mutability: Option<Token![mut]>,
             pub pat: Box<Pat>,
-        }),
-
-        /// A literal pattern: `0`.
-        ///
-        /// This holds an `Expr` rather than a `Lit` because negative numbers
-        /// are represented as an `Expr::Unary`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Lit(PatLit {
-            pub expr: Box<Expr>,
-        }),
-
-        /// A range pattern: `1..=2`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Range(PatRange {
-            pub lo: Box<Expr>,
-            pub limits: RangeLimits,
-            pub hi: Box<Expr>,
         }),
 
         /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
@@ -874,11 +845,33 @@ ast_enum_of_structs! {
             pub back: Punctuated<Pat, Token![,]>,
         }),
 
-        /// A macro in expression position.
+        /// A struct or struct variant pattern: `Variant { x, y, .. }`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Macro(PatMacro {
-            pub mac: Macro,
+        pub Struct(PatStruct {
+            pub path: Path,
+            pub brace_token: token::Brace,
+            pub fields: Punctuated<FieldPat, Token![,]>,
+            pub dot2_token: Option<Token![..]>,
+        }),
+
+        /// A tuple pattern: `(a, b)`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Tuple(PatTuple {
+            pub paren_token: token::Paren,
+            pub front: Punctuated<Pat, Token![,]>,
+            pub dot2_token: Option<Token![..]>,
+            pub comma_token: Option<Token![,]>,
+            pub back: Punctuated<Pat, Token![,]>,
+        }),
+
+        /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub TupleStruct(PatTupleStruct {
+            pub path: Path,
+            pub pat: PatTuple,
         }),
 
         /// Tokens in pattern position not interpreted by Syn.
@@ -886,6 +879,13 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(PatVerbatim #manual_extra_traits {
             pub tokens: TokenStream,
+        }),
+
+        /// A pattern that matches any value: `_`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Wild(PatWild {
+            pub underscore_token: Token![_],
         }),
     }
 }

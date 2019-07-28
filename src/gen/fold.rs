@@ -2341,21 +2341,21 @@ pub fn fold_parenthesized_generic_arguments<V: Fold + ?Sized>(
 #[cfg(feature = "full")]
 pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
     match _i {
-        Pat::Wild(_binding_0) => Pat::Wild(_visitor.fold_pat_wild(_binding_0)),
+        Pat::Box(_binding_0) => Pat::Box(_visitor.fold_pat_box(_binding_0)),
         Pat::Ident(_binding_0) => Pat::Ident(_visitor.fold_pat_ident(_binding_0)),
+        Pat::Lit(_binding_0) => Pat::Lit(_visitor.fold_pat_lit(_binding_0)),
+        Pat::Macro(_binding_0) => Pat::Macro(_visitor.fold_pat_macro(_binding_0)),
+        Pat::Path(_binding_0) => Pat::Path(_visitor.fold_pat_path(_binding_0)),
+        Pat::Range(_binding_0) => Pat::Range(_visitor.fold_pat_range(_binding_0)),
+        Pat::Ref(_binding_0) => Pat::Ref(_visitor.fold_pat_ref(_binding_0)),
+        Pat::Slice(_binding_0) => Pat::Slice(_visitor.fold_pat_slice(_binding_0)),
         Pat::Struct(_binding_0) => Pat::Struct(_visitor.fold_pat_struct(_binding_0)),
+        Pat::Tuple(_binding_0) => Pat::Tuple(_visitor.fold_pat_tuple(_binding_0)),
         Pat::TupleStruct(_binding_0) => {
             Pat::TupleStruct(_visitor.fold_pat_tuple_struct(_binding_0))
         }
-        Pat::Path(_binding_0) => Pat::Path(_visitor.fold_pat_path(_binding_0)),
-        Pat::Tuple(_binding_0) => Pat::Tuple(_visitor.fold_pat_tuple(_binding_0)),
-        Pat::Box(_binding_0) => Pat::Box(_visitor.fold_pat_box(_binding_0)),
-        Pat::Ref(_binding_0) => Pat::Ref(_visitor.fold_pat_ref(_binding_0)),
-        Pat::Lit(_binding_0) => Pat::Lit(_visitor.fold_pat_lit(_binding_0)),
-        Pat::Range(_binding_0) => Pat::Range(_visitor.fold_pat_range(_binding_0)),
-        Pat::Slice(_binding_0) => Pat::Slice(_visitor.fold_pat_slice(_binding_0)),
-        Pat::Macro(_binding_0) => Pat::Macro(_visitor.fold_pat_macro(_binding_0)),
         Pat::Verbatim(_binding_0) => Pat::Verbatim(_visitor.fold_pat_verbatim(_binding_0)),
+        Pat::Wild(_binding_0) => Pat::Wild(_visitor.fold_pat_wild(_binding_0)),
     }
 }
 #[cfg(feature = "full")]

@@ -4131,9 +4131,9 @@
         ]
       },
       "variants": {
-        "Wild": [
+        "Box": [
           {
-            "syn": "PatWild"
+            "syn": "PatBox"
           }
         ],
         "Ident": [
@@ -4141,49 +4141,9 @@
             "syn": "PatIdent"
           }
         ],
-        "Struct": [
-          {
-            "syn": "PatStruct"
-          }
-        ],
-        "TupleStruct": [
-          {
-            "syn": "PatTupleStruct"
-          }
-        ],
-        "Path": [
-          {
-            "syn": "PatPath"
-          }
-        ],
-        "Tuple": [
-          {
-            "syn": "PatTuple"
-          }
-        ],
-        "Box": [
-          {
-            "syn": "PatBox"
-          }
-        ],
-        "Ref": [
-          {
-            "syn": "PatRef"
-          }
-        ],
         "Lit": [
           {
             "syn": "PatLit"
-          }
-        ],
-        "Range": [
-          {
-            "syn": "PatRange"
-          }
-        ],
-        "Slice": [
-          {
-            "syn": "PatSlice"
           }
         ],
         "Macro": [
@@ -4191,9 +4151,49 @@
             "syn": "PatMacro"
           }
         ],
+        "Path": [
+          {
+            "syn": "PatPath"
+          }
+        ],
+        "Range": [
+          {
+            "syn": "PatRange"
+          }
+        ],
+        "Ref": [
+          {
+            "syn": "PatRef"
+          }
+        ],
+        "Slice": [
+          {
+            "syn": "PatSlice"
+          }
+        ],
+        "Struct": [
+          {
+            "syn": "PatStruct"
+          }
+        ],
+        "Tuple": [
+          {
+            "syn": "PatTuple"
+          }
+        ],
+        "TupleStruct": [
+          {
+            "syn": "PatTupleStruct"
+          }
+        ],
         "Verbatim": [
           {
             "syn": "PatVerbatim"
+          }
+        ],
+        "Wild": [
+          {
+            "syn": "PatWild"
           }
         ]
       }

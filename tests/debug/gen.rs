@@ -4198,8 +4198,9 @@ impl Debug for Lite<syn::Pat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Pat::Wild(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Wild");
+            syn::Pat::Box(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Box");
+                formatter.field("pat", Lite(&_val.pat));
                 formatter.finish()
             }
             syn::Pat::Ident(_val) => {
@@ -4247,30 +4248,14 @@ impl Debug for Lite<syn::Pat> {
                 }
                 formatter.finish()
             }
-            syn::Pat::Struct(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Struct");
-                formatter.field("path", Lite(&_val.path));
-                if !_val.fields.is_empty() {
-                    formatter.field("fields", Lite(&_val.fields));
-                }
-                if let Some(val) = &_val.dot2_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Dot2);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("dot2_token", Print::ref_cast(val));
-                }
+            syn::Pat::Lit(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Lit");
+                formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
-            syn::Pat::TupleStruct(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::TupleStruct");
-                formatter.field("path", Lite(&_val.path));
-                formatter.field("pat", Lite(&_val.pat));
+            syn::Pat::Macro(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Macro");
+                formatter.field("mac", Lite(&_val.mac));
                 formatter.finish()
             }
             syn::Pat::Path(_val) => {
@@ -4294,43 +4279,11 @@ impl Debug for Lite<syn::Pat> {
                 formatter.field("path", Lite(&_val.path));
                 formatter.finish()
             }
-            syn::Pat::Tuple(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Tuple");
-                if !_val.front.is_empty() {
-                    formatter.field("front", Lite(&_val.front));
-                }
-                if let Some(val) = &_val.dot2_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Dot2);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("dot2_token", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.comma_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Comma);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("comma_token", Print::ref_cast(val));
-                }
-                if !_val.back.is_empty() {
-                    formatter.field("back", Lite(&_val.back));
-                }
-                formatter.finish()
-            }
-            syn::Pat::Box(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Box");
-                formatter.field("pat", Lite(&_val.pat));
+            syn::Pat::Range(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Range");
+                formatter.field("lo", Lite(&_val.lo));
+                formatter.field("limits", Lite(&_val.limits));
+                formatter.field("hi", Lite(&_val.hi));
                 formatter.finish()
             }
             syn::Pat::Ref(_val) => {
@@ -4348,18 +4301,6 @@ impl Debug for Lite<syn::Pat> {
                     formatter.field("mutability", Print::ref_cast(val));
                 }
                 formatter.field("pat", Lite(&_val.pat));
-                formatter.finish()
-            }
-            syn::Pat::Lit(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Lit");
-                formatter.field("expr", Lite(&_val.expr));
-                formatter.finish()
-            }
-            syn::Pat::Range(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Range");
-                formatter.field("lo", Lite(&_val.lo));
-                formatter.field("limits", Lite(&_val.limits));
-                formatter.field("hi", Lite(&_val.hi));
                 formatter.finish()
             }
             syn::Pat::Slice(_val) => {
@@ -4412,14 +4353,73 @@ impl Debug for Lite<syn::Pat> {
                 }
                 formatter.finish()
             }
-            syn::Pat::Macro(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Macro");
-                formatter.field("mac", Lite(&_val.mac));
+            syn::Pat::Struct(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Struct");
+                formatter.field("path", Lite(&_val.path));
+                if !_val.fields.is_empty() {
+                    formatter.field("fields", Lite(&_val.fields));
+                }
+                if let Some(val) = &_val.dot2_token {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Dot2);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("dot2_token", Print::ref_cast(val));
+                }
+                formatter.finish()
+            }
+            syn::Pat::Tuple(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Tuple");
+                if !_val.front.is_empty() {
+                    formatter.field("front", Lite(&_val.front));
+                }
+                if let Some(val) = &_val.dot2_token {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Dot2);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("dot2_token", Print::ref_cast(val));
+                }
+                if let Some(val) = &_val.comma_token {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Comma);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("comma_token", Print::ref_cast(val));
+                }
+                if !_val.back.is_empty() {
+                    formatter.field("back", Lite(&_val.back));
+                }
+                formatter.finish()
+            }
+            syn::Pat::TupleStruct(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::TupleStruct");
+                formatter.field("path", Lite(&_val.path));
+                formatter.field("pat", Lite(&_val.pat));
                 formatter.finish()
             }
             syn::Pat::Verbatim(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Verbatim");
                 formatter.field("tokens", Lite(&_val.tokens));
+                formatter.finish()
+            }
+            syn::Pat::Wild(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Wild");
                 formatter.finish()
             }
         }
