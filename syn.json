@@ -3952,9 +3952,9 @@
         ]
       },
       "variants": {
-        "Word": [
+        "Path": [
           {
-            "proc_macro2": "Ident"
+            "syn": "Path"
           }
         ],
         "List": [
@@ -3978,8 +3978,8 @@
         ]
       },
       "fields": {
-        "ident": {
-          "proc_macro2": "Ident"
+        "path": {
+          "syn": "Path"
         },
         "paren_token": {
           "group": "Paren"
@@ -4003,8 +4003,8 @@
         ]
       },
       "fields": {
-        "ident": {
-          "proc_macro2": "Ident"
+        "path": {
+          "syn": "Path"
         },
         "eq_token": {
           "token": "Eq"

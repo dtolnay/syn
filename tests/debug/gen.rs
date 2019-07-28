@@ -4047,8 +4047,8 @@ impl Debug for Lite<syn::Meta> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Meta::Word(_val) => {
-                formatter.write_str("Word")?;
+            syn::Meta::Path(_val) => {
+                formatter.write_str("Path")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;
@@ -4056,7 +4056,7 @@ impl Debug for Lite<syn::Meta> {
             }
             syn::Meta::List(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::List");
-                formatter.field("ident", Lite(&_val.ident));
+                formatter.field("path", Lite(&_val.path));
                 if !_val.nested.is_empty() {
                     formatter.field("nested", Lite(&_val.nested));
                 }
@@ -4064,7 +4064,7 @@ impl Debug for Lite<syn::Meta> {
             }
             syn::Meta::NameValue(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::NameValue");
-                formatter.field("ident", Lite(&_val.ident));
+                formatter.field("path", Lite(&_val.path));
                 formatter.field("lit", Lite(&_val.lit));
                 formatter.finish()
             }
@@ -4075,7 +4075,7 @@ impl Debug for Lite<syn::MetaList> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("MetaList");
-        formatter.field("ident", Lite(&_val.ident));
+        formatter.field("path", Lite(&_val.path));
         if !_val.nested.is_empty() {
             formatter.field("nested", Lite(&_val.nested));
         }
@@ -4086,7 +4086,7 @@ impl Debug for Lite<syn::MetaNameValue> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("MetaNameValue");
-        formatter.field("ident", Lite(&_val.ident));
+        formatter.field("path", Lite(&_val.path));
         formatter.field("lit", Lite(&_val.lit));
         formatter.finish()
     }

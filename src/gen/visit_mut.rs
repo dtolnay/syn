@@ -2520,8 +2520,8 @@ pub fn visit_member_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Member)
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Meta) {
     match *_i {
-        Meta::Word(ref mut _binding_0) => {
-            _visitor.visit_ident_mut(_binding_0);
+        Meta::Path(ref mut _binding_0) => {
+            _visitor.visit_path_mut(_binding_0);
         }
         Meta::List(ref mut _binding_0) => {
             _visitor.visit_meta_list_mut(_binding_0);
@@ -2533,7 +2533,7 @@ pub fn visit_meta_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Meta) {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta_list_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MetaList) {
-    _visitor.visit_ident_mut(&mut _i.ident);
+    _visitor.visit_path_mut(&mut _i.path);
     tokens_helper(_visitor, &mut _i.paren_token.span);
     for mut el in Punctuated::pairs_mut(&mut _i.nested) {
         let it = el.value_mut();
@@ -2542,7 +2542,7 @@ pub fn visit_meta_list_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Meta
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta_name_value_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MetaNameValue) {
-    _visitor.visit_ident_mut(&mut _i.ident);
+    _visitor.visit_path_mut(&mut _i.path);
     tokens_helper(_visitor, &mut _i.eq_token.spans);
     _visitor.visit_lit_mut(&mut _i.lit);
 }
