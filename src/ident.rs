@@ -87,14 +87,8 @@ impl From<Token![_]> for Ident {
 
 #[cfg(feature = "parsing")]
 impl private {
-    #[cfg(syn_can_use_associated_constants)]
     pub fn peek_any_ident(input: ParseStream) -> bool {
         use crate::ext::IdentExt;
         input.peek(Ident::peek_any)
-    }
-
-    #[cfg(not(syn_can_use_associated_constants))]
-    pub fn peek_any_ident(input: ParseStream) -> bool {
-        input.cursor().ident().is_some()
     }
 }

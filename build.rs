@@ -12,10 +12,6 @@ fn main() {
     };
 
     if compiler.minor >= 20 {
-        println!("cargo:rustc-cfg=syn_can_use_associated_constants");
-    }
-
-    if compiler.minor >= 20 {
         println!("cargo:rustc-cfg=syn_can_match_ident_after_attrs");
     }
 
