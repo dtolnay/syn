@@ -43,8 +43,7 @@ impl Args {
                     false
                 } else {
                     let first = e.path.segments.first().unwrap();
-                    let segment = first.value();
-                    self.vars.contains(&segment.ident) && segment.arguments.is_empty()
+                    self.vars.contains(&first.ident) && first.arguments.is_empty()
                 }
             }
             _ => false,
