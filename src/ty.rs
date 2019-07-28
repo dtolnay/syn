@@ -21,15 +21,6 @@ ast_enum_of_structs! {
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Type {
-        /// A dynamically sized slice type: `[T]`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Slice(TypeSlice {
-            pub bracket_token: token::Bracket,
-            pub elem: Box<Type>,
-        }),
-
         /// A fixed size array type: `[T; n]`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
@@ -39,6 +30,85 @@ ast_enum_of_structs! {
             pub elem: Box<Type>,
             pub semi_token: Token![;],
             pub len: Expr,
+        }),
+
+        /// A bare function type: `fn(usize) -> bool`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub BareFn(TypeBareFn {
+            pub lifetimes: Option<BoundLifetimes>,
+            pub unsafety: Option<Token![unsafe]>,
+            pub abi: Option<Abi>,
+            pub fn_token: Token![fn],
+            pub paren_token: token::Paren,
+            pub inputs: Punctuated<BareFnArg, Token![,]>,
+            pub variadic: Option<Token![...]>,
+            pub output: ReturnType,
+        }),
+
+        /// A type contained within invisible delimiters.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Group(TypeGroup {
+            pub group_token: token::Group,
+            pub elem: Box<Type>,
+        }),
+
+        /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
+        /// a lifetime.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub ImplTrait(TypeImplTrait {
+            pub impl_token: Token![impl],
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
+        }),
+
+        /// Indication that a type should be inferred by the compiler: `_`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Infer(TypeInfer {
+            pub underscore_token: Token![_],
+        }),
+
+        /// A macro in the type position.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Macro(TypeMacro {
+            pub mac: Macro,
+        }),
+
+        /// The never type: `!`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Never(TypeNever {
+            pub bang_token: Token![!],
+        }),
+
+        /// A parenthesized type equivalent to the inner type.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Paren(TypeParen {
+            pub paren_token: token::Paren,
+            pub elem: Box<Type>,
+        }),
+
+        /// A path like `std::slice::Iter`, optionally qualified with a
+        /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
+        ///
+        /// Type arguments are stored in the Path itself.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Path(TypePath {
+            pub qself: Option<QSelf>,
+            pub path: Path,
         }),
 
         /// A raw pointer type: `*const T` or `*mut T`.
@@ -63,48 +133,13 @@ ast_enum_of_structs! {
             pub elem: Box<Type>,
         }),
 
-        /// A bare function type: `fn(usize) -> bool`.
+        /// A dynamically sized slice type: `[T]`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
-        pub BareFn(TypeBareFn {
-            pub lifetimes: Option<BoundLifetimes>,
-            pub unsafety: Option<Token![unsafe]>,
-            pub abi: Option<Abi>,
-            pub fn_token: Token![fn],
-            pub paren_token: token::Paren,
-            pub inputs: Punctuated<BareFnArg, Token![,]>,
-            pub variadic: Option<Token![...]>,
-            pub output: ReturnType,
-        }),
-
-        /// The never type: `!`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Never(TypeNever {
-            pub bang_token: Token![!],
-        }),
-
-        /// A tuple type: `(A, B, C, String)`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Tuple(TypeTuple {
-            pub paren_token: token::Paren,
-            pub elems: Punctuated<Type, Token![,]>,
-        }),
-
-        /// A path like `std::slice::Iter`, optionally qualified with a
-        /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
-        ///
-        /// Type arguments are stored in the Path itself.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Path(TypePath {
-            pub qself: Option<QSelf>,
-            pub path: Path,
+        pub Slice(TypeSlice {
+            pub bracket_token: token::Bracket,
+            pub elem: Box<Type>,
         }),
 
         /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
@@ -117,48 +152,13 @@ ast_enum_of_structs! {
             pub bounds: Punctuated<TypeParamBound, Token![+]>,
         }),
 
-        /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
-        /// a lifetime.
+        /// A tuple type: `(A, B, C, String)`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
-        pub ImplTrait(TypeImplTrait {
-            pub impl_token: Token![impl],
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        }),
-
-        /// A parenthesized type equivalent to the inner type.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Paren(TypeParen {
+        pub Tuple(TypeTuple {
             pub paren_token: token::Paren,
-            pub elem: Box<Type>,
-        }),
-
-        /// A type contained within invisible delimiters.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Group(TypeGroup {
-            pub group_token: token::Group,
-            pub elem: Box<Type>,
-        }),
-
-        /// Indication that a type should be inferred by the compiler: `_`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Infer(TypeInfer {
-            pub underscore_token: Token![_],
-        }),
-
-        /// A macro in the type position.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Macro(TypeMacro {
-            pub mac: Macro,
+            pub elems: Punctuated<Type, Token![,]>,
         }),
 
         /// Tokens in type position not interpreted by Syn.
