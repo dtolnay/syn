@@ -29,6 +29,7 @@ use crate::error::Result;
 use std::process;
 
 fn main() {
+    color_backtrace::install();
     if let Err(err) = do_main() {
         let _ = eprintln!("error: {}", err);
         process::exit(1);
