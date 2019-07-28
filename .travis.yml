@@ -2,9 +2,7 @@ sudo: false
 language: rust
 
 rust:
-    # Temporarily pinned until rustfmt is unbroken.
-    # https://github.com/rust-lang/rustfmt/issues/3703
-  - nightly-2019-07-25
+  - nightly
   - stable
   - beta
   - 1.31.0
@@ -44,7 +42,9 @@ matrix:
         - cargo check --manifest-path examples/heapsize/example/Cargo.toml
         - cargo check --manifest-path examples/lazy-static/example/Cargo.toml
         - cargo check --manifest-path examples/trace-var/example/Cargo.toml
-    - rust: nightly
+    # Temporarily pinned until rustfmt is unbroken.
+    # https://github.com/rust-lang/rustfmt/issues/3703
+    - rust: nightly-2019-07-25
       name: Codegen
       script:
         - (cd codegen && cargo run)
