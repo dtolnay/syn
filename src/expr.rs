@@ -84,25 +84,6 @@ ast_enum_of_structs! {
     /// see names getting repeated in your code, like accessing
     /// `receiver.receiver` or `pat.pat` or `cond.cond`.
     pub enum Expr {
-        /// A box expression: `box f`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Box(ExprBox #full {
-            pub attrs: Vec<Attribute>,
-            pub box_token: Token![box],
-            pub expr: Box<Expr>,
-        }),
-
-        /// A placement expression: `place <- value`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub InPlace(ExprInPlace #full {
-            pub attrs: Vec<Attribute>,
-            pub place: Box<Expr>,
-            pub arrow_token: Token![<-],
-            pub value: Box<Expr>,
-        }),
-
         /// A slice literal expression: `[a, b, c, d]`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -110,194 +91,6 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
             pub elems: Punctuated<Expr, Token![,]>,
-        }),
-
-        /// A function call expression: `invoke(a, b)`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Call(ExprCall {
-            pub attrs: Vec<Attribute>,
-            pub func: Box<Expr>,
-            pub paren_token: token::Paren,
-            pub args: Punctuated<Expr, Token![,]>,
-        }),
-
-        /// A method call expression: `x.foo::<T>(a, b)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub MethodCall(ExprMethodCall #full {
-            pub attrs: Vec<Attribute>,
-            pub receiver: Box<Expr>,
-            pub dot_token: Token![.],
-            pub method: Ident,
-            pub turbofish: Option<MethodTurbofish>,
-            pub paren_token: token::Paren,
-            pub args: Punctuated<Expr, Token![,]>,
-        }),
-
-        /// A tuple expression: `(a, b, c, d)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Tuple(ExprTuple #full {
-            pub attrs: Vec<Attribute>,
-            pub paren_token: token::Paren,
-            pub elems: Punctuated<Expr, Token![,]>,
-        }),
-
-        /// A binary operation: `a + b`, `a * b`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Binary(ExprBinary {
-            pub attrs: Vec<Attribute>,
-            pub left: Box<Expr>,
-            pub op: BinOp,
-            pub right: Box<Expr>,
-        }),
-
-        /// A unary operation: `!x`, `*x`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Unary(ExprUnary {
-            pub attrs: Vec<Attribute>,
-            pub op: UnOp,
-            pub expr: Box<Expr>,
-        }),
-
-        /// A literal in place of an expression: `1`, `"foo"`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Lit(ExprLit {
-            pub attrs: Vec<Attribute>,
-            pub lit: Lit,
-        }),
-
-        /// A cast expression: `foo as f64`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Cast(ExprCast {
-            pub attrs: Vec<Attribute>,
-            pub expr: Box<Expr>,
-            pub as_token: Token![as],
-            pub ty: Box<Type>,
-        }),
-
-        /// A type ascription expression: `foo: f64`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Type(ExprType #full {
-            pub attrs: Vec<Attribute>,
-            pub expr: Box<Expr>,
-            pub colon_token: Token![:],
-            pub ty: Box<Type>,
-        }),
-
-        /// A `let` guard: `let Some(x) = opt`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Let(ExprLet #full {
-            pub attrs: Vec<Attribute>,
-            pub let_token: Token![let],
-            pub pats: Punctuated<Pat, Token![|]>,
-            pub eq_token: Token![=],
-            pub expr: Box<Expr>,
-        }),
-
-        /// An `if` expression with an optional `else` block: `if expr { ... }
-        /// else { ... }`.
-        ///
-        /// The `else` branch expression may only be an `If` or `Block`
-        /// expression, not any of the other types of expression.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub If(ExprIf #full {
-            pub attrs: Vec<Attribute>,
-            pub if_token: Token![if],
-            pub cond: Box<Expr>,
-            pub then_branch: Block,
-            pub else_branch: Option<(Token![else], Box<Expr>)>,
-        }),
-
-        /// A while loop: `while expr { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub While(ExprWhile #full {
-            pub attrs: Vec<Attribute>,
-            pub label: Option<Label>,
-            pub while_token: Token![while],
-            pub cond: Box<Expr>,
-            pub body: Block,
-        }),
-
-        /// A for loop: `for pat in expr { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub ForLoop(ExprForLoop #full {
-            pub attrs: Vec<Attribute>,
-            pub label: Option<Label>,
-            pub for_token: Token![for],
-            pub pat: Box<Pat>,
-            pub in_token: Token![in],
-            pub expr: Box<Expr>,
-            pub body: Block,
-        }),
-
-        /// Conditionless loop: `loop { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Loop(ExprLoop #full {
-            pub attrs: Vec<Attribute>,
-            pub label: Option<Label>,
-            pub loop_token: Token![loop],
-            pub body: Block,
-        }),
-
-        /// A `match` expression: `match n { Some(n) => {}, None => {} }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Match(ExprMatch #full {
-            pub attrs: Vec<Attribute>,
-            pub match_token: Token![match],
-            pub expr: Box<Expr>,
-            pub brace_token: token::Brace,
-            pub arms: Vec<Arm>,
-        }),
-
-        /// A closure expression: `|a, b| a + b`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Closure(ExprClosure #full {
-            pub attrs: Vec<Attribute>,
-            pub asyncness: Option<Token![async]>,
-            pub movability: Option<Token![static]>,
-            pub capture: Option<Token![move]>,
-            pub or1_token: Token![|],
-            pub inputs: Punctuated<FnArg, Token![,]>,
-            pub or2_token: Token![|],
-            pub output: ReturnType,
-            pub body: Box<Expr>,
-        }),
-
-        /// An unsafe block: `unsafe { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Unsafe(ExprUnsafe #full {
-            pub attrs: Vec<Attribute>,
-            pub unsafe_token: Token![unsafe],
-            pub block: Block,
-        }),
-
-        /// A blocked scope: `{ ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Block(ExprBlock #full {
-            pub attrs: Vec<Attribute>,
-            pub label: Option<Label>,
-            pub block: Block,
         }),
 
         /// An assignment expression: `a = compute()`.
@@ -320,6 +113,102 @@ ast_enum_of_structs! {
             pub right: Box<Expr>,
         }),
 
+        /// An async block: `async { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Async(ExprAsync #full {
+            pub attrs: Vec<Attribute>,
+            pub async_token: Token![async],
+            pub capture: Option<Token![move]>,
+            pub block: Block,
+        }),
+
+        /// A binary operation: `a + b`, `a * b`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Binary(ExprBinary {
+            pub attrs: Vec<Attribute>,
+            pub left: Box<Expr>,
+            pub op: BinOp,
+            pub right: Box<Expr>,
+        }),
+
+        /// A blocked scope: `{ ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Block(ExprBlock #full {
+            pub attrs: Vec<Attribute>,
+            pub label: Option<Label>,
+            pub block: Block,
+        }),
+
+        /// A box expression: `box f`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Box(ExprBox #full {
+            pub attrs: Vec<Attribute>,
+            pub box_token: Token![box],
+            pub expr: Box<Expr>,
+        }),
+
+        /// A `break`, with an optional label to break and an optional
+        /// expression.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Break(ExprBreak #full {
+            pub attrs: Vec<Attribute>,
+            pub break_token: Token![break],
+            pub label: Option<Lifetime>,
+            pub expr: Option<Box<Expr>>,
+        }),
+
+        /// A function call expression: `invoke(a, b)`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Call(ExprCall {
+            pub attrs: Vec<Attribute>,
+            pub func: Box<Expr>,
+            pub paren_token: token::Paren,
+            pub args: Punctuated<Expr, Token![,]>,
+        }),
+
+        /// A cast expression: `foo as f64`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Cast(ExprCast {
+            pub attrs: Vec<Attribute>,
+            pub expr: Box<Expr>,
+            pub as_token: Token![as],
+            pub ty: Box<Type>,
+        }),
+
+        /// A closure expression: `|a, b| a + b`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Closure(ExprClosure #full {
+            pub attrs: Vec<Attribute>,
+            pub asyncness: Option<Token![async]>,
+            pub movability: Option<Token![static]>,
+            pub capture: Option<Token![move]>,
+            pub or1_token: Token![|],
+            pub inputs: Punctuated<FnArg, Token![,]>,
+            pub or2_token: Token![|],
+            pub output: ReturnType,
+            pub body: Box<Expr>,
+        }),
+
+        /// A `continue`, with an optional label.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Continue(ExprContinue #full {
+            pub attrs: Vec<Attribute>,
+            pub continue_token: Token![continue],
+            pub label: Option<Lifetime>,
+        }),
+
         /// Access of a named struct field (`obj.k`) or unnamed tuple struct
         /// field (`obj.0`).
         ///
@@ -329,6 +218,57 @@ ast_enum_of_structs! {
             pub base: Box<Expr>,
             pub dot_token: Token![.],
             pub member: Member,
+        }),
+
+        /// A for loop: `for pat in expr { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub ForLoop(ExprForLoop #full {
+            pub attrs: Vec<Attribute>,
+            pub label: Option<Label>,
+            pub for_token: Token![for],
+            pub pat: Box<Pat>,
+            pub in_token: Token![in],
+            pub expr: Box<Expr>,
+            pub body: Block,
+        }),
+
+        /// An expression contained within invisible delimiters.
+        ///
+        /// This variant is important for faithfully representing the precedence
+        /// of expressions and is related to `None`-delimited spans in a
+        /// `TokenStream`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Group(ExprGroup #full {
+            pub attrs: Vec<Attribute>,
+            pub group_token: token::Group,
+            pub expr: Box<Expr>,
+        }),
+
+        /// An `if` expression with an optional `else` block: `if expr { ... }
+        /// else { ... }`.
+        ///
+        /// The `else` branch expression may only be an `If` or `Block`
+        /// expression, not any of the other types of expression.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub If(ExprIf #full {
+            pub attrs: Vec<Attribute>,
+            pub if_token: Token![if],
+            pub cond: Box<Expr>,
+            pub then_branch: Block,
+            pub else_branch: Option<(Token![else], Box<Expr>)>,
+        }),
+
+        /// A placement expression: `place <- value`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub InPlace(ExprInPlace #full {
+            pub attrs: Vec<Attribute>,
+            pub place: Box<Expr>,
+            pub arrow_token: Token![<-],
+            pub value: Box<Expr>,
         }),
 
         /// A square bracketed indexing expression: `vector[2]`.
@@ -342,14 +282,75 @@ ast_enum_of_structs! {
             pub index: Box<Expr>,
         }),
 
-        /// A range expression: `1..2`, `1..`, `..2`, `1..=2`, `..=2`.
+        /// A `let` guard: `let Some(x) = opt`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Range(ExprRange #full {
+        pub Let(ExprLet #full {
             pub attrs: Vec<Attribute>,
-            pub from: Option<Box<Expr>>,
-            pub limits: RangeLimits,
-            pub to: Option<Box<Expr>>,
+            pub let_token: Token![let],
+            pub pats: Punctuated<Pat, Token![|]>,
+            pub eq_token: Token![=],
+            pub expr: Box<Expr>,
+        }),
+
+        /// A literal in place of an expression: `1`, `"foo"`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Lit(ExprLit {
+            pub attrs: Vec<Attribute>,
+            pub lit: Lit,
+        }),
+
+        /// Conditionless loop: `loop { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Loop(ExprLoop #full {
+            pub attrs: Vec<Attribute>,
+            pub label: Option<Label>,
+            pub loop_token: Token![loop],
+            pub body: Block,
+        }),
+
+        /// A macro invocation expression: `format!("{}", q)`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Macro(ExprMacro #full {
+            pub attrs: Vec<Attribute>,
+            pub mac: Macro,
+        }),
+
+        /// A `match` expression: `match n { Some(n) => {}, None => {} }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Match(ExprMatch #full {
+            pub attrs: Vec<Attribute>,
+            pub match_token: Token![match],
+            pub expr: Box<Expr>,
+            pub brace_token: token::Brace,
+            pub arms: Vec<Arm>,
+        }),
+
+        /// A method call expression: `x.foo::<T>(a, b)`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub MethodCall(ExprMethodCall #full {
+            pub attrs: Vec<Attribute>,
+            pub receiver: Box<Expr>,
+            pub dot_token: Token![.],
+            pub method: Ident,
+            pub turbofish: Option<MethodTurbofish>,
+            pub paren_token: token::Paren,
+            pub args: Punctuated<Expr, Token![,]>,
+        }),
+
+        /// A parenthesized expression: `(a + b)`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Paren(ExprParen {
+            pub attrs: Vec<Attribute>,
+            pub paren_token: token::Paren,
+            pub expr: Box<Expr>,
         }),
 
         /// A path like `std::mem::replace` possibly containing generic
@@ -365,6 +366,16 @@ ast_enum_of_structs! {
             pub path: Path,
         }),
 
+        /// A range expression: `1..2`, `1..`, `..2`, `1..=2`, `..=2`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Range(ExprRange #full {
+            pub attrs: Vec<Attribute>,
+            pub from: Option<Box<Expr>>,
+            pub limits: RangeLimits,
+            pub to: Option<Box<Expr>>,
+        }),
+
         /// A referencing operation: `&a` or `&mut a`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -375,24 +386,15 @@ ast_enum_of_structs! {
             pub expr: Box<Expr>,
         }),
 
-        /// A `break`, with an optional label to break and an optional
-        /// expression.
+        /// An array literal constructed from one repeated element: `[0u8; N]`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Break(ExprBreak #full {
+        pub Repeat(ExprRepeat #full {
             pub attrs: Vec<Attribute>,
-            pub break_token: Token![break],
-            pub label: Option<Lifetime>,
-            pub expr: Option<Box<Expr>>,
-        }),
-
-        /// A `continue`, with an optional label.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Continue(ExprContinue #full {
-            pub attrs: Vec<Attribute>,
-            pub continue_token: Token![continue],
-            pub label: Option<Lifetime>,
+            pub bracket_token: token::Bracket,
+            pub expr: Box<Expr>,
+            pub semi_token: Token![;],
+            pub len: Box<Expr>,
         }),
 
         /// A `return`, with an optional value to be returned.
@@ -402,14 +404,6 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub return_token: Token![return],
             pub expr: Option<Box<Expr>>,
-        }),
-
-        /// A macro invocation expression: `format!("{}", q)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Macro(ExprMacro #full {
-            pub attrs: Vec<Attribute>,
-            pub mac: Macro,
         }),
 
         /// A struct literal expression: `Point { x: 1, y: 1 }`.
@@ -427,39 +421,6 @@ ast_enum_of_structs! {
             pub rest: Option<Box<Expr>>,
         }),
 
-        /// An array literal constructed from one repeated element: `[0u8; N]`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Repeat(ExprRepeat #full {
-            pub attrs: Vec<Attribute>,
-            pub bracket_token: token::Bracket,
-            pub expr: Box<Expr>,
-            pub semi_token: Token![;],
-            pub len: Box<Expr>,
-        }),
-
-        /// A parenthesized expression: `(a + b)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Paren(ExprParen {
-            pub attrs: Vec<Attribute>,
-            pub paren_token: token::Paren,
-            pub expr: Box<Expr>,
-        }),
-
-        /// An expression contained within invisible delimiters.
-        ///
-        /// This variant is important for faithfully representing the precedence
-        /// of expressions and is related to `None`-delimited spans in a
-        /// `TokenStream`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Group(ExprGroup #full {
-            pub attrs: Vec<Attribute>,
-            pub group_token: token::Group,
-            pub expr: Box<Expr>,
-        }),
-
         /// A try-expression: `expr?`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -467,16 +428,6 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
             pub question_token: Token![?],
-        }),
-
-        /// An async block: `async { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Async(ExprAsync #full {
-            pub attrs: Vec<Attribute>,
-            pub async_token: Token![async],
-            pub capture: Option<Token![move]>,
-            pub block: Block,
         }),
 
         /// A try block: `try { ... }`.
@@ -488,13 +439,42 @@ ast_enum_of_structs! {
             pub block: Block,
         }),
 
-        /// A yield expression: `yield expr`.
+        /// A tuple expression: `(a, b, c, d)`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Yield(ExprYield #full {
+        pub Tuple(ExprTuple #full {
             pub attrs: Vec<Attribute>,
-            pub yield_token: Token![yield],
-            pub expr: Option<Box<Expr>>,
+            pub paren_token: token::Paren,
+            pub elems: Punctuated<Expr, Token![,]>,
+        }),
+
+        /// A type ascription expression: `foo: f64`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Type(ExprType #full {
+            pub attrs: Vec<Attribute>,
+            pub expr: Box<Expr>,
+            pub colon_token: Token![:],
+            pub ty: Box<Type>,
+        }),
+
+        /// A unary operation: `!x`, `*x`.
+        ///
+        /// *This type is available if Syn is built with the `"derive"` or
+        /// `"full"` feature.*
+        pub Unary(ExprUnary {
+            pub attrs: Vec<Attribute>,
+            pub op: UnOp,
+            pub expr: Box<Expr>,
+        }),
+
+        /// An unsafe block: `unsafe { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Unsafe(ExprUnsafe #full {
+            pub attrs: Vec<Attribute>,
+            pub unsafe_token: Token![unsafe],
+            pub block: Block,
         }),
 
         /// Tokens in expression position not interpreted by Syn.
@@ -503,6 +483,26 @@ ast_enum_of_structs! {
         /// `"full"` feature.*
         pub Verbatim(ExprVerbatim #manual_extra_traits {
             pub tokens: TokenStream,
+        }),
+
+        /// A while loop: `while expr { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub While(ExprWhile #full {
+            pub attrs: Vec<Attribute>,
+            pub label: Option<Label>,
+            pub while_token: Token![while],
+            pub cond: Box<Expr>,
+            pub body: Block,
+        }),
+
+        /// A yield expression: `yield expr`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Yield(ExprYield #full {
+            pub attrs: Vec<Attribute>,
+            pub yield_token: Token![yield],
+            pub expr: Option<Box<Expr>>,
         }),
     }
 }
