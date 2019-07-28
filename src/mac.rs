@@ -20,7 +20,7 @@ ast_struct! {
         pub path: Path,
         pub bang_token: Token![!],
         pub delimiter: MacroDelimiter,
-        pub tts: TokenStream,
+        pub tokens: TokenStream,
     }
 }
 
@@ -45,7 +45,7 @@ impl PartialEq for Macro {
         self.path == other.path
             && self.bang_token == other.bang_token
             && self.delimiter == other.delimiter
-            && TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -58,7 +58,7 @@ impl Hash for Macro {
         self.path.hash(state);
         self.bang_token.hash(state);
         self.delimiter.hash(state);
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -75,7 +75,7 @@ impl Macro {
     /// Parse the tokens within the macro invocation's delimiters into a syntax
     /// tree.
     ///
-    /// This is equivalent to `syn::parse2::<T>(mac.tts)` except that it
+    /// This is equivalent to `syn::parse2::<T>(mac.tokens)` except that it
     /// produces a more useful span when `tts` is empty.
     ///
     /// # Example
@@ -166,7 +166,7 @@ impl Macro {
         // TODO: see if we can get a group.span_close() span in here as the
         // scope, rather than the span of the whole group.
         let scope = delimiter_span(&self.delimiter);
-        private::parse_scoped(parser, scope, self.tts.clone())
+        private::parse_scoped(parser, scope, self.tokens.clone())
     }
 }
 
@@ -198,16 +198,16 @@ pub mod parsing {
 
     impl Parse for Macro {
         fn parse(input: ParseStream) -> Result<Self> {
-            let tts;
+            let tokens;
             Ok(Macro {
                 path: input.call(Path::parse_mod_style)?,
                 bang_token: input.parse()?,
                 delimiter: {
                     let (delimiter, content) = parse_delimiter(input)?;
-                    tts = content;
+                    tokens = content;
                     delimiter
                 },
-                tts: tts,
+                tokens: tokens,
             })
         }
     }
@@ -225,13 +225,13 @@ mod printing {
             self.bang_token.to_tokens(tokens);
             match self.delimiter {
                 MacroDelimiter::Paren(ref paren) => {
-                    paren.surround(tokens, |tokens| self.tts.to_tokens(tokens));
+                    paren.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
                 }
                 MacroDelimiter::Brace(ref brace) => {
-                    brace.surround(tokens, |tokens| self.tts.to_tokens(tokens));
+                    brace.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
                 }
                 MacroDelimiter::Bracket(ref bracket) => {
-                    bracket.surround(tokens, |tokens| self.tts.to_tokens(tokens));
+                    bracket.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
                 }
             }
         }

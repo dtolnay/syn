@@ -897,7 +897,7 @@ pub fn fold_attribute<V: Fold + ?Sized>(_visitor: &mut V, _i: Attribute) -> Attr
         style: _visitor.fold_attr_style(_i.style),
         bracket_token: Bracket(tokens_helper(_visitor, &_i.bracket_token.span)),
         path: _visitor.fold_path(_i.path),
-        tts: _i.tts,
+        tokens: _i.tokens,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1499,7 +1499,7 @@ pub fn fold_expr_unsafe<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprUnsafe) -> E
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_expr_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprVerbatim) -> ExprVerbatim {
-    ExprVerbatim { tts: _i.tts }
+    ExprVerbatim { tokens: _i.tokens }
 }
 #[cfg(feature = "full")]
 pub fn fold_expr_while<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> ExprWhile {
@@ -1674,7 +1674,7 @@ pub fn fold_foreign_item_verbatim<V: Fold + ?Sized>(
     _visitor: &mut V,
     _i: ForeignItemVerbatim,
 ) -> ForeignItemVerbatim {
-    ForeignItemVerbatim { tts: _i.tts }
+    ForeignItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_generic_argument<V: Fold + ?Sized>(
@@ -1826,7 +1826,7 @@ pub fn fold_impl_item_verbatim<V: Fold + ?Sized>(
     _visitor: &mut V,
     _i: ImplItemVerbatim,
 ) -> ImplItemVerbatim {
-    ImplItemVerbatim { tts: _i.tts }
+    ImplItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_index<V: Fold + ?Sized>(_visitor: &mut V, _i: Index) -> Index {
@@ -2110,7 +2110,7 @@ pub fn fold_item_use<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemUse
 }
 #[cfg(feature = "full")]
 pub fn fold_item_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemVerbatim) -> ItemVerbatim {
-    ItemVerbatim { tts: _i.tts }
+    ItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(feature = "full")]
 pub fn fold_label<V: Fold + ?Sized>(_visitor: &mut V, _i: Label) -> Label {
@@ -2227,7 +2227,7 @@ pub fn fold_macro<V: Fold + ?Sized>(_visitor: &mut V, _i: Macro) -> Macro {
         path: _visitor.fold_path(_i.path),
         bang_token: Token![!](tokens_helper(_visitor, &_i.bang_token.spans)),
         delimiter: _visitor.fold_macro_delimiter(_i.delimiter),
-        tts: _i.tts,
+        tokens: _i.tokens,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2440,7 +2440,7 @@ pub fn fold_pat_tuple_struct<V: Fold + ?Sized>(
 }
 #[cfg(feature = "full")]
 pub fn fold_pat_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: PatVerbatim) -> PatVerbatim {
-    PatVerbatim { tts: _i.tts }
+    PatVerbatim { tokens: _i.tokens }
 }
 #[cfg(feature = "full")]
 pub fn fold_pat_wild<V: Fold + ?Sized>(_visitor: &mut V, _i: PatWild) -> PatWild {
@@ -2654,7 +2654,7 @@ pub fn fold_trait_item_verbatim<V: Fold + ?Sized>(
     _visitor: &mut V,
     _i: TraitItemVerbatim,
 ) -> TraitItemVerbatim {
-    TraitItemVerbatim { tts: _i.tts }
+    TraitItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_type<V: Fold + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
@@ -2818,7 +2818,7 @@ pub fn fold_type_tuple<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeTuple) -> Typ
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_type_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeVerbatim) -> TypeVerbatim {
-    TypeVerbatim { tts: _i.tts }
+    TypeVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_un_op<V: Fold + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {

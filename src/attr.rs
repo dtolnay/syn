@@ -98,7 +98,7 @@ ast_struct! {
         pub style: AttrStyle,
         pub bracket_token: token::Bracket,
         pub path: Path,
-        pub tts: TokenStream,
+        pub tokens: TokenStream,
     }
 }
 
@@ -112,7 +112,7 @@ impl PartialEq for Attribute {
             && self.pound_token == other.pound_token
             && self.bracket_token == other.bracket_token
             && self.path == other.path
-            && TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -126,7 +126,7 @@ impl Hash for Attribute {
         self.pound_token.hash(state);
         self.bracket_token.hash(state);
         self.path.hash(state);
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -150,11 +150,11 @@ impl Attribute {
                 return None;
             };
 
-            if self.tts.is_empty() {
+            if self.tokens.is_empty() {
                 return Some(Meta::Word(name.clone()));
             }
 
-            let tts = self.tts.clone().into_iter().collect::<Vec<_>>();
+            let tts = self.tokens.clone().into_iter().collect::<Vec<_>>();
 
             if tts.len() == 1 {
                 if let Some(meta) = Attribute::extract_meta_list(name.clone(), &tts[0]) {
@@ -191,7 +191,7 @@ impl Attribute {
         let ident = first_segment.value().ident.clone();
 
         let parser = |input: ParseStream| parsing::parse_meta_after_ident(ident, input);
-        parse::Parser::parse2(parser, self.tts.clone())
+        parse::Parser::parse2(parser, self.tokens.clone())
     }
 
     /// Parses zero or more outer attributes from the stream.
@@ -554,7 +554,7 @@ pub mod parsing {
             style: AttrStyle::Inner(input.parse()?),
             bracket_token: bracketed!(content in input),
             path: content.call(Path::parse_mod_style)?,
-            tts: content.parse()?,
+            tokens: content.parse()?,
         })
     }
 
@@ -565,7 +565,7 @@ pub mod parsing {
             style: AttrStyle::Outer,
             bracket_token: bracketed!(content in input),
             path: content.call(Path::parse_mod_style)?,
-            tts: content.parse()?,
+            tokens: content.parse()?,
         })
     }
 
@@ -656,7 +656,7 @@ mod printing {
             }
             self.bracket_token.surround(tokens, |tokens| {
                 self.path.to_tokens(tokens);
-                self.tts.to_tokens(tokens);
+                self.tokens.to_tokens(tokens);
             });
         }
     }

@@ -206,7 +206,7 @@
         "path": {
           "syn": "Path"
         },
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -1924,7 +1924,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -2394,7 +2394,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -2743,7 +2743,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -3569,7 +3569,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -3847,7 +3847,7 @@
         "delimiter": {
           "syn": "MacroDelimiter"
         },
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -4439,7 +4439,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -4932,7 +4932,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }
@@ -5412,7 +5412,7 @@
         ]
       },
       "fields": {
-        "tts": {
+        "tokens": {
           "proc_macro2": "TokenStream"
         }
       }

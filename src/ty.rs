@@ -166,7 +166,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub Verbatim(TypeVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -177,7 +177,7 @@ impl Eq for TypeVerbatim {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for TypeVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -187,7 +187,7 @@ impl Hash for TypeVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -435,13 +435,13 @@ pub mod parsing {
 
                 if !contains_arguments {
                     let bang_token: Token![!] = input.parse()?;
-                    let (delimiter, tts) = mac::parse_delimiter(input)?;
+                    let (delimiter, tokens) = mac::parse_delimiter(input)?;
                     return Ok(Type::Macro(TypeMacro {
                         mac: Macro {
                             path: ty.path,
                             bang_token: bang_token,
                             delimiter: delimiter,
-                            tts: tts,
+                            tokens: tokens,
                         },
                     }));
                 }
@@ -953,7 +953,7 @@ mod printing {
 
     impl ToTokens for TypeVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 

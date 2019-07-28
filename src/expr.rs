@@ -502,7 +502,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub Verbatim(ExprVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -513,7 +513,7 @@ impl Eq for ExprVerbatim {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for ExprVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -523,7 +523,7 @@ impl Hash for ExprVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -871,7 +871,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(PatVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -882,7 +882,7 @@ impl Eq for PatVerbatim {}
 #[cfg(all(feature = "full", feature = "extra-traits"))]
 impl PartialEq for PatVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -892,7 +892,7 @@ impl Hash for PatVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -1557,14 +1557,14 @@ pub mod parsing {
 
             if !contains_arguments {
                 let bang_token: Token![!] = input.parse()?;
-                let (delimiter, tts) = mac::parse_delimiter(input)?;
+                let (delimiter, tokens) = mac::parse_delimiter(input)?;
                 return Ok(Expr::Macro(ExprMacro {
                     attrs: Vec::new(),
                     mac: Macro {
                         path: expr.path,
                         bang_token: bang_token,
                         delimiter: delimiter,
-                        tts: tts,
+                        tokens: tokens,
                     },
                 }));
             }
@@ -2474,7 +2474,7 @@ pub mod parsing {
         let path = input.call(Path::parse_mod_style)?;
         let bang_token: Token![!] = input.parse()?;
         let ident: Option<Ident> = input.parse()?;
-        let (delimiter, tts) = mac::parse_delimiter(input)?;
+        let (delimiter, tokens) = mac::parse_delimiter(input)?;
         let semi_token: Option<Token![;]> = input.parse()?;
 
         Ok(Stmt::Item(Item::Macro(ItemMacro {
@@ -2484,7 +2484,7 @@ pub mod parsing {
                 path: path,
                 bang_token: bang_token,
                 delimiter: delimiter,
-                tts: tts,
+                tokens: tokens,
             },
             semi_token: semi_token,
         })))
@@ -2627,13 +2627,13 @@ pub mod parsing {
 
             if !contains_arguments {
                 let bang_token: Token![!] = input.parse()?;
-                let (delimiter, tts) = mac::parse_delimiter(input)?;
+                let (delimiter, tokens) = mac::parse_delimiter(input)?;
                 return Ok(Pat::Macro(PatMacro {
                     mac: Macro {
                         path: path,
                         bang_token: bang_token,
                         delimiter: delimiter,
-                        tts: tts,
+                        tokens: tokens,
                     },
                 }));
             }
@@ -3571,7 +3571,7 @@ mod printing {
 
     impl ToTokens for ExprVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 
@@ -3762,7 +3762,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for PatVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 

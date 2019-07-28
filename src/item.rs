@@ -262,7 +262,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(ItemVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -307,7 +307,7 @@ impl Eq for ItemVerbatim {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for ItemVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -317,7 +317,7 @@ impl Hash for ItemVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -473,7 +473,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(ForeignItemVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -484,7 +484,7 @@ impl Eq for ForeignItemVerbatim {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for ForeignItemVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -494,7 +494,7 @@ impl Hash for ForeignItemVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -562,7 +562,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(TraitItemVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -573,7 +573,7 @@ impl Eq for TraitItemVerbatim {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for TraitItemVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -583,7 +583,7 @@ impl Hash for TraitItemVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -670,7 +670,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(ImplItemVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
+            pub tokens: TokenStream,
         }),
     }
 }
@@ -681,7 +681,7 @@ impl Eq for ImplItemVerbatim {}
 #[cfg(feature = "extra-traits")]
 impl PartialEq for ImplItemVerbatim {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
+        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 
@@ -691,7 +691,7 @@ impl Hash for ImplItemVerbatim {
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tts).hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -919,7 +919,7 @@ pub mod parsing {
             let path = input.call(Path::parse_mod_style)?;
             let bang_token: Token![!] = input.parse()?;
             let ident: Option<Ident> = input.parse()?;
-            let (delimiter, tts) = input.call(mac::parse_delimiter)?;
+            let (delimiter, tokens) = input.call(mac::parse_delimiter)?;
             let semi_token: Option<Token![;]> = if !delimiter.is_brace() {
                 Some(input.parse()?)
             } else {
@@ -932,7 +932,7 @@ pub mod parsing {
                     path: path,
                     bang_token: bang_token,
                     delimiter: delimiter,
-                    tts: tts,
+                    tokens: tokens,
                 },
                 semi_token: semi_token,
             })
@@ -1141,9 +1141,9 @@ pub mod parsing {
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic: Option<Token![...]> = match inputs.last() {
                 Some(punctuated::Pair::End(&FnArg::Captured(ArgCaptured {
-                    ty: Type::Verbatim(TypeVerbatim { ref tts }),
+                    ty: Type::Verbatim(TypeVerbatim { ref tokens }),
                     ..
-                }))) => parse2(tts.clone()).ok(),
+                }))) => parse2(tokens.clone()).ok(),
                 _ => None,
             };
 
@@ -1248,7 +1248,7 @@ pub mod parsing {
                             arg
                         },
                     ));
-                    Type::Verbatim(TypeVerbatim { tts: tokens })
+                    Type::Verbatim(TypeVerbatim { tokens: tokens })
                 }
                 Err(_) => input.parse()?,
             },
@@ -2456,13 +2456,13 @@ mod printing {
             self.ident.to_tokens(tokens);
             match self.mac.delimiter {
                 MacroDelimiter::Paren(ref paren) => {
-                    paren.surround(tokens, |tokens| self.mac.tts.to_tokens(tokens));
+                    paren.surround(tokens, |tokens| self.mac.tokens.to_tokens(tokens));
                 }
                 MacroDelimiter::Brace(ref brace) => {
-                    brace.surround(tokens, |tokens| self.mac.tts.to_tokens(tokens));
+                    brace.surround(tokens, |tokens| self.mac.tokens.to_tokens(tokens));
                 }
                 MacroDelimiter::Bracket(ref bracket) => {
-                    bracket.surround(tokens, |tokens| self.mac.tts.to_tokens(tokens));
+                    bracket.surround(tokens, |tokens| self.mac.tokens.to_tokens(tokens));
                 }
             }
             self.semi_token.to_tokens(tokens);
@@ -2491,7 +2491,7 @@ mod printing {
 
     impl ToTokens for ItemVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 
@@ -2593,7 +2593,7 @@ mod printing {
 
     impl ToTokens for TraitItemVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 
@@ -2666,7 +2666,7 @@ mod printing {
 
     impl ToTokens for ImplItemVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 
@@ -2712,7 +2712,7 @@ mod printing {
 
     impl ToTokens for ForeignItemVerbatim {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
+            self.tokens.to_tokens(tokens);
         }
     }
 

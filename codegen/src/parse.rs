@@ -178,7 +178,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
         syn::Type::Macro(syn::TypeMacro { ref mac })
             if mac.path.segments.last().unwrap().into_value().ident == "Token" =>
         {
-            let content = mac.tts.to_string();
+            let content = mac.tokens.to_string();
             let ty = tokens.get(&content).unwrap().to_string();
 
             types::Type::Token(ty)
@@ -195,7 +195,7 @@ fn introspect_features(attrs: &[syn::Attribute]) -> types::Features {
             continue;
         }
 
-        let features = parsing::parse_features.parse2(attr.tts.clone()).unwrap();
+        let features = parsing::parse_features.parse2(attr.tokens.clone()).unwrap();
 
         if ret.any.is_empty() {
             ret = features;
@@ -573,7 +573,7 @@ fn load_file<P: AsRef<Path>>(
                 let features = get_features(&item.attrs, features);
 
                 // Try to parse the AstItem declaration out of the item.
-                let tts = &item.mac.tts;
+                let tts = &item.mac.tokens;
                 let found = if item.mac.path.is_ident("ast_struct") {
                     syn::parse2::<parsing::AstStruct>(quote!(#tts))?.0
                 } else if item.mac.path.is_ident("ast_enum") {

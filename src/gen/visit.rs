@@ -901,7 +901,7 @@ pub fn visit_attribute<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_attr_style(&_i.style);
     tokens_helper(_visitor, &_i.bracket_token.span);
     _visitor.visit_path(&_i.path);
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bare_fn_arg<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BareFnArg) {
@@ -1651,7 +1651,7 @@ pub fn visit_expr_verbatim<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast ExprVerbatim,
 ) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_while<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhile) {
@@ -1868,7 +1868,7 @@ pub fn visit_foreign_item_verbatim<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast ForeignItemVerbatim,
 ) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_generic_argument<'ast, V: Visit<'ast> + ?Sized>(
@@ -2056,7 +2056,7 @@ pub fn visit_impl_item_verbatim<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast ImplItemVerbatim,
 ) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_index<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Index) {
@@ -2416,7 +2416,7 @@ pub fn visit_item_verbatim<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast ItemVerbatim,
 ) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(feature = "full")]
 pub fn visit_label<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Label) {
@@ -2516,7 +2516,7 @@ pub fn visit_macro<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ma
     _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.bang_token.spans);
     _visitor.visit_macro_delimiter(&_i.delimiter);
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_macro_delimiter<'ast, V: Visit<'ast> + ?Sized>(
@@ -2784,7 +2784,7 @@ pub fn visit_pat_tuple_struct<'ast, V: Visit<'ast> + ?Sized>(
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_verbatim<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatVerbatim) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_wild<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatWild) {
@@ -3021,7 +3021,7 @@ pub fn visit_trait_item_verbatim<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast TraitItemVerbatim,
 ) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Type) {
@@ -3232,7 +3232,7 @@ pub fn visit_type_verbatim<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast TypeVerbatim,
 ) {
-    skip!(_i.tts);
+    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_un_op<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UnOp) {
