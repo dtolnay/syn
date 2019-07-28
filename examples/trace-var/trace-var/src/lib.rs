@@ -72,7 +72,7 @@ impl Args {
     ///
     ///     // After
     ///     { VAR = INIT; println!("VAR = {:?}", VAR); }
-    fn assign_and_print(&mut self, left: Expr, op: &ToTokens, right: Expr) -> Expr {
+    fn assign_and_print(&mut self, left: Expr, op: &dyn ToTokens, right: Expr) -> Expr {
         let right = fold::fold_expr(self, right);
         parse_quote!({
             #left #op #right;
