@@ -23,47 +23,6 @@ ast_enum_of_structs! {
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Item {
-        /// An `extern crate` item: `extern crate serde`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub ExternCrate(ItemExternCrate {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub extern_token: Token![extern],
-            pub crate_token: Token![crate],
-            pub ident: Ident,
-            pub rename: Option<(Token![as], Ident)>,
-            pub semi_token: Token![;],
-        }),
-
-        /// A use declaration: `use std::collections::HashMap`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Use(ItemUse {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub use_token: Token![use],
-            pub leading_colon: Option<Token![::]>,
-            pub tree: UseTree,
-            pub semi_token: Token![;],
-        }),
-
-        /// A static item: `static BIKE: Shed = Shed(42)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Static(ItemStatic {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub static_token: Token![static],
-            pub mutability: Option<Token![mut]>,
-            pub ident: Ident,
-            pub colon_token: Token![:],
-            pub ty: Box<Type>,
-            pub eq_token: Token![=],
-            pub expr: Box<Expr>,
-            pub semi_token: Token![;],
-        }),
-
         /// A constant item: `const MAX: u16 = 65535`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -76,6 +35,47 @@ ast_enum_of_structs! {
             pub ty: Box<Type>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
+            pub semi_token: Token![;],
+        }),
+
+        /// An enum definition: `enum Foo<A, B> { C<A>, D<B> }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Enum(ItemEnum {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub enum_token: Token![enum],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub brace_token: token::Brace,
+            pub variants: Punctuated<Variant, Token![,]>,
+        }),
+
+        /// An existential type: `existential type Iter: Iterator<Item = u8>`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Existential(ItemExistential {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub existential_token: Token![existential],
+            pub type_token: Token![type],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub colon_token: Option<Token![:]>,
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
+            pub semi_token: Token![;],
+        }),
+
+        /// An `extern crate` item: `extern crate serde`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub ExternCrate(ItemExternCrate {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub extern_token: Token![extern],
+            pub crate_token: Token![crate],
+            pub ident: Ident,
+            pub rename: Option<(Token![as], Ident)>,
             pub semi_token: Token![;],
         }),
 
@@ -95,18 +95,6 @@ ast_enum_of_structs! {
             pub block: Box<Block>,
         }),
 
-        /// A module or module declaration: `mod m` or `mod m { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Mod(ItemMod {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub mod_token: Token![mod],
-            pub ident: Ident,
-            pub content: Option<(token::Brace, Vec<Item>)>,
-            pub semi: Option<Token![;]>,
-        }),
-
         /// A block of foreign items: `extern "C" { ... }`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -115,104 +103,6 @@ ast_enum_of_structs! {
             pub abi: Abi,
             pub brace_token: token::Brace,
             pub items: Vec<ForeignItem>,
-        }),
-
-        /// A type alias: `type Result<T> = std::result::Result<T, MyError>`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Type(ItemType {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub type_token: Token![type],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub eq_token: Token![=],
-            pub ty: Box<Type>,
-            pub semi_token: Token![;],
-        }),
-
-        /// An existential type: `existential type Iter: Iterator<Item = u8>`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Existential(ItemExistential {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub existential_token: Token![existential],
-            pub type_token: Token![type],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub colon_token: Option<Token![:]>,
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-            pub semi_token: Token![;],
-        }),
-
-        /// A struct definition: `struct Foo<A> { x: A }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Struct(ItemStruct {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub struct_token: Token![struct],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub fields: Fields,
-            pub semi_token: Option<Token![;]>,
-        }),
-
-        /// An enum definition: `enum Foo<A, B> { C<A>, D<B> }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Enum(ItemEnum {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub enum_token: Token![enum],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub brace_token: token::Brace,
-            pub variants: Punctuated<Variant, Token![,]>,
-        }),
-
-        /// A union definition: `union Foo<A, B> { x: A, y: B }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Union(ItemUnion {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub union_token: Token![union],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub fields: FieldsNamed,
-        }),
-
-        /// A trait definition: `pub trait Iterator { ... }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Trait(ItemTrait {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub unsafety: Option<Token![unsafe]>,
-            pub auto_token: Option<Token![auto]>,
-            pub trait_token: Token![trait],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub colon_token: Option<Token![:]>,
-            pub supertraits: Punctuated<TypeParamBound, Token![+]>,
-            pub brace_token: token::Brace,
-            pub items: Vec<TraitItem>,
-        }),
-
-        /// A trait alias: `pub trait SharableIterator = Iterator + Sync`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub TraitAlias(ItemTraitAlias {
-            pub attrs: Vec<Attribute>,
-            pub vis: Visibility,
-            pub trait_token: Token![trait],
-            pub ident: Ident,
-            pub generics: Generics,
-            pub eq_token: Token![=],
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-            pub semi_token: Token![;],
         }),
 
         /// An impl block providing trait or associated items: `impl<A> Trait
@@ -256,6 +146,116 @@ ast_enum_of_structs! {
             pub args: TokenStream,
             pub brace_token: Brace,
             pub body: TokenStream,
+        }),
+
+        /// A module or module declaration: `mod m` or `mod m { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Mod(ItemMod {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub mod_token: Token![mod],
+            pub ident: Ident,
+            pub content: Option<(token::Brace, Vec<Item>)>,
+            pub semi: Option<Token![;]>,
+        }),
+
+        /// A static item: `static BIKE: Shed = Shed(42)`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Static(ItemStatic {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub static_token: Token![static],
+            pub mutability: Option<Token![mut]>,
+            pub ident: Ident,
+            pub colon_token: Token![:],
+            pub ty: Box<Type>,
+            pub eq_token: Token![=],
+            pub expr: Box<Expr>,
+            pub semi_token: Token![;],
+        }),
+
+        /// A struct definition: `struct Foo<A> { x: A }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Struct(ItemStruct {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub struct_token: Token![struct],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub fields: Fields,
+            pub semi_token: Option<Token![;]>,
+        }),
+
+        /// A trait definition: `pub trait Iterator { ... }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Trait(ItemTrait {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub unsafety: Option<Token![unsafe]>,
+            pub auto_token: Option<Token![auto]>,
+            pub trait_token: Token![trait],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub colon_token: Option<Token![:]>,
+            pub supertraits: Punctuated<TypeParamBound, Token![+]>,
+            pub brace_token: token::Brace,
+            pub items: Vec<TraitItem>,
+        }),
+
+        /// A trait alias: `pub trait SharableIterator = Iterator + Sync`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub TraitAlias(ItemTraitAlias {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub trait_token: Token![trait],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub eq_token: Token![=],
+            pub bounds: Punctuated<TypeParamBound, Token![+]>,
+            pub semi_token: Token![;],
+        }),
+
+        /// A type alias: `type Result<T> = std::result::Result<T, MyError>`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Type(ItemType {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub type_token: Token![type],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub eq_token: Token![=],
+            pub ty: Box<Type>,
+            pub semi_token: Token![;],
+        }),
+
+        /// A union definition: `union Foo<A, B> { x: A, y: B }`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Union(ItemUnion {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub union_token: Token![union],
+            pub ident: Ident,
+            pub generics: Generics,
+            pub fields: FieldsNamed,
+        }),
+
+        /// A use declaration: `use std::collections::HashMap`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Use(ItemUse {
+            pub attrs: Vec<Attribute>,
+            pub vis: Visibility,
+            pub use_token: Token![use],
+            pub leading_colon: Option<Token![::]>,
+            pub tree: UseTree,
+            pub semi_token: Token![;],
         }),
 
         /// Tokens forming an item not interpreted by Syn.
