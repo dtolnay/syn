@@ -435,14 +435,14 @@ pub mod parsing {
         ///
         /// *This function is available if Syn is built with the `"parsing"`
         /// feature.*
-        pub fn is_ident<I>(&self, ident: I) -> bool
+        pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
         where
             Ident: PartialEq<I>,
         {
             self.leading_colon.is_none()
                 && self.segments.len() == 1
                 && self.segments[0].arguments.is_none()
-                && self.segments[0].ident == ident
+                && self.segments[0].ident == *ident
         }
 
         fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
