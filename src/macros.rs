@@ -1,61 +1,68 @@
-#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! ast_struct {
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident #full $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        struct $name:ident #full $($rest:tt)*
     ) => {
         #[cfg(feature = "full")]
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
 
         #[cfg(not(feature = "full"))]
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name {
+        $($attrs_pub)* struct $name {
             _noconstruct: (),
         }
     };
 
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident #manual_extra_traits $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        struct $name:ident #manual_extra_traits $($rest:tt)*
     ) => {
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
     };
 
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident $($rest:tt)*
+        @@ [$($attrs_pub:tt)*]
+        struct $name:ident $($rest:tt)*
     ) => {
-        $(#[$attr])*
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
+    };
+
+    ($($t:tt)*) => {
+        strip_attrs_pub!(ast_struct!($($t)*));
     };
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! ast_enum {
+    // Drop the `#no_visit` attribute, if present.
     (
-        $(#[$enum_attr:meta])*
-        pub enum $name:ident $(# $tags:ident)* { $($variants:tt)* }
+        @@ [$($attrs_pub:tt)*]
+        enum $name:ident #no_visit $($rest:tt)*
     ) => (
-        $(#[$enum_attr])*
+        ast_enum!(@@ [$($attrs_pub)*] enum $name $($rest)*);
+    );
+
+    (
+        @@ [$($attrs_pub:tt)*]
+        enum $name:ident $($rest:tt)*
+    ) => (
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub enum $name {
-            $($variants)*
-        }
-    )
+        $($attrs_pub)* enum $name $($rest)*
+    );
+
+    ($($t:tt)*) => {
+        strip_attrs_pub!(ast_enum!($($t)*));
+    };
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
+#[cfg(not(syn_can_match_ident_after_attrs))]
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
@@ -105,7 +112,78 @@ macro_rules! ast_enum_of_structs {
     )
 }
 
-#[cfg(all(feature = "printing", any(feature = "full", feature = "derive")))]
+// Unfortunately, at this time, we can't make the generated enum here have the
+// correct span. The way that the span for the overall enum decl is calculated
+// is using `lo.to(prev_span)` [1].
+//
+// If the beginning and ending spans of the enum item don't have the same macro
+// context, fallback code is run [2]. This code chooses the span within the
+// macro context to avoid firing spurious diagnostics [3].
+//
+// This means `[src]` links in rustdoc will point to the macro, instead of the
+// actual declaration, if either the first or last token of our declaration has
+// a span from the macro. With `macro_rules!` there is no way to preserve the
+// span of a `{}` block while changing its contents, so we're forced to have the
+// span of our final token point to our macro.
+//
+// [1]: https://github.com/rust-lang/rust/blob/9a90d03ad171856dc016c2dcc19292ec49a8a26f/src/libsyntax/parse/parser.rs#L7377
+// [2]: https://github.com/rust-lang/rust/blob/9a90d03ad171856dc016c2dcc19292ec49a8a26f/src/libsyntax_pos/lib.rs#L467-L478
+// [3]: https://github.com/rust-lang/rust/pull/47942
+#[cfg(syn_can_match_ident_after_attrs)]
+macro_rules! ast_enum_of_structs {
+    (
+        $(#[$enum_attr:meta])*
+        $pub:ident $enum:ident $name:ident {
+            $(
+                $(#[$variant_attr:meta])*
+                $vpub:ident $variant:ident $( ($member:ident $($rest:tt)*) )*,
+            )*
+        }
+
+        $($remaining:tt)*
+    ) => (
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(enum $enum);
+
+        ast_enum! {
+            $(#[$enum_attr])*
+            $pub $enum $name {
+                $(
+                    $(#[$variant_attr])*
+                    $variant $( ($member) )*,
+                )*
+            }
+        }
+
+        $(
+            check_keyword_matches!(pub $vpub);
+            maybe_ast_struct! {
+                $(#[$variant_attr])*
+                $(
+                    $vpub struct $member $($rest)*
+                )*
+            }
+
+            $(
+                impl From<$member> for $name {
+                    fn from(e: $member) -> $name {
+                        $name::$variant(e)
+                    }
+                }
+            )*
+        )*
+
+        #[cfg(feature = "printing")]
+        generate_to_tokens! {
+            $($remaining)*
+            ()
+            tokens
+            $name { $($variant $( [$($rest)*] )*,)* }
+        }
+    )
+}
+
+#[cfg(feature = "printing")]
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
@@ -152,7 +230,6 @@ macro_rules! to_tokens_call {
     };
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! maybe_ast_struct {
     (
         $(#[$attr:meta])*
@@ -162,4 +239,27 @@ macro_rules! maybe_ast_struct {
     ) => ();
 
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
+}
+
+#[cfg(not(syn_can_match_ident_after_attrs))]
+macro_rules! strip_attrs_pub {
+    ($mac:ident!($(#[$m:meta])* pub $($t:tt)*)) => {
+        $mac!(@@ [$(#[$m])* pub] $($t)*);
+    };
+}
+
+#[cfg(syn_can_match_ident_after_attrs)]
+macro_rules! strip_attrs_pub {
+    ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
+        check_keyword_matches!(pub $pub);
+
+        $mac!(@@ [$(#[$m])* $pub] $($t)*);
+    };
+}
+
+#[cfg(syn_can_match_ident_after_attrs)]
+macro_rules! check_keyword_matches {
+    (struct struct) => {};
+    (enum enum) => {};
+    (pub pub) => {};
 }

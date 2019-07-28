@@ -286,6 +286,7 @@ extern crate unicode_xid;
 #[cfg(feature = "printing")]
 extern crate quote;
 
+#[cfg(any(feature = "full", feature = "derive"))]
 #[macro_use]
 mod macros;
 
