@@ -569,6 +569,14 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
+            syn::Expr::Await(_val) => {
+                let mut formatter = formatter.debug_struct("Expr::Await");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("base", Lite(&_val.base));
+                formatter.finish()
+            }
             syn::Expr::Binary(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Binary");
                 if !_val.attrs.is_empty() {
@@ -1246,6 +1254,17 @@ impl Debug for Lite<syn::ExprAsync> {
             formatter.field("capture", Print::ref_cast(val));
         }
         formatter.field("block", Lite(&_val.block));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ExprAwait> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("ExprAwait");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.field("base", Lite(&_val.base));
         formatter.finish()
     }
 }
