@@ -12,7 +12,16 @@ use syn::{Attribute, Meta};
 fn test_meta_item_word() {
     let meta = test("#[foo]");
 
-    snapshot!(meta, @r###"Word("foo")"###);
+    snapshot!(meta, @r###"
+   ⋮Path(Path {
+   ⋮    segments: [
+   ⋮        PathSegment {
+   ⋮            ident: "foo",
+   ⋮            arguments: None,
+   ⋮        },
+   ⋮    ],
+   ⋮})
+    "###);
 }
 
 #[test]
@@ -21,7 +30,14 @@ fn test_meta_item_name_value() {
 
     snapshot!(meta, @r###"
    ⋮Meta::NameValue {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    lit: 5,
    ⋮}
     "###);
@@ -33,7 +49,14 @@ fn test_meta_item_bool_value() {
 
     snapshot!(meta, @r###"
    ⋮Meta::NameValue {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    lit: Lit::Bool {
    ⋮        value: true,
    ⋮    },
@@ -44,7 +67,14 @@ fn test_meta_item_bool_value() {
 
     snapshot!(meta, @r###"
    ⋮Meta::NameValue {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    lit: Lit::Bool {
    ⋮        value: false,
    ⋮    },
@@ -58,7 +88,14 @@ fn test_meta_item_list_lit() {
 
     snapshot!(meta, @r###"
    ⋮Meta::List {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
    ⋮        Literal(5),
    ⋮    ],
@@ -72,9 +109,23 @@ fn test_meta_item_list_word() {
 
     snapshot!(meta, @r###"
    ⋮Meta::List {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
-   ⋮        Meta(Word("bar")),
+   ⋮        Meta(Path(Path {
+   ⋮            segments: [
+   ⋮                PathSegment {
+   ⋮                    ident: "bar",
+   ⋮                    arguments: None,
+   ⋮                },
+   ⋮            ],
+   ⋮        })),
    ⋮    ],
    ⋮}
     "###);
@@ -86,10 +137,24 @@ fn test_meta_item_list_name_value() {
 
     snapshot!(meta, @r###"
    ⋮Meta::List {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
    ⋮        Meta(Meta::NameValue {
-   ⋮            ident: "bar",
+   ⋮            path: Path {
+   ⋮                segments: [
+   ⋮                    PathSegment {
+   ⋮                        ident: "bar",
+   ⋮                        arguments: None,
+   ⋮                    },
+   ⋮                ],
+   ⋮            },
    ⋮            lit: 5,
    ⋮        }),
    ⋮    ],
@@ -103,10 +168,24 @@ fn test_meta_item_list_bool_value() {
 
     snapshot!(meta, @r###"
    ⋮Meta::List {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
    ⋮        Meta(Meta::NameValue {
-   ⋮            ident: "bar",
+   ⋮            path: Path {
+   ⋮                segments: [
+   ⋮                    PathSegment {
+   ⋮                        ident: "bar",
+   ⋮                        arguments: None,
+   ⋮                    },
+   ⋮                ],
+   ⋮            },
    ⋮            lit: Lit::Bool {
    ⋮                value: true,
    ⋮            },
@@ -122,23 +201,65 @@ fn test_meta_item_multiple() {
 
     snapshot!(meta, @r###"
    ⋮Meta::List {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
-   ⋮        Meta(Word("word")),
+   ⋮        Meta(Path(Path {
+   ⋮            segments: [
+   ⋮                PathSegment {
+   ⋮                    ident: "word",
+   ⋮                    arguments: None,
+   ⋮                },
+   ⋮            ],
+   ⋮        })),
    ⋮        Meta(Meta::NameValue {
-   ⋮            ident: "name",
+   ⋮            path: Path {
+   ⋮                segments: [
+   ⋮                    PathSegment {
+   ⋮                        ident: "name",
+   ⋮                        arguments: None,
+   ⋮                    },
+   ⋮                ],
+   ⋮            },
    ⋮            lit: 5,
    ⋮        }),
    ⋮        Meta(Meta::List {
-   ⋮            ident: "list",
+   ⋮            path: Path {
+   ⋮                segments: [
+   ⋮                    PathSegment {
+   ⋮                        ident: "list",
+   ⋮                        arguments: None,
+   ⋮                    },
+   ⋮                ],
+   ⋮            },
    ⋮            nested: [
    ⋮                Meta(Meta::NameValue {
-   ⋮                    ident: "name2",
+   ⋮                    path: Path {
+   ⋮                        segments: [
+   ⋮                            PathSegment {
+   ⋮                                ident: "name2",
+   ⋮                                arguments: None,
+   ⋮                            },
+   ⋮                        ],
+   ⋮                    },
    ⋮                    lit: 6,
    ⋮                }),
    ⋮            ],
    ⋮        }),
-   ⋮        Meta(Word("word2")),
+   ⋮        Meta(Path(Path {
+   ⋮            segments: [
+   ⋮                PathSegment {
+   ⋮                    ident: "word2",
+   ⋮                    arguments: None,
+   ⋮                },
+   ⋮            ],
+   ⋮        })),
    ⋮    ],
    ⋮}
     "###);
@@ -150,7 +271,14 @@ fn test_bool_lit() {
 
     snapshot!(meta, @r###"
    ⋮Meta::List {
-   ⋮    ident: "foo",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "foo",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
    ⋮        Literal(Lit::Bool {
    ⋮            value: true,

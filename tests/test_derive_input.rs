@@ -111,10 +111,31 @@ fn test_struct() {
 
     snapshot!(input.attrs[0].parse_meta().unwrap(), @r###"
    ⋮Meta::List {
-   ⋮    ident: "derive",
+   ⋮    path: Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "derive",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    },
    ⋮    nested: [
-   ⋮        Meta(Word("Debug")),
-   ⋮        Meta(Word("Clone")),
+   ⋮        Meta(Path(Path {
+   ⋮            segments: [
+   ⋮                PathSegment {
+   ⋮                    ident: "Debug",
+   ⋮                    arguments: None,
+   ⋮                },
+   ⋮            ],
+   ⋮        })),
+   ⋮        Meta(Path(Path {
+   ⋮            segments: [
+   ⋮                PathSegment {
+   ⋮                    ident: "Clone",
+   ⋮                    arguments: None,
+   ⋮                },
+   ⋮            ],
+   ⋮        })),
    ⋮    ],
    ⋮}
     "###);
@@ -314,10 +335,24 @@ fn test_enum() {
     snapshot!(meta_items, @r###"
    ⋮[
    ⋮    Meta::NameValue {
-   ⋮        ident: "doc",
+   ⋮        path: Path {
+   ⋮            segments: [
+   ⋮                PathSegment {
+   ⋮                    ident: "doc",
+   ⋮                    arguments: None,
+   ⋮                },
+   ⋮            ],
+   ⋮        },
    ⋮        lit: " See the std::result module documentation for details.",
    ⋮    },
-   ⋮    Word("must_use"),
+   ⋮    Path(Path {
+   ⋮        segments: [
+   ⋮            PathSegment {
+   ⋮                ident: "must_use",
+   ⋮                arguments: None,
+   ⋮            },
+   ⋮        ],
+   ⋮    }),
    ⋮]
     "###);
 }
@@ -437,7 +472,20 @@ fn test_attr_with_mod_style_path_with_self() {
    ⋮}
     "###);
 
-    assert!(input.attrs[0].parse_meta().is_err());
+    snapshot!(input.attrs[0].parse_meta().unwrap(), @r###"
+   ⋮Path(Path {
+   ⋮    segments: [
+   ⋮        PathSegment {
+   ⋮            ident: "foo",
+   ⋮            arguments: None,
+   ⋮        },
+   ⋮        PathSegment {
+   ⋮            ident: "self",
+   ⋮            arguments: None,
+   ⋮        },
+   ⋮    ],
+   ⋮})
+    "###);
 }
 
 #[test]
