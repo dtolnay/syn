@@ -5736,6 +5736,7 @@
     "Async": "async",
     "At": "@",
     "Auto": "auto",
+    "Await": "await",
     "Bang": "!",
     "Become": "become",
     "Box": "box",

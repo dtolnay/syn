@@ -595,6 +595,7 @@ define_keywords! {
     "as"          pub struct As           /// `as`
     "async"       pub struct Async        /// `async`
     "auto"        pub struct Auto         /// `auto`
+    "await"       pub struct Await        /// `await`
     "become"      pub struct Become       /// `become`
     "box"         pub struct Box          /// `box`
     "break"       pub struct Break        /// `break`
@@ -716,6 +717,7 @@ macro_rules! Token {
     (as)          => { $crate::token::As };
     (async)       => { $crate::token::Async };
     (auto)        => { $crate::token::Auto };
+    (await)       => { $crate::token::Await };
     (become)      => { $crate::token::Become };
     (box)         => { $crate::token::Box };
     (break)       => { $crate::token::Break };
