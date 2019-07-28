@@ -1743,9 +1743,6 @@ pub fn visit_fn_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut FnArg) 
         FnArg::Inferred(ref mut _binding_0) => {
             _visitor.visit_pat_mut(_binding_0);
         }
-        FnArg::Ignored(ref mut _binding_0) => {
-            _visitor.visit_type_mut(_binding_0);
-        }
     }
 }
 #[cfg(feature = "full")]

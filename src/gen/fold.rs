@@ -1584,7 +1584,6 @@ pub fn fold_fn_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
         FnArg::SelfValue(_binding_0) => FnArg::SelfValue(_visitor.fold_arg_self(_binding_0)),
         FnArg::Captured(_binding_0) => FnArg::Captured(_visitor.fold_arg_captured(_binding_0)),
         FnArg::Inferred(_binding_0) => FnArg::Inferred(_visitor.fold_pat(_binding_0)),
-        FnArg::Ignored(_binding_0) => FnArg::Ignored(_visitor.fold_type(_binding_0)),
     }
 }
 #[cfg(feature = "full")]

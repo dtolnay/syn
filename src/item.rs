@@ -769,8 +769,6 @@ ast_enum_of_structs! {
 
         /// A pattern whose type is inferred captured by a function signature.
         pub Inferred(Pat),
-        /// A type not bound to any pattern in a function signature.
-        pub Ignored(Type),
     }
 }
 
@@ -1200,18 +1198,7 @@ pub mod parsing {
                 }
             }
 
-            let ahead = input.fork();
-            let err = match ahead.call(arg_captured) {
-                Ok(_) => return input.call(arg_captured).map(FnArg::Captured),
-                Err(err) => err,
-            };
-
-            let ahead = input.fork();
-            if ahead.parse::<Type>().is_ok() {
-                return input.parse().map(FnArg::Ignored);
-            }
-
-            Err(err)
+            input.call(arg_captured).map(FnArg::Captured)
         }
     }
 

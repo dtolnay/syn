@@ -45,6 +45,11 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/librustc_codegen_llvm/lib.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
+        // Deprecated anonymous parameter syntax in traits
+        "tests/rust/src/test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs" |
+        "tests/rust/src/test/ui/issues/issue-13105.rs" |
+        "tests/rust/src/test/ui/issues/issue-13775.rs" |
+        "tests/rust/src/test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
         // not actually test cases

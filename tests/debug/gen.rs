@@ -2164,13 +2164,6 @@ impl Debug for Lite<syn::FnArg> {
                 formatter.write_str(")")?;
                 Ok(())
             }
-            syn::FnArg::Ignored(_val) => {
-                formatter.write_str("Ignored")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
         }
     }
 }
