@@ -11,10 +11,6 @@ fn main() {
         None => return,
     };
 
-    if compiler.minor >= 19 {
-        println!("cargo:rustc-cfg=syn_can_use_thread_id");
-    }
-
     if compiler.minor >= 20 {
         println!("cargo:rustc-cfg=syn_can_use_associated_constants");
     }
