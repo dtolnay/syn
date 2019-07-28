@@ -2251,10 +2251,7 @@ pub fn visit_item_macro2_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut It
     _visitor.visit_visibility_mut(&mut _i.vis);
     tokens_helper(_visitor, &mut _i.macro_token.span);
     _visitor.visit_ident_mut(&mut _i.ident);
-    tokens_helper(_visitor, &mut _i.paren_token.span);
-    skip!(_i.args);
-    tokens_helper(_visitor, &mut _i.brace_token.span);
-    skip!(_i.body);
+    skip!(_i.rules);
 }
 #[cfg(feature = "full")]
 pub fn visit_item_mod_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemMod) {

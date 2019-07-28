@@ -2006,10 +2006,7 @@ pub fn fold_item_macro2<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemMacro2) -> I
         vis: _visitor.fold_visibility(_i.vis),
         macro_token: Token![macro](tokens_helper(_visitor, &_i.macro_token.span)),
         ident: _visitor.fold_ident(_i.ident),
-        paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
-        args: _i.args,
-        brace_token: Brace(tokens_helper(_visitor, &_i.brace_token.span)),
-        body: _i.body,
+        rules: _i.rules,
     }
 }
 #[cfg(feature = "full")]

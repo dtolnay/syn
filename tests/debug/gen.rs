@@ -3097,8 +3097,7 @@ impl Debug for Lite<syn::Item> {
                 }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
-                formatter.field("args", Lite(&_val.args));
-                formatter.field("body", Lite(&_val.body));
+                formatter.field("rules", Lite(&_val.rules));
                 formatter.finish()
             }
             syn::Item::Mod(_val) => {
@@ -3591,8 +3590,7 @@ impl Debug for Lite<syn::ItemMacro2> {
         }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
-        formatter.field("args", Lite(&_val.args));
-        formatter.field("body", Lite(&_val.body));
+        formatter.field("rules", Lite(&_val.rules));
         formatter.finish()
     }
 }

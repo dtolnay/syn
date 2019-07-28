@@ -3261,16 +3261,7 @@
         "ident": {
           "proc_macro2": "Ident"
         },
-        "paren_token": {
-          "group": "Paren"
-        },
-        "args": {
-          "proc_macro2": "TokenStream"
-        },
-        "brace_token": {
-          "group": "Brace"
-        },
-        "body": {
+        "rules": {
           "proc_macro2": "TokenStream"
         }
       }
