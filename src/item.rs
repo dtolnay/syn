@@ -1142,10 +1142,10 @@ pub mod parsing {
             let paren_token = parenthesized!(content in input);
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic: Option<Token![...]> = match inputs.last() {
-                Some(punctuated::Pair::End(&FnArg::Captured(ArgCaptured {
+                Some(&FnArg::Captured(ArgCaptured {
                     ty: Type::Verbatim(TypeVerbatim { ref tokens }),
                     ..
-                }))) => parse2(tokens.clone()).ok(),
+                })) if inputs.empty_or_trailing() => parse2(tokens.clone()).ok(),
                 _ => None,
             };
 
