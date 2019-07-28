@@ -11,7 +11,7 @@
     not(all(target_arch = "wasm32", target_os = "unknown")),
     feature = "proc-macro"
 ))]
-use proc_macro as pm;
+use crate::proc_macro as pm;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 
 use std::marker::PhantomData;

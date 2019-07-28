@@ -1,5 +1,5 @@
 use super::*;
-use punctuated::Punctuated;
+use crate::punctuated::Punctuated;
 
 ast_struct! {
     /// An enum variant.
@@ -179,8 +179,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use ext::IdentExt;
-    use parse::{Parse, ParseStream, Result};
+    use crate::ext::IdentExt;
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Variant {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -319,7 +319,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
-    use print::TokensOrDefault;
+    use crate::print::TokensOrDefault;
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut TokenStream) {

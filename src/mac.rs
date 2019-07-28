@@ -1,15 +1,15 @@
 use super::*;
+use crate::token::{Brace, Bracket, Paren};
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
 use proc_macro2::{Delimiter, Span, TokenTree};
-use token::{Brace, Bracket, Paren};
 
 #[cfg(feature = "parsing")]
-use parse::{Parse, ParseStream, Parser, Result};
+use crate::parse::{Parse, ParseStream, Parser, Result};
+#[cfg(feature = "extra-traits")]
+use crate::tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
@@ -194,7 +194,7 @@ pub fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStrea
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Macro {
         fn parse(input: ParseStream) -> Result<Self> {

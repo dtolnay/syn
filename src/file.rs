@@ -78,7 +78,7 @@ ast_struct! {
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for File {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -100,7 +100,7 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-    use attr::FilterAttrs;
+    use crate::attr::FilterAttrs;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 

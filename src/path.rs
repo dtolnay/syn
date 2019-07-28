@@ -1,5 +1,5 @@
 use super::*;
-use punctuated::Punctuated;
+use crate::punctuated::Punctuated;
 
 ast_struct! {
     /// A path at which a named item is exported: `std::collections::HashMap`.
@@ -205,9 +205,9 @@ pub mod parsing {
     use super::*;
 
     #[cfg(feature = "full")]
-    use expr;
-    use ext::IdentExt;
-    use parse::{Parse, ParseStream, Result};
+    use crate::expr;
+    use crate::ext::IdentExt;
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -524,7 +524,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
-    use print::TokensOrDefault;
+    use crate::print::TokensOrDefault;
 
     impl ToTokens for Path {
         fn to_tokens(&self, tokens: &mut TokenStream) {

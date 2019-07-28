@@ -1,12 +1,12 @@
 use super::*;
+use crate::punctuated::Punctuated;
+#[cfg(feature = "extra-traits")]
+use crate::tt::TokenStreamHelper;
 use proc_macro2::{Span, TokenStream};
-use punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(all(feature = "parsing", feature = "full"))]
 use std::mem;
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// A Rust expression.
@@ -981,9 +981,9 @@ pub mod parsing {
     use super::*;
 
     #[cfg(feature = "full")]
-    use ext::IdentExt;
-    use parse::{Parse, ParseStream, Result};
-    use path;
+    use crate::ext::IdentExt;
+    use crate::parse::{Parse, ParseStream, Result};
+    use crate::path;
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
@@ -3038,9 +3038,9 @@ mod printing {
     use quote::{ToTokens, TokenStreamExt};
 
     #[cfg(feature = "full")]
-    use attr::FilterAttrs;
+    use crate::attr::FilterAttrs;
     #[cfg(feature = "full")]
-    use print::TokensOrDefault;
+    use crate::print::TokensOrDefault;
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `TokenStream`.

@@ -203,7 +203,7 @@ use std::str::FromStr;
     not(all(target_arch = "wasm32", target_os = "unknown")),
     feature = "proc-macro"
 ))]
-use proc_macro;
+use crate::proc_macro;
 use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 
 use crate::buffer::{Cursor, TokenBuffer};

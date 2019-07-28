@@ -1,10 +1,10 @@
 use super::*;
+use crate::punctuated::Punctuated;
+#[cfg(feature = "extra-traits")]
+use crate::tt::TokenStreamHelper;
 use proc_macro2::TokenStream;
-use punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// The possible types that a Rust value could have.
@@ -245,8 +245,8 @@ ast_enum! {
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseStream, Result};
-    use path;
+    use crate::parse::{Parse, ParseStream, Result};
+    use crate::path;
 
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -827,7 +827,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
-    use print::TokensOrDefault;
+    use crate::print::TokensOrDefault;
 
     impl ToTokens for TypeSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {

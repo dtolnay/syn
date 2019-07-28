@@ -1,5 +1,5 @@
 use super::*;
-use punctuated::Punctuated;
+use crate::punctuated::Punctuated;
 
 use std::iter;
 
@@ -8,11 +8,11 @@ use proc_macro2::TokenStream;
 use proc_macro2::{Delimiter, Spacing, TokenTree};
 
 #[cfg(feature = "parsing")]
-use parse::{ParseStream, Result};
+use crate::parse::{ParseStream, Result};
+#[cfg(feature = "extra-traits")]
+use crate::tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
 
 ast_struct! {
     /// An attribute like `#[repr(transparent)]`.
@@ -542,10 +542,10 @@ where
 pub mod parsing {
     use super::*;
 
-    use ext::IdentExt;
-    use parse::{Parse, ParseStream, Result};
+    use crate::ext::IdentExt;
+    use crate::parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]
-    use private;
+    use crate::private;
 
     pub fn single_parse_inner(input: ParseStream) -> Result<Attribute> {
         let content;

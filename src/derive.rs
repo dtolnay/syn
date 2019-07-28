@@ -1,5 +1,5 @@
 use super::*;
-use punctuated::Punctuated;
+use crate::punctuated::Punctuated;
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
@@ -74,7 +74,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for DeriveInput {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -210,8 +210,8 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
-    use attr::FilterAttrs;
-    use print::TokensOrDefault;
+    use crate::attr::FilterAttrs;
+    use crate::print::TokensOrDefault;
 
     impl ToTokens for DeriveInput {
         fn to_tokens(&self, tokens: &mut TokenStream) {

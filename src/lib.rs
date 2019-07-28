@@ -299,17 +299,19 @@ pub mod group;
 pub mod token;
 
 mod ident;
-pub use ident::Ident;
+pub use crate::ident::Ident;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod attr;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use attr::{AttrStyle, Attribute, AttributeArgs, Meta, MetaList, MetaNameValue, NestedMeta};
+pub use crate::attr::{
+    AttrStyle, Attribute, AttributeArgs, Meta, MetaList, MetaNameValue, NestedMeta,
+};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use data::{
+pub use crate::data::{
     Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, VisPublic, VisRestricted,
     Visibility,
 };
@@ -317,7 +319,7 @@ pub use data::{
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use expr::{
+pub use crate::expr::{
     Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprBinary, ExprBlock, ExprBox,
     ExprBreak, ExprCall, ExprCast, ExprClosure, ExprContinue, ExprField, ExprForLoop, ExprGroup,
     ExprIf, ExprInPlace, ExprIndex, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch,
@@ -327,7 +329,7 @@ pub use expr::{
 };
 
 #[cfg(feature = "full")]
-pub use expr::{
+pub use crate::expr::{
     Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
     PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatRef, PatSlice, PatStruct, PatTuple,
     PatTupleStruct, PatVerbatim, PatWild, RangeLimits, Stmt,
@@ -336,18 +338,18 @@ pub use expr::{
 #[cfg(any(feature = "full", feature = "derive"))]
 mod generics;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use generics::{
+pub use crate::generics::{
     BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef, PredicateEq,
     PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound,
     WhereClause, WherePredicate,
 };
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
-pub use generics::{ImplGenerics, Turbofish, TypeGenerics};
+pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-pub use item::{
+pub use crate::item::{
     ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
     ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
     ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
@@ -361,15 +363,15 @@ pub use item::{
 #[cfg(feature = "full")]
 mod file;
 #[cfg(feature = "full")]
-pub use file::File;
+pub use crate::file::File;
 
 mod lifetime;
-pub use lifetime::Lifetime;
+pub use crate::lifetime::Lifetime;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod lit;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use lit::{
+pub use crate::lit::{
     FloatSuffix, IntSuffix, Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr,
     LitVerbatim, StrStyle,
 };
@@ -377,22 +379,22 @@ pub use lit::{
 #[cfg(any(feature = "full", feature = "derive"))]
 mod mac;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use mac::{Macro, MacroDelimiter};
+pub use crate::mac::{Macro, MacroDelimiter};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod derive;
 #[cfg(feature = "derive")]
-pub use derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
+pub use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod op;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use op::{BinOp, UnOp};
+pub use crate::op::{BinOp, UnOp};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use ty::{
+pub use crate::ty::{
     Abi, BareFnArg, BareFnArgName, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
     TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
     TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim,
@@ -401,7 +403,7 @@ pub use ty::{
 #[cfg(any(feature = "full", feature = "derive"))]
 mod path;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use path::{
+pub use crate::path::{
     AngleBracketedGenericArguments, Binding, Constraint, GenericArgument,
     ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf,
 };
@@ -546,7 +548,7 @@ mod gen {
     #[path = "../gen_helper.rs"]
     mod helper;
 }
-pub use gen::*;
+pub use crate::gen::*;
 
 // Not public API.
 #[doc(hidden)]

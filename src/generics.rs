@@ -1,5 +1,5 @@
 use super::*;
-use punctuated::{Iter, IterMut, Punctuated};
+use crate::punctuated::{Iter, IterMut, Punctuated};
 
 ast_struct! {
     /// Lifetimes and type parameters attached to a declaration of a function,
@@ -479,7 +479,7 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Generics {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -872,8 +872,8 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
-    use attr::FilterAttrs;
-    use print::TokensOrDefault;
+    use crate::attr::FilterAttrs;
+    use crate::print::TokensOrDefault;
 
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut TokenStream) {

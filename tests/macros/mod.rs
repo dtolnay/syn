@@ -40,12 +40,12 @@ macro_rules! snapshot {
 #[macro_export]
 macro_rules! snapshot_impl {
     (($expr:ident) as $t:ty, @$snapshot:literal) => {
-        let $expr = ::macros::Tokens::parse::<$t>($expr).unwrap();
+        let $expr = crate::macros::Tokens::parse::<$t>($expr).unwrap();
         let debug = crate::macros::debug::Lite(&$expr);
         insta::assert_debug_snapshot_matches!(debug, @$snapshot);
     };
     (($($expr:tt)*) as $t:ty, @$snapshot:literal) => {{
-        let syntax_tree = ::macros::Tokens::parse::<$t>($($expr)*).unwrap();
+        let syntax_tree = crate::macros::Tokens::parse::<$t>($($expr)*).unwrap();
         let debug = crate::macros::debug::Lite(&syntax_tree);
         insta::assert_debug_snapshot_matches!(debug, @$snapshot);
         syntax_tree

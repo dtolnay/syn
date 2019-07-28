@@ -1,13 +1,13 @@
 use super::*;
-use derive::{Data, DeriveInput};
+use crate::derive::{Data, DeriveInput};
+use crate::punctuated::Punctuated;
+use crate::token::{Brace, Paren};
 use proc_macro2::TokenStream;
-use punctuated::Punctuated;
-use token::{Brace, Paren};
 
 #[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
+use crate::tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
+use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module or scope.
@@ -778,8 +778,8 @@ ast_enum_of_structs! {
 pub mod parsing {
     use super::*;
 
-    use ext::IdentExt;
-    use parse::{Parse, ParseStream, Result};
+    use crate::ext::IdentExt;
+    use crate::parse::{Parse, ParseStream, Result};
     use proc_macro2::{Punct, Spacing, TokenTree};
     use std::iter::FromIterator;
 
@@ -2209,8 +2209,8 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
-    use attr::FilterAttrs;
-    use print::TokensOrDefault;
+    use crate::attr::FilterAttrs;
+    use crate::print::TokensOrDefault;
 
     impl ToTokens for ItemExternCrate {
         fn to_tokens(&self, tokens: &mut TokenStream) {
