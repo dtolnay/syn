@@ -11,11 +11,6 @@ fn main() {
         None => return,
     };
 
-    // Macro modularization allows re-exporting the `quote!` macro in 1.30+.
-    if compiler.minor >= 30 {
-        println!("cargo:rustc-cfg=syn_can_call_macro_by_path");
-    }
-
     if !compiler.nightly {
         println!("cargo:rustc-cfg=syn_disable_nightly_tests");
     }

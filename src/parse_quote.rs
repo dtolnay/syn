@@ -74,17 +74,6 @@ macro_rules! parse_quote {
     };
 }
 
-#[cfg(not(syn_can_call_macro_by_path))]
-#[doc(hidden)]
-#[macro_export]
-macro_rules! quote_impl {
-    ($($tt:tt)*) => {
-        // Require caller to have their own `#[macro_use] extern crate quote`.
-        quote!($($tt)*)
-    };
-}
-
-#[cfg(syn_can_call_macro_by_path)]
 #[doc(hidden)]
 #[macro_export]
 macro_rules! quote_impl {
