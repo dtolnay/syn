@@ -1,6 +1,6 @@
 use std::env;
 use std::process::Command;
-use std::str::{self, FromStr};
+use std::str;
 
 // The rustc-cfg strings below are *not* public API. Please let us know by
 // opening a GitHub issue if your build environment requires some way to enable
@@ -17,7 +17,6 @@ fn main() {
 }
 
 struct Compiler {
-    minor: u32,
     nightly: bool,
 }
 
@@ -37,23 +36,7 @@ fn rustc_version() -> Option<Compiler> {
         Err(_) => return None,
     };
 
-    let mut pieces = version.split('.');
-    if pieces.next() != Some("rustc 1") {
-        return None;
-    }
-
-    let next = match pieces.next() {
-        Some(next) => next,
-        None => return None,
-    };
-
-    let minor = match u32::from_str(next) {
-        Ok(minor) => minor,
-        Err(_) => return None,
-    };
-
     Some(Compiler {
-        minor: minor,
         nightly: version.contains("nightly"),
     })
 }
