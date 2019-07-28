@@ -123,6 +123,16 @@ ast_enum_of_structs! {
             pub block: Block,
         }),
 
+        /// An await expression: `fut.await`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Await(ExprAwait #full {
+            pub attrs: Vec<Attribute>,
+            pub base: Box<Expr>,
+            pub dot_token: Token![.],
+            pub await_token: Token![await],
+        }),
+
         /// A binary operation: `a + b`, `a * b`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
@@ -568,6 +578,7 @@ impl Expr {
             | Expr::Group(ExprGroup { ref mut attrs, .. })
             | Expr::Try(ExprTry { ref mut attrs, .. })
             | Expr::Async(ExprAsync { ref mut attrs, .. })
+            | Expr::Await(ExprAwait { ref mut attrs, .. })
             | Expr::TryBlock(ExprTryBlock { ref mut attrs, .. })
             | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
@@ -1324,6 +1335,17 @@ pub mod parsing {
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) {
                 let dot_token: Token![.] = input.parse()?;
+
+                if input.peek(Token![await]) {
+                    e = Expr::Await(ExprAwait {
+                        attrs: Vec::new(),
+                        base: Box::new(e),
+                        dot_token: dot_token,
+                        await_token: input.parse()?,
+                    });
+                    continue;
+                }
+
                 let member: Member = input.parse()?;
                 let turbofish = if member.is_named() && input.peek(Token![::]) {
                     Some(MethodTurbofish {
@@ -1407,7 +1429,10 @@ pub mod parsing {
                     paren_token: parenthesized!(content in input),
                     args: content.parse_terminated(Expr::parse)?,
                 });
-            } else if input.peek(Token![.]) {
+            } else if input.peek(Token![.])
+                && !input.peek(Token![..])
+                && !input.peek2(Token![await])
+            {
                 e = Expr::Field(ExprField {
                     attrs: Vec::new(),
                     base: Box::new(e),
@@ -3317,6 +3342,16 @@ mod printing {
             self.async_token.to_tokens(tokens);
             self.capture.to_tokens(tokens);
             self.block.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for ExprAwait {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.base.to_tokens(tokens);
+            self.dot_token.to_tokens(tokens);
+            self.await_token.to_tokens(tokens);
         }
     }
 

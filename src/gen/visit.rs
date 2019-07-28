@@ -136,6 +136,10 @@ pub trait Visit<'ast> {
     fn visit_expr_async(&mut self, i: &'ast ExprAsync) {
         visit_expr_async(self, i)
     }
+    #[cfg(feature = "full")]
+    fn visit_expr_await(&mut self, i: &'ast ExprAwait) {
+        visit_expr_await(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_binary(&mut self, i: &'ast ExprBinary) {
         visit_expr_binary(self, i)
@@ -1126,6 +1130,9 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
         Expr::Async(ref _binding_0) => {
             full!(_visitor.visit_expr_async(_binding_0));
         }
+        Expr::Await(ref _binding_0) => {
+            full!(_visitor.visit_expr_await(_binding_0));
+        }
         Expr::Binary(ref _binding_0) => {
             _visitor.visit_expr_binary(_binding_0);
         }
@@ -1278,6 +1285,15 @@ pub fn visit_expr_async<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_block(&_i.block);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_await<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprAwait) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    _visitor.visit_expr(&*_i.base);
+    tokens_helper(_visitor, &_i.dot_token.spans);
+    tokens_helper(_visitor, &_i.await_token.span);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_binary<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprBinary) {

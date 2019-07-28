@@ -680,6 +680,11 @@
             "syn": "ExprAsync"
           }
         ],
+        "Await": [
+          {
+            "syn": "ExprAwait"
+          }
+        ],
         "Binary": [
           {
             "syn": "ExprBinary"
@@ -967,6 +972,32 @@
         },
         "block": {
           "syn": "Block"
+        }
+      }
+    },
+    {
+      "ident": "ExprAwait",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "base": {
+          "box": {
+            "syn": "Expr"
+          }
+        },
+        "dot_token": {
+          "token": "Dot"
+        },
+        "await_token": {
+          "token": "Await"
         }
       }
     },
@@ -5736,6 +5767,7 @@
     "Async": "async",
     "At": "@",
     "Auto": "auto",
+    "Await": "await",
     "Bang": "!",
     "Become": "become",
     "Box": "box",

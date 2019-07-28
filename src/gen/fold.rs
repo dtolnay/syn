@@ -135,6 +135,10 @@ pub trait Fold {
     fn fold_expr_async(&mut self, i: ExprAsync) -> ExprAsync {
         fold_expr_async(self, i)
     }
+    #[cfg(feature = "full")]
+    fn fold_expr_await(&mut self, i: ExprAwait) -> ExprAwait {
+        fold_expr_await(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_binary(&mut self, i: ExprBinary) -> ExprBinary {
         fold_expr_binary(self, i)
@@ -1110,6 +1114,7 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
             Expr::AssignOp(full!(_visitor.fold_expr_assign_op(_binding_0)))
         }
         Expr::Async(_binding_0) => Expr::Async(full!(_visitor.fold_expr_async(_binding_0))),
+        Expr::Await(_binding_0) => Expr::Await(full!(_visitor.fold_expr_await(_binding_0))),
         Expr::Binary(_binding_0) => Expr::Binary(_visitor.fold_expr_binary(_binding_0)),
         Expr::Block(_binding_0) => Expr::Block(full!(_visitor.fold_expr_block(_binding_0))),
         Expr::Box(_binding_0) => Expr::Box(full!(_visitor.fold_expr_box(_binding_0))),
@@ -1189,6 +1194,15 @@ pub fn fold_expr_async<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprAsync) -> Exp
         async_token: Token![async](tokens_helper(_visitor, &_i.async_token.span)),
         capture: (_i.capture).map(|it| Token![move](tokens_helper(_visitor, &it.span))),
         block: _visitor.fold_block(_i.block),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_expr_await<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprAwait) -> ExprAwait {
+    ExprAwait {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        base: Box::new(_visitor.fold_expr(*_i.base)),
+        dot_token: Token ! [ . ](tokens_helper(_visitor, &_i.dot_token.spans)),
+        await_token: Token![await](tokens_helper(_visitor, &_i.await_token.span)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
