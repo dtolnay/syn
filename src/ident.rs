@@ -1,11 +1,11 @@
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
 #[cfg(feature = "parsing")]
+use crate::lookahead;
+#[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Result};
 #[cfg(feature = "parsing")]
 use crate::token::Token;
-#[cfg(feature = "parsing")]
-use crate::lookahead;
 
 pub use proc_macro2::Ident;
 
