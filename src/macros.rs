@@ -62,56 +62,6 @@ macro_rules! ast_enum {
     };
 }
 
-#[cfg(not(syn_can_match_ident_after_attrs))]
-macro_rules! ast_enum_of_structs {
-    (
-        $(#[$enum_attr:meta])*
-        pub enum $name:ident {
-            $(
-                $(#[$variant_attr:meta])*
-                pub $variant:ident $( ($member:ident $($rest:tt)*) )*,
-            )*
-        }
-
-        $($remaining:tt)*
-    ) => (
-        ast_enum! {
-            $(#[$enum_attr])*
-            pub enum $name {
-                $(
-                    $(#[$variant_attr])*
-                    $variant $( ($member) )*,
-                )*
-            }
-        }
-
-        $(
-            maybe_ast_struct! {
-                $(#[$variant_attr])*
-                $(
-                    pub struct $member $($rest)*
-                )*
-            }
-
-            $(
-                impl From<$member> for $name {
-                    fn from(e: $member) -> $name {
-                        $name::$variant(e)
-                    }
-                }
-            )*
-        )*
-
-        #[cfg(feature = "printing")]
-        generate_to_tokens! {
-            $($remaining)*
-            ()
-            tokens
-            $name { $($variant $( [$($rest)*] )*,)* }
-        }
-    )
-}
-
 // Unfortunately, at this time, we can't make the generated enum here have the
 // correct span. The way that the span for the overall enum decl is calculated
 // is using `lo.to(prev_span)` [1].
@@ -129,7 +79,6 @@ macro_rules! ast_enum_of_structs {
 // [1]: https://github.com/rust-lang/rust/blob/9a90d03ad171856dc016c2dcc19292ec49a8a26f/src/libsyntax/parse/parser.rs#L7377
 // [2]: https://github.com/rust-lang/rust/blob/9a90d03ad171856dc016c2dcc19292ec49a8a26f/src/libsyntax_pos/lib.rs#L467-L478
 // [3]: https://github.com/rust-lang/rust/pull/47942
-#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
@@ -241,14 +190,6 @@ macro_rules! maybe_ast_struct {
     ($($rest:tt)*) => (ast_struct! { $($rest)* });
 }
 
-#[cfg(not(syn_can_match_ident_after_attrs))]
-macro_rules! strip_attrs_pub {
-    ($mac:ident!($(#[$m:meta])* pub $($t:tt)*)) => {
-        $mac!(@@ [$(#[$m])* pub] $($t)*);
-    };
-}
-
-#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! strip_attrs_pub {
     ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
         check_keyword_matches!(pub $pub);
@@ -257,7 +198,6 @@ macro_rules! strip_attrs_pub {
     };
 }
 
-#[cfg(syn_can_match_ident_after_attrs)]
 macro_rules! check_keyword_matches {
     (struct struct) => {};
     (enum enum) => {};
