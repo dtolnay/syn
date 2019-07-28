@@ -143,14 +143,14 @@ impl Attribute {
         }
 
         let path = Path {
-            leading_colon: self.path.leading_colon.clone(),
+            leading_colon: self.path.leading_colon.as_ref().map(|colon| Token![::](colon.spans)),
             segments: self
                 .path
                 .segments
                 .pairs()
                 .map(|pair| match pair {
                     Pair::Punctuated(seg, punct) => {
-                        Pair::Punctuated(clone_ident_segment(seg), punct.clone())
+                        Pair::Punctuated(clone_ident_segment(seg), Token![::](punct.spans))
                     }
                     Pair::End(seg) => Pair::End(clone_ident_segment(seg)),
                 })
