@@ -1202,7 +1202,7 @@ pub fn fold_expr_await<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprAwait) -> Exp
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         base: Box::new(_visitor.fold_expr(*_i.base)),
         dot_token: Token ! [ . ](tokens_helper(_visitor, &_i.dot_token.spans)),
-        await_token: Token![await](tokens_helper(_visitor, &_i.await_token.span)),
+        await_token: crate::token::Await(tokens_helper(_visitor, &_i.await_token.span)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

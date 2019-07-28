@@ -70,7 +70,11 @@ fn visit(
             } else {
                 quote!(spans)
             };
-            let ty: TokenStream = syn::parse_str(&format!("Token![{}]", repr)).unwrap();
+            let ty = if repr == "await" {
+                quote!(crate::token::Await)
+            } else {
+                syn::parse_str(&format!("Token![{}]", repr)).unwrap()
+            };
             Some(quote! {
                 #ty(tokens_helper(_visitor, &#name.#spans))
             })
