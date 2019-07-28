@@ -816,12 +816,7 @@ macro_rules! export_token_macro {
     };
 }
 
-#[cfg(syn_can_match_trailing_dollar)]
 export_token_macro![($)];
-
-// Old rustc does not support ($) => {...} as a macro rule.
-#[cfg(not(syn_can_match_trailing_dollar))]
-export_token_macro![];
 
 // Old names. TODO: remove these re-exports in a breaking change.
 // https://github.com/dtolnay/syn/issues/486
