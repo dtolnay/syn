@@ -718,47 +718,25 @@ ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
-    ///
-    /// # Syntax tree enum
-    ///
-    /// This type is a [syntax tree enum].
-    ///
-    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
-    //
-    // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
-    // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum FnArg {
-        /// Self captured by reference in a function signature: `&self` or `&mut
-        /// self`.
+        /// The `self` argument of an associated method, whether taken by value
+        /// or by reference.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub SelfRef(ArgSelfRef {
-            pub and_token: Token![&],
-            pub lifetime: Option<Lifetime>,
+        pub Receiver(Receiver {
+            pub reference: Option<(Token![&], Option<Lifetime>)>,
             pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
         }),
 
-        /// Self captured by value in a function signature: `self` or `mut
-        /// self`.
+        /// A function argument accepted by pattern and type.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub SelfValue(ArgSelf {
-            pub mutability: Option<Token![mut]>,
-            pub self_token: Token![self],
-        }),
-
-        /// An explicitly typed pattern captured by a function signature.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Captured(ArgCaptured {
+        pub Typed(ArgTyped {
             pub pat: Pat,
             pub colon_token: Token![:],
             pub ty: Type,
         }),
-
-        /// A pattern whose type is inferred captured by a function signature.
-        pub Inferred(Pat),
     }
 }
 
@@ -768,6 +746,7 @@ pub mod parsing {
 
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::discouraged::Speculative;
     use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
     use std::iter::{self, FromIterator};
 
@@ -1117,7 +1096,7 @@ pub mod parsing {
             let paren_token = parenthesized!(content in input);
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic: Option<Token![...]> = match inputs.last() {
-                Some(&FnArg::Captured(ArgCaptured {
+                Some(&FnArg::Typed(ArgTyped {
                     ty: Type::Verbatim(TypeVerbatim { ref tokens }),
                     ..
                 })) if inputs.empty_or_trailing() => parse2(tokens.clone()).ok(),
@@ -1161,64 +1140,57 @@ pub mod parsing {
 
     impl Parse for FnArg {
         fn parse(input: ParseStream) -> Result<Self> {
-            // TODO: optimize using advance_to
-
-            if input.peek(Token![&]) {
-                let ahead = input.fork();
-                if ahead.call(arg_self_ref).is_ok() && !ahead.peek(Token![:]) {
-                    return input.call(arg_self_ref).map(FnArg::SelfRef);
+            let ahead = input.fork();
+            if let Ok(receiver) = ahead.parse() {
+                if !ahead.peek(Token![:]) {
+                    input.advance_to(&ahead);
+                    return Ok(FnArg::Receiver(receiver));
                 }
             }
-
-            if input.peek(Token![mut]) || input.peek(Token![self]) {
-                let ahead = input.fork();
-                if ahead.call(arg_self).is_ok() && !ahead.peek(Token![:]) {
-                    return input.call(arg_self).map(FnArg::SelfValue);
-                }
-            }
-
-            input.call(arg_captured).map(FnArg::Captured)
+            input.parse().map(FnArg::Typed)
         }
     }
 
-    fn arg_self_ref(input: ParseStream) -> Result<ArgSelfRef> {
-        Ok(ArgSelfRef {
-            and_token: input.parse()?,
-            lifetime: input.parse()?,
-            mutability: input.parse()?,
-            self_token: input.parse()?,
-        })
+    impl Parse for Receiver {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(Receiver {
+                reference: {
+                    if input.peek(Token![&]) {
+                        Some((input.parse()?, input.parse()?))
+                    } else {
+                        None
+                    }
+                },
+                mutability: input.parse()?,
+                self_token: input.parse()?,
+            })
+        }
     }
 
-    fn arg_self(input: ParseStream) -> Result<ArgSelf> {
-        Ok(ArgSelf {
-            mutability: input.parse()?,
-            self_token: input.parse()?,
-        })
-    }
-
-    fn arg_captured(input: ParseStream) -> Result<ArgCaptured> {
-        Ok(ArgCaptured {
-            pat: input.parse()?,
-            colon_token: input.parse()?,
-            ty: match input.parse::<Token![...]>() {
-                Ok(dot3) => {
-                    let args = vec![
-                        TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                        TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                        TokenTree::Punct(Punct::new('.', Spacing::Alone)),
-                    ];
-                    let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
-                        |(mut arg, span)| {
-                            arg.set_span(*span);
-                            arg
-                        },
-                    ));
-                    Type::Verbatim(TypeVerbatim { tokens: tokens })
-                }
-                Err(_) => input.parse()?,
-            },
-        })
+    impl Parse for ArgTyped {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ArgTyped {
+                pat: input.parse()?,
+                colon_token: input.parse()?,
+                ty: match input.parse::<Token![...]>() {
+                    Ok(dot3) => {
+                        let args = vec![
+                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                            TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+                        ];
+                        let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
+                            |(mut arg, span)| {
+                                arg.set_span(*span);
+                                arg
+                            },
+                        ));
+                        Type::Verbatim(TypeVerbatim { tokens: tokens })
+                    }
+                    Err(_) => input.parse()?,
+                },
+            })
+        }
     }
 
     impl Parse for ItemMod {
@@ -2701,23 +2673,18 @@ mod printing {
         }
     }
 
-    impl ToTokens for ArgSelfRef {
+    impl ToTokens for Receiver {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.and_token.to_tokens(tokens);
-            self.lifetime.to_tokens(tokens);
+            if let Some((ampersand, lifetime)) = &self.reference {
+                ampersand.to_tokens(tokens);
+                lifetime.to_tokens(tokens);
+            }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
         }
     }
 
-    impl ToTokens for ArgSelf {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.mutability.to_tokens(tokens);
-            self.self_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ArgCaptured {
+    impl ToTokens for ArgTyped {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pat.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);

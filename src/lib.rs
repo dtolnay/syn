@@ -321,7 +321,7 @@ pub use crate::data::{
 mod expr;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
-    Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
+    ClosureArg, Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
     ExprBox, ExprBreak, ExprCall, ExprCast, ExprClosure, ExprContinue, ExprField, ExprForLoop,
     ExprGroup, ExprIf, ExprInPlace, ExprIndex, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch,
     ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn,
@@ -351,12 +351,12 @@ pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
-    ArgCaptured, ArgSelf, ArgSelfRef, FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
+    ArgTyped, FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
     ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
     ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
     ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
     ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-    ItemUnion, ItemUse, ItemVerbatim, MethodSig, TraitItem, TraitItemConst, TraitItemMacro,
+    ItemUnion, ItemUse, ItemVerbatim, MethodSig, Receiver, TraitItem, TraitItemConst, TraitItemMacro,
     TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath,
     UseRename, UseTree,
 };

@@ -204,7 +204,7 @@ ast_enum_of_structs! {
             pub movability: Option<Token![static]>,
             pub capture: Option<Token![move]>,
             pub or1_token: Token![|],
-            pub inputs: Punctuated<FnArg, Token![,]>,
+            pub inputs: Punctuated<ClosureArg, Token![,]>,
             pub or2_token: Token![|],
             pub output: ReturnType,
             pub body: Box<Expr>,
@@ -637,6 +637,20 @@ impl PartialEq for Index {
 impl Hash for Index {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.index.hash(state);
+    }
+}
+
+#[cfg(feature = "full")]
+ast_enum_of_structs! {
+    /// An argument in a closure signature: the `n: usize` in `|n: usize| {}`.
+    ///
+    /// *This type is available if Syn is built with the `"full"` feature.*
+    pub enum ClosureArg {
+        /// A pattern whose type is specified in the closure signature.
+        pub Typed(ArgTyped),
+
+        /// A pattern whose type is inferred.
+        pub Inferred(Pat),
     }
 }
 
@@ -2030,7 +2044,7 @@ pub mod parsing {
             if input.peek(Token![|]) {
                 break;
             }
-            let value = fn_arg(input)?;
+            let value = closure_arg(input)?;
             inputs.push_value(value);
             if input.peek(Token![|]) {
                 break;
@@ -2081,17 +2095,17 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn fn_arg(input: ParseStream) -> Result<FnArg> {
+    fn closure_arg(input: ParseStream) -> Result<ClosureArg> {
         let pat: Pat = input.parse()?;
 
         if input.peek(Token![:]) {
-            Ok(FnArg::Captured(ArgCaptured {
+            Ok(ClosureArg::Typed(ArgTyped {
                 pat: pat,
                 colon_token: input.parse()?,
                 ty: input.parse()?,
             }))
         } else {
-            Ok(FnArg::Inferred(pat))
+            Ok(ClosureArg::Inferred(pat))
         }
     }
 
@@ -3402,19 +3416,7 @@ mod printing {
             self.movability.to_tokens(tokens);
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
-            for input in self.inputs.pairs() {
-                match **input.value() {
-                    FnArg::Captured(ArgCaptured {
-                        ref pat,
-                        ty: Type::Infer(_),
-                        ..
-                    }) => {
-                        pat.to_tokens(tokens);
-                    }
-                    _ => input.value().to_tokens(tokens),
-                }
-                input.punct().to_tokens(tokens);
-            }
+            self.inputs.to_tokens(tokens);
             self.or2_token.to_tokens(tokens);
             self.output.to_tokens(tokens);
             self.body.to_tokens(tokens);
