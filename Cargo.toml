@@ -10,6 +10,7 @@ categories = ["development-tools::procedural-macro-helpers"]
 readme = "README.md"
 include = [
     "/benches/**",
+    "/build.rs",
     "/Cargo.toml",
     "/LICENSE-APACHE",
     "/LICENSE-MIT",

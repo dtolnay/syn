@@ -130,7 +130,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub base: Box<Expr>,
             pub dot_token: Token![.],
-            pub await_token: Token![await],
+            pub await_token: token::Await,
         }),
 
         /// A binary operation: `a + b`, `a * b`.
@@ -1336,7 +1336,7 @@ pub mod parsing {
             } else if input.peek(Token![.]) && !input.peek(Token![..]) {
                 let dot_token: Token![.] = input.parse()?;
 
-                if input.peek(Token![await]) {
+                if input.peek(token::Await) {
                     e = Expr::Await(ExprAwait {
                         attrs: Vec::new(),
                         base: Box::new(e),
@@ -1431,7 +1431,7 @@ pub mod parsing {
                 });
             } else if input.peek(Token![.])
                 && !input.peek(Token![..])
-                && !input.peek2(Token![await])
+                && !input.peek2(token::Await)
             {
                 e = Expr::Field(ExprField {
                     attrs: Vec::new(),
