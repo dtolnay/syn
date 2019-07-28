@@ -18,6 +18,7 @@ include = [
     "/src/**",
     "/tests/**",
 ]
+edition = "2018"
 publish = false # contains breaking changes
 
 [lib]
