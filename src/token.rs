@@ -701,122 +701,116 @@ define_delimiters! {
     " "           pub struct Group        /// None-delimited group
 }
 
-macro_rules! export_token_macro {
-    ($($dollar:tt)*) => {
-        /// A type-macro that expands to the name of the Rust type representation of a
-        /// given token.
-        ///
-        /// See the [token module] documentation for details and examples.
-        ///
-        /// [token module]: crate::token
-        // Unfortunate duplication due to a rustdoc bug.
-        // https://github.com/rust-lang/rust/issues/45939
-        #[macro_export]
-        macro_rules! Token {
-            (abstract)    => { $crate::token::Abstract };
-            (as)          => { $crate::token::As };
-            (async)       => { $crate::token::Async };
-            (auto)        => { $crate::token::Auto };
-            (become)      => { $crate::token::Become };
-            (box)         => { $crate::token::Box };
-            (break)       => { $crate::token::Break };
-            (const)       => { $crate::token::Const };
-            (continue)    => { $crate::token::Continue };
-            (crate)       => { $crate::token::Crate };
-            (default)     => { $crate::token::Default };
-            (do)          => { $crate::token::Do };
-            (dyn)         => { $crate::token::Dyn };
-            (else)        => { $crate::token::Else };
-            (enum)        => { $crate::token::Enum };
-            (existential) => { $crate::token::Existential };
-            (extern)      => { $crate::token::Extern };
-            (final)       => { $crate::token::Final };
-            (fn)          => { $crate::token::Fn };
-            (for)         => { $crate::token::For };
-            (if)          => { $crate::token::If };
-            (impl)        => { $crate::token::Impl };
-            (in)          => { $crate::token::In };
-            (let)         => { $crate::token::Let };
-            (loop)        => { $crate::token::Loop };
-            (macro)       => { $crate::token::Macro };
-            (match)       => { $crate::token::Match };
-            (mod)         => { $crate::token::Mod };
-            (move)        => { $crate::token::Move };
-            (mut)         => { $crate::token::Mut };
-            (override)    => { $crate::token::Override };
-            (priv)        => { $crate::token::Priv };
-            (pub)         => { $crate::token::Pub };
-            (ref)         => { $crate::token::Ref };
-            (return)      => { $crate::token::Return };
-            (Self)        => { $crate::token::SelfType };
-            (self)        => { $crate::token::SelfValue };
-            (static)      => { $crate::token::Static };
-            (struct)      => { $crate::token::Struct };
-            (super)       => { $crate::token::Super };
-            (trait)       => { $crate::token::Trait };
-            (try)         => { $crate::token::Try };
-            (type)        => { $crate::token::Type };
-            (typeof)      => { $crate::token::Typeof };
-            (union)       => { $crate::token::Union };
-            (unsafe)      => { $crate::token::Unsafe };
-            (unsized)     => { $crate::token::Unsized };
-            (use)         => { $crate::token::Use };
-            (virtual)     => { $crate::token::Virtual };
-            (where)       => { $crate::token::Where };
-            (while)       => { $crate::token::While };
-            (yield)       => { $crate::token::Yield };
-            (+)           => { $crate::token::Add };
-            (+=)          => { $crate::token::AddEq };
-            (&)           => { $crate::token::And };
-            (&&)          => { $crate::token::AndAnd };
-            (&=)          => { $crate::token::AndEq };
-            (@)           => { $crate::token::At };
-            (!)           => { $crate::token::Bang };
-            (^)           => { $crate::token::Caret };
-            (^=)          => { $crate::token::CaretEq };
-            (:)           => { $crate::token::Colon };
-            (::)          => { $crate::token::Colon2 };
-            (,)           => { $crate::token::Comma };
-            (/)           => { $crate::token::Div };
-            (/=)          => { $crate::token::DivEq };
-            (.)           => { $crate::token::Dot };
-            (..)          => { $crate::token::Dot2 };
-            (...)         => { $crate::token::Dot3 };
-            (..=)         => { $crate::token::DotDotEq };
-            (=)           => { $crate::token::Eq };
-            (==)          => { $crate::token::EqEq };
-            (>=)          => { $crate::token::Ge };
-            (>)           => { $crate::token::Gt };
-            (<=)          => { $crate::token::Le };
-            (<)           => { $crate::token::Lt };
-            (*=)          => { $crate::token::MulEq };
-            (!=)          => { $crate::token::Ne };
-            (|)           => { $crate::token::Or };
-            (|=)          => { $crate::token::OrEq };
-            (||)          => { $crate::token::OrOr };
-            (#)           => { $crate::token::Pound };
-            (?)           => { $crate::token::Question };
-            (->)          => { $crate::token::RArrow };
-            (<-)          => { $crate::token::LArrow };
-            (%)           => { $crate::token::Rem };
-            (%=)          => { $crate::token::RemEq };
-            (=>)          => { $crate::token::FatArrow };
-            (;)           => { $crate::token::Semi };
-            (<<)          => { $crate::token::Shl };
-            (<<=)         => { $crate::token::ShlEq };
-            (>>)          => { $crate::token::Shr };
-            (>>=)         => { $crate::token::ShrEq };
-            (*)           => { $crate::token::Star };
-            (-)           => { $crate::token::Sub };
-            (-=)          => { $crate::token::SubEq };
-            (~)           => { $crate::token::Tilde };
-            (_)           => { $crate::token::Underscore };
-            $($dollar     => { $crate::token::Dollar };)*
-        }
-    };
+/// A type-macro that expands to the name of the Rust type representation of a
+/// given token.
+///
+/// See the [token module] documentation for details and examples.
+///
+/// [token module]: crate::token
+// Unfortunate duplication due to a rustdoc bug.
+// https://github.com/rust-lang/rust/issues/45939
+#[macro_export]
+macro_rules! Token {
+    (abstract)    => { $crate::token::Abstract };
+    (as)          => { $crate::token::As };
+    (async)       => { $crate::token::Async };
+    (auto)        => { $crate::token::Auto };
+    (become)      => { $crate::token::Become };
+    (box)         => { $crate::token::Box };
+    (break)       => { $crate::token::Break };
+    (const)       => { $crate::token::Const };
+    (continue)    => { $crate::token::Continue };
+    (crate)       => { $crate::token::Crate };
+    (default)     => { $crate::token::Default };
+    (do)          => { $crate::token::Do };
+    (dyn)         => { $crate::token::Dyn };
+    (else)        => { $crate::token::Else };
+    (enum)        => { $crate::token::Enum };
+    (existential) => { $crate::token::Existential };
+    (extern)      => { $crate::token::Extern };
+    (final)       => { $crate::token::Final };
+    (fn)          => { $crate::token::Fn };
+    (for)         => { $crate::token::For };
+    (if)          => { $crate::token::If };
+    (impl)        => { $crate::token::Impl };
+    (in)          => { $crate::token::In };
+    (let)         => { $crate::token::Let };
+    (loop)        => { $crate::token::Loop };
+    (macro)       => { $crate::token::Macro };
+    (match)       => { $crate::token::Match };
+    (mod)         => { $crate::token::Mod };
+    (move)        => { $crate::token::Move };
+    (mut)         => { $crate::token::Mut };
+    (override)    => { $crate::token::Override };
+    (priv)        => { $crate::token::Priv };
+    (pub)         => { $crate::token::Pub };
+    (ref)         => { $crate::token::Ref };
+    (return)      => { $crate::token::Return };
+    (Self)        => { $crate::token::SelfType };
+    (self)        => { $crate::token::SelfValue };
+    (static)      => { $crate::token::Static };
+    (struct)      => { $crate::token::Struct };
+    (super)       => { $crate::token::Super };
+    (trait)       => { $crate::token::Trait };
+    (try)         => { $crate::token::Try };
+    (type)        => { $crate::token::Type };
+    (typeof)      => { $crate::token::Typeof };
+    (union)       => { $crate::token::Union };
+    (unsafe)      => { $crate::token::Unsafe };
+    (unsized)     => { $crate::token::Unsized };
+    (use)         => { $crate::token::Use };
+    (virtual)     => { $crate::token::Virtual };
+    (where)       => { $crate::token::Where };
+    (while)       => { $crate::token::While };
+    (yield)       => { $crate::token::Yield };
+    (+)           => { $crate::token::Add };
+    (+=)          => { $crate::token::AddEq };
+    (&)           => { $crate::token::And };
+    (&&)          => { $crate::token::AndAnd };
+    (&=)          => { $crate::token::AndEq };
+    (@)           => { $crate::token::At };
+    (!)           => { $crate::token::Bang };
+    (^)           => { $crate::token::Caret };
+    (^=)          => { $crate::token::CaretEq };
+    (:)           => { $crate::token::Colon };
+    (::)          => { $crate::token::Colon2 };
+    (,)           => { $crate::token::Comma };
+    (/)           => { $crate::token::Div };
+    (/=)          => { $crate::token::DivEq };
+    ($)           => { $crate::token::Dollar };
+    (.)           => { $crate::token::Dot };
+    (..)          => { $crate::token::Dot2 };
+    (...)         => { $crate::token::Dot3 };
+    (..=)         => { $crate::token::DotDotEq };
+    (=)           => { $crate::token::Eq };
+    (==)          => { $crate::token::EqEq };
+    (>=)          => { $crate::token::Ge };
+    (>)           => { $crate::token::Gt };
+    (<=)          => { $crate::token::Le };
+    (<)           => { $crate::token::Lt };
+    (*=)          => { $crate::token::MulEq };
+    (!=)          => { $crate::token::Ne };
+    (|)           => { $crate::token::Or };
+    (|=)          => { $crate::token::OrEq };
+    (||)          => { $crate::token::OrOr };
+    (#)           => { $crate::token::Pound };
+    (?)           => { $crate::token::Question };
+    (->)          => { $crate::token::RArrow };
+    (<-)          => { $crate::token::LArrow };
+    (%)           => { $crate::token::Rem };
+    (%=)          => { $crate::token::RemEq };
+    (=>)          => { $crate::token::FatArrow };
+    (;)           => { $crate::token::Semi };
+    (<<)          => { $crate::token::Shl };
+    (<<=)         => { $crate::token::ShlEq };
+    (>>)          => { $crate::token::Shr };
+    (>>=)         => { $crate::token::ShrEq };
+    (*)           => { $crate::token::Star };
+    (-)           => { $crate::token::Sub };
+    (-=)          => { $crate::token::SubEq };
+    (~)           => { $crate::token::Tilde };
+    (_)           => { $crate::token::Underscore };
 }
-
-export_token_macro![($)];
 
 // Old names. TODO: remove these re-exports in a breaking change.
 // https://github.com/dtolnay/syn/issues/486
