@@ -1,7 +1,6 @@
 use super::*;
 use crate::derive::{Data, DeriveInput};
 use crate::punctuated::Punctuated;
-use crate::token::{Brace, Paren};
 use proc_macro2::TokenStream;
 
 #[cfg(feature = "extra-traits")]
@@ -142,10 +141,7 @@ ast_enum_of_structs! {
             pub vis: Visibility,
             pub macro_token: Token![macro],
             pub ident: Ident,
-            pub paren_token: Paren,
-            pub args: TokenStream,
-            pub brace_token: Brace,
-            pub body: TokenStream,
+            pub rules: TokenStream,
         }),
 
         /// A module or module declaration: `mod m` or `mod m { ... }`.
@@ -277,10 +273,7 @@ impl PartialEq for ItemMacro2 {
             && self.vis == other.vis
             && self.macro_token == other.macro_token
             && self.ident == other.ident
-            && self.paren_token == other.paren_token
-            && TokenStreamHelper(&self.args) == TokenStreamHelper(&other.args)
-            && self.brace_token == other.brace_token
-            && TokenStreamHelper(&self.body) == TokenStreamHelper(&other.body)
+            && TokenStreamHelper(&self.rules) == TokenStreamHelper(&other.rules)
     }
 }
 
@@ -294,10 +287,7 @@ impl Hash for ItemMacro2 {
         self.vis.hash(state);
         self.macro_token.hash(state);
         self.ident.hash(state);
-        self.paren_token.hash(state);
-        TokenStreamHelper(&self.args).hash(state);
-        self.brace_token.hash(state);
-        TokenStreamHelper(&self.body).hash(state);
+        TokenStreamHelper(&self.rules).hash(state);
     }
 }
 
@@ -778,8 +768,8 @@ pub mod parsing {
 
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
-    use proc_macro2::{Punct, Spacing, TokenTree};
-    use std::iter::FromIterator;
+    use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
+    use std::iter::{self, FromIterator};
 
     impl Parse for Item {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -937,44 +927,32 @@ pub mod parsing {
         }
     }
 
-    // TODO: figure out the actual grammar; is body required to be braced?
     impl Parse for ItemMacro2 {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let macro_token: Token![macro] = input.parse()?;
             let ident: Ident = input.parse()?;
+            let mut rules = TokenStream::new();
 
-            let paren_token;
-            let args;
-            let brace_token;
-            let body;
-            let lookahead = input.lookahead1();
+            let mut lookahead = input.lookahead1();
             if lookahead.peek(token::Paren) {
                 let paren_content;
-                paren_token = parenthesized!(paren_content in input);
-                args = paren_content.parse()?;
+                let paren_token = parenthesized!(paren_content in input);
+                let args: TokenStream = paren_content.parse()?;
+                let mut args = Group::new(Delimiter::Parenthesis, args);
+                args.set_span(paren_token.span);
+                rules.extend(iter::once(TokenTree::Group(args)));
+                lookahead = input.lookahead1();
+            }
 
+            if lookahead.peek(token::Brace) {
                 let brace_content;
-                brace_token = braced!(brace_content in input);
-                body = brace_content.parse()?;
-            } else if lookahead.peek(token::Brace) {
-                // Hack: the ItemMacro2 syntax tree will need to change so that
-                // we can store None for the args.
-                //
-                // https://github.com/dtolnay/syn/issues/548
-                //
-                // For now, store some sentinel tokens that are otherwise
-                // illegal.
-                paren_token = token::Paren::default();
-                args = TokenStream::from_iter(vec![
-                    TokenTree::Punct(Punct::new('$', Spacing::Alone)),
-                    TokenTree::Punct(Punct::new('$', Spacing::Alone)),
-                ]);
-
-                let brace_content;
-                brace_token = braced!(brace_content in input);
-                body = brace_content.parse()?;
+                let brace_token = braced!(brace_content in input);
+                let body: TokenStream = brace_content.parse()?;
+                let mut body = Group::new(Delimiter::Brace, body);
+                body.set_span(brace_token.span);
+                rules.extend(iter::once(TokenTree::Group(body)));
             } else {
                 return Err(lookahead.error());
             }
@@ -984,10 +962,7 @@ pub mod parsing {
                 vis: vis,
                 macro_token: macro_token,
                 ident: ident,
-                paren_token: paren_token,
-                args: args,
-                brace_token: brace_token,
-                body: body,
+                rules: rules,
             })
         }
     }
@@ -2466,17 +2441,7 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.macro_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-
-            // Hack: see comment in impl Parse for ItemMacro2.
-            if self.args.to_string() != "$ $" {
-                self.paren_token.surround(tokens, |tokens| {
-                    self.args.to_tokens(tokens);
-                });
-            }
-
-            self.brace_token.surround(tokens, |tokens| {
-                self.body.to_tokens(tokens);
-            });
+            self.rules.to_tokens(tokens);
         }
     }
 
