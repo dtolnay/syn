@@ -709,6 +709,7 @@ define_delimiters! {
 /// [token module]: crate::token
 // Unfortunate duplication due to a rustdoc bug.
 // https://github.com/rust-lang/rust/issues/45939
+#[rustfmt::skip]
 #[macro_export]
 macro_rules! Token {
     (abstract)    => { $crate::token::Abstract };
