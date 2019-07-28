@@ -1104,56 +1104,56 @@ pub fn fold_derive_input<V: Fold + ?Sized>(_visitor: &mut V, _i: DeriveInput) ->
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
     match _i {
-        Expr::Box(_binding_0) => Expr::Box(full!(_visitor.fold_expr_box(_binding_0))),
-        Expr::InPlace(_binding_0) => Expr::InPlace(full!(_visitor.fold_expr_in_place(_binding_0))),
         Expr::Array(_binding_0) => Expr::Array(full!(_visitor.fold_expr_array(_binding_0))),
-        Expr::Call(_binding_0) => Expr::Call(_visitor.fold_expr_call(_binding_0)),
-        Expr::MethodCall(_binding_0) => {
-            Expr::MethodCall(full!(_visitor.fold_expr_method_call(_binding_0)))
-        }
-        Expr::Tuple(_binding_0) => Expr::Tuple(full!(_visitor.fold_expr_tuple(_binding_0))),
-        Expr::Binary(_binding_0) => Expr::Binary(_visitor.fold_expr_binary(_binding_0)),
-        Expr::Unary(_binding_0) => Expr::Unary(_visitor.fold_expr_unary(_binding_0)),
-        Expr::Lit(_binding_0) => Expr::Lit(_visitor.fold_expr_lit(_binding_0)),
-        Expr::Cast(_binding_0) => Expr::Cast(_visitor.fold_expr_cast(_binding_0)),
-        Expr::Type(_binding_0) => Expr::Type(full!(_visitor.fold_expr_type(_binding_0))),
-        Expr::Let(_binding_0) => Expr::Let(full!(_visitor.fold_expr_let(_binding_0))),
-        Expr::If(_binding_0) => Expr::If(full!(_visitor.fold_expr_if(_binding_0))),
-        Expr::While(_binding_0) => Expr::While(full!(_visitor.fold_expr_while(_binding_0))),
-        Expr::ForLoop(_binding_0) => Expr::ForLoop(full!(_visitor.fold_expr_for_loop(_binding_0))),
-        Expr::Loop(_binding_0) => Expr::Loop(full!(_visitor.fold_expr_loop(_binding_0))),
-        Expr::Match(_binding_0) => Expr::Match(full!(_visitor.fold_expr_match(_binding_0))),
-        Expr::Closure(_binding_0) => Expr::Closure(full!(_visitor.fold_expr_closure(_binding_0))),
-        Expr::Unsafe(_binding_0) => Expr::Unsafe(full!(_visitor.fold_expr_unsafe(_binding_0))),
-        Expr::Block(_binding_0) => Expr::Block(full!(_visitor.fold_expr_block(_binding_0))),
         Expr::Assign(_binding_0) => Expr::Assign(full!(_visitor.fold_expr_assign(_binding_0))),
         Expr::AssignOp(_binding_0) => {
             Expr::AssignOp(full!(_visitor.fold_expr_assign_op(_binding_0)))
         }
-        Expr::Field(_binding_0) => Expr::Field(_visitor.fold_expr_field(_binding_0)),
-        Expr::Index(_binding_0) => Expr::Index(_visitor.fold_expr_index(_binding_0)),
-        Expr::Range(_binding_0) => Expr::Range(full!(_visitor.fold_expr_range(_binding_0))),
-        Expr::Path(_binding_0) => Expr::Path(_visitor.fold_expr_path(_binding_0)),
-        Expr::Reference(_binding_0) => {
-            Expr::Reference(full!(_visitor.fold_expr_reference(_binding_0)))
-        }
+        Expr::Async(_binding_0) => Expr::Async(full!(_visitor.fold_expr_async(_binding_0))),
+        Expr::Binary(_binding_0) => Expr::Binary(_visitor.fold_expr_binary(_binding_0)),
+        Expr::Block(_binding_0) => Expr::Block(full!(_visitor.fold_expr_block(_binding_0))),
+        Expr::Box(_binding_0) => Expr::Box(full!(_visitor.fold_expr_box(_binding_0))),
         Expr::Break(_binding_0) => Expr::Break(full!(_visitor.fold_expr_break(_binding_0))),
+        Expr::Call(_binding_0) => Expr::Call(_visitor.fold_expr_call(_binding_0)),
+        Expr::Cast(_binding_0) => Expr::Cast(_visitor.fold_expr_cast(_binding_0)),
+        Expr::Closure(_binding_0) => Expr::Closure(full!(_visitor.fold_expr_closure(_binding_0))),
         Expr::Continue(_binding_0) => {
             Expr::Continue(full!(_visitor.fold_expr_continue(_binding_0)))
         }
-        Expr::Return(_binding_0) => Expr::Return(full!(_visitor.fold_expr_return(_binding_0))),
-        Expr::Macro(_binding_0) => Expr::Macro(full!(_visitor.fold_expr_macro(_binding_0))),
-        Expr::Struct(_binding_0) => Expr::Struct(full!(_visitor.fold_expr_struct(_binding_0))),
-        Expr::Repeat(_binding_0) => Expr::Repeat(full!(_visitor.fold_expr_repeat(_binding_0))),
-        Expr::Paren(_binding_0) => Expr::Paren(_visitor.fold_expr_paren(_binding_0)),
+        Expr::Field(_binding_0) => Expr::Field(_visitor.fold_expr_field(_binding_0)),
+        Expr::ForLoop(_binding_0) => Expr::ForLoop(full!(_visitor.fold_expr_for_loop(_binding_0))),
         Expr::Group(_binding_0) => Expr::Group(full!(_visitor.fold_expr_group(_binding_0))),
+        Expr::If(_binding_0) => Expr::If(full!(_visitor.fold_expr_if(_binding_0))),
+        Expr::InPlace(_binding_0) => Expr::InPlace(full!(_visitor.fold_expr_in_place(_binding_0))),
+        Expr::Index(_binding_0) => Expr::Index(_visitor.fold_expr_index(_binding_0)),
+        Expr::Let(_binding_0) => Expr::Let(full!(_visitor.fold_expr_let(_binding_0))),
+        Expr::Lit(_binding_0) => Expr::Lit(_visitor.fold_expr_lit(_binding_0)),
+        Expr::Loop(_binding_0) => Expr::Loop(full!(_visitor.fold_expr_loop(_binding_0))),
+        Expr::Macro(_binding_0) => Expr::Macro(full!(_visitor.fold_expr_macro(_binding_0))),
+        Expr::Match(_binding_0) => Expr::Match(full!(_visitor.fold_expr_match(_binding_0))),
+        Expr::MethodCall(_binding_0) => {
+            Expr::MethodCall(full!(_visitor.fold_expr_method_call(_binding_0)))
+        }
+        Expr::Paren(_binding_0) => Expr::Paren(_visitor.fold_expr_paren(_binding_0)),
+        Expr::Path(_binding_0) => Expr::Path(_visitor.fold_expr_path(_binding_0)),
+        Expr::Range(_binding_0) => Expr::Range(full!(_visitor.fold_expr_range(_binding_0))),
+        Expr::Reference(_binding_0) => {
+            Expr::Reference(full!(_visitor.fold_expr_reference(_binding_0)))
+        }
+        Expr::Repeat(_binding_0) => Expr::Repeat(full!(_visitor.fold_expr_repeat(_binding_0))),
+        Expr::Return(_binding_0) => Expr::Return(full!(_visitor.fold_expr_return(_binding_0))),
+        Expr::Struct(_binding_0) => Expr::Struct(full!(_visitor.fold_expr_struct(_binding_0))),
         Expr::Try(_binding_0) => Expr::Try(full!(_visitor.fold_expr_try(_binding_0))),
-        Expr::Async(_binding_0) => Expr::Async(full!(_visitor.fold_expr_async(_binding_0))),
         Expr::TryBlock(_binding_0) => {
             Expr::TryBlock(full!(_visitor.fold_expr_try_block(_binding_0)))
         }
-        Expr::Yield(_binding_0) => Expr::Yield(full!(_visitor.fold_expr_yield(_binding_0))),
+        Expr::Tuple(_binding_0) => Expr::Tuple(full!(_visitor.fold_expr_tuple(_binding_0))),
+        Expr::Type(_binding_0) => Expr::Type(full!(_visitor.fold_expr_type(_binding_0))),
+        Expr::Unary(_binding_0) => Expr::Unary(_visitor.fold_expr_unary(_binding_0)),
+        Expr::Unsafe(_binding_0) => Expr::Unsafe(full!(_visitor.fold_expr_unsafe(_binding_0))),
         Expr::Verbatim(_binding_0) => Expr::Verbatim(_visitor.fold_expr_verbatim(_binding_0)),
+        Expr::While(_binding_0) => Expr::While(full!(_visitor.fold_expr_while(_binding_0))),
+        Expr::Yield(_binding_0) => Expr::Yield(full!(_visitor.fold_expr_yield(_binding_0))),
     }
 }
 #[cfg(feature = "full")]
@@ -1837,31 +1837,31 @@ pub fn fold_index<V: Fold + ?Sized>(_visitor: &mut V, _i: Index) -> Index {
 #[cfg(feature = "full")]
 pub fn fold_item<V: Fold + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
     match _i {
-        Item::ExternCrate(_binding_0) => {
-            Item::ExternCrate(_visitor.fold_item_extern_crate(_binding_0))
-        }
-        Item::Use(_binding_0) => Item::Use(_visitor.fold_item_use(_binding_0)),
-        Item::Static(_binding_0) => Item::Static(_visitor.fold_item_static(_binding_0)),
         Item::Const(_binding_0) => Item::Const(_visitor.fold_item_const(_binding_0)),
-        Item::Fn(_binding_0) => Item::Fn(_visitor.fold_item_fn(_binding_0)),
-        Item::Mod(_binding_0) => Item::Mod(_visitor.fold_item_mod(_binding_0)),
-        Item::ForeignMod(_binding_0) => {
-            Item::ForeignMod(_visitor.fold_item_foreign_mod(_binding_0))
-        }
-        Item::Type(_binding_0) => Item::Type(_visitor.fold_item_type(_binding_0)),
+        Item::Enum(_binding_0) => Item::Enum(_visitor.fold_item_enum(_binding_0)),
         Item::Existential(_binding_0) => {
             Item::Existential(_visitor.fold_item_existential(_binding_0))
         }
-        Item::Struct(_binding_0) => Item::Struct(_visitor.fold_item_struct(_binding_0)),
-        Item::Enum(_binding_0) => Item::Enum(_visitor.fold_item_enum(_binding_0)),
-        Item::Union(_binding_0) => Item::Union(_visitor.fold_item_union(_binding_0)),
-        Item::Trait(_binding_0) => Item::Trait(_visitor.fold_item_trait(_binding_0)),
-        Item::TraitAlias(_binding_0) => {
-            Item::TraitAlias(_visitor.fold_item_trait_alias(_binding_0))
+        Item::ExternCrate(_binding_0) => {
+            Item::ExternCrate(_visitor.fold_item_extern_crate(_binding_0))
+        }
+        Item::Fn(_binding_0) => Item::Fn(_visitor.fold_item_fn(_binding_0)),
+        Item::ForeignMod(_binding_0) => {
+            Item::ForeignMod(_visitor.fold_item_foreign_mod(_binding_0))
         }
         Item::Impl(_binding_0) => Item::Impl(_visitor.fold_item_impl(_binding_0)),
         Item::Macro(_binding_0) => Item::Macro(_visitor.fold_item_macro(_binding_0)),
         Item::Macro2(_binding_0) => Item::Macro2(_visitor.fold_item_macro2(_binding_0)),
+        Item::Mod(_binding_0) => Item::Mod(_visitor.fold_item_mod(_binding_0)),
+        Item::Static(_binding_0) => Item::Static(_visitor.fold_item_static(_binding_0)),
+        Item::Struct(_binding_0) => Item::Struct(_visitor.fold_item_struct(_binding_0)),
+        Item::Trait(_binding_0) => Item::Trait(_visitor.fold_item_trait(_binding_0)),
+        Item::TraitAlias(_binding_0) => {
+            Item::TraitAlias(_visitor.fold_item_trait_alias(_binding_0))
+        }
+        Item::Type(_binding_0) => Item::Type(_visitor.fold_item_type(_binding_0)),
+        Item::Union(_binding_0) => Item::Union(_visitor.fold_item_union(_binding_0)),
+        Item::Use(_binding_0) => Item::Use(_visitor.fold_item_use(_binding_0)),
         Item::Verbatim(_binding_0) => Item::Verbatim(_visitor.fold_item_verbatim(_binding_0)),
     }
 }
@@ -2658,22 +2658,22 @@ pub fn fold_trait_item_verbatim<V: Fold + ?Sized>(
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_type<V: Fold + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
     match _i {
-        Type::Slice(_binding_0) => Type::Slice(_visitor.fold_type_slice(_binding_0)),
         Type::Array(_binding_0) => Type::Array(_visitor.fold_type_array(_binding_0)),
+        Type::BareFn(_binding_0) => Type::BareFn(_visitor.fold_type_bare_fn(_binding_0)),
+        Type::Group(_binding_0) => Type::Group(_visitor.fold_type_group(_binding_0)),
+        Type::ImplTrait(_binding_0) => Type::ImplTrait(_visitor.fold_type_impl_trait(_binding_0)),
+        Type::Infer(_binding_0) => Type::Infer(_visitor.fold_type_infer(_binding_0)),
+        Type::Macro(_binding_0) => Type::Macro(_visitor.fold_type_macro(_binding_0)),
+        Type::Never(_binding_0) => Type::Never(_visitor.fold_type_never(_binding_0)),
+        Type::Paren(_binding_0) => Type::Paren(_visitor.fold_type_paren(_binding_0)),
+        Type::Path(_binding_0) => Type::Path(_visitor.fold_type_path(_binding_0)),
         Type::Ptr(_binding_0) => Type::Ptr(_visitor.fold_type_ptr(_binding_0)),
         Type::Reference(_binding_0) => Type::Reference(_visitor.fold_type_reference(_binding_0)),
-        Type::BareFn(_binding_0) => Type::BareFn(_visitor.fold_type_bare_fn(_binding_0)),
-        Type::Never(_binding_0) => Type::Never(_visitor.fold_type_never(_binding_0)),
-        Type::Tuple(_binding_0) => Type::Tuple(_visitor.fold_type_tuple(_binding_0)),
-        Type::Path(_binding_0) => Type::Path(_visitor.fold_type_path(_binding_0)),
+        Type::Slice(_binding_0) => Type::Slice(_visitor.fold_type_slice(_binding_0)),
         Type::TraitObject(_binding_0) => {
             Type::TraitObject(_visitor.fold_type_trait_object(_binding_0))
         }
-        Type::ImplTrait(_binding_0) => Type::ImplTrait(_visitor.fold_type_impl_trait(_binding_0)),
-        Type::Paren(_binding_0) => Type::Paren(_visitor.fold_type_paren(_binding_0)),
-        Type::Group(_binding_0) => Type::Group(_visitor.fold_type_group(_binding_0)),
-        Type::Infer(_binding_0) => Type::Infer(_visitor.fold_type_infer(_binding_0)),
-        Type::Macro(_binding_0) => Type::Macro(_visitor.fold_type_macro(_binding_0)),
+        Type::Tuple(_binding_0) => Type::Tuple(_visitor.fold_type_tuple(_binding_0)),
         Type::Verbatim(_binding_0) => Type::Verbatim(_visitor.fold_type_verbatim(_binding_0)),
     }
 }

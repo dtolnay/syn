@@ -660,104 +660,9 @@
         ]
       },
       "variants": {
-        "Box": [
-          {
-            "syn": "ExprBox"
-          }
-        ],
-        "InPlace": [
-          {
-            "syn": "ExprInPlace"
-          }
-        ],
         "Array": [
           {
             "syn": "ExprArray"
-          }
-        ],
-        "Call": [
-          {
-            "syn": "ExprCall"
-          }
-        ],
-        "MethodCall": [
-          {
-            "syn": "ExprMethodCall"
-          }
-        ],
-        "Tuple": [
-          {
-            "syn": "ExprTuple"
-          }
-        ],
-        "Binary": [
-          {
-            "syn": "ExprBinary"
-          }
-        ],
-        "Unary": [
-          {
-            "syn": "ExprUnary"
-          }
-        ],
-        "Lit": [
-          {
-            "syn": "ExprLit"
-          }
-        ],
-        "Cast": [
-          {
-            "syn": "ExprCast"
-          }
-        ],
-        "Type": [
-          {
-            "syn": "ExprType"
-          }
-        ],
-        "Let": [
-          {
-            "syn": "ExprLet"
-          }
-        ],
-        "If": [
-          {
-            "syn": "ExprIf"
-          }
-        ],
-        "While": [
-          {
-            "syn": "ExprWhile"
-          }
-        ],
-        "ForLoop": [
-          {
-            "syn": "ExprForLoop"
-          }
-        ],
-        "Loop": [
-          {
-            "syn": "ExprLoop"
-          }
-        ],
-        "Match": [
-          {
-            "syn": "ExprMatch"
-          }
-        ],
-        "Closure": [
-          {
-            "syn": "ExprClosure"
-          }
-        ],
-        "Unsafe": [
-          {
-            "syn": "ExprUnsafe"
-          }
-        ],
-        "Block": [
-          {
-            "syn": "ExprBlock"
           }
         ],
         "Assign": [
@@ -770,29 +675,24 @@
             "syn": "ExprAssignOp"
           }
         ],
-        "Field": [
+        "Async": [
           {
-            "syn": "ExprField"
+            "syn": "ExprAsync"
           }
         ],
-        "Index": [
+        "Binary": [
           {
-            "syn": "ExprIndex"
+            "syn": "ExprBinary"
           }
         ],
-        "Range": [
+        "Block": [
           {
-            "syn": "ExprRange"
+            "syn": "ExprBlock"
           }
         ],
-        "Path": [
+        "Box": [
           {
-            "syn": "ExprPath"
-          }
-        ],
-        "Reference": [
-          {
-            "syn": "ExprReference"
+            "syn": "ExprBox"
           }
         ],
         "Break": [
@@ -800,34 +700,34 @@
             "syn": "ExprBreak"
           }
         ],
+        "Call": [
+          {
+            "syn": "ExprCall"
+          }
+        ],
+        "Cast": [
+          {
+            "syn": "ExprCast"
+          }
+        ],
+        "Closure": [
+          {
+            "syn": "ExprClosure"
+          }
+        ],
         "Continue": [
           {
             "syn": "ExprContinue"
           }
         ],
-        "Return": [
+        "Field": [
           {
-            "syn": "ExprReturn"
+            "syn": "ExprField"
           }
         ],
-        "Macro": [
+        "ForLoop": [
           {
-            "syn": "ExprMacro"
-          }
-        ],
-        "Struct": [
-          {
-            "syn": "ExprStruct"
-          }
-        ],
-        "Repeat": [
-          {
-            "syn": "ExprRepeat"
-          }
-        ],
-        "Paren": [
-          {
-            "syn": "ExprParen"
+            "syn": "ExprForLoop"
           }
         ],
         "Group": [
@@ -835,14 +735,89 @@
             "syn": "ExprGroup"
           }
         ],
+        "If": [
+          {
+            "syn": "ExprIf"
+          }
+        ],
+        "InPlace": [
+          {
+            "syn": "ExprInPlace"
+          }
+        ],
+        "Index": [
+          {
+            "syn": "ExprIndex"
+          }
+        ],
+        "Let": [
+          {
+            "syn": "ExprLet"
+          }
+        ],
+        "Lit": [
+          {
+            "syn": "ExprLit"
+          }
+        ],
+        "Loop": [
+          {
+            "syn": "ExprLoop"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "ExprMacro"
+          }
+        ],
+        "Match": [
+          {
+            "syn": "ExprMatch"
+          }
+        ],
+        "MethodCall": [
+          {
+            "syn": "ExprMethodCall"
+          }
+        ],
+        "Paren": [
+          {
+            "syn": "ExprParen"
+          }
+        ],
+        "Path": [
+          {
+            "syn": "ExprPath"
+          }
+        ],
+        "Range": [
+          {
+            "syn": "ExprRange"
+          }
+        ],
+        "Reference": [
+          {
+            "syn": "ExprReference"
+          }
+        ],
+        "Repeat": [
+          {
+            "syn": "ExprRepeat"
+          }
+        ],
+        "Return": [
+          {
+            "syn": "ExprReturn"
+          }
+        ],
+        "Struct": [
+          {
+            "syn": "ExprStruct"
+          }
+        ],
         "Try": [
           {
             "syn": "ExprTry"
-          }
-        ],
-        "Async": [
-          {
-            "syn": "ExprAsync"
           }
         ],
         "TryBlock": [
@@ -850,14 +825,39 @@
             "syn": "ExprTryBlock"
           }
         ],
-        "Yield": [
+        "Tuple": [
           {
-            "syn": "ExprYield"
+            "syn": "ExprTuple"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "ExprType"
+          }
+        ],
+        "Unary": [
+          {
+            "syn": "ExprUnary"
+          }
+        ],
+        "Unsafe": [
+          {
+            "syn": "ExprUnsafe"
           }
         ],
         "Verbatim": [
           {
             "syn": "ExprVerbatim"
+          }
+        ],
+        "While": [
+          {
+            "syn": "ExprWhile"
+          }
+        ],
+        "Yield": [
+          {
+            "syn": "ExprYield"
           }
         ]
       }
@@ -2768,54 +2768,9 @@
         ]
       },
       "variants": {
-        "ExternCrate": [
-          {
-            "syn": "ItemExternCrate"
-          }
-        ],
-        "Use": [
-          {
-            "syn": "ItemUse"
-          }
-        ],
-        "Static": [
-          {
-            "syn": "ItemStatic"
-          }
-        ],
         "Const": [
           {
             "syn": "ItemConst"
-          }
-        ],
-        "Fn": [
-          {
-            "syn": "ItemFn"
-          }
-        ],
-        "Mod": [
-          {
-            "syn": "ItemMod"
-          }
-        ],
-        "ForeignMod": [
-          {
-            "syn": "ItemForeignMod"
-          }
-        ],
-        "Type": [
-          {
-            "syn": "ItemType"
-          }
-        ],
-        "Existential": [
-          {
-            "syn": "ItemExistential"
-          }
-        ],
-        "Struct": [
-          {
-            "syn": "ItemStruct"
           }
         ],
         "Enum": [
@@ -2823,19 +2778,24 @@
             "syn": "ItemEnum"
           }
         ],
-        "Union": [
+        "Existential": [
           {
-            "syn": "ItemUnion"
+            "syn": "ItemExistential"
           }
         ],
-        "Trait": [
+        "ExternCrate": [
           {
-            "syn": "ItemTrait"
+            "syn": "ItemExternCrate"
           }
         ],
-        "TraitAlias": [
+        "Fn": [
           {
-            "syn": "ItemTraitAlias"
+            "syn": "ItemFn"
+          }
+        ],
+        "ForeignMod": [
+          {
+            "syn": "ItemForeignMod"
           }
         ],
         "Impl": [
@@ -2851,6 +2811,46 @@
         "Macro2": [
           {
             "syn": "ItemMacro2"
+          }
+        ],
+        "Mod": [
+          {
+            "syn": "ItemMod"
+          }
+        ],
+        "Static": [
+          {
+            "syn": "ItemStatic"
+          }
+        ],
+        "Struct": [
+          {
+            "syn": "ItemStruct"
+          }
+        ],
+        "Trait": [
+          {
+            "syn": "ItemTrait"
+          }
+        ],
+        "TraitAlias": [
+          {
+            "syn": "ItemTraitAlias"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "ItemType"
+          }
+        ],
+        "Union": [
+          {
+            "syn": "ItemUnion"
+          }
+        ],
+        "Use": [
+          {
+            "syn": "ItemUse"
           }
         ],
         "Verbatim": [
@@ -4941,14 +4941,49 @@
         ]
       },
       "variants": {
-        "Slice": [
-          {
-            "syn": "TypeSlice"
-          }
-        ],
         "Array": [
           {
             "syn": "TypeArray"
+          }
+        ],
+        "BareFn": [
+          {
+            "syn": "TypeBareFn"
+          }
+        ],
+        "Group": [
+          {
+            "syn": "TypeGroup"
+          }
+        ],
+        "ImplTrait": [
+          {
+            "syn": "TypeImplTrait"
+          }
+        ],
+        "Infer": [
+          {
+            "syn": "TypeInfer"
+          }
+        ],
+        "Macro": [
+          {
+            "syn": "TypeMacro"
+          }
+        ],
+        "Never": [
+          {
+            "syn": "TypeNever"
+          }
+        ],
+        "Paren": [
+          {
+            "syn": "TypeParen"
+          }
+        ],
+        "Path": [
+          {
+            "syn": "TypePath"
           }
         ],
         "Ptr": [
@@ -4961,24 +4996,9 @@
             "syn": "TypeReference"
           }
         ],
-        "BareFn": [
+        "Slice": [
           {
-            "syn": "TypeBareFn"
-          }
-        ],
-        "Never": [
-          {
-            "syn": "TypeNever"
-          }
-        ],
-        "Tuple": [
-          {
-            "syn": "TypeTuple"
-          }
-        ],
-        "Path": [
-          {
-            "syn": "TypePath"
+            "syn": "TypeSlice"
           }
         ],
         "TraitObject": [
@@ -4986,29 +5006,9 @@
             "syn": "TypeTraitObject"
           }
         ],
-        "ImplTrait": [
+        "Tuple": [
           {
-            "syn": "TypeImplTrait"
-          }
-        ],
-        "Paren": [
-          {
-            "syn": "TypeParen"
-          }
-        ],
-        "Group": [
-          {
-            "syn": "TypeGroup"
-          }
-        ],
-        "Infer": [
-          {
-            "syn": "TypeInfer"
-          }
-        ],
-        "Macro": [
-          {
-            "syn": "TypeMacro"
+            "syn": "TypeTuple"
           }
         ],
         "Verbatim": [

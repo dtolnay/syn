@@ -1114,65 +1114,8 @@ pub fn visit_derive_input<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Expr) {
     match *_i {
-        Expr::Box(ref _binding_0) => {
-            full!(_visitor.visit_expr_box(_binding_0));
-        }
-        Expr::InPlace(ref _binding_0) => {
-            full!(_visitor.visit_expr_in_place(_binding_0));
-        }
         Expr::Array(ref _binding_0) => {
             full!(_visitor.visit_expr_array(_binding_0));
-        }
-        Expr::Call(ref _binding_0) => {
-            _visitor.visit_expr_call(_binding_0);
-        }
-        Expr::MethodCall(ref _binding_0) => {
-            full!(_visitor.visit_expr_method_call(_binding_0));
-        }
-        Expr::Tuple(ref _binding_0) => {
-            full!(_visitor.visit_expr_tuple(_binding_0));
-        }
-        Expr::Binary(ref _binding_0) => {
-            _visitor.visit_expr_binary(_binding_0);
-        }
-        Expr::Unary(ref _binding_0) => {
-            _visitor.visit_expr_unary(_binding_0);
-        }
-        Expr::Lit(ref _binding_0) => {
-            _visitor.visit_expr_lit(_binding_0);
-        }
-        Expr::Cast(ref _binding_0) => {
-            _visitor.visit_expr_cast(_binding_0);
-        }
-        Expr::Type(ref _binding_0) => {
-            full!(_visitor.visit_expr_type(_binding_0));
-        }
-        Expr::Let(ref _binding_0) => {
-            full!(_visitor.visit_expr_let(_binding_0));
-        }
-        Expr::If(ref _binding_0) => {
-            full!(_visitor.visit_expr_if(_binding_0));
-        }
-        Expr::While(ref _binding_0) => {
-            full!(_visitor.visit_expr_while(_binding_0));
-        }
-        Expr::ForLoop(ref _binding_0) => {
-            full!(_visitor.visit_expr_for_loop(_binding_0));
-        }
-        Expr::Loop(ref _binding_0) => {
-            full!(_visitor.visit_expr_loop(_binding_0));
-        }
-        Expr::Match(ref _binding_0) => {
-            full!(_visitor.visit_expr_match(_binding_0));
-        }
-        Expr::Closure(ref _binding_0) => {
-            full!(_visitor.visit_expr_closure(_binding_0));
-        }
-        Expr::Unsafe(ref _binding_0) => {
-            full!(_visitor.visit_expr_unsafe(_binding_0));
-        }
-        Expr::Block(ref _binding_0) => {
-            full!(_visitor.visit_expr_block(_binding_0));
         }
         Expr::Assign(ref _binding_0) => {
             full!(_visitor.visit_expr_assign(_binding_0));
@@ -1180,59 +1123,116 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
         Expr::AssignOp(ref _binding_0) => {
             full!(_visitor.visit_expr_assign_op(_binding_0));
         }
-        Expr::Field(ref _binding_0) => {
-            _visitor.visit_expr_field(_binding_0);
+        Expr::Async(ref _binding_0) => {
+            full!(_visitor.visit_expr_async(_binding_0));
         }
-        Expr::Index(ref _binding_0) => {
-            _visitor.visit_expr_index(_binding_0);
+        Expr::Binary(ref _binding_0) => {
+            _visitor.visit_expr_binary(_binding_0);
         }
-        Expr::Range(ref _binding_0) => {
-            full!(_visitor.visit_expr_range(_binding_0));
+        Expr::Block(ref _binding_0) => {
+            full!(_visitor.visit_expr_block(_binding_0));
         }
-        Expr::Path(ref _binding_0) => {
-            _visitor.visit_expr_path(_binding_0);
-        }
-        Expr::Reference(ref _binding_0) => {
-            full!(_visitor.visit_expr_reference(_binding_0));
+        Expr::Box(ref _binding_0) => {
+            full!(_visitor.visit_expr_box(_binding_0));
         }
         Expr::Break(ref _binding_0) => {
             full!(_visitor.visit_expr_break(_binding_0));
         }
+        Expr::Call(ref _binding_0) => {
+            _visitor.visit_expr_call(_binding_0);
+        }
+        Expr::Cast(ref _binding_0) => {
+            _visitor.visit_expr_cast(_binding_0);
+        }
+        Expr::Closure(ref _binding_0) => {
+            full!(_visitor.visit_expr_closure(_binding_0));
+        }
         Expr::Continue(ref _binding_0) => {
             full!(_visitor.visit_expr_continue(_binding_0));
         }
-        Expr::Return(ref _binding_0) => {
-            full!(_visitor.visit_expr_return(_binding_0));
+        Expr::Field(ref _binding_0) => {
+            _visitor.visit_expr_field(_binding_0);
         }
-        Expr::Macro(ref _binding_0) => {
-            full!(_visitor.visit_expr_macro(_binding_0));
-        }
-        Expr::Struct(ref _binding_0) => {
-            full!(_visitor.visit_expr_struct(_binding_0));
-        }
-        Expr::Repeat(ref _binding_0) => {
-            full!(_visitor.visit_expr_repeat(_binding_0));
-        }
-        Expr::Paren(ref _binding_0) => {
-            _visitor.visit_expr_paren(_binding_0);
+        Expr::ForLoop(ref _binding_0) => {
+            full!(_visitor.visit_expr_for_loop(_binding_0));
         }
         Expr::Group(ref _binding_0) => {
             full!(_visitor.visit_expr_group(_binding_0));
         }
+        Expr::If(ref _binding_0) => {
+            full!(_visitor.visit_expr_if(_binding_0));
+        }
+        Expr::InPlace(ref _binding_0) => {
+            full!(_visitor.visit_expr_in_place(_binding_0));
+        }
+        Expr::Index(ref _binding_0) => {
+            _visitor.visit_expr_index(_binding_0);
+        }
+        Expr::Let(ref _binding_0) => {
+            full!(_visitor.visit_expr_let(_binding_0));
+        }
+        Expr::Lit(ref _binding_0) => {
+            _visitor.visit_expr_lit(_binding_0);
+        }
+        Expr::Loop(ref _binding_0) => {
+            full!(_visitor.visit_expr_loop(_binding_0));
+        }
+        Expr::Macro(ref _binding_0) => {
+            full!(_visitor.visit_expr_macro(_binding_0));
+        }
+        Expr::Match(ref _binding_0) => {
+            full!(_visitor.visit_expr_match(_binding_0));
+        }
+        Expr::MethodCall(ref _binding_0) => {
+            full!(_visitor.visit_expr_method_call(_binding_0));
+        }
+        Expr::Paren(ref _binding_0) => {
+            _visitor.visit_expr_paren(_binding_0);
+        }
+        Expr::Path(ref _binding_0) => {
+            _visitor.visit_expr_path(_binding_0);
+        }
+        Expr::Range(ref _binding_0) => {
+            full!(_visitor.visit_expr_range(_binding_0));
+        }
+        Expr::Reference(ref _binding_0) => {
+            full!(_visitor.visit_expr_reference(_binding_0));
+        }
+        Expr::Repeat(ref _binding_0) => {
+            full!(_visitor.visit_expr_repeat(_binding_0));
+        }
+        Expr::Return(ref _binding_0) => {
+            full!(_visitor.visit_expr_return(_binding_0));
+        }
+        Expr::Struct(ref _binding_0) => {
+            full!(_visitor.visit_expr_struct(_binding_0));
+        }
         Expr::Try(ref _binding_0) => {
             full!(_visitor.visit_expr_try(_binding_0));
-        }
-        Expr::Async(ref _binding_0) => {
-            full!(_visitor.visit_expr_async(_binding_0));
         }
         Expr::TryBlock(ref _binding_0) => {
             full!(_visitor.visit_expr_try_block(_binding_0));
         }
-        Expr::Yield(ref _binding_0) => {
-            full!(_visitor.visit_expr_yield(_binding_0));
+        Expr::Tuple(ref _binding_0) => {
+            full!(_visitor.visit_expr_tuple(_binding_0));
+        }
+        Expr::Type(ref _binding_0) => {
+            full!(_visitor.visit_expr_type(_binding_0));
+        }
+        Expr::Unary(ref _binding_0) => {
+            _visitor.visit_expr_unary(_binding_0);
+        }
+        Expr::Unsafe(ref _binding_0) => {
+            full!(_visitor.visit_expr_unsafe(_binding_0));
         }
         Expr::Verbatim(ref _binding_0) => {
             _visitor.visit_expr_verbatim(_binding_0);
+        }
+        Expr::While(ref _binding_0) => {
+            full!(_visitor.visit_expr_while(_binding_0));
+        }
+        Expr::Yield(ref _binding_0) => {
+            full!(_visitor.visit_expr_yield(_binding_0));
         }
     }
 }
@@ -2063,47 +2063,23 @@ pub fn visit_index<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast In
 #[cfg(feature = "full")]
 pub fn visit_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Item) {
     match *_i {
-        Item::ExternCrate(ref _binding_0) => {
-            _visitor.visit_item_extern_crate(_binding_0);
-        }
-        Item::Use(ref _binding_0) => {
-            _visitor.visit_item_use(_binding_0);
-        }
-        Item::Static(ref _binding_0) => {
-            _visitor.visit_item_static(_binding_0);
-        }
         Item::Const(ref _binding_0) => {
             _visitor.visit_item_const(_binding_0);
-        }
-        Item::Fn(ref _binding_0) => {
-            _visitor.visit_item_fn(_binding_0);
-        }
-        Item::Mod(ref _binding_0) => {
-            _visitor.visit_item_mod(_binding_0);
-        }
-        Item::ForeignMod(ref _binding_0) => {
-            _visitor.visit_item_foreign_mod(_binding_0);
-        }
-        Item::Type(ref _binding_0) => {
-            _visitor.visit_item_type(_binding_0);
-        }
-        Item::Existential(ref _binding_0) => {
-            _visitor.visit_item_existential(_binding_0);
-        }
-        Item::Struct(ref _binding_0) => {
-            _visitor.visit_item_struct(_binding_0);
         }
         Item::Enum(ref _binding_0) => {
             _visitor.visit_item_enum(_binding_0);
         }
-        Item::Union(ref _binding_0) => {
-            _visitor.visit_item_union(_binding_0);
+        Item::Existential(ref _binding_0) => {
+            _visitor.visit_item_existential(_binding_0);
         }
-        Item::Trait(ref _binding_0) => {
-            _visitor.visit_item_trait(_binding_0);
+        Item::ExternCrate(ref _binding_0) => {
+            _visitor.visit_item_extern_crate(_binding_0);
         }
-        Item::TraitAlias(ref _binding_0) => {
-            _visitor.visit_item_trait_alias(_binding_0);
+        Item::Fn(ref _binding_0) => {
+            _visitor.visit_item_fn(_binding_0);
+        }
+        Item::ForeignMod(ref _binding_0) => {
+            _visitor.visit_item_foreign_mod(_binding_0);
         }
         Item::Impl(ref _binding_0) => {
             _visitor.visit_item_impl(_binding_0);
@@ -2113,6 +2089,30 @@ pub fn visit_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ite
         }
         Item::Macro2(ref _binding_0) => {
             _visitor.visit_item_macro2(_binding_0);
+        }
+        Item::Mod(ref _binding_0) => {
+            _visitor.visit_item_mod(_binding_0);
+        }
+        Item::Static(ref _binding_0) => {
+            _visitor.visit_item_static(_binding_0);
+        }
+        Item::Struct(ref _binding_0) => {
+            _visitor.visit_item_struct(_binding_0);
+        }
+        Item::Trait(ref _binding_0) => {
+            _visitor.visit_item_trait(_binding_0);
+        }
+        Item::TraitAlias(ref _binding_0) => {
+            _visitor.visit_item_trait_alias(_binding_0);
+        }
+        Item::Type(ref _binding_0) => {
+            _visitor.visit_item_type(_binding_0);
+        }
+        Item::Union(ref _binding_0) => {
+            _visitor.visit_item_union(_binding_0);
+        }
+        Item::Use(ref _binding_0) => {
+            _visitor.visit_item_use(_binding_0);
         }
         Item::Verbatim(ref _binding_0) => {
             _visitor.visit_item_verbatim(_binding_0);
@@ -3023,11 +3023,32 @@ pub fn visit_trait_item_verbatim<'ast, V: Visit<'ast> + ?Sized>(
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Type) {
     match *_i {
-        Type::Slice(ref _binding_0) => {
-            _visitor.visit_type_slice(_binding_0);
-        }
         Type::Array(ref _binding_0) => {
             _visitor.visit_type_array(_binding_0);
+        }
+        Type::BareFn(ref _binding_0) => {
+            _visitor.visit_type_bare_fn(_binding_0);
+        }
+        Type::Group(ref _binding_0) => {
+            _visitor.visit_type_group(_binding_0);
+        }
+        Type::ImplTrait(ref _binding_0) => {
+            _visitor.visit_type_impl_trait(_binding_0);
+        }
+        Type::Infer(ref _binding_0) => {
+            _visitor.visit_type_infer(_binding_0);
+        }
+        Type::Macro(ref _binding_0) => {
+            _visitor.visit_type_macro(_binding_0);
+        }
+        Type::Never(ref _binding_0) => {
+            _visitor.visit_type_never(_binding_0);
+        }
+        Type::Paren(ref _binding_0) => {
+            _visitor.visit_type_paren(_binding_0);
+        }
+        Type::Path(ref _binding_0) => {
+            _visitor.visit_type_path(_binding_0);
         }
         Type::Ptr(ref _binding_0) => {
             _visitor.visit_type_ptr(_binding_0);
@@ -3035,35 +3056,14 @@ pub fn visit_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Typ
         Type::Reference(ref _binding_0) => {
             _visitor.visit_type_reference(_binding_0);
         }
-        Type::BareFn(ref _binding_0) => {
-            _visitor.visit_type_bare_fn(_binding_0);
-        }
-        Type::Never(ref _binding_0) => {
-            _visitor.visit_type_never(_binding_0);
-        }
-        Type::Tuple(ref _binding_0) => {
-            _visitor.visit_type_tuple(_binding_0);
-        }
-        Type::Path(ref _binding_0) => {
-            _visitor.visit_type_path(_binding_0);
+        Type::Slice(ref _binding_0) => {
+            _visitor.visit_type_slice(_binding_0);
         }
         Type::TraitObject(ref _binding_0) => {
             _visitor.visit_type_trait_object(_binding_0);
         }
-        Type::ImplTrait(ref _binding_0) => {
-            _visitor.visit_type_impl_trait(_binding_0);
-        }
-        Type::Paren(ref _binding_0) => {
-            _visitor.visit_type_paren(_binding_0);
-        }
-        Type::Group(ref _binding_0) => {
-            _visitor.visit_type_group(_binding_0);
-        }
-        Type::Infer(ref _binding_0) => {
-            _visitor.visit_type_infer(_binding_0);
-        }
-        Type::Macro(ref _binding_0) => {
-            _visitor.visit_type_macro(_binding_0);
+        Type::Tuple(ref _binding_0) => {
+            _visitor.visit_type_tuple(_binding_0);
         }
         Type::Verbatim(ref _binding_0) => {
             _visitor.visit_type_verbatim(_binding_0);
