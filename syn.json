@@ -1290,9 +1290,17 @@
         "for_token": {
           "token": "For"
         },
-        "pat": {
-          "box": {
-            "syn": "Pat"
+        "leading_vert": {
+          "option": {
+            "token": "Or"
+          }
+        },
+        "pats": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Or"
           }
         },
         "in_token": {

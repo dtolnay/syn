@@ -1401,7 +1401,13 @@ pub fn visit_expr_for_loop_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut 
         _visitor.visit_label_mut(it)
     };
     tokens_helper(_visitor, &mut _i.for_token.span);
-    _visitor.visit_pat_mut(&mut *_i.pat);
+    if let Some(ref mut it) = _i.leading_vert {
+        tokens_helper(_visitor, &mut it.spans)
+    };
+    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
+        let it = el.value_mut();
+        _visitor.visit_pat_mut(it)
+    }
     tokens_helper(_visitor, &mut _i.in_token.span);
     _visitor.visit_expr_mut(&mut *_i.expr);
     _visitor.visit_block_mut(&mut _i.body);

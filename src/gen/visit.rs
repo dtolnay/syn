@@ -1410,7 +1410,13 @@ pub fn visit_expr_for_loop<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: 
         _visitor.visit_label(it)
     };
     tokens_helper(_visitor, &_i.for_token.span);
-    _visitor.visit_pat(&*_i.pat);
+    if let Some(ref it) = _i.leading_vert {
+        tokens_helper(_visitor, &it.spans)
+    };
+    for el in Punctuated::pairs(&_i.pats) {
+        let it = el.value();
+        _visitor.visit_pat(it)
+    }
     tokens_helper(_visitor, &_i.in_token.span);
     _visitor.visit_expr(&*_i.expr);
     _visitor.visit_block(&_i.body);
