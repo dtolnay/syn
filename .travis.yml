@@ -2,7 +2,9 @@ sudo: false
 language: rust
 
 rust:
-  - nightly
+    # Temporarily pinned until rustfmt is unbroken.
+    # https://github.com/rust-lang/rustfmt/issues/3703
+  - nightly-2019-07-25
   - stable
   - beta
   - 1.31.0
