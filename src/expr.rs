@@ -1335,6 +1335,17 @@ pub mod parsing {
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) {
                 let dot_token: Token![.] = input.parse()?;
+
+                if input.peek(Token![await]) {
+                    e = Expr::Await(ExprAwait {
+                        attrs: Vec::new(),
+                        base: Box::new(e),
+                        dot_token: dot_token,
+                        await_token: input.parse()?,
+                    });
+                    continue;
+                }
+
                 let member: Member = input.parse()?;
                 let turbofish = if member.is_named() && input.peek(Token![::]) {
                     Some(MethodTurbofish {
@@ -1418,7 +1429,10 @@ pub mod parsing {
                     paren_token: parenthesized!(content in input),
                     args: content.parse_terminated(Expr::parse)?,
                 });
-            } else if input.peek(Token![.]) {
+            } else if input.peek(Token![.])
+                && !input.peek(Token![..])
+                && !input.peek2(Token![await])
+            {
                 e = Expr::Field(ExprField {
                     attrs: Vec::new(),
                     base: Box::new(e),
