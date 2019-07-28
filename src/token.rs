@@ -812,13 +812,6 @@ macro_rules! Token {
     (_)           => { $crate::token::Underscore };
 }
 
-// Old names. TODO: remove these re-exports in a breaking change.
-// https://github.com/dtolnay/syn/issues/486
-#[doc(hidden)]
-pub use self::SelfType as CapSelf;
-#[doc(hidden)]
-pub use self::SelfValue as Self_;
-
 // Not public API.
 #[doc(hidden)]
 #[cfg(feature = "parsing")]
