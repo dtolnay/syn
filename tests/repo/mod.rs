@@ -35,14 +35,21 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
+        // TODO: attributes on function parameters
+        // https://github.com/dtolnay/syn/issues/646
+        //   extern "C" { fn ffi(#[allow(C)] a: i32); }
+        "tests/rust/src/test/ui/rfc-2565-param-attrs/param-attrs-allowed.rs" |
+        // TODO: extern crate as underscore
+        // https://github.com/dtolnay/syn/issues/673
+        //   extern crate rustc_driver as _;
+        "tests/rust/src/librustc_codegen_llvm/lib.rs" |
         // Deprecated placement syntax
-        "tests/rust/src/test/run-pass/new-box-syntax.rs" |
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
         // not actually test cases
-        "tests/rust/src/test/run-pass/macros/auxiliary/macro-comma-support.rs" |
-        "tests/rust/src/test/run-pass/macros/auxiliary/macro-include-items-expr.rs" |
+        "tests/rust/src/test/ui/macros/auxiliary/macro-comma-support.rs" |
+        "tests/rust/src/test/ui/macros/auxiliary/macro-include-items-expr.rs" |
         "tests/rust/src/test/ui/issues/auxiliary/issue-21146-inc.rs" => false,
         _ => true,
     }
