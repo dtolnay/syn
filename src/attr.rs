@@ -133,47 +133,6 @@ impl Hash for Attribute {
 impl Attribute {
     /// Parses the content of the attribute, consisting of the path and tts, as
     /// a [`Meta`] if possible.
-    ///
-    /// Deprecated; use `parse_meta` instead.
-    #[doc(hidden)]
-    pub fn interpret_meta(&self) -> Option<Meta> {
-        #[cfg(feature = "parsing")]
-        {
-            self.parse_meta().ok()
-        }
-
-        #[cfg(not(feature = "parsing"))]
-        {
-            let name = if self.path.segments.len() == 1 {
-                &self.path.segments.first().unwrap().value().ident
-            } else {
-                return None;
-            };
-
-            if self.tokens.is_empty() {
-                return Some(Meta::Word(name.clone()));
-            }
-
-            let tts = self.tokens.clone().into_iter().collect::<Vec<_>>();
-
-            if tts.len() == 1 {
-                if let Some(meta) = Attribute::extract_meta_list(name.clone(), &tts[0]) {
-                    return Some(meta);
-                }
-            }
-
-            if tts.len() == 2 {
-                if let Some(meta) = Attribute::extract_name_value(name.clone(), &tts[0], &tts[1]) {
-                    return Some(meta);
-                }
-            }
-
-            None
-        }
-    }
-
-    /// Parses the content of the attribute, consisting of the path and tts, as
-    /// a [`Meta`] if possible.
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
         if let Some(ref colon) = self.path.leading_colon {

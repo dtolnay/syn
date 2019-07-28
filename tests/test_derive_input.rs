@@ -109,7 +109,7 @@ fn test_struct() {
    ⋮}
     "###);
 
-    snapshot!(input.attrs[0].interpret_meta().unwrap(), @r###"
+    snapshot!(input.attrs[0].parse_meta().unwrap(), @r###"
    ⋮Meta::List {
    ⋮    ident: "derive",
    ⋮    nested: [
@@ -308,7 +308,7 @@ fn test_enum() {
     let meta_items: Vec<_> = input
         .attrs
         .into_iter()
-        .map(|attr| attr.interpret_meta().unwrap())
+        .map(|attr| attr.parse_meta().unwrap())
         .collect();
 
     snapshot!(meta_items, @r###"
@@ -361,7 +361,7 @@ fn test_attr_with_path() {
    ⋮}
     "###);
 
-    assert!(input.attrs[0].interpret_meta().is_none());
+    assert!(input.attrs[0].parse_meta().is_err());
 }
 
 #[test]
@@ -397,7 +397,7 @@ fn test_attr_with_non_mod_style_path() {
    ⋮}
     "###);
 
-    assert!(input.attrs[0].interpret_meta().is_none());
+    assert!(input.attrs[0].parse_meta().is_err());
 }
 
 #[test]
@@ -437,7 +437,7 @@ fn test_attr_with_mod_style_path_with_self() {
    ⋮}
     "###);
 
-    assert!(input.attrs[0].interpret_meta().is_none());
+    assert!(input.attrs[0].parse_meta().is_err());
 }
 
 #[test]
