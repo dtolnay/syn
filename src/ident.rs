@@ -5,7 +5,7 @@ use crate::parse::{Parse, ParseStream, Result};
 #[cfg(feature = "parsing")]
 use crate::token::Token;
 #[cfg(feature = "parsing")]
-use crate::{lookahead, private};
+use crate::lookahead;
 
 pub use proc_macro2::Ident;
 
@@ -82,13 +82,5 @@ ident_from_token!(extern);
 impl From<Token![_]> for Ident {
     fn from(token: Token![_]) -> Ident {
         Ident::new("_", token.span)
-    }
-}
-
-#[cfg(feature = "parsing")]
-impl private {
-    pub fn peek_any_ident(input: ParseStream) -> bool {
-        use crate::ext::IdentExt;
-        input.peek(Ident::peek_any)
     }
 }
