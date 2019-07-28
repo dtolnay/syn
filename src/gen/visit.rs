@@ -1466,6 +1466,9 @@ pub fn visit_expr_let<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.let_token.span);
+    if let Some(ref it) = _i.leading_vert {
+        tokens_helper(_visitor, &it.spans)
+    };
     for el in Punctuated::pairs(&_i.pats) {
         let it = el.value();
         _visitor.visit_pat(it)
@@ -2516,6 +2519,9 @@ pub fn visit_local<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lo
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.let_token.span);
+    if let Some(ref it) = _i.leading_vert {
+        tokens_helper(_visitor, &it.spans)
+    };
     for el in Punctuated::pairs(&_i.pats) {
         let it = el.value();
         _visitor.visit_pat(it)

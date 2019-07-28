@@ -1347,6 +1347,7 @@ pub fn fold_expr_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprLet) -> ExprLet
     ExprLet {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
+        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
         pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
@@ -2219,6 +2220,7 @@ pub fn fold_local<V: Fold + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
     Local {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
+        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
         pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
         ty: (_i.ty).map(|it| {
             (

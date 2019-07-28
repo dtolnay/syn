@@ -1457,6 +1457,9 @@ pub fn visit_expr_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprL
         _visitor.visit_attribute_mut(it)
     }
     tokens_helper(_visitor, &mut _i.let_token.span);
+    if let Some(ref mut it) = _i.leading_vert {
+        tokens_helper(_visitor, &mut it.spans)
+    };
     for mut el in Punctuated::pairs_mut(&mut _i.pats) {
         let it = el.value_mut();
         _visitor.visit_pat_mut(it)
@@ -2465,6 +2468,9 @@ pub fn visit_local_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
         _visitor.visit_attribute_mut(it)
     }
     tokens_helper(_visitor, &mut _i.let_token.span);
+    if let Some(ref mut it) = _i.leading_vert {
+        tokens_helper(_visitor, &mut it.spans)
+    };
     for mut el in Punctuated::pairs_mut(&mut _i.pats) {
         let it = el.value_mut();
         _visitor.visit_pat_mut(it)

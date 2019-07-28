@@ -854,6 +854,18 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                if let Some(val) = &_val.leading_vert {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Or);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("leading_vert", Print::ref_cast(val));
+                }
                 if !_val.pats.is_empty() {
                     formatter.field("pats", Lite(&_val.pats));
                 }
@@ -1602,6 +1614,18 @@ impl Debug for Lite<syn::ExprLet> {
         let mut formatter = formatter.debug_struct("ExprLet");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.leading_vert {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Or);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("leading_vert", Print::ref_cast(val));
         }
         if !_val.pats.is_empty() {
             formatter.field("pats", Lite(&_val.pats));
@@ -3918,6 +3942,18 @@ impl Debug for Lite<syn::Local> {
         let mut formatter = formatter.debug_struct("Local");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.leading_vert {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Or);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("leading_vert", Print::ref_cast(val));
         }
         if !_val.pats.is_empty() {
             formatter.field("pats", Lite(&_val.pats));

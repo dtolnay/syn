@@ -1452,6 +1452,11 @@
         "let_token": {
           "token": "Let"
         },
+        "leading_vert": {
+          "option": {
+            "token": "Or"
+          }
+        },
         "pats": {
           "punctuated": {
             "element": {
@@ -3821,6 +3826,11 @@
         },
         "let_token": {
           "token": "Let"
+        },
+        "leading_vert": {
+          "option": {
+            "token": "Or"
+          }
         },
         "pats": {
           "punctuated": {
