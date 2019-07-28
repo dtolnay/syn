@@ -299,6 +299,7 @@ ast_enum_of_structs! {
         pub Let(ExprLet #full {
             pub attrs: Vec<Attribute>,
             pub let_token: Token![let],
+            pub leading_vert: Option<Token![|]>,
             pub pats: Punctuated<Pat, Token![|]>,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
@@ -741,6 +742,7 @@ ast_struct! {
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
+        pub leading_vert: Option<Token![|]>,
         pub pats: Punctuated<Pat, Token![|]>,
         pub ty: Option<(Token![:], Box<Type>)>,
         pub init: Option<(Token![=], Box<Expr>)>,
@@ -1774,9 +1776,9 @@ pub mod parsing {
         Ok(ExprLet {
             attrs: Vec::new(),
             let_token: input.parse()?,
+            leading_vert: input.parse()?,
             pats: {
                 let mut pats = Punctuated::new();
-                input.parse::<Option<Token![|]>>()?;
                 let value: Pat = input.parse()?;
                 pats.push_value(value);
                 while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
@@ -2536,6 +2538,7 @@ pub mod parsing {
         Ok(Local {
             attrs: input.call(Attribute::parse_outer)?,
             let_token: input.parse()?,
+            leading_vert: input.parse()?,
             pats: {
                 let mut pats = Punctuated::new();
                 let value: Pat = input.parse()?;
@@ -3270,6 +3273,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
+            self.leading_vert.to_tokens(tokens);
             self.pats.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
@@ -3858,6 +3862,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
+            self.leading_vert.to_tokens(tokens);
             self.pats.to_tokens(tokens);
             if let Some((ref colon_token, ref ty)) = self.ty {
                 colon_token.to_tokens(tokens);
