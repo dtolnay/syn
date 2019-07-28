@@ -1009,7 +1009,11 @@ pub mod parsing {
                 rename: {
                     if input.peek(Token![as]) {
                         let as_token: Token![as] = input.parse()?;
-                        let rename: Ident = input.parse()?;
+                        let rename: Ident = if input.peek(Token![_]) {
+                            Ident::from(input.parse::<Token![_]>()?)
+                        } else {
+                            input.parse()?
+                        };
                         Some((as_token, rename))
                     } else {
                         None

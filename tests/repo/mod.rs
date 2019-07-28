@@ -39,10 +39,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // https://github.com/dtolnay/syn/issues/646
         //   extern "C" { fn ffi(#[allow(C)] a: i32); }
         "tests/rust/src/test/ui/rfc-2565-param-attrs/param-attrs-allowed.rs" |
-        // TODO: extern crate as underscore
-        // https://github.com/dtolnay/syn/issues/673
-        //   extern crate rustc_driver as _;
-        "tests/rust/src/librustc_codegen_llvm/lib.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
         // Deprecated anonymous parameter syntax in traits
