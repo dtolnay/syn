@@ -237,7 +237,8 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub label: Option<Label>,
             pub for_token: Token![for],
-            pub pat: Box<Pat>,
+            pub leading_vert: Option<Token![|]>,
+            pub pats: Punctuated<Pat, Token![|]>,
             pub in_token: Token![in],
             pub expr: Box<Expr>,
             pub body: Block,
@@ -1835,7 +1836,21 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let label: Option<Label> = input.parse()?;
             let for_token: Token![for] = input.parse()?;
-            let pat: Pat = input.parse()?;
+            let leading_vert: Option<Token![|]> = input.parse()?;
+
+            let mut pats = Punctuated::new();
+            let value: Pat = input.parse()?;
+            pats.push_value(value);
+            loop {
+                if !input.peek(Token![|]) {
+                    break;
+                }
+                let punct = input.parse()?;
+                pats.push_punct(punct);
+                let value: Pat = input.parse()?;
+                pats.push_value(value);
+            }
+
             let in_token: Token![in] = input.parse()?;
             let expr: Expr = input.call(expr_no_struct)?;
 
@@ -1848,7 +1863,8 @@ pub mod parsing {
                 attrs: inner_attrs,
                 label: label,
                 for_token: for_token,
-                pat: Box::new(pat),
+                leading_vert: leading_vert,
+                pats: pats,
                 in_token: in_token,
                 expr: Box::new(expr),
                 body: Block {
@@ -3291,7 +3307,8 @@ mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.for_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
+            self.leading_vert.to_tokens(tokens);
+            self.pats.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.body.brace_token.surround(tokens, |tokens| {
