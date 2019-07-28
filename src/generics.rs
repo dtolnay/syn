@@ -714,11 +714,9 @@ pub mod parsing {
             let lifetimes: Option<BoundLifetimes> = input.parse()?;
 
             let mut path: Path = input.parse()?;
-            if path.segments.last().unwrap().value().arguments.is_empty()
-                && input.peek(token::Paren)
-            {
+            if path.segments.last().unwrap().arguments.is_empty() && input.peek(token::Paren) {
                 let parenthesized = PathArguments::Parenthesized(input.parse()?);
-                path.segments.last_mut().unwrap().value_mut().arguments = parenthesized;
+                path.segments.last_mut().unwrap().arguments = parenthesized;
             }
 
             Ok(TraitBound {

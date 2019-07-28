@@ -74,29 +74,25 @@ impl<T, P> Punctuated<T, P> {
     }
 
     /// Borrows the first punctuated pair in this sequence.
-    pub fn first(&self) -> Option<Pair<&T, &P>> {
-        self.pairs().next()
+    pub fn first(&self) -> Option<&T> {
+        self.iter().next()
     }
 
     /// Borrows the last punctuated pair in this sequence.
-    pub fn last(&self) -> Option<Pair<&T, &P>> {
+    pub fn last(&self) -> Option<&T> {
         if self.last.is_some() {
-            self.last.as_ref().map(|t| Pair::End(t.as_ref()))
+            self.last.as_ref().map(Box::as_ref)
         } else {
-            self.inner
-                .last()
-                .map(|&(ref t, ref d)| Pair::Punctuated(t, d))
+            self.inner.last().map(|pair| &pair.0)
         }
     }
 
     /// Mutably borrows the last punctuated pair in this sequence.
-    pub fn last_mut(&mut self) -> Option<Pair<&mut T, &mut P>> {
+    pub fn last_mut(&mut self) -> Option<&mut T> {
         if self.last.is_some() {
-            self.last.as_mut().map(|t| Pair::End(t.as_mut()))
+            self.last.as_mut().map(Box::as_mut)
         } else {
-            self.inner
-                .last_mut()
-                .map(|&mut (ref mut t, ref mut d)| Pair::Punctuated(t, d))
+            self.inner.last_mut().map(|pair| &mut pair.0)
         }
     }
 

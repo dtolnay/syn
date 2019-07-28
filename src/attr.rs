@@ -142,7 +142,8 @@ impl Attribute {
         let first_segment = self
             .path
             .segments
-            .first()
+            .pairs()
+            .next()
             .expect("paths have at least one segment");
         if let Some(colon) = first_segment.punct() {
             return Err(Error::new(colon.spans[0], "expected meta value"));
