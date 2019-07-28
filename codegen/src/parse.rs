@@ -128,7 +128,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
             qself: None,
             ref path,
         }) => {
-            let last = path.segments.last().unwrap().into_value();
+            let last = path.segments.last().unwrap();
             let string = last.ident.to_string();
 
             match string.as_str() {
@@ -177,7 +177,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
             types::Type::Tuple(tys)
         }
         syn::Type::Macro(syn::TypeMacro { ref mac })
-            if mac.path.segments.last().unwrap().into_value().ident == "Token" =>
+            if mac.path.segments.last().unwrap().ident == "Token" =>
         {
             let content = mac.tokens.to_string();
             let ty = tokens.get(&content).unwrap().to_string();
@@ -224,11 +224,10 @@ fn first_arg(params: &syn::PathArguments) -> &syn::Type {
         _ => panic!("Expected at least 1 type argument here"),
     };
 
-    match **data
+    match *data
         .args
         .first()
         .expect("Expected at least 1 type argument here")
-        .value()
     {
         syn::GenericArgument::Type(ref ty) => ty,
         _ => panic!("Expected at least 1 type argument here"),
@@ -241,11 +240,10 @@ fn last_arg(params: &syn::PathArguments) -> &syn::Type {
         _ => panic!("Expected at least 1 type argument here"),
     };
 
-    match **data
+    match *data
         .args
         .last()
         .expect("Expected at least 1 type argument here")
-        .value()
     {
         syn::GenericArgument::Type(ref ty) => ty,
         _ => panic!("Expected at least 1 type argument here"),
@@ -462,7 +460,7 @@ mod parsing {
                 rules.parse::<Token![;]>()?;
                 expansion.parse::<Token![$]>()?;
                 let path: Path = expansion.parse()?;
-                let ty = path.segments.last().unwrap().into_value().ident.to_string();
+                let ty = path.segments.last().unwrap().ident.to_string();
                 tokens.insert(token, ty.to_string());
             }
         }
