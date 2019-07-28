@@ -254,7 +254,7 @@ fn last_arg(params: &syn::PathArguments) -> &syn::Type {
 mod parsing {
     use super::{AstItem, TokenLookup};
 
-    use proc_macro2::{TokenStream, TokenTree};
+    use proc_macro2::TokenStream;
     use quote::quote;
     use syn;
     use syn::parse::{Parse, ParseStream, Result};
@@ -424,43 +424,26 @@ mod parsing {
         }
     }
 
-    mod kw {
-        syn::custom_keyword!(macro_rules);
-        syn::custom_keyword!(Token);
-    }
-
-    pub fn parse_token_macro(input: ParseStream) -> Result<TokenLookup> {
-        input.parse::<TokenTree>()?;
-        input.parse::<Token![=>]>()?;
-
-        let definition;
-        braced!(definition in input);
-        definition.call(Attribute::parse_outer)?;
-        definition.parse::<kw::macro_rules>()?;
-        definition.parse::<Token![!]>()?;
-        definition.parse::<kw::Token>()?;
-
-        let rules;
-        braced!(rules in definition);
-        input.parse::<Token![;]>()?;
-
-        let mut tokens = BTreeMap::new();
-        while !rules.peek(Token![$]) {
-            let pattern;
-            parenthesized!(pattern in rules);
-            let token = pattern.parse::<TokenStream>()?.to_string();
-            rules.parse::<Token![=>]>()?;
-            let expansion;
-            braced!(expansion in rules);
-            rules.parse::<Token![;]>()?;
-            expansion.parse::<Token![$]>()?;
-            let path: Path = expansion.parse()?;
-            let ty = path.segments.last().unwrap().into_value().ident.to_string();
-            tokens.insert(token, ty.to_string());
+    pub struct TokenMacro(pub TokenLookup);
+    impl Parse for TokenMacro {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let mut tokens = BTreeMap::new();
+            while !input.is_empty() {
+                let content;
+                parenthesized!(content in input);
+                let token = content.parse::<TokenStream>()?.to_string();
+                input.parse::<Token![=]>()?;
+                input.parse::<Token![>]>()?;
+                let content;
+                braced!(content in input);
+                input.parse::<Token![;]>()?;
+                content.parse::<Token![$]>()?;
+                let path: Path = content.parse()?;
+                let ty = path.segments.last().unwrap().into_value().ident.to_string();
+                tokens.insert(token, ty.to_string());
+            }
+            Ok(TokenMacro(tokens))
         }
-        rules.parse::<TokenStream>()?;
-        tokens.insert("$".to_owned(), "Dollar".to_owned());
-        Ok(tokens)
     }
 
     fn parse_feature(input: ParseStream) -> Result<String> {
@@ -628,10 +611,10 @@ fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup> {
         match item {
             Item::Macro(item) => {
                 match item.ident {
-                    Some(ref i) if i == "export_token_macro" => {}
+                    Some(ref i) if i == "Token" => {}
                     _ => continue,
                 }
-                let tokens = item.mac.parse_body_with(parsing::parse_token_macro)?;
+                let tokens = syn::parse2::<parsing::TokenMacro>(item.mac.tokens.clone())?.0;
                 return Ok(tokens);
             }
             _ => {}
