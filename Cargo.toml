@@ -39,7 +39,7 @@ proc-macro = ["proc-macro2-next/proc-macro", "quote-next/proc-macro"]
 [dependencies]
 proc-macro2-next = { version = "0.4.4", default-features = false }
 quote-next = { version = "0.6", optional = true, default-features = false }
-unicode-xid = "0.1"
+unicode-xid = "0.2"
 
 [dev-dependencies]
 insta = "0.8"
