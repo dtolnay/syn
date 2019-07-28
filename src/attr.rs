@@ -9,6 +9,8 @@ use proc_macro2::{Delimiter, Spacing, TokenTree};
 
 #[cfg(feature = "parsing")]
 use crate::parse::{ParseStream, Result};
+#[cfg(feature = "parsing")]
+use crate::punctuated::Pair;
 #[cfg(feature = "extra-traits")]
 use crate::tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
@@ -135,22 +137,29 @@ impl Attribute {
     /// a [`Meta`] if possible.
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
-        if let Some(ref colon) = self.path.leading_colon {
-            return Err(Error::new(colon.spans[0], "expected meta identifier"));
+        fn clone_ident_segment(segment: &PathSegment) -> PathSegment {
+            PathSegment {
+                ident: segment.ident.clone(),
+                arguments: PathArguments::None,
+            }
         }
 
-        let first_segment = self
-            .path
-            .segments
-            .pairs()
-            .next()
-            .expect("paths have at least one segment");
-        if let Some(colon) = first_segment.punct() {
-            return Err(Error::new(colon.spans[0], "expected meta value"));
-        }
-        let ident = first_segment.value().ident.clone();
+        let path = Path {
+            leading_colon: self.path.leading_colon.clone(),
+            segments: self
+                .path
+                .segments
+                .pairs()
+                .map(|pair| match pair {
+                    Pair::Punctuated(seg, punct) => {
+                        Pair::Punctuated(clone_ident_segment(seg), punct.clone())
+                    }
+                    Pair::End(seg) => Pair::End(clone_ident_segment(seg)),
+                })
+                .collect(),
+        };
 
-        let parser = |input: ParseStream| parsing::parse_meta_after_ident(ident, input);
+        let parser = |input: ParseStream| parsing::parse_meta_after_path(path, input);
         parse::Parser::parse2(parser, self.tokens.clone())
     }
 
@@ -271,7 +280,7 @@ fn nested_meta_item_from_tokens(tts: &[TokenTree]) -> Option<(NestedMeta, &[Toke
                     span: ident.span(),
                 }))
             } else {
-                NestedMeta::Meta(Meta::Word(ident.clone()))
+                NestedMeta::Meta(Meta::Path(ident.clone()))
             };
             Some((nested_meta, &tts[1..]))
         }
@@ -352,9 +361,9 @@ ast_enum_of_structs! {
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
-    /// ## Word
+    /// ## Path
     ///
-    /// A meta word is like the `test` in `#[test]`.
+    /// A meta path is like the `test` in `#[test]`.
     ///
     /// ## List
     ///
@@ -374,13 +383,13 @@ ast_enum_of_structs! {
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Meta {
-        pub Word(Ident),
+        pub Path(Path),
         /// A structured list within an attribute, like `derive(Copy, Clone)`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub List(MetaList {
-            pub ident: Ident,
+            pub path: Path,
             pub paren_token: token::Paren,
             pub nested: Punctuated<NestedMeta, Token![,]>,
         }),
@@ -389,7 +398,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub NameValue(MetaNameValue {
-            pub ident: Ident,
+            pub path: Path,
             pub eq_token: Token![=],
             pub lit: Lit,
         }),
@@ -401,11 +410,11 @@ impl Meta {
     ///
     /// For example this would return the `test` in `#[test]`, the `derive` in
     /// `#[derive(Copy)]`, and the `path` in `#[path = "sys/windows.rs"]`.
-    pub fn name(&self) -> Ident {
+    pub fn path(&self) -> &Path {
         match *self {
-            Meta::Word(ref meta) => meta.clone(),
-            Meta::List(ref meta) => meta.ident.clone(),
-            Meta::NameValue(ref meta) => meta.ident.clone(),
+            Meta::Path(ref path) => path,
+            Meta::List(ref meta) => &meta.path,
+            Meta::NameValue(ref meta) => &meta.path,
         }
     }
 }
@@ -417,7 +426,7 @@ ast_enum_of_structs! {
     /// feature.*
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
-        /// would be a nested `Meta::Word`.
+        /// would be a nested `Meta::Path`.
         pub Meta(Meta),
 
         /// A Rust literal, like the `"new_name"` in `#[rename("new_name")]`.
@@ -538,24 +547,49 @@ pub mod parsing {
         }
     }
 
+    // Like Path::parse_mod_style but accepts keywords in the path.
+    fn parse_meta_path(input: ParseStream) -> Result<Path> {
+        Ok(Path {
+            leading_colon: input.parse()?,
+            segments: {
+                let mut segments = Punctuated::new();
+                while input.peek(Ident::peek_any) {
+                    let ident = Ident::parse_any(input)?;
+                    segments.push_value(PathSegment::from(ident));
+                    if !input.peek(Token![::]) {
+                        break;
+                    }
+                    let punct = input.parse()?;
+                    segments.push_punct(punct);
+                }
+                if segments.is_empty() {
+                    return Err(input.error("expected path"));
+                } else if segments.trailing_punct() {
+                    return Err(input.error("expected path segment"));
+                }
+                segments
+            },
+        })
+    }
+
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.call(Ident::parse_any)?;
-            parse_meta_after_ident(ident, input)
+            let path = input.call(parse_meta_path)?;
+            parse_meta_after_path(path, input)
         }
     }
 
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.call(Ident::parse_any)?;
-            parse_meta_list_after_ident(ident, input)
+            let path = input.call(parse_meta_path)?;
+            parse_meta_list_after_path(path, input)
         }
     }
 
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident = input.call(Ident::parse_any)?;
-            parse_meta_name_value_after_ident(ident, input)
+            let path = input.call(parse_meta_path)?;
+            parse_meta_name_value_after_path(path, input)
         }
     }
 
@@ -571,31 +605,28 @@ pub mod parsing {
         }
     }
 
-    pub fn parse_meta_after_ident(ident: Ident, input: ParseStream) -> Result<Meta> {
+    pub fn parse_meta_after_path(path: Path, input: ParseStream) -> Result<Meta> {
         if input.peek(token::Paren) {
-            parse_meta_list_after_ident(ident, input).map(Meta::List)
+            parse_meta_list_after_path(path, input).map(Meta::List)
         } else if input.peek(Token![=]) {
-            parse_meta_name_value_after_ident(ident, input).map(Meta::NameValue)
+            parse_meta_name_value_after_path(path, input).map(Meta::NameValue)
         } else {
-            Ok(Meta::Word(ident))
+            Ok(Meta::Path(path))
         }
     }
 
-    fn parse_meta_list_after_ident(ident: Ident, input: ParseStream) -> Result<MetaList> {
+    fn parse_meta_list_after_path(path: Path, input: ParseStream) -> Result<MetaList> {
         let content;
         Ok(MetaList {
-            ident: ident,
+            path: path,
             paren_token: parenthesized!(content in input),
             nested: content.parse_terminated(NestedMeta::parse)?,
         })
     }
 
-    fn parse_meta_name_value_after_ident(
-        ident: Ident,
-        input: ParseStream,
-    ) -> Result<MetaNameValue> {
+    fn parse_meta_name_value_after_path(path: Path, input: ParseStream) -> Result<MetaNameValue> {
         Ok(MetaNameValue {
-            ident: ident,
+            path: path,
             eq_token: input.parse()?,
             lit: input.parse()?,
         })
@@ -623,7 +654,7 @@ mod printing {
 
     impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.ident.to_tokens(tokens);
+            self.path.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.nested.to_tokens(tokens);
             })
@@ -632,7 +663,7 @@ mod printing {
 
     impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.ident.to_tokens(tokens);
+            self.path.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.lit.to_tokens(tokens);
         }
