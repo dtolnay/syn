@@ -70,15 +70,11 @@
 #[macro_export(local_inner_macros)]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {
-        $crate::parse_quote::parse($crate::export::From::from(quote_impl!($($tt)*)))
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! quote_impl {
-    ($($tt:tt)*) => {
-        $crate::export::quote::quote!($($tt)*)
+        $crate::parse_quote::parse(
+            $crate::export::From::from(
+                $crate::export::quote::quote!($($tt)*)
+            )
+        )
     };
 }
 
