@@ -25,7 +25,6 @@ use std::fmt::{self, Debug};
 #[cfg(any(feature = "full", feature = "derive"))]
 use std::iter;
 use std::iter::FromIterator;
-use std::marker::PhantomData;
 use std::ops::{Index, IndexMut};
 use std::option;
 use std::slice;
@@ -411,7 +410,7 @@ impl<T, P> Extend<Pair<T, P>> for Punctuated<T, P> {
 
 impl<T, P> IntoIterator for Punctuated<T, P> {
     type Item = T;
-    type IntoIter = IntoIter<T, P>;
+    type IntoIter = IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         let mut elements = Vec::with_capacity(self.len());
@@ -420,7 +419,6 @@ impl<T, P> IntoIterator for Punctuated<T, P> {
 
         IntoIter {
             inner: elements.into_iter(),
-            marker: PhantomData,
         }
     }
 }
@@ -547,14 +545,11 @@ impl<T, P> ExactSizeIterator for IntoPairs<T, P> {
 ///
 /// [module documentation]: self
 #[derive(Clone)]
-pub struct IntoIter<T, P> {
+pub struct IntoIter<T> {
     inner: vec::IntoIter<T>,
-
-    // TODO: remove P type parameter in the next breaking change
-    marker: PhantomData<P>,
 }
 
-impl<T, P> Iterator for IntoIter<T, P> {
+impl<T> Iterator for IntoIter<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -562,7 +557,7 @@ impl<T, P> Iterator for IntoIter<T, P> {
     }
 }
 
-impl<T, P> ExactSizeIterator for IntoIter<T, P> {
+impl<T> ExactSizeIterator for IntoIter<T> {
     fn len(&self) -> usize {
         self.inner.len()
     }
