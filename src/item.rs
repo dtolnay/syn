@@ -709,7 +709,7 @@ ast_struct! {
         pub generics: Generics,
         pub paren_token: token::Paren,
         pub inputs: Punctuated<FnArg, Token![,]>,
-        pub variadic: Option<Token![...]>,
+        pub variadic: Option<Variadic>,
         pub output: ReturnType,
     }
 }
@@ -732,6 +732,23 @@ ast_enum_of_structs! {
 
         /// A function argument accepted by pattern and type.
         pub Typed(PatType),
+    }
+}
+
+ast_struct! {
+    /// The variadic argument of a foreign function.
+    ///
+    /// ```rust
+    /// extern "C" {
+    ///     fn printf(format: *const c_char, ...) -> c_int;
+    ///     //                               ^^^
+    /// }
+    /// ```
+    ///
+    /// *This type is available if Syn is built with the `"full"` feature.*
+    pub struct Variadic {
+        pub attrs: Vec<Attribute>,
+        pub dots: Token![...],
     }
 }
 
@@ -1092,10 +1109,15 @@ pub mod parsing {
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic = inputs.last().as_ref().and_then(get_variadic);
 
-            fn get_variadic(input: &&FnArg) -> Option<Token![...]> {
+            fn get_variadic(input: &&FnArg) -> Option<Variadic> {
                 if let FnArg::Typed(PatType { ty, .. }) = input {
                     if let Type::Verbatim(TypeVerbatim { tokens }) = &**ty {
-                        return parse2(tokens.clone()).ok();
+                        if let Ok(dots) = parse2(tokens.clone()) {
+                            return Some(Variadic {
+                                attrs: Vec::new(),
+                                dots,
+                            });
+                        }
                     }
                 }
                 None
@@ -1149,28 +1171,7 @@ pub mod parsing {
                 }
             }
 
-            Ok(FnArg::Typed(PatType {
-                attrs: attrs,
-                pat: input.parse()?,
-                colon_token: input.parse()?,
-                ty: Box::new(match input.parse::<Option<Token![...]>>()? {
-                    Some(dot3) => {
-                        let args = vec![
-                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                            TokenTree::Punct(Punct::new('.', Spacing::Alone)),
-                        ];
-                        let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
-                            |(mut arg, span)| {
-                                arg.set_span(*span);
-                                arg
-                            },
-                        ));
-                        Type::Verbatim(TypeVerbatim { tokens: tokens })
-                    }
-                    None => input.parse()?,
-                }),
-            }))
+            input.call(fn_arg_typed).map(FnArg::Typed)
         }
     }
 
@@ -1189,6 +1190,31 @@ pub mod parsing {
                 self_token: input.parse()?,
             })
         }
+    }
+
+    fn fn_arg_typed(input: ParseStream) -> Result<PatType> {
+        Ok(PatType {
+            attrs: Vec::new(),
+            pat: input.parse()?,
+            colon_token: input.parse()?,
+            ty: Box::new(match input.parse::<Option<Token![...]>>()? {
+                Some(dot3) => {
+                    let args = vec![
+                        TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                        TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                        TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+                    ];
+                    let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
+                        |(mut arg, span)| {
+                            arg.set_span(*span);
+                            arg
+                        },
+                    ));
+                    Type::Verbatim(TypeVerbatim { tokens: tokens })
+                }
+                None => input.parse()?,
+            }),
+        })
     }
 
     impl Parse for ItemMod {
@@ -1307,18 +1333,24 @@ pub mod parsing {
             let content;
             let paren_token = parenthesized!(content in input);
             let mut inputs = Punctuated::new();
-            while !content.is_empty() && !content.peek(Token![...]) {
-                inputs.push_value(content.parse()?);
+            let mut variadic = None;
+            while !content.is_empty() {
+                let attrs = content.call(Attribute::parse_outer)?;
+
+                if let Some(dots) = content.parse()? {
+                    variadic = Some(Variadic { attrs, dots });
+                    break;
+                }
+
+                let mut arg = content.call(fn_arg_typed)?;
+                arg.attrs = attrs;
+                inputs.push_value(FnArg::Typed(arg));
                 if content.is_empty() {
                     break;
                 }
+
                 inputs.push_punct(content.parse()?);
             }
-            let variadic: Option<Token![...]> = if inputs.empty_or_trailing() {
-                content.parse()?
-            } else {
-                None
-            };
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
@@ -2680,6 +2712,13 @@ mod printing {
             }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for Variadic {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.dots.to_tokens(tokens);
         }
     }
 }
