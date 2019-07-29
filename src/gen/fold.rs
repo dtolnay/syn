@@ -2532,6 +2532,7 @@ pub fn fold_range_limits<V: Fold + ?Sized>(_visitor: &mut V, _i: RangeLimits) ->
 #[cfg(feature = "full")]
 pub fn fold_receiver<V: Fold + ?Sized>(_visitor: &mut V, _i: Receiver) -> Receiver {
     Receiver {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         reference: (_i.reference).map(|it| {
             (
                 Token ! [ & ](tokens_helper(_visitor, &(it).0.spans)),

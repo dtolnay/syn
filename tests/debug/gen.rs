@@ -4855,6 +4855,9 @@ impl Debug for Lite<syn::Receiver> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Receiver");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.reference {
             #[derive(RefCast)]
             #[repr(transparent)]

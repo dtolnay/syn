@@ -2846,6 +2846,9 @@ pub fn visit_range_limits_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut R
 }
 #[cfg(feature = "full")]
 pub fn visit_receiver_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Receiver) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     if let Some(ref mut it) = _i.reference {
         tokens_helper(_visitor, &mut (it).0.spans);
         if let Some(ref mut it) = (it).1 {

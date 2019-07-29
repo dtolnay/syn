@@ -4708,6 +4708,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "reference": {
           "option": {
             "tuple": [
