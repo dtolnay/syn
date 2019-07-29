@@ -394,6 +394,7 @@ ast_enum_of_structs! {
         pub Reference(ExprReference #full {
             pub attrs: Vec<Attribute>,
             pub and_token: Token![&],
+            pub raw: Reserved,
             pub mutability: Option<Token![mut]>,
             pub expr: Box<Expr>,
         }),
@@ -637,6 +638,13 @@ impl PartialEq for Index {
 impl Hash for Index {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.index.hash(state);
+    }
+}
+
+ast_struct! {
+    #[derive(Default)]
+    pub struct Reserved {
+        private: (),
     }
 }
 
@@ -1288,6 +1296,7 @@ pub mod parsing {
                 Ok(Expr::Reference(ExprReference {
                     attrs: attrs,
                     and_token: input.parse()?,
+                    raw: Reserved::default(),
                     mutability: input.parse()?,
                     expr: Box::new(unary_expr(input, allow_struct)?),
                 }))
