@@ -44,10 +44,6 @@ pub trait VisitMut {
         visit_angle_bracketed_generic_arguments_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_arg_typed_mut(&mut self, i: &mut ArgTyped) {
-        visit_arg_typed_mut(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_arm_mut(&mut self, i: &mut Arm) {
         visit_arm_mut(self, i)
     }
@@ -846,12 +842,6 @@ pub fn visit_angle_bracketed_generic_arguments_mut<V: VisitMut + ?Sized>(
         _visitor.visit_generic_argument_mut(it)
     }
     tokens_helper(_visitor, &mut _i.gt_token.spans);
-}
-#[cfg(feature = "full")]
-pub fn visit_arg_typed_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ArgTyped) {
-    _visitor.visit_pat_mut(&mut _i.pat);
-    tokens_helper(_visitor, &mut _i.colon_token.spans);
-    _visitor.visit_type_mut(&mut _i.ty);
 }
 #[cfg(feature = "full")]
 pub fn visit_arm_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Arm) {
@@ -1742,7 +1732,7 @@ pub fn visit_fn_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut FnArg) 
             _visitor.visit_receiver_mut(_binding_0);
         }
         FnArg::Typed(ref mut _binding_0) => {
-            _visitor.visit_arg_typed_mut(_binding_0);
+            _visitor.visit_pat_type_mut(_binding_0);
         }
     }
 }

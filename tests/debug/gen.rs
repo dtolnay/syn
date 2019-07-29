@@ -48,15 +48,6 @@ impl Debug for Lite<syn::AngleBracketedGenericArguments> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::ArgTyped> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ArgTyped");
-        formatter.field("pat", Lite(&_val.pat));
-        formatter.field("ty", Lite(&_val.ty));
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::Arm> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;

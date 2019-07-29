@@ -51,25 +51,6 @@
       }
     },
     {
-      "ident": "ArgTyped",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "pat": {
-          "syn": "Pat"
-        },
-        "colon_token": {
-          "token": "Colon"
-        },
-        "ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
       "ident": "Arm",
       "features": {
         "any": [
@@ -2177,7 +2158,7 @@
         ],
         "Typed": [
           {
-            "syn": "ArgTyped"
+            "syn": "PatType"
           }
         ]
       }

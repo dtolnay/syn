@@ -40,10 +40,6 @@ pub trait Fold {
         fold_angle_bracketed_generic_arguments(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_arg_typed(&mut self, i: ArgTyped) -> ArgTyped {
-        fold_arg_typed(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_arm(&mut self, i: Arm) -> Arm {
         fold_arm(self, i)
     }
@@ -845,14 +841,6 @@ pub fn fold_angle_bracketed_generic_arguments<V: Fold + ?Sized>(
     }
 }
 #[cfg(feature = "full")]
-pub fn fold_arg_typed<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgTyped) -> ArgTyped {
-    ArgTyped {
-        pat: _visitor.fold_pat(_i.pat),
-        colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
-        ty: _visitor.fold_type(_i.ty),
-    }
-}
-#[cfg(feature = "full")]
 pub fn fold_arm<V: Fold + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
     Arm {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
@@ -1581,7 +1569,7 @@ pub fn fold_file<V: Fold + ?Sized>(_visitor: &mut V, _i: File) -> File {
 pub fn fold_fn_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
     match _i {
         FnArg::Receiver(_binding_0) => FnArg::Receiver(_visitor.fold_receiver(_binding_0)),
-        FnArg::Typed(_binding_0) => FnArg::Typed(_visitor.fold_arg_typed(_binding_0)),
+        FnArg::Typed(_binding_0) => FnArg::Typed(_visitor.fold_pat_type(_binding_0)),
     }
 }
 #[cfg(feature = "full")]
