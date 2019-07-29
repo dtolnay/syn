@@ -7,7 +7,7 @@ mod features;
 use proc_macro2::{TokenStream, TokenTree};
 use quote::ToTokens;
 use std::str::FromStr;
-use syn::{FloatSuffix, IntSuffix, Lit};
+use syn::Lit;
 
 fn lit(s: &str) -> Lit {
     match TokenStream::from_str(s)
@@ -129,10 +129,10 @@ fn chars() {
 
 #[test]
 fn ints() {
-    fn test_int(s: &str, value: u64, suffix: IntSuffix) {
+    fn test_int(s: &str, value: u64, suffix: &str) {
         match lit(s) {
             Lit::Int(lit) => {
-                assert_eq!(lit.value(), value);
+                assert_eq!(lit.base10_digits().parse::<u64>().unwrap(), value);
                 assert_eq!(lit.suffix(), suffix);
                 let again = lit.into_token_stream().to_string();
                 if again != s {
@@ -143,34 +143,33 @@ fn ints() {
         }
     }
 
-    use syn::IntSuffix::*;
-    test_int("5", 5, None);
-    test_int("5u32", 5, U32);
-    test_int("5_0", 50, None);
-    test_int("5_____0_____", 50, None);
-    test_int("0x7f", 127, None);
-    test_int("0x7F", 127, None);
-    test_int("0b1001", 9, None);
-    test_int("0o73", 59, None);
-    test_int("0x7Fu8", 127, U8);
-    test_int("0b1001i8", 9, I8);
-    test_int("0o73u32", 59, U32);
-    test_int("0x__7___f_", 127, None);
-    test_int("0x__7___F_", 127, None);
-    test_int("0b_1_0__01", 9, None);
-    test_int("0o_7__3", 59, None);
-    test_int("0x_7F__u8", 127, U8);
-    test_int("0b__10__0_1i8", 9, I8);
-    test_int("0o__7__________________3u32", 59, U32);
+    test_int("5", 5, "");
+    test_int("5u32", 5, "u32");
+    test_int("5_0", 50, "");
+    test_int("5_____0_____", 50, "");
+    test_int("0x7f", 127, "");
+    test_int("0x7F", 127, "");
+    test_int("0b1001", 9, "");
+    test_int("0o73", 59, "");
+    test_int("0x7Fu8", 127, "u8");
+    test_int("0b1001i8", 9, "i8");
+    test_int("0o73u32", 59, "u32");
+    test_int("0x__7___f_", 127, "");
+    test_int("0x__7___F_", 127, "");
+    test_int("0b_1_0__01", 9, "");
+    test_int("0o_7__3", 59, "");
+    test_int("0x_7F__u8", 127, "u8");
+    test_int("0b__10__0_1i8", 9, "i8");
+    test_int("0o__7__________________3u32", 59, "u32");
 }
 
 #[test]
 fn floats() {
     #[cfg_attr(feature = "cargo-clippy", allow(float_cmp))]
-    fn test_float(s: &str, value: f64, suffix: FloatSuffix) {
+    fn test_float(s: &str, value: f64, suffix: &str) {
         match lit(s) {
             Lit::Float(lit) => {
-                assert_eq!(lit.value(), value);
+                assert_eq!(lit.base10_digits().parse::<f64>().unwrap(), value);
                 assert_eq!(lit.suffix(), suffix);
                 let again = lit.into_token_stream().to_string();
                 if again != s {
@@ -181,10 +180,9 @@ fn floats() {
         }
     }
 
-    use syn::FloatSuffix::*;
-    test_float("5.5", 5.5, None);
-    test_float("5.5E12", 5.5e12, None);
-    test_float("5.5e12", 5.5e12, None);
-    test_float("1.0__3e-12", 1.03e-12, None);
-    test_float("1.03e+12", 1.03e12, None);
+    test_float("5.5", 5.5, "");
+    test_float("5.5E12", 5.5e12, "");
+    test_float("5.5e12", 5.5e12, "");
+    test_float("1.0__3e-12", 1.03e-12, "");
+    test_float("1.03e+12", 1.03e12, "");
 }
