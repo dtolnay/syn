@@ -31,7 +31,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Lit {
+    pub enum Lit #manual_extra_traits {
         /// A UTF-8 string literal: `"foo"`.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
@@ -100,6 +100,71 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
         pub Verbatim(Literal),
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Eq for Lit {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for Lit {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Lit::Str(this), Lit::Str(other)) => this == other,
+            (Lit::ByteStr(this), Lit::ByteStr(other)) => this == other,
+            (Lit::Byte(this), Lit::Byte(other)) => this == other,
+            (Lit::Char(this), Lit::Char(other)) => this == other,
+            (Lit::Int(this), Lit::Int(other)) => this == other,
+            (Lit::Float(this), Lit::Float(other)) => this == other,
+            (Lit::Bool(this), Lit::Bool(other)) => this == other,
+            (Lit::Verbatim(this), Lit::Verbatim(other)) => {
+                this.to_string() == other.to_string()
+            }
+            _ => false,
+        }
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for Lit {
+    fn hash<H>(&self, hash: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            Lit::Str(lit) => {
+                hash.write_u8(0);
+                lit.hash(hash);
+            }
+            Lit::ByteStr(lit) => {
+                hash.write_u8(1);
+                lit.hash(hash);
+            }
+            Lit::Byte(lit) => {
+                hash.write_u8(2);
+                lit.hash(hash);
+            }
+            Lit::Char(lit) => {
+                hash.write_u8(3);
+                lit.hash(hash);
+            }
+            Lit::Int(lit) => {
+                hash.write_u8(4);
+                lit.hash(hash);
+            }
+            Lit::Float(lit) => {
+                hash.write_u8(5);
+                lit.hash(hash);
+            }
+            Lit::Bool(lit) => {
+                hash.write_u8(6);
+                lit.hash(hash);
+            }
+            Lit::Verbatim(lit) => {
+                hash.write_u8(7);
+                lit.to_string().hash(hash);
+            }
+        }
     }
 }
 
