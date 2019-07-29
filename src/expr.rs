@@ -204,7 +204,7 @@ ast_enum_of_structs! {
             pub movability: Option<Token![static]>,
             pub capture: Option<Token![move]>,
             pub or1_token: Token![|],
-            pub inputs: Punctuated<ClosureArg, Token![,]>,
+            pub inputs: Punctuated<Pat, Token![,]>,
             pub or2_token: Token![|],
             pub output: ReturnType,
             pub body: Box<Expr>,
@@ -637,20 +637,6 @@ impl PartialEq for Index {
 impl Hash for Index {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.index.hash(state);
-    }
-}
-
-#[cfg(feature = "full")]
-ast_enum_of_structs! {
-    /// An argument in a closure signature: the `n: usize` in `|n: usize| {}`.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub enum ClosureArg {
-        /// A pattern whose type is specified in the closure signature.
-        pub Typed(ArgTyped),
-
-        /// A pattern whose type is inferred.
-        pub Inferred(Pat),
     }
 }
 
@@ -2117,17 +2103,18 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn closure_arg(input: ParseStream) -> Result<ClosureArg> {
+    fn closure_arg(input: ParseStream) -> Result<Pat> {
         let pat: Pat = input.parse()?;
 
         if input.peek(Token![:]) {
-            Ok(ClosureArg::Typed(ArgTyped {
-                pat: pat,
+            Ok(Pat::Type(PatType {
+                attrs: Vec::new(),
+                pat: Box::new(pat),
                 colon_token: input.parse()?,
                 ty: input.parse()?,
             }))
         } else {
-            Ok(ClosureArg::Inferred(pat))
+            Ok(pat)
         }
     }
 
