@@ -840,6 +840,14 @@ ast_enum_of_structs! {
             pub pat: Box<Pat>,
         }),
 
+        /// The dots in a tuple or slice pattern: `[0, 1, ..]`
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Rest(PatRest {
+            pub attrs: Vec<Attribute>,
+            pub dot2_token: Token![..],
+        }),
+
         /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -2123,6 +2131,7 @@ pub mod parsing {
                 Pat::Path(pat) => pat.attrs = attrs,
                 Pat::Range(pat) => pat.attrs = attrs,
                 Pat::Reference(pat) => pat.attrs = attrs,
+                Pat::Rest(pat) => pat.attrs = attrs,
                 Pat::Slice(pat) => pat.attrs = attrs,
                 Pat::Struct(pat) => pat.attrs = attrs,
                 Pat::Tuple(pat) => pat.attrs = attrs,
@@ -3809,6 +3818,13 @@ mod printing {
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.pat.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for PatRest {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.dot2_token.to_tokens(tokens);
         }
     }
 

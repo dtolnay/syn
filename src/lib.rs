@@ -331,7 +331,7 @@ pub use crate::expr::{
 #[cfg(feature = "full")]
 pub use crate::expr::{
     Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
-    PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatReference, PatSlice, PatStruct, PatTuple,
+    PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
     PatTupleStruct, PatType, PatVerbatim, PatWild, RangeLimits, Stmt,
 };
 
