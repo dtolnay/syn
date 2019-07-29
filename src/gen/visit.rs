@@ -2686,11 +2686,17 @@ pub fn visit_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat)
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_box<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatBox) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     tokens_helper(_visitor, &_i.box_token.span);
     _visitor.visit_pat(&*_i.pat);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatIdent) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     if let Some(ref it) = _i.by_ref {
         tokens_helper(_visitor, &it.span)
     };
@@ -2705,14 +2711,23 @@ pub fn visit_pat_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_lit<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatLit) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     _visitor.visit_expr(&*_i.expr);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_macro<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatMacro) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     _visitor.visit_macro(&_i.mac);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatPath) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     if let Some(ref it) = _i.qself {
         _visitor.visit_qself(it)
     };
@@ -2720,12 +2735,18 @@ pub fn visit_pat_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_range<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatRange) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     _visitor.visit_expr(&*_i.lo);
     _visitor.visit_range_limits(&_i.limits);
     _visitor.visit_expr(&*_i.hi);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_ref<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatRef) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     tokens_helper(_visitor, &_i.and_token.spans);
     if let Some(ref it) = _i.mutability {
         tokens_helper(_visitor, &it.span)
@@ -2734,6 +2755,9 @@ pub fn visit_pat_ref<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_slice<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatSlice) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     tokens_helper(_visitor, &_i.bracket_token.span);
     for el in Punctuated::pairs(&_i.front) {
         let it = el.value();
@@ -2755,6 +2779,9 @@ pub fn visit_pat_slice<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatStruct) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.fields) {
@@ -2767,6 +2794,9 @@ pub fn visit_pat_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_tuple<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatTuple) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.front) {
         let it = el.value();
@@ -2788,6 +2818,9 @@ pub fn visit_pat_tuple_struct<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast PatTupleStruct,
 ) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     _visitor.visit_path(&_i.path);
     _visitor.visit_pat_tuple(&_i.pat);
 }
@@ -2797,6 +2830,9 @@ pub fn visit_pat_verbatim<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_wild<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatWild) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
     tokens_helper(_visitor, &_i.underscore_token.spans);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

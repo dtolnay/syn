@@ -2629,11 +2629,17 @@ pub fn visit_pat_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_box_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatBox) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     tokens_helper(_visitor, &mut _i.box_token.span);
     _visitor.visit_pat_mut(&mut *_i.pat);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatIdent) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     if let Some(ref mut it) = _i.by_ref {
         tokens_helper(_visitor, &mut it.span)
     };
@@ -2648,14 +2654,23 @@ pub fn visit_pat_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatI
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_lit_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatLit) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     _visitor.visit_expr_mut(&mut *_i.expr);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_macro_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatMacro) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     _visitor.visit_macro_mut(&mut _i.mac);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_path_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatPath) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     if let Some(ref mut it) = _i.qself {
         _visitor.visit_qself_mut(it)
     };
@@ -2663,12 +2678,18 @@ pub fn visit_pat_path_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatPa
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_range_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatRange) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     _visitor.visit_expr_mut(&mut *_i.lo);
     _visitor.visit_range_limits_mut(&mut _i.limits);
     _visitor.visit_expr_mut(&mut *_i.hi);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_ref_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatRef) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     tokens_helper(_visitor, &mut _i.and_token.spans);
     if let Some(ref mut it) = _i.mutability {
         tokens_helper(_visitor, &mut it.span)
@@ -2677,6 +2698,9 @@ pub fn visit_pat_ref_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatRef
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_slice_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatSlice) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     tokens_helper(_visitor, &mut _i.bracket_token.span);
     for mut el in Punctuated::pairs_mut(&mut _i.front) {
         let it = el.value_mut();
@@ -2698,6 +2722,9 @@ pub fn visit_pat_slice_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatS
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_struct_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatStruct) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     _visitor.visit_path_mut(&mut _i.path);
     tokens_helper(_visitor, &mut _i.brace_token.span);
     for mut el in Punctuated::pairs_mut(&mut _i.fields) {
@@ -2710,6 +2737,9 @@ pub fn visit_pat_struct_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Pat
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_tuple_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatTuple) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     tokens_helper(_visitor, &mut _i.paren_token.span);
     for mut el in Punctuated::pairs_mut(&mut _i.front) {
         let it = el.value_mut();
@@ -2728,6 +2758,9 @@ pub fn visit_pat_tuple_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatT
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_tuple_struct_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatTupleStruct) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     _visitor.visit_path_mut(&mut _i.path);
     _visitor.visit_pat_tuple_mut(&mut _i.pat);
 }
@@ -2737,6 +2770,9 @@ pub fn visit_pat_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut P
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_wild_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatWild) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     tokens_helper(_visitor, &mut _i.underscore_token.spans);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

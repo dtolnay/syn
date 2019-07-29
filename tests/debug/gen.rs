@@ -4151,11 +4151,17 @@ impl Debug for Lite<syn::Pat> {
         match _val {
             syn::Pat::Box(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Box");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("pat", Lite(&_val.pat));
                 formatter.finish()
             }
             syn::Pat::Ident(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Ident");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.by_ref {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -4201,16 +4207,25 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Lit(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Lit");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
             syn::Pat::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Macro");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("mac", Lite(&_val.mac));
                 formatter.finish()
             }
             syn::Pat::Path(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Path");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.qself {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -4232,6 +4247,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Range(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Range");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("lo", Lite(&_val.lo));
                 formatter.field("limits", Lite(&_val.limits));
                 formatter.field("hi", Lite(&_val.hi));
@@ -4239,6 +4257,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Ref(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Ref");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if let Some(val) = &_val.mutability {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -4256,6 +4277,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Slice(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Slice");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if !_val.front.is_empty() {
                     formatter.field("front", Lite(&_val.front));
                 }
@@ -4306,6 +4330,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Struct(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Struct");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("path", Lite(&_val.path));
                 if !_val.fields.is_empty() {
                     formatter.field("fields", Lite(&_val.fields));
@@ -4326,6 +4353,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Tuple(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Tuple");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 if !_val.front.is_empty() {
                     formatter.field("front", Lite(&_val.front));
                 }
@@ -4360,6 +4390,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::TupleStruct(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::TupleStruct");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.field("path", Lite(&_val.path));
                 formatter.field("pat", Lite(&_val.pat));
                 formatter.finish()
@@ -4371,6 +4404,9 @@ impl Debug for Lite<syn::Pat> {
             }
             syn::Pat::Wild(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Wild");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
                 formatter.finish()
             }
         }
@@ -4380,6 +4416,9 @@ impl Debug for Lite<syn::PatBox> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatBox");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("pat", Lite(&_val.pat));
         formatter.finish()
     }
@@ -4388,6 +4427,9 @@ impl Debug for Lite<syn::PatIdent> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatIdent");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.by_ref {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4436,6 +4478,9 @@ impl Debug for Lite<syn::PatLit> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatLit");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -4444,6 +4489,9 @@ impl Debug for Lite<syn::PatMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatMacro");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("mac", Lite(&_val.mac));
         formatter.finish()
     }
@@ -4452,6 +4500,9 @@ impl Debug for Lite<syn::PatPath> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatPath");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.qself {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4476,6 +4527,9 @@ impl Debug for Lite<syn::PatRange> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatRange");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("lo", Lite(&_val.lo));
         formatter.field("limits", Lite(&_val.limits));
         formatter.field("hi", Lite(&_val.hi));
@@ -4486,6 +4540,9 @@ impl Debug for Lite<syn::PatRef> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatRef");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.mutability {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4506,6 +4563,9 @@ impl Debug for Lite<syn::PatSlice> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatSlice");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if !_val.front.is_empty() {
             formatter.field("front", Lite(&_val.front));
         }
@@ -4559,6 +4619,9 @@ impl Debug for Lite<syn::PatStruct> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatStruct");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("path", Lite(&_val.path));
         if !_val.fields.is_empty() {
             formatter.field("fields", Lite(&_val.fields));
@@ -4582,6 +4645,9 @@ impl Debug for Lite<syn::PatTuple> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatTuple");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if !_val.front.is_empty() {
             formatter.field("front", Lite(&_val.front));
         }
@@ -4619,6 +4685,9 @@ impl Debug for Lite<syn::PatTupleStruct> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatTupleStruct");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.field("path", Lite(&_val.path));
         formatter.field("pat", Lite(&_val.pat));
         formatter.finish()
@@ -4636,6 +4705,9 @@ impl Debug for Lite<syn::PatWild> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PatWild");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.finish()
     }
 }

@@ -4163,6 +4163,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "box_token": {
           "token": "Box"
         },
@@ -4181,6 +4186,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "by_ref": {
           "option": {
             "token": "Ref"
@@ -4218,6 +4228,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "expr": {
           "box": {
             "syn": "Expr"
@@ -4233,6 +4248,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "mac": {
           "syn": "Macro"
         }
@@ -4246,6 +4266,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "qself": {
           "option": {
             "syn": "QSelf"
@@ -4264,6 +4289,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "lo": {
           "box": {
             "syn": "Expr"
@@ -4287,6 +4317,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "and_token": {
           "token": "And"
         },
@@ -4310,6 +4345,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "bracket_token": {
           "group": "Bracket"
         },
@@ -4356,6 +4396,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "path": {
           "syn": "Path"
         },
@@ -4385,6 +4430,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "paren_token": {
           "group": "Paren"
         },
@@ -4424,6 +4474,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "path": {
           "syn": "Path"
         },
@@ -4453,6 +4508,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "underscore_token": {
           "token": "Underscore"
         }
