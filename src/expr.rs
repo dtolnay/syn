@@ -899,6 +899,16 @@ ast_enum_of_structs! {
             pub pat: PatTuple,
         }),
 
+        /// A type ascription pattern: `foo: f64`.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Type(PatType {
+            pub attrs: Vec<Attribute>,
+            pub pat: Box<Pat>,
+            pub colon_token: Token![:],
+            pub ty: Type,
+        }),
+
         /// Tokens in pattern position not interpreted by Syn.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
@@ -3739,6 +3749,15 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
             self.pat.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for PatType {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.pat.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
         }
     }
 
