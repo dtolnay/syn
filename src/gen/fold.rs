@@ -582,6 +582,10 @@ pub trait Fold {
         fold_pat_reference(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_pat_rest(&mut self, i: PatRest) -> PatRest {
+        fold_pat_rest(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_pat_slice(&mut self, i: PatSlice) -> PatSlice {
         fold_pat_slice(self, i)
     }
@@ -2320,6 +2324,7 @@ pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
         Pat::Path(_binding_0) => Pat::Path(_visitor.fold_pat_path(_binding_0)),
         Pat::Range(_binding_0) => Pat::Range(_visitor.fold_pat_range(_binding_0)),
         Pat::Reference(_binding_0) => Pat::Reference(_visitor.fold_pat_reference(_binding_0)),
+        Pat::Rest(_binding_0) => Pat::Rest(_visitor.fold_pat_rest(_binding_0)),
         Pat::Slice(_binding_0) => Pat::Slice(_visitor.fold_pat_slice(_binding_0)),
         Pat::Struct(_binding_0) => Pat::Struct(_visitor.fold_pat_struct(_binding_0)),
         Pat::Tuple(_binding_0) => Pat::Tuple(_visitor.fold_pat_tuple(_binding_0)),
@@ -2395,15 +2400,18 @@ pub fn fold_pat_reference<V: Fold + ?Sized>(_visitor: &mut V, _i: PatReference) 
     }
 }
 #[cfg(feature = "full")]
+pub fn fold_pat_rest<V: Fold + ?Sized>(_visitor: &mut V, _i: PatRest) -> PatRest {
+    PatRest {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        dot2_token: Token![..](tokens_helper(_visitor, &_i.dot2_token.spans)),
+    }
+}
+#[cfg(feature = "full")]
 pub fn fold_pat_slice<V: Fold + ?Sized>(_visitor: &mut V, _i: PatSlice) -> PatSlice {
     PatSlice {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         bracket_token: Bracket(tokens_helper(_visitor, &_i.bracket_token.span)),
-        front: FoldHelper::lift(_i.front, |it| _visitor.fold_pat(it)),
-        middle: (_i.middle).map(|it| Box::new(_visitor.fold_pat(*it))),
-        dot2_token: (_i.dot2_token).map(|it| Token![..](tokens_helper(_visitor, &it.spans))),
-        comma_token: (_i.comma_token).map(|it| Token ! [ , ](tokens_helper(_visitor, &it.spans))),
-        back: FoldHelper::lift(_i.back, |it| _visitor.fold_pat(it)),
+        elems: FoldHelper::lift(_i.elems, |it| _visitor.fold_pat(it)),
     }
 }
 #[cfg(feature = "full")]
@@ -2421,10 +2429,7 @@ pub fn fold_pat_tuple<V: Fold + ?Sized>(_visitor: &mut V, _i: PatTuple) -> PatTu
     PatTuple {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
-        front: FoldHelper::lift(_i.front, |it| _visitor.fold_pat(it)),
-        dot2_token: (_i.dot2_token).map(|it| Token![..](tokens_helper(_visitor, &it.spans))),
-        comma_token: (_i.comma_token).map(|it| Token ! [ , ](tokens_helper(_visitor, &it.spans))),
-        back: FoldHelper::lift(_i.back, |it| _visitor.fold_pat(it)),
+        elems: FoldHelper::lift(_i.elems, |it| _visitor.fold_pat(it)),
     }
 }
 #[cfg(feature = "full")]

@@ -580,6 +580,10 @@ pub trait Visit<'ast> {
         visit_pat_reference(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_pat_rest(&mut self, i: &'ast PatRest) {
+        visit_pat_rest(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_pat_slice(&mut self, i: &'ast PatSlice) {
         visit_pat_slice(self, i)
     }
@@ -2650,6 +2654,9 @@ pub fn visit_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat)
         Pat::Reference(ref _binding_0) => {
             _visitor.visit_pat_reference(_binding_0);
         }
+        Pat::Rest(ref _binding_0) => {
+            _visitor.visit_pat_rest(_binding_0);
+        }
         Pat::Slice(ref _binding_0) => {
             _visitor.visit_pat_slice(_binding_0);
         }
@@ -2746,25 +2753,19 @@ pub fn visit_pat_reference<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_pat(&*_i.pat);
 }
 #[cfg(feature = "full")]
+pub fn visit_pat_rest<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatRest) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    tokens_helper(_visitor, &_i.dot2_token.spans);
+}
+#[cfg(feature = "full")]
 pub fn visit_pat_slice<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatSlice) {
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.bracket_token.span);
-    for el in Punctuated::pairs(&_i.front) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
-    if let Some(ref it) = _i.middle {
-        _visitor.visit_pat(&**it)
-    };
-    if let Some(ref it) = _i.dot2_token {
-        tokens_helper(_visitor, &it.spans)
-    };
-    if let Some(ref it) = _i.comma_token {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.back) {
+    for el in Punctuated::pairs(&_i.elems) {
         let it = el.value();
         _visitor.visit_pat(it)
     }
@@ -2790,17 +2791,7 @@ pub fn visit_pat_tuple<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.paren_token.span);
-    for el in Punctuated::pairs(&_i.front) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
-    if let Some(ref it) = _i.dot2_token {
-        tokens_helper(_visitor, &it.spans)
-    };
-    if let Some(ref it) = _i.comma_token {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.back) {
+    for el in Punctuated::pairs(&_i.elems) {
         let it = el.value();
         _visitor.visit_pat(it)
     }

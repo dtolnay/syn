@@ -4089,6 +4089,11 @@
             "syn": "PatReference"
           }
         ],
+        "Rest": [
+          {
+            "syn": "PatRest"
+          }
+        ],
         "Slice": [
           {
             "syn": "PatSlice"
@@ -4309,6 +4314,24 @@
       }
     },
     {
+      "ident": "PatRest",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "dot2_token": {
+          "token": "Dot2"
+        }
+      }
+    },
+    {
       "ident": "PatSlice",
       "features": {
         "any": [
@@ -4324,32 +4347,7 @@
         "bracket_token": {
           "group": "Bracket"
         },
-        "front": {
-          "punctuated": {
-            "element": {
-              "syn": "Pat"
-            },
-            "punct": "Comma"
-          }
-        },
-        "middle": {
-          "option": {
-            "box": {
-              "syn": "Pat"
-            }
-          }
-        },
-        "dot2_token": {
-          "option": {
-            "token": "Dot2"
-          }
-        },
-        "comma_token": {
-          "option": {
-            "token": "Comma"
-          }
-        },
-        "back": {
+        "elems": {
           "punctuated": {
             "element": {
               "syn": "Pat"
@@ -4409,25 +4407,7 @@
         "paren_token": {
           "group": "Paren"
         },
-        "front": {
-          "punctuated": {
-            "element": {
-              "syn": "Pat"
-            },
-            "punct": "Comma"
-          }
-        },
-        "dot2_token": {
-          "option": {
-            "token": "Dot2"
-          }
-        },
-        "comma_token": {
-          "option": {
-            "token": "Comma"
-          }
-        },
-        "back": {
+        "elems": {
           "punctuated": {
             "element": {
               "syn": "Pat"

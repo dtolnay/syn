@@ -4252,56 +4252,20 @@ impl Debug for Lite<syn::Pat> {
                 formatter.field("pat", Lite(&_val.pat));
                 formatter.finish()
             }
+            syn::Pat::Rest(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Rest");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.finish()
+            }
             syn::Pat::Slice(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Slice");
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if !_val.front.is_empty() {
-                    formatter.field("front", Lite(&_val.front));
-                }
-                if let Some(val) = &_val.middle {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(Box<syn::Pat>);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            let _val = &self.0;
-                            formatter.write_str("(")?;
-                            Debug::fmt(Lite(_val), formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("middle", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.dot2_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Dot2);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("dot2_token", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.comma_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Comma);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("comma_token", Print::ref_cast(val));
-                }
-                if !_val.back.is_empty() {
-                    formatter.field("back", Lite(&_val.back));
+                if !_val.elems.is_empty() {
+                    formatter.field("elems", Lite(&_val.elems));
                 }
                 formatter.finish()
             }
@@ -4333,35 +4297,8 @@ impl Debug for Lite<syn::Pat> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if !_val.front.is_empty() {
-                    formatter.field("front", Lite(&_val.front));
-                }
-                if let Some(val) = &_val.dot2_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Dot2);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("dot2_token", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.comma_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Comma);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("comma_token", Print::ref_cast(val));
-                }
-                if !_val.back.is_empty() {
-                    formatter.field("back", Lite(&_val.back));
+                if !_val.elems.is_empty() {
+                    formatter.field("elems", Lite(&_val.elems));
                 }
                 formatter.finish()
             }
@@ -4545,6 +4482,16 @@ impl Debug for Lite<syn::PatReference> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::PatRest> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("PatRest");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::PatSlice> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -4552,51 +4499,8 @@ impl Debug for Lite<syn::PatSlice> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if !_val.front.is_empty() {
-            formatter.field("front", Lite(&_val.front));
-        }
-        if let Some(val) = &_val.middle {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(Box<syn::Pat>);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("middle", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.dot2_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Dot2);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("dot2_token", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.comma_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Comma);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("comma_token", Print::ref_cast(val));
-        }
-        if !_val.back.is_empty() {
-            formatter.field("back", Lite(&_val.back));
+        if !_val.elems.is_empty() {
+            formatter.field("elems", Lite(&_val.elems));
         }
         formatter.finish()
     }
@@ -4634,35 +4538,8 @@ impl Debug for Lite<syn::PatTuple> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if !_val.front.is_empty() {
-            formatter.field("front", Lite(&_val.front));
-        }
-        if let Some(val) = &_val.dot2_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Dot2);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("dot2_token", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.comma_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Comma);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("comma_token", Print::ref_cast(val));
-        }
-        if !_val.back.is_empty() {
-            formatter.field("back", Lite(&_val.back));
+        if !_val.elems.is_empty() {
+            formatter.field("elems", Lite(&_val.elems));
         }
         formatter.finish()
     }

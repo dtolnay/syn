@@ -583,6 +583,10 @@ pub trait VisitMut {
         visit_pat_reference_mut(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_pat_rest_mut(&mut self, i: &mut PatRest) {
+        visit_pat_rest_mut(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_pat_slice_mut(&mut self, i: &mut PatSlice) {
         visit_pat_slice_mut(self, i)
     }
@@ -2593,6 +2597,9 @@ pub fn visit_pat_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
         Pat::Reference(ref mut _binding_0) => {
             _visitor.visit_pat_reference_mut(_binding_0);
         }
+        Pat::Rest(ref mut _binding_0) => {
+            _visitor.visit_pat_rest_mut(_binding_0);
+        }
         Pat::Slice(ref mut _binding_0) => {
             _visitor.visit_pat_slice_mut(_binding_0);
         }
@@ -2686,25 +2693,19 @@ pub fn visit_pat_reference_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut 
     _visitor.visit_pat_mut(&mut *_i.pat);
 }
 #[cfg(feature = "full")]
+pub fn visit_pat_rest_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatRest) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.dot2_token.spans);
+}
+#[cfg(feature = "full")]
 pub fn visit_pat_slice_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatSlice) {
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
     }
     tokens_helper(_visitor, &mut _i.bracket_token.span);
-    for mut el in Punctuated::pairs_mut(&mut _i.front) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
-    if let Some(ref mut it) = _i.middle {
-        _visitor.visit_pat_mut(&mut **it)
-    };
-    if let Some(ref mut it) = _i.dot2_token {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    if let Some(ref mut it) = _i.comma_token {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.back) {
+    for mut el in Punctuated::pairs_mut(&mut _i.elems) {
         let it = el.value_mut();
         _visitor.visit_pat_mut(it)
     }
@@ -2730,17 +2731,7 @@ pub fn visit_pat_tuple_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatT
         _visitor.visit_attribute_mut(it)
     }
     tokens_helper(_visitor, &mut _i.paren_token.span);
-    for mut el in Punctuated::pairs_mut(&mut _i.front) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
-    if let Some(ref mut it) = _i.dot2_token {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    if let Some(ref mut it) = _i.comma_token {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.back) {
+    for mut el in Punctuated::pairs_mut(&mut _i.elems) {
         let it = el.value_mut();
         _visitor.visit_pat_mut(it)
     }
