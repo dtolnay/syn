@@ -568,6 +568,10 @@ pub trait Visit<'ast> {
         visit_pat_macro(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_pat_or(&mut self, i: &'ast PatOr) {
+        visit_pat_or(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_pat_path(&mut self, i: &'ast PatPath) {
         visit_pat_path(self, i)
     }
@@ -853,13 +857,7 @@ pub fn visit_arm<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Arm)
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.leading_vert {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.pats) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
+    _visitor.visit_pat(&_i.pat);
     if let Some(ref it) = _i.guard {
         tokens_helper(_visitor, &(it).0.span);
         _visitor.visit_expr(&*(it).1);
@@ -1393,13 +1391,7 @@ pub fn visit_expr_for_loop<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: 
         _visitor.visit_label(it)
     };
     tokens_helper(_visitor, &_i.for_token.span);
-    if let Some(ref it) = _i.leading_vert {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.pats) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
+    _visitor.visit_pat(&_i.pat);
     tokens_helper(_visitor, &_i.in_token.span);
     _visitor.visit_expr(&*_i.expr);
     _visitor.visit_block(&_i.body);
@@ -1449,13 +1441,7 @@ pub fn visit_expr_let<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.let_token.span);
-    if let Some(ref it) = _i.leading_vert {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.pats) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
+    _visitor.visit_pat(&_i.pat);
     tokens_helper(_visitor, &_i.eq_token.spans);
     _visitor.visit_expr(&*_i.expr);
 }
@@ -2493,13 +2479,7 @@ pub fn visit_local<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lo
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.let_token.span);
-    if let Some(ref it) = _i.leading_vert {
-        tokens_helper(_visitor, &it.spans)
-    };
-    for el in Punctuated::pairs(&_i.pats) {
-        let it = el.value();
-        _visitor.visit_pat(it)
-    }
+    _visitor.visit_pat(&_i.pat);
     if let Some(ref it) = _i.ty {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_type(&*(it).1);
@@ -2645,6 +2625,9 @@ pub fn visit_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat)
         Pat::Macro(ref _binding_0) => {
             _visitor.visit_pat_macro(_binding_0);
         }
+        Pat::Or(ref _binding_0) => {
+            _visitor.visit_pat_or(_binding_0);
+        }
         Pat::Path(ref _binding_0) => {
             _visitor.visit_pat_path(_binding_0);
         }
@@ -2718,6 +2701,19 @@ pub fn visit_pat_macro<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         _visitor.visit_attribute(it)
     }
     _visitor.visit_macro(&_i.mac);
+}
+#[cfg(feature = "full")]
+pub fn visit_pat_or<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatOr) {
+    for it in &_i.attrs {
+        _visitor.visit_attribute(it)
+    }
+    if let Some(ref it) = _i.leading_vert {
+        tokens_helper(_visitor, &it.spans)
+    };
+    for el in Punctuated::pairs(&_i.cases) {
+        let it = el.value();
+        _visitor.visit_pat(it)
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast PatPath) {

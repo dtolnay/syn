@@ -570,6 +570,10 @@ pub trait Fold {
         fold_pat_macro(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_pat_or(&mut self, i: PatOr) -> PatOr {
+        fold_pat_or(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_pat_path(&mut self, i: PatPath) -> PatPath {
         fold_pat_path(self, i)
     }
@@ -852,8 +856,7 @@ pub fn fold_angle_bracketed_generic_arguments<V: Fold + ?Sized>(
 pub fn fold_arm<V: Fold + ?Sized>(_visitor: &mut V, _i: Arm) -> Arm {
     Arm {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
-        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
+        pat: _visitor.fold_pat(_i.pat),
         guard: (_i.guard).map(|it| {
             (
                 Token![if](tokens_helper(_visitor, &(it).0.span)),
@@ -1275,8 +1278,7 @@ pub fn fold_expr_for_loop<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprForLoop) -
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         label: (_i.label).map(|it| _visitor.fold_label(it)),
         for_token: Token![for](tokens_helper(_visitor, &_i.for_token.span)),
-        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
-        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
+        pat: _visitor.fold_pat(_i.pat),
         in_token: Token![in](tokens_helper(_visitor, &_i.in_token.span)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
         body: _visitor.fold_block(_i.body),
@@ -1328,8 +1330,7 @@ pub fn fold_expr_let<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprLet) -> ExprLet
     ExprLet {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
-        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
-        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
+        pat: _visitor.fold_pat(_i.pat),
         eq_token: Token ! [ = ](tokens_helper(_visitor, &_i.eq_token.spans)),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
     }
@@ -2197,8 +2198,7 @@ pub fn fold_local<V: Fold + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
     Local {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
-        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
-        pats: FoldHelper::lift(_i.pats, |it| _visitor.fold_pat(it)),
+        pat: _visitor.fold_pat(_i.pat),
         ty: (_i.ty).map(|it| {
             (
                 Token ! [ : ](tokens_helper(_visitor, &(it).0.spans)),
@@ -2322,6 +2322,7 @@ pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
         Pat::Ident(_binding_0) => Pat::Ident(_visitor.fold_pat_ident(_binding_0)),
         Pat::Lit(_binding_0) => Pat::Lit(_visitor.fold_pat_lit(_binding_0)),
         Pat::Macro(_binding_0) => Pat::Macro(_visitor.fold_pat_macro(_binding_0)),
+        Pat::Or(_binding_0) => Pat::Or(_visitor.fold_pat_or(_binding_0)),
         Pat::Path(_binding_0) => Pat::Path(_visitor.fold_pat_path(_binding_0)),
         Pat::Range(_binding_0) => Pat::Range(_visitor.fold_pat_range(_binding_0)),
         Pat::Reference(_binding_0) => Pat::Reference(_visitor.fold_pat_reference(_binding_0)),
@@ -2372,6 +2373,14 @@ pub fn fold_pat_macro<V: Fold + ?Sized>(_visitor: &mut V, _i: PatMacro) -> PatMa
     PatMacro {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         mac: _visitor.fold_macro(_i.mac),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_pat_or<V: Fold + ?Sized>(_visitor: &mut V, _i: PatOr) -> PatOr {
+    PatOr {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        leading_vert: (_i.leading_vert).map(|it| Token ! [ | ](tokens_helper(_visitor, &it.spans))),
+        cases: FoldHelper::lift(_i.cases, |it| _visitor.fold_pat(it)),
     }
 }
 #[cfg(feature = "full")]

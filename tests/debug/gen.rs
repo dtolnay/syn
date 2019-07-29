@@ -55,21 +55,7 @@ impl Debug for Lite<syn::Arm> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if let Some(val) = &_val.leading_vert {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Or);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("leading_vert", Print::ref_cast(val));
-        }
-        if !_val.pats.is_empty() {
-            formatter.field("pats", Lite(&_val.pats));
-        }
+        formatter.field("pat", Lite(&_val.pat));
         if let Some(val) = &_val.guard {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -719,21 +705,7 @@ impl Debug for Lite<syn::Expr> {
                     }
                     formatter.field("label", Print::ref_cast(val));
                 }
-                if let Some(val) = &_val.leading_vert {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Or);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("leading_vert", Print::ref_cast(val));
-                }
-                if !_val.pats.is_empty() {
-                    formatter.field("pats", Lite(&_val.pats));
-                }
+                formatter.field("pat", Lite(&_val.pat));
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.field("body", Lite(&_val.body));
                 formatter.finish()
@@ -794,21 +766,7 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if let Some(val) = &_val.leading_vert {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Or);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("leading_vert", Print::ref_cast(val));
-                }
-                if !_val.pats.is_empty() {
-                    formatter.field("pats", Lite(&_val.pats));
-                }
+                formatter.field("pat", Lite(&_val.pat));
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
@@ -1465,21 +1423,7 @@ impl Debug for Lite<syn::ExprForLoop> {
             }
             formatter.field("label", Print::ref_cast(val));
         }
-        if let Some(val) = &_val.leading_vert {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Or);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("leading_vert", Print::ref_cast(val));
-        }
-        if !_val.pats.is_empty() {
-            formatter.field("pats", Lite(&_val.pats));
-        }
+        formatter.field("pat", Lite(&_val.pat));
         formatter.field("expr", Lite(&_val.expr));
         formatter.field("body", Lite(&_val.body));
         formatter.finish()
@@ -1555,21 +1499,7 @@ impl Debug for Lite<syn::ExprLet> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if let Some(val) = &_val.leading_vert {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Or);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("leading_vert", Print::ref_cast(val));
-        }
-        if !_val.pats.is_empty() {
-            formatter.field("pats", Lite(&_val.pats));
-        }
+        formatter.field("pat", Lite(&_val.pat));
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
@@ -3871,21 +3801,7 @@ impl Debug for Lite<syn::Local> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if let Some(val) = &_val.leading_vert {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Or);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("leading_vert", Print::ref_cast(val));
-        }
-        if !_val.pats.is_empty() {
-            formatter.field("pats", Lite(&_val.pats));
-        }
+        formatter.field("pat", Lite(&_val.pat));
         if let Some(val) = &_val.ty {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4198,6 +4114,28 @@ impl Debug for Lite<syn::Pat> {
                 formatter.field("mac", Lite(&_val.mac));
                 formatter.finish()
             }
+            syn::Pat::Or(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Or");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if let Some(val) = &_val.leading_vert {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Or);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("leading_vert", Print::ref_cast(val));
+                }
+                if !_val.cases.is_empty() {
+                    formatter.field("cases", Lite(&_val.cases));
+                }
+                formatter.finish()
+            }
             syn::Pat::Path(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Path");
                 if !_val.attrs.is_empty() {
@@ -4416,6 +4354,31 @@ impl Debug for Lite<syn::PatMacro> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("mac", Lite(&_val.mac));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::PatOr> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("PatOr");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.leading_vert {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Or);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("leading_vert", Print::ref_cast(val));
+        }
+        if !_val.cases.is_empty() {
+            formatter.field("cases", Lite(&_val.cases));
+        }
         formatter.finish()
     }
 }

@@ -571,6 +571,10 @@ pub trait VisitMut {
         visit_pat_macro_mut(self, i)
     }
     #[cfg(feature = "full")]
+    fn visit_pat_or_mut(&mut self, i: &mut PatOr) {
+        visit_pat_or_mut(self, i)
+    }
+    #[cfg(feature = "full")]
     fn visit_pat_path_mut(&mut self, i: &mut PatPath) {
         visit_pat_path_mut(self, i)
     }
@@ -856,13 +860,7 @@ pub fn visit_arm_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Arm) {
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
     }
-    if let Some(ref mut it) = _i.leading_vert {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
+    _visitor.visit_pat_mut(&mut _i.pat);
     if let Some(ref mut it) = _i.guard {
         tokens_helper(_visitor, &mut (it).0.span);
         _visitor.visit_expr_mut(&mut *(it).1);
@@ -1384,13 +1382,7 @@ pub fn visit_expr_for_loop_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut 
         _visitor.visit_label_mut(it)
     };
     tokens_helper(_visitor, &mut _i.for_token.span);
-    if let Some(ref mut it) = _i.leading_vert {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
+    _visitor.visit_pat_mut(&mut _i.pat);
     tokens_helper(_visitor, &mut _i.in_token.span);
     _visitor.visit_expr_mut(&mut *_i.expr);
     _visitor.visit_block_mut(&mut _i.body);
@@ -1440,13 +1432,7 @@ pub fn visit_expr_let_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ExprL
         _visitor.visit_attribute_mut(it)
     }
     tokens_helper(_visitor, &mut _i.let_token.span);
-    if let Some(ref mut it) = _i.leading_vert {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
+    _visitor.visit_pat_mut(&mut _i.pat);
     tokens_helper(_visitor, &mut _i.eq_token.spans);
     _visitor.visit_expr_mut(&mut *_i.expr);
 }
@@ -2442,13 +2428,7 @@ pub fn visit_local_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
         _visitor.visit_attribute_mut(it)
     }
     tokens_helper(_visitor, &mut _i.let_token.span);
-    if let Some(ref mut it) = _i.leading_vert {
-        tokens_helper(_visitor, &mut it.spans)
-    };
-    for mut el in Punctuated::pairs_mut(&mut _i.pats) {
-        let it = el.value_mut();
-        _visitor.visit_pat_mut(it)
-    }
+    _visitor.visit_pat_mut(&mut _i.pat);
     if let Some(ref mut it) = _i.ty {
         tokens_helper(_visitor, &mut (it).0.spans);
         _visitor.visit_type_mut(&mut *(it).1);
@@ -2588,6 +2568,9 @@ pub fn visit_pat_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
         Pat::Macro(ref mut _binding_0) => {
             _visitor.visit_pat_macro_mut(_binding_0);
         }
+        Pat::Or(ref mut _binding_0) => {
+            _visitor.visit_pat_or_mut(_binding_0);
+        }
         Pat::Path(ref mut _binding_0) => {
             _visitor.visit_pat_path_mut(_binding_0);
         }
@@ -2661,6 +2644,19 @@ pub fn visit_pat_macro_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatM
         _visitor.visit_attribute_mut(it)
     }
     _visitor.visit_macro_mut(&mut _i.mac);
+}
+#[cfg(feature = "full")]
+pub fn visit_pat_or_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatOr) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    if let Some(ref mut it) = _i.leading_vert {
+        tokens_helper(_visitor, &mut it.spans)
+    };
+    for mut el in Punctuated::pairs_mut(&mut _i.cases) {
+        let it = el.value_mut();
+        _visitor.visit_pat_mut(it)
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_path_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatPath) {

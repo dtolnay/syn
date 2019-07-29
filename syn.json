@@ -63,18 +63,8 @@
             "syn": "Attribute"
           }
         },
-        "leading_vert": {
-          "option": {
-            "token": "Or"
-          }
-        },
-        "pats": {
-          "punctuated": {
-            "element": {
-              "syn": "Pat"
-            },
-            "punct": "Or"
-          }
+        "pat": {
+          "syn": "Pat"
         },
         "guard": {
           "option": {
@@ -1232,18 +1222,8 @@
         "for_token": {
           "token": "For"
         },
-        "leading_vert": {
-          "option": {
-            "token": "Or"
-          }
-        },
-        "pats": {
-          "punctuated": {
-            "element": {
-              "syn": "Pat"
-            },
-            "punct": "Or"
-          }
+        "pat": {
+          "syn": "Pat"
         },
         "in_token": {
           "token": "In"
@@ -1394,18 +1374,8 @@
         "let_token": {
           "token": "Let"
         },
-        "leading_vert": {
-          "option": {
-            "token": "Or"
-          }
-        },
-        "pats": {
-          "punctuated": {
-            "element": {
-              "syn": "Pat"
-            },
-            "punct": "Or"
-          }
+        "pat": {
+          "syn": "Pat"
         },
         "eq_token": {
           "token": "Eq"
@@ -3753,18 +3723,8 @@
         "let_token": {
           "token": "Let"
         },
-        "leading_vert": {
-          "option": {
-            "token": "Or"
-          }
-        },
-        "pats": {
-          "punctuated": {
-            "element": {
-              "syn": "Pat"
-            },
-            "punct": "Or"
-          }
+        "pat": {
+          "syn": "Pat"
         },
         "ty": {
           "option": {
@@ -4077,6 +4037,11 @@
             "syn": "PatMacro"
           }
         ],
+        "Or": [
+          {
+            "syn": "PatOr"
+          }
+        ],
         "Path": [
           {
             "syn": "PatPath"
@@ -4234,6 +4199,34 @@
         },
         "mac": {
           "syn": "Macro"
+        }
+      }
+    },
+    {
+      "ident": "PatOr",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "leading_vert": {
+          "option": {
+            "token": "Or"
+          }
+        },
+        "cases": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Or"
+          }
         }
       }
     },
