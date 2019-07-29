@@ -323,27 +323,6 @@ impl Debug for Lite<syn::BoundLifetimes> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::ClosureArg> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        match _val {
-            syn::ClosureArg::Typed(_val) => {
-                formatter.write_str("Typed")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-            syn::ClosureArg::Inferred(_val) => {
-                formatter.write_str("Inferred")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-        }
-    }
-}
 impl Debug for Lite<syn::ConstParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;

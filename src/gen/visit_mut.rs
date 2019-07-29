@@ -83,10 +83,6 @@ pub trait VisitMut {
     fn visit_bound_lifetimes_mut(&mut self, i: &mut BoundLifetimes) {
         visit_bound_lifetimes_mut(self, i)
     }
-    #[cfg(feature = "full")]
-    fn visit_closure_arg_mut(&mut self, i: &mut ClosureArg) {
-        visit_closure_arg_mut(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_const_param_mut(&mut self, i: &mut ConstParam) {
         visit_const_param_mut(self, i)
@@ -1027,17 +1023,6 @@ pub fn visit_bound_lifetimes_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
     }
     tokens_helper(_visitor, &mut _i.gt_token.spans);
 }
-#[cfg(feature = "full")]
-pub fn visit_closure_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ClosureArg) {
-    match *_i {
-        ClosureArg::Typed(ref mut _binding_0) => {
-            _visitor.visit_arg_typed_mut(_binding_0);
-        }
-        ClosureArg::Inferred(ref mut _binding_0) => {
-            _visitor.visit_pat_mut(_binding_0);
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_const_param_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ConstParam) {
     for it in &mut _i.attrs {
@@ -1364,7 +1349,7 @@ pub fn visit_expr_closure_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut E
     tokens_helper(_visitor, &mut _i.or1_token.spans);
     for mut el in Punctuated::pairs_mut(&mut _i.inputs) {
         let it = el.value_mut();
-        _visitor.visit_closure_arg_mut(it)
+        _visitor.visit_pat_mut(it)
     }
     tokens_helper(_visitor, &mut _i.or2_token.spans);
     _visitor.visit_return_type_mut(&mut _i.output);

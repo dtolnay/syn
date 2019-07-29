@@ -79,10 +79,6 @@ pub trait Fold {
     fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes {
         fold_bound_lifetimes(self, i)
     }
-    #[cfg(feature = "full")]
-    fn fold_closure_arg(&mut self, i: ClosureArg) -> ClosureArg {
-        fold_closure_arg(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_const_param(&mut self, i: ConstParam) -> ConstParam {
         fold_const_param(self, i)
@@ -1032,13 +1028,6 @@ pub fn fold_bound_lifetimes<V: Fold + ?Sized>(
         gt_token: Token ! [ > ](tokens_helper(_visitor, &_i.gt_token.spans)),
     }
 }
-#[cfg(feature = "full")]
-pub fn fold_closure_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: ClosureArg) -> ClosureArg {
-    match _i {
-        ClosureArg::Typed(_binding_0) => ClosureArg::Typed(_visitor.fold_arg_typed(_binding_0)),
-        ClosureArg::Inferred(_binding_0) => ClosureArg::Inferred(_visitor.fold_pat(_binding_0)),
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_const_param<V: Fold + ?Sized>(_visitor: &mut V, _i: ConstParam) -> ConstParam {
     ConstParam {
@@ -1260,7 +1249,7 @@ pub fn fold_expr_closure<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprClosure) ->
         movability: (_i.movability).map(|it| Token![static](tokens_helper(_visitor, &it.span))),
         capture: (_i.capture).map(|it| Token![move](tokens_helper(_visitor, &it.span))),
         or1_token: Token ! [ | ](tokens_helper(_visitor, &_i.or1_token.spans)),
-        inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_closure_arg(it)),
+        inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_pat(it)),
         or2_token: Token ! [ | ](tokens_helper(_visitor, &_i.or2_token.spans)),
         output: _visitor.fold_return_type(_i.output),
         body: Box::new(_visitor.fold_expr(*_i.body)),

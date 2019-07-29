@@ -432,26 +432,6 @@
       }
     },
     {
-      "ident": "ClosureArg",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "variants": {
-        "Typed": [
-          {
-            "syn": "ArgTyped"
-          }
-        ],
-        "Inferred": [
-          {
-            "syn": "Pat"
-          }
-        ]
-      }
-    },
-    {
       "ident": "ConstParam",
       "features": {
         "any": [
@@ -1177,7 +1157,7 @@
         "inputs": {
           "punctuated": {
             "element": {
-              "syn": "ClosureArg"
+              "syn": "Pat"
             },
             "punct": "Comma"
           }
