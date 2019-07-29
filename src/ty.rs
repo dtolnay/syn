@@ -208,6 +208,7 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct BareFnArg {
+        pub attrs: Vec<Attribute>,
         pub name: Option<(BareFnArgName, Token![:])>,
         pub ty: Type,
     }
@@ -768,6 +769,7 @@ pub mod parsing {
     impl Parse for BareFnArg {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(BareFnArg {
+                attrs: input.call(Attribute::parse_outer)?,
                 name: {
                     if (input.peek(Ident) || input.peek(Token![_]))
                         && !input.peek2(Token![::])
@@ -823,8 +825,9 @@ mod printing {
     use super::*;
 
     use proc_macro2::TokenStream;
-    use quote::ToTokens;
+    use quote::{ToTokens, TokenStreamExt};
 
+    use crate::attr::FilterAttrs;
     use crate::print::TokensOrDefault;
 
     impl ToTokens for TypeSlice {
@@ -969,6 +972,7 @@ mod printing {
 
     impl ToTokens for BareFnArg {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
             if let Some((ref name, ref colon)) = self.name {
                 name.to_tokens(tokens);
                 colon.to_tokens(tokens);
