@@ -2104,16 +2104,33 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     fn closure_arg(input: ParseStream) -> Result<Pat> {
-        let pat: Pat = input.parse()?;
+        let attrs = input.call(Attribute::parse_outer)?;
+        let mut pat: Pat = input.parse()?;
 
         if input.peek(Token![:]) {
             Ok(Pat::Type(PatType {
-                attrs: Vec::new(),
+                attrs: attrs,
                 pat: Box::new(pat),
                 colon_token: input.parse()?,
                 ty: input.parse()?,
             }))
         } else {
+            match &mut pat {
+                Pat::Box(pat) => pat.attrs = attrs,
+                Pat::Ident(pat) => pat.attrs = attrs,
+                Pat::Lit(pat) => pat.attrs = attrs,
+                Pat::Macro(pat) => pat.attrs = attrs,
+                Pat::Path(pat) => pat.attrs = attrs,
+                Pat::Range(pat) => pat.attrs = attrs,
+                Pat::Reference(pat) => pat.attrs = attrs,
+                Pat::Slice(pat) => pat.attrs = attrs,
+                Pat::Struct(pat) => pat.attrs = attrs,
+                Pat::Tuple(pat) => pat.attrs = attrs,
+                Pat::TupleStruct(pat) => pat.attrs = attrs,
+                Pat::Type(_) => unreachable!(),
+                Pat::Verbatim(_) => {}
+                Pat::Wild(pat) => pat.attrs = attrs,
+            }
             Ok(pat)
         }
     }
