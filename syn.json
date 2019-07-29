@@ -2142,41 +2142,6 @@
       }
     },
     {
-      "ident": "FnDecl",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "fn_token": {
-          "token": "Fn"
-        },
-        "generics": {
-          "syn": "Generics"
-        },
-        "paren_token": {
-          "group": "Paren"
-        },
-        "inputs": {
-          "punctuated": {
-            "element": {
-              "syn": "FnArg"
-            },
-            "punct": "Comma"
-          }
-        },
-        "variadic": {
-          "option": {
-            "syn": "Variadic"
-          }
-        },
-        "output": {
-          "syn": "ReturnType"
-        }
-      }
-    },
-    {
       "ident": "ForeignItem",
       "features": {
         "any": [
@@ -2227,13 +2192,8 @@
         "vis": {
           "syn": "Visibility"
         },
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "decl": {
-          "box": {
-            "syn": "FnDecl"
-          }
+        "sig": {
+          "syn": "Signature"
         },
         "semi_token": {
           "token": "Semi"
@@ -2631,7 +2591,7 @@
           }
         },
         "sig": {
-          "syn": "MethodSig"
+          "syn": "Signature"
         },
         "block": {
           "syn": "Block"
@@ -2994,33 +2954,8 @@
         "vis": {
           "syn": "Visibility"
         },
-        "constness": {
-          "option": {
-            "token": "Const"
-          }
-        },
-        "asyncness": {
-          "option": {
-            "token": "Async"
-          }
-        },
-        "unsafety": {
-          "option": {
-            "token": "Unsafe"
-          }
-        },
-        "abi": {
-          "option": {
-            "syn": "Abi"
-          }
-        },
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "decl": {
-          "box": {
-            "syn": "FnDecl"
-          }
+        "sig": {
+          "syn": "Signature"
         },
         "block": {
           "box": {
@@ -3887,42 +3822,6 @@
       }
     },
     {
-      "ident": "MethodSig",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "constness": {
-          "option": {
-            "token": "Const"
-          }
-        },
-        "asyncness": {
-          "option": {
-            "token": "Async"
-          }
-        },
-        "unsafety": {
-          "option": {
-            "token": "Unsafe"
-          }
-        },
-        "abi": {
-          "option": {
-            "syn": "Abi"
-          }
-        },
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "decl": {
-          "syn": "FnDecl"
-        }
-      }
-    },
-    {
       "ident": "MethodTurbofish",
       "features": {
         "any": [
@@ -4727,6 +4626,64 @@
       }
     },
     {
+      "ident": "Signature",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "constness": {
+          "option": {
+            "token": "Const"
+          }
+        },
+        "asyncness": {
+          "option": {
+            "token": "Async"
+          }
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
+          }
+        },
+        "abi": {
+          "option": {
+            "syn": "Abi"
+          }
+        },
+        "fn_token": {
+          "token": "Fn"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "inputs": {
+          "punctuated": {
+            "element": {
+              "syn": "FnArg"
+            },
+            "punct": "Comma"
+          }
+        },
+        "variadic": {
+          "option": {
+            "syn": "Variadic"
+          }
+        },
+        "output": {
+          "syn": "ReturnType"
+        }
+      }
+    },
+    {
       "ident": "Stmt",
       "features": {
         "any": [
@@ -4917,7 +4874,7 @@
           }
         },
         "sig": {
-          "syn": "MethodSig"
+          "syn": "Signature"
         },
         "default": {
           "option": {

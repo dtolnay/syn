@@ -304,10 +304,6 @@ pub trait Fold {
         fold_fn_arg(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_fn_decl(&mut self, i: FnDecl) -> FnDecl {
-        fold_fn_decl(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_foreign_item(&mut self, i: ForeignItem) -> ForeignItem {
         fold_foreign_item(self, i)
     }
@@ -531,10 +527,6 @@ pub trait Fold {
         fold_meta_name_value(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_method_sig(&mut self, i: MethodSig) -> MethodSig {
-        fold_method_sig(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_method_turbofish(&mut self, i: MethodTurbofish) -> MethodTurbofish {
         fold_method_turbofish(self, i)
     }
@@ -656,6 +648,10 @@ pub trait Fold {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_return_type(&mut self, i: ReturnType) -> ReturnType {
         fold_return_type(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_signature(&mut self, i: Signature) -> Signature {
+        fold_signature(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_stmt(&mut self, i: Stmt) -> Stmt {
@@ -1584,17 +1580,6 @@ pub fn fold_fn_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
     }
 }
 #[cfg(feature = "full")]
-pub fn fold_fn_decl<V: Fold + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl {
-    FnDecl {
-        fn_token: Token![fn](tokens_helper(_visitor, &_i.fn_token.span)),
-        generics: _visitor.fold_generics(_i.generics),
-        paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
-        inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_fn_arg(it)),
-        variadic: (_i.variadic).map(|it| _visitor.fold_variadic(it)),
-        output: _visitor.fold_return_type(_i.output),
-    }
-}
-#[cfg(feature = "full")]
 pub fn fold_foreign_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ForeignItem) -> ForeignItem {
     match _i {
         ForeignItem::Fn(_binding_0) => ForeignItem::Fn(_visitor.fold_foreign_item_fn(_binding_0)),
@@ -1620,8 +1605,7 @@ pub fn fold_foreign_item_fn<V: Fold + ?Sized>(
     ForeignItemFn {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        ident: _visitor.fold_ident(_i.ident),
-        decl: Box::new(_visitor.fold_fn_decl(*_i.decl)),
+        sig: _visitor.fold_signature(_i.sig),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }
@@ -1799,7 +1783,7 @@ pub fn fold_impl_item_method<V: Fold + ?Sized>(
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
         defaultness: (_i.defaultness).map(|it| Token![default](tokens_helper(_visitor, &it.span))),
-        sig: _visitor.fold_method_sig(_i.sig),
+        sig: _visitor.fold_signature(_i.sig),
         block: _visitor.fold_block(_i.block),
     }
 }
@@ -1930,12 +1914,7 @@ pub fn fold_item_fn<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemFn) -> ItemFn {
     ItemFn {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         vis: _visitor.fold_visibility(_i.vis),
-        constness: (_i.constness).map(|it| Token![const](tokens_helper(_visitor, &it.span))),
-        asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
-        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
-        abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
-        ident: _visitor.fold_ident(_i.ident),
-        decl: Box::new(_visitor.fold_fn_decl(*_i.decl)),
+        sig: _visitor.fold_signature(_i.sig),
         block: Box::new(_visitor.fold_block(*_i.block)),
     }
 }
@@ -2269,17 +2248,6 @@ pub fn fold_meta_name_value<V: Fold + ?Sized>(
     }
 }
 #[cfg(feature = "full")]
-pub fn fold_method_sig<V: Fold + ?Sized>(_visitor: &mut V, _i: MethodSig) -> MethodSig {
-    MethodSig {
-        constness: (_i.constness).map(|it| Token![const](tokens_helper(_visitor, &it.span))),
-        asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
-        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
-        abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
-        ident: _visitor.fold_ident(_i.ident),
-        decl: _visitor.fold_fn_decl(_i.decl),
-    }
-}
-#[cfg(feature = "full")]
 pub fn fold_method_turbofish<V: Fold + ?Sized>(
     _visitor: &mut V,
     _i: MethodTurbofish,
@@ -2568,6 +2536,22 @@ pub fn fold_return_type<V: Fold + ?Sized>(_visitor: &mut V, _i: ReturnType) -> R
     }
 }
 #[cfg(feature = "full")]
+pub fn fold_signature<V: Fold + ?Sized>(_visitor: &mut V, _i: Signature) -> Signature {
+    Signature {
+        constness: (_i.constness).map(|it| Token![const](tokens_helper(_visitor, &it.span))),
+        asyncness: (_i.asyncness).map(|it| Token![async](tokens_helper(_visitor, &it.span))),
+        unsafety: (_i.unsafety).map(|it| Token![unsafe](tokens_helper(_visitor, &it.span))),
+        abi: (_i.abi).map(|it| _visitor.fold_abi(it)),
+        fn_token: Token![fn](tokens_helper(_visitor, &_i.fn_token.span)),
+        ident: _visitor.fold_ident(_i.ident),
+        generics: _visitor.fold_generics(_i.generics),
+        paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
+        inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_fn_arg(it)),
+        variadic: (_i.variadic).map(|it| _visitor.fold_variadic(it)),
+        output: _visitor.fold_return_type(_i.output),
+    }
+}
+#[cfg(feature = "full")]
 pub fn fold_stmt<V: Fold + ?Sized>(_visitor: &mut V, _i: Stmt) -> Stmt {
     match _i {
         Stmt::Local(_binding_0) => Stmt::Local(_visitor.fold_local(_binding_0)),
@@ -2656,7 +2640,7 @@ pub fn fold_trait_item_method<V: Fold + ?Sized>(
 ) -> TraitItemMethod {
     TraitItemMethod {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
-        sig: _visitor.fold_method_sig(_i.sig),
+        sig: _visitor.fold_signature(_i.sig),
         default: (_i.default).map(|it| _visitor.fold_block(it)),
         semi_token: (_i.semi_token).map(|it| Token ! [ ; ](tokens_helper(_visitor, &it.spans))),
     }

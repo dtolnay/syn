@@ -2094,34 +2094,6 @@ impl Debug for Lite<syn::FnArg> {
         }
     }
 }
-impl Debug for Lite<syn::FnDecl> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("FnDecl");
-        formatter.field("generics", Lite(&_val.generics));
-        if !_val.inputs.is_empty() {
-            formatter.field("inputs", Lite(&_val.inputs));
-        }
-        if let Some(val) = &_val.variadic {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::Variadic);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("variadic", Print::ref_cast(val));
-        }
-        formatter.field("output", Lite(&_val.output));
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::ForeignItem> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -2132,8 +2104,7 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
-                formatter.field("ident", Lite(&_val.ident));
-                formatter.field("decl", Lite(&_val.decl));
+                formatter.field("sig", Lite(&_val.sig));
                 formatter.finish()
             }
             syn::ForeignItem::Static(_val) => {
@@ -2203,8 +2174,7 @@ impl Debug for Lite<syn::ForeignItemFn> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("vis", Lite(&_val.vis));
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("decl", Lite(&_val.decl));
+        formatter.field("sig", Lite(&_val.sig));
         formatter.finish()
     }
 }
@@ -2768,60 +2738,7 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
-                if let Some(val) = &_val.constness {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Const);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("constness", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.asyncness {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Async);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("asyncness", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.unsafety {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Unsafe);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("unsafety", Print::ref_cast(val));
-                }
-                if let Some(val) = &_val.abi {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::Abi);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            let _val = &self.0;
-                            formatter.write_str("(")?;
-                            Debug::fmt(Lite(_val), formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("abi", Print::ref_cast(val));
-                }
-                formatter.field("ident", Lite(&_val.ident));
-                formatter.field("decl", Lite(&_val.decl));
+                formatter.field("sig", Lite(&_val.sig));
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
@@ -3253,60 +3170,7 @@ impl Debug for Lite<syn::ItemFn> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("vis", Lite(&_val.vis));
-        if let Some(val) = &_val.constness {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Const);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("constness", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.asyncness {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Async);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("asyncness", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.unsafety {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Unsafe);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("unsafety", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.abi {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::Abi);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("abi", Print::ref_cast(val));
-        }
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("decl", Lite(&_val.decl));
+        formatter.field("sig", Lite(&_val.sig));
         formatter.field("block", Lite(&_val.block));
         formatter.finish()
     }
@@ -3916,67 +3780,6 @@ impl Debug for Lite<syn::MetaNameValue> {
         let mut formatter = formatter.debug_struct("MetaNameValue");
         formatter.field("path", Lite(&_val.path));
         formatter.field("lit", Lite(&_val.lit));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::MethodSig> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("MethodSig");
-        if let Some(val) = &_val.constness {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Const);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("constness", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.asyncness {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Async);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("asyncness", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.unsafety {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Unsafe);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("unsafety", Print::ref_cast(val));
-        }
-        if let Some(val) = &_val.abi {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::Abi);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("abi", Print::ref_cast(val));
-        }
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("decl", Lite(&_val.decl));
         formatter.finish()
     }
 }
@@ -4753,6 +4556,87 @@ impl Debug for Lite<syn::ReturnType> {
                 formatter.finish()
             }
         }
+    }
+}
+impl Debug for Lite<syn::Signature> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("Signature");
+        if let Some(val) = &_val.constness {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Const);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("constness", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.asyncness {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Async);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("asyncness", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Unsafe);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.abi {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Abi);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("abi", Print::ref_cast(val));
+        }
+        formatter.field("ident", Lite(&_val.ident));
+        formatter.field("generics", Lite(&_val.generics));
+        if !_val.inputs.is_empty() {
+            formatter.field("inputs", Lite(&_val.inputs));
+        }
+        if let Some(val) = &_val.variadic {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Variadic);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("variadic", Print::ref_cast(val));
+        }
+        formatter.field("output", Lite(&_val.output));
+        formatter.finish()
     }
 }
 impl Debug for Lite<syn::Stmt> {

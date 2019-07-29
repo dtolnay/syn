@@ -308,10 +308,6 @@ pub trait VisitMut {
         visit_fn_arg_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_fn_decl_mut(&mut self, i: &mut FnDecl) {
-        visit_fn_decl_mut(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_foreign_item_mut(&mut self, i: &mut ForeignItem) {
         visit_foreign_item_mut(self, i)
     }
@@ -535,10 +531,6 @@ pub trait VisitMut {
         visit_meta_name_value_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_method_sig_mut(&mut self, i: &mut MethodSig) {
-        visit_method_sig_mut(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_method_turbofish_mut(&mut self, i: &mut MethodTurbofish) {
         visit_method_turbofish_mut(self, i)
     }
@@ -657,6 +649,10 @@ pub trait VisitMut {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_return_type_mut(&mut self, i: &mut ReturnType) {
         visit_return_type_mut(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn visit_signature_mut(&mut self, i: &mut Signature) {
+        visit_signature_mut(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_stmt_mut(&mut self, i: &mut Stmt) {
@@ -1734,20 +1730,6 @@ pub fn visit_fn_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut FnArg) 
     }
 }
 #[cfg(feature = "full")]
-pub fn visit_fn_decl_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut FnDecl) {
-    tokens_helper(_visitor, &mut _i.fn_token.span);
-    _visitor.visit_generics_mut(&mut _i.generics);
-    tokens_helper(_visitor, &mut _i.paren_token.span);
-    for mut el in Punctuated::pairs_mut(&mut _i.inputs) {
-        let it = el.value_mut();
-        _visitor.visit_fn_arg_mut(it)
-    }
-    if let Some(ref mut it) = _i.variadic {
-        _visitor.visit_variadic_mut(it)
-    };
-    _visitor.visit_return_type_mut(&mut _i.output);
-}
-#[cfg(feature = "full")]
 pub fn visit_foreign_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ForeignItem) {
     match *_i {
         ForeignItem::Fn(ref mut _binding_0) => {
@@ -1773,8 +1755,7 @@ pub fn visit_foreign_item_fn_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
         _visitor.visit_attribute_mut(it)
     }
     _visitor.visit_visibility_mut(&mut _i.vis);
-    _visitor.visit_ident_mut(&mut _i.ident);
-    _visitor.visit_fn_decl_mut(&mut *_i.decl);
+    _visitor.visit_signature_mut(&mut _i.sig);
     tokens_helper(_visitor, &mut _i.semi_token.spans);
 }
 #[cfg(feature = "full")]
@@ -1975,7 +1956,7 @@ pub fn visit_impl_item_method_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &m
     if let Some(ref mut it) = _i.defaultness {
         tokens_helper(_visitor, &mut it.span)
     };
-    _visitor.visit_method_sig_mut(&mut _i.sig);
+    _visitor.visit_signature_mut(&mut _i.sig);
     _visitor.visit_block_mut(&mut _i.block);
 }
 #[cfg(feature = "full")]
@@ -2140,20 +2121,7 @@ pub fn visit_item_fn_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemFn
         _visitor.visit_attribute_mut(it)
     }
     _visitor.visit_visibility_mut(&mut _i.vis);
-    if let Some(ref mut it) = _i.constness {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    if let Some(ref mut it) = _i.asyncness {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    if let Some(ref mut it) = _i.unsafety {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    if let Some(ref mut it) = _i.abi {
-        _visitor.visit_abi_mut(it)
-    };
-    _visitor.visit_ident_mut(&mut _i.ident);
-    _visitor.visit_fn_decl_mut(&mut *_i.decl);
+    _visitor.visit_signature_mut(&mut _i.sig);
     _visitor.visit_block_mut(&mut *_i.block);
 }
 #[cfg(feature = "full")]
@@ -2495,23 +2463,6 @@ pub fn visit_meta_name_value_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
     _visitor.visit_path_mut(&mut _i.path);
     tokens_helper(_visitor, &mut _i.eq_token.spans);
     _visitor.visit_lit_mut(&mut _i.lit);
-}
-#[cfg(feature = "full")]
-pub fn visit_method_sig_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut MethodSig) {
-    if let Some(ref mut it) = _i.constness {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    if let Some(ref mut it) = _i.asyncness {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    if let Some(ref mut it) = _i.unsafety {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    if let Some(ref mut it) = _i.abi {
-        _visitor.visit_abi_mut(it)
-    };
-    _visitor.visit_ident_mut(&mut _i.ident);
-    _visitor.visit_fn_decl_mut(&mut _i.decl);
 }
 #[cfg(feature = "full")]
 pub fn visit_method_turbofish_mut<V: VisitMut + ?Sized>(
@@ -2861,6 +2812,33 @@ pub fn visit_return_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Re
     }
 }
 #[cfg(feature = "full")]
+pub fn visit_signature_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Signature) {
+    if let Some(ref mut it) = _i.constness {
+        tokens_helper(_visitor, &mut it.span)
+    };
+    if let Some(ref mut it) = _i.asyncness {
+        tokens_helper(_visitor, &mut it.span)
+    };
+    if let Some(ref mut it) = _i.unsafety {
+        tokens_helper(_visitor, &mut it.span)
+    };
+    if let Some(ref mut it) = _i.abi {
+        _visitor.visit_abi_mut(it)
+    };
+    tokens_helper(_visitor, &mut _i.fn_token.span);
+    _visitor.visit_ident_mut(&mut _i.ident);
+    _visitor.visit_generics_mut(&mut _i.generics);
+    tokens_helper(_visitor, &mut _i.paren_token.span);
+    for mut el in Punctuated::pairs_mut(&mut _i.inputs) {
+        let it = el.value_mut();
+        _visitor.visit_fn_arg_mut(it)
+    }
+    if let Some(ref mut it) = _i.variadic {
+        _visitor.visit_variadic_mut(it)
+    };
+    _visitor.visit_return_type_mut(&mut _i.output);
+}
+#[cfg(feature = "full")]
 pub fn visit_stmt_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Stmt) {
     match *_i {
         Stmt::Local(ref mut _binding_0) => {
@@ -2954,7 +2932,7 @@ pub fn visit_trait_item_method_mut<V: VisitMut + ?Sized>(
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
     }
-    _visitor.visit_method_sig_mut(&mut _i.sig);
+    _visitor.visit_signature_mut(&mut _i.sig);
     if let Some(ref mut it) = _i.default {
         _visitor.visit_block_mut(it)
     };

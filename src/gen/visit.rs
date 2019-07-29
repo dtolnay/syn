@@ -305,10 +305,6 @@ pub trait Visit<'ast> {
         visit_fn_arg(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_fn_decl(&mut self, i: &'ast FnDecl) {
-        visit_fn_decl(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_foreign_item(&mut self, i: &'ast ForeignItem) {
         visit_foreign_item(self, i)
     }
@@ -532,10 +528,6 @@ pub trait Visit<'ast> {
         visit_meta_name_value(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_method_sig(&mut self, i: &'ast MethodSig) {
-        visit_method_sig(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_method_turbofish(&mut self, i: &'ast MethodTurbofish) {
         visit_method_turbofish(self, i)
     }
@@ -654,6 +646,10 @@ pub trait Visit<'ast> {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_return_type(&mut self, i: &'ast ReturnType) {
         visit_return_type(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn visit_signature(&mut self, i: &'ast Signature) {
+        visit_signature(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_stmt(&mut self, i: &'ast Stmt) {
@@ -1758,20 +1754,6 @@ pub fn visit_fn_arg<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast F
     }
 }
 #[cfg(feature = "full")]
-pub fn visit_fn_decl<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FnDecl) {
-    tokens_helper(_visitor, &_i.fn_token.span);
-    _visitor.visit_generics(&_i.generics);
-    tokens_helper(_visitor, &_i.paren_token.span);
-    for el in Punctuated::pairs(&_i.inputs) {
-        let it = el.value();
-        _visitor.visit_fn_arg(it)
-    }
-    if let Some(ref it) = _i.variadic {
-        _visitor.visit_variadic(it)
-    };
-    _visitor.visit_return_type(&_i.output);
-}
-#[cfg(feature = "full")]
 pub fn visit_foreign_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ForeignItem) {
     match *_i {
         ForeignItem::Fn(ref _binding_0) => {
@@ -1800,8 +1782,7 @@ pub fn visit_foreign_item_fn<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    _visitor.visit_ident(&_i.ident);
-    _visitor.visit_fn_decl(&*_i.decl);
+    _visitor.visit_signature(&_i.sig);
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
 #[cfg(feature = "full")]
@@ -2014,7 +1995,7 @@ pub fn visit_impl_item_method<'ast, V: Visit<'ast> + ?Sized>(
     if let Some(ref it) = _i.defaultness {
         tokens_helper(_visitor, &it.span)
     };
-    _visitor.visit_method_sig(&_i.sig);
+    _visitor.visit_signature(&_i.sig);
     _visitor.visit_block(&_i.block);
 }
 #[cfg(feature = "full")]
@@ -2182,20 +2163,7 @@ pub fn visit_item_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    if let Some(ref it) = _i.constness {
-        tokens_helper(_visitor, &it.span)
-    };
-    if let Some(ref it) = _i.asyncness {
-        tokens_helper(_visitor, &it.span)
-    };
-    if let Some(ref it) = _i.unsafety {
-        tokens_helper(_visitor, &it.span)
-    };
-    if let Some(ref it) = _i.abi {
-        _visitor.visit_abi(it)
-    };
-    _visitor.visit_ident(&_i.ident);
-    _visitor.visit_fn_decl(&*_i.decl);
+    _visitor.visit_signature(&_i.sig);
     _visitor.visit_block(&*_i.block);
 }
 #[cfg(feature = "full")]
@@ -2552,23 +2520,6 @@ pub fn visit_meta_name_value<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.eq_token.spans);
     _visitor.visit_lit(&_i.lit);
-}
-#[cfg(feature = "full")]
-pub fn visit_method_sig<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast MethodSig) {
-    if let Some(ref it) = _i.constness {
-        tokens_helper(_visitor, &it.span)
-    };
-    if let Some(ref it) = _i.asyncness {
-        tokens_helper(_visitor, &it.span)
-    };
-    if let Some(ref it) = _i.unsafety {
-        tokens_helper(_visitor, &it.span)
-    };
-    if let Some(ref it) = _i.abi {
-        _visitor.visit_abi(it)
-    };
-    _visitor.visit_ident(&_i.ident);
-    _visitor.visit_fn_decl(&_i.decl);
 }
 #[cfg(feature = "full")]
 pub fn visit_method_turbofish<'ast, V: Visit<'ast> + ?Sized>(
@@ -2930,6 +2881,33 @@ pub fn visit_return_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     }
 }
 #[cfg(feature = "full")]
+pub fn visit_signature<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Signature) {
+    if let Some(ref it) = _i.constness {
+        tokens_helper(_visitor, &it.span)
+    };
+    if let Some(ref it) = _i.asyncness {
+        tokens_helper(_visitor, &it.span)
+    };
+    if let Some(ref it) = _i.unsafety {
+        tokens_helper(_visitor, &it.span)
+    };
+    if let Some(ref it) = _i.abi {
+        _visitor.visit_abi(it)
+    };
+    tokens_helper(_visitor, &_i.fn_token.span);
+    _visitor.visit_ident(&_i.ident);
+    _visitor.visit_generics(&_i.generics);
+    tokens_helper(_visitor, &_i.paren_token.span);
+    for el in Punctuated::pairs(&_i.inputs) {
+        let it = el.value();
+        _visitor.visit_fn_arg(it)
+    }
+    if let Some(ref it) = _i.variadic {
+        _visitor.visit_variadic(it)
+    };
+    _visitor.visit_return_type(&_i.output);
+}
+#[cfg(feature = "full")]
 pub fn visit_stmt<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stmt) {
     match *_i {
         Stmt::Local(ref _binding_0) => {
@@ -3029,7 +3007,7 @@ pub fn visit_trait_item_method<'ast, V: Visit<'ast> + ?Sized>(
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    _visitor.visit_method_sig(&_i.sig);
+    _visitor.visit_signature(&_i.sig);
     if let Some(ref it) = _i.default {
         _visitor.visit_block(it)
     };
