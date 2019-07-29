@@ -2480,10 +2480,6 @@ pub fn visit_local<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lo
     }
     tokens_helper(_visitor, &_i.let_token.span);
     _visitor.visit_pat(&_i.pat);
-    if let Some(ref it) = _i.ty {
-        tokens_helper(_visitor, &(it).0.spans);
-        _visitor.visit_type(&*(it).1);
-    };
     if let Some(ref it) = _i.init {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_expr(&*(it).1);

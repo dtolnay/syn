@@ -3726,20 +3726,6 @@
         "pat": {
           "syn": "Pat"
         },
-        "ty": {
-          "option": {
-            "tuple": [
-              {
-                "token": "Colon"
-              },
-              {
-                "box": {
-                  "syn": "Type"
-                }
-              }
-            ]
-          }
-        },
         "init": {
           "option": {
             "tuple": [

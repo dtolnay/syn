@@ -3802,22 +3802,6 @@ impl Debug for Lite<syn::Local> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("pat", Lite(&_val.pat));
-        if let Some(val) = &_val.ty {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print((syn::token::Colon, Box<syn::Type>));
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(&_val.1), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("ty", Print::ref_cast(val));
-        }
         if let Some(val) = &_val.init {
             #[derive(RefCast)]
             #[repr(transparent)]

@@ -2429,10 +2429,6 @@ pub fn visit_local_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
     }
     tokens_helper(_visitor, &mut _i.let_token.span);
     _visitor.visit_pat_mut(&mut _i.pat);
-    if let Some(ref mut it) = _i.ty {
-        tokens_helper(_visitor, &mut (it).0.spans);
-        _visitor.visit_type_mut(&mut *(it).1);
-    };
     if let Some(ref mut it) = _i.init {
         tokens_helper(_visitor, &mut (it).0.spans);
         _visitor.visit_expr_mut(&mut *(it).1);

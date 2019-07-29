@@ -749,7 +749,6 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
         pub pat: Pat,
-        pub ty: Option<(Token![:], Box<Type>)>,
         pub init: Option<(Token![=], Box<Expr>)>,
         pub semi_token: Token![;],
     }
@@ -2608,7 +2607,7 @@ pub mod parsing {
             let_token: input.parse()?,
             pat: {
                 let leading_vert: Option<Token![|]> = input.parse()?;
-                let pat: Pat = input.parse()?;
+                let mut pat: Pat = input.parse()?;
                 if leading_vert.is_some() || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
                     let mut cases = Punctuated::new();
                     cases.push_value(pat);
@@ -2618,23 +2617,23 @@ pub mod parsing {
                         let pat: Pat = input.parse()?;
                         cases.push_value(pat);
                     }
-                    Pat::Or(PatOr {
+                    pat = Pat::Or(PatOr {
                         attrs: Vec::new(),
                         leading_vert,
                         cases,
-                    })
-                } else {
-                    pat
+                    });
                 }
-            },
-            ty: {
                 if input.peek(Token![:]) {
                     let colon_token: Token![:] = input.parse()?;
                     let ty: Type = input.parse()?;
-                    Some((colon_token, Box::new(ty)))
-                } else {
-                    None
+                    pat = Pat::Type(PatType {
+                        attrs: Vec::new(),
+                        pat: Box::new(pat),
+                        colon_token,
+                        ty: Box::new(ty),
+                    });
                 }
+                pat
             },
             init: {
                 if input.peek(Token![=]) {
@@ -3888,10 +3887,6 @@ mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-            if let Some((ref colon_token, ref ty)) = self.ty {
-                colon_token.to_tokens(tokens);
-                ty.to_tokens(tokens);
-            }
             if let Some((ref eq_token, ref init)) = self.init {
                 eq_token.to_tokens(tokens);
                 init.to_tokens(tokens);

@@ -2199,12 +2199,6 @@ pub fn fold_local<V: Fold + ?Sized>(_visitor: &mut V, _i: Local) -> Local {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         let_token: Token![let](tokens_helper(_visitor, &_i.let_token.span)),
         pat: _visitor.fold_pat(_i.pat),
-        ty: (_i.ty).map(|it| {
-            (
-                Token ! [ : ](tokens_helper(_visitor, &(it).0.spans)),
-                Box::new(_visitor.fold_type(*(it).1)),
-            )
-        }),
         init: (_i.init).map(|it| {
             (
                 Token ! [ = ](tokens_helper(_visitor, &(it).0.spans)),
