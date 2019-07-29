@@ -16,6 +16,9 @@ pub fn traverse(
     let mut traits = TokenStream::new();
     let mut impls = TokenStream::new();
     for s in &defs.types {
+        if s.ident == "Reserved" {
+            continue;
+        }
         let features = &s.features.any;
         let features = match features.len() {
             0 => quote!(),

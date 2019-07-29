@@ -1649,6 +1649,9 @@
         "and_token": {
           "token": "And"
         },
+        "raw": {
+          "syn": "Reserved"
+        },
         "mutability": {
           "option": {
             "token": "Mut"

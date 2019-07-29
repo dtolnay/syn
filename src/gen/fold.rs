@@ -1412,6 +1412,7 @@ pub fn fold_expr_reference<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprReference
     ExprReference {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
+        raw: _i.raw,
         mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
         expr: Box::new(_visitor.fold_expr(*_i.expr)),
     }

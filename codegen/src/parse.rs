@@ -161,7 +161,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(string),
                 "Await" => types::Type::Token("Await".to_string()),
                 _ => {
-                    if items.get(&last.ident).is_some() {
+                    if items.get(&last.ident).is_some() || last.ident == "Reserved" {
                         types::Type::Syn(string)
                     } else {
                         unimplemented!("{}", string);
@@ -590,8 +590,10 @@ fn load_file<P: AsRef<Path>>(
 
                 // Record our features on the parsed AstItems.
                 for mut item in found {
-                    item.features.extend(features.clone());
-                    lookup.insert(item.ast.ident.clone(), item);
+                    if item.ast.ident != "Reserved" {
+                        item.features.extend(features.clone());
+                        lookup.insert(item.ast.ident.clone(), item);
+                    }
                 }
             }
             Item::Struct(item) => {

@@ -55,7 +55,8 @@ fn is_printable(ty: &Type) -> bool {
         Type::Box(ty) => is_printable(ty),
         Type::Tuple(ty) => ty.iter().any(is_printable),
         Type::Token(_) | Type::Group(_) => false,
-        Type::Syn(_) | Type::Std(_) | Type::Punctuated(_) | Type::Option(_) | Type::Vec(_) => true,
+        Type::Syn(name) => name != "Reserved",
+        Type::Std(_) | Type::Punctuated(_) | Type::Option(_) | Type::Vec(_) => true,
     }
 }
 
@@ -258,6 +259,10 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
 }
 
 fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
+    if node.ident == "Reserved" {
+        return TokenStream::new();
+    }
+
     let ident = Ident::new(&node.ident, Span::call_site());
     let body = expand_impl_body(defs, node, &node.ident);
 
