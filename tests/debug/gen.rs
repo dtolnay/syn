@@ -4255,8 +4255,8 @@ impl Debug for Lite<syn::Pat> {
                 formatter.field("hi", Lite(&_val.hi));
                 formatter.finish()
             }
-            syn::Pat::Ref(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Ref");
+            syn::Pat::Reference(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Reference");
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
@@ -4536,10 +4536,10 @@ impl Debug for Lite<syn::PatRange> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::PatRef> {
+impl Debug for Lite<syn::PatReference> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatRef");
+        let mut formatter = formatter.debug_struct("PatReference");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }

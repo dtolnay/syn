@@ -587,8 +587,8 @@ pub trait VisitMut {
         visit_pat_range_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_pat_ref_mut(&mut self, i: &mut PatRef) {
-        visit_pat_ref_mut(self, i)
+    fn visit_pat_reference_mut(&mut self, i: &mut PatReference) {
+        visit_pat_reference_mut(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_pat_slice_mut(&mut self, i: &mut PatSlice) {
@@ -2604,8 +2604,8 @@ pub fn visit_pat_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
         Pat::Range(ref mut _binding_0) => {
             _visitor.visit_pat_range_mut(_binding_0);
         }
-        Pat::Ref(ref mut _binding_0) => {
-            _visitor.visit_pat_ref_mut(_binding_0);
+        Pat::Reference(ref mut _binding_0) => {
+            _visitor.visit_pat_reference_mut(_binding_0);
         }
         Pat::Slice(ref mut _binding_0) => {
             _visitor.visit_pat_slice_mut(_binding_0);
@@ -2686,7 +2686,7 @@ pub fn visit_pat_range_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatR
     _visitor.visit_expr_mut(&mut *_i.hi);
 }
 #[cfg(feature = "full")]
-pub fn visit_pat_ref_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatRef) {
+pub fn visit_pat_reference_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatReference) {
     for it in &mut _i.attrs {
         _visitor.visit_attribute_mut(it)
     }

@@ -847,7 +847,7 @@ ast_enum_of_structs! {
         /// A reference pattern: `&mut (first, second)`.
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Ref(PatRef {
+        pub Reference(PatReference {
             pub attrs: Vec<Attribute>,
             pub and_token: Token![&],
             pub mutability: Option<Token![mut]>,
@@ -2660,7 +2660,7 @@ pub mod parsing {
             } else if lookahead.peek(token::Paren) {
                 input.call(pat_tuple).map(Pat::Tuple)
             } else if lookahead.peek(Token![&]) {
-                input.call(pat_ref).map(Pat::Ref)
+                input.call(pat_reference).map(Pat::Reference)
             } else if lookahead.peek(token::Bracket) {
                 input.call(pat_slice).map(Pat::Slice)
             } else {
@@ -2985,8 +2985,8 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn pat_ref(input: ParseStream) -> Result<PatRef> {
-        Ok(PatRef {
+    fn pat_reference(input: ParseStream) -> Result<PatReference> {
+        Ok(PatReference {
             attrs: Vec::new(),
             and_token: input.parse()?,
             mutability: input.parse()?,
@@ -3780,7 +3780,7 @@ mod printing {
     }
 
     #[cfg(feature = "full")]
-    impl ToTokens for PatRef {
+    impl ToTokens for PatReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);

@@ -4118,9 +4118,9 @@
             "syn": "PatRange"
           }
         ],
-        "Ref": [
+        "Reference": [
           {
-            "syn": "PatRef"
+            "syn": "PatReference"
           }
         ],
         "Slice": [
@@ -4310,7 +4310,7 @@
       }
     },
     {
-      "ident": "PatRef",
+      "ident": "PatReference",
       "features": {
         "any": [
           "full"

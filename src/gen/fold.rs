@@ -586,8 +586,8 @@ pub trait Fold {
         fold_pat_range(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_pat_ref(&mut self, i: PatRef) -> PatRef {
-        fold_pat_ref(self, i)
+    fn fold_pat_reference(&mut self, i: PatReference) -> PatReference {
+        fold_pat_reference(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_pat_slice(&mut self, i: PatSlice) -> PatSlice {
@@ -2333,7 +2333,7 @@ pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
         Pat::Macro(_binding_0) => Pat::Macro(_visitor.fold_pat_macro(_binding_0)),
         Pat::Path(_binding_0) => Pat::Path(_visitor.fold_pat_path(_binding_0)),
         Pat::Range(_binding_0) => Pat::Range(_visitor.fold_pat_range(_binding_0)),
-        Pat::Ref(_binding_0) => Pat::Ref(_visitor.fold_pat_ref(_binding_0)),
+        Pat::Reference(_binding_0) => Pat::Reference(_visitor.fold_pat_reference(_binding_0)),
         Pat::Slice(_binding_0) => Pat::Slice(_visitor.fold_pat_slice(_binding_0)),
         Pat::Struct(_binding_0) => Pat::Struct(_visitor.fold_pat_struct(_binding_0)),
         Pat::Tuple(_binding_0) => Pat::Tuple(_visitor.fold_pat_tuple(_binding_0)),
@@ -2399,8 +2399,8 @@ pub fn fold_pat_range<V: Fold + ?Sized>(_visitor: &mut V, _i: PatRange) -> PatRa
     }
 }
 #[cfg(feature = "full")]
-pub fn fold_pat_ref<V: Fold + ?Sized>(_visitor: &mut V, _i: PatRef) -> PatRef {
-    PatRef {
+pub fn fold_pat_reference<V: Fold + ?Sized>(_visitor: &mut V, _i: PatReference) -> PatReference {
+    PatReference {
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
         mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
