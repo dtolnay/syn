@@ -739,6 +739,9 @@ ast_struct! {
     /// The variadic argument of a foreign function.
     ///
     /// ```rust
+    /// # struct c_char;
+    /// # struct c_int;
+    /// #
     /// extern "C" {
     ///     fn printf(format: *const c_char, ...) -> c_int;
     ///     //                               ^^^
