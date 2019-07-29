@@ -10,5 +10,5 @@ proc-macro = true
 
 [dependencies]
 syn-next = { path = "../../../", features = ["full"] }
-quote-next = "0.6"
-proc-macro2-next = { version = "0.4", features = ["nightly"] }
+quote-next = "1.0.0-rc1"
+proc-macro2-next = { version = "1.0.0-rc1", features = ["nightly"] }

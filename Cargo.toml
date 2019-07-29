@@ -1,6 +1,6 @@
 [package]
 name = "syn-next"
-version = "0.15.42" # don't forget to update html_root_url and syn.json
+version = "1.0.0-rc1" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Parser for Rust source code"
@@ -19,7 +19,6 @@ include = [
     "/tests/**",
 ]
 edition = "2018"
-publish = false # contains breaking changes
 
 [lib]
 name = "syn"
@@ -38,8 +37,8 @@ extra-traits = []
 proc-macro = ["proc-macro2-next/proc-macro", "quote-next/proc-macro"]
 
 [dependencies]
-proc-macro2-next = { version = "0.4.4", default-features = false }
-quote-next = { version = "0.6", optional = true, default-features = false }
+proc-macro2-next = { version = "1.0.0-rc1", default-features = false }
+quote-next = { version = "1.0.0-rc1", optional = true, default-features = false }
 unicode-xid = "0.2"
 
 [dev-dependencies]
@@ -72,7 +71,3 @@ travis-ci = { repository = "dtolnay/syn" }
 
 [workspace]
 members = ["dev", "json"]
-
-[patch.crates-io]
-proc-macro2-next = { git = "https://github.com/alexcrichton/proc-macro2", branch = "next" }
-quote-next = { git = "https://github.com/dtolnay/quote" }
