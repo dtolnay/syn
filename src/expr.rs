@@ -2968,9 +2968,12 @@ pub mod parsing {
     impl Parse for Index {
         fn parse(input: ParseStream) -> Result<Self> {
             let lit: LitInt = input.parse()?;
-            if let IntSuffix::None = lit.suffix() {
+            if lit.suffix().is_empty() {
                 Ok(Index {
-                    index: lit.value() as u32,
+                    index: lit
+                        .base10_digits()
+                        .parse()
+                        .map_err(|err| Error::new(lit.span(), err))?,
                     span: lit.span(),
                 })
             } else {
