@@ -44,16 +44,8 @@ pub trait VisitMut {
         visit_angle_bracketed_generic_arguments_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_arg_captured_mut(&mut self, i: &mut ArgCaptured) {
-        visit_arg_captured_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn visit_arg_self_mut(&mut self, i: &mut ArgSelf) {
-        visit_arg_self_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn visit_arg_self_ref_mut(&mut self, i: &mut ArgSelfRef) {
-        visit_arg_self_ref_mut(self, i)
+    fn visit_arg_typed_mut(&mut self, i: &mut ArgTyped) {
+        visit_arg_typed_mut(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_arm_mut(&mut self, i: &mut Arm) {
@@ -90,6 +82,10 @@ pub trait VisitMut {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_bound_lifetimes_mut(&mut self, i: &mut BoundLifetimes) {
         visit_bound_lifetimes_mut(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn visit_closure_arg_mut(&mut self, i: &mut ClosureArg) {
+        visit_closure_arg_mut(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_const_param_mut(&mut self, i: &mut ConstParam) {
@@ -650,6 +646,10 @@ pub trait VisitMut {
     fn visit_range_limits_mut(&mut self, i: &mut RangeLimits) {
         visit_range_limits_mut(self, i)
     }
+    #[cfg(feature = "full")]
+    fn visit_receiver_mut(&mut self, i: &mut Receiver) {
+        visit_receiver_mut(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_return_type_mut(&mut self, i: &mut ReturnType) {
         visit_return_type_mut(self, i)
@@ -848,28 +848,10 @@ pub fn visit_angle_bracketed_generic_arguments_mut<V: VisitMut + ?Sized>(
     tokens_helper(_visitor, &mut _i.gt_token.spans);
 }
 #[cfg(feature = "full")]
-pub fn visit_arg_captured_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ArgCaptured) {
+pub fn visit_arg_typed_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ArgTyped) {
     _visitor.visit_pat_mut(&mut _i.pat);
     tokens_helper(_visitor, &mut _i.colon_token.spans);
     _visitor.visit_type_mut(&mut _i.ty);
-}
-#[cfg(feature = "full")]
-pub fn visit_arg_self_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ArgSelf) {
-    if let Some(ref mut it) = _i.mutability {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    tokens_helper(_visitor, &mut _i.self_token.span);
-}
-#[cfg(feature = "full")]
-pub fn visit_arg_self_ref_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ArgSelfRef) {
-    tokens_helper(_visitor, &mut _i.and_token.spans);
-    if let Some(ref mut it) = _i.lifetime {
-        _visitor.visit_lifetime_mut(it)
-    };
-    if let Some(ref mut it) = _i.mutability {
-        tokens_helper(_visitor, &mut it.span)
-    };
-    tokens_helper(_visitor, &mut _i.self_token.span);
 }
 #[cfg(feature = "full")]
 pub fn visit_arm_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Arm) {
@@ -1040,6 +1022,17 @@ pub fn visit_bound_lifetimes_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
         _visitor.visit_lifetime_def_mut(it)
     }
     tokens_helper(_visitor, &mut _i.gt_token.spans);
+}
+#[cfg(feature = "full")]
+pub fn visit_closure_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ClosureArg) {
+    match *_i {
+        ClosureArg::Typed(ref mut _binding_0) => {
+            _visitor.visit_arg_typed_mut(_binding_0);
+        }
+        ClosureArg::Inferred(ref mut _binding_0) => {
+            _visitor.visit_pat_mut(_binding_0);
+        }
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_const_param_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ConstParam) {
@@ -1367,7 +1360,7 @@ pub fn visit_expr_closure_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut E
     tokens_helper(_visitor, &mut _i.or1_token.spans);
     for mut el in Punctuated::pairs_mut(&mut _i.inputs) {
         let it = el.value_mut();
-        _visitor.visit_fn_arg_mut(it)
+        _visitor.visit_closure_arg_mut(it)
     }
     tokens_helper(_visitor, &mut _i.or2_token.spans);
     _visitor.visit_return_type_mut(&mut _i.output);
@@ -1756,17 +1749,11 @@ pub fn visit_file_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut File) {
 #[cfg(feature = "full")]
 pub fn visit_fn_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut FnArg) {
     match *_i {
-        FnArg::SelfRef(ref mut _binding_0) => {
-            _visitor.visit_arg_self_ref_mut(_binding_0);
+        FnArg::Receiver(ref mut _binding_0) => {
+            _visitor.visit_receiver_mut(_binding_0);
         }
-        FnArg::SelfValue(ref mut _binding_0) => {
-            _visitor.visit_arg_self_mut(_binding_0);
-        }
-        FnArg::Captured(ref mut _binding_0) => {
-            _visitor.visit_arg_captured_mut(_binding_0);
-        }
-        FnArg::Inferred(ref mut _binding_0) => {
-            _visitor.visit_pat_mut(_binding_0);
+        FnArg::Typed(ref mut _binding_0) => {
+            _visitor.visit_arg_typed_mut(_binding_0);
         }
     }
 }
@@ -2829,6 +2816,19 @@ pub fn visit_range_limits_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut R
             tokens_helper(_visitor, &mut _binding_0.spans);
         }
     }
+}
+#[cfg(feature = "full")]
+pub fn visit_receiver_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Receiver) {
+    if let Some(ref mut it) = _i.reference {
+        tokens_helper(_visitor, &mut (it).0.spans);
+        if let Some(ref mut it) = (it).1 {
+            _visitor.visit_lifetime_mut(it)
+        };
+    };
+    if let Some(ref mut it) = _i.mutability {
+        tokens_helper(_visitor, &mut it.span)
+    };
+    tokens_helper(_visitor, &mut _i.self_token.span);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_return_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ReturnType) {

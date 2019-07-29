@@ -51,7 +51,7 @@
       }
     },
     {
-      "ident": "ArgCaptured",
+      "ident": "ArgTyped",
       "features": {
         "any": [
           "full"
@@ -66,50 +66,6 @@
         },
         "ty": {
           "syn": "Type"
-        }
-      }
-    },
-    {
-      "ident": "ArgSelf",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "mutability": {
-          "option": {
-            "token": "Mut"
-          }
-        },
-        "self_token": {
-          "token": "SelfValue"
-        }
-      }
-    },
-    {
-      "ident": "ArgSelfRef",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "and_token": {
-          "token": "And"
-        },
-        "lifetime": {
-          "option": {
-            "syn": "Lifetime"
-          }
-        },
-        "mutability": {
-          "option": {
-            "token": "Mut"
-          }
-        },
-        "self_token": {
-          "token": "SelfValue"
         }
       }
     },
@@ -473,6 +429,26 @@
         "gt_token": {
           "token": "Gt"
         }
+      }
+    },
+    {
+      "ident": "ClosureArg",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Typed": [
+          {
+            "syn": "ArgTyped"
+          }
+        ],
+        "Inferred": [
+          {
+            "syn": "Pat"
+          }
+        ]
       }
     },
     {
@@ -1201,7 +1177,7 @@
         "inputs": {
           "punctuated": {
             "element": {
-              "syn": "FnArg"
+              "syn": "ClosureArg"
             },
             "punct": "Comma"
           }
@@ -2214,24 +2190,14 @@
         ]
       },
       "variants": {
-        "SelfRef": [
+        "Receiver": [
           {
-            "syn": "ArgSelfRef"
+            "syn": "Receiver"
           }
         ],
-        "SelfValue": [
+        "Typed": [
           {
-            "syn": "ArgSelf"
-          }
-        ],
-        "Captured": [
-          {
-            "syn": "ArgCaptured"
-          }
-        ],
-        "Inferred": [
-          {
-            "syn": "Pat"
+            "syn": "ArgTyped"
           }
         ]
       }
@@ -4678,6 +4644,38 @@
             "token": "DotDotEq"
           }
         ]
+      }
+    },
+    {
+      "ident": "Receiver",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "reference": {
+          "option": {
+            "tuple": [
+              {
+                "token": "And"
+              },
+              {
+                "option": {
+                  "syn": "Lifetime"
+                }
+              }
+            ]
+          }
+        },
+        "mutability": {
+          "option": {
+            "token": "Mut"
+          }
+        },
+        "self_token": {
+          "token": "SelfValue"
+        }
       }
     },
     {

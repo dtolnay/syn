@@ -40,16 +40,8 @@ pub trait Fold {
         fold_angle_bracketed_generic_arguments(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_arg_captured(&mut self, i: ArgCaptured) -> ArgCaptured {
-        fold_arg_captured(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_arg_self(&mut self, i: ArgSelf) -> ArgSelf {
-        fold_arg_self(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_arg_self_ref(&mut self, i: ArgSelfRef) -> ArgSelfRef {
-        fold_arg_self_ref(self, i)
+    fn fold_arg_typed(&mut self, i: ArgTyped) -> ArgTyped {
+        fold_arg_typed(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_arm(&mut self, i: Arm) -> Arm {
@@ -86,6 +78,10 @@ pub trait Fold {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_bound_lifetimes(&mut self, i: BoundLifetimes) -> BoundLifetimes {
         fold_bound_lifetimes(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_closure_arg(&mut self, i: ClosureArg) -> ClosureArg {
+        fold_closure_arg(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_const_param(&mut self, i: ConstParam) -> ConstParam {
@@ -649,6 +645,10 @@ pub trait Fold {
     fn fold_range_limits(&mut self, i: RangeLimits) -> RangeLimits {
         fold_range_limits(self, i)
     }
+    #[cfg(feature = "full")]
+    fn fold_receiver(&mut self, i: Receiver) -> Receiver {
+        fold_receiver(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_return_type(&mut self, i: ReturnType) -> ReturnType {
         fold_return_type(self, i)
@@ -845,27 +845,11 @@ pub fn fold_angle_bracketed_generic_arguments<V: Fold + ?Sized>(
     }
 }
 #[cfg(feature = "full")]
-pub fn fold_arg_captured<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgCaptured) -> ArgCaptured {
-    ArgCaptured {
+pub fn fold_arg_typed<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgTyped) -> ArgTyped {
+    ArgTyped {
         pat: _visitor.fold_pat(_i.pat),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
         ty: _visitor.fold_type(_i.ty),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_arg_self<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgSelf) -> ArgSelf {
-    ArgSelf {
-        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
-        self_token: Token![self](tokens_helper(_visitor, &_i.self_token.span)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_arg_self_ref<V: Fold + ?Sized>(_visitor: &mut V, _i: ArgSelfRef) -> ArgSelfRef {
-    ArgSelfRef {
-        and_token: Token ! [ & ](tokens_helper(_visitor, &_i.and_token.spans)),
-        lifetime: (_i.lifetime).map(|it| _visitor.fold_lifetime(it)),
-        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
-        self_token: Token![self](tokens_helper(_visitor, &_i.self_token.span)),
     }
 }
 #[cfg(feature = "full")]
@@ -1042,6 +1026,13 @@ pub fn fold_bound_lifetimes<V: Fold + ?Sized>(
         lt_token: Token ! [ < ](tokens_helper(_visitor, &_i.lt_token.spans)),
         lifetimes: FoldHelper::lift(_i.lifetimes, |it| _visitor.fold_lifetime_def(it)),
         gt_token: Token ! [ > ](tokens_helper(_visitor, &_i.gt_token.spans)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_closure_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: ClosureArg) -> ClosureArg {
+    match _i {
+        ClosureArg::Typed(_binding_0) => ClosureArg::Typed(_visitor.fold_arg_typed(_binding_0)),
+        ClosureArg::Inferred(_binding_0) => ClosureArg::Inferred(_visitor.fold_pat(_binding_0)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1265,7 +1256,7 @@ pub fn fold_expr_closure<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprClosure) ->
         movability: (_i.movability).map(|it| Token![static](tokens_helper(_visitor, &it.span))),
         capture: (_i.capture).map(|it| Token![move](tokens_helper(_visitor, &it.span))),
         or1_token: Token ! [ | ](tokens_helper(_visitor, &_i.or1_token.spans)),
-        inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_fn_arg(it)),
+        inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_closure_arg(it)),
         or2_token: Token ! [ | ](tokens_helper(_visitor, &_i.or2_token.spans)),
         output: _visitor.fold_return_type(_i.output),
         body: Box::new(_visitor.fold_expr(*_i.body)),
@@ -1596,10 +1587,8 @@ pub fn fold_file<V: Fold + ?Sized>(_visitor: &mut V, _i: File) -> File {
 #[cfg(feature = "full")]
 pub fn fold_fn_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: FnArg) -> FnArg {
     match _i {
-        FnArg::SelfRef(_binding_0) => FnArg::SelfRef(_visitor.fold_arg_self_ref(_binding_0)),
-        FnArg::SelfValue(_binding_0) => FnArg::SelfValue(_visitor.fold_arg_self(_binding_0)),
-        FnArg::Captured(_binding_0) => FnArg::Captured(_visitor.fold_arg_captured(_binding_0)),
-        FnArg::Inferred(_binding_0) => FnArg::Inferred(_visitor.fold_pat(_binding_0)),
+        FnArg::Receiver(_binding_0) => FnArg::Receiver(_visitor.fold_receiver(_binding_0)),
+        FnArg::Typed(_binding_0) => FnArg::Typed(_visitor.fold_arg_typed(_binding_0)),
     }
 }
 #[cfg(feature = "full")]
@@ -2535,6 +2524,19 @@ pub fn fold_range_limits<V: Fold + ?Sized>(_visitor: &mut V, _i: RangeLimits) ->
         RangeLimits::Closed(_binding_0) => {
             RangeLimits::Closed(Token ! [ ..= ](tokens_helper(_visitor, &_binding_0.spans)))
         }
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_receiver<V: Fold + ?Sized>(_visitor: &mut V, _i: Receiver) -> Receiver {
+    Receiver {
+        reference: (_i.reference).map(|it| {
+            (
+                Token ! [ & ](tokens_helper(_visitor, &(it).0.spans)),
+                ((it).1).map(|it| _visitor.fold_lifetime(it)),
+            )
+        }),
+        mutability: (_i.mutability).map(|it| Token![mut](tokens_helper(_visitor, &it.span))),
+        self_token: Token![self](tokens_helper(_visitor, &_i.self_token.span)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
