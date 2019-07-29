@@ -388,6 +388,7 @@ mod parsing {
             input.parse::<Token![pub]>()?;
             input.parse::<Token![enum]>()?;
             let ident: Ident = input.parse()?;
+            skip_manual_extra_traits(input);
 
             let content;
             braced!(content in input);

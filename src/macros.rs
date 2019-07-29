@@ -50,6 +50,15 @@ macro_rules! ast_enum {
 
     (
         @@ [$($attrs_pub:tt)*]
+        enum $name:ident #manual_extra_traits $($rest:tt)*
+    ) => (
+        #[cfg_attr(feature = "extra-traits", derive(Debug))]
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        $($attrs_pub)* enum $name $($rest)*
+    );
+
+    (
+        @@ [$($attrs_pub:tt)*]
         enum $name:ident $($rest:tt)*
     ) => (
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -82,7 +91,7 @@ macro_rules! ast_enum {
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
-        $pub:ident $enum:ident $name:ident {
+        $pub:ident $enum:ident $name:ident $(# $tags:ident)* {
             $(
                 $(#[$variant_attr:meta])*
                 $vpub:ident $variant:ident $( ($member:ident $($rest:tt)*) )*,
@@ -96,7 +105,7 @@ macro_rules! ast_enum_of_structs {
 
         ast_enum! {
             $(#[$enum_attr])*
-            $pub $enum $name {
+            $pub $enum $name $(# $tags)* {
                 $(
                     $(#[$variant_attr])*
                     $variant $( ($member) )*,
