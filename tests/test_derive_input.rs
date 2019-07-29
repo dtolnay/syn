@@ -299,7 +299,7 @@ fn test_enum() {
    ⋮                ident: "Surprise",
    ⋮                fields: Unit,
    ⋮                discriminant: Some(Expr::Lit {
-   ⋮                    lit: 0,
+   ⋮                    lit: 0isize,
    ⋮                }),
    ⋮            },
    ⋮            Variant {
