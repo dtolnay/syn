@@ -66,7 +66,7 @@ ast_enum_of_structs! {
 
         /// An integer literal: `1` or `1u16`.
         ///
-        /// Holds up to 64 bits of data. Use `LitVerbatim` for any larger
+        /// Holds up to 64 bits of data. Use `Lit::Verbatim` for any larger
         /// integer literal.
         ///
         /// *This type is available if Syn is built with the `"derive"` or
@@ -99,9 +99,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"derive"` or
         /// `"full"` feature.*
-        pub Verbatim(LitVerbatim #manual_extra_traits {
-            pub token: Literal,
-        }),
+        pub Verbatim(Literal),
     }
 }
 
@@ -400,16 +398,6 @@ macro_rules! lit_extra_traits {
     };
 }
 
-impl LitVerbatim {
-    pub fn span(&self) -> Span {
-        self.token.span()
-    }
-
-    pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
-    }
-}
-
 lit_extra_traits!(LitStr, token);
 lit_extra_traits!(LitByteStr, token);
 lit_extra_traits!(LitByte, token);
@@ -417,7 +405,6 @@ lit_extra_traits!(LitChar, token);
 lit_extra_traits!(LitInt, token);
 lit_extra_traits!(LitFloat, token);
 lit_extra_traits!(LitBool, value);
-lit_extra_traits!(LitVerbatim, token);
 
 ast_enum! {
     /// The style of a string literal, either plain quoted or a raw string like
@@ -626,12 +613,6 @@ mod printing {
             tokens.append(Ident::new(s, self.span));
         }
     }
-
-    impl ToTokens for LitVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
-        }
-    }
 }
 
 mod value {
@@ -670,7 +651,7 @@ mod value {
                         return Lit::Float(LitFloat { token: token });
                     } else {
                         // number overflow
-                        return Lit::Verbatim(LitVerbatim { token: token });
+                        return Lit::Verbatim(token);
                     }
                 }
                 _ => {

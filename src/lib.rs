@@ -373,7 +373,7 @@ mod lit;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::lit::{
     FloatSuffix, IntSuffix, Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr,
-    LitVerbatim, StrStyle,
+    StrStyle,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]
