@@ -854,11 +854,7 @@ ast_enum_of_structs! {
         pub Slice(PatSlice {
             pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
-            pub front: Punctuated<Pat, Token![,]>,
-            pub middle: Option<Box<Pat>>,
-            pub dot2_token: Option<Token![..]>,
-            pub comma_token: Option<Token![,]>,
-            pub back: Punctuated<Pat, Token![,]>,
+            pub elems: Punctuated<Pat, Token![,]>,
         }),
 
         /// A struct or struct variant pattern: `Variant { x, y, .. }`.
@@ -878,10 +874,7 @@ ast_enum_of_structs! {
         pub Tuple(PatTuple {
             pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
-            pub front: Punctuated<Pat, Token![,]>,
-            pub dot2_token: Option<Token![..]>,
-            pub comma_token: Option<Token![,]>,
-            pub back: Punctuated<Pat, Token![,]>,
+            pub elems: Punctuated<Pat, Token![,]>,
         }),
 
         /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
@@ -2686,6 +2679,8 @@ pub mod parsing {
                 input.call(pat_reference).map(Pat::Reference)
             } else if lookahead.peek(token::Bracket) {
                 input.call(pat_slice).map(Pat::Slice)
+            } else if lookahead.peek(Token![..]) {
+                input.call(pat_rest).map(Pat::Rest)
             } else {
                 Err(lookahead.error())
             }
@@ -2965,45 +2960,21 @@ pub mod parsing {
         let content;
         let paren_token = parenthesized!(content in input);
 
-        let mut front = Punctuated::new();
-        let mut dot2_token = None::<Token![..]>;
-        let mut comma_token = None::<Token![,]>;
-        loop {
-            if content.is_empty() {
-                break;
-            }
-            if content.peek(Token![..]) {
-                dot2_token = Some(content.parse()?);
-                comma_token = content.parse()?;
-                break;
-            }
-            let value: Pat = content.parse()?;
-            front.push_value(value);
-            if content.is_empty() {
-                break;
-            }
-            let punct = content.parse()?;
-            front.push_punct(punct);
-        }
-
-        let mut back = Punctuated::new();
+        let mut elems = Punctuated::new();
         while !content.is_empty() {
             let value: Pat = content.parse()?;
-            back.push_value(value);
+            elems.push_value(value);
             if content.is_empty() {
                 break;
             }
             let punct = content.parse()?;
-            back.push_punct(punct);
+            elems.push_punct(punct);
         }
 
         Ok(PatTuple {
             attrs: Vec::new(),
             paren_token: paren_token,
-            front: front,
-            dot2_token: dot2_token,
-            comma_token: comma_token,
-            back: back,
+            elems: elems,
         })
     }
 
@@ -3072,54 +3043,29 @@ pub mod parsing {
         let content;
         let bracket_token = bracketed!(content in input);
 
-        let mut front = Punctuated::new();
-        let mut middle = None;
-        loop {
-            if content.is_empty() || content.peek(Token![..]) {
-                break;
-            }
+        let mut elems = Punctuated::new();
+        while !content.is_empty() {
             let value: Pat = content.parse()?;
-            if content.peek(Token![..]) {
-                middle = Some(Box::new(value));
-                break;
-            }
-            front.push_value(value);
+            elems.push_value(value);
             if content.is_empty() {
                 break;
             }
             let punct = content.parse()?;
-            front.push_punct(punct);
-        }
-
-        let dot2_token: Option<Token![..]> = content.parse()?;
-        let mut comma_token = None::<Token![,]>;
-        let mut back = Punctuated::new();
-        if dot2_token.is_some() {
-            comma_token = content.parse()?;
-            if comma_token.is_some() {
-                loop {
-                    if content.is_empty() {
-                        break;
-                    }
-                    let value: Pat = content.parse()?;
-                    back.push_value(value);
-                    if content.is_empty() {
-                        break;
-                    }
-                    let punct = content.parse()?;
-                    back.push_punct(punct);
-                }
-            }
+            elems.push_punct(punct);
         }
 
         Ok(PatSlice {
             attrs: Vec::new(),
             bracket_token: bracket_token,
-            front: front,
-            middle: middle,
-            dot2_token: dot2_token,
-            comma_token: comma_token,
-            back: back,
+            elems: elems,
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn pat_rest(input: ParseStream) -> Result<PatRest> {
+        Ok(PatRest {
+            attrs: Vec::new(),
+            dot2_token: input.parse()?,
         })
     }
 
@@ -3786,20 +3732,7 @@ mod printing {
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {
-                self.front.to_tokens(tokens);
-                if let Some(ref dot2_token) = self.dot2_token {
-                    if !self.front.empty_or_trailing() {
-                        // Ensure there is a comma before the .. token.
-                        <Token![,]>::default().to_tokens(tokens);
-                    }
-                    dot2_token.to_tokens(tokens);
-                    self.comma_token.to_tokens(tokens);
-                    if self.comma_token.is_none() && !self.back.is_empty() {
-                        // Ensure there is a comma after the .. token.
-                        <Token![,]>::default().to_tokens(tokens);
-                    }
-                }
-                self.back.to_tokens(tokens);
+                self.elems.to_tokens(tokens);
             });
         }
     }
@@ -3851,32 +3784,8 @@ mod printing {
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.bracket_token.surround(tokens, |tokens| {
-                self.front.to_tokens(tokens);
-
-                // If we need a comma before the middle or standalone .. token,
-                // then make sure it's present.
-                if !self.front.empty_or_trailing()
-                    && (self.middle.is_some() || self.dot2_token.is_some())
-                {
-                    <Token![,]>::default().to_tokens(tokens);
-                }
-
-                // If we have an identifier, we always need a .. token.
-                if self.middle.is_some() {
-                    self.middle.to_tokens(tokens);
-                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
-                } else if self.dot2_token.is_some() {
-                    self.dot2_token.to_tokens(tokens);
-                }
-
-                // Make sure we have a comma before the back half.
-                if !self.back.is_empty() {
-                    TokensOrDefault(&self.comma_token).to_tokens(tokens);
-                    self.back.to_tokens(tokens);
-                } else {
-                    self.comma_token.to_tokens(tokens);
-                }
-            })
+                self.elems.to_tokens(tokens);
+            });
         }
     }
 

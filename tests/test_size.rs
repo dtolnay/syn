@@ -22,5 +22,5 @@ fn test_type_size() {
 
 #[test]
 fn test_pat_size() {
-    assert_eq!(mem::size_of::<Pat>(), 192);
+    assert_eq!(mem::size_of::<Pat>(), 144);
 }
