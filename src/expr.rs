@@ -892,7 +892,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub pat: Box<Pat>,
             pub colon_token: Token![:],
-            pub ty: Type,
+            pub ty: Box<Type>,
         }),
 
         /// Tokens in pattern position not interpreted by Syn.

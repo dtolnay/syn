@@ -4494,7 +4494,9 @@
           "token": "Colon"
         },
         "ty": {
-          "syn": "Type"
+          "box": {
+            "syn": "Type"
+          }
         }
       }
     },

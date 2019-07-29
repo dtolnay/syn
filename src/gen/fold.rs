@@ -2451,7 +2451,7 @@ pub fn fold_pat_type<V: Fold + ?Sized>(_visitor: &mut V, _i: PatType) -> PatType
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         pat: Box::new(_visitor.fold_pat(*_i.pat)),
         colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
-        ty: _visitor.fold_type(_i.ty),
+        ty: Box::new(_visitor.fold_type(*_i.ty)),
     }
 }
 #[cfg(feature = "full")]

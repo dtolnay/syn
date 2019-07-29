@@ -2763,7 +2763,7 @@ pub fn visit_pat_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatTy
     }
     _visitor.visit_pat_mut(&mut *_i.pat);
     tokens_helper(_visitor, &mut _i.colon_token.spans);
-    _visitor.visit_type_mut(&mut _i.ty);
+    _visitor.visit_type_mut(&mut *_i.ty);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatVerbatim) {
