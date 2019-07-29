@@ -237,8 +237,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub label: Option<Label>,
             pub for_token: Token![for],
-            pub leading_vert: Option<Token![|]>,
-            pub pats: Punctuated<Pat, Token![|]>,
+            pub pat: Pat,
             pub in_token: Token![in],
             pub expr: Box<Expr>,
             pub body: Block,
@@ -299,8 +298,7 @@ ast_enum_of_structs! {
         pub Let(ExprLet #full {
             pub attrs: Vec<Attribute>,
             pub let_token: Token![let],
-            pub leading_vert: Option<Token![|]>,
-            pub pats: Punctuated<Pat, Token![|]>,
+            pub pat: Pat,
             pub eq_token: Token![=],
             pub expr: Box<Expr>,
         }),
@@ -750,8 +748,7 @@ ast_struct! {
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
-        pub leading_vert: Option<Token![|]>,
-        pub pats: Punctuated<Pat, Token![|]>,
+        pub pat: Pat,
         pub ty: Option<(Token![:], Box<Type>)>,
         pub init: Option<(Token![=], Box<Expr>)>,
         pub semi_token: Token![;],
@@ -973,8 +970,7 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct Arm {
         pub attrs: Vec<Attribute>,
-        pub leading_vert: Option<Token![|]>,
-        pub pats: Punctuated<Pat, Token![|]>,
+        pub pat: Pat,
         pub guard: Option<(Token![if], Box<Expr>)>,
         pub fat_arrow_token: Token![=>],
         pub body: Box<Expr>,
@@ -1817,18 +1813,26 @@ pub mod parsing {
         Ok(ExprLet {
             attrs: Vec::new(),
             let_token: input.parse()?,
-            leading_vert: input.parse()?,
-            pats: {
-                let mut pats = Punctuated::new();
-                let value: Pat = input.parse()?;
-                pats.push_value(value);
-                while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
-                    let punct = input.parse()?;
-                    pats.push_punct(punct);
-                    let value: Pat = input.parse()?;
-                    pats.push_value(value);
+            pat: {
+                let leading_vert: Option<Token![|]> = input.parse()?;
+                let pat: Pat = input.parse()?;
+                if leading_vert.is_some() || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                    let mut cases = Punctuated::new();
+                    cases.push_value(pat);
+                    while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                        let punct = input.parse()?;
+                        cases.push_punct(punct);
+                        let pat: Pat = input.parse()?;
+                        cases.push_value(pat);
+                    }
+                    Pat::Or(PatOr {
+                        attrs: Vec::new(),
+                        leading_vert,
+                        cases,
+                    })
+                } else {
+                    pat
                 }
-                pats
             },
             eq_token: input.parse()?,
             expr: Box::new(input.call(expr_no_struct)?),
@@ -1879,19 +1883,23 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let label: Option<Label> = input.parse()?;
             let for_token: Token![for] = input.parse()?;
-            let leading_vert: Option<Token![|]> = input.parse()?;
 
-            let mut pats = Punctuated::new();
-            let value: Pat = input.parse()?;
-            pats.push_value(value);
-            loop {
-                if !input.peek(Token![|]) {
-                    break;
+            let leading_vert: Option<Token![|]> = input.parse()?;
+            let mut pat: Pat = input.parse()?;
+            if leading_vert.is_some() || input.peek(Token![|]) {
+                let mut cases = Punctuated::new();
+                cases.push_value(pat);
+                while input.peek(Token![|]) {
+                    let punct = input.parse()?;
+                    cases.push_punct(punct);
+                    let pat: Pat = input.parse()?;
+                    cases.push_value(pat);
                 }
-                let punct = input.parse()?;
-                pats.push_punct(punct);
-                let value: Pat = input.parse()?;
-                pats.push_value(value);
+                pat = Pat::Or(PatOr {
+                    attrs: Vec::new(),
+                    leading_vert,
+                    cases,
+                });
             }
 
             let in_token: Token![in] = input.parse()?;
@@ -1906,8 +1914,7 @@ pub mod parsing {
                 attrs: inner_attrs,
                 label: label,
                 for_token: for_token,
-                leading_vert: leading_vert,
-                pats: pats,
+                pat: pat,
                 in_token: in_token,
                 expr: Box::new(expr),
                 body: Block {
@@ -2599,18 +2606,26 @@ pub mod parsing {
         Ok(Local {
             attrs: input.call(Attribute::parse_outer)?,
             let_token: input.parse()?,
-            leading_vert: input.parse()?,
-            pats: {
-                let mut pats = Punctuated::new();
-                let value: Pat = input.parse()?;
-                pats.push_value(value);
-                while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
-                    let punct = input.parse()?;
-                    pats.push_punct(punct);
-                    let value: Pat = input.parse()?;
-                    pats.push_value(value);
+            pat: {
+                let leading_vert: Option<Token![|]> = input.parse()?;
+                let pat: Pat = input.parse()?;
+                if leading_vert.is_some() || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                    let mut cases = Punctuated::new();
+                    cases.push_value(pat);
+                    while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                        let punct = input.parse()?;
+                        cases.push_punct(punct);
+                        let pat: Pat = input.parse()?;
+                        cases.push_value(pat);
+                    }
+                    Pat::Or(PatOr {
+                        attrs: Vec::new(),
+                        leading_vert,
+                        cases,
+                    })
+                } else {
+                    pat
                 }
-                pats
             },
             ty: {
                 if input.peek(Token![:]) {
@@ -2904,21 +2919,26 @@ pub mod parsing {
             let requires_comma;
             Ok(Arm {
                 attrs: input.call(Attribute::parse_outer)?,
-                leading_vert: input.parse()?,
-                pats: {
-                    let mut pats = Punctuated::new();
-                    let value: Pat = input.parse()?;
-                    pats.push_value(value);
-                    loop {
-                        if !input.peek(Token![|]) {
-                            break;
+                pat: {
+                    let leading_vert: Option<Token![|]> = input.parse()?;
+                    let pat: Pat = input.parse()?;
+                    if leading_vert.is_some() || input.peek(Token![|]) {
+                        let mut cases = Punctuated::new();
+                        cases.push_value(pat);
+                        while input.peek(Token![|]) {
+                            let punct = input.parse()?;
+                            cases.push_punct(punct);
+                            let pat: Pat = input.parse()?;
+                            cases.push_value(pat);
                         }
-                        let punct = input.parse()?;
-                        pats.push_punct(punct);
-                        let value: Pat = input.parse()?;
-                        pats.push_value(value);
+                        Pat::Or(PatOr {
+                            attrs: Vec::new(),
+                            leading_vert,
+                            cases,
+                        })
+                    } else {
+                        pat
                     }
-                    pats
                 },
                 guard: {
                     if input.peek(Token![if]) {
@@ -3305,8 +3325,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
-            self.leading_vert.to_tokens(tokens);
-            self.pats.to_tokens(tokens);
+            self.pat.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
         }
@@ -3343,8 +3362,7 @@ mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.for_token.to_tokens(tokens);
-            self.leading_vert.to_tokens(tokens);
-            self.pats.to_tokens(tokens);
+            self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.expr);
             self.body.brace_token.surround(tokens, |tokens| {
@@ -3675,8 +3693,7 @@ mod printing {
     impl ToTokens for Arm {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(&self.attrs);
-            self.leading_vert.to_tokens(tokens);
-            self.pats.to_tokens(tokens);
+            self.pat.to_tokens(tokens);
             if let Some((ref if_token, ref guard)) = self.guard {
                 if_token.to_tokens(tokens);
                 guard.to_tokens(tokens);
@@ -3870,8 +3887,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
-            self.leading_vert.to_tokens(tokens);
-            self.pats.to_tokens(tokens);
+            self.pat.to_tokens(tokens);
             if let Some((ref colon_token, ref ty)) = self.ty {
                 colon_token.to_tokens(tokens);
                 ty.to_tokens(tokens);
