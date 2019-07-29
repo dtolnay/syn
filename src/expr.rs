@@ -784,6 +784,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Box(PatBox {
+            pub attrs: Vec<Attribute>,
             pub box_token: Token![box],
             pub pat: Box<Pat>,
         }),
@@ -792,6 +793,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Ident(PatIdent {
+            pub attrs: Vec<Attribute>,
             pub by_ref: Option<Token![ref]>,
             pub mutability: Option<Token![mut]>,
             pub ident: Ident,
@@ -805,6 +807,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Lit(PatLit {
+            pub attrs: Vec<Attribute>,
             pub expr: Box<Expr>,
         }),
 
@@ -812,6 +815,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Macro(PatMacro {
+            pub attrs: Vec<Attribute>,
             pub mac: Macro,
         }),
 
@@ -825,6 +829,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Path(PatPath {
+            pub attrs: Vec<Attribute>,
             pub qself: Option<QSelf>,
             pub path: Path,
         }),
@@ -833,6 +838,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Range(PatRange {
+            pub attrs: Vec<Attribute>,
             pub lo: Box<Expr>,
             pub limits: RangeLimits,
             pub hi: Box<Expr>,
@@ -842,6 +848,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Ref(PatRef {
+            pub attrs: Vec<Attribute>,
             pub and_token: Token![&],
             pub mutability: Option<Token![mut]>,
             pub pat: Box<Pat>,
@@ -851,6 +858,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Slice(PatSlice {
+            pub attrs: Vec<Attribute>,
             pub bracket_token: token::Bracket,
             pub front: Punctuated<Pat, Token![,]>,
             pub middle: Option<Box<Pat>>,
@@ -863,6 +871,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Struct(PatStruct {
+            pub attrs: Vec<Attribute>,
             pub path: Path,
             pub brace_token: token::Brace,
             pub fields: Punctuated<FieldPat, Token![,]>,
@@ -873,6 +882,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Tuple(PatTuple {
+            pub attrs: Vec<Attribute>,
             pub paren_token: token::Paren,
             pub front: Punctuated<Pat, Token![,]>,
             pub dot2_token: Option<Token![..]>,
@@ -884,6 +894,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub TupleStruct(PatTupleStruct {
+            pub attrs: Vec<Attribute>,
             pub path: Path,
             pub pat: PatTuple,
         }),
@@ -899,6 +910,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Wild(PatWild {
+            pub attrs: Vec<Attribute>,
             pub underscore_token: Token![_],
         }),
     }
@@ -2667,6 +2679,7 @@ pub mod parsing {
 
         if qself.is_some() {
             return Ok(Pat::Path(PatPath {
+                attrs: Vec::new(),
                 qself: qself,
                 path: path,
             }));
@@ -2687,6 +2700,7 @@ pub mod parsing {
                 let bang_token: Token![!] = input.parse()?;
                 let (delimiter, tokens) = mac::parse_delimiter(input)?;
                 return Ok(Pat::Macro(PatMacro {
+                    attrs: Vec::new(),
                     mac: Macro {
                         path: path,
                         bang_token: bang_token,
@@ -2705,6 +2719,7 @@ pub mod parsing {
             pat_range(input, qself, path).map(Pat::Range)
         } else {
             Ok(Pat::Path(PatPath {
+                attrs: Vec::new(),
                 qself: qself,
                 path: path,
             }))
@@ -2714,6 +2729,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn pat_wild(input: ParseStream) -> Result<PatWild> {
         Ok(PatWild {
+            attrs: Vec::new(),
             underscore_token: input.parse()?,
         })
     }
@@ -2721,6 +2737,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn pat_box(input: ParseStream) -> Result<PatBox> {
         Ok(PatBox {
+            attrs: Vec::new(),
             box_token: input.parse()?,
             pat: input.parse()?,
         })
@@ -2729,6 +2746,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn pat_ident(input: ParseStream) -> Result<PatIdent> {
         Ok(PatIdent {
+            attrs: Vec::new(),
             by_ref: input.parse()?,
             mutability: input.parse()?,
             ident: input.call(Ident::parse_any)?,
@@ -2747,6 +2765,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn pat_tuple_struct(input: ParseStream, path: Path) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
+            attrs: Vec::new(),
             path: path,
             pat: input.call(pat_tuple)?,
         })
@@ -2775,6 +2794,7 @@ pub mod parsing {
         };
 
         Ok(PatStruct {
+            attrs: Vec::new(),
             path: path,
             brace_token: brace_token,
             fields: fields,
@@ -2806,6 +2826,7 @@ pub mod parsing {
         };
 
         let mut pat = Pat::Ident(PatIdent {
+            attrs: Vec::new(),
             by_ref: by_ref,
             mutability: mutability,
             ident: ident.clone(),
@@ -2814,6 +2835,7 @@ pub mod parsing {
 
         if let Some(boxed) = boxed {
             pat = Pat::Box(PatBox {
+                attrs: Vec::new(),
                 pat: Box::new(pat),
                 box_token: boxed,
             });
@@ -2904,6 +2926,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatRange> {
         Ok(PatRange {
+            attrs: Vec::new(),
             lo: Box::new(Expr::Path(ExprPath {
                 attrs: Vec::new(),
                 qself: qself,
@@ -2952,6 +2975,7 @@ pub mod parsing {
         }
 
         Ok(PatTuple {
+            attrs: Vec::new(),
             paren_token: paren_token,
             front: front,
             dot2_token: dot2_token,
@@ -2963,6 +2987,7 @@ pub mod parsing {
     #[cfg(feature = "full")]
     fn pat_ref(input: ParseStream) -> Result<PatRef> {
         Ok(PatRef {
+            attrs: Vec::new(),
             and_token: input.parse()?,
             mutability: input.parse()?,
             pat: input.parse()?,
@@ -2974,12 +2999,16 @@ pub mod parsing {
         let lo = input.call(pat_lit_expr)?;
         if input.peek(Token![..]) {
             Ok(Pat::Range(PatRange {
+                attrs: Vec::new(),
                 lo: lo,
                 limits: input.parse()?,
                 hi: input.call(pat_lit_expr)?,
             }))
         } else {
-            Ok(Pat::Lit(PatLit { expr: lo }))
+            Ok(Pat::Lit(PatLit {
+                attrs: Vec::new(),
+                expr: lo,
+            }))
         }
     }
 
@@ -3061,6 +3090,7 @@ pub mod parsing {
         }
 
         Ok(PatSlice {
+            attrs: Vec::new(),
             bracket_token: bracket_token,
             front: front,
             middle: middle,
