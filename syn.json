@@ -4143,6 +4143,11 @@
             "syn": "PatTupleStruct"
           }
         ],
+        "Type": [
+          {
+            "syn": "PatType"
+          }
+        ],
         "Verbatim": [
           {
             "syn": "PatVerbatim"
@@ -4484,6 +4489,32 @@
         },
         "pat": {
           "syn": "PatTuple"
+        }
+      }
+    },
+    {
+      "ident": "PatType",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "pat": {
+          "box": {
+            "syn": "Pat"
+          }
+        },
+        "colon_token": {
+          "token": "Colon"
+        },
+        "ty": {
+          "syn": "Type"
         }
       }
     },

@@ -4397,6 +4397,15 @@ impl Debug for Lite<syn::Pat> {
                 formatter.field("pat", Lite(&_val.pat));
                 formatter.finish()
             }
+            syn::Pat::Type(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Type");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("pat", Lite(&_val.pat));
+                formatter.field("ty", Lite(&_val.ty));
+                formatter.finish()
+            }
             syn::Pat::Verbatim(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Verbatim");
                 formatter.field("tokens", Lite(&_val.tokens));
@@ -4690,6 +4699,18 @@ impl Debug for Lite<syn::PatTupleStruct> {
         }
         formatter.field("path", Lite(&_val.path));
         formatter.field("pat", Lite(&_val.pat));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::PatType> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("PatType");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.field("pat", Lite(&_val.pat));
+        formatter.field("ty", Lite(&_val.ty));
         formatter.finish()
     }
 }

@@ -606,6 +606,10 @@ pub trait Fold {
         fold_pat_tuple_struct(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_pat_type(&mut self, i: PatType) -> PatType {
+        fold_pat_type(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_pat_verbatim(&mut self, i: PatVerbatim) -> PatVerbatim {
         fold_pat_verbatim(self, i)
     }
@@ -2340,6 +2344,7 @@ pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
         Pat::TupleStruct(_binding_0) => {
             Pat::TupleStruct(_visitor.fold_pat_tuple_struct(_binding_0))
         }
+        Pat::Type(_binding_0) => Pat::Type(_visitor.fold_pat_type(_binding_0)),
         Pat::Verbatim(_binding_0) => Pat::Verbatim(_visitor.fold_pat_verbatim(_binding_0)),
         Pat::Wild(_binding_0) => Pat::Wild(_visitor.fold_pat_wild(_binding_0)),
     }
@@ -2449,6 +2454,15 @@ pub fn fold_pat_tuple_struct<V: Fold + ?Sized>(
         attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         path: _visitor.fold_path(_i.path),
         pat: _visitor.fold_pat_tuple(_i.pat),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_pat_type<V: Fold + ?Sized>(_visitor: &mut V, _i: PatType) -> PatType {
+    PatType {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        pat: Box::new(_visitor.fold_pat(*_i.pat)),
+        colon_token: Token ! [ : ](tokens_helper(_visitor, &_i.colon_token.spans)),
+        ty: _visitor.fold_type(_i.ty),
     }
 }
 #[cfg(feature = "full")]
