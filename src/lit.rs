@@ -1,4 +1,5 @@
 use proc_macro2::{Literal, Span};
+use std::fmt::{self, Display};
 use std::str;
 
 #[cfg(feature = "printing")]
@@ -398,6 +399,12 @@ impl LitInt {
     }
 }
 
+impl Display for LitInt {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        self.token.fmt(formatter)
+    }
+}
+
 impl LitFloat {
     pub fn new(value: f64, suffix: FloatSuffix, span: Span) -> Self {
         let mut token = match suffix {
@@ -429,6 +436,12 @@ impl LitFloat {
 
     pub fn set_span(&mut self, span: Span) {
         self.token.set_span(span)
+    }
+}
+
+impl Display for LitFloat {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        self.token.fmt(formatter)
     }
 }
 
