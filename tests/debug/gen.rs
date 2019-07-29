@@ -3591,8 +3591,8 @@ impl Debug for Lite<syn::Lit> {
             syn::Lit::ByteStr(_val) => write!(formatter, "{:?}", _val.value()),
             syn::Lit::Byte(_val) => write!(formatter, "{:?}", _val.value()),
             syn::Lit::Char(_val) => write!(formatter, "{:?}", _val.value()),
-            syn::Lit::Int(_val) => write!(formatter, "{:?}", _val.value()),
-            syn::Lit::Float(_val) => write!(formatter, "{:?}", _val.value()),
+            syn::Lit::Int(_val) => write!(formatter, "{}", _val),
+            syn::Lit::Float(_val) => write!(formatter, "{}", _val),
             syn::Lit::Bool(_val) => {
                 let mut formatter = formatter.debug_struct("Lit::Bool");
                 formatter.field("value", Lite(&_val.value));
@@ -3637,13 +3637,13 @@ impl Debug for Lite<syn::LitChar> {
 impl Debug for Lite<syn::LitFloat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
-        write!(formatter, "{:?}", _val.value())
+        write!(formatter, "{}", _val)
     }
 }
 impl Debug for Lite<syn::LitInt> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
-        write!(formatter, "{:?}", _val.value())
+        write!(formatter, "{}", _val)
     }
 }
 impl Debug for Lite<syn::LitStr> {
