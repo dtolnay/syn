@@ -350,12 +350,12 @@ pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
-    FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
+    FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro,
     ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
     ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
     ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
     ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-    ItemUnion, ItemUse, ItemVerbatim, MethodSig, Receiver, TraitItem, TraitItemConst, TraitItemMacro,
+    ItemUnion, ItemUse, ItemVerbatim, Receiver, Signature, TraitItem, TraitItemConst, TraitItemMacro,
     TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath,
     UseRename, UseTree, Variadic,
 };

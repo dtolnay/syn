@@ -85,12 +85,7 @@ ast_enum_of_structs! {
         pub Fn(ItemFn {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub constness: Option<Token![const]>,
-            pub asyncness: Option<Token![async]>,
-            pub unsafety: Option<Token![unsafe]>,
-            pub abi: Option<Abi>,
-            pub ident: Ident,
-            pub decl: Box<FnDecl>,
+            pub sig: Signature,
             pub block: Box<Block>,
         }),
 
@@ -420,8 +415,7 @@ ast_enum_of_structs! {
         pub Fn(ForeignItemFn {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
-            pub ident: Ident,
-            pub decl: Box<FnDecl>,
+            pub sig: Signature,
             pub semi_token: Token![;],
         }),
 
@@ -520,7 +514,7 @@ ast_enum_of_structs! {
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Method(TraitItemMethod {
             pub attrs: Vec<Attribute>,
-            pub sig: MethodSig,
+            pub sig: Signature,
             pub default: Option<Block>,
             pub semi_token: Option<Token![;]>,
         }),
@@ -614,7 +608,7 @@ ast_enum_of_structs! {
             pub attrs: Vec<Attribute>,
             pub vis: Visibility,
             pub defaultness: Option<Token![default]>,
-            pub sig: MethodSig,
+            pub sig: Signature,
             pub block: Block,
         }),
 
@@ -686,26 +680,17 @@ impl Hash for ImplItemVerbatim {
 }
 
 ast_struct! {
-    /// A method's signature in a trait or implementation: `unsafe fn
+    /// A function signature in a trait or implementation: `unsafe fn
     /// initialize(&self)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct MethodSig {
+    pub struct Signature {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
         pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
-        pub ident: Ident,
-        pub decl: FnDecl,
-    }
-}
-
-ast_struct! {
-    /// Header of a function declaration, without including the body.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct FnDecl {
         pub fn_token: Token![fn],
+        pub ident: Ident,
         pub generics: Generics,
         pub paren_token: token::Paren,
         pub inputs: Punctuated<FnArg, Token![,]>,
@@ -1137,13 +1122,13 @@ pub mod parsing {
             Ok(ItemFn {
                 attrs: private::attrs(outer_attrs, inner_attrs),
                 vis: vis,
-                constness: constness,
-                asyncness: asyncness,
-                unsafety: unsafety,
-                abi: abi,
-                ident: ident,
-                decl: Box::new(FnDecl {
+                sig: Signature {
+                    constness: constness,
+                    asyncness: asyncness,
+                    unsafety: unsafety,
+                    abi: abi,
                     fn_token: fn_token,
+                    ident: ident,
                     paren_token: paren_token,
                     inputs: inputs,
                     output: output,
@@ -1152,7 +1137,7 @@ pub mod parsing {
                         where_clause: where_clause,
                         ..generics
                     },
-                }),
+                },
                 block: Box::new(Block {
                     brace_token: brace_token,
                     stmts: stmts,
@@ -1362,9 +1347,13 @@ pub mod parsing {
             Ok(ForeignItemFn {
                 attrs: attrs,
                 vis: vis,
-                ident: ident,
-                decl: Box::new(FnDecl {
+                sig: Signature {
+                    constness: None,
+                    asyncness: None,
+                    unsafety: None,
+                    abi: None,
                     fn_token: fn_token,
+                    ident: ident,
                     paren_token: paren_token,
                     inputs: inputs,
                     output: output,
@@ -1373,7 +1362,7 @@ pub mod parsing {
                         where_clause: where_clause,
                         ..generics
                     },
-                }),
+                },
                 semi_token: semi_token,
             })
         }
@@ -1806,22 +1795,20 @@ pub mod parsing {
 
             Ok(TraitItemMethod {
                 attrs: private::attrs(outer_attrs, inner_attrs),
-                sig: MethodSig {
+                sig: Signature {
                     constness: constness,
                     asyncness: asyncness,
                     unsafety: unsafety,
                     abi: abi,
+                    fn_token: fn_token,
                     ident: ident,
-                    decl: FnDecl {
-                        fn_token: fn_token,
-                        paren_token: paren_token,
-                        inputs: inputs,
-                        output: output,
-                        variadic: None,
-                        generics: Generics {
-                            where_clause: where_clause,
-                            ..generics
-                        },
+                    paren_token: paren_token,
+                    inputs: inputs,
+                    output: output,
+                    variadic: None,
+                    generics: Generics {
+                        where_clause: where_clause,
+                        ..generics
                     },
                 },
                 default: brace_token.map(|brace_token| Block {
@@ -2075,22 +2062,20 @@ pub mod parsing {
                 attrs: private::attrs(outer_attrs, inner_attrs),
                 vis: vis,
                 defaultness: defaultness,
-                sig: MethodSig {
+                sig: Signature {
                     constness: constness,
                     asyncness: asyncness,
                     unsafety: unsafety,
                     abi: abi,
+                    fn_token: fn_token,
                     ident: ident,
-                    decl: FnDecl {
-                        fn_token: fn_token,
-                        paren_token: paren_token,
-                        inputs: inputs,
-                        output: output,
-                        variadic: None,
-                        generics: Generics {
-                            where_clause: where_clause,
-                            ..generics
-                        },
+                    paren_token: paren_token,
+                    inputs: inputs,
+                    output: output,
+                    variadic: None,
+                    generics: Generics {
+                        where_clause: where_clause,
+                        ..generics
                     },
                 },
                 block: Block {
@@ -2242,11 +2227,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            self.constness.to_tokens(tokens);
-            self.asyncness.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
-            self.abi.to_tokens(tokens);
-            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
+            self.sig.to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.attrs.inner());
                 tokens.append_all(&self.block.stmts);
@@ -2635,7 +2616,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
+            self.sig.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -2677,32 +2658,24 @@ mod printing {
         }
     }
 
-    impl ToTokens for MethodSig {
+    impl ToTokens for Signature {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
-            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
-        }
-    }
-
-    struct NamedDecl<'a>(&'a FnDecl, &'a Ident);
-
-    impl<'a> ToTokens for NamedDecl<'a> {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.0.fn_token.to_tokens(tokens);
-            self.1.to_tokens(tokens);
-            self.0.generics.to_tokens(tokens);
-            self.0.paren_token.surround(tokens, |tokens| {
-                self.0.inputs.to_tokens(tokens);
-                if self.0.variadic.is_some() && !self.0.inputs.empty_or_trailing() {
+            self.fn_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.inputs.to_tokens(tokens);
+                if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
-                self.0.variadic.to_tokens(tokens);
+                self.variadic.to_tokens(tokens);
             });
-            self.0.output.to_tokens(tokens);
-            self.0.generics.where_clause.to_tokens(tokens);
+            self.output.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
         }
     }
 
