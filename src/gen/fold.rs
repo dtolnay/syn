@@ -883,6 +883,7 @@ pub fn fold_attribute<V: Fold + ?Sized>(_visitor: &mut V, _i: Attribute) -> Attr
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_bare_fn_arg<V: Fold + ?Sized>(_visitor: &mut V, _i: BareFnArg) -> BareFnArg {
     BareFnArg {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
         name: (_i.name).map(|it| {
             (
                 _visitor.fold_bare_fn_arg_name((it).0),

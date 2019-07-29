@@ -888,6 +888,9 @@ pub fn visit_attribute_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Attr
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bare_fn_arg_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut BareFnArg) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
     if let Some(ref mut it) = _i.name {
         _visitor.visit_bare_fn_arg_name_mut(&mut (it).0);
         tokens_helper(_visitor, &mut (it).1.spans);

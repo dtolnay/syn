@@ -128,6 +128,9 @@ impl Debug for Lite<syn::BareFnArg> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("BareFnArg");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         if let Some(val) = &_val.name {
             #[derive(RefCast)]
             #[repr(transparent)]

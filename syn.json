@@ -157,6 +157,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "name": {
           "option": {
             "tuple": [
