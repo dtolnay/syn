@@ -53,11 +53,8 @@ impl Args {
     /// Determines whether the given `Pat` is an identifier equal to one of the
     /// variables we intend to print. Patterns are used as the left-hand side of
     /// a `let` binding.
-    fn should_print_pat(&self, p: &Punctuated<Pat, Token![|]>) -> bool {
-        if p.len() != 1 {
-            return false;
-        }
-        match p[0] {
+    fn should_print_pat(&self, p: &Pat) -> bool {
+        match p {
             Pat::Ident(ref p) => self.vars.contains(&p.ident),
             _ => false,
         }
@@ -88,16 +85,14 @@ impl Args {
     ///     // After
     ///     let VAR = { let VAR = INIT; println!("VAR = {:?}", VAR); VAR };
     fn let_and_print(&mut self, local: Local) -> Stmt {
-        let Local { pats, ty, init, .. } = local;
-        let pat = &pats[0];
-        let ty = ty.map(|(colon_token, ty)| quote!(#colon_token #ty));
+        let Local { pat, init, .. } = local;
         let init = self.fold_expr(*init.unwrap().1);
-        let ident = match *pat {
+        let ident = match pat {
             Pat::Ident(ref p) => &p.ident,
             _ => unreachable!(),
         };
         parse_quote! {
-            let #pat #ty = {
+            let #pat = {
                 #[allow(unused_mut)]
                 let #pat = #init;
                 println!(concat!(stringify!(#ident), " = {:?}"), #ident);
@@ -143,7 +138,7 @@ impl Fold for Args {
     fn fold_stmt(&mut self, s: Stmt) -> Stmt {
         match s {
             Stmt::Local(s) => {
-                if s.init.is_some() && self.should_print_pat(&s.pats) {
+                if s.init.is_some() && self.should_print_pat(&s.pat) {
                     self.let_and_print(s)
                 } else {
                     Stmt::Local(fold::fold_local(self, s))

@@ -189,8 +189,8 @@ fn test_fn_precedence_in_where_clause() {
     snapshot!(input as ItemFn, @r###"
    ⋮ItemFn {
    ⋮    vis: Inherited,
-   ⋮    ident: "f",
-   ⋮    decl: FnDecl {
+   ⋮    sig: Signature {
+   ⋮        ident: "f",
    ⋮        generics: Generics {
    ⋮            lt_token: Some,
    ⋮            params: [
@@ -259,7 +259,7 @@ fn test_fn_precedence_in_where_clause() {
    ⋮}
     "###);
 
-    let where_clause = input.decl.generics.where_clause.as_ref().unwrap();
+    let where_clause = input.sig.generics.where_clause.as_ref().unwrap();
     assert_eq!(where_clause.predicates.len(), 1);
 
     let predicate = match &where_clause.predicates[0] {

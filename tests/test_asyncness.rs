@@ -14,9 +14,9 @@ fn test_async_fn() {
     snapshot!(input as Item, @r###"
    ⋮Item::Fn {
    ⋮    vis: Inherited,
-   ⋮    asyncness: Some,
-   ⋮    ident: "process",
-   ⋮    decl: FnDecl {
+   ⋮    sig: Signature {
+   ⋮        asyncness: Some,
+   ⋮        ident: "process",
    ⋮        generics: Generics,
    ⋮        output: Default,
    ⋮    },
