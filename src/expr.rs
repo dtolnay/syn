@@ -813,6 +813,15 @@ ast_enum_of_structs! {
             pub mac: Macro,
         }),
 
+        /// A pattern that matches any one of a set of cases.
+        ///
+        /// *This type is available if Syn is built with the `"full"` feature.*
+        pub Or(PatOr {
+            pub attrs: Vec<Attribute>,
+            pub leading_vert: Option<Token![|]>,
+            pub cases: Punctuated<Pat, Token![|]>,
+        }),
+
         /// A path pattern like `Color::Red`, optionally qualified with a
         /// self-type.
         ///
@@ -2130,6 +2139,7 @@ pub mod parsing {
                 Pat::Ident(pat) => pat.attrs = attrs,
                 Pat::Lit(pat) => pat.attrs = attrs,
                 Pat::Macro(pat) => pat.attrs = attrs,
+                Pat::Or(pat) => pat.attrs = attrs,
                 Pat::Path(pat) => pat.attrs = attrs,
                 Pat::Range(pat) => pat.attrs = attrs,
                 Pat::Reference(pat) => pat.attrs = attrs,
@@ -3802,6 +3812,14 @@ mod printing {
     impl ToTokens for PatMacro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.mac.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl ToTokens for PatOr {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.leading_vert.to_tokens(tokens);
+            self.cases.to_tokens(tokens);
         }
     }
 
