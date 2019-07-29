@@ -669,7 +669,7 @@ mod value {
                     _ => {}
                 },
                 b'\'' => return Lit::Char(LitChar { token: token }),
-                b'0'...b'9' => {
+                b'0'...b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
                         if let Some((digits, suffix)) = parse_lit_int(&repr) {
                             return Lit::Int(LitInt { token, digits, suffix });
@@ -1012,6 +1012,11 @@ mod value {
 
     // Returns base 10 digits and suffix.
     pub fn parse_lit_int(mut s: &str) -> Option<(String, String)> {
+        let negative = byte(s, 0) == b'-';
+        if negative {
+            s = &s[1..];
+        }
+
         let base = match (byte(s, 0), byte(s, 1)) {
             (b'0', b'x') => {
                 s = &s[2..];
@@ -1058,7 +1063,11 @@ mod value {
 
         let suffix = s;
         if suffix.is_empty() || crate::ident::xid_ok(&suffix) {
-            Some((value.to_string(), suffix.to_owned()))
+            let mut repr = value.to_string();
+            if negative {
+                repr.insert(0, '-');
+            }
+            Some((repr, suffix.to_owned()))
         } else {
             None
         }
@@ -1072,43 +1081,65 @@ mod value {
 
         let mut bytes = input.to_owned().into_bytes();
 
-        match bytes.get(0)? {
+        let start = (*bytes.get(0)? == b'-') as usize;
+        match bytes.get(start)? {
             b'0'..=b'9' => {}
             _ => return None,
         }
 
-        let mut write = 0;
-        let mut has_e = false;
+        let mut read = start;
+        let mut write = start;
         let mut has_dot = false;
-        for read in 0..bytes.len() {
+        let mut has_e = false;
+        let mut has_neg = false;
+        let mut has_exponent = false;
+        while read < bytes.len() {
             match bytes[read] {
-                b'_' => continue, // Don't increase write
-                b @ b'0'..=b'9' => bytes[write] = b,
-                b'e' | b'E' => {
+                b'_' => {
+                    // Don't increase write
+                    read += 1;
+                    continue;
+                }
+                b @ b'0'..=b'9' => {
                     if has_e {
-                        return None;
+                        has_exponent = true;
                     }
-                    bytes[write] = b'e';
-                    has_e = true;
+                    bytes[write] = b;
                 }
                 b'.' => {
                     if has_e || has_dot {
                         return None;
                     }
-                    bytes[write] = b'.';
                     has_dot = true;
+                    bytes[write] = b'.';
+                }
+                b'e' | b'E' => {
+                    if has_e {
+                        return None;
+                    }
+                    has_e = true;
+                    bytes[write] = b'e';
+                }
+                b'-' => {
+                    if has_neg || has_exponent || !has_e {
+                        return None;
+                    }
+                    has_neg = true;
+                    bytes[write] = b'-';
                 }
                 _ => break,
             }
+            read += 1;
             write += 1;
         }
 
-        if !has_e && !has_dot {
+        if has_e && !has_exponent {
             return None;
         }
 
         let mut digits = String::from_utf8(bytes).unwrap();
-        let suffix = digits.split_off(write);
+        let suffix = digits.split_off(read);
+        digits.truncate(write);
         if suffix.is_empty() || crate::ident::xid_ok(&suffix) {
             Some((digits, suffix))
         } else {
