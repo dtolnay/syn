@@ -3742,6 +3742,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for PatType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
             self.pat.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);

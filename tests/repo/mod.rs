@@ -35,10 +35,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path_string.as_ref() {
-        // TODO: attributes on function parameters
-        // https://github.com/dtolnay/syn/issues/646
-        //   extern "C" { fn ffi(#[allow(C)] a: i32); }
-        "tests/rust/src/test/ui/rfc-2565-param-attrs/param-attrs-allowed.rs" |
         // Deprecated placement syntax
         "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
         // Deprecated anonymous parameter syntax in traits

@@ -724,6 +724,7 @@ ast_enum_of_structs! {
         ///
         /// *This type is available if Syn is built with the `"full"` feature.*
         pub Receiver(Receiver {
+            pub attrs: Vec<Attribute>,
             pub reference: Option<(Token![&], Option<Lifetime>)>,
             pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
@@ -1137,16 +1138,19 @@ pub mod parsing {
 
     impl Parse for FnArg {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+
             let ahead = input.fork();
-            if let Ok(receiver) = ahead.parse() {
+            if let Ok(mut receiver) = ahead.parse::<Receiver>() {
                 if !ahead.peek(Token![:]) {
                     input.advance_to(&ahead);
+                    receiver.attrs = attrs;
                     return Ok(FnArg::Receiver(receiver));
                 }
             }
 
             Ok(FnArg::Typed(PatType {
-                attrs: Vec::new(),
+                attrs: attrs,
                 pat: input.parse()?,
                 colon_token: input.parse()?,
                 ty: Box::new(match input.parse::<Option<Token![...]>>()? {
@@ -1173,6 +1177,7 @@ pub mod parsing {
     impl Parse for Receiver {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Receiver {
+                attrs: Vec::new(),
                 reference: {
                     if input.peek(Token![&]) {
                         Some((input.parse()?, input.parse()?))
@@ -2668,6 +2673,7 @@ mod printing {
 
     impl ToTokens for Receiver {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
             if let Some((ampersand, lifetime)) = &self.reference {
                 ampersand.to_tokens(tokens);
                 lifetime.to_tokens(tokens);
