@@ -1091,7 +1091,7 @@ mod value {
         let mut write = start;
         let mut has_dot = false;
         let mut has_e = false;
-        let mut has_neg = false;
+        let mut has_sign = false;
         let mut has_exponent = false;
         while read < bytes.len() {
             match bytes[read] {
@@ -1100,11 +1100,11 @@ mod value {
                     read += 1;
                     continue;
                 }
-                b @ b'0'..=b'9' => {
+                b'0'..=b'9' => {
                     if has_e {
                         has_exponent = true;
                     }
-                    bytes[write] = b;
+                    bytes[write] = bytes[read];
                 }
                 b'.' => {
                     if has_e || has_dot {
@@ -1120,12 +1120,18 @@ mod value {
                     has_e = true;
                     bytes[write] = b'e';
                 }
-                b'-' => {
-                    if has_neg || has_exponent || !has_e {
+                b'-' | b'+' => {
+                    if has_sign || has_exponent || !has_e {
                         return None;
                     }
-                    has_neg = true;
-                    bytes[write] = b'-';
+                    has_sign = true;
+                    if bytes[read] == b'-' {
+                        bytes[write] = bytes[read];
+                    } else {
+                        // Omit '+'
+                        read += 1;
+                        continue;
+                    }
                 }
                 _ => break,
             }
