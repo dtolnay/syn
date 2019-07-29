@@ -251,8 +251,14 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
             }
         }
         Data::Private => {
-            quote! {
-                write!(formatter, "{:?}", _val.value())
+            if node.ident == "LitInt" || node.ident == "LitFloat" {
+                quote! {
+                    write!(formatter, "{}", _val)
+                }
+            } else {
+                quote! {
+                    write!(formatter, "{:?}", _val.value())
+                }
             }
         }
     }

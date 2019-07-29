@@ -310,6 +310,9 @@ pub use crate::attr::{
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]
+mod bigint;
+
+#[cfg(any(feature = "full", feature = "derive"))]
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::data::{
@@ -372,8 +375,7 @@ pub use crate::lifetime::Lifetime;
 mod lit;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::lit::{
-    FloatSuffix, IntSuffix, Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr,
-    StrStyle,
+    Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr, StrStyle,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]

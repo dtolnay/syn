@@ -33,24 +33,24 @@ fn test_grouping() {
     snapshot!(tokens as Expr, @r###"
    ⋮Expr::Binary {
    ⋮    left: Expr::Lit {
-   ⋮        lit: 1,
+   ⋮        lit: 1i32,
    ⋮    },
    ⋮    op: Add,
    ⋮    right: Expr::Binary {
    ⋮        left: Expr::Group {
    ⋮            expr: Expr::Binary {
    ⋮                left: Expr::Lit {
-   ⋮                    lit: 2,
+   ⋮                    lit: 2i32,
    ⋮                },
    ⋮                op: Add,
    ⋮                right: Expr::Lit {
-   ⋮                    lit: 3,
+   ⋮                    lit: 3i32,
    ⋮                },
    ⋮            },
    ⋮        },
    ⋮        op: Mul,
    ⋮        right: Expr::Lit {
-   ⋮            lit: 4,
+   ⋮            lit: 4i32,
    ⋮        },
    ⋮    },
    ⋮}
