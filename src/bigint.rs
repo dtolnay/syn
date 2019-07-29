@@ -41,8 +41,15 @@ impl AddAssign<u8> for BigInt {
 }
 
 impl MulAssign<u8> for BigInt {
+    // Assumes base <=16.
     fn mul_assign(&mut self, base: u8) {
-        let _ = base;
-        unimplemented!()
+        self.reserve_two_digits();
+
+        let mut carry = 0;
+        for digit in &mut self.digits {
+            let prod = *digit * base + carry;
+            *digit = prod % 10;
+            carry = prod / 10;
+        }
     }
 }
