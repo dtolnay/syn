@@ -785,6 +785,10 @@ pub trait Fold {
     fn fold_use_tree(&mut self, i: UseTree) -> UseTree {
         fold_use_tree(self, i)
     }
+    #[cfg(feature = "full")]
+    fn fold_variadic(&mut self, i: Variadic) -> Variadic {
+        fold_variadic(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_variant(&mut self, i: Variant) -> Variant {
         fold_variant(self, i)
@@ -1579,7 +1583,7 @@ pub fn fold_fn_decl<V: Fold + ?Sized>(_visitor: &mut V, _i: FnDecl) -> FnDecl {
         generics: _visitor.fold_generics(_i.generics),
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
         inputs: FoldHelper::lift(_i.inputs, |it| _visitor.fold_fn_arg(it)),
-        variadic: (_i.variadic).map(|it| Token ! [ ... ](tokens_helper(_visitor, &it.spans))),
+        variadic: (_i.variadic).map(|it| _visitor.fold_variadic(it)),
         output: _visitor.fold_return_type(_i.output),
     }
 }
@@ -2894,6 +2898,13 @@ pub fn fold_use_tree<V: Fold + ?Sized>(_visitor: &mut V, _i: UseTree) -> UseTree
         UseTree::Rename(_binding_0) => UseTree::Rename(_visitor.fold_use_rename(_binding_0)),
         UseTree::Glob(_binding_0) => UseTree::Glob(_visitor.fold_use_glob(_binding_0)),
         UseTree::Group(_binding_0) => UseTree::Group(_visitor.fold_use_group(_binding_0)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_variadic<V: Fold + ?Sized>(_visitor: &mut V, _i: Variadic) -> Variadic {
+    Variadic {
+        attrs: FoldHelper::lift(_i.attrs, |it| _visitor.fold_attribute(it)),
+        dots: Token ! [ ... ](tokens_helper(_visitor, &_i.dots.spans)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

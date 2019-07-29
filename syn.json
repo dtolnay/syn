@@ -2190,7 +2190,7 @@
         },
         "variadic": {
           "option": {
-            "token": "Dot3"
+            "syn": "Variadic"
           }
         },
         "output": {
@@ -5655,6 +5655,24 @@
             "syn": "UseGroup"
           }
         ]
+      }
+    },
+    {
+      "ident": "Variadic",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "dots": {
+          "token": "Dot3"
+        }
       }
     },
     {

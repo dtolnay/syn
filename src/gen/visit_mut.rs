@@ -786,6 +786,10 @@ pub trait VisitMut {
     fn visit_use_tree_mut(&mut self, i: &mut UseTree) {
         visit_use_tree_mut(self, i)
     }
+    #[cfg(feature = "full")]
+    fn visit_variadic_mut(&mut self, i: &mut Variadic) {
+        visit_variadic_mut(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_variant_mut(&mut self, i: &mut Variant) {
         visit_variant_mut(self, i)
@@ -1746,7 +1750,7 @@ pub fn visit_fn_decl_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut FnDecl
         _visitor.visit_fn_arg_mut(it)
     }
     if let Some(ref mut it) = _i.variadic {
-        tokens_helper(_visitor, &mut it.spans)
+        _visitor.visit_variadic_mut(it)
     };
     _visitor.visit_return_type_mut(&mut _i.output);
 }
@@ -3260,6 +3264,13 @@ pub fn visit_use_tree_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut UseTr
             _visitor.visit_use_group_mut(_binding_0);
         }
     }
+}
+#[cfg(feature = "full")]
+pub fn visit_variadic_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Variadic) {
+    for it in &mut _i.attrs {
+        _visitor.visit_attribute_mut(it)
+    }
+    tokens_helper(_visitor, &mut _i.dots.spans);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_variant_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Variant) {
