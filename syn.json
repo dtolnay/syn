@@ -3552,7 +3552,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "LitVerbatim"
+            "proc_macro2": "Literal"
           }
         ]
       }
@@ -3626,20 +3626,6 @@
           "derive",
           "full"
         ]
-      }
-    },
-    {
-      "ident": "LitVerbatim",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "token": {
-          "proc_macro2": "Literal"
-        }
       }
     },
     {

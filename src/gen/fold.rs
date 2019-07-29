@@ -494,10 +494,6 @@ pub trait Fold {
     fn fold_lit_str(&mut self, i: LitStr) -> LitStr {
         fold_lit_str(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_lit_verbatim(&mut self, i: LitVerbatim) -> LitVerbatim {
-        fold_lit_verbatim(self, i)
-    }
     #[cfg(feature = "full")]
     fn fold_local(&mut self, i: Local) -> Local {
         fold_local(self, i)
@@ -2116,7 +2112,7 @@ pub fn fold_lit<V: Fold + ?Sized>(_visitor: &mut V, _i: Lit) -> Lit {
         Lit::Int(_binding_0) => Lit::Int(_visitor.fold_lit_int(_binding_0)),
         Lit::Float(_binding_0) => Lit::Float(_visitor.fold_lit_float(_binding_0)),
         Lit::Bool(_binding_0) => Lit::Bool(_visitor.fold_lit_bool(_binding_0)),
-        Lit::Verbatim(_binding_0) => Lit::Verbatim(_visitor.fold_lit_verbatim(_binding_0)),
+        Lit::Verbatim(_binding_0) => Lit::Verbatim(_binding_0),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2167,10 +2163,6 @@ pub fn fold_lit_str<V: Fold + ?Sized>(_visitor: &mut V, _i: LitStr) -> LitStr {
     let mut _i = _i;
     _i.set_span(span);
     _i
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_lit_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: LitVerbatim) -> LitVerbatim {
-    LitVerbatim { token: _i.token }
 }
 #[cfg(feature = "full")]
 pub fn fold_local<V: Fold + ?Sized>(_visitor: &mut V, _i: Local) -> Local {

@@ -3599,9 +3599,11 @@ impl Debug for Lite<syn::Lit> {
                 formatter.finish()
             }
             syn::Lit::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("Lit::Verbatim");
-                formatter.field("token", Lite(&_val.token));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -3648,14 +3650,6 @@ impl Debug for Lite<syn::LitStr> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         write!(formatter, "{:?}", _val.value())
-    }
-}
-impl Debug for Lite<syn::LitVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("LitVerbatim");
-        formatter.field("token", Lite(&_val.token));
-        formatter.finish()
     }
 }
 impl Debug for Lite<syn::Local> {

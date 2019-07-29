@@ -498,10 +498,6 @@ pub trait VisitMut {
     fn visit_lit_str_mut(&mut self, i: &mut LitStr) {
         visit_lit_str_mut(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_lit_verbatim_mut(&mut self, i: &mut LitVerbatim) {
-        visit_lit_verbatim_mut(self, i)
-    }
     #[cfg(feature = "full")]
     fn visit_local_mut(&mut self, i: &mut Local) {
         visit_local_mut(self, i)
@@ -2365,7 +2361,7 @@ pub fn visit_lit_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Lit) {
             _visitor.visit_lit_bool_mut(_binding_0);
         }
         Lit::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_lit_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
     }
 }
@@ -2386,10 +2382,6 @@ pub fn visit_lit_float_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitF
 pub fn visit_lit_int_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitInt) {}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_lit_str_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitStr) {}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_lit_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut LitVerbatim) {
-    skip!(_i.token);
-}
 #[cfg(feature = "full")]
 pub fn visit_local_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Local) {
     for it in &mut _i.attrs {
