@@ -321,17 +321,16 @@ pub use crate::data::{
 mod expr;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
-    ClosureArg, Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
+    Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
     ExprBox, ExprBreak, ExprCall, ExprCast, ExprClosure, ExprContinue, ExprField, ExprForLoop,
     ExprGroup, ExprIf, ExprInPlace, ExprIndex, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch,
     ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn,
     ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprType, ExprUnary, ExprUnsafe, ExprVerbatim,
     ExprWhile, ExprYield, Index, Member,
 };
-
 #[cfg(feature = "full")]
 pub use crate::expr::{
-    Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
+    Arm, Block, ClosureArg, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
     PatBox, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatRef, PatSlice, PatStruct, PatTuple,
     PatTupleStruct, PatVerbatim, PatWild, RangeLimits, Stmt,
 };
