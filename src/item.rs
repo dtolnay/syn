@@ -730,13 +730,7 @@ ast_enum_of_structs! {
         }),
 
         /// A function argument accepted by pattern and type.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
-        pub Typed(ArgTyped {
-            pub pat: Pat,
-            pub colon_token: Token![:],
-            pub ty: Type,
-        }),
+        pub Typed(PatType),
     }
 }
 
@@ -1095,13 +1089,16 @@ pub mod parsing {
             let content;
             let paren_token = parenthesized!(content in input);
             let inputs = content.parse_terminated(FnArg::parse)?;
-            let variadic: Option<Token![...]> = match inputs.last() {
-                Some(&FnArg::Typed(ArgTyped {
-                    ty: Type::Verbatim(TypeVerbatim { ref tokens }),
-                    ..
-                })) if inputs.empty_or_trailing() => parse2(tokens.clone()).ok(),
-                _ => None,
-            };
+            let variadic = inputs.last().as_ref().and_then(get_variadic);
+
+            fn get_variadic(input: &&FnArg) -> Option<Token![...]> {
+                if let FnArg::Typed(PatType { ty, .. }) = input {
+                    if let Type::Verbatim(TypeVerbatim { tokens }) = &**ty {
+                        return parse2(tokens.clone()).ok();
+                    }
+                }
+                None
+            }
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
@@ -1147,7 +1144,29 @@ pub mod parsing {
                     return Ok(FnArg::Receiver(receiver));
                 }
             }
-            input.parse().map(FnArg::Typed)
+
+            Ok(FnArg::Typed(PatType {
+                attrs: Vec::new(),
+                pat: input.parse()?,
+                colon_token: input.parse()?,
+                ty: Box::new(match input.parse::<Option<Token![...]>>()? {
+                    Some(dot3) => {
+                        let args = vec![
+                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                            TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+                        ];
+                        let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
+                            |(mut arg, span)| {
+                                arg.set_span(*span);
+                                arg
+                            },
+                        ));
+                        Type::Verbatim(TypeVerbatim { tokens: tokens })
+                    }
+                    None => input.parse()?,
+                }),
+            }))
         }
     }
 
@@ -1163,32 +1182,6 @@ pub mod parsing {
                 },
                 mutability: input.parse()?,
                 self_token: input.parse()?,
-            })
-        }
-    }
-
-    impl Parse for ArgTyped {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ArgTyped {
-                pat: input.parse()?,
-                colon_token: input.parse()?,
-                ty: match input.parse::<Token![...]>() {
-                    Ok(dot3) => {
-                        let args = vec![
-                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                            TokenTree::Punct(Punct::new('.', Spacing::Alone)),
-                        ];
-                        let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
-                            |(mut arg, span)| {
-                                arg.set_span(*span);
-                                arg
-                            },
-                        ));
-                        Type::Verbatim(TypeVerbatim { tokens: tokens })
-                    }
-                    Err(_) => input.parse()?,
-                },
             })
         }
     }
@@ -2681,14 +2674,6 @@ mod printing {
             }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ArgTyped {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.pat.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.ty.to_tokens(tokens);
         }
     }
 }

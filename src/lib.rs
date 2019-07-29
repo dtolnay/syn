@@ -350,7 +350,7 @@ pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
-    ArgTyped, FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
+    FnArg, FnDecl, ForeignItem, ForeignItemFn, ForeignItemMacro,
     ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
     ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
     ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
