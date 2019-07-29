@@ -13,7 +13,21 @@ impl BigInt {
     }
 
     pub fn to_string(&self) -> String {
-        unimplemented!()
+        let mut repr = String::with_capacity(self.digits.len());
+
+        let mut has_nonzero = false;
+        for digit in self.digits.iter().rev() {
+            has_nonzero |= *digit != 0;
+            if has_nonzero {
+                repr.push((*digit + b'0') as char);
+            }
+        }
+
+        if repr.is_empty() {
+            repr.push('0');
+        }
+
+        repr
     }
 
     fn reserve_two_digits(&mut self) {
