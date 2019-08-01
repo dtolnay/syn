@@ -42,6 +42,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/ui/issues/issue-13105.rs" |
         "tests/rust/src/test/ui/issues/issue-13775.rs" |
         "tests/rust/src/test/ui/issues/issue-34074.rs" |
+        // Deprecated await macro syntax
+        "tests/rust/src/test/ui/async-await/await-macro.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
         // not actually test cases
