@@ -251,6 +251,7 @@
     clippy::redundant_field_names,
     clippy::redundant_static_lifetimes,
     clippy::too_many_arguments,
+    clippy::trivially_copy_pass_by_ref,
 )]
 // Ignored clippy_pedantic lints.
 #![allow(

@@ -208,8 +208,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         VISIT_SRC,
         quote! {
-            #![allow(clippy::trivially_copy_pass_by_ref)]
-
             use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::punctuated::Punctuated;
