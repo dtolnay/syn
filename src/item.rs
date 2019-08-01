@@ -1159,7 +1159,9 @@ pub mod parsing {
                 }
             }
 
-            input.call(fn_arg_typed).map(FnArg::Typed)
+            let mut typed = input.call(fn_arg_typed)?;
+            typed.attrs = attrs;
+            Ok(FnArg::Typed(typed))
         }
     }
 
