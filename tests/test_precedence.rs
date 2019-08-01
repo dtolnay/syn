@@ -219,7 +219,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     use rustc_data_structures::thin_vec::ThinVec;
     use smallvec::SmallVec;
     use std::mem;
-    use syntax::ast::{AwaitOrigin, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
+    use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::mut_visit::{self, MutVisitor};
     use syntax_pos::DUMMY_SP;
 
@@ -230,10 +230,6 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     impl BracketsVisitor {
         fn recurse_expr(&mut self, e: &mut Expr) {
             match e.node {
-                ExprKind::Await(AwaitOrigin::MacroLike, _) => {
-                    // Syn sees await!() as macro and doesn't recurse inside, so
-                    // skip it here too.
-                }
                 _ => mut_visit::noop_visit_expr(e, self),
             }
         }

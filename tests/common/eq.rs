@@ -265,7 +265,7 @@ macro_rules! spanless_eq_enum {
 
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
-spanless_eq_struct!(Arg; attrs ty pat id);
+spanless_eq_struct!(Arg; attrs ty pat id span);
 spanless_eq_struct!(Arm; attrs pats guard body span);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
@@ -361,7 +361,7 @@ spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredica
 spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1) If(0 1 2)
     While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1) Closure(0 1 2 3 4 5)
-    Block(0 1) Async(0 1 2) Await(0 1) TryBlock(0) Assign(0 1) AssignOp(0 1 2)
+    Block(0 1) Async(0 1 2) Await(0) TryBlock(0) Assign(0 1) AssignOp(0 1 2)
     Field(0 1) Index(0 1) Range(0 1 2) Path(0 1) AddrOf(0 1) Break(0 1)
     Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
