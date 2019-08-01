@@ -237,42 +237,35 @@
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn-next/1.0.0-rc1")]
 #![allow(unknown_lints, bare_trait_objects, ellipsis_inclusive_range_patterns)]
-#![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
-#![cfg_attr(feature = "cargo-clippy", deny(clippy, clippy_pedantic))]
+#![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(
-        block_in_if_condition_stmt,
-        cognitive_complexity,
-        deprecated_cfg_attr,
-        doc_markdown,
-        eval_order_dependence,
-        large_enum_variant,
-        needless_pass_by_value,
-        never_loop,
-        redundant_field_names,
-        redundant_static_lifetimes,
-        too_many_arguments,
-    )
+#![allow(
+    clippy::block_in_if_condition_stmt,
+    clippy::cognitive_complexity,
+    clippy::deprecated_cfg_attr,
+    clippy::doc_markdown,
+    clippy::eval_order_dependence,
+    clippy::large_enum_variant,
+    clippy::needless_pass_by_value,
+    clippy::never_loop,
+    clippy::redundant_field_names,
+    clippy::redundant_static_lifetimes,
+    clippy::too_many_arguments,
 )]
 // Ignored clippy_pedantic lints.
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(
-        cast_possible_truncation,
-        cast_possible_wrap,
-        empty_enum,
-        if_not_else,
-        items_after_statements,
-        module_name_repetitions,
-        shadow_unrelated,
-        similar_names,
-        single_match_else,
-        unseparated_literal_suffix,
-        use_self,
-        used_underscore_binding,
-    )
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::empty_enum,
+    clippy::if_not_else,
+    clippy::items_after_statements,
+    clippy::module_name_repetitions,
+    clippy::shadow_unrelated,
+    clippy::similar_names,
+    clippy::single_match_else,
+    clippy::unseparated_literal_suffix,
+    clippy::use_self,
+    clippy::used_underscore_binding,
 )]
 
 #[cfg(all(

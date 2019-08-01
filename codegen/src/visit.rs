@@ -208,7 +208,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         VISIT_SRC,
         quote! {
-            #![cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
+            #![allow(clippy::trivially_copy_pass_by_ref)]
 
             use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]

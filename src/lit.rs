@@ -719,7 +719,7 @@ mod value {
 
     // Clippy false positive
     // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
-    #[cfg_attr(feature = "cargo-clippy", allow(needless_continue))]
+    #[allow(clippy::needless_continue)]
     fn parse_lit_str_cooked(mut s: &str) -> String {
         assert_eq!(byte(s, 0), b'"');
         s = &s[1..];
@@ -807,7 +807,7 @@ mod value {
 
     // Clippy false positive
     // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
-    #[cfg_attr(feature = "cargo-clippy", allow(needless_continue))]
+    #[allow(clippy::needless_continue)]
     fn parse_lit_byte_str_cooked(mut s: &str) -> Vec<u8> {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'"');
