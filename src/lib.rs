@@ -245,11 +245,13 @@
     clippy::deprecated_cfg_attr,
     clippy::doc_markdown,
     clippy::eval_order_dependence,
+    clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::needless_pass_by_value,
     clippy::never_loop,
     clippy::redundant_field_names,
     clippy::redundant_static_lifetimes,
+    clippy::suspicious_op_assign_impl,
     clippy::too_many_arguments,
     clippy::trivially_copy_pass_by_ref,
 )]
