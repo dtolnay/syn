@@ -61,7 +61,7 @@ fn visit(
             let val = visit(t, features, defs, &it)?;
             let name = name.owned_tokens();
             Some(quote! {
-                if let Some(ref mut it) = #name {
+                if let Some(it) = &mut #name {
                     #val
                 }
             })
@@ -140,7 +140,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                         let binding = Ident::new(&name, Span::call_site());
 
                         bind_visit_mut_fields.extend(quote! {
-                            ref mut #binding,
+                            #binding,
                         });
 
                         let borrowed_binding = Borrowed(quote!(#binding));
@@ -168,7 +168,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             };
 
             visit_mut_impl.extend(quote! {
-                match *_i {
+                match _i {
                     #visit_mut_variants
                     #nonexhaustive
                 }

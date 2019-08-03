@@ -796,7 +796,7 @@ pub trait Visit<'ast> {
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_abi<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Abi) {
     tokens_helper(_visitor, &_i.extern_token.span);
-    if let Some(ref it) = _i.name {
+    if let Some(it) = &_i.name {
         _visitor.visit_lit_str(it)
     };
 }
@@ -805,7 +805,7 @@ pub fn visit_angle_bracketed_generic_arguments<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast AngleBracketedGenericArguments,
 ) {
-    if let Some(ref it) = _i.colon2_token {
+    if let Some(it) = &_i.colon2_token {
         tokens_helper(_visitor, &it.spans)
     };
     tokens_helper(_visitor, &_i.lt_token.spans);
@@ -821,21 +821,21 @@ pub fn visit_arm<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Arm)
         _visitor.visit_attribute(it)
     }
     _visitor.visit_pat(&_i.pat);
-    if let Some(ref it) = _i.guard {
+    if let Some(it) = &_i.guard {
         tokens_helper(_visitor, &(it).0.span);
         _visitor.visit_expr(&*(it).1);
     };
     tokens_helper(_visitor, &_i.fat_arrow_token.spans);
     _visitor.visit_expr(&*_i.body);
-    if let Some(ref it) = _i.comma {
+    if let Some(it) = &_i.comma {
         tokens_helper(_visitor, &it.spans)
     };
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_attr_style<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast AttrStyle) {
-    match *_i {
+    match _i {
         AttrStyle::Outer => {}
-        AttrStyle::Inner(ref _binding_0) => {
+        AttrStyle::Inner(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
     }
@@ -853,7 +853,7 @@ pub fn visit_bare_fn_arg<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.name {
+    if let Some(it) = &_i.name {
         _visitor.visit_bare_fn_arg_name(&(it).0);
         tokens_helper(_visitor, &(it).1.spans);
     };
@@ -864,100 +864,100 @@ pub fn visit_bare_fn_arg_name<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast BareFnArgName,
 ) {
-    match *_i {
-        BareFnArgName::Named(ref _binding_0) => {
+    match _i {
+        BareFnArgName::Named(_binding_0) => {
             _visitor.visit_ident(_binding_0);
         }
-        BareFnArgName::Wild(ref _binding_0) => {
+        BareFnArgName::Wild(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bin_op<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast BinOp) {
-    match *_i {
-        BinOp::Add(ref _binding_0) => {
+    match _i {
+        BinOp::Add(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Sub(ref _binding_0) => {
+        BinOp::Sub(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Mul(ref _binding_0) => {
+        BinOp::Mul(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Div(ref _binding_0) => {
+        BinOp::Div(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Rem(ref _binding_0) => {
+        BinOp::Rem(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::And(ref _binding_0) => {
+        BinOp::And(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Or(ref _binding_0) => {
+        BinOp::Or(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::BitXor(ref _binding_0) => {
+        BinOp::BitXor(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::BitAnd(ref _binding_0) => {
+        BinOp::BitAnd(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::BitOr(ref _binding_0) => {
+        BinOp::BitOr(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Shl(ref _binding_0) => {
+        BinOp::Shl(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Shr(ref _binding_0) => {
+        BinOp::Shr(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Eq(ref _binding_0) => {
+        BinOp::Eq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Lt(ref _binding_0) => {
+        BinOp::Lt(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Le(ref _binding_0) => {
+        BinOp::Le(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Ne(ref _binding_0) => {
+        BinOp::Ne(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Ge(ref _binding_0) => {
+        BinOp::Ge(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::Gt(ref _binding_0) => {
+        BinOp::Gt(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::AddEq(ref _binding_0) => {
+        BinOp::AddEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::SubEq(ref _binding_0) => {
+        BinOp::SubEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::MulEq(ref _binding_0) => {
+        BinOp::MulEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::DivEq(ref _binding_0) => {
+        BinOp::DivEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::RemEq(ref _binding_0) => {
+        BinOp::RemEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::BitXorEq(ref _binding_0) => {
+        BinOp::BitXorEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::BitAndEq(ref _binding_0) => {
+        BinOp::BitAndEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::BitOrEq(ref _binding_0) => {
+        BinOp::BitOrEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::ShlEq(ref _binding_0) => {
+        BinOp::ShlEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        BinOp::ShrEq(ref _binding_0) => {
+        BinOp::ShrEq(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
     }
@@ -997,10 +997,10 @@ pub fn visit_const_param<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     _visitor.visit_ident(&_i.ident);
     tokens_helper(_visitor, &_i.colon_token.spans);
     _visitor.visit_type(&_i.ty);
-    if let Some(ref it) = _i.eq_token {
+    if let Some(it) = &_i.eq_token {
         tokens_helper(_visitor, &it.spans)
     };
-    if let Some(ref it) = _i.default {
+    if let Some(it) = &_i.default {
         _visitor.visit_expr(it)
     };
 }
@@ -1015,14 +1015,14 @@ pub fn visit_constraint<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(feature = "derive")]
 pub fn visit_data<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Data) {
-    match *_i {
-        Data::Struct(ref _binding_0) => {
+    match _i {
+        Data::Struct(_binding_0) => {
             _visitor.visit_data_struct(_binding_0);
         }
-        Data::Enum(ref _binding_0) => {
+        Data::Enum(_binding_0) => {
             _visitor.visit_data_enum(_binding_0);
         }
-        Data::Union(ref _binding_0) => {
+        Data::Union(_binding_0) => {
             _visitor.visit_data_union(_binding_0);
         }
     }
@@ -1040,7 +1040,7 @@ pub fn visit_data_enum<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 pub fn visit_data_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast DataStruct) {
     tokens_helper(_visitor, &_i.struct_token.span);
     _visitor.visit_fields(&_i.fields);
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -1061,128 +1061,128 @@ pub fn visit_derive_input<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Expr) {
-    match *_i {
-        Expr::Array(ref _binding_0) => {
+    match _i {
+        Expr::Array(_binding_0) => {
             full!(_visitor.visit_expr_array(_binding_0));
         }
-        Expr::Assign(ref _binding_0) => {
+        Expr::Assign(_binding_0) => {
             full!(_visitor.visit_expr_assign(_binding_0));
         }
-        Expr::AssignOp(ref _binding_0) => {
+        Expr::AssignOp(_binding_0) => {
             full!(_visitor.visit_expr_assign_op(_binding_0));
         }
-        Expr::Async(ref _binding_0) => {
+        Expr::Async(_binding_0) => {
             full!(_visitor.visit_expr_async(_binding_0));
         }
-        Expr::Await(ref _binding_0) => {
+        Expr::Await(_binding_0) => {
             full!(_visitor.visit_expr_await(_binding_0));
         }
-        Expr::Binary(ref _binding_0) => {
+        Expr::Binary(_binding_0) => {
             _visitor.visit_expr_binary(_binding_0);
         }
-        Expr::Block(ref _binding_0) => {
+        Expr::Block(_binding_0) => {
             full!(_visitor.visit_expr_block(_binding_0));
         }
-        Expr::Box(ref _binding_0) => {
+        Expr::Box(_binding_0) => {
             full!(_visitor.visit_expr_box(_binding_0));
         }
-        Expr::Break(ref _binding_0) => {
+        Expr::Break(_binding_0) => {
             full!(_visitor.visit_expr_break(_binding_0));
         }
-        Expr::Call(ref _binding_0) => {
+        Expr::Call(_binding_0) => {
             _visitor.visit_expr_call(_binding_0);
         }
-        Expr::Cast(ref _binding_0) => {
+        Expr::Cast(_binding_0) => {
             _visitor.visit_expr_cast(_binding_0);
         }
-        Expr::Closure(ref _binding_0) => {
+        Expr::Closure(_binding_0) => {
             full!(_visitor.visit_expr_closure(_binding_0));
         }
-        Expr::Continue(ref _binding_0) => {
+        Expr::Continue(_binding_0) => {
             full!(_visitor.visit_expr_continue(_binding_0));
         }
-        Expr::Field(ref _binding_0) => {
+        Expr::Field(_binding_0) => {
             _visitor.visit_expr_field(_binding_0);
         }
-        Expr::ForLoop(ref _binding_0) => {
+        Expr::ForLoop(_binding_0) => {
             full!(_visitor.visit_expr_for_loop(_binding_0));
         }
-        Expr::Group(ref _binding_0) => {
+        Expr::Group(_binding_0) => {
             full!(_visitor.visit_expr_group(_binding_0));
         }
-        Expr::If(ref _binding_0) => {
+        Expr::If(_binding_0) => {
             full!(_visitor.visit_expr_if(_binding_0));
         }
-        Expr::InPlace(ref _binding_0) => {
+        Expr::InPlace(_binding_0) => {
             full!(_visitor.visit_expr_in_place(_binding_0));
         }
-        Expr::Index(ref _binding_0) => {
+        Expr::Index(_binding_0) => {
             _visitor.visit_expr_index(_binding_0);
         }
-        Expr::Let(ref _binding_0) => {
+        Expr::Let(_binding_0) => {
             full!(_visitor.visit_expr_let(_binding_0));
         }
-        Expr::Lit(ref _binding_0) => {
+        Expr::Lit(_binding_0) => {
             _visitor.visit_expr_lit(_binding_0);
         }
-        Expr::Loop(ref _binding_0) => {
+        Expr::Loop(_binding_0) => {
             full!(_visitor.visit_expr_loop(_binding_0));
         }
-        Expr::Macro(ref _binding_0) => {
+        Expr::Macro(_binding_0) => {
             full!(_visitor.visit_expr_macro(_binding_0));
         }
-        Expr::Match(ref _binding_0) => {
+        Expr::Match(_binding_0) => {
             full!(_visitor.visit_expr_match(_binding_0));
         }
-        Expr::MethodCall(ref _binding_0) => {
+        Expr::MethodCall(_binding_0) => {
             full!(_visitor.visit_expr_method_call(_binding_0));
         }
-        Expr::Paren(ref _binding_0) => {
+        Expr::Paren(_binding_0) => {
             _visitor.visit_expr_paren(_binding_0);
         }
-        Expr::Path(ref _binding_0) => {
+        Expr::Path(_binding_0) => {
             _visitor.visit_expr_path(_binding_0);
         }
-        Expr::Range(ref _binding_0) => {
+        Expr::Range(_binding_0) => {
             full!(_visitor.visit_expr_range(_binding_0));
         }
-        Expr::Reference(ref _binding_0) => {
+        Expr::Reference(_binding_0) => {
             full!(_visitor.visit_expr_reference(_binding_0));
         }
-        Expr::Repeat(ref _binding_0) => {
+        Expr::Repeat(_binding_0) => {
             full!(_visitor.visit_expr_repeat(_binding_0));
         }
-        Expr::Return(ref _binding_0) => {
+        Expr::Return(_binding_0) => {
             full!(_visitor.visit_expr_return(_binding_0));
         }
-        Expr::Struct(ref _binding_0) => {
+        Expr::Struct(_binding_0) => {
             full!(_visitor.visit_expr_struct(_binding_0));
         }
-        Expr::Try(ref _binding_0) => {
+        Expr::Try(_binding_0) => {
             full!(_visitor.visit_expr_try(_binding_0));
         }
-        Expr::TryBlock(ref _binding_0) => {
+        Expr::TryBlock(_binding_0) => {
             full!(_visitor.visit_expr_try_block(_binding_0));
         }
-        Expr::Tuple(ref _binding_0) => {
+        Expr::Tuple(_binding_0) => {
             full!(_visitor.visit_expr_tuple(_binding_0));
         }
-        Expr::Type(ref _binding_0) => {
+        Expr::Type(_binding_0) => {
             full!(_visitor.visit_expr_type(_binding_0));
         }
-        Expr::Unary(ref _binding_0) => {
+        Expr::Unary(_binding_0) => {
             _visitor.visit_expr_unary(_binding_0);
         }
-        Expr::Unsafe(ref _binding_0) => {
+        Expr::Unsafe(_binding_0) => {
             full!(_visitor.visit_expr_unsafe(_binding_0));
         }
-        Expr::Verbatim(ref _binding_0) => {
+        Expr::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
-        Expr::While(ref _binding_0) => {
+        Expr::While(_binding_0) => {
             full!(_visitor.visit_expr_while(_binding_0));
         }
-        Expr::Yield(ref _binding_0) => {
+        Expr::Yield(_binding_0) => {
             full!(_visitor.visit_expr_yield(_binding_0));
         }
         _ => unreachable!(),
@@ -1226,7 +1226,7 @@ pub fn visit_expr_async<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.async_token.span);
-    if let Some(ref it) = _i.capture {
+    if let Some(it) = &_i.capture {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_block(&_i.block);
@@ -1254,7 +1254,7 @@ pub fn visit_expr_block<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.label {
+    if let Some(it) = &_i.label {
         _visitor.visit_label(it)
     };
     _visitor.visit_block(&_i.block);
@@ -1273,10 +1273,10 @@ pub fn visit_expr_break<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.break_token.span);
-    if let Some(ref it) = _i.label {
+    if let Some(it) = &_i.label {
         _visitor.visit_lifetime(it)
     };
-    if let Some(ref it) = _i.expr {
+    if let Some(it) = &_i.expr {
         _visitor.visit_expr(&**it)
     };
 }
@@ -1306,13 +1306,13 @@ pub fn visit_expr_closure<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.asyncness {
+    if let Some(it) = &_i.asyncness {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.movability {
+    if let Some(it) = &_i.movability {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.capture {
+    if let Some(it) = &_i.capture {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.or1_token.spans);
@@ -1333,7 +1333,7 @@ pub fn visit_expr_continue<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.continue_token.span);
-    if let Some(ref it) = _i.label {
+    if let Some(it) = &_i.label {
         _visitor.visit_lifetime(it)
     };
 }
@@ -1351,7 +1351,7 @@ pub fn visit_expr_for_loop<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: 
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.label {
+    if let Some(it) = &_i.label {
         _visitor.visit_label(it)
     };
     tokens_helper(_visitor, &_i.for_token.span);
@@ -1376,7 +1376,7 @@ pub fn visit_expr_if<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     tokens_helper(_visitor, &_i.if_token.span);
     _visitor.visit_expr(&*_i.cond);
     _visitor.visit_block(&_i.then_branch);
-    if let Some(ref it) = _i.else_branch {
+    if let Some(it) = &_i.else_branch {
         tokens_helper(_visitor, &(it).0.span);
         _visitor.visit_expr(&*(it).1);
     };
@@ -1421,7 +1421,7 @@ pub fn visit_expr_loop<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.label {
+    if let Some(it) = &_i.label {
         _visitor.visit_label(it)
     };
     tokens_helper(_visitor, &_i.loop_token.span);
@@ -1457,7 +1457,7 @@ pub fn visit_expr_method_call<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_expr(&*_i.receiver);
     tokens_helper(_visitor, &_i.dot_token.spans);
     _visitor.visit_ident(&_i.method);
-    if let Some(ref it) = _i.turbofish {
+    if let Some(it) = &_i.turbofish {
         _visitor.visit_method_turbofish(it)
     };
     tokens_helper(_visitor, &_i.paren_token.span);
@@ -1479,7 +1479,7 @@ pub fn visit_expr_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.qself {
+    if let Some(it) = &_i.qself {
         _visitor.visit_qself(it)
     };
     _visitor.visit_path(&_i.path);
@@ -1489,11 +1489,11 @@ pub fn visit_expr_range<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.from {
+    if let Some(it) = &_i.from {
         _visitor.visit_expr(&**it)
     };
     _visitor.visit_range_limits(&_i.limits);
-    if let Some(ref it) = _i.to {
+    if let Some(it) = &_i.to {
         _visitor.visit_expr(&**it)
     };
 }
@@ -1506,7 +1506,7 @@ pub fn visit_expr_reference<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.and_token.spans);
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_expr(&*_i.expr);
@@ -1527,7 +1527,7 @@ pub fn visit_expr_return<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.return_token.span);
-    if let Some(ref it) = _i.expr {
+    if let Some(it) = &_i.expr {
         _visitor.visit_expr(&**it)
     };
 }
@@ -1542,10 +1542,10 @@ pub fn visit_expr_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         let it = el.value();
         _visitor.visit_field_value(it)
     }
-    if let Some(ref it) = _i.dot2_token {
+    if let Some(it) = &_i.dot2_token {
         tokens_helper(_visitor, &it.spans)
     };
-    if let Some(ref it) = _i.rest {
+    if let Some(it) = &_i.rest {
         _visitor.visit_expr(&**it)
     };
 }
@@ -1609,7 +1609,7 @@ pub fn visit_expr_while<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.label {
+    if let Some(it) = &_i.label {
         _visitor.visit_label(it)
     };
     tokens_helper(_visitor, &_i.while_token.span);
@@ -1622,7 +1622,7 @@ pub fn visit_expr_yield<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.yield_token.span);
-    if let Some(ref it) = _i.expr {
+    if let Some(it) = &_i.expr {
         _visitor.visit_expr(&**it)
     };
 }
@@ -1632,10 +1632,10 @@ pub fn visit_field<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Fi
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    if let Some(ref it) = _i.ident {
+    if let Some(it) = &_i.ident {
         _visitor.visit_ident(it)
     };
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     _visitor.visit_type(&_i.ty);
@@ -1646,7 +1646,7 @@ pub fn visit_field_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         _visitor.visit_attribute(it)
     }
     _visitor.visit_member(&_i.member);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     _visitor.visit_pat(&*_i.pat);
@@ -1657,18 +1657,18 @@ pub fn visit_field_value<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
         _visitor.visit_attribute(it)
     }
     _visitor.visit_member(&_i.member);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     _visitor.visit_expr(&_i.expr);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_fields<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Fields) {
-    match *_i {
-        Fields::Named(ref _binding_0) => {
+    match _i {
+        Fields::Named(_binding_0) => {
             _visitor.visit_fields_named(_binding_0);
         }
-        Fields::Unnamed(ref _binding_0) => {
+        Fields::Unnamed(_binding_0) => {
             _visitor.visit_fields_unnamed(_binding_0);
         }
         Fields::Unit => {}
@@ -1705,31 +1705,31 @@ pub fn visit_file<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Fil
 }
 #[cfg(feature = "full")]
 pub fn visit_fn_arg<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FnArg) {
-    match *_i {
-        FnArg::Receiver(ref _binding_0) => {
+    match _i {
+        FnArg::Receiver(_binding_0) => {
             _visitor.visit_receiver(_binding_0);
         }
-        FnArg::Typed(ref _binding_0) => {
+        FnArg::Typed(_binding_0) => {
             _visitor.visit_pat_type(_binding_0);
         }
     }
 }
 #[cfg(feature = "full")]
 pub fn visit_foreign_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ForeignItem) {
-    match *_i {
-        ForeignItem::Fn(ref _binding_0) => {
+    match _i {
+        ForeignItem::Fn(_binding_0) => {
             _visitor.visit_foreign_item_fn(_binding_0);
         }
-        ForeignItem::Static(ref _binding_0) => {
+        ForeignItem::Static(_binding_0) => {
             _visitor.visit_foreign_item_static(_binding_0);
         }
-        ForeignItem::Type(ref _binding_0) => {
+        ForeignItem::Type(_binding_0) => {
             _visitor.visit_foreign_item_type(_binding_0);
         }
-        ForeignItem::Macro(ref _binding_0) => {
+        ForeignItem::Macro(_binding_0) => {
             _visitor.visit_foreign_item_macro(_binding_0);
         }
-        ForeignItem::Verbatim(ref _binding_0) => {
+        ForeignItem::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
         _ => unreachable!(),
@@ -1756,7 +1756,7 @@ pub fn visit_foreign_item_macro<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_macro(&_i.mac);
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -1770,7 +1770,7 @@ pub fn visit_foreign_item_static<'ast, V: Visit<'ast> + ?Sized>(
     }
     _visitor.visit_visibility(&_i.vis);
     tokens_helper(_visitor, &_i.static_token.span);
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_ident(&_i.ident);
@@ -1796,20 +1796,20 @@ pub fn visit_generic_argument<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast GenericArgument,
 ) {
-    match *_i {
-        GenericArgument::Lifetime(ref _binding_0) => {
+    match _i {
+        GenericArgument::Lifetime(_binding_0) => {
             _visitor.visit_lifetime(_binding_0);
         }
-        GenericArgument::Type(ref _binding_0) => {
+        GenericArgument::Type(_binding_0) => {
             _visitor.visit_type(_binding_0);
         }
-        GenericArgument::Binding(ref _binding_0) => {
+        GenericArgument::Binding(_binding_0) => {
             _visitor.visit_binding(_binding_0);
         }
-        GenericArgument::Constraint(ref _binding_0) => {
+        GenericArgument::Constraint(_binding_0) => {
             _visitor.visit_constraint(_binding_0);
         }
-        GenericArgument::Const(ref _binding_0) => {
+        GenericArgument::Const(_binding_0) => {
             _visitor.visit_expr(_binding_0);
         }
     }
@@ -1819,11 +1819,11 @@ pub fn visit_generic_method_argument<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast GenericMethodArgument,
 ) {
-    match *_i {
-        GenericMethodArgument::Type(ref _binding_0) => {
+    match _i {
+        GenericMethodArgument::Type(_binding_0) => {
             _visitor.visit_type(_binding_0);
         }
-        GenericMethodArgument::Const(ref _binding_0) => {
+        GenericMethodArgument::Const(_binding_0) => {
             _visitor.visit_expr(_binding_0);
         }
     }
@@ -1833,53 +1833,53 @@ pub fn visit_generic_param<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast GenericParam,
 ) {
-    match *_i {
-        GenericParam::Type(ref _binding_0) => {
+    match _i {
+        GenericParam::Type(_binding_0) => {
             _visitor.visit_type_param(_binding_0);
         }
-        GenericParam::Lifetime(ref _binding_0) => {
+        GenericParam::Lifetime(_binding_0) => {
             _visitor.visit_lifetime_def(_binding_0);
         }
-        GenericParam::Const(ref _binding_0) => {
+        GenericParam::Const(_binding_0) => {
             _visitor.visit_const_param(_binding_0);
         }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_generics<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Generics) {
-    if let Some(ref it) = _i.lt_token {
+    if let Some(it) = &_i.lt_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.params) {
         let it = el.value();
         _visitor.visit_generic_param(it)
     }
-    if let Some(ref it) = _i.gt_token {
+    if let Some(it) = &_i.gt_token {
         tokens_helper(_visitor, &it.spans)
     };
-    if let Some(ref it) = _i.where_clause {
+    if let Some(it) = &_i.where_clause {
         _visitor.visit_where_clause(it)
     };
 }
 #[cfg(feature = "full")]
 pub fn visit_impl_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ImplItem) {
-    match *_i {
-        ImplItem::Const(ref _binding_0) => {
+    match _i {
+        ImplItem::Const(_binding_0) => {
             _visitor.visit_impl_item_const(_binding_0);
         }
-        ImplItem::Method(ref _binding_0) => {
+        ImplItem::Method(_binding_0) => {
             _visitor.visit_impl_item_method(_binding_0);
         }
-        ImplItem::Type(ref _binding_0) => {
+        ImplItem::Type(_binding_0) => {
             _visitor.visit_impl_item_type(_binding_0);
         }
-        ImplItem::Existential(ref _binding_0) => {
+        ImplItem::Existential(_binding_0) => {
             _visitor.visit_impl_item_existential(_binding_0);
         }
-        ImplItem::Macro(ref _binding_0) => {
+        ImplItem::Macro(_binding_0) => {
             _visitor.visit_impl_item_macro(_binding_0);
         }
-        ImplItem::Verbatim(ref _binding_0) => {
+        ImplItem::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
         _ => unreachable!(),
@@ -1894,7 +1894,7 @@ pub fn visit_impl_item_const<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    if let Some(ref it) = _i.defaultness {
+    if let Some(it) = &_i.defaultness {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.const_token.span);
@@ -1917,7 +1917,7 @@ pub fn visit_impl_item_existential<'ast, V: Visit<'ast> + ?Sized>(
     tokens_helper(_visitor, &_i.type_token.span);
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_generics(&_i.generics);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
@@ -1935,7 +1935,7 @@ pub fn visit_impl_item_macro<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_macro(&_i.mac);
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -1948,7 +1948,7 @@ pub fn visit_impl_item_method<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    if let Some(ref it) = _i.defaultness {
+    if let Some(it) = &_i.defaultness {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_signature(&_i.sig);
@@ -1963,7 +1963,7 @@ pub fn visit_impl_item_type<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    if let Some(ref it) = _i.defaultness {
+    if let Some(it) = &_i.defaultness {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.type_token.span);
@@ -1980,59 +1980,59 @@ pub fn visit_index<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast In
 }
 #[cfg(feature = "full")]
 pub fn visit_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Item) {
-    match *_i {
-        Item::Const(ref _binding_0) => {
+    match _i {
+        Item::Const(_binding_0) => {
             _visitor.visit_item_const(_binding_0);
         }
-        Item::Enum(ref _binding_0) => {
+        Item::Enum(_binding_0) => {
             _visitor.visit_item_enum(_binding_0);
         }
-        Item::Existential(ref _binding_0) => {
+        Item::Existential(_binding_0) => {
             _visitor.visit_item_existential(_binding_0);
         }
-        Item::ExternCrate(ref _binding_0) => {
+        Item::ExternCrate(_binding_0) => {
             _visitor.visit_item_extern_crate(_binding_0);
         }
-        Item::Fn(ref _binding_0) => {
+        Item::Fn(_binding_0) => {
             _visitor.visit_item_fn(_binding_0);
         }
-        Item::ForeignMod(ref _binding_0) => {
+        Item::ForeignMod(_binding_0) => {
             _visitor.visit_item_foreign_mod(_binding_0);
         }
-        Item::Impl(ref _binding_0) => {
+        Item::Impl(_binding_0) => {
             _visitor.visit_item_impl(_binding_0);
         }
-        Item::Macro(ref _binding_0) => {
+        Item::Macro(_binding_0) => {
             _visitor.visit_item_macro(_binding_0);
         }
-        Item::Macro2(ref _binding_0) => {
+        Item::Macro2(_binding_0) => {
             _visitor.visit_item_macro2(_binding_0);
         }
-        Item::Mod(ref _binding_0) => {
+        Item::Mod(_binding_0) => {
             _visitor.visit_item_mod(_binding_0);
         }
-        Item::Static(ref _binding_0) => {
+        Item::Static(_binding_0) => {
             _visitor.visit_item_static(_binding_0);
         }
-        Item::Struct(ref _binding_0) => {
+        Item::Struct(_binding_0) => {
             _visitor.visit_item_struct(_binding_0);
         }
-        Item::Trait(ref _binding_0) => {
+        Item::Trait(_binding_0) => {
             _visitor.visit_item_trait(_binding_0);
         }
-        Item::TraitAlias(ref _binding_0) => {
+        Item::TraitAlias(_binding_0) => {
             _visitor.visit_item_trait_alias(_binding_0);
         }
-        Item::Type(ref _binding_0) => {
+        Item::Type(_binding_0) => {
             _visitor.visit_item_type(_binding_0);
         }
-        Item::Union(ref _binding_0) => {
+        Item::Union(_binding_0) => {
             _visitor.visit_item_union(_binding_0);
         }
-        Item::Use(ref _binding_0) => {
+        Item::Use(_binding_0) => {
             _visitor.visit_item_use(_binding_0);
         }
-        Item::Verbatim(ref _binding_0) => {
+        Item::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
         _ => unreachable!(),
@@ -2080,7 +2080,7 @@ pub fn visit_item_existential<'ast, V: Visit<'ast> + ?Sized>(
     tokens_helper(_visitor, &_i.type_token.span);
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_generics(&_i.generics);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
@@ -2101,7 +2101,7 @@ pub fn visit_item_extern_crate<'ast, V: Visit<'ast> + ?Sized>(
     tokens_helper(_visitor, &_i.extern_token.span);
     tokens_helper(_visitor, &_i.crate_token.span);
     _visitor.visit_ident(&_i.ident);
-    if let Some(ref it) = _i.rename {
+    if let Some(it) = &_i.rename {
         tokens_helper(_visitor, &(it).0.span);
         _visitor.visit_ident(&(it).1);
     };
@@ -2135,16 +2135,16 @@ pub fn visit_item_impl<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.defaultness {
+    if let Some(it) = &_i.defaultness {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.unsafety {
+    if let Some(it) = &_i.unsafety {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.impl_token.span);
     _visitor.visit_generics(&_i.generics);
-    if let Some(ref it) = _i.trait_ {
-        if let Some(ref it) = (it).0 {
+    if let Some(it) = &_i.trait_ {
+        if let Some(it) = &(it).0 {
             tokens_helper(_visitor, &it.spans)
         };
         _visitor.visit_path(&(it).1);
@@ -2161,11 +2161,11 @@ pub fn visit_item_macro<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.ident {
+    if let Some(it) = &_i.ident {
         _visitor.visit_ident(it)
     };
     _visitor.visit_macro(&_i.mac);
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -2187,13 +2187,13 @@ pub fn visit_item_mod<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     _visitor.visit_visibility(&_i.vis);
     tokens_helper(_visitor, &_i.mod_token.span);
     _visitor.visit_ident(&_i.ident);
-    if let Some(ref it) = _i.content {
+    if let Some(it) = &_i.content {
         tokens_helper(_visitor, &(it).0.span);
         for it in &(it).1 {
             _visitor.visit_item(it)
         }
     };
-    if let Some(ref it) = _i.semi {
+    if let Some(it) = &_i.semi {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -2204,7 +2204,7 @@ pub fn visit_item_static<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     }
     _visitor.visit_visibility(&_i.vis);
     tokens_helper(_visitor, &_i.static_token.span);
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_ident(&_i.ident);
@@ -2224,7 +2224,7 @@ pub fn visit_item_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_generics(&_i.generics);
     _visitor.visit_fields(&_i.fields);
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -2234,16 +2234,16 @@ pub fn visit_item_trait<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         _visitor.visit_attribute(it)
     }
     _visitor.visit_visibility(&_i.vis);
-    if let Some(ref it) = _i.unsafety {
+    if let Some(it) = &_i.unsafety {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.auto_token {
+    if let Some(it) = &_i.auto_token {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.trait_token.span);
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_generics(&_i.generics);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.supertraits) {
@@ -2305,7 +2305,7 @@ pub fn visit_item_use<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     }
     _visitor.visit_visibility(&_i.vis);
     tokens_helper(_visitor, &_i.use_token.span);
-    if let Some(ref it) = _i.leading_colon {
+    if let Some(it) = &_i.leading_colon {
         tokens_helper(_visitor, &it.spans)
     };
     _visitor.visit_use_tree(&_i.tree);
@@ -2326,7 +2326,7 @@ pub fn visit_lifetime_def<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
         _visitor.visit_attribute(it)
     }
     _visitor.visit_lifetime(&_i.lifetime);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
@@ -2336,29 +2336,29 @@ pub fn visit_lifetime_def<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_lit<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lit) {
-    match *_i {
-        Lit::Str(ref _binding_0) => {
+    match _i {
+        Lit::Str(_binding_0) => {
             _visitor.visit_lit_str(_binding_0);
         }
-        Lit::ByteStr(ref _binding_0) => {
+        Lit::ByteStr(_binding_0) => {
             _visitor.visit_lit_byte_str(_binding_0);
         }
-        Lit::Byte(ref _binding_0) => {
+        Lit::Byte(_binding_0) => {
             _visitor.visit_lit_byte(_binding_0);
         }
-        Lit::Char(ref _binding_0) => {
+        Lit::Char(_binding_0) => {
             _visitor.visit_lit_char(_binding_0);
         }
-        Lit::Int(ref _binding_0) => {
+        Lit::Int(_binding_0) => {
             _visitor.visit_lit_int(_binding_0);
         }
-        Lit::Float(ref _binding_0) => {
+        Lit::Float(_binding_0) => {
             _visitor.visit_lit_float(_binding_0);
         }
-        Lit::Bool(ref _binding_0) => {
+        Lit::Bool(_binding_0) => {
             _visitor.visit_lit_bool(_binding_0);
         }
-        Lit::Verbatim(ref _binding_0) => {
+        Lit::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
     }
@@ -2387,7 +2387,7 @@ pub fn visit_local<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Lo
     }
     tokens_helper(_visitor, &_i.let_token.span);
     _visitor.visit_pat(&_i.pat);
-    if let Some(ref it) = _i.init {
+    if let Some(it) = &_i.init {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_expr(&*(it).1);
     };
@@ -2405,39 +2405,39 @@ pub fn visit_macro_delimiter<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast MacroDelimiter,
 ) {
-    match *_i {
-        MacroDelimiter::Paren(ref _binding_0) => {
+    match _i {
+        MacroDelimiter::Paren(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.span);
         }
-        MacroDelimiter::Brace(ref _binding_0) => {
+        MacroDelimiter::Brace(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.span);
         }
-        MacroDelimiter::Bracket(ref _binding_0) => {
+        MacroDelimiter::Bracket(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.span);
         }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_member<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Member) {
-    match *_i {
-        Member::Named(ref _binding_0) => {
+    match _i {
+        Member::Named(_binding_0) => {
             _visitor.visit_ident(_binding_0);
         }
-        Member::Unnamed(ref _binding_0) => {
+        Member::Unnamed(_binding_0) => {
             _visitor.visit_index(_binding_0);
         }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Meta) {
-    match *_i {
-        Meta::Path(ref _binding_0) => {
+    match _i {
+        Meta::Path(_binding_0) => {
             _visitor.visit_path(_binding_0);
         }
-        Meta::List(ref _binding_0) => {
+        Meta::List(_binding_0) => {
             _visitor.visit_meta_list(_binding_0);
         }
-        Meta::NameValue(ref _binding_0) => {
+        Meta::NameValue(_binding_0) => {
             _visitor.visit_meta_name_value(_binding_0);
         }
     }
@@ -2475,11 +2475,11 @@ pub fn visit_method_turbofish<'ast, V: Visit<'ast> + ?Sized>(
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_nested_meta<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast NestedMeta) {
-    match *_i {
-        NestedMeta::Meta(ref _binding_0) => {
+    match _i {
+        NestedMeta::Meta(_binding_0) => {
             _visitor.visit_meta(_binding_0);
         }
-        NestedMeta::Literal(ref _binding_0) => {
+        NestedMeta::Literal(_binding_0) => {
             _visitor.visit_lit(_binding_0);
         }
     }
@@ -2498,53 +2498,53 @@ pub fn visit_parenthesized_generic_arguments<'ast, V: Visit<'ast> + ?Sized>(
 }
 #[cfg(feature = "full")]
 pub fn visit_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat) {
-    match *_i {
-        Pat::Box(ref _binding_0) => {
+    match _i {
+        Pat::Box(_binding_0) => {
             _visitor.visit_pat_box(_binding_0);
         }
-        Pat::Ident(ref _binding_0) => {
+        Pat::Ident(_binding_0) => {
             _visitor.visit_pat_ident(_binding_0);
         }
-        Pat::Lit(ref _binding_0) => {
+        Pat::Lit(_binding_0) => {
             _visitor.visit_pat_lit(_binding_0);
         }
-        Pat::Macro(ref _binding_0) => {
+        Pat::Macro(_binding_0) => {
             _visitor.visit_pat_macro(_binding_0);
         }
-        Pat::Or(ref _binding_0) => {
+        Pat::Or(_binding_0) => {
             _visitor.visit_pat_or(_binding_0);
         }
-        Pat::Path(ref _binding_0) => {
+        Pat::Path(_binding_0) => {
             _visitor.visit_pat_path(_binding_0);
         }
-        Pat::Range(ref _binding_0) => {
+        Pat::Range(_binding_0) => {
             _visitor.visit_pat_range(_binding_0);
         }
-        Pat::Reference(ref _binding_0) => {
+        Pat::Reference(_binding_0) => {
             _visitor.visit_pat_reference(_binding_0);
         }
-        Pat::Rest(ref _binding_0) => {
+        Pat::Rest(_binding_0) => {
             _visitor.visit_pat_rest(_binding_0);
         }
-        Pat::Slice(ref _binding_0) => {
+        Pat::Slice(_binding_0) => {
             _visitor.visit_pat_slice(_binding_0);
         }
-        Pat::Struct(ref _binding_0) => {
+        Pat::Struct(_binding_0) => {
             _visitor.visit_pat_struct(_binding_0);
         }
-        Pat::Tuple(ref _binding_0) => {
+        Pat::Tuple(_binding_0) => {
             _visitor.visit_pat_tuple(_binding_0);
         }
-        Pat::TupleStruct(ref _binding_0) => {
+        Pat::TupleStruct(_binding_0) => {
             _visitor.visit_pat_tuple_struct(_binding_0);
         }
-        Pat::Type(ref _binding_0) => {
+        Pat::Type(_binding_0) => {
             _visitor.visit_pat_type(_binding_0);
         }
-        Pat::Verbatim(ref _binding_0) => {
+        Pat::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
-        Pat::Wild(ref _binding_0) => {
+        Pat::Wild(_binding_0) => {
             _visitor.visit_pat_wild(_binding_0);
         }
         _ => unreachable!(),
@@ -2563,14 +2563,14 @@ pub fn visit_pat_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.by_ref {
+    if let Some(it) = &_i.by_ref {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_ident(&_i.ident);
-    if let Some(ref it) = _i.subpat {
+    if let Some(it) = &_i.subpat {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_pat(&*(it).1);
     };
@@ -2594,7 +2594,7 @@ pub fn visit_pat_or<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast P
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.leading_vert {
+    if let Some(it) = &_i.leading_vert {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.cases) {
@@ -2607,7 +2607,7 @@ pub fn visit_pat_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.qself {
+    if let Some(it) = &_i.qself {
         _visitor.visit_qself(it)
     };
     _visitor.visit_path(&_i.path);
@@ -2630,7 +2630,7 @@ pub fn visit_pat_reference<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     tokens_helper(_visitor, &_i.and_token.spans);
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_pat(&*_i.pat);
@@ -2664,7 +2664,7 @@ pub fn visit_pat_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         let it = el.value();
         _visitor.visit_field_pat(it)
     }
-    if let Some(ref it) = _i.dot2_token {
+    if let Some(it) = &_i.dot2_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -2708,7 +2708,7 @@ pub fn visit_pat_wild<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Path) {
-    if let Some(ref it) = _i.leading_colon {
+    if let Some(it) = &_i.leading_colon {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.segments) {
@@ -2721,12 +2721,12 @@ pub fn visit_path_arguments<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast PathArguments,
 ) {
-    match *_i {
+    match _i {
         PathArguments::None => {}
-        PathArguments::AngleBracketed(ref _binding_0) => {
+        PathArguments::AngleBracketed(_binding_0) => {
             _visitor.visit_angle_bracketed_generic_arguments(_binding_0);
         }
-        PathArguments::Parenthesized(ref _binding_0) => {
+        PathArguments::Parenthesized(_binding_0) => {
             _visitor.visit_parenthesized_generic_arguments(_binding_0);
         }
     }
@@ -2759,7 +2759,7 @@ pub fn visit_predicate_type<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast PredicateType,
 ) {
-    if let Some(ref it) = _i.lifetimes {
+    if let Some(it) = &_i.lifetimes {
         _visitor.visit_bound_lifetimes(it)
     };
     _visitor.visit_type(&_i.bounded_ty);
@@ -2774,18 +2774,18 @@ pub fn visit_qself<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast QS
     tokens_helper(_visitor, &_i.lt_token.spans);
     _visitor.visit_type(&*_i.ty);
     skip!(_i.position);
-    if let Some(ref it) = _i.as_token {
+    if let Some(it) = &_i.as_token {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.gt_token.spans);
 }
 #[cfg(feature = "full")]
 pub fn visit_range_limits<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast RangeLimits) {
-    match *_i {
-        RangeLimits::HalfOpen(ref _binding_0) => {
+    match _i {
+        RangeLimits::HalfOpen(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        RangeLimits::Closed(ref _binding_0) => {
+        RangeLimits::Closed(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
     }
@@ -2795,22 +2795,22 @@ pub fn visit_receiver<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
     for it in &_i.attrs {
         _visitor.visit_attribute(it)
     }
-    if let Some(ref it) = _i.reference {
+    if let Some(it) = &_i.reference {
         tokens_helper(_visitor, &(it).0.spans);
-        if let Some(ref it) = (it).1 {
+        if let Some(it) = &(it).1 {
             _visitor.visit_lifetime(it)
         };
     };
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     tokens_helper(_visitor, &_i.self_token.span);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_return_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ReturnType) {
-    match *_i {
+    match _i {
         ReturnType::Default => {}
-        ReturnType::Type(ref _binding_0, ref _binding_1) => {
+        ReturnType::Type(_binding_0, _binding_1) => {
             tokens_helper(_visitor, &_binding_0.spans);
             _visitor.visit_type(&**_binding_1);
         }
@@ -2818,16 +2818,16 @@ pub fn visit_return_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
 }
 #[cfg(feature = "full")]
 pub fn visit_signature<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Signature) {
-    if let Some(ref it) = _i.constness {
+    if let Some(it) = &_i.constness {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.asyncness {
+    if let Some(it) = &_i.asyncness {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.unsafety {
+    if let Some(it) = &_i.unsafety {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.abi {
+    if let Some(it) = &_i.abi {
         _visitor.visit_abi(it)
     };
     tokens_helper(_visitor, &_i.fn_token.span);
@@ -2838,24 +2838,24 @@ pub fn visit_signature<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         let it = el.value();
         _visitor.visit_fn_arg(it)
     }
-    if let Some(ref it) = _i.variadic {
+    if let Some(it) = &_i.variadic {
         _visitor.visit_variadic(it)
     };
     _visitor.visit_return_type(&_i.output);
 }
 #[cfg(feature = "full")]
 pub fn visit_stmt<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stmt) {
-    match *_i {
-        Stmt::Local(ref _binding_0) => {
+    match _i {
+        Stmt::Local(_binding_0) => {
             _visitor.visit_local(_binding_0);
         }
-        Stmt::Item(ref _binding_0) => {
+        Stmt::Item(_binding_0) => {
             _visitor.visit_item(_binding_0);
         }
-        Stmt::Expr(ref _binding_0) => {
+        Stmt::Expr(_binding_0) => {
             _visitor.visit_expr(_binding_0);
         }
-        Stmt::Semi(ref _binding_0, ref _binding_1) => {
+        Stmt::Semi(_binding_0, _binding_1) => {
             _visitor.visit_expr(_binding_0);
             tokens_helper(_visitor, &_binding_1.spans);
         }
@@ -2863,11 +2863,11 @@ pub fn visit_stmt<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Stm
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_trait_bound<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitBound) {
-    if let Some(ref it) = _i.paren_token {
+    if let Some(it) = &_i.paren_token {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_trait_bound_modifier(&_i.modifier);
-    if let Some(ref it) = _i.lifetimes {
+    if let Some(it) = &_i.lifetimes {
         _visitor.visit_bound_lifetimes(it)
     };
     _visitor.visit_path(&_i.path);
@@ -2877,29 +2877,29 @@ pub fn visit_trait_bound_modifier<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast TraitBoundModifier,
 ) {
-    match *_i {
+    match _i {
         TraitBoundModifier::None => {}
-        TraitBoundModifier::Maybe(ref _binding_0) => {
+        TraitBoundModifier::Maybe(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
     }
 }
 #[cfg(feature = "full")]
 pub fn visit_trait_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TraitItem) {
-    match *_i {
-        TraitItem::Const(ref _binding_0) => {
+    match _i {
+        TraitItem::Const(_binding_0) => {
             _visitor.visit_trait_item_const(_binding_0);
         }
-        TraitItem::Method(ref _binding_0) => {
+        TraitItem::Method(_binding_0) => {
             _visitor.visit_trait_item_method(_binding_0);
         }
-        TraitItem::Type(ref _binding_0) => {
+        TraitItem::Type(_binding_0) => {
             _visitor.visit_trait_item_type(_binding_0);
         }
-        TraitItem::Macro(ref _binding_0) => {
+        TraitItem::Macro(_binding_0) => {
             _visitor.visit_trait_item_macro(_binding_0);
         }
-        TraitItem::Verbatim(ref _binding_0) => {
+        TraitItem::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
         _ => unreachable!(),
@@ -2917,7 +2917,7 @@ pub fn visit_trait_item_const<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_ident(&_i.ident);
     tokens_helper(_visitor, &_i.colon_token.spans);
     _visitor.visit_type(&_i.ty);
-    if let Some(ref it) = _i.default {
+    if let Some(it) = &_i.default {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_expr(&(it).1);
     };
@@ -2932,7 +2932,7 @@ pub fn visit_trait_item_macro<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_macro(&_i.mac);
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -2945,10 +2945,10 @@ pub fn visit_trait_item_method<'ast, V: Visit<'ast> + ?Sized>(
         _visitor.visit_attribute(it)
     }
     _visitor.visit_signature(&_i.sig);
-    if let Some(ref it) = _i.default {
+    if let Some(it) = &_i.default {
         _visitor.visit_block(it)
     };
-    if let Some(ref it) = _i.semi_token {
+    if let Some(it) = &_i.semi_token {
         tokens_helper(_visitor, &it.spans)
     };
 }
@@ -2963,14 +2963,14 @@ pub fn visit_trait_item_type<'ast, V: Visit<'ast> + ?Sized>(
     tokens_helper(_visitor, &_i.type_token.span);
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_generics(&_i.generics);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
         let it = el.value();
         _visitor.visit_type_param_bound(it)
     }
-    if let Some(ref it) = _i.default {
+    if let Some(it) = &_i.default {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_type(&(it).1);
     };
@@ -2978,50 +2978,50 @@ pub fn visit_trait_item_type<'ast, V: Visit<'ast> + ?Sized>(
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Type) {
-    match *_i {
-        Type::Array(ref _binding_0) => {
+    match _i {
+        Type::Array(_binding_0) => {
             _visitor.visit_type_array(_binding_0);
         }
-        Type::BareFn(ref _binding_0) => {
+        Type::BareFn(_binding_0) => {
             _visitor.visit_type_bare_fn(_binding_0);
         }
-        Type::Group(ref _binding_0) => {
+        Type::Group(_binding_0) => {
             _visitor.visit_type_group(_binding_0);
         }
-        Type::ImplTrait(ref _binding_0) => {
+        Type::ImplTrait(_binding_0) => {
             _visitor.visit_type_impl_trait(_binding_0);
         }
-        Type::Infer(ref _binding_0) => {
+        Type::Infer(_binding_0) => {
             _visitor.visit_type_infer(_binding_0);
         }
-        Type::Macro(ref _binding_0) => {
+        Type::Macro(_binding_0) => {
             _visitor.visit_type_macro(_binding_0);
         }
-        Type::Never(ref _binding_0) => {
+        Type::Never(_binding_0) => {
             _visitor.visit_type_never(_binding_0);
         }
-        Type::Paren(ref _binding_0) => {
+        Type::Paren(_binding_0) => {
             _visitor.visit_type_paren(_binding_0);
         }
-        Type::Path(ref _binding_0) => {
+        Type::Path(_binding_0) => {
             _visitor.visit_type_path(_binding_0);
         }
-        Type::Ptr(ref _binding_0) => {
+        Type::Ptr(_binding_0) => {
             _visitor.visit_type_ptr(_binding_0);
         }
-        Type::Reference(ref _binding_0) => {
+        Type::Reference(_binding_0) => {
             _visitor.visit_type_reference(_binding_0);
         }
-        Type::Slice(ref _binding_0) => {
+        Type::Slice(_binding_0) => {
             _visitor.visit_type_slice(_binding_0);
         }
-        Type::TraitObject(ref _binding_0) => {
+        Type::TraitObject(_binding_0) => {
             _visitor.visit_type_trait_object(_binding_0);
         }
-        Type::Tuple(ref _binding_0) => {
+        Type::Tuple(_binding_0) => {
             _visitor.visit_type_tuple(_binding_0);
         }
-        Type::Verbatim(ref _binding_0) => {
+        Type::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
         _ => unreachable!(),
@@ -3036,13 +3036,13 @@ pub fn visit_type_array<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type_bare_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeBareFn) {
-    if let Some(ref it) = _i.lifetimes {
+    if let Some(it) = &_i.lifetimes {
         _visitor.visit_bound_lifetimes(it)
     };
-    if let Some(ref it) = _i.unsafety {
+    if let Some(it) = &_i.unsafety {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.abi {
+    if let Some(it) = &_i.abi {
         _visitor.visit_abi(it)
     };
     tokens_helper(_visitor, &_i.fn_token.span);
@@ -3051,7 +3051,7 @@ pub fn visit_type_bare_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
         let it = el.value();
         _visitor.visit_bare_fn_arg(it)
     }
-    if let Some(ref it) = _i.variadic {
+    if let Some(it) = &_i.variadic {
         tokens_helper(_visitor, &it.spans)
     };
     _visitor.visit_return_type(&_i.output);
@@ -3090,17 +3090,17 @@ pub fn visit_type_param<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         _visitor.visit_attribute(it)
     }
     _visitor.visit_ident(&_i.ident);
-    if let Some(ref it) = _i.colon_token {
+    if let Some(it) = &_i.colon_token {
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
         let it = el.value();
         _visitor.visit_type_param_bound(it)
     }
-    if let Some(ref it) = _i.eq_token {
+    if let Some(it) = &_i.eq_token {
         tokens_helper(_visitor, &it.spans)
     };
-    if let Some(ref it) = _i.default {
+    if let Some(it) = &_i.default {
         _visitor.visit_type(it)
     };
 }
@@ -3109,11 +3109,11 @@ pub fn visit_type_param_bound<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast TypeParamBound,
 ) {
-    match *_i {
-        TypeParamBound::Trait(ref _binding_0) => {
+    match _i {
+        TypeParamBound::Trait(_binding_0) => {
             _visitor.visit_trait_bound(_binding_0);
         }
-        TypeParamBound::Lifetime(ref _binding_0) => {
+        TypeParamBound::Lifetime(_binding_0) => {
             _visitor.visit_lifetime(_binding_0);
         }
     }
@@ -3125,7 +3125,7 @@ pub fn visit_type_paren<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypePath) {
-    if let Some(ref it) = _i.qself {
+    if let Some(it) = &_i.qself {
         _visitor.visit_qself(it)
     };
     _visitor.visit_path(&_i.path);
@@ -3133,10 +3133,10 @@ pub fn visit_type_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type_ptr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypePtr) {
     tokens_helper(_visitor, &_i.star_token.spans);
-    if let Some(ref it) = _i.const_token {
+    if let Some(it) = &_i.const_token {
         tokens_helper(_visitor, &it.span)
     };
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_type(&*_i.elem);
@@ -3147,10 +3147,10 @@ pub fn visit_type_reference<'ast, V: Visit<'ast> + ?Sized>(
     _i: &'ast TypeReference,
 ) {
     tokens_helper(_visitor, &_i.and_token.spans);
-    if let Some(ref it) = _i.lifetime {
+    if let Some(it) = &_i.lifetime {
         _visitor.visit_lifetime(it)
     };
-    if let Some(ref it) = _i.mutability {
+    if let Some(it) = &_i.mutability {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_type(&*_i.elem);
@@ -3165,7 +3165,7 @@ pub fn visit_type_trait_object<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast TypeTraitObject,
 ) {
-    if let Some(ref it) = _i.dyn_token {
+    if let Some(it) = &_i.dyn_token {
         tokens_helper(_visitor, &it.span)
     };
     for el in Punctuated::pairs(&_i.bounds) {
@@ -3183,14 +3183,14 @@ pub fn visit_type_tuple<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_un_op<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UnOp) {
-    match *_i {
-        UnOp::Deref(ref _binding_0) => {
+    match _i {
+        UnOp::Deref(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        UnOp::Not(ref _binding_0) => {
+        UnOp::Not(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
-        UnOp::Neg(ref _binding_0) => {
+        UnOp::Neg(_binding_0) => {
             tokens_helper(_visitor, &_binding_0.spans);
         }
     }
@@ -3225,20 +3225,20 @@ pub fn visit_use_rename<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 }
 #[cfg(feature = "full")]
 pub fn visit_use_tree<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseTree) {
-    match *_i {
-        UseTree::Path(ref _binding_0) => {
+    match _i {
+        UseTree::Path(_binding_0) => {
             _visitor.visit_use_path(_binding_0);
         }
-        UseTree::Name(ref _binding_0) => {
+        UseTree::Name(_binding_0) => {
             _visitor.visit_use_name(_binding_0);
         }
-        UseTree::Rename(ref _binding_0) => {
+        UseTree::Rename(_binding_0) => {
             _visitor.visit_use_rename(_binding_0);
         }
-        UseTree::Glob(ref _binding_0) => {
+        UseTree::Glob(_binding_0) => {
             _visitor.visit_use_glob(_binding_0);
         }
-        UseTree::Group(ref _binding_0) => {
+        UseTree::Group(_binding_0) => {
             _visitor.visit_use_group(_binding_0);
         }
     }
@@ -3257,7 +3257,7 @@ pub fn visit_variant<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast 
     }
     _visitor.visit_ident(&_i.ident);
     _visitor.visit_fields(&_i.fields);
-    if let Some(ref it) = _i.discriminant {
+    if let Some(it) = &_i.discriminant {
         tokens_helper(_visitor, &(it).0.spans);
         _visitor.visit_expr(&(it).1);
     };
@@ -3277,21 +3277,21 @@ pub fn visit_vis_restricted<'ast, V: Visit<'ast> + ?Sized>(
 ) {
     tokens_helper(_visitor, &_i.pub_token.span);
     tokens_helper(_visitor, &_i.paren_token.span);
-    if let Some(ref it) = _i.in_token {
+    if let Some(it) = &_i.in_token {
         tokens_helper(_visitor, &it.span)
     };
     _visitor.visit_path(&*_i.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_visibility<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Visibility) {
-    match *_i {
-        Visibility::Public(ref _binding_0) => {
+    match _i {
+        Visibility::Public(_binding_0) => {
             _visitor.visit_vis_public(_binding_0);
         }
-        Visibility::Crate(ref _binding_0) => {
+        Visibility::Crate(_binding_0) => {
             _visitor.visit_vis_crate(_binding_0);
         }
-        Visibility::Restricted(ref _binding_0) => {
+        Visibility::Restricted(_binding_0) => {
             _visitor.visit_vis_restricted(_binding_0);
         }
         Visibility::Inherited => {}
@@ -3310,14 +3310,14 @@ pub fn visit_where_predicate<'ast, V: Visit<'ast> + ?Sized>(
     _visitor: &mut V,
     _i: &'ast WherePredicate,
 ) {
-    match *_i {
-        WherePredicate::Type(ref _binding_0) => {
+    match _i {
+        WherePredicate::Type(_binding_0) => {
             _visitor.visit_predicate_type(_binding_0);
         }
-        WherePredicate::Lifetime(ref _binding_0) => {
+        WherePredicate::Lifetime(_binding_0) => {
             _visitor.visit_predicate_lifetime(_binding_0);
         }
-        WherePredicate::Eq(ref _binding_0) => {
+        WherePredicate::Eq(_binding_0) => {
             _visitor.visit_predicate_eq(_binding_0);
         }
     }
