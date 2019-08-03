@@ -879,7 +879,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum ImplItem {
+    pub enum ImplItem #manual_extra_traits {
         /// An associated constant within an impl block.
         Const(ImplItemConst),
 
@@ -896,7 +896,7 @@ ast_enum_of_structs! {
         Macro(ImplItemMacro),
 
         /// Tokens within an impl block not interpreted by Syn.
-        Verbatim(ImplItemVerbatim),
+        Verbatim(TokenStream),
     }
 }
 
@@ -975,32 +975,58 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// Tokens within an impl block not interpreted by Syn.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct ImplItemVerbatim #manual_extra_traits {
-        pub tokens: TokenStream,
-    }
-}
+#[cfg(feature = "extra-traits")]
+impl Eq for ImplItem {}
 
 #[cfg(feature = "extra-traits")]
-impl Eq for ImplItemVerbatim {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for ImplItemVerbatim {
+impl PartialEq for ImplItem {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
+        match (self, other) {
+            (ImplItem::Const(this), ImplItem::Const(other)) => this == other,
+            (ImplItem::Method(this), ImplItem::Method(other)) => this == other,
+            (ImplItem::Type(this), ImplItem::Type(other)) => this == other,
+            (ImplItem::Existential(this), ImplItem::Existential(other)) => this == other,
+            (ImplItem::Macro(this), ImplItem::Macro(other)) => this == other,
+            (ImplItem::Verbatim(this), ImplItem::Verbatim(other)) => {
+                TokenStreamHelper(this) == TokenStreamHelper(other)
+            }
+            _ => false,
+        }
     }
 }
 
 #[cfg(feature = "extra-traits")]
-impl Hash for ImplItemVerbatim {
+impl Hash for ImplItem {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tokens).hash(state);
+        match self {
+            ImplItem::Const(item) => {
+                state.write_u8(0);
+                item.hash(state);
+            }
+            ImplItem::Method(item) => {
+                state.write_u8(1);
+                item.hash(state);
+            }
+            ImplItem::Type(item) => {
+                state.write_u8(2);
+                item.hash(state);
+            }
+            ImplItem::Existential(item) => {
+                state.write_u8(3);
+                item.hash(state);
+            }
+            ImplItem::Macro(item) => {
+                state.write_u8(4);
+                item.hash(state);
+            }
+            ImplItem::Verbatim(item) => {
+                state.write_u8(5);
+                TokenStreamHelper(item).hash(state);
+            }
+        }
     }
 }
 
@@ -2915,12 +2941,6 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ImplItemVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tokens.to_tokens(tokens);
         }
     }
 
