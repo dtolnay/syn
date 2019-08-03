@@ -611,7 +611,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum ForeignItem {
+    pub enum ForeignItem #manual_extra_traits {
         /// A foreign function in an `extern` block.
         Fn(ForeignItemFn),
 
@@ -625,7 +625,7 @@ ast_enum_of_structs! {
         Macro(ForeignItemMacro),
 
         /// Tokens in an `extern` block not interpreted by Syn.
-        Verbatim(ForeignItemVerbatim),
+        Verbatim(TokenStream),
     }
 }
 
@@ -681,32 +681,53 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// Tokens in an `extern` block not interpreted by Syn.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct ForeignItemVerbatim #manual_extra_traits {
-        pub tokens: TokenStream,
-    }
-}
+#[cfg(feature = "extra-traits")]
+impl Eq for ForeignItem {}
 
 #[cfg(feature = "extra-traits")]
-impl Eq for ForeignItemVerbatim {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for ForeignItemVerbatim {
+impl PartialEq for ForeignItem {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
+        match (self, other) {
+            (ForeignItem::Fn(this), ForeignItem::Fn(other)) => this == other,
+            (ForeignItem::Static(this), ForeignItem::Static(other)) => this == other,
+            (ForeignItem::Type(this), ForeignItem::Type(other)) => this == other,
+            (ForeignItem::Macro(this), ForeignItem::Macro(other)) => this == other,
+            (ForeignItem::Verbatim(this), ForeignItem::Verbatim(other)) => {
+                TokenStreamHelper(this) == TokenStreamHelper(other)
+            }
+            _ => false,
+        }
     }
 }
 
 #[cfg(feature = "extra-traits")]
-impl Hash for ForeignItemVerbatim {
+impl Hash for ForeignItem {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tokens).hash(state);
+        match self {
+            ForeignItem::Fn(item) => {
+                state.write_u8(0);
+                item.hash(state);
+            }
+            ForeignItem::Static(item) => {
+                state.write_u8(1);
+                item.hash(state);
+            }
+            ForeignItem::Type(item) => {
+                state.write_u8(2);
+                item.hash(state);
+            }
+            ForeignItem::Macro(item) => {
+                state.write_u8(3);
+                item.hash(state);
+            }
+            ForeignItem::Verbatim(item) => {
+                state.write_u8(4);
+                TokenStreamHelper(item).hash(state);
+            }
+        }
     }
 }
 
@@ -2925,12 +2946,6 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ForeignItemVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tokens.to_tokens(tokens);
         }
     }
 

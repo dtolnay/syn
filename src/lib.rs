@@ -346,7 +346,7 @@ mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
     FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-    ForeignItemVerbatim, ImplItem, ImplItemConst, ImplItemExistential, ImplItemMacro,
+    ImplItem, ImplItemConst, ImplItemExistential, ImplItemMacro,
     ImplItemMethod, ImplItemType, ImplItemVerbatim, Item, ItemConst, ItemEnum, ItemExistential,
     ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic,
     ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
