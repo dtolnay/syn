@@ -259,10 +259,6 @@ pub trait Fold {
     fn fold_expr_unsafe(&mut self, i: ExprUnsafe) -> ExprUnsafe {
         fold_expr_unsafe(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_expr_verbatim(&mut self, i: ExprVerbatim) -> ExprVerbatim {
-        fold_expr_verbatim(self, i)
-    }
     #[cfg(feature = "full")]
     fn fold_expr_while(&mut self, i: ExprWhile) -> ExprWhile {
         fold_expr_while(self, i)
@@ -1132,7 +1128,7 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         Expr::Type(_binding_0) => Expr::Type(full!(_visitor.fold_expr_type(_binding_0))),
         Expr::Unary(_binding_0) => Expr::Unary(_visitor.fold_expr_unary(_binding_0)),
         Expr::Unsafe(_binding_0) => Expr::Unsafe(full!(_visitor.fold_expr_unsafe(_binding_0))),
-        Expr::Verbatim(_binding_0) => Expr::Verbatim(_visitor.fold_expr_verbatim(_binding_0)),
+        Expr::Verbatim(_binding_0) => Expr::Verbatim(_binding_0),
         Expr::While(_binding_0) => Expr::While(full!(_visitor.fold_expr_while(_binding_0))),
         Expr::Yield(_binding_0) => Expr::Yield(full!(_visitor.fold_expr_yield(_binding_0))),
     }
@@ -1487,10 +1483,6 @@ pub fn fold_expr_unsafe<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprUnsafe) -> E
         unsafe_token: Token![unsafe](tokens_helper(_visitor, &_i.unsafe_token.span)),
         block: _visitor.fold_block(_i.block),
     }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_expr_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprVerbatim) -> ExprVerbatim {
-    ExprVerbatim { tokens: _i.tokens }
 }
 #[cfg(feature = "full")]
 pub fn fold_expr_while<V: Fold + ?Sized>(_visitor: &mut V, _i: ExprWhile) -> ExprWhile {

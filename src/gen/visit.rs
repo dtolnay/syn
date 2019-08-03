@@ -259,10 +259,6 @@ pub trait Visit<'ast> {
     fn visit_expr_unsafe(&mut self, i: &'ast ExprUnsafe) {
         visit_expr_unsafe(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_expr_verbatim(&mut self, i: &'ast ExprVerbatim) {
-        visit_expr_verbatim(self, i)
-    }
     #[cfg(feature = "full")]
     fn visit_expr_while(&mut self, i: &'ast ExprWhile) {
         visit_expr_while(self, i)
@@ -1205,7 +1201,7 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
             full!(_visitor.visit_expr_unsafe(_binding_0));
         }
         Expr::Verbatim(ref _binding_0) => {
-            _visitor.visit_expr_verbatim(_binding_0);
+            skip!(_binding_0);
         }
         Expr::While(ref _binding_0) => {
             full!(_visitor.visit_expr_while(_binding_0));
@@ -1630,13 +1626,6 @@ pub fn visit_expr_unsafe<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     }
     tokens_helper(_visitor, &_i.unsafe_token.span);
     _visitor.visit_block(&_i.block);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_expr_verbatim<'ast, V: Visit<'ast> + ?Sized>(
-    _visitor: &mut V,
-    _i: &'ast ExprVerbatim,
-) {
-    skip!(_i.tokens);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_while<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast ExprWhile) {

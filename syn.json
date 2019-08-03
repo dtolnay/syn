@@ -784,7 +784,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "ExprVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ],
         "While": [
@@ -1871,20 +1871,6 @@
         },
         "block": {
           "syn": "Block"
-        }
-      }
-    },
-    {
-      "ident": "ExprVerbatim",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
         }
       }
     },

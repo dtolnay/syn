@@ -1065,9 +1065,11 @@ impl Debug for Lite<syn::Expr> {
                 formatter.finish()
             }
             syn::Expr::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("Expr::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Expr::While(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::While");
@@ -1849,14 +1851,6 @@ impl Debug for Lite<syn::ExprUnsafe> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("block", Lite(&_val.block));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ExprVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ExprVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }
