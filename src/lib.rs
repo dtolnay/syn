@@ -242,7 +242,6 @@
 #![allow(
     clippy::block_in_if_condition_stmt,
     clippy::cognitive_complexity,
-    clippy::deprecated_cfg_attr,
     clippy::doc_markdown,
     clippy::eval_order_dependence,
     clippy::inherent_to_string,
