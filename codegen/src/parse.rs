@@ -256,7 +256,7 @@ mod parsing {
     use proc_macro2::{TokenStream, TokenTree};
     use quote::quote;
     use syn;
-    use syn::parse::{Parse, ParseStream, Result};
+    use syn::parse::{ParseStream, Result};
     use syn::*;
     use syn_codegen as types;
 
@@ -304,16 +304,12 @@ mod parsing {
         })
     }
 
-    // ast_struct! parsing
-    pub struct AstStruct(pub(super) Vec<AstItem>);
-    impl Parse for AstStruct {
-        fn parse(input: ParseStream) -> Result<Self> {
-            input.call(Attribute::parse_outer)?;
-            input.parse::<Token![pub]>()?;
-            input.parse::<Token![struct]>()?;
-            let res = input.call(ast_struct_inner)?;
-            Ok(AstStruct(vec![res]))
-        }
+    pub fn ast_struct(input: ParseStream) -> Result<AstItem> {
+        input.call(Attribute::parse_outer)?;
+        input.parse::<Token![pub]>()?;
+        input.parse::<Token![struct]>()?;
+        let res = input.call(ast_struct_inner)?;
+        Ok(res)
     }
 
     fn no_visit(input: ParseStream) -> bool {
@@ -326,27 +322,23 @@ mod parsing {
         }
     }
 
-    // ast_enum! parsing
-    pub struct AstEnum(pub Vec<AstItem>);
-    impl Parse for AstEnum {
-        fn parse(input: ParseStream) -> Result<Self> {
-            input.call(Attribute::parse_outer)?;
-            input.parse::<Token![pub]>()?;
-            input.parse::<Token![enum]>()?;
-            let ident: Ident = input.parse()?;
-            let no_visit = no_visit(input);
-            let rest: TokenStream = input.parse()?;
-            Ok(AstEnum(if no_visit {
-                vec![]
-            } else {
-                vec![AstItem {
-                    ast: syn::parse2(quote! {
-                        pub enum #ident #rest
-                    })?,
-                    features: vec![],
-                }]
-            }))
-        }
+    pub fn ast_enum(input: ParseStream) -> Result<Option<AstItem>> {
+        input.call(Attribute::parse_outer)?;
+        input.parse::<Token![pub]>()?;
+        input.parse::<Token![enum]>()?;
+        let ident: Ident = input.parse()?;
+        let no_visit = no_visit(input);
+        let rest: TokenStream = input.parse()?;
+        Ok(if no_visit {
+            None
+        } else {
+            Some(AstItem {
+                ast: syn::parse2(quote! {
+                    pub enum #ident #rest
+                })?,
+                features: vec![],
+            })
+        })
     }
 
     // A single variant of an ast_enum_of_structs!
@@ -372,47 +364,42 @@ mod parsing {
         })
     }
 
-    // ast_enum_of_structs! parsing
-    pub struct AstEnumOfStructs(pub Vec<AstItem>);
-    impl Parse for AstEnumOfStructs {
-        fn parse(input: ParseStream) -> Result<Self> {
-            input.call(Attribute::parse_outer)?;
-            input.parse::<Token![pub]>()?;
-            input.parse::<Token![enum]>()?;
-            let ident: Ident = input.parse()?;
-            skip_manual_extra_traits(input);
+    pub fn ast_enum_of_structs(input: ParseStream) -> Result<AstItem> {
+        input.call(Attribute::parse_outer)?;
+        input.parse::<Token![pub]>()?;
+        input.parse::<Token![enum]>()?;
+        let ident: Ident = input.parse()?;
+        skip_manual_extra_traits(input);
 
-            let content;
-            braced!(content in input);
-            let mut variants = Vec::new();
-            while !content.is_empty() {
-                variants.push(content.call(eos_variant)?);
-            }
-
-            if let Some(ident) = input.parse::<Option<Ident>>()? {
-                assert_eq!(ident, "do_not_generate_to_tokens");
-            }
-
-            let enum_item = {
-                let variants = variants.iter().map(|v| {
-                    let name = v.name.clone();
-                    match v.member {
-                        Some(ref member) => quote!(#name(#member)),
-                        None => quote!(#name),
-                    }
-                });
-                parse_quote! {
-                    pub enum #ident {
-                        #(#variants),*
-                    }
-                }
-            };
-            let items = vec![AstItem {
-                ast: enum_item,
-                features: vec![],
-            }];
-            Ok(AstEnumOfStructs(items))
+        let content;
+        braced!(content in input);
+        let mut variants = Vec::new();
+        while !content.is_empty() {
+            variants.push(content.call(eos_variant)?);
         }
+
+        if let Some(ident) = input.parse::<Option<Ident>>()? {
+            assert_eq!(ident, "do_not_generate_to_tokens");
+        }
+
+        let enum_item = {
+            let variants = variants.iter().map(|v| {
+                let name = v.name.clone();
+                match v.member {
+                    Some(ref member) => quote!(#name(#member)),
+                    None => quote!(#name),
+                }
+            });
+            parse_quote! {
+                pub enum #ident {
+                    #(#variants),*
+                }
+            }
+        };
+        Ok(AstItem {
+            ast: enum_item,
+            features: vec![],
+        })
     }
 
     mod kw {
@@ -569,13 +556,13 @@ fn load_file<P: AsRef<Path>>(
                 let features = get_features(&item.attrs, features);
 
                 // Try to parse the AstItem declaration out of the item.
-                let tts = &item.mac.tokens;
+                let tts = item.mac.tokens.clone();
                 let found = if item.mac.path.is_ident("ast_struct") {
-                    syn::parse2::<parsing::AstStruct>(quote!(#tts))?.0
+                    Some(parsing::ast_struct.parse2(tts)?)
                 } else if item.mac.path.is_ident("ast_enum") {
-                    syn::parse2::<parsing::AstEnum>(quote!(#tts))?.0
+                    parsing::ast_enum.parse2(tts)?
                 } else if item.mac.path.is_ident("ast_enum_of_structs") {
-                    syn::parse2::<parsing::AstEnumOfStructs>(quote!(#tts))?.0
+                    Some(parsing::ast_enum_of_structs.parse2(tts)?)
                 } else {
                     continue;
                 };
