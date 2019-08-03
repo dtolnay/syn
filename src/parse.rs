@@ -1145,3 +1145,41 @@ impl private {
         f.__parse_scoped(scope, tokens)
     }
 }
+
+/// An empty syntax tree node that consumes no tokens when parsed.
+///
+/// This is useful for attribute macros that want to ensure they are not
+/// provided any attribute args.
+///
+/// ```
+/// extern crate proc_macro;
+///
+/// use proc_macro::TokenStream;
+/// use syn::parse_macro_input;
+/// use syn::parse::Nothing;
+///
+/// # const IGNORE: &str = stringify! {
+/// #[proc_macro_attribute]
+/// # };
+/// pub fn my_attr(args: TokenStream, input: TokenStream) -> TokenStream {
+///     parse_macro_input!(args as Nothing);
+///
+///     /* ... */
+/// #   "".parse().unwrap()
+/// }
+/// ```
+///
+/// ```text
+/// error: unexpected token
+///  --> src/main.rs:3:19
+///   |
+/// 3 | #[my_attr(asdf)]
+///   |           ^^^^
+/// ```
+pub struct Nothing;
+
+impl Parse for Nothing {
+    fn parse(_input: ParseStream) -> Result<Self> {
+        Ok(Nothing)
+    }
+}
