@@ -3946,7 +3946,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "PatVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ],
         "Wild": [
@@ -4316,19 +4316,6 @@
           "box": {
             "syn": "Type"
           }
-        }
-      }
-    },
-    {
-      "ident": "PatVerbatim",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
         }
       }
     },

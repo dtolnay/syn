@@ -595,10 +595,6 @@ pub trait VisitMut {
         visit_pat_type_mut(self, i)
     }
     #[cfg(feature = "full")]
-    fn visit_pat_verbatim_mut(&mut self, i: &mut PatVerbatim) {
-        visit_pat_verbatim_mut(self, i)
-    }
-    #[cfg(feature = "full")]
     fn visit_pat_wild_mut(&mut self, i: &mut PatWild) {
         visit_pat_wild_mut(self, i)
     }
@@ -2530,7 +2526,7 @@ pub fn visit_pat_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Pat) {
             _visitor.visit_pat_type_mut(_binding_0);
         }
         Pat::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_pat_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
         Pat::Wild(ref mut _binding_0) => {
             _visitor.visit_pat_wild_mut(_binding_0);
@@ -2679,10 +2675,6 @@ pub fn visit_pat_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatTy
     _visitor.visit_pat_mut(&mut *_i.pat);
     tokens_helper(_visitor, &mut _i.colon_token.spans);
     _visitor.visit_type_mut(&mut *_i.ty);
-}
-#[cfg(feature = "full")]
-pub fn visit_pat_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatVerbatim) {
-    skip!(_i.tokens);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_wild_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut PatWild) {

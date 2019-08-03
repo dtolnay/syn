@@ -4034,9 +4034,11 @@ impl Debug for Lite<syn::Pat> {
                 formatter.finish()
             }
             syn::Pat::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Pat::Wild(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Wild");
@@ -4303,14 +4305,6 @@ impl Debug for Lite<syn::PatType> {
         }
         formatter.field("pat", Lite(&_val.pat));
         formatter.field("ty", Lite(&_val.ty));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::PatVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }
