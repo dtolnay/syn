@@ -744,7 +744,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum TraitItem {
+    pub enum TraitItem #manual_extra_traits {
         /// An associated constant within the definition of a trait.
         Const(TraitItemConst),
 
@@ -758,7 +758,7 @@ ast_enum_of_structs! {
         Macro(TraitItemMacro),
 
         /// Tokens within the definition of a trait not interpreted by Syn.
-        Verbatim(TraitItemVerbatim),
+        Verbatim(TokenStream),
     }
 }
 
@@ -816,32 +816,53 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// Tokens within the definition of a trait not interpreted by Syn.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct TraitItemVerbatim #manual_extra_traits {
-        pub tokens: TokenStream,
-    }
-}
+#[cfg(feature = "extra-traits")]
+impl Eq for TraitItem {}
 
 #[cfg(feature = "extra-traits")]
-impl Eq for TraitItemVerbatim {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for TraitItemVerbatim {
+impl PartialEq for TraitItem {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
+        match (self, other) {
+            (TraitItem::Const(this), TraitItem::Const(other)) => this == other,
+            (TraitItem::Method(this), TraitItem::Method(other)) => this == other,
+            (TraitItem::Type(this), TraitItem::Type(other)) => this == other,
+            (TraitItem::Macro(this), TraitItem::Macro(other)) => this == other,
+            (TraitItem::Verbatim(this), TraitItem::Verbatim(other)) => {
+                TokenStreamHelper(this) == TokenStreamHelper(other)
+            }
+            _ => false,
+        }
     }
 }
 
 #[cfg(feature = "extra-traits")]
-impl Hash for TraitItemVerbatim {
+impl Hash for TraitItem {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tokens).hash(state);
+        match self {
+            TraitItem::Const(item) => {
+                state.write_u8(0);
+                item.hash(state);
+            }
+            TraitItem::Method(item) => {
+                state.write_u8(1);
+                item.hash(state);
+            }
+            TraitItem::Type(item) => {
+                state.write_u8(2);
+                item.hash(state);
+            }
+            TraitItem::Macro(item) => {
+                state.write_u8(3);
+                item.hash(state);
+            }
+            TraitItem::Verbatim(item) => {
+                state.write_u8(4);
+                TokenStreamHelper(item).hash(state);
+            }
+        }
     }
 }
 
@@ -2827,12 +2848,6 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for TraitItemVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tokens.to_tokens(tokens);
         }
     }
 

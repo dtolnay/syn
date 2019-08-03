@@ -351,7 +351,7 @@ pub use crate::item::{
     ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic,
     ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
     Signature, TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
-    TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+    UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };
 
 #[cfg(feature = "full")]
