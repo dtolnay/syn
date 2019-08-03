@@ -464,6 +464,16 @@ impl<'a, T, P> Iterator for Pairs<'a, T, P> {
     }
 }
 
+impl<'a, T, P> DoubleEndedIterator for Pairs<'a, T, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.last.next().map(Pair::End).or_else(|| {
+            self.inner
+                .next_back()
+                .map(|&(ref t, ref p)| Pair::Punctuated(t, p))
+        })
+    }
+}
+
 impl<'a, T, P> ExactSizeIterator for Pairs<'a, T, P> {
     fn len(&self) -> usize {
         self.inner.len() + self.last.len()
@@ -501,6 +511,16 @@ impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
     }
 }
 
+impl<'a, T, P> DoubleEndedIterator for PairsMut<'a, T, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.last.next().map(Pair::End).or_else(|| {
+            self.inner
+                .next_back()
+                .map(|&mut (ref mut t, ref mut p)| Pair::Punctuated(t, p))
+        })
+    }
+}
+
 impl<'a, T, P> ExactSizeIterator for PairsMut<'a, T, P> {
     fn len(&self) -> usize {
         self.inner.len() + self.last.len()
@@ -529,6 +549,15 @@ impl<T, P> Iterator for IntoPairs<T, P> {
     }
 }
 
+impl<T, P> DoubleEndedIterator for IntoPairs<T, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.last
+            .next()
+            .map(Pair::End)
+            .or_else(|| self.inner.next_back().map(|(t, p)| Pair::Punctuated(t, p)))
+    }
+}
+
 impl<T, P> ExactSizeIterator for IntoPairs<T, P> {
     fn len(&self) -> usize {
         self.inner.len() + self.last.len()
@@ -553,6 +582,12 @@ impl<T> Iterator for IntoIter<T> {
     }
 }
 
+impl<T> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.inner.next_back()
+    }
+}
+
 impl<T> ExactSizeIterator for IntoIter<T> {
     fn len(&self) -> usize {
         self.inner.len()
@@ -571,7 +606,9 @@ pub struct Iter<'a, T: 'a> {
     inner: Box<IterTrait<'a, T, Item = &'a T> + 'a>,
 }
 
-trait IterTrait<'a, T: 'a>: ExactSizeIterator<Item = &'a T> {
+trait IterTrait<'a, T: 'a>:
+    DoubleEndedIterator<Item = &'a T> + ExactSizeIterator<Item = &'a T>
+{
     fn clone_box(&self) -> Box<IterTrait<'a, T, Item = &'a T> + 'a>;
 }
 
@@ -606,6 +643,12 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.inner.next_back()
+    }
+}
+
 impl<'a, T> ExactSizeIterator for Iter<'a, T> {
     fn len(&self) -> usize {
         self.inner.len()
@@ -620,6 +663,14 @@ impl<'a, T, P> Iterator for PrivateIter<'a, T, P> {
             .next()
             .map(|pair| &pair.0)
             .or_else(|| self.last.next())
+    }
+}
+
+impl<'a, T, P> DoubleEndedIterator for PrivateIter<'a, T, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.last
+            .next()
+            .or_else(|| self.inner.next_back().map(|pair| &pair.0))
     }
 }
 
@@ -641,7 +692,7 @@ impl<'a, T, P> Clone for PrivateIter<'a, T, P> {
 
 impl<'a, T: 'a, I: 'a> IterTrait<'a, T> for I
 where
-    I: ExactSizeIterator<Item = &'a T> + Clone,
+    I: DoubleEndedIterator<Item = &'a T> + ExactSizeIterator<Item = &'a T> + Clone,
 {
     fn clone_box(&self) -> Box<IterTrait<'a, T, Item = &'a T> + 'a> {
         Box::new(self.clone())
@@ -654,7 +705,12 @@ where
 ///
 /// [module documentation]: self
 pub struct IterMut<'a, T: 'a> {
-    inner: Box<ExactSizeIterator<Item = &'a mut T> + 'a>,
+    inner: Box<IterMutTrait<'a, T, Item = &'a mut T> + 'a>,
+}
+
+trait IterMutTrait<'a, T: 'a>:
+    DoubleEndedIterator<Item = &'a mut T> + ExactSizeIterator<Item = &'a mut T>
+{
 }
 
 struct PrivateIterMut<'a, T: 'a, P: 'a> {
@@ -679,6 +735,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     }
 }
 
+impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.inner.next_back()
+    }
+}
+
 impl<'a, T> ExactSizeIterator for IterMut<'a, T> {
     fn len(&self) -> usize {
         self.inner.len()
@@ -696,10 +758,23 @@ impl<'a, T, P> Iterator for PrivateIterMut<'a, T, P> {
     }
 }
 
+impl<'a, T, P> DoubleEndedIterator for PrivateIterMut<'a, T, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.last
+            .next()
+            .or_else(|| self.inner.next_back().map(|pair| &mut pair.0))
+    }
+}
+
 impl<'a, T, P> ExactSizeIterator for PrivateIterMut<'a, T, P> {
     fn len(&self) -> usize {
         self.inner.len() + self.last.len()
     }
+}
+
+impl<'a, T: 'a, I: 'a> IterMutTrait<'a, T> for I where
+    I: DoubleEndedIterator<Item = &'a mut T> + ExactSizeIterator<Item = &'a mut T>
+{
 }
 
 /// A single syntax tree node of type `T` followed by its trailing punctuation
