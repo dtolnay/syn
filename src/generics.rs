@@ -368,7 +368,7 @@ impl LifetimeDef {
     pub fn new(lifetime: Lifetime) -> Self {
         LifetimeDef {
             attrs: Vec::new(),
-            lifetime: lifetime,
+            lifetime,
             colon_token: None,
             bounds: Punctuated::new(),
         }
@@ -379,7 +379,7 @@ impl From<Ident> for TypeParam {
     fn from(ident: Ident) -> Self {
         TypeParam {
             attrs: vec![],
-            ident: ident,
+            ident,
             colon_token: None,
             bounds: Punctuated::new(),
             eq_token: None,
@@ -531,20 +531,20 @@ pub mod parsing {
                 let lookahead = input.lookahead1();
                 if allow_lifetime_param && lookahead.peek(Lifetime) {
                     params.push_value(GenericParam::Lifetime(LifetimeDef {
-                        attrs: attrs,
+                        attrs,
                         ..input.parse()?
                     }));
                 } else if allow_type_param && lookahead.peek(Ident) {
                     allow_lifetime_param = false;
                     params.push_value(GenericParam::Type(TypeParam {
-                        attrs: attrs,
+                        attrs,
                         ..input.parse()?
                     }));
                 } else if lookahead.peek(Token![const]) {
                     allow_lifetime_param = false;
                     allow_type_param = false;
                     params.push_value(GenericParam::Const(ConstParam {
-                        attrs: attrs,
+                        attrs,
                         ..input.parse()?
                     }));
                 } else {
@@ -562,7 +562,7 @@ pub mod parsing {
 
             Ok(Generics {
                 lt_token: Some(lt_token),
-                params: params,
+                params,
                 gt_token: Some(gt_token),
                 where_clause: None,
             })
@@ -576,17 +576,17 @@ pub mod parsing {
             let lookahead = input.lookahead1();
             if lookahead.peek(Ident) {
                 Ok(GenericParam::Type(TypeParam {
-                    attrs: attrs,
+                    attrs,
                     ..input.parse()?
                 }))
             } else if lookahead.peek(Lifetime) {
                 Ok(GenericParam::Lifetime(LifetimeDef {
-                    attrs: attrs,
+                    attrs,
                     ..input.parse()?
                 }))
             } else if lookahead.peek(Token![const]) {
                 Ok(GenericParam::Const(ConstParam {
-                    attrs: attrs,
+                    attrs,
                     ..input.parse()?
                 }))
             } else {
@@ -751,9 +751,9 @@ pub mod parsing {
 
             Ok(TraitBound {
                 paren_token: None,
-                modifier: modifier,
-                lifetimes: lifetimes,
-                path: path,
+                modifier,
+                lifetimes,
+                path,
             })
         }
     }
@@ -786,7 +786,7 @@ pub mod parsing {
                         None
                     }
                 },
-                default: default,
+                default,
             })
         }
     }

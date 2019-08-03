@@ -327,7 +327,7 @@ impl LitByteStr {
     pub fn new(value: &[u8], span: Span) -> Self {
         let mut token = Literal::byte_string(value);
         token.set_span(span);
-        LitByteStr { token: token }
+        LitByteStr { token }
     }
 
     pub fn value(&self) -> Vec<u8> {
@@ -347,7 +347,7 @@ impl LitByte {
     pub fn new(value: u8, span: Span) -> Self {
         let mut token = Literal::u8_suffixed(value);
         token.set_span(span);
-        LitByte { token: token }
+        LitByte { token }
     }
 
     pub fn value(&self) -> u8 {
@@ -367,7 +367,7 @@ impl LitChar {
     pub fn new(value: char, span: Span) -> Self {
         let mut token = Literal::character(value);
         token.set_span(span);
-        LitChar { token: token }
+        LitChar { token }
     }
 
     pub fn value(&self) -> char {
@@ -555,7 +555,7 @@ pub mod parsing {
                         break;
                     };
                     let lit_bool = LitBool {
-                        value: value,
+                        value,
                         span: ident.span(),
                     };
                     return Ok((Lit::Bool(lit_bool), rest));
@@ -699,13 +699,13 @@ mod value {
             let repr = token.to_string();
 
             match byte(&repr, 0) {
-                b'"' | b'r' => return Lit::Str(LitStr { token: token }),
+                b'"' | b'r' => return Lit::Str(LitStr { token }),
                 b'b' => match byte(&repr, 1) {
-                    b'"' | b'r' => return Lit::ByteStr(LitByteStr { token: token }),
-                    b'\'' => return Lit::Byte(LitByte { token: token }),
+                    b'"' | b'r' => return Lit::ByteStr(LitByteStr { token }),
+                    b'\'' => return Lit::Byte(LitByte { token }),
                     _ => {}
                 },
-                b'\'' => return Lit::Char(LitChar { token: token }),
+                b'\'' => return Lit::Char(LitChar { token }),
                 b'0'...b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
                         if let Some((digits, suffix)) = parse_lit_int(&repr) {

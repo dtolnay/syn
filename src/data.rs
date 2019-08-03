@@ -320,14 +320,14 @@ pub mod parsing {
                     || content.peek(Token![super])
                 {
                     return Ok(Visibility::Restricted(VisRestricted {
-                        pub_token: pub_token,
+                        pub_token,
                         paren_token: parenthesized!(content in input),
                         in_token: None,
                         path: Box::new(Path::from(content.call(Ident::parse_any)?)),
                     }));
                 } else if content.peek(Token![in]) {
                     return Ok(Visibility::Restricted(VisRestricted {
-                        pub_token: pub_token,
+                        pub_token,
                         paren_token: parenthesized!(content in input),
                         in_token: Some(content.parse()?),
                         path: Box::new(content.call(Path::parse_mod_style)?),
@@ -336,7 +336,7 @@ pub mod parsing {
             }
 
             Ok(Visibility::Public(VisPublic {
-                pub_token: pub_token,
+                pub_token,
             }))
         }
 

@@ -17,7 +17,7 @@ unsafe impl<T: Copy> Send for ThreadBound<T> {}
 impl<T> ThreadBound<T> {
     pub fn new(value: T) -> Self {
         ThreadBound {
-            value: value,
+            value,
             thread_id: thread::current().id(),
         }
     }

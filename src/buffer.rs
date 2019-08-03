@@ -184,8 +184,8 @@ impl<'a> Cursor<'a> {
         }
 
         Cursor {
-            ptr: ptr,
-            scope: scope,
+            ptr,
+            scope,
             marker: PhantomData,
         }
     }
@@ -290,7 +290,7 @@ impl<'a> Cursor<'a> {
                     Some((ident, rest)) => {
                         let lifetime = Lifetime {
                             apostrophe: op.span(),
-                            ident: ident,
+                            ident,
                         };
                         Some((lifetime, rest))
                     }

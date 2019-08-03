@@ -399,11 +399,11 @@ impl private {
         unexpected: Rc<Cell<Option<Span>>>,
     ) -> ParseBuffer {
         ParseBuffer {
-            scope: scope,
+            scope,
             // See comment on `cell` in the struct definition.
             cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
             marker: PhantomData,
-            unexpected: unexpected,
+            unexpected,
         }
     }
 
@@ -521,11 +521,11 @@ impl<'a> ParseBuffer<'a> {
     ///         let empty_brace_token = braced!(content in input);
     ///
     ///         Ok(MarkerTrait {
-    ///             trait_token: trait_token,
-    ///             ident: ident,
-    ///             generics: generics,
-    ///             colon_token: colon_token,
-    ///             supertraits: supertraits,
+    ///             trait_token,
+    ///             ident,
+    ///             generics,
+    ///             colon_token,
+    ///             supertraits,
     ///             brace_token: empty_brace_token,
     ///         })
     ///     }
@@ -820,7 +820,7 @@ impl<'a> ParseBuffer<'a> {
     ///                 || content.peek(Token![super])
     ///             {
     ///                 return Ok(PubVisibility {
-    ///                     pub_token: pub_token,
+    ///                     pub_token,
     ///                     restricted: Some(Restricted {
     ///                         paren_token: parenthesized!(content in input),
     ///                         in_token: None,
@@ -829,7 +829,7 @@ impl<'a> ParseBuffer<'a> {
     ///                 });
     ///             } else if content.peek(Token![in]) {
     ///                 return Ok(PubVisibility {
-    ///                     pub_token: pub_token,
+    ///                     pub_token,
     ///                     restricted: Some(Restricted {
     ///                         paren_token: parenthesized!(content in input),
     ///                         in_token: Some(content.parse()?),
@@ -840,7 +840,7 @@ impl<'a> ParseBuffer<'a> {
     ///         }
     ///
     ///         Ok(PubVisibility {
-    ///             pub_token: pub_token,
+    ///             pub_token,
     ///             restricted: None,
     ///         })
     ///     }

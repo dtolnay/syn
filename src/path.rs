@@ -310,7 +310,7 @@ pub mod parsing {
                 || input.peek(Token![::]) && input.peek3(Token![<])
             {
                 Ok(PathSegment {
-                    ident: ident,
+                    ident,
                     arguments: PathArguments::AngleBracketed(input.parse()?),
                 })
             } else {
@@ -503,11 +503,11 @@ pub mod parsing {
                 }
             };
             let qself = QSelf {
-                lt_token: lt_token,
+                lt_token,
                 ty: Box::new(this),
-                position: position,
-                as_token: as_token,
-                gt_token: gt_token,
+                position,
+                as_token,
+                gt_token,
             };
             Ok((Some(qself), path))
         } else {

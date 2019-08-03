@@ -207,7 +207,7 @@ pub mod parsing {
                     tokens = content;
                     delimiter
                 },
-                tokens: tokens,
+                tokens,
             })
         }
     }

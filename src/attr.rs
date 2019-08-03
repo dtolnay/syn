@@ -486,7 +486,7 @@ pub mod parsing {
     fn parse_meta_list_after_path(path: Path, input: ParseStream) -> Result<MetaList> {
         let content;
         Ok(MetaList {
-            path: path,
+            path,
             paren_token: parenthesized!(content in input),
             nested: content.parse_terminated(NestedMeta::parse)?,
         })
@@ -494,7 +494,7 @@ pub mod parsing {
 
     fn parse_meta_name_value_after_path(path: Path, input: ParseStream) -> Result<MetaNameValue> {
         Ok(MetaNameValue {
-            path: path,
+            path,
             eq_token: input.parse()?,
             lit: input.parse()?,
         })

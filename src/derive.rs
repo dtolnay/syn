@@ -103,16 +103,16 @@ pub mod parsing {
                 let generics = input.parse::<Generics>()?;
                 let (where_clause, fields, semi) = data_struct(input)?;
                 Ok(DeriveInput {
-                    attrs: attrs,
-                    vis: vis,
-                    ident: ident,
+                    attrs,
+                    vis,
+                    ident,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                     data: Data::Struct(DataStruct {
-                        struct_token: struct_token,
-                        fields: fields,
+                        struct_token,
+                        fields,
                         semi_token: semi,
                     }),
                 })
@@ -122,17 +122,17 @@ pub mod parsing {
                 let generics = input.parse::<Generics>()?;
                 let (where_clause, brace, variants) = data_enum(input)?;
                 Ok(DeriveInput {
-                    attrs: attrs,
-                    vis: vis,
-                    ident: ident,
+                    attrs,
+                    vis,
+                    ident,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                     data: Data::Enum(DataEnum {
-                        enum_token: enum_token,
+                        enum_token,
                         brace_token: brace,
-                        variants: variants,
+                        variants,
                     }),
                 })
             } else if lookahead.peek(Token![union]) {
@@ -141,16 +141,16 @@ pub mod parsing {
                 let generics = input.parse::<Generics>()?;
                 let (where_clause, fields) = data_union(input)?;
                 Ok(DeriveInput {
-                    attrs: attrs,
-                    vis: vis,
-                    ident: ident,
+                    attrs,
+                    vis,
+                    ident,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                     data: Data::Union(DataUnion {
-                        union_token: union_token,
-                        fields: fields,
+                        union_token,
+                        fields,
                     }),
                 })
             } else {

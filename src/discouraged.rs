@@ -81,7 +81,7 @@ pub trait Speculative {
     ///         let ident = input.parse()?;
     ///         if input.peek(Token![::]) && input.peek3(Token![<]) {
     ///             return Ok(PathSegment {
-    ///                 ident: ident,
+    ///                 ident,
     ///                 arguments: PathArguments::AngleBracketed(input.parse()?),
     ///             });
     ///         }
@@ -90,7 +90,7 @@ pub trait Speculative {
     ///             if let Ok(arguments) = fork.parse() {
     ///                 input.advance_to(&fork);
     ///                 return Ok(PathSegment {
-    ///                     ident: ident,
+    ///                     ident,
     ///                     arguments: PathArguments::AngleBracketed(arguments),
     ///                 });
     ///             }

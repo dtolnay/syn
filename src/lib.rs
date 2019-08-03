@@ -248,7 +248,6 @@
     clippy::large_enum_variant,
     clippy::needless_pass_by_value,
     clippy::never_loop,
-    clippy::redundant_field_names,
     clippy::suspicious_op_assign_impl,
     clippy::too_many_arguments,
     clippy::trivially_copy_pass_by_ref,

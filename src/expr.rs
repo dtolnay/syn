@@ -1456,14 +1456,14 @@ pub mod parsing {
                     Expr::AssignOp(ExprAssignOp {
                         attrs: Vec::new(),
                         left: Box::new(lhs),
-                        op: op,
+                        op,
                         right: Box::new(rhs),
                     })
                 } else {
                     Expr::Binary(ExprBinary {
                         attrs: Vec::new(),
                         left: Box::new(lhs),
-                        op: op,
+                        op,
                         right: Box::new(rhs),
                     })
                 };
@@ -1485,7 +1485,7 @@ pub mod parsing {
                 lhs = Expr::Assign(ExprAssign {
                     attrs: Vec::new(),
                     left: Box::new(lhs),
-                    eq_token: eq_token,
+                    eq_token,
                     right: Box::new(rhs),
                 });
             } else if Precedence::Range >= base && input.peek(Token![..]) {
@@ -1511,7 +1511,7 @@ pub mod parsing {
                 lhs = Expr::Range(ExprRange {
                     attrs: Vec::new(),
                     from: Some(Box::new(lhs)),
-                    limits: limits,
+                    limits,
                     to: rhs.map(Box::new),
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
@@ -1520,7 +1520,7 @@ pub mod parsing {
                 lhs = Expr::Cast(ExprCast {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
-                    as_token: as_token,
+                    as_token,
                     ty: Box::new(ty),
                 });
             } else if Precedence::Cast >= base && input.peek(Token![:]) && !input.peek(Token![::]) {
@@ -1529,7 +1529,7 @@ pub mod parsing {
                 lhs = Expr::Type(ExprType {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
-                    colon_token: colon_token,
+                    colon_token,
                     ty: Box::new(ty),
                 });
             } else {
@@ -1567,7 +1567,7 @@ pub mod parsing {
                 lhs = Expr::Binary(ExprBinary {
                     attrs: Vec::new(),
                     left: Box::new(lhs),
-                    op: op,
+                    op,
                     right: Box::new(rhs),
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
@@ -1576,7 +1576,7 @@ pub mod parsing {
                 lhs = Expr::Cast(ExprCast {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
-                    as_token: as_token,
+                    as_token,
                     ty: Box::new(ty),
                 });
             } else {
@@ -1624,7 +1624,7 @@ pub mod parsing {
             let attrs = input.call(Attribute::parse_outer)?;
             if input.peek(Token![&]) {
                 Ok(Expr::Reference(ExprReference {
-                    attrs: attrs,
+                    attrs,
                     and_token: input.parse()?,
                     raw: Reserved::default(),
                     mutability: input.parse()?,
@@ -1632,13 +1632,13 @@ pub mod parsing {
                 }))
             } else if input.peek(Token![box]) {
                 Ok(Expr::Box(ExprBox {
-                    attrs: attrs,
+                    attrs,
                     box_token: input.parse()?,
                     expr: Box::new(unary_expr(input, allow_struct)?),
                 }))
             } else {
                 Ok(Expr::Unary(ExprUnary {
-                    attrs: attrs,
+                    attrs,
                     op: input.parse()?,
                     expr: Box::new(unary_expr(input, allow_struct)?),
                 }))
@@ -1705,7 +1705,7 @@ pub mod parsing {
                     e = Expr::Await(ExprAwait {
                         attrs: Vec::new(),
                         base: Box::new(e),
-                        dot_token: dot_token,
+                        dot_token,
                         await_token: input.parse()?,
                     });
                     continue;
@@ -1744,9 +1744,9 @@ pub mod parsing {
                         e = Expr::MethodCall(ExprMethodCall {
                             attrs: Vec::new(),
                             receiver: Box::new(e),
-                            dot_token: dot_token,
-                            method: method,
-                            turbofish: turbofish,
+                            dot_token,
+                            method,
+                            turbofish,
                             paren_token: parenthesized!(content in input),
                             args: content.parse_terminated(Expr::parse)?,
                         });
@@ -1757,8 +1757,8 @@ pub mod parsing {
                 e = Expr::Field(ExprField {
                     attrs: Vec::new(),
                     base: Box::new(e),
-                    dot_token: dot_token,
-                    member: member,
+                    dot_token,
+                    member,
                 });
             } else if input.peek(token::Bracket) {
                 let content;
@@ -1952,9 +1952,9 @@ pub mod parsing {
                     attrs: Vec::new(),
                     mac: Macro {
                         path: expr.path,
-                        bang_token: bang_token,
-                        delimiter: delimiter,
-                        tokens: tokens,
+                        bang_token,
+                        delimiter,
+                        tokens,
                     },
                 }));
             }
@@ -1976,7 +1976,7 @@ pub mod parsing {
         if content.is_empty() {
             return Ok(Expr::Tuple(ExprTuple {
                 attrs: inner_attrs,
-                paren_token: paren_token,
+                paren_token,
                 elems: Punctuated::new(),
             }));
         }
@@ -1985,7 +1985,7 @@ pub mod parsing {
         if content.is_empty() {
             return Ok(Expr::Paren(ExprParen {
                 attrs: inner_attrs,
-                paren_token: paren_token,
+                paren_token,
                 expr: Box::new(first),
             }));
         }
@@ -2003,8 +2003,8 @@ pub mod parsing {
         }
         Ok(Expr::Tuple(ExprTuple {
             attrs: inner_attrs,
-            paren_token: paren_token,
-            elems: elems,
+            paren_token,
+            elems,
         }))
     }
 
@@ -2016,7 +2016,7 @@ pub mod parsing {
         if content.is_empty() {
             return Ok(Expr::Array(ExprArray {
                 attrs: inner_attrs,
-                bracket_token: bracket_token,
+                bracket_token,
                 elems: Punctuated::new(),
             }));
         }
@@ -2036,17 +2036,17 @@ pub mod parsing {
             }
             Ok(Expr::Array(ExprArray {
                 attrs: inner_attrs,
-                bracket_token: bracket_token,
-                elems: elems,
+                bracket_token,
+                elems,
             }))
         } else if content.peek(Token![;]) {
             let semi_token: Token![;] = content.parse()?;
             let len: Expr = content.parse()?;
             Ok(Expr::Repeat(ExprRepeat {
                 attrs: inner_attrs,
-                bracket_token: bracket_token,
+                bracket_token,
                 expr: Box::new(first),
-                semi_token: semi_token,
+                semi_token,
                 len: Box::new(len),
             }))
         } else {
@@ -2237,14 +2237,14 @@ pub mod parsing {
 
             Ok(ExprForLoop {
                 attrs: inner_attrs,
-                label: label,
-                for_token: for_token,
-                pat: pat,
-                in_token: in_token,
+                label,
+                for_token,
+                pat,
+                in_token,
                 expr: Box::new(expr),
                 body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
+                    brace_token,
+                    stmts,
                 },
             })
         }
@@ -2263,11 +2263,11 @@ pub mod parsing {
 
             Ok(ExprLoop {
                 attrs: inner_attrs,
-                label: label,
-                loop_token: loop_token,
+                label,
+                loop_token,
                 body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
+                    brace_token,
+                    stmts,
                 },
             })
         }
@@ -2290,10 +2290,10 @@ pub mod parsing {
 
             Ok(ExprMatch {
                 attrs: inner_attrs,
-                match_token: match_token,
+                match_token,
                 expr: Box::new(expr),
-                brace_token: brace_token,
-                arms: arms,
+                brace_token,
+                arms,
             })
         }
     }
@@ -2432,13 +2432,13 @@ pub mod parsing {
 
         Ok(ExprClosure {
             attrs: Vec::new(),
-            asyncness: asyncness,
-            movability: movability,
-            capture: capture,
-            or1_token: or1_token,
-            inputs: inputs,
-            or2_token: or2_token,
-            output: output,
+            asyncness,
+            movability,
+            capture,
+            or1_token,
+            inputs,
+            or2_token,
+            output,
             body: Box::new(body),
         })
     }
@@ -2460,7 +2460,7 @@ pub mod parsing {
 
         if input.peek(Token![:]) {
             Ok(Pat::Type(PatType {
-                attrs: attrs,
+                attrs,
                 pat: Box::new(pat),
                 colon_token: input.parse()?,
                 ty: input.parse()?,
@@ -2502,12 +2502,12 @@ pub mod parsing {
 
             Ok(ExprWhile {
                 attrs: inner_attrs,
-                label: label,
-                while_token: while_token,
+                label,
+                while_token,
                 cond: Box::new(cond),
                 body: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
+                    brace_token,
+                    stmts,
                 },
             })
         }
@@ -2606,8 +2606,8 @@ pub mod parsing {
 
             Ok(FieldValue {
                 attrs: Vec::new(),
-                member: member,
-                colon_token: colon_token,
+                member,
+                colon_token,
                 expr: value,
             })
         }
@@ -2636,7 +2636,7 @@ pub mod parsing {
             }
 
             fields.push(FieldValue {
-                attrs: attrs,
+                attrs,
                 ..content.parse()?
             });
 
@@ -2657,11 +2657,11 @@ pub mod parsing {
 
         Ok(ExprStruct {
             attrs: private::attrs(outer_attrs, inner_attrs),
-            brace_token: brace_token,
-            path: path,
-            fields: fields,
-            dot2_token: dot2_token,
-            rest: rest,
+            brace_token,
+            path,
+            fields,
+            dot2_token,
+            rest,
         })
     }
 
@@ -2676,10 +2676,10 @@ pub mod parsing {
 
         Ok(ExprUnsafe {
             attrs: inner_attrs,
-            unsafe_token: unsafe_token,
+            unsafe_token,
             block: Block {
-                brace_token: brace_token,
-                stmts: stmts,
+                brace_token,
+                stmts,
             },
         })
     }
@@ -2695,10 +2695,10 @@ pub mod parsing {
 
         Ok(ExprBlock {
             attrs: inner_attrs,
-            label: label,
+            label,
             block: Block {
-                brace_token: brace_token,
-                stmts: stmts,
+                brace_token,
+                stmts,
             },
         })
     }
@@ -2751,9 +2751,9 @@ pub mod parsing {
             let (qself, path) = path::parsing::qpath(input, true)?;
 
             Ok(ExprPath {
-                attrs: attrs,
-                qself: qself,
-                path: path,
+                attrs,
+                qself,
+                path,
             })
         }
     }
@@ -2815,10 +2815,10 @@ pub mod parsing {
         ///                 attrs.extend(inner_attrs);
         ///                 attrs
         ///             },
-        ///             fn_token: fn_token,
-        ///             name: name,
-        ///             brace_token: brace_token,
-        ///             stmts: stmts,
+        ///             fn_token,
+        ///             name,
+        ///             brace_token,
+        ///             stmts,
         ///         })
         ///     }
         /// }
@@ -2914,15 +2914,15 @@ pub mod parsing {
         let semi_token: Option<Token![;]> = input.parse()?;
 
         Ok(Stmt::Item(Item::Macro(ItemMacro {
-            attrs: attrs,
-            ident: ident,
+            attrs,
+            ident,
             mac: Macro {
-                path: path,
-                bang_token: bang_token,
-                delimiter: delimiter,
-                tokens: tokens,
+                path,
+                bang_token,
+                delimiter,
+                tokens,
             },
-            semi_token: semi_token,
+            semi_token,
         })))
     }
 
@@ -3057,8 +3057,8 @@ pub mod parsing {
         if qself.is_some() {
             return Ok(Pat::Path(PatPath {
                 attrs: Vec::new(),
-                qself: qself,
-                path: path,
+                qself,
+                path,
             }));
         }
 
@@ -3079,10 +3079,10 @@ pub mod parsing {
                 return Ok(Pat::Macro(PatMacro {
                     attrs: Vec::new(),
                     mac: Macro {
-                        path: path,
-                        bang_token: bang_token,
-                        delimiter: delimiter,
-                        tokens: tokens,
+                        path,
+                        bang_token,
+                        delimiter,
+                        tokens,
                     },
                 }));
             }
@@ -3097,8 +3097,8 @@ pub mod parsing {
         } else {
             Ok(Pat::Path(PatPath {
                 attrs: Vec::new(),
-                qself: qself,
-                path: path,
+                qself,
+                path,
             }))
         }
     }
@@ -3143,7 +3143,7 @@ pub mod parsing {
     fn pat_tuple_struct(input: ParseStream, path: Path) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
             attrs: Vec::new(),
-            path: path,
+            path,
             pat: input.call(pat_tuple)?,
         })
     }
@@ -3172,10 +3172,10 @@ pub mod parsing {
 
         Ok(PatStruct {
             attrs: Vec::new(),
-            path: path,
-            brace_token: brace_token,
-            fields: fields,
-            dot2_token: dot2_token,
+            path,
+            brace_token,
+            fields,
+            dot2_token,
         })
     }
 
@@ -3191,7 +3191,7 @@ pub mod parsing {
         {
             return Ok(FieldPat {
                 attrs: Vec::new(),
-                member: member,
+                member,
                 colon_token: input.parse()?,
                 pat: input.parse()?,
             });
@@ -3204,8 +3204,8 @@ pub mod parsing {
 
         let mut pat = Pat::Ident(PatIdent {
             attrs: Vec::new(),
-            by_ref: by_ref,
-            mutability: mutability,
+            by_ref,
+            mutability,
             ident: ident.clone(),
             subpat: None,
         });
@@ -3314,8 +3314,8 @@ pub mod parsing {
             attrs: Vec::new(),
             lo: Box::new(Expr::Path(ExprPath {
                 attrs: Vec::new(),
-                qself: qself,
-                path: path,
+                qself,
+                path,
             })),
             limits: input.parse()?,
             hi: input.call(pat_lit_expr)?,
@@ -3340,8 +3340,8 @@ pub mod parsing {
 
         Ok(PatTuple {
             attrs: Vec::new(),
-            paren_token: paren_token,
-            elems: elems,
+            paren_token,
+            elems,
         })
     }
 
@@ -3361,7 +3361,7 @@ pub mod parsing {
         if input.peek(Token![..]) {
             Ok(Pat::Range(PatRange {
                 attrs: Vec::new(),
-                lo: lo,
+                lo,
                 limits: input.parse()?,
                 hi: input.call(pat_lit_expr)?,
             }))
@@ -3423,8 +3423,8 @@ pub mod parsing {
 
         Ok(PatSlice {
             attrs: Vec::new(),
-            bracket_token: bracket_token,
-            elems: elems,
+            bracket_token,
+            elems,
         })
     }
 

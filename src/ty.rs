@@ -370,13 +370,13 @@ pub mod parsing {
             let paren_token = parenthesized!(content in input);
             if content.is_empty() {
                 return Ok(Type::Tuple(TypeTuple {
-                    paren_token: paren_token,
+                    paren_token,
                     elems: Punctuated::new(),
                 }));
             }
             if content.peek(Lifetime) {
                 return Ok(Type::Paren(TypeParen {
-                    paren_token: paren_token,
+                    paren_token,
                     elem: Box::new(Type::TraitObject(content.parse()?)),
                 }));
             }
@@ -400,7 +400,7 @@ pub mod parsing {
             let first: Type = content.parse()?;
             if content.peek(Token![,]) {
                 return Ok(Type::Tuple(TypeTuple {
-                    paren_token: paren_token,
+                    paren_token,
                     elems: {
                         let mut elems = Punctuated::new();
                         elems.push_value(first);
@@ -420,7 +420,7 @@ pub mod parsing {
                                 paren_token: Some(paren_token),
                                 modifier: TraitBoundModifier::None,
                                 lifetimes: None,
-                                path: path,
+                                path,
                             })
                         }
                         Type::TraitObject(TypeTraitObject {
@@ -462,7 +462,7 @@ pub mod parsing {
                 }
             }
             Ok(Type::Paren(TypeParen {
-                paren_token: paren_token,
+                paren_token,
                 elem: Box::new(first),
             }))
         } else if lookahead.peek(Token![fn])
@@ -516,9 +516,9 @@ pub mod parsing {
                     return Ok(Type::Macro(TypeMacro {
                         mac: Macro {
                             path: ty.path,
-                            bang_token: bang_token,
-                            delimiter: delimiter,
-                            tokens: tokens,
+                            bang_token,
+                            delimiter,
+                            tokens,
                         },
                     }));
                 }
@@ -529,7 +529,7 @@ pub mod parsing {
                 bounds.push_value(TypeParamBound::Trait(TraitBound {
                     paren_token: None,
                     modifier: TraitBoundModifier::None,
-                    lifetimes: lifetimes,
+                    lifetimes,
                     path: ty.path,
                 }));
                 if allow_plus {
@@ -543,7 +543,7 @@ pub mod parsing {
                 }
                 return Ok(Type::TraitObject(TypeTraitObject {
                     dyn_token: None,
-                    bounds: bounds,
+                    bounds,
                 }));
             }
 
@@ -554,14 +554,14 @@ pub mod parsing {
             let elem: Type = content.parse()?;
             if content.peek(Token![;]) {
                 Ok(Type::Array(TypeArray {
-                    bracket_token: bracket_token,
+                    bracket_token,
                     elem: Box::new(elem),
                     semi_token: content.parse()?,
                     len: content.parse()?,
                 }))
             } else {
                 Ok(Type::Slice(TypeSlice {
-                    bracket_token: bracket_token,
+                    bracket_token,
                     elem: Box::new(elem),
                 }))
             }
@@ -618,9 +618,9 @@ pub mod parsing {
             };
 
             Ok(TypePtr {
-                star_token: star_token,
-                const_token: const_token,
-                mutability: mutability,
+                star_token,
+                const_token,
+                mutability,
                 elem: Box::new(input.call(Type::without_plus)?),
             })
         }
@@ -717,8 +717,8 @@ pub mod parsing {
             }
 
             Ok(TypePath {
-                qself: qself,
-                path: path,
+                qself,
+                path,
             })
         }
     }

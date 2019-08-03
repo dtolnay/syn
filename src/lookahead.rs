@@ -66,8 +66,8 @@ pub struct Lookahead1<'a> {
 
 pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
     Lookahead1 {
-        scope: scope,
-        cursor: cursor,
+        scope,
+        cursor,
         comparisons: RefCell::new(Vec::new()),
     }
 }

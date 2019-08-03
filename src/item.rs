@@ -1096,15 +1096,15 @@ pub mod parsing {
                 None
             };
             Ok(ItemMacro {
-                attrs: attrs,
-                ident: ident,
+                attrs,
+                ident,
                 mac: Macro {
-                    path: path,
-                    bang_token: bang_token,
-                    delimiter: delimiter,
-                    tokens: tokens,
+                    path,
+                    bang_token,
+                    delimiter,
+                    tokens,
                 },
-                semi_token: semi_token,
+                semi_token,
             })
         }
     }
@@ -1140,11 +1140,11 @@ pub mod parsing {
             }
 
             Ok(ItemMacro2 {
-                attrs: attrs,
-                vis: vis,
-                macro_token: macro_token,
-                ident: ident,
-                rules: rules,
+                attrs,
+                vis,
+                macro_token,
+                ident,
+                rules,
             })
         }
     }
@@ -1206,13 +1206,13 @@ pub mod parsing {
                 let ident = input.call(Ident::parse_any)?;
                 if input.peek(Token![::]) {
                     Ok(UseTree::Path(UsePath {
-                        ident: ident,
+                        ident,
                         colon2_token: input.parse()?,
                         tree: Box::new(input.parse()?),
                     }))
                 } else if input.peek(Token![as]) {
                     Ok(UseTree::Rename(UseRename {
-                        ident: ident,
+                        ident,
                         as_token: input.parse()?,
                         rename: {
                             if input.peek(Ident) {
@@ -1225,7 +1225,7 @@ pub mod parsing {
                         },
                     }))
                 } else {
-                    Ok(UseTree::Name(UseName { ident: ident }))
+                    Ok(UseTree::Name(UseName { ident }))
                 }
             } else if lookahead.peek(Token![*]) {
                 Ok(UseTree::Glob(UseGlob {
@@ -1324,26 +1324,26 @@ pub mod parsing {
 
             Ok(ItemFn {
                 attrs: private::attrs(outer_attrs, inner_attrs),
-                vis: vis,
+                vis,
                 sig: Signature {
-                    constness: constness,
-                    asyncness: asyncness,
-                    unsafety: unsafety,
-                    abi: abi,
-                    fn_token: fn_token,
-                    ident: ident,
-                    paren_token: paren_token,
-                    inputs: inputs,
-                    output: output,
-                    variadic: variadic,
+                    constness,
+                    asyncness,
+                    unsafety,
+                    abi,
+                    fn_token,
+                    ident,
+                    paren_token,
+                    inputs,
+                    output,
+                    variadic,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                 },
                 block: Box::new(Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
+                    brace_token,
+                    stmts,
                 }),
             })
         }
@@ -1403,7 +1403,7 @@ pub mod parsing {
                             arg
                         },
                     ));
-                    Type::Verbatim(TypeVerbatim { tokens: tokens })
+                    Type::Verbatim(TypeVerbatim { tokens })
                 }
                 None => input.parse()?,
             }),
@@ -1421,9 +1421,9 @@ pub mod parsing {
             if lookahead.peek(Token![;]) {
                 Ok(ItemMod {
                     attrs: outer_attrs,
-                    vis: vis,
-                    mod_token: mod_token,
-                    ident: ident,
+                    vis,
+                    mod_token,
+                    ident,
                     content: None,
                     semi: Some(input.parse()?),
                 })
@@ -1439,9 +1439,9 @@ pub mod parsing {
 
                 Ok(ItemMod {
                     attrs: private::attrs(outer_attrs, inner_attrs),
-                    vis: vis,
-                    mod_token: mod_token,
-                    ident: ident,
+                    vis,
+                    mod_token,
+                    ident,
                     content: Some((brace_token, items)),
                     semi: None,
                 })
@@ -1466,9 +1466,9 @@ pub mod parsing {
 
             Ok(ItemForeignMod {
                 attrs: private::attrs(outer_attrs, inner_attrs),
-                abi: abi,
-                brace_token: brace_token,
-                items: items,
+                abi,
+                brace_token,
+                items,
             })
         }
     }
@@ -1550,25 +1550,25 @@ pub mod parsing {
             let semi_token: Token![;] = input.parse()?;
 
             Ok(ForeignItemFn {
-                attrs: attrs,
-                vis: vis,
+                attrs,
+                vis,
                 sig: Signature {
                     constness: None,
                     asyncness: None,
                     unsafety: None,
                     abi: None,
-                    fn_token: fn_token,
-                    ident: ident,
-                    paren_token: paren_token,
-                    inputs: inputs,
-                    output: output,
-                    variadic: variadic,
+                    fn_token,
+                    ident,
+                    paren_token,
+                    inputs,
+                    output,
+                    variadic,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                 },
-                semi_token: semi_token,
+                semi_token,
             })
         }
     }
@@ -1610,9 +1610,9 @@ pub mod parsing {
                 Some(input.parse()?)
             };
             Ok(ForeignItemMacro {
-                attrs: attrs,
-                mac: mac,
-                semi_token: semi_token,
+                attrs,
+                mac,
+                semi_token,
             })
         }
     }
@@ -1674,16 +1674,16 @@ pub mod parsing {
             let generics = input.parse::<Generics>()?;
             let (where_clause, fields, semi_token) = derive::parsing::data_struct(input)?;
             Ok(ItemStruct {
-                attrs: attrs,
-                vis: vis,
-                struct_token: struct_token,
-                ident: ident,
+                attrs,
+                vis,
+                struct_token,
+                ident,
                 generics: Generics {
-                    where_clause: where_clause,
+                    where_clause,
                     ..generics
                 },
-                fields: fields,
-                semi_token: semi_token,
+                fields,
+                semi_token,
             })
         }
     }
@@ -1697,16 +1697,16 @@ pub mod parsing {
             let generics = input.parse::<Generics>()?;
             let (where_clause, brace_token, variants) = derive::parsing::data_enum(input)?;
             Ok(ItemEnum {
-                attrs: attrs,
-                vis: vis,
-                enum_token: enum_token,
-                ident: ident,
+                attrs,
+                vis,
+                enum_token,
+                ident,
                 generics: Generics {
-                    where_clause: where_clause,
+                    where_clause,
                     ..generics
                 },
-                brace_token: brace_token,
-                variants: variants,
+                brace_token,
+                variants,
             })
         }
     }
@@ -1720,15 +1720,15 @@ pub mod parsing {
             let generics = input.parse::<Generics>()?;
             let (where_clause, fields) = derive::parsing::data_union(input)?;
             Ok(ItemUnion {
-                attrs: attrs,
-                vis: vis,
-                union_token: union_token,
-                ident: ident,
+                attrs,
+                vis,
+                union_token,
+                ident,
                 generics: Generics {
-                    where_clause: where_clause,
+                    where_clause,
                     ..generics
                 },
-                fields: fields,
+                fields,
             })
         }
     }
@@ -1819,17 +1819,17 @@ pub mod parsing {
         }
 
         Ok(ItemTrait {
-            attrs: attrs,
-            vis: vis,
-            unsafety: unsafety,
-            auto_token: auto_token,
-            trait_token: trait_token,
-            ident: ident,
-            generics: generics,
-            colon_token: colon_token,
-            supertraits: supertraits,
-            brace_token: brace_token,
-            items: items,
+            attrs,
+            vis,
+            unsafety,
+            auto_token,
+            trait_token,
+            ident,
+            generics,
+            colon_token,
+            supertraits,
+            brace_token,
+            items,
         })
     }
 
@@ -1877,14 +1877,14 @@ pub mod parsing {
         let semi_token: Token![;] = input.parse()?;
 
         Ok(ItemTraitAlias {
-            attrs: attrs,
-            vis: vis,
-            trait_token: trait_token,
-            ident: ident,
-            generics: generics,
-            eq_token: eq_token,
-            bounds: bounds,
-            semi_token: semi_token,
+            attrs,
+            vis,
+            trait_token,
+            ident,
+            generics,
+            eq_token,
+            bounds,
+            semi_token,
         })
     }
 
@@ -2001,26 +2001,26 @@ pub mod parsing {
             Ok(TraitItemMethod {
                 attrs: private::attrs(outer_attrs, inner_attrs),
                 sig: Signature {
-                    constness: constness,
-                    asyncness: asyncness,
-                    unsafety: unsafety,
-                    abi: abi,
-                    fn_token: fn_token,
-                    ident: ident,
-                    paren_token: paren_token,
-                    inputs: inputs,
-                    output: output,
+                    constness,
+                    asyncness,
+                    unsafety,
+                    abi,
+                    fn_token,
+                    ident,
+                    paren_token,
+                    inputs,
+                    output,
                     variadic: None,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                 },
                 default: brace_token.map(|brace_token| Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
+                    brace_token,
+                    stmts,
                 }),
-                semi_token: semi_token,
+                semi_token,
             })
         }
     }
@@ -2055,14 +2055,14 @@ pub mod parsing {
             let semi_token: Token![;] = input.parse()?;
 
             Ok(TraitItemType {
-                attrs: attrs,
-                type_token: type_token,
-                ident: ident,
-                generics: generics,
-                colon_token: colon_token,
-                bounds: bounds,
-                default: default,
-                semi_token: semi_token,
+                attrs,
+                type_token,
+                ident,
+                generics,
+                colon_token,
+                bounds,
+                default,
+                semi_token,
             })
         }
     }
@@ -2077,9 +2077,9 @@ pub mod parsing {
                 Some(input.parse()?)
             };
             Ok(TraitItemMacro {
-                attrs: attrs,
-                mac: mac,
-                semi_token: semi_token,
+                attrs,
+                mac,
+                semi_token,
             })
         }
     }
@@ -2133,17 +2133,17 @@ pub mod parsing {
 
             Ok(ItemImpl {
                 attrs: private::attrs(outer_attrs, inner_attrs),
-                defaultness: defaultness,
-                unsafety: unsafety,
-                impl_token: impl_token,
+                defaultness,
+                unsafety,
+                impl_token,
                 generics: Generics {
-                    where_clause: where_clause,
+                    where_clause,
                     ..generics
                 },
-                trait_: trait_,
+                trait_,
                 self_ty: Box::new(self_ty),
-                brace_token: brace_token,
-                items: items,
+                brace_token,
+                items,
             })
         }
     }
@@ -2265,27 +2265,27 @@ pub mod parsing {
 
             Ok(ImplItemMethod {
                 attrs: private::attrs(outer_attrs, inner_attrs),
-                vis: vis,
-                defaultness: defaultness,
+                vis,
+                defaultness,
                 sig: Signature {
-                    constness: constness,
-                    asyncness: asyncness,
-                    unsafety: unsafety,
-                    abi: abi,
-                    fn_token: fn_token,
-                    ident: ident,
-                    paren_token: paren_token,
-                    inputs: inputs,
-                    output: output,
+                    constness,
+                    asyncness,
+                    unsafety,
+                    abi,
+                    fn_token,
+                    ident,
+                    paren_token,
+                    inputs,
+                    output,
                     variadic: None,
                     generics: Generics {
-                        where_clause: where_clause,
+                        where_clause,
                         ..generics
                     },
                 },
                 block: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
+                    brace_token,
+                    stmts,
                 },
             })
         }
@@ -2337,9 +2337,9 @@ pub mod parsing {
                 Some(input.parse()?)
             };
             Ok(ImplItemMacro {
-                attrs: attrs,
-                mac: mac,
-                semi_token: semi_token,
+                attrs,
+                mac,
+                semi_token,
             })
         }
     }
