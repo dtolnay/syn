@@ -2392,7 +2392,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_group(input: ParseStream) -> Result<ExprGroup> {
-        let group = private::parse_group(input)?;
+        let group = crate::group::parse_group(input)?;
         Ok(ExprGroup {
             attrs: Vec::new(),
             group_token: group.token,

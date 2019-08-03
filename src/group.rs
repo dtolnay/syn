@@ -2,7 +2,6 @@ use proc_macro2::{Delimiter, Span};
 
 use crate::error::Result;
 use crate::parse::ParseBuffer;
-use crate::private;
 use crate::token;
 
 // Not public API.
@@ -62,13 +61,11 @@ pub fn parse_brackets<'a>(input: &ParseBuffer<'a>) -> Result<Brackets<'a>> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl private {
-    pub fn parse_group<'a>(input: &ParseBuffer<'a>) -> Result<Group<'a>> {
-        parse_delimited(input, Delimiter::None).map(|(span, content)| Group {
-            token: token::Group(span),
-            content,
-        })
-    }
+pub(crate) fn parse_group<'a>(input: &ParseBuffer<'a>) -> Result<Group<'a>> {
+    parse_delimited(input, Delimiter::None).map(|(span, content)| Group {
+        token: token::Group(span),
+        content,
+    })
 }
 
 fn parse_delimited<'a>(
@@ -78,12 +75,12 @@ fn parse_delimited<'a>(
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
             #[cfg(procmacro2_semver_exempt)]
-            let scope = private::close_span_of_group(*cursor);
+            let scope = crate::buffer::close_span_of_group(*cursor);
             #[cfg(not(procmacro2_semver_exempt))]
             let scope = span;
-            let nested = private::advance_step_cursor(cursor, content);
-            let unexpected = private::get_unexpected(input);
-            let content = private::new_parse_buffer(scope, nested, unexpected);
+            let nested = crate::parse::advance_step_cursor(cursor, content);
+            let unexpected = crate::parse::get_unexpected(input);
+            let content = crate::parse::new_parse_buffer(scope, nested, unexpected);
             Ok(((span, content), rest))
         } else {
             let message = match delimiter {

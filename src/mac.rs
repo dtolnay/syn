@@ -166,7 +166,7 @@ impl Macro {
         // TODO: see if we can get a group.span_close() span in here as the
         // scope, rather than the span of the whole group.
         let scope = delimiter_span(&self.delimiter);
-        private::parse_scoped(parser, scope, self.tokens.clone())
+        crate::parse::parse_scoped(parser, scope, self.tokens.clone())
     }
 }
 

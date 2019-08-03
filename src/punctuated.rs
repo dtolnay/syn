@@ -32,8 +32,6 @@ use std::vec;
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Result};
-#[cfg(any(feature = "full", feature = "derive"))]
-use crate::private;
 #[cfg(feature = "parsing")]
 use crate::token::Token;
 
@@ -618,11 +616,9 @@ struct PrivateIter<'a, T: 'a, P: 'a> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl private {
-    pub fn empty_punctuated_iter<'a, T>() -> Iter<'a, T> {
-        Iter {
-            inner: Box::new(iter::empty()),
-        }
+pub(crate) fn empty_punctuated_iter<'a, T>() -> Iter<'a, T> {
+    Iter {
+        inner: Box::new(iter::empty()),
     }
 }
 
@@ -719,11 +715,9 @@ struct PrivateIterMut<'a, T: 'a, P: 'a> {
 }
 
 #[cfg(any(feature = "full", feature = "derive"))]
-impl private {
-    pub fn empty_punctuated_iter_mut<'a, T>() -> IterMut<'a, T> {
-        IterMut {
-            inner: Box::new(iter::empty()),
-        }
+pub(crate) fn empty_punctuated_iter_mut<'a, T>() -> IterMut<'a, T> {
+    IterMut {
+        inner: Box::new(iter::empty()),
     }
 }
 

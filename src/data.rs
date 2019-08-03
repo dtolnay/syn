@@ -77,7 +77,7 @@ impl Fields {
     /// variant's fields uniformly.
     pub fn iter(&self) -> punctuated::Iter<Field> {
         match self {
-            Fields::Unit => private::empty_punctuated_iter(),
+            Fields::Unit => crate::punctuated::empty_punctuated_iter(),
             Fields::Named(f) => f.named.iter(),
             Fields::Unnamed(f) => f.unnamed.iter(),
         }
@@ -88,7 +88,7 @@ impl Fields {
     /// struct or variant's fields uniformly.
     pub fn iter_mut(&mut self) -> punctuated::IterMut<Field> {
         match self {
-            Fields::Unit => private::empty_punctuated_iter_mut(),
+            Fields::Unit => crate::punctuated::empty_punctuated_iter_mut(),
             Fields::Named(f) => f.named.iter_mut(),
             Fields::Unnamed(f) => f.unnamed.iter_mut(),
         }

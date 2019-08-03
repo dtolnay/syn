@@ -888,7 +888,7 @@ pub mod parsing {
 
     impl Parse for TypeGroup {
         fn parse(input: ParseStream) -> Result<Self> {
-            let group = private::parse_group(input)?;
+            let group = crate::group::parse_group(input)?;
             Ok(TypeGroup {
                 group_token: group.token,
                 elem: group.content.parse()?,

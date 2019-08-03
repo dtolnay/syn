@@ -160,7 +160,7 @@ pub trait Speculative {
 
 impl<'a> Speculative for ParseBuffer<'a> {
     fn advance_to(&self, fork: &Self) {
-        if !private::same_scope(self.cursor(), fork.cursor()) {
+        if !crate::buffer::same_scope(self.cursor(), fork.cursor()) {
             panic!("Fork was not derived from the advancing parse stream");
         }
 

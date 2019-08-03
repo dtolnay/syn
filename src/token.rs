@@ -163,7 +163,7 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
 
     let scope = Span::call_site();
     let unexpected = Rc::new(Cell::new(None));
-    let buffer = crate::private::new_parse_buffer(scope, cursor, unexpected);
+    let buffer = crate::parse::new_parse_buffer(scope, cursor, unexpected);
     peek(&buffer)
 }
 

@@ -209,7 +209,6 @@ use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, Tok
 use crate::buffer::{Cursor, TokenBuffer};
 use crate::error;
 use crate::lookahead;
-use crate::private;
 use crate::punctuated::Punctuated;
 use crate::token::Token;
 
@@ -367,15 +366,13 @@ impl<'c, 'a> StepCursor<'c, 'a> {
     }
 }
 
-impl private {
-    pub fn advance_step_cursor<'c, 'a>(proof: StepCursor<'c, 'a>, to: Cursor<'c>) -> Cursor<'a> {
-        // Refer to the comments within the StepCursor definition. We use the
-        // fact that a StepCursor<'c, 'a> exists as proof that 'c outlives 'a.
-        // Cursor is covariant in its lifetime parameter so we can cast a
-        // Cursor<'c> to one with the shorter lifetime Cursor<'a>.
-        let _ = proof;
-        unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(to) }
-    }
+pub(crate) fn advance_step_cursor<'c, 'a>(proof: StepCursor<'c, 'a>, to: Cursor<'c>) -> Cursor<'a> {
+    // Refer to the comments within the StepCursor definition. We use the
+    // fact that a StepCursor<'c, 'a> exists as proof that 'c outlives 'a.
+    // Cursor is covariant in its lifetime parameter so we can cast a
+    // Cursor<'c> to one with the shorter lifetime Cursor<'a>.
+    let _ = proof;
+    unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(to) }
 }
 
 fn skip(input: ParseStream) -> bool {
@@ -392,24 +389,22 @@ fn skip(input: ParseStream) -> bool {
         .unwrap()
 }
 
-impl private {
-    pub fn new_parse_buffer(
-        scope: Span,
-        cursor: Cursor,
-        unexpected: Rc<Cell<Option<Span>>>,
-    ) -> ParseBuffer {
-        ParseBuffer {
-            scope,
-            // See comment on `cell` in the struct definition.
-            cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
-            marker: PhantomData,
-            unexpected,
-        }
+pub(crate) fn new_parse_buffer(
+    scope: Span,
+    cursor: Cursor,
+    unexpected: Rc<Cell<Option<Span>>>,
+) -> ParseBuffer {
+    ParseBuffer {
+        scope,
+        // See comment on `cell` in the struct definition.
+        cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
+        marker: PhantomData,
+        unexpected,
     }
+}
 
-    pub fn get_unexpected(buffer: &ParseBuffer) -> Rc<Cell<Option<Span>>> {
-        buffer.unexpected.clone()
-    }
+pub(crate) fn get_unexpected(buffer: &ParseBuffer) -> Rc<Cell<Option<Span>>> {
+    buffer.unexpected.clone()
 }
 
 impl<'a> ParseBuffer<'a> {
@@ -953,10 +948,10 @@ impl<'a> ParseBuffer<'a> {
         // the Cell intended to hold Cursor<'a>.
         //
         // In some cases it may be necessary for R to contain a Cursor<'a>.
-        // Within Syn we solve this using `private::advance_step_cursor` which
-        // uses the existence of a StepCursor<'c, 'a> as proof that it is safe
-        // to cast from Cursor<'c> to Cursor<'a>. If needed outside of Syn, it
-        // would be safe to expose that API as a method on StepCursor.
+        // Within Syn we solve this using `advance_step_cursor` which uses the
+        // existence of a StepCursor<'c, 'a> as proof that it is safe to cast
+        // from Cursor<'c> to Cursor<'a>. If needed outside of Syn, it would be
+        // safe to expose that API as a method on StepCursor.
         let (node, rest) = function(StepCursor {
             scope: self.scope,
             cursor: self.cell.get(),
@@ -1103,7 +1098,7 @@ fn tokens_to_parse_buffer(tokens: &TokenBuffer) -> ParseBuffer {
     let scope = Span::call_site();
     let cursor = tokens.begin();
     let unexpected = Rc::new(Cell::new(None));
-    private::new_parse_buffer(scope, cursor, unexpected)
+    new_parse_buffer(scope, cursor, unexpected)
 }
 
 impl<F, T> Parser for F
@@ -1129,7 +1124,7 @@ where
         let buf = TokenBuffer::new2(tokens);
         let cursor = buf.begin();
         let unexpected = Rc::new(Cell::new(None));
-        let state = private::new_parse_buffer(scope, cursor, unexpected);
+        let state = new_parse_buffer(scope, cursor, unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;
         if state.is_empty() {
@@ -1140,10 +1135,8 @@ where
     }
 }
 
-impl private {
-    pub fn parse_scoped<F: Parser>(f: F, scope: Span, tokens: TokenStream) -> Result<F::Output> {
-        f.__parse_scoped(scope, tokens)
-    }
+pub(crate) fn parse_scoped<F: Parser>(f: F, scope: Span, tokens: TokenStream) -> Result<F::Output> {
+    f.__parse_scoped(scope, tokens)
 }
 
 /// An empty syntax tree node that consumes no tokens when parsed.

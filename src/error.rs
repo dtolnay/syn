@@ -10,8 +10,6 @@ use quote::ToTokens;
 
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
-#[cfg(all(procmacro2_semver_exempt, feature = "parsing"))]
-use crate::private;
 use crate::thread::ThreadBound;
 
 /// The result of a Syn parser.
@@ -175,7 +173,7 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
         Error::new(scope, format!("unexpected end of input, {}", message))
     } else {
         #[cfg(procmacro2_semver_exempt)]
-        let span = private::open_span_of_group(cursor);
+        let span = crate::buffer::open_span_of_group(cursor);
         #[cfg(not(procmacro2_semver_exempt))]
         let span = cursor.span();
         Error::new(span, message)
