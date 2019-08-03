@@ -1190,7 +1190,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Pat {
+    pub enum Pat #manual_extra_traits {
         /// A box pattern: `box v`.
         Box(PatBox),
 
@@ -1243,7 +1243,7 @@ ast_enum_of_structs! {
         Type(PatType),
 
         /// Tokens in pattern position not interpreted by Syn.
-        Verbatim(PatVerbatim),
+        Verbatim(TokenStream),
 
         /// A pattern that matches any value: `_`.
         Wild(PatWild),
@@ -1433,16 +1433,6 @@ ast_struct! {
 
 #[cfg(feature = "full")]
 ast_struct! {
-    /// Tokens in pattern position not interpreted by Syn.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct PatVerbatim #manual_extra_traits {
-        pub tokens: TokenStream,
-    }
-}
-
-#[cfg(feature = "full")]
-ast_struct! {
     /// A pattern that matches any value: `_`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
@@ -1453,22 +1443,107 @@ ast_struct! {
 }
 
 #[cfg(all(feature = "full", feature = "extra-traits"))]
-impl Eq for PatVerbatim {}
+impl Eq for Pat {}
 
 #[cfg(all(feature = "full", feature = "extra-traits"))]
-impl PartialEq for PatVerbatim {
+impl PartialEq for Pat {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
+        match (self, other) {
+            (Pat::Box(this), Pat::Box(other)) => this == other,
+            (Pat::Ident(this), Pat::Ident(other)) => this == other,
+            (Pat::Lit(this), Pat::Lit(other)) => this == other,
+            (Pat::Macro(this), Pat::Macro(other)) => this == other,
+            (Pat::Or(this), Pat::Or(other)) => this == other,
+            (Pat::Path(this), Pat::Path(other)) => this == other,
+            (Pat::Range(this), Pat::Range(other)) => this == other,
+            (Pat::Reference(this), Pat::Reference(other)) => this == other,
+            (Pat::Rest(this), Pat::Rest(other)) => this == other,
+            (Pat::Slice(this), Pat::Slice(other)) => this == other,
+            (Pat::Struct(this), Pat::Struct(other)) => this == other,
+            (Pat::Tuple(this), Pat::Tuple(other)) => this == other,
+            (Pat::TupleStruct(this), Pat::TupleStruct(other)) => this == other,
+            (Pat::Type(this), Pat::Type(other)) => this == other,
+            (Pat::Verbatim(this), Pat::Verbatim(other)) => {
+                TokenStreamHelper(this) == TokenStreamHelper(other)
+            }
+            (Pat::Wild(this), Pat::Wild(other)) => this == other,
+            _ => false,
+        }
     }
 }
 
 #[cfg(all(feature = "full", feature = "extra-traits"))]
-impl Hash for PatVerbatim {
-    fn hash<H>(&self, state: &mut H)
+impl Hash for Pat {
+    fn hash<H>(&self, hash: &mut H)
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tokens).hash(state);
+        match self {
+            Pat::Box(pat) => {
+                hash.write_u8(0);
+                pat.hash(hash);
+            }
+            Pat::Ident(pat) => {
+                hash.write_u8(1);
+                pat.hash(hash);
+            }
+            Pat::Lit(pat) => {
+                hash.write_u8(2);
+                pat.hash(hash);
+            }
+            Pat::Macro(pat) => {
+                hash.write_u8(3);
+                pat.hash(hash);
+            }
+            Pat::Or(pat) => {
+                hash.write_u8(4);
+                pat.hash(hash);
+            }
+            Pat::Path(pat) => {
+                hash.write_u8(5);
+                pat.hash(hash);
+            }
+            Pat::Range(pat) => {
+                hash.write_u8(6);
+                pat.hash(hash);
+            }
+            Pat::Reference(pat) => {
+                hash.write_u8(7);
+                pat.hash(hash);
+            }
+            Pat::Rest(pat) => {
+                hash.write_u8(8);
+                pat.hash(hash);
+            }
+            Pat::Slice(pat) => {
+                hash.write_u8(9);
+                pat.hash(hash);
+            }
+            Pat::Struct(pat) => {
+                hash.write_u8(10);
+                pat.hash(hash);
+            }
+            Pat::Tuple(pat) => {
+                hash.write_u8(11);
+                pat.hash(hash);
+            }
+            Pat::TupleStruct(pat) => {
+                hash.write_u8(12);
+                pat.hash(hash);
+            }
+            Pat::Type(pat) => {
+                hash.write_u8(13);
+                pat.hash(hash);
+            }
+            Pat::Verbatim(pat) => {
+                hash.write_u8(14);
+                TokenStreamHelper(pat).hash(hash);
+            }
+            Pat::Wild(pat) => {
+                hash.write_u8(15);
+                pat.hash(hash);
+            }
+        }
     }
 }
 
@@ -4348,13 +4423,6 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.leading_vert.to_tokens(tokens);
             self.cases.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl ToTokens for PatVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tokens.to_tokens(tokens);
         }
     }
 

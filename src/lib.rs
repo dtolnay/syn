@@ -318,7 +318,7 @@ mod expr;
 pub use crate::expr::{
     Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
     PatBox, PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
-    PatStruct, PatTuple, PatTupleStruct, PatType, PatVerbatim, PatWild, RangeLimits, Stmt,
+    PatStruct, PatTuple, PatTupleStruct, PatType, PatWild, RangeLimits, Stmt,
 };
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
