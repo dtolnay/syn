@@ -22,52 +22,52 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Type {
         /// A fixed size array type: `[T; n]`.
-        pub Array(TypeArray),
+        Array(TypeArray),
 
         /// A bare function type: `fn(usize) -> bool`.
-        pub BareFn(TypeBareFn),
+        BareFn(TypeBareFn),
 
         /// A type contained within invisible delimiters.
-        pub Group(TypeGroup),
+        Group(TypeGroup),
 
         /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
         /// a lifetime.
-        pub ImplTrait(TypeImplTrait),
+        ImplTrait(TypeImplTrait),
 
         /// Indication that a type should be inferred by the compiler: `_`.
-        pub Infer(TypeInfer),
+        Infer(TypeInfer),
 
         /// A macro in the type position.
-        pub Macro(TypeMacro),
+        Macro(TypeMacro),
 
         /// The never type: `!`.
-        pub Never(TypeNever),
+        Never(TypeNever),
 
         /// A parenthesized type equivalent to the inner type.
-        pub Paren(TypeParen),
+        Paren(TypeParen),
 
         /// A path like `std::slice::Iter`, optionally qualified with a
         /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
-        pub Path(TypePath),
+        Path(TypePath),
 
         /// A raw pointer type: `*const T` or `*mut T`.
-        pub Ptr(TypePtr),
+        Ptr(TypePtr),
 
         /// A reference type: `&'a T` or `&'a mut T`.
-        pub Reference(TypeReference),
+        Reference(TypeReference),
 
         /// A dynamically sized slice type: `[T]`.
-        pub Slice(TypeSlice),
+        Slice(TypeSlice),
 
         /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
         /// trait or a lifetime.
-        pub TraitObject(TypeTraitObject),
+        TraitObject(TypeTraitObject),
 
         /// A tuple type: `(A, B, C, String)`.
-        pub Tuple(TypeTuple),
+        Tuple(TypeTuple),
 
         /// Tokens in type position not interpreted by Syn.
-        pub Verbatim(TypeVerbatim),
+        Verbatim(TypeVerbatim),
     }
 }
 

@@ -38,13 +38,13 @@ ast_enum_of_structs! {
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
-        pub Named(FieldsNamed),
+        Named(FieldsNamed),
 
         /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
-        pub Unnamed(FieldsUnnamed),
+        Unnamed(FieldsUnnamed),
 
         /// Unit struct or unit variant such as `None`.
-        pub Unit,
+        Unit,
     }
 }
 
@@ -167,17 +167,17 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Visibility {
         /// A public visibility level: `pub`.
-        pub Public(VisPublic),
+        Public(VisPublic),
 
         /// A crate-level visibility: `crate`.
-        pub Crate(VisCrate),
+        Crate(VisCrate),
 
         /// A visibility level restricted to some path: `pub(self)` or
         /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
-        pub Restricted(VisRestricted),
+        Restricted(VisRestricted),
 
         /// An inherited visibility, which usually means private.
-        pub Inherited,
+        Inherited,
     }
 }
 

@@ -85,143 +85,143 @@ ast_enum_of_structs! {
     /// `receiver.receiver` or `pat.pat` or `cond.cond`.
     pub enum Expr {
         /// A slice literal expression: `[a, b, c, d]`.
-        pub Array(ExprArray),
+        Array(ExprArray),
 
         /// An assignment expression: `a = compute()`.
-        pub Assign(ExprAssign),
+        Assign(ExprAssign),
 
         /// A compound assignment expression: `counter += 1`.
-        pub AssignOp(ExprAssignOp),
+        AssignOp(ExprAssignOp),
 
         /// An async block: `async { ... }`.
-        pub Async(ExprAsync),
+        Async(ExprAsync),
 
         /// An await expression: `fut.await`.
-        pub Await(ExprAwait),
+        Await(ExprAwait),
 
         /// A binary operation: `a + b`, `a * b`.
-        pub Binary(ExprBinary),
+        Binary(ExprBinary),
 
         /// A blocked scope: `{ ... }`.
-        pub Block(ExprBlock),
+        Block(ExprBlock),
 
         /// A box expression: `box f`.
-        pub Box(ExprBox),
+        Box(ExprBox),
 
         /// A `break`, with an optional label to break and an optional
         /// expression.
-        pub Break(ExprBreak),
+        Break(ExprBreak),
 
         /// A function call expression: `invoke(a, b)`.
-        pub Call(ExprCall),
+        Call(ExprCall),
 
         /// A cast expression: `foo as f64`.
-        pub Cast(ExprCast),
+        Cast(ExprCast),
 
         /// A closure expression: `|a, b| a + b`.
-        pub Closure(ExprClosure),
+        Closure(ExprClosure),
 
         /// A `continue`, with an optional label.
-        pub Continue(ExprContinue),
+        Continue(ExprContinue),
 
         /// Access of a named struct field (`obj.k`) or unnamed tuple struct
         /// field (`obj.0`).
-        pub Field(ExprField),
+        Field(ExprField),
 
         /// A for loop: `for pat in expr { ... }`.
-        pub ForLoop(ExprForLoop),
+        ForLoop(ExprForLoop),
 
         /// An expression contained within invisible delimiters.
         ///
         /// This variant is important for faithfully representing the precedence
         /// of expressions and is related to `None`-delimited spans in a
         /// `TokenStream`.
-        pub Group(ExprGroup),
+        Group(ExprGroup),
 
         /// An `if` expression with an optional `else` block: `if expr { ... }
         /// else { ... }`.
         ///
         /// The `else` branch expression may only be an `If` or `Block`
         /// expression, not any of the other types of expression.
-        pub If(ExprIf),
+        If(ExprIf),
 
         /// A placement expression: `place <- value`.
-        pub InPlace(ExprInPlace),
+        InPlace(ExprInPlace),
 
         /// A square bracketed indexing expression: `vector[2]`.
-        pub Index(ExprIndex),
+        Index(ExprIndex),
 
         /// A `let` guard: `let Some(x) = opt`.
-        pub Let(ExprLet),
+        Let(ExprLet),
 
         /// A literal in place of an expression: `1`, `"foo"`.
-        pub Lit(ExprLit),
+        Lit(ExprLit),
 
         /// Conditionless loop: `loop { ... }`.
-        pub Loop(ExprLoop),
+        Loop(ExprLoop),
 
         /// A macro invocation expression: `format!("{}", q)`.
-        pub Macro(ExprMacro),
+        Macro(ExprMacro),
 
         /// A `match` expression: `match n { Some(n) => {}, None => {} }`.
-        pub Match(ExprMatch),
+        Match(ExprMatch),
 
         /// A method call expression: `x.foo::<T>(a, b)`.
-        pub MethodCall(ExprMethodCall),
+        MethodCall(ExprMethodCall),
 
         /// A parenthesized expression: `(a + b)`.
-        pub Paren(ExprParen),
+        Paren(ExprParen),
 
         /// A path like `std::mem::replace` possibly containing generic
         /// parameters and a qualified self-type.
         ///
         /// A plain identifier like `x` is a path of length 1.
-        pub Path(ExprPath),
+        Path(ExprPath),
 
         /// A range expression: `1..2`, `1..`, `..2`, `1..=2`, `..=2`.
-        pub Range(ExprRange),
+        Range(ExprRange),
 
         /// A referencing operation: `&a` or `&mut a`.
-        pub Reference(ExprReference),
+        Reference(ExprReference),
 
         /// An array literal constructed from one repeated element: `[0u8; N]`.
-        pub Repeat(ExprRepeat),
+        Repeat(ExprRepeat),
 
         /// A `return`, with an optional value to be returned.
-        pub Return(ExprReturn),
+        Return(ExprReturn),
 
         /// A struct literal expression: `Point { x: 1, y: 1 }`.
         ///
         /// The `rest` provides the value of the remaining fields as in `S { a:
         /// 1, b: 1, ..rest }`.
-        pub Struct(ExprStruct),
+        Struct(ExprStruct),
 
         /// A try-expression: `expr?`.
-        pub Try(ExprTry),
+        Try(ExprTry),
 
         /// A try block: `try { ... }`.
-        pub TryBlock(ExprTryBlock),
+        TryBlock(ExprTryBlock),
 
         /// A tuple expression: `(a, b, c, d)`.
-        pub Tuple(ExprTuple),
+        Tuple(ExprTuple),
 
         /// A type ascription expression: `foo: f64`.
-        pub Type(ExprType),
+        Type(ExprType),
 
         /// A unary operation: `!x`, `*x`.
-        pub Unary(ExprUnary),
+        Unary(ExprUnary),
 
         /// An unsafe block: `unsafe { ... }`.
-        pub Unsafe(ExprUnsafe),
+        Unsafe(ExprUnsafe),
 
         /// Tokens in expression position not interpreted by Syn.
-        pub Verbatim(ExprVerbatim),
+        Verbatim(ExprVerbatim),
 
         /// A while loop: `while expr { ... }`.
-        pub While(ExprWhile),
+        While(ExprWhile),
 
         /// A yield expression: `yield expr`.
-        pub Yield(ExprYield),
+        Yield(ExprYield),
     }
 }
 
@@ -992,22 +992,22 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Pat {
         /// A box pattern: `box v`.
-        pub Box(PatBox),
+        Box(PatBox),
 
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
-        pub Ident(PatIdent),
+        Ident(PatIdent),
 
         /// A literal pattern: `0`.
         ///
         /// This holds an `Expr` rather than a `Lit` because negative numbers
         /// are represented as an `Expr::Unary`.
-        pub Lit(PatLit),
+        Lit(PatLit),
 
         /// A macro in expression position.
-        pub Macro(PatMacro),
+        Macro(PatMacro),
 
         /// A pattern that matches any one of a set of cases.
-        pub Or(PatOr),
+        Or(PatOr),
 
         /// A path pattern like `Color::Red`, optionally qualified with a
         /// self-type.
@@ -1016,37 +1016,37 @@ ast_enum_of_structs! {
         /// constants or associated constants. Qualified path patterns like
         /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
         /// associated constants.
-        pub Path(PatPath),
+        Path(PatPath),
 
         /// A range pattern: `1..=2`.
-        pub Range(PatRange),
+        Range(PatRange),
 
         /// A reference pattern: `&mut (first, second)`.
-        pub Reference(PatReference),
+        Reference(PatReference),
 
         /// The dots in a tuple or slice pattern: `[0, 1, ..]`
-        pub Rest(PatRest),
+        Rest(PatRest),
 
         /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
-        pub Slice(PatSlice),
+        Slice(PatSlice),
 
         /// A struct or struct variant pattern: `Variant { x, y, .. }`.
-        pub Struct(PatStruct),
+        Struct(PatStruct),
 
         /// A tuple pattern: `(a, b)`.
-        pub Tuple(PatTuple),
+        Tuple(PatTuple),
 
         /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
-        pub TupleStruct(PatTupleStruct),
+        TupleStruct(PatTupleStruct),
 
         /// A type ascription pattern: `foo: f64`.
-        pub Type(PatType),
+        Type(PatType),
 
         /// Tokens in pattern position not interpreted by Syn.
-        pub Verbatim(PatVerbatim),
+        Verbatim(PatVerbatim),
 
         /// A pattern that matches any value: `_`.
-        pub Wild(PatWild),
+        Wild(PatWild),
     }
 }
 

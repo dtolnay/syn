@@ -94,7 +94,7 @@ macro_rules! ast_enum_of_structs {
         $pub:ident $enum:ident $name:ident $(# $tags:ident)* {
             $(
                 $(#[$variant_attr:meta])*
-                $vpub:ident $variant:ident $( ($member:ident $($rest:tt)*) )*,
+                $variant:ident $( ($member:ident $($rest:tt)*) )*,
             )*
         }
 
@@ -114,11 +114,10 @@ macro_rules! ast_enum_of_structs {
         }
 
         $(
-            check_keyword_matches!(pub $vpub);
             maybe_ast_struct! {
                 $(#[$variant_attr])*
                 $(
-                    $vpub struct $member $($rest)*
+                    pub struct $member $($rest)*
                 )*
             }
 

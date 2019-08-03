@@ -38,13 +38,13 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Data {
         /// A struct input to a `proc_macro_derive` macro.
-        pub Struct(DataStruct),
+        Struct(DataStruct),
 
         /// An enum input to a `proc_macro_derive` macro.
-        pub Enum(DataEnum),
+        Enum(DataEnum),
 
         /// A tagged union input to a `proc_macro_derive` macro.
-        pub Union(DataUnion),
+        Union(DataUnion),
     }
 
     do_not_generate_to_tokens

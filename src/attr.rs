@@ -241,13 +241,13 @@ ast_enum_of_structs! {
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Meta {
-        pub Path(Path),
+        Path(Path),
 
         /// A structured list within an attribute, like `derive(Copy, Clone)`.
-        pub List(MetaList),
+        List(MetaList),
 
         /// A name-value pair within an attribute, like `feature = "nightly"`.
-        pub NameValue(MetaNameValue),
+        NameValue(MetaNameValue),
     }
 }
 
@@ -297,10 +297,10 @@ ast_enum_of_structs! {
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
         /// would be a nested `Meta::Path`.
-        pub Meta(Meta),
+        Meta(Meta),
 
         /// A Rust literal, like the `"new_name"` in `#[rename("new_name")]`.
-        pub Literal(Lit),
+        Literal(Lit),
     }
 }
 

@@ -33,13 +33,13 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum GenericParam {
         /// A generic type parameter: `T: Into<String>`.
-        pub Type(TypeParam),
+        Type(TypeParam),
 
         /// A lifetime definition: `'a: 'b + 'c + 'd`.
-        pub Lifetime(LifetimeDef),
+        Lifetime(LifetimeDef),
 
         /// A const generic parameter: `const LENGTH: usize`.
-        pub Const(ConstParam),
+        Const(ConstParam),
     }
 }
 
@@ -394,8 +394,8 @@ ast_enum_of_structs! {
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub enum TypeParamBound {
-        pub Trait(TraitBound),
-        pub Lifetime(Lifetime),
+        Trait(TraitBound),
+        Lifetime(Lifetime),
     }
 }
 
@@ -455,13 +455,13 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum WherePredicate {
         /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
-        pub Type(PredicateType),
+        Type(PredicateType),
 
         /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
-        pub Lifetime(PredicateLifetime),
+        Lifetime(PredicateLifetime),
 
         /// An equality predicate in a `where` clause (unsupported).
-        pub Eq(PredicateEq),
+        Eq(PredicateEq),
     }
 }
 

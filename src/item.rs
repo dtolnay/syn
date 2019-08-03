@@ -23,60 +23,60 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Item {
         /// A constant item: `const MAX: u16 = 65535`.
-        pub Const(ItemConst),
+        Const(ItemConst),
 
         /// An enum definition: `enum Foo<A, B> { C<A>, D<B> }`.
-        pub Enum(ItemEnum),
+        Enum(ItemEnum),
 
         /// An existential type: `existential type Iter: Iterator<Item = u8>`.
-        pub Existential(ItemExistential),
+        Existential(ItemExistential),
 
         /// An `extern crate` item: `extern crate serde`.
-        pub ExternCrate(ItemExternCrate),
+        ExternCrate(ItemExternCrate),
 
         /// A free-standing function: `fn process(n: usize) -> Result<()> { ...
         /// }`.
-        pub Fn(ItemFn),
+        Fn(ItemFn),
 
         /// A block of foreign items: `extern "C" { ... }`.
-        pub ForeignMod(ItemForeignMod),
+        ForeignMod(ItemForeignMod),
 
         /// An impl block providing trait or associated items: `impl<A> Trait
         /// for Data<A> { ... }`.
-        pub Impl(ItemImpl),
+        Impl(ItemImpl),
 
         /// A macro invocation, which includes `macro_rules!` definitions.
-        pub Macro(ItemMacro),
+        Macro(ItemMacro),
 
         /// A 2.0-style declarative macro introduced by the `macro` keyword.
-        pub Macro2(ItemMacro2),
+        Macro2(ItemMacro2),
 
         /// A module or module declaration: `mod m` or `mod m { ... }`.
-        pub Mod(ItemMod),
+        Mod(ItemMod),
 
         /// A static item: `static BIKE: Shed = Shed(42)`.
-        pub Static(ItemStatic),
+        Static(ItemStatic),
 
         /// A struct definition: `struct Foo<A> { x: A }`.
-        pub Struct(ItemStruct),
+        Struct(ItemStruct),
 
         /// A trait definition: `pub trait Iterator { ... }`.
-        pub Trait(ItemTrait),
+        Trait(ItemTrait),
 
         /// A trait alias: `pub trait SharableIterator = Iterator + Sync`.
-        pub TraitAlias(ItemTraitAlias),
+        TraitAlias(ItemTraitAlias),
 
         /// A type alias: `type Result<T> = std::result::Result<T, MyError>`.
-        pub Type(ItemType),
+        Type(ItemType),
 
         /// A union definition: `union Foo<A, B> { x: A, y: B }`.
-        pub Union(ItemUnion),
+        Union(ItemUnion),
 
         /// A use declaration: `use std::collections::HashMap`.
-        pub Use(ItemUse),
+        Use(ItemUse),
 
         /// Tokens forming an item not interpreted by Syn.
-        pub Verbatim(ItemVerbatim),
+        Verbatim(ItemVerbatim),
     }
 }
 
@@ -446,19 +446,19 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum UseTree {
         /// A path prefix of imports in a `use` item: `std::...`.
-        pub Path(UsePath),
+        Path(UsePath),
 
         /// An identifier imported by a `use` item: `HashMap`.
-        pub Name(UseName),
+        Name(UseName),
 
         /// An renamed identifier imported by a `use` item: `HashMap as Map`.
-        pub Rename(UseRename),
+        Rename(UseRename),
 
         /// A glob import in a `use` item: `*`.
-        pub Glob(UseGlob),
+        Glob(UseGlob),
 
         /// A braced group of imports in a `use` item: `{A, B, C}`.
-        pub Group(UseGroup),
+        Group(UseGroup),
     }
 }
 
@@ -527,19 +527,19 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum ForeignItem {
         /// A foreign function in an `extern` block.
-        pub Fn(ForeignItemFn),
+        Fn(ForeignItemFn),
 
         /// A foreign static item in an `extern` block: `static ext: u8`.
-        pub Static(ForeignItemStatic),
+        Static(ForeignItemStatic),
 
         /// A foreign type in an `extern` block: `type void`.
-        pub Type(ForeignItemType),
+        Type(ForeignItemType),
 
         /// A macro invocation within an extern block.
-        pub Macro(ForeignItemMacro),
+        Macro(ForeignItemMacro),
 
         /// Tokens in an `extern` block not interpreted by Syn.
-        pub Verbatim(ForeignItemVerbatim),
+        Verbatim(ForeignItemVerbatim),
     }
 }
 
@@ -639,19 +639,19 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum TraitItem {
         /// An associated constant within the definition of a trait.
-        pub Const(TraitItemConst),
+        Const(TraitItemConst),
 
         /// A trait method within the definition of a trait.
-        pub Method(TraitItemMethod),
+        Method(TraitItemMethod),
 
         /// An associated type within the definition of a trait.
-        pub Type(TraitItemType),
+        Type(TraitItemType),
 
         /// A macro invocation within the definition of a trait.
-        pub Macro(TraitItemMacro),
+        Macro(TraitItemMacro),
 
         /// Tokens within the definition of a trait not interpreted by Syn.
-        pub Verbatim(TraitItemVerbatim),
+        Verbatim(TraitItemVerbatim),
     }
 }
 
@@ -753,22 +753,22 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum ImplItem {
         /// An associated constant within an impl block.
-        pub Const(ImplItemConst),
+        Const(ImplItemConst),
 
         /// A method within an impl block.
-        pub Method(ImplItemMethod),
+        Method(ImplItemMethod),
 
         /// An associated type within an impl block.
-        pub Type(ImplItemType),
+        Type(ImplItemType),
 
         /// An existential type within an impl block.
-        pub Existential(ImplItemExistential),
+        Existential(ImplItemExistential),
 
         /// A macro invocation within an impl block.
-        pub Macro(ImplItemMacro),
+        Macro(ImplItemMacro),
 
         /// Tokens within an impl block not interpreted by Syn.
-        pub Verbatim(ImplItemVerbatim),
+        Verbatim(ImplItemVerbatim),
     }
 }
 
@@ -903,10 +903,10 @@ ast_enum_of_structs! {
     pub enum FnArg {
         /// The `self` argument of an associated method, whether taken by value
         /// or by reference.
-        pub Receiver(Receiver),
+        Receiver(Receiver),
 
         /// A function argument accepted by pattern and type.
-        pub Typed(PatType),
+        Typed(PatType),
     }
 }
 

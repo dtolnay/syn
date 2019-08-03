@@ -34,34 +34,34 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Lit #manual_extra_traits {
         /// A UTF-8 string literal: `"foo"`.
-        pub Str(LitStr),
+        Str(LitStr),
 
         /// A byte string literal: `b"foo"`.
-        pub ByteStr(LitByteStr),
+        ByteStr(LitByteStr),
 
         /// A byte literal: `b'f'`.
-        pub Byte(LitByte),
+        Byte(LitByte),
 
         /// A character literal: `'a'`.
-        pub Char(LitChar),
+        Char(LitChar),
 
         /// An integer literal: `1` or `1u16`.
         ///
         /// Holds up to 64 bits of data. Use `Lit::Verbatim` for any larger
         /// integer literal.
-        pub Int(LitInt),
+        Int(LitInt),
 
         /// A floating point literal: `1f64` or `1.0e10f64`.
         ///
         /// Must be finite. May not be infinte or NaN.
-        pub Float(LitFloat),
+        Float(LitFloat),
 
         /// A boolean literal: `true` or `false`.
-        pub Bool(LitBool),
+        Bool(LitBool),
 
         /// A raw token literal not interpreted by Syn, possibly because it
         /// represents an integer larger than 64 bits.
-        pub Verbatim(Literal),
+        Verbatim(Literal),
     }
 }
 
