@@ -471,7 +471,7 @@ pub mod parsing {
                     },
                 }));
             }
-            let first: Type = content.parse()?;
+            let mut first: Type = content.parse()?;
             if content.peek(Token![,]) {
                 return Ok(Type::Tuple(TypeTuple {
                     paren_token,
@@ -499,24 +499,23 @@ pub mod parsing {
                         }
                         Type::TraitObject(TypeTraitObject {
                             dyn_token: None,
-                            ref bounds,
+                            bounds,
                         }) => {
                             if bounds.len() > 1 || bounds.trailing_punct() {
+                                first = Type::TraitObject(TypeTraitObject {
+                                    dyn_token: None,
+                                    bounds,
+                                });
                                 break;
                             }
-                            match first {
-                                Type::TraitObject(TypeTraitObject { bounds, .. }) => {
-                                    match bounds.into_iter().next().unwrap() {
-                                        TypeParamBound::Trait(trait_bound) => {
-                                            TypeParamBound::Trait(TraitBound {
-                                                paren_token: Some(paren_token),
-                                                ..trait_bound
-                                            })
-                                        }
-                                        other => other,
-                                    }
+                            match bounds.into_iter().next().unwrap() {
+                                TypeParamBound::Trait(trait_bound) => {
+                                    TypeParamBound::Trait(TraitBound {
+                                        paren_token: Some(paren_token),
+                                        ..trait_bound
+                                    })
                                 }
-                                _ => unreachable!(),
+                                other => other,
                             }
                         }
                         _ => break,
