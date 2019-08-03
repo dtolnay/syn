@@ -349,7 +349,7 @@ pub use crate::item::{
     ForeignItemVerbatim, ImplItem, ImplItemConst, ImplItemExistential, ImplItemMacro,
     ImplItemMethod, ImplItemType, ImplItemVerbatim, Item, ItemConst, ItemEnum, ItemExistential,
     ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic,
-    ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, ItemVerbatim, Receiver,
+    ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
     Signature, TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
     TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };

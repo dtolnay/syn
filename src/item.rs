@@ -21,7 +21,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Item {
+    pub enum Item #manual_extra_traits {
         /// A constant item: `const MAX: u16 = 65535`.
         Const(ItemConst),
 
@@ -76,7 +76,7 @@ ast_enum_of_structs! {
         Use(ItemUse),
 
         /// Tokens forming an item not interpreted by Syn.
-        Verbatim(ItemVerbatim),
+        Verbatim(TokenStream),
     }
 }
 
@@ -341,12 +341,118 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// Tokens forming an item not interpreted by Syn.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct ItemVerbatim #manual_extra_traits {
-        pub tokens: TokenStream,
+#[cfg(feature = "extra-traits")]
+impl Eq for Item {}
+
+#[cfg(feature = "extra-traits")]
+impl PartialEq for Item {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Item::Const(this), Item::Const(other)) => this == other,
+            (Item::Enum(this), Item::Enum(other)) => this == other,
+            (Item::Existential(this), Item::Existential(other)) => this == other,
+            (Item::ExternCrate(this), Item::ExternCrate(other)) => this == other,
+            (Item::Fn(this), Item::Fn(other)) => this == other,
+            (Item::ForeignMod(this), Item::ForeignMod(other)) => this == other,
+            (Item::Impl(this), Item::Impl(other)) => this == other,
+            (Item::Macro(this), Item::Macro(other)) => this == other,
+            (Item::Macro2(this), Item::Macro2(other)) => this == other,
+            (Item::Mod(this), Item::Mod(other)) => this == other,
+            (Item::Static(this), Item::Static(other)) => this == other,
+            (Item::Struct(this), Item::Struct(other)) => this == other,
+            (Item::Trait(this), Item::Trait(other)) => this == other,
+            (Item::TraitAlias(this), Item::TraitAlias(other)) => this == other,
+            (Item::Type(this), Item::Type(other)) => this == other,
+            (Item::Union(this), Item::Union(other)) => this == other,
+            (Item::Use(this), Item::Use(other)) => this == other,
+            (Item::Verbatim(this), Item::Verbatim(other)) => {
+                TokenStreamHelper(this) == TokenStreamHelper(other)
+            }
+            _ => false,
+        }
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Hash for Item {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            Item::Const(item) => {
+                state.write_u8(0);
+                item.hash(state);
+            }
+            Item::Enum(item) => {
+                state.write_u8(1);
+                item.hash(state);
+            }
+            Item::Existential(item) => {
+                state.write_u8(2);
+                item.hash(state);
+            }
+            Item::ExternCrate(item) => {
+                state.write_u8(3);
+                item.hash(state);
+            }
+            Item::Fn(item) => {
+                state.write_u8(4);
+                item.hash(state);
+            }
+            Item::ForeignMod(item) => {
+                state.write_u8(5);
+                item.hash(state);
+            }
+            Item::Impl(item) => {
+                state.write_u8(6);
+                item.hash(state);
+            }
+            Item::Macro(item) => {
+                state.write_u8(7);
+                item.hash(state);
+            }
+            Item::Macro2(item) => {
+                state.write_u8(8);
+                item.hash(state);
+            }
+            Item::Mod(item) => {
+                state.write_u8(9);
+                item.hash(state);
+            }
+            Item::Static(item) => {
+                state.write_u8(10);
+                item.hash(state);
+            }
+            Item::Struct(item) => {
+                state.write_u8(11);
+                item.hash(state);
+            }
+            Item::Trait(item) => {
+                state.write_u8(12);
+                item.hash(state);
+            }
+            Item::TraitAlias(item) => {
+                state.write_u8(13);
+                item.hash(state);
+            }
+            Item::Type(item) => {
+                state.write_u8(14);
+                item.hash(state);
+            }
+            Item::Union(item) => {
+                state.write_u8(15);
+                item.hash(state);
+            }
+            Item::Use(item) => {
+                state.write_u8(16);
+                item.hash(state);
+            }
+            Item::Verbatim(item) => {
+                state.write_u8(17);
+                TokenStreamHelper(item).hash(state);
+            }
+        }
     }
 }
 
@@ -375,26 +481,6 @@ impl Hash for ItemMacro2 {
         self.macro_token.hash(state);
         self.ident.hash(state);
         TokenStreamHelper(&self.rules).hash(state);
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for ItemVerbatim {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for ItemVerbatim {
-    fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for ItemVerbatim {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
@@ -2624,12 +2710,6 @@ mod printing {
             self.macro_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.rules.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ItemVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tokens.to_tokens(tokens);
         }
     }
 
