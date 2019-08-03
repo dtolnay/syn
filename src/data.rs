@@ -38,25 +38,36 @@ ast_enum_of_structs! {
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Named(FieldsNamed {
-            pub brace_token: token::Brace,
-            pub named: Punctuated<Field, Token![,]>,
-        }),
+        pub Named(FieldsNamed),
 
         /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Unnamed(FieldsUnnamed {
-            pub paren_token: token::Paren,
-            pub unnamed: Punctuated<Field, Token![,]>,
-        }),
+        pub Unnamed(FieldsUnnamed),
 
         /// Unit struct or unit variant such as `None`.
         pub Unit,
+    }
+}
+
+ast_struct! {
+    /// Named fields of a struct or struct variant such as `Point { x: f64,
+    /// y: f64 }`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct FieldsNamed {
+        pub brace_token: token::Brace,
+        pub named: Punctuated<Field, Token![,]>,
+    }
+}
+
+ast_struct! {
+    /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct FieldsUnnamed {
+        pub paren_token: token::Paren,
+        pub unnamed: Punctuated<Field, Token![,]>,
     }
 }
 
@@ -156,35 +167,51 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Visibility {
         /// A public visibility level: `pub`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Public(VisPublic {
-            pub pub_token: Token![pub],
-        }),
+        pub Public(VisPublic),
 
         /// A crate-level visibility: `crate`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Crate(VisCrate {
-            pub crate_token: Token![crate],
-        }),
+        pub Crate(VisCrate),
 
         /// A visibility level restricted to some path: `pub(self)` or
         /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Restricted(VisRestricted {
-            pub pub_token: Token![pub],
-            pub paren_token: token::Paren,
-            pub in_token: Option<Token![in]>,
-            pub path: Box<Path>,
-        }),
+        pub Restricted(VisRestricted),
 
         /// An inherited visibility, which usually means private.
         pub Inherited,
+    }
+}
+
+ast_struct! {
+    /// A public visibility level: `pub`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct VisPublic {
+        pub pub_token: Token![pub],
+    }
+}
+
+ast_struct! {
+    /// A crate-level visibility: `crate`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct VisCrate {
+        pub crate_token: Token![crate],
+    }
+}
+
+ast_struct! {
+    /// A visibility level restricted to some path: `pub(self)` or
+    /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct VisRestricted {
+        pub pub_token: Token![pub],
+        pub paren_token: token::Paren,
+        pub in_token: Option<Token![in]>,
+        pub path: Box<Path>,
     }
 }
 

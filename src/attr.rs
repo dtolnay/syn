@@ -242,24 +242,36 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Meta {
         pub Path(Path),
+
         /// A structured list within an attribute, like `derive(Copy, Clone)`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub List(MetaList {
-            pub path: Path,
-            pub paren_token: token::Paren,
-            pub nested: Punctuated<NestedMeta, Token![,]>,
-        }),
+        pub List(MetaList),
+
         /// A name-value pair within an attribute, like `feature = "nightly"`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub NameValue(MetaNameValue {
-            pub path: Path,
-            pub eq_token: Token![=],
-            pub lit: Lit,
-        }),
+        pub NameValue(MetaNameValue),
+    }
+}
+
+ast_struct! {
+    /// A structured list within an attribute, like `derive(Copy, Clone)`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct MetaList {
+        pub path: Path,
+        pub paren_token: token::Paren,
+        pub nested: Punctuated<NestedMeta, Token![,]>,
+    }
+}
+
+ast_struct! {
+    /// A name-value pair within an attribute, like `feature = "nightly"`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct MetaNameValue {
+        pub path: Path,
+        pub eq_token: Token![=],
+        pub lit: Lit,
     }
 }
 

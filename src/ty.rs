@@ -22,152 +22,228 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Type {
         /// A fixed size array type: `[T; n]`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Array(TypeArray {
-            pub bracket_token: token::Bracket,
-            pub elem: Box<Type>,
-            pub semi_token: Token![;],
-            pub len: Expr,
-        }),
+        pub Array(TypeArray),
 
         /// A bare function type: `fn(usize) -> bool`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub BareFn(TypeBareFn {
-            pub lifetimes: Option<BoundLifetimes>,
-            pub unsafety: Option<Token![unsafe]>,
-            pub abi: Option<Abi>,
-            pub fn_token: Token![fn],
-            pub paren_token: token::Paren,
-            pub inputs: Punctuated<BareFnArg, Token![,]>,
-            pub variadic: Option<Token![...]>,
-            pub output: ReturnType,
-        }),
+        pub BareFn(TypeBareFn),
 
         /// A type contained within invisible delimiters.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Group(TypeGroup {
-            pub group_token: token::Group,
-            pub elem: Box<Type>,
-        }),
+        pub Group(TypeGroup),
 
         /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
         /// a lifetime.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub ImplTrait(TypeImplTrait {
-            pub impl_token: Token![impl],
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        }),
+        pub ImplTrait(TypeImplTrait),
 
         /// Indication that a type should be inferred by the compiler: `_`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Infer(TypeInfer {
-            pub underscore_token: Token![_],
-        }),
+        pub Infer(TypeInfer),
 
         /// A macro in the type position.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Macro(TypeMacro {
-            pub mac: Macro,
-        }),
+        pub Macro(TypeMacro),
 
         /// The never type: `!`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Never(TypeNever {
-            pub bang_token: Token![!],
-        }),
+        pub Never(TypeNever),
 
         /// A parenthesized type equivalent to the inner type.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Paren(TypeParen {
-            pub paren_token: token::Paren,
-            pub elem: Box<Type>,
-        }),
+        pub Paren(TypeParen),
 
         /// A path like `std::slice::Iter`, optionally qualified with a
         /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
-        ///
-        /// Type arguments are stored in the Path itself.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Path(TypePath {
-            pub qself: Option<QSelf>,
-            pub path: Path,
-        }),
+        pub Path(TypePath),
 
         /// A raw pointer type: `*const T` or `*mut T`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Ptr(TypePtr {
-            pub star_token: Token![*],
-            pub const_token: Option<Token![const]>,
-            pub mutability: Option<Token![mut]>,
-            pub elem: Box<Type>,
-        }),
+        pub Ptr(TypePtr),
 
         /// A reference type: `&'a T` or `&'a mut T`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Reference(TypeReference {
-            pub and_token: Token![&],
-            pub lifetime: Option<Lifetime>,
-            pub mutability: Option<Token![mut]>,
-            pub elem: Box<Type>,
-        }),
+        pub Reference(TypeReference),
 
         /// A dynamically sized slice type: `[T]`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Slice(TypeSlice {
-            pub bracket_token: token::Bracket,
-            pub elem: Box<Type>,
-        }),
+        pub Slice(TypeSlice),
 
         /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
         /// trait or a lifetime.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub TraitObject(TypeTraitObject {
-            pub dyn_token: Option<Token![dyn]>,
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        }),
+        pub TraitObject(TypeTraitObject),
 
         /// A tuple type: `(A, B, C, String)`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Tuple(TypeTuple {
-            pub paren_token: token::Paren,
-            pub elems: Punctuated<Type, Token![,]>,
-        }),
+        pub Tuple(TypeTuple),
 
         /// Tokens in type position not interpreted by Syn.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Verbatim(TypeVerbatim #manual_extra_traits {
-            pub tokens: TokenStream,
-        }),
+        pub Verbatim(TypeVerbatim),
+    }
+}
+
+ast_struct! {
+    /// A fixed size array type: `[T; n]`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeArray {
+        pub bracket_token: token::Bracket,
+        pub elem: Box<Type>,
+        pub semi_token: Token![;],
+        pub len: Expr,
+    }
+}
+
+ast_struct! {
+    /// A bare function type: `fn(usize) -> bool`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeBareFn {
+        pub lifetimes: Option<BoundLifetimes>,
+        pub unsafety: Option<Token![unsafe]>,
+        pub abi: Option<Abi>,
+        pub fn_token: Token![fn],
+        pub paren_token: token::Paren,
+        pub inputs: Punctuated<BareFnArg, Token![,]>,
+        pub variadic: Option<Token![...]>,
+        pub output: ReturnType,
+    }
+}
+
+ast_struct! {
+    /// A type contained within invisible delimiters.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeGroup {
+        pub group_token: token::Group,
+        pub elem: Box<Type>,
+    }
+}
+
+ast_struct! {
+    /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
+    /// a lifetime.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeImplTrait {
+        pub impl_token: Token![impl],
+        pub bounds: Punctuated<TypeParamBound, Token![+]>,
+    }
+}
+
+ast_struct! {
+    /// Indication that a type should be inferred by the compiler: `_`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeInfer {
+        pub underscore_token: Token![_],
+    }
+}
+
+ast_struct! {
+    /// A macro in the type position.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeMacro {
+        pub mac: Macro,
+    }
+}
+
+ast_struct! {
+    /// The never type: `!`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeNever {
+        pub bang_token: Token![!],
+    }
+}
+
+ast_struct! {
+    /// A parenthesized type equivalent to the inner type.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeParen {
+        pub paren_token: token::Paren,
+        pub elem: Box<Type>,
+    }
+}
+
+ast_struct! {
+    /// A path like `std::slice::Iter`, optionally qualified with a
+    /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypePath {
+        pub qself: Option<QSelf>,
+        pub path: Path,
+    }
+}
+
+ast_struct! {
+    /// A raw pointer type: `*const T` or `*mut T`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypePtr {
+        pub star_token: Token![*],
+        pub const_token: Option<Token![const]>,
+        pub mutability: Option<Token![mut]>,
+        pub elem: Box<Type>,
+    }
+}
+
+ast_struct! {
+    /// A reference type: `&'a T` or `&'a mut T`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeReference {
+        pub and_token: Token![&],
+        pub lifetime: Option<Lifetime>,
+        pub mutability: Option<Token![mut]>,
+        pub elem: Box<Type>,
+    }
+}
+
+ast_struct! {
+    /// A dynamically sized slice type: `[T]`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeSlice {
+        pub bracket_token: token::Bracket,
+        pub elem: Box<Type>,
+    }
+}
+
+ast_struct! {
+    /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
+    /// trait or a lifetime.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeTraitObject {
+        pub dyn_token: Option<Token![dyn]>,
+        pub bounds: Punctuated<TypeParamBound, Token![+]>,
+    }
+}
+
+ast_struct! {
+    /// A tuple type: `(A, B, C, String)`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeTuple {
+        pub paren_token: token::Paren,
+        pub elems: Punctuated<Type, Token![,]>,
+    }
+}
+
+ast_struct! {
+    /// Tokens in type position not interpreted by Syn.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeVerbatim #manual_extra_traits {
+        pub tokens: TokenStream,
     }
 }
 

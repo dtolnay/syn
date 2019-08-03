@@ -38,36 +38,51 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Data {
         /// A struct input to a `proc_macro_derive` macro.
-        ///
-        /// *This type is available if Syn is built with the `"derive"`
-        /// feature.*
-        pub Struct(DataStruct {
-            pub struct_token: Token![struct],
-            pub fields: Fields,
-            pub semi_token: Option<Token![;]>,
-        }),
+        pub Struct(DataStruct),
 
         /// An enum input to a `proc_macro_derive` macro.
-        ///
-        /// *This type is available if Syn is built with the `"derive"`
-        /// feature.*
-        pub Enum(DataEnum {
-            pub enum_token: Token![enum],
-            pub brace_token: token::Brace,
-            pub variants: Punctuated<Variant, Token![,]>,
-        }),
+        pub Enum(DataEnum),
 
         /// A tagged union input to a `proc_macro_derive` macro.
-        ///
-        /// *This type is available if Syn is built with the `"derive"`
-        /// feature.*
-        pub Union(DataUnion {
-            pub union_token: Token![union],
-            pub fields: FieldsNamed,
-        }),
+        pub Union(DataUnion),
     }
 
     do_not_generate_to_tokens
+}
+
+ast_struct! {
+    /// A struct input to a `proc_macro_derive` macro.
+    ///
+    /// *This type is available if Syn is built with the `"derive"`
+    /// feature.*
+    pub struct DataStruct {
+        pub struct_token: Token![struct],
+        pub fields: Fields,
+        pub semi_token: Option<Token![;]>,
+    }
+}
+
+ast_struct! {
+    /// An enum input to a `proc_macro_derive` macro.
+    ///
+    /// *This type is available if Syn is built with the `"derive"`
+    /// feature.*
+    pub struct DataEnum {
+        pub enum_token: Token![enum],
+        pub brace_token: token::Brace,
+        pub variants: Punctuated<Variant, Token![,]>,
+    }
+}
+
+ast_struct! {
+    /// A tagged union input to a `proc_macro_derive` macro.
+    ///
+    /// *This type is available if Syn is built with the `"derive"`
+    /// feature.*
+    pub struct DataUnion {
+        pub union_token: Token![union],
+        pub fields: FieldsNamed,
+    }
 }
 
 #[cfg(feature = "parsing")]

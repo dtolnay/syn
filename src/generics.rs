@@ -33,42 +33,57 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum GenericParam {
         /// A generic type parameter: `T: Into<String>`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Type(TypeParam {
-            pub attrs: Vec<Attribute>,
-            pub ident: Ident,
-            pub colon_token: Option<Token![:]>,
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-            pub eq_token: Option<Token![=]>,
-            pub default: Option<Type>,
-        }),
+        pub Type(TypeParam),
 
         /// A lifetime definition: `'a: 'b + 'c + 'd`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Lifetime(LifetimeDef {
-            pub attrs: Vec<Attribute>,
-            pub lifetime: Lifetime,
-            pub colon_token: Option<Token![:]>,
-            pub bounds: Punctuated<Lifetime, Token![+]>,
-        }),
+        pub Lifetime(LifetimeDef),
 
         /// A const generic parameter: `const LENGTH: usize`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Const(ConstParam {
-            pub attrs: Vec<Attribute>,
-            pub const_token: Token![const],
-            pub ident: Ident,
-            pub colon_token: Token![:],
-            pub ty: Type,
-            pub eq_token: Option<Token![=]>,
-            pub default: Option<Expr>,
-        }),
+        pub Const(ConstParam),
+    }
+}
+
+ast_struct! {
+    /// A generic type parameter: `T: Into<String>`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeParam {
+        pub attrs: Vec<Attribute>,
+        pub ident: Ident,
+        pub colon_token: Option<Token![:]>,
+        pub bounds: Punctuated<TypeParamBound, Token![+]>,
+        pub eq_token: Option<Token![=]>,
+        pub default: Option<Type>,
+    }
+}
+
+ast_struct! {
+    /// A lifetime definition: `'a: 'b + 'c + 'd`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LifetimeDef {
+        pub attrs: Vec<Attribute>,
+        pub lifetime: Lifetime,
+        pub colon_token: Option<Token![:]>,
+        pub bounds: Punctuated<Lifetime, Token![+]>,
+    }
+}
+
+ast_struct! {
+    /// A const generic parameter: `const LENGTH: usize`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct ConstParam {
+        pub attrs: Vec<Attribute>,
+        pub const_token: Token![const],
+        pub ident: Ident,
+        pub colon_token: Token![:],
+        pub ty: Type,
+        pub eq_token: Option<Token![=]>,
+        pub default: Option<Expr>,
     }
 }
 
@@ -440,38 +455,53 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum WherePredicate {
         /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Type(PredicateType {
-            /// Any lifetimes from a `for` binding
-            pub lifetimes: Option<BoundLifetimes>,
-            /// The type being bounded
-            pub bounded_ty: Type,
-            pub colon_token: Token![:],
-            /// Trait and lifetime bounds (`Clone+Send+'static`)
-            pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        }),
+        pub Type(PredicateType),
 
         /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Lifetime(PredicateLifetime {
-            pub lifetime: Lifetime,
-            pub colon_token: Token![:],
-            pub bounds: Punctuated<Lifetime, Token![+]>,
-        }),
+        pub Lifetime(PredicateLifetime),
 
         /// An equality predicate in a `where` clause (unsupported).
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Eq(PredicateEq {
-            pub lhs_ty: Type,
-            pub eq_token: Token![=],
-            pub rhs_ty: Type,
-        }),
+        pub Eq(PredicateEq),
+    }
+}
+
+ast_struct! {
+    /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct PredicateType {
+        /// Any lifetimes from a `for` binding
+        pub lifetimes: Option<BoundLifetimes>,
+        /// The type being bounded
+        pub bounded_ty: Type,
+        pub colon_token: Token![:],
+        /// Trait and lifetime bounds (`Clone+Send+'static`)
+        pub bounds: Punctuated<TypeParamBound, Token![+]>,
+    }
+}
+
+ast_struct! {
+    /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct PredicateLifetime {
+        pub lifetime: Lifetime,
+        pub colon_token: Token![:],
+        pub bounds: Punctuated<Lifetime, Token![+]>,
+    }
+}
+
+ast_struct! {
+    /// An equality predicate in a `where` clause (unsupported).
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct PredicateEq {
+        pub lhs_ty: Type,
+        pub eq_token: Token![=],
+        pub rhs_ty: Type,
     }
 }
 

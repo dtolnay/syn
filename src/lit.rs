@@ -34,77 +34,114 @@ ast_enum_of_structs! {
     // blocked on https://github.com/rust-lang/rust/issues/62833
     pub enum Lit #manual_extra_traits {
         /// A UTF-8 string literal: `"foo"`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Str(LitStr #manual_extra_traits {
-            token: Literal,
-        }),
+        pub Str(LitStr),
 
         /// A byte string literal: `b"foo"`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub ByteStr(LitByteStr #manual_extra_traits {
-            token: Literal,
-        }),
+        pub ByteStr(LitByteStr),
 
         /// A byte literal: `b'f'`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Byte(LitByte #manual_extra_traits {
-            token: Literal,
-        }),
+        pub Byte(LitByte),
 
         /// A character literal: `'a'`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Char(LitChar #manual_extra_traits {
-            token: Literal,
-        }),
+        pub Char(LitChar),
 
         /// An integer literal: `1` or `1u16`.
         ///
         /// Holds up to 64 bits of data. Use `Lit::Verbatim` for any larger
         /// integer literal.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Int(LitInt #manual_extra_traits {
-            token: Literal,
-            digits: String,
-            suffix: String,
-        }),
+        pub Int(LitInt),
 
         /// A floating point literal: `1f64` or `1.0e10f64`.
         ///
         /// Must be finite. May not be infinte or NaN.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Float(LitFloat #manual_extra_traits {
-            token: Literal,
-            digits: String,
-            suffix: String,
-        }),
+        pub Float(LitFloat),
 
         /// A boolean literal: `true` or `false`.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
-        pub Bool(LitBool #manual_extra_traits {
-            pub value: bool,
-            pub span: Span,
-        }),
+        pub Bool(LitBool),
 
         /// A raw token literal not interpreted by Syn, possibly because it
         /// represents an integer larger than 64 bits.
-        ///
-        /// *This type is available if Syn is built with the `"derive"` or
-        /// `"full"` feature.*
         pub Verbatim(Literal),
+    }
+}
+
+ast_struct! {
+    /// A UTF-8 string literal: `"foo"`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitStr #manual_extra_traits {
+        token: Literal,
+    }
+}
+
+ast_struct! {
+    /// A byte string literal: `b"foo"`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitByteStr #manual_extra_traits {
+        token: Literal,
+    }
+}
+
+ast_struct! {
+    /// A byte literal: `b'f'`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitByte #manual_extra_traits {
+        token: Literal,
+    }
+}
+
+ast_struct! {
+    /// A character literal: `'a'`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitChar #manual_extra_traits {
+        token: Literal,
+    }
+}
+
+ast_struct! {
+    /// An integer literal: `1` or `1u16`.
+    ///
+    /// Holds up to 64 bits of data. Use `Lit::Verbatim` for any larger
+    /// integer literal.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitInt #manual_extra_traits {
+        token: Literal,
+        digits: String,
+        suffix: String,
+    }
+}
+
+ast_struct! {
+    /// A floating point literal: `1f64` or `1.0e10f64`.
+    ///
+    /// Must be finite. May not be infinte or NaN.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitFloat #manual_extra_traits {
+        token: Literal,
+        digits: String,
+        suffix: String,
+    }
+}
+
+ast_struct! {
+    /// A boolean literal: `true` or `false`.
+    ///
+    /// *This type is available if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct LitBool #manual_extra_traits {
+        pub value: bool,
+        pub span: Span,
     }
 }
 
