@@ -481,7 +481,7 @@ pub mod parsing {
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
         {
-            if input.peek(Token![dyn]) {
+            if input.peek(Token![dyn ]) {
                 let mut trait_object: TypeTraitObject = input.parse()?;
                 if lifetimes.is_some() {
                     match *trait_object.bounds.iter_mut().next().unwrap() {
@@ -716,10 +716,7 @@ pub mod parsing {
                 path.segments.last_mut().unwrap().arguments = parenthesized;
             }
 
-            Ok(TypePath {
-                qself,
-                path,
-            })
+            Ok(TypePath { qself, path })
         }
     }
 

@@ -948,8 +948,8 @@ pub mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
-    use crate::parse::{Parse, ParseStream, Result};
     use crate::parse::discouraged::Speculative;
+    use crate::parse::{Parse, ParseStream, Result};
     use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
     use std::iter::{self, FromIterator};
 
@@ -1341,10 +1341,7 @@ pub mod parsing {
                         ..generics
                     },
                 },
-                block: Box::new(Block {
-                    brace_token,
-                    stmts,
-                }),
+                block: Box::new(Block { brace_token, stmts }),
             })
         }
     }
@@ -2016,10 +2013,7 @@ pub mod parsing {
                         ..generics
                     },
                 },
-                default: brace_token.map(|brace_token| Block {
-                    brace_token,
-                    stmts,
-                }),
+                default: brace_token.map(|brace_token| Block { brace_token, stmts }),
                 semi_token,
             })
         }
@@ -2283,10 +2277,7 @@ pub mod parsing {
                         ..generics
                     },
                 },
-                block: Block {
-                    brace_token,
-                    stmts,
-                },
+                block: Block { brace_token, stmts },
             })
         }
     }

@@ -159,9 +159,7 @@ impl PartialEq for Lit {
             (Lit::Int(this), Lit::Int(other)) => this == other,
             (Lit::Float(this), Lit::Float(other)) => this == other,
             (Lit::Bool(this), Lit::Bool(other)) => this == other,
-            (Lit::Verbatim(this), Lit::Verbatim(other)) => {
-                this.to_string() == other.to_string()
-            }
+            (Lit::Verbatim(this), Lit::Verbatim(other)) => this.to_string() == other.to_string(),
             _ => false,
         }
     }
@@ -388,7 +386,11 @@ impl LitInt {
         if let Some((digits, suffix)) = value::parse_lit_int(repr) {
             let mut token = value::to_literal(repr);
             token.set_span(span);
-            LitInt { token, digits, suffix }
+            LitInt {
+                token,
+                digits,
+                suffix,
+            }
         } else {
             panic!("Not an integer literal: `{}`", repr);
         }
@@ -415,7 +417,11 @@ impl From<Literal> for LitInt {
     fn from(token: Literal) -> Self {
         let repr = token.to_string();
         if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
-            LitInt { token, digits, suffix }
+            LitInt {
+                token,
+                digits,
+                suffix,
+            }
         } else {
             panic!("Not an integer literal: `{}`", repr);
         }
@@ -433,7 +439,11 @@ impl LitFloat {
         if let Some((digits, suffix)) = value::parse_lit_float(repr) {
             let mut token = value::to_literal(repr);
             token.set_span(span);
-            LitFloat { token, digits, suffix }
+            LitFloat {
+                token,
+                digits,
+                suffix,
+            }
         } else {
             panic!("Not a float literal: `{}`", repr);
         }
@@ -460,7 +470,11 @@ impl From<Literal> for LitFloat {
     fn from(token: Literal) -> Self {
         let repr = token.to_string();
         if let Some((digits, suffix)) = value::parse_lit_float(&repr) {
-            LitFloat { token, digits, suffix }
+            LitFloat {
+                token,
+                digits,
+                suffix,
+            }
         } else {
             panic!("Not a float literal: `{}`", repr);
         }
@@ -709,11 +723,19 @@ mod value {
                 b'0'...b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
                         if let Some((digits, suffix)) = parse_lit_int(&repr) {
-                            return Lit::Int(LitInt { token, digits, suffix });
+                            return Lit::Int(LitInt {
+                                token,
+                                digits,
+                                suffix,
+                            });
                         }
                     }
                     if let Some((digits, suffix)) = parse_lit_float(&repr) {
-                        return Lit::Float(LitFloat { token, digits, suffix });
+                        return Lit::Float(LitFloat {
+                            token,
+                            digits,
+                            suffix,
+                        });
                     }
                 }
                 b't' | b'f' => {
@@ -1045,7 +1067,6 @@ mod value {
             panic!("character code {:x} is not a valid unicode character", ch);
         }
     }
-
 
     // Returns base 10 digits and suffix.
     pub fn parse_lit_int(mut s: &str) -> Option<(String, String)> {

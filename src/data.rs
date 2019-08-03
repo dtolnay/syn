@@ -335,9 +335,7 @@ pub mod parsing {
                 }
             }
 
-            Ok(Visibility::Public(VisPublic {
-                pub_token,
-            }))
+            Ok(Visibility::Public(VisPublic { pub_token }))
         }
 
         fn parse_crate(input: ParseStream) -> Result<Self> {

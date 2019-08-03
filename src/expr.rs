@@ -1794,9 +1794,7 @@ pub mod parsing {
                     paren_token: parenthesized!(content in input),
                     args: content.parse_terminated(Expr::parse)?,
                 });
-            } else if input.peek(Token![.])
-                && !input.peek(Token![..])
-                && !input.peek2(token::Await)
+            } else if input.peek(Token![.]) && !input.peek(Token![..]) && !input.peek2(token::Await)
             {
                 e = Expr::Field(ExprField {
                     attrs: Vec::new(),
@@ -2141,10 +2139,15 @@ pub mod parsing {
             pat: {
                 let leading_vert: Option<Token![|]> = input.parse()?;
                 let pat: Pat = input.parse()?;
-                if leading_vert.is_some() || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                if leading_vert.is_some()
+                    || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
+                {
                     let mut cases = Punctuated::new();
                     cases.push_value(pat);
-                    while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                    while input.peek(Token![|])
+                        && !input.peek(Token![||])
+                        && !input.peek(Token![|=])
+                    {
                         let punct = input.parse()?;
                         cases.push_punct(punct);
                         let pat: Pat = input.parse()?;
@@ -2242,10 +2245,7 @@ pub mod parsing {
                 pat,
                 in_token,
                 expr: Box::new(expr),
-                body: Block {
-                    brace_token,
-                    stmts,
-                },
+                body: Block { brace_token, stmts },
             })
         }
     }
@@ -2265,10 +2265,7 @@ pub mod parsing {
                 attrs: inner_attrs,
                 label,
                 loop_token,
-                body: Block {
-                    brace_token,
-                    stmts,
-                },
+                body: Block { brace_token, stmts },
             })
         }
     }
@@ -2505,10 +2502,7 @@ pub mod parsing {
                 label,
                 while_token,
                 cond: Box::new(cond),
-                body: Block {
-                    brace_token,
-                    stmts,
-                },
+                body: Block { brace_token, stmts },
             })
         }
     }
@@ -2677,10 +2671,7 @@ pub mod parsing {
         Ok(ExprUnsafe {
             attrs: inner_attrs,
             unsafe_token,
-            block: Block {
-                brace_token,
-                stmts,
-            },
+            block: Block { brace_token, stmts },
         })
     }
 
@@ -2696,10 +2687,7 @@ pub mod parsing {
         Ok(ExprBlock {
             attrs: inner_attrs,
             label,
-            block: Block {
-                brace_token,
-                stmts,
-            },
+            block: Block { brace_token, stmts },
         })
     }
 
@@ -2750,11 +2738,7 @@ pub mod parsing {
 
             let (qself, path) = path::parsing::qpath(input, true)?;
 
-            Ok(ExprPath {
-                attrs,
-                qself,
-                path,
-            })
+            Ok(ExprPath { attrs, qself, path })
         }
     }
 
@@ -2934,10 +2918,15 @@ pub mod parsing {
             pat: {
                 let leading_vert: Option<Token![|]> = input.parse()?;
                 let mut pat: Pat = input.parse()?;
-                if leading_vert.is_some() || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                if leading_vert.is_some()
+                    || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
+                {
                     let mut cases = Punctuated::new();
                     cases.push_value(pat);
-                    while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                    while input.peek(Token![|])
+                        && !input.peek(Token![||])
+                        && !input.peek(Token![|=])
+                    {
                         let punct = input.parse()?;
                         cases.push_punct(punct);
                         let pat: Pat = input.parse()?;

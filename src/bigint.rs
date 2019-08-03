@@ -7,9 +7,7 @@ pub struct BigInt {
 
 impl BigInt {
     pub fn new() -> Self {
-        BigInt {
-            digits: Vec::new(),
-        }
+        BigInt { digits: Vec::new() }
     }
 
     pub fn to_string(&self) -> String {
@@ -32,9 +30,8 @@ impl BigInt {
 
     fn reserve_two_digits(&mut self) {
         let len = self.digits.len();
-        let desired = len
-            + !self.digits.ends_with(&[0, 0]) as usize
-            + !self.digits.ends_with(&[0]) as usize;
+        let desired =
+            len + !self.digits.ends_with(&[0, 0]) as usize + !self.digits.ends_with(&[0]) as usize;
         self.digits.resize(desired, 0);
     }
 }

@@ -143,7 +143,11 @@ impl Attribute {
         }
 
         let path = Path {
-            leading_colon: self.path.leading_colon.as_ref().map(|colon| Token![::](colon.spans)),
+            leading_colon: self
+                .path
+                .leading_colon
+                .as_ref()
+                .map(|colon| Token![::](colon.spans)),
             segments: self
                 .path
                 .segments

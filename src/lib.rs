@@ -250,7 +250,7 @@
     clippy::never_loop,
     clippy::suspicious_op_assign_impl,
     clippy::too_many_arguments,
-    clippy::trivially_copy_pass_by_ref,
+    clippy::trivially_copy_pass_by_ref
 )]
 // Ignored clippy_pedantic lints.
 #![allow(
@@ -264,7 +264,7 @@
     clippy::single_match_else,
     clippy::unseparated_literal_suffix,
     clippy::use_self,
-    clippy::used_underscore_binding,
+    clippy::used_underscore_binding
 )]
 
 #[cfg(all(
@@ -314,6 +314,12 @@ pub use crate::data::{
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
+#[cfg(feature = "full")]
+pub use crate::expr::{
+    Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
+    PatBox, PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
+    PatStruct, PatTuple, PatTupleStruct, PatType, PatVerbatim, PatWild, RangeLimits, Stmt,
+};
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
     Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
@@ -322,12 +328,6 @@ pub use crate::expr::{
     ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn,
     ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprType, ExprUnary, ExprUnsafe, ExprVerbatim,
     ExprWhile, ExprYield, Index, Member,
-};
-#[cfg(feature = "full")]
-pub use crate::expr::{
-    Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
-    PatBox, PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
-    PatTupleStruct, PatType, PatVerbatim, PatWild, RangeLimits, Stmt,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -345,14 +345,13 @@ pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
-    FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro,
-    ForeignItemStatic, ForeignItemType, ForeignItemVerbatim, ImplItem, ImplItemConst,
-    ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType, ImplItemVerbatim, Item,
-    ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
-    ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-    ItemUnion, ItemUse, ItemVerbatim, Receiver, Signature, TraitItem, TraitItemConst, TraitItemMacro,
-    TraitItemMethod, TraitItemType, TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath,
-    UseRename, UseTree, Variadic,
+    FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
+    ForeignItemVerbatim, ImplItem, ImplItemConst, ImplItemExistential, ImplItemMacro,
+    ImplItemMethod, ImplItemType, ImplItemVerbatim, Item, ItemConst, ItemEnum, ItemExistential,
+    ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2, ItemMod, ItemStatic,
+    ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, ItemVerbatim, Receiver,
+    Signature, TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType,
+    TraitItemVerbatim, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };
 
 #[cfg(feature = "full")]
