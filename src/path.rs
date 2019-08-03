@@ -79,9 +79,9 @@ impl Default for PathArguments {
 
 impl PathArguments {
     pub fn is_empty(&self) -> bool {
-        match *self {
+        match self {
             PathArguments::None => true,
-            PathArguments::AngleBracketed(ref bracketed) => bracketed.args.is_empty(),
+            PathArguments::AngleBracketed(bracketed) => bracketed.args.is_empty(),
             PathArguments::Parenthesized(_) => false,
         }
     }
@@ -542,12 +542,12 @@ mod printing {
 
     impl ToTokens for PathArguments {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
+            match self {
                 PathArguments::None => {}
-                PathArguments::AngleBracketed(ref arguments) => {
+                PathArguments::AngleBracketed(arguments) => {
                     arguments.to_tokens(tokens);
                 }
-                PathArguments::Parenthesized(ref arguments) => {
+                PathArguments::Parenthesized(arguments) => {
                     arguments.to_tokens(tokens);
                 }
             }
@@ -557,12 +557,12 @@ mod printing {
     impl ToTokens for GenericArgument {
         #[allow(clippy::match_same_arms)]
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
-                GenericArgument::Lifetime(ref lt) => lt.to_tokens(tokens),
-                GenericArgument::Type(ref ty) => ty.to_tokens(tokens),
-                GenericArgument::Binding(ref tb) => tb.to_tokens(tokens),
-                GenericArgument::Constraint(ref tc) => tc.to_tokens(tokens),
-                GenericArgument::Const(ref e) => match *e {
+            match self {
+                GenericArgument::Lifetime(lt) => lt.to_tokens(tokens),
+                GenericArgument::Type(ty) => ty.to_tokens(tokens),
+                GenericArgument::Binding(tb) => tb.to_tokens(tokens),
+                GenericArgument::Constraint(tc) => tc.to_tokens(tokens),
+                GenericArgument::Const(e) => match *e {
                     Expr::Lit(_) => e.to_tokens(tokens),
 
                     // NOTE: We should probably support parsing blocks with only
@@ -664,8 +664,8 @@ mod printing {
 
     impl private {
         pub fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
-            let qself = match *qself {
-                Some(ref qself) => qself,
+            let qself = match qself {
+                Some(qself) => qself,
                 None => {
                     path.to_tokens(tokens);
                     return;

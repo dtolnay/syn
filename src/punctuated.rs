@@ -344,11 +344,11 @@ impl<T, P> Punctuated<T, P> {
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut list = f.debug_list();
-        for &(ref t, ref p) in &self.inner {
+        for (t, p) in &self.inner {
             list.entry(t);
             list.entry(p);
         }
-        if let Some(ref last) = self.last {
+        if let Some(last) = &self.last {
             list.entry(last);
         }
         list.finish()
@@ -459,7 +459,7 @@ impl<'a, T, P> Iterator for Pairs<'a, T, P> {
     fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
-            .map(|&(ref t, ref p)| Pair::Punctuated(t, p))
+            .map(|(t, p)| Pair::Punctuated(t, p))
             .or_else(|| self.last.next().map(Pair::End))
     }
 }
@@ -469,7 +469,7 @@ impl<'a, T, P> DoubleEndedIterator for Pairs<'a, T, P> {
         self.last.next().map(Pair::End).or_else(|| {
             self.inner
                 .next_back()
-                .map(|&(ref t, ref p)| Pair::Punctuated(t, p))
+                .map(|(t, p)| Pair::Punctuated(t, p))
         })
     }
 }
@@ -506,7 +506,7 @@ impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
     fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
-            .map(|&mut (ref mut t, ref mut p)| Pair::Punctuated(t, p))
+            .map(|(t, p)| Pair::Punctuated(t, p))
             .or_else(|| self.last.next().map(Pair::End))
     }
 }
@@ -516,7 +516,7 @@ impl<'a, T, P> DoubleEndedIterator for PairsMut<'a, T, P> {
         self.last.next().map(Pair::End).or_else(|| {
             self.inner
                 .next_back()
-                .map(|&mut (ref mut t, ref mut p)| Pair::Punctuated(t, p))
+                .map(|(t, p)| Pair::Punctuated(t, p))
         })
     }
 }
@@ -800,23 +800,23 @@ impl<T, P> Pair<T, P> {
 
     /// Borrows the syntax tree node from this punctuated pair.
     pub fn value(&self) -> &T {
-        match *self {
-            Pair::Punctuated(ref t, _) | Pair::End(ref t) => t,
+        match self {
+            Pair::Punctuated(t, _) | Pair::End(t) => t,
         }
     }
 
     /// Mutably borrows the syntax tree node from this punctuated pair.
     pub fn value_mut(&mut self) -> &mut T {
-        match *self {
-            Pair::Punctuated(ref mut t, _) | Pair::End(ref mut t) => t,
+        match self {
+            Pair::Punctuated(t, _) | Pair::End(t) => t,
         }
     }
 
     /// Borrows the punctuation from this punctuated pair, unless this pair is
     /// the final one and there is no trailing punctuation.
     pub fn punct(&self) -> Option<&P> {
-        match *self {
-            Pair::Punctuated(_, ref d) => Some(d),
+        match self {
+            Pair::Punctuated(_, d) => Some(d),
             Pair::End(_) => None,
         }
     }
@@ -845,8 +845,8 @@ impl<T, P> Index<usize> for Punctuated<T, P> {
 
     fn index(&self, index: usize) -> &Self::Output {
         if index == self.len() - 1 {
-            match self.last {
-                Some(ref t) => t,
+            match &self.last {
+                Some(t) => t,
                 None => &self.inner[index].0,
             }
         } else {
@@ -858,8 +858,8 @@ impl<T, P> Index<usize> for Punctuated<T, P> {
 impl<T, P> IndexMut<usize> for Punctuated<T, P> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         if index == self.len() - 1 {
-            match self.last {
-                Some(ref mut t) => t,
+            match &mut self.last {
+                Some(t) => t,
                 None => &mut self.inner[index].0,
             }
         } else {
@@ -890,12 +890,12 @@ mod printing {
         P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
-                Pair::Punctuated(ref a, ref b) => {
+            match self {
+                Pair::Punctuated(a, b) => {
                     a.to_tokens(tokens);
                     b.to_tokens(tokens);
                 }
-                Pair::End(ref a) => a.to_tokens(tokens),
+                Pair::End(a) => a.to_tokens(tokens),
             }
         }
     }

@@ -293,13 +293,13 @@ impl LitStr {
 
         // Token tree with every span replaced by the given one.
         fn respan_token_tree(mut token: TokenTree, span: Span) -> TokenTree {
-            match token {
-                TokenTree::Group(ref mut g) => {
+            match &mut token {
+                TokenTree::Group(g) => {
                     let stream = respan_token_stream(g.stream().clone(), span);
                     *g = Group::new(g.delimiter(), stream);
                     g.set_span(span);
                 }
-                ref mut other => other.set_span(span),
+                other => other.set_span(span),
             }
             token
         }

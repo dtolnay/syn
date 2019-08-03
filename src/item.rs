@@ -1225,24 +1225,24 @@ pub mod parsing {
             }?;
 
             {
-                let item_attrs = match item {
-                    Item::ExternCrate(ref mut item) => &mut item.attrs,
-                    Item::Use(ref mut item) => &mut item.attrs,
-                    Item::Static(ref mut item) => &mut item.attrs,
-                    Item::Const(ref mut item) => &mut item.attrs,
-                    Item::Fn(ref mut item) => &mut item.attrs,
-                    Item::Mod(ref mut item) => &mut item.attrs,
-                    Item::ForeignMod(ref mut item) => &mut item.attrs,
-                    Item::Type(ref mut item) => &mut item.attrs,
-                    Item::Existential(ref mut item) => &mut item.attrs,
-                    Item::Struct(ref mut item) => &mut item.attrs,
-                    Item::Enum(ref mut item) => &mut item.attrs,
-                    Item::Union(ref mut item) => &mut item.attrs,
-                    Item::Trait(ref mut item) => &mut item.attrs,
-                    Item::TraitAlias(ref mut item) => &mut item.attrs,
-                    Item::Impl(ref mut item) => &mut item.attrs,
-                    Item::Macro(ref mut item) => &mut item.attrs,
-                    Item::Macro2(ref mut item) => &mut item.attrs,
+                let item_attrs = match &mut item {
+                    Item::ExternCrate(item) => &mut item.attrs,
+                    Item::Use(item) => &mut item.attrs,
+                    Item::Static(item) => &mut item.attrs,
+                    Item::Const(item) => &mut item.attrs,
+                    Item::Fn(item) => &mut item.attrs,
+                    Item::Mod(item) => &mut item.attrs,
+                    Item::ForeignMod(item) => &mut item.attrs,
+                    Item::Type(item) => &mut item.attrs,
+                    Item::Existential(item) => &mut item.attrs,
+                    Item::Struct(item) => &mut item.attrs,
+                    Item::Enum(item) => &mut item.attrs,
+                    Item::Union(item) => &mut item.attrs,
+                    Item::Trait(item) => &mut item.attrs,
+                    Item::TraitAlias(item) => &mut item.attrs,
+                    Item::Impl(item) => &mut item.attrs,
+                    Item::Macro(item) => &mut item.attrs,
+                    Item::Macro2(item) => &mut item.attrs,
                     Item::Verbatim(_) | Item::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
@@ -1667,11 +1667,11 @@ pub mod parsing {
             }?;
 
             {
-                let item_attrs = match item {
-                    ForeignItem::Fn(ref mut item) => &mut item.attrs,
-                    ForeignItem::Static(ref mut item) => &mut item.attrs,
-                    ForeignItem::Type(ref mut item) => &mut item.attrs,
-                    ForeignItem::Macro(ref mut item) => &mut item.attrs,
+                let item_attrs = match &mut item {
+                    ForeignItem::Fn(item) => &mut item.attrs,
+                    ForeignItem::Static(item) => &mut item.attrs,
+                    ForeignItem::Type(item) => &mut item.attrs,
+                    ForeignItem::Macro(item) => &mut item.attrs,
                     ForeignItem::Verbatim(_) | ForeignItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
@@ -2096,11 +2096,11 @@ pub mod parsing {
             }?;
 
             {
-                let item_attrs = match item {
-                    TraitItem::Const(ref mut item) => &mut item.attrs,
-                    TraitItem::Method(ref mut item) => &mut item.attrs,
-                    TraitItem::Type(ref mut item) => &mut item.attrs,
-                    TraitItem::Macro(ref mut item) => &mut item.attrs,
+                let item_attrs = match &mut item {
+                    TraitItem::Const(item) => &mut item.attrs,
+                    TraitItem::Method(item) => &mut item.attrs,
+                    TraitItem::Type(item) => &mut item.attrs,
+                    TraitItem::Macro(item) => &mut item.attrs,
                     TraitItem::Verbatim(_) | TraitItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
@@ -2369,12 +2369,12 @@ pub mod parsing {
             }?;
 
             {
-                let item_attrs = match item {
-                    ImplItem::Const(ref mut item) => &mut item.attrs,
-                    ImplItem::Method(ref mut item) => &mut item.attrs,
-                    ImplItem::Type(ref mut item) => &mut item.attrs,
-                    ImplItem::Existential(ref mut item) => &mut item.attrs,
-                    ImplItem::Macro(ref mut item) => &mut item.attrs,
+                let item_attrs = match &mut item {
+                    ImplItem::Const(item) => &mut item.attrs,
+                    ImplItem::Method(item) => &mut item.attrs,
+                    ImplItem::Type(item) => &mut item.attrs,
+                    ImplItem::Existential(item) => &mut item.attrs,
+                    ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) | ImplItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
@@ -2541,7 +2541,7 @@ mod printing {
             self.extern_token.to_tokens(tokens);
             self.crate_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            if let Some((ref as_token, ref rename)) = self.rename {
+            if let Some((as_token, rename)) = &self.rename {
                 as_token.to_tokens(tokens);
                 rename.to_tokens(tokens);
             }
@@ -2607,7 +2607,7 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.mod_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            if let Some((ref brace, ref items)) = self.content {
+            if let Some((brace, items)) = &self.content {
                 brace.surround(tokens, |tokens| {
                     tokens.append_all(self.attrs.inner());
                     tokens.append_all(items);
@@ -2681,12 +2681,12 @@ mod printing {
             self.struct_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            match self.fields {
-                Fields::Named(ref fields) => {
+            match &self.fields {
+                Fields::Named(fields) => {
                     self.generics.where_clause.to_tokens(tokens);
                     fields.to_tokens(tokens);
                 }
-                Fields::Unnamed(ref fields) => {
+                Fields::Unnamed(fields) => {
                     fields.to_tokens(tokens);
                     self.generics.where_clause.to_tokens(tokens);
                     TokensOrDefault(&self.semi_token).to_tokens(tokens);
@@ -2752,7 +2752,7 @@ mod printing {
             self.unsafety.to_tokens(tokens);
             self.impl_token.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            if let Some((ref polarity, ref path, ref for_token)) = self.trait_ {
+            if let Some((polarity, path, for_token)) = &self.trait_ {
                 polarity.to_tokens(tokens);
                 path.to_tokens(tokens);
                 for_token.to_tokens(tokens);
@@ -2772,14 +2772,14 @@ mod printing {
             self.mac.path.to_tokens(tokens);
             self.mac.bang_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            match self.mac.delimiter {
-                MacroDelimiter::Paren(ref paren) => {
+            match &self.mac.delimiter {
+                MacroDelimiter::Paren(paren) => {
                     paren.surround(tokens, |tokens| self.mac.tokens.to_tokens(tokens));
                 }
-                MacroDelimiter::Brace(ref brace) => {
+                MacroDelimiter::Brace(brace) => {
                     brace.surround(tokens, |tokens| self.mac.tokens.to_tokens(tokens));
                 }
-                MacroDelimiter::Bracket(ref bracket) => {
+                MacroDelimiter::Bracket(bracket) => {
                     bracket.surround(tokens, |tokens| self.mac.tokens.to_tokens(tokens));
                 }
             }
@@ -2840,7 +2840,7 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
-            if let Some((ref eq_token, ref default)) = self.default {
+            if let Some((eq_token, default)) = &self.default {
                 eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
             }
@@ -2852,8 +2852,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.sig.to_tokens(tokens);
-            match self.default {
-                Some(ref block) => {
+            match &self.default {
+                Some(block) => {
                     block.brace_token.surround(tokens, |tokens| {
                         tokens.append_all(self.attrs.inner());
                         tokens.append_all(&block.stmts);
@@ -2877,7 +2877,7 @@ mod printing {
                 self.bounds.to_tokens(tokens);
             }
             self.generics.where_clause.to_tokens(tokens);
-            if let Some((ref eq_token, ref default)) = self.default {
+            if let Some((eq_token, default)) = &self.default {
                 eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
             }

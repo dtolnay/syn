@@ -163,8 +163,8 @@ impl Generics {
                 predicates: Punctuated::new(),
             });
         }
-        match self.where_clause {
-            Some(ref mut where_clause) => where_clause,
+        match &mut self.where_clause {
+            Some(where_clause) => where_clause,
             None => unreachable!(),
         }
     }
@@ -180,7 +180,7 @@ impl<'a> Iterator for TypeParams<'a> {
             Some(item) => item,
             None => return None,
         };
-        if let GenericParam::Type(ref type_param) = *next {
+        if let GenericParam::Type(type_param) = next {
             Some(type_param)
         } else {
             self.next()
@@ -198,7 +198,7 @@ impl<'a> Iterator for TypeParamsMut<'a> {
             Some(item) => item,
             None => return None,
         };
-        if let GenericParam::Type(ref mut type_param) = *next {
+        if let GenericParam::Type(type_param) = next {
             Some(type_param)
         } else {
             self.next()
@@ -216,7 +216,7 @@ impl<'a> Iterator for Lifetimes<'a> {
             Some(item) => item,
             None => return None,
         };
-        if let GenericParam::Lifetime(ref lifetime) = *next {
+        if let GenericParam::Lifetime(lifetime) = next {
             Some(lifetime)
         } else {
             self.next()
@@ -234,7 +234,7 @@ impl<'a> Iterator for LifetimesMut<'a> {
             Some(item) => item,
             None => return None,
         };
-        if let GenericParam::Lifetime(ref mut lifetime) = *next {
+        if let GenericParam::Lifetime(lifetime) = next {
             Some(lifetime)
         } else {
             self.next()
@@ -252,7 +252,7 @@ impl<'a> Iterator for ConstParams<'a> {
             Some(item) => item,
             None => return None,
         };
-        if let GenericParam::Const(ref const_param) = *next {
+        if let GenericParam::Const(const_param) = next {
             Some(const_param)
         } else {
             self.next()
@@ -270,7 +270,7 @@ impl<'a> Iterator for ConstParamsMut<'a> {
             Some(item) => item,
             None => return None,
         };
-        if let GenericParam::Const(ref mut const_param) = *next {
+        if let GenericParam::Const(const_param) = next {
             Some(const_param)
         } else {
             self.next()
@@ -968,9 +968,9 @@ mod printing {
                     <Token![,]>::default().to_tokens(tokens);
                     trailing_or_empty = true;
                 }
-                match **param.value() {
+                match *param.value() {
                     GenericParam::Lifetime(_) => unreachable!(),
-                    GenericParam::Type(ref param) => {
+                    GenericParam::Type(param) => {
                         // Leave off the type parameter defaults
                         tokens.append_all(param.attrs.outer());
                         param.ident.to_tokens(tokens);
@@ -979,7 +979,7 @@ mod printing {
                             param.bounds.to_tokens(tokens);
                         }
                     }
-                    GenericParam::Const(ref param) => {
+                    GenericParam::Const(param) => {
                         // Leave off the const parameter defaults
                         tokens.append_all(param.attrs.outer());
                         param.const_token.to_tokens(tokens);
@@ -1010,7 +1010,7 @@ mod printing {
             // not been settled yet. https://github.com/rust-lang/rust/issues/44580
             let mut trailing_or_empty = true;
             for param in self.0.params.pairs() {
-                if let GenericParam::Lifetime(ref def) = **param.value() {
+                if let GenericParam::Lifetime(def) = *param.value() {
                     // Leave off the lifetime bounds and attributes
                     def.lifetime.to_tokens(tokens);
                     param.punct().to_tokens(tokens);
@@ -1025,13 +1025,13 @@ mod printing {
                     <Token![,]>::default().to_tokens(tokens);
                     trailing_or_empty = true;
                 }
-                match **param.value() {
+                match *param.value() {
                     GenericParam::Lifetime(_) => unreachable!(),
-                    GenericParam::Type(ref param) => {
+                    GenericParam::Type(param) => {
                         // Leave off the type parameter defaults
                         param.ident.to_tokens(tokens);
                     }
-                    GenericParam::Const(ref param) => {
+                    GenericParam::Const(param) => {
                         // Leave off the const parameter defaults
                         param.ident.to_tokens(tokens);
                     }
@@ -1094,8 +1094,8 @@ mod printing {
                 self.lifetimes.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             };
-            match self.paren_token {
-                Some(ref paren) => paren.surround(tokens, to_tokens),
+            match &self.paren_token {
+                Some(paren) => paren.surround(tokens, to_tokens),
                 None => to_tokens(tokens),
             }
         }
@@ -1103,9 +1103,9 @@ mod printing {
 
     impl ToTokens for TraitBoundModifier {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
+            match self {
                 TraitBoundModifier::None => {}
-                TraitBoundModifier::Maybe(ref t) => t.to_tokens(tokens),
+                TraitBoundModifier::Maybe(t) => t.to_tokens(tokens),
             }
         }
     }

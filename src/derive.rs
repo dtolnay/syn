@@ -234,20 +234,20 @@ mod printing {
                 attr.to_tokens(tokens);
             }
             self.vis.to_tokens(tokens);
-            match self.data {
-                Data::Struct(ref d) => d.struct_token.to_tokens(tokens),
-                Data::Enum(ref d) => d.enum_token.to_tokens(tokens),
-                Data::Union(ref d) => d.union_token.to_tokens(tokens),
+            match &self.data {
+                Data::Struct(d) => d.struct_token.to_tokens(tokens),
+                Data::Enum(d) => d.enum_token.to_tokens(tokens),
+                Data::Union(d) => d.union_token.to_tokens(tokens),
             }
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            match self.data {
-                Data::Struct(ref data) => match data.fields {
-                    Fields::Named(ref fields) => {
+            match &self.data {
+                Data::Struct(data) => match &data.fields {
+                    Fields::Named(fields) => {
                         self.generics.where_clause.to_tokens(tokens);
                         fields.to_tokens(tokens);
                     }
-                    Fields::Unnamed(ref fields) => {
+                    Fields::Unnamed(fields) => {
                         fields.to_tokens(tokens);
                         self.generics.where_clause.to_tokens(tokens);
                         TokensOrDefault(&data.semi_token).to_tokens(tokens);
@@ -257,13 +257,13 @@ mod printing {
                         TokensOrDefault(&data.semi_token).to_tokens(tokens);
                     }
                 },
-                Data::Enum(ref data) => {
+                Data::Enum(data) => {
                     self.generics.where_clause.to_tokens(tokens);
                     data.brace_token.surround(tokens, |tokens| {
                         data.variants.to_tokens(tokens);
                     });
                 }
-                Data::Union(ref data) => {
+                Data::Union(data) => {
                     self.generics.where_clause.to_tokens(tokens);
                     data.fields.to_tokens(tokens);
                 }

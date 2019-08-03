@@ -76,10 +76,10 @@ impl Fields {
     /// iterator can be used to iterate over a named or unnamed struct or
     /// variant's fields uniformly.
     pub fn iter(&self) -> punctuated::Iter<Field> {
-        match *self {
+        match self {
             Fields::Unit => private::empty_punctuated_iter(),
-            Fields::Named(ref f) => f.named.iter(),
-            Fields::Unnamed(ref f) => f.unnamed.iter(),
+            Fields::Named(f) => f.named.iter(),
+            Fields::Unnamed(f) => f.unnamed.iter(),
         }
     }
 
@@ -87,10 +87,10 @@ impl Fields {
     /// object. This iterator can be used to iterate over a named or unnamed
     /// struct or variant's fields uniformly.
     pub fn iter_mut(&mut self) -> punctuated::IterMut<Field> {
-        match *self {
+        match self {
             Fields::Unit => private::empty_punctuated_iter_mut(),
-            Fields::Named(ref mut f) => f.named.iter_mut(),
-            Fields::Unnamed(ref mut f) => f.unnamed.iter_mut(),
+            Fields::Named(f) => f.named.iter_mut(),
+            Fields::Unnamed(f) => f.unnamed.iter_mut(),
         }
     }
 }
@@ -364,7 +364,7 @@ mod printing {
             tokens.append_all(&self.attrs);
             self.ident.to_tokens(tokens);
             self.fields.to_tokens(tokens);
-            if let Some((ref eq_token, ref disc)) = self.discriminant {
+            if let Some((eq_token, disc)) = &self.discriminant {
                 eq_token.to_tokens(tokens);
                 disc.to_tokens(tokens);
             }
@@ -391,7 +391,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(&self.attrs);
             self.vis.to_tokens(tokens);
-            if let Some(ref ident) = self.ident {
+            if let Some(ident) = &self.ident {
                 ident.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }

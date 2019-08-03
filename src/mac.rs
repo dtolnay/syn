@@ -64,10 +64,10 @@ impl Hash for Macro {
 
 #[cfg(feature = "parsing")]
 fn delimiter_span(delimiter: &MacroDelimiter) -> Span {
-    match *delimiter {
-        MacroDelimiter::Paren(ref token) => token.span,
-        MacroDelimiter::Brace(ref token) => token.span,
-        MacroDelimiter::Bracket(ref token) => token.span,
+    match delimiter {
+        MacroDelimiter::Paren(token) => token.span,
+        MacroDelimiter::Brace(token) => token.span,
+        MacroDelimiter::Bracket(token) => token.span,
     }
 }
 
@@ -223,14 +223,14 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
-            match self.delimiter {
-                MacroDelimiter::Paren(ref paren) => {
+            match &self.delimiter {
+                MacroDelimiter::Paren(paren) => {
                     paren.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
                 }
-                MacroDelimiter::Brace(ref brace) => {
+                MacroDelimiter::Brace(brace) => {
                     brace.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
                 }
-                MacroDelimiter::Bracket(ref bracket) => {
+                MacroDelimiter::Bracket(bracket) => {
                     bracket.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
                 }
             }

@@ -285,10 +285,10 @@ impl Meta {
     /// For example this would return the `test` in `#[test]`, the `derive` in
     /// `#[derive(Copy)]`, and the `path` in `#[path = "sys/windows.rs"]`.
     pub fn path(&self) -> &Path {
-        match *self {
-            Meta::Path(ref path) => path,
-            Meta::List(ref meta) => &meta.path,
-            Meta::NameValue(ref meta) => &meta.path,
+        match self {
+            Meta::Path(path) => path,
+            Meta::List(meta) => &meta.path,
+            Meta::NameValue(meta) => &meta.path,
         }
     }
 }
@@ -514,7 +514,7 @@ mod printing {
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pound_token.to_tokens(tokens);
-            if let AttrStyle::Inner(ref b) = self.style {
+            if let AttrStyle::Inner(b) = &self.style {
                 b.to_tokens(tokens);
             }
             self.bracket_token.surround(tokens, |tokens| {

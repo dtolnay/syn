@@ -558,8 +558,8 @@ pub mod parsing {
             if input.peek(Token![dyn ]) {
                 let mut trait_object: TypeTraitObject = input.parse()?;
                 if lifetimes.is_some() {
-                    match *trait_object.bounds.iter_mut().next().unwrap() {
-                        TypeParamBound::Trait(ref mut trait_bound) => {
+                    match trait_object.bounds.iter_mut().next().unwrap() {
+                        TypeParamBound::Trait(trait_bound) => {
                             trait_bound.lifetimes = lifetimes;
                         }
                         TypeParamBound::Lifetime(_) => unreachable!(),
@@ -998,8 +998,8 @@ mod printing {
     impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.star_token.to_tokens(tokens);
-            match self.mutability {
-                Some(ref tok) => tok.to_tokens(tokens),
+            match &self.mutability {
+                Some(tok) => tok.to_tokens(tokens),
                 None => {
                     TokensOrDefault(&self.const_token).to_tokens(tokens);
                 }
@@ -1025,7 +1025,7 @@ mod printing {
             self.fn_token.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
-                if let Some(ref variadic) = self.variadic {
+                if let Some(variadic) = &self.variadic {
                     if !self.inputs.empty_or_trailing() {
                         let span = variadic.spans[0];
                         Token![,](span).to_tokens(tokens);
@@ -1101,9 +1101,9 @@ mod printing {
 
     impl ToTokens for ReturnType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
+            match self {
                 ReturnType::Default => {}
-                ReturnType::Type(ref arrow, ref ty) => {
+                ReturnType::Type(arrow, ty) => {
                     arrow.to_tokens(tokens);
                     ty.to_tokens(tokens);
                 }
@@ -1114,7 +1114,7 @@ mod printing {
     impl ToTokens for BareFnArg {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            if let Some((ref name, ref colon)) = self.name {
+            if let Some((name, colon)) = &self.name {
                 name.to_tokens(tokens);
                 colon.to_tokens(tokens);
             }
@@ -1124,9 +1124,9 @@ mod printing {
 
     impl ToTokens for BareFnArgName {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
-                BareFnArgName::Named(ref t) => t.to_tokens(tokens),
-                BareFnArgName::Wild(ref t) => t.to_tokens(tokens),
+            match self {
+                BareFnArgName::Named(t) => t.to_tokens(tokens),
+                BareFnArgName::Wild(t) => t.to_tokens(tokens),
             }
         }
     }

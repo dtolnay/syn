@@ -966,47 +966,47 @@ impl Hash for Expr {
 impl Expr {
     #[cfg(all(feature = "parsing", feature = "full"))]
     fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
-        match *self {
-            Expr::Box(ExprBox { ref mut attrs, .. })
-            | Expr::InPlace(ExprInPlace { ref mut attrs, .. })
-            | Expr::Array(ExprArray { ref mut attrs, .. })
-            | Expr::Call(ExprCall { ref mut attrs, .. })
-            | Expr::MethodCall(ExprMethodCall { ref mut attrs, .. })
-            | Expr::Tuple(ExprTuple { ref mut attrs, .. })
-            | Expr::Binary(ExprBinary { ref mut attrs, .. })
-            | Expr::Unary(ExprUnary { ref mut attrs, .. })
-            | Expr::Lit(ExprLit { ref mut attrs, .. })
-            | Expr::Cast(ExprCast { ref mut attrs, .. })
-            | Expr::Type(ExprType { ref mut attrs, .. })
-            | Expr::Let(ExprLet { ref mut attrs, .. })
-            | Expr::If(ExprIf { ref mut attrs, .. })
-            | Expr::While(ExprWhile { ref mut attrs, .. })
-            | Expr::ForLoop(ExprForLoop { ref mut attrs, .. })
-            | Expr::Loop(ExprLoop { ref mut attrs, .. })
-            | Expr::Match(ExprMatch { ref mut attrs, .. })
-            | Expr::Closure(ExprClosure { ref mut attrs, .. })
-            | Expr::Unsafe(ExprUnsafe { ref mut attrs, .. })
-            | Expr::Block(ExprBlock { ref mut attrs, .. })
-            | Expr::Assign(ExprAssign { ref mut attrs, .. })
-            | Expr::AssignOp(ExprAssignOp { ref mut attrs, .. })
-            | Expr::Field(ExprField { ref mut attrs, .. })
-            | Expr::Index(ExprIndex { ref mut attrs, .. })
-            | Expr::Range(ExprRange { ref mut attrs, .. })
-            | Expr::Path(ExprPath { ref mut attrs, .. })
-            | Expr::Reference(ExprReference { ref mut attrs, .. })
-            | Expr::Break(ExprBreak { ref mut attrs, .. })
-            | Expr::Continue(ExprContinue { ref mut attrs, .. })
-            | Expr::Return(ExprReturn { ref mut attrs, .. })
-            | Expr::Macro(ExprMacro { ref mut attrs, .. })
-            | Expr::Struct(ExprStruct { ref mut attrs, .. })
-            | Expr::Repeat(ExprRepeat { ref mut attrs, .. })
-            | Expr::Paren(ExprParen { ref mut attrs, .. })
-            | Expr::Group(ExprGroup { ref mut attrs, .. })
-            | Expr::Try(ExprTry { ref mut attrs, .. })
-            | Expr::Async(ExprAsync { ref mut attrs, .. })
-            | Expr::Await(ExprAwait { ref mut attrs, .. })
-            | Expr::TryBlock(ExprTryBlock { ref mut attrs, .. })
-            | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
+        match self {
+            Expr::Box(ExprBox { attrs, .. })
+            | Expr::InPlace(ExprInPlace { attrs, .. })
+            | Expr::Array(ExprArray { attrs, .. })
+            | Expr::Call(ExprCall { attrs, .. })
+            | Expr::MethodCall(ExprMethodCall { attrs, .. })
+            | Expr::Tuple(ExprTuple { attrs, .. })
+            | Expr::Binary(ExprBinary { attrs, .. })
+            | Expr::Unary(ExprUnary { attrs, .. })
+            | Expr::Lit(ExprLit { attrs, .. })
+            | Expr::Cast(ExprCast { attrs, .. })
+            | Expr::Type(ExprType { attrs, .. })
+            | Expr::Let(ExprLet { attrs, .. })
+            | Expr::If(ExprIf { attrs, .. })
+            | Expr::While(ExprWhile { attrs, .. })
+            | Expr::ForLoop(ExprForLoop { attrs, .. })
+            | Expr::Loop(ExprLoop { attrs, .. })
+            | Expr::Match(ExprMatch { attrs, .. })
+            | Expr::Closure(ExprClosure { attrs, .. })
+            | Expr::Unsafe(ExprUnsafe { attrs, .. })
+            | Expr::Block(ExprBlock { attrs, .. })
+            | Expr::Assign(ExprAssign { attrs, .. })
+            | Expr::AssignOp(ExprAssignOp { attrs, .. })
+            | Expr::Field(ExprField { attrs, .. })
+            | Expr::Index(ExprIndex { attrs, .. })
+            | Expr::Range(ExprRange { attrs, .. })
+            | Expr::Path(ExprPath { attrs, .. })
+            | Expr::Reference(ExprReference { attrs, .. })
+            | Expr::Break(ExprBreak { attrs, .. })
+            | Expr::Continue(ExprContinue { attrs, .. })
+            | Expr::Return(ExprReturn { attrs, .. })
+            | Expr::Macro(ExprMacro { attrs, .. })
+            | Expr::Struct(ExprStruct { attrs, .. })
+            | Expr::Repeat(ExprRepeat { attrs, .. })
+            | Expr::Paren(ExprParen { attrs, .. })
+            | Expr::Group(ExprGroup { attrs, .. })
+            | Expr::Try(ExprTry { attrs, .. })
+            | Expr::Async(ExprAsync { attrs, .. })
+            | Expr::Await(ExprAwait { attrs, .. })
+            | Expr::TryBlock(ExprTryBlock { attrs, .. })
+            | Expr::Yield(ExprYield { attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
             Expr::__Nonexhaustive => unreachable!(),
         }
@@ -2175,11 +2175,11 @@ pub mod parsing {
             } else {
                 return Err(input.error("expected loop or block expression"));
             };
-            match expr {
-                Expr::While(ExprWhile { ref mut label, .. })
-                | Expr::ForLoop(ExprForLoop { ref mut label, .. })
-                | Expr::Loop(ExprLoop { ref mut label, .. })
-                | Expr::Block(ExprBlock { ref mut label, .. }) => *label = Some(the_label),
+            match &mut expr {
+                Expr::While(ExprWhile { label, .. })
+                | Expr::ForLoop(ExprForLoop { label, .. })
+                | Expr::Loop(ExprLoop { label, .. })
+                | Expr::Block(ExprBlock { label, .. }) => *label = Some(the_label),
                 _ => unreachable!(),
             }
             Ok(expr)
@@ -2872,7 +2872,7 @@ pub mod parsing {
                 let colon_token: Token![:] = input.parse()?;
                 let value: Expr = input.parse()?;
                 (Some(colon_token), value)
-            } else if let Member::Named(ref ident) = member {
+            } else if let Member::Named(ident) = &member {
                 let value = Expr::Path(ExprPath {
                     attrs: Vec::new(),
                     qself: None,
@@ -3102,7 +3102,7 @@ pub mod parsing {
                     break;
                 }
                 let s = parse_stmt(input, true)?;
-                let requires_semicolon = if let Stmt::Expr(ref s) = s {
+                let requires_semicolon = if let Stmt::Expr(s) = &s {
                     requires_terminator(s)
                 } else {
                     false
@@ -3836,9 +3836,9 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for GenericMethodArgument {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
-                GenericMethodArgument::Type(ref t) => t.to_tokens(tokens),
-                GenericMethodArgument::Const(ref c) => c.to_tokens(tokens),
+            match self {
+                GenericMethodArgument::Type(t) => t.to_tokens(tokens),
+                GenericMethodArgument::Const(c) => c.to_tokens(tokens),
             }
         }
     }
@@ -3904,7 +3904,7 @@ mod printing {
 
     #[cfg(feature = "full")]
     fn maybe_wrap_else(tokens: &mut TokenStream, else_: &Option<(Token![else], Box<Expr>)>) {
-        if let Some((ref else_token, ref else_)) = *else_ {
+        if let Some((else_token, else_)) = else_ {
             else_token.to_tokens(tokens);
 
             // If we are not one of the valid expressions to exist in an else
@@ -4116,9 +4116,9 @@ mod printing {
 
     impl ToTokens for Member {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
-                Member::Named(ref ident) => ident.to_tokens(tokens),
-                Member::Unnamed(ref index) => index.to_tokens(tokens),
+            match self {
+                Member::Named(ident) => ident.to_tokens(tokens),
+                Member::Unnamed(index) => index.to_tokens(tokens),
             }
         }
     }
@@ -4146,9 +4146,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.from.to_tokens(tokens);
-            match self.limits {
-                RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
-                RangeLimits::Closed(ref t) => t.to_tokens(tokens),
+            match &self.limits {
+                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
+                RangeLimits::Closed(t) => t.to_tokens(tokens),
             }
             self.to.to_tokens(tokens);
         }
@@ -4278,7 +4278,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.member.to_tokens(tokens);
-            if let Some(ref colon_token) = self.colon_token {
+            if let Some(colon_token) = &self.colon_token {
                 colon_token.to_tokens(tokens);
                 self.expr.to_tokens(tokens);
             }
@@ -4290,7 +4290,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(&self.attrs);
             self.pat.to_tokens(tokens);
-            if let Some((ref if_token, ref guard)) = self.guard {
+            if let Some((if_token, guard)) = &self.guard {
                 if_token.to_tokens(tokens);
                 guard.to_tokens(tokens);
             }
@@ -4313,7 +4313,7 @@ mod printing {
             self.by_ref.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            if let Some((ref at_token, ref subpat)) = self.subpat {
+            if let Some((at_token, subpat)) = &self.subpat {
                 at_token.to_tokens(tokens);
                 subpat.to_tokens(tokens);
             }
@@ -4404,9 +4404,9 @@ mod printing {
     impl ToTokens for PatRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lo.to_tokens(tokens);
-            match self.limits {
-                RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
-                RangeLimits::Closed(ref t) => t.to_tokens(tokens),
+            match &self.limits {
+                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
+                RangeLimits::Closed(t) => t.to_tokens(tokens),
             }
             self.hi.to_tokens(tokens);
         }
@@ -4439,7 +4439,7 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            if let Some(ref colon_token) = self.colon_token {
+            if let Some(colon_token) = &self.colon_token {
                 self.member.to_tokens(tokens);
                 colon_token.to_tokens(tokens);
             }
@@ -4459,11 +4459,11 @@ mod printing {
     #[cfg(feature = "full")]
     impl ToTokens for Stmt {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match *self {
-                Stmt::Local(ref local) => local.to_tokens(tokens),
-                Stmt::Item(ref item) => item.to_tokens(tokens),
-                Stmt::Expr(ref expr) => expr.to_tokens(tokens),
-                Stmt::Semi(ref expr, ref semi) => {
+            match self {
+                Stmt::Local(local) => local.to_tokens(tokens),
+                Stmt::Item(item) => item.to_tokens(tokens),
+                Stmt::Expr(expr) => expr.to_tokens(tokens),
+                Stmt::Semi(expr, semi) => {
                     expr.to_tokens(tokens);
                     semi.to_tokens(tokens);
                 }
@@ -4477,7 +4477,7 @@ mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-            if let Some((ref eq_token, ref init)) = self.init {
+            if let Some((eq_token, init)) = &self.init {
                 eq_token.to_tokens(tokens);
                 init.to_tokens(tokens);
             }
