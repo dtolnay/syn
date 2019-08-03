@@ -1065,6 +1065,7 @@ impl Hash for Index {
     }
 }
 
+#[cfg(feature = "full")]
 ast_struct! {
     #[derive(Default)]
     pub struct Reserved {
