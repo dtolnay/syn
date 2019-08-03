@@ -249,7 +249,6 @@
     clippy::needless_pass_by_value,
     clippy::never_loop,
     clippy::redundant_field_names,
-    clippy::redundant_static_lifetimes,
     clippy::suspicious_op_assign_impl,
     clippy::too_many_arguments,
     clippy::trivially_copy_pass_by_ref,
@@ -717,7 +716,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 #[cfg(all(feature = "parsing", feature = "full"))]
 pub fn parse_file(mut content: &str) -> Result<File> {
     // Strip the BOM if it is present
-    const BOM: &'static str = "\u{feff}";
+    const BOM: &str = "\u{feff}";
     if content.starts_with(BOM) {
         content = &content[BOM.len()..];
     }
