@@ -14,6 +14,13 @@ macro_rules! ast_struct {
         $($attrs_pub)* struct $name {
             _noconstruct: (),
         }
+
+        #[cfg(all(not(feature = "full"), feature = "printing"))]
+        impl ::quote::ToTokens for $name {
+            fn to_tokens(&self, _: &mut ::proc_macro2::TokenStream) {
+                unreachable!()
+            }
+        }
     };
 
     (
@@ -94,7 +101,7 @@ macro_rules! ast_enum_of_structs {
         $pub:ident $enum:ident $name:ident $(# $tags:ident)* {
             $(
                 $(#[$variant_attr:meta])*
-                $variant:ident $( ($member:ident $($rest:tt)*) )*,
+                $variant:ident $( ($member:ident) )*,
             )*
         }
 
@@ -114,13 +121,6 @@ macro_rules! ast_enum_of_structs {
         }
 
         $(
-            maybe_ast_struct! {
-                $(#[$variant_attr])*
-                $(
-                    pub struct $member $($rest)*
-                )*
-            }
-
             $(
                 impl From<$member> for $name {
                     fn from(e: $member) -> $name {
@@ -135,7 +135,7 @@ macro_rules! ast_enum_of_structs {
             $($remaining)*
             ()
             tokens
-            $name { $($variant $( [$($rest)*] )*,)* }
+            $name { $($variant $($member)*,)* }
         }
     )
 }
@@ -151,9 +151,9 @@ macro_rules! generate_to_tokens {
         );
     };
 
-    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident [$($rest:tt)*], $($next:tt)*}) => {
+    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident $member:ident, $($next:tt)*}) => {
         generate_to_tokens!(
-            ($($arms)* $name::$variant(ref _e) => to_tokens_call!(_e, $tokens, $($rest)*),)
+            ($($arms)* $name::$variant(ref _e) => _e.to_tokens($tokens),)
             $tokens $name { $($next)* }
         );
     };
@@ -167,35 +167,6 @@ macro_rules! generate_to_tokens {
             }
         }
     };
-}
-
-#[cfg(all(feature = "printing", feature = "full"))]
-macro_rules! to_tokens_call {
-    ($e:ident, $tokens:ident, $($rest:tt)*) => {
-        $e.to_tokens($tokens)
-    };
-}
-
-#[cfg(all(feature = "printing", feature = "derive", not(feature = "full")))]
-macro_rules! to_tokens_call {
-    // If the variant is marked as #full, don't auto-generate to-tokens for it.
-    ($e:ident, $tokens:ident, #full $($rest:tt)*) => {
-        unreachable!()
-    };
-    ($e:ident, $tokens:ident, $($rest:tt)*) => {
-        $e.to_tokens($tokens)
-    };
-}
-
-macro_rules! maybe_ast_struct {
-    (
-        $(#[$attr:meta])*
-        $(
-            pub struct $name:ident
-        )*
-    ) => ();
-
-    ($($rest:tt)*) => (ast_struct! { $($rest)* });
 }
 
 macro_rules! strip_attrs_pub {
