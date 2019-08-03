@@ -2671,13 +2671,7 @@ pub mod parsing {
     impl Parse for Pat {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(Token![_]) {
-                input.call(pat_wild).map(Pat::Wild)
-            } else if lookahead.peek(Token![box]) {
-                input.call(pat_box).map(Pat::Box)
-            } else if lookahead.peek(Token![-]) || lookahead.peek(Lit) {
-                pat_lit_or_range(input)
-            } else if input.peek(Ident)
+            if lookahead.peek(Ident)
                 && ({
                     input.peek2(Token![::])
                         || input.peek2(Token![!])
@@ -2692,27 +2686,33 @@ pub mod parsing {
                             }
                 })
                 || input.peek(Token![self]) && input.peek2(Token![::])
-                || input.peek(Token![::])
-                || input.peek(Token![<])
+                || lookahead.peek(Token![::])
+                || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
                 || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
                 pat_path_or_macro_or_struct_or_range(input)
-            } else if input.peek(Token![ref])
-                || input.peek(Token![mut])
+            } else if lookahead.peek(Token![_]) {
+                input.call(pat_wild).map(Pat::Wild)
+            } else if input.peek(Token![box]) {
+                input.call(pat_box).map(Pat::Box)
+            } else if input.peek(Token![-]) || lookahead.peek(Lit) {
+                pat_lit_or_range(input)
+            } else if lookahead.peek(Token![ref])
+                || lookahead.peek(Token![mut])
                 || input.peek(Token![self])
                 || input.peek(Ident)
             {
                 input.call(pat_ident).map(Pat::Ident)
-            } else if lookahead.peek(token::Paren) {
-                input.call(pat_tuple).map(Pat::Tuple)
             } else if lookahead.peek(Token![&]) {
                 input.call(pat_reference).map(Pat::Reference)
+            } else if lookahead.peek(token::Paren) {
+                input.call(pat_tuple).map(Pat::Tuple)
             } else if lookahead.peek(token::Bracket) {
                 input.call(pat_slice).map(Pat::Slice)
-            } else if lookahead.peek(Token![..]) {
+            } else if lookahead.peek(Token![..]) && !input.peek(Token![...]) {
                 input.call(pat_rest).map(Pat::Rest)
             } else {
                 Err(lookahead.error())
