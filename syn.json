@@ -4993,7 +4993,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "TypeVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ]
       }
@@ -5375,20 +5375,6 @@
             },
             "punct": "Comma"
           }
-        }
-      }
-    },
-    {
-      "ident": "TypeVerbatim",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
         }
       }
     },

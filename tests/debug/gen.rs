@@ -5196,9 +5196,11 @@ impl Debug for Lite<syn::Type> {
                 formatter.finish()
             }
             syn::Type::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("Type::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -5531,14 +5533,6 @@ impl Debug for Lite<syn::TypeTuple> {
         if !_val.elems.is_empty() {
             formatter.field("elems", Lite(&_val.elems));
         }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::TypeVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("TypeVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }

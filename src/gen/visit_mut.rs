@@ -747,10 +747,6 @@ pub trait VisitMut {
         visit_type_tuple_mut(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_type_verbatim_mut(&mut self, i: &mut TypeVerbatim) {
-        visit_type_verbatim_mut(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_un_op_mut(&mut self, i: &mut UnOp) {
         visit_un_op_mut(self, i)
     }
@@ -2990,7 +2986,7 @@ pub fn visit_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {
             _visitor.visit_type_tuple_mut(_binding_0);
         }
         Type::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_type_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
     }
 }
@@ -3138,10 +3134,6 @@ pub fn visit_type_tuple_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Typ
         let it = el.value_mut();
         _visitor.visit_type_mut(it)
     }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_type_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut TypeVerbatim) {
-    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_un_op_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut UnOp) {

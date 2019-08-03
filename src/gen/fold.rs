@@ -746,10 +746,6 @@ pub trait Fold {
         fold_type_tuple(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_type_verbatim(&mut self, i: TypeVerbatim) -> TypeVerbatim {
-        fold_type_verbatim(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_un_op(&mut self, i: UnOp) -> UnOp {
         fold_un_op(self, i)
     }
@@ -2668,7 +2664,7 @@ pub fn fold_type<V: Fold + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
             Type::TraitObject(_visitor.fold_type_trait_object(_binding_0))
         }
         Type::Tuple(_binding_0) => Type::Tuple(_visitor.fold_type_tuple(_binding_0)),
-        Type::Verbatim(_binding_0) => Type::Verbatim(_visitor.fold_type_verbatim(_binding_0)),
+        Type::Verbatim(_binding_0) => Type::Verbatim(_binding_0),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2808,10 +2804,6 @@ pub fn fold_type_tuple<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeTuple) -> Typ
         paren_token: Paren(tokens_helper(_visitor, &_i.paren_token.span)),
         elems: FoldHelper::lift(_i.elems, |it| _visitor.fold_type(it)),
     }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_type_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: TypeVerbatim) -> TypeVerbatim {
-    TypeVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_un_op<V: Fold + ?Sized>(_visitor: &mut V, _i: UnOp) -> UnOp {
