@@ -68,6 +68,9 @@ ast_enum_of_structs! {
 
         /// Tokens in type position not interpreted by Syn.
         Verbatim(TokenStream),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -333,6 +336,7 @@ impl Hash for Type {
                 hash.write_u8(14);
                 TokenStreamHelper(ty).hash(hash);
             }
+            Type::__Nonexhaustive => unreachable!(),
         }
     }
 }

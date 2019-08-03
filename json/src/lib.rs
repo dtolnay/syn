@@ -87,6 +87,9 @@ pub struct Node {
         deserialize_with = "private_if_absent"
     )]
     pub data: Data,
+
+    #[serde(skip_serializing_if = "is_true", default = "bool_true")]
+    pub exhaustive: bool,
 }
 
 /// Content of a syntax tree data structure.
@@ -200,4 +203,12 @@ where
 {
     let option = Option::deserialize(deserializer)?;
     Ok(option.unwrap_or(Data::Private))
+}
+
+fn is_true(b: &bool) -> bool {
+    *b
+}
+
+fn bool_true() -> bool {
+    true
 }

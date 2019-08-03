@@ -222,6 +222,9 @@ ast_enum_of_structs! {
 
         /// A yield expression: `yield expr`.
         Yield(ExprYield),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -955,6 +958,7 @@ impl Hash for Expr {
                 hash.write_u8(40);
                 expr.hash(hash);
             }
+            Expr::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -1004,6 +1008,7 @@ impl Expr {
             | Expr::TryBlock(ExprTryBlock { ref mut attrs, .. })
             | Expr::Yield(ExprYield { ref mut attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
+            Expr::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -1247,6 +1252,9 @@ ast_enum_of_structs! {
 
         /// A pattern that matches any value: `_`.
         Wild(PatWild),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -1543,6 +1551,7 @@ impl Hash for Pat {
                 hash.write_u8(15);
                 pat.hash(hash);
             }
+            Pat::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -2755,6 +2764,7 @@ pub mod parsing {
                 Pat::Type(_) => unreachable!(),
                 Pat::Verbatim(_) => {}
                 Pat::Wild(pat) => pat.attrs = attrs,
+                Pat::__Nonexhaustive => unreachable!(),
             }
             Ok(pat)
         }

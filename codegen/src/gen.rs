@@ -34,6 +34,7 @@ pub fn traverse(
             ident: tt.to_string(),
             features: Features::default(),
             data: Data::Private,
+            exhaustive: true,
         };
         node(&mut traits, &mut impls, &s, defs);
     }

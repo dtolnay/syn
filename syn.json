@@ -797,7 +797,8 @@
             "syn": "ExprYield"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "ExprArray",
@@ -2160,7 +2161,8 @@
             "proc_macro2": "TokenStream"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "ForeignItemFn",
@@ -2430,7 +2432,8 @@
             "proc_macro2": "TokenStream"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "ImplItemConst",
@@ -2727,7 +2730,8 @@
             "proc_macro2": "TokenStream"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "ItemConst",
@@ -3915,7 +3919,8 @@
             "syn": "PatWild"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "PatBox",
@@ -4713,7 +4718,8 @@
             "proc_macro2": "TokenStream"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "TraitItemConst",
@@ -4944,7 +4950,8 @@
             "proc_macro2": "TokenStream"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "TypeArray",

@@ -77,6 +77,9 @@ ast_enum_of_structs! {
 
         /// Tokens forming an item not interpreted by Syn.
         Verbatim(TokenStream),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -452,6 +455,7 @@ impl Hash for Item {
                 state.write_u8(17);
                 TokenStreamHelper(item).hash(state);
             }
+            Item::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -626,6 +630,9 @@ ast_enum_of_structs! {
 
         /// Tokens in an `extern` block not interpreted by Syn.
         Verbatim(TokenStream),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -727,6 +734,7 @@ impl Hash for ForeignItem {
                 state.write_u8(4);
                 TokenStreamHelper(item).hash(state);
             }
+            ForeignItem::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -759,6 +767,9 @@ ast_enum_of_structs! {
 
         /// Tokens within the definition of a trait not interpreted by Syn.
         Verbatim(TokenStream),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -862,6 +873,7 @@ impl Hash for TraitItem {
                 state.write_u8(4);
                 TokenStreamHelper(item).hash(state);
             }
+            TraitItem::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -897,6 +909,9 @@ ast_enum_of_structs! {
 
         /// Tokens within an impl block not interpreted by Syn.
         Verbatim(TokenStream),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
     }
 }
 
@@ -1026,6 +1041,7 @@ impl Hash for ImplItem {
                 state.write_u8(5);
                 TokenStreamHelper(item).hash(state);
             }
+            ImplItem::__Nonexhaustive => unreachable!(),
         }
     }
 }
@@ -1227,7 +1243,7 @@ pub mod parsing {
                     Item::Impl(ref mut item) => &mut item.attrs,
                     Item::Macro(ref mut item) => &mut item.attrs,
                     Item::Macro2(ref mut item) => &mut item.attrs,
-                    Item::Verbatim(_) => unreachable!(),
+                    Item::Verbatim(_) | Item::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
@@ -1656,7 +1672,7 @@ pub mod parsing {
                     ForeignItem::Static(ref mut item) => &mut item.attrs,
                     ForeignItem::Type(ref mut item) => &mut item.attrs,
                     ForeignItem::Macro(ref mut item) => &mut item.attrs,
-                    ForeignItem::Verbatim(_) => unreachable!(),
+                    ForeignItem::Verbatim(_) | ForeignItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
@@ -2085,7 +2101,7 @@ pub mod parsing {
                     TraitItem::Method(ref mut item) => &mut item.attrs,
                     TraitItem::Type(ref mut item) => &mut item.attrs,
                     TraitItem::Macro(ref mut item) => &mut item.attrs,
-                    TraitItem::Verbatim(_) => unreachable!(),
+                    TraitItem::Verbatim(_) | TraitItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
@@ -2359,7 +2375,7 @@ pub mod parsing {
                     ImplItem::Type(ref mut item) => &mut item.attrs,
                     ImplItem::Existential(ref mut item) => &mut item.attrs,
                     ImplItem::Macro(ref mut item) => &mut item.attrs,
-                    ImplItem::Verbatim(_) => unreachable!(),
+                    ImplItem::Verbatim(_) | ImplItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;

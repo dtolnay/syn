@@ -193,9 +193,15 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                     }
                 }
             });
+            let nonexhaustive = if node.exhaustive {
+                None
+            } else {
+                Some(quote!(_ => unreachable!()))
+            };
             quote! {
                 match _val {
                     #(#arms)*
+                    #nonexhaustive
                 }
             }
         }

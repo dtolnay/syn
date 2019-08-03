@@ -1119,6 +1119,7 @@ impl Debug for Lite<syn::Expr> {
                 }
                 formatter.finish()
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -2159,6 +2160,7 @@ impl Debug for Lite<syn::ForeignItem> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -2498,6 +2500,7 @@ impl Debug for Lite<syn::ImplItem> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -3057,6 +3060,7 @@ impl Debug for Lite<syn::Item> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -4029,6 +4033,7 @@ impl Debug for Lite<syn::Pat> {
                 }
                 formatter.finish()
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -4817,6 +4822,7 @@ impl Debug for Lite<syn::TraitItem> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -5178,6 +5184,7 @@ impl Debug for Lite<syn::Type> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }

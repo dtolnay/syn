@@ -161,9 +161,16 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 }
             }
 
+            let nonexhaustive = if s.exhaustive {
+                None
+            } else {
+                Some(quote!(_ => unreachable!()))
+            };
+
             visit_impl.extend(quote! {
                 match *_i {
                     #visit_variants
+                    #nonexhaustive
                 }
             });
         }

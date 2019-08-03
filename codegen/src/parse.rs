@@ -16,6 +16,7 @@ const SYN_CRATE_ROOT: &str = "../src/lib.rs";
 const TOKEN_SRC: &str = "../src/token.rs";
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 const EXTRA_TYPES: &[&str] = &["Lifetime"];
+const NONEXHAUSTIVE: &str = "__Nonexhaustive";
 
 // NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
 type ItemLookup = BTreeMap<Ident, AstItem>;
@@ -62,6 +63,7 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
             ident: item.ast.ident.to_string(),
             features,
             data: types::Data::Enum(introspect_enum(data, items, tokens)),
+            exhaustive: data.variants.iter().all(|v| v.ident != NONEXHAUSTIVE),
         },
         Data::Struct(ref data) => types::Node {
             ident: item.ast.ident.to_string(),
@@ -73,6 +75,7 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
                     types::Data::Private
                 }
             },
+            exhaustive: true,
         },
         Data::Union(..) => panic!("Union not supported"),
     }
@@ -85,7 +88,10 @@ fn introspect_enum(
 ) -> types::Variants {
     item.variants
         .iter()
-        .map(|variant| {
+        .filter_map(|variant| {
+            if variant.ident == NONEXHAUSTIVE {
+                return None;
+            }
             let fields = match &variant.fields {
                 syn::Fields::Unnamed(fields) => fields
                     .unnamed
@@ -95,8 +101,7 @@ fn introspect_enum(
                 syn::Fields::Unit => vec![],
                 _ => panic!("Enum representation not supported"),
             };
-
-            (variant.ident.to_string(), fields)
+            Some((variant.ident.to_string(), fields))
         })
         .collect()
 }

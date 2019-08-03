@@ -1107,6 +1107,7 @@ pub fn fold_expr<V: Fold + ?Sized>(_visitor: &mut V, _i: Expr) -> Expr {
         Expr::Verbatim(_binding_0) => Expr::Verbatim(_binding_0),
         Expr::While(_binding_0) => Expr::While(full!(_visitor.fold_expr_while(_binding_0))),
         Expr::Yield(_binding_0) => Expr::Yield(full!(_visitor.fold_expr_yield(_binding_0))),
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1557,6 +1558,7 @@ pub fn fold_foreign_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ForeignItem) ->
             ForeignItem::Macro(_visitor.fold_foreign_item_macro(_binding_0))
         }
         ForeignItem::Verbatim(_binding_0) => ForeignItem::Verbatim(_binding_0),
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1680,6 +1682,7 @@ pub fn fold_impl_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplI
         }
         ImplItem::Macro(_binding_0) => ImplItem::Macro(_visitor.fold_impl_item_macro(_binding_0)),
         ImplItem::Verbatim(_binding_0) => ImplItem::Verbatim(_binding_0),
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1790,6 +1793,7 @@ pub fn fold_item<V: Fold + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
         Item::Union(_binding_0) => Item::Union(_visitor.fold_item_union(_binding_0)),
         Item::Use(_binding_0) => Item::Use(_visitor.fold_item_use(_binding_0)),
         Item::Verbatim(_binding_0) => Item::Verbatim(_binding_0),
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2236,6 +2240,7 @@ pub fn fold_pat<V: Fold + ?Sized>(_visitor: &mut V, _i: Pat) -> Pat {
         Pat::Type(_binding_0) => Pat::Type(_visitor.fold_pat_type(_binding_0)),
         Pat::Verbatim(_binding_0) => Pat::Verbatim(_binding_0),
         Pat::Wild(_binding_0) => Pat::Wild(_visitor.fold_pat_wild(_binding_0)),
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2532,6 +2537,7 @@ pub fn fold_trait_item<V: Fold + ?Sized>(_visitor: &mut V, _i: TraitItem) -> Tra
             TraitItem::Macro(_visitor.fold_trait_item_macro(_binding_0))
         }
         TraitItem::Verbatim(_binding_0) => TraitItem::Verbatim(_binding_0),
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2618,6 +2624,7 @@ pub fn fold_type<V: Fold + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
         }
         Type::Tuple(_binding_0) => Type::Tuple(_visitor.fold_type_tuple(_binding_0)),
         Type::Verbatim(_binding_0) => Type::Verbatim(_binding_0),
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

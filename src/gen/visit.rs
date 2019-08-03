@@ -1185,6 +1185,7 @@ pub fn visit_expr<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Exp
         Expr::Yield(ref _binding_0) => {
             full!(_visitor.visit_expr_yield(_binding_0));
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1731,6 +1732,7 @@ pub fn visit_foreign_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
         ForeignItem::Verbatim(ref _binding_0) => {
             skip!(_binding_0);
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1880,6 +1882,7 @@ pub fn visit_impl_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
         ImplItem::Verbatim(ref _binding_0) => {
             skip!(_binding_0);
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2032,6 +2035,7 @@ pub fn visit_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ite
         Item::Verbatim(ref _binding_0) => {
             skip!(_binding_0);
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2543,6 +2547,7 @@ pub fn visit_pat<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat)
         Pat::Wild(ref _binding_0) => {
             _visitor.visit_pat_wild(_binding_0);
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2897,6 +2902,7 @@ pub fn visit_trait_item<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         TraitItem::Verbatim(ref _binding_0) => {
             skip!(_binding_0);
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3018,6 +3024,7 @@ pub fn visit_type<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Typ
         Type::Verbatim(ref _binding_0) => {
             skip!(_binding_0);
         }
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
