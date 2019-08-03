@@ -1302,7 +1302,7 @@ pub mod parsing {
 
             fn get_variadic(input: &&FnArg) -> Option<Variadic> {
                 if let FnArg::Typed(PatType { ty, .. }) = input {
-                    if let Type::Verbatim(TypeVerbatim { tokens }) = &**ty {
+                    if let Type::Verbatim(tokens) = &**ty {
                         if let Ok(dots) = parse2(tokens.clone()) {
                             return Some(Variadic {
                                 attrs: Vec::new(),
@@ -1400,7 +1400,7 @@ pub mod parsing {
                             arg
                         },
                     ));
-                    Type::Verbatim(TypeVerbatim { tokens })
+                    Type::Verbatim(tokens)
                 }
                 None => input.parse()?,
             }),

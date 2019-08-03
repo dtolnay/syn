@@ -390,7 +390,7 @@ mod ty;
 pub use crate::ty::{
     Abi, BareFnArg, BareFnArgName, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
     TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
-    TypeSlice, TypeTraitObject, TypeTuple, TypeVerbatim,
+    TypeSlice, TypeTraitObject, TypeTuple,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]

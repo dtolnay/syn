@@ -20,7 +20,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Type {
+    pub enum Type #manual_extra_traits {
         /// A fixed size array type: `[T; n]`.
         Array(TypeArray),
 
@@ -67,7 +67,7 @@ ast_enum_of_structs! {
         Tuple(TypeTuple),
 
         /// Tokens in type position not interpreted by Syn.
-        Verbatim(TypeVerbatim),
+        Verbatim(TokenStream),
     }
 }
 
@@ -237,33 +237,103 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// Tokens in type position not interpreted by Syn.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
-    pub struct TypeVerbatim #manual_extra_traits {
-        pub tokens: TokenStream,
-    }
-}
+#[cfg(feature = "extra-traits")]
+impl Eq for Type {}
 
 #[cfg(feature = "extra-traits")]
-impl Eq for TypeVerbatim {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for TypeVerbatim {
+impl PartialEq for Type {
     fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
+        match (self, other) {
+            (Type::Array(this), Type::Array(other)) => this == other,
+            (Type::BareFn(this), Type::BareFn(other)) => this == other,
+            (Type::Group(this), Type::Group(other)) => this == other,
+            (Type::ImplTrait(this), Type::ImplTrait(other)) => this == other,
+            (Type::Infer(this), Type::Infer(other)) => this == other,
+            (Type::Macro(this), Type::Macro(other)) => this == other,
+            (Type::Never(this), Type::Never(other)) => this == other,
+            (Type::Paren(this), Type::Paren(other)) => this == other,
+            (Type::Path(this), Type::Path(other)) => this == other,
+            (Type::Ptr(this), Type::Ptr(other)) => this == other,
+            (Type::Reference(this), Type::Reference(other)) => this == other,
+            (Type::Slice(this), Type::Slice(other)) => this == other,
+            (Type::TraitObject(this), Type::TraitObject(other)) => this == other,
+            (Type::Tuple(this), Type::Tuple(other)) => this == other,
+            (Type::Verbatim(this), Type::Verbatim(other)) => {
+                TokenStreamHelper(this) == TokenStreamHelper(other)
+            }
+            _ => false,
+        }
     }
 }
 
 #[cfg(feature = "extra-traits")]
-impl Hash for TypeVerbatim {
-    fn hash<H>(&self, state: &mut H)
+impl Hash for Type {
+    fn hash<H>(&self, hash: &mut H)
     where
         H: Hasher,
     {
-        TokenStreamHelper(&self.tokens).hash(state);
+        match self {
+            Type::Array(ty) => {
+                hash.write_u8(0);
+                ty.hash(hash);
+            }
+            Type::BareFn(ty) => {
+                hash.write_u8(1);
+                ty.hash(hash);
+            }
+            Type::Group(ty) => {
+                hash.write_u8(2);
+                ty.hash(hash);
+            }
+            Type::ImplTrait(ty) => {
+                hash.write_u8(3);
+                ty.hash(hash);
+            }
+            Type::Infer(ty) => {
+                hash.write_u8(4);
+                ty.hash(hash);
+            }
+            Type::Macro(ty) => {
+                hash.write_u8(5);
+                ty.hash(hash);
+            }
+            Type::Never(ty) => {
+                hash.write_u8(6);
+                ty.hash(hash);
+            }
+            Type::Paren(ty) => {
+                hash.write_u8(7);
+                ty.hash(hash);
+            }
+            Type::Path(ty) => {
+                hash.write_u8(8);
+                ty.hash(hash);
+            }
+            Type::Ptr(ty) => {
+                hash.write_u8(9);
+                ty.hash(hash);
+            }
+            Type::Reference(ty) => {
+                hash.write_u8(10);
+                ty.hash(hash);
+            }
+            Type::Slice(ty) => {
+                hash.write_u8(11);
+                ty.hash(hash);
+            }
+            Type::TraitObject(ty) => {
+                hash.write_u8(12);
+                ty.hash(hash);
+            }
+            Type::Tuple(ty) => {
+                hash.write_u8(13);
+                ty.hash(hash);
+            }
+            Type::Verbatim(ty) => {
+                hash.write_u8(14);
+                TokenStreamHelper(ty).hash(hash);
+            }
+        }
     }
 }
 
@@ -1022,12 +1092,6 @@ mod printing {
     impl ToTokens for TypeMacro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.mac.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for TypeVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tokens.to_tokens(tokens);
         }
     }
 
