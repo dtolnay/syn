@@ -603,13 +603,13 @@ pub struct Iter<'a, T: 'a> {
     // The `Item = &'a T` needs to be specified to support rustc 1.31 and older.
     // On modern compilers we would be able to write just IterTrait<'a, T> where
     // Item can be inferred unambiguously from the supertrait.
-    inner: Box<IterTrait<'a, T, Item = &'a T> + 'a>,
+    inner: Box<dyn IterTrait<'a, T, Item = &'a T> + 'a>,
 }
 
 trait IterTrait<'a, T: 'a>:
     DoubleEndedIterator<Item = &'a T> + ExactSizeIterator<Item = &'a T>
 {
-    fn clone_box(&self) -> Box<IterTrait<'a, T, Item = &'a T> + 'a>;
+    fn clone_box(&self) -> Box<dyn IterTrait<'a, T, Item = &'a T> + 'a>;
 }
 
 struct PrivateIter<'a, T: 'a, P: 'a> {
@@ -694,7 +694,7 @@ impl<'a, T: 'a, I: 'a> IterTrait<'a, T> for I
 where
     I: DoubleEndedIterator<Item = &'a T> + ExactSizeIterator<Item = &'a T> + Clone,
 {
-    fn clone_box(&self) -> Box<IterTrait<'a, T, Item = &'a T> + 'a> {
+    fn clone_box(&self) -> Box<dyn IterTrait<'a, T, Item = &'a T> + 'a> {
         Box::new(self.clone())
     }
 }
@@ -705,7 +705,7 @@ where
 ///
 /// [module documentation]: self
 pub struct IterMut<'a, T: 'a> {
-    inner: Box<IterMutTrait<'a, T, Item = &'a mut T> + 'a>,
+    inner: Box<dyn IterMutTrait<'a, T, Item = &'a mut T> + 'a>,
 }
 
 trait IterMutTrait<'a, T: 'a>:
