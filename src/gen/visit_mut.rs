@@ -323,10 +323,6 @@ pub trait VisitMut {
     fn visit_foreign_item_type_mut(&mut self, i: &mut ForeignItemType) {
         visit_foreign_item_type_mut(self, i)
     }
-    #[cfg(feature = "full")]
-    fn visit_foreign_item_verbatim_mut(&mut self, i: &mut ForeignItemVerbatim) {
-        visit_foreign_item_verbatim_mut(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_generic_argument_mut(&mut self, i: &mut GenericArgument) {
         visit_generic_argument_mut(self, i)
@@ -366,10 +362,6 @@ pub trait VisitMut {
     #[cfg(feature = "full")]
     fn visit_impl_item_type_mut(&mut self, i: &mut ImplItemType) {
         visit_impl_item_type_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn visit_impl_item_verbatim_mut(&mut self, i: &mut ImplItemVerbatim) {
-        visit_impl_item_verbatim_mut(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_index_mut(&mut self, i: &mut Index) {
@@ -446,10 +438,6 @@ pub trait VisitMut {
     #[cfg(feature = "full")]
     fn visit_item_use_mut(&mut self, i: &mut ItemUse) {
         visit_item_use_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn visit_item_verbatim_mut(&mut self, i: &mut ItemVerbatim) {
-        visit_item_verbatim_mut(self, i)
     }
     #[cfg(feature = "full")]
     fn visit_label_mut(&mut self, i: &mut Label) {
@@ -673,10 +661,6 @@ pub trait VisitMut {
     #[cfg(feature = "full")]
     fn visit_trait_item_type_mut(&mut self, i: &mut TraitItemType) {
         visit_trait_item_type_mut(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn visit_trait_item_verbatim_mut(&mut self, i: &mut TraitItemVerbatim) {
-        visit_trait_item_verbatim_mut(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_type_mut(&mut self, i: &mut Type) {
@@ -1725,7 +1709,7 @@ pub fn visit_foreign_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut F
             _visitor.visit_foreign_item_macro_mut(_binding_0);
         }
         ForeignItem::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_foreign_item_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
     }
 }
@@ -1781,13 +1765,6 @@ pub fn visit_foreign_item_type_mut<V: VisitMut + ?Sized>(
     tokens_helper(_visitor, &mut _i.type_token.span);
     _visitor.visit_ident_mut(&mut _i.ident);
     tokens_helper(_visitor, &mut _i.semi_token.spans);
-}
-#[cfg(feature = "full")]
-pub fn visit_foreign_item_verbatim_mut<V: VisitMut + ?Sized>(
-    _visitor: &mut V,
-    _i: &mut ForeignItemVerbatim,
-) {
-    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_generic_argument_mut<V: VisitMut + ?Sized>(
@@ -1875,7 +1852,7 @@ pub fn visit_impl_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Impl
             _visitor.visit_impl_item_macro_mut(_binding_0);
         }
         ImplItem::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_impl_item_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
     }
 }
@@ -1955,13 +1932,6 @@ pub fn visit_impl_item_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut
     _visitor.visit_type_mut(&mut _i.ty);
     tokens_helper(_visitor, &mut _i.semi_token.spans);
 }
-#[cfg(feature = "full")]
-pub fn visit_impl_item_verbatim_mut<V: VisitMut + ?Sized>(
-    _visitor: &mut V,
-    _i: &mut ImplItemVerbatim,
-) {
-    skip!(_i.tokens);
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_index_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Index) {
     skip!(_i.index);
@@ -2022,7 +1992,7 @@ pub fn visit_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Item) {
             _visitor.visit_item_use_mut(_binding_0);
         }
         Item::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_item_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
     }
 }
@@ -2292,10 +2262,6 @@ pub fn visit_item_use_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemU
     };
     _visitor.visit_use_tree_mut(&mut _i.tree);
     tokens_helper(_visitor, &mut _i.semi_token.spans);
-}
-#[cfg(feature = "full")]
-pub fn visit_item_verbatim_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ItemVerbatim) {
-    skip!(_i.tokens);
 }
 #[cfg(feature = "full")]
 pub fn visit_label_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Label) {
@@ -2867,7 +2833,7 @@ pub fn visit_trait_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Tra
             _visitor.visit_trait_item_macro_mut(_binding_0);
         }
         TraitItem::Verbatim(ref mut _binding_0) => {
-            _visitor.visit_trait_item_verbatim_mut(_binding_0);
+            skip!(_binding_0);
         }
     }
 }
@@ -2932,13 +2898,6 @@ pub fn visit_trait_item_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
         _visitor.visit_type_mut(&mut (it).1);
     };
     tokens_helper(_visitor, &mut _i.semi_token.spans);
-}
-#[cfg(feature = "full")]
-pub fn visit_trait_item_verbatim_mut<V: VisitMut + ?Sized>(
-    _visitor: &mut V,
-    _i: &mut TraitItemVerbatim,
-) {
-    skip!(_i.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Type) {

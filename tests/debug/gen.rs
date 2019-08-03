@@ -2153,9 +2153,11 @@ impl Debug for Lite<syn::ForeignItem> {
                 formatter.finish()
             }
             syn::ForeignItem::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("ForeignItem::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -2229,14 +2231,6 @@ impl Debug for Lite<syn::ForeignItemType> {
         }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ForeignItemVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ForeignItemVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }
@@ -2498,9 +2492,11 @@ impl Debug for Lite<syn::ImplItem> {
                 formatter.finish()
             }
             syn::ImplItem::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("ImplItem::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -2629,14 +2625,6 @@ impl Debug for Lite<syn::ImplItemType> {
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
         formatter.field("ty", Lite(&_val.ty));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ImplItemVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ImplItemVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }
@@ -3063,9 +3051,11 @@ impl Debug for Lite<syn::Item> {
                 formatter.finish()
             }
             syn::Item::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("Item::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -3524,14 +3514,6 @@ impl Debug for Lite<syn::ItemUse> {
             formatter.field("leading_colon", Print::ref_cast(val));
         }
         formatter.field("tree", Lite(&_val.tree));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ItemVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ItemVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }
@@ -4829,9 +4811,11 @@ impl Debug for Lite<syn::TraitItem> {
                 formatter.finish()
             }
             syn::TraitItem::Verbatim(_val) => {
-                let mut formatter = formatter.debug_struct("TraitItem::Verbatim");
-                formatter.field("tokens", Lite(&_val.tokens));
-                formatter.finish()
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
         }
     }
@@ -4966,14 +4950,6 @@ impl Debug for Lite<syn::TraitItemType> {
             }
             formatter.field("default", Print::ref_cast(val));
         }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::TraitItemVerbatim> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("TraitItemVerbatim");
-        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }

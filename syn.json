@@ -2157,7 +2157,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "ForeignItemVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ]
       }
@@ -2273,19 +2273,6 @@
         },
         "semi_token": {
           "token": "Semi"
-        }
-      }
-    },
-    {
-      "ident": "ForeignItemVerbatim",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
         }
       }
     },
@@ -2440,7 +2427,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "ImplItemVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ]
       }
@@ -2626,19 +2613,6 @@
       }
     },
     {
-      "ident": "ImplItemVerbatim",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
-        }
-      }
-    },
-    {
       "ident": "Index",
       "features": {
         "any": [
@@ -2750,7 +2724,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "ItemVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ]
       }
@@ -3414,19 +3388,6 @@
         },
         "semi_token": {
           "token": "Semi"
-        }
-      }
-    },
-    {
-      "ident": "ItemVerbatim",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
         }
       }
     },
@@ -4749,7 +4710,7 @@
         ],
         "Verbatim": [
           {
-            "syn": "TraitItemVerbatim"
+            "proc_macro2": "TokenStream"
           }
         ]
       }
@@ -4896,19 +4857,6 @@
         },
         "semi_token": {
           "token": "Semi"
-        }
-      }
-    },
-    {
-      "ident": "TraitItemVerbatim",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "tokens": {
-          "proc_macro2": "TokenStream"
         }
       }
     },

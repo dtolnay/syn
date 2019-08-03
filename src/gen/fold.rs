@@ -319,10 +319,6 @@ pub trait Fold {
     fn fold_foreign_item_type(&mut self, i: ForeignItemType) -> ForeignItemType {
         fold_foreign_item_type(self, i)
     }
-    #[cfg(feature = "full")]
-    fn fold_foreign_item_verbatim(&mut self, i: ForeignItemVerbatim) -> ForeignItemVerbatim {
-        fold_foreign_item_verbatim(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_generic_argument(&mut self, i: GenericArgument) -> GenericArgument {
         fold_generic_argument(self, i)
@@ -362,10 +358,6 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType {
         fold_impl_item_type(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_impl_item_verbatim(&mut self, i: ImplItemVerbatim) -> ImplItemVerbatim {
-        fold_impl_item_verbatim(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_index(&mut self, i: Index) -> Index {
@@ -442,10 +434,6 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_item_use(&mut self, i: ItemUse) -> ItemUse {
         fold_item_use(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_item_verbatim(&mut self, i: ItemVerbatim) -> ItemVerbatim {
-        fold_item_verbatim(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_label(&mut self, i: Label) -> Label {
@@ -672,10 +660,6 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_trait_item_type(&mut self, i: TraitItemType) -> TraitItemType {
         fold_trait_item_type(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_trait_item_verbatim(&mut self, i: TraitItemVerbatim) -> TraitItemVerbatim {
-        fold_trait_item_verbatim(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_type(&mut self, i: Type) -> Type {
@@ -1572,9 +1556,7 @@ pub fn fold_foreign_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ForeignItem) ->
         ForeignItem::Macro(_binding_0) => {
             ForeignItem::Macro(_visitor.fold_foreign_item_macro(_binding_0))
         }
-        ForeignItem::Verbatim(_binding_0) => {
-            ForeignItem::Verbatim(_visitor.fold_foreign_item_verbatim(_binding_0))
-        }
+        ForeignItem::Verbatim(_binding_0) => ForeignItem::Verbatim(_binding_0),
     }
 }
 #[cfg(feature = "full")]
@@ -1628,13 +1610,6 @@ pub fn fold_foreign_item_type<V: Fold + ?Sized>(
         ident: _visitor.fold_ident(_i.ident),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
-}
-#[cfg(feature = "full")]
-pub fn fold_foreign_item_verbatim<V: Fold + ?Sized>(
-    _visitor: &mut V,
-    _i: ForeignItemVerbatim,
-) -> ForeignItemVerbatim {
-    ForeignItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_generic_argument<V: Fold + ?Sized>(
@@ -1704,9 +1679,7 @@ pub fn fold_impl_item<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItem) -> ImplI
             ImplItem::Existential(_visitor.fold_impl_item_existential(_binding_0))
         }
         ImplItem::Macro(_binding_0) => ImplItem::Macro(_visitor.fold_impl_item_macro(_binding_0)),
-        ImplItem::Verbatim(_binding_0) => {
-            ImplItem::Verbatim(_visitor.fold_impl_item_verbatim(_binding_0))
-        }
+        ImplItem::Verbatim(_binding_0) => ImplItem::Verbatim(_binding_0),
     }
 }
 #[cfg(feature = "full")]
@@ -1781,13 +1754,6 @@ pub fn fold_impl_item_type<V: Fold + ?Sized>(_visitor: &mut V, _i: ImplItemType)
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
 }
-#[cfg(feature = "full")]
-pub fn fold_impl_item_verbatim<V: Fold + ?Sized>(
-    _visitor: &mut V,
-    _i: ImplItemVerbatim,
-) -> ImplItemVerbatim {
-    ImplItemVerbatim { tokens: _i.tokens }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_index<V: Fold + ?Sized>(_visitor: &mut V, _i: Index) -> Index {
     Index {
@@ -1823,7 +1789,7 @@ pub fn fold_item<V: Fold + ?Sized>(_visitor: &mut V, _i: Item) -> Item {
         Item::Type(_binding_0) => Item::Type(_visitor.fold_item_type(_binding_0)),
         Item::Union(_binding_0) => Item::Union(_visitor.fold_item_union(_binding_0)),
         Item::Use(_binding_0) => Item::Use(_visitor.fold_item_use(_binding_0)),
-        Item::Verbatim(_binding_0) => Item::Verbatim(_visitor.fold_item_verbatim(_binding_0)),
+        Item::Verbatim(_binding_0) => Item::Verbatim(_binding_0),
     }
 }
 #[cfg(feature = "full")]
@@ -2059,10 +2025,6 @@ pub fn fold_item_use<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemUse) -> ItemUse
         tree: _visitor.fold_use_tree(_i.tree),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
-}
-#[cfg(feature = "full")]
-pub fn fold_item_verbatim<V: Fold + ?Sized>(_visitor: &mut V, _i: ItemVerbatim) -> ItemVerbatim {
-    ItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(feature = "full")]
 pub fn fold_label<V: Fold + ?Sized>(_visitor: &mut V, _i: Label) -> Label {
@@ -2569,9 +2531,7 @@ pub fn fold_trait_item<V: Fold + ?Sized>(_visitor: &mut V, _i: TraitItem) -> Tra
         TraitItem::Macro(_binding_0) => {
             TraitItem::Macro(_visitor.fold_trait_item_macro(_binding_0))
         }
-        TraitItem::Verbatim(_binding_0) => {
-            TraitItem::Verbatim(_visitor.fold_trait_item_verbatim(_binding_0))
-        }
+        TraitItem::Verbatim(_binding_0) => TraitItem::Verbatim(_binding_0),
     }
 }
 #[cfg(feature = "full")]
@@ -2637,13 +2597,6 @@ pub fn fold_trait_item_type<V: Fold + ?Sized>(
         }),
         semi_token: Token ! [ ; ](tokens_helper(_visitor, &_i.semi_token.spans)),
     }
-}
-#[cfg(feature = "full")]
-pub fn fold_trait_item_verbatim<V: Fold + ?Sized>(
-    _visitor: &mut V,
-    _i: TraitItemVerbatim,
-) -> TraitItemVerbatim {
-    TraitItemVerbatim { tokens: _i.tokens }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_type<V: Fold + ?Sized>(_visitor: &mut V, _i: Type) -> Type {
