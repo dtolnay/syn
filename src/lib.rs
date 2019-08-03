@@ -57,7 +57,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! syn-next = "1.0.0-rc1"
+//! syn-next = "1.0.0-rc2"
 //! quote-next = "1.0.0-rc1"
 //!
 //! [lib]
@@ -235,7 +235,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn-next/1.0.0-rc1")]
+#![doc(html_root_url = "https://docs.rs/syn-next/1.0.0-rc2")]
 #![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
