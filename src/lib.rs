@@ -256,7 +256,6 @@
 // Ignored clippy_pedantic lints.
 #![allow(
     clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
     clippy::empty_enum,
     clippy::if_not_else,
     clippy::items_after_statements,
