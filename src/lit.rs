@@ -720,7 +720,7 @@ mod value {
                     _ => {}
                 },
                 b'\'' => return Lit::Char(LitChar { token }),
-                b'0'...b'9' | b'-' => {
+                b'0'..=b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
                         if let Some((digits, suffix)) = parse_lit_int(&repr) {
                             return Lit::Int(LitInt {
@@ -1015,15 +1015,15 @@ mod value {
         let b1 = byte(s, 1);
         ch += 0x10
             * match b0 {
-                b'0'...b'9' => b0 - b'0',
-                b'a'...b'f' => 10 + (b0 - b'a'),
-                b'A'...b'F' => 10 + (b0 - b'A'),
+                b'0'..=b'9' => b0 - b'0',
+                b'a'..=b'f' => 10 + (b0 - b'a'),
+                b'A'..=b'F' => 10 + (b0 - b'A'),
                 _ => panic!("unexpected non-hex character after \\x"),
             };
         ch += match b1 {
-            b'0'...b'9' => b1 - b'0',
-            b'a'...b'f' => 10 + (b1 - b'a'),
-            b'A'...b'F' => 10 + (b1 - b'A'),
+            b'0'..=b'9' => b1 - b'0',
+            b'a'..=b'f' => 10 + (b1 - b'a'),
+            b'A'..=b'F' => 10 + (b1 - b'A'),
             _ => panic!("unexpected non-hex character after \\x"),
         };
         (ch, &s[2..])
@@ -1039,17 +1039,17 @@ mod value {
         for _ in 0..6 {
             let b = byte(s, 0);
             match b {
-                b'0'...b'9' => {
+                b'0'..=b'9' => {
                     ch *= 0x10;
                     ch += u32::from(b - b'0');
                     s = &s[1..];
                 }
-                b'a'...b'f' => {
+                b'a'..=b'f' => {
                     ch *= 0x10;
                     ch += u32::from(10 + b - b'a');
                     s = &s[1..];
                 }
-                b'A'...b'F' => {
+                b'A'..=b'F' => {
                     ch *= 0x10;
                     ch += u32::from(10 + b - b'A');
                     s = &s[1..];
@@ -1088,7 +1088,7 @@ mod value {
                 s = &s[2..];
                 2
             }
-            (b'0'...b'9', _) => 10,
+            (b'0'..=b'9', _) => 10,
             _ => return None,
         };
 
@@ -1096,9 +1096,9 @@ mod value {
         loop {
             let b = byte(s, 0);
             let digit = match b {
-                b'0'...b'9' => b - b'0',
-                b'a'...b'f' if base > 10 => b - b'a' + 10,
-                b'A'...b'F' if base > 10 => b - b'A' + 10,
+                b'0'..=b'9' => b - b'0',
+                b'a'..=b'f' if base > 10 => b - b'a' + 10,
+                b'A'..=b'F' if base > 10 => b - b'A' + 10,
                 b'_' => {
                     s = &s[1..];
                     continue;

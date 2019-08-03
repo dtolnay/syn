@@ -236,7 +236,7 @@
 
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn-next/1.0.0-rc1")]
-#![allow(unknown_lints, ellipsis_inclusive_range_patterns)]
+#![allow(unknown_lints)]
 #![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
