@@ -353,30 +353,22 @@ mod parsing {
     struct EosVariant {
         name: Ident,
         member: Option<Path>,
-        inner: Option<AstItem>,
     }
     fn eos_variant(input: ParseStream) -> Result<EosVariant> {
         input.call(Attribute::parse_outer)?;
-        input.parse::<Token![pub]>()?;
         let variant: Ident = input.parse()?;
-        let (member, inner) = if input.peek(token::Paren) {
+        let member = if input.peek(token::Paren) {
             let content;
             parenthesized!(content in input);
-            if content.fork().call(ast_struct_inner).is_ok() {
-                let item = content.call(ast_struct_inner)?;
-                (Some(Path::from(item.ast.ident.clone())), Some(item))
-            } else {
-                let path: Path = content.parse()?;
-                (Some(path), None)
-            }
+            let path: Path = content.parse()?;
+            Some(path)
         } else {
-            (None, None)
+            None
         };
         input.parse::<Token![,]>()?;
         Ok(EosVariant {
             name: variant,
             member,
-            inner,
         })
     }
 
@@ -415,11 +407,10 @@ mod parsing {
                     }
                 }
             };
-            let mut items = vec![AstItem {
+            let items = vec![AstItem {
                 ast: enum_item,
                 features: vec![],
             }];
-            items.extend(variants.into_iter().filter_map(|v| v.inner));
             Ok(AstEnumOfStructs(items))
         }
     }
