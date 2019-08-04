@@ -64,15 +64,14 @@
 //! In this technique, using the `Type`'s span for the error message makes the
 //! error appear in the correct place underlining the right type.
 
-use proc_macro2::{Span, TokenStream};
-use quote::ToTokens;
+use proc_macro2::Span;
+use quote::spanned::Spanned as ToTokens;
 
 /// A trait that can provide the `Span` of the complete contents of a syntax
 /// tree node.
 ///
 /// This trait is automatically implemented for all types that implement
-/// [`ToTokens`] from the `quote` crate. It is sealed and cannot be implemented
-/// outside of the Syn crate other than by implementing `ToTokens`.
+/// [`ToTokens`] from the `quote` crate, as well as for `Span` itself.
 ///
 /// [`ToTokens`]: quote::ToTokens
 ///
@@ -82,7 +81,7 @@ use quote::ToTokens;
 ///
 /// *This trait is available if Syn is built with both the `"parsing"` and
 /// `"printing"` features.*
-pub trait Spanned: private::Sealed {
+pub trait Spanned {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.
     ///
@@ -90,55 +89,8 @@ pub trait Spanned: private::Sealed {
     fn span(&self) -> Span;
 }
 
-mod private {
-    use quote::ToTokens;
-    pub trait Sealed {}
-    impl<T: ToTokens> Sealed for T {}
-}
-
-impl<T> Spanned for T
-where
-    T: ToTokens,
-{
+impl<T: ?Sized + ToTokens> Spanned for T {
     fn span(&self) -> Span {
-        join_spans(self.into_token_stream())
+        self.__span()
     }
-}
-
-fn join_spans(tokens: TokenStream) -> Span {
-    let mut iter = tokens.into_iter().filter_map(|tt| {
-        // FIXME: This shouldn't be required, since optimally spans should
-        // never be invalid. This filter_map can probably be removed when
-        // https://github.com/rust-lang/rust/issues/43081 is resolved.
-        let span = tt.span();
-        let debug = format!("{:?}", span);
-        if debug.ends_with("bytes(0..0)") {
-            None
-        } else {
-            Some(span)
-        }
-    });
-
-    let mut joined = match iter.next() {
-        Some(span) => span,
-        None => return Span::call_site(),
-    };
-
-    #[cfg(procmacro2_semver_exempt)]
-    {
-        for next in iter {
-            if let Some(span) = joined.join(next) {
-                joined = span;
-            }
-        }
-    }
-
-    #[cfg(not(procmacro2_semver_exempt))]
-    {
-        // We can't join spans without procmacro2_semver_exempt so just grab the
-        // first one.
-        joined = joined;
-    }
-
-    joined
 }
