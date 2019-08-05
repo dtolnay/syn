@@ -291,7 +291,7 @@ spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token node span);
 spanless_eq_struct!(Local; pat ty init id span attrs);
-spanless_eq_struct!(Mac_; path delim tts);
+spanless_eq_struct!(Mac_; path delim tts prior_type_ascription);
 spanless_eq_struct!(MacroDef; tokens legacy);
 spanless_eq_struct!(MethodSig; header decl);
 spanless_eq_struct!(Mod; inner items inline);
@@ -332,7 +332,7 @@ spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default) Const(ty));
-spanless_eq_enum!(ImplItemKind; Const(0 1) Method(0 1) Type(0) OpaqueTy(0) Macro(0));
+spanless_eq_enum!(ImplItemKind; Const(0 1) Method(0 1) TyAlias(0) OpaqueTy(0) Macro(0));
 spanless_eq_enum!(ImplPolarity; Positive Negative);
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
 spanless_eq_enum!(IsAsync; Async(closure_id return_impl_trait_id) NotAsync);
@@ -366,7 +366,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
-    Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) Ty(0 1) OpaqueTy(0 1)
+    Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1) OpaqueTy(0 1)
     Enum(0 1) Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
     Impl(0 1 2 3 4 5 6) Mac(0) MacroDef(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0) Byte(0) Char(0) Int(0 1)
