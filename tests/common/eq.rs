@@ -11,17 +11,17 @@ use self::rustc_target::abi::FloatTy;
 use self::rustc_target::spec::abi::Abi;
 use self::syntax::ast::{
     AngleBracketedArgs, AnonConst, Arg, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
-    AttrId, AttrStyle, Attribute, AwaitOrigin, BareFnTy, BinOpKind, BindingMode, Block,
-    BlockCheckMode, CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind,
-    Field, FieldPat, FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy,
-    GenericArg, GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm,
-    Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync,
-    IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter,
-    MacStmtStyle, Mac_, MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId,
-    ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
-    RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
-    TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety,
-    UseTree, UseTreeKind, VariantData, Variant_, VisibilityKind, WhereBoundPredicate, WhereClause,
+    AttrId, AttrStyle, Attribute, BareFnTy, BinOpKind, BindingMode, Block, BlockCheckMode,
+    CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat,
+    FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg,
+    GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident,
+    ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item,
+    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac_,
+    MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat,
+    PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
+    StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind,
+    TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree,
+    UseTreeKind, VariantData, Variant_, VisibilityKind, WhereBoundPredicate, WhereClause,
     WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;
@@ -317,7 +317,6 @@ spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(AttrStyle; Outer Inner);
-spanless_eq_enum!(AwaitOrigin; FieldLike MacroLike);
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BindingMode; ByRef(0) ByValue(0));
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
