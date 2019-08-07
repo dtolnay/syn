@@ -8,6 +8,7 @@
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
+use std::env;
 use std::fs;
 use std::time::{Duration, Instant};
 
@@ -101,6 +102,7 @@ fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
 }
 
 fn main() {
+    env::set_current_dir("..").unwrap();
     repo::clone_rust();
 
     macro_rules! testcases {

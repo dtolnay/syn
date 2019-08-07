@@ -9,7 +9,6 @@ documentation = "https://docs.rs/syn"
 categories = ["development-tools::procedural-macro-helpers"]
 readme = "README.md"
 include = [
-    "/benches/**",
     "/build.rs",
     "/Cargo.toml",
     "/LICENSE-APACHE",
@@ -45,17 +44,6 @@ regex = "1.0"
 termcolor = "1.0"
 walkdir = "2.1"
 
-[[bench]]
-name = "rust"
-edition = "2018"
-harness = false
-required-features = ["full", "parsing"]
-
-[[bench]]
-name = "file"
-edition = "2018"
-required-features = ["full", "parsing"]
-
 [package.metadata.docs.rs]
 all-features = true
 
@@ -66,4 +54,4 @@ all-features = true
 travis-ci = { repository = "dtolnay/syn" }
 
 [workspace]
-members = ["dev", "json"]
+members = ["benches", "dev", "json"]

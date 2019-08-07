@@ -1,0 +1,22 @@
+[package]
+name = "syn-benches"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dev-dependencies]
+proc-macro2 = "0.4.4"
+syn = { path = "..", features = ["full", "parsing"] }
+walkdir = "2.1"
+
+[[bench]]
+name = "rust"
+path = "rust.rs"
+edition = "2018"
+harness = false
+
+[[bench]]
+name = "file"
+path = "file.rs"
+edition = "2018"
