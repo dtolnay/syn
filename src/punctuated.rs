@@ -464,11 +464,10 @@ impl<'a, T, P> Iterator for Pairs<'a, T, P> {
 
 impl<'a, T, P> DoubleEndedIterator for Pairs<'a, T, P> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.last.next().map(Pair::End).or_else(|| {
-            self.inner
-                .next_back()
-                .map(|(t, p)| Pair::Punctuated(t, p))
-        })
+        self.last
+            .next()
+            .map(Pair::End)
+            .or_else(|| self.inner.next_back().map(|(t, p)| Pair::Punctuated(t, p)))
     }
 }
 
@@ -511,11 +510,10 @@ impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
 
 impl<'a, T, P> DoubleEndedIterator for PairsMut<'a, T, P> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.last.next().map(Pair::End).or_else(|| {
-            self.inner
-                .next_back()
-                .map(|(t, p)| Pair::Punctuated(t, p))
-        })
+        self.last
+            .next()
+            .map(Pair::End)
+            .or_else(|| self.inner.next_back().map(|(t, p)| Pair::Punctuated(t, p)))
     }
 }
 

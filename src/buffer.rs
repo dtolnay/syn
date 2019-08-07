@@ -261,9 +261,7 @@ impl<'a> Cursor<'a> {
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
-            Entry::Punct(op) if op.as_char() != '\'' => {
-                Some((op.clone(), unsafe { self.bump() }))
-            }
+            Entry::Punct(op) if op.as_char() != '\'' => Some((op.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }

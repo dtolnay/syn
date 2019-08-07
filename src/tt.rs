@@ -39,9 +39,7 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
                         _ => false,
                     }
             }
-            (TokenTree::Literal(l1), TokenTree::Literal(l2)) => {
-                l1.to_string() == l2.to_string()
-            }
+            (TokenTree::Literal(l1), TokenTree::Literal(l2)) => l1.to_string() == l2.to_string(),
             (TokenTree::Ident(s1), TokenTree::Ident(s2)) => s1 == s2,
             _ => false,
         }
