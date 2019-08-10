@@ -200,7 +200,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 
 #[cfg(all(
-    not(all(target_arch = "wasm32", target_os = "unknown")),
+    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
     feature = "proc-macro"
 ))]
 use crate::proc_macro;
@@ -1066,7 +1066,7 @@ pub trait Parser: Sized {
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
     #[cfg(all(
-        not(all(target_arch = "wasm32", target_os = "unknown")),
+        not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
         feature = "proc-macro"
     ))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {

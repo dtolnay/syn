@@ -63,6 +63,11 @@ matrix:
       env: TARGET=wasm32-unknown-unknown
       install:
         - rustup target add "${TARGET}"
+    - rust: nightly
+      name: WASI
+      env: TARGET=wasm32-wasi
+      install:
+        - rustup target add "${TARGET}"
   allow_failures:
     - rust: nightly
       name: Clippy

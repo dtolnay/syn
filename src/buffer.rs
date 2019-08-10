@@ -8,7 +8,7 @@
 // is 100% safe but the implementation is fragile internally.
 
 #[cfg(all(
-    not(all(target_arch = "wasm32", target_os = "unknown")),
+    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
     feature = "proc-macro"
 ))]
 use crate::proc_macro as pm;
@@ -101,7 +101,7 @@ impl TokenBuffer {
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
     #[cfg(all(
-        not(all(target_arch = "wasm32", target_os = "unknown")),
+        not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
         feature = "proc-macro"
     ))]
     pub fn new(stream: pm::TokenStream) -> TokenBuffer {
