@@ -8,7 +8,7 @@ publish = false # this is an internal crate which should never be published
 
 [dependencies]
 syn-next = { path = "..", features = ["full", "extra-traits"] }
-quote-next = "1.0.0-rc1"
+quote-next = "1.0.0-rc2"
 color-backtrace = "0.2"
 failure = "0.1"
 indexmap = { version = "1.0", features = ["serde-1"] }

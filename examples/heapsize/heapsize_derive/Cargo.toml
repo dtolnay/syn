@@ -10,5 +10,5 @@ proc-macro = true
 
 [dependencies]
 proc-macro2-next = "1.0.0-rc1"
-quote-next = "1.0.0-rc1"
+quote-next = "1.0.0-rc2"
 syn-next = { path = "../../.." }

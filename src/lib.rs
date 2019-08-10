@@ -58,7 +58,7 @@
 //! ```toml
 //! [dependencies]
 //! syn-next = "1.0.0-rc2"
-//! quote-next = "1.0.0-rc1"
+//! quote-next = "1.0.0-rc2"
 //!
 //! [lib]
 //! proc-macro = true
