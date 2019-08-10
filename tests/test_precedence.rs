@@ -220,24 +220,16 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     use smallvec::SmallVec;
     use std::mem;
     use syntax::ast::{Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
-    use syntax::mut_visit::{self, MutVisitor};
+    use syntax::mut_visit::{noop_visit_expr, MutVisitor};
     use syntax_pos::DUMMY_SP;
 
     struct BracketsVisitor {
         failed: bool,
     };
 
-    impl BracketsVisitor {
-        fn recurse_expr(&mut self, e: &mut Expr) {
-            match e.node {
-                _ => mut_visit::noop_visit_expr(e, self),
-            }
-        }
-    }
-
     impl MutVisitor for BracketsVisitor {
         fn visit_expr(&mut self, e: &mut P<Expr>) {
-            self.recurse_expr(e);
+            noop_visit_expr(e, self);
             match e.node {
                 ExprKind::If(..) | ExprKind::Block(..) | ExprKind::Let(..) => {}
                 _ => {
@@ -257,7 +249,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
 
         fn visit_field(&mut self, f: &mut Field) {
             if f.is_shorthand {
-                self.recurse_expr(&mut f.expr);
+                noop_visit_expr(&mut f.expr, self);
             } else {
                 self.visit_expr(&mut f.expr);
             }
@@ -278,11 +270,11 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
             let node = match stmt.node {
                 // Don't wrap toplevel expressions in statements.
                 StmtKind::Expr(mut e) => {
-                    self.recurse_expr(&mut e);
+                    noop_visit_expr(&mut e, self);
                     StmtKind::Expr(e)
                 }
                 StmtKind::Semi(mut e) => {
-                    self.recurse_expr(&mut e);
+                    noop_visit_expr(&mut e, self);
                     StmtKind::Semi(e)
                 }
                 s => s,
