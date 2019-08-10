@@ -2754,7 +2754,7 @@ pub fn fold_type_trait_object<V: Fold + ?Sized>(
     _i: TypeTraitObject,
 ) -> TypeTraitObject {
     TypeTraitObject {
-        dyn_token: (_i.dyn_token).map(|it| Token![dyn ](tokens_helper(_visitor, &it.span))),
+        dyn_token: (_i.dyn_token).map(|it| Token![dyn](tokens_helper(_visitor, &it.span))),
         bounds: FoldHelper::lift(_i.bounds, |it| _visitor.fold_type_param_bound(it)),
     }
 }
