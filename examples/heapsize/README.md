@@ -59,10 +59,10 @@ error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
 
 Some unstable APIs in the `proc-macro2` crate let us improve this further by
 joining together the span of the field name and the field type. There is no
-difference in our code -- everything is as shown in this directory -- but
-building the example crate with `cargo build` shows errors like the one above
-and building with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo build` is
-able to show errors like the following.
+difference in our code &mdash; everything is as shown in this directory &mdash;
+but building the example crate with `cargo build` shows errors like the one
+above and building with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo build`
+is able to show errors like the following.
 
 ```
 error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied

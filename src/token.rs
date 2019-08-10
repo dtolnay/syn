@@ -236,8 +236,8 @@ macro_rules! define_keywords {
             #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
             #[$doc]
             ///
-            /// Don't try to remember the name of this type -- use the [`Token!`]
-            /// macro instead.
+            /// Don't try to remember the name of this type &mdash; use the
+            /// [`Token!`] macro instead.
             ///
             /// [`Token!`]: crate::token
             pub struct $name {
@@ -342,8 +342,8 @@ macro_rules! define_punctuation_structs {
             #[repr(C)]
             #[$doc]
             ///
-            /// Don't try to remember the name of this type -- use the [`Token!`]
-            /// macro instead.
+            /// Don't try to remember the name of this type &mdash; use the
+            /// [`Token!`] macro instead.
             ///
             /// [`Token!`]: crate::token
             pub struct $name {
