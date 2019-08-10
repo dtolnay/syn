@@ -569,6 +569,11 @@ mod thread;
 #[allow(non_camel_case_types)]
 struct private;
 
+// https://github.com/rust-lang/rust/issues/62830
+mod rustdoc_workaround {
+    pub use crate::parse::{self as parse_module};
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 mod error;

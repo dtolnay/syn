@@ -4,7 +4,7 @@
 /// Refer to the [`parse` module] documentation for more details about parsing
 /// in Syn.
 ///
-/// [`parse` module]: parse/index.html
+/// [`parse` module]: crate::rustdoc_workaround::parse_module
 ///
 /// # Intended usage
 ///
@@ -36,9 +36,6 @@
 /// #   "".parse().unwrap()
 /// }
 /// ```
-//
-// TODO: change the parse module link to an intra rustdoc link, currently
-// blocked on https://github.com/rust-lang/rust/issues/62830
 #[macro_export(local_inner_macros)]
 macro_rules! parse_macro_input {
     ($tokenstream:ident as $ty:ty) => {
