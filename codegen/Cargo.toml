@@ -7,19 +7,19 @@ edition = "2018"
 publish = false # this is an internal crate which should never be published
 
 [dependencies]
-syn-next = { path = "..", features = ["full", "extra-traits"] }
-quote-next = "1.0.0-rc2"
 color-backtrace = "0.2"
 failure = "0.1"
 indexmap = { version = "1.0", features = ["serde-1"] }
 inflections = "1.1"
 proc-macro2-next = "1.0.0-rc1"
+quote-next = "1.0.0-rc2"
 rustfmt = { package = "rustfmt-nightly", git = "https://github.com/rust-lang-nursery/rustfmt" }
+semver = { version = "0.9", features = ["serde"] }
 serde = { version = "1.0.88", features = ["derive"] }
 serde_json = "1.0.38"
-toml = "0.4.10"
-semver = { version = "0.9", features = ["serde"] }
 syn-codegen = { path = "../json" }
+syn-next = { path = "..", features = ["full", "extra-traits"] }
+toml = "0.4.10"
 
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of
