@@ -588,6 +588,55 @@ mod gen {
     ///
     /// *This module is available if Syn is built with the `"visit-mut"`
     /// feature.*
+    ///
+    /// <br>
+    ///
+    /// # Example
+    ///
+    /// This mut visitor replace occurrences of u256 suffixed integer literals
+    /// like `999u256` with a macro invocation `bigint::u256!(999)`.
+    ///
+    /// ```
+    /// // [dependencies]
+    /// // quote-next = "1.0.0-rc3"
+    /// // syn-next = { version = "1.0.0-rc2", features = ["full", "visit-mut"] }
+    ///
+    /// use quote::quote;
+    /// use syn::visit_mut::{self, VisitMut};
+    /// use syn::{parse_quote, Expr, File, Lit, LitInt};
+    ///
+    /// struct BigintReplace;
+    ///
+    /// impl VisitMut for BigintReplace {
+    ///     fn visit_expr_mut(&mut self, node: &mut Expr) {
+    ///         if let Expr::Lit(expr) = &node {
+    ///             if let Lit::Int(int) = &expr.lit {
+    ///                 if int.suffix() == "u256" {
+    ///                     let digits = int.base10_digits();
+    ///                     let unsuffixed: LitInt = syn::parse_str(digits).unwrap();
+    ///                     *node = parse_quote!(bigint::u256!(#unsuffixed));
+    ///                     return;
+    ///                 }
+    ///             }
+    ///         }
+    ///
+    ///         // Delegate to the default impl to visit nested expressions.
+    ///         visit_mut::visit_expr_mut(self, node);
+    ///     }
+    /// }
+    ///
+    /// fn main() {
+    ///     let code = quote! {
+    ///         fn main() {
+    ///             let _ = 999u256;
+    ///         }
+    ///     };
+    ///
+    ///     let mut syntax_tree: File = syn::parse2(code).unwrap();
+    ///     BigintReplace.visit_file_mut(&mut syntax_tree);
+    ///     println!("{}", quote!(#syntax_tree));
+    /// }
+    /// ```
     #[cfg(feature = "visit-mut")]
     pub mod visit_mut;
 
