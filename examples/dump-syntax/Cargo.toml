@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 colored = "1.7"
-proc-macro2-next = { version = "1.0.0-rc2", features = ["span-locations"] }
+proc-macro2-next = { version = "1.0.0-rc3", features = ["span-locations"] }
 
 [dependencies.syn-next]
 path = "../.."
