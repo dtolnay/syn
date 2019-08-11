@@ -51,7 +51,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Top-level content of the syntax tree description.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Definitions {
     /// The Syn version whose syntax tree is described by this data.
     pub version: Version,
@@ -70,7 +70,7 @@ pub struct Definitions {
 }
 
 /// Syntax tree type defined by Syn.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Node {
     /// Name of the type.
     ///
@@ -93,7 +93,7 @@ pub struct Node {
 }
 
 /// Content of a syntax tree data structure.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Data {
     /// This is an opaque type with no publicy accessible structure.
     Private,
@@ -121,7 +121,7 @@ pub type Fields = IndexMap<String, Type>;
 pub type Variants = IndexMap<String, Vec<Type>>;
 
 /// Type of a struct field or tuple variant field in the syntax tree.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Syntax tree type defined by Syn.
@@ -176,14 +176,14 @@ pub enum Type {
 /// This refers to `syn::punctuated::Punctuated<#element, #punct>`.
 ///
 /// The punct string will match one of the keys in the `tokens` map.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Punctuated {
     pub element: Box<Type>,
     pub punct: String,
 }
 
 /// Features behind which a syntax tree type is cfg gated.
-#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Features {
     /// Type is accessible if at least one of these features is enabled against
     /// the Syn dependency.

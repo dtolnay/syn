@@ -13,9 +13,20 @@ pub fn traverse(
     defs: &Definitions,
     node: fn(&mut TokenStream, &mut TokenStream, &Node, &Definitions),
 ) -> (TokenStream, TokenStream) {
+    let mut types = defs.types.clone();
+    for terminal in TERMINAL_TYPES {
+        types.push(Node {
+            ident: terminal.to_string(),
+            features: Features::default(),
+            data: Data::Private,
+            exhaustive: true,
+        });
+    }
+    types.sort_by(|a, b| a.ident.cmp(&b.ident));
+
     let mut traits = TokenStream::new();
     let mut impls = TokenStream::new();
-    for s in &defs.types {
+    for s in types {
         if s.ident == "Reserved" {
             continue;
         }
@@ -27,16 +38,8 @@ pub fn traverse(
         };
         traits.extend(features.clone());
         impls.extend(features);
-        node(&mut traits, &mut impls, s, defs);
-    }
-    for tt in TERMINAL_TYPES {
-        let s = Node {
-            ident: tt.to_string(),
-            features: Features::default(),
-            data: Data::Private,
-            exhaustive: true,
-        };
         node(&mut traits, &mut impls, &s, defs);
     }
+
     (traits, impls)
 }

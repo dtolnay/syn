@@ -339,6 +339,9 @@ pub trait VisitMut {
     fn visit_generics_mut(&mut self, i: &mut Generics) {
         visit_generics_mut(self, i)
     }
+    fn visit_ident_mut(&mut self, i: &mut Ident) {
+        visit_ident_mut(self, i)
+    }
     #[cfg(feature = "full")]
     fn visit_impl_item_mut(&mut self, i: &mut ImplItem) {
         visit_impl_item_mut(self, i)
@@ -630,6 +633,9 @@ pub trait VisitMut {
     fn visit_signature_mut(&mut self, i: &mut Signature) {
         visit_signature_mut(self, i)
     }
+    fn visit_span_mut(&mut self, i: &mut Span) {
+        visit_span_mut(self, i)
+    }
     #[cfg(feature = "full")]
     fn visit_stmt_mut(&mut self, i: &mut Stmt) {
         visit_stmt_mut(self, i)
@@ -789,12 +795,6 @@ pub trait VisitMut {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_where_predicate_mut(&mut self, i: &mut WherePredicate) {
         visit_where_predicate_mut(self, i)
-    }
-    fn visit_span_mut(&mut self, i: &mut Span) {
-        visit_span_mut(self, i)
-    }
-    fn visit_ident_mut(&mut self, i: &mut Ident) {
-        visit_ident_mut(self, i)
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1874,6 +1874,11 @@ pub fn visit_generics_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Gener
         _visitor.visit_where_clause_mut(it)
     };
 }
+pub fn visit_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {
+    let mut span = _i.span();
+    _visitor.visit_span_mut(&mut span);
+    _i.set_span(span);
+}
 #[cfg(feature = "full")]
 pub fn visit_impl_item_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut ImplItem) {
     match _i {
@@ -2871,6 +2876,7 @@ pub fn visit_signature_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Sign
     };
     _visitor.visit_return_type_mut(&mut _i.output);
 }
+pub fn visit_span_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Span) {}
 #[cfg(feature = "full")]
 pub fn visit_stmt_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Stmt) {
     match _i {
@@ -3349,10 +3355,4 @@ pub fn visit_where_predicate_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
             _visitor.visit_predicate_eq_mut(_binding_0);
         }
     }
-}
-pub fn visit_span_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Span) {}
-pub fn visit_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {
-    let mut span = _i.span();
-    _visitor.visit_span_mut(&mut span);
-    _i.set_span(span);
 }
