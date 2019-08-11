@@ -1,6 +1,6 @@
 macro_rules! ast_struct {
     (
-        @@ [$($attrs_pub:tt)*]
+        [$($attrs_pub:tt)*]
         struct $name:ident #full $($rest:tt)*
     ) => {
         #[cfg(feature = "full")]
@@ -24,7 +24,7 @@ macro_rules! ast_struct {
     };
 
     (
-        @@ [$($attrs_pub:tt)*]
+        [$($attrs_pub:tt)*]
         struct $name:ident #manual_extra_traits $($rest:tt)*
     ) => {
         #[cfg_attr(feature = "extra-traits", derive(Debug))]
@@ -33,7 +33,7 @@ macro_rules! ast_struct {
     };
 
     (
-        @@ [$($attrs_pub:tt)*]
+        [$($attrs_pub:tt)*]
         struct $name:ident $($rest:tt)*
     ) => {
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -49,14 +49,14 @@ macro_rules! ast_struct {
 macro_rules! ast_enum {
     // Drop the `#no_visit` attribute, if present.
     (
-        @@ [$($attrs_pub:tt)*]
+        [$($attrs_pub:tt)*]
         enum $name:ident #no_visit $($rest:tt)*
     ) => (
-        ast_enum!(@@ [$($attrs_pub)*] enum $name $($rest)*);
+        ast_enum!([$($attrs_pub)*] enum $name $($rest)*);
     );
 
     (
-        @@ [$($attrs_pub:tt)*]
+        [$($attrs_pub:tt)*]
         enum $name:ident #manual_extra_traits $($rest:tt)*
     ) => (
         #[cfg_attr(feature = "extra-traits", derive(Debug))]
@@ -65,7 +65,7 @@ macro_rules! ast_enum {
     );
 
     (
-        @@ [$($attrs_pub:tt)*]
+        [$($attrs_pub:tt)*]
         enum $name:ident $($rest:tt)*
     ) => (
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -165,7 +165,7 @@ macro_rules! strip_attrs_pub {
     ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
         check_keyword_matches!(pub $pub);
 
-        $mac!(@@ [$(#[$m])* $pub] $($t)*);
+        $mac!([$(#[$m])* $pub] $($t)*);
     };
 }
 
