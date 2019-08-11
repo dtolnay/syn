@@ -315,9 +315,7 @@ pub use crate::data::{
 mod expr;
 #[cfg(feature = "full")]
 pub use crate::expr::{
-    Arm, FieldPat, FieldValue, GenericMethodArgument, Label, MethodTurbofish, Pat, PatBox,
-    PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
-    PatStruct, PatTuple, PatTupleStruct, PatType, PatWild, RangeLimits,
+    Arm, FieldValue, GenericMethodArgument, Label, MethodTurbofish, RangeLimits,
 };
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
@@ -395,6 +393,15 @@ pub use crate::ty::{
     Abi, BareFnArg, BareFnArgName, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
     TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
     TypeSlice, TypeTraitObject, TypeTuple,
+};
+
+#[cfg(feature = "full")]
+mod pat;
+#[cfg(feature = "full")]
+pub use crate::pat::{
+    FieldPat, Pat, PatBox,
+    PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
+    PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]
