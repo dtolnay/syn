@@ -315,9 +315,9 @@ pub use crate::data::{
 mod expr;
 #[cfg(feature = "full")]
 pub use crate::expr::{
-    Arm, Block, FieldPat, FieldValue, GenericMethodArgument, Label, Local, MethodTurbofish, Pat,
-    PatBox, PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
-    PatStruct, PatTuple, PatTupleStruct, PatType, PatWild, RangeLimits, Stmt,
+    Arm, FieldPat, FieldValue, GenericMethodArgument, Label, MethodTurbofish, Pat, PatBox,
+    PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
+    PatStruct, PatTuple, PatTupleStruct, PatType, PatWild, RangeLimits,
 };
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
@@ -382,6 +382,11 @@ pub use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 mod op;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::op::{BinOp, UnOp};
+
+#[cfg(feature = "full")]
+mod stmt;
+#[cfg(feature = "full")]
+pub use crate::stmt::{Block, Local, Stmt};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod ty;
