@@ -399,9 +399,8 @@ pub use crate::ty::{
 mod pat;
 #[cfg(feature = "full")]
 pub use crate::pat::{
-    FieldPat, Pat, PatBox,
-    PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest, PatSlice,
-    PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
+    FieldPat, Pat, PatBox, PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference,
+    PatRest, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]
