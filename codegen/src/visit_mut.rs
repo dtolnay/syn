@@ -13,7 +13,7 @@ fn simple_visit(item: &str, name: &Operand) -> TokenStream {
     let method = Ident::new(&format!("visit_{}_mut", ident), Span::call_site());
     let name = name.ref_mut_tokens();
     quote! {
-        _visitor.#method(#name)
+        v.#method(#name)
     }
 }
 
@@ -54,7 +54,7 @@ fn visit(
                     let (it, p) = el.into_tuple();
                     #val;
                     if let Some(p) = p {
-                        tokens_helper(_visitor, &mut p.spans);
+                        tokens_helper(v, &mut p.spans);
                     }
                 }
             })
@@ -91,13 +91,13 @@ fn visit(
                 quote!(spans)
             };
             Some(quote! {
-                tokens_helper(_visitor, &mut #name.#spans)
+                tokens_helper(v, &mut #name.#spans)
             })
         }
         Type::Group(_) => {
             let name = name.tokens();
             Some(quote! {
-                tokens_helper(_visitor, &mut #name.span)
+                tokens_helper(v, &mut #name.span)
             })
         }
         Type::Syn(t) => {
@@ -171,7 +171,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             };
 
             visit_mut_impl.extend(quote! {
-                match _i {
+                match node {
                     #visit_mut_variants
                     #nonexhaustive
                 }
@@ -186,7 +186,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 }
 
                 let id = Ident::new(&field, Span::call_site());
-                let ref_toks = Owned(quote!(_i.#id));
+                let ref_toks = Owned(quote!(node.#id));
                 let visit_mut_field = visit(&ty, &s.features, defs, &ref_toks)
                     .unwrap_or_else(|| noop_visit(&ref_toks));
                 visit_mut_impl.extend(quote! {
@@ -197,9 +197,9 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         Data::Private => {
             if ty == "Ident" {
                 visit_mut_impl.extend(quote! {
-                    let mut span = _i.span();
-                    _visitor.visit_span_mut(&mut span);
-                    _i.set_span(span);
+                    let mut span = node.span();
+                    v.visit_span_mut(&mut span);
+                    node.set_span(span);
                 });
             }
         }
@@ -212,9 +212,10 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     });
 
     impls.extend(quote! {
-        pub fn #visit_mut_fn<V: VisitMut + ?Sized>(
-            _visitor: &mut V, _i: &mut #ty
-        ) {
+        pub fn #visit_mut_fn<V>(v: &mut V, node: &mut #ty)
+        where
+            V: VisitMut + ?Sized,
+        {
             #visit_mut_impl
         }
     });
@@ -226,6 +227,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         VISIT_MUT_SRC,
         quote! {
+            #![allow(unused_variables)]
+
             use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::punctuated::Punctuated;

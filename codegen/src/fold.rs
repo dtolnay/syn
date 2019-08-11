@@ -11,7 +11,7 @@ fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
     let ident = gen::under_name(item);
     let method = Ident::new(&format!("fold_{}", ident), Span::call_site());
     quote! {
-        _visitor.#method(#name)
+        f.#method(#name)
     }
 }
 
@@ -76,13 +76,13 @@ fn visit(
                 syn::parse_str(&format!("Token![{}]", repr)).unwrap()
             };
             Some(quote! {
-                #ty(tokens_helper(_visitor, &#name.#spans))
+                #ty(tokens_helper(f, &#name.#spans))
             })
         }
         Type::Group(t) => {
             let ty = Ident::new(t, Span::call_site());
             Some(quote! {
-                #ty(tokens_helper(_visitor, &#name.span))
+                #ty(tokens_helper(f, &#name.span))
             })
         }
         Type::Syn(t) => {
@@ -159,7 +159,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             };
 
             fold_impl.extend(quote! {
-                match _i {
+                match node {
                     #fold_variants
                     #nonexhaustive
                 }
@@ -170,7 +170,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
 
             for (field, ty) in fields {
                 let id = Ident::new(&field, Span::call_site());
-                let ref_toks = quote!(_i.#id);
+                let ref_toks = quote!(node.#id);
 
                 if let Type::Syn(ty) = ty {
                     if ty == "Reserved" {
@@ -197,26 +197,26 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             } else {
                 if ty == "Ident" {
                     fold_impl.extend(quote! {
-                        let mut _i = _i;
-                        let span = _visitor.fold_span(_i.span());
-                        _i.set_span(span);
+                        let mut node = node;
+                        let span = f.fold_span(node.span());
+                        node.set_span(span);
                     });
                 }
                 fold_impl.extend(quote! {
-                    _i
+                    node
                 });
             }
         }
         Data::Private => {
             if ty == "Ident" {
                 fold_impl.extend(quote! {
-                    let mut _i = _i;
-                    let span = _visitor.fold_span(_i.span());
-                    _i.set_span(span);
+                    let mut node = node;
+                    let span = f.fold_span(node.span());
+                    node.set_span(span);
                 });
             }
             fold_impl.extend(quote! {
-                _i
+                node
             });
         }
     }
@@ -225,10 +225,10 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         s.data == Data::Private && !gen::TERMINAL_TYPES.contains(&s.ident.as_str());
     if fold_span_only {
         fold_impl = quote! {
-            let span = _visitor.fold_span(_i.span());
-            let mut _i = _i;
-            _i.set_span(span);
-            _i
+            let span = f.fold_span(node.span());
+            let mut node = node;
+            node.set_span(span);
+            node
         };
     }
 
@@ -239,9 +239,10 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     });
 
     impls.extend(quote! {
-        pub fn #fold_fn<V: Fold + ?Sized>(
-            _visitor: &mut V, _i: #ty
-        ) -> #ty {
+        pub fn #fold_fn<F>(f: &mut F, node: #ty) -> #ty
+        where
+            F: Fold + ?Sized,
+        {
             #fold_impl
         }
     });
@@ -254,7 +255,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         FOLD_SRC,
         quote! {
             // Unreachable code is generated sometimes without the full feature.
-            #![allow(unreachable_code)]
+            #![allow(unreachable_code, unused_variables)]
 
             use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]

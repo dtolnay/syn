@@ -13,7 +13,7 @@ fn simple_visit(item: &str, name: &Operand) -> TokenStream {
     let method = Ident::new(&format!("visit_{}", ident), Span::call_site());
     let name = name.ref_tokens();
     quote! {
-        _visitor.#method(#name)
+        v.#method(#name)
     }
 }
 
@@ -54,7 +54,7 @@ fn visit(
                     let (it, p) = el.into_tuple();
                     #val;
                     if let Some(p) = p {
-                        tokens_helper(_visitor, &p.spans);
+                        tokens_helper(v, &p.spans);
                     }
                 }
             })
@@ -91,13 +91,13 @@ fn visit(
                 quote!(spans)
             };
             Some(quote! {
-                tokens_helper(_visitor, &#name.#spans)
+                tokens_helper(v, &#name.#spans)
             })
         }
         Type::Group(_) => {
             let name = name.tokens();
             Some(quote! {
-                tokens_helper(_visitor, &#name.span)
+                tokens_helper(v, &#name.span)
             })
         }
         Type::Syn(t) => {
@@ -171,7 +171,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             };
 
             visit_impl.extend(quote! {
-                match _i {
+                match node {
                     #visit_variants
                     #nonexhaustive
                 }
@@ -186,7 +186,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 }
 
                 let id = Ident::new(&field, Span::call_site());
-                let ref_toks = Owned(quote!(_i.#id));
+                let ref_toks = Owned(quote!(node.#id));
                 let visit_field = visit(&ty, &s.features, defs, &ref_toks)
                     .unwrap_or_else(|| noop_visit(&ref_toks));
                 visit_impl.extend(quote! {
@@ -197,7 +197,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         Data::Private => {
             if ty == "Ident" {
                 visit_impl.extend(quote! {
-                    _visitor.visit_span(&_i.span());
+                    v.visit_span(&node.span());
                 });
             }
         }
@@ -216,9 +216,10 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     });
 
     impls.extend(quote! {
-        pub fn #visit_fn<'ast, V: Visit<'ast> + ?Sized>(
-            _visitor: &mut V, _i: &#ast_lifetime #ty
-        ) {
+        pub fn #visit_fn<'ast, V>(v: &mut V, node: &#ast_lifetime #ty)
+        where
+            V: Visit<'ast> + ?Sized,
+        {
             #visit_impl
         }
     });
@@ -230,6 +231,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         VISIT_SRC,
         quote! {
+            #![allow(unused_variables)]
+
             use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::punctuated::Punctuated;
