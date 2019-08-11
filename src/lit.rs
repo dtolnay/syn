@@ -70,7 +70,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitStr #manual_extra_traits {
+    pub struct LitStr #manual_extra_traits_debug {
         token: Literal,
         suffix: String,
     }
@@ -81,7 +81,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitByteStr #manual_extra_traits {
+    pub struct LitByteStr #manual_extra_traits_debug {
         token: Literal,
     }
 }
@@ -91,7 +91,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitByte #manual_extra_traits {
+    pub struct LitByte #manual_extra_traits_debug {
         token: Literal,
     }
 }
@@ -101,7 +101,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitChar #manual_extra_traits {
+    pub struct LitChar #manual_extra_traits_debug {
         token: Literal,
     }
 }
@@ -114,7 +114,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitInt #manual_extra_traits {
+    pub struct LitInt #manual_extra_traits_debug {
         token: Literal,
         digits: String,
         suffix: String,
@@ -128,7 +128,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitFloat #manual_extra_traits {
+    pub struct LitFloat #manual_extra_traits_debug {
         token: Literal,
         digits: String,
         suffix: String,
@@ -140,7 +140,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
-    pub struct LitBool #manual_extra_traits {
+    pub struct LitBool #manual_extra_traits_debug {
         pub value: bool,
         pub span: Span,
     }
@@ -493,6 +493,75 @@ impl From<Literal> for LitFloat {
 impl Display for LitFloat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.token.fmt(formatter)
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+mod debug_impls {
+    use super::*;
+    use std::fmt::{self, Debug};
+
+    impl Debug for LitStr {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitStr")
+                .field("token", &format_args!("{}", &self.token))
+                .finish()
+        }
+    }
+
+    impl Debug for LitByteStr {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitByteStr")
+                .field("token", &format_args!("{}", &self.token))
+                .finish()
+        }
+    }
+
+    impl Debug for LitByte {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitByte")
+                .field("token", &format_args!("{}", &self.token))
+                .finish()
+        }
+    }
+
+    impl Debug for LitChar {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitChar")
+                .field("token", &format_args!("{}", &self.token))
+                .finish()
+        }
+    }
+
+    impl Debug for LitInt {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitInt")
+                .field("token", &format_args!("{}", &self.token))
+                .finish()
+        }
+    }
+
+    impl Debug for LitFloat {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitFloat")
+                .field("token", &format_args!("{}", &self.token))
+                .finish()
+        }
+    }
+
+    impl Debug for LitBool {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter
+                .debug_struct("LitBool")
+                .field("value", &self.value)
+                .finish()
+        }
     }
 }
 

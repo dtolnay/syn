@@ -34,6 +34,14 @@ macro_rules! ast_struct {
 
     (
         [$($attrs_pub:tt)*]
+        struct $name:ident #manual_extra_traits_debug $($rest:tt)*
+    ) => {
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        $($attrs_pub)* struct $name $($rest)*
+    };
+
+    (
+        [$($attrs_pub:tt)*]
         struct $name:ident $($rest:tt)*
     ) => {
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
