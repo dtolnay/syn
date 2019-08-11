@@ -112,19 +112,11 @@ impl Error {
             Some(span) => *span,
             None => return Span::call_site(),
         };
-
-        #[cfg(procmacro2_semver_exempt)]
-        {
-            let end = match self.end_span.get() {
-                Some(span) => *span,
-                None => return Span::call_site(),
-            };
-            start.join(end).unwrap_or(start)
-        }
-        #[cfg(not(procmacro2_semver_exempt))]
-        {
-            start
-        }
+        let end = match self.end_span.get() {
+            Some(span) => *span,
+            None => return Span::call_site(),
+        };
+        start.join(end).unwrap_or(start)
     }
 
     /// Render the error as an invocation of [`compile_error!`].
@@ -169,10 +161,7 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     if cursor.eof() {
         Error::new(scope, format!("unexpected end of input, {}", message))
     } else {
-        #[cfg(procmacro2_semver_exempt)]
         let span = crate::buffer::open_span_of_group(cursor);
-        #[cfg(not(procmacro2_semver_exempt))]
-        let span = cursor.span();
         Error::new(span, message)
     }
 }

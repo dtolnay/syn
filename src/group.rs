@@ -74,10 +74,7 @@ fn parse_delimited<'a>(
 ) -> Result<(Span, ParseBuffer<'a>)> {
     input.step(|cursor| {
         if let Some((content, span, rest)) = cursor.group(delimiter) {
-            #[cfg(procmacro2_semver_exempt)]
             let scope = crate::buffer::close_span_of_group(*cursor);
-            #[cfg(not(procmacro2_semver_exempt))]
-            let scope = span;
             let nested = crate::parse::advance_step_cursor(cursor, content);
             let unexpected = crate::parse::get_unexpected(input);
             let content = crate::parse::new_parse_buffer(scope, nested, unexpected);

@@ -348,7 +348,6 @@ pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
     a.scope == b.scope
 }
 
-#[cfg(procmacro2_semver_exempt)]
 pub(crate) fn open_span_of_group(cursor: Cursor) -> Span {
     match cursor.entry() {
         Entry::Group(group, _) => group.span_open(),
@@ -356,7 +355,6 @@ pub(crate) fn open_span_of_group(cursor: Cursor) -> Span {
     }
 }
 
-#[cfg(procmacro2_semver_exempt)]
 pub(crate) fn close_span_of_group(cursor: Cursor) -> Span {
     match cursor.entry() {
         Entry::Group(group, _) => group.span_close(),
