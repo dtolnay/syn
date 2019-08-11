@@ -57,10 +57,6 @@ pub trait Visit<'ast> {
         visit_bare_fn_arg(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_bare_fn_arg_name(&mut self, i: &'ast BareFnArgName) {
-        visit_bare_fn_arg_name(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_bin_op(&mut self, i: &'ast BinOp) {
         visit_bin_op(self, i)
     }
@@ -875,24 +871,10 @@ where
         v.visit_attribute(it)
     }
     if let Some(it) = &node.name {
-        v.visit_bare_fn_arg_name(&(it).0);
+        v.visit_ident(&(it).0);
         tokens_helper(v, &(it).1.spans);
     };
     v.visit_type(&node.ty);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_bare_fn_arg_name<'ast, V>(v: &mut V, node: &'ast BareFnArgName)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    match node {
-        BareFnArgName::Named(_binding_0) => {
-            v.visit_ident(_binding_0);
-        }
-        BareFnArgName::Wild(_binding_0) => {
-            tokens_helper(v, &_binding_0.spans);
-        }
-    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bin_op<'ast, V>(v: &mut V, node: &'ast BinOp)

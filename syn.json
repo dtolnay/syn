@@ -156,7 +156,7 @@
           "option": {
             "tuple": [
               {
-                "syn": "BareFnArgName"
+                "proc_macro2": "Ident"
               },
               {
                 "token": "Colon"
@@ -167,27 +167,6 @@
         "ty": {
           "syn": "Type"
         }
-      }
-    },
-    {
-      "ident": "BareFnArgName",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "variants": {
-        "Named": [
-          {
-            "proc_macro2": "Ident"
-          }
-        ],
-        "Wild": [
-          {
-            "token": "Underscore"
-          }
-        ]
       }
     },
     {

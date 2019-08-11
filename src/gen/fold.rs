@@ -56,10 +56,6 @@ pub trait Fold {
         fold_bare_fn_arg(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_bare_fn_arg_name(&mut self, i: BareFnArgName) -> BareFnArgName {
-        fold_bare_fn_arg_name(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_bin_op(&mut self, i: BinOp) -> BinOp {
         fold_bin_op(self, i)
     }
@@ -874,23 +870,11 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         name: (node.name).map(|it| {
             (
-                f.fold_bare_fn_arg_name((it).0),
+                f.fold_ident((it).0),
                 Token ! [ : ](tokens_helper(f, &(it).1.spans)),
             )
         }),
         ty: f.fold_type(node.ty),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_bare_fn_arg_name<F>(f: &mut F, node: BareFnArgName) -> BareFnArgName
-where
-    F: Fold + ?Sized,
-{
-    match node {
-        BareFnArgName::Named(_binding_0) => BareFnArgName::Named(f.fold_ident(_binding_0)),
-        BareFnArgName::Wild(_binding_0) => {
-            BareFnArgName::Wild(Token![_](tokens_helper(f, &_binding_0.spans)))
-        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

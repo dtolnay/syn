@@ -120,7 +120,7 @@ impl Debug for Lite<syn::BareFnArg> {
         if let Some(val) = &_val.name {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print((syn::BareFnArgName, syn::token::Colon));
+            struct Print((proc_macro2::Ident, syn::token::Colon));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -135,24 +135,6 @@ impl Debug for Lite<syn::BareFnArg> {
         }
         formatter.field("ty", Lite(&_val.ty));
         formatter.finish()
-    }
-}
-impl Debug for Lite<syn::BareFnArgName> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        match _val {
-            syn::BareFnArgName::Named(_val) => {
-                formatter.write_str("Named")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-            syn::BareFnArgName::Wild(_val) => {
-                formatter.write_str("Wild")?;
-                Ok(())
-            }
-        }
     }
 }
 impl Debug for Lite<syn::BinOp> {
