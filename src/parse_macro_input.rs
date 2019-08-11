@@ -6,7 +6,14 @@
 ///
 /// [`parse` module]: crate::rustdoc_workaround::parse_module
 ///
+/// <br>
+///
 /// # Intended usage
+///
+/// This macro must be called from a function that returns
+/// `proc_macro::TokenStream`. Usually this will be your proc macro entry point,
+/// the function that has the #\[proc_macro\] / #\[proc_macro_derive\] /
+/// #\[proc_macro_attribute\] attribute.
 ///
 /// ```edition2018
 /// extern crate proc_macro;
