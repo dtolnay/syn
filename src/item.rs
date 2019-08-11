@@ -25,7 +25,7 @@ ast_enum_of_structs! {
         /// A constant item: `const MAX: u16 = 65535`.
         Const(ItemConst),
 
-        /// An enum definition: `enum Foo<A, B> { C<A>, D<B> }`.
+        /// An enum definition: `enum Foo<A, B> { A(A), B(B) }`.
         Enum(ItemEnum),
 
         /// An existential type: `existential type Iter: Iterator<Item = u8>`.
@@ -101,7 +101,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// An enum definition: `enum Foo<A, B> { C<A>, D<B> }`.
+    /// An enum definition: `enum Foo<A, B> { A(A), B(B) }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct ItemEnum {
