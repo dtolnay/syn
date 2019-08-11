@@ -71,12 +71,12 @@ impl<T, P> Punctuated<T, P> {
         self.inner.len() + if self.last.is_some() { 1 } else { 0 }
     }
 
-    /// Borrows the first punctuated pair in this sequence.
+    /// Borrows the first element in this sequence.
     pub fn first(&self) -> Option<&T> {
         self.iter().next()
     }
 
-    /// Borrows the last punctuated pair in this sequence.
+    /// Borrows the last element in this sequence.
     pub fn last(&self) -> Option<&T> {
         if self.last.is_some() {
             self.last.as_ref().map(Box::as_ref)
@@ -85,7 +85,7 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
-    /// Mutably borrows the last punctuated pair in this sequence.
+    /// Mutably borrows the last element in this sequence.
     pub fn last_mut(&mut self) -> Option<&mut T> {
         if self.last.is_some() {
             self.last.as_mut().map(Box::as_mut)
