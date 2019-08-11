@@ -20,8 +20,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// Refer to the [module documentation] for details about parsing in Syn.
 ///
 /// [module documentation]: crate::rustdoc_workaround::parse_module
-///
-/// *This type is available if Syn is built with the `"parsing"` feature.*
 pub struct Error {
     // Span is implemented as an index into a thread-local interner to keep the
     // size small. It is not safe to access from a different thread. We want
