@@ -38,7 +38,9 @@
 //! [`syn::DeriveInput`]: struct.DeriveInput.html
 //! [parser functions]: parse/index.html
 //!
-//! ## Example of a custom derive
+//! <br>
+//!
+//! # Example of a custom derive
 //!
 //! The canonical custom derive using Syn looks like this. We write an ordinary
 //! Rust function tagged with a `proc_macro_derive` attribute and the name of
@@ -112,7 +114,9 @@
 //! }
 //! ```
 //!
-//! ## Spans and error reporting
+//! <p><br></p>
+//!
+//! # Spans and error reporting
 //!
 //! The token-based procedural macro API provides great control over where the
 //! compiler's error messages are displayed in user code. Consider the error the
@@ -141,7 +145,9 @@
 //!   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `Thread`
 //! ```
 //!
-//! ## Parsing a custom syntax
+//! <br>
+//!
+//! # Parsing a custom syntax
 //!
 //! The [`lazy-static`] example directory shows the implementation of a
 //! `functionlike!(...)` procedural macro in which the input tokens are parsed
@@ -173,7 +179,9 @@
 //!    |                ^^^
 //! ```
 //!
-//! ## Testing
+//! <br>
+//!
+//! # Testing
 //!
 //! When testing macros, we often care not just that the macro can be used
 //! successfully but also that when the macro is provided with invalid input it
@@ -186,7 +194,9 @@
 //!
 //! [`trybuild`]: https://github.com/dtolnay/trybuild
 //!
-//! ## Debugging
+//! <br>
+//!
+//! # Debugging
 //!
 //! When developing a procedural macro it can be helpful to look at what the
 //! generated code looks like. Use `cargo rustc -- -Zunstable-options
@@ -204,7 +214,9 @@
 //!
 //! [debugging]: https://quodlibetor.github.io/posts/debugging-rusts-new-custom-derive-system/
 //!
-//! ## Optional features
+//! <br>
+//!
+//! # Optional features
 //!
 //! Syn puts a lot of functionality behind optional features in order to
 //! optimize compile time for the most common use cases. The following features
