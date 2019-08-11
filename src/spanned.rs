@@ -4,6 +4,8 @@
 //! *This module is available if Syn is built with both the `"parsing"` and
 //! `"printing"` features.*
 //!
+//! <br>
+//!
 //! # Example
 //!
 //! Suppose in a procedural macro we have a [`Type`] that we want to assert
@@ -63,6 +65,22 @@
 //!
 //! In this technique, using the `Type`'s span for the error message makes the
 //! error appear in the correct place underlining the right type.
+//!
+//! <br>
+//!
+//! # Limitations
+//!
+//! The underlying [`proc_macro::Span::join`] method is nightly-only. When
+//! called from within a procedural macro in a nightly compiler, `Spanned` will
+//! use `join` to produce the intended span. When not using a nightly compiler,
+//! only the span of the *first token* of the syntax tree node is returned.
+//!
+//! In the common case of wanting to use the joined span as the span of a
+//! `syn::Error`, consider instead using [`syn::Error::new_spanned`] which is
+//! able to span the error correctly under the complete syntax tree node without
+//! needing the unstable `join`.
+//!
+//! [`syn::Error::new_spanned`]: crate::Error::new_spanned
 
 use proc_macro2::Span;
 use quote::spanned::Spanned as ToTokens;
