@@ -565,8 +565,7 @@ mod thread;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#[cfg(any(feature = "parsing", feature = "full", feature = "derive"))]
-#[allow(non_camel_case_types)]
+#[allow(dead_code, non_camel_case_types)]
 struct private;
 
 // https://github.com/rust-lang/rust/issues/62830
