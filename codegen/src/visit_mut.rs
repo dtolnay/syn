@@ -50,9 +50,12 @@ fn visit(
             let val = visit(&p.element, features, defs, &operand)?;
             let name = name.ref_mut_tokens();
             Some(quote! {
-                for mut el in Punctuated::pairs_mut(#name) {
-                    let it = el.value_mut();
-                    #val
+                for el in Punctuated::pairs_mut(#name) {
+                    let (it, p) = el.into_tuple();
+                    #val;
+                    if let Some(p) = p {
+                        tokens_helper(_visitor, &mut p.spans);
+                    }
                 }
             })
         }
