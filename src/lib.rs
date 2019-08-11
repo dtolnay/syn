@@ -397,9 +397,9 @@ pub use crate::stmt::{Block, Local, Stmt};
 mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::ty::{
-    Abi, BareFnArg, BareFnArgName, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
-    TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
-    TypeSlice, TypeTraitObject, TypeTuple,
+    Abi, BareFnArg, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup, TypeImplTrait, TypeInfer,
+    TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject,
+    TypeTuple,
 };
 
 #[cfg(feature = "full")]

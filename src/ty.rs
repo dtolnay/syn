@@ -359,21 +359,8 @@ ast_struct! {
     /// feature.*
     pub struct BareFnArg {
         pub attrs: Vec<Attribute>,
-        pub name: Option<(BareFnArgName, Token![:])>,
+        pub name: Option<(Ident, Token![:])>,
         pub ty: Type,
-    }
-}
-
-ast_enum! {
-    /// Name of an argument in a function type: the `n` in `fn(n: usize)`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    pub enum BareFnArgName {
-        /// Argument given a name.
-        Named(Ident),
-        /// Argument not given a name, matched with `_`.
-        Wild(Token![_]),
     }
 }
 
@@ -396,6 +383,7 @@ ast_enum! {
 pub mod parsing {
     use super::*;
 
+    use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
@@ -918,10 +906,10 @@ pub mod parsing {
                 attrs: input.call(Attribute::parse_outer)?,
                 name: {
                     if (input.peek(Ident) || input.peek(Token![_]))
-                        && !input.peek2(Token![::])
                         && input.peek2(Token![:])
+                        && !input.peek2(Token![::])
                     {
-                        let name: BareFnArgName = input.parse()?;
+                        let name = input.call(Ident::parse_any)?;
                         let colon: Token![:] = input.parse()?;
                         Some((name, colon))
                     } else {
@@ -930,19 +918,6 @@ pub mod parsing {
                 },
                 ty: input.parse()?,
             })
-        }
-    }
-
-    impl Parse for BareFnArgName {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Ident) {
-                input.parse().map(BareFnArgName::Named)
-            } else if lookahead.peek(Token![_]) {
-                input.parse().map(BareFnArgName::Wild)
-            } else {
-                Err(lookahead.error())
-            }
         }
     }
 
@@ -1118,15 +1093,6 @@ mod printing {
                 colon.to_tokens(tokens);
             }
             self.ty.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for BareFnArgName {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                BareFnArgName::Named(t) => t.to_tokens(tokens),
-                BareFnArgName::Wild(t) => t.to_tokens(tokens),
-            }
         }
     }
 
