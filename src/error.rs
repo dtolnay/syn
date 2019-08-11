@@ -78,7 +78,12 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// #     }
 /// # }
 /// ```
+#[derive(Debug, Clone)]
 pub struct Error {
+    messages: Vec<ErrorMessage>,
+}
+
+pub struct ErrorMessage {
     // Span is implemented as an index into a thread-local interner to keep the
     // size small. It is not safe to access from a different thread. We want
     // errors to be Send and Sync to play nicely with the Failure crate, so pin
@@ -94,7 +99,7 @@ struct _Test
 where
     Error: Send + Sync;
 
-impl Error {
+impl ErrorMessage {
     /// Usually the [`ParseStream::error`] method will be used instead, which
     /// automatically uses the correct span from the current position of the
     /// parse stream.
@@ -126,7 +131,7 @@ impl Error {
     /// }
     /// ```
     pub fn new<T: Display>(span: Span, message: T) -> Self {
-        Error {
+        ErrorMessage {
             start_span: ThreadBound::new(span),
             end_span: ThreadBound::new(span),
             message: message.to_string(),
@@ -151,7 +156,7 @@ impl Error {
         let mut iter = tokens.into_token_stream().into_iter();
         let start = iter.next().map_or_else(Span::call_site, |t| t.span());
         let end = iter.last().map_or(start, |t| t.span());
-        Error {
+        ErrorMessage {
             start_span: ThreadBound::new(start),
             end_span: ThreadBound::new(end),
             message: message.to_string(),
@@ -212,6 +217,27 @@ impl Error {
     }
 }
 
+impl Error {
+    pub fn new<T: Display>(span: Span, message: T) -> Self {
+        Error {
+            messages: vec![ErrorMessage::new(span, message)],
+        }
+    }
+
+    #[cfg(feature = "printing")]
+    pub fn new_spanned<T: ToTokens, U: Display>(tokens: T, message: U) -> Self {
+        Error {
+            messages: vec![ErrorMessage::new_spanned(tokens, message)],
+        }
+    }
+
+    pub fn to_compile_error(&self) -> TokenStream {
+        self.messages.iter()
+            .map(|m| m.to_compile_error())
+            .collect()
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     if cursor.eof() {
@@ -222,19 +248,51 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     }
 }
 
-impl Debug for Error {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.debug_tuple("Error").field(&self.message).finish()
+impl IntoIterator for Error {
+    type Item = ErrorMessage;
+    type IntoIter = std::vec::IntoIter<ErrorMessage>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.messages.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a Error {
+    type Item = &'a ErrorMessage;
+    type IntoIter = std::slice::Iter<'a, ErrorMessage>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.messages.iter()
     }
 }
 
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        for (i, error) in self.messages.iter().enumerate() {
+            if i != 0 {
+                formatter.write_str("; ")?;
+            }
+
+            Display::fmt(error, formatter)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Debug for ErrorMessage {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.debug_tuple("ErrorMessage").field(&self.message).finish()
+    }
+}
+
+impl Display for ErrorMessage {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str(&self.message)
     }
 }
 
-impl Clone for Error {
+impl Clone for ErrorMessage {
     fn clone(&self) -> Self {
         let start = self
             .start_span
@@ -242,7 +300,7 @@ impl Clone for Error {
             .cloned()
             .unwrap_or_else(Span::call_site);
         let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
-        Error {
+        ErrorMessage {
             start_span: ThreadBound::new(start),
             end_span: ThreadBound::new(end),
             message: self.message.clone(),
