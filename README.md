@@ -12,18 +12,16 @@ of Rust source code.
 Currently this library is geared toward use in Rust procedural macros, but
 contains some APIs that may be useful more generally.
 
-[custom derive]: https://github.com/rust-lang/rfcs/blob/master/text/1681-macros-1.1.md
-
 - **Data structures** — Syn provides a complete syntax tree that can represent
   any valid Rust source code. The syntax tree is rooted at [`syn::File`] which
   represents a full source file, but there are other entry points that may be
   useful to procedural macros including [`syn::Item`], [`syn::Expr`] and
   [`syn::Type`].
 
-- **Custom derives** — Of particular interest to custom derives is
-  [`syn::DeriveInput`] which is any of the three legal input items to a derive
-  macro. An example below shows using this type in a library that can derive
-  implementations of a trait of your own.
+- **Derives** — Of particular interest to derive macros is [`syn::DeriveInput`]
+  which is any of the three legal input items to a derive macro. An example
+  below shows using this type in a library that can derive implementations of a
+  user-defined trait.
 
 - **Parsing** — Parsing in Syn is built around [parser functions] with the
   signature `fn(ParseStream) -> Result<T>`. Every syntax tree node defined by
@@ -59,9 +57,9 @@ channel.*
 
 [*Release notes*](https://github.com/dtolnay/syn/releases)
 
-## Example of a custom derive
+## Example of a derive macro
 
-The canonical custom derive using Syn looks like this. We write an ordinary Rust
+The canonical derive macro using Syn looks like this. We write an ordinary Rust
 function tagged with a `proc_macro_derive` attribute and the name of the trait
 we are deriving. Any time that derive appears in the user's code, the Rust
 compiler passes their data structure as tokens into our macro. We get to execute
@@ -101,10 +99,10 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
 }
 ```
 
-The [`heapsize`] example directory shows a complete working Macros 1.1
-implementation of a custom derive. It works on any Rust compiler 1.15+. The
-example derives a `HeapSize` trait which computes an estimate of the amount of
-heap memory owned by a value.
+The [`heapsize`] example directory shows a complete working implementation of a
+derive macro. It works on any Rust compiler 1.31+. The example derives a
+`HeapSize` trait which computes an estimate of the amount of heap memory owned
+by a value.
 
 [`heapsize`]: examples/heapsize
 
@@ -115,7 +113,7 @@ pub trait HeapSize {
 }
 ```
 
-The custom derive allows users to write `#[derive(HeapSize)]` on data structures
+The derive macro allows users to write `#[derive(HeapSize)]` on data structures
 in their program.
 
 ```rust
@@ -219,7 +217,7 @@ compile time for the most common use cases. The following features are
 available.
 
 - **`derive`** *(enabled by default)* — Data structures for representing the
-  possible input to a custom derive, including structs and enums and types.
+  possible input to a derive macro, including structs and enums and types.
 - **`full`** — Data structures for representing the syntax tree of all valid
   Rust source code, including items and expressions.
 - **`parsing`** *(enabled by default)* — Ability to parse input tokens into a
