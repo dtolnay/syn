@@ -17,9 +17,67 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error returned when a Syn parser cannot parse the input tokens.
 ///
-/// Refer to the [module documentation] for details about parsing in Syn.
+/// # Error reporting in proc macros
 ///
-/// [module documentation]: crate::rustdoc_workaround::parse_module
+/// The correct way to report errors back to the compiler from a procedural
+/// macro is by emitting an appropriately spanned invocation of
+/// [`compile_error!`] in the generated code. This produces a better diagnostic
+/// message than simply panicking the macro.
+///
+/// When parsing macro input, the [`parse_macro_input!`] macro handles the
+/// conversion to `compile_error!` automatically.
+///
+/// ```
+/// extern crate proc_macro;
+///
+/// use proc_macro::TokenStream;
+/// use syn::{parse_macro_input, AttributeArgs, ItemFn};
+///
+/// # const IGNORE: &str = stringify! {
+/// #[proc_macro_attribute]
+/// # };
+/// pub fn my_attr(args: TokenStream, input: TokenStream) -> TokenStream {
+///     let args = parse_macro_input!(args as AttributeArgs);
+///     let input = parse_macro_input!(input as ItemFn);
+///
+///     /* ... */
+///     # TokenStream::new()
+/// }
+/// ```
+///
+/// For errors that arise later than the initial parsing stage, the
+/// [`.to_compile_error()`] method can be used to perform an explicit conversion
+/// to `compile_error!`.
+///
+/// [`.to_compile_error()`]: Error::to_compile_error
+///
+/// ```
+/// # extern crate proc_macro;
+/// #
+/// # use proc_macro::TokenStream;
+/// # use syn::{parse_macro_input, DeriveInput};
+/// #
+/// # const IGNORE: &str = stringify! {
+/// #[proc_macro_derive(MyDerive)]
+/// # };
+/// pub fn my_derive(input: TokenStream) -> TokenStream {
+///     let input = parse_macro_input!(input as DeriveInput);
+///
+///     // fn(DeriveInput) -> syn::Result<proc_macro2::TokenStream>
+///     expand::my_derive(input)
+///         .unwrap_or_else(|err| err.to_compile_error())
+///         .into()
+/// }
+/// #
+/// # mod expand {
+/// #     use proc_macro2::TokenStream;
+/// #     use syn::{DeriveInput, Result};
+/// #
+/// #     pub fn my_derive(input: DeriveInput) -> Result<TokenStream> {
+/// #         unimplemented!()
+/// #     }
+/// # }
+/// ```
 pub struct Error {
     // Span is implemented as an index into a thread-local interner to keep the
     // size small. It is not safe to access from a different thread. We want
