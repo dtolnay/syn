@@ -133,6 +133,9 @@ impl Hash for Attribute {
 impl Attribute {
     /// Parses the content of the attribute, consisting of the path and tts, as
     /// a [`Meta`] if possible.
+    ///
+    /// *This function is available if Syn is built with the `"parsing"`
+    /// feature.*
     #[cfg(feature = "parsing")]
     pub fn parse_meta(&self) -> Result<Meta> {
         fn clone_ident_segment(segment: &PathSegment) -> PathSegment {
