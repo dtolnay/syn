@@ -76,7 +76,7 @@ impl Macro {
     /// tree.
     ///
     /// This is equivalent to `syn::parse2::<T>(mac.tokens)` except that it
-    /// produces a more useful span when `tts` is empty.
+    /// produces a more useful span when `tokens` is empty.
     ///
     /// # Example
     ///

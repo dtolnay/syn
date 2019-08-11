@@ -40,13 +40,13 @@ ast_struct! {
     ///
     /// The `path` field gives the possibly colon-delimited path against which
     /// the attribute is resolved. It is equal to `"doc"` for desugared doc
-    /// comments. The `tts` field contains the rest of the attribute body as
+    /// comments. The `tokens` field contains the rest of the attribute body as
     /// tokens.
     ///
     /// ```text
     /// #[derive(Copy)]      #[crate::precondition x < 5]
     ///   ^^^^^^~~~~~~         ^^^^^^^^^^^^^^^^^^^ ~~~~~
-    ///    path  tts                   path         tts
+    ///   path  tokens                 path        tokens
     /// ```
     ///
     /// Use the [`parse_meta`] method to try parsing the tokens of an attribute
@@ -131,8 +131,8 @@ impl Hash for Attribute {
 }
 
 impl Attribute {
-    /// Parses the content of the attribute, consisting of the path and tts, as
-    /// a [`Meta`] if possible.
+    /// Parses the content of the attribute, consisting of the path and tokens,
+    /// as a [`Meta`] if possible.
     ///
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*

@@ -633,8 +633,8 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 /// Parse a proc-macro2 token stream into the chosen syntax tree node.
 ///
 /// This function parses a `proc_macro2::TokenStream` which is commonly useful
-/// when the input comes from a node of the Syn syntax tree, for example the tts
-/// of a [`Macro`] node. When in a procedural macro parsing the
+/// when the input comes from a node of the Syn syntax tree, for example the
+/// body tokens of a [`Macro`] node. When in a procedural macro parsing the
 /// `proc_macro::TokenStream` provided by the compiler, use [`syn::parse`]
 /// instead.
 ///
