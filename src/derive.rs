@@ -43,7 +43,7 @@ ast_enum_of_structs! {
         /// An enum input to a `proc_macro_derive` macro.
         Enum(DataEnum),
 
-        /// A tagged union input to a `proc_macro_derive` macro.
+        /// An untagged union input to a `proc_macro_derive` macro.
         Union(DataUnion),
     }
 
@@ -75,7 +75,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A tagged union input to a `proc_macro_derive` macro.
+    /// An untagged union input to a `proc_macro_derive` macro.
     ///
     /// *This type is available if Syn is built with the `"derive"`
     /// feature.*
