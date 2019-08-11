@@ -17,7 +17,7 @@
 //!
 //! ```text
 //! a_function_call(arg1, arg2, arg3);
-//!                 ^^^^^ ~~~~~ ^^^^
+//!                 ~~~~^ ~~~~^ ~~~~
 //! ```
 
 #[cfg(feature = "extra-traits")]
