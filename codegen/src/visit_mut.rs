@@ -194,7 +194,15 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 });
             }
         }
-        Data::Private => {}
+        Data::Private => {
+            if ty == "Ident" {
+                visit_mut_impl.extend(quote! {
+                    let mut span = _i.span();
+                    _visitor.visit_span_mut(&mut span);
+                    _i.set_span(span);
+                });
+            }
+        }
     }
 
     traits.extend(quote! {

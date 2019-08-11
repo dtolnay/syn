@@ -3351,4 +3351,8 @@ pub fn visit_where_predicate_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mu
     }
 }
 pub fn visit_span_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Span) {}
-pub fn visit_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {}
+pub fn visit_ident_mut<V: VisitMut + ?Sized>(_visitor: &mut V, _i: &mut Ident) {
+    let mut span = _i.span();
+    _visitor.visit_span_mut(&mut span);
+    _i.set_span(span);
+}
