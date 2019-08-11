@@ -28,9 +28,6 @@ ast_enum_of_structs! {
         /// An enum definition: `enum Foo<A, B> { A(A), B(B) }`.
         Enum(ItemEnum),
 
-        /// An existential type: `existential type Iter: Iterator<Item = u8>`.
-        Existential(ItemExistential),
-
         /// An `extern crate` item: `extern crate serde`.
         ExternCrate(ItemExternCrate),
 
@@ -112,23 +109,6 @@ ast_struct! {
         pub generics: Generics,
         pub brace_token: token::Brace,
         pub variants: Punctuated<Variant, Token![,]>,
-    }
-}
-
-ast_struct! {
-    /// An existential type: `existential type Iter: Iterator<Item = u8>`.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct ItemExistential {
-        pub attrs: Vec<Attribute>,
-        pub vis: Visibility,
-        pub existential_token: Token![existential],
-        pub type_token: Token![type],
-        pub ident: Ident,
-        pub generics: Generics,
-        pub colon_token: Option<Token![:]>,
-        pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        pub semi_token: Token![;],
     }
 }
 
@@ -353,7 +333,6 @@ impl PartialEq for Item {
         match (self, other) {
             (Item::Const(this), Item::Const(other)) => this == other,
             (Item::Enum(this), Item::Enum(other)) => this == other,
-            (Item::Existential(this), Item::Existential(other)) => this == other,
             (Item::ExternCrate(this), Item::ExternCrate(other)) => this == other,
             (Item::Fn(this), Item::Fn(other)) => this == other,
             (Item::ForeignMod(this), Item::ForeignMod(other)) => this == other,
@@ -391,68 +370,64 @@ impl Hash for Item {
                 state.write_u8(1);
                 item.hash(state);
             }
-            Item::Existential(item) => {
+            Item::ExternCrate(item) => {
                 state.write_u8(2);
                 item.hash(state);
             }
-            Item::ExternCrate(item) => {
+            Item::Fn(item) => {
                 state.write_u8(3);
                 item.hash(state);
             }
-            Item::Fn(item) => {
+            Item::ForeignMod(item) => {
                 state.write_u8(4);
                 item.hash(state);
             }
-            Item::ForeignMod(item) => {
+            Item::Impl(item) => {
                 state.write_u8(5);
                 item.hash(state);
             }
-            Item::Impl(item) => {
+            Item::Macro(item) => {
                 state.write_u8(6);
                 item.hash(state);
             }
-            Item::Macro(item) => {
+            Item::Macro2(item) => {
                 state.write_u8(7);
                 item.hash(state);
             }
-            Item::Macro2(item) => {
+            Item::Mod(item) => {
                 state.write_u8(8);
                 item.hash(state);
             }
-            Item::Mod(item) => {
+            Item::Static(item) => {
                 state.write_u8(9);
                 item.hash(state);
             }
-            Item::Static(item) => {
+            Item::Struct(item) => {
                 state.write_u8(10);
                 item.hash(state);
             }
-            Item::Struct(item) => {
+            Item::Trait(item) => {
                 state.write_u8(11);
                 item.hash(state);
             }
-            Item::Trait(item) => {
+            Item::TraitAlias(item) => {
                 state.write_u8(12);
                 item.hash(state);
             }
-            Item::TraitAlias(item) => {
+            Item::Type(item) => {
                 state.write_u8(13);
                 item.hash(state);
             }
-            Item::Type(item) => {
+            Item::Union(item) => {
                 state.write_u8(14);
                 item.hash(state);
             }
-            Item::Union(item) => {
+            Item::Use(item) => {
                 state.write_u8(15);
                 item.hash(state);
             }
-            Item::Use(item) => {
-                state.write_u8(16);
-                item.hash(state);
-            }
             Item::Verbatim(item) => {
-                state.write_u8(17);
+                state.write_u8(16);
                 TokenStreamHelper(item).hash(state);
             }
             Item::__Nonexhaustive => unreachable!(),
@@ -901,9 +876,6 @@ ast_enum_of_structs! {
         /// An associated type within an impl block.
         Type(ImplItemType),
 
-        /// An existential type within an impl block.
-        Existential(ImplItemExistential),
-
         /// A macro invocation within an impl block.
         Macro(ImplItemMacro),
 
@@ -964,22 +936,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// An existential type within an impl block.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct ImplItemExistential {
-        pub attrs: Vec<Attribute>,
-        pub existential_token: Token![existential],
-        pub type_token: Token![type],
-        pub ident: Ident,
-        pub generics: Generics,
-        pub colon_token: Option<Token![:]>,
-        pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        pub semi_token: Token![;],
-    }
-}
-
-ast_struct! {
     /// A macro invocation within an impl block.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
@@ -1000,7 +956,6 @@ impl PartialEq for ImplItem {
             (ImplItem::Const(this), ImplItem::Const(other)) => this == other,
             (ImplItem::Method(this), ImplItem::Method(other)) => this == other,
             (ImplItem::Type(this), ImplItem::Type(other)) => this == other,
-            (ImplItem::Existential(this), ImplItem::Existential(other)) => this == other,
             (ImplItem::Macro(this), ImplItem::Macro(other)) => this == other,
             (ImplItem::Verbatim(this), ImplItem::Verbatim(other)) => {
                 TokenStreamHelper(this) == TokenStreamHelper(other)
@@ -1029,16 +984,12 @@ impl Hash for ImplItem {
                 state.write_u8(2);
                 item.hash(state);
             }
-            ImplItem::Existential(item) => {
+            ImplItem::Macro(item) => {
                 state.write_u8(3);
                 item.hash(state);
             }
-            ImplItem::Macro(item) => {
-                state.write_u8(4);
-                item.hash(state);
-            }
             ImplItem::Verbatim(item) => {
-                state.write_u8(5);
+                state.write_u8(4);
                 TokenStreamHelper(item).hash(state);
             }
             ImplItem::__Nonexhaustive => unreachable!(),
@@ -1193,8 +1144,6 @@ pub mod parsing {
                 input.parse().map(Item::Mod)
             } else if lookahead.peek(Token![type]) {
                 input.parse().map(Item::Type)
-            } else if lookahead.peek(Token![existential]) {
-                input.parse().map(Item::Existential)
             } else if lookahead.peek(Token![struct]) {
                 input.parse().map(Item::Struct)
             } else if lookahead.peek(Token![enum]) {
@@ -1234,7 +1183,6 @@ pub mod parsing {
                     Item::Mod(item) => &mut item.attrs,
                     Item::ForeignMod(item) => &mut item.attrs,
                     Item::Type(item) => &mut item.attrs,
-                    Item::Existential(item) => &mut item.attrs,
                     Item::Struct(item) => &mut item.attrs,
                     Item::Enum(item) => &mut item.attrs,
                     Item::Union(item) => &mut item.attrs,
@@ -1803,35 +1751,6 @@ pub mod parsing {
         }
     }
 
-    impl Parse for ItemExistential {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ItemExistential {
-                attrs: input.call(Attribute::parse_outer)?,
-                vis: input.parse()?,
-                existential_token: input.parse()?,
-                type_token: input.parse()?,
-                ident: input.parse()?,
-                generics: {
-                    let mut generics: Generics = input.parse()?;
-                    generics.where_clause = input.parse()?;
-                    generics
-                },
-                colon_token: Some(input.parse()?),
-                bounds: {
-                    let mut bounds = Punctuated::new();
-                    while !input.peek(Token![;]) {
-                        if !bounds.is_empty() {
-                            bounds.push_punct(input.parse()?);
-                        }
-                        bounds.push_value(input.parse()?);
-                    }
-                    bounds
-                },
-                semi_token: input.parse()?,
-            })
-        }
-    }
-
     impl Parse for ItemStruct {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -2351,11 +2270,6 @@ pub mod parsing {
                 input.parse().map(ImplItem::Type)
             } else if vis.is_inherited()
                 && defaultness.is_none()
-                && lookahead.peek(Token![existential])
-            {
-                input.parse().map(ImplItem::Existential)
-            } else if vis.is_inherited()
-                && defaultness.is_none()
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
                     || lookahead.peek(Token![super])
@@ -2373,7 +2287,6 @@ pub mod parsing {
                     ImplItem::Const(item) => &mut item.attrs,
                     ImplItem::Method(item) => &mut item.attrs,
                     ImplItem::Type(item) => &mut item.attrs,
-                    ImplItem::Existential(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) | ImplItem::__Nonexhaustive => unreachable!(),
                 };
@@ -2468,22 +2381,6 @@ pub mod parsing {
                 eq_token: input.parse()?,
                 ty: input.parse()?,
                 semi_token: input.parse()?,
-            })
-        }
-    }
-
-    impl Parse for ImplItemExistential {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let ety: ItemExistential = input.parse()?;
-            Ok(ImplItemExistential {
-                attrs: ety.attrs,
-                existential_token: ety.existential_token,
-                type_token: ety.type_token,
-                ident: ety.ident,
-                generics: ety.generics,
-                colon_token: ety.colon_token,
-                bounds: ety.bounds,
-                semi_token: ety.semi_token,
             })
         }
     }
@@ -2639,23 +2536,6 @@ mod printing {
             self.generics.where_clause.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
-            self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ItemExistential {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.vis.to_tokens(tokens);
-            self.existential_token.to_tokens(tokens);
-            self.type_token.to_tokens(tokens);
-            self.ident.to_tokens(tokens);
-            self.generics.to_tokens(tokens);
-            self.generics.where_clause.to_tokens(tokens);
-            if !self.bounds.is_empty() {
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-                self.bounds.to_tokens(tokens);
-            }
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -2932,22 +2812,6 @@ mod printing {
             self.generics.where_clause.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
-            self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ImplItemExistential {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.existential_token.to_tokens(tokens);
-            self.type_token.to_tokens(tokens);
-            self.ident.to_tokens(tokens);
-            self.generics.to_tokens(tokens);
-            self.generics.where_clause.to_tokens(tokens);
-            if !self.bounds.is_empty() {
-                TokensOrDefault(&self.colon_token).to_tokens(tokens);
-                self.bounds.to_tokens(tokens);
-            }
             self.semi_token.to_tokens(tokens);
         }
     }

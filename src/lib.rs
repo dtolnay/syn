@@ -350,12 +350,11 @@ mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
     FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-    ImplItem, ImplItemConst, ImplItemExistential, ImplItemMacro, ImplItemMethod, ImplItemType,
-    Item, ItemConst, ItemEnum, ItemExistential, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
-    ItemMacro, ItemMacro2, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-    ItemUnion, ItemUse, Receiver, Signature, TraitItem, TraitItemConst, TraitItemMacro,
-    TraitItemMethod, TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
-    Variadic,
+    ImplItem, ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, Item, ItemConst,
+    ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMacro2, ItemMod,
+    ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
+    Signature, TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType, UseGlob,
+    UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };
 
 #[cfg(feature = "full")]

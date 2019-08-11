@@ -607,7 +607,6 @@ define_keywords! {
     "dyn"         pub struct Dyn          /// `dyn`
     "else"        pub struct Else         /// `else`
     "enum"        pub struct Enum         /// `enum`
-    "existential" pub struct Existential  /// `existential`
     "extern"      pub struct Extern       /// `extern`
     "final"       pub struct Final        /// `final`
     "fn"          pub struct Fn           /// `fn`
@@ -730,7 +729,6 @@ macro_rules! export_token_macro {
             (dyn)         => { $crate::token::Dyn };
             (else)        => { $crate::token::Else };
             (enum)        => { $crate::token::Enum };
-            (existential) => { $crate::token::Existential };
             (extern)      => { $crate::token::Extern };
             (final)       => { $crate::token::Final };
             (fn)          => { $crate::token::Fn };
