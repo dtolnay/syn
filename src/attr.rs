@@ -20,6 +20,8 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
+    /// <br>
+    ///
     /// # Syntax
     ///
     /// Rust has six types of attributes.
@@ -49,13 +51,9 @@ ast_struct! {
     ///   path  tokens                 path        tokens
     /// ```
     ///
-    /// Use the [`parse_meta`] method to try parsing the tokens of an attribute
-    /// into the structured representation that is used by convention across
-    /// most Rust libraries.
+    /// <br>
     ///
-    /// [`parse_meta`]: Attribute::parse_meta
-    ///
-    /// # Parsing
+    /// # Parsing from tokens to Attribute
     ///
     /// This type does not implement the [`Parse`] trait and thus cannot be
     /// parsed directly by [`ParseStream::parse`]. Instead use
@@ -93,6 +91,26 @@ ast_struct! {
     ///     }
     /// }
     /// ```
+    ///
+    /// <p><br></p>
+    ///
+    /// # Parsing from Attribute to structured arguments
+    ///
+    /// The grammar of attributes in Rust is very flexible, which makes the
+    /// syntax tree not that useful on its own. In particular, arguments of the
+    /// attribute are held in an arbitrary `tokens: TokenStream`. Macros are
+    /// expected to check the `path` of the attribute, decide whether they
+    /// recognize it, and then parse the remaining tokens according to whatever
+    /// grammar they wish to require for that kind of attribute.
+    ///
+    /// If the attribute you are parsing is expected to conform to the
+    /// conventional structured form of attribute, use [`parse_meta()`] to
+    /// obtain that structured representation. If the attribute follows some
+    /// other grammar of its own, use [`parse_args()`] to parse that into the
+    /// expected data structure.
+    ///
+    /// [`parse_meta()`]: Attribute::parse_meta
+    /// [`parse_args()`]: Attribute::parse_args
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
         pub style: AttrStyle,
