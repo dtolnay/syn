@@ -51,8 +51,11 @@ fn visit(
             let name = name.ref_tokens();
             Some(quote! {
                 for el in Punctuated::pairs(#name) {
-                    let it = el.value();
-                    #val
+                    let (it, p) = el.into_tuple();
+                    #val;
+                    if let Some(p) = p {
+                        tokens_helper(_visitor, &p.spans);
+                    }
                 }
             })
         }

@@ -810,8 +810,11 @@ pub fn visit_angle_bracketed_generic_arguments<'ast, V: Visit<'ast> + ?Sized>(
     };
     tokens_helper(_visitor, &_i.lt_token.spans);
     for el in Punctuated::pairs(&_i.args) {
-        let it = el.value();
-        _visitor.visit_generic_argument(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_generic_argument(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.gt_token.spans);
 }
@@ -983,8 +986,11 @@ pub fn visit_bound_lifetimes<'ast, V: Visit<'ast> + ?Sized>(
     tokens_helper(_visitor, &_i.for_token.span);
     tokens_helper(_visitor, &_i.lt_token.spans);
     for el in Punctuated::pairs(&_i.lifetimes) {
-        let it = el.value();
-        _visitor.visit_lifetime_def(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_lifetime_def(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.gt_token.spans);
 }
@@ -1009,8 +1015,11 @@ pub fn visit_constraint<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     _visitor.visit_ident(&_i.ident);
     tokens_helper(_visitor, &_i.colon_token.spans);
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "derive")]
@@ -1032,8 +1041,11 @@ pub fn visit_data_enum<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     tokens_helper(_visitor, &_i.enum_token.span);
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.variants) {
-        let it = el.value();
-        _visitor.visit_variant(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_variant(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "derive")]
@@ -1195,8 +1207,11 @@ pub fn visit_expr_array<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     }
     tokens_helper(_visitor, &_i.bracket_token.span);
     for el in Punctuated::pairs(&_i.elems) {
-        let it = el.value();
-        _visitor.visit_expr(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_expr(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1288,8 +1303,11 @@ pub fn visit_expr_call<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_expr(&*_i.func);
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.args) {
-        let it = el.value();
-        _visitor.visit_expr(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_expr(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1317,8 +1335,11 @@ pub fn visit_expr_closure<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
     };
     tokens_helper(_visitor, &_i.or1_token.spans);
     for el in Punctuated::pairs(&_i.inputs) {
-        let it = el.value();
-        _visitor.visit_pat(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_pat(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.or2_token.spans);
     _visitor.visit_return_type(&_i.output);
@@ -1462,8 +1483,11 @@ pub fn visit_expr_method_call<'ast, V: Visit<'ast> + ?Sized>(
     };
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.args) {
-        let it = el.value();
-        _visitor.visit_expr(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_expr(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1539,8 +1563,11 @@ pub fn visit_expr_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'
     _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.fields) {
-        let it = el.value();
-        _visitor.visit_field_value(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_field_value(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.dot2_token {
         tokens_helper(_visitor, &it.spans)
@@ -1575,8 +1602,11 @@ pub fn visit_expr_tuple<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     }
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.elems) {
-        let it = el.value();
-        _visitor.visit_expr(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_expr(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1678,8 +1708,11 @@ pub fn visit_fields<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast F
 pub fn visit_fields_named<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast FieldsNamed) {
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.named) {
-        let it = el.value();
-        _visitor.visit_field(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_field(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1689,8 +1722,11 @@ pub fn visit_fields_unnamed<'ast, V: Visit<'ast> + ?Sized>(
 ) {
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.unnamed) {
-        let it = el.value();
-        _visitor.visit_field(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_field(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1851,8 +1887,11 @@ pub fn visit_generics<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.params) {
-        let it = el.value();
-        _visitor.visit_generic_param(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_generic_param(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.gt_token {
         tokens_helper(_visitor, &it.spans)
@@ -1921,8 +1960,11 @@ pub fn visit_impl_item_existential<'ast, V: Visit<'ast> + ?Sized>(
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
@@ -2063,8 +2105,11 @@ pub fn visit_item_enum<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_generics(&_i.generics);
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.variants) {
-        let it = el.value();
-        _visitor.visit_variant(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_variant(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -2084,8 +2129,11 @@ pub fn visit_item_existential<'ast, V: Visit<'ast> + ?Sized>(
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
@@ -2247,8 +2295,11 @@ pub fn visit_item_trait<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.supertraits) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.brace_token.span);
     for it in &_i.items {
@@ -2269,8 +2320,11 @@ pub fn visit_item_trait_alias<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_generics(&_i.generics);
     tokens_helper(_visitor, &_i.eq_token.spans);
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.semi_token.spans);
 }
@@ -2330,8 +2384,11 @@ pub fn visit_lifetime_def<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_lifetime(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_lifetime(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2447,8 +2504,11 @@ pub fn visit_meta_list<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.nested) {
-        let it = el.value();
-        _visitor.visit_nested_meta(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_nested_meta(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2468,8 +2528,11 @@ pub fn visit_method_turbofish<'ast, V: Visit<'ast> + ?Sized>(
     tokens_helper(_visitor, &_i.colon2_token.spans);
     tokens_helper(_visitor, &_i.lt_token.spans);
     for el in Punctuated::pairs(&_i.args) {
-        let it = el.value();
-        _visitor.visit_generic_method_argument(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_generic_method_argument(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     tokens_helper(_visitor, &_i.gt_token.spans);
 }
@@ -2491,8 +2554,11 @@ pub fn visit_parenthesized_generic_arguments<'ast, V: Visit<'ast> + ?Sized>(
 ) {
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.inputs) {
-        let it = el.value();
-        _visitor.visit_type(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     _visitor.visit_return_type(&_i.output);
 }
@@ -2598,8 +2664,11 @@ pub fn visit_pat_or<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast P
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.cases) {
-        let it = el.value();
-        _visitor.visit_pat(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_pat(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -2649,8 +2718,11 @@ pub fn visit_pat_slice<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     }
     tokens_helper(_visitor, &_i.bracket_token.span);
     for el in Punctuated::pairs(&_i.elems) {
-        let it = el.value();
-        _visitor.visit_pat(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_pat(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -2661,8 +2733,11 @@ pub fn visit_pat_struct<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
     _visitor.visit_path(&_i.path);
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.fields) {
-        let it = el.value();
-        _visitor.visit_field_pat(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_field_pat(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.dot2_token {
         tokens_helper(_visitor, &it.spans)
@@ -2675,8 +2750,11 @@ pub fn visit_pat_tuple<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     }
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.elems) {
-        let it = el.value();
-        _visitor.visit_pat(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_pat(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -2712,8 +2790,11 @@ pub fn visit_path<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Pat
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.segments) {
-        let it = el.value();
-        _visitor.visit_path_segment(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_path_segment(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2750,8 +2831,11 @@ pub fn visit_predicate_lifetime<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_lifetime(&_i.lifetime);
     tokens_helper(_visitor, &_i.colon_token.spans);
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_lifetime(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_lifetime(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2765,8 +2849,11 @@ pub fn visit_predicate_type<'ast, V: Visit<'ast> + ?Sized>(
     _visitor.visit_type(&_i.bounded_ty);
     tokens_helper(_visitor, &_i.colon_token.spans);
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2835,8 +2922,11 @@ pub fn visit_signature<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'as
     _visitor.visit_generics(&_i.generics);
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.inputs) {
-        let it = el.value();
-        _visitor.visit_fn_arg(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_fn_arg(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.variadic {
         _visitor.visit_variadic(it)
@@ -2967,8 +3057,11 @@ pub fn visit_trait_item_type<'ast, V: Visit<'ast> + ?Sized>(
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.default {
         tokens_helper(_visitor, &(it).0.spans);
@@ -3048,8 +3141,11 @@ pub fn visit_type_bare_fn<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &
     tokens_helper(_visitor, &_i.fn_token.span);
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.inputs) {
-        let it = el.value();
-        _visitor.visit_bare_fn_arg(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_bare_fn_arg(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.variadic {
         tokens_helper(_visitor, &it.spans)
@@ -3068,8 +3164,11 @@ pub fn visit_type_impl_trait<'ast, V: Visit<'ast> + ?Sized>(
 ) {
     tokens_helper(_visitor, &_i.impl_token.span);
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3094,8 +3193,11 @@ pub fn visit_type_param<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
         tokens_helper(_visitor, &it.spans)
     };
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
     if let Some(it) = &_i.eq_token {
         tokens_helper(_visitor, &it.spans)
@@ -3169,16 +3271,22 @@ pub fn visit_type_trait_object<'ast, V: Visit<'ast> + ?Sized>(
         tokens_helper(_visitor, &it.span)
     };
     for el in Punctuated::pairs(&_i.bounds) {
-        let it = el.value();
-        _visitor.visit_type_param_bound(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type_param_bound(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_type_tuple<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast TypeTuple) {
     tokens_helper(_visitor, &_i.paren_token.span);
     for el in Punctuated::pairs(&_i.elems) {
-        let it = el.value();
-        _visitor.visit_type(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_type(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3203,8 +3311,11 @@ pub fn visit_use_glob<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast
 pub fn visit_use_group<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast UseGroup) {
     tokens_helper(_visitor, &_i.brace_token.span);
     for el in Punctuated::pairs(&_i.items) {
-        let it = el.value();
-        _visitor.visit_use_tree(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_use_tree(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -3301,8 +3412,11 @@ pub fn visit_visibility<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'a
 pub fn visit_where_clause<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast WhereClause) {
     tokens_helper(_visitor, &_i.where_token.span);
     for el in Punctuated::pairs(&_i.predicates) {
-        let it = el.value();
-        _visitor.visit_where_predicate(it)
+        let (it, p) = el.into_tuple();
+        _visitor.visit_where_predicate(it);
+        if let Some(p) = p {
+            tokens_helper(_visitor, &p.spans);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
