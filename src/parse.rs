@@ -1092,6 +1092,12 @@ pub trait Parser: Sized {
         let _ = scope;
         self.parse2(tokens)
     }
+
+    // Not public API.
+    #[doc(hidden)]
+    fn __parse_stream(self, input: ParseStream) -> Result<Self::Output> {
+        input.parse().and_then(|tokens| self.parse2(tokens))
+    }
 }
 
 fn tokens_to_parse_buffer(tokens: &TokenBuffer) -> ParseBuffer {
@@ -1133,10 +1139,19 @@ where
             Err(state.error("unexpected token"))
         }
     }
+
+    #[doc(hidden)]
+    fn __parse_stream(self, input: ParseStream) -> Result<Self::Output> {
+        self(input)
+    }
 }
 
 pub(crate) fn parse_scoped<F: Parser>(f: F, scope: Span, tokens: TokenStream) -> Result<F::Output> {
     f.__parse_scoped(scope, tokens)
+}
+
+pub(crate) fn parse_stream<F: Parser>(f: F, input: ParseStream) -> Result<F::Output> {
+    f.__parse_stream(input)
 }
 
 /// An empty syntax tree node that consumes no tokens when parsed.

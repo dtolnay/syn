@@ -6,7 +6,7 @@ use std::iter;
 use proc_macro2::TokenStream;
 
 #[cfg(feature = "parsing")]
-use crate::parse::{ParseStream, Result};
+use crate::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
 #[cfg(feature = "parsing")]
 use crate::punctuated::Pair;
 #[cfg(feature = "extra-traits")]
@@ -168,6 +168,39 @@ impl Attribute {
         parse::Parser::parse2(parser, self.tokens.clone())
     }
 
+    /// Parse the arguments to the attribute as a syntax tree.
+    ///
+    /// This is similar to `syn::parse2::<T>(attr.tokens)` except that:
+    ///
+    /// - the surrounding delimiters are *not* included in the input to the
+    ///   parser; and
+    /// - the error message has a more useful span when `tokens` is empty.
+    ///
+    /// ```text
+    /// #[my_attr(value < 5)]
+    ///           ^^^^^^^^^ what gets parsed
+    /// ```
+    ///
+    /// *This function is available if Syn is built with the `"parsing"`
+    /// feature.*
+    #[cfg(feature = "parsing")]
+    pub fn parse_args<T: Parse>(&self) -> Result<T> {
+        self.parse_args_with(T::parse)
+    }
+
+    /// Parse the arguments to the attribute using the given parser.
+    ///
+    /// *This function is available if Syn is built with the `"parsing"`
+    /// feature.*
+    #[cfg(feature = "parsing")]
+    pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
+        let parser = |input: ParseStream| {
+            let args = enter_args(self, input)?;
+            parse::parse_stream(parser, &args)
+        };
+        parser.parse2(self.tokens.clone())
+    }
+
     /// Parses zero or more outer attributes from the stream.
     ///
     /// *This function is available if Syn is built with the `"parsing"`
@@ -192,6 +225,54 @@ impl Attribute {
             attrs.push(input.call(parsing::single_parse_inner)?);
         }
         Ok(attrs)
+    }
+}
+
+#[cfg(feature = "parsing")]
+fn error_expected_args(attr: &Attribute) -> Error {
+    let style = match attr.style {
+        AttrStyle::Outer => "#",
+        AttrStyle::Inner(_) => "#!",
+    };
+
+    let mut path = String::new();
+    for segment in &attr.path.segments {
+        if !path.is_empty() || attr.path.leading_colon.is_some() {
+            path += "::";
+        }
+        path += &segment.ident.to_string();
+    }
+
+    let msg = format!("expected attribute arguments: {}[{}(...)]", style, path);
+
+    #[cfg(feature = "printing")]
+    return Error::new_spanned(attr, msg);
+
+    #[cfg(not(feature = "printing"))]
+    return Error::new(attr.bracket_token.span, msg);
+}
+
+#[cfg(feature = "parsing")]
+fn enter_args<'a>(attr: &Attribute, input: ParseStream<'a>) -> Result<ParseBuffer<'a>> {
+    if input.is_empty() {
+        return Err(error_expected_args(attr));
+    };
+
+    let content;
+    if input.peek(token::Paren) {
+        parenthesized!(content in input);
+    } else if input.peek(token::Bracket) {
+        bracketed!(content in input);
+    } else if input.peek(token::Brace) {
+        braced!(content in input);
+    } else {
+        return Err(input.error("unexpected token in attribute arguments"));
+    }
+
+    if input.is_empty() {
+        Ok(content)
+    } else {
+        Err(input.error("unexpected token in attribute arguments"))
     }
 }
 
