@@ -24,3 +24,8 @@ fn test_type_size() {
 fn test_pat_size() {
     assert_eq!(mem::size_of::<Pat>(), 144);
 }
+
+#[test]
+fn test_lit_size() {
+    assert_eq!(mem::size_of::<Lit>(), 88);
+}
