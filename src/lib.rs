@@ -442,12 +442,7 @@ mod gen {
     ///     /* ... */
     ///
     ///     fn visit_expr_binary(&mut self, node: &'ast ExprBinary) {
-    ///         for attr in &node.attrs {
-    ///             self.visit_attribute(attr);
-    ///         }
-    ///         self.visit_expr(&*node.left);
-    ///         self.visit_bin_op(&node.op);
-    ///         self.visit_expr(&*node.right);
+    ///         visit_expr_binary(self, node);
     ///     }
     ///
     ///     /* ... */
@@ -455,6 +450,20 @@ mod gen {
     ///     # fn visit_expr(&mut self, node: &'ast Expr);
     ///     # fn visit_bin_op(&mut self, node: &'ast BinOp);
     /// }
+    ///
+    /// pub fn visit_expr_binary<'ast, V>(v: &mut V, node: &'ast ExprBinary)
+    /// where
+    ///     V: Visit<'ast> + ?Sized,
+    /// {
+    ///     for attr in &node.attrs {
+    ///         v.visit_attribute(attr);
+    ///     }
+    ///     v.visit_expr(&*node.left);
+    ///     v.visit_bin_op(&node.op);
+    ///     v.visit_expr(&*node.right);
+    /// }
+    ///
+    /// /* ... */
     /// ```
     ///
     /// *This module is available if Syn is built with the `"visit"` feature.*
@@ -478,12 +487,7 @@ mod gen {
     ///     /* ... */
     ///
     ///     fn visit_expr_binary_mut(&mut self, node: &mut ExprBinary) {
-    ///         for attr in &mut node.attrs {
-    ///             self.visit_attribute_mut(attr);
-    ///         }
-    ///         self.visit_expr_mut(&mut *node.left);
-    ///         self.visit_bin_op_mut(&mut node.op);
-    ///         self.visit_expr_mut(&mut *node.right);
+    ///         visit_expr_binary_mut(self, node);
     ///     }
     ///
     ///     /* ... */
@@ -491,6 +495,20 @@ mod gen {
     ///     # fn visit_expr_mut(&mut self, node: &mut Expr);
     ///     # fn visit_bin_op_mut(&mut self, node: &mut BinOp);
     /// }
+    ///
+    /// pub fn visit_expr_binary_mut<V>(v: &mut V, node: &mut ExprBinary)
+    /// where
+    ///     V: VisitMut + ?Sized,
+    /// {
+    ///     for attr in &mut node.attrs {
+    ///         v.visit_attribute_mut(attr);
+    ///     }
+    ///     v.visit_expr_mut(&mut *node.left);
+    ///     v.visit_bin_op_mut(&mut node.op);
+    ///     v.visit_expr_mut(&mut *node.right);
+    /// }
+    ///
+    /// /* ... */
     /// ```
     ///
     /// *This module is available if Syn is built with the `"visit-mut"`
@@ -514,15 +532,7 @@ mod gen {
     ///     /* ... */
     ///
     ///     fn fold_expr_binary(&mut self, node: ExprBinary) -> ExprBinary {
-    ///         ExprBinary {
-    ///             attrs: node.attrs
-    ///                        .into_iter()
-    ///                        .map(|attr| self.fold_attribute(attr))
-    ///                        .collect(),
-    ///             left: Box::new(self.fold_expr(*node.left)),
-    ///             op: self.fold_bin_op(node.op),
-    ///             right: Box::new(self.fold_expr(*node.right)),
-    ///         }
+    ///         fold_expr_binary(self, node)
     ///     }
     ///
     ///     /* ... */
@@ -530,6 +540,24 @@ mod gen {
     ///     # fn fold_expr(&mut self, node: Expr) -> Expr;
     ///     # fn fold_bin_op(&mut self, node: BinOp) -> BinOp;
     /// }
+    ///
+    /// pub fn fold_expr_binary<V>(v: &mut V, node: ExprBinary) -> ExprBinary
+    /// where
+    ///     V: Fold + ?Sized,
+    /// {
+    ///     ExprBinary {
+    ///         attrs: node
+    ///             .attrs
+    ///             .into_iter()
+    ///             .map(|attr| v.fold_attribute(attr))
+    ///             .collect(),
+    ///         left: Box::new(v.fold_expr(*node.left)),
+    ///         op: v.fold_bin_op(node.op),
+    ///         right: Box::new(v.fold_expr(*node.right)),
+    ///     }
+    /// }
+    ///
+    /// /* ... */
     /// ```
     ///
     /// *This module is available if Syn is built with the `"fold"` feature.*
