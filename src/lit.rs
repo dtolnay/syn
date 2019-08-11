@@ -71,9 +71,14 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct LitStr #manual_extra_traits_debug {
-        token: Literal,
-        suffix: String,
+        repr: Box<LitStrRepr>,
     }
+}
+
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+struct LitStrRepr {
+    token: Literal,
+    suffix: Box<str>,
 }
 
 ast_struct! {
@@ -115,10 +120,15 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct LitInt #manual_extra_traits_debug {
-        token: Literal,
-        digits: String,
-        suffix: String,
+        repr: Box<LitIntRepr>,
     }
+}
+
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+struct LitIntRepr {
+    token: Literal,
+    digits: Box<str>,
+    suffix: Box<str>,
 }
 
 ast_struct! {
@@ -129,10 +139,15 @@ ast_struct! {
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct LitFloat #manual_extra_traits_debug {
-        token: Literal,
-        digits: String,
-        suffix: String,
+        repr: Box<LitFloatRepr>,
     }
+}
+
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+struct LitFloatRepr {
+    token: Literal,
+    digits: Box<str>,
+    suffix: Box<str>,
 }
 
 ast_struct! {
@@ -214,14 +229,16 @@ impl LitStr {
         let mut lit = Literal::string(value);
         lit.set_span(span);
         LitStr {
-            token: lit,
-            suffix: String::new(),
+            repr: Box::new(LitStrRepr {
+                token: lit,
+                suffix: Box::<str>::default(),
+            }),
         }
     }
 
     pub fn value(&self) -> String {
-        let (value, _) = value::parse_lit_str(&self.token.to_string());
-        value
+        let (value, _) = value::parse_lit_str(&self.repr.token.to_string());
+        String::from(value)
     }
 
     /// Parse a syntax tree node from the content of this string literal.
@@ -318,15 +335,15 @@ impl LitStr {
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
     }
 
     pub fn suffix(&self) -> &str {
-        &self.suffix
+        &self.repr.suffix
     }
 }
 
@@ -396,9 +413,11 @@ impl LitInt {
             let mut token = value::to_literal(repr);
             token.set_span(span);
             LitInt {
-                token,
-                digits,
-                suffix,
+                repr: Box::new(LitIntRepr {
+                    token,
+                    digits,
+                    suffix,
+                }),
             }
         } else {
             panic!("Not an integer literal: `{}`", repr);
@@ -406,19 +425,19 @@ impl LitInt {
     }
 
     pub fn base10_digits(&self) -> &str {
-        &self.digits
+        &self.repr.digits
     }
 
     pub fn suffix(&self) -> &str {
-        &self.suffix
+        &self.repr.suffix
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
     }
 }
 
@@ -427,9 +446,11 @@ impl From<Literal> for LitInt {
         let repr = token.to_string();
         if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
             LitInt {
-                token,
-                digits,
-                suffix,
+                repr: Box::new(LitIntRepr {
+                    token,
+                    digits,
+                    suffix,
+                }),
             }
         } else {
             panic!("Not an integer literal: `{}`", repr);
@@ -439,7 +460,7 @@ impl From<Literal> for LitInt {
 
 impl Display for LitInt {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.token.fmt(formatter)
+        self.repr.token.fmt(formatter)
     }
 }
 
@@ -449,9 +470,11 @@ impl LitFloat {
             let mut token = value::to_literal(repr);
             token.set_span(span);
             LitFloat {
-                token,
-                digits,
-                suffix,
+                repr: Box::new(LitFloatRepr {
+                    token,
+                    digits,
+                    suffix,
+                }),
             }
         } else {
             panic!("Not a float literal: `{}`", repr);
@@ -459,19 +482,19 @@ impl LitFloat {
     }
 
     pub fn base10_digits(&self) -> &str {
-        &self.digits
+        &self.repr.digits
     }
 
     pub fn suffix(&self) -> &str {
-        &self.suffix
+        &self.repr.suffix
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
     }
 }
 
@@ -480,9 +503,11 @@ impl From<Literal> for LitFloat {
         let repr = token.to_string();
         if let Some((digits, suffix)) = value::parse_lit_float(&repr) {
             LitFloat {
-                token,
-                digits,
-                suffix,
+                repr: Box::new(LitFloatRepr {
+                    token,
+                    digits,
+                    suffix,
+                }),
             }
         } else {
             panic!("Not a float literal: `{}`", repr);
@@ -492,7 +517,7 @@ impl From<Literal> for LitFloat {
 
 impl Display for LitFloat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.token.fmt(formatter)
+        self.repr.token.fmt(formatter)
     }
 }
 
@@ -505,7 +530,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitStr")
-                .field("token", &format_args!("{}", &self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -514,7 +539,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitByteStr")
-                .field("token", &format_args!("{}", &self.token))
+                .field("token", &format_args!("{}", self.token))
                 .finish()
         }
     }
@@ -523,7 +548,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitByte")
-                .field("token", &format_args!("{}", &self.token))
+                .field("token", &format_args!("{}", self.token))
                 .finish()
         }
     }
@@ -532,7 +557,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitChar")
-                .field("token", &format_args!("{}", &self.token))
+                .field("token", &format_args!("{}", self.token))
                 .finish()
         }
     }
@@ -541,7 +566,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitInt")
-                .field("token", &format_args!("{}", &self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -550,7 +575,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitFloat")
-                .field("token", &format_args!("{}", &self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -566,14 +591,14 @@ mod debug_impls {
 }
 
 macro_rules! lit_extra_traits {
-    ($ty:ident, $field:ident) => {
+    ($ty:ident, $($field:ident).+) => {
         #[cfg(feature = "extra-traits")]
         impl Eq for $ty {}
 
         #[cfg(feature = "extra-traits")]
         impl PartialEq for $ty {
             fn eq(&self, other: &Self) -> bool {
-                self.$field.to_string() == other.$field.to_string()
+                self.$($field).+.to_string() == other.$($field).+.to_string()
             }
         }
 
@@ -583,7 +608,7 @@ macro_rules! lit_extra_traits {
             where
                 H: Hasher,
             {
-                self.$field.to_string().hash(state);
+                self.$($field).+.to_string().hash(state);
             }
         }
 
@@ -596,12 +621,12 @@ macro_rules! lit_extra_traits {
     };
 }
 
-lit_extra_traits!(LitStr, token);
+lit_extra_traits!(LitStr, repr.token);
 lit_extra_traits!(LitByteStr, token);
 lit_extra_traits!(LitByte, token);
 lit_extra_traits!(LitChar, token);
-lit_extra_traits!(LitInt, token);
-lit_extra_traits!(LitFloat, token);
+lit_extra_traits!(LitInt, repr.token);
+lit_extra_traits!(LitFloat, repr.token);
 lit_extra_traits!(LitBool, value);
 
 ast_enum! {
@@ -736,7 +761,7 @@ mod printing {
 
     impl ToTokens for LitStr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
@@ -760,13 +785,13 @@ mod printing {
 
     impl ToTokens for LitInt {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for LitFloat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
@@ -793,29 +818,41 @@ mod value {
             match byte(&repr, 0) {
                 b'"' | b'r' => {
                     let (_, suffix) = parse_lit_str(&repr);
-                    return Lit::Str(LitStr { token, suffix });
+                    return Lit::Str(LitStr {
+                        repr: Box::new(LitStrRepr { token, suffix }),
+                    });
                 }
                 b'b' => match byte(&repr, 1) {
-                    b'"' | b'r' => return Lit::ByteStr(LitByteStr { token }),
-                    b'\'' => return Lit::Byte(LitByte { token }),
+                    b'"' | b'r' => {
+                        return Lit::ByteStr(LitByteStr { token });
+                    }
+                    b'\'' => {
+                        return Lit::Byte(LitByte { token });
+                    }
                     _ => {}
                 },
-                b'\'' => return Lit::Char(LitChar { token }),
+                b'\'' => {
+                    return Lit::Char(LitChar { token });
+                }
                 b'0'..=b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
                         if let Some((digits, suffix)) = parse_lit_int(&repr) {
                             return Lit::Int(LitInt {
-                                token,
-                                digits,
-                                suffix,
+                                repr: Box::new(LitIntRepr {
+                                    token,
+                                    digits,
+                                    suffix,
+                                }),
                             });
                         }
                     }
                     if let Some((digits, suffix)) = parse_lit_float(&repr) {
                         return Lit::Float(LitFloat {
-                            token,
-                            digits,
-                            suffix,
+                            repr: Box::new(LitFloatRepr {
+                                token,
+                                digits,
+                                suffix,
+                            }),
                         });
                     }
                 }
@@ -850,7 +887,7 @@ mod value {
     }
 
     // Returns (content, suffix).
-    pub fn parse_lit_str(s: &str) -> (String, String) {
+    pub fn parse_lit_str(s: &str) -> (Box<str>, Box<str>) {
         match byte(s, 0) {
             b'"' => parse_lit_str_cooked(s),
             b'r' => parse_lit_str_raw(s),
@@ -861,7 +898,7 @@ mod value {
     // Clippy false positive
     // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
     #[allow(clippy::needless_continue)]
-    fn parse_lit_str_cooked(mut s: &str) -> (String, String) {
+    fn parse_lit_str_cooked(mut s: &str) -> (Box<str>, Box<str>) {
         assert_eq!(byte(s, 0), b'"');
         s = &s[1..];
 
@@ -917,11 +954,12 @@ mod value {
         }
 
         assert!(s.starts_with('"'));
-        let suffix = s[1..].to_owned();
+        let content = content.into_boxed_str();
+        let suffix = s[1..].to_owned().into_boxed_str();
         (content, suffix)
     }
 
-    fn parse_lit_str_raw(mut s: &str) -> (String, String) {
+    fn parse_lit_str_raw(mut s: &str) -> (Box<str>, Box<str>) {
         assert_eq!(byte(s, 0), b'r');
         s = &s[1..];
 
@@ -935,8 +973,10 @@ mod value {
             assert_eq!(end, b'#');
         }
 
-        let content = s[pounds + 1..s.len() - pounds - 1].to_owned();
-        let suffix = String::new(); // todo
+        let content = s[pounds + 1..s.len() - pounds - 1]
+            .to_owned()
+            .into_boxed_str();
+        let suffix = Box::<str>::default(); // todo
         (content, suffix)
     }
 
@@ -1011,7 +1051,7 @@ mod value {
 
     fn parse_lit_byte_str_raw(s: &str) -> Vec<u8> {
         assert_eq!(byte(s, 0), b'b');
-        parse_lit_str_raw(&s[1..]).0.into_bytes()
+        String::from(parse_lit_str_raw(&s[1..]).0).into_bytes()
     }
 
     pub fn parse_lit_byte(s: &str) -> u8 {
@@ -1154,7 +1194,7 @@ mod value {
     }
 
     // Returns base 10 digits and suffix.
-    pub fn parse_lit_int(mut s: &str) -> Option<(String, String)> {
+    pub fn parse_lit_int(mut s: &str) -> Option<(Box<str>, Box<str>)> {
         let negative = byte(s, 0) == b'-';
         if negative {
             s = &s[1..];
@@ -1210,14 +1250,14 @@ mod value {
             if negative {
                 repr.insert(0, '-');
             }
-            Some((repr, suffix.to_owned()))
+            Some((repr.into_boxed_str(), suffix.to_owned().into_boxed_str()))
         } else {
             None
         }
     }
 
     // Returns base 10 digits and suffix.
-    pub fn parse_lit_float(input: &str) -> Option<(String, String)> {
+    pub fn parse_lit_float(input: &str) -> Option<(Box<str>, Box<str>)> {
         // Rust's floating point literals are very similar to the ones parsed by
         // the standard library, except that rust's literals can contain
         // ignorable underscores. Let's remove those underscores.
@@ -1290,7 +1330,7 @@ mod value {
         let suffix = digits.split_off(read);
         digits.truncate(write);
         if suffix.is_empty() || crate::ident::xid_ok(&suffix) {
-            Some((digits, suffix))
+            Some((digits.into_boxed_str(), suffix.into_boxed_str()))
         } else {
             None
         }
