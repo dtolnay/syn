@@ -10,7 +10,7 @@ ast_struct! {
     /// Parse a Rust source file into a `syn::File` and print out a debug
     /// representation of the syntax tree.
     ///
-    /// ```edition2018
+    /// ```
     /// use std::env;
     /// use std::fs::File;
     /// use std::io::Read;

@@ -22,7 +22,7 @@
 //! The following macro code takes a variable `ty` of type `Type` and produces a
 //! static assertion that `Sync` is implemented for that type.
 //!
-//! ```edition2018
+//! ```
 //! # extern crate proc_macro;
 //! #
 //! use proc_macro::TokenStream;

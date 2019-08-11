@@ -67,7 +67,7 @@ ast_struct! {
     /// [`ParseStream::parse`]: parse::ParseBuffer::parse
     /// [`ParseStream::call`]: parse::ParseBuffer::call
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{Attribute, Ident, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -398,7 +398,7 @@ ast_enum_of_structs! {
 /// For example if we are developing an attribute macro that is intended to be
 /// invoked on function items as follows:
 ///
-/// ```edition2018
+/// ```
 /// # const IGNORE: &str = stringify! {
 /// #[my_attribute(path = "/v1/refresh")]
 /// # };
@@ -410,7 +410,7 @@ ast_enum_of_structs! {
 /// The implementation of this macro would want to parse its attribute arguments
 /// as type `AttributeArgs`.
 ///
-/// ```edition2018
+/// ```
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;

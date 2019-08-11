@@ -80,7 +80,7 @@ impl Macro {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{parse_quote, Expr, ExprLit, Ident, Lit, LitStr, Macro, Token};
     /// use syn::ext::IdentExt;
     /// use syn::parse::{Error, Parse, ParseStream, Result};

@@ -247,7 +247,7 @@ impl LitStr {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use proc_macro2::Span;
     /// use syn::{Attribute, Error, Ident, Lit, Meta, MetaNameValue, Path, Result};
     ///
@@ -283,7 +283,7 @@ impl LitStr {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// # use proc_macro2::Span;
     /// # use syn::{LitStr, Result};
     /// #

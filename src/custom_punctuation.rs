@@ -3,7 +3,7 @@
 ///
 /// # Usage
 ///
-/// ```edition2018
+/// ```
 /// syn::custom_punctuation!(LeftRightArrow, <=>);
 /// ```
 ///
@@ -29,7 +29,7 @@
 ///
 /// # Example
 ///
-/// ```edition2018
+/// ```
 /// use proc_macro2::{TokenStream, TokenTree};
 /// use syn::parse::{Parse, ParseStream, Peek, Result};
 /// use syn::punctuated::Punctuated;

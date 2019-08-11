@@ -50,7 +50,7 @@ impl Error {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{Error, Ident, LitStr, Result, Token};
     /// use syn::parse::ParseStream;
     ///

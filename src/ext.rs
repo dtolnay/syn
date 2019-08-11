@@ -25,7 +25,7 @@ pub trait IdentExt: Sized + private::Sealed {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{Error, Ident, Result, Token};
     /// use syn::ext::IdentExt;
     /// use syn::parse::ParseStream;
@@ -75,7 +75,7 @@ pub trait IdentExt: Sized + private::Sealed {
     /// fixed prefix. Without using `unraw()`, this would tend to produce
     /// invalid identifiers like `__pyo3_get_r#move`.
     ///
-    /// ```edition2018
+    /// ```
     /// use proc_macro2::Span;
     /// use syn::Ident;
     /// use syn::ext::IdentExt;

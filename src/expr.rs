@@ -19,7 +19,7 @@ ast_enum_of_structs! {
     /// This type is a syntax tree enum. In Syn this and other syntax tree enums
     /// are designed to be traversed using the following rebinding idiom.
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::Expr;
     /// #
     /// # fn example(expr: Expr) {
@@ -53,7 +53,7 @@ ast_enum_of_structs! {
     ///
     /// This approach avoids repeating the variant names twice on every line.
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::{Expr, ExprMethodCall};
     /// #
     /// # fn example(expr: Expr) {
@@ -69,7 +69,7 @@ ast_enum_of_structs! {
     /// In general, the name to which a syntax tree enum variant is bound should
     /// be a suitable name for the complete syntax tree enum type.
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::{Expr, ExprField};
     /// #
     /// # fn example(discriminant: ExprField) {
@@ -1563,7 +1563,7 @@ ast_struct! {
     ///
     /// As in:
     ///
-    /// ```edition2018
+    /// ```
     /// # fn f() -> bool {
     /// #     let n = 0;
     /// match n {
@@ -3049,7 +3049,7 @@ pub mod parsing {
         ///
         /// # Example
         ///
-        /// ```edition2018
+        /// ```
         /// use syn::{braced, token, Attribute, Block, Ident, Result, Stmt, Token};
         /// use syn::parse::{Parse, ParseStream};
         ///

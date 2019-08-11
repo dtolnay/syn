@@ -64,7 +64,7 @@
 //! proc-macro = true
 //! ```
 //!
-//! ```edition2018
+//! ```
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
@@ -95,7 +95,7 @@
 //!
 //! [`heapsize`]: https://github.com/dtolnay/syn/tree/master/examples/heapsize
 //!
-//! ```edition2018
+//! ```
 //! pub trait HeapSize {
 //!     /// Total number of bytes of heap memory owned by `self`.
 //!     fn heap_size_of_children(&self) -> usize;
@@ -105,7 +105,7 @@
 //! The custom derive allows users to write `#[derive(HeapSize)]` on data
 //! structures in their program.
 //!
-//! ```edition2018
+//! ```
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[derive(HeapSize)]
 //! # };
@@ -123,7 +123,7 @@
 //! compiler's error messages are displayed in user code. Consider the error the
 //! user sees if one of their field types does not implement `HeapSize`.
 //!
-//! ```edition2018
+//! ```
 //! # const IGNORE_TOKENS: &str = stringify! {
 //! #[derive(HeapSize)]
 //! # };
@@ -157,7 +157,7 @@
 //! The example reimplements the popular `lazy_static` crate from crates.io as a
 //! procedural macro.
 //!
-//! ```edition2018
+//! ```
 //! # macro_rules! lazy_static {
 //! #     ($($tt:tt)*) => {}
 //! # }
@@ -435,7 +435,7 @@ mod gen {
     ///
     /// [`Visit`]: visit::Visit
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
     /// #
     /// pub trait Visit<'ast> {
@@ -555,7 +555,7 @@ mod gen {
     ///
     /// [`VisitMut`]: visit_mut::VisitMut
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
     /// #
     /// pub trait VisitMut {
@@ -649,7 +649,7 @@ mod gen {
     ///
     /// [`Fold`]: fold::Fold
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::{Attribute, BinOp, Expr, ExprBinary};
     /// #
     /// pub trait Fold {
@@ -786,7 +786,7 @@ pub use crate::error::{Error, Result};
 ///
 /// # Examples
 ///
-/// ```edition2018
+/// ```
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;
@@ -845,7 +845,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 ///
 /// # Examples
 ///
-/// ```edition2018
+/// ```
 /// use syn::{Expr, Result};
 ///
 /// fn run() -> Result<()> {
@@ -880,7 +880,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///
 /// # Examples
 ///
-/// ```edition2018,no_run
+/// ```no_run
 /// use std::error::Error;
 /// use std::fs::File;
 /// use std::io::Read;

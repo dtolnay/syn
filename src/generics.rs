@@ -310,7 +310,7 @@ impl Generics {
     /// Split a type's generics into the pieces required for impl'ing a trait
     /// for that type.
     ///
-    /// ```edition2018
+    /// ```
     /// # use proc_macro2::{Span, Ident};
     /// # use quote::quote;
     /// #

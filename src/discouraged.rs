@@ -43,7 +43,7 @@ pub trait Speculative {
     /// This change in behavior can be implemented in syn by replacing just the
     /// `Parse` implementation for `PathSegment`:
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::ext::IdentExt;
     /// use syn::parse::discouraged::Speculative;
     /// # use syn::parse::{Parse, ParseStream};

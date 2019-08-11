@@ -15,7 +15,7 @@
 /// the function that has the #\[proc_macro\] / #\[proc_macro_derive\] /
 /// #\[proc_macro_attribute\] attribute.
 ///
-/// ```edition2018
+/// ```
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;

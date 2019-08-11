@@ -95,7 +95,7 @@ fn parse_delimited<'a>(
 ///
 /// # Example
 ///
-/// ```edition2018
+/// ```
 /// # use quote::quote;
 /// #
 /// use syn::{parenthesized, token, Ident, Result, Token, Type};
@@ -152,7 +152,7 @@ macro_rules! parenthesized {
 ///
 /// # Example
 ///
-/// ```edition2018
+/// ```
 /// # use quote::quote;
 /// #
 /// use syn::{braced, token, Ident, Result, Token, Type};
@@ -230,7 +230,7 @@ macro_rules! braced {
 ///
 /// # Example
 ///
-/// ```edition2018
+/// ```
 /// # use quote::quote;
 /// #
 /// use proc_macro2::TokenStream;

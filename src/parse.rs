@@ -25,7 +25,7 @@
 //!
 //! [`parse_macro_input!`]: ../macro.parse_macro_input.html
 //!
-//! ```edition2018
+//! ```
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
@@ -101,7 +101,7 @@
 //! [`syn::parse_str`]: ../fn.parse_str.html
 //! [`Parse`]: trait.Parse.html
 //!
-//! ```edition2018
+//! ```
 //! use syn::Type;
 //!
 //! # fn run_parser() -> syn::Result<()> {
@@ -132,7 +132,7 @@
 //! The `Parse` trait is not implemented in these cases because there is no good
 //! behavior to consider the default.
 //!
-//! ```edition2018,compile_fail
+//! ```compile_fail
 //! # extern crate proc_macro;
 //! #
 //! # use syn::punctuated::Punctuated;
@@ -154,7 +154,7 @@
 //!
 //! [`Parser`]: trait.Parser.html
 //!
-//! ```edition2018
+//! ```
 //! extern crate proc_macro;
 //!
 //! use proc_macro::TokenStream;
@@ -294,7 +294,7 @@ impl<'a> Debug for ParseBuffer<'a> {
 ///
 /// # Example
 ///
-/// ```edition2018
+/// ```
 /// use proc_macro2::TokenTree;
 /// use syn::Result;
 /// use syn::parse::ParseStream;
@@ -424,7 +424,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// [`Attribute::parse_outer`]: crate::Attribute::parse_outer
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{Attribute, Ident, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -476,7 +476,7 @@ impl<'a> ParseBuffer<'a> {
     /// In this example we finish parsing the list of supertraits when the next
     /// token in the input is either `where` or an opening curly brace.
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{braced, token, Generics, Ident, Result, Token, TypeParamBound};
     /// use syn::parse::{Parse, ParseStream};
     /// use syn::punctuated::Punctuated;
@@ -543,7 +543,7 @@ impl<'a> ParseBuffer<'a> {
     /// union` and a macro invocation that looks like `union::some_macro! { ...
     /// }`. In other words `union` is a contextual keyword.
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{Ident, ItemUnion, Macro, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -584,7 +584,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// # use quote::quote;
     /// #
     /// use syn::{parenthesized, token, Ident, Result, Token, Type};
@@ -636,7 +636,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{braced, token, Ident, Item, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -675,7 +675,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, Token, TypeParam};
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -725,7 +725,7 @@ impl<'a> ParseBuffer<'a> {
     /// is if your macro ends up parsing a large amount of content more than
     /// once.
     ///
-    /// ```edition2018
+    /// ```
     /// # use syn::{Expr, Result};
     /// # use syn::parse::ParseStream;
     /// #
@@ -768,7 +768,7 @@ impl<'a> ParseBuffer<'a> {
     /// needs to distinguish parentheses that specify visibility restrictions
     /// from parentheses that form part of a tuple type.
     ///
-    /// ```edition2018
+    /// ```
     /// # struct A;
     /// # struct B;
     /// # struct C;
@@ -785,7 +785,7 @@ impl<'a> ParseBuffer<'a> {
     /// parentheses after the `pub` keyword. This is a small bounded amount of
     /// work performed against the forked parse stream.
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{parenthesized, token, Ident, Path, Result, Token};
     /// use syn::ext::IdentExt;
     /// use syn::parse::{Parse, ParseStream};
@@ -856,7 +856,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use syn::{Expr, Result, Token};
     /// use syn::parse::{Parse, ParseStream};
     ///
@@ -893,7 +893,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// # Example
     ///
-    /// ```edition2018
+    /// ```
     /// use proc_macro2::TokenTree;
     /// use syn::Result;
     /// use syn::parse::ParseStream;
