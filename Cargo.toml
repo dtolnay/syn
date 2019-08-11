@@ -37,8 +37,8 @@ extra-traits = []
 proc-macro = ["proc-macro2-next/proc-macro", "quote-next/proc-macro"]
 
 [dependencies]
-proc-macro2-next = { version = "1.0.0-rc1", default-features = false }
-quote-next = { version = "1.0.0-rc2", optional = true, default-features = false }
+proc-macro2-next = { version = "1.0.0-rc2", default-features = false }
+quote-next = { version = "1.0.0-rc3", optional = true, default-features = false }
 unicode-xid = "0.2"
 
 [dev-dependencies]
