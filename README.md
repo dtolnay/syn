@@ -4,7 +4,7 @@ Parser for Rust source code
 [![Build Status](https://api.travis-ci.org/dtolnay/syn.svg?branch=master)](https://travis-ci.org/dtolnay/syn)
 [![Latest Version](https://img.shields.io/crates/v/syn.svg)](https://crates.io/crates/syn)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/syn/0.15/syn/)
-[![Rustc Version 1.15+](https://img.shields.io/badge/rustc-1.15+-lightgray.svg)](https://blog.rust-lang.org/2017/02/02/Rust-1.15.html)
+[![Rustc Version 1.31+](https://img.shields.io/badge/rustc-1.31+-lightgray.svg)](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
 
 Syn is a parsing library for parsing a stream of Rust tokens into a syntax tree
 of Rust source code.
@@ -50,10 +50,7 @@ If you get stuck with anything involving procedural macros in Rust I am happy to
 provide help even if the issue is not related to Syn. Please file a ticket in
 this repo.
 
-*Version requirement: Syn supports any compiler version back to Rust's very
-first support for procedural macros in Rust 1.15.0. Some features especially
-around error reporting are only available in newer compilers or on the nightly
-channel.*
+*Version requirement: Syn supports rustc 1.31 and up.*
 
 [*Release notes*](https://github.com/dtolnay/syn/releases)
 

@@ -1,5 +1,4 @@
-A complete working implementation of a derive macro. Written in Rust 2018 style
-but otherwise works on any Rust compiler 1.15+.
+A derive macro that generates trait impls.
 
 - [`heapsize/src/lib.rs`](heapsize/src/lib.rs)
 - [`heapsize_derive/src/lib.rs`](heapsize_derive/src/lib.rs)
