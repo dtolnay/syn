@@ -2396,11 +2396,6 @@
             "syn": "ImplItemType"
           }
         ],
-        "Existential": [
-          {
-            "syn": "ImplItemExistential"
-          }
-        ],
         "Macro": [
           {
             "syn": "ImplItemMacro"
@@ -2452,49 +2447,6 @@
         },
         "expr": {
           "syn": "Expr"
-        },
-        "semi_token": {
-          "token": "Semi"
-        }
-      }
-    },
-    {
-      "ident": "ImplItemExistential",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "existential_token": {
-          "token": "Existential"
-        },
-        "type_token": {
-          "token": "Type"
-        },
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "generics": {
-          "syn": "Generics"
-        },
-        "colon_token": {
-          "option": {
-            "token": "Colon"
-          }
-        },
-        "bounds": {
-          "punctuated": {
-            "element": {
-              "syn": "TypeParamBound"
-            },
-            "punct": "Add"
-          }
         },
         "semi_token": {
           "token": "Semi"
@@ -2627,11 +2579,6 @@
         "Enum": [
           {
             "syn": "ItemEnum"
-          }
-        ],
-        "Existential": [
-          {
-            "syn": "ItemExistential"
           }
         ],
         "ExternCrate": [
@@ -2790,52 +2737,6 @@
             },
             "punct": "Comma"
           }
-        }
-      }
-    },
-    {
-      "ident": "ItemExistential",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "vis": {
-          "syn": "Visibility"
-        },
-        "existential_token": {
-          "token": "Existential"
-        },
-        "type_token": {
-          "token": "Type"
-        },
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "generics": {
-          "syn": "Generics"
-        },
-        "colon_token": {
-          "option": {
-            "token": "Colon"
-          }
-        },
-        "bounds": {
-          "punctuated": {
-            "element": {
-              "syn": "TypeParamBound"
-            },
-            "punct": "Add"
-          }
-        },
-        "semi_token": {
-          "token": "Semi"
         }
       }
     },
@@ -5681,7 +5582,6 @@
     "Enum": "enum",
     "Eq": "=",
     "EqEq": "==",
-    "Existential": "existential",
     "Extern": "extern",
     "FatArrow": "=>",
     "Final": "final",

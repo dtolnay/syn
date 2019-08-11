@@ -2431,30 +2431,6 @@ impl Debug for Lite<syn::ImplItem> {
                 formatter.field("ty", Lite(&_val.ty));
                 formatter.finish()
             }
-            syn::ImplItem::Existential(_val) => {
-                let mut formatter = formatter.debug_struct("ImplItem::Existential");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("ident", Lite(&_val.ident));
-                formatter.field("generics", Lite(&_val.generics));
-                if let Some(val) = &_val.colon_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Colon);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("colon_token", Print::ref_cast(val));
-                }
-                if !_val.bounds.is_empty() {
-                    formatter.field("bounds", Lite(&_val.bounds));
-                }
-                formatter.finish()
-            }
             syn::ImplItem::Macro(_val) => {
                 let mut formatter = formatter.debug_struct("ImplItem::Macro");
                 if !_val.attrs.is_empty() {
@@ -2509,33 +2485,6 @@ impl Debug for Lite<syn::ImplItemConst> {
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("ty", Lite(&_val.ty));
         formatter.field("expr", Lite(&_val.expr));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ImplItemExistential> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ImplItemExistential");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("generics", Lite(&_val.generics));
-        if let Some(val) = &_val.colon_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Colon);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("colon_token", Print::ref_cast(val));
-        }
-        if !_val.bounds.is_empty() {
-            formatter.field("bounds", Lite(&_val.bounds));
-        }
         formatter.finish()
     }
 }
@@ -2646,31 +2595,6 @@ impl Debug for Lite<syn::Item> {
                 formatter.field("generics", Lite(&_val.generics));
                 if !_val.variants.is_empty() {
                     formatter.field("variants", Lite(&_val.variants));
-                }
-                formatter.finish()
-            }
-            syn::Item::Existential(_val) => {
-                let mut formatter = formatter.debug_struct("Item::Existential");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("vis", Lite(&_val.vis));
-                formatter.field("ident", Lite(&_val.ident));
-                formatter.field("generics", Lite(&_val.generics));
-                if let Some(val) = &_val.colon_token {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Colon);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("colon_token", Print::ref_cast(val));
-                }
-                if !_val.bounds.is_empty() {
-                    formatter.field("bounds", Lite(&_val.bounds));
                 }
                 formatter.finish()
             }
@@ -3072,34 +2996,6 @@ impl Debug for Lite<syn::ItemEnum> {
         formatter.field("generics", Lite(&_val.generics));
         if !_val.variants.is_empty() {
             formatter.field("variants", Lite(&_val.variants));
-        }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ItemExistential> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ItemExistential");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("vis", Lite(&_val.vis));
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("generics", Lite(&_val.generics));
-        if let Some(val) = &_val.colon_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Colon);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("colon_token", Print::ref_cast(val));
-        }
-        if !_val.bounds.is_empty() {
-            formatter.field("bounds", Lite(&_val.bounds));
         }
         formatter.finish()
     }

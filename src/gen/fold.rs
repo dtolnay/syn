@@ -343,10 +343,6 @@ pub trait Fold {
         fold_impl_item_const(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_impl_item_existential(&mut self, i: ImplItemExistential) -> ImplItemExistential {
-        fold_impl_item_existential(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_impl_item_macro(&mut self, i: ImplItemMacro) -> ImplItemMacro {
         fold_impl_item_macro(self, i)
     }
@@ -373,10 +369,6 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_item_enum(&mut self, i: ItemEnum) -> ItemEnum {
         fold_item_enum(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_item_existential(&mut self, i: ItemExistential) -> ItemExistential {
-        fold_item_existential(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_item_extern_crate(&mut self, i: ItemExternCrate) -> ItemExternCrate {
@@ -1828,9 +1820,6 @@ where
         ImplItem::Const(_binding_0) => ImplItem::Const(f.fold_impl_item_const(_binding_0)),
         ImplItem::Method(_binding_0) => ImplItem::Method(f.fold_impl_item_method(_binding_0)),
         ImplItem::Type(_binding_0) => ImplItem::Type(f.fold_impl_item_type(_binding_0)),
-        ImplItem::Existential(_binding_0) => {
-            ImplItem::Existential(f.fold_impl_item_existential(_binding_0))
-        }
         ImplItem::Macro(_binding_0) => ImplItem::Macro(f.fold_impl_item_macro(_binding_0)),
         ImplItem::Verbatim(_binding_0) => ImplItem::Verbatim(_binding_0),
         _ => unreachable!(),
@@ -1851,22 +1840,6 @@ where
         ty: f.fold_type(node.ty),
         eq_token: Token ! [ = ](tokens_helper(f, &node.eq_token.spans)),
         expr: f.fold_expr(node.expr),
-        semi_token: Token ! [ ; ](tokens_helper(f, &node.semi_token.spans)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_impl_item_existential<F>(f: &mut F, node: ImplItemExistential) -> ImplItemExistential
-where
-    F: Fold + ?Sized,
-{
-    ImplItemExistential {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        existential_token: Token![existential](tokens_helper(f, &node.existential_token.span)),
-        type_token: Token![type](tokens_helper(f, &node.type_token.span)),
-        ident: f.fold_ident(node.ident),
-        generics: f.fold_generics(node.generics),
-        colon_token: (node.colon_token).map(|it| Token ! [ : ](tokens_helper(f, &it.spans))),
-        bounds: FoldHelper::lift(node.bounds, |it| f.fold_type_param_bound(it)),
         semi_token: Token ! [ ; ](tokens_helper(f, &node.semi_token.spans)),
     }
 }
@@ -1929,7 +1902,6 @@ where
     match node {
         Item::Const(_binding_0) => Item::Const(f.fold_item_const(_binding_0)),
         Item::Enum(_binding_0) => Item::Enum(f.fold_item_enum(_binding_0)),
-        Item::Existential(_binding_0) => Item::Existential(f.fold_item_existential(_binding_0)),
         Item::ExternCrate(_binding_0) => Item::ExternCrate(f.fold_item_extern_crate(_binding_0)),
         Item::Fn(_binding_0) => Item::Fn(f.fold_item_fn(_binding_0)),
         Item::ForeignMod(_binding_0) => Item::ForeignMod(f.fold_item_foreign_mod(_binding_0)),
@@ -1978,23 +1950,6 @@ where
         generics: f.fold_generics(node.generics),
         brace_token: Brace(tokens_helper(f, &node.brace_token.span)),
         variants: FoldHelper::lift(node.variants, |it| f.fold_variant(it)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_item_existential<F>(f: &mut F, node: ItemExistential) -> ItemExistential
-where
-    F: Fold + ?Sized,
-{
-    ItemExistential {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        vis: f.fold_visibility(node.vis),
-        existential_token: Token![existential](tokens_helper(f, &node.existential_token.span)),
-        type_token: Token![type](tokens_helper(f, &node.type_token.span)),
-        ident: f.fold_ident(node.ident),
-        generics: f.fold_generics(node.generics),
-        colon_token: (node.colon_token).map(|it| Token ! [ : ](tokens_helper(f, &it.spans))),
-        bounds: FoldHelper::lift(node.bounds, |it| f.fold_type_param_bound(it)),
-        semi_token: Token ! [ ; ](tokens_helper(f, &node.semi_token.spans)),
     }
 }
 #[cfg(feature = "full")]
