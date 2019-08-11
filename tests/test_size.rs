@@ -12,7 +12,7 @@ fn test_expr_size() {
 
 #[test]
 fn test_item_size() {
-    assert_eq!(mem::size_of::<Item>(), 360);
+    assert_eq!(mem::size_of::<Item>(), 384);
 }
 
 #[test]

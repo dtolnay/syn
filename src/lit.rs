@@ -72,6 +72,7 @@ ast_struct! {
     /// `"full"` feature.*
     pub struct LitStr #manual_extra_traits {
         token: Literal,
+        suffix: String,
     }
 }
 
@@ -212,11 +213,15 @@ impl LitStr {
     pub fn new(value: &str, span: Span) -> Self {
         let mut lit = Literal::string(value);
         lit.set_span(span);
-        LitStr { token: lit }
+        LitStr {
+            token: lit,
+            suffix: String::new(),
+        }
     }
 
     pub fn value(&self) -> String {
-        value::parse_lit_str(&self.token.to_string())
+        let (value, _) = value::parse_lit_str(&self.token.to_string());
+        value
     }
 
     /// Parse a syntax tree node from the content of this string literal.
@@ -318,6 +323,10 @@ impl LitStr {
 
     pub fn set_span(&mut self, span: Span) {
         self.token.set_span(span)
+    }
+
+    pub fn suffix(&self) -> &str {
+        &self.suffix
     }
 }
 
@@ -713,7 +722,10 @@ mod value {
             let repr = token.to_string();
 
             match byte(&repr, 0) {
-                b'"' | b'r' => return Lit::Str(LitStr { token }),
+                b'"' | b'r' => {
+                    let (_, suffix) = parse_lit_str(&repr);
+                    return Lit::Str(LitStr { token, suffix });
+                }
                 b'b' => match byte(&repr, 1) {
                     b'"' | b'r' => return Lit::ByteStr(LitByteStr { token }),
                     b'\'' => return Lit::Byte(LitByte { token }),
@@ -768,7 +780,8 @@ mod value {
         s.chars().next().unwrap_or('\0')
     }
 
-    pub fn parse_lit_str(s: &str) -> String {
+    // Returns (content, suffix).
+    pub fn parse_lit_str(s: &str) -> (String, String) {
         match byte(s, 0) {
             b'"' => parse_lit_str_cooked(s),
             b'r' => parse_lit_str_raw(s),
@@ -779,11 +792,11 @@ mod value {
     // Clippy false positive
     // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
     #[allow(clippy::needless_continue)]
-    fn parse_lit_str_cooked(mut s: &str) -> String {
+    fn parse_lit_str_cooked(mut s: &str) -> (String, String) {
         assert_eq!(byte(s, 0), b'"');
         s = &s[1..];
 
-        let mut out = String::new();
+        let mut content = String::new();
         'outer: loop {
             let ch = match byte(s, 0) {
                 b'"' => break,
@@ -831,14 +844,15 @@ mod value {
                     ch
                 }
             };
-            out.push(ch);
+            content.push(ch);
         }
 
-        assert_eq!(s, "\"");
-        out
+        assert!(s.starts_with('"'));
+        let suffix = s[1..].to_owned();
+        (content, suffix)
     }
 
-    fn parse_lit_str_raw(mut s: &str) -> String {
+    fn parse_lit_str_raw(mut s: &str) -> (String, String) {
         assert_eq!(byte(s, 0), b'r');
         s = &s[1..];
 
@@ -852,7 +866,9 @@ mod value {
             assert_eq!(end, b'#');
         }
 
-        s[pounds + 1..s.len() - pounds - 1].to_owned()
+        let content = s[pounds + 1..s.len() - pounds - 1].to_owned();
+        let suffix = String::new(); // todo
+        (content, suffix)
     }
 
     pub fn parse_lit_byte_str(s: &str) -> Vec<u8> {
@@ -926,7 +942,7 @@ mod value {
 
     fn parse_lit_byte_str_raw(s: &str) -> Vec<u8> {
         assert_eq!(byte(s, 0), b'b');
-        parse_lit_str_raw(&s[1..]).into_bytes()
+        parse_lit_str_raw(&s[1..]).0.into_bytes()
     }
 
     pub fn parse_lit_byte(s: &str) -> u8 {
