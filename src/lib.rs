@@ -467,6 +467,45 @@ mod gen {
     /// ```
     ///
     /// *This module is available if Syn is built with the `"visit"` feature.*
+    ///
+    /// <br>
+    ///
+    /// # Example
+    ///
+    /// This visitor will print the name of every freestanding function in the
+    /// syntax tree, including nested functions.
+    ///
+    /// ```
+    /// // [dependencies]
+    /// // quote-next = "1.0.0-rc3"
+    /// // syn-next = { version = "1.0.0-rc2", features = ["full", "visit"] }
+    ///
+    /// use quote::quote;
+    /// use syn::visit::{self, Visit};
+    /// use syn::{File, ItemFn};
+    ///
+    /// struct FnVisitor;
+    ///
+    /// impl<'ast> Visit<'ast> for FnVisitor {
+    ///     fn visit_item_fn(&mut self, node: &'ast ItemFn) {
+    ///         println!("Function with name={}", node.sig.ident);
+    ///
+    ///         // Delegate to the default impl to visit any nested functions.
+    ///         visit::visit_item_fn(self, node);
+    ///     }
+    /// }
+    ///
+    /// fn main() {
+    ///     let code = quote! {
+    ///         pub fn f() {
+    ///             fn g() {}
+    ///         }
+    ///     };
+    ///
+    ///     let syntax_tree: File = syn::parse2(code).unwrap();
+    ///     FnVisitor.visit_file(&syntax_tree);
+    /// }
+    /// ```
     #[cfg(feature = "visit")]
     pub mod visit;
 
