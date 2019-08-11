@@ -194,18 +194,30 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 });
             }
         }
-        Data::Private => {}
+        Data::Private => {
+            if ty == "Ident" {
+                visit_impl.extend(quote! {
+                    _visitor.visit_span(&_i.span());
+                });
+            }
+        }
     }
 
+    let ast_lifetime = if s.ident == "Span" {
+        None
+    } else {
+        Some(quote!('ast))
+    };
+
     traits.extend(quote! {
-        fn #visit_fn(&mut self, i: &'ast #ty) {
+        fn #visit_fn(&mut self, i: &#ast_lifetime #ty) {
             #visit_fn(self, i)
         }
     });
 
     impls.extend(quote! {
         pub fn #visit_fn<'ast, V: Visit<'ast> + ?Sized>(
-            _visitor: &mut V, _i: &'ast #ty
+            _visitor: &mut V, _i: &#ast_lifetime #ty
         ) {
             #visit_impl
         }

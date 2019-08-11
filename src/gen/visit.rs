@@ -786,7 +786,7 @@ pub trait Visit<'ast> {
     fn visit_where_predicate(&mut self, i: &'ast WherePredicate) {
         visit_where_predicate(self, i)
     }
-    fn visit_span(&mut self, i: &'ast Span) {
+    fn visit_span(&mut self, i: &Span) {
         visit_span(self, i)
     }
     fn visit_ident(&mut self, i: &'ast Ident) {
@@ -3436,5 +3436,7 @@ pub fn visit_where_predicate<'ast, V: Visit<'ast> + ?Sized>(
         }
     }
 }
-pub fn visit_span<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Span) {}
-pub fn visit_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {}
+pub fn visit_span<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &Span) {}
+pub fn visit_ident<'ast, V: Visit<'ast> + ?Sized>(_visitor: &mut V, _i: &'ast Ident) {
+    _visitor.visit_span(&_i.span());
+}

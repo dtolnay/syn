@@ -76,35 +76,35 @@ pub mod visit {
     use crate::visit::Visit;
     use proc_macro2::Span;
 
-    pub fn tokens_helper<'ast, V: Visit<'ast> + ?Sized, S: Spans>(visitor: &mut V, spans: &'ast S) {
+    pub fn tokens_helper<'ast, V: Visit<'ast> + ?Sized, S: Spans>(visitor: &mut V, spans: &S) {
         spans.visit(visitor);
     }
 
     pub trait Spans {
-        fn visit<'ast, V: Visit<'ast> + ?Sized>(&'ast self, visitor: &mut V);
+        fn visit<'ast, V: Visit<'ast> + ?Sized>(&self, visitor: &mut V);
     }
 
     impl Spans for Span {
-        fn visit<'ast, V: Visit<'ast> + ?Sized>(&'ast self, visitor: &mut V) {
+        fn visit<'ast, V: Visit<'ast> + ?Sized>(&self, visitor: &mut V) {
             visitor.visit_span(self);
         }
     }
 
     impl Spans for [Span; 1] {
-        fn visit<'ast, V: Visit<'ast> + ?Sized>(&'ast self, visitor: &mut V) {
+        fn visit<'ast, V: Visit<'ast> + ?Sized>(&self, visitor: &mut V) {
             visitor.visit_span(&self[0]);
         }
     }
 
     impl Spans for [Span; 2] {
-        fn visit<'ast, V: Visit<'ast> + ?Sized>(&'ast self, visitor: &mut V) {
+        fn visit<'ast, V: Visit<'ast> + ?Sized>(&self, visitor: &mut V) {
             visitor.visit_span(&self[0]);
             visitor.visit_span(&self[1]);
         }
     }
 
     impl Spans for [Span; 3] {
-        fn visit<'ast, V: Visit<'ast> + ?Sized>(&'ast self, visitor: &mut V) {
+        fn visit<'ast, V: Visit<'ast> + ?Sized>(&self, visitor: &mut V) {
             visitor.visit_span(&self[0]);
             visitor.visit_span(&self[1]);
             visitor.visit_span(&self[2]);
