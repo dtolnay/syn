@@ -54,6 +54,8 @@ this repo.
 
 [*Release notes*](https://github.com/dtolnay/syn/releases)
 
+<br>
+
 ## Example of a derive macro
 
 The canonical derive macro using Syn looks like this. We write an ordinary Rust
@@ -123,6 +125,8 @@ struct Demo<'a, T: ?Sized> {
 }
 ```
 
+<br>
+
 ## Spans and error reporting
 
 The token-based procedural macro API provides great control over where the
@@ -148,6 +152,8 @@ error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
 7 |     bad: std::thread::Thread,
   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
 ```
+
+<br>
 
 ## Parsing a custom syntax
 
@@ -177,6 +183,8 @@ warning: come on, pick a more creative name
    |                ^^^
 ```
 
+<br>
+
 ## Testing
 
 When testing macros, we often care not just that the macro can be used
@@ -188,6 +196,8 @@ help avoid regressions from later refactors that mistakenly make an error no
 longer trigger or be less helpful than it used to be.
 
 [`trybuild`]: https://github.com/dtolnay/trybuild
+
+<br>
 
 ## Debugging
 
@@ -206,6 +216,8 @@ This write-up by Brandon W Maister discusses debugging in more detail:
 [Debugging Rust's new Custom Derive system][debugging].
 
 [debugging]: https://quodlibetor.github.io/posts/debugging-rusts-new-custom-derive-system/
+
+<br>
 
 ## Optional features
 
@@ -230,6 +242,8 @@ available.
   types.
 - **`proc-macro`** *(enabled by default)* — Runtime dependency on the dynamic
   library libproc_macro from rustc toolchain.
+
+<br>
 
 ## Proc macro shim
 
