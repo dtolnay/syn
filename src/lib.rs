@@ -38,11 +38,6 @@
 //! [`syn::DeriveInput`]: struct.DeriveInput.html
 //! [parser functions]: parse/index.html
 //!
-//! *Version requirement: Syn supports any compiler version back to Rust's very
-//! first support for procedural macros in Rust 1.15.0. Some features especially
-//! around error reporting are only available in newer compilers or on the
-//! nightly channel.*
-//!
 //! ## Example of a custom derive
 //!
 //! The canonical custom derive using Syn looks like this. We write an ordinary
