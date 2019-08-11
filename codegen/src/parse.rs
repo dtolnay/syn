@@ -289,7 +289,7 @@ mod parsing {
     }
 
     fn skip_manual_extra_traits(input: ParseStream) {
-        if peek_tag(input, "manual_extra_traits") {
+        if peek_tag(input, "manual_extra_traits") || peek_tag(input, "manual_extra_traits_debug") {
             input.parse::<Token![#]>().unwrap();
             input.parse::<Ident>().unwrap();
         }
