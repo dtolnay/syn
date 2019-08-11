@@ -183,7 +183,7 @@ pub fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStrea
                     return Err(cursor.error("expected delimiter"));
                 }
             };
-            Ok(((delimiter, g.stream().clone()), rest))
+            Ok(((delimiter, g.stream()), rest))
         } else {
             Err(cursor.error("expected delimiter"))
         }
