@@ -176,10 +176,6 @@ pub trait VisitMut {
     fn visit_expr_if_mut(&mut self, i: &mut ExprIf) {
         visit_expr_if_mut(self, i)
     }
-    #[cfg(feature = "full")]
-    fn visit_expr_in_place_mut(&mut self, i: &mut ExprInPlace) {
-        visit_expr_in_place_mut(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_index_mut(&mut self, i: &mut ExprIndex) {
         visit_expr_index_mut(self, i)
@@ -1154,9 +1150,6 @@ where
         Expr::If(_binding_0) => {
             full!(v.visit_expr_if_mut(_binding_0));
         }
-        Expr::InPlace(_binding_0) => {
-            full!(v.visit_expr_in_place_mut(_binding_0));
-        }
         Expr::Index(_binding_0) => {
             v.visit_expr_index_mut(_binding_0);
         }
@@ -1475,18 +1468,6 @@ where
         tokens_helper(v, &mut (it).0.span);
         v.visit_expr_mut(&mut *(it).1);
     };
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_in_place_mut<V>(v: &mut V, node: &mut ExprInPlace)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it)
-    }
-    v.visit_expr_mut(&mut *node.place);
-    tokens_helper(v, &mut node.arrow_token.spans);
-    v.visit_expr_mut(&mut *node.value);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_index_mut<V>(v: &mut V, node: &mut ExprIndex)

@@ -725,15 +725,6 @@ impl Debug for Lite<syn::Expr> {
                 }
                 formatter.finish()
             }
-            syn::Expr::InPlace(_val) => {
-                let mut formatter = formatter.debug_struct("Expr::InPlace");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("place", Lite(&_val.place));
-                formatter.field("value", Lite(&_val.value));
-                formatter.finish()
-            }
             syn::Expr::Index(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Index");
                 if !_val.attrs.is_empty() {
@@ -1450,18 +1441,6 @@ impl Debug for Lite<syn::ExprIf> {
             }
             formatter.field("else_branch", Print::ref_cast(val));
         }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ExprInPlace> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ExprInPlace");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("place", Lite(&_val.place));
-        formatter.field("value", Lite(&_val.value));
         formatter.finish()
     }
 }

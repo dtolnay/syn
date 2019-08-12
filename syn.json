@@ -656,11 +656,6 @@
             "syn": "ExprIf"
           }
         ],
-        "InPlace": [
-          {
-            "syn": "ExprInPlace"
-          }
-        ],
         "Index": [
           {
             "syn": "ExprIndex"
@@ -1277,34 +1272,6 @@
                 }
               }
             ]
-          }
-        }
-      }
-    },
-    {
-      "ident": "ExprInPlace",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "place": {
-          "box": {
-            "syn": "Expr"
-          }
-        },
-        "arrow_token": {
-          "token": "LArrow"
-        },
-        "value": {
-          "box": {
-            "syn": "Expr"
           }
         }
       }

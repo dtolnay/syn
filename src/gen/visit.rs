@@ -172,10 +172,6 @@ pub trait Visit<'ast> {
     fn visit_expr_if(&mut self, i: &'ast ExprIf) {
         visit_expr_if(self, i)
     }
-    #[cfg(feature = "full")]
-    fn visit_expr_in_place(&mut self, i: &'ast ExprInPlace) {
-        visit_expr_in_place(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_index(&mut self, i: &'ast ExprIndex) {
         visit_expr_index(self, i)
@@ -1150,9 +1146,6 @@ where
         Expr::If(_binding_0) => {
             full!(v.visit_expr_if(_binding_0));
         }
-        Expr::InPlace(_binding_0) => {
-            full!(v.visit_expr_in_place(_binding_0));
-        }
         Expr::Index(_binding_0) => {
             v.visit_expr_index(_binding_0);
         }
@@ -1471,18 +1464,6 @@ where
         tokens_helper(v, &(it).0.span);
         v.visit_expr(&*(it).1);
     };
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_in_place<'ast, V>(v: &mut V, node: &'ast ExprInPlace)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it)
-    }
-    v.visit_expr(&*node.place);
-    tokens_helper(v, &node.arrow_token.spans);
-    v.visit_expr(&*node.value);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_index<'ast, V>(v: &mut V, node: &'ast ExprIndex)

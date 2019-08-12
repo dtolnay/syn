@@ -171,10 +171,6 @@ pub trait Fold {
     fn fold_expr_if(&mut self, i: ExprIf) -> ExprIf {
         fold_expr_if(self, i)
     }
-    #[cfg(feature = "full")]
-    fn fold_expr_in_place(&mut self, i: ExprInPlace) -> ExprInPlace {
-        fold_expr_in_place(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_index(&mut self, i: ExprIndex) -> ExprIndex {
         fold_expr_index(self, i)
@@ -1069,7 +1065,6 @@ where
         Expr::ForLoop(_binding_0) => Expr::ForLoop(full!(f.fold_expr_for_loop(_binding_0))),
         Expr::Group(_binding_0) => Expr::Group(full!(f.fold_expr_group(_binding_0))),
         Expr::If(_binding_0) => Expr::If(full!(f.fold_expr_if(_binding_0))),
-        Expr::InPlace(_binding_0) => Expr::InPlace(full!(f.fold_expr_in_place(_binding_0))),
         Expr::Index(_binding_0) => Expr::Index(f.fold_expr_index(_binding_0)),
         Expr::Let(_binding_0) => Expr::Let(full!(f.fold_expr_let(_binding_0))),
         Expr::Lit(_binding_0) => Expr::Lit(f.fold_expr_lit(_binding_0)),
@@ -1309,18 +1304,6 @@ where
                 Box::new(f.fold_expr(*(it).1)),
             )
         }),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_expr_in_place<F>(f: &mut F, node: ExprInPlace) -> ExprInPlace
-where
-    F: Fold + ?Sized,
-{
-    ExprInPlace {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        place: Box::new(f.fold_expr(*node.place)),
-        arrow_token: Token ! [ <- ](tokens_helper(f, &node.arrow_token.spans)),
-        value: Box::new(f.fold_expr(*node.value)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
