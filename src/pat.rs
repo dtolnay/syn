@@ -51,7 +51,7 @@ ast_enum_of_structs! {
         /// A range pattern: `1..=2`.
         Range(PatRange),
 
-        /// A reference pattern: `&mut (first, second)`.
+        /// A reference pattern: `&mut var`.
         Reference(PatReference),
 
         /// The dots in a tuple or slice pattern: `[0, 1, ..]`
@@ -171,7 +171,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A reference pattern: `&mut (first, second)`.
+    /// A reference pattern: `&mut var`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct PatReference {
