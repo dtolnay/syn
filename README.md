@@ -258,19 +258,20 @@ available.
 
 ## Proc macro shim
 
-Syn uses the [proc-macro2] crate to emulate the compiler's procedural macro API
-in a stable way that works all the way back to Rust 1.15.0. This shim makes it
-possible to write code without regard for whether the current compiler version
-supports the features we use.
+Syn operates on the token representation provided by the [proc-macro2] crate
+from crates.io rather than using the compiler's built in proc-macro crate
+directly. This enables code using Syn to execute outside of the context of a
+procedural macro, such as in unit tests or build.rs, and we avoid needing
+incompatible ecosystems for proc macros vs non-macro use cases.
 
 In general all of your code should be written against proc-macro2 rather than
 proc-macro. The one exception is in the signatures of procedural macro entry
 points, which are required by the language to use `proc_macro::TokenStream`.
 
 The proc-macro2 crate will automatically detect and use the compiler's data
-structures on sufficiently new compilers.
+structures when a procedural macro is active.
 
-[proc-macro2]: https://github.com/alexcrichton/proc-macro2
+[proc-macro2]: https://docs.rs/proc-macro2-next/1.0.0-rc4/proc_macro2/
 
 <br>
 
