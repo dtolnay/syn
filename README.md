@@ -56,6 +56,17 @@ this repo.
 
 <br>
 
+## Resources
+
+The best way to learn about procedural macros is by writing some. Consider
+working through [this procedural macro workshop][workshop] to get familiar with
+the different types of procedural macros. The workshop contains relevant links
+into the Syn documentation as you work through each project.
+
+[workshop]: https://github.com/dtolnay/proc-macro-workshop
+
+<br>
+
 ## Example of a derive macro
 
 The canonical derive macro using Syn looks like this. We write an ordinary Rust
