@@ -33,7 +33,7 @@ ast_enum_of_structs! {
         /// are represented as an `Expr::Unary`.
         Lit(PatLit),
 
-        /// A macro in expression position.
+        /// A macro in pattern position.
         Macro(PatMacro),
 
         /// A pattern that matches any one of a set of cases.
@@ -121,7 +121,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A macro in expression position.
+    /// A macro in pattern position.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct PatMacro {
