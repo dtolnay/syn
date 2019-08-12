@@ -57,7 +57,7 @@ ast_enum_of_structs! {
         /// The dots in a tuple or slice pattern: `[0, 1, ..]`
         Rest(PatRest),
 
-        /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
+        /// A dynamically sized slice pattern: `[a, b, ref i @ .., y, z]`.
         Slice(PatSlice),
 
         /// A struct or struct variant pattern: `Variant { x, y, .. }`.
@@ -193,7 +193,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
+    /// A dynamically sized slice pattern: `[a, b, ref i @ .., y, z]`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct PatSlice {
