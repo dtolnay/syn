@@ -559,6 +559,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit")]
+    #[rustfmt::skip]
     pub mod visit;
 
     /// Syntax tree traversal to mutate an exclusive borrow of a syntax tree in
@@ -654,6 +655,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit-mut")]
+    #[rustfmt::skip]
     pub mod visit_mut;
 
     /// Syntax tree traversal to transform the nodes of an owned syntax tree.
@@ -739,6 +741,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "fold")]
+    #[rustfmt::skip]
     pub mod fold;
 
     #[cfg(any(feature = "full", feature = "derive"))]
