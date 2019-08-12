@@ -147,7 +147,7 @@ fn test_parse_meta_item_list_lit() {
    ⋮        ],
    ⋮    },
    ⋮    nested: [
-   ⋮        Literal(5),
+   ⋮        Lit(5),
    ⋮    ],
    ⋮}
     "###);
@@ -163,7 +163,7 @@ fn test_parse_meta_item_list_lit() {
    ⋮        ],
    ⋮    },
    ⋮    nested: [
-   ⋮        Literal(5),
+   ⋮        Lit(5),
    ⋮    ],
    ⋮}
     "###);
@@ -312,7 +312,7 @@ fn test_parse_meta_item_multiple() {
 #[test]
 fn test_parse_nested_meta() {
     let input = "5";
-    snapshot!(input as NestedMeta, @"Literal(5)");
+    snapshot!(input as NestedMeta, @"Lit(5)");
 
     let input = "list(name2 = 6)";
     snapshot!(input as NestedMeta, @r###"

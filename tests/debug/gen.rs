@@ -3635,8 +3635,8 @@ impl Debug for Lite<syn::NestedMeta> {
                 formatter.write_str(")")?;
                 Ok(())
             }
-            syn::NestedMeta::Literal(_val) => {
-                formatter.write_str("Literal")?;
+            syn::NestedMeta::Lit(_val) => {
+                formatter.write_str("Lit")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;

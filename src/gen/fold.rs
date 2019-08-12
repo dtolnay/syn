@@ -2384,7 +2384,7 @@ where
 {
     match node {
         NestedMeta::Meta(_binding_0) => NestedMeta::Meta(f.fold_meta(_binding_0)),
-        NestedMeta::Literal(_binding_0) => NestedMeta::Literal(f.fold_lit(_binding_0)),
+        NestedMeta::Lit(_binding_0) => NestedMeta::Lit(f.fold_lit(_binding_0)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

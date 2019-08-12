@@ -97,7 +97,7 @@ fn test_meta_item_list_lit() {
    ⋮        ],
    ⋮    },
    ⋮    nested: [
-   ⋮        Literal(5),
+   ⋮        Lit(5),
    ⋮    ],
    ⋮}
     "###);
@@ -280,7 +280,7 @@ fn test_bool_lit() {
    ⋮        ],
    ⋮    },
    ⋮    nested: [
-   ⋮        Literal(Lit::Bool {
+   ⋮        Lit(Lit::Bool {
    ⋮            value: true,
    ⋮        }),
    ⋮    ],

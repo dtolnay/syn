@@ -3646,7 +3646,7 @@
             "syn": "Meta"
           }
         ],
-        "Literal": [
+        "Lit": [
           {
             "syn": "Lit"
           }

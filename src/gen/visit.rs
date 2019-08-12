@@ -2736,7 +2736,7 @@ where
         NestedMeta::Meta(_binding_0) => {
             v.visit_meta(_binding_0);
         }
-        NestedMeta::Literal(_binding_0) => {
+        NestedMeta::Lit(_binding_0) => {
             v.visit_lit(_binding_0);
         }
     }

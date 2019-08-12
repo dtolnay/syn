@@ -406,7 +406,7 @@ ast_enum_of_structs! {
         Meta(Meta),
 
         /// A Rust literal, like the `"new_name"` in `#[rename("new_name")]`.
-        Literal(Lit),
+        Lit(Lit),
     }
 }
 
@@ -570,7 +570,7 @@ pub mod parsing {
     impl Parse for NestedMeta {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lit) && !(input.peek(LitBool) && input.peek2(Token![=])) {
-                input.parse().map(NestedMeta::Literal)
+                input.parse().map(NestedMeta::Lit)
             } else if input.peek(Ident::peek_any) {
                 input.parse().map(NestedMeta::Meta)
             } else {
