@@ -2320,10 +2320,7 @@ pub mod parsing {
                 input.parse().map(ImplItem::Method)
             } else if lookahead.peek(Token![type]) {
                 input.parse().map(ImplItem::Type)
-            } else if vis.is_inherited()
-                && defaultness.is_none()
-                && lookahead.peek(existential)
-            {
+            } else if vis.is_inherited() && defaultness.is_none() && lookahead.peek(existential) {
                 input.call(item_existential).map(ImplItem::Verbatim)
             } else if vis.is_inherited()
                 && defaultness.is_none()
