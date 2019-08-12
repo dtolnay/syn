@@ -175,6 +175,7 @@ pub mod parsing {
             || ahead.peek(Token![fn])
             || ahead.peek(Token![mod])
             || ahead.peek(Token![type])
+            || ahead.peek(item::parsing::existential) && ahead.peek2(Token![type])
             || ahead.peek(Token![struct])
             || ahead.peek(Token![enum])
             || ahead.peek(Token![union]) && ahead.peek2(Ident)

@@ -1074,6 +1074,8 @@ pub mod parsing {
     use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
     use std::iter::{self, FromIterator};
 
+    crate::custom_keyword!(existential);
+
     impl Parse for Item {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
@@ -1144,6 +1146,8 @@ pub mod parsing {
                 input.parse().map(Item::Mod)
             } else if lookahead.peek(Token![type]) {
                 input.parse().map(Item::Type)
+            } else if lookahead.peek(existential) {
+                input.call(item_existential).map(Item::Verbatim)
             } else if lookahead.peek(Token![struct]) {
                 input.parse().map(Item::Struct)
             } else if lookahead.peek(Token![enum]) {
@@ -1191,7 +1195,8 @@ pub mod parsing {
                     Item::Impl(item) => &mut item.attrs,
                     Item::Macro(item) => &mut item.attrs,
                     Item::Macro2(item) => &mut item.attrs,
-                    Item::Verbatim(_) | Item::__Nonexhaustive => unreachable!(),
+                    Item::Verbatim(_) => return Ok(item),
+                    Item::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
@@ -1751,6 +1756,53 @@ pub mod parsing {
         }
     }
 
+    #[cfg(not(feature = "printing"))]
+    fn item_existential(input: ParseStream) -> Result<TokenStream> {
+        Err(input.error("existential type is not supported"))
+    }
+
+    #[cfg(feature = "printing")]
+    fn item_existential(input: ParseStream) -> Result<TokenStream> {
+        use crate::attr::FilterAttrs;
+        use quote::{ToTokens, TokenStreamExt};
+
+        let attrs = input.call(Attribute::parse_outer)?;
+        let vis: Visibility = input.parse()?;
+        let existential_token: existential = input.parse()?;
+        let type_token: Token![type] = input.parse()?;
+        let ident: Ident = input.parse()?;
+
+        let mut generics: Generics = input.parse()?;
+        generics.where_clause = input.parse()?;
+
+        let colon_token: Token![:] = input.parse()?;
+
+        let mut bounds = Punctuated::new();
+        while !input.peek(Token![;]) {
+            if !bounds.is_empty() {
+                bounds.push_punct(input.parse::<Token![+]>()?);
+            }
+            bounds.push_value(input.parse::<TypeParamBound>()?);
+        }
+
+        let semi_token: Token![;] = input.parse()?;
+
+        let mut tokens = TokenStream::new();
+        tokens.append_all(attrs.outer());
+        vis.to_tokens(&mut tokens);
+        existential_token.to_tokens(&mut tokens);
+        type_token.to_tokens(&mut tokens);
+        ident.to_tokens(&mut tokens);
+        generics.to_tokens(&mut tokens);
+        generics.where_clause.to_tokens(&mut tokens);
+        if !bounds.is_empty() {
+            colon_token.to_tokens(&mut tokens);
+            bounds.to_tokens(&mut tokens);
+        }
+        semi_token.to_tokens(&mut tokens);
+        Ok(tokens)
+    }
+
     impl Parse for ItemStruct {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -2270,6 +2322,11 @@ pub mod parsing {
                 input.parse().map(ImplItem::Type)
             } else if vis.is_inherited()
                 && defaultness.is_none()
+                && lookahead.peek(existential)
+            {
+                input.call(item_existential).map(ImplItem::Verbatim)
+            } else if vis.is_inherited()
+                && defaultness.is_none()
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
                     || lookahead.peek(Token![super])
@@ -2288,7 +2345,8 @@ pub mod parsing {
                     ImplItem::Method(item) => &mut item.attrs,
                     ImplItem::Type(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
-                    ImplItem::Verbatim(_) | ImplItem::__Nonexhaustive => unreachable!(),
+                    ImplItem::Verbatim(_) => return Ok(item),
+                    ImplItem::__Nonexhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
