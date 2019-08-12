@@ -145,9 +145,6 @@ ast_enum_of_structs! {
         /// expression, not any of the other types of expression.
         If(ExprIf),
 
-        /// A placement expression: `place <- value`.
-        InPlace(ExprInPlace),
-
         /// A square bracketed indexing expression: `vector[2]`.
         Index(ExprIndex),
 
@@ -450,18 +447,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A placement expression: `place <- value`.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct ExprInPlace #full {
-        pub attrs: Vec<Attribute>,
-        pub place: Box<Expr>,
-        pub arrow_token: Token![<-],
-        pub value: Box<Expr>,
-    }
-}
-
-ast_struct! {
     /// A square bracketed indexing expression: `vector[2]`.
     ///
     /// *This type is available if Syn is built with the `"derive"` or
@@ -756,7 +741,6 @@ impl PartialEq for Expr {
             (Expr::ForLoop(this), Expr::ForLoop(other)) => this == other,
             (Expr::Group(this), Expr::Group(other)) => this == other,
             (Expr::If(this), Expr::If(other)) => this == other,
-            (Expr::InPlace(this), Expr::InPlace(other)) => this == other,
             (Expr::Index(this), Expr::Index(other)) => this == other,
             (Expr::Let(this), Expr::Let(other)) => this == other,
             (Expr::Lit(this), Expr::Lit(other)) => this == other,
@@ -862,100 +846,96 @@ impl Hash for Expr {
                 hash.write_u8(16);
                 expr.hash(hash);
             }
-            Expr::InPlace(expr) => {
+            Expr::Index(expr) => {
                 hash.write_u8(17);
                 expr.hash(hash);
             }
-            Expr::Index(expr) => {
+            Expr::Let(expr) => {
                 hash.write_u8(18);
                 expr.hash(hash);
             }
-            Expr::Let(expr) => {
+            Expr::Lit(expr) => {
                 hash.write_u8(19);
                 expr.hash(hash);
             }
-            Expr::Lit(expr) => {
+            Expr::Loop(expr) => {
                 hash.write_u8(20);
                 expr.hash(hash);
             }
-            Expr::Loop(expr) => {
+            Expr::Macro(expr) => {
                 hash.write_u8(21);
                 expr.hash(hash);
             }
-            Expr::Macro(expr) => {
+            Expr::Match(expr) => {
                 hash.write_u8(22);
                 expr.hash(hash);
             }
-            Expr::Match(expr) => {
+            Expr::MethodCall(expr) => {
                 hash.write_u8(23);
                 expr.hash(hash);
             }
-            Expr::MethodCall(expr) => {
+            Expr::Paren(expr) => {
                 hash.write_u8(24);
                 expr.hash(hash);
             }
-            Expr::Paren(expr) => {
+            Expr::Path(expr) => {
                 hash.write_u8(25);
                 expr.hash(hash);
             }
-            Expr::Path(expr) => {
+            Expr::Range(expr) => {
                 hash.write_u8(26);
                 expr.hash(hash);
             }
-            Expr::Range(expr) => {
+            Expr::Reference(expr) => {
                 hash.write_u8(27);
                 expr.hash(hash);
             }
-            Expr::Reference(expr) => {
+            Expr::Repeat(expr) => {
                 hash.write_u8(28);
                 expr.hash(hash);
             }
-            Expr::Repeat(expr) => {
+            Expr::Return(expr) => {
                 hash.write_u8(29);
                 expr.hash(hash);
             }
-            Expr::Return(expr) => {
+            Expr::Struct(expr) => {
                 hash.write_u8(30);
                 expr.hash(hash);
             }
-            Expr::Struct(expr) => {
+            Expr::Try(expr) => {
                 hash.write_u8(31);
                 expr.hash(hash);
             }
-            Expr::Try(expr) => {
+            Expr::TryBlock(expr) => {
                 hash.write_u8(32);
                 expr.hash(hash);
             }
-            Expr::TryBlock(expr) => {
+            Expr::Tuple(expr) => {
                 hash.write_u8(33);
                 expr.hash(hash);
             }
-            Expr::Tuple(expr) => {
+            Expr::Type(expr) => {
                 hash.write_u8(34);
                 expr.hash(hash);
             }
-            Expr::Type(expr) => {
+            Expr::Unary(expr) => {
                 hash.write_u8(35);
                 expr.hash(hash);
             }
-            Expr::Unary(expr) => {
+            Expr::Unsafe(expr) => {
                 hash.write_u8(36);
                 expr.hash(hash);
             }
-            Expr::Unsafe(expr) => {
-                hash.write_u8(37);
-                expr.hash(hash);
-            }
             Expr::Verbatim(expr) => {
-                hash.write_u8(38);
+                hash.write_u8(37);
                 TokenStreamHelper(expr).hash(hash);
             }
             Expr::While(expr) => {
-                hash.write_u8(39);
+                hash.write_u8(38);
                 expr.hash(hash);
             }
             Expr::Yield(expr) => {
-                hash.write_u8(40);
+                hash.write_u8(39);
                 expr.hash(hash);
             }
             Expr::__Nonexhaustive => unreachable!(),
@@ -968,7 +948,6 @@ impl Expr {
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match self {
             Expr::Box(ExprBox { attrs, .. })
-            | Expr::InPlace(ExprInPlace { attrs, .. })
             | Expr::Array(ExprArray { attrs, .. })
             | Expr::Call(ExprCall { attrs, .. })
             | Expr::MethodCall(ExprMethodCall { attrs, .. })
@@ -2140,14 +2119,6 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(all(feature = "full", feature = "printing"))]
-    impl Parse for ExprInPlace {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let msg = "placement expression has been removed from Rust and is no longer parsed";
-            Err(input.error(msg))
-        }
-    }
-
     macro_rules! impl_by_parsing_expr {
         (
             $(
@@ -2728,16 +2699,6 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.box_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    impl ToTokens for ExprInPlace {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.place.to_tokens(tokens);
-            self.arrow_token.to_tokens(tokens);
-            self.value.to_tokens(tokens);
         }
     }
 
