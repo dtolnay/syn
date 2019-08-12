@@ -26,6 +26,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// [`compile_error!`] in the generated code. This produces a better diagnostic
 /// message than simply panicking the macro.
 ///
+/// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
+///
 /// When parsing macro input, the [`parse_macro_input!`] macro handles the
 /// conversion to `compile_error!` automatically.
 ///
