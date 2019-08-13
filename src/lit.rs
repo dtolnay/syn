@@ -1,6 +1,6 @@
 use proc_macro2::{Literal, Span};
 use std::fmt::{self, Display};
-use std::str;
+use std::str::{self, FromStr};
 
 #[cfg(feature = "printing")]
 use proc_macro2::Ident;
@@ -15,6 +15,7 @@ use std::hash::{Hash, Hasher};
 
 #[cfg(feature = "parsing")]
 use crate::lookahead;
+use crate::parse::Error;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, Parser, Result};
 
@@ -428,6 +429,16 @@ impl LitInt {
         &self.repr.digits
     }
 
+    pub fn base10_parse<N>(&self) -> Result<N>
+    where
+        N: FromStr,
+        N::Err: Display,
+    {
+        self.base10_digits()
+            .parse()
+            .map_err(|err| Error::new(self.span(), err))
+    }
+
     pub fn suffix(&self) -> &str {
         &self.repr.suffix
     }
@@ -483,6 +494,16 @@ impl LitFloat {
 
     pub fn base10_digits(&self) -> &str {
         &self.repr.digits
+    }
+
+    pub fn base10_parse<N>(&self) -> Result<N>
+    where
+        N: FromStr,
+        N::Err: Display,
+    {
+        self.base10_digits()
+            .parse()
+            .map_err(|err| Error::new(self.span(), err))
     }
 
     pub fn suffix(&self) -> &str {
