@@ -11,14 +11,14 @@ color-backtrace = "0.2"
 failure = "0.1"
 indexmap = { version = "1.0", features = ["serde-1"] }
 inflections = "1.1"
-proc-macro2-next = "1.0.0-rc3"
-quote-next = "1.0.0-rc3"
+proc-macro2 = "1.0"
+quote = "1.0"
 rustfmt = { package = "rustfmt-nightly", git = "https://github.com/rust-lang-nursery/rustfmt" }
 semver = { version = "0.9", features = ["serde"] }
 serde = { version = "1.0.88", features = ["derive"] }
 serde_json = "1.0.38"
 syn-codegen = { path = "../json" }
-syn-next = { path = "..", features = ["full", "extra-traits"] }
+syn = { path = "..", features = ["full", "extra-traits"] }
 toml = "0.4.10"
 
 [workspace]

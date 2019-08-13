@@ -1,6 +1,6 @@
 [package]
-name = "syn-next"
-version = "1.0.0-rc4" # don't forget to update html_root_url and syn.json
+name = "syn"
+version = "1.0.0" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Parser for Rust source code"
@@ -28,17 +28,17 @@ default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
 derive = []
 full = []
 parsing = []
-printing = ["quote-next"]
+printing = ["quote"]
 visit = []
 visit-mut = []
 fold = []
 clone-impls = []
 extra-traits = []
-proc-macro = ["proc-macro2-next/proc-macro", "quote-next/proc-macro"]
+proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 
 [dependencies]
-proc-macro2-next = { version = "1.0.0-rc3", default-features = false }
-quote-next = { version = "1.0.0-rc3", optional = true, default-features = false }
+proc-macro2 = { version = "1.0", default-features = false }
+quote = { version = "1.0", optional = true, default-features = false }
 unicode-xid = "0.2"
 
 [dev-dependencies]

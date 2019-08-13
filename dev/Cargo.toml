@@ -14,9 +14,9 @@ path = "main.rs"
 name = "syn-dev"
 
 [dependencies]
-quote-next = "1.0.0-rc3"
+quote = "1.0"
 
-[dependencies.syn-next]
+[dependencies.syn]
 path = ".."
 default-features = false
 features = ["parsing", "full", "extra-traits", "proc-macro"]

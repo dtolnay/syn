@@ -54,8 +54,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! syn-next = "1.0.0-rc4"
-//! quote-next = "1.0.0-rc3"
+//! syn = "1.0"
+//! quote = "1.0"
 //!
 //! [lib]
 //! proc-macro = true
@@ -242,7 +242,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn-next/1.0.0-rc4")]
+#![doc(html_root_url = "https://docs.rs/syn/1.0.0")]
 #![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
@@ -493,8 +493,8 @@ mod gen {
     ///
     /// ```
     /// // [dependencies]
-    /// // quote-next = "1.0.0-rc3"
-    /// // syn-next = { version = "1.0.0-rc4", features = ["full", "visit"] }
+    /// // quote = "1.0"
+    /// // syn = { version = "1.0", features = ["full", "visit"] }
     ///
     /// use quote::quote;
     /// use syn::visit::{self, Visit};
@@ -615,8 +615,8 @@ mod gen {
     ///
     /// ```
     /// // [dependencies]
-    /// // quote-next = "1.0.0-rc3"
-    /// // syn-next = { version = "1.0.0-rc4", features = ["full", "visit-mut"] }
+    /// // quote = "1.0"
+    /// // syn = { version = "1.0", features = ["full", "visit-mut"] }
     ///
     /// use quote::quote;
     /// use syn::visit_mut::{self, VisitMut};
@@ -712,8 +712,8 @@ mod gen {
     ///
     /// ```
     /// // [dependencies]
-    /// // quote-next = "1.0.0-rc3"
-    /// // syn-next = { version = "1.0.0-rc4", features = ["fold", "full"] }
+    /// // quote = "1.0"
+    /// // syn = { version = "1.0", features = ["fold", "full"] }
     ///
     /// use quote::quote;
     /// use syn::fold::{fold_expr, Fold};
