@@ -429,6 +429,28 @@ impl LitInt {
         &self.repr.digits
     }
 
+    /// Parses the literal into a selected number type.
+    ///
+    /// This is equivalent to `lit.base10_digits().parse()` except that the
+    /// resulting errors will be correctly spanned to point to the literal token
+    /// in the macro input.
+    ///
+    /// ```
+    /// use syn::LitInt;
+    /// use syn::parse::{Parse, ParseStream, Result};
+    ///
+    /// struct Port {
+    ///     value: u16,
+    /// }
+    ///
+    /// impl Parse for Port {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         let lit: LitInt = input.parse()?;
+    ///         let value = lit.base10_parse::<u16>()?;
+    ///         Ok(Port { value })
+    ///     }
+    /// }
+    /// ```
     pub fn base10_parse<N>(&self) -> Result<N>
     where
         N: FromStr,
