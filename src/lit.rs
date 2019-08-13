@@ -47,9 +47,6 @@ ast_enum_of_structs! {
         Char(LitChar),
 
         /// An integer literal: `1` or `1u16`.
-        ///
-        /// Holds up to 64 bits of data. Use `Lit::Verbatim` for any larger
-        /// integer literal.
         Int(LitInt),
 
         /// A floating point literal: `1f64` or `1.0e10f64`.
@@ -60,8 +57,7 @@ ast_enum_of_structs! {
         /// A boolean literal: `true` or `false`.
         Bool(LitBool),
 
-        /// A raw token literal not interpreted by Syn, possibly because it
-        /// represents an integer larger than 64 bits.
+        /// A raw token literal not interpreted by Syn.
         Verbatim(Literal),
     }
 }
@@ -114,9 +110,6 @@ ast_struct! {
 
 ast_struct! {
     /// An integer literal: `1` or `1u16`.
-    ///
-    /// Holds up to 64 bits of data. Use `Lit::Verbatim` for any larger
-    /// integer literal.
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
