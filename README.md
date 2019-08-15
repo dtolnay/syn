@@ -3,7 +3,7 @@ Parser for Rust source code
 
 [![Build Status](https://api.travis-ci.org/dtolnay/syn.svg?branch=master)](https://travis-ci.org/dtolnay/syn)
 [![Latest Version](https://img.shields.io/crates/v/syn.svg)](https://crates.io/crates/syn)
-[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/syn/0.15/syn/)
+[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/syn/1.0/syn/)
 [![Rustc Version 1.31+](https://img.shields.io/badge/rustc-1.31+-lightgray.svg)](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
 
 Syn is a parsing library for parsing a stream of Rust tokens into a syntax tree
@@ -39,12 +39,12 @@ contains some APIs that may be useful more generally.
   procedural macros enable only what they need, and do not pay in compile time
   for all the rest.
 
-[`syn::File`]: https://docs.rs/syn/0.15/syn/struct.File.html
-[`syn::Item`]: https://docs.rs/syn/0.15/syn/enum.Item.html
-[`syn::Expr`]: https://docs.rs/syn/0.15/syn/enum.Expr.html
-[`syn::Type`]: https://docs.rs/syn/0.15/syn/enum.Type.html
-[`syn::DeriveInput`]: https://docs.rs/syn/0.15/syn/struct.DeriveInput.html
-[parser functions]: https://docs.rs/syn/0.15/syn/parse/index.html
+[`syn::File`]: https://docs.rs/syn/1.0/syn/struct.File.html
+[`syn::Item`]: https://docs.rs/syn/1.0/syn/enum.Item.html
+[`syn::Expr`]: https://docs.rs/syn/1.0/syn/enum.Expr.html
+[`syn::Type`]: https://docs.rs/syn/1.0/syn/enum.Type.html
+[`syn::DeriveInput`]: https://docs.rs/syn/1.0/syn/struct.DeriveInput.html
+[parser functions]: https://docs.rs/syn/1.0/syn/parse/index.html
 
 If you get stuck with anything involving procedural macros in Rust I am happy to
 provide help even if the issue is not related to Syn. Please file a ticket in
@@ -80,8 +80,8 @@ tokens back to the compiler to compile into the user's crate.
 
 ```toml
 [dependencies]
-syn = "0.15"
-quote = "0.6"
+syn = "1.0"
+quote = "1.0"
 
 [lib]
 proc-macro = true
