@@ -16,12 +16,12 @@ use self::syntax::ast::{
     FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg,
     GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident,
     ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item,
-    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac_,
+    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac,
     MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat,
     PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
     StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind,
     TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree,
-    UseTreeKind, VariantData, Variant_, VisibilityKind, WhereBoundPredicate, WhereClause,
+    UseTreeKind, VariantData, Variant, VisibilityKind, WhereBoundPredicate, WhereClause,
     WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;
@@ -266,7 +266,7 @@ macro_rules! spanless_eq_enum {
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arg; attrs ty pat id span);
-spanless_eq_struct!(Arm; attrs pats guard body span);
+spanless_eq_struct!(Arm; attrs pats guard body span id);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
 spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
@@ -274,8 +274,8 @@ spanless_eq_struct!(Block; stmts id rules span);
 spanless_eq_struct!(Crate; module attrs span);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id node span attrs);
-spanless_eq_struct!(Field; ident expr span is_shorthand attrs);
-spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs);
+spanless_eq_struct!(Field; ident expr span is_shorthand attrs id);
+spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span);
 spanless_eq_struct!(FnDecl; inputs output c_variadic);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety abi);
 spanless_eq_struct!(ForeignItem; ident attrs node id span vis);
@@ -291,7 +291,7 @@ spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token node span);
 spanless_eq_struct!(Local; pat ty init id span attrs);
-spanless_eq_struct!(Mac_; path delim tts prior_type_ascription);
+spanless_eq_struct!(Mac; path delim tts span prior_type_ascription);
 spanless_eq_struct!(MacroDef; tokens legacy);
 spanless_eq_struct!(MethodSig; header decl);
 spanless_eq_struct!(Mod; inner items inline);
@@ -309,7 +309,7 @@ spanless_eq_struct!(TraitItem; id ident attrs generics node span !tokens);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id node span);
 spanless_eq_struct!(UseTree; prefix kind span);
-spanless_eq_struct!(Variant_; ident attrs id data disr_expr);
+spanless_eq_struct!(Variant; ident attrs id data disr_expr span);
 spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bounds);
 spanless_eq_struct!(WhereClause; predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
