@@ -15,9 +15,9 @@ use std::hash::{Hash, Hasher};
 
 #[cfg(feature = "parsing")]
 use crate::lookahead;
-use crate::{Error, Result};
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, Parser};
+use crate::{Error, Result};
 
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.

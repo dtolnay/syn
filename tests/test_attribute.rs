@@ -45,7 +45,7 @@ fn test_meta_item_name_value() {
 
 #[test]
 fn test_meta_item_bool_value() {
-    let meta = test("#[foo = true]");;
+    let meta = test("#[foo = true]");
 
     snapshot!(meta, @r###"
    ⋮Meta::NameValue {
