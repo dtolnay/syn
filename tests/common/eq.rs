@@ -16,12 +16,12 @@ use self::syntax::ast::{
     FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg,
     GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident,
     ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item,
-    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, MacDelimiter, MacStmtStyle, Mac,
+    ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, Mac, MacDelimiter, MacStmtStyle,
     MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat,
     PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
     StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind,
     TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree,
-    UseTreeKind, VariantData, Variant, VisibilityKind, WhereBoundPredicate, WhereClause,
+    UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
     WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use self::syntax::parse::lexer::comments;

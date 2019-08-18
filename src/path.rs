@@ -456,11 +456,11 @@ pub mod parsing {
         ///
         /// *This function is available if Syn is built with the `"parsing"`
         /// feature.*
-        pub fn get_ident(&self) -> Option<&Ident>
-        {
+        pub fn get_ident(&self) -> Option<&Ident> {
             if self.leading_colon.is_none()
                 && self.segments.len() == 1
-                && self.segments[0].arguments.is_none() {
+                && self.segments[0].arguments.is_none()
+            {
                 Some(&self.segments[0].ident)
             } else {
                 None
