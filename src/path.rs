@@ -435,6 +435,24 @@ pub mod parsing {
         ///
         /// *This function is available if Syn is built with the `"parsing"`
         /// feature.*
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use syn::{Attribute, Error, Meta, NestedMeta, Result};
+        /// # use std::iter::FromIterator;
+        ///
+        /// fn get_serde_meta_items(attr: &Attribute) -> Result<Vec<NestedMeta>> {
+        ///     if attr.path.is_ident("serde") {
+        ///         match attr.parse_meta()? {
+        ///             Meta::List(meta) => Ok(Vec::from_iter(meta.nested)),
+        ///             bad => Err(Error::new_spanned(bad, "unrecognized attribute")),
+        ///         }
+        ///     } else {
+        ///         Ok(Vec::new())
+        ///     }
+        /// }
+        /// ```
         pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
         where
             Ident: PartialEq<I>,
