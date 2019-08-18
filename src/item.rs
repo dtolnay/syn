@@ -1044,6 +1044,12 @@ ast_struct! {
     }
 }
 
+impl Receiver {
+    pub fn lifetime(&self) -> Option<&Lifetime> {
+        self.reference.as_ref()?.1.as_ref()
+    }
+}
+
 ast_struct! {
     /// The variadic argument of a foreign function.
     ///
