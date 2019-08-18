@@ -439,10 +439,32 @@ pub mod parsing {
         where
             Ident: PartialEq<I>,
         {
-            self.leading_colon.is_none()
+            match self.get_ident() {
+                Some(id) => id == ident,
+                None => false,
+            }
+        }
+
+        /// Determines whether this is a single ident, and if so return it.
+        ///
+        /// It must be the case that:
+        ///
+        /// - the path has no leading colon,
+        /// - the number of path segments is 1,
+        /// - the first path segment has no angle bracketed or parenthesized
+        ///   path arguments
+        ///
+        /// *This function is available if Syn is built with the `"parsing"`
+        /// feature.*
+        pub fn get_ident(&self) -> Option<&Ident>
+        {
+            if self.leading_colon.is_none()
                 && self.segments.len() == 1
-                && self.segments[0].arguments.is_none()
-                && self.segments[0].ident == *ident
+                && self.segments[0].arguments.is_none() {
+                Some(&self.segments[0].ident)
+            } else {
+                None
+            }
         }
 
         fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
