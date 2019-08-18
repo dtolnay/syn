@@ -430,8 +430,8 @@ pub mod parsing {
         /// - the path has no leading colon,
         /// - the number of path segments is 1,
         /// - the first path segment has no angle bracketed or parenthesized
-        ///   path arguments
-        /// - and the ident of the first path segment is equal to the given one.
+        ///   path arguments, and
+        /// - the ident of the first path segment is equal to the given one.
         ///
         /// *This function is available if Syn is built with the `"parsing"`
         /// feature.*
@@ -445,14 +445,14 @@ pub mod parsing {
             }
         }
 
-        /// Determines whether this is a single ident, and if so return it.
+        /// If this path consists of a single ident, returns the ident.
         ///
-        /// It must be the case that:
+        /// A path is considered an ident if:
         ///
         /// - the path has no leading colon,
-        /// - the number of path segments is 1,
+        /// - the number of path segments is 1, and
         /// - the first path segment has no angle bracketed or parenthesized
-        ///   path arguments
+        ///   path arguments.
         ///
         /// *This function is available if Syn is built with the `"parsing"`
         /// feature.*
