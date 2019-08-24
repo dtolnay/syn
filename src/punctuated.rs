@@ -460,6 +460,10 @@ impl<'a, T, P> Iterator for Pairs<'a, T, P> {
             .map(|(t, p)| Pair::Punctuated(t, p))
             .or_else(|| self.last.next().map(Pair::End))
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
+    }
 }
 
 impl<'a, T, P> DoubleEndedIterator for Pairs<'a, T, P> {
@@ -506,6 +510,10 @@ impl<'a, T, P> Iterator for PairsMut<'a, T, P> {
             .map(|(t, p)| Pair::Punctuated(t, p))
             .or_else(|| self.last.next().map(Pair::End))
     }
+    
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
+    }
 }
 
 impl<'a, T, P> DoubleEndedIterator for PairsMut<'a, T, P> {
@@ -543,6 +551,10 @@ impl<T, P> Iterator for IntoPairs<T, P> {
             .map(|(t, p)| Pair::Punctuated(t, p))
             .or_else(|| self.last.next().map(Pair::End))
     }
+        
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
+    }
 }
 
 impl<T, P> DoubleEndedIterator for IntoPairs<T, P> {
@@ -575,6 +587,10 @@ impl<T> Iterator for IntoIter<T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()
+    }
+        
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
     }
 }
 
@@ -634,6 +650,10 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()
+    }
+        
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
     }
 }
 
@@ -724,6 +744,10 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()
+    }
+        
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
     }
 }
 
