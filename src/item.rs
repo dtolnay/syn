@@ -1050,26 +1050,6 @@ impl Receiver {
     }
 }
 
-ast_struct! {
-    /// The variadic argument of a foreign function.
-    ///
-    /// ```rust
-    /// # struct c_char;
-    /// # struct c_int;
-    /// #
-    /// extern "C" {
-    ///     fn printf(format: *const c_char, ...) -> c_int;
-    ///     //                               ^^^
-    /// }
-    /// ```
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
-    pub struct Variadic {
-        pub attrs: Vec<Attribute>,
-        pub dots: Token![...],
-    }
-}
-
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
@@ -2955,13 +2935,6 @@ mod printing {
             }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for Variadic {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.dots.to_tokens(tokens);
         }
     }
 }
