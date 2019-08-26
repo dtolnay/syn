@@ -407,6 +407,8 @@ pub mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
+    use proc_macro2::{Punct, Spacing, TokenTree};
+    use std::iter::FromIterator;
 
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -946,7 +948,23 @@ pub mod parsing {
                         None
                     }
                 },
-                ty: input.parse()?,
+                ty: match input.parse::<Option<Token![...]>>()? {
+                    Some(dot3) => {
+                        let args = vec![
+                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                            TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                            TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+                        ];
+                        let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
+                            |(mut arg, span)| {
+                                arg.set_span(*span);
+                                arg
+                            },
+                        ));
+                        Type::Verbatim(tokens)
+                    }
+                    None => input.parse()?,
+                },
             })
         }
     }
