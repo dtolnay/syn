@@ -723,7 +723,7 @@ pub mod parsing {
     impl Parse for TypeBareFn {
         fn parse(input: ParseStream) -> Result<Self> {
             let args;
-            let allow_variadic;
+            let mut variadic = None;
             Ok(TypeBareFn {
                 lifetimes: input.parse()?,
                 unsafety: input.parse()?,
@@ -732,26 +732,32 @@ pub mod parsing {
                 paren_token: parenthesized!(args in input),
                 inputs: {
                     let mut inputs = Punctuated::new();
-                    while !args.is_empty() && !args.peek(Token![...]) {
-                        inputs.push_value(args.parse()?);
+
+                    while !args.is_empty() {
+                        let attrs = args.call(Attribute::parse_outer)?;
+
+                        if inputs.empty_or_trailing() && args.peek(Token![...]) {
+                            variadic = Some(Variadic {
+                                attrs,
+                                dots: args.parse()?,
+                            });
+                            break;
+                        }
+
+                        inputs.push_value(BareFnArg {
+                            attrs,
+                            ..args.parse()?
+                        });
                         if args.is_empty() {
                             break;
                         }
+
                         inputs.push_punct(args.parse()?);
                     }
-                    allow_variadic = inputs.empty_or_trailing();
+
                     inputs
                 },
-                variadic: {
-                    if allow_variadic && args.peek(Token![...]) {
-                        Some(Variadic {
-                            attrs: Vec::new(),
-                            dots: args.parse()?,
-                        })
-                    } else {
-                        None
-                    }
-                },
+                variadic,
                 output: input.call(ReturnType::without_plus)?,
             })
         }
