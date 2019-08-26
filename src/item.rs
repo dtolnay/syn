@@ -1492,6 +1492,22 @@ pub mod parsing {
     }
 
     fn fn_arg_typed(input: ParseStream) -> Result<PatType> {
+        // Hack to parse pre-2018 syntax in
+        // test/ui/rfc-2565-param-attrs/param-attrs-pretty.rs
+        // because the rest of the test case is valuable.
+        if input.peek(Ident) && input.peek2(Token![<]) {
+            let span = input.fork().parse::<Ident>()?.span();
+            return Ok(PatType {
+                attrs: Vec::new(),
+                pat: Box::new(Pat::Wild(PatWild {
+                    attrs: Vec::new(),
+                    underscore_token: Token![_](span),
+                })),
+                colon_token: Token![:](span),
+                ty: input.parse()?,
+            });
+        }
+
         Ok(PatType {
             attrs: Vec::new(),
             pat: input.parse()?,
