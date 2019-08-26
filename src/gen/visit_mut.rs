@@ -749,7 +749,7 @@ pub trait VisitMut {
     fn visit_use_tree_mut(&mut self, i: &mut UseTree) {
         visit_use_tree_mut(self, i)
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_variadic_mut(&mut self, i: &mut Variadic) {
         visit_variadic_mut(self, i)
     }
@@ -3439,7 +3439,7 @@ where
         }
     }
     if let Some(it) = &mut node.variadic {
-        full!(v.visit_variadic_mut(it))
+        v.visit_variadic_mut(it)
     };
     v.visit_return_type_mut(&mut node.output);
 }
@@ -3696,7 +3696,7 @@ where
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_variadic_mut<V>(v: &mut V, node: &mut Variadic)
 where
     V: VisitMut + ?Sized,

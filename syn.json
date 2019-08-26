@@ -5332,6 +5332,7 @@
       "ident": "Variadic",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },

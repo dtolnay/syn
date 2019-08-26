@@ -747,7 +747,7 @@ pub trait Fold {
     fn fold_use_tree(&mut self, i: UseTree) -> UseTree {
         fold_use_tree(self, i)
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_variadic(&mut self, i: Variadic) -> Variadic {
         fold_variadic(self, i)
     }
@@ -2915,7 +2915,7 @@ where
         fn_token: Token![fn](tokens_helper(f, &node.fn_token.span)),
         paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
         inputs: FoldHelper::lift(node.inputs, |it| f.fold_bare_fn_arg(it)),
-        variadic: (node.variadic).map(|it| full!(f.fold_variadic(it))),
+        variadic: (node.variadic).map(|it| f.fold_variadic(it)),
         output: f.fold_return_type(node.output),
     }
 }
@@ -3140,7 +3140,7 @@ where
         UseTree::Group(_binding_0) => UseTree::Group(f.fold_use_group(_binding_0)),
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_variadic<F>(f: &mut F, node: Variadic) -> Variadic
 where
     F: Fold + ?Sized,
