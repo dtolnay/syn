@@ -247,12 +247,13 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
             }
         }
 
-        fn visit_field(&mut self, f: &mut Field) {
+        fn flat_map_field(&mut self, mut f: Field) -> SmallVec<[Field; 1]> {
             if f.is_shorthand {
                 noop_visit_expr(&mut f.expr, self);
             } else {
                 self.visit_expr(&mut f.expr);
             }
+            SmallVec::from([f])
         }
 
         // We don't want to look at expressions that might appear in patterns or
