@@ -4878,10 +4878,14 @@ impl Debug for Lite<syn::Type> {
                 if let Some(val) = &_val.variadic {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::token::Dot3);
+                    struct Print(syn::Variadic);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
                             Ok(())
                         }
                     }
@@ -5108,10 +5112,14 @@ impl Debug for Lite<syn::TypeBareFn> {
         if let Some(val) = &_val.variadic {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::token::Dot3);
+            struct Print(syn::Variadic);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
                     Ok(())
                 }
             }

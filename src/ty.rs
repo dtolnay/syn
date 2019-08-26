@@ -99,7 +99,7 @@ ast_struct! {
         pub fn_token: Token![fn],
         pub paren_token: token::Paren,
         pub inputs: Punctuated<BareFnArg, Token![,]>,
-        pub variadic: Option<Token![...]>,
+        pub variadic: Option<Variadic>,
         pub output: ReturnType,
     }
 }
@@ -723,7 +723,10 @@ pub mod parsing {
                 },
                 variadic: {
                     if allow_variadic && args.peek(Token![...]) {
-                        Some(args.parse()?)
+                        Some(Variadic {
+                            attrs: Vec::new(),
+                            dots: args.parse()?,
+                        })
                     } else {
                         None
                     }
@@ -1001,7 +1004,7 @@ mod printing {
                 self.inputs.to_tokens(tokens);
                 if let Some(variadic) = &self.variadic {
                     if !self.inputs.empty_or_trailing() {
-                        let span = variadic.spans[0];
+                        let span = variadic.dots.spans[0];
                         Token![,](span).to_tokens(tokens);
                     }
                     variadic.to_tokens(tokens);

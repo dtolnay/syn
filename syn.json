@@ -4865,7 +4865,7 @@
         },
         "variadic": {
           "option": {
-            "token": "Dot3"
+            "syn": "Variadic"
           }
         },
         "output": {

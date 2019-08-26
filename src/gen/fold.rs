@@ -2915,7 +2915,7 @@ where
         fn_token: Token![fn](tokens_helper(f, &node.fn_token.span)),
         paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
         inputs: FoldHelper::lift(node.inputs, |it| f.fold_bare_fn_arg(it)),
-        variadic: (node.variadic).map(|it| Token ! [ ... ](tokens_helper(f, &it.spans))),
+        variadic: (node.variadic).map(|it| full!(f.fold_variadic(it))),
         output: f.fold_return_type(node.output),
     }
 }

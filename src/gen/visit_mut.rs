@@ -3439,7 +3439,7 @@ where
         }
     }
     if let Some(it) = &mut node.variadic {
-        tokens_helper(v, &mut it.spans)
+        full!(v.visit_variadic_mut(it))
     };
     v.visit_return_type_mut(&mut node.output);
 }

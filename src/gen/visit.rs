@@ -3433,7 +3433,7 @@ where
         }
     }
     if let Some(it) = &node.variadic {
-        tokens_helper(v, &it.spans)
+        full!(v.visit_variadic(it))
     };
     v.visit_return_type(&node.output);
 }
