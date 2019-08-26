@@ -2905,6 +2905,25 @@ mod printing {
         }
     }
 
+    fn has_variadic(inputs: &Punctuated<FnArg, Token![,]>) -> bool {
+        let last = match inputs.last() {
+            Some(last) => last,
+            None => return false,
+        };
+
+        let pat = match last {
+            FnArg::Typed(pat) => pat,
+            FnArg::Receiver(_) => return false,
+        };
+
+        let tokens = match pat.ty.as_ref() {
+            Type::Verbatim(tokens) => tokens,
+            _ => return false,
+        };
+
+        tokens.to_string() == "..."
+    }
+
     impl ToTokens for Signature {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
@@ -2916,10 +2935,12 @@ mod printing {
             self.generics.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
-                if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
-                    <Token![,]>::default().to_tokens(tokens);
+                if self.variadic.is_some() && !has_variadic(&self.inputs) {
+                    if !self.inputs.empty_or_trailing() {
+                        <Token![,]>::default().to_tokens(tokens);
+                    }
+                    self.variadic.to_tokens(tokens);
                 }
-                self.variadic.to_tokens(tokens);
             });
             self.output.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
