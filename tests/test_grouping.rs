@@ -28,28 +28,28 @@ fn test_grouping() {
     assert_eq!(tokens.to_string(), "1i32 +  2i32 + 3i32  * 4i32");
 
     snapshot!(tokens as Expr, @r###"
-   ⋮Expr::Binary {
-   ⋮    left: Expr::Lit {
-   ⋮        lit: 1i32,
-   ⋮    },
-   ⋮    op: Add,
-   ⋮    right: Expr::Binary {
-   ⋮        left: Expr::Group {
-   ⋮            expr: Expr::Binary {
-   ⋮                left: Expr::Lit {
-   ⋮                    lit: 2i32,
-   ⋮                },
-   ⋮                op: Add,
-   ⋮                right: Expr::Lit {
-   ⋮                    lit: 3i32,
-   ⋮                },
-   ⋮            },
-   ⋮        },
-   ⋮        op: Mul,
-   ⋮        right: Expr::Lit {
-   ⋮            lit: 4i32,
-   ⋮        },
-   ⋮    },
-   ⋮}
+    Expr::Binary {
+        left: Expr::Lit {
+            lit: 1i32,
+        },
+        op: Add,
+        right: Expr::Binary {
+            left: Expr::Group {
+                expr: Expr::Binary {
+                    left: Expr::Lit {
+                        lit: 2i32,
+                    },
+                    op: Add,
+                    right: Expr::Lit {
+                        lit: 3i32,
+                    },
+                },
+            },
+            op: Mul,
+            right: Expr::Lit {
+                lit: 4i32,
+            },
+        },
+    }
     "###);
 }
