@@ -51,13 +51,11 @@ walkdir = "2.1"
 
 [[bench]]
 name = "rust"
-edition = "2018"
 harness = false
 required-features = ["full", "parsing"]
 
 [[bench]]
 name = "file"
-edition = "2018"
 required-features = ["full", "parsing"]
 
 [package.metadata.docs.rs]
