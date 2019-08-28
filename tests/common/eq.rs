@@ -5,11 +5,11 @@ extern crate syntax_pos;
 
 use std::mem;
 
-use self::rustc_data_structures::sync::Lrc;
-use self::rustc_data_structures::thin_vec::ThinVec;
-use self::rustc_target::abi::FloatTy;
-use self::rustc_target::spec::abi::Abi;
-use self::syntax::ast::{
+use rustc_data_structures::sync::Lrc;
+use rustc_data_structures::thin_vec::ThinVec;
+use rustc_target::abi::FloatTy;
+use rustc_target::spec::abi::Abi;
+use syntax::ast::{
     AngleBracketedArgs, AnonConst, Arg, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
     AttrId, AttrStyle, Attribute, BareFnTy, BinOpKind, BindingMode, Block, BlockCheckMode,
     CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat,
@@ -24,13 +24,13 @@ use self::syntax::ast::{
     UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
     WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
-use self::syntax::parse::lexer::comments;
-use self::syntax::parse::token::{self, DelimToken, Token, TokenKind};
-use self::syntax::ptr::P;
-use self::syntax::source_map::Spanned;
-use self::syntax::symbol::{sym, Symbol};
-use self::syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
-use self::syntax_pos::{Span, SyntaxContext, DUMMY_SP};
+use syntax::parse::lexer::comments;
+use syntax::parse::token::{self, DelimToken, Token, TokenKind};
+use syntax::ptr::P;
+use syntax::source_map::Spanned;
+use syntax::symbol::{sym, Symbol};
+use syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
+use syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;

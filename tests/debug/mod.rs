@@ -1,10 +1,7 @@
-extern crate proc_macro2;
-extern crate ref_cast;
-
 mod gen;
 
-use self::proc_macro2::{Ident, Literal, TokenStream};
-use self::ref_cast::RefCast;
+use proc_macro2::{Ident, Literal, TokenStream};
+use ref_cast::RefCast;
 use std::fmt::{self, Debug};
 use std::ops::Deref;
 use syn::punctuated::Punctuated;

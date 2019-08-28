@@ -1,6 +1,3 @@
-extern crate quote;
-extern crate syn;
-
 mod features;
 
 use quote::quote;

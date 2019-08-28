@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate syn;
-
+use syn::parenthesized;
 use syn::parse::{discouraged::Speculative, Parse, ParseStream, Parser, Result};
 
 #[test]

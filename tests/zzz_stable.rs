@@ -1,7 +1,5 @@
 #![cfg(syn_disable_nightly_tests)]
 
-extern crate termcolor;
-
 use std::io::{self, Write};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 

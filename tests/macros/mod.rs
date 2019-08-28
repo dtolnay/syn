@@ -1,5 +1,3 @@
-extern crate proc_macro2;
-
 #[path = "../debug/mod.rs"]
 pub mod debug;
 

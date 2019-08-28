@@ -14,15 +14,10 @@
 //!    spans.
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
-extern crate quote;
-extern crate rayon;
-extern crate regex;
 extern crate rustc_data_structures;
 extern crate smallvec;
-extern crate syn;
 extern crate syntax;
 extern crate syntax_pos;
-extern crate walkdir;
 
 mod features;
 

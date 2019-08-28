@@ -1,5 +1,3 @@
-extern crate syn;
-
 mod features;
 
 macro_rules! should_parse {

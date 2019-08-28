@@ -1,8 +1,5 @@
 use syn::punctuated::{Pair, Punctuated};
-
-extern crate quote;
-#[macro_use]
-extern crate syn;
+use syn::Token;
 
 mod features;
 

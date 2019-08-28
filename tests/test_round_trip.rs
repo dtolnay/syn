@@ -2,12 +2,8 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
-extern crate quote;
-extern crate rayon;
-extern crate syn;
 extern crate syntax;
 extern crate syntax_pos;
-extern crate walkdir;
 
 mod features;
 

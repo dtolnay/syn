@@ -1,8 +1,6 @@
-extern crate walkdir;
-
 use std::process::Command;
 
-use self::walkdir::DirEntry;
+use walkdir::DirEntry;
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();
