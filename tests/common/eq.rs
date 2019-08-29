@@ -10,14 +10,14 @@ use rustc_data_structures::thin_vec::ThinVec;
 use rustc_target::abi::FloatTy;
 use rustc_target::spec::abi::Abi;
 use syntax::ast::{
-    AngleBracketedArgs, AnonConst, Arg, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
+    AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
     AttrId, AttrStyle, Attribute, BareFnTy, BinOpKind, BindingMode, Block, BlockCheckMode,
     CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind, Field, FieldPat,
     FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg,
     GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident,
     ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item,
     ItemKind, Label, Lifetime, Lit, LitIntType, LitKind, Local, Mac, MacDelimiter, MacStmtStyle,
-    MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId, ParenthesizedArgs, Pat,
+    MacroDef, MethodSig, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat,
     PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
     StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind,
     TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree,
@@ -265,7 +265,6 @@ macro_rules! spanless_eq_enum {
 
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
-spanless_eq_struct!(Arg; attrs ty pat id span);
 spanless_eq_struct!(Arm; attrs pats guard body span id);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(Attribute; id style path tokens span !is_sugared_doc);
@@ -296,6 +295,7 @@ spanless_eq_struct!(MacroDef; tokens legacy);
 spanless_eq_struct!(MethodSig; header decl);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
+spanless_eq_struct!(Param; attrs ty pat id span);
 spanless_eq_struct!(ParenthesizedArgs; span inputs output);
 spanless_eq_struct!(Pat; id node span);
 spanless_eq_struct!(Path; span segments);
