@@ -42,8 +42,7 @@ matrix:
         - cargo check --manifest-path examples/heapsize/example/Cargo.toml
         - cargo check --manifest-path examples/lazy-static/example/Cargo.toml
         - cargo check --manifest-path examples/trace-var/example/Cargo.toml
-    # Temporarily pinned until rustfmt is unbroken.
-    - rust: nightly-2019-07-28
+    - rust: nightly
       name: Codegen
       script:
         - (cd codegen && cargo run)
