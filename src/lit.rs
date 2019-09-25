@@ -311,7 +311,7 @@ impl LitStr {
         fn respan_token_tree(mut token: TokenTree, span: Span) -> TokenTree {
             match &mut token {
                 TokenTree::Group(g) => {
-                    let stream = respan_token_stream(g.stream().clone(), span);
+                    let stream = respan_token_stream(g.stream(), span);
                     *g = Group::new(g.delimiter(), stream);
                     g.set_span(span);
                 }
