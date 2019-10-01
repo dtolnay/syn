@@ -51,7 +51,13 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         _ => true,
     }
 }
+#[cfg(windows)]
+pub fn clone_rust() {
+    let result = Command::new("powershell").args(&["-ExecutionPolicy", "Bypass", "-File", "tests/clone.ps1"]).status().unwrap();
+    assert!(result.success());
+}
 
+#[cfg(not(windows))]
 pub fn clone_rust() {
     let result = Command::new("tests/clone.sh").status().unwrap();
     assert!(result.success());

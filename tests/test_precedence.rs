@@ -86,7 +86,6 @@ fn test_simple_precedence() {
 
 /// Test expressions from rustc, like in `test_round_trip`.
 #[test]
-#[cfg_attr(target_os = "windows", ignore = "requires nix .sh")]
 fn test_rustc_precedence() {
     repo::clone_rust();
     let abort_after = common::abort_after();
