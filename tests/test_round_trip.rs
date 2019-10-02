@@ -34,9 +34,9 @@ mod repo;
 use common::eq::SpanlessEq;
 
 #[test]
-#[cfg_attr(target_os = "windows", ignore = "requires nix .sh")]
+
 fn test_round_trip() {
-    repo::clone_rust();
+    repo::clone_rust().expect("Rust did not download correctly");
     let abort_after = common::abort_after();
     if abort_after == 0 {
         panic!("Skipping all round_trip tests");

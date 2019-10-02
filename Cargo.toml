@@ -46,8 +46,11 @@ insta = "0.11"
 rayon = "1.0"
 ref-cast = "0.2"
 regex = "1.0"
+reqwest = "0.9"
+tempfile = "3.1"
 termcolor = "1.0"
 walkdir = "2.1"
+zip = "0.5"
 
 [[bench]]
 name = "rust"
