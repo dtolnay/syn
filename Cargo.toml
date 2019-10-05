@@ -20,9 +20,6 @@ include = [
 ]
 edition = "2018"
 
-[lib]
-name = "syn"
-
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
 derive = []
