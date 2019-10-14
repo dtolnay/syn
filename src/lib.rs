@@ -252,6 +252,7 @@
     clippy::eval_order_dependence,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
+    clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
     clippy::suspicious_op_assign_impl,
@@ -268,6 +269,7 @@
     clippy::shadow_unrelated,
     clippy::similar_names,
     clippy::single_match_else,
+    clippy::too_many_lines,
     clippy::unseparated_literal_suffix,
     clippy::use_self,
     clippy::used_underscore_binding
@@ -874,9 +876,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 ///     Ok(())
 /// }
 /// #
-/// # fn main() {
-/// #     run().unwrap();
-/// # }
+/// # run().unwrap();
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
@@ -918,9 +918,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///     Ok(())
 /// }
 /// #
-/// # fn main() {
-/// #     run().unwrap();
-/// # }
+/// # run().unwrap();
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
 pub fn parse_file(mut content: &str) -> Result<File> {
