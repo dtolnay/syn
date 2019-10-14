@@ -71,6 +71,8 @@ matrix:
         - rustup target add "${TARGET}"
   allow_failures:
     - rust: nightly
+      name: Codegen # temporarily broken: unresolved import `crossbeam_utils::atomic`
+    - rust: nightly
       name: Clippy
   fast_finish: true
 
