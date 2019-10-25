@@ -33,6 +33,8 @@ matrix:
   include:
     - rust: nightly
       name: Tests
+      install:
+        - rustup component add rustc-dev
       script:
         - cargo test --all-features --release
     - rust: nightly
