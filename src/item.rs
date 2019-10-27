@@ -1064,6 +1064,24 @@ ast_struct! {
     }
 }
 
+impl Signature {
+    /// A method's `self` receiver, such as `&self` or `self: Box<Self>`.
+    pub fn receiver(&self) -> Option<&FnArg> {
+        let arg = self.inputs.first()?;
+        match arg {
+            FnArg::Receiver(_) => Some(arg),
+            FnArg::Typed(PatType { pat, .. }) => {
+                if let Pat::Ident(PatIdent { ident, .. }) = &**pat {
+                    if ident == "self" {
+                        return Some(arg);
+                    }
+                }
+                None
+            }
+        }
+    }
+}
+
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
     ///
@@ -1071,6 +1089,9 @@ ast_enum_of_structs! {
     pub enum FnArg {
         /// The `self` argument of an associated method, whether taken by value
         /// or by reference.
+        ///
+        /// Note that `self` receivers with a specified type, such as `self:
+        /// Box<Self>`, are parsed as a `FnArg::Typed`.
         Receiver(Receiver),
 
         /// A function argument accepted by pattern and type.
@@ -1081,6 +1102,9 @@ ast_enum_of_structs! {
 ast_struct! {
     /// The `self` argument of an associated method, whether taken by value
     /// or by reference.
+    ///
+    /// Note that `self` receivers with a specified type, such as `self:
+    /// Box<Self>`, are parsed as a `FnArg::Typed`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct Receiver {
