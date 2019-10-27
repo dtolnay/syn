@@ -93,6 +93,24 @@ impl Fields {
             Fields::Unnamed(f) => f.unnamed.iter_mut(),
         }
     }
+
+    /// Returns the number of fields.
+    pub fn len(&self) -> usize {
+        match self {
+            Fields::Unit => 0,
+            Fields::Named(f) => f.named.len(),
+            Fields::Unnamed(f) => f.unnamed.len(),
+        }
+    }
+
+    /// Returns `true` if there are zero fields.
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Fields::Unit => true,
+            Fields::Named(f) => f.named.is_empty(),
+            Fields::Unnamed(f) => f.unnamed.is_empty(),
+        }
+    }
 }
 
 impl IntoIterator for Fields {
