@@ -221,7 +221,6 @@ impl<'a> Cursor<'a> {
 
     /// Checks whether the cursor is currently pointing at the end of its valid
     /// scope.
-    #[inline]
     pub fn eof(self) -> bool {
         // We're at eof if we're at the end of our scope.
         self.ptr == self.scope
