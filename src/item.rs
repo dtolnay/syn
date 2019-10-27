@@ -1,5 +1,5 @@
 use super::*;
-use crate::derive::{Data, DeriveInput};
+use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 use crate::punctuated::Punctuated;
 use proc_macro2::TokenStream;
 
@@ -491,6 +491,53 @@ impl From<DeriveInput> for Item {
                 ident: input.ident,
                 generics: input.generics,
                 fields: data.fields,
+            }),
+        }
+    }
+}
+
+impl From<ItemStruct> for DeriveInput {
+    fn from(input: ItemStruct) -> DeriveInput {
+        DeriveInput {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: Data::Struct(DataStruct {
+                struct_token: input.struct_token,
+                fields: input.fields,
+                semi_token: input.semi_token,
+            }),
+        }
+    }
+}
+
+impl From<ItemEnum> for DeriveInput {
+    fn from(input: ItemEnum) -> DeriveInput {
+        DeriveInput {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: Data::Enum(DataEnum {
+                enum_token: input.enum_token,
+                brace_token: input.brace_token,
+                variants: input.variants,
+            }),
+        }
+    }
+}
+
+impl From<ItemUnion> for DeriveInput {
+    fn from(input: ItemUnion) -> DeriveInput {
+        DeriveInput {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: Data::Union(DataUnion {
+                union_token: input.union_token,
+                fields: input.fields,
             }),
         }
     }
