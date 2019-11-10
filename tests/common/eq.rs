@@ -11,23 +11,23 @@ use syntax::ast::{
     Abi, AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
     AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind, BindingMode, Block,
     BlockCheckMode, CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind,
-    Field, FieldPat, FloatTy, FnDecl, FnHeader, ForeignItem, ForeignItemKind, ForeignMod,
+    Field, FieldPat, FloatTy, FnDecl, FnHeader, FnSig, ForeignItem, ForeignItemKind, ForeignMod,
     FunctionRetTy, GenericArg, GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics,
     GlobalAsm, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy,
     IsAsync, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind,
-    Local, Mac, MacDelimiter, MacStmtStyle, MacroDef, MethodSig, Mod, Movability, MutTy,
-    Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef,
-    QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrStyle, StructField,
-    TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy,
-    UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    Local, Mac, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId,
+    Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
+    RangeLimits, RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
+    TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety,
+    UseTree, UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
+    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
-use syntax::parse::lexer::comments;
-use syntax::parse::token::{self, DelimToken, Token, TokenKind};
 use syntax::ptr::P;
 use syntax::source_map::Spanned;
 use syntax::symbol::{sym, Symbol};
+use syntax::token::{self, DelimToken, Token, TokenKind};
 use syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
+use syntax::util::comments;
 use syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
@@ -276,6 +276,7 @@ spanless_eq_struct!(Field; ident expr span is_shorthand attrs id is_placeholder)
 spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholder);
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety abi);
+spanless_eq_struct!(FnSig; header decl);
 spanless_eq_struct!(ForeignItem; ident attrs kind id span vis);
 spanless_eq_struct!(ForeignMod; abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
@@ -291,7 +292,6 @@ spanless_eq_struct!(Lit; token kind span);
 spanless_eq_struct!(Local; pat ty init id span attrs);
 spanless_eq_struct!(Mac; path delim tts span prior_type_ascription);
 spanless_eq_struct!(MacroDef; tokens legacy);
-spanless_eq_struct!(MethodSig; header decl);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
@@ -366,7 +366,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
-    Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1) OpaqueTy(0 1)
+    Fn(0 1 2) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1) OpaqueTy(0 1)
     Enum(0 1) Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
     Impl(0 1 2 3 4 5 6) Mac(0) MacroDef(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0) Byte(0) Char(0) Int(0 1)
