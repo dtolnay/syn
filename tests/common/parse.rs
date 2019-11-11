@@ -1,18 +1,20 @@
+extern crate rustc_parse as parse;
 extern crate syntax;
+extern crate syntax_expand;
 extern crate syntax_pos;
 
 use syntax::ast;
-use syntax::parse;
 use syntax::ptr::P;
 use syntax::sess::ParseSess;
 use syntax::source_map::FilePathMapping;
+use syntax_expand::config::process_configure_mod;
 use syntax_pos::FileName;
 
 use std::panic;
 
 pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
-        let sess = ParseSess::new(FilePathMapping::empty());
+        let sess = ParseSess::new(FilePathMapping::empty(), process_configure_mod);
         sess.span_diagnostic.set_continue_after_error(false);
         let e = parse::new_parser_from_source_str(
             &sess,
