@@ -314,9 +314,8 @@ impl Generics {
     /// # use proc_macro2::{Span, Ident};
     /// # use quote::quote;
     /// #
-    /// # fn main() {
-    /// #     let generics: syn::Generics = Default::default();
-    /// #     let name = Ident::new("MyType", Span::call_site());
+    /// # let generics: syn::Generics = Default::default();
+    /// # let name = Ident::new("MyType", Span::call_site());
     /// #
     /// let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     /// quote! {
@@ -324,8 +323,7 @@ impl Generics {
     ///         // ...
     ///     }
     /// }
-    /// #     ;
-    /// # }
+    /// # ;
     /// ```
     ///
     /// *This method is available if Syn is built with the `"derive"` or

@@ -1,5 +1,5 @@
 use super::*;
-use crate::derive::{Data, DeriveInput};
+use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 use crate::punctuated::Punctuated;
 use proc_macro2::TokenStream;
 
@@ -491,6 +491,53 @@ impl From<DeriveInput> for Item {
                 ident: input.ident,
                 generics: input.generics,
                 fields: data.fields,
+            }),
+        }
+    }
+}
+
+impl From<ItemStruct> for DeriveInput {
+    fn from(input: ItemStruct) -> DeriveInput {
+        DeriveInput {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: Data::Struct(DataStruct {
+                struct_token: input.struct_token,
+                fields: input.fields,
+                semi_token: input.semi_token,
+            }),
+        }
+    }
+}
+
+impl From<ItemEnum> for DeriveInput {
+    fn from(input: ItemEnum) -> DeriveInput {
+        DeriveInput {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: Data::Enum(DataEnum {
+                enum_token: input.enum_token,
+                brace_token: input.brace_token,
+                variants: input.variants,
+            }),
+        }
+    }
+}
+
+impl From<ItemUnion> for DeriveInput {
+    fn from(input: ItemUnion) -> DeriveInput {
+        DeriveInput {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: Data::Union(DataUnion {
+                union_token: input.union_token,
+                fields: input.fields,
             }),
         }
     }
@@ -1017,6 +1064,24 @@ ast_struct! {
     }
 }
 
+impl Signature {
+    /// A method's `self` receiver, such as `&self` or `self: Box<Self>`.
+    pub fn receiver(&self) -> Option<&FnArg> {
+        let arg = self.inputs.first()?;
+        match arg {
+            FnArg::Receiver(_) => Some(arg),
+            FnArg::Typed(PatType { pat, .. }) => {
+                if let Pat::Ident(PatIdent { ident, .. }) = &**pat {
+                    if ident == "self" {
+                        return Some(arg);
+                    }
+                }
+                None
+            }
+        }
+    }
+}
+
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
     ///
@@ -1024,6 +1089,9 @@ ast_enum_of_structs! {
     pub enum FnArg {
         /// The `self` argument of an associated method, whether taken by value
         /// or by reference.
+        ///
+        /// Note that `self` receivers with a specified type, such as `self:
+        /// Box<Self>`, are parsed as a `FnArg::Typed`.
         Receiver(Receiver),
 
         /// A function argument accepted by pattern and type.
@@ -1034,6 +1102,9 @@ ast_enum_of_structs! {
 ast_struct! {
     /// The `self` argument of an associated method, whether taken by value
     /// or by reference.
+    ///
+    /// Note that `self` receivers with a specified type, such as `self:
+    /// Box<Self>`, are parsed as a `FnArg::Typed`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct Receiver {

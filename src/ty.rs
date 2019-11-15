@@ -784,9 +784,27 @@ pub mod parsing {
     impl Parse for TypeTuple {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
+            let paren_token = parenthesized!(content in input);
+
+            if content.is_empty() {
+                return Ok(TypeTuple {
+                    paren_token,
+                    elems: Punctuated::new(),
+                });
+            }
+
+            let first: Type = content.parse()?;
             Ok(TypeTuple {
-                paren_token: parenthesized!(content in input),
-                elems: content.parse_terminated(Type::parse)?,
+                paren_token,
+                elems: {
+                    let mut elems = Punctuated::new();
+                    elems.push_value(first);
+                    elems.push_punct(content.parse()?);
+                    let rest: Punctuated<Type, Token![,]> =
+                        content.parse_terminated(Parse::parse)?;
+                    elems.extend(rest);
+                    elems
+                },
             })
         }
     }

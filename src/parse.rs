@@ -109,9 +109,7 @@
 //! #     Ok(())
 //! # }
 //! #
-//! # fn main() {
-//! #     run_parser().unwrap();
-//! # }
+//! # run_parser().unwrap();
 //! ```
 //!
 //! The [`parse_quote!`] macro also uses this approach.
@@ -324,13 +322,11 @@ impl<'a> Debug for ParseBuffer<'a> {
 /// #     input.parse()
 /// # }
 /// #
-/// # fn main() {
-/// #     use syn::parse::Parser;
-/// #     let remainder = remainder_after_skipping_past_next_at
-/// #         .parse_str("a @ b c")
-/// #         .unwrap();
-/// #     assert_eq!(remainder.to_string(), "b c");
-/// # }
+/// # use syn::parse::Parser;
+/// # let remainder = remainder_after_skipping_past_next_at
+/// #     .parse_str("a @ b c")
+/// #     .unwrap();
+/// # assert_eq!(remainder.to_string(), "b c");
 /// ```
 #[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
@@ -615,12 +611,10 @@ impl<'a> ParseBuffer<'a> {
     ///     }
     /// }
     /// #
-    /// # fn main() {
-    /// #     let input = quote! {
-    /// #         struct S(A, B);
-    /// #     };
-    /// #     syn::parse2::<TupleStruct>(input).unwrap();
-    /// # }
+    /// # let input = quote! {
+    /// #     struct S(A, B);
+    /// # };
+    /// # syn::parse2::<TupleStruct>(input).unwrap();
     /// ```
     pub fn parse_terminated<T, P: Parse>(
         &self,
@@ -923,13 +917,11 @@ impl<'a> ParseBuffer<'a> {
     /// #     input.parse()
     /// # }
     /// #
-    /// # fn main() {
-    /// #     use syn::parse::Parser;
-    /// #     let remainder = remainder_after_skipping_past_next_at
-    /// #         .parse_str("a @ b c")
-    /// #         .unwrap();
-    /// #     assert_eq!(remainder.to_string(), "b c");
-    /// # }
+    /// # use syn::parse::Parser;
+    /// # let remainder = remainder_after_skipping_past_next_at
+    /// #     .parse_str("a @ b c")
+    /// #     .unwrap();
+    /// # assert_eq!(remainder.to_string(), "b c");
     /// ```
     pub fn step<F, R>(&self, function: F) -> Result<R>
     where

@@ -2,7 +2,9 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
+extern crate rustc_parse as parse;
 extern crate syntax;
+extern crate syntax_expand;
 extern crate syntax_pos;
 
 mod features;
@@ -10,8 +12,10 @@ mod features;
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use syntax::ast;
-use syntax::parse::{self, PResult, ParseSess};
+use syntax::errors::PResult;
+use syntax::sess::ParseSess;
 use syntax::source_map::FilePathMapping;
+use syntax_expand::config::process_configure_mod;
 use syntax_pos::edition::Edition;
 use syntax_pos::FileName;
 use walkdir::{DirEntry, WalkDir};
@@ -76,7 +80,7 @@ fn test_round_trip() {
 
             let equal = panic::catch_unwind(|| {
                 syntax::with_globals(Edition::Edition2018, || {
-                    let sess = ParseSess::new(FilePathMapping::empty());
+                    let sess = ParseSess::new(FilePathMapping::empty(), process_configure_mod);
                     let before = match libsyntax_parse(content, &sess) {
                         Ok(before) => before,
                         Err(mut diagnostic) => {

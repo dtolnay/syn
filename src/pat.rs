@@ -578,6 +578,7 @@ mod parsing {
     }
 
     fn field_pat(input: ParseStream) -> Result<FieldPat> {
+        let attrs = input.call(Attribute::parse_outer)?;
         let boxed: Option<Token![box]> = input.parse()?;
         let by_ref: Option<Token![ref]> = input.parse()?;
         let mutability: Option<Token![mut]> = input.parse()?;
@@ -587,7 +588,7 @@ mod parsing {
             || member.is_unnamed()
         {
             return Ok(FieldPat {
-                attrs: Vec::new(),
+                attrs,
                 member,
                 colon_token: input.parse()?,
                 pat: input.parse()?,
@@ -610,16 +611,16 @@ mod parsing {
         if let Some(boxed) = boxed {
             pat = Pat::Box(PatBox {
                 attrs: Vec::new(),
-                pat: Box::new(pat),
                 box_token: boxed,
+                pat: Box::new(pat),
             });
         }
 
         Ok(FieldPat {
+            attrs,
             member: Member::Named(ident),
-            pat: Box::new(pat),
-            attrs: Vec::new(),
             colon_token: None,
+            pat: Box::new(pat),
         })
     }
 

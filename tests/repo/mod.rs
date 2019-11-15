@@ -4,7 +4,7 @@ use std::io::{Seek, SeekFrom};
 use std::path::Path;
 use tar::Archive;
 
-static REVISION: &'static str = "521d78407471cb78e9bbf47160f6aa23047ac499";
+static REVISION: &'static str = "7979016aff545f7b41cc517031026020b340989d";
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();
@@ -49,9 +49,11 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
         // not actually test cases
+        "tests/rust/src/test/ui/include-single-expr-helper.rs" |
+        "tests/rust/src/test/ui/include-single-expr-helper-1.rs" |
+        "tests/rust/src/test/ui/issues/auxiliary/issue-21146-inc.rs" |
         "tests/rust/src/test/ui/macros/auxiliary/macro-comma-support.rs" |
-        "tests/rust/src/test/ui/macros/auxiliary/macro-include-items-expr.rs" |
-        "tests/rust/src/test/ui/issues/auxiliary/issue-21146-inc.rs" => false,
+        "tests/rust/src/test/ui/macros/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
     }
 }

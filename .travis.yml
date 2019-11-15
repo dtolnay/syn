@@ -33,6 +33,8 @@ matrix:
   include:
     - rust: nightly
       name: Tests
+      install:
+        - rustup component add rustc-dev
       script:
         - cargo test --all-features --release
     - rust: nightly
@@ -68,6 +70,8 @@ matrix:
       install:
         - rustup target add "${TARGET}"
   allow_failures:
+    - rust: nightly
+      name: Codegen # temporarily broken: unresolved import `crossbeam_utils::atomic`
     - rust: nightly
       name: Clippy
   fast_finish: true

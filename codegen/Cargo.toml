@@ -24,3 +24,7 @@ toml = "0.4.10"
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of
 # rustfmt in the codegen directory.
+
+[patch.crates-io]
+# work around https://github.com/rust-lang/rust/issues/65424
+crossbeam-utils = { git = "https://github.com/crossbeam-rs/crossbeam" }

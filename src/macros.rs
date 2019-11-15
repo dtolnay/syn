@@ -120,15 +120,9 @@ macro_rules! ast_enum_of_structs_impl {
         check_keyword_matches!(pub $pub);
         check_keyword_matches!(enum $enum);
 
-        $(
-            $(
-                impl From<$member> for $name {
-                    fn from(e: $member) -> $name {
-                        $name::$variant(e)
-                    }
-                }
-            )*
-        )*
+        $($(
+            ast_enum_from_struct!($name::$variant, $member);
+        )*)*
 
         #[cfg(feature = "printing")]
         generate_to_tokens! {
@@ -136,6 +130,19 @@ macro_rules! ast_enum_of_structs_impl {
             ()
             tokens
             $name { $($variant $($member)*,)* }
+        }
+    };
+}
+
+macro_rules! ast_enum_from_struct {
+    // No From<TokenStream> for verbatim variants.
+    ($name:ident::Verbatim, $member:ident) => {};
+
+    ($name:ident::$variant:ident, $member:ident) => {
+        impl From<$member> for $name {
+            fn from(e: $member) -> $name {
+                $name::$variant(e)
+            }
         }
     };
 }

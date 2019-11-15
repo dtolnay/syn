@@ -242,7 +242,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn/1.0.5")]
+#![doc(html_root_url = "https://docs.rs/syn/1.0.8")]
 #![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
@@ -252,6 +252,7 @@
     clippy::eval_order_dependence,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
+    clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
     clippy::suspicious_op_assign_impl,
@@ -265,9 +266,11 @@
     clippy::if_not_else,
     clippy::items_after_statements,
     clippy::module_name_repetitions,
+    clippy::must_use_candidate,
     clippy::shadow_unrelated,
     clippy::similar_names,
     clippy::single_match_else,
+    clippy::too_many_lines,
     clippy::unseparated_literal_suffix,
     clippy::use_self,
     clippy::used_underscore_binding
@@ -874,9 +877,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 ///     Ok(())
 /// }
 /// #
-/// # fn main() {
-/// #     run().unwrap();
-/// # }
+/// # run().unwrap();
 /// ```
 #[cfg(feature = "parsing")]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
@@ -918,9 +919,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///     Ok(())
 /// }
 /// #
-/// # fn main() {
-/// #     run().unwrap();
-/// # }
+/// # run().unwrap();
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
 pub fn parse_file(mut content: &str) -> Result<File> {
