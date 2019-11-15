@@ -34,7 +34,6 @@ mod repo;
 use common::eq::SpanlessEq;
 
 #[test]
-
 fn test_round_trip() {
     repo::clone_rust().expect("Rust did not download correctly");
     let abort_after = common::abort_after();

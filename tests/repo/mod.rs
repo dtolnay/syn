@@ -1,7 +1,8 @@
-use std::fs::{create_dir_all, read_to_string, remove_dir_all, rename, File};
-use std::io::{self, prelude::*};
+use flate2::read::GzDecoder;
+use std::fs::{read_to_string, File};
+use std::io::{Seek, SeekFrom};
 use std::path::Path;
-use walkdir::DirEntry;
+use tar::Archive;
 
 static REVISION: &'static str = "521d78407471cb78e9bbf47160f6aa23047ac499";
 
@@ -55,36 +56,29 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 }
 
-pub fn clone_rust() -> io::Result<()> {
+pub fn clone_rust() -> Result<(), Box<dyn std::error::Error>> {
     if match read_to_string("tests/rust/COMMIT") {
         Err(_) => true,
         Ok(contents) => contents.trim() != REVISION,
     } {
-        let url = format!("https://github.com/rust-lang/rust/archive/{}.zip", REVISION);
+        let url = format!(
+            "https://github.com/rust-lang/rust/archive/{}.tar.gz",
+            REVISION
+        );
         let mut tmpfile = tempfile::tempfile().unwrap();
-        if let Ok(_request) = reqwest::get(url.as_str()).unwrap().copy_to(&mut tmpfile){
-            let mut zip = zip::ZipArchive::new(tmpfile).unwrap();
-            for i in 0..zip.len() {
-                let mut file = zip.by_index(i).unwrap();
-                let outpath = file.sanitized_name();
-                if file.name().ends_with('/') {
-                    create_dir_all(&outpath).unwrap()
-                }
-                else {
-                    let mut outfile = File::create(&outpath).unwrap();
-                    io::copy(&mut file, &mut outfile).unwrap();
-                }
-            }
-            let root_folder = zip.by_index(0).unwrap().sanitized_name();
-            let rust_path = Path::new("tests/rust");
-            if rust_path.exists() {
-                remove_dir_all(rust_path)?;
-            }
-            rename(root_folder, rust_path)?;
-            if let Ok(mut commit) = File::create(&Path::new("tests/rust/COMMIT")) {
-                commit.write_all(REVISION.as_bytes())?;
+        let bytecount = reqwest::get(url.as_str()).unwrap().copy_to(&mut tmpfile)?;
+        tmpfile.seek(SeekFrom::Start(0))?;
+        let decoder = GzDecoder::new(tmpfile);
+        let mut archive = Archive::new(decoder);
+        let prefix = format!("rust-{}", REVISION);
+        for mut entry in archive.entries()?.filter_map(|e| e.ok()) {
+            if entry.path()?.starts_with(&prefix[..]) {
+                let path =
+                    Path::new("rust").join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
+                entry.unpack(&path)?;
             }
         }
+        fs::write("tests/rust/COMMIT", REVISION)?;
     }
     Ok(())
 }
