@@ -1,8 +1,9 @@
 use flate2::read::GzDecoder;
-use std::fs::{read_to_string, File};
+use std::fs::{read_to_string, write};
 use std::io::{Seek, SeekFrom};
 use std::path::Path;
 use tar::Archive;
+use walkdir::DirEntry;
 
 static REVISION: &'static str = "7979016aff545f7b41cc517031026020b340989d";
 
@@ -68,19 +69,19 @@ pub fn clone_rust() -> Result<(), Box<dyn std::error::Error>> {
             REVISION
         );
         let mut tmpfile = tempfile::tempfile().unwrap();
-        let bytecount = reqwest::get(url.as_str()).unwrap().copy_to(&mut tmpfile)?;
+        let _bytecount = reqwest::get(url.as_str()).unwrap().copy_to(&mut tmpfile)?;
         tmpfile.seek(SeekFrom::Start(0))?;
         let decoder = GzDecoder::new(tmpfile);
         let mut archive = Archive::new(decoder);
         let prefix = format!("rust-{}", REVISION);
         for mut entry in archive.entries()?.filter_map(|e| e.ok()) {
             if entry.path()?.starts_with(&prefix[..]) {
-                let path =
-                    Path::new("rust").join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
+                let path = Path::new("tests/rust")
+                    .join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
                 entry.unpack(&path)?;
             }
         }
-        fs::write("tests/rust/COMMIT", REVISION)?;
+        write("tests/rust/COMMIT", REVISION)?;
     }
     Ok(())
 }
