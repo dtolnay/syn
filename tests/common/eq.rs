@@ -8,19 +8,19 @@ use std::mem;
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use syntax::ast::{
-    Abi, AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
+    AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
     AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind, BindingMode, Block,
     BlockCheckMode, CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind,
-    Field, FieldPat, FloatTy, FnDecl, FnHeader, FnSig, ForeignItem, ForeignItemKind, ForeignMod,
-    FunctionRetTy, GenericArg, GenericArgs, GenericBound, GenericParam, GenericParamKind, Generics,
-    GlobalAsm, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy,
-    IsAsync, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind,
-    Local, Mac, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId,
-    Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
-    RangeLimits, RangeSyntax, Stmt, StmtKind, StrStyle, StructField, TraitBoundModifier, TraitItem,
-    TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety,
-    UseTree, UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
-    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader, FnSig, ForeignItem, ForeignItemKind,
+    ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound, GenericParam,
+    GenericParamKind, Generics, GlobalAsm, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm,
+    InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
+    LitIntType, LitKind, Local, Mac, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy,
+    Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef,
+    QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField,
+    TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy,
+    UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
+    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use syntax::ptr::P;
 use syntax::source_map::Spanned;
@@ -260,14 +260,13 @@ macro_rules! spanless_eq_enum {
     };
 }
 
-spanless_eq_struct!(Abi; symbol span);
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(AttrItem; path tokens);
 spanless_eq_struct!(Attribute; kind id style span);
-spanless_eq_struct!(BareFnTy; unsafety abi generic_params decl);
+spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span);
 spanless_eq_struct!(Crate; module attrs span);
 spanless_eq_struct!(EnumDef; variants);
@@ -275,7 +274,7 @@ spanless_eq_struct!(Expr; id kind span attrs);
 spanless_eq_struct!(Field; ident expr span is_shorthand attrs id is_placeholder);
 spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholder);
 spanless_eq_struct!(FnDecl; inputs output);
-spanless_eq_struct!(FnHeader; constness asyncness unsafety abi);
+spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
 spanless_eq_struct!(FnSig; header decl);
 spanless_eq_struct!(ForeignItem; ident attrs kind id span vis);
 spanless_eq_struct!(ForeignMod; abi items);
@@ -302,6 +301,7 @@ spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
 spanless_eq_struct!(QSelf; ty path_span position);
 spanless_eq_struct!(Stmt; id kind span);
+spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
 spanless_eq_struct!(StructField; span ident vis id ty attrs is_placeholder);
 spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(TraitItem; id ident attrs generics kind span !tokens);
@@ -324,6 +324,7 @@ spanless_eq_enum!(CaptureBy; Value Ref);
 spanless_eq_enum!(Constness; Const NotConst);
 spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
 spanless_eq_enum!(Defaultness; Default Final);
+spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
 spanless_eq_enum!(ForeignItemKind; Fn(0 1) Static(0 1) Ty Macro(0));
 spanless_eq_enum!(FunctionRetTy; Default(0) Ty(0));
