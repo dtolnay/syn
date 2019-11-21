@@ -401,7 +401,7 @@ mod parsing {
     // We need some way to persist whether or not we are in a closure between functions without having
     // to pass an fn pointer to each function telling it which to use.
     struct PatParseContext {
-        parse_fn: fn(ParseStream, &Self) -> Result<Pat>,
+        parse_fn: fn(ParseStream, &PatParseContext) -> Result<Pat>,
     }
 
     impl PatParseContext {
