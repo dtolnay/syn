@@ -389,8 +389,23 @@ mod parsing {
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
-    impl Parse for Pat {
-        fn parse(input: ParseStream) -> Result<Self> {
+    impl Member {
+        fn is_unnamed(&self) -> bool {
+            match *self {
+                Member::Named(_) => false,
+                Member::Unnamed(_) => true,
+            }
+        }
+    }
+
+    // We need some way to persist whether or not we are in a closure between functions without having
+    // to pass an fn pointer to each function telling it which to use.
+    struct PatParseContext {
+        parse_fn: fn(ParseStream, &Self) -> Result<Pat>,
+    }
+
+    impl PatParseContext {
+        fn parse_inner(input: ParseStream, cx: &Self) -> Result<Pat> {
             let lookahead = input.lookahead1();
             if lookahead.peek(Ident)
                 && ({
@@ -414,335 +429,396 @@ mod parsing {
                 || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
-                pat_path_or_macro_or_struct_or_range(input)
+                cx.pat_path_or_macro_or_struct_or_range(input)
             } else if lookahead.peek(Token![_]) {
-                input.call(pat_wild).map(Pat::Wild)
+                cx.pat_wild(input).map(Pat::Wild)
             } else if input.peek(Token![box]) {
-                input.call(pat_box).map(Pat::Box)
+                cx.pat_box(input).map(Pat::Box)
             } else if input.peek(Token![-]) || lookahead.peek(Lit) {
-                pat_lit_or_range(input)
+                cx.pat_lit_or_range(input)
             } else if lookahead.peek(Token![ref])
                 || lookahead.peek(Token![mut])
                 || input.peek(Token![self])
                 || input.peek(Ident)
             {
-                input.call(pat_ident).map(Pat::Ident)
+                cx.pat_ident(input).map(Pat::Ident)
             } else if lookahead.peek(Token![&]) {
-                input.call(pat_reference).map(Pat::Reference)
+                cx.pat_reference(input).map(Pat::Reference)
             } else if lookahead.peek(token::Paren) {
-                input.call(pat_tuple).map(Pat::Tuple)
+                cx.pat_tuple(input).map(Pat::Tuple)
             } else if lookahead.peek(token::Bracket) {
-                input.call(pat_slice).map(Pat::Slice)
+                cx.pat_slice(input).map(Pat::Slice)
             } else if lookahead.peek(Token![..]) && !input.peek(Token![...]) {
-                input.call(pat_rest).map(Pat::Rest)
+                cx.pat_rest(input).map(Pat::Rest)
             } else {
                 Err(lookahead.error())
             }
         }
-    }
 
-    fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
-        let (qself, path) = path::parsing::qpath(input, true)?;
+        /// This function adds functionality to parse a PatOr. It is important that this is not called
+        /// when parsing a closure argument because this function works by parsing a Token![|] if the
+        /// following ParseStream can be parsed into a Pat.
+        ///
+        /// In a closure declaration most of the time the closing Token![|] can be followed directly
+        /// by an Ident, Lit, Path, etc. and in that case we do not want to consume the closing Token![|].
+        fn parse_with_or(input: ParseStream, cx: &Self) -> Result<Pat> {
+            let mut cases = Punctuated::new();
 
-        if input.peek(Token![..]) {
-            return pat_range(input, qself, path).map(Pat::Range);
-        }
+            let leading_vert = if input.peek(Token![|]) {
+                Some(input.parse::<Token![|]>()?)
+            } else {
+                None
+            };
 
-        if qself.is_some() {
-            return Ok(Pat::Path(PatPath {
-                attrs: Vec::new(),
-                qself,
-                path,
-            }));
-        }
-
-        if input.peek(Token![!]) && !input.peek(Token![!=]) {
-            let mut contains_arguments = false;
-            for segment in &path.segments {
-                match segment.arguments {
-                    PathArguments::None => {}
-                    PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                        contains_arguments = true;
-                    }
+            loop {
+                cases.push_value(Self::parse_inner(input, cx)?);
+                // If the next token is not a pipe, then break. We've reached the end of the pattern.
+                if !input.peek(Token![|]) {
+                    break;
+                }
+                // Even if the second next is a pipe we don't want to consume it until we know it is
+                // followed by another pattern. Otherwise we would consume the closing pipe in a closure
+                // and parse further than we're supposed to.
+                let forked = &input.fork();
+                forked.parse::<Token![|]>()?;
+                match Self::parse_inner(forked, cx) {
+                    Ok(_) => cases.push_punct(input.parse()?),
+                    Err(_) => break,
                 }
             }
 
-            if !contains_arguments {
-                let bang_token: Token![!] = input.parse()?;
-                let (delimiter, tokens) = mac::parse_delimiter(input)?;
-                return Ok(Pat::Macro(PatMacro {
+            Ok(if cases.len() == 1 {
+                cases.pop().unwrap().into_value()
+            } else {
+                Pat::Or(PatOr {
                     attrs: Vec::new(),
-                    mac: Macro {
-                        path,
-                        bang_token,
-                        delimiter,
-                        tokens,
-                    },
+                    leading_vert,
+                    cases,
+                })
+            })
+        }
+
+        // pub fn parse_closure_arg(input: ParseStream) -> Result<Pat> {
+        //     // Self { parse_fn: self.parse_inner }::parse(input)
+        //     Ok(())
+        // }
+
+        fn pat_path_or_macro_or_struct_or_range(&self, input: ParseStream) -> Result<Pat> {
+            let (qself, path) = path::parsing::qpath(input, true)?;
+
+            if input.peek(Token![..]) {
+                return self.pat_range(input, qself, path).map(Pat::Range);
+            }
+
+            if qself.is_some() {
+                return Ok(Pat::Path(PatPath {
+                    attrs: Vec::new(),
+                    qself,
+                    path,
                 }));
             }
-        }
 
-        if input.peek(token::Brace) {
-            pat_struct(input, path).map(Pat::Struct)
-        } else if input.peek(token::Paren) {
-            pat_tuple_struct(input, path).map(Pat::TupleStruct)
-        } else if input.peek(Token![..]) {
-            pat_range(input, qself, path).map(Pat::Range)
-        } else {
-            Ok(Pat::Path(PatPath {
-                attrs: Vec::new(),
-                qself,
-                path,
-            }))
-        }
-    }
-
-    fn pat_wild(input: ParseStream) -> Result<PatWild> {
-        Ok(PatWild {
-            attrs: Vec::new(),
-            underscore_token: input.parse()?,
-        })
-    }
-
-    fn pat_box(input: ParseStream) -> Result<PatBox> {
-        Ok(PatBox {
-            attrs: Vec::new(),
-            box_token: input.parse()?,
-            pat: input.parse()?,
-        })
-    }
-
-    fn pat_ident(input: ParseStream) -> Result<PatIdent> {
-        Ok(PatIdent {
-            attrs: Vec::new(),
-            by_ref: input.parse()?,
-            mutability: input.parse()?,
-            ident: input.call(Ident::parse_any)?,
-            subpat: {
-                if input.peek(Token![@]) {
-                    let at_token: Token![@] = input.parse()?;
-                    let subpat: Pat = input.parse()?;
-                    Some((at_token, Box::new(subpat)))
-                } else {
-                    None
+            if input.peek(Token![!]) && !input.peek(Token![!=]) {
+                let mut contains_arguments = false;
+                for segment in &path.segments {
+                    match segment.arguments {
+                        PathArguments::None => {}
+                        PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                            contains_arguments = true;
+                        }
+                    }
                 }
-            },
-        })
-    }
 
-    fn pat_tuple_struct(input: ParseStream, path: Path) -> Result<PatTupleStruct> {
-        Ok(PatTupleStruct {
-            attrs: Vec::new(),
-            path,
-            pat: input.call(pat_tuple)?,
-        })
-    }
-
-    fn pat_struct(input: ParseStream, path: Path) -> Result<PatStruct> {
-        let content;
-        let brace_token = braced!(content in input);
-
-        let mut fields = Punctuated::new();
-        while !content.is_empty() && !content.peek(Token![..]) {
-            let value = content.call(field_pat)?;
-            fields.push_value(value);
-            if !content.peek(Token![,]) {
-                break;
+                if !contains_arguments {
+                    let bang_token: Token![!] = input.parse()?;
+                    let (delimiter, tokens) = mac::parse_delimiter(input)?;
+                    return Ok(Pat::Macro(PatMacro {
+                        attrs: Vec::new(),
+                        mac: Macro {
+                            path,
+                            bang_token,
+                            delimiter,
+                            tokens,
+                        },
+                    }));
+                }
             }
-            let punct: Token![,] = content.parse()?;
-            fields.push_punct(punct);
-        }
 
-        let dot2_token = if fields.empty_or_trailing() && content.peek(Token![..]) {
-            Some(content.parse()?)
-        } else {
-            None
-        };
-
-        Ok(PatStruct {
-            attrs: Vec::new(),
-            path,
-            brace_token,
-            fields,
-            dot2_token,
-        })
-    }
-
-    impl Member {
-        fn is_unnamed(&self) -> bool {
-            match *self {
-                Member::Named(_) => false,
-                Member::Unnamed(_) => true,
+            if input.peek(token::Brace) {
+                self.pat_struct(input, path).map(Pat::Struct)
+            } else if input.peek(token::Paren) {
+                self.pat_tuple_struct(input, path).map(Pat::TupleStruct)
+            } else if input.peek(Token![..]) {
+                self.pat_range(input, qself, path).map(Pat::Range)
+            } else {
+                Ok(Pat::Path(PatPath {
+                    attrs: Vec::new(),
+                    qself,
+                    path,
+                }))
             }
         }
-    }
 
-    fn field_pat(input: ParseStream) -> Result<FieldPat> {
-        let attrs = input.call(Attribute::parse_outer)?;
-        let boxed: Option<Token![box]> = input.parse()?;
-        let by_ref: Option<Token![ref]> = input.parse()?;
-        let mutability: Option<Token![mut]> = input.parse()?;
-        let member: Member = input.parse()?;
-
-        if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
-            || member.is_unnamed()
-        {
-            return Ok(FieldPat {
-                attrs,
-                member,
-                colon_token: input.parse()?,
-                pat: input.parse()?,
-            });
-        }
-
-        let ident = match member {
-            Member::Named(ident) => ident,
-            Member::Unnamed(_) => unreachable!(),
-        };
-
-        let mut pat = Pat::Ident(PatIdent {
-            attrs: Vec::new(),
-            by_ref,
-            mutability,
-            ident: ident.clone(),
-            subpat: None,
-        });
-
-        if let Some(boxed) = boxed {
-            pat = Pat::Box(PatBox {
+        fn pat_wild(&self, input: ParseStream) -> Result<PatWild> {
+            Ok(PatWild {
                 attrs: Vec::new(),
-                box_token: boxed,
-                pat: Box::new(pat),
-            });
-        }
-
-        Ok(FieldPat {
-            attrs,
-            member: Member::Named(ident),
-            colon_token: None,
-            pat: Box::new(pat),
-        })
-    }
-
-    fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatRange> {
-        Ok(PatRange {
-            attrs: Vec::new(),
-            lo: Box::new(Expr::Path(ExprPath {
-                attrs: Vec::new(),
-                qself,
-                path,
-            })),
-            limits: input.parse()?,
-            hi: input.call(pat_lit_expr)?,
-        })
-    }
-
-    fn pat_tuple(input: ParseStream) -> Result<PatTuple> {
-        let content;
-        let paren_token = parenthesized!(content in input);
-
-        let mut elems = Punctuated::new();
-        while !content.is_empty() {
-            let value: Pat = content.parse()?;
-            elems.push_value(value);
-            if content.is_empty() {
-                break;
-            }
-            let punct = content.parse()?;
-            elems.push_punct(punct);
-        }
-
-        Ok(PatTuple {
-            attrs: Vec::new(),
-            paren_token,
-            elems,
-        })
-    }
-
-    fn pat_reference(input: ParseStream) -> Result<PatReference> {
-        Ok(PatReference {
-            attrs: Vec::new(),
-            and_token: input.parse()?,
-            mutability: input.parse()?,
-            pat: input.parse()?,
-        })
-    }
-
-    fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
-        let lo = input.call(pat_lit_expr)?;
-        if input.peek(Token![..]) {
-            Ok(Pat::Range(PatRange {
-                attrs: Vec::new(),
-                lo,
-                limits: input.parse()?,
-                hi: input.call(pat_lit_expr)?,
-            }))
-        } else {
-            Ok(Pat::Lit(PatLit {
-                attrs: Vec::new(),
-                expr: lo,
-            }))
-        }
-    }
-
-    fn pat_lit_expr(input: ParseStream) -> Result<Box<Expr>> {
-        let neg: Option<Token![-]> = input.parse()?;
-
-        let lookahead = input.lookahead1();
-        let expr = if lookahead.peek(Lit) {
-            Expr::Lit(input.parse()?)
-        } else if lookahead.peek(Ident)
-            || lookahead.peek(Token![::])
-            || lookahead.peek(Token![<])
-            || lookahead.peek(Token![self])
-            || lookahead.peek(Token![Self])
-            || lookahead.peek(Token![super])
-            || lookahead.peek(Token![extern])
-            || lookahead.peek(Token![crate])
-        {
-            Expr::Path(input.parse()?)
-        } else {
-            return Err(lookahead.error());
-        };
-
-        Ok(Box::new(if let Some(neg) = neg {
-            Expr::Unary(ExprUnary {
-                attrs: Vec::new(),
-                op: UnOp::Neg(neg),
-                expr: Box::new(expr),
+                underscore_token: input.parse()?,
             })
-        } else {
-            expr
-        }))
-    }
-
-    fn pat_slice(input: ParseStream) -> Result<PatSlice> {
-        let content;
-        let bracket_token = bracketed!(content in input);
-
-        let mut elems = Punctuated::new();
-        while !content.is_empty() {
-            let value: Pat = content.parse()?;
-            elems.push_value(value);
-            if content.is_empty() {
-                break;
-            }
-            let punct = content.parse()?;
-            elems.push_punct(punct);
         }
 
-        Ok(PatSlice {
-            attrs: Vec::new(),
-            bracket_token,
-            elems,
-        })
+        fn pat_box(&self, input: ParseStream) -> Result<PatBox> {
+            Ok(PatBox {
+                attrs: Vec::new(),
+                box_token: input.parse()?,
+                pat: Box::new((self.parse_fn)(input, self)?),
+            })
+        }
+
+        fn pat_ident(&self, input: ParseStream) -> Result<PatIdent> {
+            Ok(PatIdent {
+                attrs: Vec::new(),
+                by_ref: input.parse()?,
+                mutability: input.parse()?,
+                ident: input.call(Ident::parse_any)?,
+                subpat: {
+                    if input.peek(Token![@]) {
+                        let at_token: Token![@] = input.parse()?;
+                        let subpat: Pat = (self.parse_fn)(input, self)?;
+                        Some((at_token, Box::new(subpat)))
+                    } else {
+                        None
+                    }
+                },
+            })
+        }
+
+        fn pat_tuple_struct(&self, input: ParseStream, path: Path) -> Result<PatTupleStruct> {
+            Ok(PatTupleStruct {
+                attrs: Vec::new(),
+                path,
+                pat: self.pat_tuple(input)?,
+            })
+        }
+
+        fn pat_struct(&self, input: ParseStream, path: Path) -> Result<PatStruct> {
+            let content;
+            let brace_token = braced!(content in input);
+
+            let mut fields = Punctuated::new();
+            while !content.is_empty() && !content.peek(Token![..]) {
+                let value = self.field_pat(&content)?;
+                fields.push_value(value);
+                if !content.peek(Token![,]) {
+                    break;
+                }
+                let punct: Token![,] = content.parse()?;
+                fields.push_punct(punct);
+            }
+
+            let dot2_token = if fields.empty_or_trailing() && content.peek(Token![..]) {
+                Some(content.parse()?)
+            } else {
+                None
+            };
+
+            Ok(PatStruct {
+                attrs: Vec::new(),
+                path,
+                brace_token,
+                fields,
+                dot2_token,
+            })
+        }
+
+        fn field_pat(&self, input: ParseStream) -> Result<FieldPat> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let boxed: Option<Token![box]> = input.parse()?;
+            let by_ref: Option<Token![ref]> = input.parse()?;
+            let mutability: Option<Token![mut]> = input.parse()?;
+            let member: Member = input.parse()?;
+
+            if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
+                || member.is_unnamed()
+            {
+                return Ok(FieldPat {
+                    attrs,
+                    member,
+                    colon_token: input.parse()?,
+                    pat: Box::new((self.parse_fn)(input, self)?),
+                });
+            }
+
+            let ident = match member {
+                Member::Named(ident) => ident,
+                Member::Unnamed(_) => unreachable!(),
+            };
+
+            let mut pat = Pat::Ident(PatIdent {
+                attrs: Vec::new(),
+                by_ref,
+                mutability,
+                ident: ident.clone(),
+                subpat: None,
+            });
+
+            if let Some(boxed) = boxed {
+                pat = Pat::Box(PatBox {
+                    attrs: Vec::new(),
+                    box_token: boxed,
+                    pat: Box::new(pat),
+                });
+            }
+
+            Ok(FieldPat {
+                attrs,
+                member: Member::Named(ident),
+                colon_token: None,
+                pat: Box::new(pat),
+            })
+        }
+
+        fn pat_range(&self, input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatRange> {
+            Ok(PatRange {
+                attrs: Vec::new(),
+                lo: Box::new(Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself,
+                    path,
+                })),
+                limits: input.parse()?,
+                hi: self.pat_lit_expr(input)?,
+            })
+        }
+
+        fn pat_tuple(&self, input: ParseStream) -> Result<PatTuple> {
+            let content;
+            let paren_token = parenthesized!(content in input);
+
+            let mut elems = Punctuated::new();
+            while !content.is_empty() {
+                let value: Pat = (self.parse_fn)(&content, self)?;
+                elems.push_value(value);
+                if content.is_empty() {
+                    break;
+                }
+                let punct = content.parse()?;
+                elems.push_punct(punct);
+            }
+
+            Ok(PatTuple {
+                attrs: Vec::new(),
+                paren_token,
+                elems,
+            })
+        }
+
+        fn pat_reference(&self, input: ParseStream) -> Result<PatReference> {
+            Ok(PatReference {
+                attrs: Vec::new(),
+                and_token: input.parse()?,
+                mutability: input.parse()?,
+                pat: Box::new((self.parse_fn)(input, self)?),
+            })
+        }
+
+        fn pat_lit_or_range(&self, input: ParseStream) -> Result<Pat> {
+            let lo = self.pat_lit_expr(input)?;
+            if input.peek(Token![..]) {
+                Ok(Pat::Range(PatRange {
+                    attrs: Vec::new(),
+                    lo,
+                    limits: input.parse()?,
+                    hi: self.pat_lit_expr(input)?,
+                }))
+            } else {
+                Ok(Pat::Lit(PatLit {
+                    attrs: Vec::new(),
+                    expr: lo,
+                }))
+            }
+        }
+
+        fn pat_lit_expr(&self, input: ParseStream) -> Result<Box<Expr>> {
+            let neg: Option<Token![-]> = input.parse()?;
+
+            let lookahead = input.lookahead1();
+            let expr = if lookahead.peek(Lit) {
+                Expr::Lit(input.parse()?)
+            } else if lookahead.peek(Ident)
+                || lookahead.peek(Token![::])
+                || lookahead.peek(Token![<])
+                || lookahead.peek(Token![self])
+                || lookahead.peek(Token![Self])
+                || lookahead.peek(Token![super])
+                || lookahead.peek(Token![extern])
+                || lookahead.peek(Token![crate])
+            {
+                Expr::Path(input.parse()?)
+            } else {
+                return Err(lookahead.error());
+            };
+
+            Ok(Box::new(if let Some(neg) = neg {
+                Expr::Unary(ExprUnary {
+                    attrs: Vec::new(),
+                    op: UnOp::Neg(neg),
+                    expr: Box::new(expr),
+                })
+            } else {
+                expr
+            }))
+        }
+
+        fn pat_slice(&self, input: ParseStream) -> Result<PatSlice> {
+            let content;
+            let bracket_token = bracketed!(content in input);
+
+            let mut elems = Punctuated::new();
+            while !content.is_empty() {
+                let value: Pat = (self.parse_fn)(&content, self)?;
+                elems.push_value(value);
+                if content.is_empty() {
+                    break;
+                }
+                let punct = content.parse()?;
+                elems.push_punct(punct);
+            }
+
+            Ok(PatSlice {
+                attrs: Vec::new(),
+                bracket_token,
+                elems,
+            })
+        }
+
+        fn pat_rest(&self, input: ParseStream) -> Result<PatRest> {
+            Ok(PatRest {
+                attrs: Vec::new(),
+                dot2_token: input.parse()?,
+            })
+        }
     }
 
-    fn pat_rest(input: ParseStream) -> Result<PatRest> {
-        Ok(PatRest {
-            attrs: Vec::new(),
-            dot2_token: input.parse()?,
-        })
+    impl Pat {
+        fn parse(input: ParseStream) -> Result<Pat> {
+            let cx = PatParseContext {
+                parse_fn: PatParseContext::parse_with_or,
+            };
+            (cx.parse_fn)(input, &cx)
+        }
+
+        pub fn parse_closure_arg(input: ParseStream) -> Result<Pat> {
+            let cx = PatParseContext {
+                parse_fn: PatParseContext::parse_inner,
+            };
+            (cx.parse_fn)(input, &cx)
+        }
+    }
+
+    impl Parse for Pat {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Self::parse(input)
+        }
     }
 }
 

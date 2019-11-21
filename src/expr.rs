@@ -2269,7 +2269,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn closure_arg(input: ParseStream) -> Result<Pat> {
         let attrs = input.call(Attribute::parse_outer)?;
-        let mut pat: Pat = input.parse()?;
+        let mut pat: Pat = Pat::parse_closure_arg(input)?;
 
         if input.peek(Token![:]) {
             Ok(Pat::Type(PatType {
