@@ -15,7 +15,6 @@ use syntax::ast;
 use syntax::errors::PResult;
 use syntax::sess::ParseSess;
 use syntax::source_map::FilePathMapping;
-use syntax_expand::config::process_configure_mod;
 use syntax_pos::edition::Edition;
 use syntax_pos::FileName;
 use walkdir::{DirEntry, WalkDir};
@@ -81,7 +80,7 @@ fn test_round_trip() {
 
             let equal = panic::catch_unwind(|| {
                 syntax::with_globals(Edition::Edition2018, || {
-                    let sess = ParseSess::new(FilePathMapping::empty(), process_configure_mod);
+                    let sess = ParseSess::new(FilePathMapping::empty());
                     let before = match libsyntax_parse(content, &sess) {
                         Ok(before) => before,
                         Err(mut diagnostic) => {
