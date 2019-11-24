@@ -81,10 +81,12 @@ fn download_and_unpack() -> Result<()> {
     for entry in archive.entries()? {
         let mut entry = entry?;
         let path = entry.path()?;
-        if path.starts_with(&prefix) {
-            let out = Path::new("tests/rust").join(path.strip_prefix(&prefix)?);
-            entry.unpack(&out)?;
+        if path == Path::new("pax_global_header") {
+            continue;
         }
+        let relative = path.strip_prefix(&prefix)?;
+        let out = Path::new("tests/rust").join(relative);
+        entry.unpack(&out)?;
     }
     fs::write("tests/rust/COMMIT", REVISION)?;
     Ok(())
