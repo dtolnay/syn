@@ -80,10 +80,10 @@ fn download_and_unpack() -> Result<()> {
     let prefix = format!("rust-{}", REVISION);
     for entry in archive.entries()? {
         let mut entry = entry?;
-        if entry.path()?.starts_with(&prefix[..]) {
-            let path =
-                Path::new("tests/rust").join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
-            entry.unpack(&path)?;
+        let path = entry.path()?;
+        if path.starts_with(&prefix) {
+            let out = Path::new("tests/rust").join(path.strip_prefix(&prefix)?);
+            entry.unpack(&out)?;
         }
     }
     fs::write("tests/rust/COMMIT", REVISION)?;
