@@ -58,27 +58,32 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 }
 
-pub fn clone_rust() -> Result<(), Box<dyn std::error::Error>> {
-    if match read_to_string("tests/rust/COMMIT") {
+pub fn clone_rust() {
+    let needs_clone = match read_to_string("tests/rust/COMMIT") {
         Err(_) => true,
         Ok(contents) => contents.trim() != REVISION,
-    } {
-        let url = format!(
-            "https://github.com/rust-lang/rust/archive/{}.tar.gz",
-            REVISION
-        );
-        let request = reqwest::get(&url)?;
-        let decoder = GzDecoder::new(request);
-        let mut archive = Archive::new(decoder);
-        let prefix = format!("rust-{}", REVISION);
-        for mut entry in archive.entries()?.filter_map(|e| e.ok()) {
-            if entry.path()?.starts_with(&prefix[..]) {
-                let path = Path::new("tests/rust")
-                    .join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
-                entry.unpack(&path)?;
-            }
-        }
-        write("tests/rust/COMMIT", REVISION)?;
+    };
+    if needs_clone {
+        download_and_unpack().unwrap();
     }
+}
+
+fn download_and_unpack() -> Result<(), Box<dyn std::error::Error>> {
+    let url = format!(
+        "https://github.com/rust-lang/rust/archive/{}.tar.gz",
+        REVISION
+    );
+    let request = reqwest::get(&url)?;
+    let decoder = GzDecoder::new(request);
+    let mut archive = Archive::new(decoder);
+    let prefix = format!("rust-{}", REVISION);
+    for mut entry in archive.entries()?.filter_map(|e| e.ok()) {
+        if entry.path()?.starts_with(&prefix[..]) {
+            let path =
+                Path::new("tests/rust").join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
+            entry.unpack(&path)?;
+        }
+    }
+    write("tests/rust/COMMIT", REVISION)?;
     Ok(())
 }

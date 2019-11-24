@@ -101,7 +101,7 @@ fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
 }
 
 fn main() {
-    repo::clone_rust().expect("Rust did not download correctly");
+    repo::clone_rust();
 
     macro_rules! testcases {
         ($($(#[$cfg:meta])* $name:path,)*) => {
