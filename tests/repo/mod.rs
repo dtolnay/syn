@@ -1,6 +1,5 @@
 use flate2::read::GzDecoder;
 use std::fs::{read_to_string, write};
-use std::io::{Seek, SeekFrom};
 use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
@@ -68,10 +67,8 @@ pub fn clone_rust() -> Result<(), Box<dyn std::error::Error>> {
             "https://github.com/rust-lang/rust/archive/{}.tar.gz",
             REVISION
         );
-        let mut tmpfile = tempfile::tempfile().unwrap();
-        let _bytecount = reqwest::get(url.as_str()).unwrap().copy_to(&mut tmpfile)?;
-        tmpfile.seek(SeekFrom::Start(0))?;
-        let decoder = GzDecoder::new(tmpfile);
+        let request = reqwest::get(&url)?;
+        let decoder = GzDecoder::new(request);
         let mut archive = Archive::new(decoder);
         let prefix = format!("rust-{}", REVISION);
         for mut entry in archive.entries()?.filter_map(|e| e.ok()) {
