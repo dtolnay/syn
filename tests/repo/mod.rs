@@ -5,7 +5,7 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-static REVISION: &'static str = "7979016aff545f7b41cc517031026020b340989d";
+const REVISION: &str = "7979016aff545f7b41cc517031026020b340989d";
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();
