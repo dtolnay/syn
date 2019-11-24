@@ -86,9 +86,8 @@ fn test_simple_precedence() {
 
 /// Test expressions from rustc, like in `test_round_trip`.
 #[test]
-#[cfg_attr(target_os = "windows", ignore = "requires nix .sh")]
 fn test_rustc_precedence() {
-    repo::clone_rust();
+    repo::clone_rust().expect("Rust did not download correctly");
     let abort_after = common::abort_after();
     if abort_after == 0 {
         panic!("Skipping all precedence tests");
