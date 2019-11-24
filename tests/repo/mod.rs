@@ -78,6 +78,12 @@ fn download_and_unpack() -> Result<()> {
     let decoder = GzDecoder::new(request);
     let mut archive = Archive::new(decoder);
     let prefix = format!("rust-{}", REVISION);
+
+    let tests_rust = Path::new("tests/rust");
+    if tests_rust.exists() {
+        fs::remove_dir_all(tests_rust)?;
+    }
+
     for entry in archive.entries()? {
         let mut entry = entry?;
         let path = entry.path()?;
@@ -85,9 +91,10 @@ fn download_and_unpack() -> Result<()> {
             continue;
         }
         let relative = path.strip_prefix(&prefix)?;
-        let out = Path::new("tests/rust").join(relative);
+        let out = tests_rust.join(relative);
         entry.unpack(&out)?;
     }
+
     fs::write("tests/rust/COMMIT", REVISION)?;
     Ok(())
 }
