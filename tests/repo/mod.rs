@@ -1,5 +1,5 @@
 use flate2::read::GzDecoder;
-use std::fs::{read_to_string, write};
+use std::fs;
 use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
@@ -59,7 +59,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
 }
 
 pub fn clone_rust() {
-    let needs_clone = match read_to_string("tests/rust/COMMIT") {
+    let needs_clone = match fs::read_to_string("tests/rust/COMMIT") {
         Err(_) => true,
         Ok(contents) => contents.trim() != REVISION,
     };
@@ -84,6 +84,6 @@ fn download_and_unpack() -> Result<(), Box<dyn std::error::Error>> {
             entry.unpack(&path)?;
         }
     }
-    write("tests/rust/COMMIT", REVISION)?;
+    fs::write("tests/rust/COMMIT", REVISION)?;
     Ok(())
 }
