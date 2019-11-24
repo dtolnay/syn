@@ -78,7 +78,8 @@ fn download_and_unpack() -> Result<()> {
     let decoder = GzDecoder::new(request);
     let mut archive = Archive::new(decoder);
     let prefix = format!("rust-{}", REVISION);
-    for mut entry in archive.entries()?.filter_map(|e| e.ok()) {
+    for entry in archive.entries()? {
+        let mut entry = entry?;
         if entry.path()?.starts_with(&prefix[..]) {
             let path =
                 Path::new("tests/rust").join(entry.path()?.strip_prefix(&prefix[..])?.to_owned());
