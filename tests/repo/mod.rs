@@ -1,3 +1,4 @@
+use anyhow::Result;
 use flate2::read::GzDecoder;
 use std::fs;
 use std::path::Path;
@@ -68,7 +69,7 @@ pub fn clone_rust() {
     }
 }
 
-fn download_and_unpack() -> Result<(), Box<dyn std::error::Error>> {
+fn download_and_unpack() -> Result<()> {
     let url = format!(
         "https://github.com/rust-lang/rust/archive/{}.tar.gz",
         REVISION
