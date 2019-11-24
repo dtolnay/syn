@@ -45,7 +45,7 @@ insta = "0.12"
 rayon = "1.0"
 ref-cast = "1.0"
 regex = "1.0"
-reqwest = "0.9"
+reqwest = { version = "0.10.0-alpha.2", features = ["blocking"] }
 tar = "0.4"
 termcolor = "1.0"
 walkdir = "2.1"
