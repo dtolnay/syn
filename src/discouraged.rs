@@ -1,9 +1,163 @@
 //! Extensions to the parsing API with niche applicability.
 
 use super::*;
+use crate::sealed::discouraged::Sealed;
 
 /// Extensions to the `ParseStream` API to support speculative parsing.
-pub trait Speculative {
+pub trait Speculative: Sealed {
+    /// Speculatively invokes a parser closure, advancing the position of the
+    /// parse stream past it.
+    ///
+    /// Returns `None`, and does not advance the parse stream, if speculative
+    /// parsing fails.
+    ///
+    /// If you can avoid doing this, you should, as it limits the ability to
+    /// generate useful errors. That said, it is often the only way to parse
+    /// syntax of the form `A* B*` for arbitrary syntax `A` and `B`. The problem
+    /// is that when we fail to speculatively parse an `A`, it's impossible to
+    /// tell whether that was because of a syntax error, and the user meant to
+    /// provide an `A`, or that the `A`s are finished and it's time to start
+    /// parsing `B`s. Use with care.
+    ///
+    /// Also note that if `A` is a subset of `B`, `A* B*` can be parsed by
+    /// parsing `B*` and removing the leading members of `A` from the
+    /// repetition, bypassing the need to involve the downsides associated with
+    /// speculative parsing.
+    ///
+    /// # Example
+    ///
+    /// There has been chatter about the possibility of making the colons in the
+    /// turbofish syntax like `path::to::<T>` no longer required by accepting
+    /// `path::to<T>` in expression position. Specifically, according to [RFC
+    /// 2544], [`PathSegment`] parsing should always try to consume a following
+    /// `<` token as the start of generic arguments, and reset to the `<` if
+    /// that fails (e.g. the token is acting as a less-than operator).
+    ///
+    /// This is the exact kind of parsing behavior which requires the "fork,
+    /// try, commit" behavior that [`ParseStream::fork`] discourages. With
+    /// `speculate`, we can avoid having to parse the speculatively parsed
+    /// content a second time.
+    ///
+    /// This change in behavior can be implemented in syn by replacing just the
+    /// `Parse` implementation for `PathSegment`:
+    ///
+    /// ```
+    /// # use syn::ext::IdentExt;
+    /// use syn::parse::discouraged::Speculative;
+    /// # use syn::parse::{Parse, ParseStream};
+    /// # use syn::{Ident, PathArguments, Result, Token};
+    ///
+    /// pub struct PathSegment {
+    ///     pub ident: Ident,
+    ///     pub arguments: PathArguments,
+    /// }
+    /// #
+    /// # impl<T> From<T> for PathSegment
+    /// # where
+    /// #     T: Into<Ident>,
+    /// # {
+    /// #     fn from(ident: T) -> Self {
+    /// #         PathSegment {
+    /// #             ident: ident.into(),
+    /// #             arguments: PathArguments::None,
+    /// #         }
+    /// #     }
+    /// # }
+    ///
+    /// impl Parse for PathSegment {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         if input.peek(Token![super])
+    ///             || input.peek(Token![self])
+    ///             || input.peek(Token![Self])
+    ///             || input.peek(Token![crate])
+    ///             || input.peek(Token![extern])
+    ///         {
+    ///             let ident = input.call(Ident::parse_any)?;
+    ///             return Ok(PathSegment::from(ident));
+    ///         }
+    ///
+    ///         let ident = input.parse()?;
+    ///         if input.peek(Token![::]) && input.peek3(Token![<]) {
+    ///             return Ok(PathSegment {
+    ///                 ident,
+    ///                 arguments: PathArguments::AngleBracketed(input.parse()?),
+    ///             });
+    ///         }
+    ///
+    ///         let arguments = input
+    ///             .speculate(|fork| {
+    ///                 Ok(PathArguments::AngleBracketed(fork.parse()?))
+    ///             })
+    ///             .unwrap_or(PathArguments::None);
+    ///         Ok(PathSegment { ident, arguments })
+    ///     }
+    /// }
+    ///
+    /// # syn::parse_str::<PathSegment>("a<b,c>").unwrap();
+    /// ```
+    ///
+    /// # Drawbacks
+    ///
+    /// The main drawback of this style of speculative parsing is in error
+    /// presentation. Even if the lookahead is the "correct" parse, the error
+    /// that is shown is that of the "fallback" parse. To use the same example
+    /// as the turbofish above, take the following unfinished "turbofish":
+    ///
+    /// ```text
+    /// let _ = f<&'a fn(), for<'a> serde::>();
+    /// ```
+    ///
+    /// If this is parsed as generic arguments, we can provide the error message
+    ///
+    /// ```text
+    /// error: expected identifier
+    ///  --> src.rs:L:C
+    ///   |
+    /// L | let _ = f<&'a fn(), for<'a> serde::>();
+    ///   |                                    ^
+    /// ```
+    ///
+    /// but if parsed using the above speculative parsing, it falls back to
+    /// assuming that the `<` is a less-than when it fails to parse the generic
+    /// arguments, and tries to interpret the `&'a` as the start of a labelled
+    /// loop, resulting in the much less helpful error
+    ///
+    /// ```text
+    /// error: expected `:`
+    ///  --> src.rs:L:C
+    ///   |
+    /// L | let _ = f<&'a fn(), for<'a> serde::>();
+    ///   |               ^^
+    /// ```
+    ///
+    /// This can be mitigated with various heuristics (two examples: show both
+    /// forks' parse errors, or show the one that consumed more tokens), but
+    /// when you can control the grammar, sticking to something that can be
+    /// parsed LL(3) and without the LL(*) speculative parsing this makes
+    /// possible, displaying reasonable errors becomes much more simple.
+    ///
+    /// [RFC 2544]: https://github.com/rust-lang/rfcs/pull/2544
+    /// [`PathSegment`]: crate::PathSegment
+    ///
+    /// # Performance
+    ///
+    /// This method performs a cheap fixed amount of extra work that does not
+    /// depend on how far the forked stream diverges.
+    fn speculate<F, T>(&self, f: F) -> Option<T>
+    where
+        F: FnOnce(ParseStream) -> Result<T>;
+
+    /// Speculatively invokes a parser closure, without advancing the position
+    /// of the parse stream.
+    ///
+    /// Like [`Speculative::speculate`], however does not advance the parse
+    /// stream.
+    ///
+    /// [`Speculative::speculate`]: Speculative::speculate
+    fn speculate_peek<F, T>(&self, f: F) -> Option<T>
+    where
+        F: FnOnce(ParseStream) -> Result<T>;
+
     /// Advance this parse stream to the position of a forked parse stream.
     ///
     /// This is the opposite operation to [`ParseStream::fork`]. You can fork a
@@ -158,7 +312,39 @@ pub trait Speculative {
     fn advance_to(&self, fork: &Self);
 }
 
+impl<'a> Sealed for ParseBuffer<'a> {}
+
 impl<'a> Speculative for ParseBuffer<'a> {
+    fn speculate<F, T>(&self, f: F) -> Option<T>
+    where
+        F: FnOnce(ParseStream) -> Result<T>,
+    {
+        let fork = self.fork();
+        let result = parse_stream(f, &fork).ok()?;
+
+        // The parse may appear to succeed, but have set the `unexpected` flag
+        // on the forked `ParseStream`.
+        fork.check_unexpected().ok()?;
+
+        // XXX: We can probably get rid of the `same_scope` check, as we know we
+        // forked from `self`. May or may not be worth it.
+        self.advance_to(&fork);
+        Some(result)
+    }
+
+    fn speculate_peek<F, T>(&self, f: F) -> Option<T>
+    where
+        F: FnOnce(ParseStream) -> Result<T>,
+    {
+        let fork = self.fork();
+        let result = f(&fork).ok()?;
+
+        // The parse may appear to succeed, but have set the `unexpected` flag
+        // on the forked `ParseStream`.
+        fork.check_unexpected().ok()?;
+        Some(result)
+    }
+
     fn advance_to(&self, fork: &Self) {
         if !crate::buffer::same_scope(self.cursor(), fork.cursor()) {
             panic!("Fork was not derived from the advancing parse stream");
