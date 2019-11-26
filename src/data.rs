@@ -238,6 +238,7 @@ pub mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Variant {
@@ -327,33 +328,32 @@ pub mod parsing {
         fn parse_pub(input: ParseStream) -> Result<Self> {
             let pub_token = input.parse::<Token![pub]>()?;
 
-            if input.peek(token::Paren) {
-                // TODO: optimize using advance_to
-                let ahead = input.fork();
-                let mut content;
-                parenthesized!(content in ahead);
+            match input.speculate(|ahead| {
+                let content;
+                let paren_token = parenthesized!(content in ahead);
 
                 if content.peek(Token![crate])
                     || content.peek(Token![self])
                     || content.peek(Token![super])
                 {
-                    return Ok(Visibility::Restricted(VisRestricted {
+                    Ok(VisRestricted {
                         pub_token,
-                        paren_token: parenthesized!(content in input),
+                        paren_token,
                         in_token: None,
                         path: Box::new(Path::from(content.call(Ident::parse_any)?)),
-                    }));
-                } else if content.peek(Token![in]) {
-                    return Ok(Visibility::Restricted(VisRestricted {
+                    })
+                } else {
+                    Ok(VisRestricted {
                         pub_token,
-                        paren_token: parenthesized!(content in input),
+                        paren_token,
                         in_token: Some(content.parse()?),
                         path: Box::new(content.call(Path::parse_mod_style)?),
-                    }));
+                    })
                 }
+            }) {
+                Some(restricted) => Ok(Visibility::Restricted(restricted)),
+                None => Ok(Visibility::Public(VisPublic { pub_token })),
             }
-
-            Ok(Visibility::Public(VisPublic { pub_token }))
         }
 
         fn parse_crate(input: ParseStream) -> Result<Self> {

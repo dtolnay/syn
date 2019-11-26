@@ -1181,6 +1181,7 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 pub(crate) mod parsing {
     use super::*;
 
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
@@ -1259,13 +1260,13 @@ pub(crate) mod parsing {
         base: Precedence,
     ) -> Result<Expr> {
         loop {
-            if input
-                .fork()
-                .parse::<BinOp>()
-                .ok()
-                .map_or(false, |op| Precedence::of(&op) >= base)
-            {
-                let op: BinOp = input.parse()?;
+            if let Some(op) = input.speculate(|ahead| {
+                let op: BinOp = ahead.parse()?;
+                if Precedence::of(&op) < base {
+                    return Err(ahead.error(""));
+                }
+                Ok(op)
+            }) {
                 let precedence = Precedence::of(&op);
                 let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
@@ -1371,13 +1372,13 @@ pub(crate) mod parsing {
         base: Precedence,
     ) -> Result<Expr> {
         loop {
-            if input
-                .fork()
-                .parse::<BinOp>()
-                .ok()
-                .map_or(false, |op| Precedence::of(&op) >= base)
-            {
-                let op: BinOp = input.parse()?;
+            if let Some(op) = input.speculate(|ahead| {
+                let op: BinOp = ahead.parse()?;
+                if Precedence::of(&op) < base {
+                    return Err(ahead.error(""));
+                }
+                Ok(op)
+            }) {
                 let precedence = Precedence::of(&op);
                 let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
@@ -1436,55 +1437,59 @@ pub(crate) mod parsing {
     // box <trailer>
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        // TODO: optimize using advance_to
-        let ahead = input.fork();
-        ahead.call(Attribute::parse_outer)?;
-        if ahead.peek(Token![&])
-            || ahead.peek(Token![box])
-            || ahead.peek(Token![*])
-            || ahead.peek(Token![!])
-            || ahead.peek(Token![-])
-        {
-            let attrs = input.call(Attribute::parse_outer)?;
-            if input.peek(Token![&]) {
-                Ok(Expr::Reference(ExprReference {
-                    attrs,
-                    and_token: input.parse()?,
-                    raw: Reserved::default(),
-                    mutability: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct)?),
-                }))
-            } else if input.peek(Token![box]) {
-                Ok(Expr::Box(ExprBox {
-                    attrs,
-                    box_token: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct)?),
-                }))
+        match input.speculate(|ahead| {
+            let attrs = ahead.call(Attribute::parse_outer)?;
+            if ahead.peek(Token![&])
+                || ahead.peek(Token![box])
+                || ahead.peek(Token![*])
+                || ahead.peek(Token![!])
+                || ahead.peek(Token![-])
+            {
+                Ok(attrs)
             } else {
-                Ok(Expr::Unary(ExprUnary {
-                    attrs,
-                    op: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct)?),
-                }))
+                Err(ahead.error("not unary_expr"))
             }
-        } else {
-            trailer_expr(input, allow_struct)
+        }) {
+            Some(attrs) => {
+                if input.peek(Token![&]) {
+                    Ok(Expr::Reference(ExprReference {
+                        attrs,
+                        and_token: input.parse()?,
+                        raw: Reserved::default(),
+                        mutability: input.parse()?,
+                        expr: Box::new(unary_expr(input, allow_struct)?),
+                    }))
+                } else if input.peek(Token![box]) {
+                    Ok(Expr::Box(ExprBox {
+                        attrs,
+                        box_token: input.parse()?,
+                        expr: Box::new(unary_expr(input, allow_struct)?),
+                    }))
+                } else {
+                    Ok(Expr::Unary(ExprUnary {
+                        attrs,
+                        op: input.parse()?,
+                        expr: Box::new(unary_expr(input, allow_struct)?),
+                    }))
+                }
+            }
+            None => trailer_expr(input, allow_struct),
         }
     }
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        // TODO: optimize using advance_to
-        let ahead = input.fork();
-        ahead.call(Attribute::parse_outer)?;
-        if ahead.peek(Token![*]) || ahead.peek(Token![!]) || ahead.peek(Token![-]) {
-            Ok(Expr::Unary(ExprUnary {
-                attrs: input.call(Attribute::parse_outer)?,
-                op: input.parse()?,
+        match input.speculate(|ahead| {
+            let attrs = ahead.call(Attribute::parse_outer)?;
+            let op: UnOp = ahead.parse()?;
+            Ok((attrs, op))
+        }) {
+            Some((attrs, op)) => Ok(Expr::Unary(ExprUnary {
+                attrs,
+                op,
                 expr: Box::new(unary_expr(input, allow_struct)?),
-            }))
-        } else {
-            trailer_expr(input, allow_struct)
+            })),
+            None => trailer_expr(input, allow_struct),
         }
     }
 
@@ -2434,20 +2439,18 @@ pub(crate) mod parsing {
         let brace_token = braced!(content in input);
         let inner_attrs = content.call(Attribute::parse_inner)?;
 
+        let mut dot2_token = None;
+        let mut rest = None;
         let mut fields = Punctuated::new();
         loop {
-            let attrs = content.call(Attribute::parse_outer)?;
-            // TODO: optimize using advance_to
-            if content.fork().parse::<Member>().is_err() {
-                if attrs.is_empty() {
-                    break;
-                } else {
-                    return Err(content.error("expected struct field"));
-                }
+            if content.peek(Token![..]) {
+                dot2_token = Some(content.parse()?);
+                rest = Some(content.parse()?);
+                break;
             }
 
             fields.push(FieldValue {
-                attrs,
+                attrs: content.call(Attribute::parse_outer)?,
                 ..content.parse()?
             });
 
@@ -2457,14 +2460,6 @@ pub(crate) mod parsing {
             let punct: Token![,] = content.parse()?;
             fields.push_punct(punct);
         }
-
-        let (dot2_token, rest) = if fields.empty_or_trailing() && content.peek(Token![..]) {
-            let dot2_token: Token![..] = content.parse()?;
-            let rest: Expr = content.parse()?;
-            (Some(dot2_token), Some(Box::new(rest)))
-        } else {
-            (None, None)
-        };
 
         Ok(ExprStruct {
             attrs: private::attrs(outer_attrs, inner_attrs),

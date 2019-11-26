@@ -47,6 +47,7 @@ ast_struct! {
 pub mod parsing {
     use super::*;
 
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::punctuated::Punctuated;
 
@@ -146,18 +147,21 @@ pub mod parsing {
     }
 
     fn parse_stmt(input: ParseStream, allow_nosemi: bool) -> Result<Stmt> {
-        // TODO: optimize using advance_to
+        // TODO: optimize using speculate
         let ahead = input.fork();
         ahead.call(Attribute::parse_outer)?;
 
-        if {
-            let ahead = ahead.fork();
+        if let Some(_) = ahead.speculate_peek(|ahead| {
+            ahead.call(Path::parse_mod_style)?;
+            ahead.parse::<Token![!]>()?;
+
             // Only parse braces here; paren and bracket will get parsed as
             // expression statements
-            ahead.call(Path::parse_mod_style).is_ok()
-                && ahead.parse::<Token![!]>().is_ok()
-                && (ahead.peek(token::Brace) || ahead.peek(Ident))
-        } {
+            if !ahead.peek(token::Brace) && !ahead.peek(Ident) {
+                return Err(ahead.error("not stmt_mac"));
+            }
+            Ok(())
+        }) {
             stmt_mac(input)
         } else if ahead.peek(Token![let]) {
             stmt_local(input).map(Stmt::Local)

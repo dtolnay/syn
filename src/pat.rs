@@ -386,6 +386,7 @@ mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
@@ -399,12 +400,13 @@ mod parsing {
                         || input.peek2(token::Brace)
                         || input.peek2(token::Paren)
                         || input.peek2(Token![..])
-                            && !{
-                                let ahead = input.fork();
-                                ahead.parse::<Ident>()?;
-                                ahead.parse::<RangeLimits>()?;
-                                ahead.is_empty() || ahead.peek(Token![,])
-                            }
+                            && input
+                                .speculate_peek(|ahead| {
+                                    ahead.parse::<Ident>()?;
+                                    ahead.parse::<RangeLimits>()?;
+                                    Ok(ahead.is_empty() || ahead.peek(Token![,]))
+                                })
+                                .unwrap_or(false)
                 })
                 || input.peek(Token![self]) && input.peek2(Token![::])
                 || lookahead.peek(Token![::])

@@ -1530,18 +1530,23 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
 
-            let ahead = input.fork();
-            if let Ok(mut receiver) = ahead.parse::<Receiver>() {
-                if !ahead.peek(Token![:]) {
-                    input.advance_to(&ahead);
+            match input.speculate(|ahead| {
+                let receiver = ahead.parse::<Receiver>()?;
+                if ahead.peek(Token![:]) {
+                    return Err(ahead.error("not a receiver"));
+                }
+                Ok(receiver)
+            }) {
+                Some(mut receiver) => {
                     receiver.attrs = attrs;
-                    return Ok(FnArg::Receiver(receiver));
+                    Ok(FnArg::Receiver(receiver))
+                }
+                None => {
+                    let mut typed = input.call(fn_arg_typed)?;
+                    typed.attrs = attrs;
+                    Ok(FnArg::Typed(typed))
                 }
             }
-
-            let mut typed = input.call(fn_arg_typed)?;
-            typed.attrs = attrs;
-            Ok(FnArg::Typed(typed))
         }
     }
 
@@ -2312,21 +2317,12 @@ pub mod parsing {
                 Generics::default()
             };
 
-            let trait_ = {
-                // TODO: optimize using advance_to
-                let ahead = input.fork();
-                if ahead.parse::<Option<Token![!]>>().is_ok()
-                    && ahead.parse::<Path>().is_ok()
-                    && ahead.parse::<Token![for]>().is_ok()
-                {
-                    let polarity: Option<Token![!]> = input.parse()?;
-                    let path: Path = input.parse()?;
-                    let for_token: Token![for] = input.parse()?;
-                    Some((polarity, path, for_token))
-                } else {
-                    None
-                }
-            };
+            let trait_ = input.speculate(|ahead| {
+                let polarity: Option<Token![!]> = ahead.parse()?;
+                let path: Path = ahead.parse()?;
+                let for_token: Token![for] = ahead.parse()?;
+                Ok((polarity, path, for_token))
+            });
             let self_ty: Type = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
 
