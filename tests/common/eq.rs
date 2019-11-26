@@ -10,17 +10,18 @@ use rustc_data_structures::thin_vec::ThinVec;
 use syntax::ast::{
     AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocTyConstraint, AssocTyConstraintKind,
     AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind, BindingMode, Block,
-    BlockCheckMode, CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef, Expr, ExprKind,
-    Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader, FnSig, ForeignItem, ForeignItemKind,
-    ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound, GenericParam,
-    GenericParamKind, Generics, GlobalAsm, Ident, ImplItem, ImplItemKind, ImplPolarity, InlineAsm,
-    InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
-    LitIntType, LitKind, Local, Mac, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy,
-    Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef,
-    QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField,
-    TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy,
-    UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    BlockCheckMode, BorrowKind, CaptureBy, Constness, Crate, CrateSugar, Defaultness, EnumDef,
+    Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader, FnSig, ForeignItem,
+    ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplItem, ImplItemKind,
+    ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label,
+    Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local, Mac, MacDelimiter, MacStmtStyle,
+    MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind,
+    Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind,
+    StrLit, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax,
+    TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, Variant,
+    VariantData, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate,
+    WherePredicate, WhereRegionPredicate,
 };
 use syntax::ptr::P;
 use syntax::source_map::Spanned;
@@ -320,6 +321,7 @@ spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BindingMode; ByRef(0) ByValue(0));
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
+spanless_eq_enum!(BorrowKind; Ref Raw);
 spanless_eq_enum!(CaptureBy; Value Ref);
 spanless_eq_enum!(Constness; Const NotConst);
 spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
@@ -363,7 +365,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1) If(0 1 2)
     While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1) Closure(0 1 2 3 4 5)
     Block(0 1) Async(0 1 2) Await(0) TryBlock(0) Assign(0 1) AssignOp(0 1 2)
-    Field(0 1) Index(0 1) Range(0 1 2) Path(0 1) AddrOf(0 1) Break(0 1)
+    Field(0 1) Index(0 1) Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1)
     Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
