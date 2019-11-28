@@ -238,6 +238,7 @@ pub mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Variant {
@@ -328,27 +329,39 @@ pub mod parsing {
             let pub_token = input.parse::<Token![pub]>()?;
 
             if input.peek(token::Paren) {
-                // TODO: optimize using advance_to
                 let ahead = input.fork();
-                let mut content;
-                parenthesized!(content in ahead);
 
+                let content;
+                let paren_token = parenthesized!(content in ahead);
                 if content.peek(Token![crate])
                     || content.peek(Token![self])
                     || content.peek(Token![super])
                 {
-                    return Ok(Visibility::Restricted(VisRestricted {
-                        pub_token,
-                        paren_token: parenthesized!(content in input),
-                        in_token: None,
-                        path: Box::new(Path::from(content.call(Ident::parse_any)?)),
-                    }));
+                    let path = Box::new(Path::from(content.call(Ident::parse_any)?));
+
+                    // Ensure there are no additional tokens within `content`.
+                    // Without explicitly checking, we may misinterpret a tuple
+                    // field as a restricted visibility, causing a parse error.
+                    // e.g. `pub (crate::A, crate::B)` (Issue #720).
+                    if content.is_empty() {
+                        input.advance_to(&ahead);
+                        return Ok(Visibility::Restricted(VisRestricted {
+                            pub_token,
+                            paren_token,
+                            in_token: None,
+                            path,
+                        }));
+                    }
                 } else if content.peek(Token![in]) {
+                    let in_token = Some(content.parse()?);
+                    let path = Box::new(content.call(Path::parse_mod_style)?);
+
+                    input.advance_to(&ahead);
                     return Ok(Visibility::Restricted(VisRestricted {
                         pub_token,
-                        paren_token: parenthesized!(content in input),
-                        in_token: Some(content.parse()?),
-                        path: Box::new(content.call(Path::parse_mod_style)?),
+                        paren_token,
+                        in_token,
+                        path,
                     }));
                 }
             }
