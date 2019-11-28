@@ -261,13 +261,16 @@ pub struct ParseBuffer<'a> {
     // the cell.
     cell: Cell<Cursor<'static>>,
     marker: PhantomData<Cursor<'a>>,
-    unexpected: Rc<Cell<Option<Span>>>,
+    unexpected: Cell<Option<Rc<Cell<Unexpected>>>>,
 }
 
 impl<'a> Drop for ParseBuffer<'a> {
     fn drop(&mut self) {
-        if !self.is_empty() && self.unexpected.get().is_none() {
-            self.unexpected.set(Some(self.cursor().span()));
+        if !self.is_empty() {
+            let (inner, old_span) = inner_unexpected(self);
+            if old_span.is_none() {
+                inner.set(Unexpected::Some(self.cursor().span()));
+            }
         }
     }
 }
@@ -388,19 +391,56 @@ fn skip(input: ParseStream) -> bool {
 pub(crate) fn new_parse_buffer(
     scope: Span,
     cursor: Cursor,
-    unexpected: Rc<Cell<Option<Span>>>,
+    unexpected: Rc<Cell<Unexpected>>,
 ) -> ParseBuffer {
     ParseBuffer {
         scope,
         // See comment on `cell` in the struct definition.
         cell: Cell::new(unsafe { mem::transmute::<Cursor, Cursor<'static>>(cursor) }),
         marker: PhantomData,
-        unexpected,
+        unexpected: Cell::new(Some(unexpected)),
     }
 }
 
-pub(crate) fn get_unexpected(buffer: &ParseBuffer) -> Rc<Cell<Option<Span>>> {
-    buffer.unexpected.clone()
+#[derive(Clone)]
+pub(crate) enum Unexpected {
+    None,
+    Some(Span),
+    Chain(Rc<Cell<Unexpected>>),
+}
+
+impl Default for Unexpected {
+    fn default() -> Self {
+        Unexpected::None
+    }
+}
+
+// If `Default::default()` for `T` is expensive, this can be slow, but allows us
+// to operate on a value within a `Cell<T>`.
+//
+// NOTE: The types we clone with this (`Unexpected` and `Rc<T>`) would be "safe"
+// to clone in-place. If this ends up beig a perf issue, we can opimize with
+// unsafe code.
+fn cell_clone<T: Default + Clone>(cell: &Cell<T>) -> T {
+    let prev = cell.take();
+    let ret = prev.clone();
+    cell.set(prev);
+    ret
+}
+
+fn inner_unexpected(buffer: &ParseBuffer) -> (Rc<Cell<Unexpected>>, Option<Span>) {
+    let mut unexpected = get_unexpected(buffer);
+    loop {
+        match cell_clone(&unexpected) {
+            Unexpected::None => return (unexpected, None),
+            Unexpected::Some(span) => return (unexpected, Some(span)),
+            Unexpected::Chain(next) => unexpected = next,
+        }
+    }
+}
+
+pub(crate) fn get_unexpected(buffer: &ParseBuffer) -> Rc<Cell<Unexpected>> {
+    cell_clone(&buffer.unexpected).unwrap()
 }
 
 impl<'a> ParseBuffer<'a> {
@@ -841,8 +881,8 @@ impl<'a> ParseBuffer<'a> {
             cell: self.cell.clone(),
             marker: PhantomData,
             // Not the parent's unexpected. Nothing cares whether the clone
-            // parses all the way.
-            unexpected: Rc::new(Cell::new(None)),
+            // parses all the way unless we `advance_to`.
+            unexpected: Cell::new(Some(Default::default())),
         }
     }
 
@@ -963,10 +1003,10 @@ impl<'a> ParseBuffer<'a> {
     }
 
     fn check_unexpected(&self) -> Result<()> {
-        match self.unexpected.get() {
-            Some(span) => Err(Error::new(span, "unexpected token")),
-            None => Ok(()),
+        if let (_, Some(span)) = inner_unexpected(self) {
+            return Err(Error::new(span, "unexpected token"));
         }
+        Ok(())
     }
 }
 
@@ -1095,7 +1135,7 @@ pub trait Parser: Sized {
 fn tokens_to_parse_buffer(tokens: &TokenBuffer) -> ParseBuffer {
     let scope = Span::call_site();
     let cursor = tokens.begin();
-    let unexpected = Rc::new(Cell::new(None));
+    let unexpected = Default::default();
     new_parse_buffer(scope, cursor, unexpected)
 }
 
@@ -1121,7 +1161,7 @@ where
     fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
         let buf = TokenBuffer::new2(tokens);
         let cursor = buf.begin();
-        let unexpected = Rc::new(Cell::new(None));
+        let unexpected = Default::default();
         let state = new_parse_buffer(scope, cursor, unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;
