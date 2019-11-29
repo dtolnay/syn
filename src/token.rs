@@ -158,10 +158,12 @@ impl private::Sealed for Ident {}
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
 fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
-    use std::default::Default;
+    use crate::parse::Unexpected;
+    use std::cell::Cell;
+    use std::rc::Rc;
 
     let scope = Span::call_site();
-    let unexpected = Default::default();
+    let unexpected = Rc::new(Cell::new(Unexpected::None));
     let buffer = crate::parse::new_parse_buffer(scope, cursor, unexpected);
     peek(&buffer)
 }

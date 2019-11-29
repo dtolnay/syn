@@ -337,7 +337,7 @@ pub mod parsing {
                     || content.peek(Token![self])
                     || content.peek(Token![super])
                 {
-                    let path = Box::new(Path::from(content.call(Ident::parse_any)?));
+                    let path = content.call(Ident::parse_any)?;
 
                     // Ensure there are no additional tokens within `content`.
                     // Without explicitly checking, we may misinterpret a tuple
@@ -349,19 +349,19 @@ pub mod parsing {
                             pub_token,
                             paren_token,
                             in_token: None,
-                            path,
+                            path: Box::new(Path::from(path)),
                         }));
                     }
                 } else if content.peek(Token![in]) {
-                    let in_token = Some(content.parse()?);
-                    let path = Box::new(content.call(Path::parse_mod_style)?);
+                    let in_token: Token![in] = content.parse()?;
+                    let path = content.call(Path::parse_mod_style)?;
 
                     input.advance_to(&ahead);
                     return Ok(Visibility::Restricted(VisRestricted {
                         pub_token,
                         paren_token,
-                        in_token,
-                        path,
+                        in_token: Some(in_token),
+                        path: Box::new(path),
                     }));
                 }
             }

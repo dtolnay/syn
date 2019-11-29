@@ -415,12 +415,8 @@ impl Default for Unexpected {
     }
 }
 
-// If `Default::default()` for `T` is expensive, this can be slow, but allows us
-// to operate on a value within a `Cell<T>`.
-//
-// NOTE: The types we clone with this (`Unexpected` and `Rc<T>`) would be "safe"
-// to clone in-place. If this ends up beig a perf issue, we can opimize with
-// unsafe code.
+// We call this on Cell<Unexpected> and Cell<Option<T>> where temporarily
+// swapping in a None is cheap.
 fn cell_clone<T: Default + Clone>(cell: &Cell<T>) -> T {
     let prev = cell.take();
     let ret = prev.clone();
@@ -882,7 +878,7 @@ impl<'a> ParseBuffer<'a> {
             marker: PhantomData,
             // Not the parent's unexpected. Nothing cares whether the clone
             // parses all the way unless we `advance_to`.
-            unexpected: Cell::new(Some(Default::default())),
+            unexpected: Cell::new(Some(Rc::new(Cell::new(Unexpected::None)))),
         }
     }
 
@@ -1003,10 +999,10 @@ impl<'a> ParseBuffer<'a> {
     }
 
     fn check_unexpected(&self) -> Result<()> {
-        if let (_, Some(span)) = inner_unexpected(self) {
-            return Err(Error::new(span, "unexpected token"));
+        match inner_unexpected(self).1 {
+            Some(span) => Err(Error::new(span, "unexpected token")),
+            None => Ok(()),
         }
-        Ok(())
     }
 }
 
@@ -1135,7 +1131,7 @@ pub trait Parser: Sized {
 fn tokens_to_parse_buffer(tokens: &TokenBuffer) -> ParseBuffer {
     let scope = Span::call_site();
     let cursor = tokens.begin();
-    let unexpected = Default::default();
+    let unexpected = Rc::new(Cell::new(Unexpected::None));
     new_parse_buffer(scope, cursor, unexpected)
 }
 
@@ -1161,7 +1157,7 @@ where
     fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
         let buf = TokenBuffer::new2(tokens);
         let cursor = buf.begin();
-        let unexpected = Default::default();
+        let unexpected = Rc::new(Cell::new(Unexpected::None));
         let state = new_parse_buffer(scope, cursor, unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;

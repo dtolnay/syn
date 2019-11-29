@@ -180,7 +180,8 @@ impl<'a> Speculative for ParseBuffer<'a> {
                     // bubble up the chain by replacing the root `unexpected`
                     // pointer, only 'unexpected' tokens from existing group
                     // parsers should bubble.
-                    fork.unexpected.set(Some(Default::default()));
+                    fork.unexpected
+                        .set(Some(Rc::new(Cell::new(Unexpected::None))));
                 }
                 // Unexpected has been set on `self`. No changes needed.
                 (_, Some(_)) => {}
