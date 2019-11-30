@@ -21,10 +21,10 @@ syn-codegen = { path = "../json" }
 syn = { path = "..", features = ["full", "extra-traits"] }
 toml = "0.4.10"
 
+# work around https://github.com/crossbeam-rs/crossbeam/issues/435
+# until https://github.com/BurntSushi/ripgrep/pull/1427 is released
+crossbeam-utils = "=0.6.5"
+
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of
 # rustfmt in the codegen directory.
-
-[patch.crates-io]
-# work around https://github.com/rust-lang/rust/issues/65424
-crossbeam-utils = { git = "https://github.com/crossbeam-rs/crossbeam" }
