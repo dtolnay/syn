@@ -1,4 +1,4 @@
-use crate::error::Result;
+use anyhow::Result;
 use proc_macro2::TokenStream;
 use std::fs;
 use std::io::Write;

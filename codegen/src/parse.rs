@@ -1,5 +1,5 @@
-use crate::error::Result;
 use crate::version;
+use anyhow::Result;
 
 use indexmap::IndexMap;
 use quote::quote;

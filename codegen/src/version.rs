@@ -1,4 +1,4 @@
-use crate::error::Result;
+use anyhow::Result;
 use semver::Version;
 use serde::Deserialize;
 

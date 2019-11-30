@@ -7,13 +7,13 @@ edition = "2018"
 publish = false # this is an internal crate which should never be published
 
 [dependencies]
+anyhow = "1.0"
 color-backtrace = "0.2"
-failure = "0.1"
 indexmap = { version = "1.0", features = ["serde-1"] }
 inflections = "1.1"
 proc-macro2 = "1.0"
 quote = "1.0"
-rustfmt = { package = "rustfmt-nightly", git = "https://github.com/rust-lang-nursery/rustfmt" }
+rustfmt = { package = "rustfmt-nightly", git = "https://github.com/dtolnay/rustfmt", branch = "error" }
 semver = { version = "0.9", features = ["serde"] }
 serde = { version = "1.0.88", features = ["derive"] }
 serde_json = "1.0.38"

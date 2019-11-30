@@ -13,7 +13,6 @@
 #![allow(clippy::needless_pass_by_value)]
 
 mod debug;
-mod error;
 mod file;
 mod fold;
 mod full;
@@ -25,13 +24,13 @@ mod version;
 mod visit;
 mod visit_mut;
 
-use crate::error::Result;
+use anyhow::Result;
 use std::process;
 
 fn main() {
     color_backtrace::install();
     if let Err(err) = do_main() {
-        let _ = eprintln!("error: {}", err);
+        let _ = eprintln!("error: {:?}", err);
         process::exit(1);
     }
 }

@@ -1,6 +1,6 @@
-use crate::error::Result;
 use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
+use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::Index;

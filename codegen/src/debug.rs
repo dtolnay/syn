@@ -1,5 +1,5 @@
-use crate::error::Result;
 use crate::file;
+use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::Index;

@@ -1,4 +1,4 @@
-use crate::error::Result;
+use anyhow::Result;
 use std::fs;
 use std::path::Path;
 use syn_codegen::Definitions;
