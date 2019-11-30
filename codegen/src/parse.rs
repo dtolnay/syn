@@ -508,9 +508,11 @@ fn get_features(attrs: &[syn::Attribute], base: &[syn::Attribute]) -> Vec<syn::A
 }
 
 #[derive(Error, Debug)]
-#[error("{path}: {error}")]
+#[error("{path}:{line}:{column}: {error}")]
 struct LoadFileError {
     path: PathBuf,
+    line: usize,
+    column: usize,
     error: syn::Error,
 }
 
@@ -524,9 +526,14 @@ fn load_file<P: AsRef<Path>>(
         Some(error) => error,
     };
 
+    let error = error.downcast::<syn::Error>()?;
+    let span = error.span().start();
+
     bail!(LoadFileError {
         path: name.as_ref().to_owned(),
-        error: error.downcast()?,
+        line: span.line,
+        column: span.column + 1,
+        error,
     })
 }
 
