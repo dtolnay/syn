@@ -3,7 +3,6 @@ use crate::punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use crate::tt::TokenStreamHelper;
 use proc_macro2::{Span, TokenStream};
-#[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 #[cfg(all(feature = "parsing", feature = "full"))]
 use std::mem;
@@ -998,7 +997,8 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    pub enum Member {
+    #[derive(Eq, PartialEq, Hash)]
+    pub enum Member #manual_extra_traits {
         /// A named field like `self.x`.
         Named(Ident),
         /// An unnamed field like `self.0`.
@@ -1027,17 +1027,14 @@ impl From<usize> for Index {
     }
 }
 
-#[cfg(feature = "extra-traits")]
 impl Eq for Index {}
 
-#[cfg(feature = "extra-traits")]
 impl PartialEq for Index {
     fn eq(&self, other: &Self) -> bool {
         self.index == other.index
     }
 }
 
-#[cfg(feature = "extra-traits")]
 impl Hash for Index {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.index.hash(state);
