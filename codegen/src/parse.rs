@@ -8,8 +8,7 @@ use syn_codegen as types;
 use thiserror::Error;
 
 use std::collections::BTreeMap;
-use std::fs::File;
-use std::io::Read;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 const SYN_CRATE_ROOT: &str = "../src/lib.rs";
@@ -546,11 +545,8 @@ fn do_load_file<P: AsRef<Path>>(
     let name = name.as_ref();
     let parent = name.parent().expect("no parent path");
 
-    let mut f = File::open(name)?;
-    let mut src = String::new();
-    f.read_to_string(&mut src)?;
-
     // Parse the file
+    let src = fs::read_to_string(name)?;
     let file = syn::parse_file(&src)?;
 
     // Collect all of the interesting AstItems declared in this file or submodules.
@@ -641,9 +637,7 @@ fn do_load_file<P: AsRef<Path>>(
 
 fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup> {
     let name = name.as_ref();
-    let mut f = File::open(name)?;
-    let mut src = String::new();
-    f.read_to_string(&mut src)?;
+    let src = fs::read_to_string(name)?;
     let file = syn::parse_file(&src)?;
     for item in file.items {
         match item {
