@@ -332,6 +332,7 @@ mod parsing {
         input.parse::<Token![pub]>()?;
         input.parse::<Token![enum]>()?;
         let ident: Ident = input.parse()?;
+        skip_manual_extra_traits(input);
         let no_visit = no_visit(input);
         let rest: TokenStream = input.parse()?;
         Ok(if no_visit {
