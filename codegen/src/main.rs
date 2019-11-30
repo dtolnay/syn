@@ -24,18 +24,8 @@ mod version;
 mod visit;
 mod visit_mut;
 
-use anyhow::Result;
-use std::process;
-
-fn main() {
+fn main() -> anyhow::Result<()> {
     color_backtrace::install();
-    if let Err(err) = do_main() {
-        let _ = eprintln!("error: {:?}", err);
-        process::exit(1);
-    }
-}
-
-fn do_main() -> Result<()> {
     let defs = parse::parse()?;
     json::generate(&defs)?;
     fold::generate(&defs)?;
