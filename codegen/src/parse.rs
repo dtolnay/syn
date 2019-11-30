@@ -1,16 +1,16 @@
 use crate::version;
-use anyhow::Result;
-
+use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use quote::quote;
 use syn::parse::Parser;
 use syn::{parse_quote, Data, DataStruct, DeriveInput, Ident, Item};
 use syn_codegen as types;
+use thiserror::Error;
 
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 const SYN_CRATE_ROOT: &str = "../src/lib.rs";
 const TOKEN_SRC: &str = "../src/token.rs";
@@ -507,7 +507,30 @@ fn get_features(attrs: &[syn::Attribute], base: &[syn::Attribute]) -> Vec<syn::A
     ret
 }
 
+#[derive(Error, Debug)]
+#[error("{path}: {error}")]
+struct LoadFileError {
+    path: PathBuf,
+    error: syn::Error,
+}
+
 fn load_file<P: AsRef<Path>>(
+    name: P,
+    features: &[syn::Attribute],
+    lookup: &mut ItemLookup,
+) -> Result<()> {
+    let error = match do_load_file(&name, features, lookup).err() {
+        None => return Ok(()),
+        Some(error) => error,
+    };
+
+    bail!(LoadFileError {
+        path: name.as_ref().to_owned(),
+        error: error.downcast()?,
+    })
+}
+
+fn do_load_file<P: AsRef<Path>>(
     name: P,
     features: &[syn::Attribute],
     lookup: &mut ItemLookup,
