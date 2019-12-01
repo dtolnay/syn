@@ -1045,7 +1045,7 @@ impl Hash for Index {
 ast_struct! {
     #[derive(Default)]
     pub struct Reserved {
-        private: (),
+        _private: (),
     }
 }
 
