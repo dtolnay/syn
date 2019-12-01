@@ -3,6 +3,10 @@ use crate::punctuated::Punctuated;
 #[cfg(feature = "extra-traits")]
 use crate::tt::TokenStreamHelper;
 use proc_macro2::{Span, TokenStream};
+#[cfg(feature = "printing")]
+use quote::IdentFragment;
+#[cfg(feature = "printing")]
+use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 #[cfg(all(feature = "parsing", feature = "full"))]
 use std::mem;
@@ -1006,6 +1010,23 @@ ast_enum! {
     }
 }
 
+#[cfg(feature = "printing")]
+impl IdentFragment for Member {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Member::Named(m) => Display::fmt(m, formatter),
+            Member::Unnamed(m) => Display::fmt(&m.index, formatter),
+        }
+    }
+
+    fn span(&self) -> Option<Span> {
+        match self {
+            Member::Named(m) => Some(m.span()),
+            Member::Unnamed(m) => Some(m.span),
+        }
+    }
+}
+
 ast_struct! {
     /// The index of an unnamed tuple struct field.
     ///
@@ -1038,6 +1059,17 @@ impl PartialEq for Index {
 impl Hash for Index {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.index.hash(state);
+    }
+}
+
+#[cfg(feature = "printing")]
+impl IdentFragment for Index {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        Display::fmt(&self.index, formatter)
+    }
+
+    fn span(&self) -> Option<Span> {
+        Some(self.span)
     }
 }
 
