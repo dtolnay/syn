@@ -7,7 +7,7 @@ use proc_macro2::TokenStream;
 use crate::tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(all(feature = "parsing", feature = "full"))]
+#[cfg(feature = "parsing")]
 use std::mem;
 
 ast_enum_of_structs! {
@@ -438,7 +438,7 @@ impl Hash for Item {
 }
 
 impl Item {
-    #[cfg(all(feature = "parsing", feature = "full"))]
+    #[cfg(feature = "parsing")]
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match self {
             Item::ExternCrate(ItemExternCrate { attrs, .. })
