@@ -578,7 +578,7 @@ fn do_load_file<P: AsRef<Path>>(
                 };
 
                 // Look up the submodule file, and recursively parse it.
-                // XXX: Only handles same-directory .rs file submodules.
+                // Only handles same-directory .rs file submodules for now.
                 let path = parent.join(&format!("{}.rs", item.ident));
                 load_file(path, &features, lookup)?;
             }
