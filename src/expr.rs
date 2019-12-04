@@ -2428,6 +2428,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     impl Parse for FieldValue {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
             let member: Member = input.parse()?;
             let (colon_token, value) = if input.peek(Token![:]) || !member.is_named() {
                 let colon_token: Token![:] = input.parse()?;
@@ -2445,7 +2446,7 @@ pub(crate) mod parsing {
             };
 
             Ok(FieldValue {
-                attrs: Vec::new(),
+                attrs,
                 member,
                 colon_token,
                 expr: value,
@@ -2462,24 +2463,22 @@ pub(crate) mod parsing {
         let content;
         let brace_token = braced!(content in input);
         let inner_attrs = content.call(Attribute::parse_inner)?;
+        let attrs = private::attrs(outer_attrs, inner_attrs);
 
         let mut fields = Punctuated::new();
-        loop {
-            let attrs = content.call(Attribute::parse_outer)?;
-            // TODO: optimize using advance_to
-            if content.fork().parse::<Member>().is_err() {
-                if attrs.is_empty() {
-                    break;
-                } else {
-                    return Err(content.error("expected struct field"));
-                }
+        while !content.is_empty() {
+            if content.peek(Token![..]) {
+                return Ok(ExprStruct {
+                    attrs,
+                    brace_token,
+                    path,
+                    fields,
+                    dot2_token: Some(content.parse()?),
+                    rest: Some(Box::new(content.parse()?)),
+                });
             }
 
-            fields.push(FieldValue {
-                attrs,
-                ..content.parse()?
-            });
-
+            fields.push(content.parse()?);
             if !content.peek(Token![,]) {
                 break;
             }
@@ -2487,21 +2486,13 @@ pub(crate) mod parsing {
             fields.push_punct(punct);
         }
 
-        let (dot2_token, rest) = if fields.empty_or_trailing() && content.peek(Token![..]) {
-            let dot2_token: Token![..] = content.parse()?;
-            let rest: Expr = content.parse()?;
-            (Some(dot2_token), Some(Box::new(rest)))
-        } else {
-            (None, None)
-        };
-
         Ok(ExprStruct {
-            attrs: private::attrs(outer_attrs, inner_attrs),
+            attrs,
             brace_token,
             path,
             fields,
-            dot2_token,
-            rest,
+            dot2_token: None,
+            rest: None,
         })
     }
 
