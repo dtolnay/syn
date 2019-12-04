@@ -7,6 +7,8 @@ use proc_macro2::TokenStream;
 use crate::tt::TokenStreamHelper;
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
+#[cfg(all(feature = "parsing", feature = "full"))]
+use std::mem;
 
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module or scope.
@@ -430,6 +432,32 @@ impl Hash for Item {
                 state.write_u8(16);
                 TokenStreamHelper(item).hash(state);
             }
+            Item::__Nonexhaustive => unreachable!(),
+        }
+    }
+}
+
+impl Item {
+    #[cfg(all(feature = "parsing", feature = "full"))]
+    pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
+        match self {
+            Item::ExternCrate(ItemExternCrate { attrs, .. })
+            | Item::Use(ItemUse { attrs, .. })
+            | Item::Static(ItemStatic { attrs, .. })
+            | Item::Const(ItemConst { attrs, .. })
+            | Item::Fn(ItemFn { attrs, .. })
+            | Item::Mod(ItemMod { attrs, .. })
+            | Item::ForeignMod(ItemForeignMod { attrs, .. })
+            | Item::Type(ItemType { attrs, .. })
+            | Item::Struct(ItemStruct { attrs, .. })
+            | Item::Enum(ItemEnum { attrs, .. })
+            | Item::Union(ItemUnion { attrs, .. })
+            | Item::Trait(ItemTrait { attrs, .. })
+            | Item::TraitAlias(ItemTraitAlias { attrs, .. })
+            | Item::Impl(ItemImpl { attrs, .. })
+            | Item::Macro(ItemMacro { attrs, .. })
+            | Item::Macro2(ItemMacro2 { attrs, .. }) => mem::replace(attrs, new),
+            Item::Verbatim(_) => Vec::new(),
             Item::__Nonexhaustive => unreachable!(),
         }
     }
@@ -1234,31 +1262,8 @@ pub mod parsing {
                 Err(lookahead.error())
             }?;
 
-            {
-                let item_attrs = match &mut item {
-                    Item::ExternCrate(item) => &mut item.attrs,
-                    Item::Use(item) => &mut item.attrs,
-                    Item::Static(item) => &mut item.attrs,
-                    Item::Const(item) => &mut item.attrs,
-                    Item::Fn(item) => &mut item.attrs,
-                    Item::Mod(item) => &mut item.attrs,
-                    Item::ForeignMod(item) => &mut item.attrs,
-                    Item::Type(item) => &mut item.attrs,
-                    Item::Struct(item) => &mut item.attrs,
-                    Item::Enum(item) => &mut item.attrs,
-                    Item::Union(item) => &mut item.attrs,
-                    Item::Trait(item) => &mut item.attrs,
-                    Item::TraitAlias(item) => &mut item.attrs,
-                    Item::Impl(item) => &mut item.attrs,
-                    Item::Macro(item) => &mut item.attrs,
-                    Item::Macro2(item) => &mut item.attrs,
-                    Item::Verbatim(_) => return Ok(item),
-                    Item::__Nonexhaustive => unreachable!(),
-                };
-                attrs.extend(item_attrs.drain(..));
-                *item_attrs = attrs;
-            }
-
+            attrs.extend(item.replace_attrs(Vec::new()));
+            item.replace_attrs(attrs);
             Ok(item)
         }
     }
