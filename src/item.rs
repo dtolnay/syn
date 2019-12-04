@@ -2317,21 +2317,14 @@ pub mod parsing {
                 Generics::default()
             };
 
-            let trait_ = {
-                // TODO: optimize using advance_to
+            let trait_ = (|| -> Option<_> {
                 let ahead = input.fork();
-                if ahead.parse::<Option<Token![!]>>().is_ok()
-                    && ahead.parse::<Path>().is_ok()
-                    && ahead.parse::<Token![for]>().is_ok()
-                {
-                    let polarity: Option<Token![!]> = input.parse()?;
-                    let path: Path = input.parse()?;
-                    let for_token: Token![for] = input.parse()?;
-                    Some((polarity, path, for_token))
-                } else {
-                    None
-                }
-            };
+                let polarity: Option<Token![!]> = ahead.parse().ok()?;
+                let path: Path = ahead.parse().ok()?;
+                let for_token: Token![for] = ahead.parse().ok()?;
+                input.advance_to(&ahead);
+                Some((polarity, path, for_token))
+            })();
             let self_ty: Type = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
 
