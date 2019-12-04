@@ -347,7 +347,6 @@ impl<'a> Cursor<'a> {
     ///
     /// This method treats `'lifetimes` as a single token.
     pub(crate) fn skip(self) -> Option<Cursor<'a>> {
-        // XXX: Should `skip` enter none-delimited groups?
         match self.entry() {
             Entry::End(..) => None,
 
