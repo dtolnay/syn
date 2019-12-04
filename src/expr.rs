@@ -1210,6 +1210,7 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 pub(crate) mod parsing {
     use super::*;
 
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
@@ -1465,16 +1466,15 @@ pub(crate) mod parsing {
     // box <trailer>
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        // TODO: optimize using advance_to
         let ahead = input.fork();
-        ahead.call(Attribute::parse_outer)?;
+        let attrs = ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![&])
             || ahead.peek(Token![box])
             || ahead.peek(Token![*])
             || ahead.peek(Token![!])
             || ahead.peek(Token![-])
         {
-            let attrs = input.call(Attribute::parse_outer)?;
+            input.advance_to(&ahead);
             if input.peek(Token![&]) {
                 Ok(Expr::Reference(ExprReference {
                     attrs,
@@ -1503,12 +1503,12 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        // TODO: optimize using advance_to
         let ahead = input.fork();
-        ahead.call(Attribute::parse_outer)?;
+        let attrs = ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![*]) || ahead.peek(Token![!]) || ahead.peek(Token![-]) {
+            input.advance_to(&ahead);
             Ok(Expr::Unary(ExprUnary {
-                attrs: input.call(Attribute::parse_outer)?,
+                attrs,
                 op: input.parse()?,
                 expr: Box::new(unary_expr(input, allow_struct)?),
             }))
