@@ -15,13 +15,13 @@ use syntax::ast::{
     ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs, GenericBound,
     GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplItem, ImplItemKind,
     ImplPolarity, InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label,
-    Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local, Mac, MacDelimiter, MacStmtStyle,
-    MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind,
-    Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind,
-    StrLit, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind, TraitObjectSyntax,
-    TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, Variant,
-    VariantData, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate,
-    WherePredicate, WhereRegionPredicate,
+    Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local, Mac, MacArgs, MacDelimiter,
+    MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs,
+    Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
+    StmtKind, StrLit, StrStyle, StructField, TraitBoundModifier, TraitItem, TraitItemKind,
+    TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, UnsafeSource, Unsafety, UseTree,
+    UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
+    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use syntax::ptr::P;
 use syntax::source_map::Spanned;
@@ -265,7 +265,7 @@ spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
-spanless_eq_struct!(AttrItem; path tokens);
+spanless_eq_struct!(AttrItem; path args);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span);
@@ -290,8 +290,8 @@ spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token kind span);
 spanless_eq_struct!(Local; pat ty init id span attrs);
-spanless_eq_struct!(Mac; path delim tts span prior_type_ascription);
-spanless_eq_struct!(MacroDef; tokens legacy);
+spanless_eq_struct!(Mac; path args prior_type_ascription);
+spanless_eq_struct!(MacroDef; body legacy);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
@@ -341,6 +341,7 @@ spanless_eq_enum!(IsAsync; Async(closure_id return_impl_trait_id) NotAsync);
 spanless_eq_enum!(IsAuto; Yes No);
 spanless_eq_enum!(LitFloatType; Suffixed(0) Unsuffixed);
 spanless_eq_enum!(LitIntType; Signed(0) Unsigned(0) Unsuffixed);
+spanless_eq_enum!(MacArgs; Empty Delimited(0 1 2) Eq(0 1));
 spanless_eq_enum!(MacDelimiter; Parenthesis Bracket Brace);
 spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
 spanless_eq_enum!(Movability; Static Movable);
