@@ -374,20 +374,6 @@ pub(crate) fn advance_step_cursor<'c, 'a>(proof: StepCursor<'c, 'a>, to: Cursor<
     unsafe { mem::transmute::<Cursor<'c>, Cursor<'a>>(to) }
 }
 
-fn skip(input: ParseStream) -> bool {
-    input
-        .step(|cursor| {
-            if let Some((_lifetime, rest)) = cursor.lifetime() {
-                Ok((true, rest))
-            } else if let Some((_token, rest)) = cursor.token_tree() {
-                Ok((true, rest))
-            } else {
-                Ok((false, *cursor))
-            }
-        })
-        .unwrap()
-}
-
 pub(crate) fn new_parse_buffer(
     scope: Span,
     cursor: Cursor,
@@ -598,14 +584,17 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
-        let ahead = self.fork();
-        skip(&ahead) && ahead.peek(token)
+        let _ = token;
+        self.cursor().skip().map_or(false, T::Token::peek)
     }
 
     /// Looks at the third-next token in the parse stream.
     pub fn peek3<T: Peek>(&self, token: T) -> bool {
-        let ahead = self.fork();
-        skip(&ahead) && skip(&ahead) && ahead.peek(token)
+        let _ = token;
+        self.cursor()
+            .skip()
+            .and_then(|c| c.skip())
+            .map_or(false, T::Token::peek)
     }
 
     /// Parses zero or more occurrences of `T` separated by punctuation of type

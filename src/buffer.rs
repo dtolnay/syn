@@ -341,6 +341,27 @@ impl<'a> Cursor<'a> {
             Entry::End(..) => Span::call_site(),
         }
     }
+
+    /// Skip over the next token without cloning it. Returns `None` if this
+    /// cursor points to eof.
+    ///
+    /// This method treats `'lifetimes` as a single token.
+    pub(crate) fn skip(self) -> Option<Cursor<'a>> {
+        // XXX: Should `skip` enter none-delimited groups?
+        match self.entry() {
+            Entry::End(..) => None,
+
+            // Treat lifetimes as a single tt for the purposes of 'skip'.
+            Entry::Punct(op) if op.as_char() == '\'' && op.spacing() == Spacing::Joint => {
+                let next = unsafe { self.bump() };
+                match next.entry() {
+                    Entry::Ident(_) => Some(unsafe { next.bump() }),
+                    _ => Some(next),
+                }
+            }
+            _ => Some(unsafe { self.bump() }),
+        }
+    }
 }
 
 pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
