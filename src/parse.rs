@@ -593,7 +593,7 @@ impl<'a> ParseBuffer<'a> {
         let _ = token;
         self.cursor()
             .skip()
-            .and_then(|c| c.skip())
+            .and_then(Cursor::skip)
             .map_or(false, T::Token::peek)
     }
 
