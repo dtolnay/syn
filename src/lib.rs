@@ -421,8 +421,10 @@ pub use crate::path::{
 };
 
 #[cfg(feature = "parsing")]
+#[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod buffer;
 #[cfg(feature = "parsing")]
+#[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod ext;
 pub mod punctuated;
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "extra-traits"))]
@@ -443,6 +445,10 @@ pub mod parse_quote;
 pub mod parse_macro_input;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(any(feature = "parsing", features = "printing")))
+)]
 pub mod spanned;
 
 mod gen {
@@ -563,6 +569,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "visit")))]
     #[rustfmt::skip]
     pub mod visit;
 
@@ -659,6 +666,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit-mut")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "visit-mut")))]
     #[rustfmt::skip]
     pub mod visit_mut;
 
@@ -745,6 +753,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "fold")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "fold")))]
     #[rustfmt::skip]
     pub mod fold;
 
@@ -766,6 +775,7 @@ mod sealed;
 mod lookahead;
 
 #[cfg(feature = "parsing")]
+#[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod parse;
 
 mod span;

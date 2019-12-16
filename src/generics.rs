@@ -7,6 +7,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[derive(Default)]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
@@ -31,6 +35,10 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum GenericParam {
         /// A generic type parameter: `T: Into<String>`.
         Type(TypeParam),
@@ -48,6 +56,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct TypeParam {
         pub attrs: Vec<Attribute>,
         pub ident: Ident,
@@ -63,6 +75,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LifetimeDef {
         pub attrs: Vec<Attribute>,
         pub lifetime: Lifetime,
@@ -76,6 +92,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ConstParam {
         pub attrs: Vec<Attribute>,
         pub const_token: Token![const],
@@ -282,6 +302,10 @@ impl<'a> Iterator for ConstParamsMut<'a> {
 ///
 /// *This type is available if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(all(any(feature = "derive", feature = "full"), feature = "printing")))
+)]
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -291,6 +315,10 @@ pub struct ImplGenerics<'a>(&'a Generics);
 ///
 /// *This type is available if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(all(any(feature = "derive", feature = "full"), feature = "printing")))
+)]
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -300,6 +328,10 @@ pub struct TypeGenerics<'a>(&'a Generics);
 ///
 /// *This type is available if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(all(any(feature = "derive", feature = "full"), feature = "printing")))
+)]
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
 #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -353,6 +385,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[derive(Default)]
     pub struct BoundLifetimes {
         pub for_token: Token![for],
@@ -391,6 +427,10 @@ ast_enum_of_structs! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum TypeParamBound {
         Trait(TraitBound),
         Lifetime(Lifetime),
@@ -402,6 +442,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct TraitBound {
         pub paren_token: Option<token::Paren>,
         pub modifier: TraitBoundModifier,
@@ -418,6 +462,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
@@ -431,6 +479,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct WhereClause {
         pub where_token: Token![where],
         pub predicates: Punctuated<WherePredicate, Token![,]>,
@@ -451,6 +503,10 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum WherePredicate {
         /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
         Type(PredicateType),
@@ -468,6 +524,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct PredicateType {
         /// Any lifetimes from a `for` binding
         pub lifetimes: Option<BoundLifetimes>,
@@ -484,6 +544,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct PredicateLifetime {
         pub lifetime: Lifetime,
         pub colon_token: Token![:],
@@ -496,6 +560,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct PredicateEq {
         pub lhs_ty: Type,
         pub eq_token: Token![=],

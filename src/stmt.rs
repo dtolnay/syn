@@ -4,6 +4,7 @@ ast_struct! {
     /// A braced block containing Rust statements.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct Block {
         pub brace_token: token::Brace,
         /// Statements in a block
@@ -15,6 +16,7 @@ ast_enum! {
     /// A statement, usually ending in a semicolon.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub enum Stmt {
         /// A local (let) binding.
         Local(Local),
@@ -34,6 +36,7 @@ ast_struct! {
     /// A local `let` binding: `let x: u64 = s.parse()?`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],

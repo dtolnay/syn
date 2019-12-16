@@ -6,6 +6,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct Path {
         pub leading_colon: Option<Token![::]>,
         pub segments: Punctuated<PathSegment, Token![::]>,
@@ -31,6 +35,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct PathSegment {
         pub ident: Ident,
         pub arguments: PathArguments,
@@ -62,6 +70,10 @@ ast_enum! {
     /// ## Parenthesized
     ///
     /// The `(A, B) -> C` in `Fn(A, B) -> C`.
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum PathArguments {
         None,
         /// The `<'a, T>` in `std::slice::iter<'a, T>`.
@@ -100,6 +112,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum GenericArgument {
         /// A lifetime argument.
         Lifetime(Lifetime),
@@ -124,6 +140,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct AngleBracketedGenericArguments {
         pub colon2_token: Option<Token![::]>,
         pub lt_token: Token![<],
@@ -137,6 +157,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct Binding {
         pub ident: Ident,
         pub eq_token: Token![=],
@@ -149,6 +173,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct Constraint {
         pub ident: Ident,
         pub colon_token: Token![:],
@@ -162,6 +190,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
         /// `(A, B)`
@@ -191,6 +223,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct QSelf {
         pub lt_token: Token![<],
         pub ty: Box<Type>,

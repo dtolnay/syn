@@ -148,6 +148,10 @@ ast_struct! {
     /// };
     /// assert_eq!(doc, attr);
     /// ```
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
         pub style: AttrStyle,
@@ -349,6 +353,10 @@ ast_enum! {
     /// - `#![feature(proc_macro)]`
     /// - `//! # Example`
     /// - `/*! Please file an issue */`
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum AttrStyle {
         Outer,
@@ -383,6 +391,10 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum Meta {
         Path(Path),
 
@@ -399,6 +411,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct MetaList {
         pub path: Path,
         pub paren_token: token::Paren,
@@ -411,6 +427,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct MetaNameValue {
         pub path: Path,
         pub eq_token: Token![=],
@@ -437,6 +457,10 @@ ast_enum_of_structs! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
         /// would be a nested `Meta::Path`.
@@ -482,6 +506,10 @@ ast_enum_of_structs! {
 /// #   "".parse().unwrap()
 /// }
 /// ```
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(any(feature = "derive", feature = "full")))
+)]
 pub type AttributeArgs = Vec<NestedMeta>;
 
 pub trait FilterAttrs<'a> {

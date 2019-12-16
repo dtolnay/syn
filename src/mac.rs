@@ -16,6 +16,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct Macro #manual_extra_traits {
         pub path: Path,
         pub bang_token: Token![!],
@@ -29,6 +33,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum MacroDelimiter {
         Paren(Paren),
         Brace(Brace),

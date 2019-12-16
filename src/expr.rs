@@ -86,6 +86,10 @@ ast_enum_of_structs! {
     /// A sign that you may not be choosing the right variable names is if you
     /// see names getting repeated in your code, like accessing
     /// `receiver.receiver` or `pat.pat` or `cond.cond`.
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum Expr #manual_extra_traits {
         /// A slice literal expression: `[a, b, c, d]`.
         Array(ExprArray),
@@ -232,6 +236,7 @@ ast_struct! {
     /// A slice literal expression: `[a, b, c, d]`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprArray #full {
         pub attrs: Vec<Attribute>,
         pub bracket_token: token::Bracket,
@@ -243,6 +248,7 @@ ast_struct! {
     /// An assignment expression: `a = compute()`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprAssign #full {
         pub attrs: Vec<Attribute>,
         pub left: Box<Expr>,
@@ -255,6 +261,7 @@ ast_struct! {
     /// A compound assignment expression: `counter += 1`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprAssignOp #full {
         pub attrs: Vec<Attribute>,
         pub left: Box<Expr>,
@@ -267,6 +274,7 @@ ast_struct! {
     /// An async block: `async { ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprAsync #full {
         pub attrs: Vec<Attribute>,
         pub async_token: Token![async],
@@ -279,6 +287,7 @@ ast_struct! {
     /// An await expression: `fut.await`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprAwait #full {
         pub attrs: Vec<Attribute>,
         pub base: Box<Expr>,
@@ -292,6 +301,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprBinary {
         pub attrs: Vec<Attribute>,
         pub left: Box<Expr>,
@@ -304,6 +317,7 @@ ast_struct! {
     /// A blocked scope: `{ ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprBlock #full {
         pub attrs: Vec<Attribute>,
         pub label: Option<Label>,
@@ -315,6 +329,7 @@ ast_struct! {
     /// A box expression: `box f`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprBox #full {
         pub attrs: Vec<Attribute>,
         pub box_token: Token![box],
@@ -327,6 +342,7 @@ ast_struct! {
     /// expression.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprBreak #full {
         pub attrs: Vec<Attribute>,
         pub break_token: Token![break],
@@ -340,6 +356,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprCall {
         pub attrs: Vec<Attribute>,
         pub func: Box<Expr>,
@@ -353,6 +373,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprCast {
         pub attrs: Vec<Attribute>,
         pub expr: Box<Expr>,
@@ -365,6 +389,7 @@ ast_struct! {
     /// A closure expression: `|a, b| a + b`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprClosure #full {
         pub attrs: Vec<Attribute>,
         pub asyncness: Option<Token![async]>,
@@ -382,6 +407,7 @@ ast_struct! {
     /// A `continue`, with an optional label.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprContinue #full {
         pub attrs: Vec<Attribute>,
         pub continue_token: Token![continue],
@@ -394,6 +420,7 @@ ast_struct! {
     /// field (`obj.0`).
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprField {
         pub attrs: Vec<Attribute>,
         pub base: Box<Expr>,
@@ -406,6 +433,7 @@ ast_struct! {
     /// A for loop: `for pat in expr { ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprForLoop #full {
         pub attrs: Vec<Attribute>,
         pub label: Option<Label>,
@@ -425,6 +453,7 @@ ast_struct! {
     /// `TokenStream`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprGroup #full {
         pub attrs: Vec<Attribute>,
         pub group_token: token::Group,
@@ -440,6 +469,7 @@ ast_struct! {
     /// expression, not any of the other types of expression.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprIf #full {
         pub attrs: Vec<Attribute>,
         pub if_token: Token![if],
@@ -454,6 +484,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprIndex {
         pub attrs: Vec<Attribute>,
         pub expr: Box<Expr>,
@@ -466,6 +500,7 @@ ast_struct! {
     /// A `let` guard: `let Some(x) = opt`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprLet #full {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
@@ -480,6 +515,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprLit {
         pub attrs: Vec<Attribute>,
         pub lit: Lit,
@@ -490,6 +529,7 @@ ast_struct! {
     /// Conditionless loop: `loop { ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprLoop #full {
         pub attrs: Vec<Attribute>,
         pub label: Option<Label>,
@@ -502,6 +542,7 @@ ast_struct! {
     /// A macro invocation expression: `format!("{}", q)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprMacro #full {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,
@@ -512,6 +553,7 @@ ast_struct! {
     /// A `match` expression: `match n { Some(n) => {}, None => {} }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprMatch #full {
         pub attrs: Vec<Attribute>,
         pub match_token: Token![match],
@@ -525,6 +567,7 @@ ast_struct! {
     /// A method call expression: `x.foo::<T>(a, b)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprMethodCall #full {
         pub attrs: Vec<Attribute>,
         pub receiver: Box<Expr>,
@@ -540,6 +583,7 @@ ast_struct! {
     /// A parenthesized expression: `(a + b)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprParen {
         pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
@@ -555,6 +599,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprPath {
         pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
@@ -566,6 +614,7 @@ ast_struct! {
     /// A range expression: `1..2`, `1..`, `..2`, `1..=2`, `..=2`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprRange #full {
         pub attrs: Vec<Attribute>,
         pub from: Option<Box<Expr>>,
@@ -578,6 +627,7 @@ ast_struct! {
     /// A referencing operation: `&a` or `&mut a`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprReference #full {
         pub attrs: Vec<Attribute>,
         pub and_token: Token![&],
@@ -591,6 +641,7 @@ ast_struct! {
     /// An array literal constructed from one repeated element: `[0u8; N]`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprRepeat #full {
         pub attrs: Vec<Attribute>,
         pub bracket_token: token::Bracket,
@@ -604,6 +655,7 @@ ast_struct! {
     /// A `return`, with an optional value to be returned.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprReturn #full {
         pub attrs: Vec<Attribute>,
         pub return_token: Token![return],
@@ -618,6 +670,7 @@ ast_struct! {
     /// 1, b: 1, ..rest }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprStruct #full {
         pub attrs: Vec<Attribute>,
         pub path: Path,
@@ -632,6 +685,7 @@ ast_struct! {
     /// A try-expression: `expr?`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprTry #full {
         pub attrs: Vec<Attribute>,
         pub expr: Box<Expr>,
@@ -643,6 +697,7 @@ ast_struct! {
     /// A try block: `try { ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprTryBlock #full {
         pub attrs: Vec<Attribute>,
         pub try_token: Token![try],
@@ -654,6 +709,7 @@ ast_struct! {
     /// A tuple expression: `(a, b, c, d)`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprTuple #full {
         pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
@@ -665,6 +721,7 @@ ast_struct! {
     /// A type ascription expression: `foo: f64`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprType #full {
         pub attrs: Vec<Attribute>,
         pub expr: Box<Expr>,
@@ -678,6 +735,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct ExprUnary {
         pub attrs: Vec<Attribute>,
         pub op: UnOp,
@@ -689,6 +750,7 @@ ast_struct! {
     /// An unsafe block: `unsafe { ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprUnsafe #full {
         pub attrs: Vec<Attribute>,
         pub unsafe_token: Token![unsafe],
@@ -700,6 +762,7 @@ ast_struct! {
     /// A while loop: `while expr { ... }`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprWhile #full {
         pub attrs: Vec<Attribute>,
         pub label: Option<Label>,
@@ -713,6 +776,7 @@ ast_struct! {
     /// A yield expression: `yield expr`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprYield #full {
         pub attrs: Vec<Attribute>,
         pub yield_token: Token![yield],
@@ -1001,6 +1065,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[derive(Eq, PartialEq, Hash)]
     pub enum Member #manual_extra_traits {
         /// A named field like `self.x`.
@@ -1032,6 +1100,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct Index #manual_extra_traits {
         pub index: u32,
         pub span: Span,
@@ -1087,6 +1159,7 @@ ast_struct! {
     /// `parse::<u64>()`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct MethodTurbofish {
         pub colon2_token: Token![::],
         pub lt_token: Token![<],
@@ -1100,6 +1173,7 @@ ast_enum! {
     /// An individual generic argument to a method, like `T`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub enum GenericMethodArgument {
         /// A type argument.
         Type(Type),
@@ -1116,6 +1190,7 @@ ast_struct! {
     /// A field-value pair in a struct literal.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct FieldValue {
         /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
@@ -1137,6 +1212,7 @@ ast_struct! {
     /// A lifetime labeling a `for`, `while`, or `loop`.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct Label {
         pub name: Lifetime,
         pub colon_token: Token![:],
@@ -1164,6 +1240,7 @@ ast_struct! {
     /// ```
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct Arm {
         pub attrs: Vec<Attribute>,
         pub pat: Pat,
@@ -1179,6 +1256,7 @@ ast_enum! {
     /// Limit types of a range, inclusive or exclusive.
     ///
     /// *This type is available if Syn is built with the `"full"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum RangeLimits {
         /// Inclusive at the beginning, exclusive at the end.

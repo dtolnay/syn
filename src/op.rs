@@ -3,6 +3,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOp {
         /// The `+` operator (addition)
@@ -69,6 +73,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum UnOp {
         /// The `*` operator for dereferencing

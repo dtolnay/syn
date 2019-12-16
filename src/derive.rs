@@ -5,6 +5,7 @@ ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
     ///
     /// *This type is available if Syn is built with the `"derive"` feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DeriveInput {
         /// Attributes tagged on the whole struct or enum.
         pub attrs: Vec<Attribute>,
@@ -36,6 +37,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "derive")))]
     pub enum Data {
         /// A struct input to a `proc_macro_derive` macro.
         Struct(DataStruct),
@@ -55,6 +57,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"`
     /// feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DataStruct {
         pub struct_token: Token![struct],
         pub fields: Fields,
@@ -67,6 +70,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"`
     /// feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DataEnum {
         pub enum_token: Token![enum],
         pub brace_token: token::Brace,
@@ -79,6 +83,7 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"`
     /// feature.*
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DataUnion {
         pub union_token: Token![union],
         pub fields: FieldsNamed,

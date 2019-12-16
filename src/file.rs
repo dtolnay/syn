@@ -67,6 +67,7 @@ ast_struct! {
     ///         ),
     /// ...
     /// ```
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "full")))]
     pub struct File {
         pub shebang: Option<String>,
         pub attrs: Vec<Attribute>,

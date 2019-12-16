@@ -33,6 +33,10 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum Lit #manual_extra_traits {
         /// A UTF-8 string literal: `"foo"`.
         Str(LitStr),
@@ -67,6 +71,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitStr #manual_extra_traits_debug {
         repr: Box<LitStrRepr>,
     }
@@ -83,6 +91,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitByteStr #manual_extra_traits_debug {
         token: Literal,
     }
@@ -93,6 +105,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitByte #manual_extra_traits_debug {
         token: Literal,
     }
@@ -103,6 +119,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitChar #manual_extra_traits_debug {
         token: Literal,
     }
@@ -113,6 +133,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitInt #manual_extra_traits_debug {
         repr: Box<LitIntRepr>,
     }
@@ -132,6 +156,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitFloat #manual_extra_traits_debug {
         repr: Box<LitFloatRepr>,
     }
@@ -149,6 +177,10 @@ ast_struct! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub struct LitBool #manual_extra_traits_debug {
         pub value: bool,
         pub span: Span,
@@ -671,6 +703,10 @@ ast_enum! {
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(
+        syn_enable_doc_cfg,
+        doc(cfg(any(feature = "derive", feature = "full")))
+    )]
     pub enum StrStyle #no_visit {
         /// An ordinary string like `"data"`.
         Cooked,
