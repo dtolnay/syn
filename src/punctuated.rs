@@ -239,6 +239,7 @@ impl<T, P> Punctuated<T, P> {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_terminated(input: ParseStream) -> Result<Self>
     where
         T: Parse,
@@ -259,6 +260,7 @@ impl<T, P> Punctuated<T, P> {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_terminated_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
@@ -295,6 +297,7 @@ impl<T, P> Punctuated<T, P> {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_separated_nonempty(input: ParseStream) -> Result<Self>
     where
         T: Parse,
@@ -315,6 +318,7 @@ impl<T, P> Punctuated<T, P> {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_separated_nonempty_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,

@@ -425,6 +425,10 @@ pub mod parsing {
         ///     }
         /// }
         /// ```
+        #[cfg_attr(
+            syn_enable_doc_cfg,
+            doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
+        )]
         pub fn parse_mod_style(input: ParseStream) -> Result<Self> {
             Ok(Path {
                 leading_colon: input.parse()?,
@@ -489,6 +493,10 @@ pub mod parsing {
         ///     }
         /// }
         /// ```
+        #[cfg_attr(
+            syn_enable_doc_cfg,
+            doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
+        )]
         pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
         where
             Ident: PartialEq<I>,
@@ -510,6 +518,10 @@ pub mod parsing {
         ///
         /// *This function is available if Syn is built with the `"parsing"`
         /// feature.*
+        #[cfg_attr(
+            syn_enable_doc_cfg,
+            doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
+        )]
         pub fn get_ident(&self) -> Option<&Ident> {
             if self.leading_colon.is_none()
                 && self.segments.len() == 1

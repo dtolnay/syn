@@ -847,6 +847,10 @@ pub use crate::error::{Error, Result};
     feature = "parsing",
     feature = "proc-macro"
 ))]
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(all(feature = "parsing", feature = "proc-macro")))
+)]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
     parse::Parser::parse(T::parse, tokens)
 }
@@ -863,6 +867,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 ///
 /// *This function is available if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
+#[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
     parse::Parser::parse2(T::parse, tokens)
 }
@@ -891,6 +896,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 /// # run().unwrap();
 /// ```
 #[cfg(feature = "parsing")]
+#[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
     parse::Parser::parse_str(T::parse, s)
 }
@@ -933,6 +939,10 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// # run().unwrap();
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
+#[cfg_attr(
+    syn_enable_doc_cfg,
+    doc(cfg(all(feature = "parsing", feature = "full")))
+)]
 pub fn parse_file(mut content: &str) -> Result<File> {
     // Strip the BOM if it is present
     const BOM: &str = "\u{feff}";
