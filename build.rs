@@ -17,8 +17,6 @@ fn main() {
 
     if !compiler.nightly {
         println!("cargo:rustc-cfg=syn_disable_nightly_tests");
-    } else {
-        println!("cargo:rustc-cfg=syn_enable_doc_cfg");
     }
 }
 

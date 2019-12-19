@@ -61,6 +61,7 @@ required-features = ["full", "parsing"]
 
 [package.metadata.docs.rs]
 all-features = true
+rustdoc-args = ["--cfg", "syn_enable_doc_cfg"]
 
 [package.metadata.playground]
 all-features = true
