@@ -107,10 +107,7 @@ pub mod parsing {
         ///     }
         /// }
         /// ```
-        #[cfg_attr(
-            syn_enable_doc_cfg,
-            doc(cfg(all(feature = "full", feature = "parsing")))
-        )]
+        #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
             let mut stmts = Vec::new();
             loop {

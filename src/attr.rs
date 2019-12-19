@@ -196,10 +196,7 @@ impl Attribute {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
-    #[cfg_attr(
-        syn_enable_doc_cfg,
-        doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
-    )]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_meta(&self) -> Result<Meta> {
         fn clone_ident_segment(segment: &PathSegment) -> PathSegment {
             PathSegment {
@@ -247,10 +244,7 @@ impl Attribute {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
-    #[cfg_attr(
-        syn_enable_doc_cfg,
-        doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
-    )]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args<T: Parse>(&self) -> Result<T> {
         self.parse_args_with(T::parse)
     }
@@ -260,10 +254,7 @@ impl Attribute {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
-    #[cfg_attr(
-        syn_enable_doc_cfg,
-        doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
-    )]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         let parser = |input: ParseStream| {
             let args = enter_args(self, input)?;
@@ -277,10 +268,7 @@ impl Attribute {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
-    #[cfg_attr(
-        syn_enable_doc_cfg,
-        doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
-    )]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) {
@@ -294,10 +282,7 @@ impl Attribute {
     /// *This function is available if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
-    #[cfg_attr(
-        syn_enable_doc_cfg,
-        doc(cfg(all(any(feature = "derive", feature = "full"), feature = "parsing")))
-    )]
+    #[cfg_attr(syn_enable_doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) && input.peek2(Token![!]) {
