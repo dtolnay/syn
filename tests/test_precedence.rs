@@ -282,7 +282,9 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
 
         fn visit_block(&mut self, block: &mut P<Block>) {
             self.visit_id(&mut block.id);
-            block.stmts.flat_map_in_place(|stmt| flat_map_stmt(stmt, self));
+            block
+                .stmts
+                .flat_map_in_place(|stmt| flat_map_stmt(stmt, self));
             self.visit_span(&mut block.span);
         }
 
