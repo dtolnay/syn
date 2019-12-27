@@ -1156,6 +1156,7 @@ pub mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
+    use crate::token::Brace;
     use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
     use std::iter::{self, FromIterator};
 
@@ -2443,7 +2444,7 @@ pub mod parsing {
 
     impl Parse for ImplItemMethod {
         fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let defaultness: Option<Token![default]> = input.parse()?;
             let constness: Option<Token![const]> = input.parse()?;
@@ -2461,13 +2462,27 @@ pub mod parsing {
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
+            let block = if let Some(semi) = input.parse()? {
+                // Accept methods without a body in an impl block because
+                // rustc's *parser* does not reject them (the compilation error
+                // is emitted later than parsing) and it can be useful for macro
+                // DSLs.
+                Block {
+                    brace_token: Brace::default(),
+                    stmts: vec![Stmt::Semi(Expr::Verbatim(TokenStream::new()), semi)],
+                }
+            } else {
+                let content;
+                let brace_token = braced!(content in input);
+                attrs.extend(content.call(Attribute::parse_inner)?);
+                Block {
+                    brace_token,
+                    stmts: content.call(Block::parse_within)?,
+                }
+            };
 
             Ok(ImplItemMethod {
-                attrs: private::attrs(outer_attrs, inner_attrs),
+                attrs,
                 vis,
                 defaultness,
                 sig: Signature {
@@ -2486,7 +2501,7 @@ pub mod parsing {
                         ..generics
                     },
                 },
-                block: Block { brace_token, stmts },
+                block,
             })
         }
     }
