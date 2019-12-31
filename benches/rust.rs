@@ -30,15 +30,15 @@ mod syn_parse {
 #[cfg(not(syn_only))]
 mod libsyntax_parse {
     extern crate rustc_data_structures;
+    extern crate rustc_span;
     extern crate syntax;
-    extern crate syntax_pos;
 
     use rustc_data_structures::sync::Lrc;
+    use rustc_span::FileName;
     use syntax::edition::Edition;
     use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
     use syntax::parse::ParseSess;
     use syntax::source_map::{FilePathMapping, SourceMap};
-    use syntax_pos::FileName;
 
     pub fn bench(content: &str) -> Result<(), ()> {
         struct SilentEmitter;

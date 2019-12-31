@@ -2,21 +2,21 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
+extern crate rustc_expand;
 extern crate rustc_parse as parse;
+extern crate rustc_span;
 extern crate syntax;
-extern crate syntax_expand;
-extern crate syntax_pos;
 
 mod features;
 
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rustc_span::edition::Edition;
+use rustc_span::FileName;
 use syntax::ast;
 use syntax::errors::PResult;
 use syntax::sess::ParseSess;
 use syntax::source_map::FilePathMapping;
-use syntax_pos::edition::Edition;
-use syntax_pos::FileName;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;

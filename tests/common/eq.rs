@@ -1,12 +1,13 @@
 extern crate rustc_data_structures;
+extern crate rustc_span;
 extern crate rustc_target;
 extern crate syntax;
-extern crate syntax_pos;
 
 use std::mem;
 
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
+use rustc_span::{Span, SyntaxContext, DUMMY_SP};
 use syntax::ast::{
     AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocItem, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind,
@@ -28,7 +29,6 @@ use syntax::symbol::{sym, Symbol};
 use syntax::token::{self, DelimToken, Token, TokenKind};
 use syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use syntax::util::comments;
-use syntax_pos::{Span, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;

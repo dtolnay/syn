@@ -1,13 +1,13 @@
+extern crate rustc_expand;
 extern crate rustc_parse as parse;
+extern crate rustc_span;
 extern crate syntax;
-extern crate syntax_expand;
-extern crate syntax_pos;
 
+use rustc_span::FileName;
 use syntax::ast;
 use syntax::ptr::P;
 use syntax::sess::ParseSess;
 use syntax::source_map::FilePathMapping;
-use syntax_pos::FileName;
 
 use std::panic;
 

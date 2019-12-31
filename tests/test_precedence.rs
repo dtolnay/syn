@@ -15,17 +15,17 @@
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
 extern crate rustc_data_structures;
+extern crate rustc_span;
 extern crate syntax;
-extern crate syntax_pos;
 
 mod features;
 
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
+use rustc_span::edition::Edition;
 use syntax::ast;
 use syntax::ptr::P;
-use syntax_pos::edition::Edition;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
@@ -209,11 +209,11 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_data_structures::thin_vec::ThinVec;
+    use rustc_span::DUMMY_SP;
     use std::mem;
     use syntax::ast::{Block, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::mut_visit::MutVisitor;
     use syntax::util::map_in_place::MapInPlace;
-    use syntax_pos::DUMMY_SP;
 
     struct BracketsVisitor {
         failed: bool,
