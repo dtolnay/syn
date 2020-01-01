@@ -1483,7 +1483,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(FnArg::parse)?;
+            let inputs = parse_fn_args(&content)?;
             let variadic = inputs.last().as_ref().and_then(get_variadic);
 
             fn get_variadic(input: &&FnArg) -> Option<Variadic> {
@@ -1566,6 +1566,33 @@ pub mod parsing {
                 self_token: input.parse()?,
             })
         }
+    }
+
+    fn parse_fn_args(input: ParseStream) -> Result<Punctuated<FnArg, Token![,]>> {
+        let mut args = Punctuated::new();
+        let mut has_receiver = false;
+        loop {
+            if input.is_empty() {
+                break;
+            }
+            let arg: FnArg = input.parse()?;
+            if let FnArg::Receiver(receiver) = &arg {
+                if has_receiver {
+                    return Err(Error::new(
+                        receiver.self_token.span,
+                        "unexpected second method receiver",
+                    ));
+                }
+                has_receiver = true;
+            }
+            args.push_value(arg);
+            if input.is_empty() {
+                break;
+            }
+            let comma: Token![,] = input.parse()?;
+            args.push_punct(comma);
+        }
+        Ok(args)
     }
 
     fn fn_arg_typed(input: ParseStream) -> Result<PatType> {
@@ -2196,7 +2223,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(FnArg::parse)?;
+            let inputs = parse_fn_args(&content)?;
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
@@ -2457,7 +2484,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(FnArg::parse)?;
+            let inputs = parse_fn_args(&content)?;
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
