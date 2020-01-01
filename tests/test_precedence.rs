@@ -375,7 +375,10 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
     struct CollectExprs(Vec<Expr>);
     impl Fold for CollectExprs {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
-            self.0.push(expr);
+            match expr {
+                Expr::Verbatim(tokens) if tokens.is_empty() => {}
+                _ => self.0.push(expr),
+            }
 
             Expr::Tuple(ExprTuple {
                 attrs: vec![],
