@@ -50,6 +50,7 @@ pub mod parsing {
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::punctuated::Punctuated;
+    use proc_macro2::TokenStream;
 
     impl Block {
         /// Parse the body of a block as zero or more statements, possibly
@@ -107,8 +108,8 @@ pub mod parsing {
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
             let mut stmts = Vec::new();
             loop {
-                while input.peek(Token![;]) {
-                    input.parse::<Token![;]>()?;
+                while let Some(semi) = input.parse::<Option<Token![;]>>()? {
+                    stmts.push(Stmt::Semi(Expr::Verbatim(TokenStream::new()), semi));
                 }
                 if input.is_empty() {
                     break;
