@@ -1,11 +1,4 @@
-sudo: false
 language: rust
-
-rust:
-  - nightly
-  - stable
-  - beta
-  - 1.31.0
 
 before_script:
   - set -o errexit
@@ -37,6 +30,10 @@ matrix:
         - rustup component add rustc-dev
       script:
         - cargo test --all-features --release
+    - rust: nightly
+    - rust: stable
+    - rust: beta
+    - rust: 1.31.0
     - rust: nightly
       name: Examples
       script:
