@@ -1,3 +1,6 @@
+mod progress;
+
+use self::progress::Progress;
 use anyhow::Result;
 use flate2::read::GzDecoder;
 use std::fs;
@@ -75,7 +78,8 @@ fn download_and_unpack() -> Result<()> {
         REVISION
     );
     let response = reqwest::blocking::get(&url)?.error_for_status()?;
-    let decoder = GzDecoder::new(response);
+    let progress = Progress::new(response);
+    let decoder = GzDecoder::new(progress);
     let mut archive = Archive::new(decoder);
     let prefix = format!("rust-{}", REVISION);
 
