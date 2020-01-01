@@ -856,7 +856,7 @@ pub mod parsing {
     }
 
     pub fn punct<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
-        let mut spans = [input.cursor().span(); 3];
+        let mut spans = [input.span(); 3];
         punct_helper(input, token, &mut spans)?;
         Ok(S::from_spans(&spans))
     }
