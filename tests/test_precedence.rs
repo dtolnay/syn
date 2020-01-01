@@ -97,16 +97,12 @@ fn test_rustc_precedence() {
     // 2018 edition is hard
     let edition_regex = Regex::new(r"\b(async|try)[!(]").unwrap();
 
-    let test_cases = WalkDir::new("tests/rust")
+    WalkDir::new("tests/rust")
         .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
         .filter_entry(repo::base_dir_filter)
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
-        .unwrap();
-    if common::travis_ci() {
-        errorf!("{} total test cases\n", test_cases.len());
-    }
-    test_cases
+        .unwrap()
         .into_par_iter()
         .for_each(|entry| {
             let path = entry.path();

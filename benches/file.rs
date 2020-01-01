@@ -1,7 +1,6 @@
 // $ cargo bench --features full --bench file
 
 #![feature(rustc_private, test)]
-#![recursion_limit = "1024"]
 
 extern crate test;
 
@@ -9,8 +8,6 @@ extern crate test;
 #[path = "../tests/macros/mod.rs"]
 mod macros;
 
-#[path = "../tests/common/mod.rs"]
-mod common;
 #[path = "../tests/repo/mod.rs"]
 pub mod repo;
 

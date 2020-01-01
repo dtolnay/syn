@@ -1,7 +1,6 @@
 mod progress;
 
 use self::progress::Progress;
-use crate::common;
 use anyhow::Result;
 use flate2::read::GzDecoder;
 use std::fs;
@@ -95,17 +94,11 @@ fn download_and_unpack() -> Result<()> {
         if path == Path::new("pax_global_header") {
             continue;
         }
-        let relative = path.strip_prefix(&prefix)?.to_owned();
-        let out = tests_rust.join(&relative);
+        let relative = path.strip_prefix(&prefix)?;
+        let out = tests_rust.join(relative);
         entry.unpack(&out)?;
-        if common::travis_ci() {
-            errorf!("unpacked {}\n", relative.display());
-        }
     }
 
     fs::write("tests/rust/COMMIT", REVISION)?;
-    if common::travis_ci() {
-        errorf!("finished unpacking {}.tar.gz\n", REVISION);
-    }
     Ok(())
 }

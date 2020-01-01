@@ -4,14 +4,11 @@
 // $ RUSTFLAGS='--cfg syn_only' cargo build --release --features full --bench rust
 
 #![cfg_attr(not(syn_only), feature(rustc_private))]
-#![recursion_limit = "1024"]
 
 #[macro_use]
 #[path = "../tests/macros/mod.rs"]
 mod macros;
 
-#[path = "../tests/common/mod.rs"]
-mod common;
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
