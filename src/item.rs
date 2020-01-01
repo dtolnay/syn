@@ -2938,6 +2938,14 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.defaultness.to_tokens(tokens);
             self.sig.to_tokens(tokens);
+            if self.block.stmts.len() == 1 {
+                if let Stmt::Item(Item::Verbatim(verbatim)) = &self.block.stmts[0] {
+                    if verbatim.to_string() == ";" {
+                        verbatim.to_tokens(tokens);
+                        return;
+                    }
+                }
+            }
             self.block.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.attrs.inner());
                 tokens.append_all(&self.block.stmts);
