@@ -30,21 +30,25 @@ mod syn_parse {
 #[cfg(not(syn_only))]
 mod libsyntax_parse {
     extern crate rustc_data_structures;
+    extern crate rustc_parse;
     extern crate rustc_span;
     extern crate syntax;
 
     use rustc_data_structures::sync::Lrc;
     use rustc_span::FileName;
     use syntax::edition::Edition;
-    use syntax::errors::{emitter::Emitter, DiagnosticBuilder, Handler};
-    use syntax::parse::ParseSess;
+    use syntax::errors::{emitter::Emitter, Diagnostic, Handler};
+    use syntax::sess::ParseSess;
     use syntax::source_map::{FilePathMapping, SourceMap};
 
     pub fn bench(content: &str) -> Result<(), ()> {
         struct SilentEmitter;
 
         impl Emitter for SilentEmitter {
-            fn emit_diagnostic(&mut self, _db: &DiagnosticBuilder) {}
+            fn emit_diagnostic(&mut self, _diag: &Diagnostic) {}
+            fn source_map(&self) -> Option<&Lrc<SourceMap>> {
+                None
+            }
         }
 
         syntax::with_globals(Edition::Edition2018, || {
@@ -52,7 +56,7 @@ mod libsyntax_parse {
             let emitter = Box::new(SilentEmitter);
             let handler = Handler::with_emitter(false, None, emitter);
             let sess = ParseSess::with_span_handler(handler, cm);
-            if let Err(mut diagnostic) = syntax::parse::parse_crate_from_source_str(
+            if let Err(mut diagnostic) = rustc_parse::parse_crate_from_source_str(
                 FileName::Custom("bench".to_owned()),
                 content.to_owned(),
                 &sess,
