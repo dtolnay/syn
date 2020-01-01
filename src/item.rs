@@ -1582,6 +1582,11 @@ pub mod parsing {
                         receiver.self_token.span,
                         "unexpected second method receiver",
                     ));
+                } else if !args.is_empty() {
+                    return Err(Error::new(
+                        receiver.self_token.span,
+                        "unexpected method receiver",
+                    ));
                 }
                 has_receiver = true;
             }
