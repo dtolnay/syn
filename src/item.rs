@@ -2462,14 +2462,17 @@ pub mod parsing {
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
 
-            let block = if let Some(semi) = input.parse()? {
+            let block = if let Some(semi) = input.parse::<Option<Token![;]>>()? {
                 // Accept methods without a body in an impl block because
                 // rustc's *parser* does not reject them (the compilation error
                 // is emitted later than parsing) and it can be useful for macro
                 // DSLs.
+                let mut punct = Punct::new(';', Spacing::Alone);
+                punct.set_span(semi.span);
+                let tokens = TokenStream::from_iter(vec![TokenTree::Punct(punct)]);
                 Block {
                     brace_token: Brace::default(),
-                    stmts: vec![Stmt::Semi(Expr::Verbatim(TokenStream::new()), semi)],
+                    stmts: vec![Stmt::Item(Item::Verbatim(tokens))],
                 }
             } else {
                 let content;
