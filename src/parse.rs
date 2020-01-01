@@ -978,6 +978,18 @@ impl<'a> ParseBuffer<'a> {
         Ok(node)
     }
 
+    /// Returns the `Span` of the next token in the parse stream, or
+    /// `Span::call_site()` if this parse stream has completely exhausted its
+    /// input `TokenStream`.
+    pub fn span(&self) -> Span {
+        let cursor = self.cursor();
+        if cursor.eof() {
+            self.scope
+        } else {
+            crate::buffer::open_span_of_group(cursor)
+        }
+    }
+
     /// Provides low-level access to the token representation underlying this
     /// parse stream.
     ///
