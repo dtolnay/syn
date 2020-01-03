@@ -56,8 +56,10 @@
 ///   or inner like `#![...]`
 /// - [`Punctuated<T, P>`] — parses zero or more `T` separated by punctuation
 ///   `P` with optional trailing punctuation
+/// - [`Vec<Stmt>`] — parses the same as `Block::parse_within`
 ///
 /// [`Punctuated<T, P>`]: punctuated::Punctuated
+/// [`Vec<Stmt>`]: Block::parse_within
 ///
 /// # Panics
 ///
@@ -112,6 +114,8 @@ impl<T: Parse> ParseQuote for T {
 use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::{attr, Attribute};
+#[cfg(feature = "full")]
+use crate::{Block, Stmt};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
@@ -127,5 +131,12 @@ impl ParseQuote for Attribute {
 impl<T: Parse, P: Parse> ParseQuote for Punctuated<T, P> {
     fn parse(input: ParseStream) -> Result<Self> {
         Self::parse_terminated(input)
+    }
+}
+
+#[cfg(feature = "full")]
+impl ParseQuote for Vec<Stmt> {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Block::parse_within(input)
     }
 }
