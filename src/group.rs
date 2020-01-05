@@ -60,8 +60,10 @@ pub fn parse_brackets<'a>(input: &ParseBuffer<'a>) -> Result<Brackets<'a>> {
     })
 }
 
+// Not public API
+#[doc(hidden)]
 #[cfg(any(feature = "full", feature = "derive"))]
-pub(crate) fn parse_group<'a>(input: &ParseBuffer<'a>) -> Result<Group<'a>> {
+pub fn parse_group<'a>(input: &ParseBuffer<'a>) -> Result<Group<'a>> {
     parse_delimited(input, Delimiter::None).map(|(span, content)| Group {
         token: token::Group(span),
         content,
