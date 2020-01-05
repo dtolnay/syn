@@ -12,11 +12,11 @@ mod features;
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_span::edition::Edition;
+use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
 use syntax::ast;
 use syntax::errors::PResult;
 use syntax::sess::ParseSess;
-use syntax::source_map::FilePathMapping;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;

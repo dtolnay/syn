@@ -3,11 +3,11 @@ extern crate rustc_parse as parse;
 extern crate rustc_span;
 extern crate syntax;
 
+use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
 use syntax::ast;
 use syntax::ptr::P;
 use syntax::sess::ParseSess;
-use syntax::source_map::FilePathMapping;
 
 use std::panic;
 

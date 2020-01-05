@@ -7,7 +7,8 @@ use std::mem;
 
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
-use rustc_span::{Span, SyntaxContext, DUMMY_SP};
+use rustc_span::source_map::Spanned;
+use rustc_span::{sym, Span, Symbol, SyntaxContext, DUMMY_SP};
 use syntax::ast::{
     AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocItem, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind,
@@ -24,8 +25,6 @@ use syntax::ast::{
     WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use syntax::ptr::P;
-use syntax::source_map::Spanned;
-use syntax::symbol::{sym, Symbol};
 use syntax::token::{self, DelimToken, Token, TokenKind};
 use syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use syntax::util::comments;
