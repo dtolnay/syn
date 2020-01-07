@@ -2661,9 +2661,14 @@ pub(crate) mod parsing {
         }
     }
 
+
+    /// Determines whether this is a named member or not
+    ///
+    /// *This function is available if Syn is built with the `"full"`
+    /// feature.*
     #[cfg(feature = "full")]
     impl Member {
-        fn is_named(&self) -> bool {
+        pub fn is_named(&self) -> bool {
             match *self {
                 Member::Named(_) => true,
                 Member::Unnamed(_) => false,
