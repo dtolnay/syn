@@ -303,7 +303,7 @@ spanless_eq_struct!(Stmt; id kind span);
 spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
 spanless_eq_struct!(StructField; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(Token; kind span);
-spanless_eq_struct!(TraitRef; path ref_id);
+spanless_eq_struct!(TraitRef; path ref_id constness);
 spanless_eq_struct!(Ty; id kind span);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant; attrs id span vis ident data disr_expr is_placeholder);
