@@ -188,6 +188,14 @@ impl Error {
         start.join(end).unwrap_or(start)
     }
 
+    /// Set the source location of the error for all contained messages.
+    pub fn set_span(&mut self, span: Span) {
+        for message in self.messages.iter_mut() {
+            message.start_span = ThreadBound::new(span);
+            message.end_span = ThreadBound::new(span);
+        }
+    }
+
     /// Render the error as an invocation of [`compile_error!`].
     ///
     /// The [`parse_macro_input!`] macro provides a convenient way to invoke
