@@ -321,13 +321,13 @@ fn enter_args<'a>(attr: &Attribute, input: ParseStream<'a>) -> Result<ParseBuffe
     } else if input.peek(token::Brace) {
         braced!(content in input);
     } else {
-        return Err(input.error("unexpected token in attribute arguments"));
+        return Err(input.error("expected one of `{`, `[`, `(`"));
     }
 
     if input.is_empty() {
         Ok(content)
     } else {
-        Err(input.error("unexpected token in attribute arguments"))
+        Err(input.error("expected one of `{`, `[`, `(`, found end of input"))
     }
 }
 
