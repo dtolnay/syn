@@ -298,13 +298,11 @@ fn error_expected_args(attr: &Attribute) -> Error {
         path += &segment.ident.to_string();
     }
 
-    let msg = format!("expected attribute arguments: {}[{}(...)]", style, path);
-
-    #[cfg(feature = "printing")]
-    return Error::new_spanned(attr, msg);
-
-    #[cfg(not(feature = "printing"))]
-    return Error::new(attr.bracket_token.span, msg);
+    let msg = format!(
+        "expected attribute arguments in parentheses: {}[{}(...)]",
+        style, path,
+    );
+    crate::error::new2(attr.pound_token.span, attr.bracket_token.span, msg)
 }
 
 #[cfg(feature = "parsing")]

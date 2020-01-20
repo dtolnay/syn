@@ -250,6 +250,17 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     }
 }
 
+#[cfg(all(feature = "parsing", any(feature = "full", feature = "derive")))]
+pub fn new2<T: Display>(start: Span, end: Span, message: T) -> Error {
+    Error {
+        messages: vec![ErrorMessage {
+            start_span: ThreadBound::new(start),
+            end_span: ThreadBound::new(end),
+            message: message.to_string(),
+        }],
+    }
+}
+
 impl Debug for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         if self.messages.len() == 1 {
