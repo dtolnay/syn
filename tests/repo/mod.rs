@@ -51,33 +51,41 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
-        // TODO
+        // TODO: visibility on enum variants
         "tests/rust/src/test/pretty/enum-variant-vis.rs" |
+        "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-enum.rs" |
+        // TODO: &raw address-of
         "tests/rust/src/test/pretty/raw-address-of.rs" |
-        "tests/rust/src/test/rustdoc-ui/test-compile-fail2.rs" |
-        "tests/rust/src/test/rustdoc-ui/test-compile-fail3.rs" |
         "tests/rust/src/test/ui/borrowck/borrow-raw-address-of-deref-mutability-ok.rs" |
         "tests/rust/src/test/ui/borrowck/borrow-raw-address-of-mutability-ok.rs" |
         "tests/rust/src/test/ui/consts/const-address-of.rs" |
         "tests/rust/src/test/ui/consts/const-mut-refs/const_mut_address_of.rs" |
         "tests/rust/src/test/ui/consts/min_const_fn/address_of_const.rs" |
-        "tests/rust/src/test/ui/half-open-range-patterns/half-open-range-pats-syntactic-pass.rs" |
-        "tests/rust/src/test/ui/half-open-range-patterns/pat-tuple-4.rs" |
         "tests/rust/src/test/ui/packed/packed-struct-address-of-element.rs" |
-        "tests/rust/src/test/ui/parser/impl-item-const-pass.rs" |
-        "tests/rust/src/test/ui/parser/impl-item-type-no-body-pass.rs" |
-        "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-enum.rs" |
-        "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-trait.rs" |
-        "tests/rust/src/test/ui/parser/trait-item-with-defaultness-pass.rs" |
-        "tests/rust/src/test/ui/parser/variadic-ffi-syntactic-pass.rs" |
         "tests/rust/src/test/ui/raw-ref-op/raw-ref-op.rs" |
         "tests/rust/src/test/ui/raw-ref-op/raw-ref-temp-deref.rs" |
         "tests/rust/src/test/ui/raw-ref-op/unusual_locations.rs" |
+        // TODO: half open range patterns
+        "tests/rust/src/test/ui/half-open-range-patterns/half-open-range-pats-syntactic-pass.rs" |
+        "tests/rust/src/test/ui/half-open-range-patterns/pat-tuple-4.rs" |
+        // TODO: inherent associated const
+        "tests/rust/src/test/ui/parser/impl-item-const-pass.rs" |
+        // TODO: inherent associated type
+        "tests/rust/src/test/ui/parser/impl-item-type-no-body-pass.rs" |
+        // TODO: visibility on trait items
+        "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-trait.rs" |
+        // TODO: default const
+        "tests/rust/src/test/ui/parser/trait-item-with-defaultness-pass.rs" |
+        // TODO: variadic ellipses before the last function argument
+        "tests/rust/src/test/ui/parser/variadic-ffi-syntactic-pass.rs" |
+        // TODO: const trait impls and bounds
         "tests/rust/src/test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
         "tests/rust/src/test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
         "tests/rust/src/test/ui/rfc-2632-const-trait-impl/feature-gate.rs" |
         "tests/rust/src/test/ui/rfc-2632-const-trait-impl/syntax.rs" |
         // not actually test cases
+        "tests/rust/src/test/rustdoc-ui/test-compile-fail2.rs" |
+        "tests/rust/src/test/rustdoc-ui/test-compile-fail3.rs" |
         "tests/rust/src/test/ui/include-single-expr-helper.rs" |
         "tests/rust/src/test/ui/include-single-expr-helper-1.rs" |
         "tests/rust/src/test/ui/issues/auxiliary/issue-21146-inc.rs" |
