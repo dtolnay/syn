@@ -303,7 +303,7 @@ spanless_eq_struct!(Stmt; id kind span);
 spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
 spanless_eq_struct!(StructField; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(Token; kind span);
-spanless_eq_struct!(TraitRef; path ref_id constness);
+spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id kind span);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant; attrs id span vis ident data disr_expr is_placeholder);
@@ -348,7 +348,7 @@ spanless_eq_enum!(RangeLimits; HalfOpen Closed);
 spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Mac(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(TokenTree; Token(0) Delimited(0 1 2));
-spanless_eq_enum!(TraitBoundModifier; None Maybe);
+spanless_eq_enum!(TraitBoundModifier; None Maybe MaybeConst MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
 spanless_eq_enum!(UnOp; Deref Not Neg);
@@ -368,7 +368,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
     Fn(0 1 2) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1) Enum(0 1)
     Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
-    Impl(unsafety polarity defaultness generics of_trait self_ty items)
+    Impl(unsafety polarity defaultness constness generics of_trait self_ty items)
     Mac(0) MacroDef(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0) Byte(0) Char(0) Int(0 1)
     Float(0 1) Bool(0) Err(0));
