@@ -54,9 +54,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // TODO: visibility on enum variants
         "tests/rust/src/test/pretty/enum-variant-vis.rs" |
         "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-enum.rs" |
-        // TODO: half open range patterns
-        "tests/rust/src/test/ui/half-open-range-patterns/half-open-range-pats-syntactic-pass.rs" |
-        "tests/rust/src/test/ui/half-open-range-patterns/pat-tuple-4.rs" |
         // TODO: inherent associated const
         "tests/rust/src/test/ui/parser/impl-item-const-pass.rs" |
         // TODO: inherent associated type

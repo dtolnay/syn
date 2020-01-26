@@ -1948,7 +1948,7 @@ pub(crate) mod parsing {
             return parse_expr(input, expr, allow_struct, Precedence::Any);
         };
 
-        if input.peek(Token![.]) || input.peek(Token![?]) {
+        if input.peek(Token![.]) && !input.peek(Token![..]) || input.peek(Token![?]) {
             expr = trailer_helper(input, expr)?;
 
             attrs.extend(expr.replace_attrs(Vec::new()));
