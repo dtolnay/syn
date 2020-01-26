@@ -386,11 +386,12 @@ mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use crate::path;
 
     impl Parse for Pat {
         fn parse(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
             let lookahead = input.lookahead1();
             if lookahead.peek(Ident)
                 && ({
@@ -434,7 +435,7 @@ mod parsing {
             } else if lookahead.peek(token::Bracket) {
                 input.call(pat_slice).map(Pat::Slice)
             } else if lookahead.peek(Token![..]) && !input.peek(Token![...]) {
-                input.call(pat_rest).map(Pat::Rest)
+                pat_range_half_open(input, begin)
             } else {
                 Err(lookahead.error())
             }
@@ -442,10 +443,11 @@ mod parsing {
     }
 
     fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
+        let begin = input.fork();
         let (qself, path) = path::parsing::qpath(input, true)?;
 
         if input.peek(Token![..]) {
-            return pat_range(input, qself, path).map(Pat::Range);
+            return pat_range(input, begin, qself, path);
         }
 
         if qself.is_some() {
@@ -487,7 +489,7 @@ mod parsing {
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
         } else if input.peek(Token![..]) {
-            pat_range(input, qself, path).map(Pat::Range)
+            pat_range(input, begin, qself, path)
         } else {
             Ok(Pat::Path(PatPath {
                 attrs: Vec::new(),
@@ -624,17 +626,44 @@ mod parsing {
         })
     }
 
-    fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatRange> {
-        Ok(PatRange {
-            attrs: Vec::new(),
-            lo: Box::new(Expr::Path(ExprPath {
+    fn pat_range(
+        input: ParseStream,
+        begin: ParseBuffer,
+        qself: Option<QSelf>,
+        path: Path,
+    ) -> Result<Pat> {
+        let limits: RangeLimits = input.parse()?;
+        let hi = input.call(pat_lit_expr)?;
+        if let Some(hi) = hi {
+            Ok(Pat::Range(PatRange {
                 attrs: Vec::new(),
-                qself,
-                path,
-            })),
-            limits: input.parse()?,
-            hi: input.call(pat_lit_expr)?,
-        })
+                lo: Box::new(Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself,
+                    path,
+                })),
+                limits,
+                hi,
+            }))
+        } else {
+            Ok(Pat::Verbatim(verbatim::between(begin, input)))
+        }
+    }
+
+    fn pat_range_half_open(input: ParseStream, begin: ParseBuffer) -> Result<Pat> {
+        let limits: RangeLimits = input.parse()?;
+        let hi = input.call(pat_lit_expr)?;
+        if hi.is_some() {
+            Ok(Pat::Verbatim(verbatim::between(begin, input)))
+        } else {
+            match limits {
+                RangeLimits::HalfOpen(dot2_token) => Ok(Pat::Rest(PatRest {
+                    attrs: Vec::new(),
+                    dot2_token,
+                })),
+                RangeLimits::Closed(_) => Err(input.error("expected range upper bound")),
+            }
+        }
     }
 
     fn pat_tuple(input: ParseStream) -> Result<PatTuple> {
@@ -669,14 +698,21 @@ mod parsing {
     }
 
     fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
-        let lo = input.call(pat_lit_expr)?;
+        let begin = input.fork();
+        let lo = input.call(pat_lit_expr)?.unwrap();
         if input.peek(Token![..]) {
-            Ok(Pat::Range(PatRange {
-                attrs: Vec::new(),
-                lo,
-                limits: input.parse()?,
-                hi: input.call(pat_lit_expr)?,
-            }))
+            let limits: RangeLimits = input.parse()?;
+            let hi = input.call(pat_lit_expr)?;
+            if let Some(hi) = hi {
+                Ok(Pat::Range(PatRange {
+                    attrs: Vec::new(),
+                    lo,
+                    limits,
+                    hi,
+                }))
+            } else {
+                Ok(Pat::Verbatim(verbatim::between(begin, input)))
+            }
         } else {
             Ok(Pat::Lit(PatLit {
                 attrs: Vec::new(),
@@ -685,7 +721,17 @@ mod parsing {
         }
     }
 
-    fn pat_lit_expr(input: ParseStream) -> Result<Box<Expr>> {
+    fn pat_lit_expr(input: ParseStream) -> Result<Option<Box<Expr>>> {
+        if input.is_empty()
+            || input.peek(Token![|])
+            || input.peek(Token![=>])
+            || input.peek(Token![:]) && !input.peek(Token![::])
+            || input.peek(Token![,])
+            || input.peek(Token![;])
+        {
+            return Ok(None);
+        }
+
         let neg: Option<Token![-]> = input.parse()?;
 
         let lookahead = input.lookahead1();
@@ -705,7 +751,7 @@ mod parsing {
             return Err(lookahead.error());
         };
 
-        Ok(Box::new(if let Some(neg) = neg {
+        Ok(Some(Box::new(if let Some(neg) = neg {
             Expr::Unary(ExprUnary {
                 attrs: Vec::new(),
                 op: UnOp::Neg(neg),
@@ -713,7 +759,7 @@ mod parsing {
             })
         } else {
             expr
-        }))
+        })))
     }
 
     fn pat_slice(input: ParseStream) -> Result<PatSlice> {
@@ -735,13 +781,6 @@ mod parsing {
             attrs: Vec::new(),
             bracket_token,
             elems,
-        })
-    }
-
-    fn pat_rest(input: ParseStream) -> Result<PatRest> {
-        Ok(PatRest {
-            attrs: Vec::new(),
-            dot2_token: input.parse()?,
         })
     }
 }
