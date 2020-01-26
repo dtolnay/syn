@@ -2444,7 +2444,38 @@ pub mod parsing {
             {
                 input.parse().map(ImplItem::Method)
             } else if lookahead.peek(Token![type]) {
-                input.parse().map(ImplItem::Type)
+                input.advance_to(&ahead);
+                let type_token: Token![type] = input.parse()?;
+                let ident: Ident = input.parse()?;
+                let mut generics: Generics = input.parse()?;
+                let colon_token: Option<Token![:]> = input.parse()?;
+                if colon_token.is_some() {
+                    let mut first = true;
+                    while !input.peek(Token![where]) && !input.peek(Token![=]) && !input.peek(Token![;]) {
+                        if !first {
+                            input.parse::<Token![+]>()?;
+                        }
+                        input.parse::<TypeParamBound>()?;
+                        first = false;
+                    }
+                }
+                generics.where_clause = input.parse()?;
+                if let Some(eq_token) = input.parse()? {
+                    return Ok(ImplItem::Type(ImplItemType {
+                        attrs,
+                        vis,
+                        defaultness,
+                        type_token,
+                        ident,
+                        generics,
+                        eq_token,
+                        ty: input.parse()?,
+                        semi_token: input.parse()?,
+                    }));
+                } else {
+                    input.parse::<Token![;]>()?;
+                    return Ok(ImplItem::Verbatim(verbatim::between(begin, input)));
+                }
             } else if vis.is_inherited() && defaultness.is_none() && lookahead.peek(existential) {
                 input.call(item_existential).map(ImplItem::Verbatim)
             } else if vis.is_inherited()
