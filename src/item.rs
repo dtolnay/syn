@@ -2139,7 +2139,9 @@ pub mod parsing {
 
     impl Parse for TraitItem {
         fn parse(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
             let mut attrs = input.call(Attribute::parse_outer)?;
+            let vis: Visibility = input.parse()?;
             let ahead = input.fork();
 
             let lookahead = ahead.lookahead1();
@@ -2177,18 +2179,20 @@ pub mod parsing {
                 Err(lookahead.error())
             }?;
 
-            {
-                let item_attrs = match &mut item {
-                    TraitItem::Const(item) => &mut item.attrs,
-                    TraitItem::Method(item) => &mut item.attrs,
-                    TraitItem::Type(item) => &mut item.attrs,
-                    TraitItem::Macro(item) => &mut item.attrs,
-                    TraitItem::Verbatim(_) | TraitItem::__Nonexhaustive => unreachable!(),
-                };
-                attrs.extend(item_attrs.drain(..));
-                *item_attrs = attrs;
+            match vis {
+                Visibility::Inherited => {}
+                _ => return Ok(TraitItem::Verbatim(verbatim::between(begin, input))),
             }
 
+            let item_attrs = match &mut item {
+                TraitItem::Const(item) => &mut item.attrs,
+                TraitItem::Method(item) => &mut item.attrs,
+                TraitItem::Type(item) => &mut item.attrs,
+                TraitItem::Macro(item) => &mut item.attrs,
+                TraitItem::Verbatim(_) | TraitItem::__Nonexhaustive => unreachable!(),
+            };
+            attrs.extend(item_attrs.drain(..));
+            *item_attrs = attrs;
             Ok(item)
         }
     }

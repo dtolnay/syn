@@ -51,8 +51,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
-        // TODO: visibility on trait items
-        "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-trait.rs" |
         // TODO: default const
         "tests/rust/src/test/ui/parser/trait-item-with-defaultness-pass.rs" |
         // TODO: variadic ellipses before the last function argument
