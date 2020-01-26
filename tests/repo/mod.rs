@@ -51,9 +51,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
-        // TODO: visibility on enum variants
-        "tests/rust/src/test/pretty/enum-variant-vis.rs" |
-        "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-enum.rs" |
         // TODO: inherent associated const
         "tests/rust/src/test/ui/parser/impl-item-const-pass.rs" |
         // TODO: inherent associated type

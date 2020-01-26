@@ -243,8 +243,10 @@ pub mod parsing {
 
     impl Parse for Variant {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let _visibility: Visibility = input.parse()?;
             Ok(Variant {
-                attrs: input.call(Attribute::parse_outer)?,
+                attrs,
                 ident: input.parse()?,
                 fields: {
                     if input.peek(token::Brace) {
