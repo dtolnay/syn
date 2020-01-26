@@ -2411,9 +2411,7 @@ pub mod parsing {
                     let ident: Ident = input.parse()?;
                     let colon_token: Token![:] = input.parse()?;
                     let ty: Type = input.parse()?;
-                    if input.peek(Token![=]) {
-                        let eq_token: Token![=] = input.parse()?;
-                        let expr: Expr = input.parse()?;
+                    if let Some(eq_token) = input.parse()? {
                         return Ok(ImplItem::Const(ImplItemConst {
                             attrs,
                             vis,
@@ -2423,7 +2421,7 @@ pub mod parsing {
                             colon_token,
                             ty,
                             eq_token,
-                            expr,
+                            expr: input.parse()?,
                             semi_token: input.parse()?,
                         }));
                     } else {
