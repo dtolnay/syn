@@ -761,6 +761,8 @@ pub mod export;
 mod custom_keyword;
 mod custom_punctuation;
 mod sealed;
+mod span;
+mod thread;
 
 #[cfg(feature = "parsing")]
 mod lookahead;
@@ -768,12 +770,11 @@ mod lookahead;
 #[cfg(feature = "parsing")]
 pub mod parse;
 
-mod span;
+#[cfg(all(feature = "parsing", feature = "full"))]
+mod verbatim;
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
-
-mod thread;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -211,7 +211,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
     use std::mem;
-    use syntax::ast::{Block, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
+    use syntax::ast::{Block, BorrowKind, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
     use syntax::mut_visit::MutVisitor;
     use syntax::util::map_in_place::MapInPlace;
 
@@ -248,6 +248,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
         use syntax::mut_visit::{noop_visit_expr, visit_opt, visit_thin_attrs};
         match &mut e.kind {
+            ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
             ExprKind::Struct(path, fields, expr) => {
                 vis.visit_path(path);
                 fields.flat_map_in_place(|field| flat_map_field(field, vis));

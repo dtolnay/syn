@@ -54,17 +54,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // TODO: visibility on enum variants
         "tests/rust/src/test/pretty/enum-variant-vis.rs" |
         "tests/rust/src/test/ui/parser/issue-65041-empty-vis-matcher-in-enum.rs" |
-        // TODO: &raw address-of
-        "tests/rust/src/test/pretty/raw-address-of.rs" |
-        "tests/rust/src/test/ui/borrowck/borrow-raw-address-of-deref-mutability-ok.rs" |
-        "tests/rust/src/test/ui/borrowck/borrow-raw-address-of-mutability-ok.rs" |
-        "tests/rust/src/test/ui/consts/const-address-of.rs" |
-        "tests/rust/src/test/ui/consts/const-mut-refs/const_mut_address_of.rs" |
-        "tests/rust/src/test/ui/consts/min_const_fn/address_of_const.rs" |
-        "tests/rust/src/test/ui/packed/packed-struct-address-of-element.rs" |
-        "tests/rust/src/test/ui/raw-ref-op/raw-ref-op.rs" |
-        "tests/rust/src/test/ui/raw-ref-op/raw-ref-temp-deref.rs" |
-        "tests/rust/src/test/ui/raw-ref-op/unusual_locations.rs" |
         // TODO: half open range patterns
         "tests/rust/src/test/ui/half-open-range-patterns/half-open-range-pats-syntactic-pass.rs" |
         "tests/rust/src/test/ui/half-open-range-patterns/pat-tuple-4.rs" |
