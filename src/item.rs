@@ -2389,6 +2389,7 @@ pub mod parsing {
 
     impl Parse for ImplItem {
         fn parse(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
             let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
             let vis: Visibility = ahead.parse()?;
@@ -2403,10 +2404,32 @@ pub mod parsing {
             };
 
             let mut item = if lookahead.peek(Token![const]) {
-                ahead.parse::<Token![const]>()?;
+                let const_token: Token![const] = ahead.parse()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) {
-                    input.parse().map(ImplItem::Const)
+                    input.advance_to(&ahead);
+                    let ident: Ident = input.parse()?;
+                    let colon_token: Token![:] = input.parse()?;
+                    let ty: Type = input.parse()?;
+                    if input.peek(Token![=]) {
+                        let eq_token: Token![=] = input.parse()?;
+                        let expr: Expr = input.parse()?;
+                        return Ok(ImplItem::Const(ImplItemConst {
+                            attrs,
+                            vis,
+                            defaultness,
+                            const_token,
+                            ident,
+                            colon_token,
+                            ty,
+                            eq_token,
+                            expr,
+                            semi_token: input.parse()?,
+                        }));
+                    } else {
+                        input.parse::<Token![;]>()?;
+                        return Ok(ImplItem::Verbatim(verbatim::between(begin, input)));
+                    }
                 } else if lookahead.peek(Token![unsafe])
                     || lookahead.peek(Token![async])
                     || lookahead.peek(Token![extern])

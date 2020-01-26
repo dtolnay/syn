@@ -51,8 +51,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
-        // TODO: inherent associated const
-        "tests/rust/src/test/ui/parser/impl-item-const-pass.rs" |
         // TODO: inherent associated type
         "tests/rust/src/test/ui/parser/impl-item-type-no-body-pass.rs" |
         // TODO: visibility on trait items
