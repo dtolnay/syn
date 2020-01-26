@@ -51,8 +51,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "tests/rust/src/test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
         "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
-        // TODO: variadic ellipses before the last function argument
-        "tests/rust/src/test/ui/parser/variadic-ffi-syntactic-pass.rs" |
         // TODO: const trait impls and bounds
         "tests/rust/src/test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
         "tests/rust/src/test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
