@@ -2142,6 +2142,7 @@ pub mod parsing {
             let begin = input.fork();
             let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
+            let defaultness: Option<Token![default]> = input.parse()?;
             let ahead = input.fork();
 
             let lookahead = ahead.lookahead1();
@@ -2179,8 +2180,8 @@ pub mod parsing {
                 Err(lookahead.error())
             }?;
 
-            match vis {
-                Visibility::Inherited => {}
+            match (vis, defaultness) {
+                (Visibility::Inherited, None) => {}
                 _ => return Ok(TraitItem::Verbatim(verbatim::between(begin, input))),
             }
 
