@@ -1214,6 +1214,8 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
+    crate::custom_keyword!(raw);
+
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
     //
@@ -1466,6 +1468,7 @@ pub(crate) mod parsing {
     // box <trailer>
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+        let begin = input.fork();
         let ahead = input.fork();
         let attrs = ahead.call(Attribute::parse_outer)?;
         if ahead.peek(Token![&])
@@ -1476,13 +1479,24 @@ pub(crate) mod parsing {
         {
             input.advance_to(&ahead);
             if input.peek(Token![&]) {
-                Ok(Expr::Reference(ExprReference {
-                    attrs,
-                    and_token: input.parse()?,
-                    raw: Reserved::default(),
-                    mutability: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct)?),
-                }))
+                let and_token: Token![&] = input.parse()?;
+                let raw: Option<raw> = input.parse()?;
+                let mutability: Option<Token![mut]> = input.parse()?;
+                if raw.is_some() && mutability.is_none() {
+                    input.parse::<Option<Token![const]>>()?;
+                }
+                let expr = Box::new(unary_expr(input, allow_struct)?);
+                if raw.is_some() {
+                    Ok(Expr::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    Ok(Expr::Reference(ExprReference {
+                        attrs,
+                        and_token,
+                        raw: Reserved::default(),
+                        mutability,
+                        expr,
+                    }))
+                }
             } else if input.peek(Token![box]) {
                 Ok(Expr::Box(ExprBox {
                     attrs,
