@@ -95,7 +95,7 @@ macro_rules! custom_keyword {
         }
 
         #[doc(hidden)]
-        #[allow(non_snake_case)]
+        #[allow(dead_code, non_snake_case)]
         pub fn $ident<__S: $crate::export::IntoSpans<[$crate::export::Span; 1]>>(
             span: __S,
         ) -> $ident {

@@ -82,7 +82,7 @@ macro_rules! custom_punctuation {
         }
 
         #[doc(hidden)]
-        #[allow(non_snake_case)]
+        #[allow(dead_code, non_snake_case)]
         pub fn $ident<__S: $crate::export::IntoSpans<custom_punctuation_repr!($($tt)+)>>(
             spans: __S,
         ) -> $ident {
