@@ -5,6 +5,7 @@
 extern crate rustc_errors;
 extern crate rustc_expand;
 extern crate rustc_parse as parse;
+extern crate rustc_session;
 extern crate rustc_span;
 extern crate syntax;
 
@@ -13,11 +14,11 @@ mod features;
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_errors::PResult;
+use rustc_session::parse::ParseSess;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
 use syntax::ast;
-use syntax::sess::ParseSess;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
