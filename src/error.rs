@@ -1,4 +1,3 @@
-use std;
 use std::fmt::{self, Debug, Display};
 use std::iter::FromIterator;
 use std::slice;

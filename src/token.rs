@@ -88,7 +88,6 @@
 //! [Printing]: https://docs.rs/quote/1.0/quote/trait.ToTokens.html
 //! [`Span`]: https://docs.rs/proc-macro2/1.0/proc_macro2/struct.Span.html
 
-use std;
 #[cfg(feature = "extra-traits")]
 use std::cmp;
 #[cfg(feature = "extra-traits")]
