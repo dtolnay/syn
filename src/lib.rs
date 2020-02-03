@@ -265,6 +265,7 @@
     clippy::empty_enum,
     clippy::if_not_else,
     clippy::items_after_statements,
+    clippy::match_same_arms,
     clippy::missing_errors_doc,
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
