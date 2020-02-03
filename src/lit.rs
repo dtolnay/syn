@@ -403,18 +403,23 @@ impl LitChar {
 
 impl LitInt {
     pub fn new(repr: &str, span: Span) -> Self {
-        if let Some((digits, suffix)) = value::parse_lit_int(repr) {
-            let mut token = value::to_literal(repr);
-            token.set_span(span);
-            LitInt {
-                repr: Box::new(LitIntRepr {
-                    token,
-                    digits,
-                    suffix,
-                }),
-            }
-        } else {
-            panic!("Not an integer literal: `{}`", repr);
+        let (digits, suffix) = match value::parse_lit_int(repr) {
+            Some(parse) => parse,
+            None => panic!("Not an integer literal: `{}`", repr),
+        };
+
+        let mut token = match value::to_literal(repr, &digits, &suffix) {
+            Some(token) => token,
+            None => panic!("Unsupported integer literal: `{}`", repr),
+        };
+
+        token.set_span(span);
+        LitInt {
+            repr: Box::new(LitIntRepr {
+                token,
+                digits,
+                suffix,
+            }),
         }
     }
 
@@ -492,18 +497,23 @@ impl Display for LitInt {
 
 impl LitFloat {
     pub fn new(repr: &str, span: Span) -> Self {
-        if let Some((digits, suffix)) = value::parse_lit_float(repr) {
-            let mut token = value::to_literal(repr);
-            token.set_span(span);
-            LitFloat {
-                repr: Box::new(LitFloatRepr {
-                    token,
-                    digits,
-                    suffix,
-                }),
-            }
-        } else {
-            panic!("Not a float literal: `{}`", repr);
+        let (digits, suffix) = match value::parse_lit_float(repr) {
+            Some(parse) => parse,
+            None => panic!("Not a float literal: `{}`", repr),
+        };
+
+        let mut token = match value::to_literal(repr, &digits, &suffix) {
+            Some(token) => token,
+            None => panic!("Unsupported float literal: `{}`", repr),
+        };
+
+        token.set_span(span);
+        LitFloat {
+            repr: Box::new(LitFloatRepr {
+                token,
+                digits,
+                suffix,
+            }),
         }
     }
 
@@ -691,7 +701,9 @@ pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use crate::buffer::Cursor;
     use crate::parse::{Parse, ParseStream, Result};
+    use proc_macro2::Punct;
 
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -699,23 +711,71 @@ pub mod parsing {
                 if let Some((lit, rest)) = cursor.literal() {
                     return Ok((Lit::new(lit), rest));
                 }
-                while let Some((ident, rest)) = cursor.ident() {
-                    let value = if ident == "true" {
-                        true
-                    } else if ident == "false" {
-                        false
-                    } else {
-                        break;
-                    };
-                    let lit_bool = LitBool {
-                        value,
-                        span: ident.span(),
-                    };
-                    return Ok((Lit::Bool(lit_bool), rest));
+
+                if let Some((ident, rest)) = cursor.ident() {
+                    let value = ident == "true";
+                    if value || ident == "false" {
+                        let lit_bool = LitBool {
+                            value,
+                            span: ident.span(),
+                        };
+                        return Ok((Lit::Bool(lit_bool), rest));
+                    }
                 }
+
+                if let Some((punct, rest)) = cursor.punct() {
+                    if punct.as_char() == '-' {
+                        if let Some((lit, rest)) = parse_negative_lit(punct, rest) {
+                            return Ok((lit, rest));
+                        }
+                    }
+                }
+
                 Err(cursor.error("expected literal"))
             })
         }
+    }
+
+    fn parse_negative_lit(neg: Punct, cursor: Cursor) -> Option<(Lit, Cursor)> {
+        let (lit, rest) = cursor.literal()?;
+
+        let mut span = neg.span();
+        span = span.join(lit.span()).unwrap_or(span);
+
+        let mut repr = lit.to_string();
+        repr.insert(0, '-');
+
+        if !(repr.ends_with("f32") || repr.ends_with("f64")) {
+            if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
+                if let Some(mut token) = value::to_literal(&repr, &digits, &suffix) {
+                    token.set_span(span);
+                    return Some((
+                        Lit::Int(LitInt {
+                            repr: Box::new(LitIntRepr {
+                                token,
+                                digits,
+                                suffix,
+                            }),
+                        }),
+                        rest,
+                    ));
+                }
+            }
+        }
+
+        let (digits, suffix) = value::parse_lit_float(&repr)?;
+        let mut token = value::to_literal(&repr, &digits, &suffix)?;
+        token.set_span(span);
+        Some((
+            Lit::Float(LitFloat {
+                repr: Box::new(LitFloatRepr {
+                    token,
+                    digits,
+                    suffix,
+                }),
+            }),
+            rest,
+        ))
     }
 
     impl Parse for LitStr {
@@ -1372,11 +1432,33 @@ mod value {
         }
     }
 
-    pub fn to_literal(s: &str) -> Literal {
-        let stream = s.parse::<TokenStream>().unwrap();
-        match stream.into_iter().next().unwrap() {
-            TokenTree::Literal(l) => l,
-            _ => unreachable!(),
+    pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
+        if repr.starts_with('-') {
+            if suffix == "f64" {
+                digits.parse().ok().map(Literal::f64_suffixed)
+            } else if suffix == "f32" {
+                digits.parse().ok().map(Literal::f32_suffixed)
+            } else if suffix == "i64" {
+                digits.parse().ok().map(Literal::i64_suffixed)
+            } else if suffix == "i32" {
+                digits.parse().ok().map(Literal::i32_suffixed)
+            } else if suffix == "i16" {
+                digits.parse().ok().map(Literal::i16_suffixed)
+            } else if suffix == "i8" {
+                digits.parse().ok().map(Literal::i8_suffixed)
+            } else if !suffix.is_empty() {
+                None
+            } else if digits.contains('.') {
+                digits.parse().ok().map(Literal::f64_unsuffixed)
+            } else {
+                digits.parse().ok().map(Literal::i64_unsuffixed)
+            }
+        } else {
+            let stream = repr.parse::<TokenStream>().unwrap();
+            match stream.into_iter().next().unwrap() {
+                TokenTree::Literal(l) => Some(l),
+                _ => unreachable!(),
+            }
         }
     }
 }

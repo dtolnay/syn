@@ -1,9 +1,9 @@
 mod features;
 
-use proc_macro2::{TokenStream, TokenTree};
+use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::ToTokens;
 use std::str::FromStr;
-use syn::Lit;
+use syn::{Lit, LitFloat, LitInt};
 
 fn lit(s: &str) -> Lit {
     match TokenStream::from_str(s)
@@ -181,4 +181,17 @@ fn floats() {
     test_float("5.5e12", 5.5e12, "");
     test_float("1.0__3e-12", 1.03e-12, "");
     test_float("1.03e+12", 1.03e12, "");
+}
+
+#[test]
+fn negative() {
+    let span = Span::call_site();
+    assert_eq!("-1", LitInt::new("-1", span).to_string());
+    assert_eq!("-1i8", LitInt::new("-1i8", span).to_string());
+    assert_eq!("-1i16", LitInt::new("-1i16", span).to_string());
+    assert_eq!("-1i32", LitInt::new("-1i32", span).to_string());
+    assert_eq!("-1i64", LitInt::new("-1i64", span).to_string());
+    assert_eq!("-1.5", LitFloat::new("-1.5", span).to_string());
+    assert_eq!("-1.5f32", LitFloat::new("-1.5f32", span).to_string());
+    assert_eq!("-1.5f64", LitFloat::new("-1.5f64", span).to_string());
 }

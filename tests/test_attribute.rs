@@ -286,6 +286,48 @@ fn test_bool_lit() {
     "###);
 }
 
+#[test]
+fn test_negative_lit() {
+    let meta = test("#[form(min = -1, max = 200)]");
+
+    snapshot!(meta, @r###"
+    Meta::List {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "form",
+                    arguments: None,
+                },
+            ],
+        },
+        nested: [
+            Meta(Meta::NameValue {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "min",
+                            arguments: None,
+                        },
+                    ],
+                },
+                lit: -1,
+            }),
+            Meta(Meta::NameValue {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "max",
+                            arguments: None,
+                        },
+                    ],
+                },
+                lit: 200,
+            }),
+        ],
+    }
+    "###);
+}
+
 fn test(input: &str) -> Meta {
     let attrs = Attribute::parse_outer.parse_str(input).unwrap();
 
