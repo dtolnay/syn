@@ -326,7 +326,7 @@ spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
 spanless_eq_enum!(Defaultness; Default Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
-spanless_eq_enum!(ForeignItemKind; Fn(0 1) Static(0 1) Ty Macro(0));
+spanless_eq_enum!(ForeignItemKind; Fn(0 1 2) Static(0 1) Ty Macro(0));
 spanless_eq_enum!(FunctionRetTy; Default(0) Ty(0));
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
