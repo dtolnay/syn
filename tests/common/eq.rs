@@ -11,17 +11,17 @@ use rustc_span::source_map::Spanned;
 use rustc_span::{sym, Span, Symbol, SyntaxContext, DUMMY_SP};
 use syntax::ast::{
     AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocItem, AssocItemKind, AssocTyConstraint,
-    AssocTyConstraintKind, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind,
-    BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Constness, Crate, CrateSugar,
+    AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
+    BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
     FnSig, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs,
     GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity,
-    InlineAsm, InlineAsmOutput, IntTy, IsAsync, IsAuto, Item, ItemKind, Label, Lifetime, Lit,
-    LitFloatType, LitIntType, LitKind, Local, Mac, MacArgs, MacDelimiter, MacStmtStyle, MacroDef,
-    Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path,
+    InlineAsm, InlineAsmOutput, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
+    LitIntType, LitKind, Local, Mac, MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod,
+    Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path,
     PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit,
     StrStyle, StructField, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy,
-    UnOp, UnsafeSource, Unsafety, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
+    UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
     WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use syntax::ptr::P;
@@ -314,6 +314,7 @@ spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
 spanless_eq_enum!(AssocItemKind; Const(0 1) Fn(0 1) TyAlias(0 1) Macro(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
+spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrKind; Normal(0) DocComment(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
@@ -321,7 +322,7 @@ spanless_eq_enum!(BindingMode; ByRef(0) ByValue(0));
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
 spanless_eq_enum!(CaptureBy; Value Ref);
-spanless_eq_enum!(Constness; Const NotConst);
+spanless_eq_enum!(Const; Yes(0) No);
 spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
 spanless_eq_enum!(Defaultness; Default Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
@@ -334,7 +335,6 @@ spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default) Const(ty));
 spanless_eq_enum!(ImplPolarity; Positive Negative);
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
-spanless_eq_enum!(IsAsync; Async(closure_id return_impl_trait_id) NotAsync);
 spanless_eq_enum!(IsAuto; Yes No);
 spanless_eq_enum!(LitFloatType; Suffixed(0) Unsuffixed);
 spanless_eq_enum!(LitIntType; Signed(0) Unsigned(0) Unsuffixed);
@@ -352,8 +352,8 @@ spanless_eq_enum!(TraitBoundModifier; None Maybe MaybeConst MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
 spanless_eq_enum!(UnOp; Deref Not Neg);
+spanless_eq_enum!(Unsafe; Yes(0) No);
 spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
-spanless_eq_enum!(Unsafety; Unsafe Normal);
 spanless_eq_enum!(UseTreeKind; Simple(0 1 2) Nested(0) Glob);
 spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Crate(0) Restricted(path id) Inherited);
