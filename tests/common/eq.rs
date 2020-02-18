@@ -14,7 +14,7 @@ use syntax::ast::{
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
-    FnSig, ForeignItem, ForeignItemKind, ForeignMod, FunctionRetTy, GenericArg, GenericArgs,
+    FnRetTy, FnSig, ForeignItem, ForeignItemKind, ForeignMod, GenericArg, GenericArgs,
     GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity,
     InlineAsm, InlineAsmOutput, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
     LitIntType, LitKind, Local, Mac, MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod,
@@ -327,8 +327,8 @@ spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
 spanless_eq_enum!(Defaultness; Default Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
+spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
 spanless_eq_enum!(ForeignItemKind; Fn(0 1 2) Static(0 1) Ty Macro(0));
-spanless_eq_enum!(FunctionRetTy; Default(0) Ty(0));
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
