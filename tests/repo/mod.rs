@@ -9,7 +9,7 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "5e8897b7b51636f157630e6639b711d698e1d101";
+const REVISION: &str = "2c462a2f776b899d46743b1b44eda976e846e61d";
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();
@@ -44,6 +44,37 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path {
+        // TODO
+        "test/mir-opt/exponential-or.rs" |
+        "test/pretty/trait-inner-attr.rs" |
+        "test/ui/or-patterns/basic-switch.rs" |
+        "test/ui/or-patterns/basic-switchint.rs" |
+        "test/ui/or-patterns/bindings-runpass-1.rs" |
+        "test/ui/or-patterns/bindings-runpass-2.rs" |
+        "test/ui/or-patterns/consistent-bindings.rs" |
+        "test/ui/or-patterns/exhaustiveness-pass.rs" |
+        "test/ui/or-patterns/for-loop.rs" |
+        "test/ui/or-patterns/if-let-while-let.rs" |
+        "test/ui/or-patterns/issue-67514-irrefutable-param.rs" |
+        "test/ui/or-patterns/issue-68785-irrefutable-param-with-at.rs" |
+        "test/ui/or-patterns/let-pattern.rs" |
+        "test/ui/or-patterns/mix-with-wild.rs" |
+        "test/ui/or-patterns/or-patterns-default-binding-modes.rs" |
+        "test/ui/or-patterns/or-patterns-syntactic-pass.rs" |
+        "test/ui/or-patterns/search-via-bindings.rs" |
+        "test/ui/or-patterns/struct-like.rs" |
+        "test/ui/parser/assoc-const-underscore-syntactic-pass.rs" |
+        "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
+        "test/ui/parser/fn-header-syntactic-pass.rs" |
+        "test/ui/parser/foreign-static-syntactic-pass.rs" |
+        "test/ui/parser/foreign-ty-syntactic-pass.rs" |
+        "test/ui/parser/inner-attr-in-trait-def.rs" |
+        "test/ui/parser/item-free-const-no-body-syntactic-pass.rs" |
+        "test/ui/parser/item-free-static-no-body-syntactic-pass.rs" |
+        "test/ui/parser/self-param-syntactic-pass.rs" |
+        "test/ui/rfc-2632-const-trait-impl/assoc-type.rs" |
+        "test/ui/rfc-2632-const-trait-impl/call-const-trait-method-pass.rs" |
+        "test/ui/rfc-2632-const-trait-impl/generic-bound.rs" |
         // Deprecated placement syntax
         "test/ui/obsolete-in-place/bad.rs" |
         // Deprecated anonymous parameter syntax in traits
