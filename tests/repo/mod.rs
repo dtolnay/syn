@@ -19,51 +19,53 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     if path.extension().map(|e| e != "rs").unwrap_or(true) {
         return false;
     }
-    let path_string = path.to_string_lossy();
-    let path_string = if cfg!(windows) {
-        path_string.replace('\\', "/").into()
-    } else {
-        path_string
-    };
+
+    let mut path_string = path.to_string_lossy();
+    if cfg!(windows) {
+        path_string = path_string.replace('\\', "/").into();
+    }
+    assert!(path_string.starts_with("tests/rust/src/"));
+    let path = &path_string["tests/rust/src/".len()..];
+
     // TODO assert that parsing fails on the parse-fail cases
-    if path_string.starts_with("tests/rust/src/test/parse-fail")
-        || path_string.starts_with("tests/rust/src/test/compile-fail")
-        || path_string.starts_with("tests/rust/src/test/rustfix")
+    if path.starts_with("test/parse-fail")
+        || path.starts_with("test/compile-fail")
+        || path.starts_with("test/rustfix")
     {
         return false;
     }
 
-    if path_string.starts_with("tests/rust/src/test/ui") {
-        let stderr_path = path.with_extension("stderr");
+    if path.starts_with("test/ui") {
+        let stderr_path = entry.path().with_extension("stderr");
         if stderr_path.exists() {
             // Expected to fail in some way
             return false;
         }
     }
 
-    match path_string.as_ref() {
+    match path {
         // Deprecated placement syntax
-        "tests/rust/src/test/ui/obsolete-in-place/bad.rs" |
+        "test/ui/obsolete-in-place/bad.rs" |
         // Deprecated anonymous parameter syntax in traits
-        "tests/rust/src/test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs" |
-        "tests/rust/src/test/ui/issues/issue-13105.rs" |
-        "tests/rust/src/test/ui/issues/issue-13775.rs" |
-        "tests/rust/src/test/ui/issues/issue-34074.rs" |
+        "test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs" |
+        "test/ui/issues/issue-13105.rs" |
+        "test/ui/issues/issue-13775.rs" |
+        "test/ui/issues/issue-34074.rs" |
         // 2015-style dyn that libsyntax rejects
-        "tests/rust/src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
+        "test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
         // TODO: const trait impls and bounds
-        "tests/rust/src/test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
-        "tests/rust/src/test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
-        "tests/rust/src/test/ui/rfc-2632-const-trait-impl/feature-gate.rs" |
-        "tests/rust/src/test/ui/rfc-2632-const-trait-impl/syntax.rs" |
+        "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
+        "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
+        "test/ui/rfc-2632-const-trait-impl/feature-gate.rs" |
+        "test/ui/rfc-2632-const-trait-impl/syntax.rs" |
         // not actually test cases
-        "tests/rust/src/test/rustdoc-ui/test-compile-fail2.rs" |
-        "tests/rust/src/test/rustdoc-ui/test-compile-fail3.rs" |
-        "tests/rust/src/test/ui/include-single-expr-helper.rs" |
-        "tests/rust/src/test/ui/include-single-expr-helper-1.rs" |
-        "tests/rust/src/test/ui/issues/auxiliary/issue-21146-inc.rs" |
-        "tests/rust/src/test/ui/macros/auxiliary/macro-comma-support.rs" |
-        "tests/rust/src/test/ui/macros/auxiliary/macro-include-items-expr.rs" => false,
+        "test/rustdoc-ui/test-compile-fail2.rs" |
+        "test/rustdoc-ui/test-compile-fail3.rs" |
+        "test/ui/include-single-expr-helper.rs" |
+        "test/ui/include-single-expr-helper-1.rs" |
+        "test/ui/issues/auxiliary/issue-21146-inc.rs" |
+        "test/ui/macros/auxiliary/macro-comma-support.rs" |
+        "test/ui/macros/auxiliary/macro-include-items-expr.rs" => false,
         _ => true,
     }
 }
