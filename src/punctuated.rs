@@ -76,6 +76,11 @@ impl<T, P> Punctuated<T, P> {
         self.iter().next()
     }
 
+    /// Mutably borrows the first element in this sequence.
+    pub fn first_mut(&mut self) -> Option<&mut T> {
+        self.iter_mut().next()
+    }
+
     /// Borrows the last element in this sequence.
     pub fn last(&self) -> Option<&T> {
         self.iter().next_back()
