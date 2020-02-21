@@ -78,20 +78,12 @@ impl<T, P> Punctuated<T, P> {
 
     /// Borrows the last element in this sequence.
     pub fn last(&self) -> Option<&T> {
-        if self.last.is_some() {
-            self.last.as_ref().map(Box::as_ref)
-        } else {
-            self.inner.last().map(|pair| &pair.0)
-        }
+        self.iter().next_back()
     }
 
     /// Mutably borrows the last element in this sequence.
     pub fn last_mut(&mut self) -> Option<&mut T> {
-        if self.last.is_some() {
-            self.last.as_mut().map(Box::as_mut)
-        } else {
-            self.inner.last_mut().map(|pair| &mut pair.0)
-        }
+        self.iter_mut().next_back()
     }
 
     /// Returns an iterator over borrowed syntax tree nodes of type `&T`.
