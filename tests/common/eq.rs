@@ -14,15 +14,15 @@ use syntax::ast::{
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
-    FnRetTy, FnSig, ForeignItem, ForeignItemKind, ForeignMod, GenericArg, GenericArgs,
-    GenericBound, GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity,
-    InlineAsm, InlineAsmOutput, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
-    LitIntType, LitKind, Local, Mac, MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod,
-    Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path,
-    PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit,
-    StrStyle, StructField, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy,
-    UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    FnRetTy, FnSig, ForeignMod, GenericArg, GenericArgs, GenericBound, GenericParam,
+    GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy,
+    IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local, Mac,
+    MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId,
+    Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
+    RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField, TraitBoundModifier,
+    TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree,
+    UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
+    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use syntax::ptr::P;
 use syntax::token::{self, DelimToken, Token, TokenKind};
@@ -128,11 +128,11 @@ spanless_eq_partial_eq!(DelimToken);
 
 macro_rules! spanless_eq_struct {
     {
-        $name:ident;
+        $name:ident $(<$param:ident>)?;
         $([$field:ident $other:ident])*
         $(![$ignore:ident])*
     } => {
-        impl SpanlessEq for $name {
+        impl $(<$param: SpanlessEq>)* SpanlessEq for $name $(<$param>)* {
             fn eq(&self, other: &Self) -> bool {
                 let $name { $($field,)* $($ignore: _,)* } = self;
                 let $name { $($field: $other,)* $($ignore: _,)* } = other;
@@ -142,14 +142,14 @@ macro_rules! spanless_eq_struct {
     };
 
     {
-        $name:ident;
+        $name:ident $(<$param:ident>)?;
         $([$field:ident $other:ident])*
         $next:ident
         $($rest:ident)*
         $(!$ignore:ident)*
     } => {
         spanless_eq_struct! {
-            $name;
+            $name $(<$param>)*;
             $([$field $other])*
             [$next other]
             $($rest)*
@@ -158,14 +158,14 @@ macro_rules! spanless_eq_struct {
     };
 
     {
-        $name:ident;
+        $name:ident $(<$param:ident>)?;
         $([$field:ident $other:ident])*
         $(![$ignore:ident])*
         !$next:ident
         $(!$rest:ident)*
     } => {
         spanless_eq_struct! {
-            $name;
+            $name $(<$param>)*;
             $([$field $other])*
             $(![$ignore])*
             ![$next]
@@ -262,7 +262,7 @@ macro_rules! spanless_eq_enum {
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
-spanless_eq_struct!(AssocItem; attrs id span vis ident defaultness generics kind !tokens);
+spanless_eq_struct!(AssocItem; attrs id span vis ident defaultness kind !tokens);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(AttrItem; path args);
 spanless_eq_struct!(Attribute; kind id style span);
@@ -276,14 +276,13 @@ spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholde
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
 spanless_eq_struct!(FnSig; header decl);
-spanless_eq_struct!(ForeignItem; attrs id span vis ident kind tokens);
 spanless_eq_struct!(ForeignMod; abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(GlobalAsm; asm);
 spanless_eq_struct!(InlineAsm; asm asm_str_style outputs inputs clobbers volatile alignstack dialect);
 spanless_eq_struct!(InlineAsmOutput; constraint expr is_rw is_indirect);
-spanless_eq_struct!(Item; attrs id span vis ident kind !tokens);
+spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token kind span);
@@ -312,7 +311,7 @@ spanless_eq_struct!(WhereClause; predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
-spanless_eq_enum!(AssocItemKind; Const(0 1) Fn(0 1) TyAlias(0 1) Macro(0));
+spanless_eq_enum!(AssocItemKind; Const(0 1) Static(0 1 2) Fn(0 1 2) TyAlias(0 1 2) Macro(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrKind; Normal(0) DocComment(0));
@@ -328,7 +327,6 @@ spanless_eq_enum!(Defaultness; Default Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
 spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
-spanless_eq_enum!(ForeignItemKind; Fn(0 1 2) Static(0 1) Ty Macro(0));
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
