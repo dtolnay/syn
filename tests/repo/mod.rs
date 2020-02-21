@@ -44,9 +44,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path {
-        // TODO
+        // TODO: or-patterns patterns: `Some(1 | 8)`
         "test/mir-opt/exponential-or.rs" |
-        "test/pretty/trait-inner-attr.rs" |
         "test/ui/or-patterns/basic-switch.rs" |
         "test/ui/or-patterns/basic-switchint.rs" |
         "test/ui/or-patterns/bindings-runpass-1.rs" |
@@ -63,32 +62,52 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/or-patterns/or-patterns-syntactic-pass.rs" |
         "test/ui/or-patterns/search-via-bindings.rs" |
         "test/ui/or-patterns/struct-like.rs" |
+
+        // TODO: inner attr in traits: `trait Foo { #![...] }`
+        "test/pretty/trait-inner-attr.rs" |
+        "test/ui/parser/inner-attr-in-trait-def.rs" |
+
+        // TODO: const underscore in traits: `trait A { const _: (); }`
         "test/ui/parser/assoc-const-underscore-syntactic-pass.rs" |
+
+        // TODO: top level fn without body: `fn f();`
         "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
         "test/ui/parser/fn-header-syntactic-pass.rs" |
+
+        // TODO: extern static with value: `extern { static X: u8 = 0; }`
         "test/ui/parser/foreign-static-syntactic-pass.rs" |
+
+        // TODO: extern type with bound: `extern { type A: Ord; }`
         "test/ui/parser/foreign-ty-syntactic-pass.rs" |
-        "test/ui/parser/inner-attr-in-trait-def.rs" |
+
+        // TODO: top level const/static without value: `const X: u8;`
         "test/ui/parser/item-free-const-no-body-syntactic-pass.rs" |
         "test/ui/parser/item-free-static-no-body-syntactic-pass.rs" |
+
+        // TODO: mut receiver in fn pointer type: `fn(mut self)`
         "test/ui/parser/self-param-syntactic-pass.rs" |
+
+        // TODO: const trait impls and bounds
         "test/ui/rfc-2632-const-trait-impl/assoc-type.rs" |
         "test/ui/rfc-2632-const-trait-impl/call-const-trait-method-pass.rs" |
+        "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
+        "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
+        "test/ui/rfc-2632-const-trait-impl/feature-gate.rs" |
         "test/ui/rfc-2632-const-trait-impl/generic-bound.rs" |
+        "test/ui/rfc-2632-const-trait-impl/syntax.rs" |
+
         // Deprecated placement syntax
         "test/ui/obsolete-in-place/bad.rs" |
+
         // Deprecated anonymous parameter syntax in traits
         "test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs" |
         "test/ui/issues/issue-13105.rs" |
         "test/ui/issues/issue-13775.rs" |
         "test/ui/issues/issue-34074.rs" |
+
         // 2015-style dyn that libsyntax rejects
         "test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs" |
-        // TODO: const trait impls and bounds
-        "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
-        "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
-        "test/ui/rfc-2632-const-trait-impl/feature-gate.rs" |
-        "test/ui/rfc-2632-const-trait-impl/syntax.rs" |
+
         // not actually test cases
         "test/rustdoc-ui/test-compile-fail2.rs" |
         "test/rustdoc-ui/test-compile-fail3.rs" |
@@ -97,6 +116,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/issues/auxiliary/issue-21146-inc.rs" |
         "test/ui/macros/auxiliary/macro-comma-support.rs" |
         "test/ui/macros/auxiliary/macro-include-items-expr.rs" => false,
+
         _ => true,
     }
 }
