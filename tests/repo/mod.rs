@@ -45,6 +45,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
 
     match path {
         // TODO: or-patterns patterns: `Some(1 | 8)`
+        // https://github.com/dtolnay/syn/issues/758
         "test/mir-opt/exponential-or.rs" |
         "test/ui/or-patterns/basic-switch.rs" |
         "test/ui/or-patterns/basic-switchint.rs" |
@@ -64,30 +65,39 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/or-patterns/struct-like.rs" |
 
         // TODO: inner attr in traits: `trait Foo { #![...] }`
+        // https://github.com/dtolnay/syn/issues/759
         "test/pretty/trait-inner-attr.rs" |
         "test/ui/parser/inner-attr-in-trait-def.rs" |
 
         // TODO: const underscore in traits: `trait A { const _: (); }`
+        // https://github.com/dtolnay/syn/issues/760
         "test/ui/parser/assoc-const-underscore-syntactic-pass.rs" |
 
         // TODO: top level fn without body: `fn f();`
+        // https://github.com/dtolnay/syn/issues/761
         "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
         "test/ui/parser/fn-header-syntactic-pass.rs" |
 
         // TODO: extern static with value: `extern { static X: u8 = 0; }`
+        // https://github.com/dtolnay/syn/issues/762
         "test/ui/parser/foreign-static-syntactic-pass.rs" |
 
         // TODO: extern type with bound: `extern { type A: Ord; }`
+        // https://github.com/dtolnay/syn/issues/763
         "test/ui/parser/foreign-ty-syntactic-pass.rs" |
 
         // TODO: top level const/static without value: `const X: u8;`
+        // https://github.com/dtolnay/syn/issues/764
         "test/ui/parser/item-free-const-no-body-syntactic-pass.rs" |
         "test/ui/parser/item-free-static-no-body-syntactic-pass.rs" |
 
         // TODO: mut receiver in fn pointer type: `fn(mut self)`
+        // https://github.com/dtolnay/syn/issues/765
         "test/ui/parser/self-param-syntactic-pass.rs" |
 
         // TODO: const trait impls and bounds
+        // https://github.com/dtolnay/syn/issues/766
+        // https://github.com/dtolnay/syn/issues/767
         "test/ui/rfc-2632-const-trait-impl/assoc-type.rs" |
         "test/ui/rfc-2632-const-trait-impl/call-const-trait-method-pass.rs" |
         "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
