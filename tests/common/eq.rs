@@ -364,7 +364,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
-    Fn(0 1 2) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1) Enum(0 1)
+    Fn(0 1 2) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1 2) Enum(0 1)
     Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
     Impl(unsafety polarity defaultness constness generics of_trait self_ty items)
     Mac(0) MacroDef(0));
