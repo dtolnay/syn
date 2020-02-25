@@ -10,7 +10,7 @@ use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
 use rustc_span::{sym, Span, Symbol, SyntaxContext, DUMMY_SP};
 use syntax::ast::{
-    AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocItem, AssocItemKind, AssocTyConstraint,
+    AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
@@ -262,7 +262,6 @@ macro_rules! spanless_eq_enum {
 spanless_eq_struct!(AngleBracketedArgs; span args constraints);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
-spanless_eq_struct!(AssocItem; attrs id span vis ident defaultness kind !tokens);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(AttrItem; path args);
 spanless_eq_struct!(Attribute; kind id style span);
@@ -311,7 +310,7 @@ spanless_eq_struct!(WhereClause; predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
-spanless_eq_enum!(AssocItemKind; Const(0 1) Static(0 1 2) Fn(0 1 2) TyAlias(0 1 2) Macro(0));
+spanless_eq_enum!(AssocItemKind; Const(0 1 2) Static(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) Macro(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrKind; Normal(0) DocComment(0));
@@ -323,7 +322,7 @@ spanless_eq_enum!(BorrowKind; Ref Raw);
 spanless_eq_enum!(CaptureBy; Value Ref);
 spanless_eq_enum!(Const; Yes(0) No);
 spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
-spanless_eq_enum!(Defaultness; Default Final);
+spanless_eq_enum!(Defaultness; Default(0) Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
 spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
@@ -363,8 +362,8 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     Field(0 1) Index(0 1) Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1)
     Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
-spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1)
-    Fn(0 1 2) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1 2) Enum(0 1)
+spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
+    Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1 2 3) Enum(0 1)
     Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
     Impl(unsafety polarity defaultness constness generics of_trait self_ty items)
     Mac(0) MacroDef(0));
