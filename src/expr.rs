@@ -15,7 +15,7 @@ ast_enum_of_structs! {
     /// A Rust expression.
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    /// feature, but most of the variants are not available unless "full" is enabled.*
     ///
     /// # Syntax tree enums
     ///
