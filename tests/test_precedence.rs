@@ -14,18 +14,18 @@
 //!    spans.
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
+extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
-extern crate syntax;
 
 mod features;
 
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
+use rustc_ast::ast;
+use rustc_ast::ptr::P;
 use rustc_span::edition::Edition;
-use syntax::ast;
-use syntax::ptr::P;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
@@ -165,7 +165,7 @@ fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    syntax::with_globals(Edition::Edition2018, || {
+    rustc_ast::with_globals(Edition::Edition2018, || {
         for expr in exprs {
             let raw = quote!(#expr).to_string();
 
@@ -208,12 +208,12 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 ///
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
+    use rustc_ast::ast::{Block, BorrowKind, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
+    use rustc_ast::mut_visit::MutVisitor;
+    use rustc_ast::util::map_in_place::MapInPlace;
     use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
     use std::mem;
-    use syntax::ast::{Block, BorrowKind, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
-    use syntax::mut_visit::MutVisitor;
-    use syntax::util::map_in_place::MapInPlace;
 
     struct BracketsVisitor {
         failed: bool,
@@ -246,7 +246,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     }
 
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
-        use syntax::mut_visit::{noop_visit_expr, visit_opt, visit_thin_attrs};
+        use rustc_ast::mut_visit::{noop_visit_expr, visit_opt, visit_thin_attrs};
         match &mut e.kind {
             ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
             ExprKind::Struct(path, fields, expr) => {

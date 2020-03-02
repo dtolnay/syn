@@ -2,23 +2,23 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 
+extern crate rustc_ast;
 extern crate rustc_errors;
 extern crate rustc_expand;
 extern crate rustc_parse as parse;
 extern crate rustc_session;
 extern crate rustc_span;
-extern crate syntax;
 
 mod features;
 
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rustc_ast::ast;
 use rustc_errors::PResult;
 use rustc_session::parse::ParseSess;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
-use syntax::ast;
 use walkdir::{DirEntry, WalkDir};
 
 use std::fs::File;
@@ -80,7 +80,7 @@ fn test_round_trip() {
             let back = quote!(#krate).to_string();
 
             let equal = panic::catch_unwind(|| {
-                syntax::with_globals(Edition::Edition2018, || {
+                rustc_ast::with_globals(Edition::Edition2018, || {
                     let sess = ParseSess::new(FilePathMapping::empty());
                     let before = match libsyntax_parse(content, &sess) {
                         Ok(before) => before,

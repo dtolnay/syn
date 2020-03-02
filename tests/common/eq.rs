@@ -1,15 +1,11 @@
+extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
 extern crate rustc_target;
-extern crate syntax;
 
 use std::mem;
 
-use rustc_data_structures::sync::Lrc;
-use rustc_data_structures::thin_vec::ThinVec;
-use rustc_span::source_map::Spanned;
-use rustc_span::{sym, Span, Symbol, SyntaxContext, DUMMY_SP};
-use syntax::ast::{
+use rustc_ast::ast::{
     AngleBracketedArgs, AnonConst, Arm, AsmDialect, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
@@ -24,10 +20,14 @@ use syntax::ast::{
     UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
     WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
-use syntax::ptr::P;
-use syntax::token::{self, DelimToken, Token, TokenKind};
-use syntax::tokenstream::{DelimSpan, TokenStream, TokenTree};
-use syntax::util::comments;
+use rustc_ast::ptr::P;
+use rustc_ast::token::{self, DelimToken, Token, TokenKind};
+use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
+use rustc_ast::util::comments;
+use rustc_data_structures::sync::Lrc;
+use rustc_data_structures::thin_vec::ThinVec;
+use rustc_span::source_map::Spanned;
+use rustc_span::{sym, Span, Symbol, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;
