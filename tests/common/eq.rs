@@ -10,15 +10,15 @@ use rustc_ast::ast::{
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
-    FnRetTy, FnSig, ForeignMod, GenericArg, GenericArgs, GenericBound, GenericParam,
-    GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity, InlineAsm, InlineAsmOutput, IntTy,
-    IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local, Mac,
-    MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId,
-    Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
-    RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField, TraitBoundModifier,
-    TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree,
-    UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate, WhereClause,
-    WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity, InlineAsm,
+    InlineAsmOutput, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType,
+    LitKind, Local, Mac, MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy,
+    Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef,
+    QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField,
+    TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, Unsafe,
+    UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind, WhereBoundPredicate,
+    WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, DelimToken, Token, TokenKind};
@@ -310,7 +310,7 @@ spanless_eq_struct!(WhereClause; predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
-spanless_eq_enum!(AssocItemKind; Const(0 1 2) Static(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) Macro(0));
+spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) Macro(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrKind; Normal(0) DocComment(0));
@@ -326,6 +326,7 @@ spanless_eq_enum!(Defaultness; Default(0) Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
 spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
+spanless_eq_enum!(ForeignItemKind; Static(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) Macro(0));
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
