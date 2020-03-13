@@ -1117,6 +1117,7 @@ pub trait Parser: Sized {
 
     // Not public API.
     #[doc(hidden)]
+    #[cfg(any(feature = "full", feature = "derive"))]
     fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
         let _ = scope;
         self.parse2(tokens)
@@ -1124,6 +1125,7 @@ pub trait Parser: Sized {
 
     // Not public API.
     #[doc(hidden)]
+    #[cfg(any(feature = "full", feature = "derive"))]
     fn __parse_stream(self, input: ParseStream) -> Result<Self::Output> {
         input.parse().and_then(|tokens| self.parse2(tokens))
     }
@@ -1155,6 +1157,7 @@ where
     }
 
     #[doc(hidden)]
+    #[cfg(any(feature = "full", feature = "derive"))]
     fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
         let buf = TokenBuffer::new2(tokens);
         let cursor = buf.begin();
@@ -1170,15 +1173,18 @@ where
     }
 
     #[doc(hidden)]
+    #[cfg(any(feature = "full", feature = "derive"))]
     fn __parse_stream(self, input: ParseStream) -> Result<Self::Output> {
         self(input)
     }
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 pub(crate) fn parse_scoped<F: Parser>(f: F, scope: Span, tokens: TokenStream) -> Result<F::Output> {
     f.__parse_scoped(scope, tokens)
 }
 
+#[cfg(any(feature = "full", feature = "derive"))]
 pub(crate) fn parse_stream<F: Parser>(f: F, input: ParseStream) -> Result<F::Output> {
     f.__parse_stream(input)
 }
