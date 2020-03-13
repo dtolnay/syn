@@ -20,7 +20,6 @@ macro_rules! full {
         unreachable!()
     };
 }
-#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! skip {
     ($($tt:tt)*) => {};
 }

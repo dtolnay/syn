@@ -238,7 +238,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
 
             #full_macro
 
-            #[cfg(any(feature = "full", feature = "derive"))]
             macro_rules! skip {
                 ($($tt:tt)*) => {};
             }
