@@ -289,7 +289,6 @@ extern crate unicode_xid;
 #[cfg(feature = "printing")]
 extern crate quote;
 
-#[cfg(any(feature = "full", feature = "derive"))]
 #[macro_use]
 mod macros;
 
@@ -312,7 +311,6 @@ pub use crate::attr::{
     AttrStyle, Attribute, AttributeArgs, Meta, MetaList, MetaNameValue, NestedMeta,
 };
 
-#[cfg(any(feature = "full", feature = "derive"))]
 mod bigint;
 
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -369,9 +367,7 @@ pub use crate::file::File;
 mod lifetime;
 pub use crate::lifetime::Lifetime;
 
-#[cfg(any(feature = "full", feature = "derive"))]
 mod lit;
-#[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::lit::{
     Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr, StrStyle,
 };

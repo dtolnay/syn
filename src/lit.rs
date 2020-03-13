@@ -22,9 +22,6 @@ use crate::{Error, Result};
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -64,9 +61,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A UTF-8 string literal: `"foo"`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitStr #manual_extra_traits_debug {
         repr: Box<LitStrRepr>,
     }
@@ -80,9 +74,6 @@ struct LitStrRepr {
 
 ast_struct! {
     /// A byte string literal: `b"foo"`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitByteStr #manual_extra_traits_debug {
         token: Literal,
     }
@@ -90,9 +81,6 @@ ast_struct! {
 
 ast_struct! {
     /// A byte literal: `b'f'`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitByte #manual_extra_traits_debug {
         token: Literal,
     }
@@ -100,9 +88,6 @@ ast_struct! {
 
 ast_struct! {
     /// A character literal: `'a'`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitChar #manual_extra_traits_debug {
         token: Literal,
     }
@@ -110,9 +95,6 @@ ast_struct! {
 
 ast_struct! {
     /// An integer literal: `1` or `1u16`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitInt #manual_extra_traits_debug {
         repr: Box<LitIntRepr>,
     }
@@ -129,9 +111,6 @@ ast_struct! {
     /// A floating point literal: `1f64` or `1.0e10f64`.
     ///
     /// Must be finite. May not be infinte or NaN.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitFloat #manual_extra_traits_debug {
         repr: Box<LitFloatRepr>,
     }
@@ -146,9 +125,6 @@ struct LitFloatRepr {
 
 ast_struct! {
     /// A boolean literal: `true` or `false`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     pub struct LitBool #manual_extra_traits_debug {
         pub value: bool,
         pub span: Span,
@@ -678,9 +654,6 @@ lit_extra_traits!(LitBool, value);
 ast_enum! {
     /// The style of a string literal, either plain quoted or a raw string like
     /// `r##"data"##`.
-    ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     pub enum StrStyle #no_visit {
         /// An ordinary string like `"data"`.
         Cooked,
