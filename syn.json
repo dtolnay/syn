@@ -3307,10 +3307,7 @@
     {
       "ident": "Lit",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       },
       "variants": {
         "Str": [
@@ -3358,10 +3355,7 @@
     {
       "ident": "LitBool",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       },
       "fields": {
         "value": {
@@ -3375,55 +3369,37 @@
     {
       "ident": "LitByte",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       }
     },
     {
       "ident": "LitByteStr",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       }
     },
     {
       "ident": "LitChar",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       }
     },
     {
       "ident": "LitFloat",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       }
     },
     {
       "ident": "LitInt",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       }
     },
     {
       "ident": "LitStr",
       "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
+        "any": []
       }
     },
     {
