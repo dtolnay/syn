@@ -36,17 +36,18 @@ mod syn_parse {
 
 #[cfg(not(syn_only))]
 mod libsyntax_parse {
+    extern crate rustc_ast;
     extern crate rustc_data_structures;
+    extern crate rustc_errors;
     extern crate rustc_parse;
+    extern crate rustc_session;
     extern crate rustc_span;
-    extern crate syntax;
 
     use rustc_data_structures::sync::Lrc;
-    use rustc_span::FileName;
-    use syntax::edition::Edition;
-    use syntax::errors::{emitter::Emitter, Diagnostic, Handler};
-    use syntax::sess::ParseSess;
-    use syntax::source_map::{FilePathMapping, SourceMap};
+    use rustc_errors::{emitter::Emitter, Diagnostic, Handler};
+    use rustc_session::parse::ParseSess;
+    use rustc_span::source_map::{FilePathMapping, SourceMap};
+    use rustc_span::{edition::Edition, FileName};
 
     pub fn bench(content: &str) -> Result<(), ()> {
         struct SilentEmitter;
@@ -58,7 +59,7 @@ mod libsyntax_parse {
             }
         }
 
-        syntax::with_globals(Edition::Edition2018, || {
+        rustc_ast::with_globals(Edition::Edition2018, || {
             let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
             let emitter = Box::new(SilentEmitter);
             let handler = Handler::with_emitter(false, None, emitter);
