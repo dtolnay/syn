@@ -124,6 +124,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/include-single-expr-helper.rs" |
         "test/ui/include-single-expr-helper-1.rs" |
         "test/ui/issues/auxiliary/issue-21146-inc.rs" |
+        "test/ui/json-bom-plus-crlf-multifile-aux.rs" |
         "test/ui/macros/auxiliary/macro-comma-support.rs" |
         "test/ui/macros/auxiliary/macro-include-items-expr.rs" => false,
 
