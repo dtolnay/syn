@@ -208,7 +208,9 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 ///
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
-    use rustc_ast::ast::{Block, BorrowKind, Expr, ExprKind, Field, Mac, Pat, Stmt, StmtKind, Ty};
+    use rustc_ast::ast::{
+        Block, BorrowKind, Expr, ExprKind, Field, MacCall, Pat, Stmt, StmtKind, Ty,
+    };
     use rustc_ast::mut_visit::MutVisitor;
     use rustc_ast::util::map_in_place::MapInPlace;
     use rustc_data_structures::thin_vec::ThinVec;
@@ -300,7 +302,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
             let _ = ty;
         }
 
-        fn visit_mac(&mut self, mac: &mut Mac) {
+        fn visit_mac(&mut self, mac: &mut MacCall) {
             // By default when folding over macros, libsyntax panics. This is
             // because it's usually not what you want, you want to run after
             // macro expansion. We do want to do that (syn doesn't do macro

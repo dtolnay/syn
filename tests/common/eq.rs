@@ -13,7 +13,7 @@ use rustc_ast::ast::{
     FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
     GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity, InlineAsm,
     InlineAsmOutput, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType,
-    LitKind, Local, Mac, MacArgs, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy,
+    LitKind, Local, MacArgs, MacCall, MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy,
     Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef,
     QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField,
     TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyKind, UintTy, UnOp, Unsafe,
@@ -286,7 +286,7 @@ spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token kind span);
 spanless_eq_struct!(Local; pat ty init id span attrs);
-spanless_eq_struct!(Mac; path args prior_type_ascription);
+spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacroDef; body legacy);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
@@ -310,7 +310,7 @@ spanless_eq_struct!(WhereClause; predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AsmDialect; Att Intel);
-spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) Macro(0));
+spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) MacCall(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrKind; Normal(0) DocComment(0));
@@ -326,7 +326,7 @@ spanless_eq_enum!(Defaultness; Default(0) Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
 spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
-spanless_eq_enum!(ForeignItemKind; Static(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) Macro(0));
+spanless_eq_enum!(ForeignItemKind; Static(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) MacCall(0));
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
@@ -343,7 +343,7 @@ spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mut Not);
 spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
-spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Empty Mac(0));
+spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Empty MacCall(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(TokenTree; Token(0) Delimited(0 1 2));
 spanless_eq_enum!(TraitBoundModifier; None Maybe MaybeConst MaybeConstMaybe);
@@ -361,21 +361,21 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1) Closure(0 1 2 3 4 5)
     Block(0 1) Async(0 1 2) Await(0) TryBlock(0) Assign(0 1 2) AssignOp(0 1 2)
     Field(0 1) Index(0 1) Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1)
-    Continue(0) Ret(0) InlineAsm(0) Mac(0) Struct(0 1 2) Repeat(0 1) Paren(0)
+    Continue(0) Ret(0) InlineAsm(0) MacCall(0) Struct(0 1 2) Repeat(0 1) Paren(0)
     Try(0) Yield(0) Err);
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
     Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1 2 3) Enum(0 1)
     Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
     Impl(unsafety polarity defaultness constness generics of_trait self_ty items)
-    Mac(0) MacroDef(0));
+    MacCall(0) MacroDef(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0) Byte(0) Char(0) Int(0 1)
     Float(0 1) Bool(0) Err(0));
 spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2) TupleStruct(0 1)
     Or(0) Path(0 1) Tuple(0) Box(0) Ref(0 1) Lit(0) Range(0 1 2) Slice(0) Rest
-    Paren(0) Mac(0));
+    Paren(0) MacCall(0));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Rptr(0 1) BareFn(0) Never
     Tup(0) Path(0 1) TraitObject(0 1) ImplTrait(0 1) Paren(0) Typeof(0) Infer
-    ImplicitSelf Mac(0) Err CVarArgs);
+    ImplicitSelf MacCall(0) Err CVarArgs);
 
 impl SpanlessEq for Ident {
     fn eq(&self, other: &Self) -> bool {
