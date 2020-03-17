@@ -287,7 +287,7 @@ spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; token kind span);
 spanless_eq_struct!(Local; pat ty init id span attrs);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
-spanless_eq_struct!(MacroDef; body legacy);
+spanless_eq_struct!(MacroDef; body macro_rules);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
