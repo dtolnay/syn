@@ -6,7 +6,7 @@ individual tokens of the input.
 - [`example/src/main.rs`](example/src/main.rs)
 
 The library implements a `lazy_static!` macro similar to the one from the real
-[`lazy_static`](https://docs.rs/lazy_static/1.0.0/lazy_static/) crate on
+[`lazy_static`](https://docs.rs/lazy_static/1.0/lazy_static/) crate on
 crates.io.
 
 ```rust

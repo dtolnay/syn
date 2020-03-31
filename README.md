@@ -271,7 +271,7 @@ points, which are required by the language to use `proc_macro::TokenStream`.
 The proc-macro2 crate will automatically detect and use the compiler's data
 structures when a procedural macro is active.
 
-[proc-macro2]: https://docs.rs/proc-macro2/1.0.0/proc_macro2/
+[proc-macro2]: https://docs.rs/proc-macro2/1.0/proc_macro2/
 
 <br>
 
