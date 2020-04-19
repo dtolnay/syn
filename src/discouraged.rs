@@ -16,7 +16,7 @@ pub trait Speculative {
     /// syntax of the form `A* B*` for arbitrary syntax `A` and `B`. The problem
     /// is that when the fork fails to parse an `A`, it's impossible to tell
     /// whether that was because of a syntax error and the user meant to provide
-    /// an `A`, or that the `A`s are finished and its time to start parsing
+    /// an `A`, or that the `A`s are finished and it's time to start parsing
     /// `B`s. Use with care.
     ///
     /// Also note that if `A` is a subset of `B`, `A* B*` can be parsed by
