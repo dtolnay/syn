@@ -212,7 +212,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
         Block, BorrowKind, Expr, ExprKind, Field, MacCall, Pat, Stmt, StmtKind, Ty,
     };
     use rustc_ast::mut_visit::MutVisitor;
-    use rustc_ast::util::map_in_place::MapInPlace;
+    use rustc_data_structures::map_in_place::MapInPlace;
     use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
     use std::mem;
