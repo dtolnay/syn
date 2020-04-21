@@ -116,11 +116,11 @@ fn main() {
     repo::clone_rust();
 
     macro_rules! testcases {
-        ($($(#[$cfg:meta])* $name:path,)*) => {
+        ($($(#[$cfg:meta])* $name:ident,)*) => {
             vec![
                 $(
                     $(#[$cfg])*
-                    (stringify!($name), $name as fn(&str) -> Result<(), ()>),
+                    (stringify!($name), $name::bench as fn(&str) -> Result<(), ()>),
                 )*
             ]
         };
@@ -140,12 +140,12 @@ fn main() {
 
     for (name, f) in testcases!(
         #[cfg(not(syn_only))]
-        read_from_disk::bench,
+        read_from_disk,
         #[cfg(not(syn_only))]
-        tokenstream_parse::bench,
-        syn_parse::bench,
+        tokenstream_parse,
+        syn_parse,
         #[cfg(not(syn_only))]
-        libsyntax_parse::bench,
+        libsyntax_parse,
     ) {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);
