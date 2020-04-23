@@ -266,10 +266,10 @@ pub struct ParseBuffer<'a> {
 
 impl<'a> Drop for ParseBuffer<'a> {
     fn drop(&mut self) {
-        if !self.is_empty() {
+        if let Some(unexpected_span) = span_of_unexpected_ignoring_nones(self.cursor()) {
             let (inner, old_span) = inner_unexpected(self);
             if old_span.is_none() {
-                inner.set(Unexpected::Some(self.cursor().span()));
+                inner.set(Unexpected::Some(unexpected_span));
             }
         }
     }
@@ -423,6 +423,23 @@ fn inner_unexpected(buffer: &ParseBuffer) -> (Rc<Cell<Unexpected>>, Option<Span>
 
 pub(crate) fn get_unexpected(buffer: &ParseBuffer) -> Rc<Cell<Unexpected>> {
     cell_clone(&buffer.unexpected).unwrap()
+}
+
+fn span_of_unexpected_ignoring_nones(mut cursor: Cursor) -> Option<Span> {
+    if cursor.eof() {
+        return None;
+    }
+    while let Some((inner, _span, rest)) = cursor.group(Delimiter::None) {
+        if let Some(unexpected) = span_of_unexpected_ignoring_nones(inner) {
+            return Some(unexpected);
+        }
+        cursor = rest;
+    }
+    if cursor.eof() {
+        None
+    } else {
+        Some(cursor.span())
+    }
 }
 
 impl<'a> ParseBuffer<'a> {
@@ -1149,10 +1166,10 @@ where
         let state = tokens_to_parse_buffer(&buf);
         let node = self(&state)?;
         state.check_unexpected()?;
-        if state.is_empty() {
-            Ok(node)
+        if let Some(unexpected_span) = span_of_unexpected_ignoring_nones(state.cursor()) {
+            Err(Error::new(unexpected_span, "unexpected token"))
         } else {
-            Err(state.error("unexpected token"))
+            Ok(node)
         }
     }
 
@@ -1165,10 +1182,10 @@ where
         let state = new_parse_buffer(scope, cursor, unexpected);
         let node = self(&state)?;
         state.check_unexpected()?;
-        if state.is_empty() {
-            Ok(node)
+        if let Some(unexpected_span) = span_of_unexpected_ignoring_nones(state.cursor()) {
+            Err(Error::new(unexpected_span, "unexpected token"))
         } else {
-            Err(state.error("unexpected token"))
+            Ok(node)
         }
     }
 
