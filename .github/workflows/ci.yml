@@ -1,0 +1,98 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  schedule: [cron: "40 1 * * *"]
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustc-dev
+      - run: cargo test --all-features --release
+
+  build:
+    name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [stable, beta, 1.31.0]
+        include:
+          - rust: nightly
+          - rust: nightly
+            name: WebAssembly
+            target: wasm32-unknown-unknown
+          - rust: nightly
+            name: WASI
+            target: wasm32-wasi
+    env:
+      target: ${{matrix.target && format('--target={0}', matrix.target)}}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{matrix.rust}}
+      - if: matrix.target
+        run: rustup target add ${{matrix.target}}
+      - run: cargo build ${{env.target}} --no-default-features
+      - run: cargo build ${{env.target}}
+      - run: cargo build ${{env.target}} --features full
+      - run: cargo build ${{env.target}} --features 'fold visit visit-mut'
+      - run: cargo build ${{env.target}} --features 'full fold visit visit-mut'
+      - run: cargo build ${{env.target}} --no-default-features --features derive
+      - run: cargo build ${{env.target}} --no-default-features --features 'derive parsing'
+      - run: cargo build ${{env.target}} --no-default-features --features 'derive printing'
+      - run: cargo build ${{env.target}} --no-default-features --features 'proc-macro parsing printing'
+      - run: cargo build ${{env.target}} --no-default-features --features full
+      - run: cargo build ${{env.target}} --no-default-features --features 'full parsing'
+      - run: cargo build ${{env.target}} --no-default-features --features 'full printing'
+      - run: cargo build ${{env.target}} --no-default-features --features 'full parsing printing'
+      - run: cargo build ${{env.target}} --no-default-features --features 'fold visit visit-mut parsing printing'
+      - run: cargo build ${{env.target}} --no-default-features --features 'full fold visit visit-mut parsing printing'
+
+  examples:
+    name: Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo check --manifest-path examples/dump-syntax/Cargo.toml
+      - run: cargo check --manifest-path examples/heapsize/example/Cargo.toml
+      - run: cargo check --manifest-path examples/lazy-static/example/Cargo.toml
+      - run: cargo check --manifest-path examples/trace-var/example/Cargo.toml
+
+  codegen:
+    name: Codegen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2020-03-22
+      - run: cd codegen && cargo run
+      - run: git diff --exit-code
+
+  msrv:
+    name: Minimal versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo update -Z minimal-versions
+      - run: cargo build --all-features
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy
+      - run: cargo clippy --all-features
