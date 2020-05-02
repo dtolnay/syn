@@ -66,8 +66,5 @@ targets = ["x86_64-unknown-linux-gnu"]
 [package.metadata.playground]
 all-features = true
 
-[badges]
-travis-ci = { repository = "dtolnay/syn" }
-
 [workspace]
 members = ["dev", "json"]
