@@ -95,7 +95,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: clippy
+      - uses: dtolnay/rust-toolchain@clippy
       - run: cargo clippy --all-features
