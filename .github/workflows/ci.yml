@@ -18,7 +18,7 @@ jobs:
 
   build:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
-    runs-on: ${{matrix.platform || 'ubuntu'}}-latest
+    runs-on: ${{matrix.os || 'ubuntu'}}-latest
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +33,7 @@ jobs:
             target: wasm32-wasi
           - rust: nightly
             name: Windows
-            platform: windows
+            os: windows
     env:
       target: ${{matrix.target && format('--target={0}', matrix.target)}}
     steps:
