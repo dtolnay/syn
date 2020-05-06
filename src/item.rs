@@ -1155,7 +1155,7 @@ pub mod parsing {
 
     use crate::ext::IdentExt;
     use crate::parse::discouraged::Speculative;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use crate::token::Brace;
     use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
     use std::iter::{self, FromIterator};
@@ -1745,6 +1745,7 @@ pub mod parsing {
 
     impl Parse for ForeignItem {
         fn parse(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
             let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
             let vis: Visibility = ahead.parse()?;
@@ -1755,7 +1756,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![static]) {
                 input.parse().map(ForeignItem::Static)
             } else if lookahead.peek(Token![type]) {
-                input.parse().map(ForeignItem::Type)
+                parse_flexible_foreign_item_type(begin, input)
             } else if vis.is_inherited()
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
@@ -1769,17 +1770,16 @@ pub mod parsing {
                 Err(lookahead.error())
             }?;
 
-            {
-                let item_attrs = match &mut item {
-                    ForeignItem::Fn(item) => &mut item.attrs,
-                    ForeignItem::Static(item) => &mut item.attrs,
-                    ForeignItem::Type(item) => &mut item.attrs,
-                    ForeignItem::Macro(item) => &mut item.attrs,
-                    ForeignItem::Verbatim(_) | ForeignItem::__Nonexhaustive => unreachable!(),
-                };
-                attrs.extend(item_attrs.drain(..));
-                *item_attrs = attrs;
-            }
+            let item_attrs = match &mut item {
+                ForeignItem::Fn(item) => &mut item.attrs,
+                ForeignItem::Static(item) => &mut item.attrs,
+                ForeignItem::Type(item) => &mut item.attrs,
+                ForeignItem::Macro(item) => &mut item.attrs,
+                ForeignItem::Verbatim(_) => return Ok(item),
+                ForeignItem::__Nonexhaustive => unreachable!(),
+            };
+            attrs.extend(item_attrs.drain(..));
+            *item_attrs = attrs;
 
             Ok(item)
         }
@@ -1850,6 +1850,55 @@ pub mod parsing {
                 ident: input.parse()?,
                 semi_token: input.parse()?,
             })
+        }
+    }
+
+    fn parse_flexible_foreign_item_type(
+        begin: ParseBuffer,
+        input: ParseStream,
+    ) -> Result<ForeignItem> {
+        let mut extra = false;
+
+        let vis: Visibility = input.parse()?;
+        let type_token: Token![type] = input.parse()?;
+        let ident: Ident = input.parse()?;
+        if input.peek(Token![<]) {
+            extra = true;
+            input.parse::<Generics>()?;
+        }
+        if input.parse::<Option<Token![:]>>()?.is_some() {
+            extra = true;
+            loop {
+                input.parse::<TypeParamBound>()?;
+                if input.peek(Token![where]) || input.peek(Token![;]) {
+                    break;
+                }
+                input.parse::<Token![+]>()?;
+                if input.peek(Token![where]) || input.peek(Token![;]) {
+                    break;
+                }
+            }
+        }
+        if input.peek(Token![where]) {
+            extra = true;
+            input.parse::<WhereClause>()?;
+        }
+        if input.parse::<Option<Token![=]>>()?.is_some() {
+            extra = true;
+            input.parse::<Type>()?;
+        }
+        let semi_token: Token![;] = input.parse()?;
+
+        if extra {
+            Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
+        } else {
+            Ok(ForeignItem::Type(ForeignItemType {
+                attrs: Vec::new(),
+                vis,
+                type_token,
+                ident,
+                semi_token,
+            }))
         }
     }
 

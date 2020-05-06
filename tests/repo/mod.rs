@@ -81,10 +81,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // https://github.com/dtolnay/syn/issues/762
         "test/ui/parser/foreign-static-syntactic-pass.rs" |
 
-        // TODO: extern type with bound: `extern { type A: Ord; }`
-        // https://github.com/dtolnay/syn/issues/763
-        "test/ui/parser/foreign-ty-syntactic-pass.rs" |
-
         // TODO: top level const/static without value: `const X: u8;`
         // https://github.com/dtolnay/syn/issues/764
         "test/ui/parser/item-free-const-no-body-syntactic-pass.rs" |
