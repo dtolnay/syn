@@ -1,7 +1,7 @@
 Parser for Rust source code
 ===========================
 
-[![Build Status](https://api.travis-ci.org/dtolnay/syn.svg?branch=master)](https://travis-ci.org/dtolnay/syn)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/syn/CI/master)](https://github.com/dtolnay/syn/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/syn.svg)](https://crates.io/crates/syn)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/syn/1.0/syn/)
 [![Rustc Version 1.31+](https://img.shields.io/badge/rustc-1.31+-lightgray.svg)](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
