@@ -1,7 +1,6 @@
 mod progress;
 
 use self::progress::Progress;
-use crate::common;
 use anyhow::Result;
 use flate2::read::GzDecoder;
 use std::fs;
@@ -167,10 +166,6 @@ fn download_and_unpack() -> Result<()> {
         let relative = path.strip_prefix(&prefix)?;
         let out = tests_rust.join(relative);
         entry.unpack(&out)?;
-        if common::travis_ci() {
-            // Something about this makes the travis build not deadlock...
-            errorf!(".");
-        }
     }
 
     fs::write("tests/rust/COMMIT", REVISION)?;

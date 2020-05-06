@@ -12,8 +12,3 @@ pub fn abort_after() -> usize {
         Err(_) => usize::max_value(),
     }
 }
-
-/// Are we running in travis-ci.org.
-pub fn travis_ci() -> bool {
-    env::var_os("TRAVIS").is_some()
-}
