@@ -11,7 +11,7 @@ use rustc_ast::ast::{
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
     FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, GlobalAsm, Ident, ImplPolarity, IntTy, IsAuto, Item,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, ImplPolarity, IntTy, IsAuto, Item,
     ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, LlvmAsmDialect,
     LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacDelimiter, MacStmtStyle,
     MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind,
@@ -27,6 +27,7 @@ use rustc_ast::util::comments;
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
+use rustc_span::symbol::Ident;
 use rustc_span::{sym, Span, Symbol, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
