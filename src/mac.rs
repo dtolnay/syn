@@ -2,7 +2,7 @@ use super::*;
 use crate::token::{Brace, Bracket, Paren};
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
-use proc_macro2::{Delimiter, Span, TokenTree};
+use proc_macro2::{Delimiter, Group, Span, TokenTree};
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
@@ -63,12 +63,19 @@ impl Hash for Macro {
 }
 
 #[cfg(feature = "parsing")]
-fn delimiter_span(delimiter: &MacroDelimiter) -> Span {
-    match delimiter {
+fn delimiter_span_close(macro_delimiter: &MacroDelimiter) -> Span {
+    let delimiter = match macro_delimiter {
+        MacroDelimiter::Paren(_) => Delimiter::Parenthesis,
+        MacroDelimiter::Brace(_) => Delimiter::Brace,
+        MacroDelimiter::Bracket(_) => Delimiter::Bracket,
+    };
+    let mut group = Group::new(delimiter, TokenStream::new());
+    group.set_span(match macro_delimiter {
         MacroDelimiter::Paren(token) => token.span,
         MacroDelimiter::Brace(token) => token.span,
         MacroDelimiter::Bracket(token) => token.span,
-    }
+    });
+    group.span_close()
 }
 
 impl Macro {
@@ -163,9 +170,7 @@ impl Macro {
     /// given parser.
     #[cfg(feature = "parsing")]
     pub fn parse_body_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
-        // TODO: see if we can get a group.span_close() span in here as the
-        // scope, rather than the span of the whole group.
-        let scope = delimiter_span(&self.delimiter);
+        let scope = delimiter_span_close(&self.delimiter);
         crate::parse::parse_scoped(parser, scope, self.tokens.clone())
     }
 }
