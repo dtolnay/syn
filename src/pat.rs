@@ -97,6 +97,9 @@ ast_struct! {
 ast_struct! {
     /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
     ///
+    /// It may also be a unit struct or struct variant (e.g. `None`), or a
+    /// constant; these cannot be distinguished syntactically.
+    ///
     /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct PatIdent {
         pub attrs: Vec<Attribute>,
