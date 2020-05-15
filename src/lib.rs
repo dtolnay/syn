@@ -260,6 +260,7 @@
     clippy::eval_order_dependence,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
+    clippy::manual_non_exhaustive,
     clippy::match_on_vec_items,
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
