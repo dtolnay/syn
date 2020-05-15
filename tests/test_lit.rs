@@ -193,3 +193,25 @@ fn negative() {
     assert_eq!("-1.5f32", LitFloat::new("-1.5f32", span).to_string());
     assert_eq!("-1.5f64", LitFloat::new("-1.5f64", span).to_string());
 }
+
+#[test]
+fn suffix() {
+    fn get_suffix(token: &str) -> String {
+        let lit = syn::parse_str::<Lit>(token).unwrap();
+        match lit {
+            Lit::Str(lit) => lit.suffix().to_owned(),
+            //Lit::ByteStr(lit) => lit.suffix().to_owned(),
+            //Lit::Byte(lit) => lit.suffix().to_owned(),
+            //Lit::Char(lit) => lit.suffix().to_owned(),
+            _ => unimplemented!(),
+        }
+    }
+
+    assert_eq!(get_suffix("\"\"s"), "s");
+    assert_eq!(get_suffix("r\"\"r"), "r");
+    assert_eq!(get_suffix("b\"\"b"), "b");
+    assert_eq!(get_suffix("br\"\"br"), "br");
+    assert_eq!(get_suffix("r#\"\"#r"), "r");
+    assert_eq!(get_suffix("'c'c"), "c");
+    assert_eq!(get_suffix("b'b'b"), "b");
+}
