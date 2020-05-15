@@ -2,7 +2,7 @@ use super::*;
 use crate::punctuated::Punctuated;
 
 ast_struct! {
-    /// A path at which a named item is exported: `std::collections::HashMap`.
+    /// A path at which a named item is exported (e.g. `std::collections::HashMap`).
     ///
     /// *This type is available if Syn is built with the `"derive"` or `"full"`
     /// feature.*
