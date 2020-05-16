@@ -362,7 +362,9 @@ impl LitByte {
     }
 
     pub fn value(&self) -> u8 {
-        value::parse_lit_byte(&self.repr.token.to_string())
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_byte(&repr);
+        value
     }
 
     pub fn span(&self) -> Span {
@@ -929,11 +931,9 @@ mod value {
                         });
                     }
                     b'\'' => {
+                        let (_, suffix) = parse_lit_byte(&repr);
                         return Lit::Byte(LitByte {
-                            repr: Box::new(LitRepr {
-                                token,
-                                suffix: Box::<str>::default(),
-                            }),
+                            repr: Box::new(LitRepr { token, suffix }),
                         });
                     }
                     _ => {}
@@ -1167,21 +1167,22 @@ mod value {
         (String::from(value).into_bytes(), suffix)
     }
 
-    pub fn parse_lit_byte(s: &str) -> u8 {
+    // Returns (value, suffix).
+    pub fn parse_lit_byte(s: &str) -> (u8, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'\'');
 
         // We're going to want to have slices which don't respect codepoint boundaries.
-        let mut s = s[2..].as_bytes();
+        let mut v = s[2..].as_bytes();
 
-        let b = match byte(s, 0) {
+        let b = match byte(v, 0) {
             b'\\' => {
-                let b = byte(s, 1);
-                s = &s[2..];
+                let b = byte(v, 1);
+                v = &v[2..];
                 match b {
                     b'x' => {
-                        let (b, rest) = backslash_x(s);
-                        s = rest;
+                        let (b, rest) = backslash_x(v);
+                        v = rest;
                         b
                     }
                     b'n' => b'\n',
@@ -1195,13 +1196,14 @@ mod value {
                 }
             }
             b => {
-                s = &s[1..];
+                v = &v[1..];
                 b
             }
         };
 
-        assert_eq!(byte(s, 0), b'\'');
-        b
+        assert_eq!(byte(v, 0), b'\'');
+        let suffix = s[s.len() - v.len() + 1..].to_owned().into_boxed_str();
+        (b, suffix)
     }
 
     pub fn parse_lit_char(mut s: &str) -> char {

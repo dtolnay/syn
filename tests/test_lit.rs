@@ -100,6 +100,7 @@ fn bytes() {
     test_byte("b'\\t'", b'\t');
     test_byte("b'\\''", b'\'');
     test_byte("b'\"'", b'"');
+    test_byte("b'a'q", b'a');
 }
 
 #[test]
