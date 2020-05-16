@@ -85,6 +85,7 @@ fn test_simple_precedence() {
 /// Test expressions from rustc, like in `test_round_trip`.
 #[test]
 fn test_rustc_precedence() {
+    common::rayon_init();
     repo::clone_rust();
     let abort_after = common::abort_after();
     if abort_after == 0 {
