@@ -4,7 +4,7 @@ use crate::punctuated::Punctuated;
 ast_struct! {
     /// An enum variant.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct Variant {
         /// Attributes tagged on the variant.
@@ -24,7 +24,7 @@ ast_struct! {
 ast_enum_of_structs! {
     /// Data stored within an enum variant or struct.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
     /// # Syntax tree enum
@@ -52,7 +52,7 @@ ast_struct! {
     /// Named fields of a struct or struct variant such as `Point { x: f64,
     /// y: f64 }`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct FieldsNamed {
         pub brace_token: token::Brace,
@@ -63,7 +63,7 @@ ast_struct! {
 ast_struct! {
     /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct FieldsUnnamed {
         pub paren_token: token::Paren,
@@ -147,7 +147,7 @@ impl<'a> IntoIterator for &'a mut Fields {
 ast_struct! {
     /// A field of a struct or enum variant.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct Field {
         /// Attributes tagged on the field.
@@ -172,7 +172,7 @@ ast_enum_of_structs! {
     /// The visibility level of an item: inherited or `pub` or
     /// `pub(restricted)`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
     /// # Syntax tree enum
@@ -202,7 +202,7 @@ ast_enum_of_structs! {
 ast_struct! {
     /// A public visibility level: `pub`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct VisPublic {
         pub pub_token: Token![pub],
@@ -212,7 +212,7 @@ ast_struct! {
 ast_struct! {
     /// A crate-level visibility: `crate`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct VisCrate {
         pub crate_token: Token![crate],
@@ -223,7 +223,7 @@ ast_struct! {
     /// A visibility level restricted to some path: `pub(self)` or
     /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct VisRestricted {
         pub pub_token: Token![pub],

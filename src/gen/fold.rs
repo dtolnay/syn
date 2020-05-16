@@ -26,7 +26,7 @@ macro_rules! full {
 ///
 /// [module documentation]: self
 ///
-/// *This trait is available if Syn is built with the `"fold"` feature.*
+/// *This trait is available only if Syn is built with the `"fold"` feature.*
 pub trait Fold {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_abi(&mut self, i: Abi) -> Abi {

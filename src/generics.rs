@@ -5,7 +5,7 @@ ast_struct! {
     /// Lifetimes and type parameters attached to a declaration of a function,
     /// enum, trait, etc.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[derive(Default)]
     pub struct Generics {
@@ -20,7 +20,7 @@ ast_enum_of_structs! {
     /// A generic type parameter, lifetime, or const generic: `T: Into<String>`,
     /// `'a: 'b`, `const LEN: usize`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
     /// # Syntax tree enum
@@ -43,7 +43,7 @@ ast_enum_of_structs! {
 ast_struct! {
     /// A generic type parameter: `T: Into<String>`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct TypeParam {
         pub attrs: Vec<Attribute>,
@@ -58,7 +58,7 @@ ast_struct! {
 ast_struct! {
     /// A lifetime definition: `'a: 'b + 'c + 'd`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct LifetimeDef {
         pub attrs: Vec<Attribute>,
@@ -71,7 +71,7 @@ ast_struct! {
 ast_struct! {
     /// A const generic parameter: `const LENGTH: usize`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct ConstParam {
         pub attrs: Vec<Attribute>,
@@ -277,7 +277,7 @@ impl<'a> Iterator for ConstParamsMut<'a> {
 
 /// Returned by `Generics::split_for_impl`.
 ///
-/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -286,7 +286,7 @@ pub struct ImplGenerics<'a>(&'a Generics);
 
 /// Returned by `Generics::split_for_impl`.
 ///
-/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -295,7 +295,7 @@ pub struct TypeGenerics<'a>(&'a Generics);
 
 /// Returned by `TypeGenerics::as_turbofish`.
 ///
-/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
 #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
@@ -323,7 +323,7 @@ impl Generics {
     /// # ;
     /// ```
     ///
-    /// *This method is available if Syn is built with the `"derive"` or
+    /// *This method is available only if Syn is built with the `"derive"` or
     /// `"full"` feature and the `"printing"` feature.*
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
         (
@@ -338,7 +338,7 @@ impl Generics {
 impl<'a> TypeGenerics<'a> {
     /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
     ///
-    /// *This method is available if Syn is built with the `"derive"` or
+    /// *This method is available only if Syn is built with the `"derive"` or
     /// `"full"` feature and the `"printing"` feature.*
     pub fn as_turbofish(&self) -> Turbofish {
         Turbofish(self.0)
@@ -348,7 +348,7 @@ impl<'a> TypeGenerics<'a> {
 ast_struct! {
     /// A set of bound lifetimes: `for<'a, 'b, 'c>`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[derive(Default)]
     pub struct BoundLifetimes {
@@ -386,7 +386,7 @@ impl From<Ident> for TypeParam {
 ast_enum_of_structs! {
     /// A trait or lifetime used as a bound on a type parameter.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub enum TypeParamBound {
         Trait(TraitBound),
@@ -397,7 +397,7 @@ ast_enum_of_structs! {
 ast_struct! {
     /// A trait used as a bound on a type parameter.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct TraitBound {
         pub paren_token: Option<token::Paren>,
@@ -413,7 +413,7 @@ ast_enum! {
     /// A modifier on a trait bound, currently only used for the `?` in
     /// `?Sized`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
@@ -426,7 +426,7 @@ ast_struct! {
     /// A `where` clause in a definition: `where T: Deserialize<'de>, D:
     /// 'static`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct WhereClause {
         pub where_token: Token![where],
@@ -437,7 +437,7 @@ ast_struct! {
 ast_enum_of_structs! {
     /// A single predicate in a `where` clause: `T: Deserialize<'de>`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
     /// # Syntax tree enum
@@ -460,7 +460,7 @@ ast_enum_of_structs! {
 ast_struct! {
     /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct PredicateType {
         /// Any lifetimes from a `for` binding
@@ -476,7 +476,7 @@ ast_struct! {
 ast_struct! {
     /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct PredicateLifetime {
         pub lifetime: Lifetime,
@@ -488,7 +488,7 @@ ast_struct! {
 ast_struct! {
     /// An equality predicate in a `where` clause (unsupported).
     ///
-    /// *This type is available if Syn is built with the `"derive"` or
+    /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
     pub struct PredicateEq {
         pub lhs_ty: Type,

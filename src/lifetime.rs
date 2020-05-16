@@ -18,7 +18,7 @@ use crate::lookahead;
 /// - All following characters must be Unicode code points with the XID_Continue
 ///   property.
 ///
-/// *This type is available if Syn is built with the `"derive"` or `"full"`
+/// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature.*
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[derive(Clone)]

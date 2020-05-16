@@ -3,7 +3,7 @@ use super::*;
 ast_struct! {
     /// A complete file of Rust source code.
     ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
+    /// *This type is available only if Syn is built with the `"full"` feature.*
     ///
     /// # Example
     ///

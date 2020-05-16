@@ -249,7 +249,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             ///
             /// [module documentation]: self
             ///
-            /// *This trait is available if Syn is built with the `"visit-mut"` feature.*
+            /// *This trait is available only if Syn is built with the `"visit-mut"` feature.*
             pub trait VisitMut {
                 #traits
             }

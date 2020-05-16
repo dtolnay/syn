@@ -1,7 +1,7 @@
 ast_enum! {
     /// A binary operator: `+`, `+=`, `&`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum BinOp {
@@ -67,7 +67,7 @@ ast_enum! {
 ast_enum! {
     /// A unary operator: `*`, `!`, `-`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum UnOp {

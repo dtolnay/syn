@@ -184,7 +184,7 @@
 //!
 //! ---
 //!
-//! *This module is available if Syn is built with the `"parsing"` feature.*
+//! *This module is available only if Syn is built with the `"parsing"` feature.*
 
 #[path = "discouraged.rs"]
 pub mod discouraged;
@@ -1094,7 +1094,7 @@ impl Parse for Literal {
 ///
 /// [module documentation]: self
 ///
-/// *This trait is available if Syn is built with the `"parsing"` feature.*
+/// *This trait is available only if Syn is built with the `"parsing"` feature.*
 pub trait Parser: Sized {
     type Output;
 
@@ -1109,7 +1109,7 @@ pub trait Parser: Sized {
     /// This function will check that the input is fully parsed. If there are
     /// any unparsed tokens at the end of the stream, an error is returned.
     ///
-    /// *This method is available if Syn is built with both the `"parsing"` and
+    /// *This method is available only if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
     #[cfg(all(
         not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
