@@ -393,7 +393,9 @@ impl LitChar {
     }
 
     pub fn value(&self) -> char {
-        value::parse_lit_char(&self.repr.token.to_string())
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_char(&repr);
+        value
     }
 
     pub fn span(&self) -> Span {
@@ -939,11 +941,9 @@ mod value {
                     _ => {}
                 },
                 b'\'' => {
+                    let (_, suffix) = parse_lit_char(&repr);
                     return Lit::Char(LitChar {
-                        repr: Box::new(LitRepr {
-                            token,
-                            suffix: Box::<str>::default(),
-                        }),
+                        repr: Box::new(LitRepr { token, suffix }),
                     });
                 }
                 b'0'..=b'9' | b'-' => {
@@ -1206,7 +1206,8 @@ mod value {
         (b, suffix)
     }
 
-    pub fn parse_lit_char(mut s: &str) -> char {
+    // Returns (value, suffix).
+    pub fn parse_lit_char(mut s: &str) -> (char, Box<str>) {
         assert_eq!(byte(s, 0), b'\'');
         s = &s[1..];
 
@@ -1242,8 +1243,9 @@ mod value {
                 ch
             }
         };
-        assert_eq!(s, "\'", "Expected end of char literal");
-        ch
+        assert_eq!(byte(s, 0), b'\'');
+        let suffix = s[1..].to_owned().into_boxed_str();
+        (ch, suffix)
     }
 
     fn backslash_x<S>(s: &S) -> (u8, &S)

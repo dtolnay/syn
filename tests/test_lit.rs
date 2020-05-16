@@ -126,6 +126,7 @@ fn chars() {
     test_char("'\\''", '\'');
     test_char("'\"'", '"');
     test_char("'\\u{1F415}'", '\u{1F415}');
+    test_char("'a'q", 'a');
 }
 
 #[test]
