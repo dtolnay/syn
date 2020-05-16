@@ -207,7 +207,8 @@ impl LitStr {
     }
 
     pub fn value(&self) -> String {
-        let (value, _) = value::parse_lit_str(&self.repr.token.to_string());
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_str(&repr);
         String::from(value)
     }
 
@@ -1079,15 +1080,13 @@ mod value {
             pounds += 1;
         }
         assert_eq!(byte(s, pounds), b'"');
-        assert_eq!(byte(s, s.len() - pounds - 1), b'"');
-        for end in s[s.len() - pounds..].bytes() {
+        let close = s.rfind('"').unwrap();
+        for end in s[close + 1..close + 1 + pounds].bytes() {
             assert_eq!(end, b'#');
         }
 
-        let content = s[pounds + 1..s.len() - pounds - 1]
-            .to_owned()
-            .into_boxed_str();
-        let suffix = Box::<str>::default(); // todo
+        let content = s[pounds + 1..close].to_owned().into_boxed_str();
+        let suffix = s[close + 1 + pounds..].to_owned().into_boxed_str();
         (content, suffix)
     }
 

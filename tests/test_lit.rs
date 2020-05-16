@@ -44,6 +44,9 @@ fn strings() {
         "contains\nnewlinesescaped newlines",
     );
     test_string("r\"raw\nstring\\\nhere\"", "raw\nstring\\\nhere");
+    test_string("\"...\"q", "...");
+    test_string("r\"...\"q", "...");
+    test_string("r##\"...\"##q", "...");
 }
 
 #[test]
