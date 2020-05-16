@@ -76,6 +76,9 @@ fn byte_strings() {
         b"contains\nnewlinesescaped newlines",
     );
     test_byte_string("br\"raw\nstring\\\nhere\"", b"raw\nstring\\\nhere");
+    test_byte_string("b\"...\"q", b"...");
+    test_byte_string("br\"...\"q", b"...");
+    test_byte_string("br##\"...\"##q", b"...");
 }
 
 #[test]

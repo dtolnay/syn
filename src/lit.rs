@@ -331,7 +331,9 @@ impl LitByteStr {
     }
 
     pub fn value(&self) -> Vec<u8> {
-        value::parse_lit_byte_str(&self.repr.token.to_string())
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_byte_str(&repr);
+        value
     }
 
     pub fn span(&self) -> Span {
@@ -921,11 +923,9 @@ mod value {
                 }
                 b'b' => match byte(&repr, 1) {
                     b'"' | b'r' => {
+                        let (_, suffix) = parse_lit_byte_str(&repr);
                         return Lit::ByteStr(LitByteStr {
-                            repr: Box::new(LitRepr {
-                                token,
-                                suffix: Box::<str>::default(),
-                            }),
+                            repr: Box::new(LitRepr { token, suffix }),
                         });
                     }
                     b'\'' => {
@@ -1090,7 +1090,8 @@ mod value {
         (content, suffix)
     }
 
-    pub fn parse_lit_byte_str(s: &str) -> Vec<u8> {
+    // Returns (content, suffix).
+    pub fn parse_lit_byte_str(s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         match byte(s, 1) {
             b'"' => parse_lit_byte_str_cooked(s),
@@ -1102,25 +1103,25 @@ mod value {
     // Clippy false positive
     // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
     #[allow(clippy::needless_continue)]
-    fn parse_lit_byte_str_cooked(mut s: &str) -> Vec<u8> {
+    fn parse_lit_byte_str_cooked(mut s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'"');
         s = &s[2..];
 
         // We're going to want to have slices which don't respect codepoint boundaries.
-        let mut s = s.as_bytes();
+        let mut v = s.as_bytes();
 
         let mut out = Vec::new();
         'outer: loop {
-            let byte = match byte(s, 0) {
+            let byte = match byte(v, 0) {
                 b'"' => break,
                 b'\\' => {
-                    let b = byte(s, 1);
-                    s = &s[2..];
+                    let b = byte(v, 1);
+                    v = &v[2..];
                     match b {
                         b'x' => {
-                            let (b, rest) = backslash_x(s);
-                            s = rest;
+                            let (b, rest) = backslash_x(v);
+                            v = rest;
                             b
                         }
                         b'n' => b'\n',
@@ -1131,10 +1132,10 @@ mod value {
                         b'\'' => b'\'',
                         b'"' => b'"',
                         b'\r' | b'\n' => loop {
-                            let byte = byte(s, 0);
+                            let byte = byte(v, 0);
                             let ch = char::from_u32(u32::from(byte)).unwrap();
                             if ch.is_whitespace() {
-                                s = &s[1..];
+                                v = &v[1..];
                             } else {
                                 continue 'outer;
                             }
@@ -1143,25 +1144,27 @@ mod value {
                     }
                 }
                 b'\r' => {
-                    assert_eq!(byte(s, 1), b'\n', "Bare CR not allowed in string");
-                    s = &s[2..];
+                    assert_eq!(byte(v, 1), b'\n', "Bare CR not allowed in string");
+                    v = &v[2..];
                     b'\n'
                 }
                 b => {
-                    s = &s[1..];
+                    v = &v[1..];
                     b
                 }
             };
             out.push(byte);
         }
 
-        assert_eq!(s, b"\"");
-        out
+        assert_eq!(byte(v, 0), b'"');
+        let suffix = s[s.len() - v.len() + 1..].to_owned().into_boxed_str();
+        (out, suffix)
     }
 
-    fn parse_lit_byte_str_raw(s: &str) -> Vec<u8> {
+    fn parse_lit_byte_str_raw(s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
-        String::from(parse_lit_str_raw(&s[1..]).0).into_bytes()
+        let (value, suffix) = parse_lit_str_raw(&s[1..]);
+        (String::from(value).into_bytes(), suffix)
     }
 
     pub fn parse_lit_byte(s: &str) -> u8 {
