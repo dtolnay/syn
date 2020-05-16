@@ -30,7 +30,7 @@ macro_rules! skip {
 ///
 /// [module documentation]: self
 ///
-/// *This trait is available if Syn is built with the `"visit-mut"` feature.*
+/// *This trait is available only if Syn is built with the `"visit-mut"` feature.*
 pub trait VisitMut {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_abi_mut(&mut self, i: &mut Abi) {

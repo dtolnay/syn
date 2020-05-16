@@ -3,7 +3,7 @@ use super::*;
 ast_struct! {
     /// A braced block containing Rust statements.
     ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
+    /// *This type is available only if Syn is built with the `"full"` feature.*
     pub struct Block {
         pub brace_token: token::Brace,
         /// Statements in a block
@@ -14,7 +14,7 @@ ast_struct! {
 ast_enum! {
     /// A statement, usually ending in a semicolon.
     ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
+    /// *This type is available only if Syn is built with the `"full"` feature.*
     pub enum Stmt {
         /// A local (let) binding.
         Local(Local),
@@ -33,7 +33,7 @@ ast_enum! {
 ast_struct! {
     /// A local `let` binding: `let x: u64 = s.parse()?`.
     ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
+    /// *This type is available only if Syn is built with the `"full"` feature.*
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
@@ -56,7 +56,7 @@ pub mod parsing {
         /// Parse the body of a block as zero or more statements, possibly
         /// including one trailing expression.
         ///
-        /// *This function is available if Syn is built with the `"parsing"`
+        /// *This function is available only if Syn is built with the `"parsing"`
         /// feature.*
         ///
         /// # Example

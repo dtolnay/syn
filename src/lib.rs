@@ -494,7 +494,7 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available if Syn is built with the `"visit"` feature.*
+    /// *This module is available only if Syn is built with the `"visit"` feature.*
     ///
     /// <br>
     ///
@@ -615,7 +615,7 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available if Syn is built with the `"visit-mut"`
+    /// *This module is available only if Syn is built with the `"visit-mut"`
     /// feature.*
     ///
     /// <br>
@@ -714,7 +714,7 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available if Syn is built with the `"fold"` feature.*
+    /// *This module is available only if Syn is built with the `"fold"` feature.*
     ///
     /// <br>
     ///
@@ -813,7 +813,7 @@ pub use crate::error::{Error, Result};
 ///
 /// [`syn::parse2`]: parse2
 ///
-/// *This function is available if Syn is built with both the `"parsing"` and
+/// *This function is available only if Syn is built with both the `"parsing"` and
 /// `"proc-macro"` features.*
 ///
 /// # Examples
@@ -860,7 +860,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 ///
 /// [`syn::parse`]: parse()
 ///
-/// *This function is available if Syn is built with the `"parsing"` feature.*
+/// *This function is available only if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
     parse::Parser::parse2(T::parse, tokens)
@@ -868,7 +868,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 
 /// Parse a string of Rust code into the chosen syntax tree node.
 ///
-/// *This function is available if Syn is built with the `"parsing"` feature.*
+/// *This function is available only if Syn is built with the `"parsing"` feature.*
 ///
 /// # Hygiene
 ///
@@ -905,7 +905,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///
 /// If present, either of these would be an error using `from_str`.
 ///
-/// *This function is available if Syn is built with the `"parsing"` and
+/// *This function is available only if Syn is built with the `"parsing"` and
 /// `"full"` features.*
 ///
 /// # Examples

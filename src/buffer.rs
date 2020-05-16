@@ -1,7 +1,7 @@
 //! A stably addressed token buffer supporting efficient traversal based on a
 //! cheaply copyable cursor.
 //!
-//! *This module is available if Syn is built with the `"parsing"` feature.*
+//! *This module is available only if Syn is built with the `"parsing"` feature.*
 
 // This module is heavily commented as it contains most of the unsafe code in
 // Syn, and caution should be used when editing it. The public-facing interface
@@ -36,7 +36,7 @@ enum Entry {
 /// `TokenStream` which requires a deep copy in order to traverse more than
 /// once.
 ///
-/// *This type is available if Syn is built with the `"parsing"` feature.*
+/// *This type is available only if Syn is built with the `"parsing"` feature.*
 pub struct TokenBuffer {
     // NOTE: Do not derive clone on this - there are raw pointers inside which
     // will be messed up. Moving the `TokenBuffer` itself is safe as the actual
@@ -98,7 +98,7 @@ impl TokenBuffer {
     /// Creates a `TokenBuffer` containing all the tokens from the input
     /// `TokenStream`.
     ///
-    /// *This method is available if Syn is built with both the `"parsing"` and
+    /// *This method is available only if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
     #[cfg(all(
         not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
@@ -133,7 +133,7 @@ impl TokenBuffer {
 /// Two cursors are equal if they have the same location in the same input
 /// stream, and have the same scope.
 ///
-/// *This type is available if Syn is built with the `"parsing"` feature.*
+/// *This type is available only if Syn is built with the `"parsing"` feature.*
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Cursor<'a> {
     // The current entry which the `Cursor` is pointing at.

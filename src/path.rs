@@ -4,7 +4,7 @@ use crate::punctuated::Punctuated;
 ast_struct! {
     /// A path at which a named item is exported: `std::collections::HashMap`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct Path {
         pub leading_colon: Option<Token![::]>,
@@ -29,7 +29,7 @@ where
 ast_struct! {
     /// A segment of a path together with any path arguments on that segment.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct PathSegment {
         pub ident: Ident,
@@ -52,7 +52,7 @@ where
 ast_enum! {
     /// Angle bracketed or parenthesized arguments of a path segment.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     ///
     /// ## Angle bracketed
@@ -98,7 +98,7 @@ impl PathArguments {
 ast_enum! {
     /// An individual generic argument, like `'a`, `T`, or `Item = T`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub enum GenericArgument {
         /// A lifetime argument.
@@ -122,7 +122,7 @@ ast_struct! {
     /// Angle bracketed arguments of a path segment: the `<K, V>` in `HashMap<K,
     /// V>`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct AngleBracketedGenericArguments {
         pub colon2_token: Option<Token![::]>,
@@ -135,7 +135,7 @@ ast_struct! {
 ast_struct! {
     /// A binding (equality constraint) on an associated type: `Item = u8`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct Binding {
         pub ident: Ident,
@@ -147,7 +147,7 @@ ast_struct! {
 ast_struct! {
     /// An associated type bound: `Iterator<Item: Display>`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct Constraint {
         pub ident: Ident,
@@ -160,7 +160,7 @@ ast_struct! {
     /// Arguments of a function path segment: the `(A, B) -> C` in `Fn(A,B) ->
     /// C`.
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
@@ -189,7 +189,7 @@ ast_struct! {
     ///  ty       position = 0
     /// ```
     ///
-    /// *This type is available if Syn is built with the `"derive"` or `"full"`
+    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     pub struct QSelf {
         pub lt_token: Token![<],
@@ -358,7 +358,7 @@ pub mod parsing {
     impl Path {
         /// Parse a `Path` containing no path arguments on any of its segments.
         ///
-        /// *This function is available if Syn is built with the `"parsing"`
+        /// *This function is available only if Syn is built with the `"parsing"`
         /// feature.*
         ///
         /// # Example
@@ -433,7 +433,7 @@ pub mod parsing {
         ///   path arguments, and
         /// - the ident of the first path segment is equal to the given one.
         ///
-        /// *This function is available if Syn is built with the `"parsing"`
+        /// *This function is available only if Syn is built with the `"parsing"`
         /// feature.*
         ///
         /// # Example
@@ -472,7 +472,7 @@ pub mod parsing {
         /// - the first path segment has no angle bracketed or parenthesized
         ///   path arguments.
         ///
-        /// *This function is available if Syn is built with the `"parsing"`
+        /// *This function is available only if Syn is built with the `"parsing"`
         /// feature.*
         pub fn get_ident(&self) -> Option<&Ident> {
             if self.leading_colon.is_none()
