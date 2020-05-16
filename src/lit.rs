@@ -62,35 +62,35 @@ ast_enum_of_structs! {
 ast_struct! {
     /// A UTF-8 string literal: `"foo"`.
     pub struct LitStr #manual_extra_traits_debug {
-        repr: Box<LitStrRepr>,
+        repr: Box<LitRepr>,
     }
-}
-
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
-struct LitStrRepr {
-    token: Literal,
-    suffix: Box<str>,
 }
 
 ast_struct! {
     /// A byte string literal: `b"foo"`.
     pub struct LitByteStr #manual_extra_traits_debug {
-        token: Literal,
+        repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte literal: `b'f'`.
     pub struct LitByte #manual_extra_traits_debug {
-        token: Literal,
+        repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A character literal: `'a'`.
     pub struct LitChar #manual_extra_traits_debug {
-        token: Literal,
+        repr: Box<LitRepr>,
     }
+}
+
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+struct LitRepr {
+    token: Literal,
+    suffix: Box<str>,
 }
 
 ast_struct! {
@@ -196,11 +196,11 @@ impl Hash for Lit {
 
 impl LitStr {
     pub fn new(value: &str, span: Span) -> Self {
-        let mut lit = Literal::string(value);
-        lit.set_span(span);
+        let mut token = Literal::string(value);
+        token.set_span(span);
         LitStr {
-            repr: Box::new(LitStrRepr {
-                token: lit,
+            repr: Box::new(LitRepr {
+                token,
                 suffix: Box::<str>::default(),
             }),
         }
@@ -321,19 +321,24 @@ impl LitByteStr {
     pub fn new(value: &[u8], span: Span) -> Self {
         let mut token = Literal::byte_string(value);
         token.set_span(span);
-        LitByteStr { token }
+        LitByteStr {
+            repr: Box::new(LitRepr {
+                token,
+                suffix: Box::<str>::default(),
+            }),
+        }
     }
 
     pub fn value(&self) -> Vec<u8> {
-        value::parse_lit_byte_str(&self.token.to_string())
+        value::parse_lit_byte_str(&self.repr.token.to_string())
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
     }
 }
 
@@ -341,19 +346,24 @@ impl LitByte {
     pub fn new(value: u8, span: Span) -> Self {
         let mut token = Literal::u8_suffixed(value);
         token.set_span(span);
-        LitByte { token }
+        LitByte {
+            repr: Box::new(LitRepr {
+                token,
+                suffix: Box::<str>::default(),
+            }),
+        }
     }
 
     pub fn value(&self) -> u8 {
-        value::parse_lit_byte(&self.token.to_string())
+        value::parse_lit_byte(&self.repr.token.to_string())
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
     }
 }
 
@@ -361,19 +371,24 @@ impl LitChar {
     pub fn new(value: char, span: Span) -> Self {
         let mut token = Literal::character(value);
         token.set_span(span);
-        LitChar { token }
+        LitChar {
+            repr: Box::new(LitRepr {
+                token,
+                suffix: Box::<str>::default(),
+            }),
+        }
     }
 
     pub fn value(&self) -> char {
-        value::parse_lit_char(&self.token.to_string())
+        value::parse_lit_char(&self.repr.token.to_string())
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
     }
 }
 
@@ -561,7 +576,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitByteStr")
-                .field("token", &format_args!("{}", self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -570,7 +585,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitByte")
-                .field("token", &format_args!("{}", self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -579,7 +594,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitChar")
-                .field("token", &format_args!("{}", self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -644,9 +659,9 @@ macro_rules! lit_extra_traits {
 }
 
 lit_extra_traits!(LitStr, repr.token);
-lit_extra_traits!(LitByteStr, token);
-lit_extra_traits!(LitByte, token);
-lit_extra_traits!(LitChar, token);
+lit_extra_traits!(LitByteStr, repr.token);
+lit_extra_traits!(LitByte, repr.token);
+lit_extra_traits!(LitChar, repr.token);
 lit_extra_traits!(LitInt, repr.token);
 lit_extra_traits!(LitFloat, repr.token);
 lit_extra_traits!(LitBool, value);
@@ -836,19 +851,19 @@ mod printing {
 
     impl ToTokens for LitByteStr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for LitByte {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for LitChar {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
@@ -888,20 +903,35 @@ mod value {
                 b'"' | b'r' => {
                     let (_, suffix) = parse_lit_str(&repr);
                     return Lit::Str(LitStr {
-                        repr: Box::new(LitStrRepr { token, suffix }),
+                        repr: Box::new(LitRepr { token, suffix }),
                     });
                 }
                 b'b' => match byte(&repr, 1) {
                     b'"' | b'r' => {
-                        return Lit::ByteStr(LitByteStr { token });
+                        return Lit::ByteStr(LitByteStr {
+                            repr: Box::new(LitRepr {
+                                token,
+                                suffix: Box::<str>::default(),
+                            }),
+                        });
                     }
                     b'\'' => {
-                        return Lit::Byte(LitByte { token });
+                        return Lit::Byte(LitByte {
+                            repr: Box::new(LitRepr {
+                                token,
+                                suffix: Box::<str>::default(),
+                            }),
+                        });
                     }
                     _ => {}
                 },
                 b'\'' => {
-                    return Lit::Char(LitChar { token });
+                    return Lit::Char(LitChar {
+                        repr: Box::new(LitRepr {
+                            token,
+                            suffix: Box::<str>::default(),
+                        }),
+                    });
                 }
                 b'0'..=b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
