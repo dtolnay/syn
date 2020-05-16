@@ -1,5 +1,3 @@
-mod features;
-
 use proc_macro2::{Ident, Span, TokenStream};
 use std::str::FromStr;
 use syn::Result;

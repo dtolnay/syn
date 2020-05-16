@@ -1,5 +1,3 @@
-mod features;
-
 use syn::{parse_quote, FnArg, Receiver, TraitItemMethod};
 
 #[test]

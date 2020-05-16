@@ -1,8 +1,6 @@
 use syn::punctuated::{Pair, Punctuated};
 use syn::Token;
 
-mod features;
-
 #[macro_use]
 mod macros;
 

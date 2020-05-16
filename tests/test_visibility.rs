@@ -1,5 +1,3 @@
-mod features;
-
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream};
 use syn::{Result, Visibility};

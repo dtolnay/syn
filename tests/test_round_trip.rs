@@ -9,8 +9,6 @@ extern crate rustc_parse as parse;
 extern crate rustc_session;
 extern crate rustc_span;
 
-mod features;
-
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_ast::ast;
