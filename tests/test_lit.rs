@@ -44,6 +44,9 @@ fn strings() {
         "contains\nnewlinesescaped newlines",
     );
     test_string("r\"raw\nstring\\\nhere\"", "raw\nstring\\\nhere");
+    test_string("\"...\"q", "...");
+    test_string("r\"...\"q", "...");
+    test_string("r##\"...\"##q", "...");
 }
 
 #[test]
@@ -73,6 +76,9 @@ fn byte_strings() {
         b"contains\nnewlinesescaped newlines",
     );
     test_byte_string("br\"raw\nstring\\\nhere\"", b"raw\nstring\\\nhere");
+    test_byte_string("b\"...\"q", b"...");
+    test_byte_string("br\"...\"q", b"...");
+    test_byte_string("br##\"...\"##q", b"...");
 }
 
 #[test]
@@ -94,6 +100,7 @@ fn bytes() {
     test_byte("b'\\t'", b'\t');
     test_byte("b'\\''", b'\'');
     test_byte("b'\"'", b'"');
+    test_byte("b'a'q", b'a');
 }
 
 #[test]
@@ -119,6 +126,7 @@ fn chars() {
     test_char("'\\''", '\'');
     test_char("'\"'", '"');
     test_char("'\\u{1F415}'", '\u{1F415}');
+    test_char("'a'q", 'a');
 }
 
 #[test]
@@ -192,4 +200,26 @@ fn negative() {
     assert_eq!("-1.5", LitFloat::new("-1.5", span).to_string());
     assert_eq!("-1.5f32", LitFloat::new("-1.5f32", span).to_string());
     assert_eq!("-1.5f64", LitFloat::new("-1.5f64", span).to_string());
+}
+
+#[test]
+fn suffix() {
+    fn get_suffix(token: &str) -> String {
+        let lit = syn::parse_str::<Lit>(token).unwrap();
+        match lit {
+            Lit::Str(lit) => lit.suffix().to_owned(),
+            Lit::ByteStr(lit) => lit.suffix().to_owned(),
+            Lit::Byte(lit) => lit.suffix().to_owned(),
+            Lit::Char(lit) => lit.suffix().to_owned(),
+            _ => unimplemented!(),
+        }
+    }
+
+    assert_eq!(get_suffix("\"\"s"), "s");
+    assert_eq!(get_suffix("r\"\"r"), "r");
+    assert_eq!(get_suffix("b\"\"b"), "b");
+    assert_eq!(get_suffix("br\"\"br"), "br");
+    assert_eq!(get_suffix("r#\"\"#r"), "r");
+    assert_eq!(get_suffix("'c'c"), "c");
+    assert_eq!(get_suffix("b'b'b"), "b");
 }

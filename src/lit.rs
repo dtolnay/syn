@@ -62,35 +62,35 @@ ast_enum_of_structs! {
 ast_struct! {
     /// A UTF-8 string literal: `"foo"`.
     pub struct LitStr #manual_extra_traits_debug {
-        repr: Box<LitStrRepr>,
+        repr: Box<LitRepr>,
     }
-}
-
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
-struct LitStrRepr {
-    token: Literal,
-    suffix: Box<str>,
 }
 
 ast_struct! {
     /// A byte string literal: `b"foo"`.
     pub struct LitByteStr #manual_extra_traits_debug {
-        token: Literal,
+        repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte literal: `b'f'`.
     pub struct LitByte #manual_extra_traits_debug {
-        token: Literal,
+        repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A character literal: `'a'`.
     pub struct LitChar #manual_extra_traits_debug {
-        token: Literal,
+        repr: Box<LitRepr>,
     }
+}
+
+#[cfg_attr(feature = "clone-impls", derive(Clone))]
+struct LitRepr {
+    token: Literal,
+    suffix: Box<str>,
 }
 
 ast_struct! {
@@ -196,18 +196,19 @@ impl Hash for Lit {
 
 impl LitStr {
     pub fn new(value: &str, span: Span) -> Self {
-        let mut lit = Literal::string(value);
-        lit.set_span(span);
+        let mut token = Literal::string(value);
+        token.set_span(span);
         LitStr {
-            repr: Box::new(LitStrRepr {
-                token: lit,
+            repr: Box::new(LitRepr {
+                token,
                 suffix: Box::<str>::default(),
             }),
         }
     }
 
     pub fn value(&self) -> String {
-        let (value, _) = value::parse_lit_str(&self.repr.token.to_string());
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_str(&repr);
         String::from(value)
     }
 
@@ -321,19 +322,30 @@ impl LitByteStr {
     pub fn new(value: &[u8], span: Span) -> Self {
         let mut token = Literal::byte_string(value);
         token.set_span(span);
-        LitByteStr { token }
+        LitByteStr {
+            repr: Box::new(LitRepr {
+                token,
+                suffix: Box::<str>::default(),
+            }),
+        }
     }
 
     pub fn value(&self) -> Vec<u8> {
-        value::parse_lit_byte_str(&self.token.to_string())
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_byte_str(&repr);
+        value
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
+    }
+
+    pub fn suffix(&self) -> &str {
+        &self.repr.suffix
     }
 }
 
@@ -341,19 +353,30 @@ impl LitByte {
     pub fn new(value: u8, span: Span) -> Self {
         let mut token = Literal::u8_suffixed(value);
         token.set_span(span);
-        LitByte { token }
+        LitByte {
+            repr: Box::new(LitRepr {
+                token,
+                suffix: Box::<str>::default(),
+            }),
+        }
     }
 
     pub fn value(&self) -> u8 {
-        value::parse_lit_byte(&self.token.to_string())
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_byte(&repr);
+        value
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
+    }
+
+    pub fn suffix(&self) -> &str {
+        &self.repr.suffix
     }
 }
 
@@ -361,19 +384,30 @@ impl LitChar {
     pub fn new(value: char, span: Span) -> Self {
         let mut token = Literal::character(value);
         token.set_span(span);
-        LitChar { token }
+        LitChar {
+            repr: Box::new(LitRepr {
+                token,
+                suffix: Box::<str>::default(),
+            }),
+        }
     }
 
     pub fn value(&self) -> char {
-        value::parse_lit_char(&self.token.to_string())
+        let repr = self.repr.token.to_string();
+        let (value, _suffix) = value::parse_lit_char(&repr);
+        value
     }
 
     pub fn span(&self) -> Span {
-        self.token.span()
+        self.repr.token.span()
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.token.set_span(span)
+        self.repr.token.set_span(span)
+    }
+
+    pub fn suffix(&self) -> &str {
+        &self.repr.suffix
     }
 }
 
@@ -561,7 +595,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitByteStr")
-                .field("token", &format_args!("{}", self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -570,7 +604,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitByte")
-                .field("token", &format_args!("{}", self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -579,7 +613,7 @@ mod debug_impls {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
                 .debug_struct("LitChar")
-                .field("token", &format_args!("{}", self.token))
+                .field("token", &format_args!("{}", self.repr.token))
                 .finish()
         }
     }
@@ -644,9 +678,9 @@ macro_rules! lit_extra_traits {
 }
 
 lit_extra_traits!(LitStr, repr.token);
-lit_extra_traits!(LitByteStr, token);
-lit_extra_traits!(LitByte, token);
-lit_extra_traits!(LitChar, token);
+lit_extra_traits!(LitByteStr, repr.token);
+lit_extra_traits!(LitByte, repr.token);
+lit_extra_traits!(LitChar, repr.token);
 lit_extra_traits!(LitInt, repr.token);
 lit_extra_traits!(LitFloat, repr.token);
 lit_extra_traits!(LitBool, value);
@@ -836,19 +870,19 @@ mod printing {
 
     impl ToTokens for LitByteStr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for LitByte {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for LitChar {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.token.to_tokens(tokens);
+            self.repr.token.to_tokens(tokens);
         }
     }
 
@@ -888,20 +922,29 @@ mod value {
                 b'"' | b'r' => {
                     let (_, suffix) = parse_lit_str(&repr);
                     return Lit::Str(LitStr {
-                        repr: Box::new(LitStrRepr { token, suffix }),
+                        repr: Box::new(LitRepr { token, suffix }),
                     });
                 }
                 b'b' => match byte(&repr, 1) {
                     b'"' | b'r' => {
-                        return Lit::ByteStr(LitByteStr { token });
+                        let (_, suffix) = parse_lit_byte_str(&repr);
+                        return Lit::ByteStr(LitByteStr {
+                            repr: Box::new(LitRepr { token, suffix }),
+                        });
                     }
                     b'\'' => {
-                        return Lit::Byte(LitByte { token });
+                        let (_, suffix) = parse_lit_byte(&repr);
+                        return Lit::Byte(LitByte {
+                            repr: Box::new(LitRepr { token, suffix }),
+                        });
                     }
                     _ => {}
                 },
                 b'\'' => {
-                    return Lit::Char(LitChar { token });
+                    let (_, suffix) = parse_lit_char(&repr);
+                    return Lit::Char(LitChar {
+                        repr: Box::new(LitRepr { token, suffix }),
+                    });
                 }
                 b'0'..=b'9' | b'-' => {
                     if !(repr.ends_with("f32") || repr.ends_with("f64")) {
@@ -1037,19 +1080,18 @@ mod value {
             pounds += 1;
         }
         assert_eq!(byte(s, pounds), b'"');
-        assert_eq!(byte(s, s.len() - pounds - 1), b'"');
-        for end in s[s.len() - pounds..].bytes() {
+        let close = s.rfind('"').unwrap();
+        for end in s[close + 1..close + 1 + pounds].bytes() {
             assert_eq!(end, b'#');
         }
 
-        let content = s[pounds + 1..s.len() - pounds - 1]
-            .to_owned()
-            .into_boxed_str();
-        let suffix = Box::<str>::default(); // todo
+        let content = s[pounds + 1..close].to_owned().into_boxed_str();
+        let suffix = s[close + 1 + pounds..].to_owned().into_boxed_str();
         (content, suffix)
     }
 
-    pub fn parse_lit_byte_str(s: &str) -> Vec<u8> {
+    // Returns (content, suffix).
+    pub fn parse_lit_byte_str(s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         match byte(s, 1) {
             b'"' => parse_lit_byte_str_cooked(s),
@@ -1061,25 +1103,25 @@ mod value {
     // Clippy false positive
     // https://github.com/rust-lang-nursery/rust-clippy/issues/2329
     #[allow(clippy::needless_continue)]
-    fn parse_lit_byte_str_cooked(mut s: &str) -> Vec<u8> {
+    fn parse_lit_byte_str_cooked(mut s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'"');
         s = &s[2..];
 
         // We're going to want to have slices which don't respect codepoint boundaries.
-        let mut s = s.as_bytes();
+        let mut v = s.as_bytes();
 
         let mut out = Vec::new();
         'outer: loop {
-            let byte = match byte(s, 0) {
+            let byte = match byte(v, 0) {
                 b'"' => break,
                 b'\\' => {
-                    let b = byte(s, 1);
-                    s = &s[2..];
+                    let b = byte(v, 1);
+                    v = &v[2..];
                     match b {
                         b'x' => {
-                            let (b, rest) = backslash_x(s);
-                            s = rest;
+                            let (b, rest) = backslash_x(v);
+                            v = rest;
                             b
                         }
                         b'n' => b'\n',
@@ -1090,10 +1132,10 @@ mod value {
                         b'\'' => b'\'',
                         b'"' => b'"',
                         b'\r' | b'\n' => loop {
-                            let byte = byte(s, 0);
+                            let byte = byte(v, 0);
                             let ch = char::from_u32(u32::from(byte)).unwrap();
                             if ch.is_whitespace() {
-                                s = &s[1..];
+                                v = &v[1..];
                             } else {
                                 continue 'outer;
                             }
@@ -1102,42 +1144,45 @@ mod value {
                     }
                 }
                 b'\r' => {
-                    assert_eq!(byte(s, 1), b'\n', "Bare CR not allowed in string");
-                    s = &s[2..];
+                    assert_eq!(byte(v, 1), b'\n', "Bare CR not allowed in string");
+                    v = &v[2..];
                     b'\n'
                 }
                 b => {
-                    s = &s[1..];
+                    v = &v[1..];
                     b
                 }
             };
             out.push(byte);
         }
 
-        assert_eq!(s, b"\"");
-        out
+        assert_eq!(byte(v, 0), b'"');
+        let suffix = s[s.len() - v.len() + 1..].to_owned().into_boxed_str();
+        (out, suffix)
     }
 
-    fn parse_lit_byte_str_raw(s: &str) -> Vec<u8> {
+    fn parse_lit_byte_str_raw(s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
-        String::from(parse_lit_str_raw(&s[1..]).0).into_bytes()
+        let (value, suffix) = parse_lit_str_raw(&s[1..]);
+        (String::from(value).into_bytes(), suffix)
     }
 
-    pub fn parse_lit_byte(s: &str) -> u8 {
+    // Returns (value, suffix).
+    pub fn parse_lit_byte(s: &str) -> (u8, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'\'');
 
         // We're going to want to have slices which don't respect codepoint boundaries.
-        let mut s = s[2..].as_bytes();
+        let mut v = s[2..].as_bytes();
 
-        let b = match byte(s, 0) {
+        let b = match byte(v, 0) {
             b'\\' => {
-                let b = byte(s, 1);
-                s = &s[2..];
+                let b = byte(v, 1);
+                v = &v[2..];
                 match b {
                     b'x' => {
-                        let (b, rest) = backslash_x(s);
-                        s = rest;
+                        let (b, rest) = backslash_x(v);
+                        v = rest;
                         b
                     }
                     b'n' => b'\n',
@@ -1151,16 +1196,18 @@ mod value {
                 }
             }
             b => {
-                s = &s[1..];
+                v = &v[1..];
                 b
             }
         };
 
-        assert_eq!(byte(s, 0), b'\'');
-        b
+        assert_eq!(byte(v, 0), b'\'');
+        let suffix = s[s.len() - v.len() + 1..].to_owned().into_boxed_str();
+        (b, suffix)
     }
 
-    pub fn parse_lit_char(mut s: &str) -> char {
+    // Returns (value, suffix).
+    pub fn parse_lit_char(mut s: &str) -> (char, Box<str>) {
         assert_eq!(byte(s, 0), b'\'');
         s = &s[1..];
 
@@ -1196,8 +1243,9 @@ mod value {
                 ch
             }
         };
-        assert_eq!(s, "\'", "Expected end of char literal");
-        ch
+        assert_eq!(byte(s, 0), b'\'');
+        let suffix = s[1..].to_owned().into_boxed_str();
+        (ch, suffix)
     }
 
     fn backslash_x<S>(s: &S) -> (u8, &S)
