@@ -18,8 +18,6 @@ extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
 
-mod features;
-
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;

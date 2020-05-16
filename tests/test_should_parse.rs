@@ -1,5 +1,3 @@
-mod features;
-
 macro_rules! should_parse {
     ($name:ident, { $($in:tt)* }) => {
         #[test]

@@ -1,5 +1,3 @@
-mod features;
-
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::ToTokens;
 use std::str::FromStr;

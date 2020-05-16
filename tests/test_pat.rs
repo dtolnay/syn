@@ -1,5 +1,3 @@
-mod features;
-
 use quote::quote;
 use syn::Pat;
 
