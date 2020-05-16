@@ -981,6 +981,18 @@ mod value {
 
             panic!("Unrecognized literal: `{}`", repr);
         }
+
+        pub fn suffix(&self) -> &str {
+            match self {
+                Lit::Str(lit) => lit.suffix(),
+                Lit::ByteStr(lit) => lit.suffix(),
+                Lit::Byte(lit) => lit.suffix(),
+                Lit::Char(lit) => lit.suffix(),
+                Lit::Int(lit) => lit.suffix(),
+                Lit::Float(lit) => lit.suffix(),
+                Lit::Bool(_) | Lit::Verbatim(_) => "",
+            }
+        }
     }
 
     /// Get the byte at offset idx, or a default of `b'\0'` if we're looking
