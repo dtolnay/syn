@@ -340,6 +340,10 @@ impl LitByteStr {
     pub fn set_span(&mut self, span: Span) {
         self.repr.token.set_span(span)
     }
+
+    pub fn suffix(&self) -> &str {
+        &self.repr.suffix
+    }
 }
 
 impl LitByte {
@@ -365,6 +369,10 @@ impl LitByte {
     pub fn set_span(&mut self, span: Span) {
         self.repr.token.set_span(span)
     }
+
+    pub fn suffix(&self) -> &str {
+        &self.repr.suffix
+    }
 }
 
 impl LitChar {
@@ -389,6 +397,10 @@ impl LitChar {
 
     pub fn set_span(&mut self, span: Span) {
         self.repr.token.set_span(span)
+    }
+
+    pub fn suffix(&self) -> &str {
+        &self.repr.suffix
     }
 }
 

@@ -200,9 +200,9 @@ fn suffix() {
         let lit = syn::parse_str::<Lit>(token).unwrap();
         match lit {
             Lit::Str(lit) => lit.suffix().to_owned(),
-            //Lit::ByteStr(lit) => lit.suffix().to_owned(),
-            //Lit::Byte(lit) => lit.suffix().to_owned(),
-            //Lit::Char(lit) => lit.suffix().to_owned(),
+            Lit::ByteStr(lit) => lit.suffix().to_owned(),
+            Lit::Byte(lit) => lit.suffix().to_owned(),
+            Lit::Char(lit) => lit.suffix().to_owned(),
             _ => unimplemented!(),
         }
     }
