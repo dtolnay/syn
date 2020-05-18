@@ -211,6 +211,8 @@ fn suffix() {
             Lit::ByteStr(lit) => lit.suffix().to_owned(),
             Lit::Byte(lit) => lit.suffix().to_owned(),
             Lit::Char(lit) => lit.suffix().to_owned(),
+            Lit::Int(lit) => lit.suffix().to_owned(),
+            Lit::Float(lit) => lit.suffix().to_owned(),
             _ => unimplemented!(),
         }
     }
@@ -222,4 +224,8 @@ fn suffix() {
     assert_eq!(get_suffix("r#\"\"#r"), "r");
     assert_eq!(get_suffix("'c'c"), "c");
     assert_eq!(get_suffix("b'b'b"), "b");
+    assert_eq!(get_suffix("1i32"), "i32");
+    assert_eq!(get_suffix("1_i32"), "i32");
+    assert_eq!(get_suffix("1.0f32"), "f32");
+    assert_eq!(get_suffix("1.0_f32"), "f32");
 }
