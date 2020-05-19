@@ -365,3 +365,11 @@ impl<'a> Iterator for Iter<'a> {
         })
     }
 }
+
+impl Extend<Error> for Error {
+    fn extend<T: IntoIterator<Item = Error>>(&mut self, iter: T) {
+        for err in iter {
+            self.combine(err);
+        }
+    }
+}
