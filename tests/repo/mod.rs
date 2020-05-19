@@ -68,10 +68,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
         "test/ui/parser/fn-header-syntactic-pass.rs" |
 
-        // TODO: extern static with value: `extern { static X: u8 = 0; }`
-        // https://github.com/dtolnay/syn/issues/762
-        "test/ui/parser/foreign-static-syntactic-pass.rs" |
-
         // TODO: top level const/static without value: `const X: u8;`
         // https://github.com/dtolnay/syn/issues/764
         "test/ui/parser/item-free-const-no-body-syntactic-pass.rs" |

@@ -1754,7 +1754,31 @@ pub mod parsing {
             let mut item = if lookahead.peek(Token![fn]) {
                 input.parse().map(ForeignItem::Fn)
             } else if lookahead.peek(Token![static]) {
-                input.parse().map(ForeignItem::Static)
+                let vis = input.parse()?;
+                let static_token = input.parse()?;
+                let mutability = input.parse()?;
+                let ident = input.parse()?;
+                let colon_token = input.parse()?;
+                let ty = input.parse()?;
+
+                if input.peek(Token![=]) {
+                    input.parse::<Token![=]>()?;
+                    input.parse::<Expr>()?;
+                    input.parse::<Token![;]>()?;
+
+                    Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    Ok(ForeignItem::Static(ForeignItemStatic {
+                        attrs: Vec::new(),
+                        vis,
+                        static_token,
+                        mutability,
+                        ident,
+                        colon_token,
+                        ty,
+                        semi_token: input.parse()?,
+                    }))
+                }
             } else if lookahead.peek(Token![type]) {
                 parse_flexible_foreign_item_type(begin, input)
             } else if vis.is_inherited()
