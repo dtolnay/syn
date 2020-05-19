@@ -63,15 +63,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/or-patterns/search-via-bindings.rs" |
         "test/ui/or-patterns/struct-like.rs" |
 
-        // TODO: inner attr in traits: `trait Foo { #![...] }`
-        // https://github.com/dtolnay/syn/issues/759
-        "test/pretty/trait-inner-attr.rs" |
-        "test/ui/parser/inner-attr-in-trait-def.rs" |
-
-        // TODO: const underscore in traits: `trait A { const _: (); }`
-        // https://github.com/dtolnay/syn/issues/760
-        "test/ui/parser/assoc-const-underscore-syntactic-pass.rs" |
-
         // TODO: top level fn without body: `fn f();`
         // https://github.com/dtolnay/syn/issues/761
         "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
