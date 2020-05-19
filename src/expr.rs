@@ -2043,8 +2043,9 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     impl Parse for ExprIf {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
             Ok(ExprIf {
-                attrs: Vec::new(),
+                attrs,
                 if_token: input.parse()?,
                 cond: Box::new(input.call(expr_no_struct)?),
                 then_branch: input.parse()?,
@@ -2082,6 +2083,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     impl Parse for ExprForLoop {
         fn parse(input: ParseStream) -> Result<Self> {
+            let outer_attrs = input.call(Attribute::parse_outer)?;
             let label: Option<Label> = input.parse()?;
             let for_token: Token![for] = input.parse()?;
 
@@ -2112,7 +2114,7 @@ pub(crate) mod parsing {
             let stmts = content.call(Block::parse_within)?;
 
             Ok(ExprForLoop {
-                attrs: inner_attrs,
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 label,
                 for_token,
                 pat,
@@ -2126,6 +2128,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     impl Parse for ExprLoop {
         fn parse(input: ParseStream) -> Result<Self> {
+            let outer_attrs = input.call(Attribute::parse_outer)?;
             let label: Option<Label> = input.parse()?;
             let loop_token: Token![loop] = input.parse()?;
 
@@ -2135,7 +2138,7 @@ pub(crate) mod parsing {
             let stmts = content.call(Block::parse_within)?;
 
             Ok(ExprLoop {
-                attrs: inner_attrs,
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 label,
                 loop_token,
                 body: Block { brace_token, stmts },
@@ -2146,6 +2149,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     impl Parse for ExprMatch {
         fn parse(input: ParseStream) -> Result<Self> {
+            let outer_attrs = input.call(Attribute::parse_outer)?;
             let match_token: Token![match] = input.parse()?;
             let expr = expr_no_struct(input)?;
 
@@ -2159,7 +2163,7 @@ pub(crate) mod parsing {
             }
 
             Ok(ExprMatch {
-                attrs: inner_attrs,
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 match_token,
                 expr: Box::new(expr),
                 brace_token,
@@ -2354,6 +2358,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     impl Parse for ExprWhile {
         fn parse(input: ParseStream) -> Result<Self> {
+            let outer_attrs = input.call(Attribute::parse_outer)?;
             let label: Option<Label> = input.parse()?;
             let while_token: Token![while] = input.parse()?;
             let cond = expr_no_struct(input)?;
@@ -2364,7 +2369,7 @@ pub(crate) mod parsing {
             let stmts = content.call(Block::parse_within)?;
 
             Ok(ExprWhile {
-                attrs: inner_attrs,
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 label,
                 while_token,
                 cond: Box::new(cond),
