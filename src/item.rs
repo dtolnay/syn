@@ -1164,6 +1164,7 @@ pub mod parsing {
 
     impl Parse for Item {
         fn parse(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
             let mut attrs = input.call(Attribute::parse_outer)?;
             let ahead = input.fork();
             let vis: Visibility = ahead.parse()?;
@@ -1194,12 +1195,61 @@ pub mod parsing {
             } else if lookahead.peek(Token![use]) {
                 input.parse().map(Item::Use)
             } else if lookahead.peek(Token![static]) {
-                input.parse().map(Item::Static)
+                let vis = input.parse()?;
+                let static_token = input.parse()?;
+                let mutability = input.parse()?;
+                let ident = input.parse()?;
+                let colon_token = input.parse()?;
+                let ty = input.parse()?;
+                if input.peek(Token![;]) {
+                    input.parse::<Token![;]>()?;
+                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    Ok(Item::Static(ItemStatic {
+                        attrs: Vec::new(),
+                        vis,
+                        static_token,
+                        mutability,
+                        ident,
+                        colon_token,
+                        ty,
+                        eq_token: input.parse()?,
+                        expr: input.parse()?,
+                        semi_token: input.parse()?,
+                    }))
+                }
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                    input.parse().map(Item::Const)
+                    let vis = input.parse()?;
+                    let const_token = input.parse()?;
+                    let ident = {
+                        let lookahead = input.lookahead1();
+                        if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                            input.call(Ident::parse_any)?
+                        } else {
+                            return Err(lookahead.error());
+                        }
+                    };
+                    let colon_token = input.parse()?;
+                    let ty = input.parse()?;
+                    if input.peek(Token![;]) {
+                        input.parse::<Token![;]>()?;
+                        Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    } else {
+                        Ok(Item::Const(ItemConst {
+                            attrs: Vec::new(),
+                            vis,
+                            const_token,
+                            ident,
+                            colon_token,
+                            ty,
+                            eq_token: input.parse()?,
+                            expr: input.parse()?,
+                            semi_token: input.parse()?,
+                        }))
+                    }
                 } else if lookahead.peek(Token![unsafe])
                     || lookahead.peek(Token![async])
                     || lookahead.peek(Token![extern])

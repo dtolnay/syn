@@ -72,11 +72,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         // https://github.com/dtolnay/syn/issues/762
         "test/ui/parser/foreign-static-syntactic-pass.rs" |
 
-        // TODO: top level const/static without value: `const X: u8;`
-        // https://github.com/dtolnay/syn/issues/764
-        "test/ui/parser/item-free-const-no-body-syntactic-pass.rs" |
-        "test/ui/parser/item-free-static-no-body-syntactic-pass.rs" |
-
         // TODO: mut receiver in fn pointer type: `fn(mut self)`
         // https://github.com/dtolnay/syn/issues/765
         "test/ui/parser/self-param-syntactic-pass.rs" |
