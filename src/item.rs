@@ -1170,20 +1170,20 @@ pub mod parsing {
             let vis: Visibility = ahead.parse()?;
 
             let lookahead = ahead.lookahead1();
-            let mut item = if lookahead.peek(Token![extern]) {
+            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+                let vis: Visibility = input.parse()?;
+                let sig = parse_signature(input)?;
+                if input.peek(Token![;]) {
+                    input.parse::<Token![;]>()?;
+                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
+                }
+            } else if lookahead.peek(Token![extern]) {
                 ahead.parse::<Token![extern]>()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Token![crate]) {
                     input.parse().map(Item::ExternCrate)
-                } else if lookahead.peek(Token![fn]) {
-                    let vis: Visibility = input.parse()?;
-                    let sig = parse_signature(input)?;
-                    if input.peek(Token![;]) {
-                        input.parse::<Token![;]>()?;
-                        Ok(Item::Verbatim(verbatim::between(begin, input)))
-                    } else {
-                        parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
-                    }
                 } else if lookahead.peek(token::Brace) {
                     input.parse().map(Item::ForeignMod)
                 } else if lookahead.peek(LitStr) {
@@ -1191,15 +1191,6 @@ pub mod parsing {
                     let lookahead = ahead.lookahead1();
                     if lookahead.peek(token::Brace) {
                         input.parse().map(Item::ForeignMod)
-                    } else if lookahead.peek(Token![fn]) {
-                        let vis: Visibility = input.parse()?;
-                        let sig = parse_signature(input)?;
-                        if input.peek(Token![;]) {
-                            input.parse::<Token![;]>()?;
-                            Ok(Item::Verbatim(verbatim::between(begin, input)))
-                        } else {
-                            parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
-                        }
                     } else {
                         Err(lookahead.error())
                     }
@@ -1264,19 +1255,6 @@ pub mod parsing {
                             semi_token: input.parse()?,
                         }))
                     }
-                } else if lookahead.peek(Token![unsafe])
-                    || lookahead.peek(Token![async])
-                    || lookahead.peek(Token![extern])
-                    || lookahead.peek(Token![fn])
-                {
-                    let vis: Visibility = input.parse()?;
-                    let sig = parse_signature(input)?;
-                    if input.peek(Token![;]) {
-                        input.parse::<Token![;]>()?;
-                        Ok(Item::Verbatim(verbatim::between(begin, input)))
-                    } else {
-                        parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
-                    }
                 } else {
                     Err(lookahead.error())
                 }
@@ -1289,29 +1267,8 @@ pub mod parsing {
                     input.parse().map(Item::Trait)
                 } else if lookahead.peek(Token![impl]) {
                     input.parse().map(Item::Impl)
-                } else if lookahead.peek(Token![async])
-                    || lookahead.peek(Token![extern])
-                    || lookahead.peek(Token![fn])
-                {
-                    let vis: Visibility = input.parse()?;
-                    let sig = parse_signature(input)?;
-                    if input.peek(Token![;]) {
-                        input.parse::<Token![;]>()?;
-                        Ok(Item::Verbatim(verbatim::between(begin, input)))
-                    } else {
-                        parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
-                    }
                 } else {
                     Err(lookahead.error())
-                }
-            } else if lookahead.peek(Token![async]) || lookahead.peek(Token![fn]) {
-                let vis: Visibility = input.parse()?;
-                let sig = parse_signature(input)?;
-                if input.peek(Token![;]) {
-                    input.parse::<Token![;]>()?;
-                    Ok(Item::Verbatim(verbatim::between(begin, input)))
-                } else {
-                    parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
                 }
             } else if lookahead.peek(Token![mod]) {
                 input.parse().map(Item::Mod)
@@ -1602,6 +1559,15 @@ pub mod parsing {
         ])
     }
 
+    fn peek_signature(input: ParseStream) -> bool {
+        let fork = input.fork();
+        fork.parse::<Option<Token![const]>>().is_ok()
+            && fork.parse::<Option<Token![async]>>().is_ok()
+            && fork.parse::<Option<Token![unsafe]>>().is_ok()
+            && fork.parse::<Option<Abi>>().is_ok()
+            && fork.peek(Token![fn])
+    }
+
     fn parse_signature(input: ParseStream) -> Result<Signature> {
         let constness: Option<Token![const]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
@@ -1850,7 +1816,7 @@ pub mod parsing {
             let vis: Visibility = ahead.parse()?;
 
             let lookahead = ahead.lookahead1();
-            let mut item = if lookahead.peek(Token![fn]) {
+            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
                 let vis: Visibility = input.parse()?;
                 let sig = parse_signature(input)?;
                 if input.peek(token::Brace) {
@@ -2329,7 +2295,9 @@ pub mod parsing {
             let ahead = input.fork();
 
             let lookahead = ahead.lookahead1();
-            let mut item = if lookahead.peek(Token![const]) {
+            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+                input.parse().map(TraitItem::Method)
+            } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
@@ -2343,12 +2311,6 @@ pub mod parsing {
                 } else {
                     Err(lookahead.error())
                 }
-            } else if lookahead.peek(Token![async])
-                || lookahead.peek(Token![unsafe])
-                || lookahead.peek(Token![extern])
-                || lookahead.peek(Token![fn])
-            {
-                input.parse().map(TraitItem::Method)
             } else if lookahead.peek(Token![type]) {
                 input.parse().map(TraitItem::Type)
             } else if lookahead.peek(Ident)
@@ -2413,21 +2375,7 @@ pub mod parsing {
     impl Parse for TraitItemMethod {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
-            let constness: Option<Token![const]> = input.parse()?;
-            let asyncness: Option<Token![async]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let abi: Option<Abi> = input.parse()?;
-            let fn_token: Token![fn] = input.parse()?;
-            let ident: Ident = input.parse()?;
-            let generics: Generics = input.parse()?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let mut inputs = parse_fn_args(&content)?;
-            let variadic = pop_variadic(&mut inputs);
-
-            let output: ReturnType = input.parse()?;
-            let where_clause: Option<WhereClause> = input.parse()?;
+            let sig = parse_signature(input)?;
 
             let lookahead = input.lookahead1();
             let (brace_token, inner_attrs, stmts, semi_token) = if lookahead.peek(token::Brace) {
@@ -2445,22 +2393,7 @@ pub mod parsing {
 
             Ok(TraitItemMethod {
                 attrs: private::attrs(outer_attrs, inner_attrs),
-                sig: Signature {
-                    constness,
-                    asyncness,
-                    unsafety,
-                    abi,
-                    fn_token,
-                    ident,
-                    paren_token,
-                    inputs,
-                    output,
-                    variadic,
-                    generics: Generics {
-                        where_clause,
-                        ..generics
-                    },
-                },
+                sig,
                 default: brace_token.map(|brace_token| Block { brace_token, stmts }),
                 semi_token,
             })
@@ -2599,7 +2532,9 @@ pub mod parsing {
                 None
             };
 
-            let mut item = if lookahead.peek(Token![const]) {
+            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+                input.parse().map(ImplItem::Method)
+            } else if lookahead.peek(Token![const]) {
                 let const_token: Token![const] = ahead.parse()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
@@ -2624,21 +2559,9 @@ pub mod parsing {
                         input.parse::<Token![;]>()?;
                         return Ok(ImplItem::Verbatim(verbatim::between(begin, input)));
                     }
-                } else if lookahead.peek(Token![unsafe])
-                    || lookahead.peek(Token![async])
-                    || lookahead.peek(Token![extern])
-                    || lookahead.peek(Token![fn])
-                {
-                    input.parse().map(ImplItem::Method)
                 } else {
                     Err(lookahead.error())
                 }
-            } else if lookahead.peek(Token![unsafe])
-                || lookahead.peek(Token![async])
-                || lookahead.peek(Token![extern])
-                || lookahead.peek(Token![fn])
-            {
-                input.parse().map(ImplItem::Method)
             } else if lookahead.peek(Token![type]) {
                 input.advance_to(&ahead);
                 let type_token: Token![type] = input.parse()?;
@@ -2737,21 +2660,7 @@ pub mod parsing {
             let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let defaultness: Option<Token![default]> = input.parse()?;
-            let constness: Option<Token![const]> = input.parse()?;
-            let asyncness: Option<Token![async]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let abi: Option<Abi> = input.parse()?;
-            let fn_token: Token![fn] = input.parse()?;
-            let ident: Ident = input.parse()?;
-            let generics: Generics = input.parse()?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let mut inputs = parse_fn_args(&content)?;
-            let variadic = pop_variadic(&mut inputs);
-
-            let output: ReturnType = input.parse()?;
-            let where_clause: Option<WhereClause> = input.parse()?;
+            let sig = parse_signature(input)?;
 
             let block = if let Some(semi) = input.parse::<Option<Token![;]>>()? {
                 // Accept methods without a body in an impl block because
@@ -2779,22 +2688,7 @@ pub mod parsing {
                 attrs,
                 vis,
                 defaultness,
-                sig: Signature {
-                    constness,
-                    asyncness,
-                    unsafety,
-                    abi,
-                    fn_token,
-                    ident,
-                    paren_token,
-                    inputs,
-                    output,
-                    variadic,
-                    generics: Generics {
-                        where_clause,
-                        ..generics
-                    },
-                },
+                sig,
                 block,
             })
         }

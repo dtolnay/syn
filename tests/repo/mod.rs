@@ -43,10 +43,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path {
-        // TODO: top level fn without body: `fn f();`
-        // https://github.com/dtolnay/syn/issues/761
-        "test/ui/parser/fn-header-syntactic-pass.rs" |
-
         // TODO: mut receiver in fn pointer type: `fn(mut self)`
         // https://github.com/dtolnay/syn/issues/765
         "test/ui/parser/self-param-syntactic-pass.rs" |
