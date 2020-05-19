@@ -1851,7 +1851,23 @@ pub mod parsing {
 
             let lookahead = ahead.lookahead1();
             let mut item = if lookahead.peek(Token![fn]) {
-                input.parse().map(ForeignItem::Fn)
+                let vis: Visibility = input.parse()?;
+                let sig = parse_signature(input)?;
+                if input.peek(token::Brace) {
+                    let content;
+                    braced!(content in input);
+                    content.call(Attribute::parse_inner)?;
+                    content.call(Block::parse_within)?;
+
+                    Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    Ok(ForeignItem::Fn(ForeignItemFn {
+                        attrs: Vec::new(),
+                        vis,
+                        sig,
+                        semi_token: input.parse()?,
+                    }))
+                }
             } else if lookahead.peek(Token![static]) {
                 let vis = input.parse()?;
                 let static_token = input.parse()?;
@@ -1910,38 +1926,12 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let fn_token: Token![fn] = input.parse()?;
-            let ident: Ident = input.parse()?;
-            let generics: Generics = input.parse()?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let mut inputs = parse_fn_args(&content)?;
-            let variadic = pop_variadic(&mut inputs);
-
-            let output: ReturnType = input.parse()?;
-            let where_clause: Option<WhereClause> = input.parse()?;
+            let sig = parse_signature(input)?;
             let semi_token: Token![;] = input.parse()?;
-
             Ok(ForeignItemFn {
                 attrs,
                 vis,
-                sig: Signature {
-                    constness: None,
-                    asyncness: None,
-                    unsafety: None,
-                    abi: None,
-                    fn_token,
-                    ident,
-                    paren_token,
-                    inputs,
-                    output,
-                    variadic,
-                    generics: Generics {
-                        where_clause,
-                        ..generics
-                    },
-                },
+                sig,
                 semi_token,
             })
         }
