@@ -2220,7 +2220,7 @@ pub mod parsing {
             let mut item = if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) {
+                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
                     input.parse().map(TraitItem::Const)
                 } else if lookahead.peek(Token![async])
                     || lookahead.peek(Token![unsafe])
@@ -2274,7 +2274,14 @@ pub mod parsing {
             Ok(TraitItemConst {
                 attrs: input.call(Attribute::parse_outer)?,
                 const_token: input.parse()?,
-                ident: input.parse()?,
+                ident: {
+                    let lookahead = input.lookahead1();
+                    if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                        input.call(Ident::parse_any)?
+                    } else {
+                        return Err(lookahead.error());
+                    }
+                },
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 default: {
@@ -2483,9 +2490,9 @@ pub mod parsing {
             let mut item = if lookahead.peek(Token![const]) {
                 let const_token: Token![const] = ahead.parse()?;
                 let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) {
+                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
                     input.advance_to(&ahead);
-                    let ident: Ident = input.parse()?;
+                    let ident: Ident = input.call(Ident::parse_any)?;
                     let colon_token: Token![:] = input.parse()?;
                     let ty: Type = input.parse()?;
                     if let Some(eq_token) = input.parse()? {
@@ -2596,7 +2603,14 @@ pub mod parsing {
                 vis: input.parse()?,
                 defaultness: input.parse()?,
                 const_token: input.parse()?,
-                ident: input.parse()?,
+                ident: {
+                    let lookahead = input.lookahead1();
+                    if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                        input.call(Ident::parse_any)?
+                    } else {
+                        return Err(lookahead.error());
+                    }
+                },
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,
