@@ -2009,32 +2009,7 @@ pub(crate) mod parsing {
         Ok(ExprLet {
             attrs: Vec::new(),
             let_token: input.parse()?,
-            pat: {
-                let leading_vert: Option<Token![|]> = input.parse()?;
-                let pat: Pat = input.parse()?;
-                if leading_vert.is_some()
-                    || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
-                {
-                    let mut cases = Punctuated::new();
-                    cases.push_value(pat);
-                    while input.peek(Token![|])
-                        && !input.peek(Token![||])
-                        && !input.peek(Token![|=])
-                    {
-                        let punct = input.parse()?;
-                        cases.push_punct(punct);
-                        let pat: Pat = input.parse()?;
-                        cases.push_value(pat);
-                    }
-                    Pat::Or(PatOr {
-                        attrs: Vec::new(),
-                        leading_vert,
-                        cases,
-                    })
-                } else {
-                    pat
-                }
-            },
+            pat: pat::parsing::pat_or(input)?,
             eq_token: input.parse()?,
             expr: Box::new(input.call(expr_no_struct)?),
         })
@@ -2085,23 +2060,7 @@ pub(crate) mod parsing {
             let label: Option<Label> = input.parse()?;
             let for_token: Token![for] = input.parse()?;
 
-            let leading_vert: Option<Token![|]> = input.parse()?;
-            let mut pat: Pat = input.parse()?;
-            if leading_vert.is_some() || input.peek(Token![|]) {
-                let mut cases = Punctuated::new();
-                cases.push_value(pat);
-                while input.peek(Token![|]) {
-                    let punct = input.parse()?;
-                    cases.push_punct(punct);
-                    let pat: Pat = input.parse()?;
-                    cases.push_value(pat);
-                }
-                pat = Pat::Or(PatOr {
-                    attrs: Vec::new(),
-                    leading_vert,
-                    cases,
-                });
-            }
+            let pat = pat::parsing::pat_or(input)?;
 
             let in_token: Token![in] = input.parse()?;
             let expr: Expr = input.call(expr_no_struct)?;
@@ -2617,27 +2576,7 @@ pub(crate) mod parsing {
             let requires_comma;
             Ok(Arm {
                 attrs: input.call(Attribute::parse_outer)?,
-                pat: {
-                    let leading_vert: Option<Token![|]> = input.parse()?;
-                    let pat: Pat = input.parse()?;
-                    if leading_vert.is_some() || input.peek(Token![|]) {
-                        let mut cases = Punctuated::new();
-                        cases.push_value(pat);
-                        while input.peek(Token![|]) {
-                            let punct = input.parse()?;
-                            cases.push_punct(punct);
-                            let pat: Pat = input.parse()?;
-                            cases.push_value(pat);
-                        }
-                        Pat::Or(PatOr {
-                            attrs: Vec::new(),
-                            leading_vert,
-                            cases,
-                        })
-                    } else {
-                        pat
-                    }
-                },
+                pat: pat::parsing::pat_or(input)?,
                 guard: {
                     if input.peek(Token![if]) {
                         let if_token: Token![if] = input.parse()?;

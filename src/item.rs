@@ -1671,7 +1671,7 @@ pub mod parsing {
 
         Ok(PatType {
             attrs: Vec::new(),
-            pat: input.parse()?,
+            pat: Box::new(pat::parsing::pat_or(input)?),
             colon_token: input.parse()?,
             ty: Box::new(match input.parse::<Option<Token![...]>>()? {
                 Some(dot3) => Type::Verbatim(variadic_to_tokens(&dot3)),

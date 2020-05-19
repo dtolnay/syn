@@ -43,26 +43,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path {
-        // TODO: or-patterns patterns: `Some(1 | 8)`
-        // https://github.com/dtolnay/syn/issues/758
-        "test/mir-opt/exponential-or.rs" |
-        "test/ui/or-patterns/basic-switch.rs" |
-        "test/ui/or-patterns/basic-switchint.rs" |
-        "test/ui/or-patterns/bindings-runpass-1.rs" |
-        "test/ui/or-patterns/bindings-runpass-2.rs" |
-        "test/ui/or-patterns/consistent-bindings.rs" |
-        "test/ui/or-patterns/exhaustiveness-pass.rs" |
-        "test/ui/or-patterns/for-loop.rs" |
-        "test/ui/or-patterns/if-let-while-let.rs" |
-        "test/ui/or-patterns/issue-67514-irrefutable-param.rs" |
-        "test/ui/or-patterns/issue-68785-irrefutable-param-with-at.rs" |
-        "test/ui/or-patterns/let-pattern.rs" |
-        "test/ui/or-patterns/mix-with-wild.rs" |
-        "test/ui/or-patterns/or-patterns-default-binding-modes.rs" |
-        "test/ui/or-patterns/or-patterns-syntactic-pass.rs" |
-        "test/ui/or-patterns/search-via-bindings.rs" |
-        "test/ui/or-patterns/struct-like.rs" |
-
         // TODO: top level fn without body: `fn f();`
         // https://github.com/dtolnay/syn/issues/761
         "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
