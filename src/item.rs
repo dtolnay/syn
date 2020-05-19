@@ -1176,7 +1176,14 @@ pub mod parsing {
                 if lookahead.peek(Token![crate]) {
                     input.parse().map(Item::ExternCrate)
                 } else if lookahead.peek(Token![fn]) {
-                    input.parse().map(Item::Fn)
+                    let vis: Visibility = input.parse()?;
+                    let sig = parse_signature(input)?;
+                    if input.peek(Token![;]) {
+                        input.parse::<Token![;]>()?;
+                        Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    } else {
+                        parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
+                    }
                 } else if lookahead.peek(token::Brace) {
                     input.parse().map(Item::ForeignMod)
                 } else if lookahead.peek(LitStr) {
@@ -1185,7 +1192,14 @@ pub mod parsing {
                     if lookahead.peek(token::Brace) {
                         input.parse().map(Item::ForeignMod)
                     } else if lookahead.peek(Token![fn]) {
-                        input.parse().map(Item::Fn)
+                        let vis: Visibility = input.parse()?;
+                        let sig = parse_signature(input)?;
+                        if input.peek(Token![;]) {
+                            input.parse::<Token![;]>()?;
+                            Ok(Item::Verbatim(verbatim::between(begin, input)))
+                        } else {
+                            parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
+                        }
                     } else {
                         Err(lookahead.error())
                     }
@@ -1255,7 +1269,14 @@ pub mod parsing {
                     || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![fn])
                 {
-                    input.parse().map(Item::Fn)
+                    let vis: Visibility = input.parse()?;
+                    let sig = parse_signature(input)?;
+                    if input.peek(Token![;]) {
+                        input.parse::<Token![;]>()?;
+                        Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    } else {
+                        parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
+                    }
                 } else {
                     Err(lookahead.error())
                 }
@@ -1272,12 +1293,26 @@ pub mod parsing {
                     || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![fn])
                 {
-                    input.parse().map(Item::Fn)
+                    let vis: Visibility = input.parse()?;
+                    let sig = parse_signature(input)?;
+                    if input.peek(Token![;]) {
+                        input.parse::<Token![;]>()?;
+                        Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    } else {
+                        parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
+                    }
                 } else {
                     Err(lookahead.error())
                 }
             } else if lookahead.peek(Token![async]) || lookahead.peek(Token![fn]) {
-                input.parse().map(Item::Fn)
+                let vis: Visibility = input.parse()?;
+                let sig = parse_signature(input)?;
+                if input.peek(Token![;]) {
+                    input.parse::<Token![;]>()?;
+                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
+                }
             } else if lookahead.peek(Token![mod]) {
                 input.parse().map(Item::Mod)
             } else if lookahead.peek(Token![type]) {
@@ -1567,53 +1602,67 @@ pub mod parsing {
         ])
     }
 
+    fn parse_signature(input: ParseStream) -> Result<Signature> {
+        let constness: Option<Token![const]> = input.parse()?;
+        let asyncness: Option<Token![async]> = input.parse()?;
+        let unsafety: Option<Token![unsafe]> = input.parse()?;
+        let abi: Option<Abi> = input.parse()?;
+        let fn_token: Token![fn] = input.parse()?;
+        let ident: Ident = input.parse()?;
+        let generics: Generics = input.parse()?;
+
+        let content;
+        let paren_token = parenthesized!(content in input);
+        let mut inputs = parse_fn_args(&content)?;
+        let variadic = pop_variadic(&mut inputs);
+
+        let output: ReturnType = input.parse()?;
+        let where_clause: Option<WhereClause> = input.parse()?;
+
+        Ok(Signature {
+            constness,
+            asyncness,
+            unsafety,
+            abi,
+            fn_token,
+            ident,
+            paren_token,
+            inputs,
+            output,
+            variadic,
+            generics: Generics {
+                where_clause,
+                ..generics
+            },
+        })
+    }
+
     impl Parse for ItemFn {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let constness: Option<Token![const]> = input.parse()?;
-            let asyncness: Option<Token![async]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let abi: Option<Abi> = input.parse()?;
-            let fn_token: Token![fn] = input.parse()?;
-            let ident: Ident = input.parse()?;
-            let generics: Generics = input.parse()?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let mut inputs = parse_fn_args(&content)?;
-            let variadic = pop_variadic(&mut inputs);
-
-            let output: ReturnType = input.parse()?;
-            let where_clause: Option<WhereClause> = input.parse()?;
-
-            let content;
-            let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
-            let stmts = content.call(Block::parse_within)?;
-
-            Ok(ItemFn {
-                attrs: private::attrs(outer_attrs, inner_attrs),
-                vis,
-                sig: Signature {
-                    constness,
-                    asyncness,
-                    unsafety,
-                    abi,
-                    fn_token,
-                    ident,
-                    paren_token,
-                    inputs,
-                    output,
-                    variadic,
-                    generics: Generics {
-                        where_clause,
-                        ..generics
-                    },
-                },
-                block: Box::new(Block { brace_token, stmts }),
-            })
+            let sig = parse_signature(input)?;
+            parse_rest_of_fn(input, outer_attrs, vis, sig)
         }
+    }
+
+    fn parse_rest_of_fn(
+        input: ParseStream,
+        outer_attrs: Vec<Attribute>,
+        vis: Visibility,
+        sig: Signature,
+    ) -> Result<ItemFn> {
+        let content;
+        let brace_token = braced!(content in input);
+        let inner_attrs = content.call(Attribute::parse_inner)?;
+        let stmts = content.call(Block::parse_within)?;
+
+        Ok(ItemFn {
+            attrs: private::attrs(outer_attrs, inner_attrs),
+            vis,
+            sig,
+            block: Box::new(Block { brace_token, stmts }),
+        })
     }
 
     impl Parse for FnArg {
