@@ -596,7 +596,7 @@ pub mod parsing {
                 attrs,
                 member,
                 colon_token: input.parse()?,
-                pat: Box::new(pat_or(input)?),
+                pat: Box::new(multi_pat(input)?),
             });
         }
 
@@ -675,7 +675,7 @@ pub mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value = pat_or(&content)?;
+            let value = multi_pat(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -771,7 +771,7 @@ pub mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value = pat_or(&content)?;
+            let value = multi_pat(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -787,8 +787,16 @@ pub mod parsing {
         })
     }
 
-    pub fn pat_or(input: ParseStream) -> Result<Pat> {
+    pub fn multi_pat(input: ParseStream) -> Result<Pat> {
+        multi_pat_impl(input, None)
+    }
+
+    pub fn multi_pat_with_leading_vert(input: ParseStream) -> Result<Pat> {
         let leading_vert: Option<Token![|]> = input.parse()?;
+        multi_pat_impl(input, leading_vert)
+    }
+
+    fn multi_pat_impl(input: ParseStream, leading_vert: Option<Token![|]>) -> Result<Pat> {
         let mut pat: Pat = input.parse()?;
         if leading_vert.is_some()
             || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
