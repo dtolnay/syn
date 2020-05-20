@@ -11,7 +11,8 @@ use rustc_ast::ast::{
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
     FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, GlobalAsm, ImplPolarity, IntTy, IsAuto, Item,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, ImplPolarity, InlineAsm, InlineAsmOperand,
+    InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy, IsAuto, Item,
     ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, LlvmAsmDialect,
     LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacDelimiter, MacStmtStyle,
     MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind,
@@ -124,8 +125,10 @@ spanless_eq_partial_eq!(u16);
 spanless_eq_partial_eq!(u128);
 spanless_eq_partial_eq!(usize);
 spanless_eq_partial_eq!(char);
+spanless_eq_partial_eq!(String);
 spanless_eq_partial_eq!(Symbol);
 spanless_eq_partial_eq!(DelimToken);
+spanless_eq_partial_eq!(InlineAsmOptions);
 
 macro_rules! spanless_eq_struct {
     {
@@ -280,6 +283,7 @@ spanless_eq_struct!(ForeignMod; abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(GlobalAsm; asm);
+spanless_eq_struct!(InlineAsm; template operands options);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
@@ -333,6 +337,8 @@ spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default) Const(ty));
 spanless_eq_enum!(ImplPolarity; Positive Negative(0));
+spanless_eq_enum!(InlineAsmRegOrRegClass; Reg(0) RegClass(0));
+spanless_eq_enum!(InlineAsmTemplatePiece; String(0) Placeholder(operand_idx modifier span));
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
 spanless_eq_enum!(IsAuto; Yes No);
 spanless_eq_enum!(LitFloatType; Suffixed(0) Unsuffixed);
@@ -363,8 +369,11 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) Call(0 1) MethodCall(0 1) Tup(0)
     While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1) Closure(0 1 2 3 4 5)
     Block(0 1) Async(0 1 2) Await(0) TryBlock(0) Assign(0 1 2) AssignOp(0 1 2)
     Field(0 1) Index(0 1) Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1)
-    Continue(0) Ret(0) LlvmInlineAsm(0) MacCall(0) Struct(0 1 2) Repeat(0 1)
-    Paren(0) Try(0) Yield(0) Err);
+    Continue(0) Ret(0) InlineAsm(0) LlvmInlineAsm(0) MacCall(0) Struct(0 1 2)
+    Repeat(0 1) Paren(0) Try(0) Yield(0) Err);
+spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
+    InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(expr)
+    Sym(expr));
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
     Fn(0 1 2 3) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0 1 2 3) Enum(0 1)
     Struct(0 1) Union(0 1) Trait(0 1 2 3 4) TraitAlias(0 1)
