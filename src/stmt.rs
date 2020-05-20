@@ -219,7 +219,7 @@ pub mod parsing {
             attrs,
             let_token: input.parse()?,
             pat: {
-                let mut pat: Pat = pat::parsing::pat_or(input)?;
+                let mut pat: Pat = pat::parsing::multi_pat_with_leading_vert(input)?;
                 if input.peek(Token![:]) {
                     let colon_token: Token![:] = input.parse()?;
                     let ty: Type = input.parse()?;

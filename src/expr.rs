@@ -2009,7 +2009,7 @@ pub(crate) mod parsing {
         Ok(ExprLet {
             attrs: Vec::new(),
             let_token: input.parse()?,
-            pat: pat::parsing::pat_or(input)?,
+            pat: pat::parsing::multi_pat_with_leading_vert(input)?,
             eq_token: input.parse()?,
             expr: Box::new(input.call(expr_no_struct)?),
         })
@@ -2060,7 +2060,7 @@ pub(crate) mod parsing {
             let label: Option<Label> = input.parse()?;
             let for_token: Token![for] = input.parse()?;
 
-            let pat = pat::parsing::pat_or(input)?;
+            let pat = pat::parsing::multi_pat_with_leading_vert(input)?;
 
             let in_token: Token![in] = input.parse()?;
             let expr: Expr = input.call(expr_no_struct)?;
@@ -2576,7 +2576,7 @@ pub(crate) mod parsing {
             let requires_comma;
             Ok(Arm {
                 attrs: input.call(Attribute::parse_outer)?,
-                pat: pat::parsing::pat_or(input)?,
+                pat: pat::parsing::multi_pat_with_leading_vert(input)?,
                 guard: {
                     if input.peek(Token![if]) {
                         let if_token: Token![if] = input.parse()?;
