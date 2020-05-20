@@ -49,7 +49,6 @@ pub mod parsing {
 
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
-    use crate::punctuated::Punctuated;
     use proc_macro2::TokenStream;
 
     impl Block {
@@ -220,28 +219,7 @@ pub mod parsing {
             attrs,
             let_token: input.parse()?,
             pat: {
-                let leading_vert: Option<Token![|]> = input.parse()?;
-                let mut pat: Pat = input.parse()?;
-                if leading_vert.is_some()
-                    || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
-                {
-                    let mut cases = Punctuated::new();
-                    cases.push_value(pat);
-                    while input.peek(Token![|])
-                        && !input.peek(Token![||])
-                        && !input.peek(Token![|=])
-                    {
-                        let punct = input.parse()?;
-                        cases.push_punct(punct);
-                        let pat: Pat = input.parse()?;
-                        cases.push_value(pat);
-                    }
-                    pat = Pat::Or(PatOr {
-                        attrs: Vec::new(),
-                        leading_vert,
-                        cases,
-                    });
-                }
+                let mut pat: Pat = pat::parsing::pat_or(input)?;
                 if input.peek(Token![:]) {
                     let colon_token: Token![:] = input.parse()?;
                     let ty: Type = input.parse()?;

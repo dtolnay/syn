@@ -385,7 +385,7 @@ impl Hash for Pat {
 }
 
 #[cfg(feature = "parsing")]
-mod parsing {
+pub mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
@@ -596,7 +596,7 @@ mod parsing {
                 attrs,
                 member,
                 colon_token: input.parse()?,
-                pat: input.parse()?,
+                pat: Box::new(pat_or(input)?),
             });
         }
 
@@ -675,7 +675,7 @@ mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value: Pat = content.parse()?;
+            let value = pat_or(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -771,7 +771,7 @@ mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value: Pat = content.parse()?;
+            let value = pat_or(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -785,6 +785,29 @@ mod parsing {
             bracket_token,
             elems,
         })
+    }
+
+    pub fn pat_or(input: ParseStream) -> Result<Pat> {
+        let leading_vert: Option<Token![|]> = input.parse()?;
+        let mut pat: Pat = input.parse()?;
+        if leading_vert.is_some()
+            || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
+        {
+            let mut cases = Punctuated::new();
+            cases.push_value(pat);
+            while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                let punct = input.parse()?;
+                cases.push_punct(punct);
+                let pat: Pat = input.parse()?;
+                cases.push_value(pat);
+            }
+            pat = Pat::Or(PatOr {
+                attrs: Vec::new(),
+                leading_vert,
+                cases,
+            });
+        }
+        Ok(pat)
     }
 }
 
