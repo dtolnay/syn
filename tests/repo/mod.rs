@@ -48,10 +48,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         "test/ui/parser/fn-body-optional-syntactic-pass.rs" |
         "test/ui/parser/fn-header-syntactic-pass.rs" |
 
-        // TODO: extern static with value: `extern { static X: u8 = 0; }`
-        // https://github.com/dtolnay/syn/issues/762
-        "test/ui/parser/foreign-static-syntactic-pass.rs" |
-
         // TODO: mut receiver in fn pointer type: `fn(mut self)`
         // https://github.com/dtolnay/syn/issues/765
         "test/ui/parser/self-param-syntactic-pass.rs" |
