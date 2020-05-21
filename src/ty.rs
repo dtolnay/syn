@@ -983,7 +983,10 @@ pub mod parsing {
         }
     }
 
-    fn parse_bare_fn_arg(input: ParseStream, allow_mut_self: bool) -> Result<Option<BareFnArg>> {
+    fn parse_bare_fn_arg(
+        input: ParseStream,
+        mut allow_mut_self: bool,
+    ) -> Result<Option<BareFnArg>> {
         let mut has_mut_self = false;
         let arg = BareFnArg {
             attrs: input.call(Attribute::parse_outer)?,
@@ -1002,6 +1005,7 @@ pub mod parsing {
                     && !input.peek3(Token![::])
                 {
                     has_mut_self = true;
+                    allow_mut_self = false;
                     input.parse::<Token![mut]>()?;
                     input.parse::<Token![self]>()?;
                     input.parse::<Token![:]>()?;
