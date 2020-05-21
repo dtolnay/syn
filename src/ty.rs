@@ -1004,7 +1004,7 @@ pub mod parsing {
                     has_mut_self = true;
                     input.parse::<Token![mut]>()?;
                     input.parse::<Token![self]>()?;
-                    input.parse::<Option<Token![:]>>()?;
+                    input.parse::<Token![:]>()?;
                     None
                 } else {
                     None
