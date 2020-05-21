@@ -43,16 +43,10 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path {
-        // TODO: const trait impls and bounds
-        // https://github.com/dtolnay/syn/issues/766
+        // TODO: const trait bounds
         // https://github.com/dtolnay/syn/issues/767
-        "test/ui/rfc-2632-const-trait-impl/assoc-type.rs" |
-        "test/ui/rfc-2632-const-trait-impl/call-const-trait-method-pass.rs" |
         "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs" |
         "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs" |
-        "test/ui/rfc-2632-const-trait-impl/feature-gate.rs" |
-        "test/ui/rfc-2632-const-trait-impl/generic-bound.rs" |
-        "test/ui/rfc-2632-const-trait-impl/syntax.rs" |
 
         // Deprecated placement syntax
         "test/ui/obsolete-in-place/bad.rs" |
