@@ -1266,7 +1266,8 @@ pub mod parsing {
                 {
                     input.parse().map(Item::Trait)
                 } else if lookahead.peek(Token![impl]) {
-                    if let Some(item) = parse_impl(input, true)? {
+                    let allow_const_impl = true;
+                    if let Some(item) = parse_impl(input, allow_const_impl)? {
                         Ok(Item::Impl(item))
                     } else {
                         Ok(Item::Verbatim(verbatim::between(begin, input)))
@@ -1293,7 +1294,8 @@ pub mod parsing {
             } else if lookahead.peek(Token![impl])
                 || lookahead.peek(Token![default]) && !ahead.peek2(Token![!])
             {
-                if let Some(item) = parse_impl(input, true)? {
+                let allow_const_impl = true;
+                if let Some(item) = parse_impl(input, allow_const_impl)? {
                     Ok(Item::Impl(item))
                 } else {
                     Ok(Item::Verbatim(verbatim::between(begin, input)))
@@ -2469,7 +2471,8 @@ pub mod parsing {
 
     impl Parse for ItemImpl {
         fn parse(input: ParseStream) -> Result<Self> {
-            parse_impl(input, false).map(Option::unwrap)
+            let allow_const_impl = false;
+            parse_impl(input, allow_const_impl).map(Option::unwrap)
         }
     }
 
