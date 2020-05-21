@@ -1031,7 +1031,10 @@ pub mod parsing {
             } else if allow_mut_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
                 has_mut_self = true;
                 input.parse::<Token![mut]>()?;
-                input.parse()?
+                Type::Path(TypePath {
+                    qself: None,
+                    path: input.parse::<Token![self]>()?.into(),
+                })
             } else {
                 input.parse()?
             },
