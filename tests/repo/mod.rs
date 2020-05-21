@@ -43,10 +43,6 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     match path {
-        // TODO: mut receiver in fn pointer type: `fn(mut self)`
-        // https://github.com/dtolnay/syn/issues/765
-        "test/ui/parser/self-param-syntactic-pass.rs" |
-
         // TODO: const trait impls and bounds
         // https://github.com/dtolnay/syn/issues/766
         // https://github.com/dtolnay/syn/issues/767
