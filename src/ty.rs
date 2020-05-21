@@ -554,7 +554,8 @@ pub mod parsing {
             || lookahead.peek(Token![unsafe])
             || lookahead.peek(Token![extern]) && !input.peek2(Token![::])
         {
-            if let Some(mut bare_fn) = parse_bare_fn(input, true)? {
+            let allow_mut_self = true;
+            if let Some(mut bare_fn) = parse_bare_fn(input, allow_mut_self)? {
                 bare_fn.lifetimes = lifetimes;
                 Ok(Type::BareFn(bare_fn))
             } else {
@@ -728,7 +729,8 @@ pub mod parsing {
 
     impl Parse for TypeBareFn {
         fn parse(input: ParseStream) -> Result<Self> {
-            parse_bare_fn(input, false).map(Option::unwrap)
+            let allow_mut_self = false;
+            parse_bare_fn(input, allow_mut_self).map(Option::unwrap)
         }
     }
 
@@ -969,7 +971,8 @@ pub mod parsing {
 
     impl Parse for BareFnArg {
         fn parse(input: ParseStream) -> Result<Self> {
-            parse_bare_fn_arg(input, false).map(Option::unwrap)
+            let allow_mut_self = false;
+            parse_bare_fn_arg(input, allow_mut_self).map(Option::unwrap)
         }
     }
 
