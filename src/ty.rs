@@ -412,7 +412,8 @@ pub mod parsing {
 
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
-            ambig_ty(input, true)
+            let allow_plus = true;
+            ambig_ty(input, allow_plus)
         }
     }
 
@@ -423,7 +424,8 @@ pub mod parsing {
         ///
         /// This parser does not allow a `+`, while the default parser does.
         pub fn without_plus(input: ParseStream) -> Result<Self> {
-            ambig_ty(input, false)
+            let allow_plus = false;
+            ambig_ty(input, allow_plus)
         }
     }
 
@@ -852,7 +854,8 @@ pub mod parsing {
 
     impl ReturnType {
         pub fn without_plus(input: ParseStream) -> Result<Self> {
-            Self::parse(input, false)
+            let allow_plus = false;
+            Self::parse(input, allow_plus)
         }
 
         pub fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
@@ -889,7 +892,8 @@ pub mod parsing {
 
     impl TypeTraitObject {
         pub fn without_plus(input: ParseStream) -> Result<Self> {
-            Self::parse(input, false)
+            let allow_plus = false;
+            Self::parse(input, allow_plus)
         }
 
         // Only allow multiple trait references if allow_plus is true.
@@ -955,7 +959,8 @@ pub mod parsing {
 
     impl Parse for TypeParen {
         fn parse(input: ParseStream) -> Result<Self> {
-            Self::parse(input, false)
+            let allow_plus = false;
+            Self::parse(input, allow_plus)
         }
     }
 
