@@ -1010,30 +1010,26 @@ pub mod parsing {
                     None
                 }
             },
-            ty: match input.parse::<Option<Token![...]>>()? {
-                Some(dot3) => {
-                    let args = vec![
-                        TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                        TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                        TokenTree::Punct(Punct::new('.', Spacing::Alone)),
-                    ];
-                    let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
-                        |(mut arg, span)| {
-                            arg.set_span(*span);
-                            arg
-                        },
-                    ));
-                    Type::Verbatim(tokens)
-                }
-                None => {
-                    if allow_mut_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
-                        has_mut_self = true;
-                        input.parse::<Token![mut]>()?;
-                        input.parse()?
-                    } else {
-                        input.parse()?
-                    }
-                }
+            ty: if !has_mut_self && input.peek(Token![...]) {
+                let dot3 = input.parse::<Token![...]>()?;
+                let args = vec![
+                    TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                    TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                    TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+                ];
+                let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
+                    |(mut arg, span)| {
+                        arg.set_span(*span);
+                        arg
+                    },
+                ));
+                Type::Verbatim(tokens)
+            } else if allow_mut_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
+                has_mut_self = true;
+                input.parse::<Token![mut]>()?;
+                input.parse()?
+            } else {
+                input.parse()?
             },
         };
 
