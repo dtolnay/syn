@@ -2000,7 +2000,16 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn generic_method_argument(input: ParseStream) -> Result<GenericMethodArgument> {
-        // TODO parse const generics as well
+        if input.peek(Lit) {
+            let lit = input.parse()?;
+            return Ok(GenericMethodArgument::Const(Expr::Lit(lit)));
+        }
+
+        if input.peek(token::Brace) {
+            let block = input.call(expr::parsing::expr_block)?;
+            return Ok(GenericMethodArgument::Const(Expr::Block(block)));
+        }
+
         input.parse().map(GenericMethodArgument::Type)
     }
 
