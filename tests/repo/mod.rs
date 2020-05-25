@@ -8,9 +8,18 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "2c462a2f776b899d46743b1b44eda976e846e61d";
+const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 static EXCLUDE: &[&str] = &[
+    // TODO
+    "test/ui/const-generics/const-param-after-const-literal-arg.rs",
+    "test/ui/const-generics/lazy-normalization/issue-71922.rs",
+    "test/ui/const-generics/trait-const-args.rs",
+    "test/ui/parser/item-free-type-bounds-syntactic-pass.rs",
+    "test/ui/proc-macro/trait-fn-args-2015.rs",
+    "tools/clippy/tests/ui/cfg_attr_rustfmt.rs",
+    "tools/clippy/tests/ui/crashes/ice-4775.rs",
+
     // TODO: const trait bounds
     // https://github.com/dtolnay/syn/issues/767
     "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs",
