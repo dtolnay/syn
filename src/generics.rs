@@ -1077,7 +1077,7 @@ mod printing {
                         if let Type::Verbatim(default) = default {
                             let mut iter = default.clone().into_iter();
                             match (iter.next(), iter.next()) {
-                                (Some(TokenTree::Punct(q)), Some(TokenTree::Ident(c)))
+                                (Some(TokenTree::Punct(ref q)), Some(TokenTree::Ident(ref c)))
                                     if q.as_char() == '?' && c == "const" =>
                                 {
                                     return default.to_tokens(tokens);
