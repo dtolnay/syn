@@ -10,6 +10,7 @@ use walkdir::DirEntry;
 
 const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
+#[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
     // TODO: impl<const N: usize>
     // https://github.com/dtolnay/syn/issues/822
