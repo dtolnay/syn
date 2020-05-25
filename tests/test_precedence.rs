@@ -208,9 +208,9 @@ fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on libsyntax objects.
 fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Block, BorrowKind, Expr, ExprKind, Field, MacCall, Pat, Stmt, StmtKind, Ty,
+        Block, BorrowKind, Expr, ExprKind, Field, GenericArg, MacCall, Pat, Stmt, StmtKind, Ty,
     };
-    use rustc_ast::mut_visit::MutVisitor;
+    use rustc_ast::mut_visit::{noop_visit_generic_arg, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
     use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
@@ -282,6 +282,14 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
             }
         }
 
+        fn visit_generic_arg(&mut self, arg: &mut GenericArg) {
+            match arg {
+                // Don't wrap const generic arg as that's invalid syntax.
+                GenericArg::Const(arg) => noop_visit_expr(&mut arg.value, self),
+                _ => noop_visit_generic_arg(arg, self),
+            }
+        }
+
         fn visit_block(&mut self, block: &mut P<Block>) {
             self.visit_id(&mut block.id);
             block
@@ -340,6 +348,14 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                     expr: Box::new(fold_expr(self, expr)),
                     paren_token: token::Paren::default(),
                 }),
+            }
+        }
+
+        fn fold_generic_argument(&mut self, arg: GenericArgument) -> GenericArgument {
+            match arg {
+                // Don't wrap const generic arg as that's invalid syntax.
+                GenericArgument::Const(a) => GenericArgument::Const(fold_expr(self, a)),
+                _ => fold_generic_argument(self, arg),
             }
         }
 
