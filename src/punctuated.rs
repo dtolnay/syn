@@ -227,6 +227,12 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
+    /// Clears the sequence of all values and punctuation, making it empty.
+    pub fn clear(&mut self) {
+        self.inner.clear();
+        self.last = None;
+    }
+
     /// Parses zero or more occurrences of `T` separated by punctuation of type
     /// `P`, with optional trailing punctuation.
     ///
