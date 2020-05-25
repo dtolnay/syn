@@ -25,6 +25,7 @@ jobs:
         rust: [stable, beta, 1.31.0]
         include:
           - rust: nightly
+            components: rustc-dev
           - rust: nightly
             name: WebAssembly
             target: wasm32-unknown-unknown
@@ -41,6 +42,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
+          components: ${{matrix.components}}
       - if: matrix.target
         run: rustup target add ${{matrix.target}}
       - run: cargo check ${{env.target}} --no-default-features
@@ -58,7 +60,7 @@ jobs:
       - run: cargo check ${{env.target}} --no-default-features --features 'full parsing printing'
       - run: cargo check ${{env.target}} --no-default-features --features 'fold visit visit-mut parsing printing'
       - run: cargo check ${{env.target}} --no-default-features --features 'full fold visit visit-mut parsing printing'
-      - if: matrix.rust == 'nightly' && matrix.target == ''
+      - if: matrix.components == 'rustc-dev'
         run: cargo check --benches --all-features --release
 
   examples:
