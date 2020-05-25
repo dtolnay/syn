@@ -116,7 +116,7 @@ fn test_rustc_precedence() {
 
             let (l_passed, l_failed) = match syn::parse_file(&content) {
                 Ok(file) => {
-                    let edition = repo::edition(path);
+                    let edition = repo::edition(path).parse().unwrap();
                     let exprs = collect_exprs(file);
                     test_expressions(edition, exprs)
                 }

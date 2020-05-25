@@ -76,7 +76,7 @@ fn test_round_trip() {
                 }
             };
             let back = quote!(#krate).to_string();
-            let edition = repo::edition(path);
+            let edition = repo::edition(path).parse().unwrap();
 
             let equal = panic::catch_unwind(|| {
                 rustc_ast::with_globals(edition, || {
