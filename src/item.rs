@@ -1306,7 +1306,6 @@ pub mod parsing {
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
                     || lookahead.peek(Token![super])
-                    || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![crate])
                     || lookahead.peek(Token![::]))
             {
@@ -1494,7 +1493,6 @@ pub mod parsing {
                 || lookahead.peek(Token![self])
                 || lookahead.peek(Token![super])
                 || lookahead.peek(Token![crate])
-                || lookahead.peek(Token![extern])
             {
                 let ident = input.call(Ident::parse_any)?;
                 if input.peek(Token![::]) {
@@ -1929,7 +1927,6 @@ pub mod parsing {
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
                     || lookahead.peek(Token![super])
-                    || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![crate])
                     || lookahead.peek(Token![::]))
             {
@@ -2393,7 +2390,6 @@ pub mod parsing {
             } else if lookahead.peek(Ident)
                 || lookahead.peek(Token![self])
                 || lookahead.peek(Token![super])
-                || lookahead.peek(Token![extern])
                 || lookahead.peek(Token![crate])
                 || lookahead.peek(Token![::])
             {
@@ -2694,7 +2690,6 @@ pub mod parsing {
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
                     || lookahead.peek(Token![super])
-                    || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![crate])
                     || lookahead.peek(Token![::]))
             {

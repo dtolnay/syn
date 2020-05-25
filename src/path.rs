@@ -291,11 +291,7 @@ pub mod parsing {
 
     impl PathSegment {
         fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
-            if input.peek(Token![super])
-                || input.peek(Token![self])
-                || input.peek(Token![crate])
-                || input.peek(Token![extern])
-            {
+            if input.peek(Token![super]) || input.peek(Token![self]) || input.peek(Token![crate]) {
                 let ident = input.call(Ident::parse_any)?;
                 return Ok(PathSegment::from(ident));
             }
@@ -400,7 +396,6 @@ pub mod parsing {
                             && !input.peek(Token![self])
                             && !input.peek(Token![Self])
                             && !input.peek(Token![crate])
-                            && !input.peek(Token![extern])
                         {
                             break;
                         }

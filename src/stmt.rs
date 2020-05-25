@@ -163,7 +163,7 @@ pub mod parsing {
             stmt_local(input, attrs).map(Stmt::Local)
         } else if input.peek(Token![pub])
             || input.peek(Token![crate]) && !input.peek2(Token![::])
-            || input.peek(Token![extern]) && !input.peek2(Token![::])
+            || input.peek(Token![extern])
             || input.peek(Token![use])
             || input.peek(Token![static]) && (input.peek2(Token![mut]) || input.peek2(Ident))
             || input.peek(Token![const])
