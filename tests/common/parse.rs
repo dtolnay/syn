@@ -12,7 +12,7 @@ use rustc_span::FileName;
 
 use std::panic;
 
-pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
+pub fn librustc_expr(input: &str) -> Option<P<ast::Expr>> {
     match panic::catch_unwind(|| {
         let sess = ParseSess::new(FilePathMapping::empty());
         let e = parse::new_parser_from_source_str(
@@ -32,7 +32,7 @@ pub fn libsyntax_expr(input: &str) -> Option<P<ast::Expr>> {
         Ok(Some(e)) => Some(e),
         Ok(None) => None,
         Err(_) => {
-            errorf!("libsyntax panicked\n");
+            errorf!("librustc panicked\n");
             None
         }
     }

@@ -81,7 +81,7 @@ fn test_round_trip() {
             let equal = panic::catch_unwind(|| {
                 rustc_ast::with_globals(edition, || {
                     let sess = ParseSess::new(FilePathMapping::empty());
-                    let before = match libsyntax_parse(content, &sess) {
+                    let before = match librustc_parse(content, &sess) {
                         Ok(before) => before,
                         Err(mut diagnostic) => {
                             diagnostic.cancel();
@@ -92,7 +92,7 @@ fn test_round_trip() {
                                 errorf!("=== {}: ignore\n", path.display());
                             } else {
                                 errorf!(
-                                "=== {}: ignore - libsyntax failed to parse original content: {}\n",
+                                "=== {}: ignore - librustc failed to parse original content: {}\n",
                                 path.display(),
                                 diagnostic.message()
                             );
@@ -100,10 +100,10 @@ fn test_round_trip() {
                             return true;
                         }
                     };
-                    let after = match libsyntax_parse(back, &sess) {
+                    let after = match librustc_parse(back, &sess) {
                         Ok(after) => after,
                         Err(mut diagnostic) => {
-                            errorf!("=== {}: libsyntax failed to parse", path.display());
+                            errorf!("=== {}: librustc failed to parse", path.display());
                             diagnostic.emit();
                             return false;
                         }
@@ -129,7 +129,7 @@ fn test_round_trip() {
                 })
             });
             match equal {
-                Err(_) => errorf!("=== {}: ignoring libsyntax panic\n", path.display()),
+                Err(_) => errorf!("=== {}: ignoring librustc panic\n", path.display()),
                 Ok(true) => {}
                 Ok(false) => {
                     let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
@@ -146,7 +146,7 @@ fn test_round_trip() {
     }
 }
 
-fn libsyntax_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
+fn librustc_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
     let name = FileName::Custom("test_round_trip".to_string());
     parse::parse_crate_from_source_str(name, content, sess)
 }

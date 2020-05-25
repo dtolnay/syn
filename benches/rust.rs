@@ -35,7 +35,7 @@ mod syn_parse {
 }
 
 #[cfg(not(syn_only))]
-mod libsyntax_parse {
+mod librustc_parse {
     extern crate rustc_ast;
     extern crate rustc_data_structures;
     extern crate rustc_errors;
@@ -145,7 +145,7 @@ fn main() {
         tokenstream_parse,
         syn_parse,
         #[cfg(not(syn_only))]
-        libsyntax_parse,
+        librustc_parse,
     ) {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);

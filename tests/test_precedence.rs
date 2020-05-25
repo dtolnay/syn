@@ -4,12 +4,12 @@
 
 //! The tests in this module do the following:
 //!
-//! 1. Parse a given expression in both `syn` and `libsyntax`.
+//! 1. Parse a given expression in both `syn` and `librustc`.
 //! 2. Fold over the expression adding brackets around each subexpression (with
-//!    some complications - see the `syn_brackets` and `libsyntax_brackets`
+//!    some complications - see the `syn_brackets` and `librustc_brackets`
 //!    methods).
 //! 3. Serialize the `syn` expression back into a string, and re-parse it with
-//!    `libsyntax`.
+//!    `librustc`.
 //! 4. Respan all of the expressions, replacing the spans with the default
 //!    spans.
 //! 5. Compare the expressions with one another, if they are not equal fail.
@@ -160,28 +160,28 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
         for expr in exprs {
             let raw = quote!(#expr).to_string();
 
-            let libsyntax_ast = if let Some(e) = libsyntax_parse_and_rewrite(&raw) {
+            let librustc_ast = if let Some(e) = librustc_parse_and_rewrite(&raw) {
                 e
             } else {
                 failed += 1;
-                errorf!("\nFAIL - libsyntax failed to parse raw\n");
+                errorf!("\nFAIL - librustc failed to parse raw\n");
                 continue;
             };
 
             let syn_expr = syn_brackets(expr);
-            let syn_ast = if let Some(e) = parse::libsyntax_expr(&quote!(#syn_expr).to_string()) {
+            let syn_ast = if let Some(e) = parse::librustc_expr(&quote!(#syn_expr).to_string()) {
                 e
             } else {
                 failed += 1;
-                errorf!("\nFAIL - libsyntax failed to parse bracketed\n");
+                errorf!("\nFAIL - librustc failed to parse bracketed\n");
                 continue;
             };
 
-            if SpanlessEq::eq(&syn_ast, &libsyntax_ast) {
+            if SpanlessEq::eq(&syn_ast, &librustc_ast) {
                 passed += 1;
             } else {
                 failed += 1;
-                errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, libsyntax_ast);
+                errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, librustc_ast);
             }
         }
     });
@@ -189,16 +189,16 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
     (passed, failed)
 }
 
-fn libsyntax_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
-    parse::libsyntax_expr(input).and_then(libsyntax_brackets)
+fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
+    parse::librustc_expr(input).and_then(librustc_brackets)
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to
 /// reveal the precidence of the parsed expressions, and produce a stringified
 /// form of the resulting expression.
 ///
-/// This method operates on libsyntax objects.
-fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
+/// This method operates on librustc objects.
+fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
         Block, BorrowKind, Expr, ExprKind, Field, GenericArg, MacCall, Pat, Stmt, StmtKind, Ty,
     };
@@ -302,7 +302,7 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
         }
 
         fn visit_mac(&mut self, mac: &mut MacCall) {
-            // By default when folding over macros, libsyntax panics. This is
+            // By default when folding over macros, librustc panics. This is
             // because it's usually not what you want, you want to run after
             // macro expansion. We do want to do that (syn doesn't do macro
             // expansion), so we implement visit_mac to just return the macro
@@ -312,11 +312,11 @@ fn libsyntax_brackets(mut libsyntax_expr: P<ast::Expr>) -> Option<P<ast::Expr>> 
     }
 
     let mut folder = BracketsVisitor { failed: false };
-    folder.visit_expr(&mut libsyntax_expr);
+    folder.visit_expr(&mut librustc_expr);
     if folder.failed {
         None
     } else {
-        Some(libsyntax_expr)
+        Some(librustc_expr)
     }
 }
 
