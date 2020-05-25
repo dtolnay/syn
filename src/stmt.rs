@@ -252,8 +252,12 @@ pub mod parsing {
     ) -> Result<Stmt> {
         let mut e = expr::parsing::expr_early(input)?;
 
-        attrs.extend(e.replace_attrs(Vec::new()));
-        e.replace_attrs(attrs);
+        let mut attr_target = &mut e;
+        while let Expr::Binary(e) = attr_target {
+            attr_target = &mut e.left;
+        }
+        attrs.extend(attr_target.replace_attrs(Vec::new()));
+        attr_target.replace_attrs(attrs);
 
         if input.peek(Token![;]) {
             return Ok(Stmt::Semi(e, input.parse()?));
