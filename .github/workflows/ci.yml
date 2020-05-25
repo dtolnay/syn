@@ -58,6 +58,8 @@ jobs:
       - run: cargo check ${{env.target}} --no-default-features --features 'full parsing printing'
       - run: cargo check ${{env.target}} --no-default-features --features 'fold visit visit-mut parsing printing'
       - run: cargo check ${{env.target}} --no-default-features --features 'full fold visit visit-mut parsing printing'
+      - if: matrix.rust == 'nightly' && matrix.target == ''
+        run: cargo check --benches --all-features --release
 
   examples:
     name: Examples
