@@ -2463,7 +2463,7 @@ pub(crate) mod parsing {
             }
 
             fields.push(content.parse()?);
-            if !content.peek(Token![,]) {
+            if content.is_empty() {
                 break;
             }
             let punct: Token![,] = content.parse()?;
