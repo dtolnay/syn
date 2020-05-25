@@ -20,9 +20,6 @@ static EXCLUDE: &[&str] = &[
     "test/ui/issues/issue-34074.rs",
     "test/ui/proc-macro/trait-fn-args-2015.rs",
 
-    // Deprecated placement syntax
-    "test/ui/obsolete-in-place/bad.rs",
-
     // not actually test cases
     "test/rustdoc-ui/test-compile-fail2.rs",
     "test/rustdoc-ui/test-compile-fail3.rs",
