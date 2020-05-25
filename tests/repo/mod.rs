@@ -12,13 +12,6 @@ const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: impl<const N: usize>
-    // https://github.com/dtolnay/syn/issues/822
-    "test/ui/const-generics/const-param-after-const-literal-arg.rs",
-    "test/ui/const-generics/lazy-normalization/issue-71922.rs",
-    "test/ui/const-generics/trait-const-args.rs",
-    "tools/clippy/tests/ui/crashes/ice-4775.rs",
-
     // TODO: ?const trait bounds
     // https://github.com/dtolnay/syn/issues/767
     "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs",
