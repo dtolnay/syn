@@ -12,11 +12,6 @@ const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: ?const trait bounds
-    // https://github.com/dtolnay/syn/issues/767
-    "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs",
-    "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs",
-
     // TODO: Deprecated anonymous parameter syntax in traits
     "test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs",
     "test/ui/issues/issue-13105.rs",
