@@ -267,7 +267,8 @@
     clippy::never_loop,
     clippy::suspicious_op_assign_impl,
     clippy::too_many_arguments,
-    clippy::trivially_copy_pass_by_ref
+    clippy::trivially_copy_pass_by_ref,
+    clippy::unnecessary_unwrap
 )]
 // Ignored clippy_pedantic lints.
 #![allow(
