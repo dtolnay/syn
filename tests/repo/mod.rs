@@ -13,8 +13,7 @@ const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: Deprecated anonymous parameter syntax in traits
-    "test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs",
+    // Deprecated anonymous parameter syntax in traits
     "test/ui/issues/issue-13105.rs",
     "test/ui/issues/issue-13775.rs",
     "test/ui/issues/issue-34074.rs",
