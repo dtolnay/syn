@@ -82,6 +82,12 @@ pub fn clone_rust() {
     if needs_clone {
         download_and_unpack().unwrap();
     }
+    let test_src = Path::new("tests/rust/src");
+    for exclude in EXCLUDE {
+        if !test_src.join(exclude).exists() {
+            panic!("excluded test file does not exist: tests/rust/src/{}", exclude);
+        }
+    }
 }
 
 fn download_and_unpack() -> Result<()> {
