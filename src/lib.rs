@@ -254,7 +254,7 @@
 #![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
-    clippy::block_in_if_condition_stmt,
+    clippy::blocks_in_if_conditions,
     clippy::cognitive_complexity,
     clippy::doc_markdown,
     clippy::eval_order_dependence,
