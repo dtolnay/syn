@@ -551,7 +551,7 @@ pub mod parsing {
         while !content.is_empty() && !content.peek(Token![..]) {
             let value = content.call(field_pat)?;
             fields.push_value(value);
-            if !content.peek(Token![,]) {
+            if content.is_empty() {
                 break;
             }
             let punct: Token![,] = content.parse()?;
