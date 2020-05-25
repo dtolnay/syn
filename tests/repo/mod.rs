@@ -11,28 +11,32 @@ use walkdir::DirEntry;
 const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 static EXCLUDE: &[&str] = &[
-    // TODO
+    // TODO: attribute on binary expr
+    "tools/clippy/tests/ui/cfg_attr_rustfmt.rs",
+
+    // TODO: type alias item with trait bound
+    "test/ui/parser/item-free-type-bounds-syntactic-pass.rs",
+
+    // TODO: impl<const N: usize>
     "test/ui/const-generics/const-param-after-const-literal-arg.rs",
     "test/ui/const-generics/lazy-normalization/issue-71922.rs",
     "test/ui/const-generics/trait-const-args.rs",
-    "test/ui/parser/item-free-type-bounds-syntactic-pass.rs",
-    "test/ui/proc-macro/trait-fn-args-2015.rs",
-    "tools/clippy/tests/ui/cfg_attr_rustfmt.rs",
     "tools/clippy/tests/ui/crashes/ice-4775.rs",
 
-    // TODO: const trait bounds
+    // TODO: ?const trait bounds
     // https://github.com/dtolnay/syn/issues/767
     "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/feature-gate.rs",
     "test/ui/rfc-2632-const-trait-impl/const-trait-bound-opt-out/syntax.rs",
 
-    // Deprecated placement syntax
-    "test/ui/obsolete-in-place/bad.rs",
-
-    // Deprecated anonymous parameter syntax in traits
+    // TODO: Deprecated anonymous parameter syntax in traits
     "test/ui/error-codes/e0119/auxiliary/issue-23563-a.rs",
     "test/ui/issues/issue-13105.rs",
     "test/ui/issues/issue-13775.rs",
     "test/ui/issues/issue-34074.rs",
+    "test/ui/proc-macro/trait-fn-args-2015.rs",
+
+    // Deprecated placement syntax
+    "test/ui/obsolete-in-place/bad.rs",
 
     // 2015-style dyn that libsyntax rejects
     "test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs",
