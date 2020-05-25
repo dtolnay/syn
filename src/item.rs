@@ -1278,7 +1278,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![mod]) {
                 input.parse().map(Item::Mod)
             } else if lookahead.peek(Token![type]) {
-                input.parse().map(Item::Type)
+                parse_flexible_item_type(begin, input)
             } else if lookahead.peek(existential) {
                 input.call(item_existential).map(Item::Verbatim)
             } else if lookahead.peek(Token![struct]) {
@@ -2022,6 +2022,54 @@ pub mod parsing {
                 ty: input.parse()?,
                 semi_token: input.parse()?,
             })
+        }
+    }
+
+    fn parse_flexible_item_type(begin: ParseBuffer, input: ParseStream) -> Result<Item> {
+        let mut extra = false;
+
+        let vis: Visibility = input.parse()?;
+        let type_token: Token![type] = input.parse()?;
+        let ident: Ident = input.parse()?;
+        let mut generics: Generics = input.parse()?;
+        if input.parse::<Option<Token![:]>>()?.is_some() {
+            extra = true;
+            loop {
+                input.parse::<TypeParamBound>()?;
+                if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                    break;
+                }
+                input.parse::<Token![+]>()?;
+                if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                    break;
+                }
+            }
+        }
+        generics.where_clause = input.parse()?;
+        let (eq_token, ty);
+        if let Some(eq) = input.parse::<Option<Token![=]>>()? {
+            eq_token = Some(eq);
+            ty = Some(input.parse::<Type>()?);
+        } else {
+            extra = true;
+            eq_token = None;
+            ty = None;
+        }
+        let semi_token: Token![;] = input.parse()?;
+
+        if extra {
+            Ok(Item::Verbatim(verbatim::between(begin, input)))
+        } else {
+            Ok(Item::Type(ItemType {
+                attrs: Vec::new(),
+                vis,
+                type_token,
+                ident,
+                generics,
+                eq_token: eq_token.unwrap(),
+                ty: Box::new(ty.unwrap()),
+                semi_token,
+            }))
         }
     }
 

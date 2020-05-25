@@ -11,10 +11,6 @@ use walkdir::DirEntry;
 const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 static EXCLUDE: &[&str] = &[
-    // TODO: type alias item with trait bound
-    // https://github.com/dtolnay/syn/issues/821
-    "test/ui/parser/item-free-type-bounds-syntactic-pass.rs",
-
     // TODO: impl<const N: usize>
     // https://github.com/dtolnay/syn/issues/822
     "test/ui/const-generics/const-param-after-const-literal-arg.rs",
