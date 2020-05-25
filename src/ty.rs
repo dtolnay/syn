@@ -554,7 +554,7 @@ pub mod parsing {
             }))
         } else if lookahead.peek(Token![fn])
             || lookahead.peek(Token![unsafe])
-            || lookahead.peek(Token![extern]) && !input.peek2(Token![::])
+            || lookahead.peek(Token![extern])
         {
             let allow_mut_self = true;
             if let Some(mut bare_fn) = parse_bare_fn(input, allow_mut_self)? {
@@ -568,7 +568,6 @@ pub mod parsing {
             || input.peek(Token![self])
             || input.peek(Token![Self])
             || input.peek(Token![crate])
-            || input.peek(Token![extern])
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
         {

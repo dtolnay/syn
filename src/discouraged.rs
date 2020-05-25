@@ -72,7 +72,6 @@ pub trait Speculative {
     ///             || input.peek(Token![self])
     ///             || input.peek(Token![Self])
     ///             || input.peek(Token![crate])
-    ///             || input.peek(Token![extern])
     ///         {
     ///             let ident = input.call(Ident::parse_any)?;
     ///             return Ok(PathSegment::from(ident));

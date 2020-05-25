@@ -1717,7 +1717,6 @@ pub(crate) mod parsing {
             || input.peek(Token![self])
             || input.peek(Token![Self])
             || input.peek(Token![super])
-            || input.peek(Token![extern])
             || input.peek(Token![crate])
         {
             path_or_macro_or_struct(input, allow_struct)
@@ -1789,7 +1788,6 @@ pub(crate) mod parsing {
             || input.peek(Token![self])
             || input.peek(Token![Self])
             || input.peek(Token![super])
-            || input.peek(Token![extern])
             || input.peek(Token![crate])
         {
             input.parse().map(Expr::Path)

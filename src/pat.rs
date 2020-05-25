@@ -415,7 +415,6 @@ pub mod parsing {
                 || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
-                || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
                 pat_path_or_macro_or_struct_or_range(input)
@@ -746,7 +745,6 @@ pub mod parsing {
             || lookahead.peek(Token![self])
             || lookahead.peek(Token![Self])
             || lookahead.peek(Token![super])
-            || lookahead.peek(Token![extern])
             || lookahead.peek(Token![crate])
         {
             Expr::Path(input.parse()?)
