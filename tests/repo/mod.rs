@@ -12,12 +12,15 @@ const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
 
 static EXCLUDE: &[&str] = &[
     // TODO: attribute on binary expr
+    // https://github.com/dtolnay/syn/issues/820
     "tools/clippy/tests/ui/cfg_attr_rustfmt.rs",
 
     // TODO: type alias item with trait bound
+    // https://github.com/dtolnay/syn/issues/821
     "test/ui/parser/item-free-type-bounds-syntactic-pass.rs",
 
     // TODO: impl<const N: usize>
+    // https://github.com/dtolnay/syn/issues/822
     "test/ui/const-generics/const-param-after-const-literal-arg.rs",
     "test/ui/const-generics/lazy-normalization/issue-71922.rs",
     "test/ui/const-generics/trait-const-args.rs",
