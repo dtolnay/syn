@@ -109,15 +109,6 @@ fn test_rustc_precedence() {
                 return;
             }
 
-            // Our version of `libsyntax` can't parse this tests
-            if path
-                .to_str()
-                .unwrap()
-                .ends_with("optional_comma_in_match_arm.rs")
-            {
-                return;
-            }
-
             let mut file = File::open(path).unwrap();
             let mut content = String::new();
             file.read_to_string(&mut content).unwrap();
