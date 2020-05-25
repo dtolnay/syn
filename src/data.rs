@@ -380,6 +380,14 @@ pub mod parsing {
                 }))
             }
         }
+
+        #[cfg(feature = "full")]
+        pub(crate) fn is_some(&self) -> bool {
+            match self {
+                Visibility::Inherited => false,
+                _ => true,
+            }
+        }
     }
 }
 
