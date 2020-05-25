@@ -64,7 +64,7 @@ fn test_simple_precedence() {
             continue;
         };
 
-        let pf = match test_expressions(vec![expr]) {
+        let pf = match test_expressions(Edition::Edition2018, vec![expr]) {
             (1, 0) => "passed",
             (0, 1) => {
                 failed += 1;
@@ -125,8 +125,9 @@ fn test_rustc_precedence() {
 
             let (l_passed, l_failed) = match syn::parse_file(&content) {
                 Ok(file) => {
+                    let edition = repo::edition(path);
                     let exprs = collect_exprs(file);
-                    test_expressions(exprs)
+                    test_expressions(edition, exprs)
                 }
                 Err(msg) => {
                     errorf!("syn failed to parse\n{:?}\n", msg);
@@ -160,11 +161,11 @@ fn test_rustc_precedence() {
     }
 }
 
-fn test_expressions(exprs: Vec<syn::Expr>) -> (usize, usize) {
+fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    rustc_ast::with_globals(Edition::Edition2018, || {
+    rustc_ast::with_globals(edition, || {
         for expr in exprs {
             let raw = quote!(#expr).to_string();
 

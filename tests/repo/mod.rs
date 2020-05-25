@@ -3,6 +3,7 @@ mod progress;
 use self::progress::Progress;
 use anyhow::Result;
 use flate2::read::GzDecoder;
+use rustc_span::edition::Edition;
 use std::fs;
 use std::path::Path;
 use tar::Archive;
@@ -21,9 +22,6 @@ static EXCLUDE: &[&str] = &[
 
     // Deprecated placement syntax
     "test/ui/obsolete-in-place/bad.rs",
-
-    // 2015-style dyn that libsyntax rejects
-    "test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs",
 
     // not actually test cases
     "test/rustdoc-ui/test-compile-fail2.rs",
@@ -69,6 +67,14 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     }
 
     !EXCLUDE.contains(&path)
+}
+
+pub fn edition(path: &Path) -> Edition {
+    if path.ends_with("dyn-2015-no-warnings-without-lints.rs") {
+        Edition::Edition2015
+    } else {
+        Edition::Edition2018
+    }
 }
 
 pub fn clone_rust() {

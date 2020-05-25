@@ -14,7 +14,6 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_ast::ast;
 use rustc_errors::PResult;
 use rustc_session::parse::ParseSess;
-use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
 use walkdir::{DirEntry, WalkDir};
@@ -77,9 +76,10 @@ fn test_round_trip() {
                 }
             };
             let back = quote!(#krate).to_string();
+            let edition = repo::edition(path);
 
             let equal = panic::catch_unwind(|| {
-                rustc_ast::with_globals(Edition::Edition2018, || {
+                rustc_ast::with_globals(edition, || {
                     let sess = ParseSess::new(FilePathMapping::empty());
                     let before = match libsyntax_parse(content, &sess) {
                         Ok(before) => before,
