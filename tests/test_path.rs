@@ -25,6 +25,6 @@ fn parse_interpolated_leading_component() {
 
     match syn::parse2::<Type>(tokens) {
         Ok(Type::Path(_)) => {}
-        expr => panic!("incorrect expr: {:?}", expr),
+        ty => panic!("incorrect ty: {:?}", ty),
     }
 }
