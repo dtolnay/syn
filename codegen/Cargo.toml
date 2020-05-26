@@ -28,7 +28,7 @@ crossbeam-utils = "=0.6.5"
 [dependencies.rustfmt]
 package = "rustfmt_lib"
 git = "https://github.com/rust-lang-nursery/rustfmt"
-rev = "9124dd88d6ef14d0ae77dc52ff5e9598f24a75a0"
+rev = "99edc8826ee6d7a5d529e8749cdf4ac999dfd954"
 
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of
