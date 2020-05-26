@@ -1545,10 +1545,6 @@ pub(crate) mod parsing {
     // <atom> ? ...
     #[cfg(feature = "full")]
     fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        if input.peek(token::Group) && !input.peek2(Token![::]) {
-            return input.call(expr_group).map(Expr::Group);
-        }
-
         let outer_attrs = input.call(Attribute::parse_outer)?;
 
         let atom = atom_expr(input, allow_struct)?;
