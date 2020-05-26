@@ -10,7 +10,7 @@ fn test_raw_operator() {
     snapshot!(stmt, @r###"
     Local(Local {
         pat: Pat::Wild,
-        init: Some(Verbatim(TokenStream(`& raw const x`))),
+        init: Some(Verbatim(`& raw const x`)),
     })
     "###);
 }

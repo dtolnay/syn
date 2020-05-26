@@ -157,15 +157,23 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                         }
                     }
                 } else if fields.len() == 1 {
-                    let ty = &fields[0];
                     let val = quote!(_val);
-                    let format = format_field(&val, ty).map(|format| {
-                        quote! {
-                            formatter.write_str("(")?;
-                            Debug::fmt(#format, formatter)?;
-                            formatter.write_str(")")?;
-                        }
-                    });
+                    let format = if variant == "Verbatim" {
+                        Some(quote! {
+                            formatter.write_str("(`")?;
+                            Display::fmt(#val, formatter)?;
+                            formatter.write_str("`)")?;
+                        })
+                    } else {
+                        let ty = &fields[0];
+                        format_field(&val, ty).map(|format| {
+                            quote! {
+                                formatter.write_str("(")?;
+                                Debug::fmt(#format, formatter)?;
+                                formatter.write_str(")")?;
+                            }
+                        })
+                    };
                     quote! {
                         syn::#ident::#variant(_val) => {
                             formatter.write_str(#v)?;
@@ -298,7 +306,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         DEBUG_SRC,
         quote! {
             use super::{Lite, RefCast};
-            use std::fmt::{self, Debug};
+            use std::fmt::{self, Debug, Display};
 
             #impls
         },
