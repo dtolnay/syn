@@ -263,7 +263,7 @@ impl Attribute {
     #[cfg(feature = "parsing")]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
-        while input.peek(Token![#]) {
+        while input.peek(Token![#]) && !input.peek(token::Group) {
             attrs.push(input.call(parsing::single_parse_outer)?);
         }
         Ok(attrs)
@@ -276,7 +276,7 @@ impl Attribute {
     #[cfg(feature = "parsing")]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
-        while input.peek(Token![#]) && input.peek2(Token![!]) {
+        while input.peek(Token![#]) && input.peek2(Token![!]) && !input.peek(token::Group) {
             attrs.push(input.call(parsing::single_parse_inner)?);
         }
         Ok(attrs)
