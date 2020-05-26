@@ -46,5 +46,20 @@ fn test_macro_variable_func() {
         TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
     ]);
 
-    syn::parse2::<Expr>(tokens).unwrap();
+    snapshot!(tokens as Expr, @r###"
+    Expr::Call {
+        func: Expr::Group {
+            expr: Expr::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "f",
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    "###);
 }
