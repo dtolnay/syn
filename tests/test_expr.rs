@@ -70,7 +70,6 @@ fn test_macro_variable_func() {
         TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
     ]);
 
-    // FIXME: the #[inside] attribute should go on the Expr::Path not Expr::Call
     snapshot!(tokens as Expr, @r###"
     Expr::Call {
         attrs: [
