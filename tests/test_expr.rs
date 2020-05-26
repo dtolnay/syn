@@ -3,7 +3,7 @@ mod macros;
 
 use std::str::FromStr;
 
-use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenStream, TokenTree};
 use quote::quote;
 use std::iter::FromIterator;
 use syn::{Expr, ExprRange};
@@ -58,6 +58,55 @@ fn test_macro_variable_func() {
                         },
                     ],
                 },
+            },
+        },
+    }
+    "###);
+
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Punct(Punct::new('#', Spacing::Alone)),
+        TokenTree::Group(Group::new(Delimiter::Bracket, quote! { outside })),
+        TokenTree::Group(Group::new(Delimiter::None, quote! { #[inside] f })),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+    ]);
+
+    // FIXME: the #[inside] attribute should go on the Expr::Path not Expr::Call
+    snapshot!(tokens as Expr, @r###"
+    Expr::Call {
+        attrs: [
+            Attribute {
+                style: Outer,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "outside",
+                            arguments: None,
+                        },
+                    ],
+                },
+                tokens: ``,
+            },
+            Attribute {
+                style: Outer,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "inside",
+                            arguments: None,
+                        },
+                    ],
+                },
+                tokens: ``,
+            },
+        ],
+        func: Expr::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "f",
+                        arguments: None,
+                    },
+                ],
             },
         },
     }
