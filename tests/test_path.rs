@@ -1,3 +1,6 @@
+#[macro_use]
+mod macros;
+
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::iter::FromIterator;
 use syn::{Expr, Type};
@@ -18,13 +21,37 @@ fn parse_interpolated_leading_component() {
         TokenTree::Ident(Ident::new("rest", Span::call_site())),
     ]);
 
-    match syn::parse2::<Expr>(tokens.clone()) {
-        Ok(Expr::Path(_)) => {}
-        expr => panic!("incorrect expr: {:?}", expr),
+    snapshot!(tokens.clone() as Expr, @r###"
+    Expr::Path {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "first",
+                    arguments: None,
+                },
+                PathSegment {
+                    ident: "rest",
+                    arguments: None,
+                },
+            ],
+        },
     }
+    "###);
 
-    match syn::parse2::<Type>(tokens) {
-        Ok(Type::Path(_)) => {}
-        ty => panic!("incorrect ty: {:?}", ty),
+    snapshot!(tokens as Type, @r###"
+    Type::Path {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "first",
+                    arguments: None,
+                },
+                PathSegment {
+                    ident: "rest",
+                    arguments: None,
+                },
+            ],
+        },
     }
+    "###);
 }
