@@ -86,27 +86,31 @@ fn test_macro_variable_func() {
                 },
                 tokens: ``,
             },
-            Attribute {
-                style: Outer,
+        ],
+        func: Expr::Group {
+            expr: Expr::Path {
+                attrs: [
+                    Attribute {
+                        style: Outer,
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "inside",
+                                    arguments: None,
+                                },
+                            ],
+                        },
+                        tokens: ``,
+                    },
+                ],
                 path: Path {
                     segments: [
                         PathSegment {
-                            ident: "inside",
+                            ident: "f",
                             arguments: None,
                         },
                     ],
                 },
-                tokens: ``,
-            },
-        ],
-        func: Expr::Path {
-            path: Path {
-                segments: [
-                    PathSegment {
-                        ident: "f",
-                        arguments: None,
-                    },
-                ],
             },
         },
     }
