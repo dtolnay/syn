@@ -3,7 +3,9 @@ mod macros;
 
 use std::str::FromStr;
 
-use proc_macro2::TokenStream;
+use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
+use quote::quote;
+use std::iter::FromIterator;
 use syn::{Expr, ExprRange};
 
 #[test]
@@ -34,4 +36,15 @@ fn test_await() {
         },
     }
     "###);
+}
+
+#[test]
+fn test_macro_variable_func() {
+    // mimics the token stream corresponding to `$fn()`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Group(Group::new(Delimiter::None, quote! { f })),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+    ]);
+
+    syn::parse2::<Expr>(tokens).unwrap();
 }
