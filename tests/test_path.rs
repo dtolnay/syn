@@ -2,6 +2,7 @@
 mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
+use quote::quote;
 use std::iter::FromIterator;
 use syn::{Expr, Type};
 
@@ -9,13 +10,7 @@ use syn::{Expr, Type};
 fn parse_interpolated_leading_component() {
     // mimics the token stream corresponding to `$mod::rest`
     let tokens = TokenStream::from_iter(vec![
-        TokenTree::Group(Group::new(
-            Delimiter::None,
-            TokenStream::from_iter(vec![TokenTree::Ident(Ident::new(
-                "first",
-                Span::call_site(),
-            ))]),
-        )),
+        TokenTree::Group(Group::new(Delimiter::None, quote! { first })),
         TokenTree::Punct(Punct::new(':', Spacing::Joint)),
         TokenTree::Punct(Punct::new(':', Spacing::Alone)),
         TokenTree::Ident(Ident::new("rest", Span::call_site())),
