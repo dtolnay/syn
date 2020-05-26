@@ -63,7 +63,7 @@ impl Debug for Lite<Literal> {
 
 impl Debug for Lite<TokenStream> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "`{}`", self.value)
+        write!(formatter, "TokenStream(`{}`)", self.value)
     }
 }
 

@@ -83,7 +83,7 @@ fn test_macro_variable_func() {
                         },
                     ],
                 },
-                tokens: ``,
+                tokens: TokenStream(``),
             },
         ],
         func: Expr::Group {
@@ -99,7 +99,7 @@ fn test_macro_variable_func() {
                                 },
                             ],
                         },
-                        tokens: ``,
+                        tokens: TokenStream(``),
                     },
                 ],
                 path: Path {

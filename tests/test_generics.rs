@@ -45,7 +45,7 @@ fn test_split_for_impl() {
                                     },
                                 ],
                             },
-                            tokens: ``,
+                            tokens: TokenStream(``),
                         },
                     ],
                     ident: "T",

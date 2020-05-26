@@ -15,7 +15,7 @@ fn test_struct() {
         }
     ";
 
-    snapshot!(input as TokenStream, @"`# [ derive ( Debug , Clone ) ] pub struct Item { pub ident : Ident , pub attrs : Vec < Attribute >, }`");
+    snapshot!(input as TokenStream, @"TokenStream(`# [ derive ( Debug , Clone ) ] pub struct Item { pub ident : Ident , pub attrs : Vec < Attribute >, }`)");
 }
 
 #[test]
