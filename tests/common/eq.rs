@@ -273,7 +273,7 @@ spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span);
 spanless_eq_struct!(Crate; module attrs span proc_macros);
 spanless_eq_struct!(EnumDef; variants);
-spanless_eq_struct!(Expr; id kind span attrs);
+spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(Field; attrs id span ident expr is_shorthand is_placeholder);
 spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholder);
 spanless_eq_struct!(FnDecl; inputs output);

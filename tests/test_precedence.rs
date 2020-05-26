@@ -267,6 +267,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                             kind: ExprKind::Err,
                             span: DUMMY_SP,
                             attrs: ThinVec::new(),
+                            tokens: None,
                         }),
                     );
                     e.kind = ExprKind::Paren(inner);
