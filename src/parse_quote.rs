@@ -69,6 +69,7 @@
 //
 // TODO: allow Punctuated to be inferred as intra doc link, currently blocked on
 // https://github.com/rust-lang/rust/issues/62834
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 #[macro_export]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {

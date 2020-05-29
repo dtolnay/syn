@@ -183,8 +183,8 @@
 //! ```
 //!
 //! ---
-//!
-//! *This module is available only if Syn is built with the `"parsing"` feature.*
+
+#![cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 
 #[path = "discouraged.rs"]
 pub mod discouraged;
@@ -1093,8 +1093,7 @@ impl Parse for Literal {
 /// Refer to the [module documentation] for details about parsing in Syn.
 ///
 /// [module documentation]: self
-///
-/// *This trait is available only if Syn is built with the `"parsing"` feature.*
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub trait Parser: Sized {
     type Output;
 
@@ -1108,13 +1107,11 @@ pub trait Parser: Sized {
     ///
     /// This function will check that the input is fully parsed. If there are
     /// any unparsed tokens at the end of the stream, an error is returned.
-    ///
-    /// *This method is available only if Syn is built with both the `"parsing"` and
-    /// `"proc-macro"` features.*
     #[cfg(all(
         not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
         feature = "proc-macro"
     ))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {
         self.parse2(proc_macro2::TokenStream::from(tokens))
     }

@@ -25,8 +25,7 @@ macro_rules! full {
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: self
-///
-/// *This trait is available only if Syn is built with the `"fold"` feature.*
+#[cfg_attr(docsrs, doc(cfg(feature = "fold")))]
 pub trait Fold {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_abi(&mut self, i: Abi) -> Abi {

@@ -17,11 +17,6 @@ use std::hash::{Hash, Hasher};
 ast_struct! {
     /// An attribute like `#[repr(transparent)]`.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
-    /// <br>
-    ///
     /// # Syntax
     ///
     /// Rust has six types of attributes.
@@ -148,6 +143,7 @@ ast_struct! {
     /// };
     /// assert_eq!(doc, attr);
     /// ```
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Attribute #manual_extra_traits {
         pub pound_token: Token![#],
         pub style: AttrStyle,
@@ -188,10 +184,8 @@ impl Hash for Attribute {
 impl Attribute {
     /// Parses the content of the attribute, consisting of the path and tokens,
     /// as a [`Meta`] if possible.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_meta(&self) -> Result<Meta> {
         fn clone_ident_segment(segment: &PathSegment) -> PathSegment {
             PathSegment {
@@ -235,19 +229,15 @@ impl Attribute {
     /// #[my_attr(value < 5)]
     ///           ^^^^^^^^^ what gets parsed
     /// ```
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args<T: Parse>(&self) -> Result<T> {
         self.parse_args_with(T::parse)
     }
 
     /// Parse the arguments to the attribute using the given parser.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         let parser = |input: ParseStream| {
             let args = enter_args(self, input)?;
@@ -257,10 +247,8 @@ impl Attribute {
     }
 
     /// Parses zero or more outer attributes from the stream.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) && !input.peek(token::Group) {
@@ -270,10 +258,8 @@ impl Attribute {
     }
 
     /// Parses zero or more inner attributes from the stream.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) && input.peek2(Token![!]) && !input.peek(token::Group) {
@@ -339,9 +325,6 @@ ast_enum! {
     /// Distinguishes between attributes that decorate an item and attributes
     /// that are contained within an item.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
     /// # Outer attributes
     ///
     /// - `#[repr(transparent)]`
@@ -354,6 +337,7 @@ ast_enum! {
     /// - `//! # Example`
     /// - `/*! Please file an issue */`
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum AttrStyle {
         Outer,
         Inner(Token![!]),
@@ -362,9 +346,6 @@ ast_enum! {
 
 ast_enum_of_structs! {
     /// Content of a compile-time structured attribute.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     ///
     /// ## Path
     ///
@@ -387,6 +368,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum Meta {
         Path(Path),
 
@@ -400,9 +382,7 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A structured list within an attribute, like `derive(Copy, Clone)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct MetaList {
         pub path: Path,
         pub paren_token: token::Paren,
@@ -412,9 +392,7 @@ ast_struct! {
 
 ast_struct! {
     /// A name-value pair within an attribute, like `feature = "nightly"`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct MetaNameValue {
         pub path: Path,
         pub eq_token: Token![=],
@@ -438,9 +416,7 @@ impl Meta {
 
 ast_enum_of_structs! {
     /// Element of a compile-time attribute list.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
         /// would be a nested `Meta::Path`.

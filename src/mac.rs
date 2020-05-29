@@ -13,9 +13,7 @@ use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Macro #manual_extra_traits {
         pub path: Path,
         pub bang_token: Token![!],
@@ -26,9 +24,7 @@ ast_struct! {
 
 ast_enum! {
     /// A grouping token that surrounds a macro body: `m!(...)` or `m!{...}` or `m![...]`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum MacroDelimiter {
         Paren(Paren),
         Brace(Brace),

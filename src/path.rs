@@ -3,9 +3,7 @@ use crate::punctuated::Punctuated;
 
 ast_struct! {
     /// A path at which a named item is exported (e.g. `std::collections::HashMap`).
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Path {
         pub leading_colon: Option<Token![::]>,
         pub segments: Punctuated<PathSegment, Token![::]>,
@@ -28,9 +26,7 @@ where
 
 ast_struct! {
     /// A segment of a path together with any path arguments on that segment.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct PathSegment {
         pub ident: Ident,
         pub arguments: PathArguments,
@@ -51,9 +47,7 @@ where
 
 ast_enum! {
     /// Angle bracketed or parenthesized arguments of a path segment.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     ///
     /// ## Angle bracketed
     ///
@@ -97,9 +91,7 @@ impl PathArguments {
 
 ast_enum! {
     /// An individual generic argument, like `'a`, `T`, or `Item = T`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum GenericArgument {
         /// A lifetime argument.
         Lifetime(Lifetime),
@@ -121,9 +113,7 @@ ast_enum! {
 ast_struct! {
     /// Angle bracketed arguments of a path segment: the `<K, V>` in `HashMap<K,
     /// V>`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct AngleBracketedGenericArguments {
         pub colon2_token: Option<Token![::]>,
         pub lt_token: Token![<],
@@ -134,9 +124,7 @@ ast_struct! {
 
 ast_struct! {
     /// A binding (equality constraint) on an associated type: `Item = u8`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Binding {
         pub ident: Ident,
         pub eq_token: Token![=],
@@ -146,9 +134,7 @@ ast_struct! {
 
 ast_struct! {
     /// An associated type bound: `Iterator<Item: Display>`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Constraint {
         pub ident: Ident,
         pub colon_token: Token![:],
@@ -159,9 +145,7 @@ ast_struct! {
 ast_struct! {
     /// Arguments of a function path segment: the `(A, B) -> C` in `Fn(A,B) ->
     /// C`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
         /// `(A, B)`
@@ -188,9 +172,7 @@ ast_struct! {
     ///  ^~~~~~   ^
     ///  ty       position = 0
     /// ```
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct QSelf {
         pub lt_token: Token![<],
         pub ty: Box<Type>,
@@ -354,9 +336,6 @@ pub mod parsing {
     impl Path {
         /// Parse a `Path` containing no path arguments on any of its segments.
         ///
-        /// *This function is available only if Syn is built with the `"parsing"`
-        /// feature.*
-        ///
         /// # Example
         ///
         /// ```
@@ -385,6 +364,7 @@ pub mod parsing {
         ///     }
         /// }
         /// ```
+        #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
         pub fn parse_mod_style(input: ParseStream) -> Result<Self> {
             Ok(Path {
                 leading_colon: input.parse()?,
@@ -428,9 +408,6 @@ pub mod parsing {
         ///   path arguments, and
         /// - the ident of the first path segment is equal to the given one.
         ///
-        /// *This function is available only if Syn is built with the `"parsing"`
-        /// feature.*
-        ///
         /// # Example
         ///
         /// ```
@@ -448,6 +425,7 @@ pub mod parsing {
         ///     }
         /// }
         /// ```
+        #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
         pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
         where
             Ident: PartialEq<I>,
@@ -466,9 +444,7 @@ pub mod parsing {
         /// - the number of path segments is 1, and
         /// - the first path segment has no angle bracketed or parenthesized
         ///   path arguments.
-        ///
-        /// *This function is available only if Syn is built with the `"parsing"`
-        /// feature.*
+        #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
         pub fn get_ident(&self) -> Option<&Ident> {
             if self.leading_colon.is_none()
                 && self.segments.len() == 1

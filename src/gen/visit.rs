@@ -28,8 +28,7 @@ macro_rules! skip {
 /// See the [module documentation] for details.
 ///
 /// [module documentation]: self
-///
-/// *This trait is available only if Syn is built with the `"visit"` feature.*
+#[cfg_attr(docsrs, doc(cfg(feature = "visit")))]
 pub trait Visit<'ast> {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_abi(&mut self, i: &'ast Abi) {

@@ -238,10 +238,8 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Parsing continues until the end of this parse stream. The entire content
     /// of this parse stream must consist of `T` and `P`.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_terminated(input: ParseStream) -> Result<Self>
     where
         T: Parse,
@@ -258,10 +256,8 @@ impl<T, P> Punctuated<T, P> {
     /// to be parsed.
     ///
     /// [`parse_terminated`]: Punctuated::parse_terminated
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_terminated_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
@@ -294,10 +290,8 @@ impl<T, P> Punctuated<T, P> {
     /// the stream. This method returns upon parsing a `T` and observing that it
     /// is not followed by a `P`, even if there are remaining tokens in the
     /// stream.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_separated_nonempty(input: ParseStream) -> Result<Self>
     where
         T: Parse,
@@ -314,10 +308,8 @@ impl<T, P> Punctuated<T, P> {
     /// the entire content of this stream.
     ///
     /// [`parse_separated_nonempty`]: Punctuated::parse_separated_nonempty
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_separated_nonempty_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,

@@ -3,9 +3,7 @@ use crate::punctuated::Punctuated;
 
 ast_struct! {
     /// An enum variant.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Variant {
         /// Attributes tagged on the variant.
         pub attrs: Vec<Attribute>,
@@ -24,9 +22,6 @@ ast_struct! {
 ast_enum_of_structs! {
     /// Data stored within an enum variant or struct.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -35,6 +30,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
@@ -51,9 +47,7 @@ ast_enum_of_structs! {
 ast_struct! {
     /// Named fields of a struct or struct variant such as `Point { x: f64,
     /// y: f64 }`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct FieldsNamed {
         pub brace_token: token::Brace,
         pub named: Punctuated<Field, Token![,]>,
@@ -62,9 +56,7 @@ ast_struct! {
 
 ast_struct! {
     /// Unnamed fields of a tuple struct or tuple variant such as `Some(T)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct FieldsUnnamed {
         pub paren_token: token::Paren,
         pub unnamed: Punctuated<Field, Token![,]>,
@@ -146,9 +138,7 @@ impl<'a> IntoIterator for &'a mut Fields {
 
 ast_struct! {
     /// A field of a struct or enum variant.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct Field {
         /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
@@ -172,9 +162,6 @@ ast_enum_of_structs! {
     /// The visibility level of an item: inherited or `pub` or
     /// `pub(restricted)`.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -183,6 +170,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub enum Visibility {
         /// A public visibility level: `pub`.
         Public(VisPublic),
@@ -201,9 +189,7 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A public visibility level: `pub`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct VisPublic {
         pub pub_token: Token![pub],
     }
@@ -211,9 +197,7 @@ ast_struct! {
 
 ast_struct! {
     /// A crate-level visibility: `crate`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct VisCrate {
         pub crate_token: Token![crate],
     }
@@ -222,9 +206,7 @@ ast_struct! {
 ast_struct! {
     /// A visibility level restricted to some path: `pub(self)` or
     /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     pub struct VisRestricted {
         pub pub_token: Token![pub],
         pub paren_token: token::Paren,

@@ -1,11 +1,6 @@
 //! A trait that can provide the `Span` of the complete contents of a syntax
 //! tree node.
 //!
-//! *This module is available only if Syn is built with both the `"parsing"` and
-//! `"printing"` features.*
-//!
-//! <br>
-//!
 //! # Example
 //!
 //! Suppose in a procedural macro we have a [`Type`] that we want to assert
@@ -81,6 +76,7 @@
 //! needing the unstable `join`.
 //!
 //! [`syn::Error::new_spanned`]: crate::Error::new_spanned
+#![cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "printing"))))]
 
 use proc_macro2::Span;
 use quote::spanned::Spanned as ToTokens;
@@ -96,9 +92,7 @@ use quote::spanned::Spanned as ToTokens;
 /// See the [module documentation] for an example.
 ///
 /// [module documentation]: self
-///
-/// *This trait is available only if Syn is built with both the `"parsing"` and
-/// `"printing"` features.*
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "printing"))))]
 pub trait Spanned {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.

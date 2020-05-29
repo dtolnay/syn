@@ -17,11 +17,9 @@ use crate::lookahead;
 ///   the XID_Start property.
 /// - All following characters must be Unicode code points with the XID_Continue
 ///   property.
-///
-/// *This type is available only if Syn is built with the `"derive"` or `"full"`
-/// feature.*
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[derive(Clone)]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub struct Lifetime {
     pub apostrophe: Span,
     pub ident: Ident,

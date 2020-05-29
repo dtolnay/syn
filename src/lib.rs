@@ -251,6 +251,7 @@
 
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/1.0.27")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
@@ -495,10 +496,6 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available only if Syn is built with the `"visit"` feature.*
-    ///
-    /// <br>
-    ///
     /// # Example
     ///
     /// This visitor will print the name of every freestanding function in the
@@ -572,6 +569,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "visit")))]
     #[rustfmt::skip]
     pub mod visit;
 
@@ -615,11 +613,6 @@ mod gen {
     ///
     /// /* ... */
     /// ```
-    ///
-    /// *This module is available only if Syn is built with the `"visit-mut"`
-    /// feature.*
-    ///
-    /// <br>
     ///
     /// # Example
     ///
@@ -668,6 +661,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit-mut")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "visit-mut")))]
     #[rustfmt::skip]
     pub mod visit_mut;
 
@@ -715,10 +709,6 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available only if Syn is built with the `"fold"` feature.*
-    ///
-    /// <br>
-    ///
     /// # Example
     ///
     /// This fold inserts parentheses to fully parenthesizes any expression.
@@ -754,6 +744,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "fold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "fold")))]
     #[rustfmt::skip]
     pub mod fold;
 
@@ -814,9 +805,6 @@ pub use crate::error::{Error, Result};
 ///
 /// [`syn::parse2`]: parse2
 ///
-/// *This function is available only if Syn is built with both the `"parsing"` and
-/// `"proc-macro"` features.*
-///
 /// # Examples
 ///
 /// ```
@@ -847,6 +835,7 @@ pub use crate::error::{Error, Result};
     feature = "parsing",
     feature = "proc-macro"
 ))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
     parse::Parser::parse(T::parse, tokens)
 }
@@ -860,16 +849,13 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 /// instead.
 ///
 /// [`syn::parse`]: parse()
-///
-/// *This function is available only if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
     parse::Parser::parse2(T::parse, tokens)
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
-///
-/// *This function is available only if Syn is built with the `"parsing"` feature.*
 ///
 /// # Hygiene
 ///
@@ -891,6 +877,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 /// # run().unwrap();
 /// ```
 #[cfg(feature = "parsing")]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
     parse::Parser::parse_str(T::parse, s)
 }
@@ -905,9 +892,6 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// - It preserves the shebang line of the file, such as `#!/usr/bin/env rustx`.
 ///
 /// If present, either of these would be an error using `from_str`.
-///
-/// *This function is available only if Syn is built with the `"parsing"` and
-/// `"full"` features.*
 ///
 /// # Examples
 ///
@@ -933,6 +917,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// # run().unwrap();
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "full"))))]
 pub fn parse_file(mut content: &str) -> Result<File> {
     // Strip the BOM if it is present
     const BOM: &str = "\u{feff}";
