@@ -1691,7 +1691,7 @@ pub(crate) mod parsing {
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
     fn atom_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        if input.peek(token::Group) && !input.peek2(Token![::]) {
+        if input.peek(token::Group) && !input.peek2(Token![::]) && !input.peek2(Token![!]) {
             input.call(expr_group).map(Expr::Group)
         } else if input.peek(Lit) {
             input.parse().map(Expr::Lit)
