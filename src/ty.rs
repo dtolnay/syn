@@ -430,7 +430,7 @@ pub mod parsing {
     }
 
     fn ambig_ty(input: ParseStream, allow_plus: bool) -> Result<Type> {
-        if input.peek(token::Group) && !input.peek2(Token![::]) {
+        if input.peek(token::Group) && !input.peek2(Token![::]) && !input.peek2(Token![<]) {
             return input.parse().map(Type::Group);
         }
 
