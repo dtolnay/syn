@@ -316,6 +316,17 @@ pub mod parsing {
 
     impl Parse for Visibility {
         fn parse(input: ParseStream) -> Result<Self> {
+            // Recognize an empty None-delimited group, as produced by a $:vis
+            // matcher that matched no tokens.
+            if input.peek(token::Group) {
+                let ahead = input.fork();
+                let group = crate::group::parse_group(&ahead)?;
+                if group.content.is_empty() {
+                    input.advance_to(&ahead);
+                    return Ok(Visibility::Inherited);
+                }
+            }
+
             if input.peek(Token![pub]) {
                 Self::parse_pub(input)
             } else if input.peek(Token![crate]) {

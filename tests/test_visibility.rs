@@ -1,6 +1,10 @@
-use proc_macro2::TokenStream;
+#[macro_use]
+mod macros;
+
+use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
+use std::iter::FromIterator;
 use syn::parse::{Parse, ParseStream};
-use syn::{Result, Visibility};
+use syn::{DeriveInput, Result, Visibility};
 
 #[derive(Debug)]
 struct VisRest {
@@ -94,4 +98,48 @@ fn test_crate_path() {
 #[test]
 fn test_junk_after_in() {
     assert_vis_parse!("pub(in some::path @@garbage)", Err);
+}
+
+#[test]
+fn test_empty_group_vis() {
+    // mimics `struct S { $vis $field: () }` where $vis is empty
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Ident(Ident::new("struct", Span::call_site())),
+        TokenTree::Ident(Ident::new("S", Span::call_site())),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_iter(vec![
+                TokenTree::Group(Group::new(Delimiter::None, TokenStream::new())),
+                TokenTree::Group(Group::new(
+                    Delimiter::None,
+                    TokenStream::from_iter(vec![TokenTree::Ident(Ident::new(
+                        "f",
+                        Span::call_site(),
+                    ))]),
+                )),
+                TokenTree::Punct(Punct::new(':', Spacing::Alone)),
+                TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+            ]),
+        )),
+    ]);
+
+    snapshot!(tokens as DeriveInput, @r###"
+    DeriveInput {
+        vis: Inherited,
+        ident: "S",
+        generics: Generics,
+        data: Data::Struct {
+            fields: Fields::Named {
+                named: [
+                    Field {
+                        vis: Inherited,
+                        ident: Some("f"),
+                        colon_token: Some,
+                        ty: Type::Tuple,
+                    },
+                ],
+            },
+        },
+    }
+    "###);
 }
