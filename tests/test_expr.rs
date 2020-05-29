@@ -115,3 +115,30 @@ fn test_macro_variable_func() {
     }
     "###);
 }
+
+#[test]
+fn test_macro_variable_macro() {
+    // mimics the token stream corresponding to `$macro!()`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Group(Group::new(Delimiter::None, quote! { m })),
+        TokenTree::Punct(Punct::new('!', Spacing::Alone)),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+    ]);
+
+    snapshot!(tokens as Expr, @r###"
+    Expr::Macro {
+        mac: Macro {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "m",
+                        arguments: None,
+                    },
+                ],
+            },
+            delimiter: Paren,
+            tokens: TokenStream(``),
+        },
+    }
+    "###);
+}
