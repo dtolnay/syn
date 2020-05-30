@@ -142,3 +142,25 @@ fn test_macro_variable_macro() {
     }
     "###);
 }
+
+#[test]
+fn test_macro_variable_struct() {
+    // mimics the token stream corresponding to `$struct {}`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Group(Group::new(Delimiter::None, quote! { S })),
+        TokenTree::Group(Group::new(Delimiter::Brace, TokenStream::new())),
+    ]);
+
+    snapshot!(tokens as Expr, @r###"
+    Expr::Struct {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "S",
+                    arguments: None,
+                },
+            ],
+        },
+    }
+    "###);
+}
