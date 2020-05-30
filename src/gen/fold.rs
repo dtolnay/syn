@@ -2,6 +2,7 @@
 // It is not intended for manual editing.
 
 #![allow(unreachable_code, unused_variables)]
+#![allow(clippy::match_wildcard_for_single_variants)]
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::gen::helper::fold::*;
 #[cfg(any(feature = "full", feature = "derive"))]

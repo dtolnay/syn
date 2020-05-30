@@ -256,6 +256,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             // Unreachable code is generated sometimes without the full feature.
             #![allow(unreachable_code, unused_variables)]
+            #![allow(clippy::match_wildcard_for_single_variants)]
 
             use crate::*;
             #[cfg(any(feature = "full", feature = "derive"))]

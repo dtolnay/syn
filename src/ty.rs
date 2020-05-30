@@ -529,7 +529,7 @@ pub mod parsing {
                                         ..trait_bound
                                     })
                                 }
-                                other => other,
+                                other @ TypeParamBound::Lifetime(_) => other,
                             }
                         }
                         _ => break,

@@ -505,7 +505,7 @@ where
         fn is_outer(attr: &&Attribute) -> bool {
             match attr.style {
                 AttrStyle::Outer => true,
-                _ => false,
+                AttrStyle::Inner(_) => false,
             }
         }
         self.into_iter().filter(is_outer)
@@ -515,7 +515,7 @@ where
         fn is_inner(attr: &&Attribute) -> bool {
             match attr.style {
                 AttrStyle::Inner(_) => true,
-                _ => false,
+                AttrStyle::Outer => false,
             }
         }
         self.into_iter().filter(is_inner)
