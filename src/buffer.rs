@@ -201,13 +201,13 @@ impl<'a> Cursor<'a> {
         Cursor::create(self.ptr.offset(1), self.scope)
     }
 
-    /// If the cursor is looking at a `None`-delimited group, move it to look at
-    /// the first token inside instead. If the group is empty, this will move
+    /// While the cursor is looking at a `None`-delimited group, move it to look
+    /// at the first token inside instead. If the group is empty, this will move
     /// the cursor past the `None`-delimited group.
     ///
     /// WARNING: This mutates its argument.
     fn ignore_none(&mut self) {
-        if let Entry::Group(group, buf) = self.entry() {
+        while let Entry::Group(group, buf) = self.entry() {
             if group.delimiter() == Delimiter::None {
                 // NOTE: We call `Cursor::create` here to make sure that
                 // situations where we should immediately exit the span after
@@ -215,6 +215,8 @@ impl<'a> Cursor<'a> {
                 unsafe {
                     *self = Cursor::create(&buf.data[0], self.scope);
                 }
+            } else {
+                break;
             }
         }
     }
