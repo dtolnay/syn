@@ -1,6 +1,4 @@
-extern crate proc_macro;
-use self::proc_macro::TokenStream;
-
+use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use std::collections::HashSet as Set;
 use syn::fold::{self, Fold};

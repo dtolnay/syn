@@ -31,8 +31,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// conversion to `compile_error!` automatically.
 ///
 /// ```
-/// extern crate proc_macro;
-///
+/// # extern crate proc_macro;
+/// #
 /// use proc_macro::TokenStream;
 /// use syn::{parse_macro_input, AttributeArgs, ItemFn};
 ///

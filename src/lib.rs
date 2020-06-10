@@ -70,8 +70,8 @@
 //! ```
 //!
 //! ```
-//! extern crate proc_macro;
-//!
+//! # extern crate proc_macro;
+//! #
 //! use proc_macro::TokenStream;
 //! use quote::quote;
 //! use syn::{parse_macro_input, DeriveInput};
@@ -820,8 +820,8 @@ pub use crate::error::{Error, Result};
 /// # Examples
 ///
 /// ```
-/// extern crate proc_macro;
-///
+/// # extern crate proc_macro;
+/// #
 /// use proc_macro::TokenStream;
 /// use quote::quote;
 /// use syn::DeriveInput;

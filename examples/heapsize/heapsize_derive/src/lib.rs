@@ -1,5 +1,3 @@
-extern crate proc_macro;
-
 use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
