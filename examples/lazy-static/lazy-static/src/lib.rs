@@ -1,9 +1,7 @@
 #![recursion_limit = "128"]
 #![feature(proc_macro_diagnostic)]
 
-extern crate proc_macro;
-use self::proc_macro::TokenStream;
-
+use proc_macro::TokenStream;
 use quote::{quote, quote_spanned};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::spanned::Spanned;

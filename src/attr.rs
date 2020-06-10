@@ -470,8 +470,8 @@ ast_enum_of_structs! {
 /// as type `AttributeArgs`.
 ///
 /// ```
-/// extern crate proc_macro;
-///
+/// # extern crate proc_macro;
+/// #
 /// use proc_macro::TokenStream;
 /// use syn::{parse_macro_input, AttributeArgs, ItemFn};
 ///
