@@ -215,6 +215,11 @@ pub use crate::lookahead::{Lookahead1, Peek};
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.
+///
+/// Refer to the [module documentation] for details about implementing and using
+/// the `Parse` trait.
+///
+/// [module documentation]: self
 pub trait Parse: Sized {
     fn parse(input: ParseStream) -> Result<Self>;
 }
