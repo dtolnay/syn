@@ -1278,9 +1278,66 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
-    fn expr_no_struct(input: ParseStream) -> Result<Expr> {
-        ambiguous_expr(input, AllowStruct(false))
+    impl Expr {
+        /// Parse an expression without consuming trailing braces.
+        ///
+        /// Consider that we want to parse the following:
+        ///
+        /// ```no_compile,no_run
+        /// my_macro! {
+        ///     if condition {
+        ///     }
+        /// }
+        /// ```
+        ///
+        /// And we want to continue parsing the block of the if statement as a
+        /// part of our custom macro (`my_macro!`).
+        ///
+        /// We might attempt to parse `condition` as an [Expr], so we build a
+        /// parser and have it consume all available tokens, one by one:
+        ///
+        /// ```
+        /// # use syn::{Result, Expr, Token, braced};
+        /// # use syn::parse::ParseStream;
+        /// # fn parse_block(_: ParseStream) -> Result<()> { Ok(()) }
+        /// # fn parse_my_macro(input: ParseStream) -> Result<()> {
+        /// input.parse::<Token![if]>()?;
+        /// let condition = input.parse::<Expr>()?;
+        ///
+        /// let block;
+        /// syn::braced!(block in input);
+        ///
+        /// parse_block(&block)?;
+        /// # Ok(())
+        /// # }
+        /// ```
+        ///
+        /// Unfortunately this will not work as expected, since parsing the
+        /// condition as an [Expr] would also consume the braces. We do this in
+        /// an effort to parse the expression as a struct.
+        ///
+        /// To work around this, you can use `Expr::parse_without_eager_brace`
+        /// instead:
+        ///
+        /// ```
+        /// # use syn::{Result, Expr, Token, braced};
+        /// # use syn::parse::ParseStream;
+        /// # fn parse_block(_: ParseStream) -> Result<()> { Ok(()) }
+        /// # fn parse_my_macro(input: ParseStream) -> Result<()> {
+        /// input.parse::<Token![if]>()?;
+        /// let condition = Expr::parse_without_eager_brace(input)?;
+        ///
+        /// let block;
+        /// braced!(block in input);
+        ///
+        /// parse_block(&block)?;
+        /// # Ok(())
+        /// # }
+        /// ```
+        #[cfg(feature = "full")]
+        pub fn parse_without_eager_brace(input: ParseStream) -> Result<Expr> {
+            ambiguous_expr(input, AllowStruct(false))
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2018,7 +2075,7 @@ pub(crate) mod parsing {
             let_token: input.parse()?,
             pat: pat::parsing::multi_pat_with_leading_vert(input)?,
             eq_token: input.parse()?,
-            expr: Box::new(input.call(expr_no_struct)?),
+            expr: Box::new(input.call(Expr::parse_without_eager_brace)?),
         })
     }
 
@@ -2029,7 +2086,7 @@ pub(crate) mod parsing {
             Ok(ExprIf {
                 attrs,
                 if_token: input.parse()?,
-                cond: Box::new(input.call(expr_no_struct)?),
+                cond: Box::new(input.call(Expr::parse_without_eager_brace)?),
                 then_branch: input.parse()?,
                 else_branch: {
                     if input.peek(Token![else]) {
@@ -2072,7 +2129,7 @@ pub(crate) mod parsing {
             let pat = pat::parsing::multi_pat_with_leading_vert(input)?;
 
             let in_token: Token![in] = input.parse()?;
-            let expr: Expr = input.call(expr_no_struct)?;
+            let expr: Expr = input.call(Expr::parse_without_eager_brace)?;
 
             let content;
             let brace_token = braced!(content in input);
@@ -2117,7 +2174,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let match_token: Token![match] = input.parse()?;
-            let expr = expr_no_struct(input)?;
+            let expr = Expr::parse_without_eager_brace(input)?;
 
             let content;
             let brace_token = braced!(content in input);
@@ -2327,7 +2384,7 @@ pub(crate) mod parsing {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let label: Option<Label> = input.parse()?;
             let while_token: Token![while] = input.parse()?;
-            let cond = expr_no_struct(input)?;
+            let cond = Expr::parse_without_eager_brace(input)?;
 
             let content;
             let brace_token = braced!(content in input);
