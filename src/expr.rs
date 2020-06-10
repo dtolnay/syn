@@ -1279,61 +1279,86 @@ pub(crate) mod parsing {
     }
 
     impl Expr {
-        /// Parse an expression without consuming trailing braces.
+        /// An alternative to the primary `Expr::parse` parser (from the
+        /// [`Parse`] trait) for ambiguous syntactic positions in which a
+        /// trailing brace should not be taken as part of the expression.
         ///
-        /// Consider that we want to parse the following:
-        ///
-        /// ```no_compile,no_run
-        /// my_macro! {
-        ///     if condition {
-        ///     }
-        /// }
-        /// ```
-        ///
-        /// And we want to continue parsing the block of the if statement as a
-        /// part of our custom macro (`my_macro!`).
-        ///
-        /// We might attempt to parse `condition` as an [Expr], so we build a
-        /// parser and have it consume all available tokens, one by one:
+        /// Rust grammar has an ambiguity where braces sometimes turn a path
+        /// expression into a struct initialization and sometimes do not. In the
+        /// following code, the expression `S {}` is one expression. Presumably
+        /// there is an empty struct `struct S {}` defined somewhere which it is
+        /// instantiating.
         ///
         /// ```
-        /// # use syn::{Result, Expr, Token, braced};
-        /// # use syn::parse::ParseStream;
-        /// # fn parse_block(_: ParseStream) -> Result<()> { Ok(()) }
-        /// # fn parse_my_macro(input: ParseStream) -> Result<()> {
-        /// input.parse::<Token![if]>()?;
-        /// let condition = input.parse::<Expr>()?;
-        ///
-        /// let block;
-        /// syn::braced!(block in input);
-        ///
-        /// parse_block(&block)?;
-        /// # Ok(())
+        /// # struct S;
+        /// # impl std::ops::Deref for S {
+        /// #     type Target = bool;
+        /// #     fn deref(&self) -> &Self::Target {
+        /// #         &true
+        /// #     }
         /// # }
+        /// let _ = *S {};
+        ///
+        /// // parsed by rustc as: `*(S {})`
         /// ```
         ///
-        /// Unfortunately this will not work as expected, since parsing the
-        /// condition as an [Expr] would also consume the braces. We do this in
-        /// an effort to parse the expression as a struct.
+        /// We would want to parse the above using `Expr::parse` after the `=`
+        /// token.
         ///
-        /// To work around this, you can use `Expr::parse_without_eager_brace`
-        /// instead:
+        /// But in the following, `S {}` is *not* a struct init expression.
         ///
         /// ```
-        /// # use syn::{Result, Expr, Token, braced};
-        /// # use syn::parse::ParseStream;
-        /// # fn parse_block(_: ParseStream) -> Result<()> { Ok(()) }
-        /// # fn parse_my_macro(input: ParseStream) -> Result<()> {
-        /// input.parse::<Token![if]>()?;
-        /// let condition = Expr::parse_without_eager_brace(input)?;
+        /// # const S: &bool = &true;
+        /// if *S {} {}
         ///
-        /// let block;
-        /// braced!(block in input);
+        /// // parsed by rustc as:
+        /// //
+        /// //    if (*S) {
+        /// //        /* empty block */
+        /// //    }
+        /// //    {
+        /// //        /* another empty block */
+        /// //    }
+        /// ```
         ///
-        /// parse_block(&block)?;
-        /// # Ok(())
+        /// For that reason we would want to parse if-conditions using
+        /// `Expr::parse_without_eager_brace` after the `if` token. Same for
+        /// similar syntactic positions such as the condition expr after a
+        /// `while` token or the expr at the top of a `match`.
+        ///
+        /// The Rust grammar's choices around which way this ambiguity is
+        /// resolved at various syntactic positions is fairly arbitrary. Really
+        /// either parse behavior could work in most positions, and language
+        /// designers just decide each case based on which is more likely to be
+        /// what the programmer had in mind most of the time.
+        ///
+        /// ```
+        /// # struct S;
+        /// # fn doc() -> S {
+        /// if return S {} {}
+        /// # unreachable!()
         /// # }
+        ///
+        /// // parsed by rustc as:
+        /// //
+        /// //    if (return (S {})) {
+        /// //    }
+        /// //
+        /// // but could equally well have been this other arbitrary choice:
+        /// //
+        /// //    if (return S) {
+        /// //    }
+        /// //    {}
         /// ```
+        ///
+        /// Note the grammar ambiguity on trailing braces is distinct from
+        /// precedence and is not captured by assigning a precedence level to
+        /// the braced struct init expr in relation to other operators. This can
+        /// be illustrated by `return 0..S {}` vs `match 0..S {}`. The former
+        /// parses as `return (0..(S {}))` implying tighter precedence for
+        /// struct init than `..`, while the latter parses as `match (0..S) {}`
+        /// implying tighter precedence for `..` than struct init, a
+        /// contradiction.
         #[cfg(feature = "full")]
         pub fn parse_without_eager_brace(input: ParseStream) -> Result<Expr> {
             ambiguous_expr(input, AllowStruct(false))
