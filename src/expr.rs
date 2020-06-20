@@ -1675,6 +1675,12 @@ pub(crate) mod parsing {
                     continue;
                 }
 
+                let float_token: Option<LitFloat> = input.parse()?;
+                if let Some(float_token) = float_token {
+                    e = multi_index(e, dot_token, float_token)?;
+                    continue;
+                }
+
                 let member: Member = input.parse()?;
                 let turbofish = if member.is_named() && input.peek(Token![::]) {
                     Some(MethodTurbofish {
@@ -1760,12 +1766,18 @@ pub(crate) mod parsing {
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) && !input.peek2(token::Await)
             {
-                e = Expr::Field(ExprField {
-                    attrs: Vec::new(),
-                    base: Box::new(e),
-                    dot_token: input.parse()?,
-                    member: input.parse()?,
-                });
+                let dot_token: Token![.] = input.parse()?;
+                let float_token: Option<LitFloat> = input.parse()?;
+                if let Some(float_token) = float_token {
+                    e = multi_index(e, dot_token, float_token)?;
+                } else {
+                    e = Expr::Field(ExprField {
+                        attrs: Vec::new(),
+                        base: Box::new(e),
+                        dot_token: input.parse()?,
+                        member: input.parse()?,
+                    });
+                }
             } else if input.peek(token::Bracket) {
                 let content;
                 e = Expr::Index(ExprIndex {
@@ -2725,6 +2737,20 @@ pub(crate) mod parsing {
                 Err(Error::new(lit.span(), "expected unsuffixed integer"))
             }
         }
+    }
+
+    fn multi_index(mut e: Expr, mut dot_token: Token![.], float: LitFloat) -> Result<Expr> {
+        for part in float.to_string().split('.') {
+            let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
+            e = Expr::Field(ExprField {
+                attrs: Vec::new(),
+                base: Box::new(e),
+                dot_token,
+                member: Member::Unnamed(index),
+            });
+            dot_token = Token![.](float.span());
+        }
+        Ok(e)
     }
 
     #[cfg(feature = "full")]
