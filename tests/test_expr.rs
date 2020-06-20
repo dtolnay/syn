@@ -51,6 +51,58 @@ fn test_await() {
 }
 
 #[test]
+#[ignore] // https://github.com/dtolnay/syn/issues/844
+fn test_tuple_multi_index() {
+    let input = "tuple.0.0";
+    snapshot!(input as Expr, @r###"
+    Expr::Field {
+        base: Expr::Field {
+            base: Expr::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "tuple",
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+            member: Unnamed(Index {
+                index: 0,
+            }),
+        },
+        member: Unnamed(Index {
+            index: 0,
+        }),
+    }
+    "###);
+
+    let tokens = quote!(tuple.0.0);
+    snapshot!(tokens as Expr, @r###"
+    Expr::Field {
+        base: Expr::Field {
+            base: Expr::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "tuple",
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+            member: Unnamed(Index {
+                index: 0,
+            }),
+        },
+        member: Unnamed(Index {
+            index: 0,
+        }),
+    }
+    "###);
+}
+
+#[test]
 fn test_macro_variable_func() {
     // mimics the token stream corresponding to `$fn()`
     let tokens = TokenStream::from_iter(vec![
