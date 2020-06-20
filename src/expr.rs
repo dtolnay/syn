@@ -1664,12 +1664,13 @@ pub(crate) mod parsing {
             } else if input.peek(Token![.]) && !input.peek(Token![..]) {
                 let dot_token: Token![.] = input.parse()?;
 
-                if input.peek(token::Await) {
+                let await_token: Option<token::Await> = input.parse()?;
+                if let Some(await_token) = await_token {
                     e = Expr::Await(ExprAwait {
                         attrs: Vec::new(),
                         base: Box::new(e),
                         dot_token,
-                        await_token: input.parse()?,
+                        await_token,
                     });
                     continue;
                 }
