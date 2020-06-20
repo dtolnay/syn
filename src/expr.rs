@@ -2019,7 +2019,7 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     pub(crate) fn expr_early(input: ParseStream) -> Result<Expr> {
-        let mut attrs = input.call(Attribute::parse_outer)?;
+        let mut attrs = input.call(expr_attrs)?;
         let mut expr = if input.peek(Token![if]) {
             Expr::If(input.parse()?)
         } else if input.peek(Token![while]) {

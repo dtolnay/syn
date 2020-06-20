@@ -197,21 +197,23 @@ fn test_macro_variable_match_arm() {
         arms: [
             Arm {
                 pat: Pat::Wild,
-                body: Expr::Tuple {
-                    attrs: [
-                        Attribute {
-                            style: Outer,
-                            path: Path {
-                                segments: [
-                                    PathSegment {
-                                        ident: "a",
-                                        arguments: None,
-                                    },
-                                ],
+                body: Expr::Group {
+                    expr: Expr::Tuple {
+                        attrs: [
+                            Attribute {
+                                style: Outer,
+                                path: Path {
+                                    segments: [
+                                        PathSegment {
+                                            ident: "a",
+                                            arguments: None,
+                                        },
+                                    ],
+                                },
+                                tokens: TokenStream(``),
                             },
-                            tokens: TokenStream(``),
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
         ],
