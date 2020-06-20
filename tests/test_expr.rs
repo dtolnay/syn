@@ -51,7 +51,6 @@ fn test_await() {
 }
 
 #[test]
-#[ignore] // https://github.com/dtolnay/syn/issues/844
 fn test_tuple_multi_index() {
     let input = "tuple.0.0";
     snapshot!(input as Expr, @r###"
