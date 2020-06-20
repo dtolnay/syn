@@ -1210,7 +1210,6 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 pub(crate) mod parsing {
     use super::*;
 
-    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
 
@@ -1551,66 +1550,53 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let begin = input.fork();
-        let ahead = input.fork();
-        let attrs = ahead.call(Attribute::parse_outer)?;
-        if ahead.peek(Token![&])
-            || ahead.peek(Token![box])
-            || ahead.peek(Token![*])
-            || ahead.peek(Token![!])
-            || ahead.peek(Token![-])
-        {
-            input.advance_to(&ahead);
-            if input.peek(Token![&]) {
-                let and_token: Token![&] = input.parse()?;
-                let raw: Option<raw> = if input.peek(raw)
-                    && (input.peek2(Token![mut]) || input.peek2(Token![const]))
-                {
+        let attrs = input.call(Attribute::parse_outer)?;
+        if input.peek(Token![&]) {
+            let and_token: Token![&] = input.parse()?;
+            let raw: Option<raw> =
+                if input.peek(raw) && (input.peek2(Token![mut]) || input.peek2(Token![const])) {
                     Some(input.parse()?)
                 } else {
                     None
                 };
-                let mutability: Option<Token![mut]> = input.parse()?;
-                if raw.is_some() && mutability.is_none() {
-                    input.parse::<Token![const]>()?;
-                }
-                let expr = Box::new(unary_expr(input, allow_struct)?);
-                if raw.is_some() {
-                    Ok(Expr::Verbatim(verbatim::between(begin, input)))
-                } else {
-                    Ok(Expr::Reference(ExprReference {
-                        attrs,
-                        and_token,
-                        raw: Reserved::default(),
-                        mutability,
-                        expr,
-                    }))
-                }
-            } else if input.peek(Token![box]) {
-                Ok(Expr::Box(ExprBox {
-                    attrs,
-                    box_token: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct)?),
-                }))
+            let mutability: Option<Token![mut]> = input.parse()?;
+            if raw.is_some() && mutability.is_none() {
+                input.parse::<Token![const]>()?;
+            }
+            let expr = Box::new(unary_expr(input, allow_struct)?);
+            if raw.is_some() {
+                Ok(Expr::Verbatim(verbatim::between(begin, input)))
             } else {
-                Ok(Expr::Unary(ExprUnary {
+                Ok(Expr::Reference(ExprReference {
                     attrs,
-                    op: input.parse()?,
-                    expr: Box::new(unary_expr(input, allow_struct)?),
+                    and_token,
+                    raw: Reserved::default(),
+                    mutability,
+                    expr,
                 }))
             }
+        } else if input.peek(Token![box]) {
+            Ok(Expr::Box(ExprBox {
+                attrs,
+                box_token: input.parse()?,
+                expr: Box::new(unary_expr(input, allow_struct)?),
+            }))
+        } else if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
+            Ok(Expr::Unary(ExprUnary {
+                attrs,
+                op: input.parse()?,
+                expr: Box::new(unary_expr(input, allow_struct)?),
+            }))
         } else {
-            trailer_expr(input, allow_struct)
+            trailer_expr(attrs, input, allow_struct)
         }
     }
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let ahead = input.fork();
-        let attrs = ahead.call(Attribute::parse_outer)?;
-        if ahead.peek(Token![*]) || ahead.peek(Token![!]) || ahead.peek(Token![-]) {
-            input.advance_to(&ahead);
+        if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
             Ok(Expr::Unary(ExprUnary {
-                attrs,
+                attrs: Vec::new(),
                 op: input.parse()?,
                 expr: Box::new(unary_expr(input, allow_struct)?),
             }))
@@ -1626,9 +1612,11 @@ pub(crate) mod parsing {
     // <atom> [ <expr> ] ...
     // <atom> ? ...
     #[cfg(feature = "full")]
-    fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let outer_attrs = input.call(Attribute::parse_outer)?;
-
+    fn trailer_expr(
+        outer_attrs: Vec<Attribute>,
+        input: ParseStream,
+        allow_struct: AllowStruct,
+    ) -> Result<Expr> {
         let atom = atom_expr(input, allow_struct)?;
         let mut e = trailer_helper(input, atom)?;
 
