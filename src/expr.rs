@@ -1543,6 +1543,30 @@ pub(crate) mod parsing {
         parse_expr(input, lhs, allow_struct, Precedence::Any)
     }
 
+    #[cfg(feature = "full")]
+    fn expr_attrs(input: ParseStream) -> Result<Vec<Attribute>> {
+        let mut attrs = Vec::new();
+        loop {
+            if input.peek(token::Group) {
+                let ahead = input.fork();
+                let group = crate::group::parse_group(&ahead)?;
+                if !group.content.peek(Token![#]) || group.content.peek2(Token![!]) {
+                    break;
+                }
+                let attr = group.content.call(attr::parsing::single_parse_outer)?;
+                if !group.content.is_empty() {
+                    break;
+                }
+                attrs.push(attr);
+            } else if input.peek(Token![#]) {
+                attrs.push(input.call(attr::parsing::single_parse_outer)?);
+            } else {
+                break;
+            }
+        }
+        Ok(attrs)
+    }
+
     // <UnOp> <trailer>
     // & <trailer>
     // &mut <trailer>
@@ -1550,7 +1574,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let begin = input.fork();
-        let attrs = input.call(Attribute::parse_outer)?;
+        let attrs = input.call(expr_attrs)?;
         if input.peek(Token![&]) {
             let and_token: Token![&] = input.parse()?;
             let raw: Option<raw> =
