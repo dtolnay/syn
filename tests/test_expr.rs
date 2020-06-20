@@ -3,7 +3,7 @@ mod macros;
 
 use std::str::FromStr;
 
-use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use quote::quote;
 use std::iter::FromIterator;
 use syn::{Expr, ExprRange};
@@ -161,6 +161,60 @@ fn test_macro_variable_struct() {
                 },
             ],
         },
+    }
+    "###);
+}
+
+#[test]
+fn test_macro_variable_match_arm() {
+    // mimics the token stream corresponding to `match v { _ => $expr }`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Ident(Ident::new("match", Span::call_site())),
+        TokenTree::Ident(Ident::new("v", Span::call_site())),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_iter(vec![
+                TokenTree::Punct(Punct::new('_', Spacing::Alone)),
+                TokenTree::Punct(Punct::new('=', Spacing::Joint)),
+                TokenTree::Punct(Punct::new('>', Spacing::Alone)),
+                TokenTree::Group(Group::new(Delimiter::None, quote! { #[a] () })),
+            ]),
+        )),
+    ]);
+
+    snapshot!(tokens as Expr, @r###"
+    Expr::Match {
+        expr: Expr::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "v",
+                        arguments: None,
+                    },
+                ],
+            },
+        },
+        arms: [
+            Arm {
+                pat: Pat::Wild,
+                body: Expr::Tuple {
+                    attrs: [
+                        Attribute {
+                            style: Outer,
+                            path: Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "a",
+                                        arguments: None,
+                                    },
+                                ],
+                            },
+                            tokens: TokenStream(``),
+                        },
+                    ],
+                },
+            },
+        ],
     }
     "###);
 }
