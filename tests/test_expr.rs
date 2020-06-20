@@ -1,8 +1,6 @@
 #[macro_use]
 mod macros;
 
-use std::str::FromStr;
-
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use quote::quote;
 use std::iter::FromIterator;
@@ -10,19 +8,33 @@ use syn::{Expr, ExprRange};
 
 #[test]
 fn test_expr_parse() {
-    let code = "..100u32";
-    let tt = TokenStream::from_str(code).unwrap();
-    let expr: Expr = syn::parse2(tt.clone()).unwrap();
-    let expr_range: ExprRange = syn::parse2(tt).unwrap();
-    assert_eq!(expr, Expr::Range(expr_range));
+    let tokens = quote!(..100u32);
+    snapshot!(tokens as Expr, @r###"
+    Expr::Range {
+        limits: HalfOpen,
+        to: Some(Expr::Lit {
+            lit: 100u32,
+        }),
+    }
+    "###);
+
+    let tokens = quote!(..100u32);
+    snapshot!(tokens as ExprRange, @r###"
+    ExprRange {
+        limits: HalfOpen,
+        to: Some(Expr::Lit {
+            lit: 100u32,
+        }),
+    }
+    "###);
 }
 
 #[test]
 fn test_await() {
     // Must not parse as Expr::Field.
-    let expr = syn::parse_str::<Expr>("fut.await").unwrap();
+    let tokens = quote!(fut.await);
 
-    snapshot!(expr, @r###"
+    snapshot!(tokens as Expr, @r###"
     Expr::Await {
         base: Expr::Path {
             path: Path {
