@@ -111,7 +111,6 @@ use self::private::WithSpan;
 use crate::buffer::Cursor;
 #[cfg(feature = "parsing")]
 use crate::error::Result;
-#[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
 use crate::lifetime::Lifetime;
 #[cfg(any(feature = "full", feature = "derive"))]
@@ -154,7 +153,6 @@ mod private {
 #[cfg(feature = "parsing")]
 impl private::Sealed for Ident {}
 
-#[cfg(any(feature = "full", feature = "derive"))]
 #[cfg(feature = "parsing")]
 fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
     use crate::parse::Unexpected;
@@ -167,7 +165,6 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
     peek(&buffer)
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 macro_rules! impl_token {
     ($name:ident $display:expr) => {
         #[cfg(feature = "parsing")]
@@ -189,7 +186,6 @@ macro_rules! impl_token {
     };
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(Lifetime "lifetime");
 #[cfg(any(feature = "full", feature = "derive"))]
 impl_token!(Lit "literal");
