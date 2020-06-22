@@ -96,13 +96,13 @@ use std::fmt::{self, Debug};
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 
-#[cfg(feature = "parsing")]
-use proc_macro2::Delimiter;
 #[cfg(any(feature = "parsing", feature = "printing"))]
 use proc_macro2::Ident;
 use proc_macro2::Span;
 #[cfg(feature = "printing")]
 use proc_macro2::TokenStream;
+#[cfg(feature = "parsing")]
+use proc_macro2::{Delimiter, Literal, Punct, TokenTree};
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 
@@ -165,7 +165,7 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
 }
 
 macro_rules! impl_token {
-    ($display:tt $name:ident) => {
+    ($display:tt $name:ty) => {
         #[cfg(feature = "parsing")]
         impl Token for $name {
             fn peek(cursor: Cursor) -> bool {
@@ -194,6 +194,10 @@ impl_token!("character literal" LitChar);
 impl_token!("integer literal" LitInt);
 impl_token!("floating point literal" LitFloat);
 impl_token!("boolean literal" LitBool);
+impl_token!("punctuation token" Punct);
+impl_token!("literal" Literal);
+impl_token!("group token" proc_macro2::Group);
+impl_token!("token" TokenTree);
 
 // Not public API.
 #[doc(hidden)]
