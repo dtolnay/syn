@@ -165,7 +165,7 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
 }
 
 macro_rules! impl_token {
-    ($name:ident $display:expr) => {
+    ($display:tt $name:ident) => {
         #[cfg(feature = "parsing")]
         impl Token for $name {
             fn peek(cursor: Cursor) -> bool {
@@ -185,15 +185,15 @@ macro_rules! impl_token {
     };
 }
 
-impl_token!(Lifetime "lifetime");
-impl_token!(Lit "literal");
-impl_token!(LitStr "string literal");
-impl_token!(LitByteStr "byte string literal");
-impl_token!(LitByte "byte literal");
-impl_token!(LitChar "character literal");
-impl_token!(LitInt "integer literal");
-impl_token!(LitFloat "floating point literal");
-impl_token!(LitBool "boolean literal");
+impl_token!("lifetime" Lifetime);
+impl_token!("literal" Lit);
+impl_token!("string literal" LitStr);
+impl_token!("byte string literal" LitByteStr);
+impl_token!("byte literal" LitByte);
+impl_token!("character literal" LitChar);
+impl_token!("integer literal" LitInt);
+impl_token!("floating point literal" LitFloat);
+impl_token!("boolean literal" LitBool);
 
 // Not public API.
 #[doc(hidden)]
