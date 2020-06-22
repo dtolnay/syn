@@ -194,10 +194,29 @@ impl_token!("character literal" LitChar);
 impl_token!("integer literal" LitInt);
 impl_token!("floating point literal" LitFloat);
 impl_token!("boolean literal" LitBool);
-impl_token!("punctuation token" Punct);
-impl_token!("literal" Literal);
 impl_token!("group token" proc_macro2::Group);
-impl_token!("token" TokenTree);
+
+macro_rules! impl_low_level_token {
+    ($display:tt $ty:ident $get:ident) => {
+        #[cfg(feature = "parsing")]
+        impl Token for $ty {
+            fn peek(cursor: Cursor) -> bool {
+                cursor.$get().is_some()
+            }
+
+            fn display() -> &'static str {
+                $display
+            }
+        }
+
+        #[cfg(feature = "parsing")]
+        impl private::Sealed for $ty {}
+    };
+}
+
+impl_low_level_token!("punctuation token" Punct punct);
+impl_low_level_token!("literal" Literal literal);
+impl_low_level_token!("token" TokenTree token_tree);
 
 // Not public API.
 #[doc(hidden)]
