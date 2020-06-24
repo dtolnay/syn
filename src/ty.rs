@@ -67,7 +67,7 @@ ast_enum_of_structs! {
         Tuple(TypeTuple),
 
         /// The unit type: `()`
-        Unit,
+        Unit(TypeUnit),
 
         /// Tokens in type position not interpreted by Syn.
         Verbatim(TokenStream),
@@ -240,6 +240,16 @@ ast_struct! {
     pub struct TypeTuple {
         pub paren_token: token::Paren,
         pub elems: Punctuated<Type, Token![,]>,
+    }
+}
+
+ast_struct! {
+    /// A unit type: `()`.
+    ///
+    /// *This type is available only if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
+    pub struct TypeUnit {
+        pub paren_token: token::Paren,
     }
 }
 
@@ -463,7 +473,9 @@ pub mod parsing {
             let content;
             let paren_token = parenthesized!(content in input);
             if content.is_empty() {
-                return Ok(Type::Unit);
+                return Ok(Type::Unit(TypeUnit {
+                    paren_token,
+                }));
             }
             if content.peek(Lifetime) {
                 return Ok(Type::Paren(TypeParen {
@@ -1078,6 +1090,12 @@ mod printing {
 
     use crate::attr::FilterAttrs;
     use crate::print::TokensOrDefault;
+
+    impl ToTokens for TypeUnit {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.paren_token.surround(tokens, |_| {});
+        }
+    }
 
     impl ToTokens for TypeSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
