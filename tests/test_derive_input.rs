@@ -165,7 +165,7 @@ fn test_union() {
                         vis: Inherited,
                         ident: Some("uninit"),
                         colon_token: Some,
-                        ty: Type::Tuple,
+                        ty: Type::Unit,
                     },
                     Field {
                         vis: Inherited,

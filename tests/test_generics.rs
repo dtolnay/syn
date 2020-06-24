@@ -56,7 +56,7 @@ fn test_split_for_impl() {
                         }),
                     ],
                     eq_token: Some,
-                    default: Some(Type::Tuple),
+                    default: Some(Type::Unit),
                 }),
             ],
             gt_token: Some,

@@ -5038,6 +5038,9 @@ impl Debug for Lite<syn::Type> {
                 }
                 formatter.finish()
             }
+            syn::Type::Unit => {
+                formatter.debug_struct("Type::Unit").finish()
+            }
             syn::Type::Verbatim(_val) => {
                 formatter.write_str("Verbatim")?;
                 formatter.write_str("(`")?;

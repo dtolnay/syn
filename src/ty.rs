@@ -66,6 +66,9 @@ ast_enum_of_structs! {
         /// A tuple type: `(A, B, C, String)`.
         Tuple(TypeTuple),
 
+        /// The unit type: `()`
+        Unit,
+
         /// Tokens in type position not interpreted by Syn.
         Verbatim(TokenStream),
 
@@ -332,6 +335,9 @@ impl Hash for Type {
                 hash.write_u8(13);
                 ty.hash(hash);
             }
+            Type::Unit => {
+                hash.write_u8(15);
+            }
             Type::Verbatim(ty) => {
                 hash.write_u8(14);
                 TokenStreamHelper(ty).hash(hash);
@@ -457,10 +463,7 @@ pub mod parsing {
             let content;
             let paren_token = parenthesized!(content in input);
             if content.is_empty() {
-                return Ok(Type::Tuple(TypeTuple {
-                    paren_token,
-                    elems: Punctuated::new(),
-                }));
+                return Ok(Type::Unit);
             }
             if content.peek(Lifetime) {
                 return Ok(Type::Paren(TypeParen {
