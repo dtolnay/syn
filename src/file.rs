@@ -37,6 +37,8 @@ ast_struct! {
     ///     file.read_to_string(&mut src).expect("Unable to read file");
     ///
     ///     let syntax = syn::parse_file(&src).expect("Unable to parse file");
+    ///     // Crate needs to be built with "extra-traits" feature enabled for Debug
+    ///     // trait to be available
     ///     println!("{:#?}", syntax);
     /// }
     /// ```
