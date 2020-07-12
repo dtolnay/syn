@@ -43,6 +43,30 @@
 /// #   "".parse().unwrap()
 /// }
 /// ```
+///
+/// <br>
+///
+/// # Expansion
+///
+/// `parse_macro_input!($variable as $Type)` expands to something like:
+///
+/// ```no_run
+/// # extern crate proc_macro;
+/// #
+/// # macro_rules! doc_test {
+/// #     ($variable:ident as $Type:ty) => {
+/// match syn::parse::<$Type>($variable) {
+///     Ok(syntax_tree) => syntax_tree,
+///     Err(err) => return proc_macro::TokenStream::from(err.to_compile_error()),
+/// }
+/// #     };
+/// # }
+/// #
+/// # fn test(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+/// #     let _ = doc_test!(input as syn::Ident);
+/// #     proc_macro::TokenStream::new()
+/// # }
+/// ```
 #[macro_export]
 macro_rules! parse_macro_input {
     ($tokenstream:ident as $ty:ty) => {
