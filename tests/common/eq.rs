@@ -442,8 +442,8 @@ fn expand_tts(tts: &TokenStream) -> Vec<TokenTree> {
                 continue;
             }
         };
-        let contents = comments::strip_doc_comment_decoration(&c.as_str());
-        let style = comments::doc_comment_style(&c.as_str());
+        let contents = comments::strip_doc_comment_decoration(c);
+        let style = comments::doc_comment_style(c);
         tokens.push(TokenTree::token(TokenKind::Pound, DUMMY_SP));
         if style == AttrStyle::Inner {
             tokens.push(TokenTree::token(TokenKind::Not, DUMMY_SP));
