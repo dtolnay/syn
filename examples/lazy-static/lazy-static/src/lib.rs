@@ -1,4 +1,3 @@
-#![recursion_limit = "128"]
 #![feature(proc_macro_diagnostic)]
 
 use proc_macro::TokenStream;

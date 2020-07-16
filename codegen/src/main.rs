@@ -9,7 +9,6 @@
 // Finally this crate generates the Visit, VisitMut, and Fold traits in Syn
 // programmatically from the syntax tree description.
 
-#![recursion_limit = "128"]
 #![allow(clippy::needless_pass_by_value)]
 
 mod debug;
