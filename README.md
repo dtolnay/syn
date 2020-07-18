@@ -46,10 +46,6 @@ contains some APIs that may be useful more generally.
 [`syn::DeriveInput`]: https://docs.rs/syn/1.0/syn/struct.DeriveInput.html
 [parser functions]: https://docs.rs/syn/1.0/syn/parse/index.html
 
-If you get stuck with anything involving procedural macros in Rust I am happy to
-provide help even if the issue is not related to Syn. Please file a ticket in
-this repo.
-
 *Version requirement: Syn supports rustc 1.31 and up.*
 
 [*Release notes*](https://github.com/dtolnay/syn/releases)
