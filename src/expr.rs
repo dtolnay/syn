@@ -1774,7 +1774,7 @@ pub(crate) mod parsing {
                     e = Expr::Field(ExprField {
                         attrs: Vec::new(),
                         base: Box::new(e),
-                        dot_token: input.parse()?,
+                        dot_token,
                         member: input.parse()?,
                     });
                 }
