@@ -326,6 +326,54 @@ ast_struct! {
     }
 }
 
+impl Item {
+    /// Returns a shared reference to the attributes of the item.
+    pub fn attrs(&self) -> &[Attribute] {
+        match self {
+            Item::Const(ItemConst { attrs, .. })
+            | Item::Enum(ItemEnum { attrs, .. })
+            | Item::ExternCrate(ItemExternCrate { attrs, .. })
+            | Item::Fn(ItemFn { attrs, .. })
+            | Item::ForeignMod(ItemForeignMod { attrs, .. })
+            | Item::Impl(ItemImpl { attrs, .. })
+            | Item::Macro(ItemMacro { attrs, .. })
+            | Item::Macro2(ItemMacro2 { attrs, .. })
+            | Item::Mod(ItemMod { attrs, .. })
+            | Item::Static(ItemStatic { attrs, .. })
+            | Item::Struct(ItemStruct { attrs, .. })
+            | Item::Trait(ItemTrait { attrs, .. })
+            | Item::TraitAlias(ItemTraitAlias { attrs, .. })
+            | Item::Type(ItemType { attrs, .. })
+            | Item::Union(ItemUnion { attrs, .. })
+            | Item::Use(ItemUse { attrs, .. }) => attrs,
+            Item::Verbatim(_) | Item::__Nonexhaustive => &[],
+        }
+    }
+
+    /// Returns an exclusive reference to the attributes of the item.
+    pub fn attrs_mut(&mut self) -> &mut [Attribute] {
+        match self {
+            Item::Const(ItemConst { attrs, .. })
+            | Item::Enum(ItemEnum { attrs, .. })
+            | Item::ExternCrate(ItemExternCrate { attrs, .. })
+            | Item::Fn(ItemFn { attrs, .. })
+            | Item::ForeignMod(ItemForeignMod { attrs, .. })
+            | Item::Impl(ItemImpl { attrs, .. })
+            | Item::Macro(ItemMacro { attrs, .. })
+            | Item::Macro2(ItemMacro2 { attrs, .. })
+            | Item::Mod(ItemMod { attrs, .. })
+            | Item::Static(ItemStatic { attrs, .. })
+            | Item::Struct(ItemStruct { attrs, .. })
+            | Item::Trait(ItemTrait { attrs, .. })
+            | Item::TraitAlias(ItemTraitAlias { attrs, .. })
+            | Item::Type(ItemType { attrs, .. })
+            | Item::Union(ItemUnion { attrs, .. })
+            | Item::Use(ItemUse { attrs, .. }) => attrs,
+            Item::Verbatim(_) | Item::__Nonexhaustive => &mut [],
+        }
+    }
+}
+
 #[cfg(feature = "extra-traits")]
 impl Eq for Item {}
 
