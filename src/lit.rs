@@ -993,6 +993,32 @@ mod value {
                 Lit::Bool(_) | Lit::Verbatim(_) => "",
             }
         }
+
+        pub fn span(&self) -> Span {
+            match self {
+                Lit::Str(lit) => lit.span(),
+                Lit::ByteStr(lit) => lit.span(),
+                Lit::Byte(lit) => lit.span(),
+                Lit::Char(lit) => lit.span(),
+                Lit::Int(lit) => lit.span(),
+                Lit::Float(lit) => lit.span(),
+                Lit::Bool(lit) => lit.span,
+                Lit::Verbatim(lit) => lit.span(),
+            }
+        }
+
+        pub fn set_span(&mut self, span: Span) {
+            match self {
+                Lit::Str(lit) => lit.set_span(span),
+                Lit::ByteStr(lit) => lit.set_span(span),
+                Lit::Byte(lit) => lit.set_span(span),
+                Lit::Char(lit) => lit.set_span(span),
+                Lit::Int(lit) => lit.set_span(span),
+                Lit::Float(lit) => lit.set_span(span),
+                Lit::Bool(lit) => lit.span = span,
+                Lit::Verbatim(lit) => lit.set_span(span),
+            }
+        }
     }
 
     /// Get the byte at offset idx, or a default of `b'\0'` if we're looking
