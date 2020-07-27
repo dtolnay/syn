@@ -13,8 +13,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          # Pinned because of https://github.com/rust-lang/rust/issues/74614
-          toolchain: nightly-2020-07-21
           components: rustc-dev
       - run: cargo test --all-features --release
 
