@@ -42,8 +42,13 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     if cfg!(windows) {
         path_string = path_string.replace('\\', "/").into();
     }
-    assert!(path_string.starts_with("tests/rust/src/"));
-    let path = &path_string["tests/rust/src/".len()..];
+    let path = if let Some(path) = path_string.strip_prefix("tests/rust/src/") {
+        path
+    } else if let Some(path) = path_string.strip_prefix("tests/rust/library/") {
+        path
+    } else {
+        panic!("unexpected path in Rust dist: {}", path_string);
+    };
 
     // TODO assert that parsing fails on the parse-fail cases
     if path.starts_with("test/parse-fail")
