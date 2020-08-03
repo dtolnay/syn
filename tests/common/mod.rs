@@ -17,7 +17,7 @@ pub fn abort_after() -> usize {
 /// Configure Rayon threadpool.
 pub fn rayon_init() {
     ThreadPoolBuilder::new()
-        .stack_size(10 * 1024 * 1024)
+        .stack_size(20 * 1024 * 1024)
         .build_global()
         .unwrap();
 }

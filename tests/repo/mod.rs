@@ -8,7 +8,7 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "46e85b4328fe18492894093c1092dfe509df4370";
+const REVISION: &str = "81e754c359c471f91263813c46c67955071716a7";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
@@ -25,6 +25,7 @@ static EXCLUDE: &[&str] = &[
     "test/ui/include-single-expr-helper-1.rs",
     "test/ui/issues/auxiliary/issue-21146-inc.rs",
     "test/ui/json-bom-plus-crlf-multifile-aux.rs",
+    "test/ui/lint/expansion-time-include.rs",
     "test/ui/macros/auxiliary/macro-comma-support.rs",
     "test/ui/macros/auxiliary/macro-include-items-expr.rs",
 ];
