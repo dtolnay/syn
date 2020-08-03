@@ -352,6 +352,17 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             }
         }
 
+        fn fold_generic_method_argument(
+            &mut self,
+            arg: GenericMethodArgument,
+        ) -> GenericMethodArgument {
+            match arg {
+                // Don't wrap const generic arg as that's invalid syntax.
+                GenericMethodArgument::Const(a) => GenericMethodArgument::Const(fold_expr(self, a)),
+                _ => fold_generic_method_argument(self, arg),
+            }
+        }
+
         fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
