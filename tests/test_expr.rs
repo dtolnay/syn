@@ -50,55 +50,72 @@ fn test_await() {
     "###);
 }
 
+#[rustfmt::skip]
 #[test]
 fn test_tuple_multi_index() {
-    let input = "tuple.0.0";
-    snapshot!(input as Expr, @r###"
-    Expr::Field {
-        base: Expr::Field {
-            base: Expr::Path {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "tuple",
-                            arguments: None,
-                        },
-                    ],
+    for &input in &[
+        "tuple.0.0",
+        "tuple .0.0",
+        "tuple. 0.0",
+        "tuple.0 .0",
+        "tuple.0. 0",
+        "tuple . 0 . 0",
+    ] {
+        snapshot!(input as Expr, @r###"
+        Expr::Field {
+            base: Expr::Field {
+                base: Expr::Path {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "tuple",
+                                arguments: None,
+                            },
+                        ],
+                    },
                 },
+                member: Unnamed(Index {
+                    index: 0,
+                }),
             },
             member: Unnamed(Index {
                 index: 0,
             }),
-        },
-        member: Unnamed(Index {
-            index: 0,
-        }),
+        }
+        "###);
     }
-    "###);
 
-    let tokens = quote!(tuple.0.0);
-    snapshot!(tokens as Expr, @r###"
-    Expr::Field {
-        base: Expr::Field {
-            base: Expr::Path {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "tuple",
-                            arguments: None,
-                        },
-                    ],
+    for tokens in vec![
+        quote!(tuple.0.0),
+        quote!(tuple .0.0),
+        quote!(tuple. 0.0),
+        quote!(tuple.0 .0),
+        quote!(tuple.0. 0),
+        quote!(tuple . 0 . 0),
+    ] {
+        snapshot!(tokens as Expr, @r###"
+        Expr::Field {
+            base: Expr::Field {
+                base: Expr::Path {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "tuple",
+                                arguments: None,
+                            },
+                        ],
+                    },
                 },
+                member: Unnamed(Index {
+                    index: 0,
+                }),
             },
             member: Unnamed(Index {
                 index: 0,
             }),
-        },
-        member: Unnamed(Index {
-            index: 0,
-        }),
+        }
+        "###);
     }
-    "###);
 }
 
 #[test]

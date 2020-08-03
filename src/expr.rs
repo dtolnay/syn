@@ -8,7 +8,7 @@ use quote::IdentFragment;
 #[cfg(feature = "printing")]
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
-#[cfg(all(feature = "parsing", feature = "full"))]
+#[cfg(feature = "parsing")]
 use std::mem;
 
 ast_enum_of_structs! {
@@ -1662,7 +1662,7 @@ pub(crate) mod parsing {
                     args: content.parse_terminated(Expr::parse)?,
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) {
-                let dot_token: Token![.] = input.parse()?;
+                let mut dot_token: Token![.] = input.parse()?;
 
                 let await_token: Option<token::Await> = input.parse()?;
                 if let Some(await_token) = await_token {
@@ -1677,8 +1677,9 @@ pub(crate) mod parsing {
 
                 let float_token: Option<LitFloat> = input.parse()?;
                 if let Some(float_token) = float_token {
-                    e = multi_index(e, dot_token, float_token)?;
-                    continue;
+                    if multi_index(&mut e, &mut dot_token, float_token)? {
+                        continue;
+                    }
                 }
 
                 let member: Member = input.parse()?;
@@ -1766,18 +1767,19 @@ pub(crate) mod parsing {
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) && !input.peek2(token::Await)
             {
-                let dot_token: Token![.] = input.parse()?;
+                let mut dot_token: Token![.] = input.parse()?;
                 let float_token: Option<LitFloat> = input.parse()?;
                 if let Some(float_token) = float_token {
-                    e = multi_index(e, dot_token, float_token)?;
-                } else {
-                    e = Expr::Field(ExprField {
-                        attrs: Vec::new(),
-                        base: Box::new(e),
-                        dot_token,
-                        member: input.parse()?,
-                    });
+                    if multi_index(&mut e, &mut dot_token, float_token)? {
+                        continue;
+                    }
                 }
+                e = Expr::Field(ExprField {
+                    attrs: Vec::new(),
+                    base: Box::new(e),
+                    dot_token,
+                    member: input.parse()?,
+                });
             } else if input.peek(token::Bracket) {
                 let content;
                 e = Expr::Index(ExprIndex {
@@ -2739,18 +2741,24 @@ pub(crate) mod parsing {
         }
     }
 
-    fn multi_index(mut e: Expr, mut dot_token: Token![.], float: LitFloat) -> Result<Expr> {
-        for part in float.to_string().split('.') {
+    fn multi_index(e: &mut Expr, dot_token: &mut Token![.], float: LitFloat) -> Result<bool> {
+        let mut float_repr = float.to_string();
+        let trailing_dot = float_repr.ends_with('.');
+        if trailing_dot {
+            float_repr.truncate(float_repr.len() - 1);
+        }
+        for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            e = Expr::Field(ExprField {
+            let base = mem::replace(e, Expr::__Nonexhaustive);
+            *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
-                base: Box::new(e),
-                dot_token,
+                base: Box::new(base),
+                dot_token: Token![.](dot_token.span),
                 member: Member::Unnamed(index),
             });
-            dot_token = Token![.](float.span());
+            *dot_token = Token![.](float.span());
         }
-        Ok(e)
+        Ok(!trailing_dot)
     }
 
     #[cfg(feature = "full")]
