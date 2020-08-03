@@ -50,6 +50,7 @@ fn test_await() {
     "###);
 }
 
+#[rustfmt::skip]
 #[test]
 fn test_tuple_multi_index() {
     for &input in &[
