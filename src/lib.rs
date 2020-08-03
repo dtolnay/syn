@@ -456,6 +456,9 @@ pub mod parse_macro_input;
 #[cfg(all(feature = "parsing", feature = "printing"))]
 pub mod spanned;
 
+#[cfg(all(feature = "parsing", feature = "full"))]
+mod whitespace;
+
 mod gen {
     /// Syntax tree traversal to walk a shared borrow of a syntax tree.
     ///
@@ -943,13 +946,16 @@ pub fn parse_file(mut content: &str) -> Result<File> {
     }
 
     let mut shebang = None;
-    if content.starts_with("#!") && !content.starts_with("#![") {
-        if let Some(idx) = content.find('\n') {
-            shebang = Some(content[..idx].to_string());
-            content = &content[idx..];
-        } else {
-            shebang = Some(content.to_string());
-            content = "";
+    if content.starts_with("#!") {
+        let rest = whitespace::skip(&content[2..]);
+        if !rest.starts_with('[') {
+            if let Some(idx) = content.find('\n') {
+                shebang = Some(content[..idx].to_string());
+                content = &content[idx..];
+            } else {
+                shebang = Some(content.to_string());
+                content = "";
+            }
         }
     }
 
