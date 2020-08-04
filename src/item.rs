@@ -2598,7 +2598,11 @@ pub mod parsing {
         let trait_ = (|| -> Option<_> {
             let ahead = input.fork();
             let polarity: Option<Token![!]> = ahead.parse().ok()?;
-            let path: Path = ahead.parse().ok()?;
+            let mut path: Path = ahead.parse().ok()?;
+            if path.segments.last().unwrap().arguments.is_empty() && ahead.peek(token::Paren) {
+                let parenthesized = PathArguments::Parenthesized(ahead.parse().ok()?);
+                path.segments.last_mut().unwrap().arguments = parenthesized;
+            }
             let for_token: Token![for] = ahead.parse().ok()?;
             input.advance_to(&ahead);
             Some((polarity, path, for_token))
