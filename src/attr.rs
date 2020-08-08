@@ -139,8 +139,10 @@ ast_struct! {
     /// let attr: ItemMod = parse_quote! {
     ///     #[doc = r" Single line doc comments"]
     ///     #[doc = r" We write so many!"]
-    ///     #[doc = r" Multi-line comments...
-    ///  May span many lines"]
+    ///     #[doc = r"
+    ///      * Multi-line comments...
+    ///      * May span many lines
+    ///      "]
     ///     mod example {
     ///         #![doc = r" Of course, they can be inner too"]
     ///         #![doc = r" And fit in a single line "]
