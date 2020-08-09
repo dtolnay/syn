@@ -36,7 +36,6 @@ mod syn_parse {
 
 #[cfg(not(syn_only))]
 mod librustc_parse {
-    extern crate rustc_ast;
     extern crate rustc_data_structures;
     extern crate rustc_errors;
     extern crate rustc_parse;
@@ -59,7 +58,7 @@ mod librustc_parse {
             }
         }
 
-        rustc_ast::with_session_globals(Edition::Edition2018, || {
+        rustc_span::with_session_globals(Edition::Edition2018, || {
             let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
             let emitter = Box::new(SilentEmitter);
             let handler = Handler::with_emitter(false, None, emitter);

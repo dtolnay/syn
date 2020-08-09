@@ -79,7 +79,7 @@ fn test_round_trip() {
             let edition = repo::edition(path).parse().unwrap();
 
             let equal = panic::catch_unwind(|| {
-                rustc_ast::with_session_globals(edition, || {
+                rustc_span::with_session_globals(edition, || {
                     let sess = ParseSess::new(FilePathMapping::empty());
                     let before = match librustc_parse(content, &sess) {
                         Ok(before) => before,

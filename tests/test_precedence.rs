@@ -156,7 +156,7 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    rustc_ast::with_session_globals(edition, || {
+    rustc_span::with_session_globals(edition, || {
         for expr in exprs {
             let raw = quote!(#expr).to_string();
 
