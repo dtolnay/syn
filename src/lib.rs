@@ -784,6 +784,9 @@ mod lookahead;
 #[cfg(feature = "parsing")]
 pub mod parse;
 
+#[cfg(feature = "full")]
+mod reserved;
+
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
 mod verbatim;
 
