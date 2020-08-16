@@ -1,5 +1,7 @@
 use super::*;
 use crate::punctuated::Punctuated;
+#[cfg(feature = "full")]
+use crate::reserved::Reserved;
 #[cfg(feature = "extra-traits")]
 use crate::tt::TokenStreamHelper;
 use proc_macro2::{Span, TokenStream};
@@ -1070,14 +1072,6 @@ impl IdentFragment for Index {
 
     fn span(&self) -> Option<Span> {
         Some(self.span)
-    }
-}
-
-#[cfg(feature = "full")]
-ast_struct! {
-    #[derive(Default)]
-    pub struct Reserved {
-        _private: (),
     }
 }
 
