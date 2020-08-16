@@ -4,12 +4,12 @@ macro_rules! ast_struct {
         struct $name:ident #full $($rest:tt)*
     ) => {
         #[cfg(feature = "full")]
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* struct $name $($rest)*
 
         #[cfg(not(feature = "full"))]
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* struct $name {
             _noconstruct: ::std::marker::PhantomData<::proc_macro2::Span>,
@@ -27,15 +27,6 @@ macro_rules! ast_struct {
         [$($attrs_pub:tt)*]
         struct $name:ident #manual_extra_traits $($rest:tt)*
     ) => {
-        #[cfg_attr(feature = "extra-traits", derive(Debug))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $($attrs_pub)* struct $name $($rest)*
-    };
-
-    (
-        [$($attrs_pub:tt)*]
-        struct $name:ident #manual_extra_traits_debug $($rest:tt)*
-    ) => {
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* struct $name $($rest)*
     };
@@ -44,7 +35,7 @@ macro_rules! ast_struct {
         [$($attrs_pub:tt)*]
         struct $name:ident $($rest:tt)*
     ) => {
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* struct $name $($rest)*
     };
@@ -67,7 +58,6 @@ macro_rules! ast_enum {
         [$($attrs_pub:tt)*]
         enum $name:ident #manual_extra_traits $($rest:tt)*
     ) => (
-        #[cfg_attr(feature = "extra-traits", derive(Debug))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* enum $name $($rest)*
     );
@@ -76,7 +66,7 @@ macro_rules! ast_enum {
         [$($attrs_pub:tt)*]
         enum $name:ident $($rest:tt)*
     ) => (
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
+        #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* enum $name $($rest)*
     );

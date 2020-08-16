@@ -61,28 +61,28 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A UTF-8 string literal: `"foo"`.
-    pub struct LitStr #manual_extra_traits_debug {
+    pub struct LitStr #manual_extra_traits {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte string literal: `b"foo"`.
-    pub struct LitByteStr #manual_extra_traits_debug {
+    pub struct LitByteStr #manual_extra_traits {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte literal: `b'f'`.
-    pub struct LitByte #manual_extra_traits_debug {
+    pub struct LitByte #manual_extra_traits {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A character literal: `'a'`.
-    pub struct LitChar #manual_extra_traits_debug {
+    pub struct LitChar #manual_extra_traits {
         repr: Box<LitRepr>,
     }
 }
@@ -95,7 +95,7 @@ struct LitRepr {
 
 ast_struct! {
     /// An integer literal: `1` or `1u16`.
-    pub struct LitInt #manual_extra_traits_debug {
+    pub struct LitInt #manual_extra_traits {
         repr: Box<LitIntRepr>,
     }
 }
@@ -111,7 +111,7 @@ ast_struct! {
     /// A floating point literal: `1f64` or `1.0e10f64`.
     ///
     /// Must be finite. May not be infinte or NaN.
-    pub struct LitFloat #manual_extra_traits_debug {
+    pub struct LitFloat #manual_extra_traits {
         repr: Box<LitFloatRepr>,
     }
 }
@@ -125,7 +125,7 @@ struct LitFloatRepr {
 
 ast_struct! {
     /// A boolean literal: `true` or `false`.
-    pub struct LitBool #manual_extra_traits_debug {
+    pub struct LitBool #manual_extra_traits {
         pub value: bool,
         pub span: Span,
     }
