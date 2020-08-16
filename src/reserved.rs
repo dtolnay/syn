@@ -8,9 +8,20 @@
 use proc_macro2::Span;
 use std::marker::PhantomData;
 
+#[cfg(feature = "extra-traits")]
+use std::fmt::{self, Debug};
+
 ast_struct! {
     #[derive(Default)]
-    pub struct Reserved {
+    #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
+    pub struct Reserved #manual_extra_traits_debug {
         _private: PhantomData<Span>,
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+impl Debug for Reserved {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.debug_struct("Reserved").finish()
     }
 }
