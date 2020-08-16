@@ -5,9 +5,12 @@
 // we can backward compatibly change `raw`'s type to Option<Token![raw]> without
 // the possibility of breaking any code.
 
+use proc_macro2::Span;
+use std::marker::PhantomData;
+
 ast_struct! {
     #[derive(Default)]
     pub struct Reserved {
-        _private: (),
+        _private: PhantomData<Span>,
     }
 }
