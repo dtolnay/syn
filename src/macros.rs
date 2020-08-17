@@ -12,7 +12,7 @@ macro_rules! ast_struct {
         #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
         $($attrs_pub)* struct $name {
-            _noconstruct: (),
+            _noconstruct: ::std::marker::PhantomData<::proc_macro2::Span>,
         }
 
         #[cfg(all(not(feature = "full"), feature = "printing"))]
