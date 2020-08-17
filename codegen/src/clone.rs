@@ -73,7 +73,17 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     let ident = Ident::new(&node.ident, Span::call_site());
     let cfg_features = cfg::features(&node.features);
-    let body = expand_impl_body(defs, node);
+
+    let body = if node.ident == "AttrStyle"
+        || node.ident == "BinOp"
+        || node.ident == "RangeLimits"
+        || node.ident == "TraitBoundModifier"
+        || node.ident == "UnOp"
+    {
+        quote!(*self)
+    } else {
+        expand_impl_body(defs, node)
+    };
 
     quote! {
         #cfg_features
@@ -94,6 +104,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         DEBUG_SRC,
         quote! {
+            #![allow(clippy::clone_on_copy, clippy::expl_impl_clone_on_copy)]
+
             use crate::*;
 
             #impls
