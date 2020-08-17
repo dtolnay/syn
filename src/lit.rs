@@ -132,26 +132,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Lit {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Lit {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Lit::Str(this), Lit::Str(other)) => this == other,
-            (Lit::ByteStr(this), Lit::ByteStr(other)) => this == other,
-            (Lit::Byte(this), Lit::Byte(other)) => this == other,
-            (Lit::Char(this), Lit::Char(other)) => this == other,
-            (Lit::Int(this), Lit::Int(other)) => this == other,
-            (Lit::Float(this), Lit::Float(other)) => this == other,
-            (Lit::Bool(this), Lit::Bool(other)) => this == other,
-            (Lit::Verbatim(this), Lit::Verbatim(other)) => this.to_string() == other.to_string(),
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Lit {
     fn hash<H>(&self, hash: &mut H)
     where
@@ -648,9 +628,6 @@ mod debug_impls {
 
 macro_rules! lit_extra_traits {
     ($ty:ident, $($field:ident).+) => {
-        #[cfg(feature = "extra-traits")]
-        impl Eq for $ty {}
-
         #[cfg(feature = "extra-traits")]
         impl PartialEq for $ty {
             fn eq(&self, other: &Self) -> bool {

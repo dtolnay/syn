@@ -160,20 +160,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Attribute {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Attribute {
-    fn eq(&self, other: &Self) -> bool {
-        self.style == other.style
-            && self.pound_token == other.pound_token
-            && self.bracket_token == other.bracket_token
-            && self.path == other.path
-            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Attribute {
     fn hash<H>(&self, state: &mut H)
     where

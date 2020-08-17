@@ -327,37 +327,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Item {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Item {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Item::Const(this), Item::Const(other)) => this == other,
-            (Item::Enum(this), Item::Enum(other)) => this == other,
-            (Item::ExternCrate(this), Item::ExternCrate(other)) => this == other,
-            (Item::Fn(this), Item::Fn(other)) => this == other,
-            (Item::ForeignMod(this), Item::ForeignMod(other)) => this == other,
-            (Item::Impl(this), Item::Impl(other)) => this == other,
-            (Item::Macro(this), Item::Macro(other)) => this == other,
-            (Item::Macro2(this), Item::Macro2(other)) => this == other,
-            (Item::Mod(this), Item::Mod(other)) => this == other,
-            (Item::Static(this), Item::Static(other)) => this == other,
-            (Item::Struct(this), Item::Struct(other)) => this == other,
-            (Item::Trait(this), Item::Trait(other)) => this == other,
-            (Item::TraitAlias(this), Item::TraitAlias(other)) => this == other,
-            (Item::Type(this), Item::Type(other)) => this == other,
-            (Item::Union(this), Item::Union(other)) => this == other,
-            (Item::Use(this), Item::Use(other)) => this == other,
-            (Item::Verbatim(this), Item::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Item {
     fn hash<H>(&self, state: &mut H)
     where
@@ -460,20 +429,6 @@ impl Item {
             Item::Verbatim(_) => Vec::new(),
             Item::__Nonexhaustive => unreachable!(),
         }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for ItemMacro2 {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for ItemMacro2 {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs
-            && self.vis == other.vis
-            && self.macro_token == other.macro_token
-            && self.ident == other.ident
-            && TokenStreamHelper(&self.rules) == TokenStreamHelper(&other.rules)
     }
 }
 
@@ -739,25 +694,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for ForeignItem {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for ForeignItem {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (ForeignItem::Fn(this), ForeignItem::Fn(other)) => this == other,
-            (ForeignItem::Static(this), ForeignItem::Static(other)) => this == other,
-            (ForeignItem::Type(this), ForeignItem::Type(other)) => this == other,
-            (ForeignItem::Macro(this), ForeignItem::Macro(other)) => this == other,
-            (ForeignItem::Verbatim(this), ForeignItem::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for ForeignItem {
     fn hash<H>(&self, state: &mut H)
     where
@@ -874,25 +810,6 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,
         pub semi_token: Option<Token![;]>,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for TraitItem {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for TraitItem {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (TraitItem::Const(this), TraitItem::Const(other)) => this == other,
-            (TraitItem::Method(this), TraitItem::Method(other)) => this == other,
-            (TraitItem::Type(this), TraitItem::Type(other)) => this == other,
-            (TraitItem::Macro(this), TraitItem::Macro(other)) => this == other,
-            (TraitItem::Verbatim(this), TraitItem::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            _ => false,
-        }
     }
 }
 
@@ -1018,25 +935,6 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,
         pub semi_token: Option<Token![;]>,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for ImplItem {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for ImplItem {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (ImplItem::Const(this), ImplItem::Const(other)) => this == other,
-            (ImplItem::Method(this), ImplItem::Method(other)) => this == other,
-            (ImplItem::Type(this), ImplItem::Type(other)) => this == other,
-            (ImplItem::Macro(this), ImplItem::Macro(other)) => this == other,
-            (ImplItem::Verbatim(this), ImplItem::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            _ => false,
-        }
     }
 }
 

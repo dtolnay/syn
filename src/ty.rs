@@ -241,35 +241,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Type {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Type {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Type::Array(this), Type::Array(other)) => this == other,
-            (Type::BareFn(this), Type::BareFn(other)) => this == other,
-            (Type::Group(this), Type::Group(other)) => this == other,
-            (Type::ImplTrait(this), Type::ImplTrait(other)) => this == other,
-            (Type::Infer(this), Type::Infer(other)) => this == other,
-            (Type::Macro(this), Type::Macro(other)) => this == other,
-            (Type::Never(this), Type::Never(other)) => this == other,
-            (Type::Paren(this), Type::Paren(other)) => this == other,
-            (Type::Path(this), Type::Path(other)) => this == other,
-            (Type::Ptr(this), Type::Ptr(other)) => this == other,
-            (Type::Reference(this), Type::Reference(other)) => this == other,
-            (Type::Slice(this), Type::Slice(other)) => this == other,
-            (Type::TraitObject(this), Type::TraitObject(other)) => this == other,
-            (Type::Tuple(this), Type::Tuple(other)) => this == other,
-            (Type::Verbatim(this), Type::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Type {
     fn hash<H>(&self, hash: &mut H)
     where

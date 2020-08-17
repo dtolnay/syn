@@ -279,36 +279,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Pat {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Pat {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Pat::Box(this), Pat::Box(other)) => this == other,
-            (Pat::Ident(this), Pat::Ident(other)) => this == other,
-            (Pat::Lit(this), Pat::Lit(other)) => this == other,
-            (Pat::Macro(this), Pat::Macro(other)) => this == other,
-            (Pat::Or(this), Pat::Or(other)) => this == other,
-            (Pat::Path(this), Pat::Path(other)) => this == other,
-            (Pat::Range(this), Pat::Range(other)) => this == other,
-            (Pat::Reference(this), Pat::Reference(other)) => this == other,
-            (Pat::Rest(this), Pat::Rest(other)) => this == other,
-            (Pat::Slice(this), Pat::Slice(other)) => this == other,
-            (Pat::Struct(this), Pat::Struct(other)) => this == other,
-            (Pat::Tuple(this), Pat::Tuple(other)) => this == other,
-            (Pat::TupleStruct(this), Pat::TupleStruct(other)) => this == other,
-            (Pat::Type(this), Pat::Type(other)) => this == other,
-            (Pat::Verbatim(this), Pat::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            (Pat::Wild(this), Pat::Wild(other)) => this == other,
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Pat {
     fn hash<H>(&self, hash: &mut H)
     where

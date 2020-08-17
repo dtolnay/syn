@@ -723,60 +723,6 @@ ast_struct! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Expr {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Expr {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Expr::Array(this), Expr::Array(other)) => this == other,
-            (Expr::Assign(this), Expr::Assign(other)) => this == other,
-            (Expr::AssignOp(this), Expr::AssignOp(other)) => this == other,
-            (Expr::Async(this), Expr::Async(other)) => this == other,
-            (Expr::Await(this), Expr::Await(other)) => this == other,
-            (Expr::Binary(this), Expr::Binary(other)) => this == other,
-            (Expr::Block(this), Expr::Block(other)) => this == other,
-            (Expr::Box(this), Expr::Box(other)) => this == other,
-            (Expr::Break(this), Expr::Break(other)) => this == other,
-            (Expr::Call(this), Expr::Call(other)) => this == other,
-            (Expr::Cast(this), Expr::Cast(other)) => this == other,
-            (Expr::Closure(this), Expr::Closure(other)) => this == other,
-            (Expr::Continue(this), Expr::Continue(other)) => this == other,
-            (Expr::Field(this), Expr::Field(other)) => this == other,
-            (Expr::ForLoop(this), Expr::ForLoop(other)) => this == other,
-            (Expr::Group(this), Expr::Group(other)) => this == other,
-            (Expr::If(this), Expr::If(other)) => this == other,
-            (Expr::Index(this), Expr::Index(other)) => this == other,
-            (Expr::Let(this), Expr::Let(other)) => this == other,
-            (Expr::Lit(this), Expr::Lit(other)) => this == other,
-            (Expr::Loop(this), Expr::Loop(other)) => this == other,
-            (Expr::Macro(this), Expr::Macro(other)) => this == other,
-            (Expr::Match(this), Expr::Match(other)) => this == other,
-            (Expr::MethodCall(this), Expr::MethodCall(other)) => this == other,
-            (Expr::Paren(this), Expr::Paren(other)) => this == other,
-            (Expr::Path(this), Expr::Path(other)) => this == other,
-            (Expr::Range(this), Expr::Range(other)) => this == other,
-            (Expr::Reference(this), Expr::Reference(other)) => this == other,
-            (Expr::Repeat(this), Expr::Repeat(other)) => this == other,
-            (Expr::Return(this), Expr::Return(other)) => this == other,
-            (Expr::Struct(this), Expr::Struct(other)) => this == other,
-            (Expr::Try(this), Expr::Try(other)) => this == other,
-            (Expr::TryBlock(this), Expr::TryBlock(other)) => this == other,
-            (Expr::Tuple(this), Expr::Tuple(other)) => this == other,
-            (Expr::Type(this), Expr::Type(other)) => this == other,
-            (Expr::Unary(this), Expr::Unary(other)) => this == other,
-            (Expr::Unsafe(this), Expr::Unsafe(other)) => this == other,
-            (Expr::Verbatim(this), Expr::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            (Expr::While(this), Expr::While(other)) => this == other,
-            (Expr::Yield(this), Expr::Yield(other)) => this == other,
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Expr {
     fn hash<H>(&self, hash: &mut H)
     where

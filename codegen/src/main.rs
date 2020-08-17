@@ -13,6 +13,7 @@
 
 mod cfg;
 mod debug;
+mod eq;
 mod file;
 mod fold;
 mod full;
@@ -30,6 +31,7 @@ fn main() -> anyhow::Result<()> {
     color_backtrace::install();
     let defs = parse::parse()?;
     debug::generate(&defs)?;
+    eq::generate(&defs)?;
     json::generate(&defs)?;
     fold::generate(&defs)?;
     visit::generate(&defs)?;

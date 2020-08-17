@@ -768,6 +768,10 @@ mod gen {
 
     #[cfg(feature = "extra-traits")]
     #[rustfmt::skip]
+    mod eq;
+
+    #[cfg(feature = "extra-traits")]
+    #[rustfmt::skip]
     mod debug;
 }
 pub use crate::gen::*;

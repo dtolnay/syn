@@ -37,19 +37,6 @@ ast_enum! {
 }
 
 #[cfg(feature = "extra-traits")]
-impl Eq for Macro {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Macro {
-    fn eq(&self, other: &Self) -> bool {
-        self.path == other.path
-            && self.bang_token == other.bang_token
-            && self.delimiter == other.delimiter
-            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
 impl Hash for Macro {
     fn hash<H>(&self, state: &mut H)
     where
