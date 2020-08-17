@@ -18,6 +18,7 @@ mod file;
 mod fold;
 mod full;
 mod gen;
+mod hash;
 mod json;
 mod lookup;
 mod operand;
@@ -32,6 +33,7 @@ fn main() -> anyhow::Result<()> {
     let defs = parse::parse()?;
     debug::generate(&defs)?;
     eq::generate(&defs)?;
+    hash::generate(&defs)?;
     json::generate(&defs)?;
     fold::generate(&defs)?;
     visit::generate(&defs)?;

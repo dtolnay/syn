@@ -9,10 +9,6 @@ use proc_macro2::TokenStream;
 use crate::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
 #[cfg(feature = "parsing")]
 use crate::punctuated::Pair;
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// An attribute like `#[repr(transparent)]`.
@@ -156,20 +152,6 @@ ast_struct! {
         pub bracket_token: token::Bracket,
         pub path: Path,
         pub tokens: TokenStream,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Attribute {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.style.hash(state);
-        self.pound_token.hash(state);
-        self.bracket_token.hash(state);
-        self.path.hash(state);
-        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 

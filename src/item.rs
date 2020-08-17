@@ -3,10 +3,6 @@ use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 use crate::punctuated::Punctuated;
 use proc_macro2::TokenStream;
 
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 #[cfg(feature = "parsing")]
 use std::mem;
 
@@ -326,86 +322,6 @@ ast_struct! {
     }
 }
 
-#[cfg(feature = "extra-traits")]
-impl Hash for Item {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            Item::Const(item) => {
-                state.write_u8(0);
-                item.hash(state);
-            }
-            Item::Enum(item) => {
-                state.write_u8(1);
-                item.hash(state);
-            }
-            Item::ExternCrate(item) => {
-                state.write_u8(2);
-                item.hash(state);
-            }
-            Item::Fn(item) => {
-                state.write_u8(3);
-                item.hash(state);
-            }
-            Item::ForeignMod(item) => {
-                state.write_u8(4);
-                item.hash(state);
-            }
-            Item::Impl(item) => {
-                state.write_u8(5);
-                item.hash(state);
-            }
-            Item::Macro(item) => {
-                state.write_u8(6);
-                item.hash(state);
-            }
-            Item::Macro2(item) => {
-                state.write_u8(7);
-                item.hash(state);
-            }
-            Item::Mod(item) => {
-                state.write_u8(8);
-                item.hash(state);
-            }
-            Item::Static(item) => {
-                state.write_u8(9);
-                item.hash(state);
-            }
-            Item::Struct(item) => {
-                state.write_u8(10);
-                item.hash(state);
-            }
-            Item::Trait(item) => {
-                state.write_u8(11);
-                item.hash(state);
-            }
-            Item::TraitAlias(item) => {
-                state.write_u8(12);
-                item.hash(state);
-            }
-            Item::Type(item) => {
-                state.write_u8(13);
-                item.hash(state);
-            }
-            Item::Union(item) => {
-                state.write_u8(14);
-                item.hash(state);
-            }
-            Item::Use(item) => {
-                state.write_u8(15);
-                item.hash(state);
-            }
-            Item::Verbatim(item) => {
-                state.write_u8(16);
-                TokenStreamHelper(item).hash(state);
-            }
-            Item::__Nonexhaustive => unreachable!(),
-        }
-    }
-}
-
 impl Item {
     #[cfg(feature = "parsing")]
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
@@ -429,20 +345,6 @@ impl Item {
             Item::Verbatim(_) => Vec::new(),
             Item::__Nonexhaustive => unreachable!(),
         }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for ItemMacro2 {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.vis.hash(state);
-        self.macro_token.hash(state);
-        self.ident.hash(state);
-        TokenStreamHelper(&self.rules).hash(state);
     }
 }
 
@@ -693,38 +595,6 @@ ast_struct! {
     }
 }
 
-#[cfg(feature = "extra-traits")]
-impl Hash for ForeignItem {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            ForeignItem::Fn(item) => {
-                state.write_u8(0);
-                item.hash(state);
-            }
-            ForeignItem::Static(item) => {
-                state.write_u8(1);
-                item.hash(state);
-            }
-            ForeignItem::Type(item) => {
-                state.write_u8(2);
-                item.hash(state);
-            }
-            ForeignItem::Macro(item) => {
-                state.write_u8(3);
-                item.hash(state);
-            }
-            ForeignItem::Verbatim(item) => {
-                state.write_u8(4);
-                TokenStreamHelper(item).hash(state);
-            }
-            ForeignItem::__Nonexhaustive => unreachable!(),
-        }
-    }
-}
-
 ast_enum_of_structs! {
     /// An item declaration within the definition of a trait.
     ///
@@ -810,38 +680,6 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,
         pub semi_token: Option<Token![;]>,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for TraitItem {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            TraitItem::Const(item) => {
-                state.write_u8(0);
-                item.hash(state);
-            }
-            TraitItem::Method(item) => {
-                state.write_u8(1);
-                item.hash(state);
-            }
-            TraitItem::Type(item) => {
-                state.write_u8(2);
-                item.hash(state);
-            }
-            TraitItem::Macro(item) => {
-                state.write_u8(3);
-                item.hash(state);
-            }
-            TraitItem::Verbatim(item) => {
-                state.write_u8(4);
-                TokenStreamHelper(item).hash(state);
-            }
-            TraitItem::__Nonexhaustive => unreachable!(),
-        }
     }
 }
 
@@ -935,38 +773,6 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,
         pub semi_token: Option<Token![;]>,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for ImplItem {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            ImplItem::Const(item) => {
-                state.write_u8(0);
-                item.hash(state);
-            }
-            ImplItem::Method(item) => {
-                state.write_u8(1);
-                item.hash(state);
-            }
-            ImplItem::Type(item) => {
-                state.write_u8(2);
-                item.hash(state);
-            }
-            ImplItem::Macro(item) => {
-                state.write_u8(3);
-                item.hash(state);
-            }
-            ImplItem::Verbatim(item) => {
-                state.write_u8(4);
-                TokenStreamHelper(item).hash(state);
-            }
-            ImplItem::__Nonexhaustive => unreachable!(),
-        }
     }
 }
 

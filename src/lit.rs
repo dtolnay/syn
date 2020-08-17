@@ -131,49 +131,6 @@ ast_struct! {
     }
 }
 
-#[cfg(feature = "extra-traits")]
-impl Hash for Lit {
-    fn hash<H>(&self, hash: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            Lit::Str(lit) => {
-                hash.write_u8(0);
-                lit.hash(hash);
-            }
-            Lit::ByteStr(lit) => {
-                hash.write_u8(1);
-                lit.hash(hash);
-            }
-            Lit::Byte(lit) => {
-                hash.write_u8(2);
-                lit.hash(hash);
-            }
-            Lit::Char(lit) => {
-                hash.write_u8(3);
-                lit.hash(hash);
-            }
-            Lit::Int(lit) => {
-                hash.write_u8(4);
-                lit.hash(hash);
-            }
-            Lit::Float(lit) => {
-                hash.write_u8(5);
-                lit.hash(hash);
-            }
-            Lit::Bool(lit) => {
-                hash.write_u8(6);
-                lit.hash(hash);
-            }
-            Lit::Verbatim(lit) => {
-                hash.write_u8(7);
-                lit.to_string().hash(hash);
-            }
-        }
-    }
-}
-
 impl LitStr {
     pub fn new(value: &str, span: Span) -> Self {
         let mut token = Literal::string(value);

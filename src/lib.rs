@@ -772,6 +772,10 @@ mod gen {
 
     #[cfg(feature = "extra-traits")]
     #[rustfmt::skip]
+    mod hash;
+
+    #[cfg(feature = "extra-traits")]
+    #[rustfmt::skip]
     mod debug;
 }
 pub use crate::gen::*;

@@ -1,10 +1,6 @@
 use super::*;
 use crate::punctuated::Punctuated;
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
 use proc_macro2::TokenStream;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
@@ -275,82 +271,6 @@ ast_struct! {
         pub member: Member,
         pub colon_token: Option<Token![:]>,
         pub pat: Box<Pat>,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Pat {
-    fn hash<H>(&self, hash: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            Pat::Box(pat) => {
-                hash.write_u8(0);
-                pat.hash(hash);
-            }
-            Pat::Ident(pat) => {
-                hash.write_u8(1);
-                pat.hash(hash);
-            }
-            Pat::Lit(pat) => {
-                hash.write_u8(2);
-                pat.hash(hash);
-            }
-            Pat::Macro(pat) => {
-                hash.write_u8(3);
-                pat.hash(hash);
-            }
-            Pat::Or(pat) => {
-                hash.write_u8(4);
-                pat.hash(hash);
-            }
-            Pat::Path(pat) => {
-                hash.write_u8(5);
-                pat.hash(hash);
-            }
-            Pat::Range(pat) => {
-                hash.write_u8(6);
-                pat.hash(hash);
-            }
-            Pat::Reference(pat) => {
-                hash.write_u8(7);
-                pat.hash(hash);
-            }
-            Pat::Rest(pat) => {
-                hash.write_u8(8);
-                pat.hash(hash);
-            }
-            Pat::Slice(pat) => {
-                hash.write_u8(9);
-                pat.hash(hash);
-            }
-            Pat::Struct(pat) => {
-                hash.write_u8(10);
-                pat.hash(hash);
-            }
-            Pat::Tuple(pat) => {
-                hash.write_u8(11);
-                pat.hash(hash);
-            }
-            Pat::TupleStruct(pat) => {
-                hash.write_u8(12);
-                pat.hash(hash);
-            }
-            Pat::Type(pat) => {
-                hash.write_u8(13);
-                pat.hash(hash);
-            }
-            Pat::Verbatim(pat) => {
-                hash.write_u8(14);
-                TokenStreamHelper(pat).hash(hash);
-            }
-            Pat::Wild(pat) => {
-                hash.write_u8(15);
-                pat.hash(hash);
-            }
-            Pat::__Nonexhaustive => unreachable!(),
-        }
     }
 }
 

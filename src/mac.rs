@@ -6,10 +6,6 @@ use proc_macro2::{Delimiter, Group, Span, TokenTree};
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
@@ -33,19 +29,6 @@ ast_enum! {
         Paren(Paren),
         Brace(Brace),
         Bracket(Bracket),
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Macro {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.path.hash(state);
-        self.bang_token.hash(state);
-        self.delimiter.hash(state);
-        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
