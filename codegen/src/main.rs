@@ -11,6 +11,7 @@
 
 #![allow(clippy::needless_pass_by_value)]
 
+mod cfg;
 mod file;
 mod fold;
 mod full;

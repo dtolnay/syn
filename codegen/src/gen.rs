@@ -1,6 +1,6 @@
+use crate::cfg;
 use inflections::Inflect;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
 use syn_codegen::{Data, Definitions, Features, Node};
 
 pub const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
@@ -30,12 +30,7 @@ pub fn traverse(
         if s.ident == "Reserved" {
             continue;
         }
-        let features = &s.features.any;
-        let features = match features.len() {
-            0 => quote!(),
-            1 => quote!(#[cfg(feature = #(#features)*)]),
-            _ => quote!(#[cfg(any(#(feature = #features),*))]),
-        };
+        let features = cfg::features(&s.features);
         traits.extend(features.clone());
         impls.extend(features);
         node(&mut traits, &mut impls, &s, defs);
