@@ -1,4 +1,4 @@
-use crate::file;
+use crate::{file, lookup};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
@@ -128,15 +128,6 @@ fn syntax_tree_enum<'a>(outer: &str, inner: &str, fields: &'a [Type]) -> Option<
     }
 }
 
-fn lookup<'a>(defs: &'a Definitions, name: &str) -> &'a Node {
-    for node in &defs.types {
-        if node.ident == name {
-            return node;
-        }
-    }
-    panic!("not found: {}", name)
-}
-
 fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream {
     let ident = Ident::new(&node.ident, Span::call_site());
 
@@ -150,7 +141,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                     }
                 } else if let Some(inner) = syntax_tree_enum(name, v, fields) {
                     let path = format!("{}::{}", name, v);
-                    let format = expand_impl_body(defs, lookup(defs, inner), &path);
+                    let format = expand_impl_body(defs, lookup::node(defs, inner), &path);
                     quote! {
                         syn::#ident::#variant(_val) => {
                             #format

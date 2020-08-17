@@ -17,6 +17,7 @@ mod fold;
 mod full;
 mod gen;
 mod json;
+mod lookup;
 mod operand;
 mod parse;
 mod snapshot;
