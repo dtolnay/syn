@@ -19,7 +19,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Item #manual_extra_traits {
+    pub enum Item {
         /// A constant item: `const MAX: u16 = 65535`.
         Const(ItemConst),
 
@@ -187,7 +187,7 @@ ast_struct! {
     /// A 2.0-style declarative macro introduced by the `macro` keyword.
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
-    pub struct ItemMacro2 #manual_extra_traits {
+    pub struct ItemMacro2 {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
         pub macro_token: Token![macro],
@@ -522,7 +522,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum ForeignItem #manual_extra_traits {
+    pub enum ForeignItem {
         /// A foreign function in an `extern` block.
         Fn(ForeignItemFn),
 
@@ -608,7 +608,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum TraitItem #manual_extra_traits {
+    pub enum TraitItem {
         /// An associated constant within the definition of a trait.
         Const(TraitItemConst),
 
@@ -696,7 +696,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum ImplItem #manual_extra_traits {
+    pub enum ImplItem {
         /// An associated constant within an impl block.
         Const(ImplItemConst),
 

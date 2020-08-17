@@ -30,7 +30,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Lit #manual_extra_traits {
+    pub enum Lit {
         /// A UTF-8 string literal: `"foo"`.
         Str(LitStr),
 
@@ -61,28 +61,28 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A UTF-8 string literal: `"foo"`.
-    pub struct LitStr #manual_extra_traits {
+    pub struct LitStr {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte string literal: `b"foo"`.
-    pub struct LitByteStr #manual_extra_traits {
+    pub struct LitByteStr {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte literal: `b'f'`.
-    pub struct LitByte #manual_extra_traits {
+    pub struct LitByte {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A character literal: `'a'`.
-    pub struct LitChar #manual_extra_traits {
+    pub struct LitChar {
         repr: Box<LitRepr>,
     }
 }
@@ -95,7 +95,7 @@ struct LitRepr {
 
 ast_struct! {
     /// An integer literal: `1` or `1u16`.
-    pub struct LitInt #manual_extra_traits {
+    pub struct LitInt {
         repr: Box<LitIntRepr>,
     }
 }
@@ -111,7 +111,7 @@ ast_struct! {
     /// A floating point literal: `1f64` or `1.0e10f64`.
     ///
     /// Must be finite. May not be infinte or NaN.
-    pub struct LitFloat #manual_extra_traits {
+    pub struct LitFloat {
         repr: Box<LitFloatRepr>,
     }
 }
@@ -125,7 +125,7 @@ struct LitFloatRepr {
 
 ast_struct! {
     /// A boolean literal: `true` or `false`.
-    pub struct LitBool #manual_extra_traits {
+    pub struct LitBool {
         pub value: bool,
         pub span: Span,
     }

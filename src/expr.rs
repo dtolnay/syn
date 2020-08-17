@@ -86,7 +86,7 @@ ast_enum_of_structs! {
     /// A sign that you may not be choosing the right variable names is if you
     /// see names getting repeated in your code, like accessing
     /// `receiver.receiver` or `pat.pat` or `cond.cond`.
-    pub enum Expr #manual_extra_traits {
+    pub enum Expr {
         /// A slice literal expression: `[a, b, c, d]`.
         Array(ExprArray),
 
@@ -776,7 +776,7 @@ ast_enum! {
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[derive(Eq, PartialEq, Hash)]
-    pub enum Member #manual_extra_traits {
+    pub enum Member {
         /// A named field like `self.x`.
         Named(Ident),
         /// An unnamed field like `self.0`.
@@ -806,7 +806,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    pub struct Index #manual_extra_traits {
+    pub struct Index {
         pub index: u32,
         pub span: Span,
     }

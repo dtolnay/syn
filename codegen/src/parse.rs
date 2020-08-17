@@ -281,18 +281,10 @@ mod parsing {
         }
     }
 
-    fn skip_manual_extra_traits(input: ParseStream) {
-        if peek_tag(input, "manual_extra_traits") {
-            input.parse::<Token![#]>().unwrap();
-            input.parse::<Ident>().unwrap();
-        }
-    }
-
     // Parses a simple AstStruct without the `pub struct` prefix.
     fn ast_struct_inner(input: ParseStream) -> Result<AstItem> {
         let ident: Ident = input.parse()?;
         let features = full(input);
-        skip_manual_extra_traits(input);
         let rest: TokenStream = input.parse()?;
         Ok(AstItem {
             ast: syn::parse2(quote! {
@@ -325,7 +317,6 @@ mod parsing {
         input.parse::<Token![pub]>()?;
         input.parse::<Token![enum]>()?;
         let ident: Ident = input.parse()?;
-        skip_manual_extra_traits(input);
         let no_visit = no_visit(input);
         let rest: TokenStream = input.parse()?;
         Ok(if no_visit {
@@ -368,7 +359,6 @@ mod parsing {
         input.parse::<Token![pub]>()?;
         input.parse::<Token![enum]>()?;
         let ident: Ident = input.parse()?;
-        skip_manual_extra_traits(input);
 
         let content;
         braced!(content in input);

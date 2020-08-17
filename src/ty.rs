@@ -16,7 +16,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Type #manual_extra_traits {
+    pub enum Type {
         /// A fixed size array type: `[T; n]`.
         Array(TypeArray),
 

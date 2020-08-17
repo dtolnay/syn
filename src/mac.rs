@@ -12,7 +12,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    pub struct Macro #manual_extra_traits {
+    pub struct Macro {
         pub path: Path,
         pub bang_token: Token![!],
         pub delimiter: MacroDelimiter,

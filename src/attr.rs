@@ -146,7 +146,7 @@ ast_struct! {
     /// };
     /// assert_eq!(doc, attr);
     /// ```
-    pub struct Attribute #manual_extra_traits {
+    pub struct Attribute {
         pub pound_token: Token![#],
         pub style: AttrStyle,
         pub bracket_token: token::Bracket,

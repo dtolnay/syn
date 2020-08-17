@@ -23,14 +23,6 @@ macro_rules! ast_struct {
 
     (
         [$($attrs_pub:tt)*]
-        struct $name:ident #manual_extra_traits $($rest:tt)*
-    ) => {
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $($attrs_pub)* struct $name $($rest)*
-    };
-
-    (
-        [$($attrs_pub:tt)*]
         struct $name:ident $($rest:tt)*
     ) => {
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
@@ -49,14 +41,6 @@ macro_rules! ast_enum {
         enum $name:ident #no_visit $($rest:tt)*
     ) => (
         ast_enum!([$($attrs_pub)*] enum $name $($rest)*);
-    );
-
-    (
-        [$($attrs_pub:tt)*]
-        enum $name:ident #manual_extra_traits $($rest:tt)*
-    ) => (
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        $($attrs_pub)* enum $name $($rest)*
     );
 
     (
