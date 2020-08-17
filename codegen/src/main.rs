@@ -12,6 +12,7 @@
 #![allow(clippy::needless_pass_by_value)]
 
 mod cfg;
+mod clone;
 mod debug;
 mod eq;
 mod file;
@@ -31,6 +32,7 @@ mod visit_mut;
 fn main() -> anyhow::Result<()> {
     color_backtrace::install();
     let defs = parse::parse()?;
+    clone::generate(&defs)?;
     debug::generate(&defs)?;
     eq::generate(&defs)?;
     hash::generate(&defs)?;

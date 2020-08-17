@@ -766,6 +766,10 @@ mod gen {
     #[path = "../gen_helper.rs"]
     mod helper;
 
+    #[cfg(feature = "clone-impls")]
+    #[rustfmt::skip]
+    mod clone;
+
     #[cfg(feature = "extra-traits")]
     #[rustfmt::skip]
     mod eq;
