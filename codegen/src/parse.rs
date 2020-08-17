@@ -253,7 +253,6 @@ mod parsing {
 
     use proc_macro2::{TokenStream, TokenTree};
     use quote::quote;
-    use syn;
     use syn::parse::{ParseStream, Result};
     use syn::*;
     use syn_codegen as types;
@@ -598,7 +597,7 @@ fn do_load_file<P: AsRef<Path>>(
                 };
 
                 // Record our features on the parsed AstItems.
-                for mut item in found {
+                if let Some(mut item) = found {
                     if item.ast.ident != "Reserved" {
                         item.features.extend(clone_features(&features));
                         lookup.insert(item.ast.ident.clone(), item);
@@ -638,16 +637,13 @@ fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup> {
     let src = fs::read_to_string(name)?;
     let file = syn::parse_file(&src)?;
     for item in file.items {
-        match item {
-            Item::Macro(item) => {
-                match item.ident {
-                    Some(ref i) if i == "export_token_macro" => {}
-                    _ => continue,
-                }
-                let tokens = item.mac.parse_body_with(parsing::parse_token_macro)?;
-                return Ok(tokens);
+        if let Item::Macro(item) = item {
+            match item.ident {
+                Some(ref i) if i == "export_token_macro" => {}
+                _ => continue,
             }
-            _ => {}
+            let tokens = item.mac.parse_body_with(parsing::parse_token_macro)?;
+            return Ok(tokens);
         }
     }
 
