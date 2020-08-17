@@ -51,7 +51,6 @@ pub fn parse() -> Result<types::Definitions> {
 }
 
 /// Data extracted from syn source
-#[derive(Clone)]
 pub struct AstItem {
     ast: DeriveInput,
     features: Vec<Attribute>,
@@ -490,12 +489,16 @@ mod parsing {
     }
 }
 
+fn clone_features(features: &[Attribute]) -> Vec<Attribute> {
+    features.iter().map(|attr| parse_quote!(#attr)).collect()
+}
+
 fn get_features(attrs: &[Attribute], base: &[Attribute]) -> Vec<Attribute> {
-    let mut ret = base.to_owned();
+    let mut ret = clone_features(base);
 
     for attr in attrs {
         if attr.path.is_ident("cfg") {
-            ret.push(attr.clone());
+            ret.push(parse_quote!(#attr));
         }
     }
 
@@ -597,7 +600,7 @@ fn do_load_file<P: AsRef<Path>>(
                 // Record our features on the parsed AstItems.
                 for mut item in found {
                     if item.ast.ident != "Reserved" {
-                        item.features.extend(features.clone());
+                        item.features.extend(clone_features(&features));
                         lookup.insert(item.ast.ident.clone(), item);
                     }
                 }
@@ -619,7 +622,7 @@ fn do_load_file<P: AsRef<Path>>(
                                     semi_token: item.semi_token,
                                 }),
                             },
-                            features: features.to_owned(),
+                            features: clone_features(features),
                         },
                     );
                 }
