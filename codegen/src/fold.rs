@@ -1,7 +1,7 @@
 use crate::{file, full, gen};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
@@ -9,7 +9,7 @@ const FOLD_SRC: &str = "../src/gen/fold.rs";
 
 fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
     let ident = gen::under_name(item);
-    let method = Ident::new(&format!("fold_{}", ident), Span::call_site());
+    let method = format_ident!("fold_{}", ident);
     quote! {
         f.#method(#name)
     }
@@ -104,7 +104,7 @@ fn visit(
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
-    let fold_fn = Ident::new(&format!("fold_{}", under_name), Span::call_site());
+    let fold_fn = format_ident!("fold_{}", under_name);
 
     let mut fold_impl = TokenStream::new();
 
@@ -126,8 +126,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                     let mut fold_fields = TokenStream::new();
 
                     for (idx, ty) in fields.iter().enumerate() {
-                        let name = format!("_binding_{}", idx);
-                        let binding = Ident::new(&name, Span::call_site());
+                        let binding = format_ident!("_binding_{}", idx);
 
                         bind_fold_fields.extend(quote! {
                             #binding,

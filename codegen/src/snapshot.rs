@@ -1,7 +1,7 @@
 use crate::file;
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Node, Type};
 
@@ -182,10 +182,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                         }
                     }
                 } else {
-                    let pats = (0..fields.len())
-                        .map(|i| Ident::new(&format!("_v{}", i), Span::call_site()));
+                    let pats = (0..fields.len()).map(|i| format_ident!("_v{}", i));
                     let fields = fields.iter().enumerate().filter_map(|(i, ty)| {
-                        let index = Ident::new(&format!("_v{}", i), Span::call_site());
+                        let index = format_ident!("_v{}", i);
                         let val = quote!(#index);
                         let format = format_field(&val, ty)?;
                         Some(quote! {

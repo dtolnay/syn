@@ -2,7 +2,7 @@ use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
@@ -10,7 +10,7 @@ const VISIT_SRC: &str = "../src/gen/visit.rs";
 
 fn simple_visit(item: &str, name: &Operand) -> TokenStream {
     let ident = gen::under_name(item);
-    let method = Ident::new(&format!("visit_{}", ident), Span::call_site());
+    let method = format_ident!("visit_{}", ident);
     let name = name.ref_tokens();
     quote! {
         v.#method(#name)
@@ -119,7 +119,7 @@ fn visit(
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let under_name = gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
-    let visit_fn = Ident::new(&format!("visit_{}", under_name), Span::call_site());
+    let visit_fn = format_ident!("visit_{}", under_name);
 
     let mut visit_impl = TokenStream::new();
 
@@ -139,8 +139,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                     let mut visit_fields = TokenStream::new();
 
                     for (idx, ty) in fields.iter().enumerate() {
-                        let name = format!("_binding_{}", idx);
-                        let binding = Ident::new(&name, Span::call_site());
+                        let binding = format_ident!("_binding_{}", idx);
 
                         bind_visit_fields.extend(quote! {
                             #binding,
