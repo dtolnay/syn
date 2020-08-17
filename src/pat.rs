@@ -1,10 +1,6 @@
 use super::*;
 use crate::punctuated::Punctuated;
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
 use proc_macro2::TokenStream;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
@@ -20,7 +16,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Pat #manual_extra_traits {
+    pub enum Pat {
         /// A box pattern: `box v`.
         Box(PatBox),
 
@@ -275,112 +271,6 @@ ast_struct! {
         pub member: Member,
         pub colon_token: Option<Token![:]>,
         pub pat: Box<Pat>,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for Pat {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Pat {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Pat::Box(this), Pat::Box(other)) => this == other,
-            (Pat::Ident(this), Pat::Ident(other)) => this == other,
-            (Pat::Lit(this), Pat::Lit(other)) => this == other,
-            (Pat::Macro(this), Pat::Macro(other)) => this == other,
-            (Pat::Or(this), Pat::Or(other)) => this == other,
-            (Pat::Path(this), Pat::Path(other)) => this == other,
-            (Pat::Range(this), Pat::Range(other)) => this == other,
-            (Pat::Reference(this), Pat::Reference(other)) => this == other,
-            (Pat::Rest(this), Pat::Rest(other)) => this == other,
-            (Pat::Slice(this), Pat::Slice(other)) => this == other,
-            (Pat::Struct(this), Pat::Struct(other)) => this == other,
-            (Pat::Tuple(this), Pat::Tuple(other)) => this == other,
-            (Pat::TupleStruct(this), Pat::TupleStruct(other)) => this == other,
-            (Pat::Type(this), Pat::Type(other)) => this == other,
-            (Pat::Verbatim(this), Pat::Verbatim(other)) => {
-                TokenStreamHelper(this) == TokenStreamHelper(other)
-            }
-            (Pat::Wild(this), Pat::Wild(other)) => this == other,
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Pat {
-    fn hash<H>(&self, hash: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            Pat::Box(pat) => {
-                hash.write_u8(0);
-                pat.hash(hash);
-            }
-            Pat::Ident(pat) => {
-                hash.write_u8(1);
-                pat.hash(hash);
-            }
-            Pat::Lit(pat) => {
-                hash.write_u8(2);
-                pat.hash(hash);
-            }
-            Pat::Macro(pat) => {
-                hash.write_u8(3);
-                pat.hash(hash);
-            }
-            Pat::Or(pat) => {
-                hash.write_u8(4);
-                pat.hash(hash);
-            }
-            Pat::Path(pat) => {
-                hash.write_u8(5);
-                pat.hash(hash);
-            }
-            Pat::Range(pat) => {
-                hash.write_u8(6);
-                pat.hash(hash);
-            }
-            Pat::Reference(pat) => {
-                hash.write_u8(7);
-                pat.hash(hash);
-            }
-            Pat::Rest(pat) => {
-                hash.write_u8(8);
-                pat.hash(hash);
-            }
-            Pat::Slice(pat) => {
-                hash.write_u8(9);
-                pat.hash(hash);
-            }
-            Pat::Struct(pat) => {
-                hash.write_u8(10);
-                pat.hash(hash);
-            }
-            Pat::Tuple(pat) => {
-                hash.write_u8(11);
-                pat.hash(hash);
-            }
-            Pat::TupleStruct(pat) => {
-                hash.write_u8(12);
-                pat.hash(hash);
-            }
-            Pat::Type(pat) => {
-                hash.write_u8(13);
-                pat.hash(hash);
-            }
-            Pat::Verbatim(pat) => {
-                hash.write_u8(14);
-                TokenStreamHelper(pat).hash(hash);
-            }
-            Pat::Wild(pat) => {
-                hash.write_u8(15);
-                pat.hash(hash);
-            }
-            Pat::__Nonexhaustive => unreachable!(),
-        }
     }
 }
 

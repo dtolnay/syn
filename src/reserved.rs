@@ -13,8 +13,8 @@ use std::fmt::{self, Debug};
 
 ast_struct! {
     #[derive(Default)]
-    #[cfg_attr(feature = "extra-traits", derive(Eq, PartialEq, Hash))]
-    pub struct Reserved #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct Reserved {
         _private: PhantomData<Span>,
     }
 }

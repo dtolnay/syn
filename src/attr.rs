@@ -9,10 +9,6 @@ use proc_macro2::TokenStream;
 use crate::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
 #[cfg(feature = "parsing")]
 use crate::punctuated::Pair;
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// An attribute like `#[repr(transparent)]`.
@@ -150,40 +146,12 @@ ast_struct! {
     /// };
     /// assert_eq!(doc, attr);
     /// ```
-    pub struct Attribute #manual_extra_traits {
+    pub struct Attribute {
         pub pound_token: Token![#],
         pub style: AttrStyle,
         pub bracket_token: token::Bracket,
         pub path: Path,
         pub tokens: TokenStream,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for Attribute {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Attribute {
-    fn eq(&self, other: &Self) -> bool {
-        self.style == other.style
-            && self.pound_token == other.pound_token
-            && self.bracket_token == other.bracket_token
-            && self.path == other.path
-            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Attribute {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.style.hash(state);
-        self.pound_token.hash(state);
-        self.bracket_token.hash(state);
-        self.path.hash(state);
-        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 

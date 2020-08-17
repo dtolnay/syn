@@ -12,10 +12,14 @@
 #![allow(clippy::needless_pass_by_value)]
 
 mod cfg;
+mod clone;
+mod debug;
+mod eq;
 mod file;
 mod fold;
 mod full;
 mod gen;
+mod hash;
 mod json;
 mod lookup;
 mod operand;
@@ -28,6 +32,10 @@ mod visit_mut;
 fn main() -> anyhow::Result<()> {
     color_backtrace::install();
     let defs = parse::parse()?;
+    clone::generate(&defs)?;
+    debug::generate(&defs)?;
+    eq::generate(&defs)?;
+    hash::generate(&defs)?;
     json::generate(&defs)?;
     fold::generate(&defs)?;
     visit::generate(&defs)?;

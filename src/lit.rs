@@ -30,7 +30,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
-    pub enum Lit #manual_extra_traits {
+    pub enum Lit {
         /// A UTF-8 string literal: `"foo"`.
         Str(LitStr),
 
@@ -61,28 +61,32 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A UTF-8 string literal: `"foo"`.
-    pub struct LitStr #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct LitStr {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte string literal: `b"foo"`.
-    pub struct LitByteStr #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct LitByteStr {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A byte literal: `b'f'`.
-    pub struct LitByte #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct LitByte {
         repr: Box<LitRepr>,
     }
 }
 
 ast_struct! {
     /// A character literal: `'a'`.
-    pub struct LitChar #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct LitChar {
         repr: Box<LitRepr>,
     }
 }
@@ -95,7 +99,8 @@ struct LitRepr {
 
 ast_struct! {
     /// An integer literal: `1` or `1u16`.
-    pub struct LitInt #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct LitInt {
         repr: Box<LitIntRepr>,
     }
 }
@@ -111,7 +116,8 @@ ast_struct! {
     /// A floating point literal: `1f64` or `1.0e10f64`.
     ///
     /// Must be finite. May not be infinte or NaN.
-    pub struct LitFloat #manual_extra_traits_debug {
+    #[cfg_attr(feature = "clone-impls", derive(Clone))]
+    pub struct LitFloat {
         repr: Box<LitFloatRepr>,
     }
 }
@@ -125,72 +131,9 @@ struct LitFloatRepr {
 
 ast_struct! {
     /// A boolean literal: `true` or `false`.
-    pub struct LitBool #manual_extra_traits_debug {
+    pub struct LitBool {
         pub value: bool,
         pub span: Span,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for Lit {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Lit {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Lit::Str(this), Lit::Str(other)) => this == other,
-            (Lit::ByteStr(this), Lit::ByteStr(other)) => this == other,
-            (Lit::Byte(this), Lit::Byte(other)) => this == other,
-            (Lit::Char(this), Lit::Char(other)) => this == other,
-            (Lit::Int(this), Lit::Int(other)) => this == other,
-            (Lit::Float(this), Lit::Float(other)) => this == other,
-            (Lit::Bool(this), Lit::Bool(other)) => this == other,
-            (Lit::Verbatim(this), Lit::Verbatim(other)) => this.to_string() == other.to_string(),
-            _ => false,
-        }
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Lit {
-    fn hash<H>(&self, hash: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            Lit::Str(lit) => {
-                hash.write_u8(0);
-                lit.hash(hash);
-            }
-            Lit::ByteStr(lit) => {
-                hash.write_u8(1);
-                lit.hash(hash);
-            }
-            Lit::Byte(lit) => {
-                hash.write_u8(2);
-                lit.hash(hash);
-            }
-            Lit::Char(lit) => {
-                hash.write_u8(3);
-                lit.hash(hash);
-            }
-            Lit::Int(lit) => {
-                hash.write_u8(4);
-                lit.hash(hash);
-            }
-            Lit::Float(lit) => {
-                hash.write_u8(5);
-                lit.hash(hash);
-            }
-            Lit::Bool(lit) => {
-                hash.write_u8(6);
-                lit.hash(hash);
-            }
-            Lit::Verbatim(lit) => {
-                hash.write_u8(7);
-                lit.to_string().hash(hash);
-            }
-        }
     }
 }
 
@@ -648,9 +591,6 @@ mod debug_impls {
 
 macro_rules! lit_extra_traits {
     ($ty:ident, $($field:ident).+) => {
-        #[cfg(feature = "extra-traits")]
-        impl Eq for $ty {}
-
         #[cfg(feature = "extra-traits")]
         impl PartialEq for $ty {
             fn eq(&self, other: &Self) -> bool {

@@ -6,17 +6,13 @@ use proc_macro2::{Delimiter, Group, Span, TokenTree};
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
-#[cfg(feature = "extra-traits")]
-use crate::tt::TokenStreamHelper;
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    pub struct Macro #manual_extra_traits {
+    pub struct Macro {
         pub path: Path,
         pub bang_token: Token![!],
         pub delimiter: MacroDelimiter,
@@ -33,32 +29,6 @@ ast_enum! {
         Paren(Paren),
         Brace(Brace),
         Bracket(Bracket),
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for Macro {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Macro {
-    fn eq(&self, other: &Self) -> bool {
-        self.path == other.path
-            && self.bang_token == other.bang_token
-            && self.delimiter == other.delimiter
-            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Macro {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.path.hash(state);
-        self.bang_token.hash(state);
-        self.delimiter.hash(state);
-        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 
