@@ -2,8 +2,11 @@ use crate::version;
 use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use quote::quote;
-use syn::parse::Parser;
-use syn::{parse_quote, Data, DataStruct, DeriveInput, Ident, Item};
+use syn::parse::{Error, Parser};
+use syn::{
+    parse_quote, Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument,
+    Ident, Item, PathArguments, TypeMacro, TypePath, TypeTuple, Visibility,
+};
 use syn_codegen as types;
 use thiserror::Error;
 
@@ -51,7 +54,7 @@ pub fn parse() -> Result<types::Definitions> {
 #[derive(Clone)]
 pub struct AstItem {
     ast: DeriveInput,
-    features: Vec<syn::Attribute>,
+    features: Vec<Attribute>,
 }
 
 fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> types::Node {
@@ -80,11 +83,7 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
     }
 }
 
-fn introspect_enum(
-    item: &syn::DataEnum,
-    items: &ItemLookup,
-    tokens: &TokenLookup,
-) -> types::Variants {
+fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) -> types::Variants {
     item.variants
         .iter()
         .filter_map(|variant| {
@@ -92,12 +91,12 @@ fn introspect_enum(
                 return None;
             }
             let fields = match &variant.fields {
-                syn::Fields::Unnamed(fields) => fields
+                Fields::Unnamed(fields) => fields
                     .unnamed
                     .iter()
                     .map(|field| introspect_type(&field.ty, items, tokens))
                     .collect(),
-                syn::Fields::Unit => vec![],
+                Fields::Unit => vec![],
                 _ => panic!("Enum representation not supported"),
             };
             Some((variant.ident.to_string(), fields))
@@ -105,13 +104,9 @@ fn introspect_enum(
         .collect()
 }
 
-fn introspect_struct(
-    item: &syn::DataStruct,
-    items: &ItemLookup,
-    tokens: &TokenLookup,
-) -> types::Fields {
+fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup) -> types::Fields {
     match &item.fields {
-        syn::Fields::Named(fields) => fields
+        Fields::Named(fields) => fields
             .named
             .iter()
             .map(|field| {
@@ -121,14 +116,14 @@ fn introspect_struct(
                 )
             })
             .collect(),
-        syn::Fields::Unit => IndexMap::new(),
+        Fields::Unit => IndexMap::new(),
         _ => panic!("Struct representation not supported"),
     }
 }
 
 fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -> types::Type {
     match item {
-        syn::Type::Path(syn::TypePath {
+        syn::Type::Path(TypePath {
             qself: None,
             ref path,
         }) => {
@@ -173,14 +168,14 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 }
             }
         }
-        syn::Type::Tuple(syn::TypeTuple { ref elems, .. }) => {
+        syn::Type::Tuple(TypeTuple { ref elems, .. }) => {
             let tys = elems
                 .iter()
                 .map(|ty| introspect_type(&ty, items, tokens))
                 .collect();
             types::Type::Tuple(tys)
         }
-        syn::Type::Macro(syn::TypeMacro { ref mac })
+        syn::Type::Macro(TypeMacro { ref mac })
             if mac.path.segments.last().unwrap().ident == "Token" =>
         {
             let content = mac.tokens.to_string();
@@ -192,7 +187,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
     }
 }
 
-fn introspect_features(attrs: &[syn::Attribute]) -> types::Features {
+fn introspect_features(attrs: &[Attribute]) -> types::Features {
     let mut ret = types::Features::default();
 
     for attr in attrs {
@@ -215,16 +210,16 @@ fn introspect_features(attrs: &[syn::Attribute]) -> types::Features {
     ret
 }
 
-fn is_pub(vis: &syn::Visibility) -> bool {
+fn is_pub(vis: &Visibility) -> bool {
     match vis {
-        syn::Visibility::Public(_) => true,
+        Visibility::Public(_) => true,
         _ => false,
     }
 }
 
-fn first_arg(params: &syn::PathArguments) -> &syn::Type {
+fn first_arg(params: &PathArguments) -> &syn::Type {
     let data = match *params {
-        syn::PathArguments::AngleBracketed(ref data) => data,
+        PathArguments::AngleBracketed(ref data) => data,
         _ => panic!("Expected at least 1 type argument here"),
     };
 
@@ -233,14 +228,14 @@ fn first_arg(params: &syn::PathArguments) -> &syn::Type {
         .first()
         .expect("Expected at least 1 type argument here")
     {
-        syn::GenericArgument::Type(ref ty) => ty,
+        GenericArgument::Type(ref ty) => ty,
         _ => panic!("Expected at least 1 type argument here"),
     }
 }
 
-fn last_arg(params: &syn::PathArguments) -> &syn::Type {
+fn last_arg(params: &PathArguments) -> &syn::Type {
     let data = match *params {
-        syn::PathArguments::AngleBracketed(ref data) => data,
+        PathArguments::AngleBracketed(ref data) => data,
         _ => panic!("Expected at least 1 type argument here"),
     };
 
@@ -249,7 +244,7 @@ fn last_arg(params: &syn::PathArguments) -> &syn::Type {
         .last()
         .expect("Expected at least 1 type argument here")
     {
-        syn::GenericArgument::Type(ref ty) => ty,
+        GenericArgument::Type(ref ty) => ty,
         _ => panic!("Expected at least 1 type argument here"),
     }
 }
@@ -277,7 +272,7 @@ mod parsing {
 
     // Parses #full - returns #[cfg(feature = "full")] if it is present, and
     // nothing otherwise.
-    fn full(input: ParseStream) -> Vec<syn::Attribute> {
+    fn full(input: ParseStream) -> Vec<Attribute> {
         if peek_tag(input, "full") {
             input.parse::<Token![#]>().unwrap();
             input.parse::<Ident>().unwrap();
@@ -452,11 +447,11 @@ mod parsing {
     }
 
     fn parse_feature(input: ParseStream) -> Result<String> {
-        let i: syn::Ident = input.parse()?;
+        let i: Ident = input.parse()?;
         assert_eq!(i, "feature");
 
         input.parse::<Token![=]>()?;
-        let s = input.parse::<syn::LitStr>()?;
+        let s = input.parse::<LitStr>()?;
 
         Ok(s.value())
     }
@@ -467,10 +462,10 @@ mod parsing {
         let level_1;
         parenthesized!(level_1 in input);
 
-        let i: syn::Ident = level_1.fork().parse()?;
+        let i: Ident = level_1.fork().parse()?;
 
         if i == "any" {
-            level_1.parse::<syn::Ident>()?;
+            level_1.parse::<Ident>()?;
 
             let level_2;
             parenthesized!(level_2 in level_1);
@@ -495,7 +490,7 @@ mod parsing {
     }
 }
 
-fn get_features(attrs: &[syn::Attribute], base: &[syn::Attribute]) -> Vec<syn::Attribute> {
+fn get_features(attrs: &[Attribute], base: &[Attribute]) -> Vec<Attribute> {
     let mut ret = base.to_owned();
 
     for attr in attrs {
@@ -513,12 +508,12 @@ struct LoadFileError {
     path: PathBuf,
     line: usize,
     column: usize,
-    error: syn::Error,
+    error: Error,
 }
 
 fn load_file<P: AsRef<Path>>(
     name: P,
-    features: &[syn::Attribute],
+    features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
     let error = match do_load_file(&name, features, lookup).err() {
@@ -526,7 +521,7 @@ fn load_file<P: AsRef<Path>>(
         Some(error) => error,
     };
 
-    let error = error.downcast::<syn::Error>()?;
+    let error = error.downcast::<Error>()?;
     let span = error.span().start();
 
     bail!(LoadFileError {
@@ -539,7 +534,7 @@ fn load_file<P: AsRef<Path>>(
 
 fn do_load_file<P: AsRef<Path>>(
     name: P,
-    features: &[syn::Attribute],
+    features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
     let name = name.as_ref();
