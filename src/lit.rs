@@ -590,11 +590,11 @@ mod debug_impls {
 }
 
 macro_rules! lit_extra_traits {
-    ($ty:ident, $($field:ident).+) => {
+    ($ty:ident) => {
         #[cfg(feature = "extra-traits")]
         impl PartialEq for $ty {
             fn eq(&self, other: &Self) -> bool {
-                self.$($field).+.to_string() == other.$($field).+.to_string()
+                self.repr.token.to_string() == other.repr.token.to_string()
             }
         }
 
@@ -604,7 +604,7 @@ macro_rules! lit_extra_traits {
             where
                 H: Hasher,
             {
-                self.$($field).+.to_string().hash(state);
+                self.repr.token.to_string().hash(state);
             }
         }
 
@@ -617,12 +617,12 @@ macro_rules! lit_extra_traits {
     };
 }
 
-lit_extra_traits!(LitStr, repr.token);
-lit_extra_traits!(LitByteStr, repr.token);
-lit_extra_traits!(LitByte, repr.token);
-lit_extra_traits!(LitChar, repr.token);
-lit_extra_traits!(LitInt, repr.token);
-lit_extra_traits!(LitFloat, repr.token);
+lit_extra_traits!(LitStr);
+lit_extra_traits!(LitByteStr);
+lit_extra_traits!(LitByte);
+lit_extra_traits!(LitChar);
+lit_extra_traits!(LitInt);
+lit_extra_traits!(LitFloat);
 
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
