@@ -576,7 +576,6 @@ pub mod parsing {
 
             let mut params = Punctuated::new();
             let mut allow_lifetime_param = true;
-            let mut allow_type_param = true;
             loop {
                 if input.peek(Token![>]) {
                     break;
@@ -589,7 +588,7 @@ pub mod parsing {
                         attrs,
                         ..input.parse()?
                     }));
-                } else if allow_type_param && lookahead.peek(Ident) {
+                } else if lookahead.peek(Ident) {
                     allow_lifetime_param = false;
                     params.push_value(GenericParam::Type(TypeParam {
                         attrs,
@@ -597,7 +596,6 @@ pub mod parsing {
                     }));
                 } else if lookahead.peek(Token![const]) {
                     allow_lifetime_param = false;
-                    allow_type_param = false;
                     params.push_value(GenericParam::Const(ConstParam {
                         attrs,
                         ..input.parse()?

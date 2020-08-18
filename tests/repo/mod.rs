@@ -12,13 +12,6 @@ const REVISION: &str = "792c645ca7d11a8d254df307d019c5bf01445c37";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: type parameters after const parameters: struct S<const N: usize, T>
-    // https://github.com/dtolnay/syn/issues/886
-    "test/ui/const-generics/defaults/complex-unord-param.rs",
-    "test/ui/const-generics/defaults/needs-feature.rs",
-    "test/ui/const-generics/defaults/simple-defaults.rs",
-    "test/ui/const-generics/type-after-const-ok.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "test/ui/const-generics/const-expression-parameter.rs",
 
