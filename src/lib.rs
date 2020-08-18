@@ -762,9 +762,6 @@ mod gen {
     #[rustfmt::skip]
     pub mod fold;
 
-    #[cfg(any(feature = "full", feature = "derive"))]
-    #[path = "../gen_helper.rs"]
-    mod helper;
     #[cfg(feature = "clone-impls")]
     #[rustfmt::skip]
     mod clone;
@@ -780,6 +777,10 @@ mod gen {
     #[cfg(feature = "extra-traits")]
     #[rustfmt::skip]
     mod debug;
+
+    #[cfg(any(feature = "full", feature = "derive"))]
+    #[path = "../gen_helper.rs"]
+    mod helper;
 }
 pub use crate::gen::*;
 
