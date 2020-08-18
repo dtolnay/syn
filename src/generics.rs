@@ -415,7 +415,6 @@ ast_enum! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum TraitBoundModifier {
         None,
         Maybe(Token![?]),

@@ -945,7 +945,6 @@ ast_enum! {
     /// Limit types of a range, inclusive or exclusive.
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum RangeLimits {
         /// Inclusive at the beginning, exclusive at the end.
         HalfOpen(Token![..]),

@@ -74,16 +74,25 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     let ident = Ident::new(&node.ident, Span::call_site());
     let cfg_features = cfg::features(&node.features);
 
-    let body = if node.ident == "AttrStyle"
+    let copy = node.ident == "AttrStyle"
         || node.ident == "BinOp"
         || node.ident == "RangeLimits"
         || node.ident == "TraitBoundModifier"
-        || node.ident == "UnOp"
-    {
-        quote!(*self)
-    } else {
-        expand_impl_body(defs, node)
-    };
+        || node.ident == "UnOp";
+    if copy {
+        return quote! {
+            #cfg_features
+            impl Copy for #ident {}
+            #cfg_features
+            impl Clone for #ident {
+                fn clone(&self) -> Self {
+                    *self
+                }
+            }
+        };
+    }
+
+    let body = expand_impl_body(defs, node);
 
     quote! {
         #cfg_features

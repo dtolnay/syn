@@ -37,6 +37,8 @@ impl Clone for Arm {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
+impl Copy for AttrStyle {}
+#[cfg(any(feature = "derive", feature = "full"))]
 impl Clone for AttrStyle {
     fn clone(&self) -> Self {
         *self
@@ -64,6 +66,8 @@ impl Clone for BareFnArg {
         }
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+impl Copy for BinOp {}
 #[cfg(any(feature = "derive", feature = "full"))]
 impl Clone for BinOp {
     fn clone(&self) -> Self {
@@ -1585,6 +1589,8 @@ impl Clone for QSelf {
     }
 }
 #[cfg(feature = "full")]
+impl Copy for RangeLimits {}
+#[cfg(feature = "full")]
 impl Clone for RangeLimits {
     fn clone(&self) -> Self {
         *self
@@ -1650,6 +1656,8 @@ impl Clone for TraitBound {
         }
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+impl Copy for TraitBoundModifier {}
 #[cfg(any(feature = "derive", feature = "full"))]
 impl Clone for TraitBoundModifier {
     fn clone(&self) -> Self {
@@ -1899,6 +1907,8 @@ impl Clone for TypeTuple {
         }
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+impl Copy for UnOp {}
 #[cfg(any(feature = "derive", feature = "full"))]
 impl Clone for UnOp {
     fn clone(&self) -> Self {

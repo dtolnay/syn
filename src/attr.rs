@@ -323,7 +323,6 @@ ast_enum! {
     /// - `#![feature(proc_macro)]`
     /// - `//! # Example`
     /// - `/*! Please file an issue */`
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum AttrStyle {
         Outer,
         Inner(Token![!]),
